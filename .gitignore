@@ -1,0 +1,7 @@
+npm-debug.log*
+/firebase-config.json
+/server-config.json
+/node_modules
+# jsonファイルの内容が含まれているので、/distをignoreしている
+/dist
+*.sqlite3
