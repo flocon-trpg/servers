@@ -5,7 +5,7 @@ import * as NumParam from '../stateManagers/states/numParam';
 import { update } from '../stateManagers/states/types';
 import { createStateMap } from '../@shared/StateMap';
 import { StrIndex100 } from '../@shared/indexes';
-import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
+import { EyeInvisibleOutlined, EyeOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 
 const inputWidth = 50;
 
@@ -59,7 +59,9 @@ const NumberParameterInput: React.FC<Props> = ({
                                 value: { newValue: 0 },
                             });
                             onOperate(operation);
-                        }}>追加</Button> :
+                        }}>
+                        <PlusOutlined />
+                    </Button> :
                     <Button
                         size='small'
                         onClick={() => {
@@ -68,7 +70,9 @@ const NumberParameterInput: React.FC<Props> = ({
                                 value: { newValue: undefined },
                             });
                             onOperate(operation);
-                        }}>削除</Button>}
+                        }}>
+                        <DeleteOutlined />
+                    </Button>}
             </>}
             <Switch
                 size='small'
@@ -109,7 +113,9 @@ const NumberParameterInput: React.FC<Props> = ({
                                 value: { newValue: 0 },
                             });
                             onOperate(operation);
-                        }}>追加</Button> :
+                        }}>
+                        <PlusOutlined />
+                    </Button> :
                     <Button
                         size='small'
                         onClick={() => {
@@ -118,7 +124,9 @@ const NumberParameterInput: React.FC<Props> = ({
                                 value: { newValue: undefined },
                             });
                             onOperate(operation);
-                        }}>削除</Button>}
+                        }}>
+                        <DeleteOutlined />
+                    </Button>}
             </>}
             <Switch
                 size='small'

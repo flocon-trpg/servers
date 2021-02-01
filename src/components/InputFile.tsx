@@ -11,7 +11,7 @@ type ImageProps = {
     filePath?: FilePath;
 }
 
-const Image: React.FC<ImageProps> = ({filePath}: ImageProps) => {
+const Image: React.FC<ImageProps> = ({ filePath }: ImageProps) => {
     const src = useFirebaseStorageUrl(filePath);
     if (src == null) {
         return null;
@@ -56,19 +56,21 @@ const InputFile: React.FC<Props> = ({ filePath, onPathChange, openFilesManager, 
                 openFilesManager({ openFileType: some, onOpen });
             }}>Open</Button>);
         }
-        return(<Button onClick={() => {
+        return (<Button onClick={() => {
             if (onPathChange != null) {
                 onPathChange(null);
             }
         }}>Remove</Button>);
     })();
-    
+
     return (
-        <span>
+        <div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
             {imageElement}
+            {imageElement == null ? null : <div style={({ width: 4 })} />}
             {fileNameElement}
+            <div style={({ width: 4 })} />
             {button}
-        </span>
+        </div>
     );
 };
 

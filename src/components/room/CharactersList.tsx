@@ -1,7 +1,8 @@
 import React from 'react';
 import MyAuthContext from '../../contexts/MyAuthContext';
-import { Table, Checkbox, Button, InputNumber, Input } from 'antd';
+import { Table, Checkbox, Button, InputNumber, Input, Dropdown, Menu, Switch } from 'antd';
 import * as Room from '../../stateManagers/states/room';
+import * as Participant from '../../stateManagers/states/participant';
 import * as Character from '../../stateManagers/states/character';
 import { CompositeKey, compositeKeyToString, createStateMap, StateMap } from '../../@shared/StateMap';
 import { secureId, simpleId } from '../../utils/generators';
@@ -18,6 +19,15 @@ import NumberParameterInput from '../../foundations/NumberParameterInput';
 import BooleanParameterInput from '../../foundations/BooleanParameterInput';
 import StringParameterInput from '../../foundations/StringParameterInput';
 import { useFirebaseStorageUrl } from '../../hooks/firebaseStorage';
+import { SettingOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+
+const characterOperationBase: Character.PostOperation = {
+    boolParams: new Map(),
+    numParams: new Map(),
+    numMaxParams: new Map(),
+    strParams: new Map(),
+    pieceLocations: createStateMap(),
+};
 
 type Props = {
     room: Room.State;
@@ -30,8 +40,8 @@ type DataSource = {
         state: Character.State;
         createdByMe: boolean | null;
     };
+    participants: ReadonlyMap<string, Participant.State>;
     operate: (operation: Room.PostOperationSetup) => void;
-
 }
 
 const minNumParameter = -1000000;
@@ -151,17 +161,17 @@ const Image: React.FC<{ filePath?: FilePathFragment }> = ({ filePath }: { filePa
     if (src == null) {
         return null;
     }
-    return (<img src={src} width={30} height={30} />);
+    return (<img src={src} width={25} height={25} />);
 };
 
-const CharactersList: React.FC<Props> = (props: Props) => {
+const CharactersList: React.FC<Props> = ({ room }: Props) => {
     const myAuth = React.useContext(MyAuthContext);
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
     const dispatchRoomComponentsState = React.useContext(DispatchRoomComponentsStateContext);
     const operate = React.useContext(OperateContext);
 
     const charactersDataSource: DataSource[] =
-        props.room.characters.toArray().map(([key, character]) => {
+        room.characters.toArray().map(([key, character]) => {
             const createdByMe = myAuth == null ? null : (myAuth.uid === key.createdBy);
             return {
                 key: compositeKeyToString(key), // antdのtableのkeyとして必要
@@ -170,64 +180,84 @@ const CharactersList: React.FC<Props> = (props: Props) => {
                     state: character,
                     createdByMe,
                 },
+                participants: room.participants,
                 operate,
             };
         });
 
     const columns = __([
         {
-            title: 'Image',
-            key: 'image',
-            // eslint-disable-next-line react/display-name
-            render: (_: unknown, { character }: DataSource) => (<Image filePath={character.state.image ?? undefined} />),
-        },
-        {
-            title: 'Name',
+            title: '名前',
             key: 'name',
             // eslint-disable-next-line react/display-name
-            render: (_: unknown, { character }: DataSource) => character.state.name,
+            render: (_: unknown, { character }: DataSource) => (
+                <div
+                    style={({ display: 'flex', flexDirection: 'row' })}>
+                    <Button style={({ alignSelf: 'center' })} size='small' onClick={() => dispatchRoomComponentsState({ type: characterDrawerType, newValue: { type: update, stateKey: character.stateKey } })}>
+                        <SettingOutlined />
+                    </Button>
+                    <div style={({ width: 12 })} />
+                    <Image filePath={character.state.image ?? undefined} />
+                    <div style={({ width: 4 })} />
+                    <Input value={character.state.name} bordered={false} size='small' />
+                </div>),
         },
         {
-            title: 'CreatedByMe',
-            key: 'createdByMe',
+            title: '作成者',
+            key: '作成者',
             // eslint-disable-next-line react/display-name
-            render: (_: unknown, { character }: DataSource) => {
-                if (character.createdByMe == null) {
+            render: (_: unknown, { character, participants }: DataSource) => {
+                const participant = participants.get(character.stateKey.createdBy);
+                if (participant == null) {
                     return '?';
                 }
-                return character.createdByMe ? 'o' : 'x';
+                return (
+                    <div>
+                        <span>{participant.name}</span>
+                        {character.createdByMe === true ? <span style={({ fontWeight: 'bold' })}> (自分)</span> : null}
+                    </div>
+                );
             },
         },
         {
-            title: 'Open',
-            key: 'open',
+            title: '全体公開',
+            key: '全体公開',
             // eslint-disable-next-line react/display-name
-            render: (_: unknown, { character }: DataSource) => (<Checkbox checked={character.state.isPrivate} />)
+            render: (_: unknown, { character, operate }: DataSource) => (
+                <Switch
+                    disabled={!character.createdByMe}
+                    checkedChildren={<EyeOutlined />}
+                    unCheckedChildren={<EyeInvisibleOutlined />}
+                    checked={!character.state.isPrivate}
+                    onChange={newValue => {
+                        const setup = Room.createPostOperationSetup();
+                        const characterOperation: Character.PostOperation = {
+                            ...characterOperationBase,
+                            isPrivate: {
+                                newValue: !newValue,
+                            },
+                        };
+                        setup.characters.set(character.stateKey, {
+                            type: update,
+                            operation: characterOperation,
+                        });
+                        operate(setup);
+                    }} />)
         },
-        ...strIndex20Array.map(key => createNumParameterColumn({ key, room: props.room })),
-        ...strIndex20Array.map(key => createBooleanParameterColumn({ key, room: props.room })),
-        ...strIndex20Array.map(key => createStringParameterColumn({ key, room: props.room })),
-        {
-            title: '',
-            dataIndex: 'details',
-            key: 'details',
-            // eslint-disable-next-line react/display-name
-            render: (_: unknown, { character }: DataSource) =>
-                (
-                    <Button onClick={() => dispatchRoomComponentsState({ type: characterDrawerType, newValue: { type: update, stateKey: character.stateKey } })}>詳細</Button>
-                )
-        }
+        ...strIndex20Array.map(key => createNumParameterColumn({ key, room })),
+        ...strIndex20Array.map(key => createBooleanParameterColumn({ key, room })),
+        ...strIndex20Array.map(key => createStringParameterColumn({ key, room })),
     ]).compact(x => x).toArray();
 
     return (
         <div>
-            <Button onClick={() => dispatch({ type: characterDrawerType, newValue: { type: create } })}>
+            <Button size='small' onClick={() => dispatch({ type: characterDrawerType, newValue: { type: create } })}>
                 キャラクターを作成
             </Button>
-            <Button onClick={() => dispatch({ type: characterParameterNamesDrawerVisibility, newValue: true })}>
+            <Button size='small' onClick={() => dispatch({ type: characterParameterNamesDrawerVisibility, newValue: true })}>
                 パラメーターを追加・編集・削除
             </Button>
-            <Table columns={columns} dataSource={charactersDataSource} />
+            <Table columns={columns} dataSource={charactersDataSource} size='small' />
         </div>);
 };
 

@@ -313,9 +313,9 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                     <Col flex={0}></Col>
                     <Col span={inputSpan}>
                         <Checkbox
-                            checked={character.isPrivate}
-                            onChange={e => updateCharacter({ isPrivate: e.target.checked })}>
-                            キャラクター全体を非公開にする
+                            checked={!character.isPrivate}
+                            onChange={e => updateCharacter({ isPrivate: !e.target.checked })}>
+                            キャラクター全体を公開する
                         </Checkbox>
                     </Col>
                 </Row>
@@ -370,13 +370,13 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                 }
                 {
                     strIndex20Array.map(key => {
-                        const paramName = roomState.paramNames.get({ type: RoomParameterNameType.Num, key });
+                        const paramName = roomState.paramNames.get({ type: RoomParameterNameType.Bool, key });
                         if (paramName === undefined) {
                             return null;
                         }
                         const value = character.boolParams.get(key);
                         return (
-                            <Row key={`numParam${key}Row`} gutter={gutter} align='middle'>
+                            <Row key={`boolParam${key}Row`} gutter={gutter} align='middle'>
                                 <Col flex='auto' />
                                 <Col flex={0}>{paramName.name}</Col>
                                 <Col span={inputSpan}>

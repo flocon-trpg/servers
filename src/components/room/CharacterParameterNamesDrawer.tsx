@@ -11,6 +11,7 @@ import produce from 'immer';
 import { StrIndex100, strIndex100Array, strIndex20Array } from '../../@shared/indexes';
 import { RoomParameterNameType } from '../../generated/graphql';
 import { replace } from '../../stateManagers/states/types';
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 
 type Props = {
     roomState: Room.State;
@@ -75,8 +76,9 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                                 label={`数値パラメーター${key}`}
                                 name={`numParameter${key}`}>
                                 <Space>
-                                    {state == null ? <Input disabled /> :
+                                    {state == null ? <Input size='small' disabled /> :
                                         <Input
+                                            size='small'
                                             value={state.name}
                                             onChange={e => {
                                                 const operation = Room.createPostOperationSetup();
@@ -84,6 +86,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                                                 operate(operation);
                                             }} />}
                                     <Button
+                                        size='small'
                                         onClick={() => {
                                             if (state == null) {
                                                 setVisibleParameterForm({
@@ -96,7 +99,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                                             operation.paramNames.set({ key, type: RoomParameterNameType.Num }, { type: replace, newValue: undefined });
                                             operate(operation);
                                         }} >
-                                        {state == null ? '追加' : '削除'}
+                                        {state == null ? <PlusOutlined /> : <DeleteOutlined />}
                                     </Button>
                                 </Space>
                             </Form.Item>
@@ -133,7 +136,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                                             operation.paramNames.set({ key, type: RoomParameterNameType.Bool }, { type: replace, newValue: undefined });
                                             operate(operation);
                                         }} >
-                                        {state == null ? '追加' : '削除'}
+                                        {state == null ? <PlusOutlined /> : <DeleteOutlined />}
                                     </Button>
                                 </Space>
                             </Form.Item>
@@ -170,7 +173,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                                             operation.paramNames.set({ key, type: RoomParameterNameType.Str }, { type: replace, newValue: undefined });
                                             operate(operation);
                                         }} >
-                                        {state == null ? '追加' : '削除'}
+                                        {state == null ? <PlusOutlined /> : <DeleteOutlined />}
                                     </Button>
                                 </Space>
                             </Form.Item>
