@@ -1,0 +1,18 @@
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+// body {
+//     padding: $pt-navbar-height 0 0 0;
+// }
+
+.cancel-rnd {
+    cursor: auto;
+}
+
+// これがあることで、antdのTabPaneの子要素のheightを100%にできる（Chrome DevToolsを用いて特定。代わりに.ant-tabs-content-topを対象にしてもよさそう）。
+// これによりy方向のスクロールバーを用いて表示することが可能になる。
+.ant-tabs-content {
+    height: 100%;
+}

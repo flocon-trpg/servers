@@ -1,0 +1,1 @@
+export const TEST = process.env.customKey === 'test';
