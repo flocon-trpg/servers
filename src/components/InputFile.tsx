@@ -13,10 +13,13 @@ type ImageProps = {
 
 const Image: React.FC<ImageProps> = ({ filePath }: ImageProps) => {
     const src = useFirebaseStorageUrl(filePath);
-    if (src == null) {
+    if (src == null || filePath == null) {
         return null;
     }
-    return (<img src={src} width={50} height={50} />);
+    return (
+        <a href={src} target='_blank' rel='noopener noreferrer'>
+            <img src={src} width={30} height={30} />
+        </a>);
 };
 
 type Props = {
@@ -37,7 +40,7 @@ const InputFile: React.FC<Props> = ({ filePath, onPathChange, openFilesManager, 
         if (filePath == null || showImage !== true) {
             return null;
         }
-        return (<Image filePath={filePath} />);
+        return (<Image filePath={filePath}/>);
     })();
     const fileNameElement = (() => {
         if (filePath == null) {

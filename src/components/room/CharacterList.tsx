@@ -1,6 +1,6 @@
 import React from 'react';
 import MyAuthContext from '../../contexts/MyAuthContext';
-import { Table, Checkbox, Button, InputNumber, Input, Dropdown, Menu, Switch } from 'antd';
+import { Table, Checkbox, Button, InputNumber, Input, Dropdown, Menu, Switch, Tooltip, Popover } from 'antd';
 import * as Room from '../../stateManagers/states/room';
 import * as Participant from '../../stateManagers/states/participant';
 import * as Character from '../../stateManagers/states/character';
@@ -20,6 +20,8 @@ import BooleanParameterInput from '../../foundations/BooleanParameterInput';
 import StringParameterInput from '../../foundations/StringParameterInput';
 import { useFirebaseStorageUrl } from '../../hooks/firebaseStorage';
 import { SettingOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+import ToggleButton from '../../foundations/ToggleButton';
+import { characterNotCreatedByMe, makeCharacterNotPrivate, makeCharacterPrivate } from '../../resource/text/main';
 
 const characterOperationBase: Character.PostOperation = {
     boolParams: new Map(),
@@ -103,6 +105,8 @@ const createNumParameterColumn = ({
             return (
                 <>
                     <NumberParameterInput
+                        isCharacterPrivate={character.state.isPrivate}
+                        compact
                         parameterKey={key}
                         numberParameter={character.state.numParams.get(key)}
                         numberMaxParameter={character.state.numMaxParams.get(key)}
@@ -156,12 +160,12 @@ const createStringParameterColumn = ({
     };
 };
 
-const Image: React.FC<{ filePath?: FilePathFragment }> = ({ filePath }: { filePath?: FilePathFragment }) => {
+const Image: React.FC<{ filePath?: FilePathFragment; iconSize: boolean }> = ({ filePath, iconSize }: { filePath?: FilePathFragment; iconSize: boolean }) => {
     const src = useFirebaseStorageUrl(filePath);
     if (src == null) {
         return null;
     }
-    return (<img src={src} width={25} height={25} />);
+    return (<img src={src} width={iconSize ? 25 : 150} height={iconSize ? 25 : 150} />);
 };
 
 const CharactersList: React.FC<Props> = ({ room }: Props) => {
@@ -187,19 +191,33 @@ const CharactersList: React.FC<Props> = ({ room }: Props) => {
 
     const columns = __([
         {
+            title: '',
+            key: 'menu',
+            width: 20,
+            // eslint-disable-next-line react/display-name
+            render: (_: unknown, { character }: DataSource) => (
+                <Tooltip title='編集'>
+                    <Button
+                        style={({ alignSelf: 'center' })}
+                        size='small'
+                        onClick={() => dispatchRoomComponentsState({ type: characterDrawerType, newValue: { type: update, stateKey: character.stateKey } })}>
+                        <SettingOutlined />
+                    </Button>
+                </Tooltip>),
+        },
+        {
             title: '名前',
             key: 'name',
             // eslint-disable-next-line react/display-name
             render: (_: unknown, { character }: DataSource) => (
-                <div
-                    style={({ display: 'flex', flexDirection: 'row' })}>
-                    <Button style={({ alignSelf: 'center' })} size='small' onClick={() => dispatchRoomComponentsState({ type: characterDrawerType, newValue: { type: update, stateKey: character.stateKey } })}>
-                        <SettingOutlined />
-                    </Button>
-                    <div style={({ width: 12 })} />
-                    <Image filePath={character.state.image ?? undefined} />
+                <div style={({ display: 'flex', flexDirection: 'row' })}>
+                    <Popover trigger='hover' content={<Image filePath={character.state.image ?? undefined} iconSize={false} />}>
+                        <div>
+                            <Image filePath={character.state.image ?? undefined} iconSize={true} />
+                        </div>
+                    </Popover>
                     <div style={({ width: 4 })} />
-                    <Input value={character.state.name} bordered={false} size='small' />
+                    <Input value={character.state.name} size='small' />
                 </div>),
         },
         {
@@ -224,11 +242,13 @@ const CharactersList: React.FC<Props> = ({ room }: Props) => {
             key: '全体公開',
             // eslint-disable-next-line react/display-name
             render: (_: unknown, { character, operate }: DataSource) => (
-                <Switch
-                    disabled={!character.createdByMe}
+                <ToggleButton
+                    size='small'
+                    checked={!character.state.isPrivate}
+                    disabled={character.createdByMe ? false : characterNotCreatedByMe}
                     checkedChildren={<EyeOutlined />}
                     unCheckedChildren={<EyeInvisibleOutlined />}
-                    checked={!character.state.isPrivate}
+                    tooltip={character.state.isPrivate ? makeCharacterNotPrivate : makeCharacterPrivate}
                     onChange={newValue => {
                         const setup = Room.createPostOperationSetup();
                         const characterOperation: Character.PostOperation = {

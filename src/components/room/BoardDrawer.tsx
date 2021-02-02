@@ -38,7 +38,7 @@ const defaultBoard: Board.State = {
 };
 
 const gutter: [Gutter, Gutter] = [16, 16];
-const inputSpan = 16;
+const inputSpan = 18;
 
 const BoardDrawer: React.FC<Props> = ({ roomState }: Props) => {
     const componentsState = React.useContext(ComponentsStateContext);

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Menu, Layout as AntdLayout, Drawer, Dropdown } from 'antd';
 import DraggableCard, { horizontalPadding } from '../../foundations/DraggableCard';
-import CharactersList from './CharactersList';
+import CharactersList from './CharacterList';
 import useRoomConfig from '../../hooks/localStorage/useRoomConfig';
 import { useSelector } from '../../store';
 import roomConfigModule from '../../modules/roomConfigModule';

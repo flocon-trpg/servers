@@ -22,6 +22,9 @@ import MyAuthContext from '../../contexts/MyAuthContext';
 import NumberParameterInput from '../../foundations/NumberParameterInput';
 import BooleanParameterInput from '../../foundations/BooleanParameterInput';
 import StringParameterInput from '../../foundations/StringParameterInput';
+import ToggleButton from '../../foundations/ToggleButton';
+import { SettingOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+import { characterNotCreatedByMe, makeCharacterNotPrivate, makeCharacterPrivate } from '../../resource/text/main';
 
 const notFound = 'notFound';
 
@@ -57,7 +60,7 @@ const defaultPieceLocation: PieceLocation.State = {
 };
 
 const gutter: [Gutter, Gutter] = [16, 16];
-const inputSpan = 18;
+const inputSpan = 16;
 
 const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
     const myAuth = React.useContext(MyAuthContext);
@@ -310,22 +313,30 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
             <div>
                 <Row gutter={gutter} align='middle'>
                     <Col flex='auto' />
-                    <Col flex={0}></Col>
+                    <Col flex={0}>全体公開</Col>
                     <Col span={inputSpan}>
-                        <Checkbox
+                        <ToggleButton
+                            disabled={createdByMe ? false : characterNotCreatedByMe}
                             checked={!character.isPrivate}
-                            onChange={e => updateCharacter({ isPrivate: !e.target.checked })}>
-                            キャラクター全体を公開する
-                        </Checkbox>
+                            checkedChildren={<EyeOutlined />}
+                            unCheckedChildren={<EyeInvisibleOutlined />}
+                            tooltip={character.isPrivate ? makeCharacterNotPrivate : makeCharacterPrivate}
+                            onChange={newValue => updateCharacter({ isPrivate: !newValue })} />
                     </Col>
                 </Row>
+
+                {pieceLocationElement == null ? null : <>
+                    <Divider />
+                    <PageHeader
+                        title="コマ" />
+                </>}
 
                 {pieceLocationElement}
 
                 <Divider />
 
                 <PageHeader
-                    title="キャラクター" />
+                    title="パラメーター" />
 
                 <Row gutter={gutter} align='middle'>
                     <Col flex='auto' />
@@ -356,6 +367,8 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                                 <Col flex={0}>{paramName.name}</Col>
                                 <Col span={inputSpan}>
                                     <NumberParameterInput
+                                        isCharacterPrivate={character.isPrivate}
+                                        compact={false}
                                         parameterKey={key}
                                         numberParameter={value}
                                         numberMaxParameter={maxValue}

@@ -1,20 +1,24 @@
 import React from 'react';
-import { Button, Checkbox, InputNumber, Space, Switch } from 'antd';
+import { Button, Checkbox, InputNumber, Space, Switch, Tag, Tooltip } from 'antd';
 import * as Character from '../stateManagers/states/character';
 import * as NumParam from '../stateManagers/states/numParam';
 import { update } from '../stateManagers/states/types';
 import { createStateMap } from '../@shared/StateMap';
 import { StrIndex100 } from '../@shared/indexes';
 import { EyeInvisibleOutlined, EyeOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import ToggleButton from './ToggleButton';
+import { addParameter, characterNotCreatedByMe, deleteParameter, makeParameterNotPrivate, makeParameterPrivate } from '../resource/text/main';
 
 const inputWidth = 50;
 
 type Props = {
+    isCharacterPrivate: boolean;
     parameterKey: StrIndex100;
     numberParameter: NumParam.State | undefined;
     numberMaxParameter: NumParam.State | undefined;
     createdByMe: boolean;
     onOperate: (operation: Character.PostOperation) => void;
+    compact: boolean;
 }
 
 const createCharacterOperationBase = (): Character.WritablePostOperation => ({
@@ -26,12 +30,86 @@ const createCharacterOperationBase = (): Character.WritablePostOperation => ({
 });
 
 const NumberParameterInput: React.FC<Props> = ({
+    isCharacterPrivate,
     parameterKey,
     numberParameter,
     numberMaxParameter,
     createdByMe,
     onOperate,
+    compact,
 }: Props) => {
+    const addOrDeleteNumberParameterButton: JSX.Element | null = (() => {
+        if (compact) {
+            return null;
+        }
+        if (numberParameter?.value === undefined) {
+            return (
+                <Tooltip title={addParameter}>
+                    <Button
+                        size='small'
+                        onClick={() => {
+                            const operation = createCharacterOperationBase();
+                            operation.numParams.set(parameterKey, {
+                                value: { newValue: 0 },
+                            });
+                            onOperate(operation);
+                        }}>
+                        <PlusOutlined />
+                    </Button>
+                </Tooltip>);
+        }
+        return (
+            <Tooltip title={deleteParameter}>
+                <Button
+                    size='small'
+                    onClick={() => {
+                        const operation = createCharacterOperationBase();
+                        operation.numParams.set(parameterKey, {
+                            value: { newValue: undefined },
+                        });
+                        onOperate(operation);
+                    }}>
+                    <DeleteOutlined />
+                </Button>
+            </Tooltip>);
+    })();
+
+    const addOrDeleteNumberMaxParameterButton: JSX.Element | null = (() => {
+        if (compact) {
+            return null;
+        }
+        if (numberMaxParameter?.value === undefined) {
+            return (
+                <Tooltip title={addParameter}>
+                    <Button
+                        size='small'
+                        onClick={() => {
+                            const operation = createCharacterOperationBase();
+                            operation.numMaxParams.set(parameterKey, {
+                                value: { newValue: 0 },
+                            });
+                            onOperate(operation);
+                        }}>
+                        <PlusOutlined />
+                    </Button>
+                </Tooltip>);
+        }
+        return (
+            <Tooltip title={deleteParameter}>
+                <Button
+                    size='small'
+                    onClick={() => {
+                        const operation = createCharacterOperationBase();
+                        operation.numMaxParams.set(parameterKey, {
+                            value: { newValue: undefined },
+                        });
+                        onOperate(operation);
+                    }}>
+                    <DeleteOutlined />
+                </Button>
+            </Tooltip>);
+    })();
+
     return (
         <div>
             {!createdByMe && numberParameter?.isValuePrivate === true ? '?' : <>
@@ -50,36 +128,15 @@ const NumberParameterInput: React.FC<Props> = ({
                         });
                         onOperate(operation);
                     }} />
-                {numberParameter?.value === undefined ?
-                    <Button
-                        size='small'
-                        onClick={() => {
-                            const operation = createCharacterOperationBase();
-                            operation.numParams.set(parameterKey, {
-                                value: { newValue: 0 },
-                            });
-                            onOperate(operation);
-                        }}>
-                        <PlusOutlined />
-                    </Button> :
-                    <Button
-                        size='small'
-                        onClick={() => {
-                            const operation = createCharacterOperationBase();
-                            operation.numParams.set(parameterKey, {
-                                value: { newValue: undefined },
-                            });
-                            onOperate(operation);
-                        }}>
-                        <DeleteOutlined />
-                    </Button>}
+                {addOrDeleteNumberParameterButton}
             </>}
-            <Switch
-                size='small'
-                disabled={!createdByMe}
+            <ToggleButton
+                checked={!(numberParameter?.isValuePrivate ?? false)}
+                disabled={createdByMe ? false : characterNotCreatedByMe}
+                tooltip={(numberParameter?.isValuePrivate ?? false) ? makeParameterNotPrivate(isCharacterPrivate) : makeParameterPrivate(isCharacterPrivate)}
                 checkedChildren={<EyeOutlined />}
                 unCheckedChildren={<EyeInvisibleOutlined />}
-                checked={!(numberParameter?.isValuePrivate ?? false)}
+                size='small'
                 onChange={e => {
                     const operation = createCharacterOperationBase();
                     operation.numParams.set(parameterKey, {
@@ -87,7 +144,7 @@ const NumberParameterInput: React.FC<Props> = ({
                     });
                     onOperate(operation);
                 }} />
-            <span>/</span>
+            <span> / </span>
             {!createdByMe && numberMaxParameter?.isValuePrivate === true ? '?' : <>
                 <InputNumber
                     style={({ width: inputWidth })}
@@ -104,36 +161,15 @@ const NumberParameterInput: React.FC<Props> = ({
                         });
                         onOperate(operation);
                     }} />
-                {numberMaxParameter?.value === undefined ?
-                    <Button
-                        size='small'
-                        onClick={() => {
-                            const operation = createCharacterOperationBase();
-                            operation.numMaxParams.set(parameterKey, {
-                                value: { newValue: 0 },
-                            });
-                            onOperate(operation);
-                        }}>
-                        <PlusOutlined />
-                    </Button> :
-                    <Button
-                        size='small'
-                        onClick={() => {
-                            const operation = createCharacterOperationBase();
-                            operation.numMaxParams.set(parameterKey, {
-                                value: { newValue: undefined },
-                            });
-                            onOperate(operation);
-                        }}>
-                        <DeleteOutlined />
-                    </Button>}
+                {addOrDeleteNumberMaxParameterButton}
             </>}
-            <Switch
-                size='small'
-                disabled={!createdByMe}
+            <ToggleButton
+                checked={!(numberMaxParameter?.isValuePrivate ?? false)}
+                disabled={createdByMe ? false : characterNotCreatedByMe}
+                tooltip={(numberMaxParameter?.isValuePrivate ?? false) ? makeParameterNotPrivate(isCharacterPrivate) : makeParameterPrivate(isCharacterPrivate)}
                 checkedChildren={<EyeOutlined />}
                 unCheckedChildren={<EyeInvisibleOutlined />}
-                checked={!(numberMaxParameter?.isValuePrivate ?? false)}
+                size='small'
                 onChange={e => {
                     const operation = createCharacterOperationBase();
                     operation.numMaxParams.set(parameterKey, {
