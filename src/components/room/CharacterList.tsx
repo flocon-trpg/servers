@@ -144,8 +144,9 @@ const createStringParameterColumn = ({
             return (
                 <>
                     <StringParameterInput
+                        isCharacterPrivate={character.state.isPrivate}
                         parameterKey={key}
-                        stringParameter={character.state.strParams.get(key)}
+                        parameter={character.state.strParams.get(key)}
                         createdByMe={character.createdByMe ?? false}
                         onOperate={characterOperation => {
                             const operation = Room.createPostOperationSetup();

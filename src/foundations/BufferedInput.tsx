@@ -3,7 +3,7 @@ import { Input } from 'antd';
 import { useBuffer } from '../hooks/useBuffer';
 import { InputProps } from 'antd/lib/input';
 
-type OnChangeParams = {
+export type OnChangeParams = {
     previousValue: string;
     currentValue: string;
     isReset: boolean;
@@ -11,21 +11,20 @@ type OnChangeParams = {
 
 export type Props = Omit<InputProps, 'defaultValue' | 'ref' | 'onChange' | 'value'> & {
     value: string;
-    valueKey: number;
-    // useEffectのdepsに使われているので、BufferedInputを使う際はuseConstantなどを使って固定化するのを忘れないように！
+    valueResetKey: number;
     onChange: (params: OnChangeParams) => void;
 };
 
 const BufferedInput: React.FC<Props> = (props: Props) => {
-    const {value, valueKey, onChange} = props;
+    const {value, valueResetKey: valueResetKey, onChange} = props;
     const [localState, setLocalState] = React.useState<string>(value);
-    const buffer = useBuffer(localState, value, valueKey);
+    const buffer = useBuffer(localState, value, valueResetKey);
     const ref = React.useRef<Input>(null);
 
     React.useEffect(() => {
         ref.current?.setValue(value);
         setLocalState(value);
-    }, [value, valueKey]);
+    }, [value, valueResetKey]);
 
     React.useEffect(() => {
         if (buffer.previousValue == null) {
@@ -39,7 +38,7 @@ const BufferedInput: React.FC<Props> = (props: Props) => {
             currentValue: buffer.currentValue,
             isReset: buffer.isReset,
         });
-    }, [buffer, onChange]);
+    }, [buffer]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <Input {...props} value={undefined} ref={ref} defaultValue={value} onChange={e => setLocalState(e.target.value)} />

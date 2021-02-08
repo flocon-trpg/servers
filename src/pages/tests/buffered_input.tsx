@@ -7,9 +7,6 @@ import { BufferResult } from '../../hooks/useBuffer';
 
 const Main: React.FC = () => {
     const [changelog, setChangelog] = React.useState<BufferResult<string>[]>([]);
-    const onChange = useConstant(() => (e: BufferResult<string>) => {
-        setChangelog(state => [...state, e]);
-    });
     const [value, setValue] = React.useState<string>('init text');
     const [valueKey, setValueKey] = React.useState(0);
     React.useEffect(() => {
@@ -20,7 +17,9 @@ const Main: React.FC = () => {
     }, []);
 
     return <div>
-        <BufferedInput value={value} onChange={onChange} valueKey={valueKey} />
+        <BufferedInput value={value} onChange={(e: BufferResult<string>) => {
+            setChangelog(state => [...state, e]);
+        }} valueResetKey={valueKey} />
         <div>
             {changelog.map((log, i) => <div key={i}>{`previousValue: ${log.previousValue}, currentValue: ${log.currentValue}. isReset: ${log.isReset}`}</div>)}
         </div>

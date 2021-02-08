@@ -1,16 +1,59 @@
 import { StateManager } from './StateManager';
 
+type Operation = {
+    oldValue: number;
+    newValue: number;
+}
+
 const initRevision = 0;
 const initState = 0;
 
-const createStateManager = () => new StateManager<number, number, number>({
+const createStateManager = () => new StateManager<number, Operation, Operation>({
     revision: initRevision,
     state: initState,
-    applyGetOperation: ({ state, operation }) => state + operation,
-    applyPostOperation: ({ state, operation }) => state + operation,
-    composePostOperation: ({ first, second }) => first + second,
-    transform: ({ first, second }) => ({ firstPrime: first, secondPrime: second }),
-    diff: ({ prev, next }) => next - prev,
+    applyGetOperation: ({ state, operation }) => {
+        if (state !== operation.oldValue) {
+            throw 'Failure at applyGetOperation: state !== operation.oldValue';
+        }
+        return operation.newValue;
+    },
+    applyPostOperation: ({ state, operation }) => {
+        if (state !== operation.oldValue) {
+            throw 'Failure at applyPostOperation: state !== operation.oldValue';
+        }
+        return operation.newValue;
+    },
+    composePostOperation: ({ first, second }) => {
+        if (first.newValue !== second.oldValue) {
+            throw 'Failure at composePostOperation: first.newValue !== operation.oldValue';
+        }
+        return {
+            oldValue: first.oldValue,
+            newValue: second.newValue,
+        };
+    },
+    getFirstTransform: ({ first, second }) => {
+        if (first.oldValue !== second.oldValue) {
+            throw 'Failure at getFirstTransform: first.oldValue !== second.oldValue';
+        }
+        return {
+            firstPrime: { oldValue: second.newValue, newValue: first.newValue },
+            secondPrime: { oldValue: first.newValue, newValue: first.newValue },
+        };
+    },
+    postFirstTransform: ({ first, second }) => {
+        if (first.oldValue !== second.oldValue) {
+            throw 'Failure at postFirstTransform: first.oldValue !== second.oldValue';
+        }
+        return {
+            firstPrime: { oldValue: second.newValue, newValue: first.newValue },
+            secondPrime: { oldValue: first.newValue, newValue: first.newValue },
+        };
+    },
+    diff: ({ prev, next }) => ({
+        oldValue: prev,
+        newValue: next,
+    }),
 });
 
 it('tests init StateManager', () => {
@@ -26,17 +69,18 @@ it('tests init StateManager', () => {
 it('tests StateManager.operate', () => {
     const target = createStateManager();
 
-    target.operate(2);
+    const newState = 2;
+    target.operate({ oldValue: initState, newValue: newState });
 
     expect(target.isPosting).toBe(false);
     expect(target.requiresReload).toBe(false);
     expect(target.revision).toBe(initRevision);
-    expect(target.uiState).toBe(initState + 2);
+    expect(target.uiState).toBe(newState);
     expect(target.waitingResponseSince()).toBeNull();
 });
 
 it('tests StateManager.post', () => {
-    const operation = 2;
+    const operation = { oldValue: initState, newValue: 2 };
 
     const target = createStateManager();
 
@@ -46,7 +90,7 @@ it('tests StateManager.post', () => {
     expect(target.isPosting).toBe(true);
     expect(target.requiresReload).toBe(false);
     expect(target.revision).toBe(initRevision);
-    expect(target.uiState).toBe(initState + operation);
+    expect(target.uiState).toBe(operation.newValue);
     expect(target.waitingResponseSince()).not.toBeNull();
 
     if (postResult === undefined) {
@@ -54,13 +98,13 @@ it('tests StateManager.post', () => {
         throw 'Guard';
     }
     expect(postResult.actualState).toBe(0);
-    expect(postResult.operationToPost).toBe(operation);
+    expect(postResult.operationToPost).toEqual(operation);
     expect(postResult.revision).toBe(initRevision);
 });
 
-it('tests StateManager.post -> non-id onPosted', () => {
-    const operation = 2;
-    const resultOperation = 20;
+it('tests StateManager: post -> non-id onPosted', () => {
+    const operation = { oldValue: initState, newValue: 2 };
+    const resultOperation = { oldValue: initState, newValue: 20 };
 
     const target = createStateManager();
 
@@ -80,12 +124,12 @@ it('tests StateManager.post -> non-id onPosted', () => {
     expect(target.isPosting).toBe(false);
     expect(target.requiresReload).toBe(false);
     expect(target.revision).toBe(initRevision + 1);
-    expect(target.uiState).toBe(initState + resultOperation);
+    expect(target.uiState).toBe(resultOperation.newValue);
     expect(target.waitingResponseSince()).toBeNull();
 });
 
-it('tests StateManager.post -> id onPosted', () => {
-    const operation = 2;
+it('tests StateManager: post -> onPosted({ isId: true })', () => {
+    const operation = { oldValue: initState, newValue: 2 };
 
     const target = createStateManager();
 
@@ -108,8 +152,8 @@ it('tests StateManager.post -> id onPosted', () => {
     expect(target.waitingResponseSince()).toBeNull();
 });
 
-it('tests StateManager.post -> onPosted({ isSuccess: null })', () => {
-    const operation = 2;
+it('tests StateManager: post -> onPosted({ isSuccess: null })', () => {
+    const operation = { oldValue: initState, newValue: 2 };
 
     const target = createStateManager();
 
@@ -125,11 +169,11 @@ it('tests StateManager.post -> onPosted({ isSuccess: null })', () => {
 
     expect(target.isPosting).toBe(false);
     expect(target.requiresReload).toBe(true);
-    expect(target.uiState).toBe(initState + operation);
+    expect(target.uiState).toBe(operation.newValue);
 });
 
-it('tests StateManager.post -> onPosted({ isSuccess: false })', () => {
-    const operation = 2;
+it('tests StateManager: post -> onPosted({ isSuccess: false })', () => {
+    const operation = { oldValue: initState, newValue: 2 };
 
     const target = createStateManager();
 
@@ -146,12 +190,12 @@ it('tests StateManager.post -> onPosted({ isSuccess: false })', () => {
     expect(target.isPosting).toBe(false);
     expect(target.requiresReload).toBe(false);
     expect(target.revision).toBe(initRevision);
-    expect(target.uiState).toBe(initState + operation);
+    expect(target.uiState).toBe(operation.newValue);
     expect(target.waitingResponseSince()).toBeNull();
 });
 
 it('tests StateManager.onOthersGet(initRevision + 1)', () => {
-    const operation = 2;
+    const operation = { oldValue: initState, newValue: 2 };
 
     const target = createStateManager();
 
@@ -160,12 +204,12 @@ it('tests StateManager.onOthersGet(initRevision + 1)', () => {
     expect(target.isPosting).toBe(false);
     expect(target.requiresReload).toBe(false);
     expect(target.revision).toBe(initRevision + 1);
-    expect(target.uiState).toBe(initState + operation);
+    expect(target.uiState).toBe(operation.newValue);
     expect(target.waitingResponseSince()).toBeNull();
 });
 
 test.each([initRevision - 1, initRevision])('tests StateManager.onOthersGet(%i)', revision => {
-    const operation = 2;
+    const operation = { oldValue: initState, newValue: 2 };
 
     const target = createStateManager();
 
@@ -178,8 +222,8 @@ test.each([initRevision - 1, initRevision])('tests StateManager.onOthersGet(%i)'
     expect(target.waitingResponseSince()).toBeNull();
 });
 
-test('tests StateManager.onOthersGet(initRevision + 2)', () => {
-    const operation = 2;
+test('tests StateManager: onOthersGet(initRevision + 2)', () => {
+    const operation = { oldValue: initState, newValue: 2 };
 
     const target = createStateManager();
 
@@ -193,25 +237,25 @@ test('tests StateManager.onOthersGet(initRevision + 2)', () => {
 });
 
 test('tests StateManager.onOthersGet(initRevision + 2) -> onOthersGet(initRevision + 1)', () => {
-    const firstOperation = 2;
-    const secondOperation = 20;
+    const firstOperation = { oldValue: initState, newValue: 2 };
+    const secondOperation = { oldValue: 2, newValue: 20 };
 
     const target = createStateManager();
 
-    target.onOthersGet(firstOperation, initRevision + 2);
-    target.onOthersGet(secondOperation, initRevision + 1);
+    target.onOthersGet(secondOperation, initRevision + 2);
+    target.onOthersGet(firstOperation, initRevision + 1);
 
     expect(target.isPosting).toBe(false);
     expect(target.requiresReload).toBe(false);
     expect(target.revision).toBe(initRevision + 2);
-    expect(target.uiState).toBe(initState + firstOperation + secondOperation);
+    expect(target.uiState).toBe(secondOperation.newValue);
     expect(target.waitingResponseSince()).toBeNull();
 });
 
-test('tests StateManager.post -> onOthersGet(initRevision + 2) -> onPosted', () => {
-    const firstOperation = 2;
-    const secondOperation = 20;
-    const firstOperationResult = 200;
+test('tests StateManager: post -> onOthersGet(initRevision + 2) -> onPosted', () => {
+    const firstOperation = { oldValue: initState, newValue: 2 };
+    const secondOperation = { oldValue: 20, newValue: 200 };
+    const firstOperationResult = { oldValue: initState, newValue: 20 };
 
     const target = createStateManager();
 
@@ -232,6 +276,36 @@ test('tests StateManager.post -> onOthersGet(initRevision + 2) -> onPosted', () 
     expect(target.isPosting).toBe(false);
     expect(target.requiresReload).toBe(false);
     expect(target.revision).toBe(initRevision + 2);
-    expect(target.uiState).toBe(initState + firstOperationResult + secondOperation);
+    expect(target.uiState).toBe(secondOperation.newValue);
+    expect(target.waitingResponseSince()).toBeNull();
+});
+
+test('tests StateManager: operate -> post -> operate -> onPosted({ isSuccess: true })', () => {
+    const firstOperation = { oldValue: initState, newValue: 2 };
+    const secondOperation = { oldValue: 2, newValue: 20 };
+    const firstOperationResult = { oldValue: initState, newValue: 200 };
+
+    const target = createStateManager();
+
+    target.operate(firstOperation);
+
+    const postResult = target.post();
+    if (postResult === undefined) {
+        throw 'Guard';
+    }
+
+    target.operate(secondOperation);
+
+    postResult.onPosted({
+        isSuccess: true,
+        isId: false,
+        revisionTo: initRevision + 1,
+        result: firstOperationResult,
+    });
+
+    expect(target.isPosting).toBe(false);
+    expect(target.requiresReload).toBe(false);
+    expect(target.revision).toBe(initRevision + 1);
+    expect(target.uiState).toBe(secondOperation.newValue);
     expect(target.waitingResponseSince()).toBeNull();
 });

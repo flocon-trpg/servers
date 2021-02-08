@@ -5,6 +5,7 @@ import { StrIndex100, StrIndex5 } from '../../@shared/indexes';
 import { ParamNameOperationInput, ParamNamesOperationInput, ParamNameValueState, PieceLocationOperationInput, PieceLocationsOperationInput, PieceLocationValueState, ReplaceParamNameOperationInput, ReplacePieceLocationOperationInput, ReplaceRoomBgmOperationInput, RoomBgmOperationInput, RoomBgmsOperationInput, RoomBgmValueState, RoomParameterNameType, UpdateParamNameOperationInput, UpdatePieceLocationOperationInput, UpdateRoomBgmOperationInput } from '../../generated/graphql';
 import { transform as transformReplace, transformNullable as transformNullableReplace } from './replaceValue';
 import { OperationElement, replace } from './types';
+import { ReplaceValueOperationModule } from './utils/replaceValueOperation';
 
 export type State = Omit<ParamNameValueState, '__typename'>;
 export type PostOperation = ParamNameOperationInput;
@@ -56,9 +57,7 @@ export const compose = ({
     second: PostOperation;
 }): PostOperation => {
     const result: PostOperation = { ...first };
-    if (second.name !== undefined) {
-        result.name = second.name;
-    }
+    result.name = ReplaceValueOperationModule.compose(first.name, second.name);
     return result;
 };
 

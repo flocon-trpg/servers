@@ -13,6 +13,7 @@ import { createStateMap, ReadonlyStateMap, StateMap } from '../../@shared/StateM
 import { OperationElement, replace, update } from './types';
 import { isStrIndex100, isStrIndex5, StrIndex100, StrIndex5 } from '../../@shared/indexes';
 import { CustomDualKeyMap } from '../../@shared/CustomDualKeyMap';
+import { ReplaceValueOperationModule } from './utils/replaceValueOperation';
 
 export type State = Omit<RoomGetStateFragment, '__typename' | 'revision' | 'boards' | 'characters' | 'participants' | 'bgms' | 'paramNames'> & {
     boards: ReadonlyStateMap<Board.State>;
@@ -275,9 +276,7 @@ export const compose = ({
             innerCompose: ParamName.compose,
         }));
 
-    if (second.name !== undefined) {
-        result.name = second.name;
-    }
+    result.name = ReplaceValueOperationModule.compose(first.name, second.name);
 
     return result;
 };

@@ -10,7 +10,8 @@ const createParmeters = (state: Room.State, revision: number): Parameters => {
         applyGetOperation: Room.applyGetOperation,
         applyPostOperation: Room.applyPostOperation,
         composePostOperation: Room.compose,
-        transform: Room.transform,
+        getFirstTransform: Room.transform,
+        postFirstTransform: Room.transform,
         diff: Room.diff,
     };
 };

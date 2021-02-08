@@ -418,8 +418,9 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                                 <Col flex={0}>{paramName.name}</Col>
                                 <Col span={inputSpan}>
                                     <StringParameterInput
+                                        isCharacterPrivate={character.isPrivate}
                                         parameterKey={key}
-                                        stringParameter={value}
+                                        parameter={value}
                                         createdByMe={createdByMe}
                                         onOperate={operation => {
                                             updateCharacterByOperation(operation);

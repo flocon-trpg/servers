@@ -117,7 +117,6 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     useUserConfig(user?.uid ?? null, store.dispatch);
 
     if (apolloClient == null) {
-        // ブラウザではこのメッセージは表示されないはず
         return (<div style={({ padding: 5 })}>Preparing Apollo Client...</div>);
     }
     return (

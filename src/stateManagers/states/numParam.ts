@@ -2,6 +2,7 @@ import produce from 'immer';
 import { StrIndex100 } from '../../@shared/indexes';
 import { NumParamOperationInput, NumParamsOperationInput, NumParamValueState, UpdateNumParamOperationInput } from '../../generated/graphql';
 import { transform as transformReplace, transformNullable as transformNullableReplace } from './replaceValue';
+import { ReplaceNullableValueOperationModule, ReplaceValueOperationModule } from './utils/replaceValueOperation';
 
 export type State = Omit<NumParamValueState, '__typename'>;
 export type PostOperation = NumParamOperationInput;
@@ -35,12 +36,10 @@ export const compose = ({
     second: PostOperation;
 }): PostOperation => {
     const result: PostOperation = { ...first };
-    if (second.isValuePrivate !== undefined) {
-        result.isValuePrivate = second.isValuePrivate;
-    }
-    if (second.value != null) {
-        result.value = second.value;
-    }
+
+    result.isValuePrivate = ReplaceValueOperationModule.compose(first.isValuePrivate, second.isValuePrivate);
+    result.value = ReplaceNullableValueOperationModule.compose(first.value, second.value);
+    
     return result;
 };
 

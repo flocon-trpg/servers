@@ -181,7 +181,6 @@ export const useRoomState = (roomId: string): RoomStateResult => {
                     operationCache.clear(); // 早めのメモリ解放
                     stateManager = newStateManager;
                     const operate = (operation: Room.PostOperationSetup) => {
-                        console.info('operate');
                         const $stateManager = stateManager;
                         if ($stateManager == null) {
                             return;

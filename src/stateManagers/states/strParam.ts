@@ -4,6 +4,7 @@ import { TextTwoWayOperation, TextUpOperation } from '../../@shared/textOperatio
 import { StrParamOperation, StrParamOperationInput, StrParamsOperationInput, StrParamValueState, UpdateStrParamOperationInput } from '../../generated/graphql';
 import { TextUpOperationModule } from '../../utils/operations';
 import { transform as transformReplace } from './replaceValue';
+import { ReplaceValueOperationModule } from './utils/replaceValueOperation';
 
 export type State = Omit<StrParamValueState, '__typename'>;
 export type PostOperation = Omit<StrParamOperationInput, 'value'> & {
@@ -55,12 +56,10 @@ export const compose = ({
     second: PostOperation;
 }): PostOperation => {
     const result: PostOperation = { ...first };
-    if (second.isValuePrivate !== undefined) {
-        result.isValuePrivate = second.isValuePrivate;
-    }
-    if (second.value != null) {
-        result.value = second.value;
-    }
+
+    result.isValuePrivate = ReplaceValueOperationModule.compose(first.isValuePrivate, second.isValuePrivate);
+    result.value = TextUpOperationModule.compose({ first: first.value, second: second.value });
+
     return result;
 };
 

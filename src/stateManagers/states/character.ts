@@ -13,6 +13,7 @@ import { createStateMap, ReadonlyStateMap, StateMap } from '../../@shared/StateM
 import { __ } from '../../@shared/collection';
 import { isStrIndex100, StrIndex100 } from '../../@shared/indexes';
 import { TextUpOperationModule } from '../../utils/operations';
+import { ReplaceNullableValueOperationModule, ReplaceValueOperationModule } from './utils/replaceValueOperation';
 
 export type State = Omit<CharacterValueStateFragment, '__typename' | 'pieceLocations' | 'boolParams' | 'numParams' | 'numMaxParams' | 'strParams'> & {
     pieceLocations: ReadonlyStateMap<PieceLocation.State>;
@@ -327,15 +328,10 @@ export const compose = ({
         innerCompose: StrParam.compose,
     });
 
-    if (second.image != null) {
-        result.image = second.image;
-    }
-    if (second.isPrivate != null) {
-        result.isPrivate = second.isPrivate;
-    }
-    if (second.name != null) {
-        result.name = second.name;
-    }
+    result.image = ReplaceNullableValueOperationModule.compose(first.image, second.image);
+    result.isPrivate = ReplaceValueOperationModule.compose(first.isPrivate, second.isPrivate);
+    result.name = ReplaceValueOperationModule.compose(first.name, second.name);
+    
     return result;
 };
 

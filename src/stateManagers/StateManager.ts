@@ -27,7 +27,8 @@ export type StateManagerParameters<TState, TGetOperation, TPostOperation> = {
     applyGetOperation: Apply<TState, TGetOperation>;
     applyPostOperation: Apply<TState, TPostOperation>;
     composePostOperation: Compose<TPostOperation>;
-    transform: Transform<TGetOperation, TPostOperation>;
+    getFirstTransform: Transform<TGetOperation, TPostOperation>;
+    postFirstTransform: Transform<TPostOperation, TGetOperation>;
     diff: Diff<TState, TGetOperation>;
 }
 
@@ -82,13 +83,10 @@ class StateManagerCore<TState, TGetOperation, TPostOperation> {
             let uiState = this.actualState;
             const first = this._postingOperation?.operation;
             if (first !== undefined) {
-                console.info('first !== undefined');
                 uiState = this.params.applyPostOperation({ state: uiState, operation: first });
             }
             const second = this._localOperation;
             if (second !== undefined) {
-                console.info('second !== undefined');
-                console.log({ state: this.actualState, first, second });
                 uiState = this.params.applyPostOperation({ state: uiState, operation: second });
             }
             this._uiStateCache = uiState;
@@ -113,22 +111,26 @@ class StateManagerCore<TState, TGetOperation, TPostOperation> {
         this._pendingGetOperations.delete(this._revision + 1);
 
         if (toApply.isMine) {
-            /*                                   prev actualState
-             *                                    /              \
-             *            this._postingOperation /                \ toApply.operation
-             *                                  /      diff        \
-             *           (expected next actualState) ------------- next actualState
-             *              /                                        /
-             *             / this._localOperation                   / (xform)
-             *            /                                        /
-             *    prev uiState                              next uiState
+            /*                                      prev actualState
+             *                                          /        \
+             *                                         /          \
+             *                 this._postingOperation /            \ toApply.operation
+             *                                       /              \
+             *                                      /      diff      \
+             * expectedState(expected next actualState) ------------- next actualState
+             *                        /                                  /
+             *                       /                                  /
+             * this._localOperation /                                  / (xform)
+             *                     /                                  /
+             *                    /                                  /
+             *              prev uiState                        next uiState
              */
 
-            const expectedActualState = this._postingOperation?.operation === undefined ?
+            const expectedState = this._postingOperation?.operation === undefined ?
                 this._actualState :
                 this.params.applyPostOperation({ state: this._actualState, operation: this._postingOperation.operation });
             this._actualState = this.params.applyGetOperation({ state: this._actualState, operation: toApply.operation });
-            const diff = this.params.diff({ next: this._actualState, prev: expectedActualState });
+            const diff = this.params.diff({ prev: expectedState, next: this._actualState });
             this._localOperation = (() => {
                 if (this._localOperation === undefined) {
                     return undefined;
@@ -136,7 +138,7 @@ class StateManagerCore<TState, TGetOperation, TPostOperation> {
                 if (diff === undefined) {
                     return this._localOperation;
                 }
-                return this.params.transform({ first: diff, second: this._localOperation }).secondPrime;
+                return this.params.postFirstTransform({ first: this._localOperation, second: diff }).firstPrime;
             })();
             this._postingOperation = undefined;
 
@@ -166,13 +168,13 @@ class StateManagerCore<TState, TGetOperation, TPostOperation> {
             if (this._postingOperation?.operation === undefined) {
                 return { postedStateDiff: toApply.operation, nextPostingOperation: undefined };
             }
-            const xform = this.params.transform({ first: toApply.operation, second: this._postingOperation.operation });
+            const xform = this.params.getFirstTransform({ first: toApply.operation, second: this._postingOperation.operation });
             return { postedStateDiff: xform.firstPrime, nextPostingOperation: xform.secondPrime };
         })();
         if (this._postingOperation !== undefined) {
             this._postingOperation = { ...this._postingOperation, operation: nextPostingOperation };
         }
-        const nextLocalOperation = this._localOperation === undefined ? undefined : this.params.transform({ first: postedStateDiff, second: this._localOperation }).secondPrime;
+        const nextLocalOperation = this._localOperation === undefined ? undefined : this.params.getFirstTransform({ first: postedStateDiff, second: this._localOperation }).secondPrime;
         this._localOperation = nextLocalOperation;
 
         this._revision++;
@@ -234,7 +236,7 @@ class StateManagerCore<TState, TGetOperation, TPostOperation> {
             this._uiStateCache = undefined;
             return true;
         }
-        const transformedLocalOperation = this.params.transform({ first: diffBack, second: this._localOperation });
+        const transformedLocalOperation = this.params.getFirstTransform({ first: diffBack, second: this._localOperation });
         this._postingOperation = undefined;
         this._localOperation = transformedLocalOperation.secondPrime;
         this._uiStateCache = undefined;

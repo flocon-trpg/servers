@@ -56,6 +56,21 @@ export const TextUpOperationModule = {
         }
         return result.value;
     },
+    compose: ({ first, second }: { first?: TextUpOperation.Operation; second?: TextUpOperation.Operation }): TextUpOperation.Operation | undefined => {
+        if (first == null) {
+            return second;
+        } else {
+            if (second == null) {
+                return first;
+            } else {
+                const composed = TextUpOperation.compose({ first, second });
+                if (composed.isError) {
+                    throw `TextUpOperationModule.compose failure: ${JSON.stringify({ first, second })}`;
+                }
+                return composed.value;
+            }
+        }
+    },
     transform: ({ first, second }: { first?: TextUpOperation.Operation; second?: TextUpOperation.Operation }): { firstPrime?: TextUpOperation.Operation; secondPrime?: TextUpOperation.Operation }=> {
         if (first == null || second == null) {
             return {

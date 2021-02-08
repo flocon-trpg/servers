@@ -4,6 +4,7 @@ import { ReadonlyStateMap } from '../../@shared/StateMap';
 import { PieceLocationOperationInput, PieceLocationsOperationInput, PieceLocationValueState, ReplacePieceLocationOperationInput, ReplaceRoomBgmOperationInput, RoomBgmOperationInput, RoomBgmsOperationInput, RoomBgmValueState, UpdatePieceLocationOperationInput, UpdateRoomBgmOperationInput } from '../../generated/graphql';
 import { transform as transformReplace, transformNullable as transformNullableReplace } from './replaceValue';
 import { OperationElement, replace } from './types';
+import { ReplaceNullableValueOperationModule, ReplaceValueOperationModule } from './utils/replaceValueOperation';
 
 export type State = Omit<RoomBgmValueState, '__typename'>;
 export type PostOperation = RoomBgmOperationInput;
@@ -41,12 +42,10 @@ export const compose = ({
     second: PostOperation;
 }): PostOperation => {
     const result: PostOperation = { ...first };
-    if (second.files !== undefined) {
-        result.files = second.files;
-    }
-    if (second.volume != null) {
-        result.volume = second.volume;
-    }
+
+    result.files = ReplaceValueOperationModule.compose(first.files, second.files);
+    result.volume = ReplaceValueOperationModule.compose(first.volume, second.volume);
+
     return result;
 };
 

@@ -3,6 +3,7 @@ import { ReadonlyStateMap } from '../../@shared/StateMap';
 import { PieceLocationOperationInput, PieceLocationsOperationInput, PieceLocationValueState, ReplacePieceLocationOperationInput, UpdatePieceLocationOperationInput } from '../../generated/graphql';
 import { transform as transformReplace, transformNullable as transformNullableReplace } from './replaceValue';
 import { OperationElement, replace } from './types';
+import { ReplaceValueOperationModule } from './utils/replaceValueOperation';
 
 export type State = Omit<PieceLocationValueState, '__typename'>;
 export type PostOperation = PieceLocationOperationInput;
@@ -64,36 +65,18 @@ export const compose = ({
     second: PostOperation;
 }): PostOperation => {
     const result: PostOperation = { ...first };
-    if (second.isPrivate !== undefined) {
-        result.isPrivate = second.isPrivate;
-    }
-    if (second.isCellMode != null) {
-        result.isCellMode = second.isCellMode;
-    }
-    if (second.x !== undefined) {
-        result.x = second.x;
-    }
-    if (second.y !== undefined) {
-        result.y = second.y;
-    }
-    if (second.w !== undefined) {
-        result.w = second.w;
-    }
-    if (second.h !== undefined) {
-        result.h = second.h;
-    }
-    if (second.cellX !== undefined) {
-        result.cellX = second.cellX;
-    }
-    if (second.cellY !== undefined) {
-        result.cellY = second.cellY;
-    }
-    if (second.cellW !== undefined) {
-        result.cellW = second.cellW;
-    }
-    if (second.cellH !== undefined) {
-        result.cellH = second.cellH;
-    }
+
+    result.isPrivate = ReplaceValueOperationModule.compose(first.isPrivate, second.isPrivate);
+    result.isCellMode = ReplaceValueOperationModule.compose(first.isCellMode, second.isCellMode);
+    result.x = ReplaceValueOperationModule.compose(first.x, second.x);
+    result.y = ReplaceValueOperationModule.compose(first.y, second.y);
+    result.w = ReplaceValueOperationModule.compose(first.w, second.w);
+    result.h = ReplaceValueOperationModule.compose(first.h, second.h);
+    result.cellX = ReplaceValueOperationModule.compose(first.cellX, second.cellX);
+    result.cellY = ReplaceValueOperationModule.compose(first.cellY, second.cellY);
+    result.cellW = ReplaceValueOperationModule.compose(first.cellW, second.cellW);
+    result.cellH = ReplaceValueOperationModule.compose(first.cellH, second.cellH);
+
     return result;
 };
 

@@ -1,18 +1,22 @@
 import React from 'react';
-import { Button, Checkbox, Input, InputNumber, Space, Switch } from 'antd';
+import { Button, Checkbox, InputNumber, Space, Switch, Tag, Tooltip } from 'antd';
 import * as Character from '../stateManagers/states/character';
 import * as StrParam from '../stateManagers/states/strParam';
 import { update } from '../stateManagers/states/types';
 import { createStateMap } from '../@shared/StateMap';
 import { StrIndex100 } from '../@shared/indexes';
-import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
+import { EyeInvisibleOutlined, EyeOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import ToggleButton from './ToggleButton';
+import { addParameter, characterNotCreatedByMe, deleteParameter, makeParameterNotPrivate, makeParameterPrivate } from '../resource/text/main';
+import BufferedInput from './BufferedInput';
 import { TextUpOperationModule } from '../utils/operations';
 
-const inputWidth = 120;
+const inputWidth = 150;
 
 type Props = {
+    isCharacterPrivate: boolean;
     parameterKey: StrIndex100;
-    stringParameter: StrParam.State | undefined;
+    parameter: StrParam.State | undefined;
     createdByMe: boolean;
     onOperate: (operation: Character.PostOperation) => void;
 }
@@ -26,35 +30,40 @@ const createCharacterOperationBase = (): Character.WritablePostOperation => ({
 });
 
 const StringParameterInput: React.FC<Props> = ({
+    isCharacterPrivate,
     parameterKey,
-    stringParameter,
+    parameter,
     createdByMe,
     onOperate,
 }: Props) => {
     return (
         <div>
-            {!createdByMe && stringParameter?.isValuePrivate === true ? '?' : <>
-                <Input
-                    size='small'
+            {!createdByMe && parameter?.isValuePrivate === true ? '?' :
+                <BufferedInput
                     style={({ width: inputWidth })}
-                    value={stringParameter?.value ?? ''}
+                    size='small'
+                    value={parameter?.value ?? ''}
+                    valueResetKey={0}
                     onChange={e => {
+                        if (e.isReset) {
+                            return;
+                        }
                         const operation = createCharacterOperationBase();
                         operation.strParams.set(parameterKey, {
-                            value: TextUpOperationModule.diff({ first: stringParameter?.value ?? '', second: e.target.value}),
+                            value: TextUpOperationModule.diff({first: e.previousValue, second: e.currentValue}),
                         });
                         onOperate(operation);
-                    }} />
-            </>}
-            <Switch
-                size='small'
-                disabled={!createdByMe}
+                    }} />}
+            <ToggleButton
+                checked={!(parameter?.isValuePrivate ?? false)}
+                disabled={createdByMe ? false : characterNotCreatedByMe}
+                tooltip={(parameter?.isValuePrivate ?? false) ? makeParameterNotPrivate(isCharacterPrivate) : makeParameterPrivate(isCharacterPrivate)}
                 checkedChildren={<EyeOutlined />}
                 unCheckedChildren={<EyeInvisibleOutlined />}
-                checked={!(stringParameter?.isValuePrivate ?? false)}
+                size='small'
                 onChange={e => {
                     const operation = createCharacterOperationBase();
-                    operation.strParams.set(parameterKey, {
+                    operation.numParams.set(parameterKey, {
                         isValuePrivate: { newValue: !e },
                     });
                     onOperate(operation);
