@@ -200,7 +200,7 @@ const CharactersList: React.FC<Props> = ({ room }: Props) => {
         {
             title: '',
             key: 'menu',
-            width: 20,
+            width: 44,
             // eslint-disable-next-line react/display-name
             render: (_: unknown, { character }: DataSource) => (
                 <Tooltip title='編集'>
@@ -211,6 +211,35 @@ const CharactersList: React.FC<Props> = ({ room }: Props) => {
                         <SettingOutlined />
                     </Button>
                 </Tooltip>),
+        },
+        {
+            title: '全体公開',
+            key: '全体公開',
+            width: 80,
+            // eslint-disable-next-line react/display-name
+            render: (_: unknown, { character, operate }: DataSource) => (
+                <ToggleButton
+                    size='small'
+                    checked={!character.state.isPrivate}
+                    disabled={character.createdByMe ? false : characterIsNotPrivateAndNotCreatedByMe}
+                    showAsTextWhenDisabled
+                    checkedChildren={<EyeOutlined />}
+                    unCheckedChildren={<EyeInvisibleOutlined />}
+                    tooltip={character.state.isPrivate ? characterIsPrivate({ isCreate: false }) : characterIsNotPrivate({ isCreate: false })}
+                    onChange={newValue => {
+                        const setup = Room.createPostOperationSetup();
+                        const characterOperation: Character.PostOperation = {
+                            ...characterOperationBase,
+                            isPrivate: {
+                                newValue: !newValue,
+                            },
+                        };
+                        setup.characters.set(character.stateKey, {
+                            type: update,
+                            operation: characterOperation,
+                        });
+                        operate(setup);
+                    }} />)
         },
         {
             title: '名前',
@@ -243,34 +272,6 @@ const CharactersList: React.FC<Props> = ({ room }: Props) => {
                     </div>
                 );
             },
-        },
-        {
-            title: '全体公開',
-            key: '全体公開',
-            // eslint-disable-next-line react/display-name
-            render: (_: unknown, { character, operate }: DataSource) => (
-                <ToggleButton
-                    size='small'
-                    checked={!character.state.isPrivate}
-                    disabled={character.createdByMe ? false : characterIsNotPrivateAndNotCreatedByMe}
-                    showAsTextWhenDisabled
-                    checkedChildren={<EyeOutlined />}
-                    unCheckedChildren={<EyeInvisibleOutlined />}
-                    tooltip={character.state.isPrivate ? characterIsPrivate({ isCreate: false }) : characterIsNotPrivate({ isCreate: false })}
-                    onChange={newValue => {
-                        const setup = Room.createPostOperationSetup();
-                        const characterOperation: Character.PostOperation = {
-                            ...characterOperationBase,
-                            isPrivate: {
-                                newValue: !newValue,
-                            },
-                        };
-                        setup.characters.set(character.stateKey, {
-                            type: update,
-                            operation: characterOperation,
-                        });
-                        operate(setup);
-                    }} />)
         },
         ...strIndex20Array.map(key => createNumParameterColumn({ key, room })),
         ...strIndex20Array.map(key => createBooleanParameterColumn({ key, room })),
