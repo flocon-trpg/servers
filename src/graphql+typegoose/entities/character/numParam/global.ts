@@ -81,25 +81,6 @@ class NumParamState {
         return result;
     }
 
-    private setToNumParamBase({
-        numParamValueBase,
-    }: {
-        numParamValueBase: $MikroORM.NumParamBase;
-    }) {
-        numParamValueBase.isValuePrivate = this._object.isValuePrivate;
-        numParamValueBase.value = this._object.value;
-    }
-
-    public toMikroORMState({
-        key,
-    }: {
-        key: string;
-    }): $MikroORM.NumParam {
-        const result = new $MikroORM.NumParam({ ...this._object, key });
-        this.setToNumParamBase({ numParamValueBase: result });
-        return result;
-    }
-
     public toGraphQL({ key, createdByMe }: { key: string; createdByMe: boolean }): $GraphQL.NumParamState {
         return {
             key,
@@ -126,7 +107,7 @@ export class NumParamsState {
         return new NumParamsState(core);
     }
 
-    public static createFromMikroORM(source: ($MikroORM.NumParam | $MikroORM.RemovedNumParam)[]): NumParamsState {
+    public static createFromMikroORM(source: ($MikroORM.NumParam | $MikroORM.RemovedNumParam | $MikroORM.NumMaxParam | $MikroORM.RemovedNumMaxParam)[]): NumParamsState {
         const core = new Map<StrIndex100, NumParamState>();
         for (const elem of source) {
             const index = elem.key;
@@ -226,7 +207,7 @@ export class NumParamsDownOperation {
     public static async create({
         update
     }: {
-        update: Collection<$MikroORM.UpdateNumParamOp>;
+        update: Collection<$MikroORM.UpdateNumParamOp | $MikroORM.UpdateNumMaxParamOp>;
     }): Promise<Result<NumParamsDownOperation>> {
         const downOperation = await ParamMapOperations.createDownOperationFromMikroORM({
             toKey: state => {
@@ -282,19 +263,35 @@ class NumParamTwoWayOperation {
         }
     }
 
-    public toMikroORM({
+    private setToMikroORMBase(target: $MikroORM.UpdateNumParamOp | $MikroORM.UpdateNumMaxParamOp) {
+        if (this.valueProps.isValuePrivate !== undefined) {
+            target.isValuePrivate = this.valueProps.isValuePrivate.oldValue;
+        }
+        if (this.valueProps.value !== undefined) {
+            target.value = this.valueProps.value;
+        }
+    }
+
+    public toNumParamMikroORM({
         key,
     }: {
         key: string;
     }): $MikroORM.UpdateNumParamOp {
         const result = new $MikroORM.UpdateNumParamOp({ key });
 
-        if (this.valueProps.isValuePrivate !== undefined) {
-            result.isValuePrivate = this.valueProps.isValuePrivate.oldValue;
-        }
-        if (this.valueProps.value !== undefined) {
-            result.value = this.valueProps.value;
-        }
+        this.setToMikroORMBase(result);
+
+        return result;
+    }
+
+    public toNumMaxParamMikroORM({
+        key,
+    }: {
+        key: string;
+    }): $MikroORM.UpdateNumParamOp {
+        const result = new $MikroORM.UpdateNumMaxParamOp({ key });
+
+        this.setToMikroORMBase(result);
 
         return result;
     }
@@ -334,7 +331,7 @@ export class NumParamsTwoWayOperation {
 
     public setToMikroORM(entity: UpdateCharaOp): void {
         this.readonlyMap.forEach((operation, key) => {
-            const updateOperation = operation.toMikroORM({
+            const updateOperation = operation.toNumParamMikroORM({
                 key: key
             });
             entity.updateNumParamOps.add(updateOperation);
@@ -343,7 +340,7 @@ export class NumParamsTwoWayOperation {
 
     public setMaxValueToMikroORM(entity: UpdateCharaOp): void {
         this.readonlyMap.forEach((operation, key) => {
-            const updateOperation = operation.toMikroORM({
+            const updateOperation = operation.toNumMaxParamMikroORM({
                 key: key
             });
             entity.updateNumMaxParamOps.add(updateOperation);
