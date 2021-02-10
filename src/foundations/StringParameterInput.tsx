@@ -20,6 +20,7 @@ type Props = {
     parameter: StrParam.State | undefined;
     createdByMe: boolean;
     onOperate: (operation: Character.PostOperation) => void;
+    compact: boolean;
 }
 
 const createCharacterOperationBase = (): Character.WritablePostOperation => ({
@@ -37,42 +38,61 @@ const StringParameterInput: React.FC<Props> = ({
     parameter,
     createdByMe,
     onOperate,
+    compact,
 }: Props) => {
-    return (
-        <div style={({ whiteSpace: 'nowrap' })}>
-            {!createdByMe && parameter?.isValuePrivate === true ? '?' :
-                <BufferedInput
-                    style={({ width: inputWidth })}
-                    size='small'
-                    value={parameter?.value ?? ''}
-                    valueResetKey={0}
-                    onChange={e => {
-                        if (e.isReset) {
-                            return;
-                        }
-                        const operation = createCharacterOperationBase();
-                        operation.strParams.set(parameterKey, {
-                            value: TextUpOperationModule.diff({first: e.previousValue, second: e.currentValue}),
-                        });
-                        onOperate(operation);
-                    }} />}
-            <ToggleButton
-                checked={!(parameter?.isValuePrivate ?? false)}
-                disabled={createdByMe ? false : parameterIsNotPrivateAndNotCreatedByMe}
-                hideWhenDisabled
-                tooltip={(parameter?.isValuePrivate ?? false) ? parameterIsPrivate({ isCharacterPrivate, isCreate }) : parameterIsNotPrivate({ isCharacterPrivate, isCreate })}
-                checkedChildren={<EyeOutlined />}
-                unCheckedChildren={<EyeInvisibleOutlined />}
-                size='small'
-                onChange={e => {
-                    const operation = createCharacterOperationBase();
-                    operation.numParams.set(parameterKey, {
-                        isValuePrivate: { newValue: !e },
-                    });
-                    onOperate(operation);
-                }} />
-        </div>
+    const input = ({ disabled }: { disabled: boolean }) => (
+        <BufferedInput
+            style={({ width: inputWidth })}
+            size='small'
+            disabled={disabled}
+            value={parameter?.value ?? ''}
+            valueResetKey={0}
+            onChange={e => {
+                if (e.isReset) {
+                    return;
+                }
+                const operation = createCharacterOperationBase();
+                operation.strParams.set(parameterKey, {
+                    value: TextUpOperationModule.diff({ first: e.previousValue, second: e.currentValue }),
+                });
+                onOperate(operation);
+            }} />
     );
+
+    if (!createdByMe && parameter?.isValuePrivate === true) {
+        if (compact) {
+            return (<Tooltip title={parameterIsPrivateAndNotCreatedByMe}><EyeInvisibleOutlined /></Tooltip>);
+        }
+        return (
+            <>
+                {input({ disabled: true })}
+                <Tooltip title={parameterIsPrivateAndNotCreatedByMe}><EyeInvisibleOutlined /></Tooltip>
+            </>
+        );
+    }
+    const isPrivateButton = (
+        <ToggleButton
+            checked={!(parameter?.isValuePrivate ?? false)}
+            disabled={createdByMe ? false : parameterIsNotPrivateAndNotCreatedByMe}
+            hideWhenDisabled={compact}
+            showAsTextWhenDisabled={!compact}
+            tooltip={(parameter?.isValuePrivate ?? false) ? parameterIsPrivate({ isCharacterPrivate, isCreate }) : parameterIsNotPrivate({ isCharacterPrivate, isCreate })}
+            checkedChildren={<EyeOutlined />}
+            unCheckedChildren={<EyeInvisibleOutlined />}
+            size='small'
+            onChange={e => {
+                const operation = createCharacterOperationBase();
+                operation.strParams.set(parameterKey, {
+                    isValuePrivate: { newValue: !e },
+                });
+                onOperate(operation);
+            }} />
+    );
+    return (
+        <>
+            {input({ disabled: false })}
+            {(compact && !createdByMe) ? null : isPrivateButton}
+        </>);
 };
 
 export default StringParameterInput;

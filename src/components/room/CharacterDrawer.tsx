@@ -397,8 +397,11 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                                 <Col flex={0}>{paramName.name}</Col>
                                 <Col span={inputSpan}>
                                     <BooleanParameterInput
+                                        isCharacterPrivate={character.isPrivate}
+                                        isCreate
+                                        compact={false}
                                         parameterKey={key}
-                                        booleanParameter={value}
+                                        parameter={value}
                                         createdByMe={createdByMe}
                                         onOperate={operation => {
                                             updateCharacterByOperation(operation);
@@ -421,6 +424,7 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                                 <Col flex={0}>{paramName.name}</Col>
                                 <Col span={inputSpan}>
                                     <StringParameterInput
+                                        compact={false}
                                         isCharacterPrivate={character.isPrivate}
                                         isCreate
                                         parameterKey={key}

@@ -69,8 +69,11 @@ const createBooleanParameterColumn = ({
             return (
                 <>
                     <BooleanParameterInput
+                        isCharacterPrivate={character.state.isPrivate}
+                        isCreate={false}
+                        compact
                         parameterKey={key}
-                        booleanParameter={character.state.boolParams.get(key)}
+                        parameter={character.state.boolParams.get(key)}
                         createdByMe={character.createdByMe ?? false}
                         onOperate={characterOperation => {
                             const operation = Room.createPostOperationSetup();
@@ -145,6 +148,7 @@ const createStringParameterColumn = ({
             return (
                 <>
                     <StringParameterInput
+                        compact
                         isCharacterPrivate={character.state.isPrivate}
                         isCreate={false}
                         parameterKey={key}
