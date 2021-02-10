@@ -24,7 +24,7 @@ import { RestoredStrParams, StrParamsDownOperation, StrParamsState, StrParamsTwo
 import { NumParamsOperation } from './numParam/graphql';
 import { StrParamsOperation } from './strParam/graphql';
 import { BoolParam } from './boolParam/mikro-orm';
-import { NumParam } from './numParam/mikro-orm';
+import { NumMaxParam, NumParam } from './numParam/mikro-orm';
 import { StrParam } from './strParam/mikro-orm';
 
 type CharacterStateType = {
@@ -156,8 +156,8 @@ class CharacterState {
         }
 
         if (downOperation.valueProps.image !== undefined) {
-            prevState.params.object.image = downOperation.valueProps.image.oldValue;
-            twoWayOperationCore.image = { ...downOperation.valueProps.image, newValue: nextState.object.image };
+            prevState.params.object.image = downOperation.valueProps.image.oldValue ?? undefined;
+            twoWayOperationCore.image = { oldValue: downOperation.valueProps.image.oldValue ?? undefined, newValue: nextState.object.image };
         }
 
         const twoWayOperation = new CharacterTwoWayOperation({
@@ -223,7 +223,7 @@ class CharacterState {
             result.params.object.name = operation.valueProps.name.oldValue;
         }
         if (operation.valueProps.image !== undefined) {
-            result.params.object.image = operation.valueProps.image.oldValue;
+            result.params.object.image = operation.valueProps.image.oldValue ?? undefined;
         }
 
         return result;
@@ -579,7 +579,7 @@ class CharacterTwoWayOperation {
             state: entity.numMaxParams,
             operation: this.params.numMaxParams.readonlyMapAsStringKey,
             create: async ({ key, operation }) => {
-                const result = new NumParam({
+                const result = new NumMaxParam({
                     key,
                     isValuePrivate: false,
                 });
@@ -833,7 +833,7 @@ class RestoredCharacter {
 
         twoWayOperationCore.image = ReplaceNullableFilePathTwoWayOperationModule.transform({
             first: this.params.twoWayOperation?.valueProps.image,
-            second: clientOperation.image,
+            second: clientOperation.image === undefined ? undefined : { newValue: clientOperation.image.newValue },
             prevState: this.params.prevState.object.image,
         });
 

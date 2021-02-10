@@ -23,6 +23,7 @@ import { __ } from '../../../@shared/collection';
 import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
 import { TextTwoWayOperation } from '../../../@shared/textOperation';
 import { TextTwoWayOperationModule } from '../../Operations';
+import { NumMaxParam } from '../../entities/character/numParam/mikro-orm';
 
 const timeout = 20000;
 
@@ -286,6 +287,7 @@ describe('operate then getRoom', () => {
         }
     }, timeout);
 
+
     it('updates room.name', async (): Promise<void> => {
         const oldRoomName = 'ROOM_NAME(old)';
         const newRoomName = 'ROOM_NAME(new)';
@@ -319,6 +321,7 @@ describe('operate then getRoom', () => {
         await testCore({ operateByCreator: true });
         await testCore({ operateByCreator: false });
     }, timeout);
+
 
     it('updates character.name when not private', async (): Promise<void> => {
         const oldCharacterName = 'CHARACTER_NAME(old)';
@@ -363,6 +366,7 @@ describe('operate then getRoom', () => {
         await testCore({ operateByCreator: false });
     }, timeout);
 
+
     it('updates my character.name when private', async (): Promise<void> => {
         const oldCharacterName = 'CHARACTER_NAME(old)';
         const newCharacterName = 'CHARACTER_NAME(new)';
@@ -402,6 +406,7 @@ describe('operate then getRoom', () => {
         });
     }, timeout);
 
+
     it('updates other\'s character.name when private', async (): Promise<void> => {
         const oldCharacterName = 'CHARACTER_NAME(old)';
         const newCharacterName = 'CHARACTER_NAME(new)';
@@ -433,6 +438,7 @@ describe('operate then getRoom', () => {
             }
         });
     }, timeout);
+
 
     it('adds→updates→removes piecesLocation', async (): Promise<void> => {
         const testCore = async (orm: ORM) => {
@@ -559,7 +565,7 @@ describe('operate then getRoom', () => {
                 const operateResult2 = await roomResolver.operateCore({
                     args: {
                         id: createRoomResult.room.id,
-                        prevRevision: roomPrevRevision,
+                        prevRevision: roomPrevRevision + 1,
                         requestId,
                         operation: {
                             value: {
@@ -627,7 +633,7 @@ describe('operate then getRoom', () => {
                 const operateResult3 = await roomResolver.operateCore({
                     args: {
                         id: createRoomResult.room.id,
-                        prevRevision: roomPrevRevision + 1,
+                        prevRevision: roomPrevRevision + 2,
                         requestId,
                         operation: {
                             value: {
@@ -699,6 +705,100 @@ describe('operate then getRoom', () => {
         await testCore(psql);
         await testCore(sqlite);
     }, timeout);
+
+
+    it('adds numMaxParam', async (): Promise<void> => {
+        const key = '1' as const;
+        const newValue = 100;
+
+        await operateThenGetRoomTest({
+            operateByCreator: false,
+            source: {
+                character: {
+                    setupState: () => {
+                        return;
+                    },
+                    operation: {
+                        pieceLocations: { replace: [], update: [] },
+                        boolParams: { update: [] },
+                        numParams: { update: [] },
+                        numMaxParams: {
+                            update: [
+                                { key, operation: { value: { newValue } } }
+                            ] },
+                        strParams: { update: [] },
+                    },
+                }
+            },
+            test: {
+                operation: ({operatedByMe, operatedByAnother}) => {
+                    expect(operatedByMe.characters.replace.length).toBe(0);
+                    const numMaxParamsUpdates = __(operatedByMe.characters.update).single().operation.numMaxParams.update;
+                    const numMaxParamsUpdate = __(numMaxParamsUpdates).single();
+                    expect(numMaxParamsUpdate.key).toBe(key);
+                    expect(numMaxParamsUpdate.operation.value?.newValue).toBe(newValue);
+
+                    expect(operatedByMe).toEqual(operatedByAnother);
+                },
+                state: ({ createdByMe, createdByAnother }) => {
+                    const numMaxParams = __(createdByMe.characters).single().value.numMaxParams;
+                    const numMaxParam = __(numMaxParams).single();
+                    expect(numMaxParam.value.value).toBe(newValue);
+
+                    expect(numMaxParam.value.value).toEqual(__(__(createdByAnother.characters).single().value.numMaxParams).single().value.value);
+                }
+            }
+        });
+    }, timeout);
+
+
+    it('removes numMaxParam.value', async (): Promise<void> => {
+        const key = '1' as const;
+        const oldValue = 100;
+
+        await operateThenGetRoomTest({
+            operateByCreator: false,
+            source: {
+                character: {
+                    setupState: character => {
+                        const numMaxParam = new NumMaxParam({ key, isValuePrivate: false, value: oldValue });
+                        character.numMaxParams.add(numMaxParam);
+                    },
+                    operation: {
+                        pieceLocations: { replace: [], update: [] },
+                        boolParams: { update: [] },
+                        numParams: { update: [] },
+                        numMaxParams: {
+                            update: [
+                                { key, operation: { value: { newValue: undefined } } }
+                            ]
+                        },
+                        strParams: { update: [] },
+                    },
+                }
+            },
+            test: {
+                operation: ({ operatedByMe, operatedByAnother }) => {
+                    expect(operatedByMe.characters.replace.length).toBe(0);
+                    const numMaxParamsUpdates = __(operatedByMe.characters.update).single().operation.numMaxParams.update;
+                    const numMaxParamsUpdate = __(numMaxParamsUpdates).single();
+                    expect(numMaxParamsUpdate.key).toBe(key);
+                    expect(numMaxParamsUpdate.operation.value).not.toBeUndefined();
+                    expect(numMaxParamsUpdate.operation.value?.newValue).toBeUndefined();
+
+                    expect(operatedByMe).toEqual(operatedByAnother);
+                },
+                state: ({ createdByMe, createdByAnother }) => {
+                    const numMaxParams = __(createdByMe.characters).single().value.numMaxParams;
+                    const numMaxParam = __(numMaxParams).single();
+                    expect(numMaxParam.value.value).toBeUndefined();
+
+                    expect(numMaxParam.value.value).toEqual(__(__(createdByAnother.characters).single().value.numMaxParams).single().value.value);
+                }
+            }
+        });
+    }, timeout);
+
 
     it('tries to add PieceLocation but the board does not exist', async (): Promise<void> => {
         const testCore = async (orm: ORM) => {
@@ -812,6 +912,7 @@ describe('operate then getRoom', () => {
         await testCore(psql);
         await testCore(sqlite);
     }, timeout);
+
 
     it('transforms - first: remove, second: update', async (): Promise<void> => {
         const testCore = async (orm: ORM) => {
@@ -935,6 +1036,7 @@ describe('operate then getRoom', () => {
         await testCore(psql);
         await testCore(sqlite);
     }, timeout);
+
 
     it('transforms - first: update, second: update', async (): Promise<void> => {
         const testCore = async (orm: ORM) => {
@@ -1069,6 +1171,7 @@ describe('operate then getRoom', () => {
         await testCore(psql);
         await testCore(sqlite);
     }, timeout);
+
 
     it('transforms - first: remove, second: remove', async (): Promise<void> => {
         const testCore = async (orm: ORM) => {

@@ -156,6 +156,9 @@ export const removeRoom = async (em: EM, room: Room): Promise<void> => {
         await character.numParams.init();
         character.numParams.removeAll();
 
+        await character.numMaxParams.init();
+        character.numMaxParams.removeAll();
+
         await character.strParams.init();
         character.strParams.removeAll();
         

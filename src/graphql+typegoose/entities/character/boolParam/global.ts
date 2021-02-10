@@ -53,8 +53,8 @@ class BoolParamState {
             twoWayOperationCore.isValuePrivate = { ...downOperation.valueProps.isValuePrivate, newValue: nextState._object.isValuePrivate };
         }
         if (downOperation.valueProps.value !== undefined) {
-            prevState._object.value = downOperation.valueProps.value.oldValue;
-            twoWayOperationCore.value = { ...downOperation.valueProps.value, newValue: nextState._object.value };
+            prevState._object.value = downOperation.valueProps.value.oldValue ?? undefined;
+            twoWayOperationCore.value = { oldValue: downOperation.valueProps.value.oldValue ?? undefined, newValue: nextState._object.value };
         }
 
         return ResultModule.ok(new RestoredBoolParam({ prevState, nextState, twoWayOperation: new BoolParamTwoWayOperation({ valueProps: twoWayOperationCore }) }));
@@ -76,7 +76,7 @@ class BoolParamState {
             result._object.isValuePrivate = operation.valueProps.isValuePrivate.oldValue;
         }
         if (operation.valueProps.value !== undefined) {
-            result._object.value = operation.valueProps.value.oldValue;
+            result._object.value = operation.valueProps.value.oldValue ?? undefined;
         }
         return result;
     }
@@ -388,7 +388,7 @@ class RestoredBoolParam {
         if (!this.params.nextState.object.isValuePrivate || createdByMe) {
             twoWayOperationCore.value = ReplaceNullableBooleanTwoWayOperationModule.transform({
                 first: this.params.twoWayOperation?.valueProps.value,
-                second: clientOperation.value,
+                second: clientOperation.value === undefined ? undefined : { newValue: clientOperation.value.newValue },
                 prevState: this.params.prevState.object.value,
             });
         }
@@ -483,6 +483,7 @@ export const toGraphQLOperation = (params: {
         prevState: params.prevState.readonlyMap,
         nextState: params.nextState.readonlyMap,
         toUpdateOperation: ({ operation, key }) => ({ key, operation: operation.toGraphQL(params.createdByMe) }),
+        defaultState: new BoolParamState({ isValuePrivate: false }),
     });
     return { update };
 };

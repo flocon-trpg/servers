@@ -85,8 +85,8 @@ class BoardState {
         const twoWayOperationCore: BoardTwoWayOperationType = {};
 
         if (downOperation.valueProps.backgroundImage !== undefined) {
-            prevState._object.backgroundImage = downOperation.valueProps.backgroundImage.oldValue;
-            twoWayOperationCore.backgroundImage = { ...downOperation.valueProps.backgroundImage, newValue: nextState._object.backgroundImage };
+            prevState._object.backgroundImage = downOperation.valueProps.backgroundImage.oldValue ?? undefined;
+            twoWayOperationCore.backgroundImage = { oldValue: downOperation.valueProps.backgroundImage.oldValue ?? undefined, newValue: nextState._object.backgroundImage };
         }
 
         if (downOperation.valueProps.cellColumnCount !== undefined) {
@@ -141,7 +141,7 @@ class BoardState {
     public applyBack(operation: BoardDownOperation): BoardState {
         const result = this.clone();
         if (operation.valueProps.backgroundImage !== undefined) {
-            result._object.backgroundImage = operation.valueProps.backgroundImage.oldValue;
+            result._object.backgroundImage = operation.valueProps.backgroundImage.oldValue ?? undefined;
         }
         if (operation.valueProps.cellColumnCount !== undefined) {
             result._object.cellColumnCount = operation.valueProps.cellColumnCount.oldValue;
@@ -510,7 +510,7 @@ class RestoredBoard {
 
         twoWayOperationCore.backgroundImage = ReplaceNullableFilePathTwoWayOperationModule.transform({
             first: this.params.twoWayOperation?.valueProps.backgroundImage,
-            second: clientOperation.backgroundImage,
+            second: clientOperation.backgroundImage === undefined ? undefined : { newValue: clientOperation.backgroundImage.newValue },
             prevState: this.params.prevState.object.backgroundImage,
         });
         twoWayOperationCore.cellColumnCount = ReplaceNumberTwoWayOperationModule.transform({

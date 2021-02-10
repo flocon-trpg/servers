@@ -10,14 +10,14 @@ export const replace = 'replace';
 export const update = 'update';
 
 export type GraphQLStateMapOperation<TState, TUpOperation> = {
-    replace: { id: string; createdBy: string; newValue?: TState }[];
+    replace: { id: string; createdBy: string; newValue: TState | undefined }[];
 
     update: { id: string; createdBy: string; operation: TUpOperation }[];
 }
 
 type ReplaceDown<TState> = {
     type: typeof replace;
-    operation: { oldValue?: TState };
+    operation: { oldValue: TState | undefined };
 }
 
 type UpdateDown<TDownOperation> = {
@@ -29,7 +29,7 @@ export type DualKeyMapDownOperationElementUnion<TState, TDownOperation> = Replac
 
 type ReplaceUp<TState> = {
     type: typeof replace;
-    operation: { newValue?: TState };
+    operation: { newValue: TState | undefined };
 }
 
 type UpdateUp<TUpOperation> = {
@@ -41,7 +41,7 @@ export type DualKeyMapUpOperationElementUnion<TState, TUpOperation> = ReplaceUp<
 
 type ReplaceTwoWay<TState> = {
     type: typeof replace;
-    operation: { oldValue?: TState; newValue?: TState };
+    operation: { oldValue: TState | undefined; newValue: TState | undefined };
 }
 
 type UpdateTwoWay<TDownOperation> = {
@@ -442,7 +442,7 @@ export const composeDownOperation = <TKey1, TKey2, TState, TDownOperation>({ fir
             case both:
                 switch (groupJoined.left.type) {
                     case 'replace':
-                        result.set(key, { type: 'replace', operation: groupJoined.right.operation });
+                        result.set(key, { type: 'replace', operation: groupJoined.left.operation });
                         continue;
                     case 'update':
                         switch (groupJoined.right.type) {
@@ -494,7 +494,7 @@ export const transform = <TKey1, TKey2, TServerState, TClientState, TFirstOperat
                 const innerPrevState = prevState.get(key);
                 const innerNextState = nextState.get(key);
 
-                /**** requested to delete ****/
+                /**** requested to remove ****/
 
                 if (operation.operation.newValue === undefined) {
                     if (innerPrevState === undefined) {
@@ -511,7 +511,7 @@ export const transform = <TKey1, TKey2, TServerState, TClientState, TFirstOperat
                         }
                     }
 
-                    result.set(key, { type: replace, operation: { oldValue: innerNextState } });
+                    result.set(key, { type: replace, operation: { oldValue: innerNextState, newValue: undefined } });
                     break;
                 }
 
@@ -523,7 +523,7 @@ export const transform = <TKey1, TKey2, TServerState, TClientState, TFirstOperat
                 if (innerNextState !== undefined) {
                     break;
                 }
-                result.set(key, { type: replace, operation: { newValue: toServerState(operation.operation.newValue, key) } });
+                result.set(key, { type: replace, operation: { oldValue: undefined, newValue: toServerState(operation.operation.newValue, key) } });
                 break;
             }
             case update: {

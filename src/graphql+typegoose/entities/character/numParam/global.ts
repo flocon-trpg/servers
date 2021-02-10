@@ -53,8 +53,8 @@ class NumParamState {
             twoWayOperationCore.isValuePrivate = { ...downOperation.valueProps.isValuePrivate, newValue: nextState._object.isValuePrivate };
         }
         if (downOperation.valueProps.value !== undefined) {
-            prevState._object.value = downOperation.valueProps.value.oldValue;
-            twoWayOperationCore.value = { ...downOperation.valueProps.value, newValue: nextState._object.value };
+            prevState._object.value = downOperation.valueProps.value.oldValue ?? undefined;
+            twoWayOperationCore.value = { oldValue: downOperation.valueProps.value.oldValue ?? undefined, newValue: nextState._object.value };
         }
 
         return ResultModule.ok(new RestoredNumParam({ prevState, nextState, twoWayOperation: new NumParamTwoWayOperation({ valueProps: twoWayOperationCore }) }));
@@ -76,7 +76,7 @@ class NumParamState {
             result._object.isValuePrivate = operation.valueProps.isValuePrivate.oldValue;
         }
         if (operation.valueProps.value !== undefined) {
-            result._object.value = operation.valueProps.value.oldValue;
+            result._object.value = operation.valueProps.value.oldValue ?? undefined;
         }
         return result;
     }
@@ -273,7 +273,7 @@ class NumParamTwoWayOperation {
         return this.params.valueProps;
     }
 
-    public apply(entity: $MikroORM.NumParam) {
+    public apply(entity: $MikroORM.NumParamBase) {
         if (this.params.valueProps.isValuePrivate !== undefined) {
             entity.isValuePrivate = this.params.valueProps.isValuePrivate.newValue;
         }
@@ -397,7 +397,7 @@ class RestoredNumParam {
         if (!this.params.nextState.object.isValuePrivate || createdByMe) {
             twoWayOperationCore.value = ReplaceNullableNumberTwoWayOperationModule.transform({
                 first: this.params.twoWayOperation?.valueProps.value,
-                second: clientOperation.value,
+                second: clientOperation.value === undefined ? undefined : { newValue: clientOperation.value.newValue },
                 prevState: this.params.prevState.object.value,
             });
         }
@@ -492,6 +492,7 @@ export const toGraphQLOperation = (params: {
         prevState: params.prevState.readonlyMap,
         nextState: params.nextState.readonlyMap,
         toUpdateOperation: ({ operation, key }) => ({ key, operation: operation.toGraphQL(params.createdByMe) }),
+        defaultState: new NumParamState({ isValuePrivate: false }),
     });
     return { update };
 };

@@ -208,6 +208,17 @@ type TextOperationArrayElement<TInsert, TDelete> = {
     edit: EditElement<TInsert, TDelete>;
 }
 
+const prevLengthOfTextOperationElementArray = <TInsert, TDelete>(source: ReadonlyArray<TextOperationArrayElement<TInsert, TDelete>>, getDeleteLength: (del: TDelete) => PositiveInt) => {
+    return source.reduce((seed, elem) => {
+        switch (elem.type) {
+            case retain:
+                return seed + elem.retain.value;
+            default:
+                return seed + (elem.edit.delete === undefined ? 0 : getDeleteLength(elem.edit.delete).value);
+        }
+    }, 0);
+};
+
 type TextOperationUnit<TInsert, TDelete> = {
     type: typeof retain;
     retain: PositiveInt;
@@ -449,9 +460,12 @@ const replace = ({ source, start, count, replacement }: { source: string; start:
 
 export const deleteStringNotMatch = 'deleteStringNotMatch';
 export const stateTooShort = 'stateTooShort';
+export const stateTooLong = 'stateTooLong';
 
 export type ApplyError<TDelete> = {
     type: typeof stateTooShort;
+} | {
+    type: typeof stateTooLong;
 } | {
     type: typeof deleteStringNotMatch;
     startCharIndex: number;
@@ -479,6 +493,14 @@ const applyAndRestoreCore = <TDelete1, TDelete2>({
     // restoreOption === undefinedのとき、TDelete2は使われないのでOkの値は何でもいい。
     mapping: (params: { expected: TDelete1; actual: NonEmptyString }) => Option<TDelete2>;
 }): CustomResult<{ newState: string; restored?: TextOperation<NonEmptyString, TDelete2> }, ApplyError<TDelete1>> => {
+    const prevLength = prevLengthOfTextOperationElementArray(action, getDeleteLength);
+    if (state.length < prevLength) {
+        return ResultModule.error({ type: stateTooShort });
+    }
+    if (state.length > prevLength) {
+        return ResultModule.error({ type: stateTooLong });
+    }
+
     let result = state;
     let cursor = 0;
     const builder = restoreOption == null ? undefined : new TextOperationBuilder<NonEmptyString, TDelete2>(restoreOption.factory);
@@ -765,12 +787,18 @@ const transformCore = <TInsert, TDelete>({
             if (secondShift === undefined) {
                 return ResultModule.ok({ firstPrime: firstPrime.build(), secondPrime: secondPrime.build() });
             }
+            if (secondShift.type === insert$) {
+                firstPrime.retain(factory.getInsertLength(secondShift.insert));
+            }
             secondPrime.onUnit(secondShift);
             secondShift = undefined;
             continue;
         }
         if (secondShift === undefined) {
             firstPrime.onUnit(firstShift);
+            if (firstShift.type === insert$) {
+                secondPrime.retain(factory.getInsertLength(firstShift.insert));
+            }
             firstShift = undefined;
             continue;
         }

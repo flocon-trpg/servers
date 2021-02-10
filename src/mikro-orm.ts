@@ -88,6 +88,7 @@ export const createSQLite = async ({ dbName, debug }: { dbName: string; debug?: 
             path: './migrations/sqlite'
         },
         type: 'sqlite',
+        forceUndefined: true,
         debug,
     });
 };
@@ -101,6 +102,7 @@ export const createPostgreSQL = async ({ dbName, clientUrl, debug }: { dbName: s
         },
         type: 'postgresql',
         debug,
+        forceUndefined: true,
         clientUrl,
     });
 };

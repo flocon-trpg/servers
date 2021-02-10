@@ -514,6 +514,7 @@ export const toGraphQLOperation = (params: {
             }
             return { key, operation: result };
         },
+        defaultState: new StrParamState({ isValuePrivate: false, value: '' }),
     });
     return { update };
 };

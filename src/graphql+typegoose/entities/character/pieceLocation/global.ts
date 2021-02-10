@@ -412,9 +412,6 @@ class PieceLocationTwoWayOperation {
         if (this.params.valueProps.w !== undefined) {
             entity.w = this.params.valueProps.w.newValue;
         }
-        if (this.params.valueProps.w !== undefined) {
-            entity.w = this.params.valueProps.w.newValue;
-        }
         if (this.params.valueProps.x !== undefined) {
             entity.x = this.params.valueProps.x.newValue;
         }

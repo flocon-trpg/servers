@@ -33,12 +33,12 @@ type TransformParameters<T> = {
     prevState: T;
 }
 type NullableTransformParameters<T> = {
-    first: { oldValue?: T; newValue?: T } | undefined;
-    second: { newValue?: T } | undefined;
+    first: { oldValue: T | undefined; newValue: T | undefined } | undefined;
+    second: { newValue: T | undefined } | undefined;
     prevState: T | undefined;
 }
 type TransformResult<T> = { oldValue: T; newValue: T } | undefined;
-type NullableTransformResult<T> = { oldValue?: T; newValue?: T } | undefined;
+type NullableTransformResult<T> = { oldValue: T | undefined; newValue: T | undefined } | undefined;
 
 type ToGraphQLOperationParameters<T> = {
     valueOperation?: {
@@ -52,8 +52,8 @@ type ToGraphQLOperationParameters<T> = {
 }
 type ToGraphQLOperationNullableParameters<T> = {
     valueOperation?: {
-        oldValue?: T;
-        newValue?: T;
+        oldValue: T | undefined;
+        newValue: T | undefined;
     };
     isValuePrivateOpeartion?: {
         oldValue: boolean;
@@ -114,7 +114,7 @@ const ReplaceValueOperationModule = {
 };
 
 const ReplaceNullableValueOperationModule = {
-    compose<T>(first: { oldValue?: T } | undefined, second: { oldValue?: T } | undefined): { oldValue?: T } | undefined {
+    compose<T>(first: { oldValue: T | undefined } | undefined, second: { oldValue: T | undefined } | undefined): { oldValue: T | undefined } | undefined {
         if (first === undefined) {
             return second;
         }
@@ -137,8 +137,8 @@ const ReplaceNullableValueOperationModule = {
         isValuePrivateOperation,
     }: {
         valueOperation?: {
-            oldValue?: T;
-            newValue?: T;
+            oldValue: T | undefined;
+            newValue: T | undefined;
         };
         isValuePrivateOperation?: {
             oldValue: boolean;
@@ -292,11 +292,11 @@ export class ReplaceNullableBooleanUpOperation {
 }
 
 export type ReplaceNullableBooleanDownOperation = {
-    oldValue?: boolean;
+    oldValue: boolean | null | undefined;
 }
 
 export const ReplaceNullableBooleanDownOperationModule = {
-    validate: (source: { oldValue?: boolean | null } | null | undefined): { oldValue?: boolean } | undefined => {
+    validate: (source: { oldValue: boolean | null | undefined } | null | undefined): { oldValue: boolean | undefined } | undefined => {
         if (source == null) {
             return undefined;
         }
@@ -312,8 +312,8 @@ export const ReplaceNullableBooleanDownOperationModule = {
 };
 
 export type ReplaceNullableBooleanTwoWayOperation = {
-    oldValue?: boolean;
-    newValue?: boolean;
+    oldValue: boolean | undefined;
+    newValue: boolean | undefined;
 }
 
 export const ReplaceNullableBooleanTwoWayOperationModule = {
@@ -330,11 +330,11 @@ export class ReplaceNullableFilePathUpOperation {
 }
 
 export type ReplaceNullableFilePathDownOperation = {
-    oldValue?: GlobalFilePath;
+    oldValue: GlobalFilePath | null | undefined;
 }
 
 export const ReplaceNullableFilePathDownOperationModule = {
-    validate: (source: { oldValue?: GlobalFilePath | null } | null | undefined): { oldValue?: GlobalFilePath } | undefined => {
+    validate: (source: { oldValue: GlobalFilePath | null | undefined } | null | undefined): { oldValue: GlobalFilePath | undefined } | undefined => {
         if (source == null) {
             return undefined;
         }
@@ -344,12 +344,12 @@ export const ReplaceNullableFilePathDownOperationModule = {
         validateFilePath(source.oldValue);
         return { oldValue: source.oldValue ?? undefined };
     },
-    create: (setPath: string | undefined, setSourceType: FileSourceType | undefined, useSet: boolean): { oldValue?: GlobalFilePath } | undefined => {
+    create: (setPath: string | undefined, setSourceType: FileSourceType | undefined, useSet: boolean): { oldValue: GlobalFilePath | undefined } | undefined => {
         if (setPath !== undefined && setSourceType !== undefined) {
             return { oldValue: { path: setPath, sourceType: setSourceType } };
         }
         if (useSet) {
-            return {};
+            return { oldValue: undefined };
         }
         return undefined;
     },
@@ -357,8 +357,8 @@ export const ReplaceNullableFilePathDownOperationModule = {
 };
 
 export type ReplaceNullableFilePathTwoWayOperation = {
-    oldValue?: GlobalFilePath;
-    newValue?: GlobalFilePath;
+    oldValue: GlobalFilePath | undefined;
+    newValue: GlobalFilePath | undefined;
 }
 
 export const ReplaceNullableFilePathTwoWayOperationModule = {
@@ -375,11 +375,11 @@ export class ReplaceNullableNumberUpOperation {
 }
 
 export type ReplaceNullableNumberDownOperation = {
-    oldValue?: number;
+    oldValue: number | null | undefined;
 }
 
 export const ReplaceNullableNumberDownOperationModule = {
-    validate: (source: { oldValue?: number | null } | null | undefined): { oldValue?: number } | undefined => {
+    validate: (source: { oldValue: number | null | undefined } | null | undefined): { oldValue: number | undefined } | undefined => {
         if (source == null) {
             return undefined;
         }
@@ -395,8 +395,8 @@ export const ReplaceNullableNumberDownOperationModule = {
 };
 
 export type ReplaceNullableNumberTwoWayOperation = {
-    oldValue?: number;
-    newValue?: number;
+    oldValue: number | undefined;
+    newValue: number | undefined;
 }
 
 export const ReplaceNullableNumberTwoWayOperationModule = {
@@ -413,11 +413,11 @@ export class ReplaceNullableStringUpOperation {
 }
 
 export type ReplaceNullableStringDownOperation = {
-    oldValue?: string;
+    oldValue: string | null | undefined;
 }
 
 export const ReplaceNullableStringDownOperationModule = {
-    validate: (source: { oldValue?: string | null } | null | undefined): { oldValue?: string } | undefined => {
+    validate: (source: { oldValue: string | null | undefined } | null | undefined): { oldValue: string | undefined } | undefined => {
         if (source == null) {
             return undefined;
         }
@@ -433,8 +433,8 @@ export const ReplaceNullableStringDownOperationModule = {
 };
 
 export type ReplaceNullableStringTwoWayOperation = {
-    oldValue?: string;
-    newValue?: string;
+    oldValue: string | undefined;
+    newValue: string | undefined;
 }
 
 export const ReplaceNullableStringTwoWayOperationModule = {

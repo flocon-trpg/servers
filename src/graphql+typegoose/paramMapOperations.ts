@@ -73,21 +73,23 @@ export const toGraphQLWithState = <TKey, TSourceState, TSourceOperation, TUpdate
     prevState,
     nextState,
     toUpdateOperation,
+    defaultState,
 }: {
     source: ReadonlyMap<TKey, TSourceOperation>;
     prevState: ReadonlyMap<TKey, TSourceState>;
     nextState: ReadonlyMap<TKey, TSourceState>;
     toUpdateOperation: (params: { operation: TSourceOperation; key: TKey; prevState: TSourceState; nextState: TSourceState }) => TUpdateOperation | null | undefined;
+    defaultState: TSourceState;
 }): TUpdateOperation[] => {
     const updates: TUpdateOperation[] = [];
     source.forEach((serverOperation, key) => {
-        const prevStateElement = prevState.get(key);
+        let prevStateElement = prevState.get(key);
         if (prevStateElement === undefined) {
-            throw `tried to operate "${key}", but not found in prevState.`;
+            prevStateElement = defaultState;
         }
-        const nextStateElement = nextState.get(key);
+        let nextStateElement = nextState.get(key);
         if (nextStateElement === undefined) {
-            throw `tried to operate "${key}", but not found in nextState.`;
+            nextStateElement = defaultState;
         }
         const clientOperation = toUpdateOperation({
             operation: serverOperation,
@@ -245,7 +247,6 @@ export const apply = async <TKey, TEntityState, TOperation>(params: {
     (await params.state.loadItems()).forEach(s => {
         stateAsMap.set(params.toKey(s), s);
     });
-    // TODO: throwのメッセージをちゃんとしたものにする、もしくはResultModule.errorを返す
     for (const [key, value] of groupJoin(stateAsMap, params.operation)) {
         switch (value.type) {
             case left:

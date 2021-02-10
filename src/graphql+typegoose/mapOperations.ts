@@ -13,7 +13,7 @@ export const update = 'update';
 
 type ReplaceDown<TState> = {
     type: typeof replace;
-    operation: { oldValue?: TState };
+    operation: { oldValue: TState | undefined };
 }
 
 type UpdateDown<TDownOperation> = {
@@ -25,7 +25,7 @@ export type MapDownOperationElementUnion<TState, TDownOperation> = ReplaceDown<T
 
 type ReplaceUp<TState> = {
     type: typeof replace;
-    operation: { newValue?: TState };
+    operation: { newValue: TState | undefined };
 }
 
 type UpdateUp<TUpOperation> = {
@@ -37,7 +37,7 @@ export type MapUpOperationElementUnion<TState, TUpOperation> = ReplaceUp<TState>
 
 type ReplaceFull<TState> = {
     type: typeof replace;
-    operation: { oldValue?: TState; newValue?: TState };
+    operation: { oldValue: TState | undefined; newValue: TState | undefined };
 }
 
 type UpdateFull<TDownOperation> = {
