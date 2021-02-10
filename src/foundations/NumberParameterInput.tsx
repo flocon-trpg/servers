@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Checkbox, InputNumber, Space, Switch, Tag, Tooltip } from 'antd';
+import { Button, Checkbox, Input, InputNumber, Space, Switch, Tag, Tooltip } from 'antd';
 import * as Character from '../stateManagers/states/character';
 import * as NumParam from '../stateManagers/states/numParam';
 import { update } from '../stateManagers/states/types';
@@ -7,12 +7,13 @@ import { createStateMap } from '../@shared/StateMap';
 import { StrIndex100 } from '../@shared/indexes';
 import { EyeInvisibleOutlined, EyeOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import ToggleButton from './ToggleButton';
-import { addParameter, characterNotCreatedByMe, deleteParameter, makeParameterNotPrivate, makeParameterPrivate } from '../resource/text/main';
+import { addParameter, deleteParameter, parameterIsPrivate, parameterIsNotPrivate, parameterIsPrivateAndNotCreatedByMe, parameterIsNotPrivateAndNotCreatedByMe } from '../resource/text/main';
 
 const inputWidth = 50;
 
 type Props = {
     isCharacterPrivate: boolean;
+    isCreate: boolean;
     parameterKey: StrIndex100;
     numberParameter: NumParam.State | undefined;
     numberMaxParameter: NumParam.State | undefined;
@@ -29,8 +30,11 @@ const createCharacterOperationBase = (): Character.WritablePostOperation => ({
     strParams: new Map(),
 });
 
+const disabledInput = (<Input style={({ width: inputWidth })} disabled value='?' size='small' />);
+
 const NumberParameterInput: React.FC<Props> = ({
     isCharacterPrivate,
+    isCreate,
     parameterKey,
     numberParameter,
     numberMaxParameter,
@@ -38,15 +42,16 @@ const NumberParameterInput: React.FC<Props> = ({
     onOperate,
     compact,
 }: Props) => {
-    const addOrDeleteNumberParameterButton: JSX.Element | null = (() => {
+    const addOrDeleteNumberParameterButton = ({ disabled }: { disabled: boolean }): JSX.Element | null => {
         if (compact) {
             return null;
         }
-        if (numberParameter?.value === undefined) {
+        if (numberParameter?.value == null) {
             return (
                 <Tooltip title={addParameter}>
                     <Button
                         size='small'
+                        disabled={disabled}
                         onClick={() => {
                             const operation = createCharacterOperationBase();
                             operation.numParams.set(parameterKey, {
@@ -62,6 +67,7 @@ const NumberParameterInput: React.FC<Props> = ({
             <Tooltip title={deleteParameter}>
                 <Button
                     size='small'
+                    disabled={disabled}
                     onClick={() => {
                         const operation = createCharacterOperationBase();
                         operation.numParams.set(parameterKey, {
@@ -72,17 +78,18 @@ const NumberParameterInput: React.FC<Props> = ({
                     <DeleteOutlined />
                 </Button>
             </Tooltip>);
-    })();
+    };
 
-    const addOrDeleteNumberMaxParameterButton: JSX.Element | null = (() => {
+    const addOrDeleteNumberMaxParameterButton = ({ disabled }: { disabled: boolean }): JSX.Element | null => {
         if (compact) {
             return null;
         }
-        if (numberMaxParameter?.value === undefined) {
+        if (numberMaxParameter?.value == null) {
             return (
                 <Tooltip title={addParameter}>
                     <Button
                         size='small'
+                        disabled={disabled}
                         onClick={() => {
                             const operation = createCharacterOperationBase();
                             operation.numMaxParams.set(parameterKey, {
@@ -98,6 +105,7 @@ const NumberParameterInput: React.FC<Props> = ({
             <Tooltip title={deleteParameter}>
                 <Button
                     size='small'
+                    disabled={disabled}
                     onClick={() => {
                         const operation = createCharacterOperationBase();
                         operation.numMaxParams.set(parameterKey, {
@@ -108,15 +116,55 @@ const NumberParameterInput: React.FC<Props> = ({
                     <DeleteOutlined />
                 </Button>
             </Tooltip>);
-    })();
+    };
 
-    return (
-        <div>
-            {!createdByMe && numberParameter?.isValuePrivate === true ? '?' : <>
+    const numberParameterInput = (() => {
+        if (!createdByMe && numberParameter?.isValuePrivate === true) {
+            if (compact) {
+                return (<Tooltip title={parameterIsPrivateAndNotCreatedByMe}><EyeInvisibleOutlined /></Tooltip>);
+            }
+            return (
+                <>
+                    {disabledInput}
+                    {addOrDeleteNumberParameterButton({ disabled: true })}
+                    <Tooltip title={parameterIsPrivateAndNotCreatedByMe}><EyeInvisibleOutlined /></Tooltip>
+                </>
+            );
+        }
+        const isPrivateButton = (
+            <ToggleButton
+                checked={!(numberParameter?.isValuePrivate ?? false)}
+                disabled={createdByMe ? false : parameterIsNotPrivateAndNotCreatedByMe}
+                hideWhenDisabled={compact}
+                showAsTextWhenDisabled={!compact}
+                tooltip={(numberParameter?.isValuePrivate ?? false) ? parameterIsPrivate({ isCharacterPrivate, isCreate }) : parameterIsNotPrivate({ isCharacterPrivate, isCreate })}
+                checkedChildren={<EyeOutlined />}
+                unCheckedChildren={<EyeInvisibleOutlined />}
+                size='small'
+                onChange={e => {
+                    const operation = createCharacterOperationBase();
+                    operation.numParams.set(parameterKey, {
+                        isValuePrivate: { newValue: !e },
+                    });
+                    onOperate(operation);
+                }} />
+        );
+        if (numberParameter?.value == null) {
+            if (compact) {
+                return null;
+            }
+            return (<>
+                {disabledInput}
+                {addOrDeleteNumberParameterButton({ disabled: false })}
+                {isPrivateButton}
+            </>);
+        }
+        return (
+            <>
                 <InputNumber
                     style={({ width: inputWidth })}
                     size='small'
-                    disabled={numberParameter?.value === undefined}
+                    disabled={numberParameter?.value == null}
                     value={numberParameter?.value ?? 0}
                     onChange={newValue => {
                         if (typeof newValue !== 'number') {
@@ -128,28 +176,57 @@ const NumberParameterInput: React.FC<Props> = ({
                         });
                         onOperate(operation);
                     }} />
-                {addOrDeleteNumberParameterButton}
-            </>}
+                {addOrDeleteNumberParameterButton({ disabled: false })}
+                {isPrivateButton}
+            </>);
+    })();
+    const numberMaxParameterInput = (() => {
+        if (!createdByMe && numberMaxParameter?.isValuePrivate === true) {
+            if (compact) {
+                return (<Tooltip title={parameterIsPrivateAndNotCreatedByMe}><EyeInvisibleOutlined /></Tooltip>);
+            }
+            return (
+                <>
+                    {disabledInput}
+                    {addOrDeleteNumberMaxParameterButton({ disabled: true })}
+                    <Tooltip title={parameterIsPrivateAndNotCreatedByMe}><EyeInvisibleOutlined /></Tooltip>
+                </>
+            );
+        }
+        const isPrivateButton = (
             <ToggleButton
-                checked={!(numberParameter?.isValuePrivate ?? false)}
-                disabled={createdByMe ? false : characterNotCreatedByMe}
-                tooltip={(numberParameter?.isValuePrivate ?? false) ? makeParameterNotPrivate(isCharacterPrivate) : makeParameterPrivate(isCharacterPrivate)}
+                checked={!(numberMaxParameter?.isValuePrivate ?? false)}
+                disabled={createdByMe ? false : parameterIsNotPrivateAndNotCreatedByMe}
+                hideWhenDisabled={compact}
+                showAsTextWhenDisabled={!compact}
+                tooltip={(numberMaxParameter?.isValuePrivate ?? false) ? parameterIsPrivate({ isCharacterPrivate, isCreate }) : parameterIsNotPrivate({ isCharacterPrivate, isCreate })}
                 checkedChildren={<EyeOutlined />}
                 unCheckedChildren={<EyeInvisibleOutlined />}
                 size='small'
                 onChange={e => {
                     const operation = createCharacterOperationBase();
-                    operation.numParams.set(parameterKey, {
+                    operation.numMaxParams.set(parameterKey, {
                         isValuePrivate: { newValue: !e },
                     });
                     onOperate(operation);
                 }} />
-            <span> / </span>
-            {!createdByMe && numberMaxParameter?.isValuePrivate === true ? '?' : <>
+        );
+        if (numberMaxParameter?.value == null) {
+            if (compact) {
+                return null;
+            }
+            return (<>
+                {disabledInput}
+                {addOrDeleteNumberMaxParameterButton({ disabled: false })}
+                {isPrivateButton}
+            </>);
+        }
+        return (
+            <>
                 <InputNumber
                     style={({ width: inputWidth })}
                     size='small'
-                    disabled={numberMaxParameter?.value === undefined}
+                    disabled={numberMaxParameter.value == null}
                     value={numberMaxParameter?.value ?? 0}
                     onChange={newValue => {
                         if (typeof newValue !== 'number') {
@@ -161,22 +238,18 @@ const NumberParameterInput: React.FC<Props> = ({
                         });
                         onOperate(operation);
                     }} />
-                {addOrDeleteNumberMaxParameterButton}
-            </>}
-            <ToggleButton
-                checked={!(numberMaxParameter?.isValuePrivate ?? false)}
-                disabled={createdByMe ? false : characterNotCreatedByMe}
-                tooltip={(numberMaxParameter?.isValuePrivate ?? false) ? makeParameterNotPrivate(isCharacterPrivate) : makeParameterPrivate(isCharacterPrivate)}
-                checkedChildren={<EyeOutlined />}
-                unCheckedChildren={<EyeInvisibleOutlined />}
-                size='small'
-                onChange={e => {
-                    const operation = createCharacterOperationBase();
-                    operation.numMaxParams.set(parameterKey, {
-                        isValuePrivate: { newValue: !e },
-                    });
-                    onOperate(operation);
-                }} />
+                {addOrDeleteNumberMaxParameterButton({ disabled: false })}
+                {isPrivateButton}
+            </>
+        );
+    })();
+
+    return (
+        <div style={({ whiteSpace: 'nowrap' })}>
+            {numberParameterInput}
+            {(numberParameterInput == null && numberMaxParameterInput != null) ? disabledInput : null}
+            {numberMaxParameterInput == null ? null : (<span> / </span>)}
+            {numberMaxParameterInput}
         </div>
     );
 };

@@ -24,7 +24,7 @@ import BooleanParameterInput from '../../foundations/BooleanParameterInput';
 import StringParameterInput from '../../foundations/StringParameterInput';
 import ToggleButton from '../../foundations/ToggleButton';
 import { SettingOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
-import { characterNotCreatedByMe, makeCharacterNotPrivate, makeCharacterPrivate } from '../../resource/text/main';
+import { characterIsPrivate, characterIsNotPrivate, characterIsNotPrivateAndNotCreatedByMe } from '../../resource/text/main';
 
 const notFound = 'notFound';
 
@@ -316,11 +316,13 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                     <Col flex={0}>全体公開</Col>
                     <Col span={inputSpan}>
                         <ToggleButton
-                            disabled={createdByMe ? false : characterNotCreatedByMe}
+                            size='small'
+                            disabled={(createdByMe || drawerType?.type === create) ? false : characterIsNotPrivateAndNotCreatedByMe}
+                            showAsTextWhenDisabled
                             checked={!character.isPrivate}
                             checkedChildren={<EyeOutlined />}
                             unCheckedChildren={<EyeInvisibleOutlined />}
-                            tooltip={character.isPrivate ? makeCharacterNotPrivate : makeCharacterPrivate}
+                            tooltip={character.isPrivate ? characterIsPrivate({ isCreate: drawerType?.type === create }) : characterIsNotPrivate({ isCreate: drawerType?.type === create })}
                             onChange={newValue => updateCharacter({ isPrivate: !newValue })} />
                     </Col>
                 </Row>
@@ -368,6 +370,7 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                                 <Col span={inputSpan}>
                                     <NumberParameterInput
                                         isCharacterPrivate={character.isPrivate}
+                                        isCreate
                                         compact={false}
                                         parameterKey={key}
                                         numberParameter={value}
@@ -375,7 +378,7 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                                         createdByMe={createdByMe}
                                         onOperate={operation => {
                                             updateCharacterByOperation(operation);
-                                        }}/>
+                                        }} />
                                 </Col>
                             </Row>
                         );
@@ -419,6 +422,7 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                                 <Col span={inputSpan}>
                                     <StringParameterInput
                                         isCharacterPrivate={character.isPrivate}
+                                        isCreate
                                         parameterKey={key}
                                         parameter={value}
                                         createdByMe={createdByMe}

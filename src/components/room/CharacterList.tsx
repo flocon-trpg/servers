@@ -21,7 +21,7 @@ import StringParameterInput from '../../foundations/StringParameterInput';
 import { useFirebaseStorageUrl } from '../../hooks/firebaseStorage';
 import { SettingOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import ToggleButton from '../../foundations/ToggleButton';
-import { characterNotCreatedByMe, makeCharacterNotPrivate, makeCharacterPrivate } from '../../resource/text/main';
+import { characterIsPrivate, characterIsNotPrivate, parameterIsPrivateAndNotCreatedByMe, characterIsNotPrivateAndNotCreatedByMe } from '../../resource/text/main';
 
 const characterOperationBase: Character.PostOperation = {
     boolParams: new Map(),
@@ -106,6 +106,7 @@ const createNumParameterColumn = ({
                 <>
                     <NumberParameterInput
                         isCharacterPrivate={character.state.isPrivate}
+                        isCreate={false}
                         compact
                         parameterKey={key}
                         numberParameter={character.state.numParams.get(key)}
@@ -145,6 +146,7 @@ const createStringParameterColumn = ({
                 <>
                     <StringParameterInput
                         isCharacterPrivate={character.state.isPrivate}
+                        isCreate={false}
                         parameterKey={key}
                         parameter={character.state.strParams.get(key)}
                         createdByMe={character.createdByMe ?? false}
@@ -218,7 +220,7 @@ const CharactersList: React.FC<Props> = ({ room }: Props) => {
                         </div>
                     </Popover>
                     <div style={({ width: 4 })} />
-                    <Input value={character.state.name} size='small' />
+                    <Input style={({ minWidth: 100 })} value={character.state.name} size='small' />
                 </div>),
         },
         {
@@ -231,7 +233,7 @@ const CharactersList: React.FC<Props> = ({ room }: Props) => {
                     return '?';
                 }
                 return (
-                    <div>
+                    <div style={({ whiteSpace: 'nowrap' })}>
                         <span>{participant.name}</span>
                         {character.createdByMe === true ? <span style={({ fontWeight: 'bold' })}> (自分)</span> : null}
                     </div>
@@ -246,10 +248,11 @@ const CharactersList: React.FC<Props> = ({ room }: Props) => {
                 <ToggleButton
                     size='small'
                     checked={!character.state.isPrivate}
-                    disabled={character.createdByMe ? false : characterNotCreatedByMe}
+                    disabled={character.createdByMe ? false : characterIsNotPrivateAndNotCreatedByMe}
+                    showAsTextWhenDisabled
                     checkedChildren={<EyeOutlined />}
                     unCheckedChildren={<EyeInvisibleOutlined />}
-                    tooltip={character.state.isPrivate ? makeCharacterNotPrivate : makeCharacterPrivate}
+                    tooltip={character.state.isPrivate ? characterIsPrivate({ isCreate: false }) : characterIsNotPrivate({ isCreate: false })}
                     onChange={newValue => {
                         const setup = Room.createPostOperationSetup();
                         const characterOperation: Character.PostOperation = {

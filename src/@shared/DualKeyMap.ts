@@ -127,8 +127,9 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
     }
 
     // 主な使用目的はデバッグのために文字列化させるため
-    public toJSON(): string {
-        return JSON.stringify([...this._core]);
+    public toJSON(valueToString?: (value: TValue) => string): string {
+        return JSON.stringify([...this._core]
+            .map(([key1, value]) => [key1, [...value].map(([key2, value]) => [key2, valueToString === undefined ? value : valueToString(value)])]));
     }
 }
 

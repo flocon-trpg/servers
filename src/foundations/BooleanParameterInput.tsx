@@ -29,7 +29,7 @@ const BooleanParameterInput: React.FC<Props> = ({
     onOperate,
 }: Props) => {
     return (
-        <div>
+        <div style={({ whiteSpace: 'nowrap' })}>
             {!createdByMe && booleanParameter?.isValuePrivate === true ? '?' : <>
                 <Checkbox
                     disabled={booleanParameter?.value === undefined}
