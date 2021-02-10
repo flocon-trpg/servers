@@ -80,7 +80,7 @@ const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) => {
                         height: props.headerHeight ?? defaultHeaderHeight,
                         padding: `0 ${horizontalPadding}px`,
                     })}>
-                    <div style={({ flex: 0 })}>{props.header}</div>
+                    <div style={({ flex: 0, whiteSpace: 'nowrap' })}>{props.header}</div>
                     <div style={({ flex: 'auto' })} />
                     <div style={({ flex: 0, cursor: 'pointer' })} onClick={() => props.onClose()}><CloseOutlined style={({ opacity: 0.7 })} /></div>
                 </div>
