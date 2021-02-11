@@ -203,6 +203,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                             <Button
                                 size='small'
                                 disabled={addNumParamSelector == null}
+                                icon={<PlusOutlined />}
                                 onClick={() => {
                                     if (addNumParamSelector == null) {
                                         return;
@@ -249,6 +250,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                             <Button
                                 size='small'
                                 disabled={addBoolParamSelector == null}
+                                icon={<PlusOutlined />}
                                 onClick={() => {
                                     if (addBoolParamSelector == null) {
                                         return;
@@ -295,6 +297,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                             <Button
                                 size='small'
                                 disabled={addStrParamSelector == null}
+                                icon={<PlusOutlined />}
                                 onClick={() => {
                                     if (addStrParamSelector == null) {
                                         return;
