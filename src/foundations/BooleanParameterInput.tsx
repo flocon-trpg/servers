@@ -128,11 +128,11 @@ const BooleanParameterInput: React.FC<Props> = ({
         </>);
     }
     return (
-        <>
+        <div style={({ whiteSpace: 'nowrap' })}>
             {checkbox({ disabled: false })}
             {addOrDeleteButton({ disabled: false })}
             {isPrivateButton}
-        </>);
+        </div>);
 };
 
 export default BooleanParameterInput;

@@ -89,10 +89,10 @@ const StringParameterInput: React.FC<Props> = ({
             }} />
     );
     return (
-        <>
+        <div style={({ whiteSpace: 'nowrap' })}>
             {input({ disabled: false })}
             {(compact && !createdByMe) ? null : isPrivateButton}
-        </>);
+        </div>);
 };
 
 export default StringParameterInput;
