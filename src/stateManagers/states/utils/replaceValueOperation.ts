@@ -6,7 +6,7 @@ export const ReplaceValueOperationModule = {
         if (second == null) {
             return first ?? undefined;
         }
-        return { newValue: first.newValue };
+        return { newValue: second.newValue };
     },
 };
 
@@ -18,6 +18,6 @@ export const ReplaceNullableValueOperationModule = {
         if (second == null) {
             return { newValue: first?.newValue ?? undefined };
         }
-        return { newValue: first.newValue ?? undefined };
+        return { newValue: second.newValue ?? undefined };
     },
 };

@@ -10,8 +10,9 @@ import { characterParameterNamesDrawerVisibility } from './RoomComponentsState';
 import produce from 'immer';
 import { isStrIndex20, StrIndex100, strIndex100Array, StrIndex20, strIndex20Array } from '../../@shared/indexes';
 import { RoomParameterNameType } from '../../generated/graphql';
-import { replace } from '../../stateManagers/states/types';
+import { replace, update } from '../../stateManagers/states/types';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import CollaborativeInput from '../../foundations/CollaborativeInput';
 
 type Props = {
     roomState: Room.State;
@@ -69,7 +70,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                         value={state.name}
                         onChange={e => {
                             const operation = Room.createPostOperationSetup();
-                            operation.paramNames.set({ key, type: RoomParameterNameType.Num }, { type: replace, newValue: { name: e.target.value } });
+                            operation.paramNames.set({ key, type: RoomParameterNameType.Num }, { type: update, operation: { name: { newValue: e.target.value } } });
                             operate(operation);
                         }} />
                     <Button
@@ -103,7 +104,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                         value={state.name}
                         onChange={e => {
                             const operation = Room.createPostOperationSetup();
-                            operation.paramNames.set({ key, type: RoomParameterNameType.Bool }, { type: replace, newValue: { name: e.target.value } });
+                            operation.paramNames.set({ key, type: RoomParameterNameType.Bool }, { type: update, operation: { name: { newValue: e.target.value } } });
                             operate(operation);
                         }} />
                     <Button
@@ -132,12 +133,16 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                 label={`文字列パラメーター${key}`}
                 name={`strParameter${key}`}>
                 <Space>
-                    <Input
+                    <CollaborativeInput
                         size='small'
                         value={state.name}
+                        bufferDuration={200}
                         onChange={e => {
+                            if (e.previousValue === e.currentValue) {
+                                return;
+                            }
                             const operation = Room.createPostOperationSetup();
-                            operation.paramNames.set({ key, type: RoomParameterNameType.Str }, { type: replace, newValue: { name: e.target.value } });
+                            operation.paramNames.set({ key, type: RoomParameterNameType.Str }, { type: update, operation: { name: { newValue: e.currentValue } } });
                             operate(operation);
                         }} />
                     <Button
@@ -177,7 +182,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                             strIndex20Array.filter(key => roomState.paramNames.has({ key, type: RoomParameterNameType.Num })).length === 0 ? null : <div style={({ padding: 6 })} />
                         }
                         <div style={({ display: 'flex', flexDirection: 'row' })}>
-                            <Select 
+                            <Select
                                 style={({ minWidth: 150 })}
                                 size='small'
                                 value={addNumParamSelector}
@@ -211,7 +216,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                                         key: addNumParamSelector,
                                     });
                                 }}>
-                                    追加
+                                追加
                             </Button>
                         </div>
                     </Collapse.Panel>
@@ -324,7 +329,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                             setAddNumParamSelector(undefined);
                             break;
                     }
-                    setVisibleParameterForm(undefined);                   
+                    setVisibleParameterForm(undefined);
                 }}
                 disabled={value => value.trim() === ''}
                 onClose={() => setVisibleParameterForm(undefined)} />}

@@ -8,8 +8,8 @@ import { StrIndex100 } from '../@shared/indexes';
 import { EyeInvisibleOutlined, EyeOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import ToggleButton from './ToggleButton';
 import { addParameter, deleteParameter, parameterIsPrivate, parameterIsNotPrivate, parameterIsPrivateAndNotCreatedByMe, parameterIsNotPrivateAndNotCreatedByMe } from '../resource/text/main';
-import BufferedInput from './BufferedInput';
 import { TextUpOperationModule } from '../utils/operations';
+import CollaborativeInput from './CollaborativeInput';
 
 const inputWidth = 150;
 
@@ -41,14 +41,14 @@ const StringParameterInput: React.FC<Props> = ({
     compact,
 }: Props) => {
     const input = ({ disabled }: { disabled: boolean }) => (
-        <BufferedInput
+        <CollaborativeInput
             style={({ width: inputWidth })}
             size='small'
+            bufferDuration='default'
             disabled={disabled}
             value={parameter?.value ?? ''}
-            valueResetKey={0}
             onChange={e => {
-                if (e.isReset) {
+                if (e.previousValue === e.currentValue) {
                     return;
                 }
                 const operation = createCharacterOperationBase();

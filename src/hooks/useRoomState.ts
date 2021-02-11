@@ -122,6 +122,7 @@ export const useRoomState = (roomId: string): RoomStateResult => {
                     return;
                 }
                 const valueInput = Room.toGraphQLInput(toPost.operationToPost);
+                console.info({ valueInput });
                 const result = await operateMutation({
                     variables: {
                         id: roomId,
