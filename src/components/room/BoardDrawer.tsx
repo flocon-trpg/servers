@@ -38,7 +38,7 @@ const defaultBoard: Board.State = {
 };
 
 const gutter: [Gutter, Gutter] = [16, 16];
-const inputSpan = 18;
+const inputSpan = 16;
 
 const BoardDrawer: React.FC<Props> = ({ roomState }: Props) => {
     const componentsState = React.useContext(ComponentsStateContext);
@@ -128,7 +128,7 @@ const BoardDrawer: React.FC<Props> = ({ roomState }: Props) => {
                     <Col flex='auto' />
                     <Col flex={0}>名前</Col>
                     <Col span={inputSpan}>
-                        <Input value={board.name} onChange={e => updateBoard({ name: e.target.value })} />
+                        <Input size='small' value={board.name} onChange={e => updateBoard({ name: e.target.value })} />
                     </Col>
                 </Row>
                 <Row gutter={gutter} align='middle'>
@@ -142,9 +142,18 @@ const BoardDrawer: React.FC<Props> = ({ roomState }: Props) => {
                     <Col flex='auto' />
                     <Col flex={0}>グリッドの数</Col>
                     <Col span={inputSpan}>
-                        <InputNumber value={board.cellColumnCount} onChange={newValue => typeof newValue === 'number' ? updateBoard({ cellColumnCount: newValue }) : undefined} />
-                        *
-                        <InputNumber value={board.cellRowCount} onChange={newValue => typeof newValue === 'number' ? updateBoard({ cellRowCount: newValue }) : undefined} />
+                        <span>x=</span>
+                        <InputNumber 
+                            size='small' 
+                            style={({ width: 80 })} 
+                            value={board.cellColumnCount} 
+                            onChange={newValue => typeof newValue === 'number' ? updateBoard({ cellColumnCount: newValue }) : undefined} />
+                        <span style={({ marginLeft: 10 })}>y=</span>
+                        <InputNumber 
+                            size='small' 
+                            style={({ width: 80 })} 
+                            value={board.cellRowCount} 
+                            onChange={newValue => typeof newValue === 'number' ? updateBoard({ cellRowCount: newValue }) : undefined} />
                     </Col>
                 </Row>
                 <Row gutter={gutter} align='middle'>
@@ -152,16 +161,23 @@ const BoardDrawer: React.FC<Props> = ({ roomState }: Props) => {
                     <Col flex={0}>グリッドの大きさ</Col>
                     <Col span={inputSpan}>
                         {/* cellWidth === cellHeight という前提だが、もし異なる場合は代表してcellWidthの値を用いることにしている */}
-                        <InputNumber value={board.cellWidth} onChange={newValue => typeof newValue === 'number' ? updateBoard({ cellWidth: newValue, cellHeight: newValue }) : undefined} />
+                        <InputNumber size='small' value={board.cellWidth} onChange={newValue => typeof newValue === 'number' ? updateBoard({ cellWidth: newValue, cellHeight: newValue }) : undefined} />
                     </Col>
                 </Row>
                 <Row gutter={gutter} align='middle'>
                     <Col flex='auto' />
                     <Col flex={0}>グリッドの基準点</Col>
                     <Col span={inputSpan}>
-                        <InputNumber value={board.cellOffsetX} onChange={newValue => typeof newValue === 'number' ? updateBoard({ cellOffsetX: newValue }) : undefined} />
-                        ,
-                        <InputNumber value={board.cellOffsetY} onChange={newValue => typeof newValue === 'number' ? updateBoard({ cellOffsetY: newValue }) : undefined} />
+                        <span>x=</span>
+                        <InputNumber 
+                            size='small' 
+                            value={board.cellOffsetX} 
+                            onChange={newValue => typeof newValue === 'number' ? updateBoard({ cellOffsetX: newValue }) : undefined} />
+                        <span style={({ marginLeft: 10 })}>y=</span>
+                        <InputNumber 
+                            size='small'
+                            value={board.cellOffsetY} 
+                            onChange={newValue => typeof newValue === 'number' ? updateBoard({ cellOffsetY: newValue }) : undefined} />
                     </Col>
                 </Row>
             </div>

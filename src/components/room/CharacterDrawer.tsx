@@ -344,7 +344,7 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                     <Col flex='auto' />
                     <Col flex={0}>名前</Col>
                     <Col span={inputSpan}>
-                        <Input value={character.name} onChange={e => updateCharacter({ name: e.target.value })} />
+                        <Input size='small' value={character.name} onChange={e => updateCharacter({ name: e.target.value })} />
                     </Col>
                 </Row>
 

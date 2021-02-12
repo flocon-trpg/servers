@@ -23,7 +23,7 @@ import { createPostOperationSetup, setupPostOperation } from '../../stateManager
 import { OperationElement, replace, update } from '../../stateManagers/states/types';
 import * as PieceLocation from '../../stateManagers/states/pieceLocation';
 import MyAuthContext from '../../contexts/MyAuthContext';
-import { EyeOutlined, EyeInvisibleOutlined, CheckOutlined } from '@ant-design/icons';
+import * as Icon from '@ant-design/icons';
 import { getCellPosition, getCellSize } from './utils';
 
 type Vector2 = {
@@ -227,7 +227,7 @@ const Board: React.FC<BoardProps> = ({ roomId, board, boardKey, boardsPanelConfi
                 return null;
             }
             return <IconImage
-                {...PieceLocation.getPosition({ state: pieceLocationValue, cellWidth: board.cellWidth, cellHeight: board.cellHeight })}
+                {...PieceLocation.getPosition({ ...board, state: pieceLocationValue })}
                 key={compositeKeyToString(characterKey)}
                 filePath={character.image}
                 draggable
@@ -352,6 +352,12 @@ const Board: React.FC<BoardProps> = ({ roomId, board, boardKey, boardsPanelConfi
                         offsetYDelta: -e.evt.movementY / nonZeroScale,
                     }));
                 }}>
+                {/* このRectがないと画像がないところで位置をドラッグで変えることができない。ただもっといい方法があるかも */}
+                <ReactKonva.Rect
+                    x={-100000}
+                    y={-100000}
+                    width={200000}
+                    height={200000} />
                 {backgroundImageKonva}
                 {grid}
             </ReactKonva.Layer>
@@ -384,13 +390,7 @@ const boardsDropDownStyle: React.CSSProperties = {
 
 const zoomButtonStyle: React.CSSProperties = {
     position: 'absolute',
-    top: 100,
-    right: 20,
-};
-
-const resetButtonStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: 150,
+    bottom: 70,
     right: 20,
 };
 
@@ -443,7 +443,7 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                                     if (boardKey.createdBy !== activeBoardKey.createdBy || boardKey.id !== activeBoardKey.id) {
                                         return false;
                                     }
-                                    return PieceLocation.isCursorOnIcon({ state: piece, cellWidth: board.cellWidth, cellHeight: board.cellHeight, cursorPosition: stateOffset });
+                                    return PieceLocation.isCursorOnIcon({ ...board, state: piece, cursorPosition: stateOffset });
                                 });
                             if (found === undefined) {
                                 return null;
@@ -572,7 +572,7 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                         };
 
                         return (
-                            <Menu.SubMenu key={compositeKeyToString(key)} title={<span>{pieceLocationExists ? <CheckOutlined /> : null} {value.name}</span>}>
+                            <Menu.SubMenu key={compositeKeyToString(key)} title={<span>{pieceLocationExists ? <Icon.CheckOutlined /> : null} {value.name}</span>}>
                                 <Menu.Item
                                     disabled={!pieceLocationExists}
                                     onClick={() => {
@@ -697,48 +697,49 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                     編集
                 </Button>
             </span>
-            <span style={zoomButtonStyle}>
-                <Button onClick={() => {
-                    if (activeBoardKey == null) {
-                        return;
-                    }
-                    dispatch(roomConfigModule.actions.updateBoard({
-                        roomId,
-                        boardKey: activeBoardKey,
-                        panelId: boardsPanelConfigId,
-                        zoomDelta: 0.25,
-                    }));
-                }}>
-                    +
-                </Button>
-                <Button onClick={() => {
-                    if (activeBoardKey == null) {
-                        return;
-                    }
-                    dispatch(roomConfigModule.actions.updateBoard({
-                        roomId,
-                        boardKey: activeBoardKey,
-                        panelId: boardsPanelConfigId,
-                        zoomDelta: -0.25,
-                    }));
-                }}>
-                    -
-                </Button>
-            </span>
-            <span style={resetButtonStyle}>
-                <Button onClick={() => {
-                    if (activeBoardKey == null) {
-                        return;
-                    }
-                    dispatch(roomConfigModule.actions.resetBoard({
-                        roomId,
-                        boardKey: activeBoardKey,
-                        panelId: boardsPanelConfigId,
-                    }));
-                }}>
-                    リセット
-                </Button>
-            </span>
+            <div style={zoomButtonStyle}>
+                <div style={({ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' })}>
+                    <Button onClick={() => {
+                        if (activeBoardKey == null) {
+                            return;
+                        }
+                        dispatch(roomConfigModule.actions.updateBoard({
+                            roomId,
+                            boardKey: activeBoardKey,
+                            panelId: boardsPanelConfigId,
+                            zoomDelta: 0.25,
+                        }));
+                    }}>
+                        <Icon.ZoomInOutlined />
+                    </Button>
+                    <Button onClick={() => {
+                        if (activeBoardKey == null) {
+                            return;
+                        }
+                        dispatch(roomConfigModule.actions.updateBoard({
+                            roomId,
+                            boardKey: activeBoardKey,
+                            panelId: boardsPanelConfigId,
+                            zoomDelta: -0.25,
+                        }));
+                    }}>
+                        <Icon.ZoomOutOutlined />
+                    </Button>
+                    <div style={({ height: 6 })} />
+                    <Button onClick={() => {
+                        if (activeBoardKey == null) {
+                            return;
+                        }
+                        dispatch(roomConfigModule.actions.resetBoard({
+                            roomId,
+                            boardKey: activeBoardKey,
+                            panelId: boardsPanelConfigId,
+                        }));
+                    }}>
+                        Boardの位置とズームをリセット
+                    </Button>
+                </div>
+            </div>
             {contextMenu}
         </div >
     );

@@ -170,14 +170,18 @@ export const getPosition = ({
     state,
     cellWidth,
     cellHeight,
+    cellOffsetX,
+    cellOffsetY,
 }: {
     state: State;
     cellWidth: number;
     cellHeight: number;
+    cellOffsetX: number;
+    cellOffsetY: number;
 }): { x: number; y: number; w: number; h: number } => {
     return {
-        x: state.isCellMode ? (state.cellX * cellWidth) : state.x,
-        y: state.isCellMode ? (state.cellY * cellHeight) : state.y,
+        x: state.isCellMode ? (state.cellX * cellWidth + cellOffsetX) : state.x,
+        y: state.isCellMode ? (state.cellY * cellHeight + cellOffsetY) : state.y,
         w: state.isCellMode ? (state.cellW * cellWidth) : state.w,
         h: state.isCellMode ? (state.cellH * cellHeight) : state.h,
     };
@@ -188,12 +192,16 @@ export const isCursorOnIcon = ({
     cellWidth,
     cellHeight,
     cursorPosition,
+    cellOffsetX,
+    cellOffsetY,
 }: {
     state: State;
     cellWidth: number;
     cellHeight: number;
-    cursorPosition: {x: number; y: number};
+    cursorPosition: { x: number; y: number };
+    cellOffsetX: number;
+    cellOffsetY: number;
 }): boolean => {
-    const {x, y, w, h} = getPosition({state, cellWidth, cellHeight});
+    const { x, y, w, h } = getPosition({ state, cellWidth, cellHeight, cellOffsetX, cellOffsetY });
     return x <= cursorPosition.x && cursorPosition.x <= (x + w) && y <= cursorPosition.y && cursorPosition.y <= (y + h);
 };
