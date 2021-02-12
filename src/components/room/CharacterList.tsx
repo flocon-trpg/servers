@@ -19,7 +19,7 @@ import NumberParameterInput from '../../foundations/NumberParameterInput';
 import BooleanParameterInput from '../../foundations/BooleanParameterInput';
 import StringParameterInput from '../../foundations/StringParameterInput';
 import { useFirebaseStorageUrl } from '../../hooks/firebaseStorage';
-import { SettingOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+import * as Icon from '@ant-design/icons';
 import ToggleButton from '../../foundations/ToggleButton';
 import { characterIsPrivate, characterIsNotPrivate, parameterIsPrivateAndNotCreatedByMe, characterIsNotPrivateAndNotCreatedByMe } from '../../resource/text/main';
 
@@ -208,7 +208,7 @@ const CharactersList: React.FC<Props> = ({ room }: Props) => {
                         style={({ alignSelf: 'center' })}
                         size='small'
                         onClick={() => dispatchRoomComponentsState({ type: characterDrawerType, newValue: { type: update, stateKey: character.stateKey } })}>
-                        <SettingOutlined />
+                        <Icon.SettingOutlined />
                     </Button>
                 </Tooltip>),
         },
@@ -223,8 +223,8 @@ const CharactersList: React.FC<Props> = ({ room }: Props) => {
                     checked={!character.state.isPrivate}
                     disabled={character.createdByMe ? false : characterIsNotPrivateAndNotCreatedByMe}
                     showAsTextWhenDisabled
-                    checkedChildren={<EyeOutlined />}
-                    unCheckedChildren={<EyeInvisibleOutlined />}
+                    checkedChildren={<Icon.EyeOutlined />}
+                    unCheckedChildren={<Icon.EyeInvisibleOutlined />}
                     tooltip={character.state.isPrivate ? characterIsPrivate({ isCreate: false }) : characterIsNotPrivate({ isCreate: false })}
                     onChange={newValue => {
                         const setup = Room.createPostOperationSetup();
@@ -246,12 +246,14 @@ const CharactersList: React.FC<Props> = ({ room }: Props) => {
             key: 'name',
             // eslint-disable-next-line react/display-name
             render: (_: unknown, { character }: DataSource) => (
-                <div style={({ display: 'flex', flexDirection: 'row' })}>
-                    <Popover trigger='hover' content={<Image filePath={character.state.image ?? undefined} iconSize={false} />}>
-                        <div>
-                            <Image filePath={character.state.image ?? undefined} iconSize={true} />
-                        </div>
-                    </Popover>
+                <div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
+                    {character.state.image == null ?
+                        <Icon.QuestionOutlined /> :
+                        <Popover trigger='hover' content={<Image filePath={character.state.image ?? undefined} iconSize={false} />}>
+                            <div>
+                                <Image filePath={character.state.image ?? undefined} iconSize={true} />
+                            </div>
+                        </Popover>}
                     <div style={({ width: 4 })} />
                     <Input style={({ minWidth: 100 })} value={character.state.name} size='small' />
                 </div>),

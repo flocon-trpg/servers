@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Comment, message, Tabs, Button, Menu, Dropdown } from 'antd';
+import { Comment, message, Tabs, Button, Menu, Dropdown, Tooltip } from 'antd';
 import moment from 'moment';
 import { AllRoomMessagesSuccessResult, apolloError, failure, loading, useAllRoomMessages, useFilteredRoomMessages, publicChannel, RoomMessage, publicMessage, privateMessage, soundEffect } from '../../hooks/useRoomMessages';
 import * as Participant from '../../stateManagers/states/participant';
@@ -19,7 +19,18 @@ import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
 import * as Character from '../../stateManagers/states/character';
 import { ReadonlyStateMap } from '../../@shared/StateMap';
-import { RoomPrivateMessageFragment, RoomPublicMessageFragment, RoomSoundEffectFragment, useDeleteMessageMutation, useMakeMessageNotSecretMutation } from '../../generated/graphql';
+import { FilePathFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment, RoomSoundEffectFragment, useDeleteMessageMutation, useEditMessageMutation, useMakeMessageNotSecretMutation } from '../../generated/graphql';
+import * as Icon from '@ant-design/icons';
+import { useFirebaseStorageUrl } from '../../hooks/firebaseStorage';
+import InputModal from '../InputModal';
+
+const Image: React.FC<{ filePath: FilePathFragment | undefined }> = ({ filePath }: { filePath: FilePathFragment | undefined }) => {
+    const src = useFirebaseStorageUrl(filePath);
+    if (src == null) {
+        return <Icon.QuestionOutlined style={({ width: 16, height: 16 })} />;
+    }
+    return (<img src={src} width={16} height={16} />);
+};
 
 type PublicChannelKey =
     | typeof $free
@@ -74,7 +85,7 @@ export type RoomUIMessage = {
 type RoomMessageProps = {
     roomId: string;
     message: RoomUIMessage;
-    participants?: ReadonlyMap<string, Participant.State>;
+    participants: ReadonlyMap<string, Participant.State> | undefined;
     style?: React.CSSProperties;
     characters: ReadonlyStateMap<Character.State>;
 }
@@ -85,30 +96,61 @@ const deletedMessageStyle: React.CSSProperties = {
 
 const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, participants, style, characters }: RoomMessageProps) => {
     const myAuth = React.useContext(MyAuthContext);
+    const [editMessageMutation] = useEditMessageMutation();
     const [deleteMessageMutation] = useDeleteMessageMutation();
     const [makeMessageNotSecret] = useMakeMessageNotSecretMutation();
+    const [isEditModalVisible, setIsEditModalVisible] = React.useState(false);
 
     if (message.type == soundEffect) {
         return null;
     }
 
-    let participantName: string | null = null;
-    let characterName: string | null = null;
-    if (message.value.createdBy != null) {
-        if (participants != null) {
-            participantName = participants.get(message.value.createdBy)?.name ?? message.value.createdBy;
-        }
-        characterName = message.value.characterName ?? null;
-        if (myAuth != null && message.value.characterStateId != null) {
-            characterName = characters.get({ createdBy: myAuth.uid, id: message.value.characterStateId })?.name ?? characterName;
-        }
+    let createdByMe: boolean | null;
+    if (myAuth == null) {
+        createdByMe = null;
+    } else {
+        createdByMe = (myAuth.uid === message.value.createdBy);
     }
+
+    const nameElement = (() => {
+        if (message.value.createdBy == null) {
+            return <span style={({ color: 'gray' })}>(システムメッセージ)</span>;
+        }
+        let participantName: string | null = null;
+        if (participants != null) {
+            participantName = participants.get(message.value.createdBy)?.name ?? null;
+        }
+
+        let character: Character.State | undefined = undefined;
+        if (message.value.characterStateId != null) {
+            character = characters.get({ createdBy: message.value.createdBy, id: message.value.characterStateId });
+        }
+        if (message.value.characterStateId == null) {
+            if (message.value.customName == null) {
+                return <Tooltip title={participantName ?? message.value.createdBy}>
+                    <div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
+                        <Icon.UserOutlined style={({ width: 16, height: 16 })} />
+                        {participantName ?? message.value.createdBy}
+                    </div>
+                </Tooltip>;
+            }
+            return <Tooltip title={participantName ?? message.value.createdBy}>
+                {message.value.customName}
+            </Tooltip>;
+        }
+        return <Tooltip title={participantName ?? message.value.createdBy}>
+            <div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
+                <Image filePath={character?.image ?? undefined} />
+                {character?.name == null ? message.value.characterName : character.name}
+            </div>
+        </Tooltip>;
+    })();
     let content: JSX.Element;
     if (message.value.text == null) {
         // 当初、削除された場合斜体にして表そうと考えたが、現状はボツにしている。
         // まず、italicなどでは対応してない日本語フォントの場合斜体にならない（対応しているフォントを選べばいいだけの話だが）。なのでtransform: skewX(-15deg)を使おうとしたが、文字列が斜めになることで横幅が少し増えるため、横のスクロールバーが出てしまう問題が出たので却下（x方向のスクロールバーを常に非表示にすれば解決しそうだが、x方向のスクロールバーを表示させたい場合は困る）。
         // ただ、解決策はありそうなのでのちのち斜体にするかもしれない。
-        content = (<span style={deletedMessageStyle}>(deleted)</span>);
+        content = (<span style={deletedMessageStyle}>(このメッセージは削除されました)</span>);
     } else {
         content = (
             <span>
@@ -124,30 +166,90 @@ const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, par
     if (createdAt != null) {
         datetime = moment(new Date(createdAt)).format('YYYY/MM/DD HH:mm:ss');
     }
+    let updatedInfo: JSX.Element | null = null;
+    if (message.value.updatedAt != null) {
+        if (message.value.text == null) {
+            updatedInfo = (
+                <Tooltip title={`${moment(new Date(message.value.updatedAt)).format('YYYY/MM/DD HH:mm:ss')}に削除されました`}>
+                    <span style={({ color: 'gray' })}>(削除済み)</span>
+                </Tooltip>
+            );
+        } else {
+            updatedInfo = (
+                <Tooltip title={`${moment(new Date(message.value.updatedAt)).format('YYYY/MM/DD HH:mm:ss')}に編集されました`}>
+                    <span style={({ color: 'gray' })}>(編集済み)</span>
+                </Tooltip>
+            );
+        }
+    }
+    const notSecretMenuItem = message.value.isSecret ?
+        <Menu.Item
+            onClick={() => {
+                makeMessageNotSecret({ variables: { messageId: message.value.messageId, roomId } });
+            }}>
+            公開
+        </Menu.Item>
+        : null;
+    const editMenuItem = (createdByMe === true && message.value.commandResult == null) ?
+        <Menu.Item onClick={() => {
+            setIsEditModalVisible(true);
+        }}>
+            編集
+        </Menu.Item> :
+        null;
+    const deleteMenuItem = createdByMe === true ?
+        <Menu.Item onClick={() => {
+            deleteMessageMutation({ variables: { messageId: message.value.messageId, roomId } });
+        }}>
+            削除
+        </Menu.Item> :
+        null;
+    const allMenuItemsAreNull = notSecretMenuItem == null && editMenuItem == null && deleteMenuItem == null;
+    const menuItems =
+        <>
+            {notSecretMenuItem}
+            {editMenuItem}
+            {deleteMenuItem}
+        </>;
     return (
-        <div style={({ ...style, display: 'flex', flexDirection: 'column' })}>
-            <div style={({ display: 'flex', flexDirection: 'row' })}>
-                <div style={({ flex: '0 0 auto' })}>{characterName ?? participantName}</div>
-                <div style={({ flex: '0 0 auto', width: 6 })} />
-                <div style={({ flex: '0 0 auto', color: 'gray' })}>{datetime}</div>
-                <div style={({ flex: 1 })} />
-                <div style={({ flex: '0 0 auto' })} >
-                    {message.value.isSecret ? <Button size='small' type='text' onClick={() => {
-                        makeMessageNotSecret({ variables: { messageId: message.value.messageId, roomId } });
-                    }}>公開</Button> : null}
-                    <Button
-                        size='small'
-                        type='text'
-                        onClick={() => {
-                            deleteMessageMutation({ variables: { messageId: message.value.messageId, roomId } });
-                        }}>
-                        削除
-                    </Button>
+        <div style={({ ...style, display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 4, marginTop: 4 })}>
+            <div style={({ flex: '0 0 auto', display: 'flex', flexDirection: 'column' })}>
+                <div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
+                    <div style={({ flex: '0 0 auto' })}>
+                        {nameElement}
+                    </div>
+                    <div style={({ flex: '0 0 auto', width: 6 })} />
+                    <div style={({ flex: '0 0 auto', color: 'gray' })}>{datetime}</div>
+                    {updatedInfo == null ? null : <div style={({ flex: '0 0 auto', width: 6 })} />}
+                    {updatedInfo}
+                    <div style={({ flex: 1 })} />
+                </div>
+                <div>
+                    {content}
                 </div>
             </div>
-            <div>
-                {content}
+            <div style={({ flex: 1 })} />
+            <div style={({ flex: '0 0 auto' })} >
+                {allMenuItemsAreNull ? null : <Dropdown overlay={<Menu>{menuItems}</Menu>} trigger={['click']}>
+                    <Button type='text' size='small'><Icon.EllipsisOutlined /></Button>
+                </Dropdown>}
             </div>
+            <InputModal
+                title='メッセージの編集'
+                visible={isEditModalVisible}
+                onOk={(value, setValue) => {
+                    editMessageMutation({ variables: { messageId: message.value.messageId, roomId, text: value } }).then(() => {
+                        setIsEditModalVisible(false);
+                        setValue('');
+                    });
+                }}
+                onClose={setValue => {
+                    setIsEditModalVisible(false);
+                    setValue('');
+                }}
+                onOpen={setValue => {
+                    setValue(message.value.text ?? '');
+                }} />
         </div>
     );
 };
@@ -458,6 +560,7 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
     return (
         <Tabs
             type="editable-card"
+            size='small'
             hideAdd={addIconMenuItems.length === 0}
             addIcon={(<Dropdown trigger={['click']} overlay={<Menu>{addIconMenuItems}</Menu>}>
                 <PlusOutlined />

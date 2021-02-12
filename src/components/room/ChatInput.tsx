@@ -11,8 +11,11 @@ import roomConfigModule from '../../modules/roomConfigModule';
 import * as Character from '../../stateManagers/states/character';
 import { ReadonlyStateMap } from '../../@shared/StateMap';
 import MyAuthContext from '../../contexts/MyAuthContext';
+import * as Participant from '../../stateManagers/states/participant';
 
-const noCharacterKey = '';
+const defaultNameKey = 'defaultNameKey';
+const customNameKey = 'customNameKey';
+const useCharacterKey = 'useCharacterKey';
 
 type Props = {
     roomId: string;
@@ -25,32 +28,30 @@ const ChatInput: React.FC<Props> = ({ roomId, style, activeTab, characters }: Pr
     const myAuth = React.useContext(MyAuthContext);
     const [writePublicMessage] = useWritePublicMessageMutation();
     const [writePrivateMessage] = useWritePrivateMessageMutation();
-    const [isPosting, setIsPosting] = React.useState(false); // 現状、チャンネルに関わらず並行して投稿することはできないが、この制限はstateを増やすなどにより取り除くことができる。
+    const [isPosting, setIsPosting] = React.useState(false); // 現状、チャンネルごとに並列的に投稿することはできないが、この制限はstateを増やすなどにより取り除くことができる。
     const [text, setText] = React.useState('');
+    const [customName, setCustomName] = React.useState('');
+    const [selectedNameType, setSelectedNameType] = React.useState<string>();
     const [selectedCharacterStateId, setSelectedCharacterStateId] = React.useState<string>();
     const roomConfig = useSelector(state => state.roomConfigModule);
     const dispatch = useDispatch();
     const myCharacters = React.useMemo(() => {
-        const noCharacterElement = (
-            <Select.Option key={noCharacterKey} value={noCharacterKey}>
-                (キャラクターなし)
-            </Select.Option>);
         if (myAuth?.uid == null) {
-            return [noCharacterElement];
+            return [];
         }
-        const result: (JSX.Element)[] = [noCharacterElement];
-        characters.forEach((character, key) => {
+        return characters.toArray().map(([key, character]) => {
             if (key.createdBy === myAuth.uid) {
-                result.push(
+                return (
                     <Select.Option key={key.id} value={key.id}>
                         {character.name}
-                    </Select.Option>);
+                    </Select.Option>
+                );
             }
+            return null;
         });
-        return result;
     }, [characters, myAuth?.uid]);
 
-    const onClick = () => {
+    const post = () => {
         if (text === '' || isPosting || activeTab == null) {
             return;
         }
@@ -68,7 +69,8 @@ const ChatInput: React.FC<Props> = ({ roomId, style, activeTab, characters }: Pr
                     channelKey: activeTab,
                     text,
                     gameType: roomConfig?.gameType,
-                    characterStateId: selectedCharacterStateId,
+                    characterStateId: selectedNameType === useCharacterKey ? selectedCharacterStateId : undefined,
+                    customName: selectedNameType === customNameKey ? customName : undefined,
                 }
             }).then(e => {
                 setIsPosting(false);
@@ -99,34 +101,9 @@ const ChatInput: React.FC<Props> = ({ roomId, style, activeTab, characters }: Pr
 
     return (
         <div style={({ ...style, alignItems: 'stretch', display: 'flex', flexDirection: 'column' })}>
-            <div style={({ flex: 'auto', alignItems: 'center', display: 'flex', flexDirection: 'row' })}>
+            <div>
                 <Select
-                    showSearch
-                    style={{ width: 200 }}
-                    placeholder="キャラクター"
-                    optionFilterProp="children"
-                    value={(selectedCharacterStateId == null || myAuth == null ? undefined : characters.get({ createdBy: myAuth.uid, id: selectedCharacterStateId })?.name)}
-                    onSelect={(_, option) => {
-                        const key = option.key;
-                        if (typeof key !== 'string') {
-                            return;
-                        }
-                        if (key === noCharacterKey) {
-                            setSelectedCharacterStateId(undefined);
-                            return;
-                        }
-                        setSelectedCharacterStateId(key);
-                    }}
-                    filterOption={(input, option) => {
-                        const value = option?.key;
-                        if (typeof value !== 'string') {
-                            return false;
-                        }
-                        return value.toLowerCase().indexOf(input.toLowerCase()) >= 0;
-                    }}>
-                    {myCharacters}
-                </Select>
-                <Select
+                    size='small'
                     showSearch
                     style={{ width: 200 }}
                     placeholder="ゲームの種類"
@@ -144,15 +121,69 @@ const ChatInput: React.FC<Props> = ({ roomId, style, activeTab, characters }: Pr
                 </Select>
             </div>
             <div style={({ flex: 'auto', alignItems: 'center', display: 'flex', flexDirection: 'row' })}>
+                <Select
+                    style={{ width: 150 }}
+                    size='small'
+                    placeholder="名前"
+                    onSelect={(_, option) => {
+                        const key = option.key;
+                        if (typeof key !== 'string') {
+                            return;
+                        }
+                        setSelectedNameType(key);
+                    }}>
+                    <Select.Option key={defaultNameKey} value={defaultNameKey}>
+                        キャラクターなし
+                    </Select.Option>
+                    <Select.Option key={useCharacterKey} value={useCharacterKey}>
+                        キャラクターあり
+                    </Select.Option>
+                    <Select.Option key={customNameKey} value={customNameKey}>
+                        カスタム名
+                    </Select.Option>
+                </Select>
+                {selectedNameType === useCharacterKey && <Select
+                    style={{ width: 200 }}
+                    size='small'
+                    showSearch
+                    placeholder="キャラクター"
+                    optionFilterProp="children"
+                    value={(selectedCharacterStateId == null || myAuth == null ? undefined : characters.get({ createdBy: myAuth.uid, id: selectedCharacterStateId })?.name)}
+                    onSelect={(_, option) => {
+                        const key = option.key;
+                        if (typeof key !== 'string') {
+                            return;
+                        }
+                        setSelectedCharacterStateId(key);
+                    }}
+                    filterOption={(input, option) => {
+                        const value = option?.key;
+                        if (typeof value !== 'string') {
+                            return false;
+                        }
+                        return value.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+                    }}>
+                    {myCharacters}
+                </Select>}
+                {selectedNameType === customNameKey && <Input
+                    style={{ width: 200 }}
+                    size='small'
+                    placeholder="カスタム名"
+                    value={customName}
+                    onChange={e => setCustomName(e.target.value)} />}
+            </div>
+            <div style={({ flex: 'auto', alignItems: 'center', display: 'flex', flexDirection: 'row' })}>
                 <Input
+                    size='small'
                     placeholder="メッセージ"
                     disabled={activeTab == null || activeTab === $system}
                     value={activeTab == null || activeTab === $system ? 'このチャンネルには投稿できません。' : text}
                     onChange={e => setText(e.target.value)}
-                    onPressEnter={onClick} />
+                    onPressEnter={post} />
                 <Button
+                    size='small'
                     disabled={text === '' || isPosting || activeTab == null || activeTab === $system}
-                    onClick={onClick}>
+                    onClick={post}>
                     {isPosting ? <LoadingOutlined /> : '投稿'}
                 </Button>
             </div>
