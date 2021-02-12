@@ -5,7 +5,6 @@ import * as http from 'http';
 import admin from 'firebase-admin';
 import { ExpressContext } from 'apollo-server-express/dist/ApolloServer';
 import { authToken } from './@shared/Constants';
-//import { beginConnection } from './typeorm/Connection';
 import { ResolverContext } from './graphql+typegoose/utils/Contexts';
 import registerEnumTypes from './graphql+typegoose/registerEnumTypes';
 import { buildSchema } from './buildSchema';

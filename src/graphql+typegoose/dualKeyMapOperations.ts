@@ -574,17 +574,16 @@ export const apply = async <TKey1, TKey2, TEntityState, TReplaceOperationState, 
     (await params.state.loadItems()).forEach(s => {
         stateAsStateMap.set(params.toDualKey(s), s);
     });
-    // TODO: throwのメッセージをちゃんとしたものにする、もしくはResultModule.errorを返す
     for (const [key, value] of groupJoin(stateAsStateMap, params.operation)) {
         switch (value.type) {
             case left:
                 continue;
             case right: {
                 if (value.right.type === update) {
-                    throw 'fail';
+                    throw 'state == null && operation.type === update';
                 }
                 if (value.right.operation.newValue === undefined) {
-                    throw 'fail';
+                    throw 'state == null && operation.newValue === undefined';
                 }
                 const created = await params.create({ key, state: value.right.operation.newValue });
                 if (created !== undefined) {
@@ -598,7 +597,7 @@ export const apply = async <TKey1, TKey2, TEntityState, TReplaceOperationState, 
                     continue;
                 }
                 if (value.right.operation.newValue !== undefined) {
-                    throw 'fail';
+                    throw 'state != null && operation.newValue !== undefined';
                 }
                 const deleted = await params.delete({ key });
                 if (deleted) {

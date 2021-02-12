@@ -322,7 +322,7 @@ export class BoardsDownOperation {
         update: Collection<$MikroORM.UpdateBoardOp>;
     }): Promise<Result<BoardsDownOperation>> {
         const downOperation = await DualKeyMapOperations.createDownOperationFromMikroORM({
-            toDualKey: source => ResultModule.ok(keyFactory.createDualKey(source)),
+            toDualKey: source => ResultModule.ok(keyFactory.createDualKey({ createdBy: source.createdBy, id: source.stateId })),
             add,
             remove,
             update,
@@ -481,7 +481,7 @@ export class BoardsTwoWayOperation {
         entity: Collection<$MikroORM.Board>;
     }): Promise<void> {
         await DualKeyMapOperations.apply({
-            toDualKey: state => keyFactory.createDualKey(state),
+            toDualKey: state => keyFactory.createDualKey({ createdBy: state.createdBy, id: state.stateId }),
             state: entity,
             operation: this.readonlyStateMap.dualKeyMap,
             create: async params => {
@@ -580,7 +580,7 @@ export class RestoredBoards {
             update: clientOperation.update,
             getState: source => source.newValue,
             getOperation: source => source.operation,
-            createDualKey: source => ResultModule.ok(keyFactory.createDualKey(source)),
+            createDualKey: source => ResultModule.ok(keyFactory.createDualKey({ createdBy: source.createdBy, id: source.id })),
         });
         if (second.isError) {
             return second;
