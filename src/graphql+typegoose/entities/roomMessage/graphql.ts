@@ -71,6 +71,9 @@ export class RoomPublicMessage {
     public text?: string;
 
     @Field({ nullable: true })
+    public textColor?: string;
+
+    @Field({ nullable: true })
     public commandResult?: string;
 
     @Field({ nullable: true })
@@ -115,6 +118,9 @@ export class RoomPrivateMessage {
 
     @Field({ nullable: true })
     public text?: string;
+
+    @Field({ nullable: true })
+    public textColor?: string;
 
     @Field({ nullable: true })
     public commandResult?: string;

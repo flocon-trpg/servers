@@ -1,5 +1,6 @@
 import { Reference } from '@mikro-orm/core';
 import { plainToClass } from 'class-transformer';
+import Color from 'color';
 import { Arg, Args, ArgsType, Ctx, Field, Mutation, PubSub, PubSubEngine, Query, Resolver, Root, Subscription } from 'type-graphql';
 import { GameType } from '../../../@shared/bcdice';
 import { __ } from '../../../@shared/collection';
@@ -38,6 +39,9 @@ class WritePublicMessageArgs {
     @Field()
     public text!: string;
 
+    @Field({ nullable: true })
+    public textColor?: string;
+
     @Field()
     public channelKey!: string;
 
@@ -61,6 +65,9 @@ class WritePrivateMessageArgs {
 
     @Field()
     public text!: string;
+
+    @Field({ nullable: true })
+    public textColor?: string;
 
     @Field({ nullable: true })
     public characterStateId?: string;
@@ -191,6 +198,7 @@ const createRoomPublicMessage = ({
         channelKey,
         messageId: msg.id,
         text: msg.text ?? undefined,
+        textColor: msg.textColor ?? undefined,
         commandResult: msg.commandResult ?? undefined,
         altTextToSecret: msg.altTextToSecret ?? undefined,
         isSecret: msg.isSecret,
@@ -226,10 +234,15 @@ const createRoomPrivateMessage = async ({
         createdAt: msg.createdAt.getTime(),
         updatedAt: msg.updatedAt?.getTime(),
         text: msg.text ?? undefined,
+        textColor: msg.textColor ?? undefined,
         commandResult: msg.commandResult ?? undefined,
         altTextToSecret: msg.altTextToSecret ?? undefined,
         isSecret: msg.isSecret,
     };
+};
+
+const fixTextColor = (color: string) => {
+    return Color(color).rgb().string();
 };
 
 @Resolver()
@@ -527,6 +540,7 @@ export class RoomMessageResolver {
 
             const entity = new RoomPubMsg();
             entity.text = args.text;
+            entity.textColor = args.textColor == null ? undefined : fixTextColor(args.textColor);
             entity.createdBy = Reference.create(meAsUser);
             let ch = await em.findOne(RoomPubCh, { key: channelKey, room: room.id });
             if (ch == null) {
@@ -666,6 +680,7 @@ export class RoomMessageResolver {
 
             const entity = new RoomPrvMsg();
             entity.text = args.text;
+            args.textColor == null ? undefined : fixTextColor(args.textColor);
             entity.createdBy = Reference.create(meAsUser);
             for (const participantUserRef of participantUsers) {
                 const participantUser = await participantUserRef.load();

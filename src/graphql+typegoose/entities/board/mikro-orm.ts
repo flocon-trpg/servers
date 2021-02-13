@@ -77,6 +77,10 @@ export abstract class BoardBase {
 
     @Enum({ items: () => FileSourceType, nullable: true })
     public backgroundImageSourceType?: FileSourceType;
+
+    // eslint-disable-next-line @typescript-eslint/no-inferrable-types
+    @Property()
+    public backgroundImageZoom: number = 1;
 }
 
 @Entity()
@@ -179,6 +183,9 @@ export class UpdateBoardOp {
 
     @Property({ type: JsonType, nullable: true })
     public backgroundImage?: ReplaceNullableFilePathDownOperation;
+
+    @Property({ nullable: true })
+    public backgroundImageZoom?: number;
 
 
     @ManyToOne(() => RoomOp, { wrappedReference: true })

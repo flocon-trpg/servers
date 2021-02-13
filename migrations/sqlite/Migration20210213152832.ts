@@ -1,6 +1,6 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20210130150631 extends Migration {
+export class Migration20210213152832 extends Migration {
 
   async up(): Promise<void> {
     this.addSql('create table `user` (`user_uid` varchar not null, `is_entry` integer not null, primary key (`user_uid`));');
@@ -9,7 +9,7 @@ export class Migration20210130150631 extends Migration {
 
     this.addSql('create table `room_op` (`id` varchar not null, `prev_revision` integer not null, `name` varchar null, primary key (`id`));');
 
-    this.addSql('create table `room_prv_msg` (`id` varchar not null, `version` integer not null default 1, `created_at` datetime not null, `updated_at` datetime null, `text` varchar null, `command_result` varchar null, `alt_text_to_secret` varchar null, `is_secret` integer not null, `chara_state_id` varchar null, `chara_name` varchar null, `custom_name` varchar null, primary key (`id`));');
+    this.addSql('create table `room_prv_msg` (`id` varchar not null, `version` integer not null default 1, `created_at` datetime not null, `updated_at` datetime null, `text` varchar null, `text_color` varchar null, `command_result` varchar null, `alt_text_to_secret` varchar null, `is_secret` integer not null, `chara_state_id` varchar null, `chara_name` varchar null, `custom_name` varchar null, primary key (`id`));');
 
     this.addSql('create table `user_visible_room_prv_msgs` (`user_user_uid` varchar not null, `room_prv_msg_id` varchar not null, primary key (`user_user_uid`, `room_prv_msg_id`));');
     this.addSql('create index `user_visible_room_prv_msgs_user_user_uid_index` on `user_visible_room_prv_msgs` (`user_user_uid`);');
@@ -17,7 +17,7 @@ export class Migration20210130150631 extends Migration {
 
     this.addSql('create table `room_pub_ch` (`id` varchar not null, `version` integer not null default 1, `updated_at` datetime null, `key` varchar not null, `name` varchar null, primary key (`id`));');
 
-    this.addSql('create table `room_pub_msg` (`id` varchar not null, `version` integer not null default 1, `created_at` datetime not null, `updated_at` datetime null, `text` varchar null, `command_result` varchar null, `alt_text_to_secret` varchar null, `is_secret` integer not null, `chara_state_id` varchar null, `chara_name` varchar null, `custom_name` varchar null, primary key (`id`));');
+    this.addSql('create table `room_pub_msg` (`id` varchar not null, `version` integer not null default 1, `created_at` datetime not null, `updated_at` datetime null, `text` varchar null, `text_color` varchar null, `command_result` varchar null, `alt_text_to_secret` varchar null, `is_secret` integer not null, `chara_state_id` varchar null, `chara_name` varchar null, `custom_name` varchar null, primary key (`id`));');
 
     this.addSql('create table `room_se` (`id` varchar not null, `created_at` datetime not null, `file_path` varchar not null, `file_source_type` text check (`file_source_type` in (\'Default\', \'FirebaseStorage\')) not null, `volume` integer not null, primary key (`id`));');
 
@@ -129,11 +129,11 @@ export class Migration20210130150631 extends Migration {
     this.addSql('create index `piece_loc_board_id_index` on `piece_loc` (`board_id`);');
     this.addSql('create index `piece_loc_board_created_by_index` on `piece_loc` (`board_created_by`);');
 
-    this.addSql('create table `update_board_op` (`id` varchar not null, `created_by` varchar not null, `state_id` varchar not null, `name` varchar null, `cell_width` integer null, `cell_height` integer null, `cell_row_count` integer null, `cell_column_count` integer null, `cell_offset_x` integer null, `cell_offset_y` integer null, `background_image` json null, primary key (`id`));');
+    this.addSql('create table `update_board_op` (`id` varchar not null, `created_by` varchar not null, `state_id` varchar not null, `name` varchar null, `cell_width` integer null, `cell_height` integer null, `cell_row_count` integer null, `cell_column_count` integer null, `cell_offset_x` integer null, `cell_offset_y` integer null, `background_image` json null, `background_image_zoom` integer null, primary key (`id`));');
     this.addSql('create index `update_board_op_created_by_index` on `update_board_op` (`created_by`);');
     this.addSql('create index `update_board_op_state_id_index` on `update_board_op` (`state_id`);');
 
-    this.addSql('create table `remove_board_op` (`id` varchar not null, `created_by` varchar not null, `state_id` varchar not null, `name` varchar not null, `cell_width` integer not null, `cell_height` integer not null, `cell_row_count` integer not null, `cell_column_count` integer not null, `cell_offset_x` integer not null, `cell_offset_y` integer not null, `background_image_path` varchar null, `background_image_source_type` text check (`background_image_source_type` in (\'Default\', \'FirebaseStorage\')) null, primary key (`id`));');
+    this.addSql('create table `remove_board_op` (`id` varchar not null, `created_by` varchar not null, `state_id` varchar not null, `name` varchar not null, `cell_width` integer not null, `cell_height` integer not null, `cell_row_count` integer not null, `cell_column_count` integer not null, `cell_offset_x` integer not null, `cell_offset_y` integer not null, `background_image_path` varchar null, `background_image_source_type` text check (`background_image_source_type` in (\'Default\', \'FirebaseStorage\')) null, `background_image_zoom` integer not null, primary key (`id`));');
     this.addSql('create index `remove_board_op_created_by_index` on `remove_board_op` (`created_by`);');
     this.addSql('create index `remove_board_op_state_id_index` on `remove_board_op` (`state_id`);');
 
@@ -141,7 +141,7 @@ export class Migration20210130150631 extends Migration {
     this.addSql('create index `add_board_op_created_by_index` on `add_board_op` (`created_by`);');
     this.addSql('create index `add_board_op_state_id_index` on `add_board_op` (`state_id`);');
 
-    this.addSql('create table `board` (`id` varchar not null, `created_by` varchar not null, `state_id` varchar not null, `name` varchar not null, `cell_width` integer not null, `cell_height` integer not null, `cell_row_count` integer not null, `cell_column_count` integer not null, `cell_offset_x` integer not null, `cell_offset_y` integer not null, `background_image_path` varchar null, `background_image_source_type` text check (`background_image_source_type` in (\'Default\', \'FirebaseStorage\')) null, `version` integer not null default 1, primary key (`id`));');
+    this.addSql('create table `board` (`id` varchar not null, `created_by` varchar not null, `state_id` varchar not null, `name` varchar not null, `cell_width` integer not null, `cell_height` integer not null, `cell_row_count` integer not null, `cell_column_count` integer not null, `cell_offset_x` integer not null, `cell_offset_y` integer not null, `background_image_path` varchar null, `background_image_source_type` text check (`background_image_source_type` in (\'Default\', \'FirebaseStorage\')) null, `background_image_zoom` integer not null, `version` integer not null default 1, primary key (`id`));');
     this.addSql('create index `board_created_by_index` on `board` (`created_by`);');
     this.addSql('create index `board_state_id_index` on `board` (`state_id`);');
 

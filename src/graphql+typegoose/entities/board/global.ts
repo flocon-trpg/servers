@@ -20,17 +20,19 @@ type BoardStateType = {
     cellOffsetX: number;
     cellOffsetY: number;
     backgroundImage?: FilePath;
+    backgroundImageZoom: number;
 }
 
 type BoardDownOperationType = {
-    backgroundImage?: ReplaceNullableFilePathDownOperation;
+    name?: ReplaceStringDownOperation;
     cellHeight?: ReplaceNumberDownOperation;
     cellWidth?: ReplaceNumberDownOperation;
     cellRowCount?: ReplaceNumberDownOperation;
     cellColumnCount?: ReplaceNumberDownOperation;
     cellOffsetX?: ReplaceNumberDownOperation;
     cellOffsetY?: ReplaceNumberDownOperation;
-    name?: ReplaceStringDownOperation;
+    backgroundImage?: ReplaceNullableFilePathDownOperation;
+    backgroundImageZoom?: ReplaceNumberDownOperation;
 }
 
 type BoardTwoWayOperationType = {
@@ -42,6 +44,7 @@ type BoardTwoWayOperationType = {
     cellOffsetX?: ReplaceNumberTwoWayOperation;
     cellOffsetY?: ReplaceNumberTwoWayOperation;
     backgroundImage?: ReplaceNullableFilePathTwoWayOperation;
+    backgroundImageZoom?: ReplaceNumberTwoWayOperation;
 }
 
 const keyFactory: KeyFactory<CompositeKey, string, string> = {
@@ -87,6 +90,11 @@ class BoardState {
         if (downOperation.valueProps.backgroundImage !== undefined) {
             prevState._object.backgroundImage = downOperation.valueProps.backgroundImage.oldValue ?? undefined;
             twoWayOperationCore.backgroundImage = { oldValue: downOperation.valueProps.backgroundImage.oldValue ?? undefined, newValue: nextState._object.backgroundImage };
+        }
+
+        if (downOperation.valueProps.backgroundImageZoom !== undefined) {
+            prevState._object.backgroundImageZoom = downOperation.valueProps.backgroundImageZoom.oldValue;
+            twoWayOperationCore.backgroundImageZoom = { ...downOperation.valueProps.backgroundImageZoom, newValue: nextState._object.backgroundImageZoom };
         }
 
         if (downOperation.valueProps.cellColumnCount !== undefined) {
@@ -143,6 +151,9 @@ class BoardState {
         if (operation.valueProps.backgroundImage !== undefined) {
             result._object.backgroundImage = operation.valueProps.backgroundImage.oldValue ?? undefined;
         }
+        if (operation.valueProps.backgroundImageZoom !== undefined) {
+            result._object.backgroundImageZoom = operation.valueProps.backgroundImageZoom.oldValue ?? undefined;
+        }
         if (operation.valueProps.cellColumnCount !== undefined) {
             result._object.cellColumnCount = operation.valueProps.cellColumnCount.oldValue;
         }
@@ -174,6 +185,7 @@ class BoardState {
     }) {
         boardBase.backgroundImagePath = this._object.backgroundImage?.path;
         boardBase.backgroundImageSourceType = this._object.backgroundImage?.sourceType;
+        boardBase.backgroundImageZoom = this._object.backgroundImageZoom;
         boardBase.cellHeight = this._object.cellHeight;
         boardBase.cellWidth = this._object.cellWidth;
         boardBase.cellColumnCount = this._object.cellColumnCount;
@@ -276,6 +288,7 @@ class BoardDownOperation {
         const object: BoardDownOperationType = {};
 
         object.backgroundImage = ReplaceNullableFilePathDownOperationModule.validate(entity.backgroundImage);
+        object.backgroundImageZoom = entity.backgroundImageZoom === undefined ? undefined : { oldValue: entity.backgroundImageZoom };
         object.cellHeight = entity.cellHeight === undefined ? undefined : { oldValue: entity.cellHeight };
         object.cellWidth = entity.cellWidth === undefined ? undefined : { oldValue: entity.cellWidth };
         object.cellHeight = entity.cellHeight === undefined ? undefined : { oldValue: entity.cellHeight };
@@ -296,6 +309,7 @@ class BoardDownOperation {
     public compose(second: BoardDownOperation): Result<BoardDownOperation> {
         const object: BoardDownOperationType = {
             backgroundImage: ReplaceNullableFilePathDownOperationModule.compose(this.valueProps.backgroundImage, second.valueProps.backgroundImage),
+            backgroundImageZoom: ReplaceNumberDownOperationModule.compose(this.valueProps.backgroundImageZoom, second.valueProps.backgroundImageZoom),
             cellColumnCount: ReplaceNumberDownOperationModule.compose(this.valueProps.cellColumnCount, second.valueProps.cellColumnCount),
             cellHeight: ReplaceNumberDownOperationModule.compose(this.valueProps.cellHeight, second.valueProps.cellHeight),
             cellOffsetX: ReplaceNumberDownOperationModule.compose(this.valueProps.cellOffsetX, second.valueProps.cellOffsetX),
@@ -369,6 +383,9 @@ class BoardTwoWayOperation {
             entity.backgroundImagePath = this.params.valueProps.backgroundImage.newValue?.path;
             entity.backgroundImageSourceType = this.params.valueProps.backgroundImage.newValue?.sourceType;
         }
+        if (this.params.valueProps.backgroundImageZoom !== undefined) {
+            entity.backgroundImageZoom = this.params.valueProps.backgroundImageZoom.newValue;
+        }
         if (this.params.valueProps.cellColumnCount !== undefined) {
             entity.cellColumnCount = this.params.valueProps.cellColumnCount.newValue;
         }
@@ -402,6 +419,9 @@ class BoardTwoWayOperation {
         const result = new $MikroORM.UpdateBoardOp({ createdBy, stateId });
         if (this.valueProps.backgroundImage !== undefined) {
             result.backgroundImage = this.valueProps.backgroundImage;
+        }
+        if (this.valueProps.backgroundImageZoom !== undefined) {
+            result.backgroundImageZoom = this.valueProps.backgroundImageZoom.oldValue;
         }
         if (this.valueProps.cellColumnCount !== undefined) {
             result.cellColumnCount = this.valueProps.cellColumnCount.oldValue;
@@ -512,6 +532,11 @@ class RestoredBoard {
             first: this.params.twoWayOperation?.valueProps.backgroundImage,
             second: clientOperation.backgroundImage === undefined ? undefined : { newValue: clientOperation.backgroundImage.newValue },
             prevState: this.params.prevState.object.backgroundImage,
+        });
+        twoWayOperationCore.backgroundImageZoom = ReplaceNumberTwoWayOperationModule.transform({
+            first: this.params.twoWayOperation?.valueProps.backgroundImageZoom,
+            second: clientOperation.backgroundImageZoom,
+            prevState: this.params.prevState.object.backgroundImageZoom,
         });
         twoWayOperationCore.cellColumnCount = ReplaceNumberTwoWayOperationModule.transform({
             first: this.params.twoWayOperation?.valueProps.cellColumnCount,

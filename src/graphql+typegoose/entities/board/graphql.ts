@@ -28,6 +28,9 @@ export class BoardValueState {
 
     @Field(() => FilePath, { nullable: true })
     public backgroundImage?: FilePath;
+
+    @Field()
+    public backgroundImageZoom!: number;
 }
 
 @ObjectType()
@@ -68,6 +71,9 @@ export class BoardOperation {
 
     @Field({ nullable: true })
     public backgroundImage?: ReplaceNullableFilePathUpOperation;
+
+    @Field({ nullable: true })
+    public backgroundImageZoom?: ReplaceNumberUpOperation;
 }
 
 @ObjectType()
