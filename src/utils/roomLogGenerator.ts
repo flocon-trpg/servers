@@ -9,8 +9,6 @@ import moment from 'moment';
 
 const privateMessage = 'privateMessage';
 const publicMessage = 'publicMessage';
-const publicChannel = 'publicChannel';
-const soundEffect = 'soundEffect';
 
 type CreatedBy = { rolePlayPart?: string; participantNamePart: string }
 
@@ -169,7 +167,6 @@ ${left}
 ${msg.value.text == null ? '<span class="text gray">(削除済み)</span>' : `<span class="text">${escape(msg.value.text ?? '')}</span>`}
 </div>`;
     }).reduce((seed, elem) => seed + elem, '');
-
 
     return `<!DOCTYPE html>
 <html lang="ja">

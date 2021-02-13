@@ -14,6 +14,7 @@ export type Scalars = {
 export type BoardOperation = {
   __typename?: 'BoardOperation';
   backgroundImage?: Maybe<ReplaceNullableFilePathUpOperation>;
+  backgroundImageZoom?: Maybe<ReplaceNumberUpOperation>;
   cellColumnCount?: Maybe<ReplaceNumberUpOperation>;
   cellHeight?: Maybe<ReplaceNumberUpOperation>;
   cellOffsetX?: Maybe<ReplaceNumberUpOperation>;
@@ -25,6 +26,7 @@ export type BoardOperation = {
 
 export type BoardOperationInput = {
   backgroundImage?: Maybe<ReplaceNullableFilePathUpOperationInput>;
+  backgroundImageZoom?: Maybe<ReplaceNumberUpOperationInput>;
   cellColumnCount?: Maybe<ReplaceNumberUpOperationInput>;
   cellHeight?: Maybe<ReplaceNumberUpOperationInput>;
   cellOffsetX?: Maybe<ReplaceNumberUpOperationInput>;
@@ -55,6 +57,7 @@ export type BoardState = {
 export type BoardValueState = {
   __typename?: 'BoardValueState';
   backgroundImage?: Maybe<FilePath>;
+  backgroundImageZoom: Scalars['Float'];
   cellColumnCount: Scalars['Float'];
   cellHeight: Scalars['Float'];
   cellOffsetX: Scalars['Float'];
@@ -66,6 +69,7 @@ export type BoardValueState = {
 
 export type BoardValueStateInput = {
   backgroundImage?: Maybe<FilePathInput>;
+  backgroundImageZoom: Scalars['Float'];
   cellColumnCount: Scalars['Float'];
   cellHeight: Scalars['Float'];
   cellOffsetX: Scalars['Float'];
@@ -472,6 +476,7 @@ export type MutationWritePrivateMessageArgs = {
   customName?: Maybe<Scalars['String']>;
   roomId: Scalars['String'];
   text: Scalars['String'];
+  textColor?: Maybe<Scalars['String']>;
   visibleTo: Array<Scalars['String']>;
 };
 
@@ -483,6 +488,7 @@ export type MutationWritePublicMessageArgs = {
   gameType?: Maybe<Scalars['String']>;
   roomId: Scalars['String'];
   text: Scalars['String'];
+  textColor?: Maybe<Scalars['String']>;
 };
 
 
@@ -962,6 +968,7 @@ export type RoomPrivateMessage = {
   isSecret: Scalars['Boolean'];
   messageId: Scalars['String'];
   text?: Maybe<Scalars['String']>;
+  textColor?: Maybe<Scalars['String']>;
   updatedAt?: Maybe<Scalars['Float']>;
   visibleTo: Array<Scalars['String']>;
 };
@@ -1001,6 +1008,7 @@ export type RoomPublicMessage = {
   isSecret: Scalars['Boolean'];
   messageId: Scalars['String'];
   text?: Maybe<Scalars['String']>;
+  textColor?: Maybe<Scalars['String']>;
   updatedAt?: Maybe<Scalars['Float']>;
 };
 
@@ -1248,7 +1256,7 @@ export type BoardStateFragment = (
 
 export type BoardValueStateFragment = (
   { __typename?: 'BoardValueState' }
-  & Pick<BoardValueState, 'name' | 'cellWidth' | 'cellHeight' | 'cellRowCount' | 'cellColumnCount' | 'cellOffsetX' | 'cellOffsetY'>
+  & Pick<BoardValueState, 'name' | 'cellWidth' | 'cellHeight' | 'cellRowCount' | 'cellColumnCount' | 'cellOffsetX' | 'cellOffsetY' | 'backgroundImageZoom'>
   & { backgroundImage?: Maybe<(
     { __typename?: 'FilePath' }
     & FilePathFragment
@@ -1303,6 +1311,9 @@ export type BoardOperationFragment = (
       { __typename?: 'FilePath' }
       & FilePathFragment
     )> }
+  )>, backgroundImageZoom?: Maybe<(
+    { __typename?: 'ReplaceNumberUpOperation' }
+    & Pick<ReplaceNumberUpOperation, 'newValue'>
   )> }
 );
 
@@ -1726,12 +1737,12 @@ export type RoomPublicChannelFragment = (
 
 export type RoomPublicMessageFragment = (
   { __typename?: 'RoomPublicMessage' }
-  & Pick<RoomPublicMessage, 'messageId' | 'channelKey' | 'text' | 'commandResult' | 'altTextToSecret' | 'isSecret' | 'createdBy' | 'characterStateId' | 'characterName' | 'customName' | 'createdAt' | 'updatedAt'>
+  & Pick<RoomPublicMessage, 'messageId' | 'channelKey' | 'text' | 'textColor' | 'commandResult' | 'altTextToSecret' | 'isSecret' | 'createdBy' | 'characterStateId' | 'characterName' | 'customName' | 'createdAt' | 'updatedAt'>
 );
 
 export type RoomPrivateMessageFragment = (
   { __typename?: 'RoomPrivateMessage' }
-  & Pick<RoomPrivateMessage, 'messageId' | 'visibleTo' | 'text' | 'commandResult' | 'altTextToSecret' | 'isSecret' | 'createdBy' | 'characterStateId' | 'characterName' | 'customName' | 'createdAt' | 'updatedAt'>
+  & Pick<RoomPrivateMessage, 'messageId' | 'visibleTo' | 'text' | 'textColor' | 'commandResult' | 'altTextToSecret' | 'isSecret' | 'createdBy' | 'characterStateId' | 'characterName' | 'customName' | 'createdAt' | 'updatedAt'>
 );
 
 export type RoomSoundEffectFragment = (
@@ -2163,6 +2174,7 @@ export const BoardValueStateFragmentDoc = gql`
   backgroundImage {
     ...FilePath
   }
+  backgroundImageZoom
 }
     ${FilePathFragmentDoc}`;
 export const BoardStateFragmentDoc = gql`
@@ -2383,6 +2395,9 @@ export const BoardOperationFragmentDoc = gql`
     newValue {
       ...FilePath
     }
+  }
+  backgroundImageZoom {
+    newValue
   }
 }
     ${FilePathFragmentDoc}`;
@@ -2638,6 +2653,7 @@ export const RoomPublicMessageFragmentDoc = gql`
   messageId
   channelKey
   text
+  textColor
   commandResult
   altTextToSecret
   isSecret
@@ -2660,6 +2676,7 @@ export const RoomPrivateMessageFragmentDoc = gql`
   messageId
   visibleTo
   text
+  textColor
   commandResult
   altTextToSecret
   isSecret

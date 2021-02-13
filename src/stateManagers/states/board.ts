@@ -27,6 +27,9 @@ export const applyOperation = ({ state, operation }: { state: State; operation: 
         if (operation.backgroundImage != null) {
             state.backgroundImage = operation.backgroundImage.newValue;
         }
+        if (operation.backgroundImageZoom != null) {
+            state.backgroundImageZoom = operation.backgroundImageZoom.newValue;
+        }
         if (operation.cellColumnCount != null) {
             state.cellColumnCount = operation.cellColumnCount.newValue;
         }
@@ -61,6 +64,9 @@ export const compose = ({
     const result: PostOperation = { ...first };
     if (second.backgroundImage != null) {
         result.backgroundImage = second.backgroundImage;
+    }
+    if (second.backgroundImageZoom != null) {
+        result.backgroundImageZoom = second.backgroundImageZoom;
     }
     if (second.cellColumnCount != null) {
         result.cellColumnCount = second.cellColumnCount;
@@ -98,6 +104,9 @@ export const transform = ({
 
     firstPrime.backgroundImage = transformNullableReplace({ first: first.backgroundImage, second: second.backgroundImage }).firstPrime;
     secondPrime.backgroundImage = transformNullableReplace({ first: first.backgroundImage, second: second.backgroundImage }).secondPrime;
+
+    firstPrime.backgroundImageZoom = transformReplace({ first: first.backgroundImageZoom, second: second.backgroundImageZoom }).firstPrime;
+    secondPrime.backgroundImageZoom = transformReplace({ first: first.backgroundImageZoom, second: second.backgroundImageZoom }).secondPrime;
 
     firstPrime.cellColumnCount = transformReplace({ first: first.cellColumnCount, second: second.cellColumnCount }).firstPrime;
     secondPrime.cellColumnCount = transformReplace({ first: first.cellColumnCount, second: second.cellColumnCount }).secondPrime;
@@ -144,6 +153,9 @@ export const diff = ({
                 }
             };
         }
+    }
+    if (prev.backgroundImageZoom != next.backgroundImageZoom) {
+        result.backgroundImageZoom = { newValue: next.backgroundImageZoom };
     }
     if (prev.cellColumnCount != next.cellColumnCount) {
         result.cellColumnCount = { newValue: next.cellColumnCount };

@@ -282,6 +282,8 @@ const Board: React.FC<BoardProps> = ({ roomId, board, boardKey, boardsPanelConfi
     const backgroundImageKonva = backgroundImage.type === 'success' ?
         <ReactKonva.Image
             image={backgroundImage.image}
+            scaleX={Math.max(board.backgroundImageZoom, 0)}
+            scaleY={Math.max(board.backgroundImageZoom, 0)}
             onClick={e => e.evt.preventDefault()} /> :
         null;
 

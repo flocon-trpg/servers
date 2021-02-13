@@ -35,6 +35,7 @@ const defaultBoard: Board.State = {
     cellWidth: 0,
     cellOffsetX: 0,
     cellOffsetY: 0,
+    backgroundImageZoom: 1,
 };
 
 const gutter: [Gutter, Gutter] = [16, 16];
@@ -136,6 +137,28 @@ const BoardDrawer: React.FC<Props> = ({ roomState }: Props) => {
                     <Col flex={0}>背景画像</Col>
                     <Col span={inputSpan}>
                         <InputFile filePath={board.backgroundImage ?? undefined} onPathChange={path => updateBoard({ backgroundImage: path ?? undefined })} openFilesManager={setFilesManagerDrawerType} />
+                    </Col>
+                </Row>
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
+                    <Col flex={0}>背景画像の拡大率</Col>
+                    <Col span={inputSpan}>
+                        <InputNumber 
+                            size='small' 
+                            value={board.backgroundImageZoom * 100}
+                            min={0}
+                            formatter={value => `${value}%`}
+                            parser={value => {
+                                if (value == null) {
+                                    return 100;
+                                }
+                                const num = Number(value.replace('%', ''));
+                                if (isNaN(num)) {
+                                    return 100;
+                                }
+                                return num;
+                            }}
+                            onChange={newValue => typeof newValue === 'number' ? updateBoard({ backgroundImageZoom: newValue / 100 }) : undefined} />
                     </Col>
                 </Row>
                 <Row gutter={gutter} align='middle'>
