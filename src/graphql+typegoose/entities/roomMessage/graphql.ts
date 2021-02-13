@@ -2,6 +2,7 @@ import { createUnionType, Field, InputType, ObjectType } from 'type-graphql';
 import { $free, $system } from '../../../@shared/Constants';
 import { DeleteMessageFailureType } from '../../../enums/DeleteMessageFailureType';
 import { EditMessageFailureType } from '../../../enums/EditMessageFailureType';
+import { GetRoomLogFailureType } from '../../../enums/GetRoomLogFailureType';
 import { GetRoomMessagesFailureType } from '../../../enums/GetRoomMessagesFailureType';
 import { MakeMessageNotSecretFailureType } from '../../../enums/MakeMessageNotSecretFailureType';
 import { WritePrivateRoomMessageFailureType } from '../../../enums/WritePrivateRoomMessageFailureType';
@@ -223,6 +224,29 @@ export const GetRoomMessagesResult = createUnionType({
                 return RoomMessages;
             case GetRoomMessagesFailureResultType:
                 return GetRoomMessagesFailureResult;
+        }
+    }
+});
+
+export const GetRoomLogFailureResultType = 'GetRoomLogFailureResultType';
+
+@ObjectType()
+export class GetRoomLogFailureResult {
+    public __tstype!: typeof GetRoomLogFailureResultType;
+
+    @Field(() => GetRoomLogFailureType)
+    public failureType!: GetRoomLogFailureType;
+}
+
+export const GetRoomLogResult = createUnionType({
+    name: 'GetRoomLogResult',
+    types: () => [RoomMessages, GetRoomLogFailureResult] as const,
+    resolveType: value => {
+        switch (value.__tstype) {
+            case RoomMessagesType:
+                return RoomMessages;
+            case GetRoomLogFailureResultType:
+                return GetRoomLogFailureResult;
         }
     }
 });
