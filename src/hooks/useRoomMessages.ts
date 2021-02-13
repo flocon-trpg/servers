@@ -11,7 +11,6 @@ import { PrivateChannelSet, PrivateChannelsSet } from '../utils/PrivateChannelsS
 // 2. フィルタリングしたい場合、useAllRoomMessagesによって得た値をuseFilteredRoomMessagesに渡す。配列に対して毎回filterメソッドを実行するより軽いはず。
 
 
-// CO:
 export const privateMessage = 'privateMessage';
 export const publicMessage = 'publicMessage';
 export const publicChannel = 'publicChannel';
@@ -312,7 +311,7 @@ export type AllRoomMessagesResult = {
 export const useAllRoomMessages = ({ roomId }: { roomId: string }): AllRoomMessagesResult => {
     const [result, setResult] = React.useState<AllRoomMessagesResultCore>({ type: loading, events: [] });
 
-    const messages = useGetMessagesQuery({ variables: { roomId }, fetchPolicy: 'no-cache' });
+    const messages = useGetMessagesQuery({ variables: { roomId }, fetchPolicy: 'network-only' });
     const messageEventSubscription = useMessageEventSubscription({ variables: { roomId } });
 
     React.useEffect(() => {

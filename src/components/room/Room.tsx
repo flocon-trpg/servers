@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Layout as AntdLayout, Drawer, Dropdown } from 'antd';
+import { Menu, Layout as AntdLayout, Drawer, Dropdown, Popconfirm } from 'antd';
 import DraggableCard, { horizontalPadding } from '../../foundations/DraggableCard';
 import CharactersList from './CharacterList';
 import useRoomConfig from '../../hooks/localStorage/useRoomConfig';
@@ -21,11 +21,20 @@ import BoardDrawer from './BoardDrawer';
 import CreatePrivateMessageDrawer from './CreatePrivateMessageDrawer';
 import { boardsPanel, charactersPanel, gameEffectPanel, messagesPanel } from '../../states/RoomConfig';
 import { CheckOutlined, PlusOutlined } from '@ant-design/icons';
-import { useLeaveRoomMutation } from '../../generated/graphql';
+import { useGetLogLazyQuery, useGetLogQuery, useLeaveRoomMutation } from '../../generated/graphql';
 import { useRouter } from 'next/router';
 import path from '../../utils/path';
 import PlaySoundBehavior from '../../foundations/PlaySoundBehavior';
 import SoundPlayer from './SoundPlayer';
+import Modal from 'antd/lib/modal/Modal';
+import fileDownload from 'js-file-download';
+import { generateAsStaticHtml } from '../../utils/roomLogGenerator';
+import moment from 'moment';
+
+type ModalState = {
+    onOk: () => void;
+    content: React.ReactNode;
+}
 
 const childrenContainerPadding = `12px ${horizontalPadding}px`;
 const bottomContainerPadding = `0px ${horizontalPadding}px`;
@@ -39,10 +48,33 @@ type Props = {
 const Room: React.FC<Props> = ({ roomState, roomId, operate }: Props) => {
     useRoomConfig(roomId);
     const roomConfig = useSelector(state => state.roomConfigModule);
+    const [modalState, setModalState] = React.useState<ModalState>();
     const router = useRouter();
     const dispatch = useDispatch();
     const [componentsState, dispatchComponentsState] = React.useReducer(reduce, defaultRoomComponentsState);
+    const [getLogQuery, getLogQueryResult] = useGetLogLazyQuery({ variables: { roomId }, fetchPolicy: 'network-only' });
     const [leaveRoomMutation] = useLeaveRoomMutation({ variables: { id: roomId } });
+    const roomStateRef = React.useRef(roomState);
+
+    React.useEffect(() => {
+        roomStateRef.current = roomState;
+    },[roomState]);
+
+    React.useEffect(() => {
+        const data = getLogQueryResult.data;
+        if (data == null) {
+            return;
+        }
+        if (data.result.__typename !== 'RoomMessages') {
+            // TODO: エラーメッセージを出す
+            return;
+        }
+        fileDownload(generateAsStaticHtml({ 
+            messages: data.result, 
+            participants: roomStateRef.current.participants, 
+            characters: roomStateRef.current.characters
+        }), `log_${moment(new Date()).format('YYYYMMDDHHmmss')}.html`);
+    },[getLogQueryResult.data]);
 
     if (roomConfig == null || roomConfig.roomId !== roomId) {
         return (<div>loading config file...</div>);
@@ -91,6 +123,17 @@ const Room: React.FC<Props> = ({ roomState, roomId, operate }: Props) => {
                                 <Menu.SubMenu title="部屋">
                                     <Menu.Item onClick={() => dispatchComponentsState({ type: roomDrawerVisibility, newValue: true })}>
                                         編集
+                                    </Menu.Item>
+                                    <Menu.Item onClick={() => setModalState({
+                                        content: (<span>
+                                            <p>ログには、自分が見ることのできるメッセージだけでなく秘話などの非公開情報も全て含まれます。また、ログをダウンロードすると、システムメッセージによって全員に通知されます。</p>
+                                            <p>ログをダウンロードしますか？</p>
+                                        </span>),
+                                        onOk: () => {
+                                            getLogQuery();
+                                        }
+                                    })}>
+                                        ログをダウンロード
                                     </Menu.Item>
                                     <Menu.Item onClick={() => {
                                         leaveRoomMutation().then(result => {
@@ -218,6 +261,18 @@ const Room: React.FC<Props> = ({ roomState, roomId, operate }: Props) => {
                                     <RoomMessages roomId={roomId} participants={roomState.participants} characters={roomState.characters} />
                                 </DraggableCard>}
                             </div>
+
+                            <Modal
+                                visible={modalState != null}
+                                onOk={() => {
+                                    if (modalState != null) {
+                                        modalState.onOk();
+                                    }
+                                    setModalState(undefined);
+                                }}
+                                onCancel={() => setModalState(undefined)}>
+                                {modalState == null || modalState.content}
+                            </Modal>
 
                             <BoardDrawer roomState={roomState} />
                             <CharacterDrawer roomState={roomState} />

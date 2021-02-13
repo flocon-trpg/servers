@@ -293,6 +293,22 @@ export enum GetRoomFailureType {
   NotSignIn = 'NotSignIn'
 }
 
+export type GetRoomLogFailureResult = {
+  __typename?: 'GetRoomLogFailureResult';
+  failureType: GetRoomLogFailureType;
+};
+
+export enum GetRoomLogFailureType {
+  NotAuthorized = 'NotAuthorized',
+  NotEntry = 'NotEntry',
+  NotParticipant = 'NotParticipant',
+  NotSignIn = 'NotSignIn',
+  RoomNotFound = 'RoomNotFound',
+  UnknownError = 'UnknownError'
+}
+
+export type GetRoomLogResult = GetRoomLogFailureResult | RoomMessages;
+
 export type GetRoomMessagesFailureResult = {
   __typename?: 'GetRoomMessagesFailureResult';
   failureType: GetRoomMessagesFailureType;
@@ -683,9 +699,15 @@ export type Pong = {
 
 export type Query = {
   __typename?: 'Query';
+  getLog: GetRoomLogResult;
   getMessages: GetRoomMessagesResult;
   getRoom: GetRoomResult;
   getRoomsList: GetRoomsListResult;
+};
+
+
+export type QueryGetLogArgs = {
+  roomId: Scalars['String'];
 };
 
 
@@ -1831,6 +1853,34 @@ export type GetMessagesQuery = (
   ) }
 );
 
+export type GetLogQueryVariables = Exact<{
+  roomId: Scalars['String'];
+}>;
+
+
+export type GetLogQuery = (
+  { __typename?: 'Query' }
+  & { result: (
+    { __typename?: 'GetRoomLogFailureResult' }
+    & Pick<GetRoomLogFailureResult, 'failureType'>
+  ) | (
+    { __typename?: 'RoomMessages' }
+    & { publicMessages: Array<(
+      { __typename?: 'RoomPublicMessage' }
+      & RoomPublicMessageFragment
+    )>, privateMessages: Array<(
+      { __typename?: 'RoomPrivateMessage' }
+      & RoomPrivateMessageFragment
+    )>, publicChannels: Array<(
+      { __typename?: 'RoomPublicChannel' }
+      & RoomPublicChannelFragment
+    )>, soundEffects: Array<(
+      { __typename?: 'RoomSoundEffect' }
+      & RoomSoundEffectFragment
+    )> }
+  ) }
+);
+
 export type CreateRoomMutationVariables = Exact<{
   input: CreateRoomInput;
 }>;
@@ -2795,6 +2845,58 @@ export function useGetMessagesLazyQuery(baseOptions?: Apollo.LazyQueryHookOption
 export type GetMessagesQueryHookResult = ReturnType<typeof useGetMessagesQuery>;
 export type GetMessagesLazyQueryHookResult = ReturnType<typeof useGetMessagesLazyQuery>;
 export type GetMessagesQueryResult = Apollo.QueryResult<GetMessagesQuery, GetMessagesQueryVariables>;
+export const GetLogDocument = gql`
+    query GetLog($roomId: String!) {
+  result: getLog(roomId: $roomId) {
+    ... on RoomMessages {
+      publicMessages {
+        ...RoomPublicMessage
+      }
+      privateMessages {
+        ...RoomPrivateMessage
+      }
+      publicChannels {
+        ...RoomPublicChannel
+      }
+      soundEffects {
+        ...RoomSoundEffect
+      }
+    }
+    ... on GetRoomLogFailureResult {
+      failureType
+    }
+  }
+}
+    ${RoomPublicMessageFragmentDoc}
+${RoomPrivateMessageFragmentDoc}
+${RoomPublicChannelFragmentDoc}
+${RoomSoundEffectFragmentDoc}`;
+
+/**
+ * __useGetLogQuery__
+ *
+ * To run a query within a React component, call `useGetLogQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetLogQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetLogQuery({
+ *   variables: {
+ *      roomId: // value for 'roomId'
+ *   },
+ * });
+ */
+export function useGetLogQuery(baseOptions: Apollo.QueryHookOptions<GetLogQuery, GetLogQueryVariables>) {
+        return Apollo.useQuery<GetLogQuery, GetLogQueryVariables>(GetLogDocument, baseOptions);
+      }
+export function useGetLogLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetLogQuery, GetLogQueryVariables>) {
+          return Apollo.useLazyQuery<GetLogQuery, GetLogQueryVariables>(GetLogDocument, baseOptions);
+        }
+export type GetLogQueryHookResult = ReturnType<typeof useGetLogQuery>;
+export type GetLogLazyQueryHookResult = ReturnType<typeof useGetLogLazyQuery>;
+export type GetLogQueryResult = Apollo.QueryResult<GetLogQuery, GetLogQueryVariables>;
 export const CreateRoomDocument = gql`
     mutation CreateRoom($input: CreateRoomInput!) {
   result: createRoom(input: $input) {

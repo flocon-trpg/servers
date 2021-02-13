@@ -169,7 +169,7 @@ export const useRoomState = (roomId: string): RoomStateResult => {
         apolloClient.query<GetRoomQuery, GetRoomQueryVariables>({
             query: GetRoomDocument,
             variables: { id: roomId },
-            fetchPolicy: 'no-cache'
+            fetchPolicy: 'network-only'
         }).then(q => {
             switch (q.data.result.__typename) {
                 case 'GetJoinedRoomResult': {

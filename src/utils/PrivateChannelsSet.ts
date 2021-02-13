@@ -7,12 +7,12 @@ const toString = (visibleTo: ReadonlySet<string>): string => {
 export class PrivateChannelSet {
     private readonly _source: ReadonlySet<string>
 
-    public constructor(source: string | ReadonlySet<string>) {
-        if (typeof source === 'string') {
-            this._source = new Set<string>(source.split(';').filter(x => x !== ''));
+    public constructor(userUid: string | ReadonlySet<string>) {
+        if (typeof userUid === 'string') {
+            this._source = new Set<string>(userUid.split(';').filter(x => x !== ''));
             return;
         }
-        this._source = source;
+        this._source = userUid;
     }
 
     public toString(): string {
@@ -20,10 +20,10 @@ export class PrivateChannelSet {
     }
 
     // participantsのkeyはUserUid
-    public toChannelNameBase(participants: ReadonlyMap<string, Participant.State>, myUserUid: string): string[] {
+    public toChannelNameBase(participants: ReadonlyMap<string, Participant.State>, skipMe?: { userUid: string }): string[] {
         const result: string[] = [];
         this._source.forEach(userUid => {
-            if (userUid === myUserUid) {
+            if (userUid === skipMe?.userUid) {
                 return;
             }
             const participant = participants.get(userUid);

@@ -122,9 +122,6 @@ const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, par
         }
 
         let character: Character.State | undefined = undefined;
-        if (message.value.characterStateId != null) {
-            character = characters.get({ createdBy: message.value.createdBy, id: message.value.characterStateId });
-        }
         if (message.value.characterStateId == null) {
             if (message.value.customName == null) {
                 return <Tooltip title={participantName ?? message.value.createdBy}>
@@ -137,6 +134,8 @@ const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, par
             return <Tooltip title={participantName ?? message.value.createdBy}>
                 {message.value.customName}
             </Tooltip>;
+        } else {
+            character = characters.get({ createdBy: message.value.createdBy, id: message.value.characterStateId });
         }
         return <Tooltip title={participantName ?? message.value.createdBy}>
             <div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
@@ -437,7 +436,7 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
     };
 
     const createPrivateChannelName = (channel: PrivateChannelSet, showIcon: boolean) => {
-        const channelNameBase = channel.toChannelNameBase(participants, myAuth?.uid ?? '');
+        const channelNameBase = channel.toChannelNameBase(participants, { userUid: myAuth?.uid ?? '' });
         if (channelNameBase.length === 0) {
             return '独り言';
         }
@@ -487,7 +486,7 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
 
     const privateChannelElements = allRoomMessagesResult.value.privateChannels.toArray()
         .map(channel => {
-            const channelNameBase = channel.toChannelNameBase(participants, myAuth?.uid ?? '');
+            const channelNameBase = channel.toChannelNameBase(participants, { userUid: myAuth?.uid ?? '' });
             const tab = createPrivateChannelName(channel, true);
             const tabPane = (
                 <TabPane tab={tab} key={channel.toString()}>

@@ -60,7 +60,7 @@ const RoomsListComponent: React.FC<RoomsListComponentProps> = ({ rooms }: RoomsL
 const pollingInterval = 30000;
 
 const RoomCore: React.FC = () => {
-    const rooms = useGetRoomsListQuery({ fetchPolicy: 'no-cache' });
+    const rooms = useGetRoomsListQuery({ fetchPolicy: 'network-only' });
 
     switch (rooms.data?.result.__typename) {
         case 'GetRoomsListSuccessResult':
