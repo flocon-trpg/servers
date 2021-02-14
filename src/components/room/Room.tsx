@@ -11,7 +11,7 @@ import Boards from './Boards';
 import { recordToArray } from '../../utils/record';
 import RoomMessages, { Tab } from './RoomMessages';
 import CharacterParameterNamesDrawer from './CharacterParameterNamesDrawer';
-import { RoomComponentsState, defaultRoomComponentsState, reduce, roomDrawerVisibility } from './RoomComponentsState';
+import { RoomComponentsState, defaultRoomComponentsState, reduce, editRoomDrawerVisibility } from './RoomComponentsState';
 import DrawerFooter from '../../layouts/DrawerFooter';
 import ComponentsStateContext from './contexts/RoomComponentsStateContext';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
@@ -20,7 +20,7 @@ import CharacterDrawer from './CharacterDrawer';
 import BoardDrawer from './BoardDrawer';
 import CreatePrivateMessageDrawer from './CreatePrivateMessageDrawer';
 import { boardsPanel, charactersPanel, gameEffectPanel, messagesPanel } from '../../states/RoomConfig';
-import { CheckOutlined, PlusOutlined } from '@ant-design/icons';
+import * as Icon from '@ant-design/icons';
 import { useGetLogLazyQuery, useGetLogQuery, useLeaveRoomMutation } from '../../generated/graphql';
 import { useRouter } from 'next/router';
 import path from '../../utils/path';
@@ -30,6 +30,7 @@ import Modal from 'antd/lib/modal/Modal';
 import fileDownload from 'js-file-download';
 import { generateAsStaticHtml } from '../../utils/roomLogGenerator';
 import moment from 'moment';
+import EditRoomDrawer from './EditRoomDrawer';
 
 type ModalState = {
     onOk: () => void;
@@ -121,7 +122,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, operate }: Props) => {
                         <AntdLayout.Content>
                             <Menu triggerSubMenuAction='click' selectable={false} mode="horizontal">
                                 <Menu.SubMenu title="部屋">
-                                    <Menu.Item onClick={() => dispatchComponentsState({ type: roomDrawerVisibility, newValue: true })}>
+                                    <Menu.Item onClick={() => dispatchComponentsState({ type: editRoomDrawerVisibility, newValue: true })}>
                                         編集
                                     </Menu.Item>
                                     <Menu.Item onClick={() => setModalState({
@@ -152,7 +153,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, operate }: Props) => {
                                         dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: charactersPanel } }));
                                     }}>
                                         <div>
-                                            <span>{roomConfig.panels.charactersPanel.isMinimized ? null : <CheckOutlined />}</span>
+                                            <span>{roomConfig.panels.charactersPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
                                             <span>キャラクター一覧</span>
                                         </div>
                                     </Menu.Item>
@@ -169,7 +170,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, operate }: Props) => {
                                                             dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: boardsPanel, panelId: pair.key } }));
                                                         }}>
                                                         <div>
-                                                            <span>{pair.value.isMinimized ? null : <CheckOutlined />}</span>
+                                                            <span>{pair.value.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
                                                             <span>{`パネル${i}`}</span>
                                                         </div>
                                                     </Menu.Item>);
@@ -191,7 +192,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, operate }: Props) => {
                                             }));
                                         }}>
                                             <div>
-                                                <span>{roomConfig.panels.messagesPanel.isMinimized ? null : <PlusOutlined />}</span>
+                                                <span>{roomConfig.panels.messagesPanel.isMinimized ? null : <Icon.PlusOutlined />}</span>
                                                 <span>新規作成</span>
                                             </div>
                                         </Menu.Item>
@@ -201,7 +202,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, operate }: Props) => {
                                         dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: messagesPanel } }));
                                     }}>
                                         <div>
-                                            <span>{roomConfig.panels.messagesPanel.isMinimized ? null : <CheckOutlined />}</span>
+                                            <span>{roomConfig.panels.messagesPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
                                             <span>メッセージ</span>
                                         </div>
                                     </Menu.Item>
@@ -210,7 +211,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, operate }: Props) => {
                                         dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: gameEffectPanel } }));
                                     }}>
                                         <div>
-                                            <span>{roomConfig.panels.gameEffectPanel.isMinimized ? null : <CheckOutlined />}</span>
+                                            <span>{roomConfig.panels.gameEffectPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
                                             <span>エフェクト</span>
                                         </div>
                                     </Menu.Item>
@@ -278,6 +279,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, operate }: Props) => {
                             <CharacterDrawer roomState={roomState} />
                             <CharacterParameterNamesDrawer roomState={roomState} />
                             <CreatePrivateMessageDrawer roomState={roomState} roomId={roomId} />
+                            <EditRoomDrawer roomState={roomState}/>
 
                             <PlaySoundBehavior bgms={roomState.bgms} />
                         </AntdLayout.Content>

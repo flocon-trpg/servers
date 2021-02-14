@@ -6,7 +6,7 @@ export const update = 'update';
 export const characterParameterNamesDrawerVisibility = 'characterParameterNamesDrawerVisibility';
 export const boardDrawerType = 'boardDrawerType';
 export const characterDrawerType = 'characterDrawerType';
-export const roomDrawerVisibility = 'roomDrawerVisibility';
+export const editRoomDrawerVisibility = 'editRoomDrawerVisibility';
 export const createPrivateMessageDrawerVisibility = 'createPrivateMessageDrawerVisibility';
 
 export type BoardEditorDrawerType = {
@@ -30,7 +30,7 @@ export type RoomComponentsState = {
     characterParameterNamesDrawerVisibility: boolean;
     boardDrawerType: BoardEditorDrawerType | null;
     characterDrawerType: CharacterEditorDrawerType | null;
-    roomDrawerVisibility: boolean;
+    editRoomDrawerVisibility: boolean;
     createPrivateMessageDrawerVisibility: boolean;
 }
 
@@ -38,7 +38,7 @@ export const defaultRoomComponentsState: RoomComponentsState = {
     characterParameterNamesDrawerVisibility: false,
     boardDrawerType: null,
     characterDrawerType: null,
-    roomDrawerVisibility: false,
+    editRoomDrawerVisibility: false,
     createPrivateMessageDrawerVisibility: false,
 };
 
@@ -52,7 +52,7 @@ export type RoomComponentsAction = {
     type: typeof characterDrawerType;
     newValue: CharacterEditorDrawerType | null;
 } | {
-    type: typeof roomDrawerVisibility;
+    type: typeof editRoomDrawerVisibility;
     newValue: boolean;
 } | {
     type: typeof createPrivateMessageDrawerVisibility;
@@ -76,10 +76,10 @@ export const reduce = (state: RoomComponentsState, action: RoomComponentsAction)
                 ...state,
                 characterDrawerType: action.newValue,
             };
-        case roomDrawerVisibility:
+        case editRoomDrawerVisibility:
             return {
                 ...state,
-                roomDrawerVisibility: action.newValue,
+                editRoomDrawerVisibility: action.newValue,
             };
         case createPrivateMessageDrawerVisibility:
             return {
