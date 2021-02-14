@@ -1,6 +1,4 @@
 npm-debug.log*
-/firebase-config.json
-/web-config.json
 /.next
 /node_modules
 /out

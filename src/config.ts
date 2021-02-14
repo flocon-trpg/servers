@@ -7,18 +7,17 @@ import { JSONObject } from './@shared/JSONObject';
 
 // TODO: httpやwsが未指定のときは現在のURLから判断して自動的にURLを生成するが、このURLのうちhttp/httpsの部分やws/wssの部分だけ変えたいというケースに対応したほうがよさそうか？
 const loadConfig = () => {
-
-    const firebaseFile = process.env['NEXT_PUBLIC_TRPG_FIREBASE_CONFIG'];
+    const firebaseFile = process.env['NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG'];
     if (firebaseFile == null) {
-        throw 'Firebase config is not found. Set NEXT_PUBLIC_TRPG_FIREBASE_CONFIG environment variable.';
+        throw 'Firebase config is not found. Set NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG environment variable.';
     }
 
     const firebaseJson = JSON.parse(firebaseFile.toString());
     const firebaseConfig = createFirebaseConfig(firebaseJson);
 
-    const webConfigFile = process.env['NEXT_PUBLIC_TRPG_WEB_CONFIG'];
+    const webConfigFile = process.env['NEXT_PUBLIC_FLOCON_WEB_CONFIG'];
     if (webConfigFile == null) {
-        throw 'Web config is not found. Set NEXT_PUBLIC_TRPG_WEB_CONFIG environment variable.';
+        throw 'Web config is not found. Set NEXT_PUBLIC_FLOCON_WEB_CONFIG environment variable.';
     }
 
     const webConfigJson = JSON.parse(webConfigFile.toString());
