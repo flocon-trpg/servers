@@ -8,6 +8,7 @@ import { $free, $system } from '../../../@shared/Constants';
 import { Result, ResultModule } from '../../../@shared/Result';
 import { groupJoin } from '../../../@shared/Set';
 import { left } from '../../../@shared/Types';
+import { loadServerConfigAsMain } from '../../../config';
 import { DeleteMessageFailureType } from '../../../enums/DeleteMessageFailureType';
 import { EditMessageFailureType } from '../../../enums/EditMessageFailureType';
 import { GetRoomLogFailureType } from '../../../enums/GetRoomLogFailureType';
@@ -255,7 +256,7 @@ export class RoomMessageResolver {
 
         const queue = async (): Promise<Result<typeof GetRoomMessagesResult>> => {
             const em = context.createEm();
-            const entry = await checkEntry({ userUid: decodedIdToken.uid, em });
+            const entry = await checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return ResultModule.ok({
@@ -364,7 +365,7 @@ export class RoomMessageResolver {
 
         const queue = async (): Promise<Result<{ result: typeof GetRoomLogResult; payload?: MessageUpdatePayload }>> => {
             const em = context.createEm();
-            const entry = await checkEntry({ userUid: decodedIdToken.uid, em });
+            const entry = await checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return ResultModule.ok({
@@ -498,7 +499,7 @@ export class RoomMessageResolver {
 
         const queue = async (): Promise<Result<{ result: typeof WritePublicRoomMessageResult; payload?: MessageUpdatePayload }>> => {
             const em = context.createEm();
-            const entry = await checkEntry({ userUid: decodedIdToken.uid, em });
+            const entry = await checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return ResultModule.ok({
@@ -632,7 +633,7 @@ export class RoomMessageResolver {
 
         const queue = async (): Promise<Result<{ result: typeof WritePrivateRoomMessageResult; payload?: MessageUpdatePayload }>> => {
             const em = context.createEm();
-            const entry = await checkEntry({ userUid: decodedIdToken.uid, em });
+            const entry = await checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return ResultModule.ok({
@@ -757,7 +758,7 @@ export class RoomMessageResolver {
 
         const queue = async (): Promise<Result<{ result: typeof WriteRoomSoundEffectResult; payload?: MessageUpdatePayload }>> => {
             const em = context.createEm();
-            const entry = await checkEntry({ userUid: decodedIdToken.uid, em });
+            const entry = await checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return ResultModule.ok({
@@ -856,7 +857,7 @@ export class RoomMessageResolver {
 
         const queue = async (): Promise<Result<{ result: MakeMessageNotSecretResult; payload?: MessageUpdatePayload }>> => {
             const em = context.createEm();
-            const entry = await checkEntry({ userUid: decodedIdToken.uid, em });
+            const entry = await checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase});
             await em.flush();
             if (!entry) {
                 return ResultModule.ok({
@@ -995,7 +996,7 @@ export class RoomMessageResolver {
 
         const queue = async (): Promise<Result<{ result: DeleteMessageResult; payload?: MessageUpdatePayload }>> => {
             const em = context.createEm();
-            const entry = await checkEntry({ userUid: decodedIdToken.uid, em });
+            const entry = await checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase});
             await em.flush();
             if (!entry) {
                 return ResultModule.ok({
@@ -1140,7 +1141,7 @@ export class RoomMessageResolver {
 
         const queue = async (): Promise<Result<{ result: EditMessageResult; payload?: MessageUpdatePayload }>> => {
             const em = context.createEm();
-            const entry = await checkEntry({ userUid: decodedIdToken.uid, em });
+            const entry = await checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase});
             await em.flush();
             if (!entry) {
                 return ResultModule.ok({

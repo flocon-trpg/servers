@@ -9,9 +9,8 @@ import { ResolverContext } from './graphql+typegoose/utils/Contexts';
 import registerEnumTypes from './graphql+typegoose/registerEnumTypes';
 import { buildSchema } from './buildSchema';
 import { PromiseQueue } from './utils/PromiseQueue';
-import { MikroORM } from '@mikro-orm/core';
 import { createPostgreSQL, createSQLite } from './mikro-orm';
-import { firebaseConfig, postgresql, serverConfig, sqlite } from './config';
+import { firebaseConfig, loadServerConfigAsMain, postgresql, sqlite } from './config';
 import { CustomResult, ResultModule } from './@shared/Result';
 
 const main = async (params: { debug: boolean }): Promise<void> => {
@@ -24,12 +23,13 @@ const main = async (params: { debug: boolean }): Promise<void> => {
     const schema = await buildSchema({ emitSchemaFile: false });
 
     const orm = await (async () => {
+        const serverConfig = loadServerConfigAsMain();
         try {
             switch (serverConfig.database.__type) {
                 case postgresql:
-                    return await createPostgreSQL(serverConfig.database.postgresql);
+                    return await createPostgreSQL({...serverConfig.database.postgresql, debug: params.debug });
                 case sqlite:
-                    return await createSQLite(serverConfig.database.sqlite);
+                    return await createSQLite({ ...serverConfig.database.sqlite, debug: params.debug } );
             }
         } catch (error) {
             console.error('📌 Could not connect to the database', error);

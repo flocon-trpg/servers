@@ -196,7 +196,8 @@ const operateThenGetRoomTestCore = async (strategy: IntegratedTestStrategy, orm:
                     }
                 }
             },
-            context: createResolverContext(orm, operateBy)
+            context: createResolverContext(orm, operateBy),
+            globalEntryPhrase: undefined,
         });
 
         if ('failureType' in operateResult.result) {
@@ -228,6 +229,7 @@ const operateThenGetRoomTestCore = async (strategy: IntegratedTestStrategy, orm:
                 id: createRoomResult.room.id,
             },
             context: createResolverContext(orm, createRoomResult.creator.userUid),
+            globalEntryPhrase: undefined,
         });
         if (!('room' in getRoomByCreator)) {
             throw 'getRoomByCreator is not "success"';
@@ -237,6 +239,7 @@ const operateThenGetRoomTestCore = async (strategy: IntegratedTestStrategy, orm:
                 id: createRoomResult.room.id,
             },
             context: createResolverContext(orm, createRoomResult.anotherUser.userUid),
+            globalEntryPhrase: undefined,
         });
         if (!('room' in getRoomByAnother)) {
             throw 'getRoomByAnother is not "success"';
@@ -536,7 +539,8 @@ describe('operate then getRoom', () => {
                             }
                         }
                     },
-                    context: createResolverContext(orm, createRoomResult.creator.userUid)
+                    context: createResolverContext(orm, createRoomResult.creator.userUid),
+                    globalEntryPhrase: undefined,
                 });
 
                 // **** test add operation ****
@@ -607,7 +611,8 @@ describe('operate then getRoom', () => {
                             }
                         }
                     },
-                    context: createResolverContext(orm, createRoomResult.creator.userUid)
+                    context: createResolverContext(orm, createRoomResult.creator.userUid),
+                    globalEntryPhrase: undefined,
                 });
 
                 // **** test update operation ****
@@ -673,7 +678,8 @@ describe('operate then getRoom', () => {
                             }
                         }
                     },
-                    context: createResolverContext(orm, createRoomResult.creator.userUid)
+                    context: createResolverContext(orm, createRoomResult.creator.userUid),
+                    globalEntryPhrase: undefined,
                 });
 
                 // **** test remove operation ****
@@ -897,7 +903,8 @@ describe('operate then getRoom', () => {
                             }
                         }
                     },
-                    context: createResolverContext(orm, createRoomResult.creator.userUid)
+                    context: createResolverContext(orm, createRoomResult.creator.userUid),
+                    globalEntryPhrase: undefined,
                 });
 
                 expect(operateResult1.type).toBe('id');
@@ -973,7 +980,8 @@ describe('operate then getRoom', () => {
                             }
                         }
                     },
-                    context: createResolverContext(orm, createRoomResult.creator.userUid)
+                    context: createResolverContext(orm, createRoomResult.creator.userUid),
+                    globalEntryPhrase: undefined,
                 });
 
                 // **** execute operation 2 ****
@@ -1017,7 +1025,8 @@ describe('operate then getRoom', () => {
                             }
                         }
                     },
-                    context: createResolverContext(orm, createRoomResult.nonCreator.userUid)
+                    context: createResolverContext(orm, createRoomResult.nonCreator.userUid),
+                    globalEntryPhrase: undefined,
                 });
 
                 // **** test ****
@@ -1108,7 +1117,8 @@ describe('operate then getRoom', () => {
                             }
                         }
                     },
-                    context: createResolverContext(orm, createRoomResult.creator.userUid)
+                    context: createResolverContext(orm, createRoomResult.creator.userUid),
+                    globalEntryPhrase: undefined,
                 });
 
                 // **** execute operation 2 ****
@@ -1152,7 +1162,8 @@ describe('operate then getRoom', () => {
                             }
                         }
                     },
-                    context: createResolverContext(orm, createRoomResult.nonCreator.userUid)
+                    context: createResolverContext(orm, createRoomResult.nonCreator.userUid),
+                    globalEntryPhrase: undefined,
                 });
 
                 // **** test ****
@@ -1231,7 +1242,8 @@ describe('operate then getRoom', () => {
                             }
                         }
                     },
-                    context: createResolverContext(orm, createRoomResult.creator.userUid)
+                    context: createResolverContext(orm, createRoomResult.creator.userUid),
+                    globalEntryPhrase: undefined,
                 });
 
                 // **** execute operation 2 ****
@@ -1265,7 +1277,8 @@ describe('operate then getRoom', () => {
                             }
                         }
                     },
-                    context: createResolverContext(orm, createRoomResult.nonCreator.userUid)
+                    context: createResolverContext(orm, createRoomResult.nonCreator.userUid),
+                    globalEntryPhrase: undefined,
                 });
 
                 // **** test ****

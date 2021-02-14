@@ -1,18 +1,19 @@
 import fs from 'fs';
 import { createFirebaseConfig, FirebaseConfig } from './@shared/config';
 import { JSONObject } from './@shared/JSONObject';
+import { loadAsMain, loadMigrationCreate, loadMigrationUp } from './utils/commandLineArgs';
 
 export const postgresql = 'postgresql';
 export const sqlite = 'sqlite';
 
 type Database = {
-    __type: 'postgresql';
+    __type: typeof postgresql;
     postgresql: {
         dbName: string;
         clientUrl: string;
     };
 } | {
-    __type: 'sqlite';
+    __type: typeof sqlite;
     sqlite: {
         dbName: string;
     };
@@ -25,42 +26,82 @@ type ServerConfig = {
 }
 
 const loadFirebaseConfig = (): FirebaseConfig => {
-    const file = fs.readFileSync('./firebase-config.json').toString();
-    const json = JSON.parse(file.toString());
+    let env = process.env['FLOCON_FIREBASE_CONFIG'];
+    if (env == null) {
+        env = process.env['NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG'];
+    }
+    if (env == null) {
+        throw 'Firebase config is not found. Set FLOCON_FIREBASE_CONFIG or NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG environment variable.';
+    }
+    const json = JSON.parse(env);
 
     return createFirebaseConfig(json);
 };
 
-const loadServerConfig = (): ServerConfig => {
-    const file = fs.readFileSync('./server-config.json').toString();
-    const json = JSON.parse(file.toString());
+const loadServerConfig = ({ databaseArg }: { databaseArg: typeof postgresql | typeof sqlite | null }): ServerConfig => {
+    const env = process.env['FLOCON_SERVER_CONFIG'];
+    if (env == null) {
+        throw 'Server config is not found. Set FLOCON_SERVER_CONFIG environment variable.';
+    }
+    const json = JSON.parse(env);
 
     const j = JSONObject.init(json);
 
-    const postgresql = j.get('database').tryGet('postgresql');
-    const sqlite = j.get('database').tryGet('sqlite');
+    const postgresqlJson = j.get('database').tryGet('postgresql');
+    const sqliteJson = j.get('database').tryGet('sqlite');
+
     let database: Database;
-    if (postgresql == null) {
-        if (sqlite == null) {
-            throw 'database/postgresql or database/sqlite is required.';
-        }
-        database = {
-            __type: 'sqlite',
-            sqlite: {
-                dbName: sqlite.get('dbName').valueAsString(),
+    switch (databaseArg) {
+        case null:
+            database = (() => {
+                if (sqliteJson != null) {
+                    if (postgresqlJson != null) {
+                        throw 'Server config has SQLite and PostgreSQL config, but --db parameter is missing.';
+                    }
+                    return {
+                        __type: 'sqlite',
+                        sqlite: {
+                            dbName: sqliteJson.get('dbName').valueAsString(),
+                        }
+                    } as const;
+                }
+                if (postgresqlJson == null) {
+                    throw 'database/postgresql or database/sqlite is required.';
+                }
+                return {
+                    __type: postgresql,
+                    postgresql: {
+                        dbName: postgresqlJson.get('dbName').valueAsString(),
+                        clientUrl: postgresqlJson.get('clientUrl').valueAsString(),
+                    }
+                } as const;
+            })();
+            break;
+        case sqlite: {
+            if (sqliteJson == null) {
+                throw 'database/sqlite is required.';
             }
-        };
-    } else {
-        if (sqlite != null) {
-            throw 'You cannot set database/postgresql and database/sqlite together.';
+            database = {
+                __type: sqlite,
+                sqlite: {
+                    dbName: sqliteJson.get('dbName').valueAsString(),
+                }
+            };
+            break;
         }
-        database = {
-            __type: 'postgresql',
-            postgresql: {
-                dbName: postgresql.get('dbName').valueAsString(),
-                clientUrl: postgresql.get('clientUrl').valueAsString(),
+        case postgresql: {
+            if (postgresqlJson == null) {
+                throw 'database/postgresql is required.';
             }
-        };
+            database = {
+                __type: postgresql,
+                postgresql: {
+                    dbName: postgresqlJson.get('dbName').valueAsString(),
+                    clientUrl: postgresqlJson.get('clientUrl').valueAsString(),
+                }
+            };
+            break;
+        }
     }
 
     return {
@@ -70,4 +111,27 @@ const loadServerConfig = (): ServerConfig => {
 };
 
 export const firebaseConfig = loadFirebaseConfig();
-export const serverConfig = loadServerConfig();
+
+let serverConfigAsMainCache: ServerConfig | null = null;
+export const loadServerConfigAsMain = (): ServerConfig => {
+    if (serverConfigAsMainCache == null) {
+        serverConfigAsMainCache = loadServerConfig({ databaseArg: loadAsMain().db ?? null });
+    }
+    return serverConfigAsMainCache;
+};
+
+let serverConfigAsMigrationCreateCache: ServerConfig | null = null;
+export const loadServerConfigAsMigrationCreate = (): ServerConfig => {
+    if (serverConfigAsMigrationCreateCache == null) {
+        serverConfigAsMigrationCreateCache = loadServerConfig({ databaseArg: loadMigrationCreate().db ?? null });
+    }
+    return serverConfigAsMigrationCreateCache;
+};
+
+let serverConfigAsMigrationUpCache: ServerConfig | null = null;
+export const loadServerConfigAsMigrationUp = (): ServerConfig => {
+    if (serverConfigAsMigrationUpCache == null) {
+        serverConfigAsMigrationUpCache = loadServerConfig({ databaseArg: loadMigrationUp().db ?? null });
+    }
+    return serverConfigAsMigrationUpCache;
+};

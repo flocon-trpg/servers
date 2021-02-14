@@ -6,8 +6,8 @@ import { User } from '../../entities/user/mikro-orm';
 import { Room } from '../../entities/room/mikro-orm';
 import { __ } from '../../../@shared/collection';
 import { Participant } from '../../entities/participant/mikro-orm';
-import { serverConfig } from '../../../config';
 import { Reference } from '@mikro-orm/core';
+import { loadServerConfigAsMain } from '../../../config';
 
 export const NotSignIn = 'NotSignIn';
 export const AnonymousAccount = 'AnonymousAccount';
@@ -31,11 +31,11 @@ export const checkSignInAndNotAnonymous = (context: ResolverContext): DecodedIdT
 };
 
 // Userが見つかっても、entryしていなかったらnullを返す。
-export const getUserIfEntry = async ({ em, userUid }: { em: EM; userUid: string }): Promise<User | null> => {
+export const getUserIfEntry = async ({ em, userUid, globalEntryPhrase }: { em: EM; userUid: string; globalEntryPhrase: string | undefined }): Promise<User | null> => {
     const user = await em.findOne(User, { userUid });
 
     if (user == null) {
-        if (serverConfig.globalEntryPhrase == null) {
+        if (globalEntryPhrase == null) {
             const newUser = new User({ userUid });
             newUser.isEntry = true;
             em.persist(newUser);
@@ -48,7 +48,7 @@ export const getUserIfEntry = async ({ em, userUid }: { em: EM; userUid: string 
         return user;
     }
 
-    if (serverConfig.globalEntryPhrase == null) {
+    if (globalEntryPhrase == null) {
         user.isEntry = true;
         return user;
     }
@@ -56,8 +56,8 @@ export const getUserIfEntry = async ({ em, userUid }: { em: EM; userUid: string 
     return null;
 };
 
-export const checkEntry = async ({ em, userUid }: { em: EM; userUid: string }): Promise<boolean> => {
-    return (await getUserIfEntry({ em, userUid })) != null;
+export const checkEntry = async ({ em, userUid, globalEntryPhrase }: { em: EM; userUid: string; globalEntryPhrase: string | undefined }): Promise<boolean> => {
+    return (await getUserIfEntry({ em, userUid, globalEntryPhrase })) != null;
 };
 
 export const findRoomAndMyParticipant = async ({

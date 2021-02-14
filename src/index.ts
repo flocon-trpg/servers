@@ -190,5 +190,6 @@ import 'bcdice/lib/diceBot/YearZeroEngine';
 import 'bcdice/lib/diceBot/ZettaiReido';
 
 import main from './main';
+import { loadAsMain } from './utils/commandLineArgs';
 
-main({ debug: true }).catch(err => console.error(err));
+main({ debug: loadAsMain().debug }).catch(err => console.error(err));

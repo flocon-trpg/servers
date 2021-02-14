@@ -6,9 +6,9 @@ import { checkSignIn, NotSignIn } from './utils/helpers';
 import { queueLimitReached } from '../../utils/PromiseQueue';
 import { serverTooBusyMessage } from './utils/messages';
 import { User } from '../entities/user/mikro-orm';
-import { serverConfig } from '../../config';
 import { Pong } from '../entities/pong/graphql';
 import { PONG } from '../utils/Topics';
+import { loadServerConfigAsMain } from '../../config';
 
 
 export type PongPayload = {
@@ -23,7 +23,7 @@ export class MainResolver {
         const queue = async () => {
             const em = context.createEm();
 
-            const globalEntryPhrase = serverConfig.globalEntryPhrase;
+            const globalEntryPhrase = loadServerConfigAsMain().globalEntryPhrase;
             const decodedIdToken = checkSignIn(context);
             if (decodedIdToken === NotSignIn) {
                 return {

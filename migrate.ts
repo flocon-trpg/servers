@@ -1,7 +1,7 @@
 
 import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
+import { loadServerConfigAsMigrationCreate, loadServerConfigAsMigrationUp } from './src/config';
 import { createPostgreSQL, createSQLite } from './src/mikro-orm';
-import { serverConfig } from './src/config';
 
 const create = 'create';
 const createInitial = 'create-initial';
@@ -21,49 +21,26 @@ const prettify = (dbType: DBType) => {
     }
 };
 
-const tooManyArgsError = 'too many arguments';
-
-const main = async () => {
-    let type: typeof create | typeof createInitial | typeof up;
-    let dbArg: string | undefined = undefined;
-
-    const args = process.argv.slice(2);
-    if (args[0] === create || args[0] === createInitial || args[0] === up) {
-        type = args[0];
-        dbArg = args[1];
-        if (args.length >= 3) {
-            throw tooManyArgsError;
+export const migrate = async (type: typeof create | typeof createInitial | typeof up) => {
+    const serverConfig = (() => {
+        if (type === up) {
+            return loadServerConfigAsMigrationUp();
         }
-    } else {
-        type = up;
-        dbArg = args[0];
-        if (args.length >= 2) {
-            throw tooManyArgsError;
-        }
-    }
+        return loadServerConfigAsMigrationCreate();
+    })();
 
     let orm: MikroORM<IDatabaseDriver<Connection>>;
     let dbType: DBType;
     // TODO: 他のDBにも対応させる
-    switch (dbArg) {
+    switch (serverConfig.database.__type) {
         case sqlite:
-            if (serverConfig.database.__type !== sqlite) {
-                throw 'Database type in server-config.json is not SQLite.';
-            }
             orm = await createSQLite({ ...serverConfig.database.sqlite, debug: true });
             dbType = sqlite;
             break;
         case postgresql:
-            if (serverConfig.database.__type !== postgresql) {
-                throw 'Database type in server-config.json is not PostgreSQL.';
-            }
             orm = await createPostgreSQL({ ...serverConfig.database.postgresql, debug: true });
             dbType = postgresql;
             break;
-        case undefined:
-            throw 'DB type must be specified';
-        default:
-            throw `${dbArg} is not supported DB type`;
     }
 
     if (type === create) {
@@ -111,8 +88,3 @@ const main = async () => {
     }
     console.log(`😊 migration-up is successfully finished. DB type is ${prettify(dbType)}`);
 };
-
-main().catch(err => {
-    console.log(err);
-    console.log('❌ migration failed.');
-});

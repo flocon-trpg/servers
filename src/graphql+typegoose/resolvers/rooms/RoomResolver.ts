@@ -27,6 +27,7 @@ import { Result, ResultModule } from '../../../@shared/Result';
 import * as User$MikroORM from '../../entities/user/mikro-orm';
 import { createPrivateMessages, createPublicMessages } from '../utils/sample';
 import { LeaveRoomFailureType } from '../../../enums/LeaveRoomFailureType';
+import { loadServerConfigAsMain } from '../../../config';
 
 @InputType()
 class CreateRoomInput {
@@ -103,7 +104,7 @@ export type RoomOperationPayload = {
 
 @Resolver()
 export class RoomResolver {
-    public async getRoomsListCore({ context }: { context: ResolverContext }): Promise<typeof GetRoomsListResult> {
+    public async getRoomsListCore({ context, globalEntryPhrase }: { context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<typeof GetRoomsListResult> {
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
             return { failureType: GetRoomsListFailureType.NotSignIn };
@@ -111,7 +112,7 @@ export class RoomResolver {
 
         const queue = async () => {
             const em = context.createEm();
-            const entry = await checkEntry({ em, userUid: decodedIdToken.uid });
+            const entry = await checkEntry({ em, userUid: decodedIdToken.uid, globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return {
@@ -136,10 +137,10 @@ export class RoomResolver {
 
     @Query(() => GetRoomsListResult)
     public getRoomsList(@Ctx() context: ResolverContext): Promise<typeof GetRoomsListResult> {
-        return this.getRoomsListCore({ context });
+        return this.getRoomsListCore({ context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
     }
 
-    public async createRoomCore({ input, context }: { input: CreateRoomInput; context: ResolverContext }): Promise<typeof CreateRoomResult> {
+    public async createRoomCore({ input, context, globalEntryPhrase }: { input: CreateRoomInput; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<typeof CreateRoomResult> {
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
             return { failureType: CreateRoomFailureType.NotSignIn };
@@ -147,7 +148,7 @@ export class RoomResolver {
 
         const queue = async (): Promise<typeof CreateRoomResult> => {
             const em = context.createEm();
-            const entryUser = await getUserIfEntry({ userUid: decodedIdToken.uid, em });
+            const entryUser = await getUserIfEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase, });
             await em.flush();
             if (entryUser == null) {
                 return {
@@ -183,10 +184,10 @@ export class RoomResolver {
 
     @Mutation(() => CreateRoomResult)
     public createRoom(@Arg('input') input: CreateRoomInput, @Ctx() context: ResolverContext): Promise<typeof CreateRoomResult> {
-        return this.createRoomCore({ input, context });
+        return this.createRoomCore({ input, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
     }
 
-    public async joinRoomAsPlayerCore({ args, context }: { args: JoinRoomArgs; context: ResolverContext }): Promise<typeof JoinRoomResult> {
+    public async joinRoomAsPlayerCore({ args, context, globalEntryPhrase }: { args: JoinRoomArgs; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<typeof JoinRoomResult> {
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
             return { failureType: JoinRoomFailureType.NotSignIn };
@@ -194,7 +195,7 @@ export class RoomResolver {
 
         const queue = async () => {
             const em = context.createEm();
-            const entryUser = await getUserIfEntry({ userUid: decodedIdToken.uid, em });
+            const entryUser = await getUserIfEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase, });
             await em.flush();
             if (entryUser == null) {
                 return {
@@ -252,10 +253,10 @@ export class RoomResolver {
 
     @Mutation(() => JoinRoomResult)
     public joinRoomAsPlayer(@Args() args: JoinRoomArgs, @Ctx() context: ResolverContext): Promise<typeof JoinRoomResult> {
-        return this.joinRoomAsPlayerCore({ args, context });
+        return this.joinRoomAsPlayerCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
     }
 
-    public async joinRoomAsSpectatorCore({ args, context }: { args: JoinRoomArgs; context: ResolverContext }): Promise<typeof JoinRoomResult> {
+    public async joinRoomAsSpectatorCore({ args, context, globalEntryPhrase }: { args: JoinRoomArgs; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<typeof JoinRoomResult> {
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
             return { failureType: JoinRoomFailureType.NotSignIn };
@@ -263,7 +264,7 @@ export class RoomResolver {
 
         const queue = async () => {
             const em = context.createEm();
-            const entryUser = await getUserIfEntry({ userUid: decodedIdToken.uid, em });
+            const entryUser = await getUserIfEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase, });
             await em.flush();
             if (entryUser == null) {
                 return {
@@ -322,10 +323,10 @@ export class RoomResolver {
 
     @Mutation(() => JoinRoomResult)
     public joinRoomAsSpectator(@Args() args: JoinRoomArgs, @Ctx() context: ResolverContext): Promise<typeof JoinRoomResult> {
-        return this.joinRoomAsSpectatorCore({ args, context });
+        return this.joinRoomAsSpectatorCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
     }
 
-    public async getRoomCore({ args, context }: { args: GetRoomArgs; context: ResolverContext }): Promise<typeof GetRoomResult> {
+    public async getRoomCore({ args, context, globalEntryPhrase }: { args: GetRoomArgs; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<typeof GetRoomResult> {
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
             return { failureType: GetRoomFailureType.NotSignIn };
@@ -333,7 +334,7 @@ export class RoomResolver {
 
         const queue = async (): Promise<Result<typeof GetRoomResult>> => {
             const em = context.createEm();
-            const entry = await checkEntry({ userUid: decodedIdToken.uid, em });
+            const entry = await checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase, });
             await em.flush();
             if (!entry) {
                 return ResultModule.ok({
@@ -371,7 +372,7 @@ export class RoomResolver {
 
     @Query(() => GetRoomResult)
     public getRoom(@Args() args: GetRoomArgs, @Ctx() context: ResolverContext): Promise<typeof GetRoomResult> {
-        return this.getRoomCore({ args, context });
+        return this.getRoomCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
     }
 
     public async leaveRoomCore({ id, context }: { id: string; context: ResolverContext }): Promise<LeaveRoomResult> {
@@ -414,7 +415,7 @@ export class RoomResolver {
         return await this.leaveRoomCore({ id, context });
     }
 
-    public async operateCore({ args, context }: { args: OperateArgs; context: ResolverContext }): Promise<OperateCoreResult> {
+    public async operateCore({ args, context, globalEntryPhrase }: { args: OperateArgs; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<OperateCoreResult> {
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
             return {
@@ -425,7 +426,11 @@ export class RoomResolver {
 
         const queue = async (): Promise<Result<OperateCoreResult>> => {
             const em = context.createEm();
-            const entry = await checkEntry({ userUid: decodedIdToken.uid, em });
+            const entry = await checkEntry({
+                userUid: decodedIdToken.uid,
+                em,
+                globalEntryPhrase,
+            });
             await em.flush();
             if (!entry) {
                 return ResultModule.ok({
@@ -503,7 +508,7 @@ export class RoomResolver {
 
     @Mutation(() => OperateRoomResult)
     public async operate(@Args() args: OperateArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<typeof OperateRoomResult> {
-        const operateResult = await this.operateCore({ args, context });
+        const operateResult = await this.operateCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
         if (operateResult.type === 'success') {
             await pubSub.publish(ROOM_OPERATED, operateResult.payload);
         }
