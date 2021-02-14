@@ -109,7 +109,7 @@ const Layout: React.FC<PropsWithChildren<Props>> = ({ children, showEntryForm, o
         <AntdLayout style={({ height: '100vh' })}>
             <Header>
                 <Row>
-                    <Col flex={0}><Link href="/">(Logo)</Link></Col>
+                    <Col flex={0}><Link href="/">Flocon</Link></Col>
                     <Col flex={1} />
                     <Col flex={0}>
                         <Space>
