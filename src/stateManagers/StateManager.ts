@@ -370,3 +370,49 @@ export class StateManager<TState, TGetOperation, TPostOperation> {
         this._requiresReload = false;
     }
 }
+
+export type GetOnlyStateManagerParameters<TState, TOperation> = {
+    revision: number;
+    state: TState;
+    apply: Apply<TState, TOperation>;
+}
+
+export class GetOnlyStateManager<TState, TOperation> {
+    private readonly core: StateManager<TState, TOperation, TOperation>;
+
+    public constructor(private readonly params: GetOnlyStateManagerParameters<TState, TOperation>) {
+        this.core = new StateManager<TState, TOperation, TOperation>({
+            ...params,
+            applyGetOperation: params.apply,
+            applyPostOperation: params.apply,
+            composePostOperation: () => {
+                throw 'composePostOperation should not be called';
+            },
+            getFirstTransform: () => {
+                throw 'getFirstTransform should not be called';
+            },
+            postFirstTransform: () => {
+                throw 'postFirstTransform should not be called';
+            },
+            diff: () => {
+                throw 'diff should not be called';
+            },
+        });
+    }
+
+    public get uiState(): TState {
+        return this.core.uiState;
+    }
+
+    public get revision(): number {
+        return this.core.revision;
+    }
+
+    public reload({ state, revision }: { state: TState; revision: number }): void {
+        this.reload({state, revision});
+    }
+
+    public onGet(operation: TOperation, revisionTo: number): void {
+        this.core.onOthersGet(operation, revisionTo);
+    }
+}

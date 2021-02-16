@@ -13,7 +13,7 @@ import Loading from '../../components/alerts/Loading';
 
 type JoinRoomFormProps = {
     room: RoomAsListItemFragment;
-    onJoin?: (params: { name: string; role: ParticipantRole }) => void;
+    onJoin?: () => void;
 }
 
 const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ room, onJoin }: JoinRoomFormProps) => {
@@ -33,7 +33,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ room, onJoin }: JoinRoomFor
         switch (result.data.result.__typename) {
             case 'JoinRoomSuccessResult':
                 if (onJoin != null) {
-                    onJoin(result.data.result);
+                    onJoin();
                 }
                 return;
             case 'JoinRoomFailureResult':
@@ -109,7 +109,7 @@ const RoomRouter: React.FC<{ id: string }> = ({ id }: { id: string }) => {
 
     switch (state.type) {
         case joined: {
-            if (state.operate == null) {
+            if (state.operateRoom == null) {
                 // TODO: Buttonなどを用いたreloadに対応させる。
                 return (
                     <Layout requiresLogin showEntryForm={false}>
@@ -118,7 +118,7 @@ const RoomRouter: React.FC<{ id: string }> = ({ id }: { id: string }) => {
             }
             return (
                 <Layout requiresLogin showEntryForm={false}>
-                    <RoomComponent roomId={id} roomState={state.state} operate={state.operate} />
+                    <RoomComponent roomId={id} roomState={state.roomState} participantsState={state.participantsState} operate={state.operateRoom} />
                 </Layout>);
         }
         case nonJoined:

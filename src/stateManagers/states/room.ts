@@ -15,10 +15,9 @@ import { isStrIndex100, isStrIndex5, StrIndex100, StrIndex5 } from '../../@share
 import { CustomDualKeyMap } from '../../@shared/CustomDualKeyMap';
 import { ReplaceValueOperationModule } from './utils/replaceValueOperation';
 
-export type State = Omit<RoomGetStateFragment, '__typename' | 'revision' | 'boards' | 'characters' | 'participants' | 'bgms' | 'paramNames'> & {
+export type State = Omit<RoomGetStateFragment, '__typename' | 'revision' | 'boards' | 'characters' | 'bgms' | 'paramNames'> & {
     boards: ReadonlyStateMap<Board.State>;
     characters: ReadonlyStateMap<Character.State>;
-    participants: ReadonlyMap<string, Participant.State>;
     bgms: ReadonlyMap<StrIndex5, Bgm.State>;
     paramNames: ParamName.ReadonlyStateMap<ParamName.State>;
 };
@@ -48,10 +47,6 @@ export const createState = (source: RoomGetStateFragment): State => {
     source.characters.forEach(character => {
         characters.set(character, Character.createState(character.value));
     });
-    const participants = new Map<string, Participant.State>();
-    source.participants.forEach(participant => {
-        participants.set(participant.userUid, participant);
-    });
     const bgms = new Map<StrIndex5, Bgm.State>();
     source.bgms.forEach(bgm => {
         const key = bgm.channelKey;
@@ -72,7 +67,6 @@ export const createState = (source: RoomGetStateFragment): State => {
         ...source,
         boards,
         characters,
-        participants,
         bgms,
         paramNames,
     };

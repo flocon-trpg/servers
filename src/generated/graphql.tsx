@@ -277,6 +277,7 @@ export enum FileSourceType {
 
 export type GetJoinedRoomResult = {
   __typename?: 'GetJoinedRoomResult';
+  participant: ParticipantsGetState;
   role: ParticipantRole;
   room: RoomGetState;
 };
@@ -362,8 +363,7 @@ export type JoinRoomResult = JoinRoomFailureResult | JoinRoomSuccessResult;
 
 export type JoinRoomSuccessResult = {
   __typename?: 'JoinRoomSuccessResult';
-  name: Scalars['String'];
-  role: ParticipantRole;
+  operation?: Maybe<ParticipantsOperation>;
 };
 
 export enum LeaveRoomFailureType {
@@ -606,11 +606,10 @@ export type ParamNameValueStateInput = {
   name: Scalars['String'];
 };
 
-export type Participant = {
-  __typename?: 'Participant';
-  name: Scalars['String'];
-  role?: Maybe<Scalars['String']>;
-  userUid: Scalars['String'];
+export type ParticipantOperation = {
+  __typename?: 'ParticipantOperation';
+  name?: Maybe<ReplaceStringUpOperation>;
+  role?: Maybe<ReplaceNullableParticipantRoleUpOperation>;
 };
 
 export enum ParticipantRole {
@@ -618,6 +617,32 @@ export enum ParticipantRole {
   Player = 'Player',
   Spectator = 'Spectator'
 }
+
+export type ParticipantsGetState = {
+  __typename?: 'ParticipantsGetState';
+  participants: Array<ParticipantState>;
+  revision: Scalars['Float'];
+};
+
+export type ParticipantsOperation = {
+  __typename?: 'ParticipantsOperation';
+  operatedBy: Scalars['String'];
+  replace: Array<ReplaceParticipantOperation>;
+  revisionTo: Scalars['Float'];
+  update: Array<UpdateParticipantOperation>;
+};
+
+export type ParticipantState = {
+  __typename?: 'ParticipantState';
+  userUid: Scalars['String'];
+  value: ParticipantValueState;
+};
+
+export type ParticipantValueState = {
+  __typename?: 'ParticipantValueState';
+  name: Scalars['String'];
+  role?: Maybe<ParticipantRole>;
+};
 
 export type PieceLocationOperation = {
   __typename?: 'PieceLocationOperation';
@@ -797,6 +822,11 @@ export type ReplaceNullableNumberUpOperationInput = {
   newValue?: Maybe<Scalars['Float']>;
 };
 
+export type ReplaceNullableParticipantRoleUpOperation = {
+  __typename?: 'ReplaceNullableParticipantRoleUpOperation';
+  newValue?: Maybe<ParticipantRole>;
+};
+
 export type ReplaceNumberUpOperation = {
   __typename?: 'ReplaceNumberUpOperation';
   newValue: Scalars['Float'];
@@ -817,6 +847,12 @@ export type ReplaceParamNameOperationInput = {
   key: Scalars['String'];
   newValue?: Maybe<ParamNameValueStateInput>;
   type: RoomParameterNameType;
+};
+
+export type ReplaceParticipantOperation = {
+  __typename?: 'ReplaceParticipantOperation';
+  newValue: ParticipantValueState;
+  userUid: Scalars['String'];
 };
 
 export type ReplacePieceLocationOperation = {
@@ -906,7 +942,6 @@ export type RoomGetState = {
   characters: Array<CharacterState>;
   name: Scalars['String'];
   paramNames: Array<ParamNameState>;
-  participants: Array<Participant>;
   revision: Scalars['Float'];
 };
 
@@ -920,7 +955,7 @@ export type RoomMessages = {
   soundEffects: Array<RoomSoundEffect>;
 };
 
-export type RoomOperated = DeleteRoomOperation | RoomOperation;
+export type RoomOperated = DeleteRoomOperation | ParticipantsOperation | RoomOperation;
 
 export type RoomOperation = {
   __typename?: 'RoomOperation';
@@ -1162,6 +1197,12 @@ export type UpdateParamNameOperationInput = {
   key: Scalars['String'];
   operation: ParamNameOperationInput;
   type: RoomParameterNameType;
+};
+
+export type UpdateParticipantOperation = {
+  __typename?: 'UpdateParticipantOperation';
+  operation: ParticipantOperation;
+  userUid: Scalars['String'];
 };
 
 export type UpdatePieceLocationOperation = {
@@ -1541,7 +1582,10 @@ type JoinRoomResult_JoinRoomFailureResult_Fragment = (
 
 type JoinRoomResult_JoinRoomSuccessResult_Fragment = (
   { __typename?: 'JoinRoomSuccessResult' }
-  & Pick<JoinRoomSuccessResult, 'role' | 'name'>
+  & { operation?: Maybe<(
+    { __typename?: 'ParticipantsOperation' }
+    & ParticipantsOperationFragment
+  )> }
 );
 
 export type JoinRoomResultFragment = JoinRoomResult_JoinRoomFailureResult_Fragment | JoinRoomResult_JoinRoomSuccessResult_Fragment;
@@ -1614,9 +1658,40 @@ export type PieceLocationsOperationFragment = (
   )> }
 );
 
-export type ParticipantFragment = (
-  { __typename?: 'Participant' }
-  & Pick<Participant, 'userUid' | 'name' | 'role'>
+export type ParticipantOperationFragment = (
+  { __typename?: 'ParticipantOperation' }
+  & { name?: Maybe<(
+    { __typename?: 'ReplaceStringUpOperation' }
+    & Pick<ReplaceStringUpOperation, 'newValue'>
+  )>, role?: Maybe<(
+    { __typename?: 'ReplaceNullableParticipantRoleUpOperation' }
+    & Pick<ReplaceNullableParticipantRoleUpOperation, 'newValue'>
+  )> }
+);
+
+export type ParticipantsOperationFragment = (
+  { __typename?: 'ParticipantsOperation' }
+  & Pick<ParticipantsOperation, 'revisionTo' | 'operatedBy'>
+  & { replace: Array<(
+    { __typename?: 'ReplaceParticipantOperation' }
+    & Pick<ReplaceParticipantOperation, 'userUid'>
+    & { newValue: (
+      { __typename?: 'ParticipantValueState' }
+      & ParticipantValueStateFragment
+    ) }
+  )>, update: Array<(
+    { __typename?: 'UpdateParticipantOperation' }
+    & Pick<UpdateParticipantOperation, 'userUid'>
+    & { operation: (
+      { __typename?: 'ParticipantOperation' }
+      & ParticipantOperationFragment
+    ) }
+  )> }
+);
+
+export type ParticipantValueStateFragment = (
+  { __typename?: 'ParticipantValueState' }
+  & Pick<ParticipantValueState, 'name' | 'role'>
 );
 
 export type RoomAsListItemFragment = (
@@ -1633,9 +1708,6 @@ export type RoomGetStateFragment = (
   )>, characters: Array<(
     { __typename?: 'CharacterState' }
     & CharacterStateFragment
-  )>, participants: Array<(
-    { __typename?: 'Participant' }
-    & ParticipantFragment
   )>, paramNames: Array<(
     { __typename?: 'ParamNameState' }
     & Pick<ParamNameState, 'key' | 'type'>
@@ -1809,6 +1881,17 @@ export type GetRoomQuery = (
     & { room: (
       { __typename?: 'RoomGetState' }
       & RoomGetStateFragment
+    ), participant: (
+      { __typename?: 'ParticipantsGetState' }
+      & Pick<ParticipantsGetState, 'revision'>
+      & { participants: Array<(
+        { __typename?: 'ParticipantState' }
+        & Pick<ParticipantState, 'userUid'>
+        & { value: (
+          { __typename?: 'ParticipantValueState' }
+          & ParticipantValueStateFragment
+        ) }
+      )> }
     ) }
   ) | (
     { __typename?: 'GetNonJoinedRoomResult' }
@@ -2109,6 +2192,9 @@ export type RoomOperatedSubscription = (
     { __typename?: 'DeleteRoomOperation' }
     & Pick<DeleteRoomOperation, 'deletedBy'>
   ) | (
+    { __typename?: 'ParticipantsOperation' }
+    & ParticipantsOperationFragment
+  ) | (
     { __typename?: 'RoomOperation' }
     & RoomOperationFragment
   )> }
@@ -2259,13 +2345,6 @@ export const CharacterStateFragmentDoc = gql`
   }
 }
     ${CharacterValueStateFragmentDoc}`;
-export const ParticipantFragmentDoc = gql`
-    fragment Participant on Participant {
-  userUid
-  name
-  role
-}
-    `;
 export const RoomGetStateFragmentDoc = gql`
     fragment RoomGetState on RoomGetState {
   boards {
@@ -2273,9 +2352,6 @@ export const RoomGetStateFragmentDoc = gql`
   }
   characters {
     ...CharacterState
-  }
-  participants {
-    ...Participant
   }
   revision
   name
@@ -2298,7 +2374,6 @@ export const RoomGetStateFragmentDoc = gql`
 }
     ${BoardStateFragmentDoc}
 ${CharacterStateFragmentDoc}
-${ParticipantFragmentDoc}
 ${FilePathFragmentDoc}`;
 export const CreateRoomResultFragmentDoc = gql`
     fragment CreateRoomResult on CreateRoomResult {
@@ -2357,17 +2432,53 @@ export const GetRoomResultFragmentDoc = gql`
 }
     ${RoomGetStateFragmentDoc}
 ${GetNonJoinedRoomResultFragmentDoc}`;
+export const ParticipantValueStateFragmentDoc = gql`
+    fragment ParticipantValueState on ParticipantValueState {
+  name
+  role
+}
+    `;
+export const ParticipantOperationFragmentDoc = gql`
+    fragment ParticipantOperation on ParticipantOperation {
+  name {
+    newValue
+  }
+  role {
+    newValue
+  }
+}
+    `;
+export const ParticipantsOperationFragmentDoc = gql`
+    fragment ParticipantsOperation on ParticipantsOperation {
+  revisionTo
+  operatedBy
+  replace {
+    userUid
+    newValue {
+      ...ParticipantValueState
+    }
+  }
+  update {
+    userUid
+    operation {
+      ...ParticipantOperation
+    }
+  }
+}
+    ${ParticipantValueStateFragmentDoc}
+${ParticipantOperationFragmentDoc}`;
 export const JoinRoomResultFragmentDoc = gql`
     fragment JoinRoomResult on JoinRoomResult {
   ... on JoinRoomSuccessResult {
-    role
-    name
+    operation {
+      ...ParticipantsOperation
+    }
   }
   ... on JoinRoomFailureResult {
     failureType
   }
 }
-    `;
+    ${ParticipantsOperationFragmentDoc}`;
 export const BoardOperationFragmentDoc = gql`
     fragment BoardOperation on BoardOperation {
   name {
@@ -2735,6 +2846,15 @@ export const GetRoomDocument = gql`
       room {
         ...RoomGetState
       }
+      participant {
+        revision
+        participants {
+          userUid
+          value {
+            ...ParticipantValueState
+          }
+        }
+      }
     }
     ... on GetNonJoinedRoomResult {
       roomAsListItem {
@@ -2747,6 +2867,7 @@ export const GetRoomDocument = gql`
   }
 }
     ${RoomGetStateFragmentDoc}
+${ParticipantValueStateFragmentDoc}
 ${RoomAsListItemFragmentDoc}`;
 
 /**
@@ -3374,12 +3495,16 @@ export const RoomOperatedDocument = gql`
     ... on RoomOperation {
       ...RoomOperation
     }
+    ... on ParticipantsOperation {
+      ...ParticipantsOperation
+    }
     ... on DeleteRoomOperation {
       deletedBy
     }
   }
 }
-    ${RoomOperationFragmentDoc}`;
+    ${RoomOperationFragmentDoc}
+${ParticipantsOperationFragmentDoc}`;
 
 /**
  * __useRoomOperatedSubscription__

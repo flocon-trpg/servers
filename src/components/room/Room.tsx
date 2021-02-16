@@ -7,6 +7,7 @@ import { useSelector } from '../../store';
 import roomConfigModule from '../../modules/roomConfigModule';
 import { useDispatch } from 'react-redux';
 import * as RoomStates from '../../stateManagers/states/room';
+import * as Participant from '../../stateManagers/states/participant';
 import Boards from './Boards';
 import { recordToArray } from '../../utils/record';
 import RoomMessages, { Tab } from './RoomMessages';
@@ -31,6 +32,7 @@ import fileDownload from 'js-file-download';
 import { generateAsStaticHtml } from '../../utils/roomLogGenerator';
 import moment from 'moment';
 import EditRoomDrawer from './EditRoomDrawer';
+import MyAuthContext from '../../contexts/MyAuthContext';
 
 type ModalState = {
     onOk: () => void;
@@ -42,12 +44,14 @@ const bottomContainerPadding = `0px ${horizontalPadding}px`;
 
 type Props = {
     roomState: RoomStates.State;
+    participantsState: Participant.State;
     operate: ((operation: RoomStates.PostOperationSetup) => void);
     roomId: string;
 }
 
-const Room: React.FC<Props> = ({ roomState, roomId, operate }: Props) => {
+const Room: React.FC<Props> = ({ roomState, participantsState, roomId, operate }: Props) => {
     useRoomConfig(roomId);
+    const myAuth = React.useContext(MyAuthContext);
     const roomConfig = useSelector(state => state.roomConfigModule);
     const [modalState, setModalState] = React.useState<ModalState>();
     const router = useRouter();
@@ -56,10 +60,14 @@ const Room: React.FC<Props> = ({ roomState, roomId, operate }: Props) => {
     const [getLogQuery, getLogQueryResult] = useGetLogLazyQuery({ variables: { roomId }, fetchPolicy: 'network-only' });
     const [leaveRoomMutation] = useLeaveRoomMutation({ variables: { id: roomId } });
     const roomStateRef = React.useRef(roomState);
+    const participantsStateRef = React.useRef(participantsState);
 
     React.useEffect(() => {
         roomStateRef.current = roomState;
     },[roomState]);
+    React.useEffect(() => {
+        participantsStateRef.current = participantsState;
+    }, [participantsState]);
 
     React.useEffect(() => {
         const data = getLogQueryResult.data;
@@ -72,13 +80,18 @@ const Room: React.FC<Props> = ({ roomState, roomId, operate }: Props) => {
         }
         fileDownload(generateAsStaticHtml({ 
             messages: data.result, 
-            participants: roomStateRef.current.participants, 
+            participants: participantsStateRef.current, 
             characters: roomStateRef.current.characters
         }), `log_${moment(new Date()).format('YYYYMMDDHHmmss')}.html`);
     },[getLogQueryResult.data]);
 
     if (roomConfig == null || roomConfig.roomId !== roomId) {
         return (<div>loading config file...</div>);
+    }
+
+    let me: Participant.StateElement | undefined = undefined;
+    if (myAuth != null) {
+        me = participantsState.get(myAuth.uid);
     }
 
     // TODO: offset, zoom
@@ -216,6 +229,9 @@ const Room: React.FC<Props> = ({ roomState, roomId, operate }: Props) => {
                                         </div>
                                     </Menu.Item>
                                 </Menu.SubMenu>
+                                {me == null || <Menu.SubMenu title={<span><Icon.UserOutlined />{me.name}</span>}>
+
+                                </Menu.SubMenu>}
                             </Menu>
                             <div>
                                 {boardsPanels}
@@ -231,7 +247,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, operate }: Props) => {
                                     minHeight={150}
                                     minWidth={150}
                                     zIndex={roomConfig.panels.charactersPanel.zIndex}>
-                                    <CharactersList room={roomState} />
+                                    <CharactersList room={roomState} participants={participantsState} />
                                 </DraggableCard>}
                                 {roomConfig.panels.gameEffectPanel.isMinimized ? null : <DraggableCard
                                     header="Game effect"
@@ -259,7 +275,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, operate }: Props) => {
                                     minHeight={150}
                                     minWidth={150}
                                     zIndex={roomConfig.panels.messagesPanel.zIndex}>
-                                    <RoomMessages roomId={roomId} participants={roomState.participants} characters={roomState.characters} />
+                                    <RoomMessages roomId={roomId} participantsState={participantsState} characters={roomState.characters} />
                                 </DraggableCard>}
                             </div>
 
@@ -278,7 +294,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, operate }: Props) => {
                             <BoardDrawer roomState={roomState} />
                             <CharacterDrawer roomState={roomState} />
                             <CharacterParameterNamesDrawer roomState={roomState} />
-                            <CreatePrivateMessageDrawer roomState={roomState} roomId={roomId} />
+                            <CreatePrivateMessageDrawer roomState={roomState} participantsState={participantsState} roomId={roomId} />
                             <EditRoomDrawer roomState={roomState}/>
 
                             <PlaySoundBehavior bgms={roomState.bgms} />

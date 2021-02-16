@@ -20,7 +20,7 @@ export class PrivateChannelSet {
     }
 
     // participantsのkeyはUserUid
-    public toChannelNameBase(participants: ReadonlyMap<string, Participant.State>, skipMe?: { userUid: string }): string[] {
+    public toChannelNameBase(participants: Participant.State, skipMe?: { userUid: string }): string[] {
         const result: string[] = [];
         this._source.forEach(userUid => {
             if (userUid === skipMe?.userUid) {

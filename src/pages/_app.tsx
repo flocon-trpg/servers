@@ -33,7 +33,7 @@ const createApolloClient = (config: Config, signedInAs?: firebase.User, omitWebS
     if (uri === undefined) {
         uri = `${location.protocol}//${location.host}/graphql`;
     }
-    appConsole.log(`GraphQL http(s): ${uri}`);
+    appConsole.log(`GraphQL HTTP URL: ${uri}`);
     const httpLink = new HttpLink({
         uri,
     });
@@ -53,7 +53,7 @@ const createApolloClient = (config: Config, signedInAs?: firebase.User, omitWebS
         if (uri === undefined) {
             uri = `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/graphql`;
         }
-        appConsole.log(`GraphQL ws(s): ${uri}`);
+        appConsole.log(`GraphQL WebSocket URL: ${uri}`);
         const wsLink = new WebSocketLink({
             uri,
             options: {
@@ -117,7 +117,9 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     useUserConfig(user?.uid ?? null, store.dispatch);
 
     if (apolloClient == null) {
-        return (<div style={({ padding: 5 })}>Preparing Apollo Client...</div>);
+        return (<div style={({ padding: 5 })}>
+            しばらくお待ち下さい…。もし約20秒以上この画面のままの場合、どこかで問題が発生している可能性があります。 / Please wait... If you have waited for more than about 20 seconds, something might be wrong.
+        </div>);
     }
     return (
         <ApolloProvider client={apolloClient}>

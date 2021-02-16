@@ -20,13 +20,14 @@ const drawerBaseProps: Partial<DrawerProps> = {
 type Props = {
     roomId: string;
     roomState: Room.State;
+    participantsState: Participant.State;
 }
 
 const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 18;
 
 // TODO: playerの場合、characterの情報も一緒に載せたほうがわかりやすい
-const CreatePrivateMessageDrawer: React.FC<Props> = ({ roomId, roomState }: Props) => {
+const CreatePrivateMessageDrawer: React.FC<Props> = ({ roomId, roomState, participantsState: participants }: Props) => {
     const myAuth = React.useContext(MyAuthContext);
     const componentsState = React.useContext(ComponentsStateContext);
     const visible = componentsState.createPrivateMessageDrawerVisibility;
@@ -40,13 +41,13 @@ const CreatePrivateMessageDrawer: React.FC<Props> = ({ roomId, roomState }: Prop
         return null;
     }
 
-    const selectedParticipants = new Map<string, Participant.State>(); // 存在しないユーザーや自分自身のUserUidは除かれる
-    roomState.participants.forEach(participant => {
-        if (participant.userUid === myAuth.uid) {
+    const selectedParticipants = new Map<string, Participant.StateElement>(); // 存在しないユーザーや自分自身のUserUidは除かれる
+    participants.forEach((participant, userUid) => {
+        if (userUid === myAuth.uid) {
             return;
         }
-        if (selectedUserIds.has(participant.userUid)) {
-            selectedParticipants.set(participant.userUid, participant);
+        if (selectedUserIds.has(userUid)) {
+            selectedParticipants.set(userUid, participant);
         }
     });
 
@@ -101,25 +102,25 @@ const CreatePrivateMessageDrawer: React.FC<Props> = ({ roomId, roomState }: Prop
                     <Col flex={0}>対象ユーザー</Col>
                     <Col span={inputSpan}>
                         <div>
-                            {__(roomState.participants).map(([, participant]) => {
+                            {__(participants).map(([userUid, participant]) => {
                                 return (
                                     <>
                                         <Checkbox
-                                            key={participant.userUid}
-                                            disabled={participant.userUid === myAuth.uid}
-                                            checked={participant.userUid === myAuth.uid || selectedParticipants.has(participant.userUid)}
+                                            key={userUid}
+                                            disabled={userUid === myAuth.uid}
+                                            checked={userUid === myAuth.uid || selectedParticipants.has(userUid)}
                                             onChange={newValue => {
                                                 const newSelectedUserIds = new Set(selectedUserIds);
                                                 if (newValue.target.checked) {
-                                                    newSelectedUserIds.add(participant.userUid);
+                                                    newSelectedUserIds.add(userUid);
                                                 } else {
-                                                    newSelectedUserIds.delete(participant.userUid);
+                                                    newSelectedUserIds.delete(userUid);
                                                 }
                                                 setSelectedUserIds(newSelectedUserIds);
                                             }}>
                                             {participant.name}
                                         </Checkbox>
-                                        <br key={participant.userUid + '<br>'} />
+                                        <br key={userUid + '<br>'} />
                                     </>);
                             }).toArray()}
                             {selectedParticipants.size === 0 ? <Alert message="対象ユーザーが自分のみの場合、独り言になります。独り言を使うことで、自分の考えをログに残すことができます。" type="info" showIcon /> : null}

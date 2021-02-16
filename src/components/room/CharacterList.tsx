@@ -33,6 +33,7 @@ const characterOperationBase: Character.PostOperation = {
 
 type Props = {
     room: Room.State;
+    participants: Participant.State;
 }
 
 type DataSource = {
@@ -42,7 +43,7 @@ type DataSource = {
         state: Character.State;
         createdByMe: boolean | null;
     };
-    participants: ReadonlyMap<string, Participant.State>;
+    participants: Participant.State;
     operate: (operation: Room.PostOperationSetup) => void;
 }
 
@@ -175,7 +176,7 @@ const Image: React.FC<{ filePath?: FilePathFragment; iconSize: boolean }> = ({ f
     return (<img src={src} width={iconSize ? 25 : 150} height={iconSize ? 25 : 150} />);
 };
 
-const CharactersList: React.FC<Props> = ({ room }: Props) => {
+const CharactersList: React.FC<Props> = ({ room, participants }: Props) => {
     const myAuth = React.useContext(MyAuthContext);
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
     const dispatchRoomComponentsState = React.useContext(DispatchRoomComponentsStateContext);
@@ -191,7 +192,7 @@ const CharactersList: React.FC<Props> = ({ room }: Props) => {
                     state: character,
                     createdByMe,
                 },
-                participants: room.participants,
+                participants,
                 operate,
             };
         });
@@ -255,15 +256,32 @@ const CharactersList: React.FC<Props> = ({ room }: Props) => {
                             </div>
                         </Popover>}
                     <div style={({ width: 4 })} />
-                    <Input style={({ minWidth: 100 })} value={character.state.name} size='small' />
+                    <Input 
+                        style={({ minWidth: 100 })}
+                        value={character.state.name} 
+                        size='small'
+                        onChange={newValue => {
+                            const setup = Room.createPostOperationSetup();
+                            const characterOperation: Character.PostOperation = {
+                                ...characterOperationBase,
+                                name: {
+                                    newValue: newValue.target.value,
+                                },
+                            };
+                            setup.characters.set(character.stateKey, {
+                                type: update,
+                                operation: characterOperation,
+                            });
+                            operate(setup);
+                        }} />
                 </div>),
         },
         {
             title: '作成者',
             key: '作成者',
             // eslint-disable-next-line react/display-name
-            render: (_: unknown, { character, participants }: DataSource) => {
-                const participant = participants.get(character.stateKey.createdBy);
+            render: (_: unknown, { character, participants: $participants }: DataSource) => {
+                const participant = $participants.get(character.stateKey.createdBy);
                 if (participant == null) {
                     return '?';
                 }

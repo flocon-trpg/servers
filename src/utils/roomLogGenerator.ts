@@ -56,7 +56,7 @@ const createRoomMessageArray = ({
     characters,
 }: {
     messages: RoomMessages;
-    participants: ReadonlyMap<string, ParticipantState>;
+    participants: ParticipantState;
     characters: ReadonlyStateMap<CharacterState>;
 }) => {
     const result: RoomMessage[] = [];
@@ -149,7 +149,7 @@ const createRoomMessageArray = ({
 
 export const generateAsStaticHtml = (params: {
     messages: RoomMessages;
-    participants: ReadonlyMap<string, ParticipantState>;
+    participants: ParticipantState;
     characters: ReadonlyStateMap<CharacterState>;
 }) => {
     const elements = createRoomMessageArray(params).sort((x, y) => x.createdAt - y.createdAt).map(msg => {

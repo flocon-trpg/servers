@@ -7,6 +7,7 @@ export const characterParameterNamesDrawerVisibility = 'characterParameterNamesD
 export const boardDrawerType = 'boardDrawerType';
 export const characterDrawerType = 'characterDrawerType';
 export const editRoomDrawerVisibility = 'editRoomDrawerVisibility';
+export const editParticipantDrawerVisibility = 'editParticipantDrawerVisibility';
 export const createPrivateMessageDrawerVisibility = 'createPrivateMessageDrawerVisibility';
 
 export type BoardEditorDrawerType = {
@@ -31,6 +32,7 @@ export type RoomComponentsState = {
     boardDrawerType: BoardEditorDrawerType | null;
     characterDrawerType: CharacterEditorDrawerType | null;
     editRoomDrawerVisibility: boolean;
+    editParticipantDrawerVisibility: boolean;
     createPrivateMessageDrawerVisibility: boolean;
 }
 
@@ -39,6 +41,7 @@ export const defaultRoomComponentsState: RoomComponentsState = {
     boardDrawerType: null,
     characterDrawerType: null,
     editRoomDrawerVisibility: false,
+    editParticipantDrawerVisibility: true,
     createPrivateMessageDrawerVisibility: false,
 };
 
@@ -55,17 +58,15 @@ export type RoomComponentsAction = {
     type: typeof editRoomDrawerVisibility;
     newValue: boolean;
 } | {
+    type: typeof editParticipantDrawerVisibility;
+    newValue: boolean;
+} | {
     type: typeof createPrivateMessageDrawerVisibility;
     newValue: boolean;
 }
 
 export const reduce = (state: RoomComponentsState, action: RoomComponentsAction): RoomComponentsState => {
     switch(action.type) {
-        case characterParameterNamesDrawerVisibility:
-            return {
-                ...state,
-                characterParameterNamesDrawerVisibility: action.newValue
-            };
         case boardDrawerType:
             return {
                 ...state,
@@ -76,15 +77,25 @@ export const reduce = (state: RoomComponentsState, action: RoomComponentsAction)
                 ...state,
                 characterDrawerType: action.newValue,
             };
-        case editRoomDrawerVisibility:
+        case characterParameterNamesDrawerVisibility:
             return {
                 ...state,
-                editRoomDrawerVisibility: action.newValue,
+                characterParameterNamesDrawerVisibility: action.newValue
             };
         case createPrivateMessageDrawerVisibility:
             return {
                 ...state,
                 createPrivateMessageDrawerVisibility: action.newValue,
+            };
+        case editParticipantDrawerVisibility:
+            return {
+                ...state,
+                editParticipantDrawerVisibility: action.newValue,
+            };
+        case editRoomDrawerVisibility:
+            return {
+                ...state,
+                editRoomDrawerVisibility: action.newValue,
             };
     }
 };

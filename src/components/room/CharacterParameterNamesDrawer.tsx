@@ -232,7 +232,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                             <Select
                                 style={({ minWidth: 150 })}
                                 size='small'
-                                value={addNumParamSelector}
+                                value={addBoolParamSelector}
                                 onSelect={newValue => {
                                     setAddBoolParamSelector(newValue);
                                 }}

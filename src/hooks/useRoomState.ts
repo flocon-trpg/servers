@@ -1,10 +1,11 @@
 import React from 'react';
 import { Subject } from 'rxjs';
-import { GetRoomDocument, GetRoomFailureType, GetRoomQuery, GetRoomQueryVariables, RoomAsListItemFragment, RoomOperatedDocument, RoomOperatedSubscription, RoomOperatedSubscriptionVariables, RoomOperationFragment, useOperateMutation } from '../generated/graphql';
+import { GetRoomDocument, GetRoomFailureType, GetRoomQuery, GetRoomQueryVariables, ParticipantsOperationFragment, RoomAsListItemFragment, RoomOperatedDocument, RoomOperatedSubscription, RoomOperatedSubscriptionVariables, RoomOperationFragment, useOperateMutation } from '../generated/graphql';
 import * as Rx from 'rxjs/operators';
 import { useApolloClient } from '@apollo/client';
-import { StateManager } from '../stateManagers/StateManager';
+import { GetOnlyStateManager, StateManager } from '../stateManagers/StateManager';
 import * as Room from '../stateManagers/states/room';
+import * as Participant from '../stateManagers/states/participant';
 import { create as createStateManager } from '../stateManagers/main';
 import MyAuthContext from '../contexts/MyAuthContext';
 
@@ -22,9 +23,11 @@ type RoomState = {
     type: typeof loading;
 } | {
     type: typeof joined;
-    state: Room.State;
+    roomState: Room.State;
     // undefinedならばrefetchが必要。
-    operate: ((operation: Room.PostOperationSetup) => void) | undefined;
+    operateRoom: ((operation: Room.PostOperationSetup) => void) | undefined;
+    participantsState: Participant.State;
+    // participantの更新は、mutationを直接呼び出すことで行う。
 } | {
     type: typeof requiresLogin;
 } | {
@@ -62,10 +65,11 @@ export const useRoomState = (roomId: string): RoomStateResult => {
             return;
         }
 
-        let stateManager: StateManager<Room.State, Room.GetOperation, Room.PostOperation> | null = null;
+        let roomStateManager: StateManager<Room.State, Room.GetOperation, Room.PostOperation> | null = null;
+        let participantStateManager: GetOnlyStateManager<Participant.State, Participant.Operation> | null = null;
 
-        const onStateManagerUpdate = () => {
-            const $stateManager = stateManager;
+        const onRoomStateManagerUpdate = () => {
+            const $stateManager = roomStateManager;
             if ($stateManager == null) {
                 return;
             }
@@ -76,48 +80,79 @@ export const useRoomState = (roomId: string): RoomStateResult => {
                 const newState = $stateManager.uiState;
                 return {
                     ...oldValue,
-                    state: newState,
-                    operate: $stateManager.requiresReload ? undefined : oldValue.operate,
+                    roomState: newState,
+                    operateRoom: $stateManager.requiresReload ? undefined : oldValue.operateRoom,
+                };
+            });
+        };
+
+        const onParticipantStateManagerUpdate = () => {
+            const $stateManager = participantStateManager;
+            if ($stateManager == null) {
+                return;
+            }
+            setState(oldValue => {
+                if (oldValue.type !== joined) {
+                    return oldValue;
+                }
+                const newState = $stateManager.uiState;
+                return {
+                    ...oldValue,
+                    participantsState: newState,
                 };
             });
         };
 
         const postTrigger = new Subject<void>();
-        const operationCache = new Map<number, RoomOperationFragment>(); // キーはrevisionTo
+        const roomOperationCache = new Map<number, RoomOperationFragment>(); // キーはrevisionTo
+        const participantOperationCache = new Map<number, ParticipantsOperationFragment>(); // キーはrevisionTo
         // TODO: GetRoomQueryを受信中にoperationを受け取り損ねるのをなるべく防ぐためにsubscriptionを先に行っているが、必要のない場面でもsubscribeするため非効率。もしパフォーマンス上の問題があるなら、getOperationのようなqueryをサーバー側に実装してからコードを変更すべきか。
         // そもそも、「subscribeの通信確立後にGetRoomQueryを実行」ということができればいいのだが、Apolloの仕様がまだわからないのでなんともいえない。
-        const subscription0 = apolloClient.subscribe<RoomOperatedSubscription, RoomOperatedSubscriptionVariables>({ query: RoomOperatedDocument, variables: { id: roomId } })
+        const graphQLSubscriptionSubscription = apolloClient.subscribe<RoomOperatedSubscription, RoomOperatedSubscriptionVariables>({ query: RoomOperatedDocument, variables: { id: roomId } })
             .subscribe(s => {
                 if (s.data?.roomOperated == null) {
                     return;
                 }
-                if (s.data.roomOperated.__typename === 'DeleteRoomOperation') {
-                    // TODO: 削除時の処理
-                    return;
-                }
-                if (s.data.roomOperated.__typename !== 'RoomOperation') {
-                    return;
-                }
-                if (stateManager == null) {
-                    operationCache.set(s.data.roomOperated.revisionTo, s.data.roomOperated);
-                    return;
-                }
-                if (s.data.roomOperated.operatedBy !== userUid) {
-                    const getOperation = Room.createGetOperation(s.data.roomOperated.value);
-                    stateManager.onOthersGet(getOperation, s.data.roomOperated.revisionTo);
-                    onStateManagerUpdate();
+                switch (s.data.roomOperated.__typename) {
+                    case 'DeleteRoomOperation':
+                        // TODO: 削除時の処理
+                        return;
+                    case 'RoomOperation': {
+                        if (roomStateManager == null) {
+                            roomOperationCache.set(s.data.roomOperated.revisionTo, s.data.roomOperated);
+                            return;
+                        }
+                        // Roomは、他人が行った変更はSubscriptionの結果を用い、自分が行った変更はMutationの結果を用いている。
+                        if (s.data.roomOperated.operatedBy !== userUid) {
+                            const getOperation = Room.createGetOperation(s.data.roomOperated.value);
+                            roomStateManager.onOthersGet(getOperation, s.data.roomOperated.revisionTo);
+                            onRoomStateManagerUpdate();
+                        }
+                        return;
+                    }
+                    case 'ParticipantsOperation': {
+                        if (participantStateManager == null) {
+                            participantOperationCache.set(s.data.roomOperated.revisionTo, s.data.roomOperated);
+                            return;
+                        }
+                        // Participantは、すべてSubscriptionの結果を用いている。
+                        const operation = Participant.createOperation(s.data.roomOperated);
+                        participantStateManager.onGet(operation, s.data.roomOperated.revisionTo);
+                        onParticipantStateManagerUpdate();
+                        return;
+                    }
                 }
             });
-        const subscription1 = postTrigger.pipe(
+        const postTriggerSubscription = postTrigger.pipe(
             Rx.sampleTime(sampleTime),
             Rx.map(async () => {
-                if (stateManager == null) {
+                if (roomStateManager == null) {
                     return;
                 }
-                if (stateManager.isPosting || stateManager.requiresReload) {
+                if (roomStateManager.isPosting || roomStateManager.requiresReload) {
                     return;
                 }
-                const toPost = stateManager.post();
+                const toPost = roomStateManager.post();
                 if (toPost == null) {
                     return;
                 }
@@ -145,7 +180,7 @@ export const useRoomState = (roomId: string): RoomStateResult => {
                             revisionTo: result.data.result.operation.revisionTo,
                             result: Room.createGetOperation(result.data.result.operation.value)
                         });
-                        onStateManagerUpdate();
+                        onRoomStateManagerUpdate();
                         break;
                     case 'OperateRoomIdResult':
                         toPost.onPosted({
@@ -153,7 +188,7 @@ export const useRoomState = (roomId: string): RoomStateResult => {
                             isId: true,
                             requestId: result.data.result.requestId,
                         });
-                        onStateManagerUpdate();
+                        onRoomStateManagerUpdate();
                         break;
                     case 'OperateRoomNonJoinedResult':
                     case 'OperateRoomFailureResult':
@@ -173,16 +208,27 @@ export const useRoomState = (roomId: string): RoomStateResult => {
         }).then(q => {
             switch (q.data.result.__typename) {
                 case 'GetJoinedRoomResult': {
-                    const newStateManager = createStateManager(Room.createState(q.data.result.room), q.data.result.room.revision);
-                    operationCache.forEach((operation, revisionTo) => {
+                    const newRoomStateManager = createStateManager(Room.createState(q.data.result.room), q.data.result.room.revision);
+                    const newParticipantManager = new GetOnlyStateManager<Participant.State, Participant.Operation>({
+                        revision: q.data.result.participant.revision,
+                        state: Participant.createState(q.data.result.participant),
+                        apply: Participant.applyOperation,
+                    });
+                    roomOperationCache.forEach((operation, revisionTo) => {
+                        // Roomは、他人が行った変更はSubscriptionの結果を用い、自分が行った変更はMutationの結果を用いている。
                         if (operation.operatedBy !== userUid) {
-                            newStateManager.onOthersGet(Room.createGetOperation(operation.value), revisionTo);
+                            newRoomStateManager.onOthersGet(Room.createGetOperation(operation.value), revisionTo);
                         }
                     });
-                    operationCache.clear(); // 早めのメモリ解放
-                    stateManager = newStateManager;
+                    participantOperationCache.forEach((operation, revisionTo) => {
+                        // Participantは、すべてSubscriptionの結果を用いている。
+                        newParticipantManager.onGet(Participant.createOperation(operation), revisionTo);
+                    });
+
+                    roomOperationCache.clear(); // 早めのメモリ解放
+                    roomStateManager = newRoomStateManager;
                     const operate = (operation: Room.PostOperationSetup) => {
-                        const $stateManager = stateManager;
+                        const $stateManager = roomStateManager;
                         if ($stateManager == null) {
                             return;
                         }
@@ -193,19 +239,24 @@ export const useRoomState = (roomId: string): RoomStateResult => {
                                 }
                                 return {
                                     ...oldValue,
-                                    operate: undefined,
+                                    operateRoom: undefined,
                                 };
                             });
                             return;
                         }
                         $stateManager.operate(Room.setupPostOperation(operation, userUid));
-                        onStateManagerUpdate();
+                        onRoomStateManagerUpdate();
                         postTrigger.next();
                     };
+
+                    participantOperationCache.clear(); // 早めのメモリ解放
+                    participantStateManager = newParticipantManager;
+
                     setState({
                         type: joined,
-                        state: newStateManager.uiState,
-                        operate: newStateManager.requiresReload ? undefined : operate,
+                        roomState: newRoomStateManager.uiState,
+                        operateRoom: newRoomStateManager.requiresReload ? undefined : operate,
+                        participantsState: newParticipantManager.uiState,
                     });
                     break;
                 }
@@ -229,9 +280,9 @@ export const useRoomState = (roomId: string): RoomStateResult => {
         });
 
         return () => {
-            stateManager = null; // 早めのメモリ解放
-            subscription0.unsubscribe();
-            subscription1.unsubscribe();
+            roomStateManager = null; // 早めのメモリ解放
+            graphQLSubscriptionSubscription.unsubscribe();
+            postTriggerSubscription.unsubscribe();
         };
     }, [refetchKey, apolloClient, roomId, myAuth?.uid, operateMutation]);
 
