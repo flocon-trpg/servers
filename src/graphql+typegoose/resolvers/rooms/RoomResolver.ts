@@ -414,30 +414,51 @@ export class RoomResolver {
         return this.getRoomCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
     }
 
-    public async leaveRoomCore({ id, context }: { id: string; context: ResolverContext }): Promise<LeaveRoomResult> {
+    public async leaveRoomCore({ id, context }: { id: string; context: ResolverContext }): Promise<{ result: LeaveRoomResult; payload: RoomOperatedPayload | undefined }> {
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
-            return { failureType: LeaveRoomFailureType.NotSignIn };
+            return {
+                result: { failureType: LeaveRoomFailureType.NotSignIn },
+                payload: undefined,
+            };
         }
 
-        const queue = async (): Promise<Result<LeaveRoomResult>> => {
+        const queue = async (): Promise<Result<{ result: LeaveRoomResult; payload: RoomOperatedPayload | undefined }>> => {
             const em = context.createEm();
             // entryしていなくても呼べる
-            const findResult = await findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId: id });
+            const findResult = await findRoomAndMyParticipantAndParitipantUserUids({ em, userUid: decodedIdToken.uid, roomId: id });
             if (findResult == null) {
                 return ResultModule.ok({
-                    failureType: LeaveRoomFailureType.NotFound,
+                    result: { failureType: LeaveRoomFailureType.NotFound },
+                    payload: undefined,
                 });
             }
-            const { me } = findResult;
-            if (me === undefined) {
+            const { me, room, participantUserUids } = findResult;
+            if (me === undefined || me.role == null) {
                 return ResultModule.ok({
-                    failureType: LeaveRoomFailureType.NotEntry,
+                    result: { failureType: LeaveRoomFailureType.NotEntry },
+                    payload: undefined,
                 });
             }
-            me.role = undefined;
+            const graphQLOperation = await updateAndCreateGraphQLOperation({
+                em,
+                userUid: decodedIdToken.uid,
+                operation: {
+                    role: { newValue: undefined }
+                },
+                room,
+            });
             await em.flush();
-            return ResultModule.ok({});
+            return ResultModule.ok({
+                result: {},
+                payload: {
+                    type: 'participantOperation',
+                    // Roomに参加したばかりの場合、decodedToken.uidはparticipantUserUidsに含まれないためSubscriptionは実行されない。だが、そのようなユーザーにroomOperatedで通知する必要はないため問題ない。
+                    participants: participantUserUids,
+                    participantsOperation: graphQLOperation,
+                    roomId: room.id,
+                },
+            });
         };
         const result = await context.promiseQueue.next(queue);
         if (result.type === queueLimitReached) {
@@ -450,8 +471,12 @@ export class RoomResolver {
     }
 
     @Mutation(() => LeaveRoomResult)
-    public async leaveRoom(@Arg('id') id: string, @Ctx() context: ResolverContext): Promise<LeaveRoomResult> {
-        return await this.leaveRoomCore({ id, context });
+    public async leaveRoom(@Arg('id') id: string, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<LeaveRoomResult> {
+        const { result, payload } = await this.leaveRoomCore({ id, context });
+        if (payload != null) {
+            await pubSub.publish(ROOM_OPERATED, payload);
+        }
+        return result;
     }
 
     public async operateCore({ args, context, globalEntryPhrase }: { args: OperateArgs; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<OperateCoreResult> {
