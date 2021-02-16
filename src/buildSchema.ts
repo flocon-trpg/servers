@@ -1,10 +1,10 @@
 import { buildSchema as buildSchemaCore, BuildSchemaOptions, buildSchemaSync as buildSchemaSyncCore, PrintSchemaOptions } from 'type-graphql';
 import path from 'path';
 import { GraphQLSchema } from 'graphql';
-import registerEnumTypes from './graphql+typegoose/registerEnumTypes';
-import { RoomResolver } from './graphql+typegoose/resolvers/rooms/RoomResolver';
-import { MainResolver } from './graphql+typegoose/resolvers/MainResolver';
-import { RoomMessageResolver } from './graphql+typegoose/resolvers/rooms/RoomMessageResolver';
+import registerEnumTypes from './graphql+mikro-orm/registerEnumTypes';
+import { RoomResolver } from './graphql+mikro-orm/resolvers/rooms/RoomResolver';
+import { MainResolver } from './graphql+mikro-orm/resolvers/MainResolver';
+import { RoomMessageResolver } from './graphql+mikro-orm/resolvers/rooms/RoomMessageResolver';
 
 type Options = {
     emitSchemaFile: boolean;

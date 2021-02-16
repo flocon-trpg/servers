@@ -1,5 +1,5 @@
 import { anonymous } from '../../../@shared/Constants';
-import { DecodedIdToken, ResolverContext } from '../../../graphql+typegoose/utils/Contexts';
+import { DecodedIdToken, ResolverContext } from '../../utils/Contexts';
 import admin from 'firebase-admin';
 import { EM } from '../../../utils/types';
 import { User } from '../../entities/user/mikro-orm';

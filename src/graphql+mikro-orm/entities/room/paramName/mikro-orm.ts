@@ -2,7 +2,7 @@ import { Entity, Enum, IdentifiedReference, Index, JsonType, ManyToOne, PrimaryK
 import { v4 } from 'uuid';
 import { RoomParameterNameType } from '../../../../enums/RoomParameterNameType';
 import { TextDownOperationUnit } from '../../../Operations';
-import { Room, RoomOp } from '../../room/mikro-orm';
+import { Room, RoomOp } from '../mikro-orm';
 
 // 例えば (key, type) = ('1', Str) のとき、そのRoomのすべてのCharacterは'1'というkeyで文字列のパラメーターを設定できるようになる。
 export abstract class ParamNameBase {

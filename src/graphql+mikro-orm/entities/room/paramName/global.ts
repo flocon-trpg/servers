@@ -4,7 +4,7 @@ import * as $GraphQL from './graphql';
 import * as $MikroORM from './mikro-orm';
 import * as DualKeyMapOperations from '../../../dualKeyMapOperations';
 import { Collection } from '@mikro-orm/core';
-import { RoomOp } from '../../room/mikro-orm';
+import { RoomOp } from '../mikro-orm';
 import { undefinedForAll } from '../../../../utils/helpers';
 import { RoomParameterNameType } from '../../../../enums/RoomParameterNameType';
 import { CustomDualKeyMap, KeyFactory, ReadonlyCustomDualKeyMap } from '../../../../@shared/CustomDualKeyMap';

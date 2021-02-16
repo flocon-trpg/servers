@@ -2,10 +2,10 @@ import BCDice from 'bcdice';
 import { __ } from '../@shared/collection';
 import { analyze as analyzeCore, executeCompareOperator, maybeDice, MaybeDice, Parameter, prettifyOperator } from '../@shared/expression';
 import { RoomParameterNameType } from '../enums/RoomParameterNameType';
-import { Chara } from '../graphql+typegoose/entities/character/mikro-orm';
-import { NumParam } from '../graphql+typegoose/entities/character/numParam/mikro-orm';
-import { Room } from '../graphql+typegoose/entities/room/mikro-orm';
-import { ParamName } from '../graphql+typegoose/entities/room/paramName/mikro-orm';
+import { Chara } from '../graphql+mikro-orm/entities/character/mikro-orm';
+import { NumParam } from '../graphql+mikro-orm/entities/character/numParam/mikro-orm';
+import { Room } from '../graphql+mikro-orm/entities/room/mikro-orm';
+import { ParamName } from '../graphql+mikro-orm/entities/room/paramName/mikro-orm';
 import { EM } from '../utils/types';
 
 const bcdice = new BCDice();

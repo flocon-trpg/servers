@@ -1,6 +1,6 @@
 import { Resolver, Query, Args, Mutation, Ctx, PubSub, Subscription, Root, ArgsType, Field, Arg, Publisher, InputType, PubSubEngine, Int } from 'type-graphql';
 
-import { ResolverContext } from '../../../graphql+typegoose/utils/Contexts';
+import { ResolverContext } from '../../utils/Contexts';
 import { ParticipantRole } from '../../../enums/ParticipantRole';
 import { GetRoomResult } from '../../entities/getRoomResult/graphql';
 import { GetRoomFailureType } from '../../../enums/GetRoomFailureType';
@@ -453,7 +453,6 @@ export class RoomResolver {
                 result: {},
                 payload: {
                     type: 'participantOperation',
-                    // Roomに参加したばかりの場合、decodedToken.uidはparticipantUserUidsに含まれないためSubscriptionは実行されない。だが、そのようなユーザーにroomOperatedで通知する必要はないため問題ない。
                     participants: participantUserUids,
                     participantsOperation: graphQLOperation,
                     roomId: room.id,
