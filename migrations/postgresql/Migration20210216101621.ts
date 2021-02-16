@@ -1,12 +1,12 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20210213153133 extends Migration {
+export class Migration20210216101621 extends Migration {
 
   async up(): Promise<void> {
     this.addSql('create table "user" ("user_uid" varchar(255) not null, "is_entry" bool not null);');
     this.addSql('alter table "user" add constraint "user_pkey" primary key ("user_uid");');
 
-    this.addSql('create table "room" ("id" varchar(255) not null, "version" int4 not null default 1, "name" varchar(255) not null, "revision" int4 not null, "updated_at" timestamptz(0) null, "join_as_player_phrase" varchar(255) null, "join_as_spectator_phrase" varchar(255) null, "delete_phrase" varchar(255) null);');
+    this.addSql('create table "room" ("id" varchar(255) not null, "version" int4 not null default 1, "updated_at" timestamptz(0) null, "join_as_player_phrase" varchar(255) null, "join_as_spectator_phrase" varchar(255) null, "delete_phrase" varchar(255) null, "room_revision" int4 not null, "name" varchar(255) not null, "partici_revision" int4 not null);');
     this.addSql('alter table "room" add constraint "room_pkey" primary key ("id");');
 
     this.addSql('create table "room_op" ("id" varchar(255) not null, "prev_revision" int4 not null, "name" varchar(255) null, "room_id" varchar(255) not null);');
@@ -67,8 +67,17 @@ export class Migration20210213153133 extends Migration {
     this.addSql('create index "param_name_key_index" on "param_name" ("key");');
     this.addSql('create index "param_name_type_index" on "param_name" ("type");');
 
-    this.addSql('create table "participant" ("id" varchar(255) not null, "name" varchar(255) not null, "role" text check ("role" in (\'Player\', \'Spectator\', \'Master\')) null, "user_user_uid" varchar(255) not null, "room_id" varchar(255) not null);');
-    this.addSql('alter table "participant" add constraint "participant_pkey" primary key ("id");');
+    this.addSql('create table "partici_op" ("id" varchar(255) not null, "prev_revision" int4 not null, "room_id" varchar(255) not null);');
+    this.addSql('alter table "partici_op" add constraint "partici_op_pkey" primary key ("id");');
+
+    this.addSql('create table "add_partici_op" ("id" varchar(255) not null, "user_user_uid" varchar(255) not null, "partici_op_id" varchar(255) not null);');
+    this.addSql('alter table "add_partici_op" add constraint "add_partici_op_pkey" primary key ("id");');
+
+    this.addSql('create table "update_partici_op" ("id" varchar(255) not null, "name" varchar(255) null, "role" text check ("role" in (\'Player\', \'Spectator\', \'Master\', \'Left\')) null, "user_user_uid" varchar(255) not null, "partici_op_id" varchar(255) not null);');
+    this.addSql('alter table "update_partici_op" add constraint "update_partici_op_pkey" primary key ("id");');
+
+    this.addSql('create table "partici" ("id" varchar(255) not null, "version" int4 not null default 1, "name" varchar(255) not null, "role" text check ("role" in (\'Player\', \'Spectator\', \'Master\')) null, "user_user_uid" varchar(255) not null, "room_id" varchar(255) not null);');
+    this.addSql('alter table "partici" add constraint "partici_pkey" primary key ("id");');
 
     this.addSql('create table "update_chara_op" ("id" varchar(255) not null, "created_by" varchar(255) not null, "state_id" varchar(255) not null, "is_private" bool null, "name" varchar(255) null, "image" jsonb null, "room_op_id" varchar(255) not null);');
     this.addSql('alter table "update_chara_op" add constraint "update_chara_op_pkey" primary key ("id");');
@@ -222,8 +231,16 @@ export class Migration20210213153133 extends Migration {
 
     this.addSql('alter table "param_name" add constraint "param_name_room_id_foreign" foreign key ("room_id") references "room" ("id") on update cascade;');
 
-    this.addSql('alter table "participant" add constraint "participant_user_user_uid_foreign" foreign key ("user_user_uid") references "user" ("user_uid") on update cascade;');
-    this.addSql('alter table "participant" add constraint "participant_room_id_foreign" foreign key ("room_id") references "room" ("id") on update cascade;');
+    this.addSql('alter table "partici_op" add constraint "partici_op_room_id_foreign" foreign key ("room_id") references "room" ("id") on update cascade;');
+
+    this.addSql('alter table "add_partici_op" add constraint "add_partici_op_user_user_uid_foreign" foreign key ("user_user_uid") references "user" ("user_uid") on update cascade;');
+    this.addSql('alter table "add_partici_op" add constraint "add_partici_op_partici_op_id_foreign" foreign key ("partici_op_id") references "partici_op" ("id") on update cascade;');
+
+    this.addSql('alter table "update_partici_op" add constraint "update_partici_op_user_user_uid_foreign" foreign key ("user_user_uid") references "user" ("user_uid") on update cascade;');
+    this.addSql('alter table "update_partici_op" add constraint "update_partici_op_partici_op_id_foreign" foreign key ("partici_op_id") references "partici_op" ("id") on update cascade;');
+
+    this.addSql('alter table "partici" add constraint "partici_user_user_uid_foreign" foreign key ("user_user_uid") references "user" ("user_uid") on update cascade;');
+    this.addSql('alter table "partici" add constraint "partici_room_id_foreign" foreign key ("room_id") references "room" ("id") on update cascade;');
 
     this.addSql('alter table "update_chara_op" add constraint "update_chara_op_room_op_id_foreign" foreign key ("room_op_id") references "room_op" ("id") on update cascade;');
 
@@ -277,6 +294,8 @@ export class Migration20210213153133 extends Migration {
 
     this.addSql('alter table "board" add constraint "board_room_id_foreign" foreign key ("room_id") references "room" ("id") on update cascade;');
 
+    this.addSql('alter table "room_op" add constraint "room_op_prev_revision_room_id_unique" unique ("prev_revision", "room_id");');
+
     this.addSql('alter table "room_pub_ch" add constraint "room_pub_ch_room_id_key_unique" unique ("room_id", "key");');
 
     this.addSql('alter table "update_room_bgm_op" add constraint "update_room_bgm_op_room_op_id_channel_key_unique" unique ("room_op_id", "channel_key");');
@@ -295,7 +314,13 @@ export class Migration20210213153133 extends Migration {
 
     this.addSql('alter table "param_name" add constraint "param_name_room_id_type_key_unique" unique ("room_id", "type", "key");');
 
-    this.addSql('alter table "participant" add constraint "participant_user_user_uid_room_id_unique" unique ("user_user_uid", "room_id");');
+    this.addSql('alter table "partici_op" add constraint "partici_op_prev_revision_room_id_unique" unique ("prev_revision", "room_id");');
+
+    this.addSql('alter table "add_partici_op" add constraint "add_partici_op_partici_op_id_user_user_uid_unique" unique ("partici_op_id", "user_user_uid");');
+
+    this.addSql('alter table "update_partici_op" add constraint "update_partici_op_partici_op_id_user_user_uid_unique" unique ("partici_op_id", "user_user_uid");');
+
+    this.addSql('alter table "partici" add constraint "partici_user_user_uid_room_id_unique" unique ("user_user_uid", "room_id");');
 
     this.addSql('alter table "update_bool_param_op" add constraint "update_bool_param_op_update_chara_op_id_key_unique" unique ("update_chara_op_id", "key");');
 

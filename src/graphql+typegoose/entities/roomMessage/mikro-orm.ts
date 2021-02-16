@@ -2,7 +2,6 @@ import { Collection, Entity, Enum, IdentifiedReference, ManyToMany, ManyToOne, O
 import { v4 } from 'uuid';
 import { FileSourceType } from '../../../enums/FileSourceType';
 import { Chara } from '../character/mikro-orm';
-import { Participant } from '../participant/mikro-orm';
 import { Room } from '../room/mikro-orm';
 import { User } from '../user/mikro-orm';
 

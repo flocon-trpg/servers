@@ -5,9 +5,9 @@ import { EM } from '../../../utils/types';
 import { User } from '../../entities/user/mikro-orm';
 import { Room } from '../../entities/room/mikro-orm';
 import { __ } from '../../../@shared/collection';
-import { Participant } from '../../entities/participant/mikro-orm';
 import { Reference } from '@mikro-orm/core';
 import { loadServerConfigAsMain } from '../../../config';
+import { Partici } from '../../entities/participant/mikro-orm';
 
 export const NotSignIn = 'NotSignIn';
 export const AnonymousAccount = 'AnonymousAccount';
@@ -68,12 +68,12 @@ export const findRoomAndMyParticipant = async ({
     em: EM;
     userUid: string;
     roomId: string;
-}): Promise<{ room: Room; me?: Participant } | null> => {
+}): Promise<{ room: Room; me?: Partici } | null> => {
     const room = await em.findOne(Room, { id: roomId });
     if (room == null) {
         return null;
     }
-    const participants = await room.participants.loadItems();
+    const participants = await room.particis.loadItems();
     const me = await __(participants).findOrUndefinedAsync(async p => {
         const loadedUserUid = await p.user.load('userUid');
         return loadedUserUid === userUid;
@@ -89,13 +89,13 @@ export const findRoomAndMyParticipantAndParitipantUserUids = async ({
     em: EM;
     userUid: string;
     roomId: string;
-}): Promise<{ room: Room; me?: Participant; participantUsers: Reference<User>[]; participantUserUids: ReadonlySet<string> } | null> => {
+}): Promise<{ room: Room; me?: Partici; participantUsers: Reference<User>[]; participantUserUids: ReadonlySet<string> } | null> => {
     const room = await em.findOne(Room, { id: roomId });
     if (room == null) {
         return null;
     }
-    const participants = await room.participants.loadItems();
-    const participantUserUids: { participant: Participant; userUid: string }[] = [];
+    const participants = await room.particis.loadItems();
+    const participantUserUids: { participant: Partici; userUid: string }[] = [];
     const participantUsers: Reference<User>[] = [];
     for (const participant of participants) {
         participantUsers.push(participant.user);

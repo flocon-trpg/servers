@@ -1,11 +1,11 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20210213152832 extends Migration {
+export class Migration20210216101602 extends Migration {
 
   async up(): Promise<void> {
     this.addSql('create table `user` (`user_uid` varchar not null, `is_entry` integer not null, primary key (`user_uid`));');
 
-    this.addSql('create table `room` (`id` varchar not null, `version` integer not null default 1, `name` varchar not null, `revision` integer not null, `updated_at` datetime null, `join_as_player_phrase` varchar null, `join_as_spectator_phrase` varchar null, `delete_phrase` varchar null, primary key (`id`));');
+    this.addSql('create table `room` (`id` varchar not null, `version` integer not null default 1, `updated_at` datetime null, `join_as_player_phrase` varchar null, `join_as_spectator_phrase` varchar null, `delete_phrase` varchar null, `room_revision` integer not null, `name` varchar not null, `partici_revision` integer not null, primary key (`id`));');
 
     this.addSql('create table `room_op` (`id` varchar not null, `prev_revision` integer not null, `name` varchar null, primary key (`id`));');
 
@@ -52,7 +52,13 @@ export class Migration20210213152832 extends Migration {
     this.addSql('create index `param_name_key_index` on `param_name` (`key`);');
     this.addSql('create index `param_name_type_index` on `param_name` (`type`);');
 
-    this.addSql('create table `participant` (`id` varchar not null, `name` varchar not null, `role` text check (`role` in (\'Player\', \'Spectator\', \'Master\')) null, primary key (`id`));');
+    this.addSql('create table `partici_op` (`id` varchar not null, `prev_revision` integer not null, primary key (`id`));');
+
+    this.addSql('create table `add_partici_op` (`id` varchar not null, primary key (`id`));');
+
+    this.addSql('create table `update_partici_op` (`id` varchar not null, `name` varchar null, `role` text check (`role` in (\'Player\', \'Spectator\', \'Master\', \'Left\')) null, primary key (`id`));');
+
+    this.addSql('create table `partici` (`id` varchar not null, `version` integer not null default 1, `name` varchar not null, `role` text check (`role` in (\'Player\', \'Spectator\', \'Master\')) null, primary key (`id`));');
 
     this.addSql('create table `update_chara_op` (`id` varchar not null, `created_by` varchar not null, `state_id` varchar not null, `is_private` integer null, `name` varchar null, `image` json null, primary key (`id`));');
     this.addSql('create index `update_chara_op_created_by_index` on `update_chara_op` (`created_by`);');
@@ -195,10 +201,23 @@ export class Migration20210213152832 extends Migration {
     this.addSql('alter table `param_name` add column `room_id` varchar null;');
     this.addSql('create index `param_name_room_id_index` on `param_name` (`room_id`);');
 
-    this.addSql('alter table `participant` add column `user_user_uid` varchar null;');
-    this.addSql('alter table `participant` add column `room_id` varchar null;');
-    this.addSql('create index `participant_user_user_uid_index` on `participant` (`user_user_uid`);');
-    this.addSql('create index `participant_room_id_index` on `participant` (`room_id`);');
+    this.addSql('alter table `partici_op` add column `room_id` varchar null;');
+    this.addSql('create index `partici_op_room_id_index` on `partici_op` (`room_id`);');
+
+    this.addSql('alter table `add_partici_op` add column `user_user_uid` varchar null;');
+    this.addSql('alter table `add_partici_op` add column `partici_op_id` varchar null;');
+    this.addSql('create index `add_partici_op_user_user_uid_index` on `add_partici_op` (`user_user_uid`);');
+    this.addSql('create index `add_partici_op_partici_op_id_index` on `add_partici_op` (`partici_op_id`);');
+
+    this.addSql('alter table `update_partici_op` add column `user_user_uid` varchar null;');
+    this.addSql('alter table `update_partici_op` add column `partici_op_id` varchar null;');
+    this.addSql('create index `update_partici_op_user_user_uid_index` on `update_partici_op` (`user_user_uid`);');
+    this.addSql('create index `update_partici_op_partici_op_id_index` on `update_partici_op` (`partici_op_id`);');
+
+    this.addSql('alter table `partici` add column `user_user_uid` varchar null;');
+    this.addSql('alter table `partici` add column `room_id` varchar null;');
+    this.addSql('create index `partici_user_user_uid_index` on `partici` (`user_user_uid`);');
+    this.addSql('create index `partici_room_id_index` on `partici` (`room_id`);');
 
     this.addSql('alter table `update_chara_op` add column `room_op_id` varchar null;');
     this.addSql('create index `update_chara_op_room_op_id_index` on `update_chara_op` (`room_op_id`);');
@@ -278,6 +297,8 @@ export class Migration20210213152832 extends Migration {
     this.addSql('alter table `board` add column `room_id` varchar null;');
     this.addSql('create index `board_room_id_index` on `board` (`room_id`);');
 
+    this.addSql('create unique index `room_op_prev_revision_room_id_unique` on `room_op` (`prev_revision`, `room_id`);');
+
     this.addSql('create unique index `room_pub_ch_room_id_key_unique` on `room_pub_ch` (`room_id`, `key`);');
 
     this.addSql('create unique index `update_room_bgm_op_room_op_id_channel_key_unique` on `update_room_bgm_op` (`room_op_id`, `channel_key`);');
@@ -296,7 +317,13 @@ export class Migration20210213152832 extends Migration {
 
     this.addSql('create unique index `param_name_room_id_type_key_unique` on `param_name` (`room_id`, `type`, `key`);');
 
-    this.addSql('create unique index `participant_user_user_uid_room_id_unique` on `participant` (`user_user_uid`, `room_id`);');
+    this.addSql('create unique index `partici_op_prev_revision_room_id_unique` on `partici_op` (`prev_revision`, `room_id`);');
+
+    this.addSql('create unique index `add_partici_op_partici_op_id_user_user_uid_unique` on `add_partici_op` (`partici_op_id`, `user_user_uid`);');
+
+    this.addSql('create unique index `update_partici_op_partici_op_id_user_user_uid_unique` on `update_partici_op` (`partici_op_id`, `user_user_uid`);');
+
+    this.addSql('create unique index `partici_user_user_uid_room_id_unique` on `partici` (`user_user_uid`, `room_id`);');
 
     this.addSql('create unique index `update_bool_param_op_update_chara_op_id_key_unique` on `update_bool_param_op` (`update_chara_op_id`, `key`);');
 

@@ -1,7 +1,6 @@
 import { Connection, IDatabaseDriver, LoggerNamespace, MikroORM } from '@mikro-orm/core';
 import { AddBoardOp, Board, BoardBase, RemoveBoardOp, UpdateBoardOp } from './graphql+typegoose/entities/board/mikro-orm';
 import { CharaBase, Chara, AddCharaOp, RemoveCharaOp, UpdateCharaOp } from './graphql+typegoose/entities/character/mikro-orm';
-import { Participant } from './graphql+typegoose/entities/participant/mikro-orm';
 import { AddPieceLocOp, PieceLoc, PieceLocBase, RemovedPieceLoc, RemovePieceLocOp, UpdatePieceLocOp } from './graphql+typegoose/entities/character/pieceLocation/mikro-orm';
 import { Room, RoomOp } from './graphql+typegoose/entities/room/mikro-orm';
 import { RoomPrvMsg, RoomPubCh, RoomPubMsg, RoomSe } from './graphql+typegoose/entities/roomMessage/mikro-orm';
@@ -12,6 +11,7 @@ import { AddRoomBgmOp, RemoveRoomBgmOp, RoomBgm, RoomBgmBase, UpdateRoomBgmOp } 
 import { BoolParam, BoolParamBase, RemovedBoolParam, UpdateBoolParamOp } from './graphql+typegoose/entities/character/boolParam/mikro-orm';
 import { NumParamBase, NumParam, RemovedNumParam, AddNumParamOp, UpdateNumParamOp, NumMaxParam, NumMaxParamBase, RemovedNumMaxParam, UpdateNumMaxParamOp } from './graphql+typegoose/entities/character/numParam/mikro-orm';
 import { StrParamBase, StrParam, RemovedStrParam, UpdateStrParamOp } from './graphql+typegoose/entities/character/strParam/mikro-orm';
+import { AddParticiOp, Partici, ParticiOp, UpdateParticiOp } from './graphql+typegoose/entities/participant/mikro-orm';
 
 const entities = [
     BoardBase,
@@ -47,7 +47,10 @@ const entities = [
     RemovedStrParam,
     UpdateStrParamOp,
 
-    Participant,
+    Partici,
+    ParticiOp,
+    AddParticiOp,
+    UpdateParticiOp,
 
     PieceLocBase,
     PieceLoc,

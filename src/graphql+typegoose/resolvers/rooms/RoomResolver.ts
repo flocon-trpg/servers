@@ -11,23 +11,25 @@ import { JoinRoomFailureType } from '../../../enums/JoinRoomFailureType';
 import { GetRoomsListResult } from '../../entities/getRoomsListResult/graphql';
 import * as Room$MikroORM from '../../entities/room/mikro-orm';
 import * as Room$Global from '../../entities/room/global';
+import * as Participant$GraphQL from '../../entities/participant/graphql';
 import { stateToGraphql as stateToGraphql$RoomAsListItem } from '../../entities/roomAsListItem/global';
 import { queueLimitReached } from '../../../utils/PromiseQueue';
 import { LeaveRoomResult } from '../../entities/leaveRoomResult/graphql';
 import { CreateRoomResult } from '../../entities/createRoomResult/graphql';
-import { Participant } from '../../entities/participant/mikro-orm';
 import { JoinRoomResult } from '../../entities/joinRoomResult/graphql';
 import { serverTooBusyMessage } from '../utils/messages';
 import { RoomOperation, RoomOperated, RoomOperationInput } from '../../entities/room/graphql';
 import { OperateRoomFailureResult, OperateRoomIdResult, OperateRoomNonJoinedResult, OperateRoomResult, OperateRoomSuccessResult } from '../../entities/operateRoomResult/graphql';
 import { OperateRoomFailureType } from '../../../enums/OperateRoomFailureType';
 import { ROOM_OPERATED } from '../../utils/Topics';
-import { toGraphQL } from '../../entities/participant/global';
 import { Result, ResultModule } from '../../../@shared/Result';
 import * as User$MikroORM from '../../entities/user/mikro-orm';
 import { createPrivateMessages, createPublicMessages } from '../utils/sample';
 import { LeaveRoomFailureType } from '../../../enums/LeaveRoomFailureType';
 import { loadServerConfigAsMain } from '../../../config';
+import { MapUpOperationElementUnion, ReadonlyMapUpOperation, replace, update } from '../../mapOperations';
+import { Partici } from '../../entities/participant/mikro-orm';
+import { addAndCreateGraphQLOperation, toGraphQL as toParticipantsGraphQL, updateAndCreateGraphQLOperation } from '../../entities/participant/global';
 
 @InputType()
 class CreateRoomInput {
@@ -80,6 +82,23 @@ class GetRoomArgs {
     public id!: string;
 }
 
+type RoomOperationPayload = {
+    type: 'roomOperationPayload';
+    roomId: string;
+    participants: ReadonlySet<string>; // UserUid
+    graphQLOperationGenerator: Room$Global.GraphQLOperationGenerator;
+    operatedBy: string;
+}
+
+type ParticipantOperationPayload = {
+    type: 'participantOperation';
+    roomId: string;
+    participants: ReadonlySet<string>; // UserUid
+    participantsOperation: Participant$GraphQL.ParticipantsOperation;
+}
+
+type RoomOperatedPayload = RoomOperationPayload | ParticipantOperationPayload;
+
 type OperateCoreResult = {
     type: 'success';
     result: OperateRoomSuccessResult;
@@ -95,12 +114,110 @@ type OperateCoreResult = {
     result: OperateRoomFailureResult;
 }
 
-export type RoomOperationPayload = {
-    roomId: string;
-    participants: ReadonlySet<string>; // UserUid
-    graphQLOperationGenerator: Room$Global.GraphQLOperationGenerator;
-    operatedBy: string;
-}
+const joinRoomCore = async ({
+    args,
+    context,
+    globalEntryPhrase,
+    strategy,
+}: {
+    args: JoinRoomArgs;
+    context: ResolverContext;
+    globalEntryPhrase: string | undefined;
+    // 新たにRoleを設定する場合はParticipantRoleを返す。Roleを変えない場合は'id'を返す。
+    strategy: (params: {
+        room: Room$MikroORM.Room;
+        args: JoinRoomArgs;
+        me: Partici | undefined;
+    }) => ParticipantRole | JoinRoomFailureType.WrongPhrase | 'id';
+}): Promise<{ result: typeof JoinRoomResult; payload: RoomOperatedPayload | undefined }> => {
+    const decodedIdToken = checkSignIn(context);
+    if (decodedIdToken === NotSignIn) {
+        return { result: { failureType: JoinRoomFailureType.NotSignIn }, payload: undefined };
+    }
+
+    const queue = async (): Promise<{ result: typeof JoinRoomResult; payload: RoomOperatedPayload | undefined }> => {
+        const em = context.createEm();
+        const entryUser = await getUserIfEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase, });
+        await em.flush();
+        if (entryUser == null) {
+            return {
+                result: {
+                    failureType: JoinRoomFailureType.NotEntry,
+                },
+                payload: undefined,
+            };
+        }
+        const findResult = await findRoomAndMyParticipantAndParitipantUserUids({ em, userUid: decodedIdToken.uid, roomId: args.id });
+        if (findResult == null) {
+            return {
+                result: {
+                    failureType: JoinRoomFailureType.NotFound,
+                },
+                payload: undefined,
+            };
+        }
+        const { room, me, participantUserUids } = findResult;
+        const strategyResult = strategy({ me, room, args });
+        switch (strategyResult) {
+            case 'id': {
+                return {
+                    result: {
+                        operation: undefined,
+                    },
+                    payload: undefined,
+                };
+            }
+            case JoinRoomFailureType.WrongPhrase: {
+                return {
+                    result: {
+                        failureType: JoinRoomFailureType.WrongPhrase,
+                    },
+                    payload: undefined,
+                };
+            }
+            default: {
+                let graphQLOperation: Participant$GraphQL.ParticipantsOperation;
+                if (me == null) {
+                    graphQLOperation = await addAndCreateGraphQLOperation({
+                        em,
+                        userUid: decodedIdToken.uid,
+                        newValue: { role: ParticipantRole.Player, name: args.name },
+                        user: entryUser,
+                        room,
+                    });
+                } else {
+                    graphQLOperation = await updateAndCreateGraphQLOperation({
+                        em,
+                        userUid: decodedIdToken.uid,
+                        operation: {
+                            role: { newValue: strategyResult }
+                        },
+                        room,
+                    });
+                }
+                await em.flush();
+                return {
+                    result: {
+                        operation: graphQLOperation,
+                    },
+                    payload: {
+                        type: 'participantOperation',
+                        // Roomに参加したばかりの場合、decodedToken.uidはparticipantUserUidsに含まれないためSubscriptionは実行されない。だが、そのようなユーザーにroomOperatedで通知する必要はないため問題ない。
+                        participants: participantUserUids,
+                        participantsOperation: graphQLOperation,
+                        roomId: room.id,
+                    },
+                };
+            }
+        }
+    };
+
+    const result = await context.promiseQueue.next(queue);
+    if (result.type === queueLimitReached) {
+        throw serverTooBusyMessage;
+    }
+    return result.value;
+};
 
 @Resolver()
 export class RoomResolver {
@@ -156,9 +273,10 @@ export class RoomResolver {
                 };
             }
             const newRoom = new Room$MikroORM.Room({ name: input.roomName });
-            const newParticipant = new Participant({ role: ParticipantRole.Master, name: input.participantName });
-            newRoom.participants.add(newParticipant);
-            entryUser.participants.add(newParticipant);
+            // このRoomのroomOperatedを購読しているユーザーはいないので、roomOperatedは実行する必要がない。
+            const newParticipant = new Partici({ role: ParticipantRole.Master, name: input.participantName });
+            newRoom.particis.add(newParticipant);
+            entryUser.particis.add(newParticipant);
             newRoom.deletePhrase = input.deletePhrase;
             newRoom.joinAsPlayerPhrase = input.joinAsPlayerPhrase;
             newRoom.joinAsSpectatorPhrase = input.joinAsSpectatorPhrase;
@@ -166,7 +284,7 @@ export class RoomResolver {
             const roomState = await Room$Global.RoomState.create(newRoom);
             const graphqlState = await roomState.toGraphQL({
                 deliverTo: decodedIdToken.uid,
-                revision: newRoom.revision
+                revision: newRoom.roomRevision
             });
             await em.flush();
             return {
@@ -187,143 +305,63 @@ export class RoomResolver {
         return this.createRoomCore({ input, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
     }
 
-    public async joinRoomAsPlayerCore({ args, context, globalEntryPhrase }: { args: JoinRoomArgs; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<typeof JoinRoomResult> {
-        const decodedIdToken = checkSignIn(context);
-        if (decodedIdToken === NotSignIn) {
-            return { failureType: JoinRoomFailureType.NotSignIn };
-        }
-
-        const queue = async () => {
-            const em = context.createEm();
-            const entryUser = await getUserIfEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase, });
-            await em.flush();
-            if (entryUser == null) {
-                return {
-                    failureType: JoinRoomFailureType.NotEntry,
-                };
-            }
-            const findResult = await findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId: args.id });
-            if (findResult == null) {
-                return {
-                    failureType: JoinRoomFailureType.NotFound,
-                };
-            }
-            const { room, me } = findResult;
-            if (me !== undefined) {
-                switch (me.role) {
-                    case ParticipantRole.Master:
-                    case ParticipantRole.Player: {
-                        return toGraphQL({ source: { ...me, role: me.role }, userUid: decodedIdToken.uid });
-                    }
-                    case ParticipantRole.Spectator:
-                    case null:
-                    case undefined: {
-                        if (room.joinAsPlayerPhrase != null && room.joinAsPlayerPhrase !== args.phrase) {
-                            return {
-                                failureType: JoinRoomFailureType.WrongPhrase,
-                            };
-                        }
-                        me.role = ParticipantRole.Player;
-                        await em.flush();
-                        return toGraphQL({ source: { ...me, role: me.role }, userUid: decodedIdToken.uid });
+    public async joinRoomAsPlayerCore({ args, context, globalEntryPhrase }: { args: JoinRoomArgs; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<{ result: typeof JoinRoomResult; payload: RoomOperatedPayload | undefined }> {
+        return joinRoomCore({
+            args, context, globalEntryPhrase, strategy: ({ me, room }) => {
+                if (me != null) {
+                    switch (me.role) {
+                        case ParticipantRole.Master:
+                        case ParticipantRole.Player:
+                            return 'id';
+                        default:
+                            break;
                     }
                 }
+                if (room.joinAsPlayerPhrase != null && room.joinAsPlayerPhrase !== args.phrase) {
+                    return JoinRoomFailureType.WrongPhrase;
+                }
+                return ParticipantRole.Player;
             }
-            if (room.joinAsPlayerPhrase != null && room.joinAsPlayerPhrase !== args.phrase) {
-                return {
-                    failureType: JoinRoomFailureType.WrongPhrase,
-                };
-            }
-            const newParticipant = new Participant({ role: ParticipantRole.Player, name: args.name });
-            room.participants.add(newParticipant);
-            entryUser.participants.add(newParticipant);
-            await em.flush();
-            return {
-                ...newParticipant,
-                role: ParticipantRole.Player,
-            };
-        };
-
-        const result = await context.promiseQueue.next(queue);
-        if (result.type === queueLimitReached) {
-            throw serverTooBusyMessage;
-        }
-        return result.value;
+        });
     }
 
     @Mutation(() => JoinRoomResult)
-    public joinRoomAsPlayer(@Args() args: JoinRoomArgs, @Ctx() context: ResolverContext): Promise<typeof JoinRoomResult> {
-        return this.joinRoomAsPlayerCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+    public async joinRoomAsPlayer(@Args() args: JoinRoomArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<typeof JoinRoomResult> {
+        const { result, payload } = await this.joinRoomAsPlayerCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+        if (payload != null) {
+            await pubSub.publish(ROOM_OPERATED, payload);
+        }
+        return result;
     }
 
-    public async joinRoomAsSpectatorCore({ args, context, globalEntryPhrase }: { args: JoinRoomArgs; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<typeof JoinRoomResult> {
-        const decodedIdToken = checkSignIn(context);
-        if (decodedIdToken === NotSignIn) {
-            return { failureType: JoinRoomFailureType.NotSignIn };
-        }
-
-        const queue = async () => {
-            const em = context.createEm();
-            const entryUser = await getUserIfEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase, });
-            await em.flush();
-            if (entryUser == null) {
-                return {
-                    failureType: JoinRoomFailureType.NotEntry,
-                };
-            }
-            const findResult = await findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId: args.id });
-            if (findResult == null) {
-                return {
-                    failureType: JoinRoomFailureType.NotFound,
-                };
-            }
-            const { room, me } = findResult;
-            if (me !== undefined) {
-                switch (me.role) {
-                    case ParticipantRole.Master:
-                    case ParticipantRole.Player:
-                    case ParticipantRole.Spectator: {
-                        return toGraphQL({ source: { ...me, role: me.role }, userUid: decodedIdToken.uid });
-                    }
-                    case null:
-                    case undefined: {
-                        if (room.joinAsSpectatorPhrase != null && room.joinAsSpectatorPhrase !== args.phrase) {
-                            return {
-                                failureType: JoinRoomFailureType.WrongPhrase,
-                            };
-                        }
-                        me.role = ParticipantRole.Spectator;
-                        await em.flush();
-                        return toGraphQL({ source: { ...me, role: me.role }, userUid: decodedIdToken.uid });
+    public async joinRoomAsSpectatorCore({ args, context, globalEntryPhrase }: { args: JoinRoomArgs; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<{ result: typeof JoinRoomResult; payload: RoomOperatedPayload | undefined }> {
+        return joinRoomCore({
+            args, context, globalEntryPhrase, strategy: ({ me, room }) => {
+                if (me != null) {
+                    switch (me.role) {
+                        case ParticipantRole.Master:
+                        case ParticipantRole.Player:
+                        case ParticipantRole.Spectator:
+                            return 'id';
+                        default:
+                            break;
                     }
                 }
+                if (room.joinAsSpectatorPhrase != null && room.joinAsSpectatorPhrase !== args.phrase) {
+                    return JoinRoomFailureType.WrongPhrase;
+                }
+                return ParticipantRole.Player;
             }
-            if (room.joinAsSpectatorPhrase != null && room.joinAsSpectatorPhrase !== args.phrase) {
-                return {
-                    failureType: JoinRoomFailureType.WrongPhrase,
-                };
-            }
-
-            const newParticipant = new Participant({ role: ParticipantRole.Spectator, name: args.name });
-            room.participants.add(newParticipant);
-            entryUser.participants.add(newParticipant);
-            await em.flush();
-            return {
-                ...newParticipant,
-                role: ParticipantRole.Spectator,
-            };
-        };
-
-        const result = await context.promiseQueue.next(queue);
-        if (result.type === queueLimitReached) {
-            throw serverTooBusyMessage;
-        }
-        return result.value;
+        });
     }
 
     @Mutation(() => JoinRoomResult)
-    public joinRoomAsSpectator(@Args() args: JoinRoomArgs, @Ctx() context: ResolverContext): Promise<typeof JoinRoomResult> {
-        return this.joinRoomAsSpectatorCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+    public async joinRoomAsSpectator(@Args() args: JoinRoomArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<typeof JoinRoomResult> {
+        const { result, payload } = await this.joinRoomAsSpectatorCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+        if (payload != null) {
+            await pubSub.publish(ROOM_OPERATED, payload);
+        }
+        return result;
     }
 
     public async getRoomCore({ args, context, globalEntryPhrase }: { args: GetRoomArgs; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<typeof GetRoomResult> {
@@ -357,7 +395,8 @@ export class RoomResolver {
             const roomState = await Room$Global.RoomState.create(room);
             return ResultModule.ok({
                 role: me.role,
-                room: await roomState.toGraphQL({ revision: room.revision, deliverTo: decodedIdToken.uid }),
+                room: await roomState.toGraphQL({ revision: room.roomRevision, deliverTo: decodedIdToken.uid }),
+                participant: await toParticipantsGraphQL({ room }),
             });
         };
         const result = await context.promiseQueue.next(queue);
@@ -445,7 +484,7 @@ export class RoomResolver {
                     result: { failureType: OperateRoomFailureType.NotFound }
                 });
             }
-            const { room, me, participantUserUids: paritipantUserUids } = findResult;
+            const { room, me, participantUserUids } = findResult;
             if (me === undefined) {
                 return ResultModule.ok({
                     type: 'nonJoined',
@@ -453,7 +492,7 @@ export class RoomResolver {
                 });
             }
             const roomState = await Room$Global.RoomState.create(room);
-            const downOperation = await Room$Global.RoomDownOperation.findRange(em, room.id, { from: args.prevRevision, expectedTo: room.revision });
+            const downOperation = await Room$Global.RoomDownOperation.findRange(em, room.id, { from: args.prevRevision, expectedTo: room.roomRevision });
             if (downOperation.isError) {
                 return downOperation;
             }
@@ -477,8 +516,9 @@ export class RoomResolver {
             await em.flush();
 
             const roomOperationPayload: RoomOperationPayload = {
+                type: 'roomOperationPayload',
                 roomId: args.id,
-                participants: paritipantUserUids,
+                participants: participantUserUids,
                 graphQLOperationGenerator,
                 operatedBy: decodedIdToken.uid,
             };
@@ -516,7 +556,7 @@ export class RoomResolver {
     }
 
     @Subscription(() => RoomOperated, { topics: ROOM_OPERATED, nullable: true })
-    public roomOperated(@Root() payload: RoomOperationPayload, @Arg('id') id: string, @Ctx() context: ResolverContext): typeof RoomOperated | undefined {
+    public roomOperated(@Root() payload: RoomOperatedPayload, @Arg('id') id: string, @Ctx() context: ResolverContext): typeof RoomOperated | undefined {
         if (context.decodedIdToken == null || context.decodedIdToken.isError) {
             return undefined;
         }
@@ -524,14 +564,21 @@ export class RoomResolver {
         if (id !== payload.roomId) {
             return undefined;
         }
-        if (payload.operatedBy === userUid) {
-            // payload.operatedBy === userUidの場合、結果はsubscriptionではなくmutationのほうで返す。
-            return undefined;
-        }
         if (!payload.participants.has(userUid)) {
             return undefined;
         }
-        // TODO: DeleteRoomGetOperationも返す
-        return payload.graphQLOperationGenerator.toGraphQLOperation({ operatedBy: payload.operatedBy, deliverTo: userUid, nextRevision: payload.graphQLOperationGenerator.currentRevision });
+        if (payload.type === 'roomOperationPayload') {
+            // web_api側ではpayload.operatedBy === userUidを満たすSubscriptionは無視している（代わりにMutationの結果を用いる）ため、この条件を満たすSubscriptionを送信しないことで通信量の削減が期待できる。だが、ParticipantsOperationと挙動が異なるのは直感的でないため、条件を満たすときでも送信するようにしている。
+            // もし条件を満たすときは送信しないようにしたい場合は、↓のコードのコメントアウトを解除する。
+            // if (payload.operatedBy === userUid) {
+            //     return undefined;
+            // }
+
+            // TODO: DeleteRoomGetOperationも返す
+            return payload.graphQLOperationGenerator.toGraphQLOperation({ operatedBy: payload.operatedBy, deliverTo: userUid, nextRevision: payload.graphQLOperationGenerator.currentRevision });
+        }
+        if (payload.type === 'participantOperation') {
+            return payload.participantsOperation;
+        }
     }
 }

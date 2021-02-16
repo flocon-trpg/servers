@@ -2,14 +2,15 @@ import { createUnionType, Field, InputType, ObjectType } from 'type-graphql';
 import { ReplaceNullableStringUpOperation, ReplaceStringUpOperation } from '../../Operations';
 import { BoardsOperation, BoardState } from '../board/graphql';
 import { CharacterState, CharactersOperation } from '../character/graphql';
-import { Participant } from '../participant/graphql';
+import { participantsOperation, ParticipantsOperation, ParticipantState } from '../participant/graphql';
 import { RoomBgmsOperation, RoomBgmState } from './bgm/graphql';
 import { ParamNamesOperation, ParamNameState } from './paramName/graphql';
 
 @ObjectType()
 export class RoomGetState {
-    @Field()
+    @Field({ description: 'Current revision of Room. Whenever Room is updated, this value is incremented by 1. This value is required when you apply RoomOperation. / Roomの現在のリビジョン。Roomが更新されるたび、この値は1増加する。RoomOperationを適用する際に必要となる。' })
     public revision!: number;
+
 
     @Field()
     public name!: string;
@@ -25,9 +26,6 @@ export class RoomGetState {
 
     @Field(() => [ParamNameState])
     public paramNames!: ParamNameState[];
-
-    @Field(() => [Participant])
-    public participants!: Participant[];
 }
 
 @ObjectType()
@@ -50,14 +48,12 @@ export class RoomOperationValue {
     public name?: ReplaceStringUpOperation;
 }
 
-@InputType()
-export class RoomOperationInput {
-    @Field()
-    public value!: RoomOperationValue;
-}
+export const roomOperation = 'RoomOperation';
 
 @ObjectType()
 export class RoomOperation {
+    public __tstype!: typeof roomOperation;
+
     @Field()
     public revisionTo!: number;
 
@@ -68,22 +64,33 @@ export class RoomOperation {
     public value!: RoomOperationValue;
 }
 
+@InputType()
+export class RoomOperationInput {
+    @Field()
+    public value!: RoomOperationValue;
+}
+
+export const deleteRoomOperation = 'DeleteRoomOperation';
+
 @ObjectType()
 export class DeleteRoomOperation {
+    public __tstype!: typeof deleteRoomOperation;
+
     @Field()
     public deletedBy!: string;
 }
 
 export const RoomOperated = createUnionType({
     name: 'RoomOperated',
-    types: () => [RoomOperation, DeleteRoomOperation] as const,
+    types: () => [RoomOperation, ParticipantsOperation, DeleteRoomOperation] as const,
     resolveType: value => {
-        if ('revisionTo' in value) {
-            return RoomOperation;
+        switch(value.__tstype) {
+            case roomOperation:
+                return RoomOperation;
+            case participantsOperation:
+                return ParticipantsOperation;
+            case deleteRoomOperation:
+                return DeleteRoomOperation;
         }
-        if ('deletedBy' in value) {
-            return DeleteRoomOperation;
-        }
-        return undefined;
     }
 });

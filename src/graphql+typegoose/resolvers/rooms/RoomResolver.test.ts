@@ -2,7 +2,6 @@ import { ParticipantRole } from '../../../enums/ParticipantRole';
 
 import { DualKeyMapUpOperation, DualKeyMapUpOperationElementUnion, update } from '../../dualKeyMapOperations';
 import { CharactersTwoWayOperation } from '../../entities/character/global';
-import { Participant, Participant as Participant$MikroORM } from '../../entities/participant/mikro-orm';
 import * as $MikroORM from '../../entities/room/mikro-orm';
 import * as Global from '../../entities/room/global';
 import * as GraphQL from '../../entities/room/graphql';
@@ -24,6 +23,7 @@ import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
 import { TextTwoWayOperation } from '../../../@shared/textOperation';
 import { TextTwoWayOperationModule } from '../../Operations';
 import { NumMaxParam } from '../../entities/character/numParam/mikro-orm';
+import { Partici } from '../../entities/participant/mikro-orm';
 
 const timeout = 20000;
 
@@ -100,18 +100,18 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }: { em: EM; setupRoom
 
     // 現状はとりあえず全員がParticipantRole.Masterのケースのみを考えている。
     const creatorUser = new User$MikroORM({ userUid: creatorUserUid });
-    const creatorParticipant = new Participant$MikroORM({ name: creatorName, role: ParticipantRole.Master });
+    const creatorParticipant = new Partici({ name: creatorName, role: ParticipantRole.Master });
     creatorUser.isEntry = true;
-    creatorUser.participants.add(creatorParticipant);
+    creatorUser.particis.add(creatorParticipant);
     const nonCreatorUser = new User$MikroORM({ userUid: nonCreatorUserUid });
-    const nonCreatorParticipant = new Participant$MikroORM({ name: nonCreatorName, role: ParticipantRole.Master });
+    const nonCreatorParticipant = new Partici({ name: nonCreatorName, role: ParticipantRole.Master });
     nonCreatorUser.isEntry = true;
-    nonCreatorUser.participants.add(nonCreatorParticipant);
+    nonCreatorUser.particis.add(nonCreatorParticipant);
     const anotherUser = new User$MikroORM({ userUid: anotherUserUid });
-    const anotherParticipant = new Participant$MikroORM({ name: anotherName, role: ParticipantRole.Master });
+    const anotherParticipant = new Partici({ name: anotherName, role: ParticipantRole.Master });
     anotherUser.isEntry = true;
-    anotherUser.participants.add(anotherParticipant);
-    room.participants.add(creatorParticipant, nonCreatorParticipant, anotherParticipant);
+    anotherUser.particis.add(anotherParticipant);
+    room.particis.add(creatorParticipant, nonCreatorParticipant, anotherParticipant);
     em.persist([room]);
 
     return {
@@ -140,7 +140,7 @@ const operateThenGetRoomTestCore = async (strategy: IntegratedTestStrategy, orm:
         await resetDatabase(em);
 
         const createRoomResult = setupRoomAndUsersAndParticipants({ em, setupRoom: strategy.source.roomValue?.setupState });
-        const roomPrevRevision = createRoomResult.room.revision;
+        const roomPrevRevision = createRoomResult.room.roomRevision;
 
         let character: { entity: Character$MikroORM.Chara; operation: Character$GraphQL.UpdateCharacterOperation } | null = null;
         if (strategy.source.character) {
@@ -453,7 +453,7 @@ describe('operate then getRoom', () => {
                 await resetDatabase(em);
 
                 const createRoomResult = setupRoomAndUsersAndParticipants({ em });
-                const roomPrevRevision = createRoomResult.room.revision;
+                const roomPrevRevision = createRoomResult.room.roomRevision;
 
                 const characterStateId = v4();
                 const characterState = new Character$MikroORM.Chara({
@@ -817,7 +817,7 @@ describe('operate then getRoom', () => {
                 await resetDatabase(em);
 
                 const createRoomResult = setupRoomAndUsersAndParticipants({ em });
-                const roomPrevRevision = createRoomResult.room.revision;
+                const roomPrevRevision = createRoomResult.room.roomRevision;
 
                 const characterStateId = v4();
                 const characterState = new Character$MikroORM.Chara({
@@ -933,7 +933,7 @@ describe('operate then getRoom', () => {
                 await resetDatabase(em);
 
                 const createRoomResult = setupRoomAndUsersAndParticipants({ em });
-                const roomFirstRevision = createRoomResult.room.revision;
+                const roomFirstRevision = createRoomResult.room.roomRevision;
 
                 const characterStateId = v4();
                 const characterState = new Character$MikroORM.Chara({
@@ -1060,7 +1060,7 @@ describe('operate then getRoom', () => {
                 await resetDatabase(em);
 
                 const createRoomResult = setupRoomAndUsersAndParticipants({ em });
-                const roomFirstRevision = createRoomResult.room.revision;
+                const roomFirstRevision = createRoomResult.room.roomRevision;
 
                 const characterStateId = v4();
                 const characterState = new Character$MikroORM.Chara({
@@ -1195,7 +1195,7 @@ describe('operate then getRoom', () => {
                 await resetDatabase(em);
 
                 const createRoomResult = setupRoomAndUsersAndParticipants({ em });
-                const roomFirstRevision = createRoomResult.room.revision;
+                const roomFirstRevision = createRoomResult.room.roomRevision;
 
                 const characterStateId = v4();
                 const characterState = new Character$MikroORM.Chara({

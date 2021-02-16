@@ -4,7 +4,6 @@ import { analyze as analyzeCore, executeCompareOperator, maybeDice, MaybeDice, P
 import { RoomParameterNameType } from '../enums/RoomParameterNameType';
 import { Chara } from '../graphql+typegoose/entities/character/mikro-orm';
 import { NumParam } from '../graphql+typegoose/entities/character/numParam/mikro-orm';
-import { Participant } from '../graphql+typegoose/entities/participant/mikro-orm';
 import { Room } from '../graphql+typegoose/entities/room/mikro-orm';
 import { ParamName } from '../graphql+typegoose/entities/room/paramName/mikro-orm';
 import { EM } from '../utils/types';

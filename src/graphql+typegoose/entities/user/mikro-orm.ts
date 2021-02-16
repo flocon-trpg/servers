@@ -1,5 +1,5 @@
 import { Cascade, Collection, Entity, ManyToMany, OneToMany, PrimaryKey, Property } from '@mikro-orm/core';
-import { Participant } from '../participant/mikro-orm';
+import { Partici } from '../participant/mikro-orm';
 import { RoomPrvMsg, RoomPubMsg, RoomSe } from '../roomMessage/mikro-orm';
 
 // ユーザーがアカウント登録した時点では作られず、初めてentryなどをしたときに作られる。
@@ -20,8 +20,8 @@ export class User {
     @Property()
     public isEntry: boolean = false;
 
-    @OneToMany(() => Participant, x => x.user, { orphanRemoval: true })
-    public participants = new Collection<Participant>(this);
+    @OneToMany(() => Partici, x => x.user, { orphanRemoval: true })
+    public particis = new Collection<Partici>(this);
 
     @OneToMany(() => RoomPubMsg, x => x.createdBy, { orphanRemoval: true })
     public roomPubMsgs = new Collection<RoomPubMsg>(this);

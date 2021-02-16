@@ -56,7 +56,7 @@ const loadServerConfig = ({ databaseArg }: { databaseArg: typeof postgresql | ty
             database = (() => {
                 if (sqliteJson != null) {
                     if (postgresqlJson != null) {
-                        throw 'Server config has SQLite and PostgreSQL config, but --db parameter is missing.';
+                        throw 'When server config has SQLite and PostgreSQL config, you must use --db parameter.';
                     }
                     return {
                         __type: 'sqlite',

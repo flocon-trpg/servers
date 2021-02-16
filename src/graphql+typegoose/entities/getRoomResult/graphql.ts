@@ -1,16 +1,20 @@
 import { createUnionType, Field, ObjectType } from 'type-graphql';
 import { GetRoomFailureType } from '../../../enums/GetRoomFailureType';
 import { ParticipantRole } from '../../../enums/ParticipantRole';
-import { RoomGetState, RoomOperation } from '../room/graphql';
+import { ParticipantsGetState } from '../participant/graphql';
+import { RoomGetState } from '../room/graphql';
 import { RoomAsListItem } from '../roomAsListItem/graphql';
 
 @ObjectType()
 export class GetJoinedRoomResult {
-    @Field(() => ParticipantRole)
+    @Field(() => ParticipantRole, { description: '自分の現在のParticipantRole。' })
     public role!: ParticipantRole
 
     @Field()
     public room!: RoomGetState;
+
+    @Field()
+    public participant!: ParticipantsGetState;
 }
 
 @ObjectType()

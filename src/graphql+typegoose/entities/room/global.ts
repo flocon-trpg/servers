@@ -6,10 +6,12 @@ import * as Board$Global from '../board/global';
 import * as Character$Global from '../character/global';
 import * as Participant$GraphQL from '../participant/graphql';
 import * as Participant$MikroORM from '../participant/mikro-orm';
+import * as Participant$Global from '../participant/global';
 import * as GraphQL from './graphql';
 import * as $MikroORM from './mikro-orm';
 import { undefinedForAll } from '../../../utils/helpers';
 import { EM } from '../../../utils/types';
+import { __ } from '../../../@shared/collection';
 
 type IsSequentialResult<T> = {
     type: 'DuplicateElement';
@@ -99,7 +101,7 @@ export class RoomDownOperation {
         if (paramNames.isError) {
             return paramNames;
         }
-        
+
         const boards = await Board$Global.BoardsDownOperation.create({
             add: entity.addBoardOps,
             remove: entity.removeBoardOps,
@@ -236,11 +238,10 @@ export class RoomState {
         characters: Character$Global.CharactersState;
         bgms: Bgm$Global.RoomBgmsState;
         paramNames: ParamName$Global.ParamNamesState;
-        participants: Participant$MikroORM.Participant[];
     }) { }
 
     public static async create(entity: $MikroORM.Room): Promise<RoomState> {
-        const roomValue: RoomType = { 
+        const roomValue: RoomType = {
             ...entity,
         };
 
@@ -250,7 +251,6 @@ export class RoomState {
             characters: await Character$Global.CharactersState.create(await entity.characters.loadItems()),
             bgms: Bgm$Global.RoomBgmsState.create(await entity.roomBgms.loadItems()),
             paramNames: ParamName$Global.ParamNamesState.create(await entity.paramNames.loadItems()),
-            participants: await entity.participants.loadItems(),
         });
     }
 
@@ -294,7 +294,6 @@ export class RoomState {
                 characters: prevCharactersState.value.prevState,
                 bgms: prevBgmsState.value.prevState,
                 paramNames: prevParamNamesState.value.prevState,
-                participants: nextState.params.participants,
             }),
             nextState,
             twoWayOperation: new RoomTwoWayOperation({
@@ -334,19 +333,10 @@ export class RoomState {
             characters: this.params.characters.clone(),
             bgms: this.params.bgms.clone(),
             paramNames: this.params.paramNames.clone(),
-            participants: this.params.participants,
         });
     }
 
     public async toGraphQL({ revision, deliverTo }: { revision: number; deliverTo: string }): Promise<GraphQL.RoomGetState> {
-        const participants: Participant$GraphQL.Participant[] = [];
-        for (const participant of this.params.participants) {
-            const userUid = await participant.user.load('userUid');
-            participants.push({
-                ...participant,
-                userUid,
-            });
-        }
         return {
             ...this.params.roomValue,
             revision,
@@ -354,7 +344,6 @@ export class RoomState {
             characters: this.params.characters.toGraphQL({ deliverTo }),
             bgms: this.params.bgms.toGraphQL(),
             paramNames: this.params.paramNames.toGraphQL(),
-            participants,
         };
     }
 }
@@ -418,12 +407,12 @@ export class RoomTwoWayOperation {
         em: EM;
         entity: $MikroORM.Room;
     }): Promise<GraphQLOperationGenerator> {
-        const prevRevision = params.entity.revision;
+        const prevRevision = params.entity.roomRevision;
         const prevState = await RoomState.create(params.entity);
         await this.apply(params.entity);
-        params.entity.revision = prevRevision + 1;
-        const operation = this.toMikroORM({ prevRevision: prevRevision });
-        params.entity.operations.add(operation);
+        params.entity.roomRevision = prevRevision + 1;
+        const operation = this.toMikroORM({ prevRevision });
+        params.entity.roomOperations.add(operation);
         const nextState = await RoomState.create(params.entity);
         return new GraphQLOperationGenerator({ prevState, nextState, twoWayOperation: this, currentRevision: prevRevision + 1 });
     }
@@ -435,6 +424,7 @@ export class RestoredRoom {
     // - apply(nextState, twoWayOperation.down) = prevState
     public constructor(private readonly params: { prevState: RoomState; nextState: RoomState; twoWayOperation?: RoomTwoWayOperation }) { }
 
+    // ユーザーが行おうとしているRoomOperationValueをtransformする。
     public transform({ clientOperation, operatedBy }: { clientOperation: GraphQL.RoomOperationValue; operatedBy: string }): Result<RoomTwoWayOperation | undefined> {
         const boards = new Board$Global.RestoredBoards({
             prevState: this.params.prevState.boards,
@@ -488,9 +478,9 @@ export class RestoredRoom {
             return ResultModule.ok(undefined);
         }
 
-        return ResultModule.ok(new RoomTwoWayOperation({ 
+        return ResultModule.ok(new RoomTwoWayOperation({
             valueProps: twoWayOperationCore,
-            boards: transformedBoards.value, 
+            boards: transformedBoards.value,
             characters: transformedCharacters.value,
             bgms: transformedBgms.value,
             paramNames: transformedParamNames.value,
@@ -548,6 +538,7 @@ export class GraphQLOperationGenerator {
         operationValue.name = this.params.twoWayOperation.valueProps.name;
 
         return {
+            __tstype: GraphQL.roomOperation,
             revisionTo: params.nextRevision,
             operatedBy: params.operatedBy,
             value: operationValue
