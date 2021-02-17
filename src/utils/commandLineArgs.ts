@@ -1,6 +1,5 @@
 import yargs from 'yargs';
 
-const psql = 'psql';
 export const postgresql = 'postgresql';
 export const sqlite = 'sqlite';
 
@@ -9,7 +8,6 @@ type DbType = typeof postgresql | typeof sqlite;
 const toDbType = (source: string) => {
     switch (source) {
         case postgresql:
-        case psql:
             return postgresql;
         case sqlite:
             return sqlite;
@@ -30,7 +28,7 @@ const getMain = (): Main => {
                 'db': {
                     type: 'string',
                     nargs: 1,
-                    choices: [postgresql, psql, sqlite],
+                    choices: [postgresql, sqlite],
                 },
                 'debug': {
                     type: 'boolean',
@@ -69,7 +67,7 @@ const getMigrationUp = (): MigrationUp => {
                     type: 'string',
                     demandOption: true,
                     nargs: 1,
-                    choices: [postgresql, psql, sqlite],
+                    choices: [postgresql, sqlite],
                 }
             }).argv;
 
@@ -109,7 +107,7 @@ const getMigrationCreate = (): MigrationCreate => {
                     type: 'string',
                     demandOption: true,
                     nargs: 1,
-                    choices: [postgresql, psql, sqlite],
+                    choices: [postgresql, sqlite],
                 },
                 'init': {
                     type: 'boolean',
