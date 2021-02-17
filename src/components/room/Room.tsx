@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Layout as AntdLayout, Drawer, Dropdown, Popconfirm } from 'antd';
+import { Menu, Layout as AntdLayout, Drawer, Dropdown, Popconfirm, Input, Tooltip } from 'antd';
 import DraggableCard, { horizontalPadding } from '../../foundations/DraggableCard';
 import CharactersList from './CharacterList';
 import useRoomConfig from '../../hooks/localStorage/useRoomConfig';
@@ -22,7 +22,7 @@ import BoardDrawer from './BoardDrawer';
 import CreatePrivateMessageDrawer from './CreatePrivateMessageDrawer';
 import { boardsPanel, charactersPanel, gameEffectPanel, messagesPanel } from '../../states/RoomConfig';
 import * as Icon from '@ant-design/icons';
-import { useGetLogLazyQuery, useGetLogQuery, useLeaveRoomMutation } from '../../generated/graphql';
+import { ParticipantRole, useGetLogLazyQuery, useGetLogQuery, useJoinRoomAsPlayerMutation, useLeaveRoomMutation, useRequiresPhraseToJoinAsPlayerLazyQuery, useRequiresPhraseToJoinAsPlayerQuery } from '../../generated/graphql';
 import { useRouter } from 'next/router';
 import path from '../../utils/path';
 import PlaySoundBehavior from '../../foundations/PlaySoundBehavior';
@@ -33,6 +33,74 @@ import { generateAsStaticHtml } from '../../utils/roomLogGenerator';
 import moment from 'moment';
 import EditRoomDrawer from './EditRoomDrawer';
 import MyAuthContext from '../../contexts/MyAuthContext';
+
+type BecomePlayerModalProps = {
+    roomId: string;
+    visible: boolean;
+    // 現在、Playerに昇格するためにはjoinRoomAsPlayerを呼ばなければならず、これにはnameが必要。だが、昇格するだけならばnameは不必要である。余裕があればapi_serverのほうで新たにmutationを追加してそれを用いる。
+    myParticipantName: string;
+    onOk: () => void;
+    onCancel: () => void;
+}
+
+const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, myParticipantName, onOk, onCancel }: BecomePlayerModalProps) => {
+    const [inputValue, setInputValue] = React.useState('');
+    const [isPosting, setIsPosting] = React.useState(false);
+    const [joinRoomAsPlayer] = useJoinRoomAsPlayerMutation();
+    const [requiresPhraseToJoinAsPlayer, requiresPhraseToJoinAsPlayerResult] = useRequiresPhraseToJoinAsPlayerLazyQuery();
+    const requiresPhraseToJoinAsPlayerRef = React.useRef(requiresPhraseToJoinAsPlayer);
+    React.useEffect(() => {
+        requiresPhraseToJoinAsPlayerRef.current = requiresPhraseToJoinAsPlayer;
+    }, [requiresPhraseToJoinAsPlayer]);
+    React.useEffect(() => {
+        setInputValue('');
+        setIsPosting(false);
+        requiresPhraseToJoinAsPlayerRef.current({ variables: { roomId } });
+    }, [visible, roomId]);
+
+    if (requiresPhraseToJoinAsPlayerResult.data?.result.__typename !== 'RequiresPhraseSuccessResult') {
+        return (
+            <Modal
+                visible={visible}
+                okButtonProps={({ disabled: true })}
+                onCancel={() => onCancel()}>
+                サーバーと通信中です…
+            </Modal>
+        );
+    }
+    if (requiresPhraseToJoinAsPlayerResult.data.result.value) {
+        return (
+            <Modal
+                visible={visible}
+                okButtonProps={({ disabled: isPosting })}
+                onOk={() => {
+                    setIsPosting(true);
+                    // TODO: catch
+                    joinRoomAsPlayer({ variables: { id: roomId, name: myParticipantName, phrase: inputValue } }).then(() => {
+                        onOk();
+                    });
+                }}
+                onCancel={() => onCancel()}>
+                <Input placeholder='フレーズ' value={inputValue} onChange={e => setInputValue(e.target.value)} />
+            </Modal>
+        );
+    }
+    return (
+        <Modal
+            visible={visible}
+            okButtonProps={({ disabled: isPosting })}
+            onOk={() => {
+                setIsPosting(true);
+                // TODO: catch
+                joinRoomAsPlayer({ variables: { id: roomId, name: myParticipantName } }).then(() => {
+                    onOk();
+                });
+            }}
+            onCancel={() => onCancel()}>
+            フレーズなしで参加者に昇格できます。昇格しますか？
+        </Modal>
+    );
+};
 
 type ModalState = {
     onOk: () => void;
@@ -54,6 +122,7 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, operate }
     const myAuth = React.useContext(MyAuthContext);
     const roomConfig = useSelector(state => state.roomConfigModule);
     const [modalState, setModalState] = React.useState<ModalState>();
+    const [isBecomePlayerModalVisible, setIsBecomePlayerModalVisible] = React.useState(false);
     const router = useRouter();
     const dispatch = useDispatch();
     const [componentsState, dispatchComponentsState] = React.useReducer(reduce, defaultRoomComponentsState);
@@ -64,7 +133,7 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, operate }
 
     React.useEffect(() => {
         roomStateRef.current = roomState;
-    },[roomState]);
+    }, [roomState]);
     React.useEffect(() => {
         participantsStateRef.current = participantsState;
     }, [participantsState]);
@@ -78,12 +147,12 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, operate }
             // TODO: エラーメッセージを出す
             return;
         }
-        fileDownload(generateAsStaticHtml({ 
-            messages: data.result, 
-            participants: participantsStateRef.current, 
+        fileDownload(generateAsStaticHtml({
+            messages: data.result,
+            participants: participantsStateRef.current,
             characters: roomStateRef.current.characters
         }), `log_${moment(new Date()).format('YYYYMMDDHHmmss')}.html`);
-    },[getLogQueryResult.data]);
+    }, [getLogQueryResult.data]);
 
     if (roomConfig == null || roomConfig.roomId !== roomId) {
         return (<div>loading config file...</div>);
@@ -230,7 +299,11 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, operate }
                                     </Menu.Item>
                                 </Menu.SubMenu>
                                 {me == null || <Menu.SubMenu title={<span><Icon.UserOutlined />{me.name}</span>}>
-
+                                    <Menu.Item
+                                        disabled={me.role === ParticipantRole.Player || me.role === ParticipantRole.Master}
+                                        onClick={() => setIsBecomePlayerModalVisible(true)}>
+                                        {me.role === ParticipantRole.Player || me.role === ParticipantRole.Master ? <Tooltip title='すでに昇格済みです。'>参加者に昇格</Tooltip> : '参加者に昇格'}
+                                    </Menu.Item>
                                 </Menu.SubMenu>}
                             </Menu>
                             <div>
@@ -290,12 +363,14 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, operate }
                                 onCancel={() => setModalState(undefined)}>
                                 {modalState == null || modalState.content}
                             </Modal>
+                            {me == null ? null : <BecomePlayerModal visible={isBecomePlayerModalVisible} onOk={() => setIsBecomePlayerModalVisible(false)} onCancel={() => setIsBecomePlayerModalVisible(false)}
+                                roomId={roomId} myParticipantName={me.name} />}
 
                             <BoardDrawer roomState={roomState} />
                             <CharacterDrawer roomState={roomState} />
                             <CharacterParameterNamesDrawer roomState={roomState} />
                             <CreatePrivateMessageDrawer roomState={roomState} participantsState={participantsState} roomId={roomId} />
-                            <EditRoomDrawer roomState={roomState}/>
+                            <EditRoomDrawer roomState={roomState} />
 
                             <PlaySoundBehavior bgms={roomState.bgms} />
                         </AntdLayout.Content>

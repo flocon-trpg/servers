@@ -277,7 +277,7 @@ export enum FileSourceType {
 
 export type GetJoinedRoomResult = {
   __typename?: 'GetJoinedRoomResult';
-  participant: ParticipantsGetState;
+  participants: ParticipantsGetState;
   role: ParticipantRole;
   room: RoomGetState;
 };
@@ -734,6 +734,7 @@ export type Query = {
   getMessages: GetRoomMessagesResult;
   getRoom: GetRoomResult;
   getRoomsList: GetRoomsListResult;
+  requiresPhraseToJoinAsPlayer: RequiresPhraseResult;
 };
 
 
@@ -749,6 +750,11 @@ export type QueryGetMessagesArgs = {
 
 export type QueryGetRoomArgs = {
   id: Scalars['String'];
+};
+
+
+export type QueryRequiresPhraseToJoinAsPlayerArgs = {
+  roomId: Scalars['String'];
 };
 
 export type ReplaceBoardOperation = {
@@ -886,6 +892,24 @@ export type ReplaceStringUpOperation = {
 
 export type ReplaceStringUpOperationInput = {
   newValue: Scalars['String'];
+};
+
+export type RequiresPhraseFailureResult = {
+  __typename?: 'RequiresPhraseFailureResult';
+  failureType: RequiresPhraseFailureType;
+};
+
+export enum RequiresPhraseFailureType {
+  NotEntry = 'NotEntry',
+  NotFound = 'NotFound',
+  NotSignIn = 'NotSignIn'
+}
+
+export type RequiresPhraseResult = RequiresPhraseFailureResult | RequiresPhraseSuccessResult;
+
+export type RequiresPhraseSuccessResult = {
+  __typename?: 'RequiresPhraseSuccessResult';
+  value: Scalars['Boolean'];
 };
 
 export type RoomAsListItem = {
@@ -1881,7 +1905,7 @@ export type GetRoomQuery = (
     & { room: (
       { __typename?: 'RoomGetState' }
       & RoomGetStateFragment
-    ), participant: (
+    ), participants: (
       { __typename?: 'ParticipantsGetState' }
       & Pick<ParticipantsGetState, 'revision'>
       & { participants: Array<(
@@ -1972,6 +1996,22 @@ export type GetLogQuery = (
       { __typename?: 'RoomSoundEffect' }
       & RoomSoundEffectFragment
     )> }
+  ) }
+);
+
+export type RequiresPhraseToJoinAsPlayerQueryVariables = Exact<{
+  roomId: Scalars['String'];
+}>;
+
+
+export type RequiresPhraseToJoinAsPlayerQuery = (
+  { __typename?: 'Query' }
+  & { result: (
+    { __typename?: 'RequiresPhraseFailureResult' }
+    & Pick<RequiresPhraseFailureResult, 'failureType'>
+  ) | (
+    { __typename?: 'RequiresPhraseSuccessResult' }
+    & Pick<RequiresPhraseSuccessResult, 'value'>
   ) }
 );
 
@@ -2846,7 +2886,7 @@ export const GetRoomDocument = gql`
       room {
         ...RoomGetState
       }
-      participant {
+      participants {
         revision
         participants {
           userUid
@@ -3035,6 +3075,44 @@ export function useGetLogLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Get
 export type GetLogQueryHookResult = ReturnType<typeof useGetLogQuery>;
 export type GetLogLazyQueryHookResult = ReturnType<typeof useGetLogLazyQuery>;
 export type GetLogQueryResult = Apollo.QueryResult<GetLogQuery, GetLogQueryVariables>;
+export const RequiresPhraseToJoinAsPlayerDocument = gql`
+    query RequiresPhraseToJoinAsPlayer($roomId: String!) {
+  result: requiresPhraseToJoinAsPlayer(roomId: $roomId) {
+    ... on RequiresPhraseSuccessResult {
+      value
+    }
+    ... on RequiresPhraseFailureResult {
+      failureType
+    }
+  }
+}
+    `;
+
+/**
+ * __useRequiresPhraseToJoinAsPlayerQuery__
+ *
+ * To run a query within a React component, call `useRequiresPhraseToJoinAsPlayerQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRequiresPhraseToJoinAsPlayerQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRequiresPhraseToJoinAsPlayerQuery({
+ *   variables: {
+ *      roomId: // value for 'roomId'
+ *   },
+ * });
+ */
+export function useRequiresPhraseToJoinAsPlayerQuery(baseOptions: Apollo.QueryHookOptions<RequiresPhraseToJoinAsPlayerQuery, RequiresPhraseToJoinAsPlayerQueryVariables>) {
+        return Apollo.useQuery<RequiresPhraseToJoinAsPlayerQuery, RequiresPhraseToJoinAsPlayerQueryVariables>(RequiresPhraseToJoinAsPlayerDocument, baseOptions);
+      }
+export function useRequiresPhraseToJoinAsPlayerLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RequiresPhraseToJoinAsPlayerQuery, RequiresPhraseToJoinAsPlayerQueryVariables>) {
+          return Apollo.useLazyQuery<RequiresPhraseToJoinAsPlayerQuery, RequiresPhraseToJoinAsPlayerQueryVariables>(RequiresPhraseToJoinAsPlayerDocument, baseOptions);
+        }
+export type RequiresPhraseToJoinAsPlayerQueryHookResult = ReturnType<typeof useRequiresPhraseToJoinAsPlayerQuery>;
+export type RequiresPhraseToJoinAsPlayerLazyQueryHookResult = ReturnType<typeof useRequiresPhraseToJoinAsPlayerLazyQuery>;
+export type RequiresPhraseToJoinAsPlayerQueryResult = Apollo.QueryResult<RequiresPhraseToJoinAsPlayerQuery, RequiresPhraseToJoinAsPlayerQueryVariables>;
 export const CreateRoomDocument = gql`
     mutation CreateRoom($input: CreateRoomInput!) {
   result: createRoom(input: $input) {

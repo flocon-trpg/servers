@@ -210,8 +210,8 @@ export const useRoomState = (roomId: string): RoomStateResult => {
                 case 'GetJoinedRoomResult': {
                     const newRoomStateManager = createStateManager(Room.createState(q.data.result.room), q.data.result.room.revision);
                     const newParticipantManager = new GetOnlyStateManager<Participant.State, Participant.Operation>({
-                        revision: q.data.result.participant.revision,
-                        state: Participant.createState(q.data.result.participant),
+                        revision: q.data.result.participants.revision,
+                        state: Participant.createState(q.data.result.participants),
                         apply: Participant.applyOperation,
                     });
                     roomOperationCache.forEach((operation, revisionTo) => {

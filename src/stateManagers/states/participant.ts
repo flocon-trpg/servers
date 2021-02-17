@@ -41,7 +41,7 @@ const applyOperationElement = ({
     operation
 }: {
     state: StateElement;
-        operation: Omit<ParticipantOperation, '__typename'>;
+    operation: Omit<ParticipantOperation, '__typename'>;
 }) => {
     return produce(state, draft => {
         if (operation.name != null) {
@@ -80,7 +80,7 @@ export const compose = ({
         innerApply: applyOperationElement,
         innerCompose: ({ first, second }) => {
             return {
-                name: ReplaceValueOperationModule.compose(first.name, second.name ),
+                name: ReplaceValueOperationModule.compose(first.name, second.name),
                 role: ReplaceNullableValueOperationModule.compose(first.role, second.role),
             };
         }
