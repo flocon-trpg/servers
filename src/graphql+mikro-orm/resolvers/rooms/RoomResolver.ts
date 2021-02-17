@@ -1,4 +1,4 @@
-import { Resolver, Query, Args, Mutation, Ctx, PubSub, Subscription, Root, ArgsType, Field, Arg, Publisher, InputType, PubSubEngine, Int } from 'type-graphql';
+import { Resolver, Query, Args, Mutation, Ctx, PubSub, Subscription, Root, ArgsType, Field, Arg, Publisher, InputType, PubSubEngine, Int, ObjectType, createUnionType } from 'type-graphql';
 
 import { ResolverContext } from '../../utils/Contexts';
 import { ParticipantRole } from '../../../enums/ParticipantRole';
@@ -30,6 +30,33 @@ import { loadServerConfigAsMain } from '../../../config';
 import { MapUpOperationElementUnion, ReadonlyMapUpOperation, replace, update } from '../../mapOperations';
 import { Partici } from '../../entities/participant/mikro-orm';
 import { addAndCreateGraphQLOperation, toGraphQL as toParticipantsGraphQL, updateAndCreateGraphQLOperation } from '../../entities/participant/global';
+import { RequiresPhraseFailureType } from '../../../enums/RequiresPhraseFailureType';
+
+@ObjectType()
+class RequiresPhraseSuccessResult {
+    @Field()
+    public value!: boolean;
+}
+
+@ObjectType()
+class RequiresPhraseFailureResult {
+    @Field(() => RequiresPhraseFailureType)
+    public failureType!: RequiresPhraseFailureType;
+}
+
+const RequiresPhraseResult = createUnionType({
+    name: 'RequiresPhraseResult',
+    types: () => [RequiresPhraseSuccessResult, RequiresPhraseFailureResult] as const,
+    resolveType: value => {
+        if ('value' in value) {
+            return RequiresPhraseSuccessResult;
+        }
+        if ('failureType' in value) {
+            return RequiresPhraseFailureResult;
+        }
+        return undefined;
+    }
+});
 
 @InputType()
 class CreateRoomInput {
@@ -257,6 +284,45 @@ export class RoomResolver {
         return this.getRoomsListCore({ context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
     }
 
+    public async requiresPhraseToJoinAsPlayerCore({ roomId,context, globalEntryPhrase }: {roomId: string;  context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<typeof RequiresPhraseResult> {
+        const decodedIdToken = checkSignIn(context);
+        if (decodedIdToken === NotSignIn) {
+            return { failureType: RequiresPhraseFailureType.NotSignIn };
+        }
+
+        const queue = async () => {
+            const em = context.createEm();
+            const entry = await checkEntry({ em, userUid: decodedIdToken.uid, globalEntryPhrase });
+            await em.flush();
+            if (!entry) {
+                return {
+                    failureType: RequiresPhraseFailureType.NotEntry,
+                };
+            }
+
+            const room = await em.findOne(Room$MikroORM.Room, { id: roomId });
+            if (room == null) {
+                return {
+                    failureType: RequiresPhraseFailureType.NotFound,
+                };
+            }
+            return {
+                value: room.joinAsPlayerPhrase != null,
+            };
+        };
+
+        const result = await context.promiseQueue.next(queue);
+        if (result.type === queueLimitReached) {
+            throw serverTooBusyMessage;
+        }
+        return result.value;
+    }
+
+    @Query(() => RequiresPhraseResult)
+    public requiresPhraseToJoinAsPlayer(@Arg('roomId') roomId: string, @Ctx() context: ResolverContext): Promise<typeof RequiresPhraseResult> {
+        return this.requiresPhraseToJoinAsPlayerCore({ roomId, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+    }
+
     public async createRoomCore({ input, context, globalEntryPhrase }: { input: CreateRoomInput; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<typeof CreateRoomResult> {
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
@@ -350,7 +416,7 @@ export class RoomResolver {
                 if (room.joinAsSpectatorPhrase != null && room.joinAsSpectatorPhrase !== args.phrase) {
                     return JoinRoomFailureType.WrongPhrase;
                 }
-                return ParticipantRole.Player;
+                return ParticipantRole.Spectator;
             }
         });
     }
@@ -396,7 +462,7 @@ export class RoomResolver {
             return ResultModule.ok({
                 role: me.role,
                 room: await roomState.toGraphQL({ revision: room.roomRevision, deliverTo: decodedIdToken.uid }),
-                participant: await toParticipantsGraphQL({ room }),
+                participants: await toParticipantsGraphQL({ room }),
             });
         };
         const result = await context.promiseQueue.next(queue);

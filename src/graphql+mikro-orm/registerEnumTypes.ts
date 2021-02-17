@@ -17,6 +17,7 @@ import { DeleteMessageFailureType } from '../enums/DeleteMessageFailureType';
 import { EditMessageFailureType } from '../enums/EditMessageFailureType';
 import { MakeMessageNotSecretFailureType } from '../enums/MakeMessageNotSecretFailureType';
 import { GetRoomLogFailureType } from '../enums/GetRoomLogFailureType';
+import { RequiresPhraseFailureType } from '../enums/RequiresPhraseFailureType';
 
 let hasRegistered = false;
 const registerEnumTypes = (): void => {
@@ -65,6 +66,9 @@ const registerEnumTypes = (): void => {
     });
     registerEnumType(ParticipantRole, {
         name: 'ParticipantRole'
+    });
+    registerEnumType(RequiresPhraseFailureType, {
+        name: 'RequiresPhraseFailureType'
     });
     registerEnumType(RoomParameterNameType, {
         name: 'RoomParameterNameType'

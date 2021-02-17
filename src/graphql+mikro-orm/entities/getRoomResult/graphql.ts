@@ -14,7 +14,7 @@ export class GetJoinedRoomResult {
     public room!: RoomGetState;
 
     @Field()
-    public participant!: ParticipantsGetState;
+    public participants!: ParticipantsGetState;
 }
 
 @ObjectType()
