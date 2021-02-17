@@ -118,7 +118,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
 
     if (apolloClient == null) {
         return (<div style={({ padding: 5 })}>
-            {'しばらくお待ち下さい…。 / Please wait...'/*しばらくお待ち下さい…。もし約20秒以上この画面のままの場合、どこかで問題が発生している可能性があります。 / Please wait... If you have waited for more than about 20 seconds, something might be wrong.*/}
+            {'しばらくお待ち下さい… / Please wait…'/*しばらくお待ち下さい…。もし約20秒以上この画面のままの場合、どこかで問題が発生している可能性があります。 / Please wait... If you have waited for more than about 20 seconds, something might be wrong.*/}
         </div>);
     }
     return (

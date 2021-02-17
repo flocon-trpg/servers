@@ -27,10 +27,12 @@ const PlayBgmBehavior: React.FC<PlayBgmBehaviorProps> = ({ bgm }: PlayBgmBehavio
         const howl = new Howl({
             src: __(urlArray).compact(x => x).toArray(),
             loop: true,
+            volume,
         });
         howl.play();
         return (() => {
-            howl.stop();
+            howl.fade(volume, 0, 1000);
+            setTimeout(() => howl.stop(), 1000);
         });
     }, [urlArray, volume]);
 

@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import React from 'react';
 import RoomComponent from '../../components/room/Room';
 import { GetRoomFailureType, JoinRoomAsPlayerMutation, JoinRoomFailureType, ParticipantRole, RoomAsListItemFragment, RoomGetStateFragment, useJoinRoomAsPlayerMutation, useJoinRoomAsSpectatorMutation, useRoomOperatedSubscription } from '../../generated/graphql';
-import { Alert, Button, Input, Result, Spin } from 'antd';
+import { Alert, Button, Card, Input, Result, Spin, Tooltip } from 'antd';
 import Layout from '../../layouts/Layout';
 import { ApolloProvider, FetchResult } from '@apollo/client';
 import MyAuthContext from '../../contexts/MyAuthContext';
@@ -10,14 +10,17 @@ import { createState } from '../../stateManagers/states/room';
 import { getRoomFailure, joined, loading, mutationFailure, nonJoined, requiresLogin, useRoomState } from '../../hooks/useRoomState';
 import AlertDialog from '../../foundations/AlertDialog';
 import Loading from '../../components/alerts/Loading';
+import { State as ParticipantsState } from '../../stateManagers/states/participant';
+import Center from '../../foundations/Center';
 
 type JoinRoomFormProps = {
-    room: RoomAsListItemFragment;
+    roomState: RoomAsListItemFragment;
     onJoin?: () => void;
 }
 
-const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ room, onJoin }: JoinRoomFormProps) => {
-    const [name, setName] = React.useState<string>('anonymous');
+const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRoomFormProps) => {
+    const myAuth = React.useContext(MyAuthContext);
+    const [name, setName] = React.useState<string>(myAuth?.displayName ?? '');
     const [playerPhrase, setPlayerPhrase] = React.useState<string>('');
     const [spectatorPhrase, setSpectatorPhrase] = React.useState<string>('');
     const [joinRoomAsPlayer, joinRoomAsPlayerResult] = useJoinRoomAsPlayerMutation();
@@ -63,43 +66,51 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ room, onJoin }: JoinRoomFor
         if (disableJoinActions) {
             return;
         }
-        const phrase = room.requiresPhraseToJoinAsPlayer ? playerPhrase : undefined;
-        await joinRoomAsPlayer({ variables: { id: room.id, phrase, name } }).then(OnGetResult);
+        const phrase = roomState.requiresPhraseToJoinAsPlayer ? playerPhrase : undefined;
+        await joinRoomAsPlayer({ variables: { id: roomState.id, phrase, name } }).then(OnGetResult);
     };
     const onJoinAsSpectatorButtonClick = async () => {
         if (disableJoinActions) {
             return;
         }
-        const phrase = room.requiresPhraseToJoinAsSpectator ? spectatorPhrase : undefined;
-        await joinRoomAsSpectator({ variables: { id: room.id, phrase, name } }).then(OnGetResult);
+        const phrase = roomState.requiresPhraseToJoinAsSpectator ? spectatorPhrase : undefined;
+        await joinRoomAsSpectator({ variables: { id: roomState.id, phrase, name } }).then(OnGetResult);
     };
     return (
         <Spin spinning={disableJoinActions}>
             {errorMessage == null ? null : (<Alert message={errorMessage} type='error' showIcon />)}
-            <Input
-                onChange={e => setName(e.target.value)}
-                value={name}
-                placeholder="name" />
-            <Input
-                disabled={!room.requiresPhraseToJoinAsPlayer}
-                onChange={e => setPlayerPhrase(e.target.value)}
-                value={playerPhrase}
-                placeholder="player phrase" />
-            <Button
-                type="primary"
-                onClick={onJoinAsPlayerButtonClick}>
-                join as a player
-            </Button>
-            <Input
-                disabled={!room.requiresPhraseToJoinAsSpectator}
-                onChange={e => setSpectatorPhrase(e.target.value)}
-                value={spectatorPhrase}
-                placeholder="spectator phrase" />
-            <Button
-                type="primary"
-                onClick={onJoinAsSpectatorButtonClick}>
-                join as a spectator
-            </Button>
+            <div style={({ display: 'grid', gridTemplateRows: '42px 34px 42px 42px 42px', gridTemplateColumns: '150px 280px 100px', alignItems: 'center' })}>
+                <div style={({ gridColumn: 1, gridRow: 1, marginRight: 8, justifySelf: 'right' })}>名前</div>
+                <Input
+                    style={({ gridColumn: 2, gridRow: 1 })}
+                    onChange={e => setName(e.target.value)}
+                    value={name}
+                    placeholder="名前" />
+                <div style={({ gridColumn: 1, gridRow: 3, marginRight: 8, justifySelf: 'right' })}>参加者として入室</div>
+                {roomState.requiresPhraseToJoinAsPlayer ? <Input
+                    style={({ gridColumn: 2, gridRow: 3 })}
+                    onChange={e => setPlayerPhrase(e.target.value)}
+                    value={playerPhrase}
+                    placeholder="参加フレーズ" /> : <div style={({ gridColumn: 2, gridRow: 3, marginLeft: 4, fontSize: 'small' })}>(参加フレーズなしで入室できます)</div>}
+                <Button
+                    style={({ gridColumn: 3, gridRow: 3 })}
+                    type='primary'
+                    onClick={onJoinAsPlayerButtonClick}>
+                    入室
+                </Button>
+                <div style={({ gridColumn: 1, gridRow: 4, marginRight: 8, justifySelf: 'right' })}>観戦者として入室</div>
+                {roomState.requiresPhraseToJoinAsSpectator ? <Input
+                    style={({ gridColumn: 2, gridRow: 4 })}
+                    onChange={e => setSpectatorPhrase(e.target.value)}
+                    value={spectatorPhrase}
+                    placeholder="観戦フレーズ" /> : <div style={({ gridColumn: 2, gridRow: 4, marginLeft: 4, fontSize: 'small' })}>(観戦フレーズなしで入室できます)</div>}
+                <Button
+                    style={({ gridColumn: 3, gridRow: 4 })}
+                    type='primary'
+                    onClick={onJoinAsPlayerButtonClick}>
+                    入室
+                </Button>
+            </div>
         </Spin>
     );
 };
@@ -123,7 +134,11 @@ const RoomRouter: React.FC<{ id: string }> = ({ id }: { id: string }) => {
         }
         case nonJoined:
             return (<Layout requiresLogin showEntryForm={false}>
-                <JoinRoomForm room={state.nonJoinedRoom} onJoin={() => refetch()} />
+                <Center>
+                    <Card title="入室" >
+                        <JoinRoomForm roomState={state.nonJoinedRoom} onJoin={() => refetch()} />
+                    </Card>
+                </Center>
             </Layout >);
         case getRoomFailure: {
             switch (state.getRoomFailureType) {
