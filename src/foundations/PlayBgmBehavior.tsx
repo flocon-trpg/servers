@@ -11,11 +11,11 @@ import { useDeepCompareEffectNoCheck } from 'use-deep-compare-effect';
 import { useFirebaseStorageUrlArray } from '../hooks/firebaseStorage';
 import { __ } from '../@shared/collection';
 
-type PlayBgmBehaviorProps = {
+type PlayBgmBehaviorCoreProps = {
     bgm: Bgm.State | null;
 }
 
-const PlayBgmBehavior: React.FC<PlayBgmBehaviorProps> = ({ bgm }: PlayBgmBehaviorProps) => {
+const PlayBgmBehaviorCore: React.FC<PlayBgmBehaviorCoreProps> = ({ bgm }: PlayBgmBehaviorCoreProps) => {
     const urlArray = useFirebaseStorageUrlArray(bgm?.files);
     const volume = bgm?.volume;
 
@@ -43,12 +43,12 @@ type Props = {
     bgms: ReadonlyMap<StrIndex5, Bgm.State>;
 }
 
-const PlaySoundBehavior: React.FC<Props> = ({ bgms }: Props) => {
+const PlayBgmBehavior: React.FC<Props> = ({ bgms }: Props) => {
     return (
         <div>
-            {[...bgms].map(([key, bgm]) => <PlayBgmBehavior key={key} bgm={bgm} />)}
+            {[...bgms].map(([key, bgm]) => <PlayBgmBehaviorCore key={key} bgm={bgm} />)}
         </div>
     );
 };
 
-export default PlaySoundBehavior;
+export default PlayBgmBehavior;

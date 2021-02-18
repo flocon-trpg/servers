@@ -2247,6 +2247,24 @@ export type WritePrivateMessageMutation = (
   ) }
 );
 
+export type WriteRoomSoundEffectMutationVariables = Exact<{
+  roomId: Scalars['String'];
+  file: FilePathInput;
+  volume: Scalars['Float'];
+}>;
+
+
+export type WriteRoomSoundEffectMutation = (
+  { __typename?: 'Mutation' }
+  & { result: (
+    { __typename?: 'RoomSoundEffect' }
+    & RoomSoundEffectFragment
+  ) | (
+    { __typename?: 'WriteRoomSoundEffectFailureResult' }
+    & Pick<WriteRoomSoundEffectFailureResult, 'failureType'>
+  ) }
+);
+
 export type EditMessageMutationVariables = Exact<{
   roomId: Scalars['String'];
   messageId: Scalars['String'];
@@ -3602,6 +3620,45 @@ export function useWritePrivateMessageMutation(baseOptions?: Apollo.MutationHook
 export type WritePrivateMessageMutationHookResult = ReturnType<typeof useWritePrivateMessageMutation>;
 export type WritePrivateMessageMutationResult = Apollo.MutationResult<WritePrivateMessageMutation>;
 export type WritePrivateMessageMutationOptions = Apollo.BaseMutationOptions<WritePrivateMessageMutation, WritePrivateMessageMutationVariables>;
+export const WriteRoomSoundEffectDocument = gql`
+    mutation WriteRoomSoundEffect($roomId: String!, $file: FilePathInput!, $volume: Float!) {
+  result: writeRoomSoundEffect(roomId: $roomId, file: $file, volume: $volume) {
+    ... on RoomSoundEffect {
+      ...RoomSoundEffect
+    }
+    ... on WriteRoomSoundEffectFailureResult {
+      failureType
+    }
+  }
+}
+    ${RoomSoundEffectFragmentDoc}`;
+export type WriteRoomSoundEffectMutationFn = Apollo.MutationFunction<WriteRoomSoundEffectMutation, WriteRoomSoundEffectMutationVariables>;
+
+/**
+ * __useWriteRoomSoundEffectMutation__
+ *
+ * To run a mutation, you first call `useWriteRoomSoundEffectMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useWriteRoomSoundEffectMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [writeRoomSoundEffectMutation, { data, loading, error }] = useWriteRoomSoundEffectMutation({
+ *   variables: {
+ *      roomId: // value for 'roomId'
+ *      file: // value for 'file'
+ *      volume: // value for 'volume'
+ *   },
+ * });
+ */
+export function useWriteRoomSoundEffectMutation(baseOptions?: Apollo.MutationHookOptions<WriteRoomSoundEffectMutation, WriteRoomSoundEffectMutationVariables>) {
+        return Apollo.useMutation<WriteRoomSoundEffectMutation, WriteRoomSoundEffectMutationVariables>(WriteRoomSoundEffectDocument, baseOptions);
+      }
+export type WriteRoomSoundEffectMutationHookResult = ReturnType<typeof useWriteRoomSoundEffectMutation>;
+export type WriteRoomSoundEffectMutationResult = Apollo.MutationResult<WriteRoomSoundEffectMutation>;
+export type WriteRoomSoundEffectMutationOptions = Apollo.BaseMutationOptions<WriteRoomSoundEffectMutation, WriteRoomSoundEffectMutationVariables>;
 export const EditMessageDocument = gql`
     mutation EditMessage($roomId: String!, $messageId: String!, $text: String!) {
   result: editMessage(roomId: $roomId, messageId: $messageId, text: $text) {

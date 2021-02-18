@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { Comment, message, Tabs, Button, Menu, Dropdown, Tooltip } from 'antd';
 import moment from 'moment';
-import { AllRoomMessagesSuccessResult, apolloError, failure, loading, useAllRoomMessages, useFilteredRoomMessages, publicChannel, RoomMessage, publicMessage, privateMessage, soundEffect } from '../../hooks/useRoomMessages';
+import { AllRoomMessagesSuccessResult, apolloError, failure, loading, useAllRoomMessages, useFilteredRoomMessages, publicChannel, RoomMessage, publicMessage, privateMessage, soundEffect, newEvent } from '../../hooks/useRoomMessages';
 import * as Participant from '../../stateManagers/states/participant';
 import { __ } from '../../@shared/collection';
 import useConstant from 'use-constant';
@@ -19,11 +19,13 @@ import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
 import * as Character from '../../stateManagers/states/character';
 import { ReadonlyStateMap } from '../../@shared/StateMap';
-import { FilePathFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment, RoomSoundEffectFragment, useDeleteMessageMutation, useEditMessageMutation, useMakeMessageNotSecretMutation } from '../../generated/graphql';
+import { FilePathFragment, FilePathFragmentDoc, RoomPrivateMessageFragment, RoomPublicMessageFragment, RoomSoundEffectFragment, useDeleteMessageMutation, useEditMessageMutation, useMakeMessageNotSecretMutation } from '../../generated/graphql';
 import * as Icon from '@ant-design/icons';
 import { useFirebaseStorageUrl } from '../../hooks/firebaseStorage';
 import InputModal from '../InputModal';
 import Jdenticon from '../../foundations/Jdenticon';
+import { Howl } from 'howler';
+import PlaySoundEffectBehavior from '../../foundations/PlaySoundEffectBehavior';
 
 const Image: React.FC<{ filePath: FilePathFragment | undefined }> = ({ filePath }: { filePath: FilePathFragment | undefined }) => {
     const src = useFirebaseStorageUrl(filePath);
@@ -627,6 +629,20 @@ type Props = {
 const RoomMessages: React.FC<Props> = ({ roomId, participantsState: participants, onActiveTabChange, characters }: Props) => {
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
     const allRoomMessages = useAllRoomMessages({ roomId });
+    const [soundEffect, setSoundEffect] = React.useState<{ filePath: FilePathFragment; volume: number }>();
+
+    React.useEffect(() => {
+        if (allRoomMessages.type !== newEvent) {
+            return;
+        }
+        if (allRoomMessages.event.__typename !== 'RoomSoundEffect') {
+            return;
+        }
+        setSoundEffect({
+            filePath: allRoomMessages.event.file,
+            volume: allRoomMessages.event.volume,
+        });
+    }, [allRoomMessages]);
 
     switch (allRoomMessages.type) {
         case 'loaded':
@@ -640,6 +656,7 @@ const RoomMessages: React.FC<Props> = ({ roomId, participantsState: participants
                         プライベートメッセージを作成
                     </Button>
                     <ChannelMessageTabs style={({ flex: 'auto' })} allRoomMessagesResult={allRoomMessages} participantsState={participants} roomId={roomId} onActiveTabChange={onActiveTabChange} characters={characters} />
+                    <PlaySoundEffectBehavior value={soundEffect} />
                 </div>
             );
         }

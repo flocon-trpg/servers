@@ -25,7 +25,7 @@ import * as Icon from '@ant-design/icons';
 import { ParticipantRole, useChangeParticipantNameMutation, useGetLogLazyQuery, useGetLogQuery, useJoinRoomAsPlayerMutation, useLeaveRoomMutation, usePromoteToPlayerMutation, useRequiresPhraseToJoinAsPlayerLazyQuery, useRequiresPhraseToJoinAsPlayerQuery } from '../../generated/graphql';
 import { useRouter } from 'next/router';
 import path from '../../utils/path';
-import PlaySoundBehavior from '../../foundations/PlaySoundBehavior';
+import PlayBgmBehavior from '../../foundations/PlayBgmBehavior';
 import SoundPlayer from './SoundPlayer';
 import Modal from 'antd/lib/modal/Modal';
 import fileDownload from 'js-file-download';
@@ -393,7 +393,7 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, operate }
                                     minHeight={150}
                                     minWidth={150}
                                     zIndex={roomConfig.panels.gameEffectPanel.zIndex}>
-                                    <SoundPlayer />
+                                    <SoundPlayer roomId={roomId} />
                                 </DraggableCard>}
                                 {roomConfig.panels.messagesPanel.isMinimized ? null : <DraggableCard
                                     header="Messages"
@@ -453,7 +453,7 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, operate }
                             <CreatePrivateMessageDrawer roomState={roomState} participantsState={participantsState} roomId={roomId} />
                             <EditRoomDrawer roomState={roomState} />
 
-                            <PlaySoundBehavior bgms={roomState.bgms} />
+                            <PlayBgmBehavior bgms={roomState.bgms} />
                         </AntdLayout.Content>
                     </AntdLayout>
                 </OperateContext.Provider>
