@@ -79,7 +79,7 @@ export const addAndCreateGraphQLOperation = async ({
     return {
         __tstype: $GraphQL.participantsOperation,
         operatedBy: userUid,
-        revisionTo: room.particiRevision + 1,
+        revisionTo: room.particiRevision,
         update: [],
         replace: [{
             userUid: userUid,
