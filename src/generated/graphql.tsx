@@ -208,7 +208,6 @@ export enum CreateRoomFailureType {
 }
 
 export type CreateRoomInput = {
-  deletePhrase?: Maybe<Scalars['String']>;
   joinAsPlayerPhrase?: Maybe<Scalars['String']>;
   joinAsSpectatorPhrase?: Maybe<Scalars['String']>;
   participantName: Scalars['String'];
@@ -238,9 +237,21 @@ export type DeleteMessageResult = {
   failureType?: Maybe<DeleteMessageFailureType>;
 };
 
+export enum DeleteRoomFailureType {
+  NotCreatedByYou = 'NotCreatedByYou',
+  NotEntry = 'NotEntry',
+  NotFound = 'NotFound',
+  NotSignIn = 'NotSignIn'
+}
+
 export type DeleteRoomOperation = {
   __typename?: 'DeleteRoomOperation';
   deletedBy: Scalars['String'];
+};
+
+export type DeleteRoomResult = {
+  __typename?: 'DeleteRoomResult';
+  failureType?: Maybe<DeleteRoomFailureType>;
 };
 
 export enum EditMessageFailureType {
@@ -410,6 +421,7 @@ export type Mutation = {
   changeParticipantName: ChangeParticipantNameResult;
   createRoom: CreateRoomResult;
   deleteMessage: DeleteMessageResult;
+  deleteRoom: DeleteRoomResult;
   editMessage: EditMessageResult;
   entryToServer: EntryToServerResult;
   joinRoomAsPlayer: JoinRoomResult;
@@ -439,6 +451,11 @@ export type MutationCreateRoomArgs = {
 export type MutationDeleteMessageArgs = {
   messageId: Scalars['String'];
   roomId: Scalars['String'];
+};
+
+
+export type MutationDeleteRoomArgs = {
+  id: Scalars['String'];
 };
 
 
@@ -955,6 +972,7 @@ export type RequiresPhraseSuccessResult = {
 
 export type RoomAsListItem = {
   __typename?: 'RoomAsListItem';
+  createdBy: Scalars['String'];
   id: Scalars['ID'];
   name: Scalars['String'];
   requiresPhraseToJoinAsPlayer: Scalars['Boolean'];
@@ -1005,6 +1023,7 @@ export type RoomGetState = {
   bgms: Array<RoomBgmState>;
   boards: Array<BoardState>;
   characters: Array<CharacterState>;
+  createdBy: Scalars['String'];
   name: Scalars['String'];
   paramNames: Array<ParamNameState>;
   revision: Scalars['Float'];
@@ -1761,12 +1780,12 @@ export type ParticipantValueStateFragment = (
 
 export type RoomAsListItemFragment = (
   { __typename?: 'RoomAsListItem' }
-  & Pick<RoomAsListItem, 'id' | 'name' | 'requiresPhraseToJoinAsPlayer' | 'requiresPhraseToJoinAsSpectator'>
+  & Pick<RoomAsListItem, 'id' | 'name' | 'createdBy' | 'requiresPhraseToJoinAsPlayer' | 'requiresPhraseToJoinAsSpectator'>
 );
 
 export type RoomGetStateFragment = (
   { __typename?: 'RoomGetState' }
-  & Pick<RoomGetState, 'revision' | 'name'>
+  & Pick<RoomGetState, 'revision' | 'name' | 'createdBy'>
   & { boards: Array<(
     { __typename?: 'BoardState' }
     & BoardStateFragment
@@ -2083,6 +2102,19 @@ export type CreateRoomMutation = (
   ) | (
     { __typename?: 'CreateRoomSuccessResult' }
     & CreateRoomResult_CreateRoomSuccessResult_Fragment
+  ) }
+);
+
+export type DeleteRoomMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type DeleteRoomMutation = (
+  { __typename?: 'Mutation' }
+  & { result: (
+    { __typename?: 'DeleteRoomResult' }
+    & Pick<DeleteRoomResult, 'failureType'>
   ) }
 );
 
@@ -2474,14 +2506,15 @@ export const CharacterStateFragmentDoc = gql`
     ${CharacterValueStateFragmentDoc}`;
 export const RoomGetStateFragmentDoc = gql`
     fragment RoomGetState on RoomGetState {
+  revision
+  name
+  createdBy
   boards {
     ...BoardState
   }
   characters {
     ...CharacterState
   }
-  revision
-  name
   paramNames {
     key
     type
@@ -2519,6 +2552,7 @@ export const RoomAsListItemFragmentDoc = gql`
     fragment RoomAsListItem on RoomAsListItem {
   id
   name
+  createdBy
   requiresPhraseToJoinAsPlayer
   requiresPhraseToJoinAsSpectator
 }
@@ -3270,6 +3304,38 @@ export function useCreateRoomMutation(baseOptions?: Apollo.MutationHookOptions<C
 export type CreateRoomMutationHookResult = ReturnType<typeof useCreateRoomMutation>;
 export type CreateRoomMutationResult = Apollo.MutationResult<CreateRoomMutation>;
 export type CreateRoomMutationOptions = Apollo.BaseMutationOptions<CreateRoomMutation, CreateRoomMutationVariables>;
+export const DeleteRoomDocument = gql`
+    mutation DeleteRoom($id: String!) {
+  result: deleteRoom(id: $id) {
+    failureType
+  }
+}
+    `;
+export type DeleteRoomMutationFn = Apollo.MutationFunction<DeleteRoomMutation, DeleteRoomMutationVariables>;
+
+/**
+ * __useDeleteRoomMutation__
+ *
+ * To run a mutation, you first call `useDeleteRoomMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteRoomMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteRoomMutation, { data, loading, error }] = useDeleteRoomMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteRoomMutation(baseOptions?: Apollo.MutationHookOptions<DeleteRoomMutation, DeleteRoomMutationVariables>) {
+        return Apollo.useMutation<DeleteRoomMutation, DeleteRoomMutationVariables>(DeleteRoomDocument, baseOptions);
+      }
+export type DeleteRoomMutationHookResult = ReturnType<typeof useDeleteRoomMutation>;
+export type DeleteRoomMutationResult = Apollo.MutationResult<DeleteRoomMutation>;
+export type DeleteRoomMutationOptions = Apollo.BaseMutationOptions<DeleteRoomMutation, DeleteRoomMutationVariables>;
 export const JoinRoomAsPlayerDocument = gql`
     mutation JoinRoomAsPlayer($id: String!, $name: String!, $phrase: String) {
   result: joinRoomAsPlayer(id: $id, name: $name, phrase: $phrase) {

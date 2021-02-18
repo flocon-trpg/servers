@@ -22,7 +22,7 @@ import BoardDrawer from './BoardDrawer';
 import CreatePrivateMessageDrawer from './CreatePrivateMessageDrawer';
 import { boardsPanel, charactersPanel, gameEffectPanel, messagesPanel, participantsPanel } from '../../states/RoomConfig';
 import * as Icon from '@ant-design/icons';
-import { ChangeParticipantNameFailureType, ParticipantRole, PromoteFailureType, useChangeParticipantNameMutation, useGetLogLazyQuery, useGetLogQuery, useJoinRoomAsPlayerMutation, useLeaveRoomMutation, usePromoteToPlayerMutation, useRequiresPhraseToJoinAsPlayerLazyQuery, useRequiresPhraseToJoinAsPlayerQuery } from '../../generated/graphql';
+import { ChangeParticipantNameFailureType, DeleteRoomFailureType, ParticipantRole, PromoteFailureType, useChangeParticipantNameMutation, useDeleteRoomMutation, useGetLogLazyQuery, useGetLogQuery, useJoinRoomAsPlayerMutation, useLeaveRoomMutation, usePromoteToPlayerMutation, useRequiresPhraseToJoinAsPlayerLazyQuery, useRequiresPhraseToJoinAsPlayerQuery } from '../../generated/graphql';
 import { useRouter } from 'next/router';
 import path from '../../utils/path';
 import PlayBgmBehavior from '../../foundations/PlayBgmBehavior';
@@ -90,7 +90,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, 
                             });
                             onOk();
                             return;
-                        } 
+                        }
 
                         if (e.data?.result.failureType != null) {
                             let text: string | undefined;
@@ -111,7 +111,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, 
                                     type: 'warning',
                                     message: '参加者への昇格に失敗しました。',
                                     description: text,
-                                    createdAt: new Date().getTime(), 
+                                    createdAt: new Date().getTime(),
                                 },
                             });
                             onOk();
@@ -175,6 +175,82 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, 
             }}
             onCancel={() => onCancel()}>
             フレーズなしで参加者に昇格できます。昇格しますか？
+        </Modal>
+    );
+};
+
+type DeleteRoomModalProps = {
+    roomId: string;
+    roomCreatedByMe: boolean;
+    visible: boolean;
+    onOk: () => void;
+    onCancel: () => void;
+}
+
+const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({ roomId, visible, onOk, onCancel, roomCreatedByMe }: DeleteRoomModalProps) => {
+    const notificationContext = React.useContext(NotificationContext);
+    const [isPosting, setIsPosting] = React.useState(false);
+    const [deleteRoom] = useDeleteRoomMutation();
+    React.useEffect(() => {
+        setIsPosting(false);
+    }, [visible, roomId]);
+
+    const disabled = isPosting || !roomCreatedByMe;
+    return (
+        <Modal
+            visible={visible}
+            title='部屋の削除'
+            okButtonProps={({ disabled })}
+            okType='danger'
+            okText='削除する'
+            cancelText={disabled ? '閉じる' : 'キャンセル'}
+            onOk={() => {
+                setIsPosting(true);
+                deleteRoom({ variables: { id: roomId } }).then(e => {
+                    if (e.errors != null) {
+                        notificationContext({
+                            type: apolloErrors,
+                            createdAt: new Date().getTime(),
+                            errors: e.errors
+                        });
+                        onOk();
+                        return;
+                    }
+
+                    if (e.data?.result.failureType != null) {
+                        let text: string | undefined;
+                        switch (e.data?.result.failureType) {
+                            case DeleteRoomFailureType.NotCreatedByYou:
+                                text = 'この部屋の作成者でないため、削除できません。';
+                                break;
+                            default:
+                                text = undefined;
+                                break;
+                        }
+                        notificationContext({
+                            type: 'text',
+                            notification: {
+                                type: 'warning',
+                                message: '部屋の削除に失敗しました。',
+                                description: text,
+                                createdAt: new Date().getTime(),
+                            },
+                        });
+                        onOk();
+                        return;
+                    }
+
+                    onOk();
+                });
+            }}
+            onCancel={() => onCancel()}>
+            {roomCreatedByMe ?
+                <div>
+                    <p>この部屋を削除します。この部屋を作成したユーザーでない限り、部屋を削除することはできません。</p>
+                    <p style={({ fontWeight: 'bold' })}>部屋を削除すると元に戻すことはできず、ログ出力もできません。</p>
+                    <p>本当によろしいですか？</p>
+                </div> :
+                <div>この部屋の作成者でないため、削除することができません。</div>}
         </Modal>
     );
 };
@@ -261,6 +337,7 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, operate }
     const [confirmModalState, setConfirmModalState] = React.useState<ConfirmModalState>();
     const [isBecomePlayerModalVisible, setIsBecomePlayerModalVisible] = React.useState(false);
     const [isChangeMyParticipantNameModalVisible, setIsChangeMyParticipantNameModalVisible] = React.useState(false);
+    const [isDeleteRoomModalVisible, setIsDeleteRoomModalVisible] = React.useState(false);
     const router = useRouter();
     const dispatch = useDispatch();
     const [componentsState, dispatchComponentsState] = React.useReducer(reduceComponentsState, defaultRoomComponentsState);
@@ -362,6 +439,10 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, operate }
                                         <Menu.Item onClick={() => dispatchComponentsState({ type: editRoomDrawerVisibility, newValue: true })}>
                                             編集
                                         </Menu.Item>
+                                        <Menu.Item onClick={() => setIsDeleteRoomModalVisible(true)}>
+                                            <span style={({ color: 'red' })}>削除</span>
+                                        </Menu.Item>
+                                        <Menu.Divider />
                                         <Menu.Item onClick={() => setConfirmModalState({
                                             content: (<span>
                                                 <p>ログには、自分が見ることのできるメッセージだけでなく秘話などの非公開情報も全て含まれます。また、ログをダウンロードすると、システムメッセージによって全員に通知されます。</p>
@@ -559,6 +640,12 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, operate }
                                     onOk={() => setIsChangeMyParticipantNameModalVisible(false)}
                                     onCancel={() => setIsChangeMyParticipantNameModalVisible(false)}
                                     roomId={roomId} />
+                                <DeleteRoomModal
+                                    visible={isDeleteRoomModalVisible}
+                                    onOk={() => setIsDeleteRoomModalVisible(false)}
+                                    onCancel={() => setIsDeleteRoomModalVisible(false)}
+                                    roomId={roomId}
+                                    roomCreatedByMe={myAuth?.uid === roomState.createdBy} />
 
                                 <BoardDrawer roomState={roomState} />
                                 <CharacterDrawer roomState={roomState} />

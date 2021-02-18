@@ -7,7 +7,7 @@ import Layout from '../../layouts/Layout';
 import { ApolloProvider, FetchResult } from '@apollo/client';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import { createState } from '../../stateManagers/states/room';
-import { getRoomFailure, joined, loading, mutationFailure, nonJoined, requiresLogin, useRoomState } from '../../hooks/useRoomState';
+import { deleted, getRoomFailure, joined, loading, mutationFailure, nonJoined, requiresLogin, useRoomState } from '../../hooks/useRoomState';
 import AlertDialog from '../../foundations/AlertDialog';
 import Loading from '../../components/alerts/Loading';
 import { State as ParticipantsState } from '../../stateManagers/states/participant';
@@ -176,6 +176,14 @@ const RoomRouter: React.FC<{ id: string }> = ({ id }: { id: string }) => {
             return (
                 <Layout requiresLogin showEntryForm={false}>
                     <AlertDialog alert={(<Alert type="error" message="Please reload browser" showIcon />)} />
+                </Layout>);
+        case deleted:
+            return (
+                <Layout requiresLogin={false} showEntryForm={false}>
+                    <Result
+                        status='warning'
+                        title='この部屋は削除されました'
+                    />
                 </Layout>);
     }
 };

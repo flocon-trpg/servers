@@ -11,8 +11,6 @@ const wrapperCol = 24 - labelCol;
 
 const roomName = 'roomName';
 const participantName = 'userName';
-const deletePhrase = 'deletePhrase';
-const useDeletePhrase = 'useDeletePhrase';
 const joinAsPlayerPhrase = 'joinAsPlayerPhrase';
 const joinAsSpectatorPhrase = 'joinAsSpectatorPhrase';
 
@@ -39,14 +37,11 @@ const CreateRoomCore: React.FC = () => {
                 }
                 const roomNameValue: string = e[roomName];
                 const participantNameValue: string = e[participantName];
-                const deletePhraseValue: string = e[deletePhrase];
-                const useDeletePhraseValue: boolean = e[useDeletePhrase];
                 const joinAsPlayerPhraseValue: string = e[joinAsPlayerPhrase];
                 const joinAsSpectatorPhraseValue: string = e[joinAsSpectatorPhrase];
                 const input: CreateRoomInput = {
                     roomName: roomNameValue,
                     participantName: participantNameValue,
-                    deletePhrase: useDeletePhraseValue ? deletePhraseValue : undefined,
                     joinAsPlayerPhrase: isJoinAsPlayerPhraseEnabled ? joinAsPlayerPhraseValue : undefined,
                     joinAsSpectatorPhrase: isJoinAsSpectatorPhraseEnabled ? joinAsSpectatorPhraseValue : undefined,
                 };
@@ -82,11 +77,6 @@ const CreateRoomCore: React.FC = () => {
             <Form.Item
                 label="自分の名前"
                 name={participantName}>
-                <Input />
-            </Form.Item>
-            <Form.Item
-                label="削除フレーズ"
-                name={deletePhrase}>
                 <Input />
             </Form.Item>
             <Form.Item

@@ -18,6 +18,7 @@ export const requiresLogin = 'requiresLogin';
 export const nonJoined = 'nonJoined';
 export const getRoomFailure = 'getRoomFailure';
 export const mutationFailure = 'mutationFailure';
+export const deleted = 'deleted';
 
 type RoomState = {
     type: typeof loading;
@@ -39,6 +40,9 @@ type RoomState = {
 } | {
     // TODO: エラーの内容を返したり、unionを細分化する。
     type: typeof mutationFailure;
+} | {
+    type: typeof deleted;
+    deletedBy: string;
 }
 
 type RoomStateResult = {
@@ -115,7 +119,10 @@ export const useRoomState = (roomId: string): RoomStateResult => {
                 }
                 switch (s.data.roomOperated.__typename) {
                     case 'DeleteRoomOperation':
-                        // TODO: 削除時の処理
+                        setState({
+                            type: deleted,
+                            deletedBy: s.data.roomOperated.deletedBy,
+                        });
                         return;
                     case 'RoomOperation': {
                         if (roomStateManager == null) {
