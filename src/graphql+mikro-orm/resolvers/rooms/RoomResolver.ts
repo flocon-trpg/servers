@@ -13,7 +13,7 @@ import * as Participant$GraphQL from '../../entities/participant/graphql';
 import { stateToGraphql as stateToGraphql$RoomAsListItem } from '../../entities/roomAsListItem/global';
 import { queueLimitReached } from '../../../utils/PromiseQueue';
 import { serverTooBusyMessage } from '../utils/messages';
-import { RoomOperation, RoomOperated, RoomOperationInput } from '../../entities/room/graphql';
+import { RoomOperation, RoomOperated, RoomOperationInput, deleteRoomOperation } from '../../entities/room/graphql';
 import { OperateRoomFailureType } from '../../../enums/OperateRoomFailureType';
 import { ROOM_OPERATED } from '../../utils/Topics';
 import { Result, ResultModule } from '../../../@shared/Result';
@@ -34,6 +34,8 @@ import { PromoteResult } from '../../results/PromoteMeResult';
 import { PromoteFailureType } from '../../../enums/PromoteFailureType';
 import { ChangeParticipantNameResult } from '../../results/ChangeParticipantNameResult';
 import { ChangeParticipantNameFailureType } from '../../../enums/ChangeParticipantNameFailureType';
+import { DeleteRoomResult } from '../../results/DeleteRoomResult';
+import { DeleteRoomFailureType } from '../../../enums/DeleteRoomFailureType';
 
 @InputType()
 class CreateRoomInput {
@@ -48,9 +50,12 @@ class CreateRoomInput {
 
     @Field({ nullable: true })
     public joinAsSpectatorPhrase?: string;
+}
 
-    @Field({ nullable: true })
-    public deletePhrase?: string;
+@ArgsType()
+class DeleteRoomArgs {
+    @Field()
+    public id!: string;
 }
 
 @ArgsType()
@@ -112,6 +117,12 @@ type RoomOperationPayload = {
     operatedBy: string;
 }
 
+type DeleteRoomPayload = {
+    type: 'deleteRoomPayload';
+    roomId: string;
+    deletedBy: string;
+}
+
 type ParticipantOperationPayload = {
     type: 'participantOperation';
     roomId: string;
@@ -119,7 +130,7 @@ type ParticipantOperationPayload = {
     participantsOperation: Participant$GraphQL.ParticipantsOperation;
 }
 
-type RoomOperatedPayload = RoomOperationPayload | ParticipantOperationPayload;
+type RoomOperatedPayload = RoomOperationPayload | DeleteRoomPayload | ParticipantOperationPayload;
 
 type OperateCoreResult = {
     type: 'success';
@@ -450,12 +461,11 @@ export class RoomResolver {
                     failureType: CreateRoomFailureType.NotEntry,
                 };
             }
-            const newRoom = new Room$MikroORM.Room({ name: input.roomName });
+            const newRoom = new Room$MikroORM.Room({ name: input.roomName, createdBy: decodedIdToken.uid });
             // このRoomのroomOperatedを購読しているユーザーはいないので、roomOperatedは実行する必要がない。
             const newParticipant = new Partici({ role: ParticipantRole.Master, name: input.participantName });
             newRoom.particis.add(newParticipant);
             entryUser.particis.add(newParticipant);
-            newRoom.deletePhrase = input.deletePhrase;
             newRoom.joinAsPlayerPhrase = input.joinAsPlayerPhrase;
             newRoom.joinAsSpectatorPhrase = input.joinAsSpectatorPhrase;
             em.persist(newRoom);
@@ -483,6 +493,70 @@ export class RoomResolver {
         return this.createRoomCore({ input, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
     }
 
+    public async deleteRoomCore({ args, context, globalEntryPhrase }: { args: DeleteRoomArgs; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<{ result: DeleteRoomResult; payload: RoomOperatedPayload | undefined }> {
+        const decodedIdToken = checkSignIn(context);
+        if (decodedIdToken === NotSignIn) {
+            return {
+                result: { failureType: DeleteRoomFailureType.NotSignIn },
+                payload: undefined,
+            };
+        }
+
+        const queue = async (): Promise<{ result: DeleteRoomResult; payload: RoomOperatedPayload | undefined }> => {
+            const em = context.createEm();
+            const entry = await checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase, });
+            await em.flush();
+            if (!entry) {
+                return {
+                    result: { failureType: DeleteRoomFailureType.NotEntry },
+                    payload: undefined,
+                };
+            }
+
+            // そのRoomのParticipantでない場合でも削除できるようになっている。ただし、もしキック機能が実装されて部屋作成者がキックされた場合は再考の余地があるか。
+
+            const room = await em.findOne(Room$MikroORM.Room, { id: args.id });
+            if (room == null) {
+                return {
+                    result: { failureType: DeleteRoomFailureType.NotFound },
+                    payload: undefined,
+                };
+            }
+            const roomId = room.id;
+            if (room.createdBy !== decodedIdToken.uid) {
+                return {
+                    result: { failureType: DeleteRoomFailureType.NotCreatedByYou },
+                    payload: undefined,
+                };
+            }
+            await Room$MikroORM.deleteRoom(em, room);
+            await em.flush();
+            return {
+                result: { failureType: undefined },
+                payload: {
+                    type: 'deleteRoomPayload',
+                    roomId,
+                    deletedBy: decodedIdToken.uid,
+                },
+            };
+        };
+
+        const result = await context.promiseQueue.next(queue);
+        if (result.type === queueLimitReached) {
+            throw serverTooBusyMessage;
+        }
+        return result.value;
+    }
+
+    @Mutation(() => DeleteRoomResult)
+    public async deleteRoom(@Args() args: DeleteRoomArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<DeleteRoomResult> {
+        const { result, payload } = await this.deleteRoomCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+        if (payload != null) {
+            await pubSub.publish(ROOM_OPERATED, payload);
+        }
+        return result;
+    }
+
     public async joinRoomAsPlayerCore({ args, context, globalEntryPhrase }: { args: JoinRoomArgs; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<{ result: typeof JoinRoomResult; payload: RoomOperatedPayload | undefined }> {
         return joinRoomCore({
             args,
@@ -494,7 +568,7 @@ export class RoomResolver {
                         case undefined:
                             break;
                         default:
-                            return JoinRoomFailureType.AlreadyParticipant; 
+                            return JoinRoomFailureType.AlreadyParticipant;
                     }
                 }
                 if (room.joinAsPlayerPhrase != null && room.joinAsPlayerPhrase !== args.phrase) {
@@ -516,9 +590,9 @@ export class RoomResolver {
 
     public async joinRoomAsSpectatorCore({ args, context, globalEntryPhrase }: { args: JoinRoomArgs; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<{ result: typeof JoinRoomResult; payload: RoomOperatedPayload | undefined }> {
         return joinRoomCore({
-            args, 
+            args,
             context,
-            globalEntryPhrase, 
+            globalEntryPhrase,
             strategy: ({ me, room }) => {
                 if (me != null) {
                     switch (me.role) {
@@ -619,7 +693,7 @@ export class RoomResolver {
                 em,
                 userUid: decodedIdToken.uid,
                 operation: {
-                    name: {newValue: args.newName },
+                    name: { newValue: args.newName },
                 },
                 room,
             });
@@ -877,6 +951,13 @@ export class RoomResolver {
         const userUid = context.decodedIdToken.value.uid;
         if (id !== payload.roomId) {
             return undefined;
+        }
+        if (payload.type === 'deleteRoomPayload') {
+            // Roomが削除されたことは非公開にする必要はないので、このように全員に通知して構わない。
+            return {
+                __tstype: deleteRoomOperation,
+                deletedBy: payload.deletedBy,
+            };
         }
         if (!payload.participants.has(userUid)) {
             return undefined;

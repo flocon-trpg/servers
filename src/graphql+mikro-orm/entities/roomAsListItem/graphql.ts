@@ -8,6 +8,9 @@ export class RoomAsListItem {
     @Field()
     public name!: string;
 
+    @Field({ description: 'この部屋の作成者。Firebase AuthenticationのUserUidで表現される。' })
+    public createdBy!: string;
+
     @Field()
     public requiresPhraseToJoinAsPlayer!: boolean;
 

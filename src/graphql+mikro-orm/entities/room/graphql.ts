@@ -12,6 +12,9 @@ export class RoomGetState {
     public revision!: number;
 
 
+    @Field({description: 'この部屋の作成者。Firebase AuthenticationのUserUidで表現される。'})
+    public createdBy!: string;
+
     @Field()
     public name!: string;
 

@@ -17,10 +17,13 @@ import { Partici, ParticiOp } from '../participant/mikro-orm';
 export class Room {
     public constructor({
         name,
+        createdBy,
     }: {
         name: string;
+        createdBy: string;
     }) {
         this.name = name;
+        this.createdBy = createdBy;
     }
 
     @PrimaryKey()
@@ -40,8 +43,9 @@ export class Room {
     @Property({ nullable: true })
     public joinAsSpectatorPhrase?: string;
 
-    @Property({ nullable: true })
-    public deletePhrase?: string;
+    // userUid
+    @Property()
+    public createdBy!: string;
 
 
     // **** RoomOpの管轄 ****
@@ -159,7 +163,8 @@ export class RoomOp {
     public updateCharacterOps = new Collection<UpdateCharaOp>(this);
 }
 
-export const removeRoom = async (em: EM, room: Room): Promise<void> => {
+// このメソッドではflushは行われない。flushのし忘れに注意。
+export const deleteRoom = async (em: EM, room: Room): Promise<void> => {
     await room.boards.init();
     room.boards.removeAll();
 

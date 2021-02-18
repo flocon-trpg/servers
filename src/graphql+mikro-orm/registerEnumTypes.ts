@@ -20,6 +20,7 @@ import { GetRoomLogFailureType } from '../enums/GetRoomLogFailureType';
 import { RequiresPhraseFailureType } from '../enums/RequiresPhraseFailureType';
 import { PromoteFailureType } from '../enums/PromoteFailureType';
 import { ChangeParticipantNameFailureType } from '../enums/ChangeParticipantNameFailureType';
+import { DeleteRoomFailureType } from '../enums/DeleteRoomFailureType';
 
 let hasRegistered = false;
 const registerEnumTypes = (): void => {
@@ -35,6 +36,9 @@ const registerEnumTypes = (): void => {
     });
     registerEnumType(DeleteMessageFailureType, {
         name: 'DeleteMessageFailureType'
+    });
+    registerEnumType(DeleteRoomFailureType, {
+        name: 'DeleteRoomFailureType'
     });
     registerEnumType(EditMessageFailureType, {
         name: 'EditMessageFailureType'

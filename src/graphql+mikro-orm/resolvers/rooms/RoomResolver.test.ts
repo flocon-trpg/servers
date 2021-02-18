@@ -53,7 +53,7 @@ type IntegratedTestStrategy = {
 
 const resetDatabase = async (em: EM): Promise<void> => {
     for (const room of await em.find($MikroORM.Room, {})) {
-        await $MikroORM.removeRoom(em, room);
+        await $MikroORM.deleteRoom(em, room);
     }
     for (const user of await em.find(User$MikroORM, {})) {
         em.remove(user);
@@ -87,7 +87,7 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }: { em: EM; setupRoom
     const anotherUserUid = 'ANOTHER_USER_ID';
     const anotherName = 'ANOTHER_USER_NAME';
 
-    const room = new $MikroORM.Room({ name: roomName });
+    const room = new $MikroORM.Room({ name: roomName, createdBy: creatorUserUid });
     if (setupRoom != null) {
         setupRoom(room);
     }

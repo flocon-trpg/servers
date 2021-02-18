@@ -64,6 +64,7 @@ const isSequential = <T>(array: T[], getIndex: (elem: T) => number): IsSequentia
 
 type RoomType = {
     name: string;
+    createdBy: string;
 }
 
 type RoomDownOperationType = {
