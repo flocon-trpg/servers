@@ -45,7 +45,7 @@ const loadConfig = () => {
             },
             firebase: {
                 storage: {
-                    enableShared: storage.get('enableShared').valueAsBoolean(),
+                    enablePublic: storage.get('enablePublic').valueAsBoolean(),
                     enableUnlisted: storage.get('enableUnlisted').valueAsBoolean(),
                 },
             },

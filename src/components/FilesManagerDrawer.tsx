@@ -18,20 +18,21 @@ import FirebaseStorageLink from './FirebaseStorageLink';
 import { FilesManagerDrawerType, some } from '../utils/types';
 import FirebaseAppNotFound from './alerts/FirebaseAppNotFound';
 import ConfigContext from '../contexts/ConfigContext';
+import { __ } from '../@shared/collection';
 
 type Reference = firebase.default.storage.Reference;
 
 type Column = ColumnGroupType<Reference> | ColumnType<Reference>;
 
-const ForceReloadSharedListKeyContext = React.createContext(0);
-const SetForceReloadSharedListKeyContext = React.createContext<React.Dispatch<React.SetStateAction<number>>>(() => undefined);
+const ForceReloadPublicListKeyContext = React.createContext(0);
+const SetForceReloadPublicListKeyContext = React.createContext<React.Dispatch<React.SetStateAction<number>>>(() => undefined);
 const ForceReloadUnlistedListKeyContext = React.createContext(0);
 const SetForceReloadUnlistedListKeyContext = React.createContext<React.Dispatch<React.SetStateAction<number>>>(() => undefined);
 
 const Path = {
-    shared: {
-        file: (fileName: string) => `version/1/uploader/shared/${fileName}`,
-        list: 'version/1/uploader/shared',
+    public: {
+        file: (fileName: string) => `version/1/uploader/public/${fileName}`,
+        list: 'version/1/uploader/public',
     },
     unlisted: {
         file: (userId: string, fileName: string) => `version/1/uploader/unlisted/${userId}/${fileName}`,
@@ -39,9 +40,9 @@ const Path = {
     },
 };
 
-const shared = 'shared';
+const $public = 'public';
 const unlisted = 'unlisted';
-type StorageType = typeof shared | typeof unlisted;
+type StorageType = typeof $public | typeof unlisted;
 
 type FirebaseUploaderProps = {
     authUser: firebase.default.User;
@@ -52,16 +53,14 @@ type FirebaseUploaderProps = {
 const FirebaseUploader: React.FC<FirebaseUploaderProps> = ({ authUser, onUploaded, storageType }: FirebaseUploaderProps) => {
     const config = React.useContext(ConfigContext);
 
+    if (storageType === $public) {
+        return <span>publicモードは読み取り専用です。ファイルを設置するには、サーバー管理者がFirebase Storageで直接ファイルをアップロードします。</span>;
+    }
+
     const webConfig = config.web;
     const accept = 'image/gif,image/jpeg,image/png,audio/mpeg,audio/wav';
     const customRequest = (options: RcCustomRequestOptions) => {
         const storageRef = (() => {
-            if (storageType === shared) {
-                if (!webConfig.firebase.storage.enableShared) {
-                    return null;
-                }
-                return getStorageForce(config).ref(Path.shared.file(options.file.name));
-            }
             if (!webConfig.firebase.storage.enableUnlisted) {
                 return null;
             }
@@ -119,7 +118,7 @@ type FileOptionsMenuProps = {
 }
 
 const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({ reference, storageType }: FileOptionsMenuProps) => {
-    const setForceReloadSharedListKey = React.useContext(SetForceReloadSharedListKeyContext);
+    const setForceReloadPublicListKey = React.useContext(SetForceReloadPublicListKeyContext);
     const setForceReloadUnlistedListKey = React.useContext(SetForceReloadUnlistedListKeyContext);
 
     return (
@@ -131,8 +130,8 @@ const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({ reference, storageTyp
                         onOk() {
                             reference.delete().then(() => {
                                 switch(storageType) {
-                                    case shared:
-                                        setForceReloadSharedListKey(oldValue => oldValue + 1);
+                                    case $public:
+                                        setForceReloadPublicListKey(oldValue => oldValue + 1);
                                         break;
                                     case unlisted:
                                         setForceReloadUnlistedListKey(oldValue => oldValue + 1);
@@ -192,10 +191,10 @@ type FirebaseFilesManagerProps = {
 }
 
 const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({ myAuth, onFlieOpen }: FirebaseFilesManagerProps) => {
-    const [sharedFiles, setSharedFiles] = React.useState<Reference[]>([]);
+    const [publicFiles, setPublicFiles] = React.useState<Reference[]>([]);
     const [unlistedFiles, setUnlistedFiles] = React.useState<Reference[]>([]);
-    const forceReloadSharedListKey = React.useContext(ForceReloadSharedListKeyContext);
-    const setForceReloadSharedListKey = React.useContext(SetForceReloadSharedListKeyContext);
+    const forceReloadPublicListKey = React.useContext(ForceReloadPublicListKeyContext);
+    const setForceReloadPublicListKey = React.useContext(SetForceReloadPublicListKeyContext);
     const forceReloadUnlistedListKey = React.useContext(ForceReloadUnlistedListKeyContext);
     const setForceReloadUnlistedListKey = React.useContext(SetForceReloadUnlistedListKeyContext);
     const config = React.useContext(ConfigContext);
@@ -203,20 +202,20 @@ const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({ myAuth, onF
     React.useEffect(() => {
         let unsubscribed = false;
         const main = async () => {
-            if (!config.web.firebase.storage.enableShared) {
+            if (!config.web.firebase.storage.enablePublic) {
                 return;
             }
-            const shared = await getStorageForce(config).ref(Path.shared.list).listAll();
+            const $public = await getStorageForce(config).ref(Path.public.list).listAll();
             if (unsubscribed) {
                 return;
             }
-            setSharedFiles(shared.items);
+            setPublicFiles($public.items);
         };
         main();
         return () => {
             unsubscribed = true;
         };
-    }, [forceReloadSharedListKey, config]); // もしsharedでアクセスできるファイルがUserによって異なるように変更した場合、depsにmyAuth.uidなどを含めるほうがいい。
+    }, [forceReloadPublicListKey, config]); // もしpublicでアクセスできるファイルがUserによって異なるように変更した場合、depsにmyAuth.uidなどを含めるほうがいい。
 
     React.useEffect(() => {
         let unsubscribed = false;
@@ -237,7 +236,7 @@ const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({ myAuth, onF
         };
     }, [myAuth.uid, forceReloadUnlistedListKey, config]);
 
-    if (!config.web.firebase.storage.enableShared && !config.web.firebase.storage.enableUnlisted) {
+    if (!config.web.firebase.storage.enablePublic && !config.web.firebase.storage.enableUnlisted) {
         return (<div>Firebase StorageのUIは管理者によって全て無効化されています。</div>);
     }
 
@@ -270,28 +269,28 @@ const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({ myAuth, onF
         );
     })();
 
-    const sharedTabPane: JSX.Element = (() => {
-        if (config.web.firebase.storage.enableShared) {
+    const publicTabPane: JSX.Element = (() => {
+        if (config.web.firebase.storage.enablePublic) {
             return (
-                <Tabs.TabPane tab="shared" key="storage2">
+                <Tabs.TabPane tab="public" key="storage2">
                     <div>
-                        <FirebaseUploader storageType={shared} authUser={myAuth} onUploaded={() => {
-                            setForceReloadSharedListKey(oldValue => oldValue + 1);
+                        <FirebaseUploader storageType={$public} authUser={myAuth} onUploaded={() => {
+                            setForceReloadPublicListKey(oldValue => oldValue + 1);
                         }} />
-                        <FirebaseFilesList files={sharedFiles} onFlieOpen={onFirebaseFileOpen} storageType="shared" />
+                        <FirebaseFilesList files={publicFiles} onFlieOpen={onFirebaseFileOpen} storageType="public" />
                     </div>
                 </Tabs.TabPane>
             );
         }
         return (
-            <Tabs.TabPane tab="shared" disabled key="storage2" />
+            <Tabs.TabPane tab="public" disabled key="storage2" />
         );
     })();
 
     return (
         <Tabs>
             {unlistedTabPane}
-            {sharedTabPane}
+            {publicTabPane}
         </Tabs>
     );
 };
@@ -303,7 +302,7 @@ type Props = {
 
 const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => {
     const myAuth = React.useContext(MyAuthContext);
-    const [forceReloadSharedListKey, setForceReloadSharedListKey] = React.useState(0);
+    const [forceReloadPublicListKey, setForceReloadPublicListKey] = React.useState(0);
     const [forceReloadUnlistedListKey, setForceReloadUnlistedListKey] = React.useState(0);
 
     const child = (() => {
@@ -327,8 +326,8 @@ const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => 
     })();
 
     return (
-        <ForceReloadSharedListKeyContext.Provider value={forceReloadSharedListKey}>
-            <SetForceReloadSharedListKeyContext.Provider value={setForceReloadSharedListKey}>
+        <ForceReloadPublicListKeyContext.Provider value={forceReloadPublicListKey}>
+            <SetForceReloadPublicListKeyContext.Provider value={setForceReloadPublicListKey}>
                 <ForceReloadUnlistedListKeyContext.Provider value={forceReloadUnlistedListKey}>
                     <SetForceReloadUnlistedListKeyContext.Provider value={setForceReloadUnlistedListKey}>
                         <Drawer
@@ -345,8 +344,8 @@ const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => 
                         </Drawer>
                     </SetForceReloadUnlistedListKeyContext.Provider>
                 </ForceReloadUnlistedListKeyContext.Provider>
-            </SetForceReloadSharedListKeyContext.Provider>
-        </ForceReloadSharedListKeyContext.Provider>
+            </SetForceReloadPublicListKeyContext.Provider>
+        </ForceReloadPublicListKeyContext.Provider>
     );
 };
 
