@@ -208,7 +208,7 @@ const createRoomPublicMessage = ({
         characterName: msg.charaName ?? undefined,
         customName: msg.customName,
         createdAt: msg.createdAt.getTime(),
-        updatedAt: msg.updatedAt?.getTime(),
+        updatedAt: msg.textUpdatedAt,
     };
 };
 
@@ -233,7 +233,7 @@ const createRoomPrivateMessage = async ({
         characterName: msg.charaName ?? undefined,
         customName: msg.customName,
         createdAt: msg.createdAt.getTime(),
-        updatedAt: msg.updatedAt?.getTime(),
+        updatedAt: msg.textUpdatedAt,
         text: msg.text ?? undefined,
         textColor: msg.textColor ?? undefined,
         commandResult: msg.commandResult ?? undefined,
@@ -581,7 +581,7 @@ export class RoomMessageResolver {
                 characterStateId: chara?.stateId,
                 characterName: chara?.name,
                 createdAt: entity.createdAt.getTime(),
-                updatedAt: entity.updatedAt?.getTime(),
+                updatedAt: entity.textUpdatedAt,
             };
 
             const payload: MessageUpdatePayload = {
@@ -714,7 +714,7 @@ export class RoomMessageResolver {
                 characterStateId: chara?.stateId,
                 characterName: chara?.name,
                 createdAt: entity.createdAt.getTime(),
-                updatedAt: entity.updatedAt?.getTime(),
+                updatedAt: entity.textUpdatedAt,
             };
 
             const payload: MessageUpdatePayload = {
@@ -915,7 +915,7 @@ export class RoomMessageResolver {
                             text: publicMsg.text,
                             commandResult: publicMsg.commandResult,
                             altTextToSecret: publicMsg.altTextToSecret,
-                            updatedAt: publicMsg.updatedAt?.getTime(),
+                            updatedAt: publicMsg.textUpdatedAt,
                         }
                     }
                 });
@@ -953,7 +953,7 @@ export class RoomMessageResolver {
                             text: privateMsg.text,
                             commandResult: privateMsg.commandResult,
                             altTextToSecret: privateMsg.altTextToSecret,
-                            updatedAt: privateMsg.updatedAt?.getTime(),
+                            updatedAt: privateMsg.textUpdatedAt,
                         }
                     }
                 });
@@ -1041,6 +1041,7 @@ export class RoomMessageResolver {
                 publicMsg.altTextToSecret = undefined;
                 publicMsg.commandResult = undefined;
                 publicMsg.isSecret = false;
+                publicMsg.textUpdatedAt = new Date().getTime();
                 await em.flush();
                 return ResultModule.ok({
                     result: {},
@@ -1057,7 +1058,7 @@ export class RoomMessageResolver {
                             text: publicMsg.text,
                             commandResult: publicMsg.commandResult,
                             altTextToSecret: publicMsg.altTextToSecret,
-                            updatedAt: publicMsg.updatedAt?.getTime(),
+                            updatedAt: publicMsg.textUpdatedAt,
                         }
                     }
                 });
@@ -1082,6 +1083,7 @@ export class RoomMessageResolver {
                 privateMsg.altTextToSecret = undefined;
                 privateMsg.commandResult = undefined;
                 privateMsg.isSecret = false;
+                privateMsg.textUpdatedAt = new Date().getTime();
                 await em.flush();
                 return ResultModule.ok({
                     result: {},
@@ -1098,7 +1100,7 @@ export class RoomMessageResolver {
                             text: privateMsg.text,
                             commandResult: privateMsg.commandResult,
                             altTextToSecret: privateMsg.altTextToSecret,
-                            updatedAt: privateMsg.updatedAt?.getTime(),
+                            updatedAt: privateMsg.textUpdatedAt,
                         }
                     }
                 });
@@ -1183,6 +1185,7 @@ export class RoomMessageResolver {
                     });
                 }
                 publicMsg.text = args.text;
+                publicMsg.textUpdatedAt = new Date().getTime();
                 await em.flush();
                 return ResultModule.ok({
                     result: {},
@@ -1199,7 +1202,7 @@ export class RoomMessageResolver {
                             text: publicMsg.text,
                             commandResult: publicMsg.commandResult,
                             altTextToSecret: publicMsg.altTextToSecret,
-                            updatedAt: publicMsg.updatedAt?.getTime(),
+                            updatedAt: publicMsg.textUpdatedAt,
                         }
                     }
                 });
@@ -1221,6 +1224,7 @@ export class RoomMessageResolver {
                     });
                 }
                 privateMsg.text = args.text;
+                privateMsg.textUpdatedAt = new Date().getTime();
                 await em.flush();
                 return ResultModule.ok({
                     result: {},
@@ -1237,7 +1241,7 @@ export class RoomMessageResolver {
                             text: privateMsg.text,
                             commandResult: privateMsg.commandResult,
                             altTextToSecret: privateMsg.altTextToSecret,
-                            updatedAt: privateMsg.updatedAt?.getTime(),
+                            updatedAt: privateMsg.textUpdatedAt,
                         }
                     }
                 });
@@ -1281,22 +1285,6 @@ export class RoomMessageResolver {
         }
         const userUid: string = context.decodedIdToken.value.uid;
 
-        switch (payload.value.__tstype) {
-            case RoomPrivateMessageType:
-            case RoomPublicMessageType: {
-                if (payload.value.isSecret && (payload.value.createdBy !== userUid)) {
-                    return undefined;
-                }
-                break;
-            }
-            case RoomPrivateMessageUpdateType:
-            case RoomPublicMessageUpdateType:
-                if (payload.value.isSecret && (payload.createdBy !== userUid)) {
-                    return undefined;
-                }
-                break;
-        }
-
         if (payload.value.__tstype === RoomPrivateMessageType) {
             if (payload.value.visibleTo.find(vt => vt === userUid) === undefined) {
                 return undefined;
@@ -1309,6 +1297,30 @@ export class RoomMessageResolver {
             if (payload.visibleTo.find(vt => vt === userUid) === undefined) {
                 return undefined;
             }
+        }
+
+        switch (payload.value.__tstype) {
+            case RoomPrivateMessageType:
+            case RoomPublicMessageType: {
+                if (payload.value.isSecret && (payload.value.createdBy !== userUid)) {
+                    return {
+                        ...payload.value,
+                        text: undefined,
+                        commandResult: undefined,
+                    };
+                }
+                break;
+            }
+            case RoomPrivateMessageUpdateType:
+            case RoomPublicMessageUpdateType:
+                if (payload.value.isSecret && (payload.createdBy !== userUid)) {
+                    return {
+                        ...payload.value,
+                        text: undefined,
+                        commandResult: undefined,
+                    };
+                }
+                break;
         }
 
         return payload.value;

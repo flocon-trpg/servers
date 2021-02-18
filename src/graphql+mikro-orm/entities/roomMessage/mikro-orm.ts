@@ -84,6 +84,9 @@ export class RoomPubMsg {
     @Property({ nullable: true, length: 65535 })
     public text?: string;
 
+    @Property({ nullable: true, default: null })
+    public textUpdatedAt?: number;
+
     // フォーマットは#nnnnnn。
     // nullishの場合はblackとみなす。もしダークテーマに対応したときは場合に応じてwhiteとみなすのもありかも？
     @Property({ nullable: true })
@@ -139,6 +142,9 @@ export class RoomPrvMsg {
     // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
     @Property({ nullable: true, length: 65535 })
     public text?: string;
+
+    @Property({ nullable: true, default: null })
+    public textUpdatedAt?: number;
 
     // フォーマットは#nnnnnn。
     // nullishの場合はblackとみなす。もしダークテーマに対応したときは場合に応じてwhiteとみなすのもありかも？
