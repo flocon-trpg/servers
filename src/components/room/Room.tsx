@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Layout as AntdLayout, Drawer, Dropdown, Popconfirm, Input, Tooltip } from 'antd';
+import { Menu, Layout as AntdLayout, notification as antdNotification, Input, Tooltip } from 'antd';
 import DraggableCard, { horizontalPadding } from '../../foundations/DraggableCard';
 import CharactersList from './CharacterList';
 import useRoomConfig from '../../hooks/localStorage/useRoomConfig';
@@ -12,7 +12,7 @@ import Boards from './Boards';
 import { recordToArray } from '../../utils/record';
 import RoomMessages, { Tab } from './RoomMessages';
 import CharacterParameterNamesDrawer from './CharacterParameterNamesDrawer';
-import { RoomComponentsState, defaultRoomComponentsState, reduce, editRoomDrawerVisibility } from './RoomComponentsState';
+import { RoomComponentsState, defaultRoomComponentsState, reduceComponentsState, editRoomDrawerVisibility } from './RoomComponentsState';
 import DrawerFooter from '../../layouts/DrawerFooter';
 import ComponentsStateContext from './contexts/RoomComponentsStateContext';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
@@ -22,7 +22,7 @@ import BoardDrawer from './BoardDrawer';
 import CreatePrivateMessageDrawer from './CreatePrivateMessageDrawer';
 import { boardsPanel, charactersPanel, gameEffectPanel, messagesPanel, participantsPanel } from '../../states/RoomConfig';
 import * as Icon from '@ant-design/icons';
-import { ParticipantRole, useChangeParticipantNameMutation, useGetLogLazyQuery, useGetLogQuery, useJoinRoomAsPlayerMutation, useLeaveRoomMutation, usePromoteToPlayerMutation, useRequiresPhraseToJoinAsPlayerLazyQuery, useRequiresPhraseToJoinAsPlayerQuery } from '../../generated/graphql';
+import { ChangeParticipantNameFailureType, ParticipantRole, PromoteFailureType, useChangeParticipantNameMutation, useGetLogLazyQuery, useGetLogQuery, useJoinRoomAsPlayerMutation, useLeaveRoomMutation, usePromoteToPlayerMutation, useRequiresPhraseToJoinAsPlayerLazyQuery, useRequiresPhraseToJoinAsPlayerQuery } from '../../generated/graphql';
 import { useRouter } from 'next/router';
 import path from '../../utils/path';
 import PlayBgmBehavior from '../../foundations/PlayBgmBehavior';
@@ -35,6 +35,7 @@ import EditRoomDrawer from './EditRoomDrawer';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import Jdenticon from '../../foundations/Jdenticon';
 import ParticipantList from './ParticipantList';
+import NotificationContext, { apolloErrors, Notification, text, TextNotification, toTextNotification } from './contexts/NotificationContext';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -44,6 +45,7 @@ type BecomePlayerModalProps = {
 }
 
 const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, onOk, onCancel }: BecomePlayerModalProps) => {
+    const notificationContext = React.useContext(NotificationContext);
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
     const [promoteToPlayer] = usePromoteToPlayerMutation();
@@ -79,8 +81,43 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, 
                 okButtonProps={({ disabled: isPosting })}
                 onOk={() => {
                     setIsPosting(true);
-                    // TODO: catch
-                    promoteToPlayer({ variables: { roomId, phrase: inputValue } }).then(() => {
+                    promoteToPlayer({ variables: { roomId, phrase: inputValue } }).then(e => {
+                        if (e.errors != null) {
+                            notificationContext({
+                                type: apolloErrors,
+                                createdAt: new Date().getTime(),
+                                errors: e.errors
+                            });
+                            onOk();
+                            return;
+                        } 
+
+                        if (e.data?.result.failureType != null) {
+                            let text: string | undefined;
+                            switch (e.data?.result.failureType) {
+                                case PromoteFailureType.WrongPhrase:
+                                    text = 'フレーズが誤っています。';
+                                    break;
+                                case PromoteFailureType.NoNeedToPromote:
+                                    text = '既に昇格済みです。';
+                                    break;
+                                default:
+                                    text = undefined;
+                                    break;
+                            }
+                            notificationContext({
+                                type: 'text',
+                                notification: {
+                                    type: 'warning',
+                                    message: '参加者への昇格に失敗しました。',
+                                    description: text,
+                                    createdAt: new Date().getTime(), 
+                                },
+                            });
+                            onOk();
+                            return;
+                        }
+
                         onOk();
                     });
                 }}
@@ -96,8 +133,43 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, 
             okButtonProps={({ disabled: isPosting })}
             onOk={() => {
                 setIsPosting(true);
-                // TODO: catch
-                promoteToPlayer({ variables: { roomId } }).then(() => {
+                promoteToPlayer({ variables: { roomId } }).then(e => {
+                    if (e.errors != null) {
+                        notificationContext({
+                            type: apolloErrors,
+                            createdAt: new Date().getTime(),
+                            errors: e.errors
+                        });
+                        onOk();
+                        return;
+                    }
+
+                    if (e.data?.result.failureType != null) {
+                        let text: string | undefined;
+                        switch (e.data?.result.failureType) {
+                            case PromoteFailureType.WrongPhrase:
+                                text = 'フレーズが誤っています。';
+                                break;
+                            case PromoteFailureType.NoNeedToPromote:
+                                text = '既に昇格済みです。';
+                                break;
+                            default:
+                                text = undefined;
+                                break;
+                        }
+                        notificationContext({
+                            type: 'text',
+                            notification: {
+                                type: 'warning',
+                                message: '参加者への昇格に失敗しました。',
+                                description: text,
+                                createdAt: new Date().getTime(),
+                            },
+                        });
+                        onOk();
+                        return;
+                    }
+
                     onOk();
                 });
             }}
@@ -115,6 +187,7 @@ type ChangeMyParticipantNameModalProps = {
 }
 
 const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> = ({ roomId, visible, onOk: onOkCore, onCancel }: ChangeMyParticipantNameModalProps) => {
+    const notificationContext = React.useContext(NotificationContext);
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
     const [changeParticipantName] = useChangeParticipantNameMutation();
@@ -125,8 +198,31 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
 
     const onOk = () => {
         setIsPosting(true);
-        // TODO: catch
-        changeParticipantName({ variables: { roomId, newName: inputValue } }).then(() => {
+        changeParticipantName({ variables: { roomId, newName: inputValue } }).then(e => {
+            if (e.errors != null) {
+                notificationContext({
+                    type: apolloErrors,
+                    createdAt: new Date().getTime(),
+                    errors: e.errors
+                });
+                onOkCore();
+                return;
+            }
+
+            if (e.data?.result.failureType != null) {
+                notificationContext({
+                    type: 'text',
+                    notification: {
+                        type: 'warning',
+                        message: '名前の変更に失敗しました。',
+                        description: text,
+                        createdAt: new Date().getTime(),
+                    },
+                });
+                onOkCore();
+                return;
+            }
+
             onOkCore();
         });
     };
@@ -167,7 +263,23 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, operate }
     const [isChangeMyParticipantNameModalVisible, setIsChangeMyParticipantNameModalVisible] = React.useState(false);
     const router = useRouter();
     const dispatch = useDispatch();
-    const [componentsState, dispatchComponentsState] = React.useReducer(reduce, defaultRoomComponentsState);
+    const [componentsState, dispatchComponentsState] = React.useReducer(reduceComponentsState, defaultRoomComponentsState);
+    const [notification, setNotification] = React.useState<Notification>();
+    const [allNotifications, setAllNotifications] = React.useState<TextNotification[]>([]);
+    React.useEffect(() => {
+        if (notification == null) {
+            return;
+        }
+        const textNotification = toTextNotification(notification);
+        antdNotification[textNotification.type]({
+            message: textNotification.message,
+            description: textNotification.description,
+            placement: 'bottomRight',
+        });
+        setAllNotifications(oldValue => {
+            return [...oldValue, textNotification];
+        });
+    }, [notification]);
     const [getLogQuery, getLogQueryResult] = useGetLogLazyQuery({ variables: { roomId }, fetchPolicy: 'network-only' });
     const [leaveRoomMutation] = useLeaveRoomMutation({ variables: { id: roomId } });
     const roomStateRef = React.useRef(roomState);
@@ -242,220 +354,222 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, operate }
         <ComponentsStateContext.Provider value={componentsState}>
             <DispatchRoomComponentsStateContext.Provider value={dispatchComponentsState}>
                 <OperateContext.Provider value={operate}>
-                    <AntdLayout>
-                        <AntdLayout.Content>
-                            <Menu triggerSubMenuAction='click' selectable={false} mode="horizontal">
-                                <Menu.SubMenu title="部屋">
-                                    <Menu.Item onClick={() => dispatchComponentsState({ type: editRoomDrawerVisibility, newValue: true })}>
-                                        編集
-                                    </Menu.Item>
-                                    <Menu.Item onClick={() => setConfirmModalState({
-                                        content: (<span>
-                                            <p>ログには、自分が見ることのできるメッセージだけでなく秘話などの非公開情報も全て含まれます。また、ログをダウンロードすると、システムメッセージによって全員に通知されます。</p>
-                                            <p>ログをダウンロードしますか？</p>
-                                        </span>),
-                                        onOk: () => {
-                                            getLogQuery();
-                                        }
-                                    })}>
-                                        ログをダウンロード
-                                    </Menu.Item>
-                                    <Menu.Item onClick={() => {
-                                        leaveRoomMutation().then(result => {
-                                            if (result.data == null) {
-                                                return;
+                    <NotificationContext.Provider value={setNotification}>
+                        <AntdLayout>
+                            <AntdLayout.Content>
+                                <Menu triggerSubMenuAction='click' selectable={false} mode="horizontal">
+                                    <Menu.SubMenu title="部屋">
+                                        <Menu.Item onClick={() => dispatchComponentsState({ type: editRoomDrawerVisibility, newValue: true })}>
+                                            編集
+                                        </Menu.Item>
+                                        <Menu.Item onClick={() => setConfirmModalState({
+                                            content: (<span>
+                                                <p>ログには、自分が見ることのできるメッセージだけでなく秘話などの非公開情報も全て含まれます。また、ログをダウンロードすると、システムメッセージによって全員に通知されます。</p>
+                                                <p>ログをダウンロードしますか？</p>
+                                            </span>),
+                                            onOk: () => {
+                                                getLogQuery();
                                             }
-                                            router.push(path.rooms.index);
-                                        });
-                                    }}>
-                                        退室する
-                                    </Menu.Item>
-                                </Menu.SubMenu>
-                                <Menu.SubMenu title="ウィンドウ">
-                                    <Menu.Item onClick={() => {
-                                        dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: charactersPanel }, newValue: false }));
-                                        dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: charactersPanel } }));
-                                    }}>
-                                        <div>
-                                            <span>{roomConfig.panels.charactersPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
-                                            <span>キャラクター一覧</span>
-                                        </div>
-                                    </Menu.Item>
-                                    <Menu.SubMenu title="ボード">
-                                        {
-                                            recordToArray(roomConfig.panels.boardsPanels).map((pair, i) => {
-                                                return (
-                                                    <Menu.Item
-                                                        key={pair.key}
-                                                        onClick={() => {
-                                                            // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
-                                                            dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: boardsPanel, panelId: pair.key }, newValue: false }));
-
-                                                            dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: boardsPanel, panelId: pair.key } }));
-                                                        }}>
-                                                        <div>
-                                                            <span>{pair.value.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
-                                                            <span>{`パネル${i}`}</span>
-                                                        </div>
-                                                    </Menu.Item>);
-                                            })
-                                        }
-                                        <Menu.Divider />
+                                        })}>
+                                            ログをダウンロード
+                                        </Menu.Item>
                                         <Menu.Item onClick={() => {
-                                            dispatch(roomConfigModule.actions.addBoardPanelConfig({
-                                                roomId,
-                                                panel: {
-                                                    activeBoardKey: null,
-                                                    boards: {},
-                                                    isMinimized: false,
-                                                    x: 10,
-                                                    y: 10,
-                                                    width: 400,
-                                                    height: 300,
-                                                },
-                                            }));
+                                            leaveRoomMutation().then(result => {
+                                                if (result.data == null) {
+                                                    return;
+                                                }
+                                                router.push(path.rooms.index);
+                                            });
+                                        }}>
+                                            退室する
+                                        </Menu.Item>
+                                    </Menu.SubMenu>
+                                    <Menu.SubMenu title="ウィンドウ">
+                                        <Menu.Item onClick={() => {
+                                            dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: charactersPanel }, newValue: false }));
+                                            dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: charactersPanel } }));
                                         }}>
                                             <div>
-                                                <span>{roomConfig.panels.messagesPanel.isMinimized ? null : <Icon.PlusOutlined />}</span>
-                                                <span>新規作成</span>
+                                                <span>{roomConfig.panels.charactersPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
+                                                <span>キャラクター一覧</span>
+                                            </div>
+                                        </Menu.Item>
+                                        <Menu.SubMenu title="ボード">
+                                            {
+                                                recordToArray(roomConfig.panels.boardsPanels).map((pair, i) => {
+                                                    return (
+                                                        <Menu.Item
+                                                            key={pair.key}
+                                                            onClick={() => {
+                                                                // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
+                                                                dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: boardsPanel, panelId: pair.key }, newValue: false }));
+
+                                                                dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: boardsPanel, panelId: pair.key } }));
+                                                            }}>
+                                                            <div>
+                                                                <span>{pair.value.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
+                                                                <span>{`パネル${i}`}</span>
+                                                            </div>
+                                                        </Menu.Item>);
+                                                })
+                                            }
+                                            <Menu.Divider />
+                                            <Menu.Item onClick={() => {
+                                                dispatch(roomConfigModule.actions.addBoardPanelConfig({
+                                                    roomId,
+                                                    panel: {
+                                                        activeBoardKey: null,
+                                                        boards: {},
+                                                        isMinimized: false,
+                                                        x: 10,
+                                                        y: 10,
+                                                        width: 400,
+                                                        height: 300,
+                                                    },
+                                                }));
+                                            }}>
+                                                <div>
+                                                    <span>{roomConfig.panels.messagesPanel.isMinimized ? null : <Icon.PlusOutlined />}</span>
+                                                    <span>新規作成</span>
+                                                </div>
+                                            </Menu.Item>
+                                        </Menu.SubMenu>
+                                        <Menu.Item onClick={() => {
+                                            dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: messagesPanel }, newValue: false }));
+                                            dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: messagesPanel } }));
+                                        }}>
+                                            <div>
+                                                <span>{roomConfig.panels.messagesPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
+                                                <span>メッセージ</span>
+                                            </div>
+                                        </Menu.Item>
+                                        <Menu.Item onClick={() => {
+                                            dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: gameEffectPanel }, newValue: false }));
+                                            dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: gameEffectPanel } }));
+                                        }}>
+                                            <div>
+                                                <span>{roomConfig.panels.gameEffectPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
+                                                <span>エフェクト</span>
+                                            </div>
+                                        </Menu.Item>
+                                        <Menu.Item onClick={() => {
+                                            dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: participantsPanel }, newValue: false }));
+                                            dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: participantsPanel } }));
+                                        }}>
+                                            <div>
+                                                <span>{roomConfig.panels.participantsPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
+                                                <span>入室者</span>
                                             </div>
                                         </Menu.Item>
                                     </Menu.SubMenu>
-                                    <Menu.Item onClick={() => {
-                                        dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: messagesPanel }, newValue: false }));
-                                        dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: messagesPanel } }));
-                                    }}>
-                                        <div>
-                                            <span>{roomConfig.panels.messagesPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
-                                            <span>メッセージ</span>
-                                        </div>
-                                    </Menu.Item>
-                                    <Menu.Item onClick={() => {
-                                        dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: gameEffectPanel }, newValue: false }));
-                                        dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: gameEffectPanel } }));
-                                    }}>
-                                        <div>
-                                            <span>{roomConfig.panels.gameEffectPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
-                                            <span>エフェクト</span>
-                                        </div>
-                                    </Menu.Item>
-                                    <Menu.Item onClick={() => {
-                                        dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: participantsPanel }, newValue: false }));
-                                        dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: participantsPanel } }));
-                                    }}>
-                                        <div>
-                                            <span>{roomConfig.panels.participantsPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
-                                            <span>入室者</span>
-                                        </div>
-                                    </Menu.Item>
-                                </Menu.SubMenu>
-                                {(me == null || myAuth == null) || <Menu.SubMenu
-                                    title={<div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
-                                        <Jdenticon hashOrValue={myAuth.uid} size={20} tooltipMode='userUid' />
-                                        <span style={({ marginLeft: 4 })}>{me.name}</span>
-                                    </div>}>
-                                    <Menu.Item
-                                        onClick={() => setIsChangeMyParticipantNameModalVisible(true)}>
-                                        名前を変更
-                                    </Menu.Item>
-                                    <Menu.Item
-                                        disabled={me.role === ParticipantRole.Player || me.role === ParticipantRole.Master}
-                                        onClick={() => setIsBecomePlayerModalVisible(true)}>
-                                        {me.role === ParticipantRole.Player || me.role === ParticipantRole.Master ? <Tooltip title='すでに昇格済みです。'>参加者に昇格</Tooltip> : '参加者に昇格'}
-                                    </Menu.Item>
-                                </Menu.SubMenu>}
-                            </Menu>
-                            <div>
-                                {boardsPanels}
-                                {roomConfig.panels.charactersPanel.isMinimized ? null : <DraggableCard
-                                    header="Characters"
-                                    onDragStop={e => dispatch(roomConfigModule.actions.moveCharactersPanel({ ...e, roomId }))}
-                                    onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeCharactersPanel({ roomId, dir, delta }))}
-                                    onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: charactersPanel } }))}
-                                    onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: charactersPanel }, newValue: true }))}
-                                    childrenContainerStyle={({ padding: childrenContainerPadding, overflowY: 'scroll', backgroundColor: 'white' })}
-                                    position={roomConfig.panels.charactersPanel}
-                                    size={roomConfig.panels.charactersPanel}
-                                    minHeight={150}
-                                    minWidth={150}
-                                    zIndex={roomConfig.panels.charactersPanel.zIndex}>
-                                    <CharactersList room={roomState} participants={participantsState} />
-                                </DraggableCard>}
-                                {roomConfig.panels.gameEffectPanel.isMinimized ? null : <DraggableCard
-                                    header="Game effect"
-                                    onDragStop={e => dispatch(roomConfigModule.actions.moveGameEffectPanel({ ...e, roomId }))}
-                                    onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeGameEffectPanel({ roomId, dir, delta }))}
-                                    onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: gameEffectPanel } }))}
-                                    onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: gameEffectPanel }, newValue: true }))}
-                                    childrenContainerStyle={({ padding: childrenContainerPadding, overflowY: 'scroll', backgroundColor: 'white' })}
-                                    position={roomConfig.panels.gameEffectPanel}
-                                    size={roomConfig.panels.gameEffectPanel}
-                                    minHeight={150}
-                                    minWidth={150}
-                                    zIndex={roomConfig.panels.gameEffectPanel.zIndex}>
-                                    <SoundPlayer roomId={roomId} />
-                                </DraggableCard>}
-                                {roomConfig.panels.messagesPanel.isMinimized ? null : <DraggableCard
-                                    header="Messages"
-                                    onDragStop={e => dispatch(roomConfigModule.actions.moveMessagesPanel({ ...e, roomId }))}
-                                    onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeMessagesPanel({ roomId, dir, delta }))}
-                                    onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: messagesPanel } }))}
-                                    onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: messagesPanel }, newValue: true }))}
-                                    childrenContainerStyle={({ padding: childrenContainerPadding, backgroundColor: 'white' })}
-                                    position={roomConfig.panels.messagesPanel}
-                                    size={roomConfig.panels.messagesPanel}
-                                    minHeight={150}
-                                    minWidth={150}
-                                    zIndex={roomConfig.panels.messagesPanel.zIndex}>
-                                    <RoomMessages roomId={roomId} participantsState={participantsState} characters={roomState.characters} />
-                                </DraggableCard>}
-                                {roomConfig.panels.participantsPanel.isMinimized ? null : <DraggableCard
-                                    header="Participants"
-                                    onDragStop={e => dispatch(roomConfigModule.actions.moveParticipantsPanel({ ...e, roomId }))}
-                                    onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeParticipantsPanel({ roomId, dir, delta }))}
-                                    onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: participantsPanel } }))}
-                                    onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: participantsPanel }, newValue: true }))}
-                                    childrenContainerStyle={({ padding: childrenContainerPadding, backgroundColor: 'white' })}
-                                    position={roomConfig.panels.participantsPanel}
-                                    size={roomConfig.panels.participantsPanel}
-                                    minHeight={150}
-                                    minWidth={150}
-                                    zIndex={roomConfig.panels.participantsPanel.zIndex}>
-                                    <ParticipantList participants={participantsState} />
-                                </DraggableCard>}
-                            </div>
+                                    {(me == null || myAuth == null) || <Menu.SubMenu
+                                        title={<div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
+                                            <Jdenticon hashOrValue={myAuth.uid} size={20} tooltipMode='userUid' />
+                                            <span style={({ marginLeft: 4 })}>{me.name}</span>
+                                        </div>}>
+                                        <Menu.Item
+                                            onClick={() => setIsChangeMyParticipantNameModalVisible(true)}>
+                                            名前を変更
+                                        </Menu.Item>
+                                        <Menu.Item
+                                            disabled={me.role === ParticipantRole.Player || me.role === ParticipantRole.Master}
+                                            onClick={() => setIsBecomePlayerModalVisible(true)}>
+                                            {me.role === ParticipantRole.Player || me.role === ParticipantRole.Master ? <Tooltip title='すでに昇格済みです。'>参加者に昇格</Tooltip> : '参加者に昇格'}
+                                        </Menu.Item>
+                                    </Menu.SubMenu>}
+                                </Menu>
+                                <div>
+                                    {boardsPanels}
+                                    {roomConfig.panels.charactersPanel.isMinimized ? null : <DraggableCard
+                                        header="Characters"
+                                        onDragStop={e => dispatch(roomConfigModule.actions.moveCharactersPanel({ ...e, roomId }))}
+                                        onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeCharactersPanel({ roomId, dir, delta }))}
+                                        onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: charactersPanel } }))}
+                                        onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: charactersPanel }, newValue: true }))}
+                                        childrenContainerStyle={({ padding: childrenContainerPadding, overflowY: 'scroll', backgroundColor: 'white' })}
+                                        position={roomConfig.panels.charactersPanel}
+                                        size={roomConfig.panels.charactersPanel}
+                                        minHeight={150}
+                                        minWidth={150}
+                                        zIndex={roomConfig.panels.charactersPanel.zIndex}>
+                                        <CharactersList room={roomState} participants={participantsState} />
+                                    </DraggableCard>}
+                                    {roomConfig.panels.gameEffectPanel.isMinimized ? null : <DraggableCard
+                                        header="Game effect"
+                                        onDragStop={e => dispatch(roomConfigModule.actions.moveGameEffectPanel({ ...e, roomId }))}
+                                        onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeGameEffectPanel({ roomId, dir, delta }))}
+                                        onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: gameEffectPanel } }))}
+                                        onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: gameEffectPanel }, newValue: true }))}
+                                        childrenContainerStyle={({ padding: childrenContainerPadding, overflowY: 'scroll', backgroundColor: 'white' })}
+                                        position={roomConfig.panels.gameEffectPanel}
+                                        size={roomConfig.panels.gameEffectPanel}
+                                        minHeight={150}
+                                        minWidth={150}
+                                        zIndex={roomConfig.panels.gameEffectPanel.zIndex}>
+                                        <SoundPlayer roomId={roomId} />
+                                    </DraggableCard>}
+                                    {roomConfig.panels.messagesPanel.isMinimized ? null : <DraggableCard
+                                        header="Messages"
+                                        onDragStop={e => dispatch(roomConfigModule.actions.moveMessagesPanel({ ...e, roomId }))}
+                                        onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeMessagesPanel({ roomId, dir, delta }))}
+                                        onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: messagesPanel } }))}
+                                        onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: messagesPanel }, newValue: true }))}
+                                        childrenContainerStyle={({ padding: childrenContainerPadding, backgroundColor: 'white' })}
+                                        position={roomConfig.panels.messagesPanel}
+                                        size={roomConfig.panels.messagesPanel}
+                                        minHeight={150}
+                                        minWidth={150}
+                                        zIndex={roomConfig.panels.messagesPanel.zIndex}>
+                                        <RoomMessages roomId={roomId} participantsState={participantsState} characters={roomState.characters} notifications={allNotifications} />
+                                    </DraggableCard>}
+                                    {roomConfig.panels.participantsPanel.isMinimized ? null : <DraggableCard
+                                        header="Participants"
+                                        onDragStop={e => dispatch(roomConfigModule.actions.moveParticipantsPanel({ ...e, roomId }))}
+                                        onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeParticipantsPanel({ roomId, dir, delta }))}
+                                        onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: participantsPanel } }))}
+                                        onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: participantsPanel }, newValue: true }))}
+                                        childrenContainerStyle={({ padding: childrenContainerPadding, backgroundColor: 'white' })}
+                                        position={roomConfig.panels.participantsPanel}
+                                        size={roomConfig.panels.participantsPanel}
+                                        minHeight={150}
+                                        minWidth={150}
+                                        zIndex={roomConfig.panels.participantsPanel.zIndex}>
+                                        <ParticipantList participants={participantsState} />
+                                    </DraggableCard>}
+                                </div>
 
-                            <Modal
-                                visible={confirmModalState != null}
-                                onOk={() => {
-                                    if (confirmModalState != null) {
-                                        confirmModalState.onOk();
-                                    }
-                                    setConfirmModalState(undefined);
-                                }}
-                                onCancel={() => setConfirmModalState(undefined)}>
-                                {confirmModalState == null || confirmModalState.content}
-                            </Modal>
-                            <BecomePlayerModal
-                                visible={isBecomePlayerModalVisible}
-                                onOk={() => setIsBecomePlayerModalVisible(false)}
-                                onCancel={() => setIsBecomePlayerModalVisible(false)}
-                                roomId={roomId} />
-                            <ChangeMyParticipantNameModal
-                                visible={isChangeMyParticipantNameModalVisible}
-                                onOk={() => setIsChangeMyParticipantNameModalVisible(false)}
-                                onCancel={() => setIsChangeMyParticipantNameModalVisible(false)}
-                                roomId={roomId} />
+                                <Modal
+                                    visible={confirmModalState != null}
+                                    onOk={() => {
+                                        if (confirmModalState != null) {
+                                            confirmModalState.onOk();
+                                        }
+                                        setConfirmModalState(undefined);
+                                    }}
+                                    onCancel={() => setConfirmModalState(undefined)}>
+                                    {confirmModalState == null || confirmModalState.content}
+                                </Modal>
+                                <BecomePlayerModal
+                                    visible={isBecomePlayerModalVisible}
+                                    onOk={() => setIsBecomePlayerModalVisible(false)}
+                                    onCancel={() => setIsBecomePlayerModalVisible(false)}
+                                    roomId={roomId} />
+                                <ChangeMyParticipantNameModal
+                                    visible={isChangeMyParticipantNameModalVisible}
+                                    onOk={() => setIsChangeMyParticipantNameModalVisible(false)}
+                                    onCancel={() => setIsChangeMyParticipantNameModalVisible(false)}
+                                    roomId={roomId} />
 
-                            <BoardDrawer roomState={roomState} />
-                            <CharacterDrawer roomState={roomState} />
-                            <CharacterParameterNamesDrawer roomState={roomState} />
-                            <CreatePrivateMessageDrawer roomState={roomState} participantsState={participantsState} roomId={roomId} />
-                            <EditRoomDrawer roomState={roomState} />
+                                <BoardDrawer roomState={roomState} />
+                                <CharacterDrawer roomState={roomState} />
+                                <CharacterParameterNamesDrawer roomState={roomState} />
+                                <CreatePrivateMessageDrawer roomState={roomState} participantsState={participantsState} roomId={roomId} />
+                                <EditRoomDrawer roomState={roomState} />
 
-                            <PlayBgmBehavior bgms={roomState.bgms} />
-                        </AntdLayout.Content>
-                    </AntdLayout>
+                                <PlayBgmBehavior bgms={roomState.bgms} />
+                            </AntdLayout.Content>
+                        </AntdLayout>
+                    </NotificationContext.Provider>
                 </OperateContext.Provider>
             </DispatchRoomComponentsStateContext.Provider>
         </ComponentsStateContext.Provider>);

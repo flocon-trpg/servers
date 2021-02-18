@@ -26,6 +26,7 @@ import InputModal from '../InputModal';
 import Jdenticon from '../../foundations/Jdenticon';
 import { Howl } from 'howler';
 import PlaySoundEffectBehavior from '../../foundations/PlaySoundEffectBehavior';
+import { Notification, TextNotification } from './contexts/NotificationContext';
 
 const Image: React.FC<{ filePath: FilePathFragment | undefined }> = ({ filePath }: { filePath: FilePathFragment | undefined }) => {
     const src = useFirebaseStorageUrl(filePath);
@@ -333,9 +334,10 @@ type ChannelMessageTabsProps = {
     onActiveTabChange?: (activeTab: Tab) => void;
     style?: Omit<React.CSSProperties, 'height'>;
     characters: ReadonlyStateMap<Character.State>;
+    notifications: ReadonlyArray<TextNotification>;
 }
 
-const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessagesResult, participantsState, roomId, onActiveTabChange, style, characters }: ChannelMessageTabsProps) => {
+const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessagesResult, participantsState, roomId, onActiveTabChange, style, characters, notifications }: ChannelMessageTabsProps) => {
     const myAuth = React.useContext(MyAuthContext);
     const roomConfig = useSelector(state => state.roomConfigModule);
     const dispatch = useDispatch();
@@ -353,17 +355,32 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
     const channel9Messages = useFilteredRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[9] });
     const channel10Messages = useFilteredRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[10] });
 
+    const channelSystemMessages: RoomUIMessage[] = (() => {
+        const $notifications = notifications.map(notification => {
+            return {
+                type: publicMessage,
+                value: {
+                    channelKey: $system,
+                    messageId: `${notification.message}@${notification.createdAt}`,
+                    text: `通知: ${notification.message} ${notification.description}`,
+                    isSecret: false,
+                    createdAt: notification.createdAt,
+                },
+            } as const;
+        });
+        const base = [...$notifications, ...channelSystemMessages$].sort((x, y) => y.value.createdAt - x.value.createdAt);
 
+        return [{
+            type: publicMessage,
+            value: {
+                channelKey: $system,
+                messageId: 'system0',
+                text: '（仮メッセージ）ようこそ！',
+                isSecret: false,
+            }
+        } as const, ...base];
+    })();
     // 説明用メッセージを付加している。channel1のメッセージを1個以上にすることで、（デフォルトの設定であれば）channel1を必ずUIに表示させるという狙いもある。
-    const channelSystemMessages: RoomUIMessage[] = [{
-        type: publicMessage,
-        value: {
-            channelKey: $system,
-            messageId: 'system0',
-            text: '（仮メッセージ）ようこそ！',
-            isSecret: false,
-        }
-    }, ...channelSystemMessages$];
     const channelFreeMessages: RoomUIMessage[] = [{
         type: publicMessage,
         value: {
@@ -624,9 +641,10 @@ type Props = {
     participantsState: Participant.State;
     onActiveTabChange?: (activeTab: Tab) => void;
     characters: ReadonlyStateMap<Character.State>;
+    notifications: ReadonlyArray<TextNotification>;
 }
 
-const RoomMessages: React.FC<Props> = ({ roomId, participantsState: participants, onActiveTabChange, characters }: Props) => {
+const RoomMessages: React.FC<Props> = ({ roomId, participantsState: participants, onActiveTabChange, characters, notifications }: Props) => {
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
     const allRoomMessages = useAllRoomMessages({ roomId });
     const [soundEffect, setSoundEffect] = React.useState<{ filePath: FilePathFragment; volume: number }>();
@@ -655,7 +673,14 @@ const RoomMessages: React.FC<Props> = ({ roomId, participantsState: participants
                         onClick={() => dispatch({ type: createPrivateMessageDrawerVisibility, newValue: true })}>
                         プライベートメッセージを作成
                     </Button>
-                    <ChannelMessageTabs style={({ flex: 'auto' })} allRoomMessagesResult={allRoomMessages} participantsState={participants} roomId={roomId} onActiveTabChange={onActiveTabChange} characters={characters} />
+                    <ChannelMessageTabs 
+                        style={({ flex: 'auto' })} 
+                        allRoomMessagesResult={allRoomMessages}
+                        participantsState={participants} 
+                        roomId={roomId}
+                        onActiveTabChange={onActiveTabChange} 
+                        characters={characters}
+                        notifications={notifications} />
                     <PlaySoundEffectBehavior value={soundEffect} />
                 </div>
             );

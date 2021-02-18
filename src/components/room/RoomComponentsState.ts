@@ -65,7 +65,7 @@ export type RoomComponentsAction = {
     newValue: boolean;
 }
 
-export const reduce = (state: RoomComponentsState, action: RoomComponentsAction): RoomComponentsState => {
+export const reduceComponentsState = (state: RoomComponentsState, action: RoomComponentsAction): RoomComponentsState => {
     switch(action.type) {
         case boardDrawerType:
             return {
