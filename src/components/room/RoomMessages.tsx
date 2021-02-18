@@ -156,7 +156,7 @@ const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, par
             </div>);
     })();
     let content: JSX.Element;
-    if (message.value.text == null) {
+    if (message.value.text == null && message.value.altTextToSecret == null) {
         // 当初、削除された場合斜体にして表そうと考えたが、現状はボツにしている。
         // まず、italicなどでは対応してない日本語フォントの場合斜体にならない（対応しているフォントを選べばいいだけの話だが）。なのでtransform: skewX(-15deg)を使おうとしたが、文字列が斜めになることで横幅が少し増えるため、横のスクロールバーが出てしまう問題が出たので却下（x方向のスクロールバーを常に非表示にすれば解決しそうだが、x方向のスクロールバーを表示させたい場合は困る）。
         // ただ、解決策はありそうなのでのちのち斜体にするかもしれない。
@@ -164,7 +164,7 @@ const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, par
     } else {
         content = (
             <span>
-                {message.value.text}
+                {message.value.text ?? message.value.altTextToSecret}
                 <span> </span>
                 <span style={({ fontWeight: 'bold' })}>{message.value.commandResult}</span>
                 <span> </span>
@@ -192,7 +192,7 @@ const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, par
             );
         }
     }
-    const notSecretMenuItem = message.value.isSecret ?
+    const notSecretMenuItem = (message.value.isSecret && message.value.createdBy != null && message.value.createdBy === myAuth?.uid) ?
         <Menu.Item
             onClick={() => {
                 makeMessageNotSecret({ variables: { messageId: message.value.messageId, roomId } });
