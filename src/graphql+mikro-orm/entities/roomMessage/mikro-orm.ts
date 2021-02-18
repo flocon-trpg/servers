@@ -155,7 +155,7 @@ export class RoomPrvMsg {
 
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property()
-    public isSecret: boolean = true;
+    public isSecret: boolean = false;
 
     // 発言がキャラクターに紐付いているときはnon-nullish、PLとして発言もしくはcreatedByがnullishの場合はnullishという想定。
     // キャラクターが削除/削除をUndoされるケースを考慮して、リレーションにはしていない。
