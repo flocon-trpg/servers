@@ -1,6 +1,5 @@
 import { Field, ObjectType } from 'type-graphql';
-import { LeaveRoomFailureType } from '../../../enums/LeaveRoomFailureType';
-import { ParticipantRole } from '../../../enums/ParticipantRole';
+import { LeaveRoomFailureType } from '../../enums/LeaveRoomFailureType';
 
 @ObjectType()
 export class LeaveRoomResult {

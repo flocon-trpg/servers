@@ -1,8 +1,6 @@
-import { Field, ObjectType, createUnionType } from 'type-graphql';
-import { JoinRoomFailureType } from '../../../enums/JoinRoomFailureType';
-import { ParticipantRole } from '../../../enums/ParticipantRole';
-import { ParticipantsOperation } from '../participant/graphql';
-import { RoomGetState } from '../room/graphql';
+import { createUnionType, Field, ObjectType } from 'type-graphql';
+import { JoinRoomFailureType } from '../../enums/JoinRoomFailureType';
+import { ParticipantsOperation } from '../entities/participant/graphql';
 
 @ObjectType()
 export class JoinRoomSuccessResult {

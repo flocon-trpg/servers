@@ -1,6 +1,6 @@
 import { createUnionType, Field, ObjectType } from 'type-graphql';
-import { GetRoomsListFailureType } from '../../../enums/GetRoomsListFailureType';
-import { RoomAsListItem } from '../roomAsListItem/graphql';
+import { GetRoomsListFailureType } from '../../enums/GetRoomsListFailureType';
+import { RoomAsListItem } from '../entities/roomAsListItem/graphql';
 
 @ObjectType()
 export class GetRoomsListSuccessResult {

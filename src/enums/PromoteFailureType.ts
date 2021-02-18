@@ -1,7 +1,8 @@
-export enum JoinRoomFailureType {
+export enum PromoteFailureType {
     NotFound = 'NotFound',
     NotEntry = 'NotEntry',
     NotSignIn = 'NotSignIn',
     WrongPhrase = 'WrongPhrase',
-    AlreadyParticipant = 'AlreadyParticipant',
+    NoNeedToPromote = 'NoNeedToPromote',
+    NotParticipant = 'NotParticipant',
 }

@@ -18,6 +18,8 @@ import { EditMessageFailureType } from '../enums/EditMessageFailureType';
 import { MakeMessageNotSecretFailureType } from '../enums/MakeMessageNotSecretFailureType';
 import { GetRoomLogFailureType } from '../enums/GetRoomLogFailureType';
 import { RequiresPhraseFailureType } from '../enums/RequiresPhraseFailureType';
+import { PromoteFailureType } from '../enums/PromoteFailureType';
+import { ChangeParticipantNameFailureType } from '../enums/ChangeParticipantNameFailureType';
 
 let hasRegistered = false;
 const registerEnumTypes = (): void => {
@@ -25,6 +27,9 @@ const registerEnumTypes = (): void => {
         return;
     }
     hasRegistered = true;
+    registerEnumType(ChangeParticipantNameFailureType, {
+        name: 'ChangeParticipantNameFailureType'
+    });
     registerEnumType(CreateRoomFailureType, {
         name: 'CreateRoomFailureType'
     });
@@ -66,6 +71,9 @@ const registerEnumTypes = (): void => {
     });
     registerEnumType(ParticipantRole, {
         name: 'ParticipantRole'
+    });
+    registerEnumType(PromoteFailureType, {
+        name: 'PromoteFailureType'
     });
     registerEnumType(RequiresPhraseFailureType, {
         name: 'RequiresPhraseFailureType'

@@ -1,5 +1,4 @@
 import { Arg, Ctx, Mutation, PubSub, PubSubEngine, Resolver, Root, Subscription } from 'type-graphql';
-import { EntryToServerResult } from '../entities/entryToServerResult/graphql';
 import { ResolverContext } from '../utils/Contexts';
 import { EntryToServerResultType } from '../../enums/EntryToServerResultType';
 import { checkSignIn, NotSignIn } from './utils/helpers';
@@ -9,6 +8,7 @@ import { User } from '../entities/user/mikro-orm';
 import { Pong } from '../entities/pong/graphql';
 import { PONG } from '../utils/Topics';
 import { loadServerConfigAsMain } from '../../config';
+import { EntryToServerResult } from '../results/EntryToServerResult';
 
 
 export type PongPayload = {

@@ -1,7 +1,7 @@
 import { createUnionType, Field, ObjectType } from 'type-graphql';
-import { OperateRoomFailureType } from '../../../enums/OperateRoomFailureType';
-import { RoomOperation } from '../room/graphql';
-import { RoomAsListItem } from '../roomAsListItem/graphql';
+import { OperateRoomFailureType } from '../../enums/OperateRoomFailureType';
+import { RoomOperation } from '../entities/room/graphql';
+import { RoomAsListItem } from '../entities/roomAsListItem/graphql';
 
 @ObjectType()
 export class OperateRoomSuccessResult {

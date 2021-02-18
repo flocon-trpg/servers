@@ -1,7 +1,5 @@
 import { ParticipantRole } from '../../../enums/ParticipantRole';
 
-import { DualKeyMapUpOperation, DualKeyMapUpOperationElementUnion, update } from '../../dualKeyMapOperations';
-import { CharactersTwoWayOperation } from '../../entities/character/global';
 import * as $MikroORM from '../../entities/room/mikro-orm';
 import * as Global from '../../entities/room/global';
 import * as GraphQL from '../../entities/room/graphql';
@@ -14,14 +12,10 @@ import { v4 } from 'uuid';
 import { ResolverContext } from '../../utils/Contexts';
 import { PromiseQueue } from '../../../utils/PromiseQueue';
 import { RoomResolver } from './RoomResolver';
-import produce from 'immer';
 import * as Board$MikroORM from '../../entities/board/mikro-orm';
 import * as Character$MikroORM from '../../entities/character/mikro-orm';
 import * as PieceLocation$MikroORM from '../../entities/character/pieceLocation/mikro-orm';
 import { __ } from '../../../@shared/collection';
-import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
-import { TextTwoWayOperation } from '../../../@shared/textOperation';
-import { TextTwoWayOperationModule } from '../../Operations';
 import { NumMaxParam } from '../../entities/character/numParam/mikro-orm';
 import { Partici } from '../../entities/participant/mikro-orm';
 

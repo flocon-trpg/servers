@@ -2,24 +2,18 @@ import { Resolver, Query, Args, Mutation, Ctx, PubSub, Subscription, Root, ArgsT
 
 import { ResolverContext } from '../../utils/Contexts';
 import { ParticipantRole } from '../../../enums/ParticipantRole';
-import { GetRoomResult } from '../../entities/getRoomResult/graphql';
 import { GetRoomFailureType } from '../../../enums/GetRoomFailureType';
 import { GetRoomsListFailureType } from '../../../enums/GetRoomsListFailureType';
 import { CreateRoomFailureType } from '../../../enums/CreateRoomFailureType';
 import { checkEntry, checkSignIn, findRoomAndMyParticipant, findRoomAndMyParticipantAndParitipantUserUids, getUserIfEntry, NotSignIn } from '../utils/helpers';
 import { JoinRoomFailureType } from '../../../enums/JoinRoomFailureType';
-import { GetRoomsListResult } from '../../entities/getRoomsListResult/graphql';
 import * as Room$MikroORM from '../../entities/room/mikro-orm';
 import * as Room$Global from '../../entities/room/global';
 import * as Participant$GraphQL from '../../entities/participant/graphql';
 import { stateToGraphql as stateToGraphql$RoomAsListItem } from '../../entities/roomAsListItem/global';
 import { queueLimitReached } from '../../../utils/PromiseQueue';
-import { LeaveRoomResult } from '../../entities/leaveRoomResult/graphql';
-import { CreateRoomResult } from '../../entities/createRoomResult/graphql';
-import { JoinRoomResult } from '../../entities/joinRoomResult/graphql';
 import { serverTooBusyMessage } from '../utils/messages';
 import { RoomOperation, RoomOperated, RoomOperationInput } from '../../entities/room/graphql';
-import { OperateRoomFailureResult, OperateRoomIdResult, OperateRoomNonJoinedResult, OperateRoomResult, OperateRoomSuccessResult } from '../../entities/operateRoomResult/graphql';
 import { OperateRoomFailureType } from '../../../enums/OperateRoomFailureType';
 import { ROOM_OPERATED } from '../../utils/Topics';
 import { Result, ResultModule } from '../../../@shared/Result';
@@ -27,36 +21,20 @@ import * as User$MikroORM from '../../entities/user/mikro-orm';
 import { createPrivateMessages, createPublicMessages } from '../utils/sample';
 import { LeaveRoomFailureType } from '../../../enums/LeaveRoomFailureType';
 import { loadServerConfigAsMain } from '../../../config';
-import { MapUpOperationElementUnion, ReadonlyMapUpOperation, replace, update } from '../../mapOperations';
 import { Partici } from '../../entities/participant/mikro-orm';
 import { addAndCreateGraphQLOperation, toGraphQL as toParticipantsGraphQL, updateAndCreateGraphQLOperation } from '../../entities/participant/global';
 import { RequiresPhraseFailureType } from '../../../enums/RequiresPhraseFailureType';
-
-@ObjectType()
-class RequiresPhraseSuccessResult {
-    @Field()
-    public value!: boolean;
-}
-
-@ObjectType()
-class RequiresPhraseFailureResult {
-    @Field(() => RequiresPhraseFailureType)
-    public failureType!: RequiresPhraseFailureType;
-}
-
-const RequiresPhraseResult = createUnionType({
-    name: 'RequiresPhraseResult',
-    types: () => [RequiresPhraseSuccessResult, RequiresPhraseFailureResult] as const,
-    resolveType: value => {
-        if ('value' in value) {
-            return RequiresPhraseSuccessResult;
-        }
-        if ('failureType' in value) {
-            return RequiresPhraseFailureResult;
-        }
-        return undefined;
-    }
-});
+import { OperateRoomFailureResult, OperateRoomIdResult, OperateRoomNonJoinedResult, OperateRoomResult, OperateRoomSuccessResult } from '../../results/OperateRoomResult';
+import { JoinRoomResult } from '../../results/JoinRoomResult';
+import { GetRoomsListResult } from '../../results/GetRoomsListResult';
+import { RequiresPhraseResult } from '../../results/RequiresPhraseResult';
+import { CreateRoomResult } from '../../results/CreateRoomResult';
+import { GetRoomResult } from '../../results/GetRoomResult';
+import { LeaveRoomResult } from '../../results/LeaveRoomResult';
+import { PromoteResult } from '../../results/PromoteMeResult';
+import { PromoteFailureType } from '../../../enums/PromoteFailureType';
+import { ChangeParticipantNameResult } from '../../results/ChangeParticipantNameResult';
+import { ChangeParticipantNameFailureType } from '../../../enums/ChangeParticipantNameFailureType';
 
 @InputType()
 class CreateRoomInput {
@@ -86,6 +64,24 @@ class JoinRoomArgs {
 
     @Field({ nullable: true })
     public phrase?: string;
+}
+
+@ArgsType()
+class PromoteArgs {
+    @Field()
+    public roomId!: string;
+
+    @Field({ nullable: true })
+    public phrase?: string;
+}
+
+@ArgsType()
+class ChangeParticipantNameArgs {
+    @Field()
+    public roomId!: string;
+
+    @Field()
+    public newName!: string;
 }
 
 @ArgsType()
@@ -155,7 +151,7 @@ const joinRoomCore = async ({
         room: Room$MikroORM.Room;
         args: JoinRoomArgs;
         me: Partici | undefined;
-    }) => ParticipantRole | JoinRoomFailureType.WrongPhrase | 'id';
+    }) => ParticipantRole | JoinRoomFailureType.WrongPhrase | JoinRoomFailureType.AlreadyParticipant | 'id';
 }): Promise<{ result: typeof JoinRoomResult; payload: RoomOperatedPayload | undefined }> => {
     const decodedIdToken = checkSignIn(context);
     if (decodedIdToken === NotSignIn) {
@@ -202,13 +198,21 @@ const joinRoomCore = async ({
                     payload: undefined,
                 };
             }
+            case JoinRoomFailureType.AlreadyParticipant: {
+                return {
+                    result: {
+                        failureType: JoinRoomFailureType.AlreadyParticipant,
+                    },
+                    payload: undefined,
+                };
+            }
             default: {
                 let graphQLOperation: Participant$GraphQL.ParticipantsOperation;
                 if (me == null) {
                     graphQLOperation = await addAndCreateGraphQLOperation({
                         em,
                         userUid: decodedIdToken.uid,
-                        newValue: { role: ParticipantRole.Player, name: args.name },
+                        newValue: { role: strategyResult, name: args.name },
                         user: entryUser,
                         room,
                     });
@@ -217,7 +221,8 @@ const joinRoomCore = async ({
                         em,
                         userUid: decodedIdToken.uid,
                         operation: {
-                            role: { newValue: strategyResult }
+                            role: { newValue: strategyResult },
+                            name: { newValue: args.name },
                         },
                         room,
                     });
@@ -230,6 +235,114 @@ const joinRoomCore = async ({
                     payload: {
                         type: 'participantOperation',
                         // Roomに参加したばかりの場合、decodedToken.uidはparticipantUserUidsに含まれないためSubscriptionは実行されない。だが、そのようなユーザーにroomOperatedで通知する必要はないため問題ない。
+                        participants: participantUserUids,
+                        participantsOperation: graphQLOperation,
+                        roomId: room.id,
+                    },
+                };
+            }
+        }
+    };
+
+    const result = await context.promiseQueue.next(queue);
+    if (result.type === queueLimitReached) {
+        throw serverTooBusyMessage;
+    }
+    return result.value;
+};
+
+const promoteMeCore = async ({
+    roomId,
+    context,
+    globalEntryPhrase,
+    strategy,
+}: {
+    roomId: string;
+    context: ResolverContext;
+    globalEntryPhrase: string | undefined;
+    strategy: (params: {
+        room: Room$MikroORM.Room;
+        me: Partici;
+    }) => ParticipantRole | PromoteFailureType.WrongPhrase | PromoteFailureType.NoNeedToPromote | PromoteFailureType.NotParticipant;
+}): Promise<{ result: PromoteResult; payload: RoomOperatedPayload | undefined }> => {
+    const decodedIdToken = checkSignIn(context);
+    if (decodedIdToken === NotSignIn) {
+        return { result: { failureType: PromoteFailureType.NotSignIn }, payload: undefined };
+    }
+
+    const queue = async (): Promise<{ result: PromoteResult; payload: RoomOperatedPayload | undefined }> => {
+        const em = context.createEm();
+        const entryUser = await getUserIfEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase, });
+        await em.flush();
+        if (entryUser == null) {
+            return {
+                result: {
+                    failureType: PromoteFailureType.NotEntry,
+                },
+                payload: undefined,
+            };
+        }
+        const findResult = await findRoomAndMyParticipantAndParitipantUserUids({ em, userUid: decodedIdToken.uid, roomId });
+        if (findResult == null) {
+            return {
+                result: {
+                    failureType: PromoteFailureType.NotFound,
+                },
+                payload: undefined,
+            };
+        }
+        const { room, me, participantUserUids } = findResult;
+        if (me == null) {
+            return {
+                result: {
+                    failureType: PromoteFailureType.NotParticipant,
+                },
+                payload: undefined,
+            };
+        }
+        const strategyResult = strategy({ me, room });
+        switch (strategyResult) {
+            case PromoteFailureType.NoNeedToPromote: {
+                return {
+                    result: {
+                        failureType: PromoteFailureType.NoNeedToPromote,
+                    },
+                    payload: undefined,
+                };
+            }
+            case PromoteFailureType.WrongPhrase: {
+                return {
+                    result: {
+                        failureType: PromoteFailureType.WrongPhrase,
+                    },
+                    payload: undefined,
+                };
+            }
+            case PromoteFailureType.NotParticipant: {
+                return {
+                    result: {
+                        failureType: PromoteFailureType.NotParticipant,
+                    },
+                    payload: undefined,
+                };
+            }
+            default: {
+                const graphQLOperation = await updateAndCreateGraphQLOperation({
+                    em,
+                    userUid: decodedIdToken.uid,
+                    operation: {
+                        role: { newValue: strategyResult },
+                    },
+                    room,
+                });
+
+                await em.flush();
+                return {
+                    result: {
+                        failureType: undefined,
+                    },
+                    payload: {
+                        type: 'participantOperation',
                         participants: participantUserUids,
                         participantsOperation: graphQLOperation,
                         roomId: room.id,
@@ -284,7 +397,7 @@ export class RoomResolver {
         return this.getRoomsListCore({ context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
     }
 
-    public async requiresPhraseToJoinAsPlayerCore({ roomId,context, globalEntryPhrase }: {roomId: string;  context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<typeof RequiresPhraseResult> {
+    public async requiresPhraseToJoinAsPlayerCore({ roomId, context, globalEntryPhrase }: { roomId: string; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<typeof RequiresPhraseResult> {
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
             return { failureType: RequiresPhraseFailureType.NotSignIn };
@@ -373,14 +486,16 @@ export class RoomResolver {
 
     public async joinRoomAsPlayerCore({ args, context, globalEntryPhrase }: { args: JoinRoomArgs; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<{ result: typeof JoinRoomResult; payload: RoomOperatedPayload | undefined }> {
         return joinRoomCore({
-            args, context, globalEntryPhrase, strategy: ({ me, room }) => {
+            args,
+            context,
+            globalEntryPhrase,
+            strategy: ({ me, room }) => {
                 if (me != null) {
                     switch (me.role) {
-                        case ParticipantRole.Master:
-                        case ParticipantRole.Player:
-                            return 'id';
-                        default:
+                        case undefined:
                             break;
+                        default:
+                            return JoinRoomFailureType.AlreadyParticipant; 
                     }
                 }
                 if (room.joinAsPlayerPhrase != null && room.joinAsPlayerPhrase !== args.phrase) {
@@ -402,15 +517,16 @@ export class RoomResolver {
 
     public async joinRoomAsSpectatorCore({ args, context, globalEntryPhrase }: { args: JoinRoomArgs; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<{ result: typeof JoinRoomResult; payload: RoomOperatedPayload | undefined }> {
         return joinRoomCore({
-            args, context, globalEntryPhrase, strategy: ({ me, room }) => {
+            args, 
+            context,
+            globalEntryPhrase, 
+            strategy: ({ me, room }) => {
                 if (me != null) {
                     switch (me.role) {
-                        case ParticipantRole.Master:
-                        case ParticipantRole.Player:
-                        case ParticipantRole.Spectator:
-                            return 'id';
-                        default:
+                        case undefined:
                             break;
+                        default:
+                            return JoinRoomFailureType.AlreadyParticipant;
                     }
                 }
                 if (room.joinAsSpectatorPhrase != null && room.joinAsSpectatorPhrase !== args.phrase) {
@@ -424,6 +540,115 @@ export class RoomResolver {
     @Mutation(() => JoinRoomResult)
     public async joinRoomAsSpectator(@Args() args: JoinRoomArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<typeof JoinRoomResult> {
         const { result, payload } = await this.joinRoomAsSpectatorCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+        if (payload != null) {
+            await pubSub.publish(ROOM_OPERATED, payload);
+        }
+        return result;
+    }
+
+    public async promoteToPlayerCore({ args, context, globalEntryPhrase }: { args: PromoteArgs; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<{ result: PromoteResult; payload: RoomOperatedPayload | undefined }> {
+        return promoteMeCore({
+            ...args,
+            context,
+            globalEntryPhrase,
+            strategy: ({ me, room }) => {
+                switch (me.role) {
+                    case ParticipantRole.Master:
+                    case ParticipantRole.Player:
+                        return PromoteFailureType.NoNeedToPromote;
+                    case ParticipantRole.Spectator: {
+                        if (room.joinAsPlayerPhrase != null && room.joinAsPlayerPhrase !== args.phrase) {
+                            return PromoteFailureType.WrongPhrase;
+                        }
+                        return ParticipantRole.Player;
+                    }
+                    case undefined:
+                        return PromoteFailureType.NotParticipant;
+                }
+            }
+        });
+    }
+
+    @Mutation(() => PromoteResult)
+    public async promoteToPlayer(@Args() args: PromoteArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<PromoteResult> {
+        const { result, payload } = await this.promoteToPlayerCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+        if (payload != null) {
+            await pubSub.publish(ROOM_OPERATED, payload);
+        }
+        return result;
+    }
+
+    public async changeParticipantNameCore({ args, context, globalEntryPhrase }: { args: ChangeParticipantNameArgs; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<{ result: ChangeParticipantNameResult; payload: RoomOperatedPayload | undefined }> {
+        const decodedIdToken = checkSignIn(context);
+        if (decodedIdToken === NotSignIn) {
+            return { result: { failureType: ChangeParticipantNameFailureType.NotSignIn }, payload: undefined };
+        }
+
+        const queue = async (): Promise<{ result: ChangeParticipantNameResult; payload: RoomOperatedPayload | undefined }> => {
+            const em = context.createEm();
+            const entryUser = await getUserIfEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase, });
+            await em.flush();
+            if (entryUser == null) {
+                return {
+                    result: {
+                        failureType: ChangeParticipantNameFailureType.NotEntry,
+                    },
+                    payload: undefined,
+                };
+            }
+            const findResult = await findRoomAndMyParticipantAndParitipantUserUids({ em, userUid: decodedIdToken.uid, roomId: args.roomId });
+            if (findResult == null) {
+                return {
+                    result: {
+                        failureType: ChangeParticipantNameFailureType.NotFound,
+                    },
+                    payload: undefined,
+                };
+            }
+            const { room, me, participantUserUids } = findResult;
+            // me.role == nullのときは弾かないようにしてもいいかも？
+            if (me == null || me.role == null) {
+                return {
+                    result: {
+                        failureType: ChangeParticipantNameFailureType.NotParticipant,
+                    },
+                    payload: undefined,
+                };
+            }
+
+            const graphQLOperation = await updateAndCreateGraphQLOperation({
+                em,
+                userUid: decodedIdToken.uid,
+                operation: {
+                    name: {newValue: args.newName },
+                },
+                room,
+            });
+
+            await em.flush();
+            return {
+                result: {
+                    failureType: undefined,
+                },
+                payload: {
+                    type: 'participantOperation',
+                    participants: participantUserUids,
+                    participantsOperation: graphQLOperation,
+                    roomId: room.id,
+                },
+            };
+        };
+
+        const result = await context.promiseQueue.next(queue);
+        if (result.type === queueLimitReached) {
+            throw serverTooBusyMessage;
+        }
+        return result.value;
+    }
+
+    @Mutation(() => ChangeParticipantNameResult)
+    public async changeParticipantName(@Args() args: ChangeParticipantNameArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<ChangeParticipantNameResult> {
+        const { result, payload } = await this.changeParticipantNameCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
         if (payload != null) {
             await pubSub.publish(ROOM_OPERATED, payload);
         }
