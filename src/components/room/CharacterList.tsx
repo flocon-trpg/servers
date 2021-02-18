@@ -249,7 +249,7 @@ const CharactersList: React.FC<Props> = ({ room, participants }: Props) => {
             render: (_: unknown, { character }: DataSource) => (
                 <div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
                     {character.state.image == null ?
-                        <Icon.QuestionCircleFilled /> :
+                        <Icon.UserOutlined /> :
                         <Popover trigger='hover' content={<Image filePath={character.state.image ?? undefined} iconSize={false} />}>
                             <div>
                                 <Image filePath={character.state.image ?? undefined} iconSize={true} />

@@ -17,6 +17,7 @@
         "howler": "^2.2.1",
         "html-escaper": "^3.0.0",
         "immer": "^8.0.0",
+        "jdenticon": "^3.1.0",
         "js-file-download": "^0.4.12",
         "konva": "^7.1.8",
         "localforage": "^1.9.0",

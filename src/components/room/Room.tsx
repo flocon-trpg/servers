@@ -33,6 +33,7 @@ import { generateAsStaticHtml } from '../../utils/roomLogGenerator';
 import moment from 'moment';
 import EditRoomDrawer from './EditRoomDrawer';
 import MyAuthContext from '../../contexts/MyAuthContext';
+import Jdenticon from '../../foundations/Jdenticon';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -338,7 +339,11 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, operate }
                                         </div>
                                     </Menu.Item>
                                 </Menu.SubMenu>
-                                {me == null || <Menu.SubMenu title={<span><Icon.UserOutlined />{me.name}</span>}>
+                                {(me == null || myAuth == null) || <Menu.SubMenu
+                                    title={<div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
+                                        <Jdenticon hashOrValue={myAuth.uid} size={20} tooltipMode='userUid' />
+                                        <span style={({ marginLeft: 4 })}>{me.name}</span>
+                                    </div>}>
                                     <Menu.Item
                                         onClick={() => setIsChangeMyParticipantNameModalVisible(true)}>
                                         名前を変更

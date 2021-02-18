@@ -23,11 +23,12 @@ import { FilePathFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment
 import * as Icon from '@ant-design/icons';
 import { useFirebaseStorageUrl } from '../../hooks/firebaseStorage';
 import InputModal from '../InputModal';
+import Jdenticon from '../../foundations/Jdenticon';
 
 const Image: React.FC<{ filePath: FilePathFragment | undefined }> = ({ filePath }: { filePath: FilePathFragment | undefined }) => {
     const src = useFirebaseStorageUrl(filePath);
     if (src == null) {
-        return <Icon.QuestionCircleFilled style={({ width: 16, height: 16 })} />;
+        return <Icon.UserOutlined style={({ width: 16, height: 16 })} />;
     }
     return (<img src={src} width={16} height={16} />);
 };
@@ -124,25 +125,32 @@ const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, par
         let character: Character.State | undefined = undefined;
         if (message.value.characterStateId == null) {
             if (message.value.customName == null) {
-                return <Tooltip title={participantName ?? message.value.createdBy}>
+                return (
                     <div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
-                        <Icon.UserOutlined style={({ width: 16, height: 16 })} />
-                        {participantName ?? message.value.createdBy}
-                    </div>
-                </Tooltip>;
+                        {message.value.createdBy != null && <Jdenticon hashOrValue={message.value.createdBy} size={16} tooltipMode='userUid' />}
+                        <Tooltip title={participantName ?? message.value.createdBy}>
+                            {participantName ?? message.value.createdBy}
+                        </Tooltip>
+                    </div>);
             }
-            return <Tooltip title={participantName ?? message.value.createdBy}>
-                {message.value.customName}
-            </Tooltip>;
+            return (
+                <div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
+                    {message.value.createdBy != null && <Jdenticon hashOrValue={message.value.createdBy} size={16} tooltipMode='userUid' />}
+                    <Tooltip title={participantName ?? message.value.createdBy}>
+                        {message.value.customName}
+                    </Tooltip>
+                </div>);
         } else {
             character = characters.get({ createdBy: message.value.createdBy, id: message.value.characterStateId });
         }
-        return <Tooltip title={participantName ?? message.value.createdBy}>
+        return (
             <div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
+                {message.value.createdBy != null && <Jdenticon hashOrValue={message.value.createdBy} size={16} tooltipMode='userUid' />}
                 <Image filePath={character?.image ?? undefined} />
-                {character?.name == null ? message.value.characterName : character.name}
-            </div>
-        </Tooltip>;
+                <Tooltip title={participantName ?? message.value.createdBy}>
+                    {character?.name == null ? message.value.characterName : character.name}
+                </Tooltip>
+            </div>);
     })();
     let content: JSX.Element;
     if (message.value.text == null) {
