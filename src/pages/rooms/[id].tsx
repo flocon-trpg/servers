@@ -107,7 +107,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                 <Button
                     style={({ gridColumn: 3, gridRow: 4 })}
                     type='primary'
-                    onClick={onJoinAsPlayerButtonClick}>
+                    onClick={onJoinAsSpectatorButtonClick}>
                     入室
                 </Button>
             </div>

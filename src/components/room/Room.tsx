@@ -22,7 +22,7 @@ import BoardDrawer from './BoardDrawer';
 import CreatePrivateMessageDrawer from './CreatePrivateMessageDrawer';
 import { boardsPanel, charactersPanel, gameEffectPanel, messagesPanel } from '../../states/RoomConfig';
 import * as Icon from '@ant-design/icons';
-import { ParticipantRole, useGetLogLazyQuery, useGetLogQuery, useJoinRoomAsPlayerMutation, useLeaveRoomMutation, useRequiresPhraseToJoinAsPlayerLazyQuery, useRequiresPhraseToJoinAsPlayerQuery } from '../../generated/graphql';
+import { ParticipantRole, useChangeParticipantNameMutation, useGetLogLazyQuery, useGetLogQuery, useJoinRoomAsPlayerMutation, useLeaveRoomMutation, usePromoteToPlayerMutation, useRequiresPhraseToJoinAsPlayerLazyQuery, useRequiresPhraseToJoinAsPlayerQuery } from '../../generated/graphql';
 import { useRouter } from 'next/router';
 import path from '../../utils/path';
 import PlaySoundBehavior from '../../foundations/PlaySoundBehavior';
@@ -37,16 +37,14 @@ import MyAuthContext from '../../contexts/MyAuthContext';
 type BecomePlayerModalProps = {
     roomId: string;
     visible: boolean;
-    // 現在、Playerに昇格するためにはjoinRoomAsPlayerを呼ばなければならず、これにはnameが必要。だが、昇格するだけならばnameは不必要である。余裕があればapi_serverのほうで新たにmutationを追加してそれを用いる。
-    myParticipantName: string;
     onOk: () => void;
     onCancel: () => void;
 }
 
-const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, myParticipantName, onOk, onCancel }: BecomePlayerModalProps) => {
+const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, onOk, onCancel }: BecomePlayerModalProps) => {
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
-    const [joinRoomAsPlayer] = useJoinRoomAsPlayerMutation();
+    const [promoteToPlayer] = usePromoteToPlayerMutation();
     const [requiresPhraseToJoinAsPlayer, requiresPhraseToJoinAsPlayerResult] = useRequiresPhraseToJoinAsPlayerLazyQuery();
     const requiresPhraseToJoinAsPlayerRef = React.useRef(requiresPhraseToJoinAsPlayer);
     React.useEffect(() => {
@@ -58,10 +56,13 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, 
         requiresPhraseToJoinAsPlayerRef.current({ variables: { roomId } });
     }, [visible, roomId]);
 
+    const title = '参加者に昇格';
+
     if (requiresPhraseToJoinAsPlayerResult.data?.result.__typename !== 'RequiresPhraseSuccessResult') {
         return (
             <Modal
                 visible={visible}
+                title={title}
                 okButtonProps={({ disabled: true })}
                 onCancel={() => onCancel()}>
                 サーバーと通信中です…
@@ -72,11 +73,12 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, 
         return (
             <Modal
                 visible={visible}
+                title={title}
                 okButtonProps={({ disabled: isPosting })}
                 onOk={() => {
                     setIsPosting(true);
                     // TODO: catch
-                    joinRoomAsPlayer({ variables: { id: roomId, name: myParticipantName, phrase: inputValue } }).then(() => {
+                    promoteToPlayer({ variables: { roomId, phrase: inputValue } }).then(() => {
                         onOk();
                     });
                 }}
@@ -88,11 +90,12 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, 
     return (
         <Modal
             visible={visible}
+            title={title}
             okButtonProps={({ disabled: isPosting })}
             onOk={() => {
                 setIsPosting(true);
                 // TODO: catch
-                joinRoomAsPlayer({ variables: { id: roomId, name: myParticipantName } }).then(() => {
+                promoteToPlayer({ variables: { roomId } }).then(() => {
                     onOk();
                 });
             }}
@@ -102,7 +105,43 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, 
     );
 };
 
-type ModalState = {
+type ChangeMyParticipantNameModalProps = {
+    roomId: string;
+    visible: boolean;
+    onOk: () => void;
+    onCancel: () => void;
+}
+
+const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> = ({ roomId, visible, onOk: onOkCore, onCancel }: ChangeMyParticipantNameModalProps) => {
+    const [inputValue, setInputValue] = React.useState('');
+    const [isPosting, setIsPosting] = React.useState(false);
+    const [changeParticipantName] = useChangeParticipantNameMutation();
+    React.useEffect(() => {
+        setInputValue('');
+        setIsPosting(false);
+    }, [visible, roomId]);
+
+    const onOk = () => {
+        setIsPosting(true);
+        // TODO: catch
+        changeParticipantName({ variables: { roomId, newName: inputValue } }).then(() => {
+            onOkCore();
+        });
+    };
+
+    return (
+        <Modal
+            visible={visible}
+            title='名前を変更'
+            okButtonProps={({ disabled: isPosting })}
+            onOk={() => onOk()}
+            onCancel={() => onCancel()}>
+            <Input placeholder='新しい名前' autoFocus value={inputValue} onChange={e => setInputValue(e.target.value)} onPressEnter={() => onOk()} />
+        </Modal>
+    );
+};
+
+type ConfirmModalState = {
     onOk: () => void;
     content: React.ReactNode;
 }
@@ -121,8 +160,9 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, operate }
     useRoomConfig(roomId);
     const myAuth = React.useContext(MyAuthContext);
     const roomConfig = useSelector(state => state.roomConfigModule);
-    const [modalState, setModalState] = React.useState<ModalState>();
+    const [confirmModalState, setConfirmModalState] = React.useState<ConfirmModalState>();
     const [isBecomePlayerModalVisible, setIsBecomePlayerModalVisible] = React.useState(false);
+    const [isChangeMyParticipantNameModalVisible, setIsChangeMyParticipantNameModalVisible] = React.useState(false);
     const router = useRouter();
     const dispatch = useDispatch();
     const [componentsState, dispatchComponentsState] = React.useReducer(reduce, defaultRoomComponentsState);
@@ -207,7 +247,7 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, operate }
                                     <Menu.Item onClick={() => dispatchComponentsState({ type: editRoomDrawerVisibility, newValue: true })}>
                                         編集
                                     </Menu.Item>
-                                    <Menu.Item onClick={() => setModalState({
+                                    <Menu.Item onClick={() => setConfirmModalState({
                                         content: (<span>
                                             <p>ログには、自分が見ることのできるメッセージだけでなく秘話などの非公開情報も全て含まれます。また、ログをダウンロードすると、システムメッセージによって全員に通知されます。</p>
                                             <p>ログをダウンロードしますか？</p>
@@ -300,6 +340,10 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, operate }
                                 </Menu.SubMenu>
                                 {me == null || <Menu.SubMenu title={<span><Icon.UserOutlined />{me.name}</span>}>
                                     <Menu.Item
+                                        onClick={() => setIsChangeMyParticipantNameModalVisible(true)}>
+                                        名前を変更
+                                    </Menu.Item>
+                                    <Menu.Item
                                         disabled={me.role === ParticipantRole.Player || me.role === ParticipantRole.Master}
                                         onClick={() => setIsBecomePlayerModalVisible(true)}>
                                         {me.role === ParticipantRole.Player || me.role === ParticipantRole.Master ? <Tooltip title='すでに昇格済みです。'>参加者に昇格</Tooltip> : '参加者に昇格'}
@@ -353,18 +397,26 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, operate }
                             </div>
 
                             <Modal
-                                visible={modalState != null}
+                                visible={confirmModalState != null}
                                 onOk={() => {
-                                    if (modalState != null) {
-                                        modalState.onOk();
+                                    if (confirmModalState != null) {
+                                        confirmModalState.onOk();
                                     }
-                                    setModalState(undefined);
+                                    setConfirmModalState(undefined);
                                 }}
-                                onCancel={() => setModalState(undefined)}>
-                                {modalState == null || modalState.content}
+                                onCancel={() => setConfirmModalState(undefined)}>
+                                {confirmModalState == null || confirmModalState.content}
                             </Modal>
-                            {me == null ? null : <BecomePlayerModal visible={isBecomePlayerModalVisible} onOk={() => setIsBecomePlayerModalVisible(false)} onCancel={() => setIsBecomePlayerModalVisible(false)}
-                                roomId={roomId} myParticipantName={me.name} />}
+                            <BecomePlayerModal
+                                visible={isBecomePlayerModalVisible}
+                                onOk={() => setIsBecomePlayerModalVisible(false)}
+                                onCancel={() => setIsBecomePlayerModalVisible(false)}
+                                roomId={roomId} />
+                            <ChangeMyParticipantNameModal
+                                visible={isChangeMyParticipantNameModalVisible}
+                                onOk={() => setIsChangeMyParticipantNameModalVisible(false)}
+                                onCancel={() => setIsChangeMyParticipantNameModalVisible(false)}
+                                roomId={roomId} />
 
                             <BoardDrawer roomState={roomState} />
                             <CharacterDrawer roomState={roomState} />

@@ -121,6 +121,18 @@ export type BoolParamValueStateInput = {
   value?: Maybe<Scalars['Boolean']>;
 };
 
+export enum ChangeParticipantNameFailureType {
+  NotEntry = 'NotEntry',
+  NotFound = 'NotFound',
+  NotParticipant = 'NotParticipant',
+  NotSignIn = 'NotSignIn'
+}
+
+export type ChangeParticipantNameResult = {
+  __typename?: 'ChangeParticipantNameResult';
+  failureType?: Maybe<ChangeParticipantNameFailureType>;
+};
+
 export type CharacterOperation = {
   __typename?: 'CharacterOperation';
   boolParams: BoolParamsOperation;
@@ -353,6 +365,7 @@ export type JoinRoomFailureResult = {
 };
 
 export enum JoinRoomFailureType {
+  AlreadyParticipant = 'AlreadyParticipant',
   NotEntry = 'NotEntry',
   NotFound = 'NotFound',
   NotSignIn = 'NotSignIn',
@@ -394,6 +407,7 @@ export type MakeMessageNotSecretResult = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  changeParticipantName: ChangeParticipantNameResult;
   createRoom: CreateRoomResult;
   deleteMessage: DeleteMessageResult;
   editMessage: EditMessageResult;
@@ -404,9 +418,16 @@ export type Mutation = {
   makeMessageNotSecret: MakeMessageNotSecretResult;
   operate: OperateRoomResult;
   ping: Pong;
+  promoteToPlayer: PromoteResult;
   writePrivateMessage: WritePrivateRoomMessageResult;
   writePublicMessage: WritePublicRoomMessageResult;
   writeRoomSoundEffect: WriteRoomSoundEffectResult;
+};
+
+
+export type MutationChangeParticipantNameArgs = {
+  newName: Scalars['String'];
+  roomId: Scalars['String'];
 };
 
 
@@ -468,6 +489,12 @@ export type MutationOperateArgs = {
 
 export type MutationPingArgs = {
   value: Scalars['Float'];
+};
+
+
+export type MutationPromoteToPlayerArgs = {
+  phrase?: Maybe<Scalars['String']>;
+  roomId: Scalars['String'];
 };
 
 
@@ -726,6 +753,20 @@ export type Pong = {
   __typename?: 'Pong';
   createdBy?: Maybe<Scalars['String']>;
   value: Scalars['Float'];
+};
+
+export enum PromoteFailureType {
+  NoNeedToPromote = 'NoNeedToPromote',
+  NotEntry = 'NotEntry',
+  NotFound = 'NotFound',
+  NotParticipant = 'NotParticipant',
+  NotSignIn = 'NotSignIn',
+  WrongPhrase = 'WrongPhrase'
+}
+
+export type PromoteResult = {
+  __typename?: 'PromoteResult';
+  failureType?: Maybe<PromoteFailureType>;
 };
 
 export type Query = {
@@ -2015,6 +2056,20 @@ export type RequiresPhraseToJoinAsPlayerQuery = (
   ) }
 );
 
+export type ChangeParticipantNameMutationVariables = Exact<{
+  roomId: Scalars['String'];
+  newName: Scalars['String'];
+}>;
+
+
+export type ChangeParticipantNameMutation = (
+  { __typename?: 'Mutation' }
+  & { result: (
+    { __typename?: 'ChangeParticipantNameResult' }
+    & Pick<ChangeParticipantNameResult, 'failureType'>
+  ) }
+);
+
 export type CreateRoomMutationVariables = Exact<{
   input: CreateRoomInput;
 }>;
@@ -2067,6 +2122,19 @@ export type JoinRoomAsSpectatorMutation = (
   ) }
 );
 
+export type EntryToServerMutationVariables = Exact<{
+  phrase: Scalars['String'];
+}>;
+
+
+export type EntryToServerMutation = (
+  { __typename?: 'Mutation' }
+  & { result: (
+    { __typename?: 'EntryToServerResult' }
+    & Pick<EntryToServerResult, 'type'>
+  ) }
+);
+
 export type LeaveRoomMutationVariables = Exact<{
   id: Scalars['String'];
 }>;
@@ -2111,19 +2179,6 @@ export type OperateMutation = (
   ) }
 );
 
-export type EntryToServerMutationVariables = Exact<{
-  phrase: Scalars['String'];
-}>;
-
-
-export type EntryToServerMutation = (
-  { __typename?: 'Mutation' }
-  & { result: (
-    { __typename?: 'EntryToServerResult' }
-    & Pick<EntryToServerResult, 'type'>
-  ) }
-);
-
 export type PingMutationVariables = Exact<{
   value: Scalars['Float'];
 }>;
@@ -2134,6 +2189,20 @@ export type PingMutation = (
   & { result: (
     { __typename?: 'Pong' }
     & Pick<Pong, 'createdBy' | 'value'>
+  ) }
+);
+
+export type PromoteToPlayerMutationVariables = Exact<{
+  roomId: Scalars['String'];
+  phrase?: Maybe<Scalars['String']>;
+}>;
+
+
+export type PromoteToPlayerMutation = (
+  { __typename?: 'Mutation' }
+  & { result: (
+    { __typename?: 'PromoteResult' }
+    & Pick<PromoteResult, 'failureType'>
   ) }
 );
 
@@ -3113,6 +3182,39 @@ export function useRequiresPhraseToJoinAsPlayerLazyQuery(baseOptions?: Apollo.La
 export type RequiresPhraseToJoinAsPlayerQueryHookResult = ReturnType<typeof useRequiresPhraseToJoinAsPlayerQuery>;
 export type RequiresPhraseToJoinAsPlayerLazyQueryHookResult = ReturnType<typeof useRequiresPhraseToJoinAsPlayerLazyQuery>;
 export type RequiresPhraseToJoinAsPlayerQueryResult = Apollo.QueryResult<RequiresPhraseToJoinAsPlayerQuery, RequiresPhraseToJoinAsPlayerQueryVariables>;
+export const ChangeParticipantNameDocument = gql`
+    mutation ChangeParticipantName($roomId: String!, $newName: String!) {
+  result: changeParticipantName(roomId: $roomId, newName: $newName) {
+    failureType
+  }
+}
+    `;
+export type ChangeParticipantNameMutationFn = Apollo.MutationFunction<ChangeParticipantNameMutation, ChangeParticipantNameMutationVariables>;
+
+/**
+ * __useChangeParticipantNameMutation__
+ *
+ * To run a mutation, you first call `useChangeParticipantNameMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useChangeParticipantNameMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [changeParticipantNameMutation, { data, loading, error }] = useChangeParticipantNameMutation({
+ *   variables: {
+ *      roomId: // value for 'roomId'
+ *      newName: // value for 'newName'
+ *   },
+ * });
+ */
+export function useChangeParticipantNameMutation(baseOptions?: Apollo.MutationHookOptions<ChangeParticipantNameMutation, ChangeParticipantNameMutationVariables>) {
+        return Apollo.useMutation<ChangeParticipantNameMutation, ChangeParticipantNameMutationVariables>(ChangeParticipantNameDocument, baseOptions);
+      }
+export type ChangeParticipantNameMutationHookResult = ReturnType<typeof useChangeParticipantNameMutation>;
+export type ChangeParticipantNameMutationResult = Apollo.MutationResult<ChangeParticipantNameMutation>;
+export type ChangeParticipantNameMutationOptions = Apollo.BaseMutationOptions<ChangeParticipantNameMutation, ChangeParticipantNameMutationVariables>;
 export const CreateRoomDocument = gql`
     mutation CreateRoom($input: CreateRoomInput!) {
   result: createRoom(input: $input) {
@@ -3218,6 +3320,38 @@ export function useJoinRoomAsSpectatorMutation(baseOptions?: Apollo.MutationHook
 export type JoinRoomAsSpectatorMutationHookResult = ReturnType<typeof useJoinRoomAsSpectatorMutation>;
 export type JoinRoomAsSpectatorMutationResult = Apollo.MutationResult<JoinRoomAsSpectatorMutation>;
 export type JoinRoomAsSpectatorMutationOptions = Apollo.BaseMutationOptions<JoinRoomAsSpectatorMutation, JoinRoomAsSpectatorMutationVariables>;
+export const EntryToServerDocument = gql`
+    mutation EntryToServer($phrase: String!) {
+  result: entryToServer(phrase: $phrase) {
+    type
+  }
+}
+    `;
+export type EntryToServerMutationFn = Apollo.MutationFunction<EntryToServerMutation, EntryToServerMutationVariables>;
+
+/**
+ * __useEntryToServerMutation__
+ *
+ * To run a mutation, you first call `useEntryToServerMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEntryToServerMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [entryToServerMutation, { data, loading, error }] = useEntryToServerMutation({
+ *   variables: {
+ *      phrase: // value for 'phrase'
+ *   },
+ * });
+ */
+export function useEntryToServerMutation(baseOptions?: Apollo.MutationHookOptions<EntryToServerMutation, EntryToServerMutationVariables>) {
+        return Apollo.useMutation<EntryToServerMutation, EntryToServerMutationVariables>(EntryToServerDocument, baseOptions);
+      }
+export type EntryToServerMutationHookResult = ReturnType<typeof useEntryToServerMutation>;
+export type EntryToServerMutationResult = Apollo.MutationResult<EntryToServerMutation>;
+export type EntryToServerMutationOptions = Apollo.BaseMutationOptions<EntryToServerMutation, EntryToServerMutationVariables>;
 export const LeaveRoomDocument = gql`
     mutation LeaveRoom($id: String!) {
   result: leaveRoom(id: $id) {
@@ -3306,38 +3440,6 @@ export function useOperateMutation(baseOptions?: Apollo.MutationHookOptions<Oper
 export type OperateMutationHookResult = ReturnType<typeof useOperateMutation>;
 export type OperateMutationResult = Apollo.MutationResult<OperateMutation>;
 export type OperateMutationOptions = Apollo.BaseMutationOptions<OperateMutation, OperateMutationVariables>;
-export const EntryToServerDocument = gql`
-    mutation EntryToServer($phrase: String!) {
-  result: entryToServer(phrase: $phrase) {
-    type
-  }
-}
-    `;
-export type EntryToServerMutationFn = Apollo.MutationFunction<EntryToServerMutation, EntryToServerMutationVariables>;
-
-/**
- * __useEntryToServerMutation__
- *
- * To run a mutation, you first call `useEntryToServerMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useEntryToServerMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [entryToServerMutation, { data, loading, error }] = useEntryToServerMutation({
- *   variables: {
- *      phrase: // value for 'phrase'
- *   },
- * });
- */
-export function useEntryToServerMutation(baseOptions?: Apollo.MutationHookOptions<EntryToServerMutation, EntryToServerMutationVariables>) {
-        return Apollo.useMutation<EntryToServerMutation, EntryToServerMutationVariables>(EntryToServerDocument, baseOptions);
-      }
-export type EntryToServerMutationHookResult = ReturnType<typeof useEntryToServerMutation>;
-export type EntryToServerMutationResult = Apollo.MutationResult<EntryToServerMutation>;
-export type EntryToServerMutationOptions = Apollo.BaseMutationOptions<EntryToServerMutation, EntryToServerMutationVariables>;
 export const PingDocument = gql`
     mutation Ping($value: Float!) {
   result: ping(value: $value) {
@@ -3371,6 +3473,39 @@ export function usePingMutation(baseOptions?: Apollo.MutationHookOptions<PingMut
 export type PingMutationHookResult = ReturnType<typeof usePingMutation>;
 export type PingMutationResult = Apollo.MutationResult<PingMutation>;
 export type PingMutationOptions = Apollo.BaseMutationOptions<PingMutation, PingMutationVariables>;
+export const PromoteToPlayerDocument = gql`
+    mutation PromoteToPlayer($roomId: String!, $phrase: String) {
+  result: promoteToPlayer(roomId: $roomId, phrase: $phrase) {
+    failureType
+  }
+}
+    `;
+export type PromoteToPlayerMutationFn = Apollo.MutationFunction<PromoteToPlayerMutation, PromoteToPlayerMutationVariables>;
+
+/**
+ * __usePromoteToPlayerMutation__
+ *
+ * To run a mutation, you first call `usePromoteToPlayerMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `usePromoteToPlayerMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [promoteToPlayerMutation, { data, loading, error }] = usePromoteToPlayerMutation({
+ *   variables: {
+ *      roomId: // value for 'roomId'
+ *      phrase: // value for 'phrase'
+ *   },
+ * });
+ */
+export function usePromoteToPlayerMutation(baseOptions?: Apollo.MutationHookOptions<PromoteToPlayerMutation, PromoteToPlayerMutationVariables>) {
+        return Apollo.useMutation<PromoteToPlayerMutation, PromoteToPlayerMutationVariables>(PromoteToPlayerDocument, baseOptions);
+      }
+export type PromoteToPlayerMutationHookResult = ReturnType<typeof usePromoteToPlayerMutation>;
+export type PromoteToPlayerMutationResult = Apollo.MutationResult<PromoteToPlayerMutation>;
+export type PromoteToPlayerMutationOptions = Apollo.BaseMutationOptions<PromoteToPlayerMutation, PromoteToPlayerMutationVariables>;
 export const WritePublicMessageDocument = gql`
     mutation WritePublicMessage($roomId: String!, $text: String!, $channelKey: String!, $characterStateId: String, $customName: String, $gameType: String) {
   result: writePublicMessage(
