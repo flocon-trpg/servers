@@ -18,7 +18,6 @@ import { OperateRoomFailureType } from '../../../enums/OperateRoomFailureType';
 import { ROOM_OPERATED } from '../../utils/Topics';
 import { Result, ResultModule } from '../../../@shared/Result';
 import * as User$MikroORM from '../../entities/user/mikro-orm';
-import { createPrivateMessages, createPublicMessages } from '../utils/sample';
 import { LeaveRoomFailureType } from '../../../enums/LeaveRoomFailureType';
 import { loadServerConfigAsMain } from '../../../config';
 import { Partici } from '../../entities/participant/mikro-orm';
