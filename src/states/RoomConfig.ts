@@ -30,6 +30,7 @@ export const boardsPanel = 'boardsPanel';
 export const charactersPanel = 'charactersPanel';
 export const gameEffectPanel = 'gameEffectPanel';
 export const messagesPanel = 'messagesPanel';
+export const participantsPanel = 'participantsPanel';
 
 export type PanelAction = {
     roomId: string;
@@ -42,6 +43,8 @@ export type PanelAction = {
         type: typeof gameEffectPanel;
     } | {
         type: typeof messagesPanel;
+    } | {
+        type: typeof participantsPanel;
     };
 }
 

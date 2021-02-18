@@ -7,12 +7,14 @@ import { BoardsPanelConfig, castToPartialBoardsPanelConfig, defaultBoardsPanelsC
 import { castToPartialMessagesPanelConfig, defaultMessagesPanelConfig, MessagesPanelConfig, PartialMessagesPanelConfig, toCompleteMessagesPanelConfig } from './MessagesPanelConfig';
 import { ReadonlyStateToReduce } from '../hooks/useRoomMessages';
 import { castToPartialGameEffectPanelConfig, defaultGameEffectPanelConfig, GameEffectPanelConfig, PartialGameEffectPanelConfig, toCompleteGameEffectPanelConfig } from './GameEffectPanelConfig';
+import { castToPartialParticipantsPanelConfig, defaultParticipantsPanelConfig, PartialParticipantsPanelConfig, ParticipantsPanelConfig, toCompleteParticipantsPanelConfig } from './ParticipantsPanelConfig';
 
 export type PanelsConfig = {
     boardsPanels: Record<string, BoardsPanelConfig>;
     charactersPanel: CharactersPanelConfig;
     gameEffectPanel: GameEffectPanelConfig;
     messagesPanel: MessagesPanelConfig;
+    participantsPanel: ParticipantsPanelConfig;
 }
 
 export type PartialPanelsConfig = {
@@ -20,6 +22,7 @@ export type PartialPanelsConfig = {
     charactersPanel?: PartialCharactersPanelConfig;
     gameEffectPanel?: PartialGameEffectPanelConfig;
     messagesPanel?: PartialMessagesPanelConfig;
+    participantsPanel?: PartialParticipantsPanelConfig;
 }
 
 export const castToPartialPanelsConfig = (source: unknown): PartialPanelsConfig | undefined => {
@@ -31,6 +34,7 @@ export const castToPartialPanelsConfig = (source: unknown): PartialPanelsConfig 
         charactersPanel: castToPartialCharactersPanelConfig(source.charactersPanel),
         gameEffectPanel: castToPartialGameEffectPanelConfig(source.gameEffectPanel),
         messagesPanel: castToPartialMessagesPanelConfig(source.messagesPanel),
+        participantsPanel: castToPartialParticipantsPanelConfig(source.participantsPanel),
     };
 };
 
@@ -40,6 +44,7 @@ export const toCompletePanelsConfig = (source: PartialPanelsConfig): PanelsConfi
         charactersPanel: toCompleteCharactersPanelConfig(source.charactersPanel ?? {}),
         gameEffectPanel: toCompleteGameEffectPanelConfig(source.gameEffectPanel ?? {}),
         messagesPanel: toCompleteMessagesPanelConfig(source.messagesPanel ?? {}),
+        participantsPanel: toCompleteParticipantsPanelConfig(source.participantsPanel ?? {}),
     };
 };
 
@@ -49,5 +54,6 @@ export const defaultPanelsConfig = (): PanelsConfig => {
         charactersPanel: defaultCharactersPanelConfig(),
         gameEffectPanel: defaultGameEffectPanelConfig(),
         messagesPanel: defaultMessagesPanelConfig(),
+        participantsPanel: defaultParticipantsPanelConfig(),
     };
 };

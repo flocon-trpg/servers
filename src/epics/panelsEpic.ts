@@ -43,6 +43,10 @@ const updatePanelsEpic = (action$: ActionsObservable<AnyAction>, state$: StateOb
 
                     || roomConfigModule.actions.moveMessagesPanel.match(action)
                     || roomConfigModule.actions.resizeMessagesPanel.match(action)
+
+                    || roomConfigModule.actions.moveParticipantsPanel.match(action)
+                    || roomConfigModule.actions.resizeParticipantsPanel.match(action)
+
                     || roomConfigModule.actions.updateChannelVisibility.match(action)
                 ) {
                     return action;

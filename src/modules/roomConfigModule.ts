@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 //import { BoardConfig, BoardsPanelConfig } from '../states/BoardsPanelConfig';
-import { boardsPanel, charactersPanel, gameEffectPanel, messagesPanel, PanelAction, RoomConfig, UpdateGameTypeAction } from '../states/RoomConfig';
+import { boardsPanel, charactersPanel, gameEffectPanel, messagesPanel, PanelAction, participantsPanel, RoomConfig, UpdateGameTypeAction } from '../states/RoomConfig';
 import * as generators from '../utils/generators';
 import { ResizableDelta } from 'react-rnd';
 import { ResizeDirection } from 're-resizable';
@@ -129,6 +129,7 @@ const bringPanelToFront = (state: RoomConfig | null, action: PanelAction): void 
     panels.push(state.panels.charactersPanel);
     panels.push(state.panels.gameEffectPanel);
     panels.push(state.panels.messagesPanel);
+    panels.push(state.panels.participantsPanel);
 
     // まずzIndexが小さい順に0,1,2,…と割り振っていく。こうすることで、例えば[-100, 5, 10000]のように飛び飛びになっている状態を修正する。zIndexが同一であるパネルが複数ある場合でも異なるzIndexになるため、場合によっては前面に来るパネルが変わる可能性もあるが、直接Configを編集したりしていない限りすべてが異なるzIndexであるはずなので無視している。
     // 次に、最前面にさせたいパネルのzIndexに(max(割り振ったzIndex) + 1)を代入して完了。
@@ -156,6 +157,10 @@ const bringPanelToFront = (state: RoomConfig | null, action: PanelAction): void 
         }
         case messagesPanel: {
             state.panels.messagesPanel.zIndex = panels.length;
+            return;
+        }
+        case participantsPanel: {
+            state.panels.participantsPanel.zIndex = panels.length;
             return;
         }
     }
@@ -205,6 +210,10 @@ const roomConfigModule = createSlice({
                 }
                 case messagesPanel: {
                     state.panels.messagesPanel.isMinimized = action.payload.newValue;
+                    return;
+                }
+                case participantsPanel: {
+                    state.panels.participantsPanel.isMinimized = action.payload.newValue;
                     return;
                 }
             }
@@ -319,27 +328,6 @@ const roomConfigModule = createSlice({
             delete targetPanel.boards[compositeKeyToString(action.payload.boardKey)];
         },
 
-        moveGameEffectPanel: (state: RoomConfig | null, action: PayloadAction<MovePanelAction>) => {
-            if (state == null || state.roomId !== action.payload.roomId) {
-                return;
-            }
-            const targetPanel = state.panels.gameEffectPanel;
-            if (targetPanel == null) {
-                return;
-            }
-            movePanel(targetPanel, action.payload);
-        },
-        resizeGameEffectPanel: (state: RoomConfig | null, action: PayloadAction<ResizePanelAction>) => {
-            if (state == null || state.roomId !== action.payload.roomId) {
-                return;
-            }
-            const targetPanel = state.panels.gameEffectPanel;
-            if (targetPanel == null) {
-                return;
-            }
-            resizePanel(targetPanel, action.payload.dir, action.payload.delta);
-        },
-
         moveCharactersPanel: (state: RoomConfig | null, action: PayloadAction<MovePanelAction>) => {
             if (state == null || state.roomId !== action.payload.roomId) {
                 return;
@@ -355,6 +343,27 @@ const roomConfigModule = createSlice({
                 return;
             }
             const targetPanel = state.panels.charactersPanel;
+            if (targetPanel == null) {
+                return;
+            }
+            resizePanel(targetPanel, action.payload.dir, action.payload.delta);
+        },
+
+        moveGameEffectPanel: (state: RoomConfig | null, action: PayloadAction<MovePanelAction>) => {
+            if (state == null || state.roomId !== action.payload.roomId) {
+                return;
+            }
+            const targetPanel = state.panels.gameEffectPanel;
+            if (targetPanel == null) {
+                return;
+            }
+            movePanel(targetPanel, action.payload);
+        },
+        resizeGameEffectPanel: (state: RoomConfig | null, action: PayloadAction<ResizePanelAction>) => {
+            if (state == null || state.roomId !== action.payload.roomId) {
+                return;
+            }
+            const targetPanel = state.panels.gameEffectPanel;
             if (targetPanel == null) {
                 return;
             }
@@ -381,6 +390,28 @@ const roomConfigModule = createSlice({
             }
             resizePanel(targetPanel, action.payload.dir, action.payload.delta);
         },
+
+        moveParticipantsPanel: (state: RoomConfig | null, action: PayloadAction<MovePanelAction>) => {
+            if (state == null || state.roomId !== action.payload.roomId) {
+                return;
+            }
+            const targetPanel = state.panels.participantsPanel;
+            if (targetPanel == null) {
+                return;
+            }
+            movePanel(targetPanel, action.payload);
+        },
+        resizeParticipantsPanel: (state: RoomConfig | null, action: PayloadAction<ResizePanelAction>) => {
+            if (state == null || state.roomId !== action.payload.roomId) {
+                return;
+            }
+            const targetPanel = state.panels.participantsPanel;
+            if (targetPanel == null) {
+                return;
+            }
+            resizePanel(targetPanel, action.payload.dir, action.payload.delta);
+        },
+
         updateChannelVisibility: (state: RoomConfig | null, action: PayloadAction<UpdateChannelVisibilityAction>) => {
             if (state == null || state.roomId !== action.payload.roomId) {
                 return;

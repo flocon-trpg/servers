@@ -20,7 +20,7 @@ import OperateContext from './contexts/OperateContext';
 import CharacterDrawer from './CharacterDrawer';
 import BoardDrawer from './BoardDrawer';
 import CreatePrivateMessageDrawer from './CreatePrivateMessageDrawer';
-import { boardsPanel, charactersPanel, gameEffectPanel, messagesPanel } from '../../states/RoomConfig';
+import { boardsPanel, charactersPanel, gameEffectPanel, messagesPanel, participantsPanel } from '../../states/RoomConfig';
 import * as Icon from '@ant-design/icons';
 import { ParticipantRole, useChangeParticipantNameMutation, useGetLogLazyQuery, useGetLogQuery, useJoinRoomAsPlayerMutation, useLeaveRoomMutation, usePromoteToPlayerMutation, useRequiresPhraseToJoinAsPlayerLazyQuery, useRequiresPhraseToJoinAsPlayerQuery } from '../../generated/graphql';
 import { useRouter } from 'next/router';
@@ -34,6 +34,7 @@ import moment from 'moment';
 import EditRoomDrawer from './EditRoomDrawer';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import Jdenticon from '../../foundations/Jdenticon';
+import ParticipantList from './ParticipantList';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -338,6 +339,15 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, operate }
                                             <span>エフェクト</span>
                                         </div>
                                     </Menu.Item>
+                                    <Menu.Item onClick={() => {
+                                        dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: participantsPanel }, newValue: false }));
+                                        dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: participantsPanel } }));
+                                    }}>
+                                        <div>
+                                            <span>{roomConfig.panels.participantsPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
+                                            <span>入室者</span>
+                                        </div>
+                                    </Menu.Item>
                                 </Menu.SubMenu>
                                 {(me == null || myAuth == null) || <Menu.SubMenu
                                     title={<div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
@@ -398,6 +408,20 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, operate }
                                     minWidth={150}
                                     zIndex={roomConfig.panels.messagesPanel.zIndex}>
                                     <RoomMessages roomId={roomId} participantsState={participantsState} characters={roomState.characters} />
+                                </DraggableCard>}
+                                {roomConfig.panels.participantsPanel.isMinimized ? null : <DraggableCard
+                                    header="Participants"
+                                    onDragStop={e => dispatch(roomConfigModule.actions.moveParticipantsPanel({ ...e, roomId }))}
+                                    onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeParticipantsPanel({ roomId, dir, delta }))}
+                                    onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: participantsPanel } }))}
+                                    onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: participantsPanel }, newValue: true }))}
+                                    childrenContainerStyle={({ padding: childrenContainerPadding, backgroundColor: 'white' })}
+                                    position={roomConfig.panels.participantsPanel}
+                                    size={roomConfig.panels.participantsPanel}
+                                    minHeight={150}
+                                    minWidth={150}
+                                    zIndex={roomConfig.panels.participantsPanel.zIndex}>
+                                    <ParticipantList participants={participantsState} />
                                 </DraggableCard>}
                             </div>
 
