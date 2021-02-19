@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import React from 'react';
 import RoomComponent from '../../components/room/Room';
 import { GetRoomFailureType, JoinRoomAsPlayerMutation, JoinRoomFailureType, ParticipantRole, RoomAsListItemFragment, RoomGetStateFragment, useJoinRoomAsPlayerMutation, useJoinRoomAsSpectatorMutation, useRoomOperatedSubscription } from '../../generated/graphql';
-import { Alert, Button, Card, Input, Result, Spin, Tooltip } from 'antd';
+import { Alert, Button, Card, Input, Result, Spin, notification as antdNotification } from 'antd';
 import Layout from '../../layouts/Layout';
 import { ApolloProvider, FetchResult } from '@apollo/client';
 import MyAuthContext from '../../contexts/MyAuthContext';
@@ -12,6 +12,7 @@ import AlertDialog from '../../foundations/AlertDialog';
 import Loading from '../../components/alerts/Loading';
 import { State as ParticipantsState } from '../../stateManagers/states/participant';
 import Center from '../../foundations/Center';
+import NotificationContext, { TextNotification, toTextNotification, Notification } from '../../components/room/contexts/NotificationContext';
 
 type JoinRoomFormProps = {
     roomState: RoomAsListItemFragment;
@@ -115,7 +116,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
     );
 };
 
-const RoomRouter: React.FC<{ id: string }> = ({ id }: { id: string }) => {
+const RoomRouter: React.FC<{ id: string; allNotifications: ReadonlyArray<TextNotification> }> = ({ id, allNotifications }: { id: string; allNotifications: ReadonlyArray<TextNotification> }) => {
     const { refetch, state } = useRoomState(id);
 
     switch (state.type) {
@@ -129,7 +130,7 @@ const RoomRouter: React.FC<{ id: string }> = ({ id }: { id: string }) => {
             }
             return (
                 <Layout requiresLogin showEntryForm={false}>
-                    <RoomComponent roomId={id} roomState={state.roomState} participantsState={state.participantsState} operate={state.operateRoom} />
+                    <RoomComponent roomId={id} roomState={state.roomState} participantsState={state.participantsState} operate={state.operateRoom} allNotifications={allNotifications} />
                 </Layout>);
         }
         case nonJoined:
@@ -188,7 +189,7 @@ const RoomRouter: React.FC<{ id: string }> = ({ id }: { id: string }) => {
     }
 };
 
-const RoomCore: React.FC = () => {
+const RoomCore: React.FC<{ allNotifications: ReadonlyArray<TextNotification> }> = ({ allNotifications }: { allNotifications: ReadonlyArray<TextNotification> }) => {
     const router = useRouter();
     const id = router.query.id;
 
@@ -201,11 +202,29 @@ const RoomCore: React.FC = () => {
             </Layout>);
     }
 
-    return (<RoomRouter id={id} />);
+    return (<RoomRouter id={id} allNotifications={allNotifications} />);
 };
 
 const Room: React.FC = () => {
-    return (<RoomCore />);
+    const [notification, setNotification] = React.useState<Notification>();
+    const [allNotifications, setAllNotifications] = React.useState<TextNotification[]>([]);
+    React.useEffect(() => {
+        if (notification == null) {
+            return;
+        }
+        const textNotification = toTextNotification(notification);
+        antdNotification[textNotification.type]({
+            message: textNotification.message,
+            description: textNotification.description,
+            placement: 'bottomRight',
+        });
+        setAllNotifications(oldValue => {
+            return [...oldValue, textNotification];
+        });
+    }, [notification]);
+    return (<NotificationContext.Provider value={setNotification}>
+        <RoomCore allNotifications={allNotifications} />
+    </NotificationContext.Provider>);
 };
 
 export default Room;

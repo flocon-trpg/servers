@@ -2,7 +2,7 @@ import React from 'react';
 import * as GraphQL from '../../generated/graphql';
 import { success, useImage, useImageFromGraphQL } from '../../hooks/image';
 import DraggableCore from 'react-draggable';
-import ReactKonva from 'react-konva';
+import * as ReactKonva from 'react-konva';
 import { State } from '../../stateManagers/states/board';
 import * as Character from '../../stateManagers/states/character';
 import { CompositeKey, compositeKeyToString, createStateMap, ReadonlyStateMap, StateMap, stringToCompositeKey, toJSONString } from '../../@shared/StateMap';
@@ -465,7 +465,7 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                     activeBoardKey: compositeKeyToString(key),
                 }
             }))}>
-            {board.name}
+            {board.name === '' ? '(名前なし)' : board.name}
         </Menu.Item>));
     const boardsMenu = (
         <Menu>
@@ -548,21 +548,24 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                     {__(characters.toArray()).compact(([key, value]) => {
                         const pieceLocationExists = __(value.pieceLocations).exists(([boardKey]) => activeBoardKey.id === boardKey.id && activeBoardKey.createdBy === boardKey.createdBy);
 
+                        const cellPosition = getCellPosition({ ...contextMenuState, board });
                         // TODO: x,y,w,h の値が適当
                         const pieceLocationWhichIsCellMode = {
-                            ...getCellPosition({ ...contextMenuState, board }),
                             x: 0,
                             y: 0,
                             w: 50,
                             h: 50,
+                            cellX: cellPosition.cellX,
+                            cellY: cellPosition.cellY,
                             cellW: 1,
                             cellH: 1,
                             isCellMode: true,
                             isPrivate: false,
                         };
-
+                        
                         const pieceLocationWhichIsNotCellMode = {
-                            ...contextMenuState,
+                            x: contextMenuState.x,
+                            y: contextMenuState.y,
                             w: 50,
                             h: 50,
                             isPrivate: false,

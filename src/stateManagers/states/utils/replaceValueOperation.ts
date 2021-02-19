@@ -13,10 +13,10 @@ export const ReplaceValueOperationModule = {
 export const ReplaceNullableValueOperationModule = {
     compose<T>(first: { newValue?: T | null } | null | undefined, second: { newValue?: T | null } | null | undefined): { newValue?: T } | undefined {
         if (first == null) {
-            return { newValue: second?.newValue ?? undefined };
+            return second == null ? undefined : { newValue: second.newValue ?? undefined };
         }
         if (second == null) {
-            return { newValue: first?.newValue ?? undefined };
+            return { newValue: first.newValue ?? undefined };
         }
         return { newValue: second.newValue ?? undefined };
     },

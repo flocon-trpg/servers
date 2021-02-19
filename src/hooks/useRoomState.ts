@@ -1,13 +1,14 @@
 import React from 'react';
 import { Subject } from 'rxjs';
-import { GetRoomDocument, GetRoomFailureType, GetRoomQuery, GetRoomQueryVariables, ParticipantsOperationFragment, RoomAsListItemFragment, RoomOperatedDocument, RoomOperatedSubscription, RoomOperatedSubscriptionVariables, RoomOperationFragment, useOperateMutation } from '../generated/graphql';
+import { GetRoomDocument, GetRoomFailureType, GetRoomQuery, GetRoomQueryVariables, OperateMutation, ParticipantsOperationFragment, RoomAsListItemFragment, RoomOperatedDocument, RoomOperatedSubscription, RoomOperatedSubscriptionVariables, RoomOperationFragment, useOperateMutation } from '../generated/graphql';
 import * as Rx from 'rxjs/operators';
-import { useApolloClient } from '@apollo/client';
+import { ApolloError, FetchResult, useApolloClient } from '@apollo/client';
 import { GetOnlyStateManager, StateManager } from '../stateManagers/StateManager';
 import * as Room from '../stateManagers/states/room';
 import * as Participant from '../stateManagers/states/participant';
 import { create as createStateManager } from '../stateManagers/main';
 import MyAuthContext from '../contexts/MyAuthContext';
+import NotificationContext, { apolloError, text } from '../components/room/contexts/NotificationContext';
 
 const sampleTime = 3000;
 
@@ -52,6 +53,7 @@ type RoomStateResult = {
 
 export const useRoomState = (roomId: string): RoomStateResult => {
     const myAuth = React.useContext(MyAuthContext);
+    const notificationContext = React.useContext(NotificationContext);
     const apolloClient = useApolloClient();
     const [operateMutation] = useOperateMutation();
     const [state, setState] = React.useState<RoomState>({ type: loading });
@@ -165,14 +167,37 @@ export const useRoomState = (roomId: string): RoomStateResult => {
                 }
                 const valueInput = Room.toGraphQLInput(toPost.operationToPost);
                 console.info({ valueInput });
-                const result = await operateMutation({
-                    variables: {
-                        id: roomId,
-                        operation: { value: valueInput },
-                        revisionFrom: toPost.revision,
-                        requestId: toPost.requestId,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                let result: FetchResult<OperateMutation, Record<string, any>, Record<string, any>>;
+                try {
+                    result = await operateMutation({
+                        variables: {
+                            id: roomId,
+                            operation: { value: valueInput },
+                            revisionFrom: toPost.revision,
+                            requestId: toPost.requestId,
+                        }
+                    });
+                } catch (e) {
+                    if (e instanceof ApolloError) {
+                        notificationContext({
+                            type: apolloError,
+                            error: e,
+                            createdAt: new Date().getTime(),
+                        });
+                    } else {
+                        notificationContext({
+                            type: text,
+                            notification: {
+                                type: 'error',
+                                message: 'Unknown error at operateMutation, useRoomState',
+                                createdAt: new Date().getTime(),
+                            }
+                        });
                     }
-                });
+                    toPost.onPosted({ isSuccess: null });
+                    return;
+                }
                 console.info({ valueInput, result });
                 if (result.data == null) {
                     // TODO: isSuccess: falseのケースに対応（サーバー側の対応も必要か）
