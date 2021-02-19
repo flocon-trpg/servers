@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Button, Drawer, Dropdown, Menu, Modal, Radio, Table, Tabs, Tooltip, Upload } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
-import { RcCustomRequestOptions, ShowUploadListInterface } from 'antd/lib/upload/interface';
+import { ShowUploadListInterface } from 'antd/lib/upload/interface';
 import Link from 'next/link';
 import { FilePathFragment, FileSourceType } from '../generated/graphql';
 import { ColumnGroupType, ColumnType } from 'antd/lib/table';
@@ -59,33 +59,37 @@ const FirebaseUploader: React.FC<FirebaseUploaderProps> = ({ authUser, onUploade
 
     const webConfig = config.web;
     const accept = 'image/gif,image/jpeg,image/png,audio/mpeg,audio/wav';
-    const customRequest = (options: RcCustomRequestOptions) => {
-        const storageRef = (() => {
-            if (!webConfig.firebase.storage.enableUnlisted) {
-                return null;
-            }
-            return getStorageForce(config).ref(Path.unlisted.file(authUser.uid, options.file.name));
-        })();
-        if (storageRef == null) {
-            return;
-        }
-        storageRef.put(options.file).then(() => {
-            options.onSuccess({}, options.file);
-            onUploaded();
-        }).catch(err => {
-            if (typeof err === 'string') {
-                options.onError(new Error(err));
-                return;
-            }
-            options.onError(err);
-        });
-    };
+
     // TODO: antdのUploaderでアップロードが完了したとき、そのログを消すメッセージが「remove file」でアイコンがゴミ箱なのは紛らわしいと思うので直したい。
     // TODO: 同一ファイル名のファイルをアップロードすると上書きされるので、そのときは失敗させるかダイアログを出したほうが親切か。
     return (
         <Upload.Dragger
             accept={accept}
-            customRequest={customRequest}
+            customRequest={options => {
+                const storageRef = (() => {
+                    if (!webConfig.firebase.storage.enableUnlisted) {
+                        return null;
+                    }
+                    return getStorageForce(config).ref(Path.unlisted.file(authUser.uid, options.file.name));
+                })();
+                if (storageRef == null) {
+                    return;
+                }
+                storageRef.put(options.file).then(() => {
+                    if (options.onSuccess != null) {
+                        options.onSuccess({}, new XMLHttpRequest());
+                    }
+                    onUploaded();
+                }).catch(err => {
+                    if (options.onError != null) {
+                        if (typeof err === 'string') {
+                            options.onError(new Error(err));
+                            return;
+                        }
+                        options.onError(err);
+                    }
+                });
+            }}
             multiple>
             Click or drag file to this area
         </Upload.Dragger>
