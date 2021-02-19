@@ -86,7 +86,7 @@ const CollaborativeInput: React.FC<Props> = (props: Props) => {
     }, [changeParams]);
 
     return (
-        <Input value={undefined} ref={ref} defaultValue={undefined} onChange={e => {
+        <Input {...props} value={undefined} ref={ref} defaultValue={undefined} onChange={e => {
             subject.next(e.currentTarget.value);
         }} />
     );

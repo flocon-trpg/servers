@@ -176,7 +176,7 @@ const Image: React.FC<{ filePath?: FilePathFragment; iconSize: boolean }> = ({ f
     return (<img src={src} width={iconSize ? 25 : 150} height={iconSize ? 25 : 150} />);
 };
 
-const CharactersList: React.FC<Props> = ({ room, participants }: Props) => {
+const CharacterList: React.FC<Props> = ({ room, participants }: Props) => {
     const myAuth = React.useContext(MyAuthContext);
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
     const dispatchRoomComponentsState = React.useContext(DispatchRoomComponentsStateContext);
@@ -310,4 +310,4 @@ const CharactersList: React.FC<Props> = ({ room, participants }: Props) => {
         </div>);
 };
 
-export default CharactersList;
+export default CharacterList;

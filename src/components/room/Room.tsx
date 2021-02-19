@@ -1,7 +1,7 @@
 import React from 'react';
 import { Menu, Layout as AntdLayout, notification as antdNotification, Input, Tooltip } from 'antd';
 import DraggableCard, { horizontalPadding } from '../../foundations/DraggableCard';
-import CharactersList from './CharacterList';
+import CharacterList from './CharacterList';
 import useRoomConfig from '../../hooks/localStorage/useRoomConfig';
 import { useSelector } from '../../store';
 import roomConfigModule from '../../modules/roomConfigModule';
@@ -558,7 +558,7 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, allNotifi
                                     minHeight={150}
                                     minWidth={150}
                                     zIndex={roomConfig.panels.charactersPanel.zIndex}>
-                                    <CharactersList room={roomState} participants={participantsState} />
+                                    <CharacterList room={roomState} participants={participantsState} />
                                 </DraggableCard>}
                                 {roomConfig.panels.gameEffectPanel.isMinimized ? null : <DraggableCard
                                     header="Game effect"
