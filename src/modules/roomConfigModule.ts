@@ -181,7 +181,8 @@ const roomConfigModule = createSlice({
             if (state == null || state.roomId !== action.payload.roomId) {
                 return;
             }
-            state.gameType = action.payload.gameType;
+            state.gameTypeId = action.payload.gameType?.id;
+            state.gameTypeName = action.payload.gameType?.name;
         },
         bringPanelToFront: (state: RoomConfig | null, action: PayloadAction<PanelAction>) => {
             bringPanelToFront(state, action.payload);

@@ -1,17 +1,18 @@
 import React from 'react';
 import { Button, Input, Select } from 'antd';
 import { isPublicChannelKey, Tab } from './RoomMessages';
-import { useWritePrivateMessageMutation, useWritePublicMessageMutation } from '../../generated/graphql';
+import { useListAvailableGameSystemsQuery, useWritePrivateMessageMutation, useWritePublicMessageMutation } from '../../generated/graphql';
 import { LoadingOutlined } from '@ant-design/icons';
 import { $system } from '../../@shared/Constants';
 import { useSelector } from '../../store';
-import { allGameTypes } from '../../@shared/bcdice';
 import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
 import * as Character from '../../stateManagers/states/character';
 import { ReadonlyStateMap } from '../../@shared/StateMap';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import * as Participant from '../../stateManagers/states/participant';
+import NotificationContext, { graphQLErrors } from './contexts/NotificationContext';
+import { apolloError } from '../../hooks/useRoomMessages';
 
 const defaultNameKey = 'defaultNameKey';
 const customNameKey = 'customNameKey';
@@ -25,6 +26,18 @@ type Props = {
 }
 
 const ChatInput: React.FC<Props> = ({ roomId, style, activeTab, characters }: Props) => {
+    const notificationContext = React.useContext(NotificationContext);
+    const availableGameSystems = useListAvailableGameSystemsQuery();
+    React.useEffect(() => {
+        if (availableGameSystems.error == null) {
+            return;
+        }
+        notificationContext({
+            type: apolloError,
+            error: availableGameSystems.error,
+            createdAt: new Date().getTime(),
+        });
+    }, [availableGameSystems.error, notificationContext]);
     const myAuth = React.useContext(MyAuthContext);
     const [writePublicMessage] = useWritePublicMessageMutation();
     const [writePrivateMessage] = useWritePrivateMessageMutation();
@@ -68,7 +81,7 @@ const ChatInput: React.FC<Props> = ({ roomId, style, activeTab, characters }: Pr
                     roomId,
                     channelKey: activeTab,
                     text,
-                    gameType: roomConfig?.gameType,
+                    gameType: roomConfig?.gameTypeId,
                     characterStateId: selectedNameType === useCharacterKey ? selectedCharacterStateId : undefined,
                     customName: selectedNameType === customNameKey ? customName : undefined,
                 }
@@ -97,7 +110,7 @@ const ChatInput: React.FC<Props> = ({ roomId, style, activeTab, characters }: Pr
         return;
     };
 
-    const gameTypes = allGameTypes.map(gameType => <Select.Option key={gameType} value={gameType}>{gameType}</Select.Option>);
+    const gameTypes = (availableGameSystems.data?.result.value ?? []).map(x => x).sort((x, y) => x.sortKey.localeCompare(y.sortKey)).map(gameSystem => <Select.Option key={gameSystem.id} value={gameSystem.name}>{gameSystem.name}</Select.Option>);
 
     return (
         <div style={({ ...style, alignItems: 'stretch', display: 'flex', flexDirection: 'column' })}>
@@ -108,8 +121,13 @@ const ChatInput: React.FC<Props> = ({ roomId, style, activeTab, characters }: Pr
                     style={{ width: 200 }}
                     placeholder="ゲームの種類"
                     optionFilterProp="children"
-                    value={roomConfig?.gameType}
-                    onSelect={newValue => dispatch(roomConfigModule.actions.setGameType({ roomId, gameType: newValue }))}
+                    value={roomConfig?.gameTypeName}
+                    onSelect={(newValue, option) => {
+                        if (typeof option.key !== 'string') {
+                            return;
+                        }
+                        dispatch(roomConfigModule.actions.setGameType({ roomId, gameType: { id: option.key, name: newValue } }));
+                    }}
                     filterOption={(input, option) => {
                         const value: unknown = option?.value;
                         if (typeof value !== 'string') {

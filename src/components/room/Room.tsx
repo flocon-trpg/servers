@@ -35,7 +35,7 @@ import EditRoomDrawer from './EditRoomDrawer';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import Jdenticon from '../../foundations/Jdenticon';
 import ParticipantList from './ParticipantList';
-import NotificationContext, { apolloErrors, Notification, text, TextNotification, toTextNotification } from './contexts/NotificationContext';
+import NotificationContext, { graphQLErrors, Notification, text, TextNotification, toTextNotification } from './contexts/NotificationContext';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -84,7 +84,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, 
                     promoteToPlayer({ variables: { roomId, phrase: inputValue } }).then(e => {
                         if (e.errors != null) {
                             notificationContext({
-                                type: apolloErrors,
+                                type: graphQLErrors,
                                 createdAt: new Date().getTime(),
                                 errors: e.errors
                             });
@@ -136,7 +136,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, 
                 promoteToPlayer({ variables: { roomId } }).then(e => {
                     if (e.errors != null) {
                         notificationContext({
-                            type: apolloErrors,
+                            type: graphQLErrors,
                             createdAt: new Date().getTime(),
                             errors: e.errors
                         });
@@ -209,7 +209,7 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({ roomId, visible, onOk
                 deleteRoom({ variables: { id: roomId } }).then(e => {
                     if (e.errors != null) {
                         notificationContext({
-                            type: apolloErrors,
+                            type: graphQLErrors,
                             createdAt: new Date().getTime(),
                             errors: e.errors
                         });
@@ -277,7 +277,7 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
         changeParticipantName({ variables: { roomId, newName: inputValue } }).then(e => {
             if (e.errors != null) {
                 notificationContext({
-                    type: apolloErrors,
+                    type: graphQLErrors,
                     createdAt: new Date().getTime(),
                     errors: e.errors
                 });

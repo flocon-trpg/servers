@@ -1,9 +1,11 @@
+import { ApolloError } from '@apollo/client';
 import { GraphQLError } from 'graphql';
 import React from 'react';
 import * as Room from '../../../stateManagers/states/room';
 
 export const text = 'text';
-export const apolloErrors = 'apolloErrors';
+export const graphQLErrors = 'graphQLErrors';
+export const apolloError = 'apolloError';
 
 export type TextNotification = {
     type: 'success' | 'info' | 'warning' | 'error';
@@ -16,8 +18,12 @@ export type Notification = {
     type: typeof text;
     notification: TextNotification;
 } | {
-    type: typeof apolloErrors;
+    type: typeof graphQLErrors;
     errors: ReadonlyArray<GraphQLError>;
+    createdAt: number;
+} | {
+    type: typeof apolloError;
+    error: ApolloError;
     createdAt: number;
 }
 
@@ -25,10 +31,18 @@ export const toTextNotification = (source: Notification): TextNotification => {
     if (source.type === text) {
         return source.notification;
     }
+    if (source.type === apolloError) {
+        return {
+            type: 'error',
+            message: 'Apollo error',
+            description: source.error.message,
+            createdAt: source.createdAt,
+        };
+    }
     const firstError = source.errors[0];
     return {
         type: 'error',
-        message: 'Apollo error',
+        message: 'GraqhQL error',
         description: firstError == null ? undefined : firstError.message,
         createdAt: source.createdAt,
     };

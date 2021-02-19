@@ -2,6 +2,8 @@ import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -9,6 +11,13 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+};
+
+export type AvailableGameSystem = {
+  __typename?: 'AvailableGameSystem';
+  id: Scalars['String'];
+  name: Scalars['String'];
+  sortKey: Scalars['String'];
 };
 
 export type BoardOperation = {
@@ -34,17 +43,6 @@ export type BoardOperationInput = {
   cellRowCount?: Maybe<ReplaceNumberUpOperationInput>;
   cellWidth?: Maybe<ReplaceNumberUpOperationInput>;
   name?: Maybe<ReplaceStringUpOperationInput>;
-};
-
-export type BoardsOperation = {
-  __typename?: 'BoardsOperation';
-  replace: Array<ReplaceBoardOperation>;
-  update: Array<UpdateBoardOperation>;
-};
-
-export type BoardsOperationInput = {
-  replace: Array<ReplaceBoardOperationInput>;
-  update: Array<UpdateBoardOperationInput>;
 };
 
 export type BoardState = {
@@ -79,6 +77,17 @@ export type BoardValueStateInput = {
   name: Scalars['String'];
 };
 
+export type BoardsOperation = {
+  __typename?: 'BoardsOperation';
+  replace: Array<ReplaceBoardOperation>;
+  update: Array<UpdateBoardOperation>;
+};
+
+export type BoardsOperationInput = {
+  replace: Array<ReplaceBoardOperationInput>;
+  update: Array<UpdateBoardOperationInput>;
+};
+
 export type BoolParamOperation = {
   __typename?: 'BoolParamOperation';
   isValuePrivate?: Maybe<ReplaceBooleanUpOperation>;
@@ -88,15 +97,6 @@ export type BoolParamOperation = {
 export type BoolParamOperationInput = {
   isValuePrivate?: Maybe<ReplaceBooleanUpOperationInput>;
   value?: Maybe<ReplaceNullableBooleanUpOperationInput>;
-};
-
-export type BoolParamsOperation = {
-  __typename?: 'BoolParamsOperation';
-  update: Array<UpdateBoolParamOperation>;
-};
-
-export type BoolParamsOperationInput = {
-  update: Array<UpdateBoolParamOperationInput>;
 };
 
 export type BoolParamState = {
@@ -119,6 +119,15 @@ export type BoolParamValueState = {
 export type BoolParamValueStateInput = {
   isValuePrivate: Scalars['Boolean'];
   value?: Maybe<Scalars['Boolean']>;
+};
+
+export type BoolParamsOperation = {
+  __typename?: 'BoolParamsOperation';
+  update: Array<UpdateBoolParamOperation>;
+};
+
+export type BoolParamsOperationInput = {
+  update: Array<UpdateBoolParamOperationInput>;
 };
 
 export enum ChangeParticipantNameFailureType {
@@ -156,17 +165,6 @@ export type CharacterOperationInput = {
   strParams: StrParamsOperationInput;
 };
 
-export type CharactersOperation = {
-  __typename?: 'CharactersOperation';
-  replace: Array<ReplaceCharacterOperation>;
-  update: Array<UpdateCharacterOperation>;
-};
-
-export type CharactersOperationInput = {
-  replace: Array<ReplaceCharacterOperationInput>;
-  update: Array<UpdateCharacterOperationInput>;
-};
-
 export type CharacterState = {
   __typename?: 'CharacterState';
   createdBy: Scalars['String'];
@@ -195,6 +193,17 @@ export type CharacterValueStateInput = {
   numParams: Array<NumParamStateInput>;
   pieceLocations: Array<PieceLocationStateInput>;
   strParams: Array<StrParamStateInput>;
+};
+
+export type CharactersOperation = {
+  __typename?: 'CharactersOperation';
+  replace: Array<ReplaceCharacterOperation>;
+  update: Array<UpdateCharacterOperation>;
+};
+
+export type CharactersOperationInput = {
+  replace: Array<ReplaceCharacterOperationInput>;
+  update: Array<UpdateCharacterOperationInput>;
 };
 
 export type CreateRoomFailureResult = {
@@ -401,6 +410,11 @@ export type LeaveRoomResult = {
   failureType?: Maybe<LeaveRoomFailureType>;
 };
 
+export type ListAvailableGameSystemsResult = {
+  __typename?: 'ListAvailableGameSystemsResult';
+  value: Array<AvailableGameSystem>;
+};
+
 export enum MakeMessageNotSecretFailureType {
   MessageNotFound = 'MessageNotFound',
   NotEntry = 'NotEntry',
@@ -553,15 +567,6 @@ export type NumParamOperationInput = {
   value?: Maybe<ReplaceNullableNumberUpOperationInput>;
 };
 
-export type NumParamsOperation = {
-  __typename?: 'NumParamsOperation';
-  update: Array<UpdateNumParamOperation>;
-};
-
-export type NumParamsOperationInput = {
-  update: Array<UpdateNumParamOperationInput>;
-};
-
 export type NumParamState = {
   __typename?: 'NumParamState';
   key: Scalars['String'];
@@ -582,6 +587,15 @@ export type NumParamValueState = {
 export type NumParamValueStateInput = {
   isValuePrivate: Scalars['Boolean'];
   value?: Maybe<Scalars['Float']>;
+};
+
+export type NumParamsOperation = {
+  __typename?: 'NumParamsOperation';
+  update: Array<UpdateNumParamOperation>;
+};
+
+export type NumParamsOperationInput = {
+  update: Array<UpdateNumParamOperationInput>;
 };
 
 export type OperateRoomFailureResult = {
@@ -623,17 +637,6 @@ export type ParamNameOperationInput = {
   name?: Maybe<ReplaceStringUpOperationInput>;
 };
 
-export type ParamNamesOperation = {
-  __typename?: 'ParamNamesOperation';
-  replace: Array<ReplaceParamNameOperation>;
-  update: Array<UpdateParamNameOperation>;
-};
-
-export type ParamNamesOperationInput = {
-  replace: Array<ReplaceParamNameOperationInput>;
-  update: Array<UpdateParamNameOperationInput>;
-};
-
 export type ParamNameState = {
   __typename?: 'ParamNameState';
   key: Scalars['String'];
@@ -650,6 +653,17 @@ export type ParamNameValueStateInput = {
   name: Scalars['String'];
 };
 
+export type ParamNamesOperation = {
+  __typename?: 'ParamNamesOperation';
+  replace: Array<ReplaceParamNameOperation>;
+  update: Array<UpdateParamNameOperation>;
+};
+
+export type ParamNamesOperationInput = {
+  replace: Array<ReplaceParamNameOperationInput>;
+  update: Array<UpdateParamNameOperationInput>;
+};
+
 export type ParticipantOperation = {
   __typename?: 'ParticipantOperation';
   name?: Maybe<ReplaceStringUpOperation>;
@@ -661,6 +675,18 @@ export enum ParticipantRole {
   Player = 'Player',
   Spectator = 'Spectator'
 }
+
+export type ParticipantState = {
+  __typename?: 'ParticipantState';
+  userUid: Scalars['String'];
+  value: ParticipantValueState;
+};
+
+export type ParticipantValueState = {
+  __typename?: 'ParticipantValueState';
+  name: Scalars['String'];
+  role?: Maybe<ParticipantRole>;
+};
 
 export type ParticipantsGetState = {
   __typename?: 'ParticipantsGetState';
@@ -674,18 +700,6 @@ export type ParticipantsOperation = {
   replace: Array<ReplaceParticipantOperation>;
   revisionTo: Scalars['Float'];
   update: Array<UpdateParticipantOperation>;
-};
-
-export type ParticipantState = {
-  __typename?: 'ParticipantState';
-  userUid: Scalars['String'];
-  value: ParticipantValueState;
-};
-
-export type ParticipantValueState = {
-  __typename?: 'ParticipantValueState';
-  name: Scalars['String'];
-  role?: Maybe<ParticipantRole>;
 };
 
 export type PieceLocationOperation = {
@@ -713,17 +727,6 @@ export type PieceLocationOperationInput = {
   w?: Maybe<ReplaceNumberUpOperationInput>;
   x?: Maybe<ReplaceNumberUpOperationInput>;
   y?: Maybe<ReplaceNumberUpOperationInput>;
-};
-
-export type PieceLocationsOperation = {
-  __typename?: 'PieceLocationsOperation';
-  replace: Array<ReplacePieceLocationOperation>;
-  update: Array<UpdatePieceLocationOperation>;
-};
-
-export type PieceLocationsOperationInput = {
-  replace: Array<ReplacePieceLocationOperationInput>;
-  update: Array<UpdatePieceLocationOperationInput>;
 };
 
 export type PieceLocationState = {
@@ -766,6 +769,17 @@ export type PieceLocationValueStateInput = {
   y: Scalars['Float'];
 };
 
+export type PieceLocationsOperation = {
+  __typename?: 'PieceLocationsOperation';
+  replace: Array<ReplacePieceLocationOperation>;
+  update: Array<UpdatePieceLocationOperation>;
+};
+
+export type PieceLocationsOperationInput = {
+  replace: Array<ReplacePieceLocationOperationInput>;
+  update: Array<UpdatePieceLocationOperationInput>;
+};
+
 export type Pong = {
   __typename?: 'Pong';
   createdBy?: Maybe<Scalars['String']>;
@@ -792,6 +806,7 @@ export type Query = {
   getMessages: GetRoomMessagesResult;
   getRoom: GetRoomResult;
   getRoomsList: GetRoomsListResult;
+  listAvailableGameSystems: ListAvailableGameSystemsResult;
   requiresPhraseToJoinAsPlayer: RequiresPhraseResult;
 };
 
@@ -990,17 +1005,6 @@ export type RoomBgmOperationInput = {
   volume?: Maybe<ReplaceNumberUpOperationInput>;
 };
 
-export type RoomBgmsOperation = {
-  __typename?: 'RoomBgmsOperation';
-  replace: Array<ReplaceRoomBgmOperation>;
-  update: Array<UpdateRoomBgmOperation>;
-};
-
-export type RoomBgmsOperationInput = {
-  replace: Array<ReplaceRoomBgmOperationInput>;
-  update: Array<UpdateRoomBgmOperationInput>;
-};
-
 export type RoomBgmState = {
   __typename?: 'RoomBgmState';
   channelKey: Scalars['String'];
@@ -1016,6 +1020,17 @@ export type RoomBgmValueState = {
 export type RoomBgmValueStateInput = {
   files: Array<FilePathInput>;
   volume: Scalars['Float'];
+};
+
+export type RoomBgmsOperation = {
+  __typename?: 'RoomBgmsOperation';
+  replace: Array<ReplaceRoomBgmOperation>;
+  update: Array<UpdateRoomBgmOperation>;
+};
+
+export type RoomBgmsOperationInput = {
+  replace: Array<ReplaceRoomBgmOperationInput>;
+  update: Array<UpdateRoomBgmOperationInput>;
 };
 
 export type RoomGetState = {
@@ -1161,15 +1176,6 @@ export type StrParamOperationInput = {
   value?: Maybe<Array<TextUpOperationUnitInput>>;
 };
 
-export type StrParamsOperation = {
-  __typename?: 'StrParamsOperation';
-  update: Array<UpdateStrParamOperation>;
-};
-
-export type StrParamsOperationInput = {
-  update: Array<UpdateStrParamOperationInput>;
-};
-
 export type StrParamState = {
   __typename?: 'StrParamState';
   key: Scalars['String'];
@@ -1190,6 +1196,15 @@ export type StrParamValueState = {
 export type StrParamValueStateInput = {
   isValuePrivate: Scalars['Boolean'];
   value: Scalars['String'];
+};
+
+export type StrParamsOperation = {
+  __typename?: 'StrParamsOperation';
+  update: Array<UpdateStrParamOperation>;
+};
+
+export type StrParamsOperationInput = {
+  update: Array<UpdateStrParamOperationInput>;
 };
 
 export type Subscription = {
@@ -2059,6 +2074,20 @@ export type GetLogQuery = (
   ) }
 );
 
+export type ListAvailableGameSystemsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ListAvailableGameSystemsQuery = (
+  { __typename?: 'Query' }
+  & { result: (
+    { __typename?: 'ListAvailableGameSystemsResult' }
+    & { value: Array<(
+      { __typename?: 'AvailableGameSystem' }
+      & Pick<AvailableGameSystem, 'id' | 'name' | 'sortKey'>
+    )> }
+  ) }
+);
+
 export type RequiresPhraseToJoinAsPlayerQueryVariables = Exact<{
   roomId: Scalars['String'];
 }>;
@@ -2261,7 +2290,7 @@ export type WritePublicMessageMutation = (
 
 export type WritePrivateMessageMutationVariables = Exact<{
   roomId: Scalars['String'];
-  visibleTo: Array<Scalars['String']>;
+  visibleTo: Array<Scalars['String']> | Scalars['String'];
   text: Scalars['String'];
   characterStateId?: Maybe<Scalars['String']>;
   customName?: Maybe<Scalars['String']>;
@@ -3196,6 +3225,42 @@ export function useGetLogLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Get
 export type GetLogQueryHookResult = ReturnType<typeof useGetLogQuery>;
 export type GetLogLazyQueryHookResult = ReturnType<typeof useGetLogLazyQuery>;
 export type GetLogQueryResult = Apollo.QueryResult<GetLogQuery, GetLogQueryVariables>;
+export const ListAvailableGameSystemsDocument = gql`
+    query ListAvailableGameSystems {
+  result: listAvailableGameSystems {
+    value {
+      id
+      name
+      sortKey
+    }
+  }
+}
+    `;
+
+/**
+ * __useListAvailableGameSystemsQuery__
+ *
+ * To run a query within a React component, call `useListAvailableGameSystemsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useListAvailableGameSystemsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useListAvailableGameSystemsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useListAvailableGameSystemsQuery(baseOptions?: Apollo.QueryHookOptions<ListAvailableGameSystemsQuery, ListAvailableGameSystemsQueryVariables>) {
+        return Apollo.useQuery<ListAvailableGameSystemsQuery, ListAvailableGameSystemsQueryVariables>(ListAvailableGameSystemsDocument, baseOptions);
+      }
+export function useListAvailableGameSystemsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ListAvailableGameSystemsQuery, ListAvailableGameSystemsQueryVariables>) {
+          return Apollo.useLazyQuery<ListAvailableGameSystemsQuery, ListAvailableGameSystemsQueryVariables>(ListAvailableGameSystemsDocument, baseOptions);
+        }
+export type ListAvailableGameSystemsQueryHookResult = ReturnType<typeof useListAvailableGameSystemsQuery>;
+export type ListAvailableGameSystemsLazyQueryHookResult = ReturnType<typeof useListAvailableGameSystemsLazyQuery>;
+export type ListAvailableGameSystemsQueryResult = Apollo.QueryResult<ListAvailableGameSystemsQuery, ListAvailableGameSystemsQueryVariables>;
 export const RequiresPhraseToJoinAsPlayerDocument = gql`
     query RequiresPhraseToJoinAsPlayer($roomId: String!) {
   result: requiresPhraseToJoinAsPlayer(roomId: $roomId) {

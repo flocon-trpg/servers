@@ -7,23 +7,28 @@ export type RoomConfig = {
     roomId: string;
 
     version: 1;
-    gameType?: string;
+    gameTypeId?: string;
+    gameTypeName?: string;
     panels: PanelsConfig;
 }
 
 export type PartialRoomConfig = {
     // PartialRoomConfigはlocalforage.getItemで使われるが、localforage.setItemでは使われない。
-    // getItemする際、roomIdをキーに用いるため、roomIdをストレージに保存する必要はない。
+    // getItemする際、roomIdをキーに用いるため、roomIdをストレージに保存していない。
     // そのため、RoomConfigのほうでは定義しているroomIdは、こちらでは定義していない。
 
     version?: number;
-    gameType?: string;
+    gameTypeId?: string;
+    gameTypeName?: string;
     panels?: PartialPanelsConfig;
 }
 
 export type UpdateGameTypeAction = {
     roomId: string;
-    gameType?: string;
+    gameType: {
+        id: string;
+        name: string;
+    } | undefined;
 }
 
 export const boardsPanel = 'boardsPanel';
@@ -55,7 +60,8 @@ export const castToPartialRoomConfig = (source: unknown): PartialRoomConfig | un
     return {
         version: 1,
         panels: castToPartialPanelsConfig(source.panels),
-        gameType: castToString(source.gameType),
+        gameTypeId: castToString(source.gameTypeId),
+        gameTypeName: castToString(source.gameTypeName),
     };
 };
 
@@ -69,7 +75,8 @@ export const toCompleteRoomConfig = (source: PartialRoomConfig, roomId: string):
         roomId,
         version: source.version,
         panels: source.panels == null ? defaultPanelsConfig() : toCompletePanelsConfig(source.panels),
-        gameType: source.gameType,
+        gameTypeId: source.gameTypeId,
+        gameTypeName: source.gameTypeName,
     };
 };
 
