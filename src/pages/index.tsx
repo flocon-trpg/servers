@@ -14,8 +14,9 @@ const Index: React.FC = () => {
     return (
         <Layout requiresLogin={false} showEntryForm={false}>
             <div>
-                <Link href='/rooms'>Get rooms</Link>
+                <Link href='/rooms'>部屋一覧</Link>
                 <Button onClick={() => setDrawerType({ openFileType: none })}>Open Files Manager</Button>
+                <Link href='/dev-memo'>制作メモ</Link>
                 <FilesManagerDrawer drawerType={drawerType} onClose={() => setDrawerType(null)} />
             </div>
         </Layout>
