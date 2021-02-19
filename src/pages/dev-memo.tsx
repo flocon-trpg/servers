@@ -53,12 +53,12 @@ const Index: React.FC = () => {
                 <Typography.Title level={4}>大きさ</Typography.Title>
                 現在はボタンなどは全体的に小さめにしているが、コードを変えてコンパクトモードをONにすることでさらに小さくできる。コンパクトモードをONにしたうえで、小さすぎて見にくい部分だけ大きくすることもできる。
                 <Typography.Title level={5}>現在の設定</Typography.Title>
-                <Image src='/rooms/default.png' width={1920} height={1040} quality={100} />
+                <img src='/images/rooms/default.png' />
                 <Typography.Title level={5}>コンパクトモードON</Typography.Title>
-                <Image src='/rooms/compact.png' width={1920} height={1040} quality={100} />
+                <img src='/rooms/rooms/compact.png' />
                 <Typography.Title level={4}>ダークテーマ</Typography.Title>
                 使っているライブラリにはダークテーマもある。ダークテーマだと画面が全体的に暗めなので目が疲れにくいらしいが、ココフォリアっぽさが強い気がする。なお、↓の画像は見ての通りただ単にダークテーマをONにしただけで調整は一切していない状態。もしダークテーマを採用する場合はちゃんと全部暗くする。可能であればダークテーマのON/OFFをサーバー管理者もしくはユーザーが自由に切り替えられるのが理想だが、チャットの文字色など課題もある。
-                <Image src='/rooms/dark.png' width={1920} height={1040} quality={100} />
+                <img src='/rooms/rooms/dark.png' />
                 <Typography.Title level={4}>その他</Typography.Title>
                 <ul>
                     <li>どどんとふなどではトップページに部屋一覧があるが、Floconではトップページからいったん部屋一覧ページを経由して部屋に入る必要があるため少し煩わしい。ただ、将来floconの機能が拡充していってページの情報量が非常に多くなり、結局これらのページはわけたままのほうがいい状態になる可能性もなくはないためまだなんともいえない。</li>
