@@ -1,7 +1,6 @@
 import { Typography } from 'antd';
 import React from 'react';
 import Layout from '../layouts/Layout';
-import Image from 'next/image';
 
 // TODO:
 // テスト協力者に対する未完成の部分の説明や、フィードバックを得やすくするためのページ。
@@ -55,10 +54,10 @@ const Index: React.FC = () => {
                 <Typography.Title level={5}>現在の設定</Typography.Title>
                 <img src='/images/rooms/default.png' />
                 <Typography.Title level={5}>コンパクトモードON</Typography.Title>
-                <img src='/rooms/rooms/compact.png' />
+                <img src='/images/rooms/compact.png' />
                 <Typography.Title level={4}>ダークテーマ</Typography.Title>
                 使っているライブラリにはダークテーマもある。ダークテーマだと画面が全体的に暗めなので目が疲れにくいらしいが、ココフォリアっぽさが強い気がする。なお、↓の画像は見ての通りただ単にダークテーマをONにしただけで調整は一切していない状態。もしダークテーマを採用する場合はちゃんと全部暗くする。可能であればダークテーマのON/OFFをサーバー管理者もしくはユーザーが自由に切り替えられるのが理想だが、チャットの文字色など課題もある。
-                <img src='/rooms/rooms/dark.png' />
+                <img src='/images/rooms/dark.png' />
                 <Typography.Title level={4}>その他</Typography.Title>
                 <ul>
                     <li>どどんとふなどではトップページに部屋一覧があるが、Floconではトップページからいったん部屋一覧ページを経由して部屋に入る必要があるため少し煩わしい。ただ、将来floconの機能が拡充していってページの情報量が非常に多くなり、結局これらのページはわけたままのほうがいい状態になる可能性もなくはないためまだなんともいえない。</li>
@@ -70,7 +69,7 @@ const Index: React.FC = () => {
                 <ul>
                     <li>[軽度] Chromeだと、部屋に初めて入室した際にBoardウィンドウが表示されない？少し操作すると直る。</li>
                     <li>[軽度～中度] キャラクターなどを操作したとき動作が全体的にもっさりしている。</li>
-                    <li>[軽度] 多くの環境で、部屋でウィンドウを右下に持っていくと白い背景の部分が見えてしまう（ちなみにこのページでも同じことが起こる）。<br /><Image src='/rooms/issue.png' width={1501} height={535} quality={100} /></li>
+                    <li>[軽度] 多くの環境で、部屋でウィンドウを右下に持っていくと白い背景の部分が見えてしまう（ちなみにこのページでも同じことが起こる）。<br /><img src='/images/rooms/issue.png' /></li>
                 </ul>
                 <Typography.Title level={3}>Tips的なもの</Typography.Title>
                 <p>ダイスは全角でもOK（この仕様は将来変わる可能性もあり）。例えば、{'1d100<={SAN} と 1d100≦{SAN} と １ｄ１００≦｛SAN｝ '}は同じ意味になる。ただし、この例におけるSANのようなパラメーター名の部分は全角と半角をしっかり区別する必要がある。また、仕様がまだ固まりきっていない部分もある（例: {'<='} の代わりに＜＝は使えるのか？）。</p>
