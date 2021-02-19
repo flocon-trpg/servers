@@ -1,4 +1,5 @@
-import BCDice from 'bcdice';
+import { DynamicLoader } from 'bcdice';
+import Result from 'bcdice/ts/result';
 import { __ } from '../@shared/collection';
 import { analyze as analyzeCore, executeCompareOperator, maybeDice, MaybeDice, Parameter, prettifyOperator } from '../@shared/expression';
 import { RoomParameterNameType } from '../enums/RoomParameterNameType';
@@ -8,7 +9,15 @@ import { Room } from '../graphql+mikro-orm/entities/room/mikro-orm';
 import { ParamName } from '../graphql+mikro-orm/entities/room/paramName/mikro-orm';
 import { EM } from '../utils/types';
 
-const bcdice = new BCDice();
+const loader = new DynamicLoader();
+const roll = async (text: string, gameType: string): Promise<Result | null> => {
+    const gameSystemInfo = loader.listAvailableGameSystems().find(info => info.id === gameType);
+    if (gameSystemInfo == null) {
+        return null;
+    }
+    const gameSystem = await loader.dynamicLoad(gameSystemInfo.id);
+    return gameSystem.eval(text);
+};
 
 export const plain = 'plain';
 export const command = 'command';
@@ -74,11 +83,14 @@ const toHanAscii = (source: string): string => {
 
 // {text: '1d100'} -> bcdice.rollしてからstringifyした結果を返す
 // {text: '5'} -> 5
-const execute = ({ text, gameType }: { text: string; gameType: string }) => {
+const execute = async ({ text, gameType }: { text: string; gameType: string }) => {
     const hankakuText = toHanAscii(text);
-    const [, result] = bcdice.roll(hankakuText, gameType);
-    if (result != null && result.length !== 0) {
-        const { text, sum } = stringify(result);
+    const result = await roll(hankakuText, gameType);
+    if(result == null) {
+        return null;
+    }
+    if (result != null) {
+        const { text, sum } = stringify(result.rands);
         return { text, number: sum };
     }
     const number = Number(hankakuText);
@@ -88,10 +100,10 @@ const execute = ({ text, gameType }: { text: string; gameType: string }) => {
     return { text: number.toString(), number };
 };
 
-const getDiceOrNumber = ({ dice, gameType }: { dice: MaybeDice; gameType: string }): { text: string; number: number; isSecret: boolean } | null => {
-    const result = execute({ text: dice.command, gameType });
+const getDiceOrNumber = async ({ dice, gameType }: { dice: MaybeDice; gameType: string }): Promise<{ text: string; number: number; isSecret: boolean } | null> => {
+    const result = await execute({ text: dice.command, gameType });
     if (result == null) {
-        const result = execute({ text: `${dice.isMaybeSecretSuffix ?? ''}${dice.command}`, gameType });
+        const result = await execute({ text: `${dice.isMaybeSecretSuffix ?? ''}${dice.command}`, gameType });
         if (result == null) {
             return null;
         }
@@ -114,7 +126,7 @@ const getParameterOrDiceOrNumber = async (params: {
     return { ...result, isSecret: false };
 };
 
-type Result = {
+type AnalyzeResult = {
     type: typeof plain;
 } | {
     type: typeof command;
@@ -122,13 +134,14 @@ type Result = {
     isSecret: boolean;
 }
 
+// bcdice 1.x の名残で、bcdiceに任せられそうな処理も自前で処理している。2.x に処理を任せることも考えているが、そうするとダイスのテキストのフォーマットの仕様が変わる可能性がある。
 export const analyze = async (params: {
     em: EM;
     text: string;
     chara: Chara | null;
     gameType: string;
     room: Room;
-}): Promise<Result> => {
+}): Promise<AnalyzeResult> => {
     const exp = analyzeCore(params.text);
     if (exp == null) {
         return { type: plain };

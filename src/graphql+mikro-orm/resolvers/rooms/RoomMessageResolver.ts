@@ -26,6 +26,7 @@ import { FilePath } from '../../entities/filePath/graphql';
 import { Room } from '../../entities/room/mikro-orm';
 import { DeleteMessageResult, EditMessageResult, GetRoomLogFailureResultType, GetRoomLogResult, GetRoomMessagesFailureResultType, GetRoomMessagesResult, MakeMessageNotSecretResult, RoomMessage, RoomMessageEvent, RoomMessages, RoomMessagesType, RoomPrivateMessage, RoomPrivateMessageType, RoomPrivateMessageUpdateType, RoomPublicChannel, RoomPublicChannelType, RoomPublicMessage, RoomPublicMessageType, RoomPublicMessageUpdateType, RoomSoundEffect, RoomSoundEffectType, WritePrivateRoomMessageFailureResultType, WritePrivateRoomMessageResult, WritePublicRoomMessageFailureResultType, WritePublicRoomMessageResult, WriteRoomSoundEffectFailureResultType, WriteRoomSoundEffectResult } from '../../entities/roomMessage/graphql';
 import { RoomPrvMsg, RoomPubCh, RoomPubMsg, RoomSe } from '../../entities/roomMessage/mikro-orm';
+import { User } from '../../entities/user/mikro-orm';
 import { ResolverContext } from '../../utils/Contexts';
 import { ROOM_MESSAGE_UPDATE } from '../../utils/Topics';
 import { checkEntry, checkSignIn, findRoomAndMyParticipant, findRoomAndMyParticipantAndParitipantUserUids, NotSignIn } from '../utils/helpers';
@@ -542,7 +543,7 @@ export class RoomMessageResolver {
             const entity = new RoomPubMsg();
             entity.text = args.text;
             entity.textColor = args.textColor == null ? undefined : fixTextColor(args.textColor);
-            entity.createdBy = Reference.create(meAsUser);
+            entity.createdBy = Reference.create<User, 'userUid'>(meAsUser);
             let ch = await em.findOne(RoomPubCh, { key: channelKey, room: room.id });
             if (ch == null) {
                 ch = new RoomPubCh({ key: channelKey });
@@ -682,7 +683,7 @@ export class RoomMessageResolver {
             const entity = new RoomPrvMsg();
             entity.text = args.text;
             args.textColor == null ? undefined : fixTextColor(args.textColor);
-            entity.createdBy = Reference.create(meAsUser);
+            entity.createdBy = Reference.create<User, 'userUid'>(meAsUser);
             for (const participantUserRef of participantUsers) {
                 const participantUser = await participantUserRef.load();
                 if (visibleTo.has(participantUser.userUid)) {
@@ -801,7 +802,7 @@ export class RoomMessageResolver {
                 fileSourceType: args.file.sourceType,
                 volume: args.volume,
             });
-            entity.createdBy = Reference.create(meAsUser);
+            entity.createdBy = Reference.create<User, 'userUid'>(meAsUser);
             entity.room = Reference.create(room);
             await em.persistAndFlush(entity);
 

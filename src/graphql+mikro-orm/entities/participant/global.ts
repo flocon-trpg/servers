@@ -5,7 +5,7 @@ import * as $GraphQL from './graphql';
 import { ReplaceStringUpOperation } from '../../Operations';
 import { Collection, Reference } from '@mikro-orm/core';
 import * as MapOperations from '../../mapOperations';
-import { User as MikroORMUser } from '../user/mikro-orm';
+import { User as MikroORMUser, User } from '../user/mikro-orm';
 import { EM } from '../../../utils/types';
 import { RoomOperation, RoomOperationValue } from '../room/graphql';
 import { Room as MikroORMRoom } from '../room/mikro-orm';
@@ -70,8 +70,8 @@ export const addAndCreateGraphQLOperation = async ({
     const newEntity = new $MikroORM.Partici(newValue);
     const operationEntity = new $MikroORM.AddParticiOp();
     newEntity.room = Reference.create(room);
-    newEntity.user = Reference.create(user);
-    operationEntity.user = Reference.create(user);
+    newEntity.user = Reference.create<User, 'userUid'>(user);
+    operationEntity.user = Reference.create<User, 'userUid'>(user);
     em.persist(newEntity);
     particiOp.addParticiOps.add(operationEntity);
     em.persist(particiOp);
@@ -113,7 +113,7 @@ export const updateAndCreateGraphQLOperation = async ({
 
     const graphQLOperation: $GraphQL.ParticipantOperation = {};
     const operationEntity = new $MikroORM.UpdateParticiOp();
-    operationEntity.user = Reference.create(found.user);
+    operationEntity.user = Reference.create<User, 'userUid'>(found.user);
     if (operation.name != null) {
         if (found.name !== operation.name.newValue) {
             operationEntity.name = found.name;
