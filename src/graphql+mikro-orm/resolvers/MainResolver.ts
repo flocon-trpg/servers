@@ -1,4 +1,4 @@
-import { Arg, Ctx, Mutation, PubSub, PubSubEngine, Resolver, Root, Subscription } from 'type-graphql';
+import { Arg, Ctx, Mutation, PubSub, PubSubEngine, Query, Resolver, Root, Subscription } from 'type-graphql';
 import { ResolverContext } from '../utils/Contexts';
 import { EntryToServerResultType } from '../../enums/EntryToServerResultType';
 import { checkSignIn, NotSignIn } from './utils/helpers';
@@ -9,6 +9,8 @@ import { Pong } from '../entities/pong/graphql';
 import { PONG } from '../utils/Topics';
 import { loadServerConfigAsMain } from '../../config';
 import { EntryToServerResult } from '../results/EntryToServerResult';
+import { ListAvailableGameSystemsResult } from '../results/ListAvailableGameSystemsResult';
+import { listAvailableGameSystems } from '../../messageAnalyzer/main';
 
 
 export type PongPayload = {
@@ -18,8 +20,15 @@ export type PongPayload = {
 
 @Resolver()
 export class MainResolver {
+    @Query(() => ListAvailableGameSystemsResult)
+    public async listAvailableGameSystems(): Promise<ListAvailableGameSystemsResult> {
+        return {
+            value: listAvailableGameSystems(),
+        };
+    }
+
     @Mutation(() => EntryToServerResult)
-    async entryToServer(@Arg('phrase', () => String ,{ nullable: true }) phrase: string | null | undefined, @Ctx() context: ResolverContext): Promise<EntryToServerResult> {
+    public async entryToServer(@Arg('phrase', () => String ,{ nullable: true }) phrase: string | null | undefined, @Ctx() context: ResolverContext): Promise<EntryToServerResult> {
         const queue = async () => {
             const em = context.createEm();
 

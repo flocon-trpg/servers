@@ -10,8 +10,13 @@ import { ParamName } from '../graphql+mikro-orm/entities/room/paramName/mikro-or
 import { EM } from '../utils/types';
 
 const loader = new DynamicLoader();
+
+export const listAvailableGameSystems = () => {
+    return loader.listAvailableGameSystems();
+};
+
 const roll = async (text: string, gameType: string): Promise<Result | null> => {
-    const gameSystemInfo = loader.listAvailableGameSystems().find(info => info.id === gameType);
+    const gameSystemInfo = listAvailableGameSystems().find(info => info.id === gameType);
     if (gameSystemInfo == null) {
         return null;
     }
