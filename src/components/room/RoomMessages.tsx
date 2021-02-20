@@ -166,7 +166,7 @@ const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, par
             <span>
                 {message.value.text ?? message.value.altTextToSecret}
                 <span> </span>
-                <span style={({ fontWeight: 'bold' })}>{message.value.commandResult}</span>
+                {message.value.commandResult != null && <span style={({ fontWeight: 'bold' })}>{`${message.value.commandResult.text}${message.value.commandResult.isSuccess === true ? ' (成功)' : ''}${message.value.commandResult.isSuccess === false ? ' (失敗)' : ''}`}</span>}
                 <span> </span>
                 <span style={({ fontWeight: 'bold' })}>{message.value.isSecret ? 'Secret' : ''}</span>
             </span>);

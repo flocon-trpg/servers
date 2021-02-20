@@ -3,7 +3,6 @@ export const parameter = 'parameter';
 
 export type MaybeDice = {
     type: typeof maybeDice;
-    isMaybeSecretSuffix?: string;
     command: string;
 }
 
@@ -91,24 +90,8 @@ const toMaybeDiceOrParameter = (token: string): MaybeDice | Parameter => {
             parameter: value,
         };
     }
-    // 暫定的に、先頭にsがついているかだけのシンプルな判定にしている
-    const diceMatch = token.trim().match(/^(?<s>[sSｓＳ])(?<value>.*)$/u);
-    const diceGroups = diceMatch?.groups;
-    if (diceGroups != null) {
-        const s = diceGroups['s'];
-        const value = diceGroups['value'];
-        if (s == null || value == null) {
-            throw 'Regexp error: s == null || value == null';
-        }
-        return {
-            type: maybeDice,
-            isMaybeSecretSuffix: s,
-            command: value,
-        };
-    }
     return {
         type: maybeDice,
-        isMaybeSecretSuffix: undefined,
         command: token.trim(),
     };
 };
