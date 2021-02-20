@@ -151,7 +151,23 @@ export const useRoomState = (roomId: string): RoomStateResult => {
                         return;
                     }
                 }
-            });
+            }, 
+            () => notificationContext({
+                type: text,
+                notification: {
+                    type: 'error',
+                    message: 'RoomOperatedSubscriptionのsubscribeでerrorが呼ばれました。',
+                    createdAt: new Date().getTime(),
+                },
+            }),
+            () => notificationContext({
+                type: text,
+                notification: {
+                    type: 'warning',
+                    message: 'RoomOperatedSubscriptionの通信が終了しました。',
+                    createdAt: new Date().getTime(),
+                },
+            }));
         const postTriggerSubscription = postTrigger.pipe(
             Rx.sampleTime(sampleTime),
             Rx.map(async () => {

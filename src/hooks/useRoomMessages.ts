@@ -2,6 +2,7 @@ import { ApolloError } from '@apollo/client';
 import produce from 'immer';
 import React from 'react';
 import { __ } from '../@shared/collection';
+import NotificationContext, { text } from '../components/room/contexts/NotificationContext';
 import { useMessageEventSubscription, useGetMessagesQuery, RoomMessageEventFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment, RoomPublicChannelFragment, RoomSoundEffectFragment } from '../generated/graphql';
 import { appConsole } from '../utils/appConsole';
 import { PrivateChannelSet, PrivateChannelsSet } from '../utils/PrivateChannelsSet';
@@ -310,7 +311,7 @@ export type AllRoomMessagesResult = {
 
 export const useAllRoomMessages = ({ roomId }: { roomId: string }): AllRoomMessagesResult => {
     const [result, setResult] = React.useState<AllRoomMessagesResultCore>({ type: loading, events: [] });
-
+    const notificationContext = React.useContext(NotificationContext);
     const messages = useGetMessagesQuery({ variables: { roomId }, fetchPolicy: 'network-only' });
     const messageEventSubscription = useMessageEventSubscription({ variables: { roomId } });
 
@@ -379,6 +380,17 @@ export const useAllRoomMessages = ({ roomId }: { roomId: string }): AllRoomMessa
             });
         }
     }, [messageEventSubscription.data]);
+
+    React.useEffect(() => {
+        if (messageEventSubscription.error == null) {
+            return;
+        }
+        notificationContext({
+            type: apolloError,
+            error: messageEventSubscription.error,
+            createdAt: new Date().getTime(),
+        });
+    }, [notificationContext, messageEventSubscription.error]);
 
     return result;
 };

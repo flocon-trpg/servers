@@ -14,6 +14,7 @@ export type TextNotification = {
     createdAt: number;
 }
 
+// systemMessageなどとマージするので、createdAtの型はそれに合わせてnumberにしている。
 export type Notification = {
     type: typeof text;
     notification: TextNotification;
