@@ -126,39 +126,34 @@ export const analyze = async (params: {
     gameType: string;
     room: Room;
 }): Promise<AnalyzeResult> => {
-    const analyzed = await getDiceOrNumber(params);
-    if (analyzed == null) {
-        const exp = analyzeCore(params.text);
-        if (exp == null) {
-            return { type: plain };
-        }
-        if (!exp.isCompare) {
-            return {
-                type: plain,
-            };
-        }
-
+    const exp = analyzeCore(params.text);
+    if (exp?.isCompare === true) {
         const left = await getParameterOrDiceOrNumber({ ...params, value: exp.left });
         const right = await getParameterOrDiceOrNumber({ ...params, value: exp.right });
-        if (left == null || right == null) {
-            // 少なくとも一方がダイスロールのフォーマットになっていないため、ただの文字列とみなす。
-            return {
-                type: plain,
-            };
-        }
-        if (left.number != null && right.number != null) {
+        if (left != null && right != null) {
+            if (left.number != null && right.number != null) {
+                return {
+                    type: command,
+                    result: `${left.text} ${prettifyOperator(exp.compareOperator)} ${right.text}`,
+                    isSuccess: executeCompareOperator(left.number, right.number, exp.compareOperator),
+                    isSecret: (left.bcdice?.secret ?? false) || (right.bcdice?.secret ?? false),
+                };
+            }
+            // BCDiceは例えば '1d100 < {NON_EXIST_PARAM}' のような文字列も1d100と判定されるため、ここで弾いている。ただし、'1d100 {SAN}'のような文字列も1d100と判定されるが、これは防いでいない。
+            // まず最初に {SAN} のような文字列を置き換えてしまってから判定し始めたほうがいいか。
             return {
                 type: command,
-                result: `${left.text} ${prettifyOperator(exp.compareOperator)} ${right.text}`,
-                isSuccess: executeCompareOperator(left.number, right.number, exp.compareOperator),
+                result: `${left.text}; ${right.text}`,
+                isSuccess: null,
                 isSecret: (left.bcdice?.secret ?? false) || (right.bcdice?.secret ?? false),
             };
         }
+    }
+
+    const analyzed = await getDiceOrNumber(params);
+    if (analyzed == null) {
         return {
-            type: command,
-            result: `${left.text}; ${right.text}`,
-            isSuccess: null,
-            isSecret: (left.bcdice?.secret ?? false) || (right.bcdice?.secret ?? false),
+            type: plain,
         };
     }
 
