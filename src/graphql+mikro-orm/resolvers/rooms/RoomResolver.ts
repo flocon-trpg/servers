@@ -880,7 +880,7 @@ export class RoomResolver {
                 });
             }
             const roomState = await Room$Global.RoomState.create(room);
-            const downOperation = await Room$Global.RoomDownOperation.findRange(em, room.id, { from: args.prevRevision, expectedTo: room.roomRevision });
+            const downOperation = await Room$Global.RoomDownOperation.findRange(em, roomState, room.id, { from: args.prevRevision, expectedTo: room.roomRevision });
             if (downOperation.isError) {
                 return downOperation;
             }

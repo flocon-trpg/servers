@@ -84,6 +84,21 @@ class RoomBgmState {
         return result;
     }
 
+    public static diff({ prev, next }: { prev: RoomBgmState; next: RoomBgmState }): RoomBgmDownOperation | undefined {
+        const resultType: RoomBgmDownOperationType = {};
+        if (prev.object.files !== next.object.files) {
+            resultType.files = { oldValue: prev.object.files };
+        }
+        if (prev.object.volume !== next.object.volume) {
+            resultType.volume = { oldValue: prev.object.volume };
+        }
+        const result = new RoomBgmDownOperation(resultType);
+        if (result.isId) {
+            return undefined;
+        }
+        return result;
+    }
+
     private setToRoomBgmBase({
         roomBgmBase,
     }: {
@@ -179,7 +194,7 @@ export class RoomBgmsState {
 }
 
 class RoomBgmDownOperation {
-    private constructor(private readonly object: RoomBgmDownOperationType) { }
+    public constructor(private readonly object: RoomBgmDownOperationType) { }
 
     public static create(entity: $MikroORM.UpdateRoomBgmOp): Result<RoomBgmDownOperation> {
         const object: RoomBgmDownOperationType = {};
@@ -188,6 +203,10 @@ class RoomBgmDownOperation {
         object.volume = entity.volume === undefined ? undefined : { oldValue: entity.volume };
 
         return ResultModule.ok(new RoomBgmDownOperation(object));
+    }
+
+    public get isId() {
+        return undefinedForAll(this.object);
     }
 
     public get valueProps(): Readonly<RoomBgmDownOperationType> {
@@ -241,14 +260,16 @@ export class RoomBgmsDownOperation {
         return ResultModule.ok(new RoomBgmsDownOperation(downOperation.value));
     }
 
-    public compose(second: RoomBgmsDownOperation): Result<RoomBgmsDownOperation> {
+    public compose(second: RoomBgmsDownOperation, state: RoomBgmsState): Result<RoomBgmsDownOperation> {
         const composed = MapOperations.composeDownOperation({
+            state: state.readonlyMap,
             first: this.core,
             second: second.core,
             innerApplyBack: ({ downOperation, nextState }) => {
                 return ResultModule.ok(nextState.applyBack(downOperation));
             },
             innerCompose: ({ first, second }) => first.compose(second),
+            innerDiff: RoomBgmState.diff,
         });
         if (composed.isError) {
             return composed;

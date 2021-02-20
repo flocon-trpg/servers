@@ -82,10 +82,12 @@ type ApplyBackParameters<TKey1, TKey2, TState, TDownOperation> = {
 }
 
 type ComposeParameters<TKey1, TKey2, TState, TDownOperation> = {
+    state: ReadonlyDualKeyMap<TKey1, TKey2, TState>;
     first: ReadonlyDualKeyMapDownOperation<TKey1, TKey2, TState, TDownOperation>;
     second: ReadonlyDualKeyMapDownOperation<TKey1, TKey2, TState, TDownOperation>;
     innerApplyBack: (params: { downOperation: TDownOperation; nextState: TState }) => Result<TState>;
-    innerCompose: (params: { first: TDownOperation; second: TDownOperation }) => Result<TDownOperation>;
+    innerCompose: (params: { state: TState | undefined; first: TDownOperation; second: TDownOperation }) => Result<TDownOperation>;
+    innerDiff: (params: { prev: TState; next: TState }) => TDownOperation | undefined;
 }
 
 type ProtectedValuePolicy<TKey, TServerState> = {
@@ -414,7 +416,7 @@ export const applyBack = <TKey1, TKey2, TState, TDownOperation>({ nextState, dow
     return ResultModule.ok(prevState);
 };
 
-export const composeDownOperation = <TKey1, TKey2, TState, TDownOperation>({ first, second, innerApplyBack, innerCompose }: ComposeParameters<TKey1, TKey2, TState, TDownOperation>): Result<DualKeyMapDownOperation<TKey1, TKey2, TState, TDownOperation>> => {
+export const composeDownOperation = <TKey1, TKey2, TState, TDownOperation>({ state, first, second, innerApplyBack, innerCompose, innerDiff }: ComposeParameters<TKey1, TKey2, TState, TDownOperation>): Result<DualKeyMapDownOperation<TKey1, TKey2, TState, TDownOperation>> => {
     const result = new DualKeyMap<TKey1, TKey2, DualKeyMapDownOperationElementUnion<TState, TDownOperation>>();
 
     for (const [key, groupJoined] of groupJoin(first, second)) {
@@ -442,6 +444,33 @@ export const composeDownOperation = <TKey1, TKey2, TState, TDownOperation>({ fir
             case both:
                 switch (groupJoined.left.type) {
                     case 'replace':
+                        switch (groupJoined.right.type) {
+                            case 'replace': {
+                                const left = groupJoined.left.operation.oldValue;
+                                const right = groupJoined.right.operation.oldValue;
+                                if (right === undefined) {
+                                    if (left === undefined) {
+                                        return ResultModule.error(`first and second are undefined. the key is "${key}".`);
+                                    }
+                                    const stateElement = state.get(key);
+                                    if (stateElement === undefined) {
+                                        return ResultModule.error('stateElement is undefined');
+                                    }
+                                    // remove→add、つまり置き換えなのでupdateになる
+                                    const diffResult = innerDiff({ prev: left, next: stateElement });
+                                    if (diffResult !== undefined) {
+                                        result.set(key, { type: 'update', operation: diffResult });
+                                    }
+                                    continue;
+                                }
+                                if (left === undefined) {
+                                    // add→removeなのでスルーしてよい
+                                    continue;
+                                }
+                                result.set(key, { type: 'replace', operation: { oldValue: left } });
+                                continue;
+                            }
+                        }
                         result.set(key, { type: 'replace', operation: groupJoined.left.operation });
                         continue;
                     case 'update':
@@ -458,7 +487,7 @@ export const composeDownOperation = <TKey1, TKey2, TState, TDownOperation>({ fir
                                 continue;
                             }
                             case 'update': {
-                                const update = innerCompose({ first: groupJoined.left.operation, second: groupJoined.right.operation });
+                                const update = innerCompose({ state: state.get(key), first: groupJoined.left.operation, second: groupJoined.right.operation });
                                 if (update.isError) {
                                     return update;
                                 }
@@ -607,4 +636,36 @@ export const apply = async <TKey1, TKey2, TEntityState, TReplaceOperationState, 
             }
         }
     }
+};
+
+export const diff = <TKey1, TKey2, TState, TOperation>({
+    prev,
+    next,
+    innerDiff,
+}: {
+    prev: ReadonlyDualKeyMap<TKey1, TKey2, TState>;
+    next: ReadonlyDualKeyMap<TKey1, TKey2, TState>;
+    innerDiff: (params: { prev: TState; next: TState }) => TOperation | undefined;
+}): DualKeyMapDownOperation<TKey1, TKey2, TState, TOperation> => {
+    const result = new DualKeyMap<TKey1, TKey2, DualKeyMapDownOperationElementUnion<TState, TOperation>>();
+    for (const [key, value] of groupJoin(prev, next)) {
+        switch (value.type) {
+            case left:
+                result.set(key, { type: replace, operation: { oldValue: value.left } });
+                continue;
+            case right: {
+                result.set(key, { type: replace, operation: { oldValue: undefined } });
+                continue;
+            }
+            case both: {
+                const diffResult = innerDiff({ prev: value.left, next: value.right });
+                if (diffResult === undefined) {
+                    continue;
+                }
+                result.set(key, { type: update, operation: diffResult });
+                continue;
+            }
+        }
+    }
+    return result;
 };

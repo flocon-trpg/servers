@@ -172,6 +172,45 @@ class PieceLocationState {
         return result;
     }
 
+    public static diff({ prev, next }: { prev: PieceLocationState; next: PieceLocationState }): PieceLocationDownOperation | undefined {
+        const resultType: PieceLocationDownOperationType = {};
+        if (prev.object.cellH !== next.object.cellH) {
+            resultType.cellH = { oldValue: prev.object.cellH };
+        }
+        if (prev.object.cellW !== next.object.cellW) {
+            resultType.cellW = { oldValue: prev.object.cellW };
+        }
+        if (prev.object.cellX !== next.object.cellX) {
+            resultType.cellX = { oldValue: prev.object.cellX };
+        }
+        if (prev.object.cellY !== next.object.cellY) {
+            resultType.cellY = { oldValue: prev.object.cellY };
+        }
+        if (prev.object.h !== next.object.h) {
+            resultType.h = { oldValue: prev.object.h };
+        }
+        if (prev.object.isCellMode !== next.object.isCellMode) {
+            resultType.isCellMode = { oldValue: prev.object.isCellMode };
+        }
+        if (prev.object.isPrivate !== next.object.isPrivate) {
+            resultType.isPrivate = { oldValue: prev.object.isPrivate };
+        }
+        if (prev.object.w !== next.object.w) {
+            resultType.w = { oldValue: prev.object.w };
+        }
+        if (prev.object.x !== next.object.x) {
+            resultType.x = { oldValue: prev.object.x };
+        }
+        if (prev.object.y !== next.object.y) {
+            resultType.y = { oldValue: prev.object.y };
+        }
+        const result = new PieceLocationDownOperation(resultType);
+        if (result.isId) {
+            return undefined;
+        }
+        return result;
+    }
+
     public toMikroORMPieceLocation({
         boardId,
         boardCreatedBy,
@@ -288,10 +327,19 @@ export class PieceLocationsState {
         }
         return new PieceLocationsState(createStateMap(result.value));
     }
+
+    public static diff({ prev, next }: { prev: PieceLocationsState; next: PieceLocationsState }): PieceLocationsDownOperation {
+        const result = DualKeyMapOperations.diff({
+            prev: prev.readonlyStateMap.dualKeyMap,
+            next: next.readonlyStateMap.dualKeyMap,
+            innerDiff: PieceLocationState.diff,
+        });
+        return new PieceLocationsDownOperation(createStateMap(result));
+    }
 }
 
 class PieceLocationDownOperation {
-    private constructor(private readonly object: PieceLocationDownOperationType) { }
+    public constructor(private readonly object: PieceLocationDownOperationType) { }
 
     public static create(entity: $MikroORM.UpdatePieceLocOp): PieceLocationDownOperation {
         const object: PieceLocationDownOperationType = {};
@@ -308,6 +356,10 @@ class PieceLocationDownOperation {
         object.y = entity.y === undefined ? undefined : { oldValue: entity.y };
 
         return new PieceLocationDownOperation(object);
+    }
+
+    public get isId() {
+        return undefinedForAll(this.object);
     }
 
     public get valueProps(): Readonly<PieceLocationDownOperationType> {
@@ -333,7 +385,7 @@ class PieceLocationDownOperation {
 }
 
 export class PieceLocationsDownOperation {
-    private constructor(private readonly core: DualKeyMapOperations.ReadonlyStateMapDownOperation<PieceLocationState, PieceLocationDownOperation>) { }
+    public constructor(private readonly core: DualKeyMapOperations.ReadonlyStateMapDownOperation<PieceLocationState, PieceLocationDownOperation>) { }
 
     public static async create({
         add,
@@ -358,14 +410,16 @@ export class PieceLocationsDownOperation {
         return ResultModule.ok(new PieceLocationsDownOperation(createStateMap(downOperation.value)));
     }
 
-    public compose(second: PieceLocationsDownOperation): Result<PieceLocationsDownOperation> {
+    public compose(second: PieceLocationsDownOperation, state: PieceLocationsState): Result<PieceLocationsDownOperation> {
         const composed = DualKeyMapOperations.composeDownOperation({
+            state: state.readonlyStateMap.dualKeyMap,
             first: this.core.dualKeyMap,
             second: second.core.dualKeyMap,
             innerApplyBack: ({ downOperation, nextState }) => {
                 return ResultModule.ok(nextState.applyBack(downOperation));
             },
             innerCompose: ({ first, second }) => first.compose(second),
+            innerDiff: PieceLocationState.diff,
         });
         if (composed.isError) {
             return composed;

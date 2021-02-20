@@ -81,6 +81,22 @@ class NumParamState {
         return result;
     }
 
+    public static diff({ prev, next }: { prev: NumParamState; next: NumParamState }): NumParamDownOperation | undefined {
+        const resultType: NumParamDownOperationType = {};
+        if (prev.object.isValuePrivate !== next.object.isValuePrivate) {
+            resultType.isValuePrivate = { oldValue: prev.object.isValuePrivate };
+        }
+        if (prev.object.value !== next.object.value) {
+            resultType.value = { oldValue: prev.object.value };
+        }
+        
+        const result = new NumParamDownOperation(resultType);
+        if (result.isId) {
+            return undefined;
+        }
+        return result;
+    }
+
     public toGraphQL({ key, createdByMe }: { key: string; createdByMe: boolean }): $GraphQL.NumParamState {
         return {
             key,
@@ -173,10 +189,22 @@ export class NumParamsState {
         }
         return new NumParamsState(result.value);
     }
+
+    public static diff({ prev, next }: { prev: NumParamsState; next: NumParamsState }): NumParamsDownOperation {
+        const result = ParamMapOperations.diff({
+            prev: prev.readonlyMap,
+            next: next.readonlyMap,
+            innerDiff: ({ prev, next }) => NumParamState.diff({
+                prev: prev ?? new NumParamState({ isValuePrivate: false }),
+                next: next ?? new NumParamState({ isValuePrivate: false }),
+            }),
+        });
+        return new NumParamsDownOperation(result);
+    }
 }
 
 class NumParamDownOperation {
-    private constructor(private readonly object: NumParamDownOperationType) { }
+    public constructor(private readonly object: NumParamDownOperationType) { }
 
     public static create(entity: $MikroORM.UpdateNumParamOp): Result<NumParamDownOperation> {
         const object: NumParamDownOperationType = {};
@@ -187,6 +215,10 @@ class NumParamDownOperation {
         return ResultModule.ok(new NumParamDownOperation(object));
     }
 
+    public get isId() {
+        return undefinedForAll(this.object);
+    }
+    
     public get valueProps(): Readonly<NumParamDownOperationType> {
         return this.object;
     }
@@ -202,7 +234,7 @@ class NumParamDownOperation {
 }
 
 export class NumParamsDownOperation {
-    private constructor(private readonly core: ReadonlyMap<StrIndex100, NumParamDownOperation>) { }
+    public constructor(private readonly core: ReadonlyMap<StrIndex100, NumParamDownOperation>) { }
 
     public static async create({
         update

@@ -89,6 +89,22 @@ class StrParamState {
         return result;
     }
 
+    public static diff({ prev, next }: { prev: StrParamState; next: StrParamState }): StrParamDownOperation | undefined {
+        const resultType: StrParamDownOperationType = {};
+        if (prev.object.isValuePrivate !== next.object.isValuePrivate) {
+            resultType.isValuePrivate = { oldValue: prev.object.isValuePrivate };
+        }
+        if (prev.object.value !== next.object.value) {
+            resultType.value = TextDownOperationModule.diff(prev.object.value, next.object.value);
+        }
+
+        const result = new StrParamDownOperation(resultType);
+        if (result.isId) {
+            return undefined;
+        }
+        return result;
+    }
+
     private setToStrParamBase({
         numParamValueBase,
     }: {
@@ -200,10 +216,22 @@ export class StrParamsState {
         }
         return new StrParamsState(result.value);
     }
+
+    public static diff({ prev, next }: { prev: StrParamsState; next: StrParamsState }): StrParamsDownOperation {
+        const result = ParamMapOperations.diff({
+            prev: prev.readonlyMap,
+            next: next.readonlyMap,
+            innerDiff: ({ prev, next }) => StrParamState.diff({
+                prev: prev ?? new StrParamState({ isValuePrivate: false, value: '' }),
+                next: next ?? new StrParamState({ isValuePrivate: false, value: '' }),
+            }),
+        });
+        return new StrParamsDownOperation(result);
+    }
 }
 
 class StrParamDownOperation {
-    private constructor(private readonly object: StrParamDownOperationType) { }
+    public constructor(private readonly object: StrParamDownOperationType) { }
 
     public static create(entity: $MikroORM.UpdateStrParamOp): Result<StrParamDownOperation> {
         const object: StrParamDownOperationType = {};
@@ -212,6 +240,10 @@ class StrParamDownOperation {
         object.value = TextDownOperationModule.ofUnitAndValidate(entity.value);
 
         return ResultModule.ok(new StrParamDownOperation(object));
+    }
+
+    public get isId() {
+        return undefinedForAll(this.object);
     }
 
     public get valueProps(): Readonly<StrParamDownOperationType> {
@@ -229,7 +261,7 @@ class StrParamDownOperation {
 }
 
 export class StrParamsDownOperation {
-    private constructor(private readonly core: ReadonlyMap<StrIndex100, StrParamDownOperation>) { }
+    public constructor(private readonly core: ReadonlyMap<StrIndex100, StrParamDownOperation>) { }
 
     public static async create({
         update

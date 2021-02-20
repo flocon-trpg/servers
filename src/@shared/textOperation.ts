@@ -1383,4 +1383,29 @@ export namespace TextDownOperation {
         }
         return builder.build();
     };
+
+    export const diff = ({
+        first,
+        second,
+    }: {
+        first: string;
+        second: string;
+    }): Operation => {
+        const builder = new TextOperationBuilder<PositiveInt, NonEmptyString>(downFactory);
+        const dmp = new diff_match_patch();
+        dmp.diff_main(first, second).forEach(([diffType, diff]) => {
+            switch (diffType) {
+                case -1:
+                    builder.delete(new NonEmptyString(diff));
+                    break;
+                case 0:
+                    builder.retain(new PositiveInt(diff.length));
+                    break;
+                case 1:
+                    builder.insert(new PositiveInt(diff.length));
+                    break;
+            }
+        });
+        return builder.build();
+    };
 }

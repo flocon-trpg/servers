@@ -53,7 +53,7 @@ const keyFactory: KeyFactory<CompositeKey, string, string> = {
 };
 
 const createStateMap = <T>(source?: DualKeyMapSource<string, string, T> | DualKeyMap<string, string, T>) => {
-    return new CustomDualKeyMap<CompositeKey, string, string, T>({ ...keyFactory, sourceMap: source});
+    return new CustomDualKeyMap<CompositeKey, string, string, T>({ ...keyFactory, sourceMap: source });
 };
 
 class BoardState {
@@ -178,6 +178,42 @@ class BoardState {
         return result;
     }
 
+    public static diff({ prev, next }: { prev: BoardState; next: BoardState }): BoardDownOperation | undefined {
+        const resultType: BoardDownOperationType = {};
+        if (prev.object.backgroundImage !== next.object.backgroundImage) {
+            resultType.backgroundImage = { oldValue: prev.object.backgroundImage };
+        }
+        if (prev.object.backgroundImageZoom !== next.object.backgroundImageZoom) {
+            resultType.backgroundImageZoom = { oldValue: prev.object.backgroundImageZoom };
+        }
+        if (prev.object.cellColumnCount !== next.object.cellColumnCount) {
+            resultType.cellColumnCount = { oldValue: prev.object.cellColumnCount };
+        }
+        if (prev.object.cellHeight !== next.object.cellHeight) {
+            resultType.cellHeight = { oldValue: prev.object.cellHeight };
+        }
+        if (prev.object.cellOffsetX !== next.object.cellOffsetX) {
+            resultType.cellOffsetX = { oldValue: prev.object.cellOffsetX };
+        }
+        if (prev.object.cellOffsetY !== next.object.cellOffsetY) {
+            resultType.cellOffsetY = { oldValue: prev.object.cellOffsetY };
+        }
+        if (prev.object.cellRowCount !== next.object.cellRowCount) {
+            resultType.cellRowCount = { oldValue: prev.object.cellRowCount };
+        }
+        if (prev.object.cellWidth !== next.object.cellWidth) {
+            resultType.cellWidth = { oldValue: prev.object.cellWidth };
+        }
+        if (prev.object.name !== next.object.name) {
+            resultType.name = { oldValue: prev.object.name };
+        }
+        const result = new BoardDownOperation(resultType);
+        if (result.isId) {
+            return undefined;
+        }
+        return result;
+    }
+
     private setToBoardBase({
         boardBase,
     }: {
@@ -282,7 +318,7 @@ export class BoardsState {
 }
 
 class BoardDownOperation {
-    private constructor(private readonly object: BoardDownOperationType) { }
+    public constructor(private readonly object: BoardDownOperationType) { }
 
     public static create(entity: $MikroORM.UpdateBoardOp): BoardDownOperation {
         const object: BoardDownOperationType = {};
@@ -300,6 +336,10 @@ class BoardDownOperation {
         object.name = entity.name === undefined ? undefined : { oldValue: entity.name };
 
         return new BoardDownOperation(object);
+    }
+
+    public get isId() {
+        return undefinedForAll(this.object);
     }
 
     public get valueProps(): Readonly<BoardDownOperationType> {
@@ -349,14 +389,16 @@ export class BoardsDownOperation {
         return ResultModule.ok(new BoardsDownOperation(createStateMap(downOperation.value)));
     }
 
-    public compose(second: BoardsDownOperation): Result<BoardsDownOperation> {
+    public compose(second: BoardsDownOperation, state: BoardsState): Result<BoardsDownOperation> {
         const composed = DualKeyMapOperations.composeDownOperation({
+            state: state.readonlyStateMap.dualKeyMap,
             first: this.core.dualKeyMap,
             second: second.core.dualKeyMap,
             innerApplyBack: ({ downOperation, nextState }) => {
                 return ResultModule.ok(nextState.applyBack(downOperation));
             },
             innerCompose: ({ first, second }) => first.compose(second),
+            innerDiff: BoardState.diff,
         });
         if (composed.isError) {
             return composed;

@@ -89,6 +89,18 @@ class ParamNameState {
         return result;
     }
 
+    public static diff({ prev, next }: { prev: ParamNameState; next: ParamNameState }): ParamNameDownOperation | undefined {
+        const resultType: ParamNameDownOperationType = {};
+        if (prev.object.name !== next.object.name) {
+            resultType.name = { oldValue: prev.object.name };
+        }
+        const result = new ParamNameDownOperation(resultType);
+        if (result.isId) {
+            return undefined;
+        }
+        return result;
+    }
+
     private setToParamNameBase({
         paramNameBase,
     }: {
@@ -188,7 +200,7 @@ export class ParamNamesState {
 }
 
 class ParamNameDownOperation {
-    private constructor(private readonly object: ParamNameDownOperationType) { }
+    public constructor(private readonly object: ParamNameDownOperationType) { }
 
     public static create(entity: $MikroORM.UpdateParamNameOp): Result<ParamNameDownOperation> {
         const object: ParamNameDownOperationType = {};
@@ -196,6 +208,10 @@ class ParamNameDownOperation {
         object.name = entity.name === undefined ? undefined : { oldValue: entity.name };
 
         return ResultModule.ok(new ParamNameDownOperation(object));
+    }
+
+    public get isId() {
+        return undefinedForAll(this.object);
     }
 
     public get valueProps(): Readonly<ParamNameDownOperationType> {
@@ -248,14 +264,16 @@ export class ParamNamesDownOperation {
         return ResultModule.ok(new ParamNamesDownOperation(downOperation.value));
     }
 
-    public compose(second: ParamNamesDownOperation): Result<ParamNamesDownOperation> {
+    public compose(second: ParamNamesDownOperation, state: ParamNamesState): Result<ParamNamesDownOperation> {
         const composed = DualKeyMapOperations.composeDownOperation({
+            state: state.readonlyStateMap.dualKeyMap,
             first: this.core,
             second: second.core,
             innerApplyBack: ({ downOperation, nextState }) => {
                 return ResultModule.ok(nextState.applyBack(downOperation));
             },
             innerCompose: ({ first, second }) => first.compose(second),
+            innerDiff: ParamNameState.diff, 
         });
         if (composed.isError) {
             return composed;

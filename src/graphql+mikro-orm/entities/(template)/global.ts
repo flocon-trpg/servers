@@ -83,6 +83,21 @@ class FoobarState {
         return result;
     }
 
+    public static diff({ prev, next }: { prev: FoobarState; next: FoobarState }): FoobarDownOperation | undefined {
+        const resultType: FoobarDownOperationType = {};
+        if (prev.object.hoge !== next.object.hoge) {
+            resultType.hoge = { oldValue: prev.object.hoge };
+        }
+        if (prev.object.isPrivate !== next.object.isPrivate) {
+            resultType.isPrivate = { oldValue: prev.object.isPrivate };
+        }
+        const result = new FoobarDownOperation(resultType);
+        if (result.isId) {
+            return undefined;
+        }
+        return result;
+    }
+
     private setToFoobarBase({
         foobarBase,
     }: {
@@ -182,7 +197,7 @@ export class FoobarsState {
 }
 
 class FoobarDownOperation {
-    private constructor(private readonly object: FoobarDownOperationType) { }
+    public constructor(private readonly object: FoobarDownOperationType) { }
 
     public static create(entity: $MikroORM.UpdateFoobarOp): Result<FoobarDownOperation> {
         const object: FoobarDownOperationType = {};
@@ -191,6 +206,10 @@ class FoobarDownOperation {
         object.hoge = entity.hoge === undefined ? undefined : { oldValue: entity.hoge };
 
         return ResultModule.ok(new FoobarDownOperation(object));
+    }
+
+    public get isId() {
+        return undefinedForAll(this.object);
     }
 
     public get valueProps(): Readonly<FoobarDownOperationType> {
@@ -238,14 +257,16 @@ export class FoobarsDownOperation {
         return ResultModule.ok(new FoobarsDownOperation(downOperation.value));
     }
 
-    public compose(second: FoobarsDownOperation): Result<FoobarsDownOperation> {
+    public compose(second: FoobarsDownOperation, state: FoobarsState): Result<FoobarsDownOperation> {
         const composed = DualKeyMapOperations.composeDownOperation({
+            state: state.readonlyStateMap.dualKeyMap,
             first: this.core,
             second: second.core,
             innerApplyBack: ({ downOperation, nextState }) => {
                 return ResultModule.ok(nextState.applyBack(downOperation));
             },
             innerCompose: ({ first, second }) => first.compose(second),
+            innerDiff: FoobarState.diff
         });
         if (composed.isError) {
             return composed;

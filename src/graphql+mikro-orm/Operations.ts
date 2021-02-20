@@ -604,11 +604,9 @@ export const TextDownOperationModule = {
 
         return TextDownOperationCore.ofUnit(unit);
     },
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     applyBack: (nextState: string, action: TextDownOperation) => {
         return TextDownOperationCore.applyBack({ nextState, action });
     },
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     applyBackAndRestore: (nextState: string, action: TextDownOperation) => {
         return TextDownOperationCore.applyBackAndRestore({ nextState, action });
     },
@@ -624,6 +622,9 @@ export const TextDownOperationModule = {
             throw result.error;
         }
         return result.value;
+    },
+    diff: (prev: string, next: string) => {
+        return TextDownOperationCore.diff({first: prev, second: next});
     }
 };
 

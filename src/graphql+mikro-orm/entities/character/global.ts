@@ -229,6 +229,37 @@ class CharacterState {
         return result;
     }
 
+    public static diff({ prev, next }: { prev: CharacterState; next: CharacterState }): CharacterDownOperation | undefined {
+        const resultType: CharacterDownOperationType = {};
+        if (prev.object.image !== next.object.image) {
+            resultType.image = { oldValue: prev.object.image };
+        }
+        if (prev.object.isPrivate !== next.object.isPrivate) {
+            resultType.isPrivate = { oldValue: prev.object.isPrivate };
+        }
+        if (prev.object.name !== next.object.name) {
+            resultType.name = { oldValue: prev.object.name };
+        }
+        const boolParams = BoolParamsState.diff({ prev: prev.boolParams, next: next.boolParams });
+        const numParams = NumParamsState.diff({ prev: prev.numParams, next: next.numParams });
+        const numMaxParams = NumParamsState.diff({ prev: prev.numMaxParams, next: next.numMaxParams });
+        const strParams = StrParamsState.diff({ prev: prev.strParams, next: next.strParams });
+        const pieceLocations = PieceLocationsState.diff({ prev: prev.pieceLocations, next: next.pieceLocations });
+
+        const result = new CharacterDownOperation({
+            object: resultType,
+            boolParams,
+            numParams,
+            numMaxParams,
+            strParams,
+            pieceLocations,
+        });
+        if (result.isId) {
+            return undefined;
+        }
+        return result;
+    }
+
     private setToCharacterBase({
         characterBase,
     }: {
@@ -341,7 +372,7 @@ export class CharactersState {
 }
 
 class CharacterDownOperation {
-    private constructor(private readonly params: {
+    public constructor(private readonly params: {
         object: CharacterDownOperationType;
         boolParams: BoolParamsDownOperation;
         numParams: NumParamsDownOperation;
@@ -405,6 +436,15 @@ class CharacterDownOperation {
         }));
     }
 
+    public get isId() {
+        return undefinedForAll(this.params.object)
+            && this.boolParams.readonlyMap.size === 0
+            && this.numParams.readonlyMap.size === 0
+            && this.numMaxParams.readonlyMap.size === 0
+            && this.strParams.readonlyMap.size === 0
+            && this.pieceLocations.readonlyStateMap.isEmpty;
+    }
+
     public get valueProps(): Readonly<CharacterDownOperationType> {
         return this.params.object;
     }
@@ -429,7 +469,7 @@ class CharacterDownOperation {
         return this.params.pieceLocations;
     }
 
-    public compose(second: CharacterDownOperation): Result<CharacterDownOperation> {
+    public compose(second: CharacterDownOperation, state: CharacterState): Result<CharacterDownOperation> {
         const boolParams = this.params.boolParams.compose(second.params.boolParams);
         if (boolParams.isError) {
             return boolParams;
@@ -450,7 +490,7 @@ class CharacterDownOperation {
             return strParams;
         }
 
-        const pieceLocations = this.params.pieceLocations.compose(second.params.pieceLocations);
+        const pieceLocations = this.params.pieceLocations.compose(second.params.pieceLocations, state.pieceLocations);
         if (pieceLocations.isError) {
             return pieceLocations;
         }
@@ -503,14 +543,21 @@ export class CharactersDownOperation {
         return ResultModule.ok(new CharactersDownOperation(downOperation.value));
     }
 
-    public compose(second: CharactersDownOperation): Result<CharactersDownOperation> {
+    public compose(second: CharactersDownOperation, state: CharactersState): Result<CharactersDownOperation> {
         const composed = DualKeyMapOperations.composeDownOperation({
+            state: state.readonlyStateMap.dualKeyMap,
             first: this.core,
             second: second.core,
             innerApplyBack: ({ downOperation, nextState }) => {
                 return ResultModule.ok(nextState.applyBack(downOperation));
             },
-            innerCompose: ({ first, second }) => first.compose(second),
+            innerCompose: ({ state, first, second }) => {
+                if (state === undefined) {
+                    return ResultModule.error('CharactersState is undefined');
+                }
+                return first.compose(second, state);
+            },
+            innerDiff: CharacterState.diff,
         });
         if (composed.isError) {
             return composed;

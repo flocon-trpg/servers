@@ -81,6 +81,21 @@ class BoolParamState {
         return result;
     }
 
+    public static diff({ prev, next }: { prev: BoolParamState; next: BoolParamState }): BoolParamDownOperation | undefined {
+        const resultType: BoolParamDownOperationType = {};
+        if (prev.object.isValuePrivate !== next.object.isValuePrivate) {
+            resultType.isValuePrivate = { oldValue: prev.object.isValuePrivate };
+        }
+        if (prev.object.value !== next.object.value) {
+            resultType.value = { oldValue: prev.object.value };
+        }
+        const result = new BoolParamDownOperation(resultType);
+        if (result.isId) {
+            return undefined;
+        }
+        return result;
+    }
+
     private setToBoolParamBase({
         numParamValueBase,
     }: {
@@ -192,10 +207,22 @@ export class BoolParamsState {
         }
         return new BoolParamsState(result.value);
     }
+
+    public static diff({ prev, next }: { prev: BoolParamsState; next: BoolParamsState }): BoolParamsDownOperation {
+        const result = ParamMapOperations.diff({
+            prev: prev.readonlyMap,
+            next: next.readonlyMap,
+            innerDiff: ({ prev, next }) => BoolParamState.diff({ 
+                prev: prev ?? new BoolParamState({ isValuePrivate: false }),
+                next: next ?? new BoolParamState({ isValuePrivate: false }),
+            }),
+        });
+        return new BoolParamsDownOperation(result);
+    }
 }
 
 class BoolParamDownOperation {
-    private constructor(private readonly object: BoolParamDownOperationType) { }
+    public constructor(private readonly object: BoolParamDownOperationType) { }
 
     public static create(entity: $MikroORM.UpdateBoolParamOp): Result<BoolParamDownOperation> {
         const object: BoolParamDownOperationType = {};
@@ -204,6 +231,10 @@ class BoolParamDownOperation {
         object.value = entity.value;
 
         return ResultModule.ok(new BoolParamDownOperation(object));
+    }
+
+    public get isId() {
+        return undefinedForAll(this.object);
     }
 
     public get valueProps(): Readonly<BoolParamDownOperationType> {
@@ -221,7 +252,7 @@ class BoolParamDownOperation {
 }
 
 export class BoolParamsDownOperation {
-    private constructor(private readonly core: ReadonlyMap<StrIndex100, BoolParamDownOperation>) { }
+    public constructor(private readonly core: ReadonlyMap<StrIndex100, BoolParamDownOperation>) { }
 
     public static async create({
         update

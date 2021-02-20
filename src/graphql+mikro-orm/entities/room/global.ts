@@ -135,7 +135,7 @@ export class RoomDownOperation {
         }));
     }
 
-    public static async findRange(em: EM, roomId: string, revisionRange: { from: number; expectedTo?: number }): Promise<Result<RoomDownOperation | undefined>> {
+    public static async findRange(em: EM, roomState: RoomState, roomId: string, revisionRange: { from: number; expectedTo?: number }): Promise<Result<RoomDownOperation | undefined>> {
         const operationEntities = await em.find($MikroORM.RoomOp, { room: { id: roomId }, prevRevision: { $gte: revisionRange.from } });
         const isSequentialResult = isSequential(operationEntities, o => o.prevRevision);
         if (isSequentialResult.type === 'NotSequential') {
@@ -172,7 +172,7 @@ export class RoomDownOperation {
             if (second.isError) {
                 return second;
             }
-            const composed = operation.compose(second.value);
+            const composed = operation.compose(second.value, roomState);
             if (composed.isError) {
                 return composed;
             }
@@ -201,20 +201,20 @@ export class RoomDownOperation {
         return this.params.valueProps;
     }
 
-    private compose(second: RoomDownOperation): Result<RoomDownOperation> {
-        const boards = this.params.boards.compose(second.params.boards);
+    private compose(second: RoomDownOperation, state: RoomState): Result<RoomDownOperation> {
+        const boards = this.params.boards.compose(second.params.boards, state.boards);
         if (boards.isError) {
             return boards;
         }
-        const characters = this.params.characters.compose(second.params.characters);
+        const characters = this.params.characters.compose(second.params.characters, state.characters);
         if (characters.isError) {
             return characters;
         }
-        const bgms = this.params.bgms.compose(second.params.bgms);
+        const bgms = this.params.bgms.compose(second.params.bgms, state.bgms);
         if (bgms.isError) {
             return bgms;
         }
-        const paramNames = this.params.paramNames.compose(second.params.paramNames);
+        const paramNames = this.params.paramNames.compose(second.params.paramNames, state.paramNames);
         if (paramNames.isError) {
             return paramNames;
         }

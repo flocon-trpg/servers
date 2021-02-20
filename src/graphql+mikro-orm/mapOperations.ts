@@ -72,10 +72,12 @@ type ApplyBackParameters<TKey, TState, TDownOperation> = {
 }
 
 type ComposeParameters<TKey, TState, TDownOperation> = {
+    state: ReadonlyMap<TKey, TState>;
     first: ReadonlyMapDownOperation<TKey, TState, TDownOperation>;
     second: ReadonlyMapDownOperation<TKey, TState, TDownOperation>;
     innerApplyBack: (params: { downOperation: TDownOperation; nextState: TState }) => Result<TState>;
-    innerCompose: (params: { first: TDownOperation; second: TDownOperation }) => Result<TDownOperation>;
+    innerCompose: (params: { state: TState | undefined; first: TDownOperation; second: TDownOperation }) => Result<TDownOperation>;
+    innerDiff: (params: { prev: TState; next: TState }) => TDownOperation | undefined;
 }
 
 type ProtectedValuePolicy<TKey, TServerState> = {
@@ -270,12 +272,14 @@ export const applyBack = <TKey, TState, TDownOperation>({ nextState, downOperati
     return ResultModule.ok(get(stateMapResult.value));
 };
 
-export const composeDownOperation = <TKey, TState, TDownOperation>({ first, second, innerApplyBack, innerCompose }: ComposeParameters<TKey, TState, TDownOperation>): Result<MapDownOperation<TKey, TState, TDownOperation>> => {
+export const composeDownOperation = <TKey, TState, TDownOperation>({ state, first, second, innerApplyBack, innerCompose, innerDiff }: ComposeParameters<TKey, TState, TDownOperation>): Result<MapDownOperation<TKey, TState, TDownOperation>> => {
     const stateMapResult = DualKeyMapOperations.composeDownOperation({
+        state: toDualKeyMap(state),
         first: toDualKeyMap(first),
         second: toDualKeyMap(second),
         innerApplyBack,
-        innerCompose
+        innerCompose,
+        innerDiff,
     });
     if (stateMapResult.isError) {
         return stateMapResult;
@@ -355,4 +359,36 @@ export const apply = async <TKey, TEntityState, TReplaceOperationState, TOperati
             }
         }
     }
+};
+
+export const diff = <TKey, TState, TOperation>({
+    prev,
+    next,
+    innerDiff,
+}: {
+    prev: ReadonlyMap<TKey, TState>;
+    next: ReadonlyMap<TKey, TState>;
+    innerDiff: (params: { prev: TState; next: TState }) => TOperation | undefined;
+}): MapDownOperation<TKey, TState, TOperation> => {
+    const result = new Map<TKey, MapDownOperationElementUnion<TState, TOperation>>();
+    for (const [key, value] of groupJoin(prev, next)) {
+        switch (value.type) {
+            case left:
+                result.set(key, { type: replace, operation: { oldValue: value.left } });
+                continue;
+            case right: {
+                result.set(key, { type: replace, operation: { oldValue: undefined } });
+                continue;
+            }
+            case both: {
+                const diffResult = innerDiff({ prev: value.left, next: value.right });
+                if (diffResult === undefined) {
+                    continue;
+                }
+                result.set(key, { type: update, operation: diffResult });
+                continue;
+            }
+        }
+    }
+    return result;
 };

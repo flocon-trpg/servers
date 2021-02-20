@@ -265,3 +265,41 @@ export const apply = async <TKey, TEntityState, TOperation>(params: {
         }
     }
 };
+
+export const diff = <TKey, TState, TOperation>({
+    prev,
+    next,
+    innerDiff,
+}: {
+    prev: ReadonlyMap<TKey, TState>;
+    next: ReadonlyMap<TKey, TState>;
+    innerDiff: (params: { prev: TState | undefined; next: TState | undefined }) => TOperation | undefined;
+}): Map<TKey, TOperation> => {
+    const result = new Map<TKey, TOperation>();
+    for (const [key, value] of groupJoin(prev, next)) {
+        let prev: TState | undefined = undefined;
+        let next: TState | undefined = undefined;
+
+        switch (value.type) {
+            case left:
+                prev = value.left;
+                break;
+            case right: {
+                next = value.right;
+                break;
+            }
+            case both: {
+                prev = value.left;
+                next = value.right;
+                break;
+            }
+        }
+        const diffResult = innerDiff({ prev, next });
+        if (diffResult === undefined) {
+            continue;
+        }
+        result.set(key, diffResult);
+        continue;
+    }
+    return result;
+};
