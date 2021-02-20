@@ -55,30 +55,17 @@ const getParameter = async ({ em, parameter, chara, room }: { em: EM; parameter:
     };
 };
 
-const stringify = (dice: number[][]): { text: string; sum: number } => {
+const sum = (dice: Result): number => {
     let sum = 0;
-    const left = __(dice).compact(die => {
-        const result = die[0];
-        const max = die[1];
-        // result == null || max == null になるケースは確認していないが、念の為。
+    dice.rands.forEach(rnd => {
+        const result = rnd[0];
+        // result == nullになるケースは確認していないが、念の為。
         if (result == null) {
-            return null;
+            return;
         }
         sum += result;
-        if (max == null) {
-            return `(${result})`;
-        }
-        return `(1d${max}→${result})`;
-    }).reduce((seed, elem) => {
-        if (seed == null) {
-            return elem;
-        }
-        return `${seed}+${elem}`;
-    }, null as string | null);
-    if (left == null) {
-        return { text: '0', sum: 0 };
-    }
-    return { text: `${left}=${sum}`, sum };
+    });
+    return sum;
 };
 
 // https://www.yoheim.net/blog.php?q=20191101
@@ -86,35 +73,19 @@ const toHanAscii = (source: string): string => {
     return source.replace(/[Ａ-Ｚａ-ｚ０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
 };
 
-// {text: '1d100'} -> bcdice.rollしてからstringifyした結果を返す
+// {text: '1d100'} -> bcdiceのtextを返す
 // {text: '5'} -> 5
-const execute = async ({ text, gameType }: { text: string; gameType: string }) => {
+const getDiceOrNumber = async ({ text, gameType }: { text: string; gameType: string }): Promise<{ text: string; number: number; bcdice: Result | null } | null> => {
     const hankakuText = toHanAscii(text);
     const result = await roll(hankakuText, gameType);
-    if(result == null) {
-        return null;
-    }
     if (result != null) {
-        const { text, sum } = stringify(result.rands);
-        return { text, number: sum };
+        return { text: result.text, number: sum(result), bcdice: result };
     }
     const number = Number(hankakuText);
     if (isNaN(number) || !isFinite(number)) {
         return null;
     }
-    return { text: number.toString(), number };
-};
-
-const getDiceOrNumber = async ({ dice, gameType }: { dice: MaybeDice; gameType: string }): Promise<{ text: string; number: number; isSecret: boolean } | null> => {
-    const result = await execute({ text: dice.command, gameType });
-    if (result == null) {
-        const result = await execute({ text: `${dice.isMaybeSecretSuffix ?? ''}${dice.command}`, gameType });
-        if (result == null) {
-            return null;
-        }
-        return { text: result.text, number: result.number, isSecret: false };
-    }
-    return { text: result.text, number: result.number, isSecret: dice.isMaybeSecretSuffix != null };
+    return { text: number.toString(), number, bcdice: null };
 };
 
 const getParameterOrDiceOrNumber = async (params: {
@@ -123,12 +94,12 @@ const getParameterOrDiceOrNumber = async (params: {
     chara: Chara | null;
     gameType: string;
     room: Room;
-}): Promise<{ text: string; number: number | null; isSecret: boolean } | null> => {
+}): Promise<{ text: string; number: number | null; bcdice: Result | null } | null> => {
     if (params.value.type === maybeDice) {
-        return getDiceOrNumber({ dice: params.value, gameType: params.gameType });
+        return getDiceOrNumber({ text: params.value.command, gameType: params.gameType });
     }
     const result = await getParameter({ ...params, parameter: params.value });
-    return { ...result, isSecret: false };
+    return { ...result, bcdice: null };
 };
 
 type AnalyzeResult = {
@@ -137,9 +108,17 @@ type AnalyzeResult = {
     type: typeof command;
     result: string;
     isSecret: boolean;
+    // nullの場合は、成功判定のないコマンドを表す
+    isSuccess: boolean | null;
 }
 
-// bcdice 1.x の名残で、bcdiceに任せられそうな処理も自前で処理している。2.x に処理を任せることも考えているが、そうするとダイスのテキストのフォーマットの仕様が変わる可能性がある。
+const isSuccess = ({ success, failure }: { success: boolean; failure: boolean }) => {
+    if (success === failure) {
+        return null;
+    }
+    return success;
+};
+
 export const analyze = async (params: {
     em: EM;
     text: string;
@@ -147,11 +126,18 @@ export const analyze = async (params: {
     gameType: string;
     room: Room;
 }): Promise<AnalyzeResult> => {
-    const exp = analyzeCore(params.text);
-    if (exp == null) {
-        return { type: plain };
-    }
-    if (exp.isCompare) {
+    const analyzed = await getDiceOrNumber(params);
+    if (analyzed == null) {
+        const exp = analyzeCore(params.text);
+        if (exp == null) {
+            return { type: plain };
+        }
+        if (!exp.isCompare) {
+            return {
+                type: plain,
+            };
+        }
+
         const left = await getParameterOrDiceOrNumber({ ...params, value: exp.left });
         const right = await getParameterOrDiceOrNumber({ ...params, value: exp.right });
         if (left == null || right == null) {
@@ -163,34 +149,23 @@ export const analyze = async (params: {
         if (left.number != null && right.number != null) {
             return {
                 type: command,
-                result: `${left.text} ${prettifyOperator(exp.compareOperator)} ${right.text}; ${executeCompareOperator(left.number, right.number, exp.compareOperator) ? '成功' : '失敗'}`,
-                isSecret: left.isSecret || right.isSecret,
+                result: `${left.text} ${prettifyOperator(exp.compareOperator)} ${right.text}`,
+                isSuccess: executeCompareOperator(left.number, right.number, exp.compareOperator),
+                isSecret: (left.bcdice?.secret ?? false) || (right.bcdice?.secret ?? false),
             };
         }
         return {
             type: command,
             result: `${left.text}; ${right.text}`,
-            isSecret: left.isSecret || right.isSecret,
+            isSuccess: null,
+            isSecret: (left.bcdice?.secret ?? false) || (right.bcdice?.secret ?? false),
         };
     }
 
-    const analyzed = await getParameterOrDiceOrNumber({ ...params, value: exp.text });
-    if (analyzed == null) {
-        // ダイスロールのフォーマットになっていないため、ただの文字列とみなす。
-        return {
-            type: plain,
-        };
-    }
-    if (analyzed.number != null) {
-        return {
-            type: command,
-            result: `${analyzed.text}`,
-            isSecret: analyzed.isSecret,
-        };
-    }
     return {
         type: command,
         result: analyzed.text,
-        isSecret: analyzed.isSecret,
+        isSuccess: analyzed.bcdice == null ? null : isSuccess(analyzed.bcdice),
+        isSecret: analyzed.bcdice?.secret ?? false,
     };
 };

@@ -181,9 +181,11 @@ const analyzeTextAndSetToEntity = async (params: {
             params.targetEntity.text = params.text;
             params.targetEntity.altTextToSecret = 'シークレットダイス';
             params.targetEntity.commandResult = rolled.result;
+            params.targetEntity.commandIsSuccess = rolled.isSuccess ?? undefined;
         } else {
             params.targetEntity.text = params.text;
             params.targetEntity.commandResult = rolled.result;
+            params.targetEntity.commandIsSuccess = rolled.isSuccess ?? undefined;
         }
     }
 };
@@ -201,7 +203,10 @@ const createRoomPublicMessage = ({
         messageId: msg.id,
         text: msg.text ?? undefined,
         textColor: msg.textColor ?? undefined,
-        commandResult: msg.commandResult ?? undefined,
+        commandResult: msg.commandResult == null ? undefined : {
+            text: msg.commandResult,
+            isSuccess: msg.commandIsSuccess,
+        },
         altTextToSecret: msg.altTextToSecret ?? undefined,
         isSecret: msg.isSecret,
         createdBy: msg.createdBy?.userUid,
@@ -216,19 +221,23 @@ const createRoomPublicMessage = ({
 const createRoomPrivateMessage = async ({
     msg,
     myUserUid,
+    visibleTo: visibleToCore,
+    visibleToMe: visibleToMeCore,
 }: {
     msg: RoomPrvMsg;
     myUserUid: string;
+    visibleTo?: string[];
+    visibleToMe?: boolean;
 }): Promise<RoomPrivateMessage | null> => {
-    const visibleTo = (await msg.visibleTo.loadItems()).map(user => user.userUid);
-    const visibleToMe = visibleTo.find(userUid => userUid === myUserUid);
+    const visibleTo = visibleToCore ?? (await msg.visibleTo.loadItems()).map(user => user.userUid);
+    const visibleToMe = visibleToMeCore ?? visibleTo.find(userUid => userUid === myUserUid);
     if (!visibleToMe) {
         return null;
     }
     return {
         __tstype: RoomPrivateMessageType,
         messageId: msg.id,
-        visibleTo,
+        visibleTo: [...visibleTo].sort(),
         createdBy: msg.createdBy?.userUid,
         characterStateId: msg.charaStateId ?? undefined,
         characterName: msg.charaName ?? undefined,
@@ -237,7 +246,10 @@ const createRoomPrivateMessage = async ({
         updatedAt: msg.textUpdatedAt,
         text: msg.text ?? undefined,
         textColor: msg.textColor ?? undefined,
-        commandResult: msg.commandResult ?? undefined,
+        commandResult: msg.commandResult == null ? undefined : {
+            text: msg.commandResult,
+            isSuccess: msg.commandIsSuccess,
+        },
         altTextToSecret: msg.altTextToSecret ?? undefined,
         isSecret: msg.isSecret,
     };
@@ -573,17 +585,7 @@ export class RoomMessageResolver {
             entity.roomPubCh = Reference.create(ch);
             await em.persistAndFlush(entity);
 
-            const result: RoomPublicMessage = {
-                ...entity,
-                __tstype: RoomPublicMessageType,
-                messageId: entity.id,
-                channelKey,
-                createdBy: meAsUser.userUid,
-                characterStateId: chara?.stateId,
-                characterName: chara?.name,
-                createdAt: entity.createdAt.getTime(),
-                updatedAt: entity.textUpdatedAt,
-            };
+            const result: RoomPublicMessage = createRoomPublicMessage({ msg: entity, channelKey });
 
             const payload: MessageUpdatePayload = {
                 roomId: args.roomId,
@@ -706,17 +708,10 @@ export class RoomMessageResolver {
             await em.persistAndFlush(entity);
 
             const visibleToArray = [...visibleTo].sort();
-            const result: RoomPrivateMessage = {
-                ...entity,
-                __tstype: RoomPrivateMessageType,
-                messageId: entity.id,
-                visibleTo: visibleToArray,
-                createdBy: meAsUser.userUid,
-                characterStateId: chara?.stateId,
-                characterName: chara?.name,
-                createdAt: entity.createdAt.getTime(),
-                updatedAt: entity.textUpdatedAt,
-            };
+            const result = await createRoomPrivateMessage({ msg: entity, myUserUid: meAsUser.userUid, visibleTo: visibleToArray, visibleToMe: true });
+            if (result == null) {
+                throw 'This should not happen';
+            }
 
             const payload: MessageUpdatePayload = {
                 roomId: args.roomId,
@@ -858,7 +853,7 @@ export class RoomMessageResolver {
 
         const queue = async (): Promise<Result<{ result: MakeMessageNotSecretResult; payload?: MessageUpdatePayload }>> => {
             const em = context.createEm();
-            const entry = await checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase});
+            const entry = await checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return ResultModule.ok({
@@ -914,7 +909,10 @@ export class RoomMessageResolver {
                             characterName: publicMsg.charaName,
                             isSecret: publicMsg.isSecret,
                             text: publicMsg.text,
-                            commandResult: publicMsg.commandResult,
+                            commandResult: publicMsg.commandResult == null ? undefined : {
+                                text: publicMsg.commandResult ,
+                                isSuccess: publicMsg.commandIsSuccess,
+                            },
                             altTextToSecret: publicMsg.altTextToSecret,
                             updatedAt: publicMsg.textUpdatedAt,
                         }
@@ -952,7 +950,10 @@ export class RoomMessageResolver {
                             characterName: privateMsg.charaName,
                             isSecret: privateMsg.isSecret,
                             text: privateMsg.text,
-                            commandResult: privateMsg.commandResult,
+                            commandResult: privateMsg.commandResult == null ? undefined : {
+                                text: privateMsg.commandResult,
+                                isSuccess: privateMsg.commandIsSuccess,
+                            },
                             altTextToSecret: privateMsg.altTextToSecret,
                             updatedAt: privateMsg.textUpdatedAt,
                         }
@@ -997,7 +998,7 @@ export class RoomMessageResolver {
 
         const queue = async (): Promise<Result<{ result: DeleteMessageResult; payload?: MessageUpdatePayload }>> => {
             const em = context.createEm();
-            const entry = await checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase});
+            const entry = await checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return ResultModule.ok({
@@ -1057,7 +1058,10 @@ export class RoomMessageResolver {
                             characterName: publicMsg.charaName,
                             isSecret: publicMsg.isSecret,
                             text: publicMsg.text,
-                            commandResult: publicMsg.commandResult,
+                            commandResult: publicMsg.commandResult == null ? undefined : {
+                                text: publicMsg.commandResult,
+                                isSuccess: publicMsg.commandIsSuccess,
+                            },
                             altTextToSecret: publicMsg.altTextToSecret,
                             updatedAt: publicMsg.textUpdatedAt,
                         }
@@ -1099,7 +1103,10 @@ export class RoomMessageResolver {
                             characterName: privateMsg.charaName,
                             isSecret: privateMsg.isSecret,
                             text: privateMsg.text,
-                            commandResult: privateMsg.commandResult,
+                            commandResult: privateMsg.commandResult == null ? undefined : {
+                                text: privateMsg.commandResult,
+                                isSuccess: privateMsg.commandIsSuccess,
+                            },
                             altTextToSecret: privateMsg.altTextToSecret,
                             updatedAt: privateMsg.textUpdatedAt,
                         }
@@ -1144,7 +1151,7 @@ export class RoomMessageResolver {
 
         const queue = async (): Promise<Result<{ result: EditMessageResult; payload?: MessageUpdatePayload }>> => {
             const em = context.createEm();
-            const entry = await checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase});
+            const entry = await checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return ResultModule.ok({
@@ -1201,7 +1208,10 @@ export class RoomMessageResolver {
                             characterName: publicMsg.charaName,
                             isSecret: publicMsg.isSecret,
                             text: publicMsg.text,
-                            commandResult: publicMsg.commandResult,
+                            commandResult: publicMsg.commandResult == null ? undefined : {
+                                text: publicMsg.commandResult,
+                                isSuccess: publicMsg.commandIsSuccess,
+                            },
                             altTextToSecret: publicMsg.altTextToSecret,
                             updatedAt: publicMsg.textUpdatedAt,
                         }
@@ -1240,7 +1250,10 @@ export class RoomMessageResolver {
                             characterName: privateMsg.charaName,
                             isSecret: privateMsg.isSecret,
                             text: privateMsg.text,
-                            commandResult: privateMsg.commandResult,
+                            commandResult: privateMsg.commandResult == null ? undefined : {
+                                text: privateMsg.commandResult,
+                                isSuccess: privateMsg.commandIsSuccess,
+                            },
                             altTextToSecret: privateMsg.altTextToSecret,
                             updatedAt: privateMsg.textUpdatedAt,
                         }

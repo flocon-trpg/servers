@@ -38,6 +38,15 @@ Secret設定であり、本文が非公開になっていて閲覧できない�
 Secret設定であり、本文が非公開の状態だとtrue。公開しているならばfalse。もしこれがなければ自分がしたSecret発言を公開したかどうかがわからない。
 */
 
+@ObjectType()
+export class CommandResult {
+    @Field()
+    public text!: string;
+
+    @Field({ nullable: true, description: '成功判定のないコマンドの場合はnullish。成功判定のあるコマンドの場合はその結果。' })
+    public isSuccess?: boolean;
+}
+
 export const RoomPublicChannelType = 'RoomPublicChannel';
 
 @ObjectType()
@@ -74,7 +83,7 @@ export class RoomPublicMessage {
     public textColor?: string;
 
     @Field({ nullable: true })
-    public commandResult?: string;
+    public commandResult?: CommandResult;
 
     @Field({ nullable: true })
     public altTextToSecret?: string;
@@ -123,7 +132,7 @@ export class RoomPrivateMessage {
     public textColor?: string;
 
     @Field({ nullable: true })
-    public commandResult?: string;
+    public commandResult?: CommandResult;
 
     @Field({ nullable: true })
     public altTextToSecret?: string;
@@ -328,7 +337,7 @@ export const WriteRoomSoundEffectResult = createUnionType({
 
 @ObjectType()
 export class MakeMessageNotSecretResult {
-    @Field(() => MakeMessageNotSecretFailureType, {nullable: true})
+    @Field(() => MakeMessageNotSecretFailureType, { nullable: true })
     public failureType?: MakeMessageNotSecretFailureType;
 }
 
@@ -374,7 +383,7 @@ export class RoomPublicMessageUpdate {
     public text?: string;
 
     @Field({ nullable: true })
-    public commandResult?: string;
+    public commandResult?: CommandResult;
 
     @Field({ nullable: true })
     public altTextToSecret?: string;
@@ -401,7 +410,7 @@ export class RoomPrivateMessageUpdate {
     public text?: string;
 
     @Field({ nullable: true })
-    public commandResult?: string;
+    public commandResult?: CommandResult;
 
     @Field({ nullable: true })
     public altTextToSecret?: string;
@@ -415,7 +424,7 @@ export class RoomPrivateMessageUpdate {
 
 export const RoomMessageEvent = createUnionType({
     name: 'RoomMessageEvent',
-    types: () => [RoomPublicMessage, RoomPrivateMessage, RoomPublicChannel, RoomSoundEffect, RoomPublicChannelUpdate, RoomPublicMessageUpdate, RoomPrivateMessageUpdate ] as const,
+    types: () => [RoomPublicMessage, RoomPrivateMessage, RoomPublicChannel, RoomSoundEffect, RoomPublicChannelUpdate, RoomPublicMessageUpdate, RoomPrivateMessageUpdate] as const,
     resolveType: value => {
         switch (value.__tstype) {
             case RoomPrivateMessageType:

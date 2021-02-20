@@ -96,6 +96,10 @@ export class RoomPubMsg {
     @Property({ nullable: true, length: 65535 })
     public commandResult?: string;
 
+    // 成功判定のあるコマンドの場合、成功したかどうかを表す。
+    @Property({ nullable: true, default: null })
+    public commandIsSuccess?: boolean;
+
     // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
     @Property({ nullable: true, length: 65535 })
     public altTextToSecret?: string;
@@ -154,6 +158,10 @@ export class RoomPrvMsg {
     // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
     @Property({ nullable: true, length: 65535 })
     public commandResult?: string;
+
+    // 成功判定のあるコマンドの場合、成功したかどうかを表す。
+    @Property({ nullable: true, default: null })
+    public commandIsSuccess?: boolean;
 
     // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
     @Property({ nullable: true, length: 65535 })
