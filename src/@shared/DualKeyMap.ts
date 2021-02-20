@@ -29,6 +29,9 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
     private static mapMap<TKey1, TKey2, TValue1, TValue2>(source: DualKeyMapSource<TKey1, TKey2, TValue1>, mapping: (source: TValue1) => TValue2): Map<TKey1, Map<TKey2, TValue2>> {
         const result = new Map<TKey1, Map<TKey2, TValue2>>();
         for (const [firstKey, first] of source) {
+            if (first.size === 0) {
+                continue;
+            }
             const toSet = new Map<TKey2, TValue2>();
             for (const [secondKey, second] of first) {
                 toSet.set(secondKey, mapping(second));

@@ -41,21 +41,27 @@ export const apply = <TKey, TState, TOperation>({
 };
 
 export const compose = <TKey, TState, TOperation>({
+    state,
     first,
     second,
     innerApply,
     innerCompose,
+    innerDiff,
 }: {
+    state: ReadonlyMap<TKey, TState>;
     first: ReadonlyMap<TKey, OperationElement<TState, TOperation>>;
     second: ReadonlyMap<TKey, OperationElement<TState, TOperation>>;
     innerApply: (params: { state: TState; operation: TOperation }) => TState;
-    innerCompose: (params: { first: TOperation; second: TOperation }) => TOperation;
+    innerCompose: (params: { state: TState | undefined; first: TOperation; second: TOperation }) => TOperation;
+    innerDiff: Diff<TState, TOperation>;
 }): Map<TKey, OperationElement<TState, TOperation>> => {
     const result = $DualKeyMap.compose({
+        state: toDualKeyMap(state),
         first: toDualKeyMap(first),
         second: toDualKeyMap(second),
         innerApply,
         innerCompose,
+        innerDiff,
     });
     return toMap(result);
 };

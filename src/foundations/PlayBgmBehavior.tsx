@@ -24,8 +24,12 @@ const PlayBgmBehaviorCore: React.FC<PlayBgmBehaviorCoreProps> = ({ bgm }: PlayBg
             return;
         }
 
+        const src = __(urlArray).compact(x => x).toArray();
+        if (src.length === 0) {
+            return;
+        }
         const howl = new Howl({
-            src: __(urlArray).compact(x => x).toArray(),
+            src,
             loop: true,
             volume,
         });

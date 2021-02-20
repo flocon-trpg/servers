@@ -286,9 +286,11 @@ export const applyOperation = ({ state, operation }: { state: State; operation: 
 };
 
 export const compose = ({
+    state,
     first,
-    second
+    second,
 }: {
+    state: State;
     first: PostOperation;
     second: PostOperation;
 }): PostOperation => {
@@ -297,10 +299,12 @@ export const compose = ({
     const result: PostOperation = { ...first };
 
     const pieceLocations = $DualKeyMap.compose({
+        state: state.pieceLocations.dualKeyMap,
         first: first.pieceLocations.dualKeyMap,
         second: second.pieceLocations.dualKeyMap,
         innerApply: PieceLocation.applyOperation,
         innerCompose: PieceLocation.compose,
+        innerDiff: PieceLocation.diff,
     });
     result.pieceLocations = first.pieceLocations.wrap(pieceLocations);
 

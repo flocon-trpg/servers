@@ -68,13 +68,16 @@ export const applyOperation = ({
 };
 
 export const compose = ({
+    state,
     first,
     second
 }: {
+    state: State;
     first: Operation;
     second: Operation;
 }): Operation => {
     return $Map.compose({
+        state,
         first,
         second,
         innerApply: applyOperationElement,
@@ -83,6 +86,16 @@ export const compose = ({
                 name: ReplaceValueOperationModule.compose(first.name, second.name),
                 role: ReplaceNullableValueOperationModule.compose(first.role, second.role),
             };
-        }
+        },
+        innerDiff: ({prev, next}) => {
+            const result: Omit<ParticipantOperation, '__typename'> = {};
+            if (prev.name !== next.name) {
+                result.name = {newValue: next.name};
+            }
+            if (prev.role != next.role) {
+                result.role = { newValue: next.role };
+            }
+            return result;
+        },
     });
 };

@@ -48,20 +48,43 @@ export const apply = <TKey1, TKey2, TState, TOperation>({
 };
 
 const composeElement = <TState, TOperation>({
+    state,
     first,
     second,
     innerApply,
     innerCompose,
+    innerDiff,
 }: {
+    state: TState | undefined;
     first: OperationElement<TState, TOperation>;
     second: OperationElement<TState, TOperation>;
     innerApply: (params: { state: TState; operation: TOperation }) => TState;
-    innerCompose: (params: { first: TOperation; second: TOperation }) => TOperation;
-}): OperationElement<TState, TOperation> => {
+    innerCompose: (params: { state: TState | undefined; first: TOperation; second: TOperation }) => TOperation;
+    innerDiff: Diff<TState, TOperation>;
+}): OperationElement<TState, TOperation> | undefined => {
     switch (first.type) {
         case replace:
             switch (second.type) {
                 case replace:
+                    if (second.newValue !== undefined) {
+                        if (first.newValue !== undefined) {
+                            throw 'cannot compose (add, add)';
+                        }
+
+                        // (remove, add) なのでreplaceを表すため、これを表現するにはdiffを用いたupdateが必要になってくる。
+
+                        if (state === undefined) {
+                            throw 'state is undefined, but first is remove';
+                        }
+                        const diffResult = innerDiff({ prev: state, next: second.newValue });
+                        if (diffResult === undefined) {
+                            return undefined;
+                        }
+                        return { type: update, operation: diffResult };
+                    }
+                    if (first.newValue === undefined) {
+                        throw 'cannot compose (remove, remove)';
+                    }
                     return { type: replace, newValue: second.newValue };
                 case update:
                     if (first.newValue === undefined) {
@@ -73,24 +96,31 @@ const composeElement = <TState, TOperation>({
         case update:
             switch (second.type) {
                 case replace:
+                    if (second.newValue !== undefined) {
+                        throw 'cannot compose (update, add)';
+                    }
                     return { type: replace, newValue: second.newValue };
                 case update:
-                    return { type: update, operation: innerCompose({ first: first.operation, second: second.operation }) };
+                    return { type: update, operation: innerCompose({ state, first: first.operation, second: second.operation }) };
             }
             break;
     }
 };
 
 export const compose = <TKey1, TKey2, TState, TOperation>({
+    state,
     first,
     second,
     innerApply,
     innerCompose,
+    innerDiff,
 }: {
+    state: ReadonlyDualKeyMap<TKey1, TKey2, TState>;
     first: ReadonlyDualKeyMap<TKey1, TKey2, OperationElement<TState, TOperation>>;
     second: ReadonlyDualKeyMap<TKey1, TKey2, OperationElement<TState, TOperation>>;
     innerApply: (params: { state: TState; operation: TOperation }) => TState;
-    innerCompose: (params: { first: TOperation; second: TOperation }) => TOperation;
+    innerCompose: (params: { state: TState | undefined; first: TOperation; second: TOperation }) => TOperation;
+    innerDiff: Diff<TState, TOperation>;
 }) => {
     const result = new DualKeyMap<TKey1, TKey2, OperationElement<TState, TOperation>>();
     groupJoin(first, second).forEach((group, key) => {
@@ -102,8 +132,17 @@ export const compose = <TKey1, TKey2, TState, TOperation>({
                 result.set(key, group.right);
                 return;
             case both: {
-                const composed = composeElement({ first: group.left, second: group.right, innerApply, innerCompose });
-                result.set(key, composed);
+                const composed = composeElement({ 
+                    state: state.get(key), 
+                    first: group.left,
+                    second: group.right, 
+                    innerApply, 
+                    innerCompose,
+                    innerDiff
+                });
+                if (composed !== undefined) {
+                    result.set(key, composed);
+                }
                 return;
             }
         }

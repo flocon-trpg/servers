@@ -26,7 +26,7 @@ module.exports = {
         'react-hooks'
     ],
     'rules': {
-        'indent': [
+        '@typescript-eslint/indent': [
             'error',
             4,
             { 'SwitchCase': 1 },

@@ -223,7 +223,29 @@ export const useRoomState = (roomId: string): RoomStateResult => {
                         onRoomStateManagerUpdate();
                         break;
                     case 'OperateRoomNonJoinedResult':
+                        notificationContext({
+                            type: text,
+                            notification: {
+                                type: 'error',
+                                message: '部屋に入室していないため、operateできませんでした。',
+                                createdAt: new Date().getTime(),
+                            }
+                        });
+                        // TODO: 状況によって自動リトライを可能にする。
+                        setState({
+                            type: mutationFailure,
+                        });
+                        break;
                     case 'OperateRoomFailureResult':
+                        notificationContext({
+                            type: text,
+                            notification: {
+                                type: 'error',
+                                message: 'operateで問題が発生しました。',
+                                description: result.data.result.failureType,
+                                createdAt: new Date().getTime(),
+                            }
+                        });
                         // TODO: 状況によって自動リトライを可能にする。
                         setState({
                             type: mutationFailure,

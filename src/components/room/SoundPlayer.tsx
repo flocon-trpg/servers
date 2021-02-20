@@ -6,13 +6,16 @@ import OperateContext from './contexts/OperateContext';
 import FilesManagerDrawer from '../FilesManagerDrawer';
 import { FilesManagerDrawerType, some } from '../../utils/types';
 import { createPostOperationSetup } from '../../stateManagers/states/room';
-import { replace } from '../../stateManagers/states/types';
+import { replace, update } from '../../stateManagers/states/types';
+import { StrIndex5 } from '../../@shared/indexes';
+import { State } from '../../stateManagers/states/roomBgm';
 
 type Props = {
     roomId: string;
+    bgmsState: ReadonlyMap<StrIndex5, State>;
 }
 
-const SoundPlayer: React.FC<Props> = ({ roomId }: Props) => {
+const SoundPlayer: React.FC<Props> = ({ roomId, bgmsState }: Props) => {
     const operate = React.useContext(OperateContext);
     const [files, setFiles] = React.useState<FilePathInput[]>([]);
     const [writeRoomSoundEffect] = useWriteRoomSoundEffectMutation();
@@ -31,6 +34,18 @@ const SoundPlayer: React.FC<Props> = ({ roomId }: Props) => {
             <Button onClick={() => setFiles([])}>BGMリストをクリア</Button>
             <Button onClick={() => {
                 const operation = createPostOperationSetup();
+                if (bgmsState.has('1')) {
+                    operation.bgms.set('1', {
+                        type: update,
+                        operation: {
+                            files: {
+                                newValue: files,
+                            },
+                        },
+                    });
+                    operate(operation);
+                    return;
+                }
                 operation.bgms.set('1', {
                     type: replace,
                     newValue: {
@@ -42,11 +57,14 @@ const SoundPlayer: React.FC<Props> = ({ roomId }: Props) => {
             }}>BGMを再生</Button>
             <Button onClick={() => {
                 const operation = createPostOperationSetup();
-                operation.bgms.set('1', {
-                    type: replace,
-                    newValue: undefined,
-                });
-                operate(operation);
+                if (bgmsState.has('1')) {
+                    operation.bgms.set('1', {
+                        type: replace,
+                        newValue: undefined,
+                    });
+                    operate(operation);
+                    return;
+                }
             }}>BGMを停止</Button>
             <br />
             <Button

@@ -6,7 +6,8 @@ export type Apply<TState, TOperation> = (params: {
     operation: TOperation;
 }) => TState;
 
-export type Compose<TOperation> = (params: {
+export type Compose<TState, TOperation> = (params: {
+    state: TState;
     first: TOperation;
     second: TOperation;
 }) => TOperation;
@@ -26,7 +27,7 @@ export type StateManagerParameters<TState, TGetOperation, TPostOperation> = {
     state: TState;
     applyGetOperation: Apply<TState, TGetOperation>;
     applyPostOperation: Apply<TState, TPostOperation>;
-    composePostOperation: Compose<TPostOperation>;
+    composePostOperation: Compose<TState, TPostOperation>;
     getFirstTransform: Transform<TGetOperation, TPostOperation>;
     postFirstTransform: Transform<TPostOperation, TGetOperation>;
     diff: Diff<TState, TGetOperation>;
@@ -99,7 +100,7 @@ class StateManagerCore<TState, TGetOperation, TPostOperation> {
     }
 
     public operate(operation: TPostOperation) {
-        this._localOperation = this._localOperation === undefined ? operation : this.params.composePostOperation({ first: this._localOperation, second: operation });
+        this._localOperation = this._localOperation === undefined ? operation : this.params.composePostOperation({ state: this.actualState, first: this._localOperation, second: operation });
         this._uiStateCache = undefined;
     }
 
@@ -256,7 +257,7 @@ class StateManagerCore<TState, TGetOperation, TPostOperation> {
             this._postingOperation = undefined;
             return true;
         }
-        this._localOperation = this.params.composePostOperation({ first: this._postingOperation.operation, second: this._localOperation });
+        this._localOperation = this.params.composePostOperation({ state: this.actualState, first: this._postingOperation.operation, second: this._localOperation });
         this._postingOperation = undefined;
         return true;
     }

@@ -231,9 +231,11 @@ export const applyGetOperation = (params: {
 };
 
 export const compose = ({
+    state,
     first,
     second
 }: {
+    state: State;
     first: PostOperation;
     second: PostOperation;
 }): PostOperation => {
@@ -241,33 +243,46 @@ export const compose = ({
 
     result.boards = result.boards.wrap(
         $DualKeyMap.compose({
+            state: state.boards.dualKeyMap,
             first: first.boards.dualKeyMap,
             second: second.boards.dualKeyMap,
             innerApply: Board.applyOperation,
             innerCompose: Board.compose,
+            innerDiff: Board.diff,
         }));
 
     result.characters = result.characters.wrap(
         $DualKeyMap.compose({
+            state: state.characters.dualKeyMap,
             first: first.characters.dualKeyMap,
             second: second.characters.dualKeyMap,
             innerApply: Character.applyOperation,
-            innerCompose: Character.compose,
+            innerCompose: ({ state, first, second }) => {
+                if (state === undefined) {
+                    throw 'Character.State is undefined';
+                }
+                return Character.compose({ state, first, second });
+            },
+            innerDiff: Character.diff,
         }));
 
     result.bgms = $Map.compose({
+        state: state.bgms,
         first: first.bgms,
         second: second.bgms,
         innerApply: Bgm.applyOperation,
         innerCompose: Bgm.compose,
+        innerDiff: Bgm.diff,
     });
 
     result.paramNames = result.paramNames.wrap(
         $DualKeyMap.compose({
+            state: state.paramNames.dualKeyMap,
             first: first.paramNames.dualKeyMap,
             second: second.paramNames.dualKeyMap,
             innerApply: ParamName.applyOperation,
             innerCompose: ParamName.compose,
+            innerDiff: ParamName.diff,
         }));
 
     result.name = ReplaceValueOperationModule.compose(first.name, second.name);

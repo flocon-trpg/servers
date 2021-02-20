@@ -572,7 +572,7 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, allNotifi
                                     minHeight={150}
                                     minWidth={150}
                                     zIndex={roomConfig.panels.gameEffectPanel.zIndex}>
-                                    <SoundPlayer roomId={roomId} />
+                                    <SoundPlayer roomId={roomId} bgmsState={roomState.bgms} />
                                 </DraggableCard>}
                                 {roomConfig.panels.messagesPanel.isMinimized ? null : <DraggableCard
                                     header="Messages"
