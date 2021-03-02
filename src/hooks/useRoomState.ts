@@ -28,7 +28,6 @@ type RoomState = {
     roomState: Room.State;
     // undefinedならばrefetchが必要。
     operateRoom: ((operation: Room.PostOperationSetup) => void) | undefined;
-    participantsState: Participant.State;
     // participantの更新は、mutationを直接呼び出すことで行う。
 } | {
     type: typeof requiresLogin;
@@ -280,6 +279,12 @@ export const useRoomState = (roomId: string): RoomStateResult => {
                         postTrigger.next();
                     };
 
+                    setState({
+                        type: joined,
+                        roomState: newRoomStateManager.uiState,
+                        operateRoom: newRoomStateManager.requiresReload ? undefined : operate,
+                    });
+
                     break;
                 }
                 case 'GetNonJoinedRoomResult': {
@@ -306,7 +311,7 @@ export const useRoomState = (roomId: string): RoomStateResult => {
             graphQLSubscriptionSubscription.unsubscribe();
             postTriggerSubscription.unsubscribe();
         };
-    }, [refetchKey, apolloClient, roomId, myAuth?.uid, operateMutation]);
+    }, [refetchKey, apolloClient, roomId, myAuth?.uid, operateMutation, notificationContext]);
 
     return { refetch, state };
 };
