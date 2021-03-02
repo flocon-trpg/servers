@@ -28,7 +28,7 @@ export class MainResolver {
     }
 
     @Mutation(() => EntryToServerResult)
-    public async entryToServer(@Arg('phrase', () => String ,{ nullable: true }) phrase: string | null | undefined, @Ctx() context: ResolverContext): Promise<EntryToServerResult> {
+    public async entryToServer(@Arg('phrase', () => String, { nullable: true }) phrase: string | null | undefined, @Ctx() context: ResolverContext): Promise<EntryToServerResult> {
         const queue = async () => {
             const em = context.createEm();
 

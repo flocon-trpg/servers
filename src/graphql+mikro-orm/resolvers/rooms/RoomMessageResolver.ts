@@ -21,7 +21,7 @@ import { WriteRoomSoundEffectFailureType } from '../../../enums/WriteRoomSoundEf
 import { analyze, plain } from '../../../messageAnalyzer/main';
 import { queueLimitReached } from '../../../utils/PromiseQueue';
 import { EM } from '../../../utils/types';
-import { Chara } from '../../entities/character/mikro-orm';
+import { Chara } from '../../entities/room/character/mikro-orm';
 import { FilePath } from '../../entities/filePath/graphql';
 import { Room } from '../../entities/room/mikro-orm';
 import { DeleteMessageResult, EditMessageResult, GetRoomLogFailureResultType, GetRoomLogResult, GetRoomMessagesFailureResultType, GetRoomMessagesResult, MakeMessageNotSecretResult, RoomMessage, RoomMessageEvent, RoomMessages, RoomMessagesType, RoomPrivateMessage, RoomPrivateMessageType, RoomPrivateMessageUpdateType, RoomPublicChannel, RoomPublicChannelType, RoomPublicMessage, RoomPublicMessageType, RoomPublicMessageUpdateType, RoomSoundEffect, RoomSoundEffectType, WritePrivateRoomMessageFailureResultType, WritePrivateRoomMessageResult, WritePublicRoomMessageFailureResultType, WritePublicRoomMessageResult, WriteRoomSoundEffectFailureResultType, WriteRoomSoundEffectResult } from '../../entities/roomMessage/graphql';

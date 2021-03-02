@@ -1,500 +1,266 @@
-import { Result, ResultModule } from '../../../../@shared/Result';
-import { ReplaceStringDownOperation, ReplaceStringDownOperationModule, ReplaceStringTwoWayOperation, ReplaceStringTwoWayOperationModule } from '../../../Operations';
-import * as $GraphQL from './graphql';
-import * as $MikroORM from './mikro-orm';
-import * as DualKeyMapOperations from '../../../dualKeyMapOperations';
 import { Collection } from '@mikro-orm/core';
-import { RoomOp } from '../mikro-orm';
-import { undefinedForAll } from '../../../../utils/helpers';
-import { RoomParameterNameType } from '../../../../enums/RoomParameterNameType';
-import { CustomDualKeyMap, KeyFactory, ReadonlyCustomDualKeyMap } from '../../../../@shared/CustomDualKeyMap';
-import { DualKeyMap, DualKeyMapSource } from '../../../../@shared/DualKeyMap';
+import { DualKey, DualKeyMap, ReadonlyDualKeyMap } from '../../../../@shared/DualKeyMap';
 import { isStrIndex100, StrIndex100 } from '../../../../@shared/indexes';
+import { Result, ResultModule } from '../../../../@shared/Result';
+import { RoomParameterNameType } from '../../../../enums/RoomParameterNameType';
+import { undefinedForAll } from '../../../../utils/helpers';
+import { EM } from '../../../../utils/types';
+import { createDownOperationFromMikroORM, createUpOperationFromGraphQL, ReadonlyDualKeyMapDownOperation, ReadonlyDualKeyMapTwoWayOperation, ReadonlyDualKeyMapUpOperation, replace, update } from '../../../dualKeyMapOperations';
+import { ReplaceStringDownOperation, ReplaceStringDownOperationModule, ReplaceStringTwoWayOperation, ReplaceStringTwoWayOperationModule, ReplaceStringUpOperation } from '../../../Operations';
+import { TransformerFactory } from '../../global';
+import { Room, RoomOp } from '../mikro-orm';
+import { ParamNamesOperation, ParamNameState, ParamNameValueState } from './graphql';
+import { AddParamNameOp, ParamName, ParamNameBase, RemoveParamNameOp, UpdateParamNameOp } from './mikro-orm';
 
-type ParamNameStateType = {
-    name: string;
-}
-
-type ParamNameDownOperationType = {
-    name?: ReplaceStringDownOperation;
-}
-
-type ParamNameTwoWayOperationType = {
-    name?: ReplaceStringTwoWayOperation;
-}
-
-type Key = {
-    key: StrIndex100;
-    type: RoomParameterNameType;
-}
-
-const keyFactory: KeyFactory<Key, RoomParameterNameType, StrIndex100> = {
-    createDualKey: key => ({ first: key.type, second: key.key }),
-    createKey: key => ({ type: key.first, key: key.second }),
-};
-
-const createStateMap = <T>(source?: DualKeyMapSource<RoomParameterNameType, StrIndex100, T> | DualKeyMap<RoomParameterNameType, StrIndex100, T>) => {
-    return new CustomDualKeyMap<Key, RoomParameterNameType, StrIndex100, T>({ ...keyFactory, sourceMap: source });
-};
-
-type ReadonlyStateMap = ReadonlyCustomDualKeyMap<Key, RoomParameterNameType, StrIndex100, ParamNameState>;
-
-class ParamNameState {
-    private constructor(private readonly _object: ParamNameStateType) {
-
+export namespace GlobalParamName {
+    export type StateType = {
+        name: string;
     }
 
-    public static createFromGraphQL(state: $GraphQL.ParamNameValueState) {
-        const result = new ParamNameState(state);
-        return result.clone();
+    export type DownOperationType = {
+        name?: ReplaceStringDownOperation;
     }
 
-    public static createFromMikroORM(entity: $MikroORM.ParamName | $MikroORM.RemoveParamNameOp) {
-        const entityObject: ParamNameStateType = {
-            name: entity.name,
-        };
-        return new ParamNameState(entityObject);
+    export type UpOperationType = {
+        name?: ReplaceStringUpOperation;
     }
 
-    public static restore({ downOperation, nextState }: { downOperation?: ParamNameDownOperation; nextState: ParamNameState }): Result<RestoredParamName> {
-        if (downOperation === undefined) {
-            return ResultModule.ok(new RestoredParamName({ prevState: nextState, nextState }));
-        }
-        const prevState = nextState.clone();
-        const twoWayOperationCore: ParamNameTwoWayOperationType = {};
-
-        if (downOperation.valueProps.name !== undefined) {
-            prevState._object.name = downOperation.valueProps.name.oldValue;
-            twoWayOperationCore.name = { ...downOperation.valueProps.name, newValue: nextState._object.name };
-        }
-
-        return ResultModule.ok(new RestoredParamName({ prevState, nextState, twoWayOperation: new ParamNameTwoWayOperation({ valueProps: twoWayOperationCore }) }));
+    export type TwoWayOperationType = {
+        name?: ReplaceStringTwoWayOperation;
     }
 
-    public get object(): Readonly<ParamNameStateType> {
-        return this._object;
-    }
+    export namespace MikroORM {
+        export namespace ToGlobal {
+            export const state = (entity: ParamNameBase): StateType => entity;
 
-    public clone(): ParamNameState {
-        return new ParamNameState({
-            ...this._object,
-        });
-    }
-
-    public applyBack(operation: ParamNameDownOperation): ParamNameState {
-        const result = this.clone();
-        if (operation.valueProps.name !== undefined) {
-            result._object.name = operation.valueProps.name.oldValue;
-        }
-        return result;
-    }
-
-    public static diff({ prev, next }: { prev: ParamNameState; next: ParamNameState }): ParamNameDownOperation | undefined {
-        const resultType: ParamNameDownOperationType = {};
-        if (prev.object.name !== next.object.name) {
-            resultType.name = { oldValue: prev.object.name };
-        }
-        const result = new ParamNameDownOperation(resultType);
-        if (result.isId) {
-            return undefined;
-        }
-        return result;
-    }
-
-    private setToParamNameBase({
-        paramNameBase,
-    }: {
-        paramNameBase: $MikroORM.ParamNameBase;
-    }) {
-        paramNameBase.name = this._object.name;
-    }
-
-    public toMikroORMState({
-        key,
-        type,
-    }: {
-        key: string;
-        type: RoomParameterNameType;
-    }): $MikroORM.ParamName {
-        const result = new $MikroORM.ParamName({ ...this._object, key, type });
-        this.setToParamNameBase({ paramNameBase: result });
-        return result;
-    }
-
-    public toMikroORMRemoveOperation({
-        key,
-        type,
-    }: {
-        key: string;
-        type: RoomParameterNameType;
-    }): $MikroORM.RemoveParamNameOp {
-        const result = new $MikroORM.RemoveParamNameOp({ ...this._object, key, type });
-        this.setToParamNameBase({ paramNameBase: result });
-        return result;
-    }
-
-    public toGraphQL({ key, type }: { key: string; type: RoomParameterNameType }): $GraphQL.ParamNameState {
-        return {
-            key,
-            type,
-            value: {
-                ...this.object,
-            },
-        };
-    }
-}
-
-export class ParamNamesState {
-    public constructor(private readonly _readonlyStateMap: ReadonlyStateMap) { }
-
-    public static create(source: ($MikroORM.ParamName | $MikroORM.RemoveParamNameOp)[]): ParamNamesState {
-        const core = new DualKeyMap<RoomParameterNameType, StrIndex100, ParamNameState>();
-        for (const elem of source) {
-            const key = elem.key;
-            if (!isStrIndex100(key)) {
-                throw 'key must be "1", or "2", or ..., or "100"';
-            }
-            core.set(keyFactory.createDualKey({ type: elem.type, key }), ParamNameState.createFromMikroORM(elem));
-        }
-        return new ParamNamesState(createStateMap(core));
-    }
-
-    public static restore({ downOperation, nextState }: { downOperation?: ParamNamesDownOperation; nextState: ParamNamesState }): Result<RestoredParamNames> {
-        if (downOperation === undefined) {
-            return ResultModule.ok(new RestoredParamNames({ prevState: nextState, nextState }));
-        }
-        const restored = DualKeyMapOperations.restore({
-            nextState: nextState.readonlyStateMap.dualKeyMap,
-            downOperation: downOperation.readonlyStateMap,
-            innerRestore: params => {
-                const restored = ParamNameState.restore(params);
-                if (restored.isError) {
-                    return restored;
+            export const stateMany = (entity: ReadonlyArray<ParamNameBase>): ReadonlyDualKeyMap<RoomParameterNameType, StrIndex100, StateType> => {
+                const result = new DualKeyMap<RoomParameterNameType, StrIndex100, StateType>();
+                for (const elem of entity) {
+                    if (!isStrIndex100(elem.key)) {
+                        continue;
+                    }
+                    result.set({ first: elem.type, second: elem.key }, state(elem));
                 }
-                return ResultModule.ok({ prevState: restored.value.prevState, twoWayOperation: restored.value.twoWayOperation });
-            }
-        });
-        if (restored.isError) {
-            return restored;
+                return result;
+            };
+
+            export const downOperationMany = async ({
+                add,
+                update,
+                remove,
+            }: {
+                add: Collection<AddParamNameOp>;
+                update: Collection<UpdateParamNameOp>;
+                remove: Collection<RemoveParamNameOp>;
+            }): Promise<Result<ReadonlyDualKeyMapDownOperation<RoomParameterNameType, StrIndex100, StateType, DownOperationType>>> => {
+                return await createDownOperationFromMikroORM({
+                    add,
+                    update,
+                    remove,
+                    toDualKey: x => {
+                        if (!isStrIndex100(x.key)) {
+                            throw 'key must be "1", or "2", or ..., or "100"';
+                        }
+                        return ResultModule.ok({ first: x.type, second: x.key });
+                    },
+                    getState: async x => ResultModule.ok(state(x)),
+                    getOperation: async entity => ResultModule.ok({
+                        name: entity.name == null ? undefined : { oldValue: entity.name },
+                    })
+                });
+            };
         }
-        return ResultModule.ok(new RestoredParamNames({
-            prevState: new ParamNamesState(createStateMap(restored.value.prevState)),
-            nextState: nextState,
-            twoWayOperation: new ParamNamesTwoWayOperation(restored.value.twoWayOperation),
-        }));
     }
 
-    public get readonlyStateMap(): ReadonlyStateMap {
-        return this._readonlyStateMap;
-    }
+    export namespace Global {
+        export namespace ToGraphQL {
+            export const state = ({ source }: { source: StateType }): ParamNameValueState => source;
 
-    public clone(): ParamNamesState {
-        return new ParamNamesState(this.readonlyStateMap.clone());
-    }
+            export const stateMany = ({ source }: { source: ReadonlyDualKeyMap<RoomParameterNameType, StrIndex100, StateType> }): ParamNameState[] => {
+                const result: ParamNameState[] = [];
+                source.forEach((value, key) => {
+                    result.push({
+                        type: key.first,
+                        key: key.second,
+                        value: state({ source: value }),
+                    });
+                });
+                return result;
+            };
 
-    public toGraphQL(): $GraphQL.ParamNameState[] {
-        return this._readonlyStateMap.toArray().map(([key, state]) => {
-            return state.toGraphQL(key);
-        });
-    }
-}
-
-class ParamNameDownOperation {
-    public constructor(private readonly object: ParamNameDownOperationType) { }
-
-    public static create(entity: $MikroORM.UpdateParamNameOp): Result<ParamNameDownOperation> {
-        const object: ParamNameDownOperationType = {};
-
-        object.name = entity.name === undefined ? undefined : { oldValue: entity.name };
-
-        return ResultModule.ok(new ParamNameDownOperation(object));
-    }
-
-    public get isId() {
-        return undefinedForAll(this.object);
-    }
-
-    public get valueProps(): Readonly<ParamNameDownOperationType> {
-        return this.object;
-    }
-
-    public compose(second: ParamNameDownOperation): Result<ParamNameDownOperation> {
-        const valueProps: ParamNameDownOperationType = {
-            name: ReplaceStringDownOperationModule.compose(this.valueProps.name, second.valueProps.name),
-        };
-
-        return ResultModule.ok(new ParamNameDownOperation(valueProps));
-    }
-}
-
-export class ParamNamesDownOperation {
-    private constructor(private readonly core: DualKeyMapOperations.ReadonlyDualKeyMapDownOperation<RoomParameterNameType, StrIndex100, ParamNameState, ParamNameDownOperation>) { }
-
-    public static async create({
-        add,
-        remove,
-        update
-    }: {
-        add: Collection<$MikroORM.AddParamNameOp>;
-        remove: Collection<$MikroORM.RemoveParamNameOp>;
-        update: Collection<$MikroORM.UpdateParamNameOp>;
-    }): Promise<Result<ParamNamesDownOperation>> {
-        const downOperation = await DualKeyMapOperations.createDownOperationFromMikroORM({
-            toDualKey: state => {
-                const key = state.key;
-                if (!isStrIndex100(key)) {
-                    return ResultModule.error('key must be "1", or "2", or ..., or "100"');
+            export const operation = ({ operation }: { operation: ReadonlyDualKeyMapTwoWayOperation<RoomParameterNameType, StrIndex100, StateType, TwoWayOperationType> }): ParamNamesOperation => {
+                const result: ParamNamesOperation = { replace: [], update: [] };
+                for (const [key, value] of operation) {
+                    switch (value.type) {
+                        case replace: {
+                            if (value.operation.newValue === undefined) {
+                                result.replace.push({
+                                    type: key.first,
+                                    key: key.second,
+                                    newValue: undefined,
+                                });
+                                continue;
+                            }
+                            result.replace.push({
+                                type: key.first,
+                                key: key.second,
+                                newValue: value.operation.newValue,
+                            });
+                            continue;
+                        }
+                        case update: {
+                            result.update.push({
+                                type: key.first,
+                                key: key.second,
+                                operation: value.operation,
+                            });
+                        }
+                    }
                 }
-                return ResultModule.ok(keyFactory.createDualKey({ key, type: state.type }));
-            },
-            add,
-            remove,
-            update,
-            getState: async state => {
-                const result = ParamNameState.createFromMikroORM(state);
-                return ResultModule.ok(result);
-            },
-            getOperation: async operation => {
-                return ParamNameDownOperation.create(operation);
-            },
-        });
-        if (downOperation.isError) {
-            return downOperation;
-        }
-        return ResultModule.ok(new ParamNamesDownOperation(downOperation.value));
-    }
-
-    public compose(second: ParamNamesDownOperation, state: ParamNamesState): Result<ParamNamesDownOperation> {
-        const composed = DualKeyMapOperations.composeDownOperation({
-            state: state.readonlyStateMap.dualKeyMap,
-            first: this.core,
-            second: second.core,
-            innerApplyBack: ({ downOperation, nextState }) => {
-                return ResultModule.ok(nextState.applyBack(downOperation));
-            },
-            innerCompose: ({ first, second }) => first.compose(second),
-            innerDiff: ParamNameState.diff, 
-        });
-        if (composed.isError) {
-            return composed;
-        }
-        return ResultModule.ok(new ParamNamesDownOperation(composed.value));
-    }
-
-    public get readonlyStateMap(): DualKeyMapOperations.ReadonlyDualKeyMapDownOperation<RoomParameterNameType, StrIndex100, ParamNameState, ParamNameDownOperation> {
-        return this.core;
-    }
-}
-
-class ParamNameTwoWayOperation {
-    public constructor(private readonly params: { valueProps: ParamNameTwoWayOperationType }) {
-
-    }
-
-    public get valueProps(): Readonly<ParamNameTwoWayOperationType> {
-        return this.params.valueProps;
-    }
-
-    public apply(entity: $MikroORM.ParamName) {
-        if (this.params.valueProps.name !== undefined) {
-            entity.name = this.params.valueProps.name.newValue;
-        }
-    }
-
-    public toMikroORM({
-        key,
-        type,
-    }: {
-        key: StrIndex100;
-        type: RoomParameterNameType;
-    }): $MikroORM.UpdateParamNameOp {
-        const result = new $MikroORM.UpdateParamNameOp({ key, type });
-
-        if (this.valueProps.name !== undefined) {
-            result.name = this.valueProps.name.oldValue;
+                return result;
+            };
         }
 
-        return result;
-    }
+        export const applyToEntity = async ({
+            em,
+            parent,
+            parentOp,
+            operation,
+        }: {
+            em: EM;
+            parent: Room;
+            parentOp: RoomOp;
+            operation: ReadonlyDualKeyMapTwoWayOperation<RoomParameterNameType, StrIndex100, StateType, TwoWayOperationType>;
+        }) => {
+            for (const [key, value] of operation) {
+                switch (value.type) {
+                    case replace: {
+                        if (value.operation.newValue === undefined) {
+                            if (value.operation.oldValue === undefined) {
+                                console.warn('Replace: oldValue === newValue === undefined. This should be id.');
+                                continue;
+                            }
+                            const toRemove = await em.findOneOrFail(ParamName, { room: { id: parent.id }, type: key.first, key: key.second });
+                            em.remove(toRemove);
 
-    public toGraphQL(): $GraphQL.ParamNameOperation {
-        return {
-            ...this.valueProps,
+                            const op = new RemoveParamNameOp({
+                                type: key.first,
+                                key: key.second,
+                                name: value.operation.oldValue.name,
+                            });
+                            parentOp.removeParamNameOps.add(op);
+                            continue;
+                        }
+
+                        const toAdd = new ParamName({
+                            type: key.first,
+                            key: key.second,
+                            name: value.operation.newValue.name,
+                        });
+                        parent.paramNames.add(toAdd);
+
+                        const op = new AddParamNameOp({ type: key.first, key: key.second });
+                        parentOp.addParamNameOps.add(op);
+                        continue;
+                    }
+                    case update: {
+                        const target = await em.findOneOrFail(ParamName, { room: { id: parent.id }, type: key.first, key: key.second });
+                        const op = new UpdateParamNameOp({ type: key.first, key: key.second });
+
+                        if (value.operation.name != null) {
+                            target.name = value.operation.name.newValue;
+                            op.name = value.operation.name.oldValue;
+                        }
+
+                        parentOp.updateParamNameOps.add(op);
+                        continue;
+                    }
+                }
+            }
         };
     }
-}
 
-export class ParamNamesTwoWayOperation {
-    public constructor(private readonly operations: DualKeyMapOperations.ReadonlyDualKeyMapTwoWayOperation<RoomParameterNameType, StrIndex100, ParamNameState, ParamNameTwoWayOperation>) {
+    export namespace GraphQL {
+        export namespace ToGlobal {
+            export const state = (entity: ParamNameValueState): StateType => entity;
 
-    }
-
-    public static createEmpty(): ParamNamesTwoWayOperation {
-        return new ParamNamesTwoWayOperation(new DualKeyMap());
-    }
-
-    public get readonlyStateMap(): DualKeyMapOperations.ReadonlyDualKeyMapTwoWayOperation<RoomParameterNameType, StrIndex100, ParamNameState, ParamNameTwoWayOperation> {
-        return this.operations;
-    }
-
-    public get readonlyStateMapAsStringKey(): DualKeyMapOperations.ReadonlyDualKeyMapTwoWayOperation<RoomParameterNameType, string, ParamNameState, ParamNameTwoWayOperation> {
-        return this.operations;
-    }
-
-    public get isId(): boolean {
-        return this.readonlyStateMap.size === 0;
-    }
-
-    public setToMikroORM(entity: RoomOp): void {
-        this.readonlyStateMap.forEach((operation, key) => {
-            if (operation.type === DualKeyMapOperations.update) {
-                const updateOperation = operation.operation.toMikroORM({
-                    type: key.first,
-                    key: key.second,
+            export const upOperationMany = (source: ParamNamesOperation): Result<ReadonlyDualKeyMapUpOperation<RoomParameterNameType, StrIndex100, StateType, UpOperationType>> => {
+                return createUpOperationFromGraphQL({
+                    replace: source.replace,
+                    update: source.update,
+                    createDualKey: x => {
+                        if (!isStrIndex100(x.key)) {
+                            return ResultModule.error('key must be "1", or "2", or ..., or "100"');
+                        }
+                        return ResultModule.ok({ first: x.type, second: x.key });
+                    },
+                    getState: x => x.newValue == null ? undefined : state(x.newValue),
+                    getOperation: x => ResultModule.ok({
+                        name: x.operation.name,
+                    }),
                 });
-                entity.updateParamNameOps.add(updateOperation);
-                return;
-            }
-            if (operation.operation.oldValue === undefined) {
-                const element = new $MikroORM.AddParamNameOp({
-                    type: key.first,
-                    key: key.second
-                });
-                entity.addParamNameOps.add(element);
-                return;
+            };
+        }
+    }
+
+    export const transformerFactory: TransformerFactory<DualKey<RoomParameterNameType, StrIndex100>, StateType, StateType, DownOperationType, UpOperationType, TwoWayOperationType> = ({
+        composeLoose: ({ first, second }) => {
+            const valueProps: DownOperationType = {
+                name: ReplaceStringDownOperationModule.compose(first.name, second.name),
+            };
+            return ResultModule.ok(valueProps);
+        },
+        restore: ({ nextState, downOperation }) => {
+            if (downOperation === undefined) {
+                return ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
             }
 
-            const removeOperation = operation.operation.oldValue.toMikroORMRemoveOperation({
-                type: key.first,
-                key: key.second
+            const prevState: StateType = { ...nextState };
+            const twoWayOperation: TwoWayOperationType = {};
+
+            if (downOperation.name !== undefined) {
+                prevState.name = downOperation.name.oldValue;
+                twoWayOperation.name = { ...downOperation.name, newValue: nextState.name };
+            }
+
+            return ResultModule.ok({ prevState, twoWayOperation });
+        },
+        transform: ({ prevState, clientOperation, serverOperation }) => {
+            const twoWayOperation: TwoWayOperationType = {};
+
+            twoWayOperation.name = ReplaceStringTwoWayOperationModule.transform({
+                first: serverOperation?.name,
+                second: clientOperation.name,
+                prevState: prevState.name,
             });
-            entity.removeParamNameOps.add(removeOperation);
-        });
-    }
 
-    public async apply({
-        entity,
-    }: {
-        entity: Collection<$MikroORM.ParamName>;
-    }): Promise<void> {
-        await DualKeyMapOperations.apply({
-            toDualKey: state => ({ second: state.key, first: state.type }),
-            state: entity,
-            operation: this.readonlyStateMapAsStringKey,
-            create: async params => {
-                return params.state.toMikroORMState({ key: params.key.second, type: params.key.first });
-            },
-            update: async params => {
-                params.operation.apply(params.state);
-            },
-            delete: async () => true,
-        });
-    }
-
-    public toJSON(): string {
-        return JSON.stringify(this.operations);
-    }
-}
-
-class RestoredParamName {
-    // Make sure these:
-    // - apply(prevState, twoWayOperation.up) = nextState
-    // - apply(nextState, twoWayOperation.down) = prevState
-    public constructor(private readonly params: { prevState: ParamNameState; nextState: ParamNameState; twoWayOperation?: ParamNameTwoWayOperation }) { }
-
-    public transform({ clientOperation }: { clientOperation: $GraphQL.ParamNameOperation }): Result<ParamNameTwoWayOperation | undefined> {
-        const twoWayOperationCore: ParamNameTwoWayOperationType = {};
-
-        twoWayOperationCore.name = ReplaceStringTwoWayOperationModule.transform({
-            first: this.params.twoWayOperation?.valueProps.name,
-            second: clientOperation.name,
-            prevState: this.params.prevState.object.name,
-        });
-
-        if (undefinedForAll(twoWayOperationCore)) {
-            return ResultModule.ok(undefined);
-        }
-
-        return ResultModule.ok(new ParamNameTwoWayOperation({ valueProps: twoWayOperationCore }));
-    }
-
-    public get prevState(): ParamNameState {
-        return this.params.prevState;
-    }
-
-    public get nextState(): ParamNameState {
-        return this.params.nextState;
-    }
-
-    public get twoWayOperation(): ParamNameTwoWayOperation | undefined {
-        return this.params.twoWayOperation;
-    }
-}
-
-export class RestoredParamNames {
-    // Make sure these:
-    // - apply(prevState, twoWayOperation.up) = nextState
-    // - apply(nextState, twoWayOperation.down) = prevState
-    public constructor(private readonly params: { prevState: ParamNamesState; nextState: ParamNamesState; twoWayOperation?: ParamNamesTwoWayOperation }) { }
-
-    public transform({ clientOperation }: { clientOperation: $GraphQL.ParamNamesOperation }): Result<ParamNamesTwoWayOperation> {
-        const second = DualKeyMapOperations.createUpOperationFromGraphQL({
-            replace: clientOperation.replace,
-            update: clientOperation.update,
-            getState: source => source.newValue,
-            getOperation: source => source.operation,
-            createDualKey: source => {
-                const key = source.key;
-                if (!isStrIndex100(key)) {
-                    throw 'key must be "1", or "2", or ..., or "100"';
-                }
-                return ResultModule.ok(keyFactory.createDualKey({ key, type: source.type }));
+            if (undefinedForAll(twoWayOperation)) {
+                return ResultModule.ok(undefined);
             }
-        });
-        if (second.isError) {
-            return second;
+
+            return ResultModule.ok({ ...twoWayOperation });
+        },
+        diff: ({ prevState, nextState }) => {
+            const resultType: TwoWayOperationType = {};
+            if (prevState.name !== nextState.name) {
+                resultType.name = { oldValue: prevState.name, newValue: nextState.name };
+            }
+            if (undefinedForAll(resultType)) {
+                return undefined;
+            }
+            return { ...resultType };
+        },
+        applyBack: ({ downOperation, nextState }) => {
+            const result = { ...nextState };
+
+            if (downOperation.name !== undefined) {
+                result.name = downOperation.name.oldValue;
+            }
+
+            return ResultModule.ok(result);
+        },
+        toServerState: ({ clientState }) => clientState,
+        protectedValuePolicy: {
         }
-        const transformed = DualKeyMapOperations.transform({
-            first: this.params.twoWayOperation?.readonlyStateMap,
-            second: second.value,
-            prevState: this.params.prevState.readonlyStateMap.dualKeyMap,
-            nextState: this.params.nextState.readonlyStateMap.dualKeyMap,
-            innerTransform: params => {
-                const restored = new RestoredParamName({ ...params, twoWayOperation: params.first });
-                return restored.transform({ clientOperation: params.second });
-            },
-            toServerState: clientState => {
-                return ParamNameState.createFromGraphQL(clientState);
-            },
-            protectedValuePolicy: {}
-        });
-
-        if (transformed.isError) {
-            return transformed;
-        }
-        return ResultModule.ok(new ParamNamesTwoWayOperation(transformed.value));
-    }
-
-    public get prevState(): ParamNamesState {
-        return this.params.prevState;
-    }
-
-    public get nextState(): ParamNamesState {
-        return this.params.nextState;
-    }
-
-    public get twoWayOperation(): ParamNamesTwoWayOperation | undefined {
-        return this.params.twoWayOperation;
-    }
-}
-
-// Make sure these:
-// - apply(prevState, twoWayOperation.up) = nextState
-// - apply(nextState, twoWayOperation.down) = prevState
-export const toGraphQLOperation = (params: { prevState: ParamNamesState; nextState: ParamNamesState; twoWayOperation: ParamNamesTwoWayOperation }): $GraphQL.ParamNamesOperation => {
-    return DualKeyMapOperations.toGraphQL({
-        source: params.twoWayOperation.readonlyStateMap,
-        toReplaceOperation: ({ nextState, key }) => ({ ...keyFactory.createKey(key), newValue: nextState?.toGraphQL(keyFactory.createKey(key)).value }),
-        toUpdateOperation: ({ operation, key }) => ({ ...keyFactory.createKey(key), operation: operation.toGraphQL() }),
     });
-};
+}

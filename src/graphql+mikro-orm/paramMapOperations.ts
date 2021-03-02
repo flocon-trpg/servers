@@ -48,7 +48,7 @@ export const createUpOperationFromGraphQL = <TKey, TUpOperation, TUpOperationEle
     return ResultModule.ok(result);
 };
 
-export const toGraphQL = <TKey, TAddOperation, TSourceOperation, TUpdateOperation>({
+export const toGraphQL = <TKey, TSourceOperation, TUpdateOperation>({
     source,
     toUpdateOperation,
 }: {
@@ -113,7 +113,7 @@ export const restore = <TKey, TState, TDownOperation, TTwoWayOperation>({
 }: {
     nextState: ReadonlyMap<TKey, TState>;
     downOperation: ReadonlyMap<TKey, TDownOperation>;
-    innerRestore: (params: { downOperation: TDownOperation; nextState: TState }) => Result<RestoreResult<TState, TTwoWayOperation> | undefined>;
+    innerRestore: (params: { downOperation: TDownOperation; nextState: TState; key: TKey }) => Result<RestoreResult<TState, TTwoWayOperation> | undefined>;
 }): Result<RestoreResult<Map<TKey, TState>, Map<TKey, TTwoWayOperation>>> => {
     const prevState = new Map(nextState);
     const twoWayOperation = new Map<TKey, TTwoWayOperation>();
@@ -123,7 +123,7 @@ export const restore = <TKey, TState, TDownOperation, TTwoWayOperation>({
         if (nextCharacterState === undefined) {
             return ResultModule.error(`tried to update "${key}", but nextState does not have such a key`);
         }
-        const restored = innerRestore({ downOperation: value, nextState: nextCharacterState });
+        const restored = innerRestore({ downOperation: value, nextState: nextCharacterState, key });
         if (restored.isError) {
             return restored;
         }
@@ -143,7 +143,7 @@ export const restore = <TKey, TState, TDownOperation, TTwoWayOperation>({
 export const applyBack = <TKey, TState, TDownOperation>({ nextState, downOperation, innerApplyBack }: {
     nextState: ReadonlyMap<TKey, TState>;
     downOperation: ReadonlyMap<TKey, TDownOperation>;
-    innerApplyBack: (params: { downOperation: TDownOperation; nextState: TState }) => Result<TState>;
+    innerApplyBack: (params: { downOperation: TDownOperation; nextState: TState; key: TKey }) => Result<TState>;
 }): Result<Map<TKey, TState>> => {
     const prevState = new Map(nextState);
 
@@ -152,7 +152,7 @@ export const applyBack = <TKey, TState, TDownOperation>({ nextState, downOperati
         if (nextCharacterState === undefined) {
             return ResultModule.error(`tried to update "${key}", but nextState does not have such a key`);
         }
-        const oldValue = innerApplyBack({ downOperation: value, nextState: nextCharacterState });
+        const oldValue = innerApplyBack({ downOperation: value, nextState: nextCharacterState, key });
         if (oldValue.isError) {
             return oldValue;
         }
@@ -170,7 +170,7 @@ export const composeDownOperation = <TKey, TDownOperation>({
 }: {
     first: ReadonlyMap<TKey, TDownOperation>;
     second: ReadonlyMap<TKey, TDownOperation>;
-    innerCompose: (params: { first: TDownOperation; second: TDownOperation }) => Result<TDownOperation>;
+    innerCompose: (params: { key: TKey; first: TDownOperation; second: TDownOperation }) => Result<TDownOperation | undefined>;
 }): Result<Map<TKey, TDownOperation>> => {
     const result = new Map<TKey, TDownOperation>();
 
@@ -183,11 +183,13 @@ export const composeDownOperation = <TKey, TDownOperation>({
                 result.set(key, groupJoined.right);
                 continue;
             case both: {
-                const update = innerCompose({ first: groupJoined.left, second: groupJoined.right });
+                const update = innerCompose({ first: groupJoined.left, second: groupJoined.right, key });
                 if (update.isError) {
                     return update;
                 }
-                result.set(key, update.value);
+                if (update.value !== undefined) {
+                    result.set(key, update.value);
+                }
                 continue;
             }
                 break;
@@ -273,7 +275,7 @@ export const diff = <TKey, TState, TOperation>({
 }: {
     prev: ReadonlyMap<TKey, TState>;
     next: ReadonlyMap<TKey, TState>;
-    innerDiff: (params: { prev: TState | undefined; next: TState | undefined }) => TOperation | undefined;
+    innerDiff: (params: { prev: TState | undefined; next: TState | undefined; key: TKey }) => TOperation | undefined;
 }): Map<TKey, TOperation> => {
     const result = new Map<TKey, TOperation>();
     for (const [key, value] of groupJoin(prev, next)) {
@@ -294,7 +296,7 @@ export const diff = <TKey, TState, TOperation>({
                 break;
             }
         }
-        const diffResult = innerDiff({ prev, next });
+        const diffResult = innerDiff({ prev, next, key });
         if (diffResult === undefined) {
             continue;
         }

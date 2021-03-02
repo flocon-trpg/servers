@@ -1,3 +1,3 @@
-import { FilePath as GraphqlFilePath } from './graphql';
+import { FilePath as GraphQLFilePath } from './graphql';
 
-export type FilePath = Readonly<GraphqlFilePath>;
+export type FilePath = Readonly<GraphQLFilePath>;

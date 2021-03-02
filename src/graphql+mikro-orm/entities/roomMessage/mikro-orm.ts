@@ -1,7 +1,7 @@
 import { Collection, Entity, Enum, IdentifiedReference, ManyToMany, ManyToOne, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { FileSourceType } from '../../../enums/FileSourceType';
-import { Chara } from '../character/mikro-orm';
+import { Chara } from '../room/character/mikro-orm';
 import { Room } from '../room/mikro-orm';
 import { User } from '../user/mikro-orm';
 

@@ -1,17 +1,19 @@
 import { Connection, IDatabaseDriver, LoggerNamespace, MikroORM } from '@mikro-orm/core';
-import { AddBoardOp, Board, BoardBase, RemoveBoardOp, UpdateBoardOp } from './graphql+mikro-orm/entities/board/mikro-orm';
-import { CharaBase, Chara, AddCharaOp, RemoveCharaOp, UpdateCharaOp } from './graphql+mikro-orm/entities/character/mikro-orm';
-import { AddPieceLocOp, PieceLoc, PieceLocBase, RemovedPieceLoc, RemovePieceLocOp, UpdatePieceLocOp } from './graphql+mikro-orm/entities/character/pieceLocation/mikro-orm';
+import { AddBoardOp, Board, BoardBase, RemoveBoardOp, UpdateBoardOp } from './graphql+mikro-orm/entities/room/board/mikro-orm';
+import { CharaBase, Chara, AddCharaOp, RemoveCharaOp, UpdateCharaOp } from './graphql+mikro-orm/entities/room/character/mikro-orm';
+import { AddCharaPieceOp, CharaPiece, CharaPieceBase, RemovedCharaPiece, RemoveCharaPieceOp, UpdateCharaPieceOp } from './graphql+mikro-orm/entities/room/character/piece/mikro-orm';
 import { Room, RoomOp } from './graphql+mikro-orm/entities/room/mikro-orm';
 import { RoomPrvMsg, RoomPubCh, RoomPubMsg, RoomSe } from './graphql+mikro-orm/entities/roomMessage/mikro-orm';
 import { User } from './graphql+mikro-orm/entities/user/mikro-orm';
 import { EM } from './utils/types';
 import { AddParamNameOp, ParamName, ParamNameBase, RemoveParamNameOp, UpdateParamNameOp } from './graphql+mikro-orm/entities/room/paramName/mikro-orm';
 import { AddRoomBgmOp, RemoveRoomBgmOp, RoomBgm, RoomBgmBase, UpdateRoomBgmOp } from './graphql+mikro-orm/entities/room/bgm/mikro-orm';
-import { BoolParam, BoolParamBase, RemovedBoolParam, UpdateBoolParamOp } from './graphql+mikro-orm/entities/character/boolParam/mikro-orm';
-import { NumParamBase, NumParam, RemovedNumParam, AddNumParamOp, UpdateNumParamOp, NumMaxParam, NumMaxParamBase, RemovedNumMaxParam, UpdateNumMaxParamOp } from './graphql+mikro-orm/entities/character/numParam/mikro-orm';
-import { StrParamBase, StrParam, RemovedStrParam, UpdateStrParamOp } from './graphql+mikro-orm/entities/character/strParam/mikro-orm';
-import { AddParticiOp, Partici, ParticiOp, UpdateParticiOp } from './graphql+mikro-orm/entities/participant/mikro-orm';
+import { BoolParam, BoolParamBase, RemovedBoolParam, UpdateBoolParamOp } from './graphql+mikro-orm/entities/room/character/boolParam/mikro-orm';
+import { NumParamBase, NumParam, RemovedNumParam, UpdateNumParamOp, NumMaxParam, NumMaxParamBase, RemovedNumMaxParam, UpdateNumMaxParamOp } from './graphql+mikro-orm/entities/room/character/numParam/mikro-orm';
+import { StrParamBase, StrParam, RemovedStrParam, UpdateStrParamOp } from './graphql+mikro-orm/entities/room/character/strParam/mikro-orm';
+import { AddParticiOp, Partici, RemoveParticiOp, UpdateParticiOp } from './graphql+mikro-orm/entities/room/participant/mikro-orm';
+import { AddMyValueOp, MyValue, RemovedMyValue, RemoveMyValueOp, UpdateMyValueOp } from './graphql+mikro-orm/entities/room/participant/myValue/mikro-orm_value';
+import { AddMyValuePieceOp, MyValuePiece, RemovedMyValuePieceByMyValue, RemovedMyValuePieceByPartici, RemoveMyValuePieceOp, UpdateMyValuePieceOp } from './graphql+mikro-orm/entities/room/participant/myValue/mikro-orm_piece';
 
 const entities = [
     BoardBase,
@@ -34,7 +36,6 @@ const entities = [
     NumParamBase,
     NumParam,
     RemovedNumParam,
-    AddNumParamOp,
     UpdateNumParamOp,
 
     NumMaxParamBase,
@@ -48,16 +49,27 @@ const entities = [
     UpdateStrParamOp,
 
     Partici,
-    ParticiOp,
     AddParticiOp,
     UpdateParticiOp,
+    RemoveParticiOp,
+    MyValue,
+    RemovedMyValue,
+    AddMyValueOp,
+    RemoveMyValueOp,
+    UpdateMyValueOp,
+    MyValuePiece,
+    RemovedMyValuePieceByPartici,
+    RemovedMyValuePieceByMyValue,
+    AddMyValuePieceOp,
+    RemoveMyValuePieceOp,
+    UpdateMyValuePieceOp,
 
-    PieceLocBase,
-    PieceLoc,
-    RemovedPieceLoc,
-    AddPieceLocOp,
-    RemovePieceLocOp,
-    UpdatePieceLocOp,
+    CharaPieceBase,
+    CharaPiece,
+    RemovedCharaPiece,
+    AddCharaPieceOp,
+    RemoveCharaPieceOp,
+    UpdateCharaPieceOp,
 
     ParamNameBase,
     ParamName,

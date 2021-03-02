@@ -7,7 +7,7 @@ import { Room } from '../../entities/room/mikro-orm';
 import { __ } from '../../../@shared/collection';
 import { Reference } from '@mikro-orm/core';
 import { loadServerConfigAsMain } from '../../../config';
-import { Partici } from '../../entities/participant/mikro-orm';
+import { Partici } from '../../entities/room/participant/mikro-orm';
 
 export const NotSignIn = 'NotSignIn';
 export const AnonymousAccount = 'AnonymousAccount';

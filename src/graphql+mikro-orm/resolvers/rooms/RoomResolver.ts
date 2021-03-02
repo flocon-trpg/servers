@@ -1,5 +1,4 @@
-import { Resolver, Query, Args, Mutation, Ctx, PubSub, Subscription, Root, ArgsType, Field, Arg, Publisher, InputType, PubSubEngine, Int, ObjectType, createUnionType } from 'type-graphql';
-
+import { Resolver, Query, Args, Mutation, Ctx, PubSub, Subscription, Root, ArgsType, Field, Arg, InputType, PubSubEngine, Int } from 'type-graphql';
 import { ResolverContext } from '../../utils/Contexts';
 import { ParticipantRole } from '../../../enums/ParticipantRole';
 import { GetRoomFailureType } from '../../../enums/GetRoomFailureType';
@@ -8,20 +7,16 @@ import { CreateRoomFailureType } from '../../../enums/CreateRoomFailureType';
 import { checkEntry, checkSignIn, findRoomAndMyParticipant, findRoomAndMyParticipantAndParitipantUserUids, getUserIfEntry, NotSignIn } from '../utils/helpers';
 import { JoinRoomFailureType } from '../../../enums/JoinRoomFailureType';
 import * as Room$MikroORM from '../../entities/room/mikro-orm';
-import * as Room$Global from '../../entities/room/global';
-import * as Participant$GraphQL from '../../entities/participant/graphql';
-import { stateToGraphql as stateToGraphql$RoomAsListItem } from '../../entities/roomAsListItem/global';
+import { stateToGraphQL as stateToGraphql$RoomAsListItem } from '../../entities/roomAsListItem/global';
 import { queueLimitReached } from '../../../utils/PromiseQueue';
 import { serverTooBusyMessage } from '../utils/messages';
 import { RoomOperation, RoomOperated, RoomOperationInput, deleteRoomOperation } from '../../entities/room/graphql';
 import { OperateRoomFailureType } from '../../../enums/OperateRoomFailureType';
 import { ROOM_OPERATED } from '../../utils/Topics';
 import { Result, ResultModule } from '../../../@shared/Result';
-import * as User$MikroORM from '../../entities/user/mikro-orm';
 import { LeaveRoomFailureType } from '../../../enums/LeaveRoomFailureType';
 import { loadServerConfigAsMain } from '../../../config';
-import { Partici } from '../../entities/participant/mikro-orm';
-import { addAndCreateGraphQLOperation, toGraphQL as toParticipantsGraphQL, updateAndCreateGraphQLOperation } from '../../entities/participant/global';
+import { Partici } from '../../entities/room/participant/mikro-orm';
 import { RequiresPhraseFailureType } from '../../../enums/RequiresPhraseFailureType';
 import { OperateRoomFailureResult, OperateRoomIdResult, OperateRoomNonJoinedResult, OperateRoomResult, OperateRoomSuccessResult } from '../../results/OperateRoomResult';
 import { JoinRoomResult } from '../../results/JoinRoomResult';
@@ -36,6 +31,11 @@ import { ChangeParticipantNameResult } from '../../results/ChangeParticipantName
 import { ChangeParticipantNameFailureType } from '../../../enums/ChangeParticipantNameFailureType';
 import { DeleteRoomResult } from '../../results/DeleteRoomResult';
 import { DeleteRoomFailureType } from '../../../enums/DeleteRoomFailureType';
+import { GlobalRoom } from '../../entities/room/global';
+import { client, RequestedBy, server } from '../../Types';
+import { GlobalParticipant } from '../../entities/room/participant/global';
+import { MapTwoWayOperationElementUnion, replace, update } from '../../mapOperations';
+import { EM } from '../../../utils/types';
 
 @InputType()
 class CreateRoomInput {
@@ -113,8 +113,8 @@ type RoomOperationPayload = {
     type: 'roomOperationPayload';
     roomId: string;
     participants: ReadonlySet<string>; // UserUid
-    graphQLOperationGenerator: Room$Global.GraphQLOperationGenerator;
-    operatedBy: string;
+    generateOperation: (deliverTo: string) => RoomOperation;
+    operatedBy: RequestedBy;
 }
 
 type DeleteRoomPayload = {
@@ -123,14 +123,7 @@ type DeleteRoomPayload = {
     deletedBy: string;
 }
 
-type ParticipantOperationPayload = {
-    type: 'participantOperation';
-    roomId: string;
-    participants: ReadonlySet<string>; // UserUid
-    participantsOperation: Participant$GraphQL.ParticipantsOperation;
-}
-
-type RoomOperatedPayload = RoomOperationPayload | DeleteRoomPayload | ParticipantOperationPayload;
+type RoomOperatedPayload = RoomOperationPayload | DeleteRoomPayload;
 
 type OperateCoreResult = {
     type: 'success';
@@ -146,6 +139,102 @@ type OperateCoreResult = {
     type: 'failure';
     result: OperateRoomFailureResult;
 }
+
+const operateParticipantAndFlush = async ({
+    myUserUid,
+    em,
+    room,
+    participantUserUids,
+    create,
+    update,
+}: {
+    myUserUid: string;
+    em: EM;
+    room: Room$MikroORM.Room;
+    participantUserUids: ReadonlySet<string>;
+    create?: {
+        role: ParticipantRole | undefined;
+        name: string;
+    };
+    update?: {
+        role?: { newValue: ParticipantRole | undefined };
+        name?: { newValue: string };
+    };
+}): Promise<{ result: typeof JoinRoomResult; payload: RoomOperatedPayload | undefined }> => {
+    const prevRevision = room.revision;
+    const roomState = await GlobalRoom.MikroORM.ToGlobal.state(room);
+    const me = roomState.participants.get(myUserUid);
+    const participantsOperation = new Map<string, MapTwoWayOperationElementUnion<GlobalParticipant.StateType, GlobalParticipant.TwoWayOperationType>>();
+    if (me == null) {
+        if (create != null) {
+            participantsOperation.set(myUserUid, {
+                type: replace,
+                operation: {
+                    oldValue: undefined,
+                    newValue: {
+                        name: create.name,
+                        role: create.role,
+                        myNumberValues: new Map(),
+                    }
+                },
+            });
+        }
+    } else {
+        if (update != null) {
+            const operation = GlobalParticipant.transformerFactory({ type: server }).diff({
+                key: myUserUid,
+                prevState: me,
+                nextState: {
+                    ...me,
+                    role: update.role === undefined ? me.role : update.role.newValue,
+                    name: update.name === undefined ? me.name : update.name.newValue,
+                },
+            });
+            if (operation !== undefined) {
+                participantsOperation.set(myUserUid, {
+                    type: 'update',
+                    operation,
+                });
+            }
+        }
+    }
+
+    const roomOperation: GlobalRoom.TwoWayOperationType = {
+        ...GlobalRoom.Global.emptyTwoWayOperation(),
+        participants: participantsOperation,
+    };
+    await GlobalRoom.Global.applyToEntity({ em, target: room, operation: roomOperation });
+    await em.flush();
+    const nextRoomState = await GlobalRoom.MikroORM.ToGlobal.state(room);
+    const generateOperation = (deliverTo: string): RoomOperation => {
+        const value = GlobalRoom.Global.ToGraphQL.operation({
+            operation: roomOperation,
+            prevState: roomState,
+            nextState: nextRoomState,
+            requestedBy: { type: client, userUid: deliverTo },
+        });
+        return {
+            __tstype: 'RoomOperation',
+            revisionTo: prevRevision + 1,
+            // TODO: ''ではなく、サーバーによってoperateされたことを明確に示す
+            operatedBy: '',
+            value,
+        };
+    };
+    return {
+        result: {
+            operation: generateOperation(myUserUid),
+        },
+        payload: {
+            type: 'roomOperationPayload',
+            // Roomに参加したばかりの場合、decodedToken.uidはparticipantUserUidsに含まれないためSubscriptionは実行されない。だが、そのようなユーザーにroomOperatedで通知する必要はないため問題ない。
+            participants: participantUserUids,
+            generateOperation,
+            roomId: room.id,
+            operatedBy: { type: server },
+        },
+    };
+};
 
 const joinRoomCore = async ({
     args,
@@ -217,39 +306,19 @@ const joinRoomCore = async ({
                 };
             }
             default: {
-                let graphQLOperation: Participant$GraphQL.ParticipantsOperation;
-                if (me == null) {
-                    graphQLOperation = await addAndCreateGraphQLOperation({
-                        em,
-                        userUid: decodedIdToken.uid,
-                        newValue: { role: strategyResult, name: args.name },
-                        user: entryUser,
-                        room,
-                    });
-                } else {
-                    graphQLOperation = await updateAndCreateGraphQLOperation({
-                        em,
-                        userUid: decodedIdToken.uid,
-                        operation: {
-                            role: { newValue: strategyResult },
-                            name: { newValue: args.name },
-                        },
-                        room,
-                    });
-                }
-                await em.flush();
-                return {
-                    result: {
-                        operation: graphQLOperation,
+                return await operateParticipantAndFlush({
+                    em,
+                    room,
+                    participantUserUids,
+                    myUserUid: decodedIdToken.uid,
+                    create: {
+                        name: args.name,
+                        role: strategyResult,
                     },
-                    payload: {
-                        type: 'participantOperation',
-                        // Roomに参加したばかりの場合、decodedToken.uidはparticipantUserUidsに含まれないためSubscriptionは実行されない。だが、そのようなユーザーにroomOperatedで通知する必要はないため問題ない。
-                        participants: participantUserUids,
-                        participantsOperation: graphQLOperation,
-                        roomId: room.id,
-                    },
-                };
+                    update: {
+                        role: { newValue: strategyResult },
+                    }
+                });
             }
         }
     };
@@ -337,26 +406,19 @@ const promoteMeCore = async ({
                 };
             }
             default: {
-                const graphQLOperation = await updateAndCreateGraphQLOperation({
-                    em,
-                    userUid: decodedIdToken.uid,
-                    operation: {
-                        role: { newValue: strategyResult },
-                    },
-                    room,
-                });
-
-                await em.flush();
                 return {
                     result: {
                         failureType: undefined,
                     },
-                    payload: {
-                        type: 'participantOperation',
-                        participants: participantUserUids,
-                        participantsOperation: graphQLOperation,
-                        roomId: room.id,
-                    },
+                    payload: (await operateParticipantAndFlush({
+                        em,
+                        room,
+                        participantUserUids,
+                        myUserUid: decodedIdToken.uid,
+                        update: {
+                            role: { newValue: strategyResult },
+                        }
+                    })).payload,
                 };
             }
         }
@@ -468,15 +530,20 @@ export class RoomResolver {
             entryUser.particis.add(newParticipant);
             newRoom.joinAsPlayerPhrase = input.joinAsPlayerPhrase;
             newRoom.joinAsSpectatorPhrase = input.joinAsSpectatorPhrase;
+            const revision = newRoom.revision;
             em.persist(newRoom);
-            const roomState = await Room$Global.RoomState.create(newRoom);
-            const graphqlState = await roomState.toGraphQL({
-                deliverTo: decodedIdToken.uid,
-                revision: newRoom.roomRevision
+            const roomState = await GlobalRoom.MikroORM.ToGlobal.state(newRoom);
+            const graphqlState = GlobalRoom.Global.ToGraphQL.state({
+                source: roomState,
+                requestedBy: { type: client, userUid: decodedIdToken.uid },
             });
             await em.flush();
             return {
-                room: graphqlState,
+                room: {
+                    ...graphqlState,
+                    revision,
+                    createdBy: decodedIdToken.uid,
+                },
                 id: newRoom.id,
             };
         };
@@ -689,26 +756,21 @@ export class RoomResolver {
                 };
             }
 
-            const graphQLOperation = await updateAndCreateGraphQLOperation({
+            const { payload } = await operateParticipantAndFlush({
                 em,
-                userUid: decodedIdToken.uid,
-                operation: {
+                myUserUid: decodedIdToken.uid,
+                update: {
                     name: { newValue: args.newName },
                 },
                 room,
+                participantUserUids,
             });
 
-            await em.flush();
             return {
                 result: {
                     failureType: undefined,
                 },
-                payload: {
-                    type: 'participantOperation',
-                    participants: participantUserUids,
-                    participantsOperation: graphQLOperation,
-                    roomId: room.id,
-                },
+                payload,
             };
         };
 
@@ -756,11 +818,14 @@ export class RoomResolver {
                 });
             }
 
-            const roomState = await Room$Global.RoomState.create(room);
+            const roomState = await GlobalRoom.MikroORM.ToGlobal.state(room);
             return ResultModule.ok({
                 role: me.role,
-                room: await roomState.toGraphQL({ revision: room.roomRevision, deliverTo: decodedIdToken.uid }),
-                participants: await toParticipantsGraphQL({ room }),
+                room: {
+                    ...GlobalRoom.Global.ToGraphQL.state({ source: roomState, requestedBy: { type: client, userUid: decodedIdToken.uid } }),
+                    revision: room.revision,
+                    createdBy: room.createdBy,
+                },
             });
         };
         const result = await context.promiseQueue.next(queue);
@@ -804,23 +869,18 @@ export class RoomResolver {
                     payload: undefined,
                 });
             }
-            const graphQLOperation = await updateAndCreateGraphQLOperation({
+            const { payload } = await operateParticipantAndFlush({
                 em,
-                userUid: decodedIdToken.uid,
-                operation: {
-                    role: { newValue: undefined }
+                myUserUid: decodedIdToken.uid,
+                update: {
+                    role: { newValue: undefined },
                 },
                 room,
+                participantUserUids,
             });
-            await em.flush();
             return ResultModule.ok({
                 result: {},
-                payload: {
-                    type: 'participantOperation',
-                    participants: participantUserUids,
-                    participantsOperation: graphQLOperation,
-                    roomId: room.id,
-                },
+                payload,
             });
         };
         const result = await context.promiseQueue.next(queue);
@@ -879,46 +939,85 @@ export class RoomResolver {
                     result: { roomAsListItem: stateToGraphql$RoomAsListItem({ roomEntity: room }) }
                 });
             }
-            const roomState = await Room$Global.RoomState.create(room);
-            const downOperation = await Room$Global.RoomDownOperation.findRange(em, roomState, room.id, { from: args.prevRevision, expectedTo: room.roomRevision });
+            const clientOperation = GlobalRoom.GraphQL.ToGlobal.upOperation(args.operation);
+            if (clientOperation.isError) {
+                return clientOperation;
+            }
+
+            const roomState = await GlobalRoom.MikroORM.ToGlobal.state(room);
+            const downOperation = await GlobalRoom.MikroORM.ToGlobal.downOperationMany({
+                em,
+                roomId: room.id,
+                revisionRange: { from: args.prevRevision, expectedTo: room.revision },
+            });
             if (downOperation.isError) {
                 return downOperation;
             }
 
-            const restoredRoom = Room$Global.RoomState.restore({
-                nextState: roomState,
-                downOperation: downOperation.value
-            });
-            if (restoredRoom.isError) {
-                return restoredRoom;
+            const transformerFactory = GlobalRoom.transformerFactory({ type: client, userUid: decodedIdToken.uid });
+            let prevState: GlobalRoom.StateType = roomState;
+            let twoWayOperation: GlobalRoom.TwoWayOperationType | undefined = undefined;
+            if (downOperation.value !== undefined) {
+                const restoredRoom = transformerFactory.restore({
+                    key: null,
+                    nextState: roomState,
+                    downOperation: downOperation.value
+                });
+                if (restoredRoom.isError) {
+                    return restoredRoom;
+                }
+                prevState = restoredRoom.value.prevState;
+                twoWayOperation = restoredRoom.value.twoWayOperation;
             }
 
-            const transformed = restoredRoom.value.transform({ clientOperation: args.operation.value, operatedBy: decodedIdToken.uid });
+            const transformed = transformerFactory.transform({
+                key: null,
+                prevState,
+                currentState: roomState,
+                clientOperation: clientOperation.value,
+                serverOperation: twoWayOperation,
+            });
             if (transformed.isError) {
                 return transformed;
             }
             if (transformed.value === undefined) {
                 return ResultModule.ok({ type: 'id', result: { requestId: args.requestId } });
             }
-            const graphQLOperationGenerator = await transformed.value.applyAndCreateOperation({ em, entity: room });
+
+            const operation = transformed.value;
+            const prevRevision = room.revision;
+
+            await GlobalRoom.Global.applyToEntity({ em, target: room, operation });
             await em.flush();
+
+            const nextRoomState = await GlobalRoom.MikroORM.ToGlobal.state(room);
+            const generateOperation = (deliverTo: string): RoomOperation => {
+                const value = GlobalRoom.Global.ToGraphQL.operation({
+                    operation,
+                    prevState: roomState,
+                    nextState: nextRoomState,
+                    requestedBy: { type: client, userUid: deliverTo },
+                });
+                return {
+                    __tstype: 'RoomOperation',
+                    revisionTo: prevRevision + 1,
+                    operatedBy: decodedIdToken.uid,
+                    value,
+                };
+            };
 
             const roomOperationPayload: RoomOperationPayload = {
                 type: 'roomOperationPayload',
                 roomId: args.id,
                 participants: participantUserUids,
-                graphQLOperationGenerator,
-                operatedBy: decodedIdToken.uid,
+                generateOperation,
+                operatedBy: { type: client, userUid: decodedIdToken.uid },
             };
             const result: OperateCoreResult = {
                 type: 'success',
                 payload: roomOperationPayload,
                 result: {
-                    operation: graphQLOperationGenerator.toGraphQLOperation({
-                        operatedBy: decodedIdToken.uid,
-                        deliverTo: decodedIdToken.uid,
-                        nextRevision: graphQLOperationGenerator.currentRevision
-                    })
+                    operation: generateOperation(decodedIdToken.uid)
                 },
             };
 
@@ -963,17 +1062,12 @@ export class RoomResolver {
             return undefined;
         }
         if (payload.type === 'roomOperationPayload') {
-            // web_api側ではpayload.operatedBy === userUidを満たすSubscriptionは無視している（代わりにMutationの結果を用いる）ため、この条件を満たすSubscriptionを送信しないことで通信量の削減が期待できる。だが、ParticipantsOperationと挙動が異なるのは直感的でないため、条件を満たすときでも送信するようにしている。
-            // もし条件を満たすときは送信しないようにしたい場合は、↓のコードのコメントアウトを解除する。
-            // if (payload.operatedBy === userUid) {
-            //     return undefined;
-            // }
+            if (RequestedBy.createdByMe({ requestedBy: payload.operatedBy, userUid })) {
+                return undefined;
+            }
 
             // TODO: DeleteRoomGetOperationも返す
-            return payload.graphQLOperationGenerator.toGraphQLOperation({ operatedBy: payload.operatedBy, deliverTo: userUid, nextRevision: payload.graphQLOperationGenerator.currentRevision });
-        }
-        if (payload.type === 'participantOperation') {
-            return payload.participantsOperation;
+            return payload.generateOperation(userUid);
         }
     }
 }

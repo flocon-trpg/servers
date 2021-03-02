@@ -1,11 +1,11 @@
 import { createUnionType, Field, ObjectType } from 'type-graphql';
 import { JoinRoomFailureType } from '../../enums/JoinRoomFailureType';
-import { ParticipantsOperation } from '../entities/participant/graphql';
+import { RoomOperation } from '../entities/room/graphql';
 
 @ObjectType()
 export class JoinRoomSuccessResult {
     @Field({ nullable: true })
-    public operation?: ParticipantsOperation
+    public operation?: RoomOperation
 }
 
 @ObjectType()

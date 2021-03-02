@@ -72,30 +72,31 @@ export type ReadonlyStateMapTwoWayOperation<TState, TTwoWayOperation> = Readonly
 type RestoreParameters<TKey1, TKey2, TState, TDownOperation, TTwoWayOperation> = {
     nextState: ReadonlyDualKeyMap<TKey1, TKey2, TState>;
     downOperation: ReadonlyDualKeyMapDownOperation<TKey1, TKey2, TState, TDownOperation>;
-    innerRestore: (params: { downOperation: TDownOperation; nextState: TState }) => Result<RestoreResult<TState, TTwoWayOperation | undefined>>;
+    innerRestore: (params: { key: DualKey<TKey1, TKey2>; downOperation: TDownOperation; nextState: TState }) => Result<RestoreResult<TState, TTwoWayOperation | undefined>>;
+    innerDiff: (params: { key: DualKey<TKey1, TKey2>; prevState: TState; nextState: TState }) => TTwoWayOperation | undefined;
 }
 
 type ApplyBackParameters<TKey1, TKey2, TState, TDownOperation> = {
     nextState: ReadonlyDualKeyMap<TKey1, TKey2, TState>;
     downOperation: ReadonlyDualKeyMapDownOperation<TKey1, TKey2, TState, TDownOperation>;
-    innerApplyBack: (params: { downOperation: TDownOperation; nextState: TState }) => Result<TState>;
+    innerApplyBack: (params: { key: DualKey<TKey1, TKey2>; downOperation: TDownOperation; nextState: TState }) => Result<TState>;
 }
 
 type ComposeParameters<TKey1, TKey2, TState, TDownOperation> = {
-    state: ReadonlyDualKeyMap<TKey1, TKey2, TState>;
     first: ReadonlyDualKeyMapDownOperation<TKey1, TKey2, TState, TDownOperation>;
     second: ReadonlyDualKeyMapDownOperation<TKey1, TKey2, TState, TDownOperation>;
-    innerApplyBack: (params: { downOperation: TDownOperation; nextState: TState }) => Result<TState>;
-    innerCompose: (params: { state: TState | undefined; first: TDownOperation; second: TDownOperation }) => Result<TDownOperation>;
-    innerDiff: (params: { prev: TState; next: TState }) => TDownOperation | undefined;
+    innerApplyBack: (params: { key: DualKey<TKey1, TKey2>; downOperation: TDownOperation; nextState: TState }) => Result<TState>;
+    innerCompose: (params: { key: DualKey<TKey1, TKey2>; first: TDownOperation; second: TDownOperation }) => Result<TDownOperation | undefined>;
 }
 
-type ProtectedValuePolicy<TKey, TServerState> = {
-    // falseを返すと、「TServerState全体がprivateであり編集不可能」とみなしてスキップする。
-    // 「ユーザーがprivateだと思っていたらその後すぐ変更があってprivateになった」というケースがあるので、falseでもエラーは返さず処理が続行される。
+export type ProtectedValuePolicy<TKey, TServerState> = {
+    // trueを返すと、「TServerState全体がprivateであり編集不可能」とみなしてスキップする。ただし制限されるのはtransformのみであるため、読み取りなどは制限されない。
+    // 「ユーザーがprivateだと思っていたらその後すぐ変更があってprivateになった」というケースがあるので、trueでもエラーは返さず処理が続行される。
     // 関数ではなくundefinedを渡した場合、常にfalseを返す関数が渡されたときと同等の処理が行われる。
     // cancelUpdateは実装していない。理由は、innerTransformのほうで対応できるため。
     cancelRemove?: (params: { key: TKey; nextState: TServerState }) => boolean;
+
+    cancelCreate?: (params: { key: TKey }) => boolean;
 }
 
 // Make sure this:
@@ -130,7 +131,7 @@ export const createDownOperationFromMikroORM = async <TKey1, TKey2, TAdd, TRemov
     remove: Collection<TRemove>;
     update: Collection<TUpdate>;
     getState: (source: TRemove) => Promise<Result<TGlobalState>>;
-    getOperation: (source: TUpdate) => Promise<Result<TGlobalDownOperation>>;
+    getOperation: (source: TUpdate) => Promise<Result<TGlobalDownOperation | undefined>>;
 }): Promise<Result<DualKeyMapDownOperation<TKey1, TKey2, TGlobalState, TGlobalDownOperation>>> => {
     const result = new DualKeyMap<TKey1, TKey2, DualKeyMapDownOperationElementUnion<TGlobalState, TGlobalDownOperation>>();
     for (const a of await add.loadItems()) {
@@ -166,6 +167,9 @@ export const createDownOperationFromMikroORM = async <TKey1, TKey2, TAdd, TRemov
         if (converted.isError) {
             return converted;
         }
+        if (converted.value === undefined) {
+            continue;
+        }
         result.set(key.value, { type: 'update', operation: converted.value });
     }
     return ResultModule.ok(result);
@@ -181,7 +185,7 @@ export const createUpOperationFromGraphQL = <TKey1, TKey2, TState, TStateElement
     replace: ReadonlyArray<TState>;
     update: ReadonlyArray<TUpOperation>;
     getState: (source: TState) => TStateElement | undefined;
-    getOperation: (source: TUpOperation) => TUpOperationElement;
+    getOperation: (source: TUpOperation) => Result<TUpOperationElement>;
     createDualKey: (operation: TState | TUpOperation) => Result<DualKey<TKey1, TKey2>>;
 }): Result<DualKeyMapUpOperation<TKey1, TKey2, TStateElement, TUpOperationElement>> => {
     const result = new DualKeyMap<TKey1, TKey2, DualKeyMapUpOperationElementUnion<TStateElement, TUpOperationElement>>();
@@ -203,7 +207,11 @@ export const createUpOperationFromGraphQL = <TKey1, TKey2, TState, TStateElement
         if (result.has(key.value)) {
             return ResultModule.error(`${key.value} is duplicate`);
         }
-        result.set(key.value, { type: 'update', operation: getOperation(operation) });
+        const getOperationResult = getOperation(operation);
+        if (getOperationResult.isError) {
+            return getOperationResult;
+        }
+        result.set(key.value, { type: 'update', operation: getOperationResult.value });
     }
     return ResultModule.ok(result);
 };
@@ -262,7 +270,7 @@ export const toGraphQLWithState = <TKey1, TKey2, TSourceState, TReplaceOperation
 }: {
     source: ReadonlyDualKeyMapTwoWayOperation<TKey1, TKey2, TSourceState, TSourceOperation>;
     // 対象となるユーザーの視点で、全体がprivateとなるときはtrueを返す。一部がprivate、もしくはprivateである部分がないときはfalseを返す。
-    isPrivate: (state: TSourceState) => boolean;
+    isPrivate: (state: TSourceState, key: DualKey<TKey1, TKey2>) => boolean;
     prevState: ReadonlyDualKeyMap<TKey1, TKey2, TSourceState>;
     nextState: ReadonlyDualKeyMap<TKey1, TKey2, TSourceState>;
     // toReplaceOperationとtoUpdateOperationでは、全体がprivateになるケースについて書く必要はない。
@@ -275,8 +283,8 @@ export const toGraphQLWithState = <TKey1, TKey2, TSourceState, TReplaceOperation
             return;
         }
         const { oldValue, newValue } = serverOperation.operation;
-        if (oldValue === undefined || isPrivate(oldValue)) {
-            if (newValue === undefined || isPrivate(newValue)) {
+        if (oldValue === undefined || isPrivate(oldValue, key)) {
+            if (newValue === undefined || isPrivate(newValue, key)) {
                 return;
             }
             const toPush = toReplaceOperation({ nextState: newValue, key });
@@ -286,7 +294,7 @@ export const toGraphQLWithState = <TKey1, TKey2, TSourceState, TReplaceOperation
             replaces.push(toPush);
             return;
         }
-        if (newValue === undefined || isPrivate(newValue)) {
+        if (newValue === undefined || isPrivate(newValue, key)) {
             const toPush = toReplaceOperation({ prevState: oldValue, key });
             if (toPush == null) {
                 return;
@@ -314,8 +322,8 @@ export const toGraphQLWithState = <TKey1, TKey2, TSourceState, TReplaceOperation
         if (nextStateElement === undefined) {
             throw `tried to operate "${key}", but not found in nextState.`;
         }
-        if (isPrivate(prevStateElement)) {
-            if (isPrivate(nextStateElement)) {
+        if (isPrivate(prevStateElement, key)) {
+            if (isPrivate(nextStateElement, key)) {
                 return;
             }
             const toPush = toReplaceOperation({ nextState: nextStateElement, key });
@@ -325,7 +333,7 @@ export const toGraphQLWithState = <TKey1, TKey2, TSourceState, TReplaceOperation
             replaces.push(toPush);
             return;
         }
-        if (isPrivate(nextStateElement)) {
+        if (isPrivate(nextStateElement, key)) {
             const toPush = toReplaceOperation({ prevState: prevStateElement, key });
             if (toPush == null) {
                 return;
@@ -348,20 +356,36 @@ export const toGraphQLWithState = <TKey1, TKey2, TSourceState, TReplaceOperation
     return { replace: replaces, update: updates };
 };
 
-export const restore = <TKey1, TKey2, TState, TDownOperation, TTwoWayOperation>({ nextState, downOperation, innerRestore }: RestoreParameters<TKey1, TKey2, TState, TDownOperation, TTwoWayOperation>): Result<RestoreResult<DualKeyMap<TKey1, TKey2, TState>, DualKeyMapTwoWayOperation<TKey1, TKey2, TState, TTwoWayOperation>>> => {
+// downOperationは、composeDownOperationLooseによって作成されたものでも構わない。その代わり、innerDiffはdownでなくtwoWayである必要がある。
+export const restore = <TKey1, TKey2, TState, TDownOperation, TTwoWayOperation>({ nextState, downOperation, innerRestore, innerDiff }: RestoreParameters<TKey1, TKey2, TState, TDownOperation, TTwoWayOperation>): Result<RestoreResult<DualKeyMap<TKey1, TKey2, TState>, DualKeyMapTwoWayOperation<TKey1, TKey2, TState, TTwoWayOperation>>> => {
     const prevState = nextState.clone();
     const twoWayOperation = new DualKeyMap<TKey1, TKey2, DualKeyMapTwoWayOperationElementUnion<TState, TTwoWayOperation>>();
 
     for (const [key, value] of downOperation) {
         switch (value.type) {
             case 'replace': {
-                const nextStateElement = nextState.get(key);
-                if (value.operation.oldValue === undefined) {
+                const oldValue = value.operation.oldValue;
+                const newValue = nextState.get(key);
+                if (oldValue === undefined) {
                     prevState.delete(key);
                 } else {
-                    prevState.set(key, value.operation.oldValue);
+                    prevState.set(key, oldValue);
                 }
-                twoWayOperation.set(key, { type: 'replace', operation: { oldValue: value.operation.oldValue, newValue: nextStateElement } });
+                if (oldValue === undefined) {
+                    if (newValue === undefined) {
+                        break;
+                    }
+                    twoWayOperation.set(key, { type: 'replace', operation: { oldValue, newValue } });
+                    break;
+                }
+                if (newValue === undefined) {
+                    twoWayOperation.set(key, { type: 'replace', operation: { oldValue, newValue } });
+                    break;
+                }
+                const diff = innerDiff({ key, prevState: oldValue, nextState: newValue });
+                if (diff !== undefined) {
+                    twoWayOperation.set(key, { type: 'update', operation: diff });
+                }
                 break;
             }
             case 'update': {
@@ -369,7 +393,7 @@ export const restore = <TKey1, TKey2, TState, TDownOperation, TTwoWayOperation>(
                 if (nextCharacterState === undefined) {
                     return ResultModule.error(`tried to update "${toJSONString(key)}", but nextState does not have such a key`);
                 }
-                const restored = innerRestore({ downOperation: value.operation, nextState: nextCharacterState });
+                const restored = innerRestore({ key, downOperation: value.operation, nextState: nextCharacterState });
                 if (restored.isError) {
                     return restored;
                 }
@@ -403,7 +427,7 @@ export const applyBack = <TKey1, TKey2, TState, TDownOperation>({ nextState, dow
                 if (nextCharacterState === undefined) {
                     return ResultModule.error(`tried to update "${toJSONString(key)}", but nextState does not have such a key`);
                 }
-                const oldValue = innerApplyBack({ downOperation: value.operation, nextState: nextCharacterState });
+                const oldValue = innerApplyBack({ key, downOperation: value.operation, nextState: nextCharacterState });
                 if (oldValue.isError) {
                     return oldValue;
                 }
@@ -416,7 +440,8 @@ export const applyBack = <TKey1, TKey2, TState, TDownOperation>({ nextState, dow
     return ResultModule.ok(prevState);
 };
 
-export const composeDownOperation = <TKey1, TKey2, TState, TDownOperation>({ state, first, second, innerApplyBack, innerCompose, innerDiff }: ComposeParameters<TKey1, TKey2, TState, TDownOperation>): Result<DualKeyMapDownOperation<TKey1, TKey2, TState, TDownOperation>> => {
+// stateが必要ないため処理を高速化&簡略化できるが、その代わり戻り値のreplaceにおいて oldValue === undefined && newValue === undefined もしくは oldValue !== undefined && newValue !== undefinedになるケースがある。
+export const composeDownOperationLoose = <TKey1, TKey2, TState, TDownOperation>({ first, second, innerApplyBack, innerCompose }: ComposeParameters<TKey1, TKey2, TState, TDownOperation>): Result<DualKeyMapDownOperation<TKey1, TKey2, TState, TDownOperation>> => {
     const result = new DualKeyMap<TKey1, TKey2, DualKeyMapDownOperationElementUnion<TState, TDownOperation>>();
 
     for (const [key, groupJoined] of groupJoin(first, second)) {
@@ -447,26 +472,6 @@ export const composeDownOperation = <TKey1, TKey2, TState, TDownOperation>({ sta
                         switch (groupJoined.right.type) {
                             case 'replace': {
                                 const left = groupJoined.left.operation.oldValue;
-                                const right = groupJoined.right.operation.oldValue;
-                                if (right === undefined) {
-                                    if (left === undefined) {
-                                        return ResultModule.error(`first and second are undefined. the key is "${key}".`);
-                                    }
-                                    const stateElement = state.get(key);
-                                    if (stateElement === undefined) {
-                                        return ResultModule.error('stateElement is undefined');
-                                    }
-                                    // remove→add、つまり置き換えなのでupdateになる
-                                    const diffResult = innerDiff({ prev: left, next: stateElement });
-                                    if (diffResult !== undefined) {
-                                        result.set(key, { type: 'update', operation: diffResult });
-                                    }
-                                    continue;
-                                }
-                                if (left === undefined) {
-                                    // add→removeなのでスルーしてよい
-                                    continue;
-                                }
                                 result.set(key, { type: 'replace', operation: { oldValue: left } });
                                 continue;
                             }
@@ -479,7 +484,7 @@ export const composeDownOperation = <TKey1, TKey2, TState, TDownOperation>({ sta
                                 if (groupJoined.right.operation.oldValue === undefined) {
                                     return ResultModule.error(`first is update, but second.oldValue is undefined. the key is "${key}".`);
                                 }
-                                const firstOldValue = innerApplyBack({ downOperation: groupJoined.left.operation, nextState: groupJoined.right.operation.oldValue });
+                                const firstOldValue = innerApplyBack({ key, downOperation: groupJoined.left.operation, nextState: groupJoined.right.operation.oldValue });
                                 if (firstOldValue.isError) {
                                     return firstOldValue;
                                 }
@@ -487,9 +492,12 @@ export const composeDownOperation = <TKey1, TKey2, TState, TDownOperation>({ sta
                                 continue;
                             }
                             case 'update': {
-                                const update = innerCompose({ state: state.get(key), first: groupJoined.left.operation, second: groupJoined.right.operation });
+                                const update = innerCompose({ key, first: groupJoined.left.operation, second: groupJoined.right.operation });
                                 if (update.isError) {
                                     return update;
+                                }
+                                if (update.value === undefined) {
+                                    continue;
                                 }
                                 result.set(key, { type: 'update', operation: update.value });
                                 continue;
@@ -549,9 +557,18 @@ export const transform = <TKey1, TKey2, TServerState, TClientState, TFirstOperat
                 if (innerPrevState !== undefined) {
                     return ResultModule.error(`"${key}" was found at requested revision. When adding a state, old value must be empty.`);
                 }
+
                 if (innerNextState !== undefined) {
+                    // addを試みたが、既に誰かによってaddされているので何もする必要がない。よって終了。
                     break;
                 }
+
+                if (protectedValuePolicy.cancelCreate) {
+                    if (protectedValuePolicy.cancelCreate({ key })) {
+                        break;
+                    }
+                }
+
                 result.set(key, { type: replace, operation: { oldValue: undefined, newValue: toServerState(operation.operation.newValue, key) } });
                 break;
             }
@@ -645,20 +662,20 @@ export const diff = <TKey1, TKey2, TState, TOperation>({
 }: {
     prev: ReadonlyDualKeyMap<TKey1, TKey2, TState>;
     next: ReadonlyDualKeyMap<TKey1, TKey2, TState>;
-    innerDiff: (params: { prev: TState; next: TState }) => TOperation | undefined;
-}): DualKeyMapDownOperation<TKey1, TKey2, TState, TOperation> => {
-    const result = new DualKeyMap<TKey1, TKey2, DualKeyMapDownOperationElementUnion<TState, TOperation>>();
+    innerDiff: (params: { key: DualKey<TKey1, TKey2>; prev: TState; next: TState }) => TOperation | undefined;
+}): DualKeyMapTwoWayOperation<TKey1, TKey2, TState, TOperation> => {
+    const result = new DualKeyMap<TKey1, TKey2, DualKeyMapTwoWayOperationElementUnion<TState, TOperation>>();
     for (const [key, value] of groupJoin(prev, next)) {
         switch (value.type) {
             case left:
-                result.set(key, { type: replace, operation: { oldValue: value.left } });
+                result.set(key, { type: replace, operation: { oldValue: value.left, newValue: undefined } });
                 continue;
             case right: {
-                result.set(key, { type: replace, operation: { oldValue: undefined } });
+                result.set(key, { type: replace, operation: { oldValue: undefined, newValue: value.right } });
                 continue;
             }
             case both: {
-                const diffResult = innerDiff({ prev: value.left, next: value.right });
+                const diffResult = innerDiff({ key, prev: value.left, next: value.right });
                 if (diffResult === undefined) {
                     continue;
                 }

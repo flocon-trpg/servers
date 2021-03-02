@@ -25,7 +25,7 @@ export class CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TValue> {
     }
 
     public wrap<TResult>(dualKeyMap: DualKeyMap<TKeySource1, TKeySource2, TResult>): CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TResult> {
-        const result = new CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TResult>({...this.params, sourceMap: undefined});
+        const result = new CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TResult>({ ...this.params, sourceMap: undefined });
         result._dualKeyMap = dualKeyMap;
         return result;
     }
@@ -38,7 +38,7 @@ export class CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TValue> {
         return this.params.createDualKey(source);
     }
 
-    public map<TResult>(mapping: (source: TValue) => TResult): CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TResult> {
+    public map<TResult>(mapping: (source: TValue, key: DualKey<TKeySource1, TKeySource2>) => TResult): CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TResult> {
         const result = new CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TResult>({ ...this.params, sourceMap: undefined });
         result._dualKeyMap = this._dualKeyMap.map(mapping);
         return result;
@@ -111,8 +111,9 @@ export class CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TValue> {
     }
 }
 
-export type ReadonlyCustomDualKeyMap<TKey, TKeySource1, TKeySource2, TValue> = Omit<Readonly<CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TValue>>, 'set' | 'delete' | 'dualKeyMap'> & {
+export type ReadonlyCustomDualKeyMap<TKey, TKeySource1, TKeySource2, TValue> = Omit<Readonly<CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TValue>>, 'set' | 'delete' | 'getByFirst' | 'dualKeyMap'> & {
     [Symbol.iterator](): IterableIterator<readonly [TKey, TValue]>;
+    getByFirst(key: TKeySource1): ReadonlyMap<TKeySource2, TValue> | undefined;
     readonly dualKeyMap: ReadonlyDualKeyMap<TKeySource1, TKeySource2, TValue>;
 }
 

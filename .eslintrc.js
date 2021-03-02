@@ -46,6 +46,7 @@ module.exports = {
             'error'
         ],
         '@typescript-eslint/explicit-module-boundary-types': 'off',
+        '@typescript-eslint/no-namespace': 'off',
         'space-before-blocks': 'warn',
     }
 };

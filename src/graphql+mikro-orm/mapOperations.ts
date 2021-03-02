@@ -63,6 +63,7 @@ type RestoreParameters<TKey, TState, TDownOperation, TTwoWayOperation> = {
     nextState: ReadonlyMap<TKey, TState>;
     downOperation: ReadonlyMapDownOperation<TKey, TState, TDownOperation>;
     innerRestore: (params: { downOperation: TDownOperation; nextState: TState }) => Result<RestoreResult<TState, TTwoWayOperation | undefined>>;
+    innerDiff: (params: { prevState: TState; nextState: TState }) => TTwoWayOperation | undefined;
 }
 
 type ApplyBackParameters<TKey, TState, TDownOperation> = {
@@ -72,16 +73,15 @@ type ApplyBackParameters<TKey, TState, TDownOperation> = {
 }
 
 type ComposeParameters<TKey, TState, TDownOperation> = {
-    state: ReadonlyMap<TKey, TState>;
     first: ReadonlyMapDownOperation<TKey, TState, TDownOperation>;
     second: ReadonlyMapDownOperation<TKey, TState, TDownOperation>;
     innerApplyBack: (params: { downOperation: TDownOperation; nextState: TState }) => Result<TState>;
-    innerCompose: (params: { state: TState | undefined; first: TDownOperation; second: TDownOperation }) => Result<TDownOperation>;
-    innerDiff: (params: { prev: TState; next: TState }) => TDownOperation | undefined;
+    innerCompose: (params: { first: TDownOperation; second: TDownOperation }) => Result<TDownOperation | undefined>;
 }
 
 type ProtectedValuePolicy<TKey, TServerState> = {
     cancelRemove?: (params: { key: TKey; nextState: TServerState }) => boolean;
+    cancelCreate?: (params: { key: TKey }) => boolean;
 }
 
 // Make sure this:
@@ -129,7 +129,7 @@ export const createDownOperationFromMikroORM = async <TKey, TAdd, TRemove, TUpda
     remove: Collection<TRemove>;
     update: Collection<TUpdate>;
     getState: (source: TRemove) => Promise<Result<TGlobalState>>;
-    getOperation: (source: TUpdate) => Promise<Result<TGlobalDownOperation>>;
+    getOperation: (source: TUpdate) => Promise<Result<TGlobalDownOperation | undefined>>;
 }): Promise<Result<MapDownOperation<TKey, TGlobalState, TGlobalDownOperation>>> => {
     const result = new Map<TKey, MapDownOperationElementUnion<TGlobalState, TGlobalDownOperation>>();
     for (const a of await add.loadItems()) {
@@ -165,6 +165,9 @@ export const createDownOperationFromMikroORM = async <TKey, TAdd, TRemove, TUpda
         if (converted.isError) {
             return converted;
         }
+        if (converted.value === undefined) {
+            continue;
+        }
         result.set(key.value, { type: 'update', operation: converted.value });
     }
     return ResultModule.ok(result);
@@ -180,7 +183,7 @@ export const createUpOperationFromGraphQL = <TKey, TState, TStateElement, TUpOpe
     replace: ReadonlyArray<TState>;
     update: ReadonlyArray<TUpOperation>;
     getState: (source: TState) => TStateElement | undefined;
-    getOperation: (source: TUpOperation) => TUpOperationElement;
+    getOperation: (source: TUpOperation) => Result<TUpOperationElement>;
     createKey: (operation: TState | TUpOperation) => Result<TKey>;
 }): Result<MapUpOperation<TKey, TStateElement, TUpOperationElement>> => {
     const result = new Map<TKey, MapUpOperationElementUnion<TStateElement, TUpOperationElement>>();
@@ -202,7 +205,11 @@ export const createUpOperationFromGraphQL = <TKey, TState, TStateElement, TUpOpe
         if (result.has(key.value)) {
             return ResultModule.error(`${key.value} is duplicate`);
         }
-        result.set(key.value, { type: 'update', operation: getOperation(operation) });
+        const getOperationResult = getOperation(operation);
+        if (getOperationResult.isError) {
+            return getOperationResult;
+        }
+        result.set(key.value, { type: 'update', operation: getOperationResult.value });
     }
     return ResultModule.ok(result);
 };
@@ -237,7 +244,7 @@ export const toGraphQLWithState = <TKey, TSourceState, TReplaceOperation, TSourc
     toUpdateOperation,
 }: {
     source: ReadonlyMapTwoWayOperation<TKey, TSourceState, TSourceOperation>;
-    isPrivate: (state: TSourceState) => boolean;
+    isPrivate: (state: TSourceState, key: TKey) => boolean;
     prevState: ReadonlyMap<TKey, TSourceState>;
     nextState: ReadonlyMap<TKey, TSourceState>;
     toReplaceOperation: (params: { prevState?: TSourceState; nextState?: TSourceState; key: TKey }) => TReplaceOperation | null | undefined;
@@ -245,7 +252,7 @@ export const toGraphQLWithState = <TKey, TSourceState, TReplaceOperation, TSourc
 }): GraphQLOperation<TReplaceOperation, TUpdateOperation> => {
     return DualKeyMapOperations.toGraphQLWithState({
         source: toDualKeyMap(source),
-        isPrivate,
+        isPrivate: (state, key) => isPrivate(state, key.second),
         prevState: toDualKeyMap(prevState),
         nextState: toDualKeyMap(nextState),
         toReplaceOperation: ({ prevState, nextState, key: dualKey }) => toReplaceOperation({ prevState, nextState, key: dualKey.second }),
@@ -253,8 +260,8 @@ export const toGraphQLWithState = <TKey, TSourceState, TReplaceOperation, TSourc
     });
 };
 
-export const restore = <TKey, TState, TDownOperation, TTwoWayOperation>({ nextState, downOperation, innerRestore }: RestoreParameters<TKey, TState, TDownOperation, TTwoWayOperation>): Result<RestoreResult<Map<TKey, TState>, MapTwoWayOperation<TKey, TState, TTwoWayOperation>>> => {
-    const stateMapResult = DualKeyMapOperations.restore({ nextState: toDualKeyMap(nextState), downOperation: toDualKeyMap(downOperation), innerRestore });
+export const restore = <TKey, TState, TDownOperation, TTwoWayOperation>({ nextState, downOperation, innerRestore, innerDiff }: RestoreParameters<TKey, TState, TDownOperation, TTwoWayOperation>): Result<RestoreResult<Map<TKey, TState>, MapTwoWayOperation<TKey, TState, TTwoWayOperation>>> => {
+    const stateMapResult = DualKeyMapOperations.restore({ nextState: toDualKeyMap(nextState), downOperation: toDualKeyMap(downOperation), innerRestore, innerDiff });
     if (stateMapResult.isError) {
         return stateMapResult;
     }
@@ -272,14 +279,12 @@ export const applyBack = <TKey, TState, TDownOperation>({ nextState, downOperati
     return ResultModule.ok(get(stateMapResult.value));
 };
 
-export const composeDownOperation = <TKey, TState, TDownOperation>({ state, first, second, innerApplyBack, innerCompose, innerDiff }: ComposeParameters<TKey, TState, TDownOperation>): Result<MapDownOperation<TKey, TState, TDownOperation>> => {
-    const stateMapResult = DualKeyMapOperations.composeDownOperation({
-        state: toDualKeyMap(state),
+export const composeDownOperation = <TKey, TState, TDownOperation>({ first, second, innerApplyBack, innerCompose }: ComposeParameters<TKey, TState, TDownOperation>): Result<MapDownOperation<TKey, TState, TDownOperation>> => {
+    const stateMapResult = DualKeyMapOperations.composeDownOperationLoose({
         first: toDualKeyMap(first),
         second: toDualKeyMap(second),
         innerApplyBack,
         innerCompose,
-        innerDiff,
     });
     if (stateMapResult.isError) {
         return stateMapResult;
@@ -297,6 +302,7 @@ export const transform = <TKey, TServerState, TClientState, TFirstOperation, TSe
     protectedValuePolicy
 }: TransformParameters<TKey, TServerState, TClientState, TFirstOperation, TSecondOperation>): Result<MapTwoWayOperation<TKey, TServerState, TFirstOperation>> => {
     const cancelRemove = protectedValuePolicy.cancelRemove;
+    const cancelCreate = protectedValuePolicy.cancelCreate;
     const stateMapResult = DualKeyMapOperations.transform({
         first: first === undefined ? undefined : toDualKeyMap(first),
         second: toDualKeyMap(second),
@@ -305,7 +311,8 @@ export const transform = <TKey, TServerState, TClientState, TFirstOperation, TSe
         innerTransform: params => innerTransform({ ...params, key: params.key.second }),
         toServerState: (state, key) => toServerState(state, key.second),
         protectedValuePolicy: {
-            cancelRemove: cancelRemove === undefined ? undefined : params => cancelRemove({ nextState: params.nextState, key: params.key.second })
+            cancelRemove: cancelRemove === undefined ? undefined : params => cancelRemove({ key: params.key.second, nextState: params.nextState }),
+            cancelCreate: cancelCreate === undefined ? undefined : params => cancelCreate({ key: params.key.second }),
         },
     });
     if (stateMapResult.isError) {
@@ -369,15 +376,15 @@ export const diff = <TKey, TState, TOperation>({
     prev: ReadonlyMap<TKey, TState>;
     next: ReadonlyMap<TKey, TState>;
     innerDiff: (params: { prev: TState; next: TState }) => TOperation | undefined;
-}): MapDownOperation<TKey, TState, TOperation> => {
-    const result = new Map<TKey, MapDownOperationElementUnion<TState, TOperation>>();
+}): MapTwoWayOperation<TKey, TState, TOperation> => {
+    const result = new Map<TKey, MapTwoWayOperationElementUnion<TState, TOperation>>();
     for (const [key, value] of groupJoin(prev, next)) {
         switch (value.type) {
             case left:
-                result.set(key, { type: replace, operation: { oldValue: value.left } });
+                result.set(key, { type: replace, operation: { oldValue: value.left, newValue: undefined } });
                 continue;
             case right: {
-                result.set(key, { type: replace, operation: { oldValue: undefined } });
+                result.set(key, { type: replace, operation: { oldValue: undefined, newValue: value.right } });
                 continue;
             }
             case both: {

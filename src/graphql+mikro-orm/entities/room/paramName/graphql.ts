@@ -29,7 +29,7 @@ export class ParamNameOperation {
 }
 
 @ObjectType()
-    @InputType('ReplaceParamNameOperationInput')
+@InputType('ReplaceParamNameOperationInput')
 export class ReplaceParamNameOperation {
     @Field()
     public key!: string

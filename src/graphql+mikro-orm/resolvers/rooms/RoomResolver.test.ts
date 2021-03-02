@@ -1,10 +1,9 @@
 import { ParticipantRole } from '../../../enums/ParticipantRole';
 
 import * as $MikroORM from '../../entities/room/mikro-orm';
-import * as Global from '../../entities/room/global';
 import * as GraphQL from '../../entities/room/graphql';
-import * as Board$GraphQL from '../../entities/board/graphql';
-import * as Character$GraphQL from '../../entities/character/graphql';
+import * as Board$GraphQL from '../../entities/room/board/graphql';
+import * as Character$GraphQL from '../../entities/room/character/graphql';
 import { createPostgreSQL, createSQLite } from '../../../mikro-orm';
 import { EM, ORM } from '../../../utils/types';
 import { User as User$MikroORM } from '../../entities/user/mikro-orm';
@@ -12,12 +11,13 @@ import { v4 } from 'uuid';
 import { ResolverContext } from '../../utils/Contexts';
 import { PromiseQueue } from '../../../utils/PromiseQueue';
 import { RoomResolver } from './RoomResolver';
-import * as Board$MikroORM from '../../entities/board/mikro-orm';
-import * as Character$MikroORM from '../../entities/character/mikro-orm';
-import * as PieceLocation$MikroORM from '../../entities/character/pieceLocation/mikro-orm';
+import * as Board$MikroORM from '../../entities/room/board/mikro-orm';
+import * as Character$MikroORM from '../../entities/room/character/mikro-orm';
+import * as PieceLocation$MikroORM from '../../entities/room/character/piece/mikro-orm';
 import { __ } from '../../../@shared/collection';
-import { NumMaxParam } from '../../entities/character/numParam/mikro-orm';
-import { Partici } from '../../entities/participant/mikro-orm';
+import { NumMaxParam } from '../../entities/room/character/numParam/mikro-orm';
+import { Partici } from '../../entities/room/participant/mikro-orm';
+import { GlobalRoom } from '../../entities/room/global';
 
 const timeout = 20000;
 
@@ -28,13 +28,13 @@ const PostgreSQL = {
 
 const SQLite = { dbName: './test.sqlite3' };
 
-type RoomValueOperation = Omit<GraphQL.RoomOperationValue, | 'boards' | 'characters' | 'bgms' | 'paramNames'>;
+type RoomValueOperation = Omit<GraphQL.RoomOperationValue, | 'boards' | 'characters' | 'bgms' | 'paramNames' | 'participants'>;
 
 type IntegratedTestStrategy = {
     operateByCreator: boolean;
     // setupStateでは、原則として/(One|Many)To(One|Many)/が付いたプロパティを変更してはならない。
     source: {
-        serverOperation?: Global.RoomDownOperation;
+        serverOperation?: GlobalRoom.DownOperationType;
         roomValue?: {
             setupState: (baseState: $MikroORM.Room) => void;
             operation: RoomValueOperation;
@@ -134,7 +134,7 @@ const operateThenGetRoomTestCore = async (strategy: IntegratedTestStrategy, orm:
         await resetDatabase(em);
 
         const createRoomResult = setupRoomAndUsersAndParticipants({ em, setupRoom: strategy.source.roomValue?.setupState });
-        const roomPrevRevision = createRoomResult.room.roomRevision;
+        const roomPrevRevision = createRoomResult.room.revision;
 
         let character: { entity: Character$MikroORM.Chara; operation: Character$GraphQL.UpdateCharacterOperation } | null = null;
         if (strategy.source.character) {
@@ -186,6 +186,9 @@ const operateThenGetRoomTestCore = async (strategy: IntegratedTestStrategy, orm:
                         paramNames: {
                             replace: [],
                             update: [],
+                        },
+                        participants: {
+                            update: [],
                         }
                     }
                 }
@@ -211,11 +214,7 @@ const operateThenGetRoomTestCore = async (strategy: IntegratedTestStrategy, orm:
 
         strategy.test.operation({
             operatedByMe: operateResult.result.operation.value,
-            operatedByAnother: operateResult.payload.graphQLOperationGenerator.toGraphQLOperation({
-                operatedBy: operateBy,
-                deliverTo: createRoomResult.anotherUser.userUid,
-                nextRevision: roomPrevRevision + 1
-            }).value,
+            operatedByAnother: operateResult.payload.generateOperation(createRoomResult.anotherUser.userUid).value,
         });
 
         const getRoomByCreator = await roomResolver.getRoomCore({
@@ -335,7 +334,7 @@ describe('operate then getRoom', () => {
                         },
                         operation: {
                             name: { newValue: newCharacterName },
-                            pieceLocations: { replace: [], update: [] },
+                            pieces: { replace: [], update: [] },
                             boolParams: { update: [] },
                             numParams: { update: [] },
                             numMaxParams: { update: [] },
@@ -378,7 +377,7 @@ describe('operate then getRoom', () => {
                     },
                     operation: {
                         name: { newValue: newCharacterName },
-                        pieceLocations: { replace: [], update: [] },
+                        pieces: { replace: [], update: [] },
                         boolParams: { update: [] },
                         numParams: { update: [] },
                         numMaxParams: { update: [] },
@@ -418,7 +417,7 @@ describe('operate then getRoom', () => {
                     },
                     operation: {
                         name: { newValue: newCharacterName },
-                        pieceLocations: { replace: [], update: [] },
+                        pieces: { replace: [], update: [] },
                         boolParams: { update: [] },
                         numParams: { update: [] },
                         numMaxParams: { update: [] },
@@ -437,7 +436,7 @@ describe('operate then getRoom', () => {
     }, timeout);
 
 
-    it('adds→updates→removes piecesLocation', async (): Promise<void> => {
+    it('adds→updates→removes character pieces', async (): Promise<void> => {
         const testCore = async (orm: ORM) => {
             const requestId = 'REQUEST_ID';
 
@@ -447,7 +446,7 @@ describe('operate then getRoom', () => {
                 await resetDatabase(em);
 
                 const createRoomResult = setupRoomAndUsersAndParticipants({ em });
-                const roomPrevRevision = createRoomResult.room.roomRevision;
+                const roomPrevRevision = createRoomResult.room.revision;
 
                 const characterStateId = v4();
                 const characterState = new Character$MikroORM.Chara({
@@ -496,7 +495,7 @@ describe('operate then getRoom', () => {
                                         id: characterStateId,
                                         createdBy: characterState.createdBy,
                                         operation: {
-                                            pieceLocations: {
+                                            pieces: {
                                                 replace: [{
                                                     boardId: boardStateId,
                                                     boardCreatedBy: boardState.createdBy,
@@ -530,6 +529,9 @@ describe('operate then getRoom', () => {
                                     replace: [],
                                     update: [],
                                 },
+                                participants: {
+                                    update: [],
+                                }
                             }
                         }
                     },
@@ -548,15 +550,15 @@ describe('operate then getRoom', () => {
                 expect(operateResult1.result.operation.value.characters.replace.length).toBe(0);
                 expect(operateResult1.result.operation.value.characters.update.length).toBe(1);
                 const update1 = operateResult1.result.operation.value.characters.update[0];
-                expect(update1.operation.pieceLocations.replace.length).toBe(1);
-                expect(update1.operation.pieceLocations.update.length).toBe(0);
-                const pieceLocation1 = update1.operation.pieceLocations.replace[0];
+                expect(update1.operation.pieces.replace.length).toBe(1);
+                expect(update1.operation.pieces.update.length).toBe(0);
+                const pieceLocation1 = update1.operation.pieces.replace[0];
                 expect(pieceLocation1.boardCreatedBy).toBe(boardState.createdBy);
                 expect(pieceLocation1.boardId).toBe(boardStateId);
                 expect(pieceLocation1.newValue?.isPrivate).toBe(false);
                 expect(pieceLocation1.newValue?.x).toBe(11);
 
-                const subscription1 = operateResult1.payload.graphQLOperationGenerator.toGraphQLOperation({ operatedBy: createRoomResult.creator.userUid, deliverTo: createRoomResult.anotherUser.userUid, nextRevision: roomPrevRevision + 1 });
+                const subscription1 = operateResult1.payload.generateOperation(createRoomResult.anotherUser.userUid);
                 expect(operateResult1.result.operation.value).toEqual(subscription1.value);
 
                 // **** execute update operation ****
@@ -577,7 +579,7 @@ describe('operate then getRoom', () => {
                                         id: characterStateId,
                                         createdBy: characterState.createdBy,
                                         operation: {
-                                            pieceLocations: {
+                                            pieces: {
                                                 replace: [],
                                                 update: [{
                                                     boardId: boardStateId,
@@ -602,6 +604,9 @@ describe('operate then getRoom', () => {
                                     replace: [],
                                     update: [],
                                 },
+                                participants: {
+                                    update: [],
+                                },
                             }
                         }
                     },
@@ -620,12 +625,12 @@ describe('operate then getRoom', () => {
                 expect(operateResult2.result.operation.value.characters.replace.length).toBe(0);
                 expect(operateResult2.result.operation.value.characters.update.length).toBe(1);
                 const update2 = operateResult2.result.operation.value.characters.update[0];
-                expect(update2.operation.pieceLocations.replace.length).toBe(0);
-                expect(update2.operation.pieceLocations.update.length).toBe(1);
-                const pieceLocation2 = update2.operation.pieceLocations.update[0];
+                expect(update2.operation.pieces.replace.length).toBe(0);
+                expect(update2.operation.pieces.update.length).toBe(1);
+                const pieceLocation2 = update2.operation.pieces.update[0];
                 expect(pieceLocation2.operation.x?.newValue).toBe(12);
 
-                const subscription2 = operateResult2.payload.graphQLOperationGenerator.toGraphQLOperation({ operatedBy: createRoomResult.creator.userUid, deliverTo: createRoomResult.anotherUser.userUid, nextRevision: roomPrevRevision + 2 });
+                const subscription2 = operateResult2.payload.generateOperation(createRoomResult.anotherUser.userUid);
                 expect(operateResult2.result.operation.value).toEqual(subscription2.value);
 
                 // **** execute remove operation ****
@@ -646,7 +651,7 @@ describe('operate then getRoom', () => {
                                         id: characterStateId,
                                         createdBy: characterState.createdBy,
                                         operation: {
-                                            pieceLocations: {
+                                            pieces: {
                                                 replace: [{
                                                     boardId: boardStateId,
                                                     boardCreatedBy: boardState.createdBy,
@@ -669,6 +674,9 @@ describe('operate then getRoom', () => {
                                     replace: [],
                                     update: [],
                                 },
+                                participants: {
+                                    update: [],
+                                }
                             }
                         }
                     },
@@ -687,12 +695,12 @@ describe('operate then getRoom', () => {
                 expect(operateResult3.result.operation.value.characters.replace.length).toBe(0);
                 expect(operateResult3.result.operation.value.characters.update.length).toBe(1);
                 const update3 = operateResult3.result.operation.value.characters.update[0];
-                expect(update3.operation.pieceLocations.replace.length).toBe(1);
-                expect(update3.operation.pieceLocations.update.length).toBe(0);
-                const pieceLocation3 = update3.operation.pieceLocations.replace[0];
+                expect(update3.operation.pieces.replace.length).toBe(1);
+                expect(update3.operation.pieces.update.length).toBe(0);
+                const pieceLocation3 = update3.operation.pieces.replace[0];
                 expect(pieceLocation3.newValue).toBeUndefined();
 
-                const subscription3 = operateResult3.payload.graphQLOperationGenerator.toGraphQLOperation({ operatedBy: createRoomResult.creator.userUid, deliverTo: createRoomResult.anotherUser.userUid, nextRevision: roomPrevRevision + 3 });
+                const subscription3 = operateResult3.payload.generateOperation(createRoomResult.anotherUser.userUid);
                 expect(operateResult3.result.operation.value).toEqual(subscription3.value);
             } finally {
                 await orm.close();
@@ -719,19 +727,20 @@ describe('operate then getRoom', () => {
                         return;
                     },
                     operation: {
-                        pieceLocations: { replace: [], update: [] },
+                        pieces: { replace: [], update: [] },
                         boolParams: { update: [] },
                         numParams: { update: [] },
                         numMaxParams: {
                             update: [
                                 { key, operation: { value: { newValue } } }
-                            ] },
+                            ]
+                        },
                         strParams: { update: [] },
                     },
                 }
             },
             test: {
-                operation: ({operatedByMe, operatedByAnother}) => {
+                operation: ({ operatedByMe, operatedByAnother }) => {
                     expect(operatedByMe.characters.replace.length).toBe(0);
                     const numMaxParamsUpdates = __(operatedByMe.characters.update).single().operation.numMaxParams.update;
                     const numMaxParamsUpdate = __(numMaxParamsUpdates).single();
@@ -765,7 +774,7 @@ describe('operate then getRoom', () => {
                         character.numMaxParams.add(numMaxParam);
                     },
                     operation: {
-                        pieceLocations: { replace: [], update: [] },
+                        pieces: { replace: [], update: [] },
                         boolParams: { update: [] },
                         numParams: { update: [] },
                         numMaxParams: {
@@ -811,7 +820,7 @@ describe('operate then getRoom', () => {
                 await resetDatabase(em);
 
                 const createRoomResult = setupRoomAndUsersAndParticipants({ em });
-                const roomPrevRevision = createRoomResult.room.roomRevision;
+                const roomPrevRevision = createRoomResult.room.revision;
 
                 const characterStateId = v4();
                 const characterState = new Character$MikroORM.Chara({
@@ -860,7 +869,7 @@ describe('operate then getRoom', () => {
                                         id: characterStateId,
                                         createdBy: characterState.createdBy,
                                         operation: {
-                                            pieceLocations: {
+                                            pieces: {
                                                 replace: [{
                                                     boardId: nonExistBoardId,
                                                     boardCreatedBy: boardState.createdBy,
@@ -892,6 +901,9 @@ describe('operate then getRoom', () => {
                                 },
                                 paramNames: {
                                     replace: [],
+                                    update: [],
+                                },
+                                participants: {
                                     update: [],
                                 },
                             }
@@ -927,7 +939,7 @@ describe('operate then getRoom', () => {
                 await resetDatabase(em);
 
                 const createRoomResult = setupRoomAndUsersAndParticipants({ em });
-                const roomFirstRevision = createRoomResult.room.roomRevision;
+                const roomFirstRevision = createRoomResult.room.revision;
 
                 const characterStateId = v4();
                 const characterState = new Character$MikroORM.Chara({
@@ -971,6 +983,9 @@ describe('operate then getRoom', () => {
                                     replace: [],
                                     update: [],
                                 },
+                                participants: {
+                                    update: [],
+                                }
                             }
                         }
                     },
@@ -997,7 +1012,7 @@ describe('operate then getRoom', () => {
                                         createdBy: createRoomResult.creator.userUid,
                                         operation: {
                                             name: { newValue: characterName2 },
-                                            pieceLocations: {
+                                            pieces: {
                                                 replace: [],
                                                 update: [],
                                             },
@@ -1016,6 +1031,9 @@ describe('operate then getRoom', () => {
                                     replace: [],
                                     update: [],
                                 },
+                                participants: {
+                                    update: [],
+                                }
                             }
                         }
                     },
@@ -1054,7 +1072,7 @@ describe('operate then getRoom', () => {
                 await resetDatabase(em);
 
                 const createRoomResult = setupRoomAndUsersAndParticipants({ em });
-                const roomFirstRevision = createRoomResult.room.roomRevision;
+                const roomFirstRevision = createRoomResult.room.revision;
 
                 const characterStateId = v4();
                 const characterState = new Character$MikroORM.Chara({
@@ -1089,7 +1107,7 @@ describe('operate then getRoom', () => {
                                         createdBy: createRoomResult.creator.userUid,
                                         operation: {
                                             name: { newValue: characterName1 },
-                                            pieceLocations: {
+                                            pieces: {
                                                 replace: [],
                                                 update: [],
                                             },
@@ -1108,6 +1126,9 @@ describe('operate then getRoom', () => {
                                     replace: [],
                                     update: [],
                                 },
+                                participants: {
+                                    update: [],
+                                }
                             }
                         }
                     },
@@ -1134,7 +1155,7 @@ describe('operate then getRoom', () => {
                                         createdBy: createRoomResult.creator.userUid,
                                         operation: {
                                             name: { newValue: characterName2 },
-                                            pieceLocations: {
+                                            pieces: {
                                                 replace: [],
                                                 update: [],
                                             },
@@ -1153,6 +1174,9 @@ describe('operate then getRoom', () => {
                                     replace: [],
                                     update: [],
                                 },
+                                participants: {
+                                    update: [],
+                                }
                             }
                         }
                     },
@@ -1189,7 +1213,7 @@ describe('operate then getRoom', () => {
                 await resetDatabase(em);
 
                 const createRoomResult = setupRoomAndUsersAndParticipants({ em });
-                const roomFirstRevision = createRoomResult.room.roomRevision;
+                const roomFirstRevision = createRoomResult.room.revision;
 
                 const characterStateId = v4();
                 const characterState = new Character$MikroORM.Chara({
@@ -1233,6 +1257,9 @@ describe('operate then getRoom', () => {
                                     replace: [],
                                     update: [],
                                 },
+                                participants: {
+                                    update: [],
+                                }
                             }
                         }
                     },
@@ -1268,6 +1295,9 @@ describe('operate then getRoom', () => {
                                     replace: [],
                                     update: [],
                                 },
+                                participants: {
+                                    update: [],
+                                }
                             }
                         }
                     },

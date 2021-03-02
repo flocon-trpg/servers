@@ -1,7 +1,7 @@
 import { Room } from '../room/mikro-orm';
 import { RoomAsListItem } from './graphql';
 
-export const stateToGraphql = ({
+export const stateToGraphQL = ({
     roomEntity,
 }: {
     roomEntity: Room;

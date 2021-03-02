@@ -1,15 +1,15 @@
 import { Cascade, Collection, Entity, Enum, IdentifiedReference, Index, JsonType, ManyToOne, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { EM } from '../../../utils/types';
-import { AddBoardOp, Board, RemoveBoardOp, UpdateBoardOp } from '../board/mikro-orm';
-import { AddCharaOp, Chara, RemoveCharaOp, UpdateCharaOp } from '../character/mikro-orm';
+import { AddBoardOp, Board, RemoveBoardOp, UpdateBoardOp } from './board/mikro-orm';
+import { AddCharaOp, Chara, RemoveCharaOp, UpdateCharaOp } from './character/mikro-orm';
 import { RoomPrvMsg, RoomPubCh, RoomSe as RoomSe } from '../roomMessage/mikro-orm';
 import { RoomParameterNameType } from '../../../enums/RoomParameterNameType';
 import { ReplaceFilePathArrayDownOperation, ReplaceNullableStringDownOperation } from '../../Operations';
 import { FilePath } from '../filePath/global';
 import { AddRoomBgmOp, RemoveRoomBgmOp, RoomBgm, UpdateRoomBgmOp } from './bgm/mikro-orm';
 import { AddParamNameOp, ParamName, RemoveParamNameOp, UpdateParamNameOp } from './paramName/mikro-orm';
-import { Partici, ParticiOp } from '../participant/mikro-orm';
+import { AddParticiOp, Partici, RemoveParticiOp, UpdateParticiOp } from './participant/mikro-orm';
 
 // Roomは最新の状況を反映するが、RoomOperationを用いて1つ前の状態に戻せるのは一部のプロパティのみ。
 // 例えばrevisionやparticipantsはRoomOperationをいくらapplyしても最新のまま。
@@ -48,17 +48,18 @@ export class Room {
     public createdBy!: string;
 
 
-    // **** RoomOpの管轄 ****
-
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property()
-    public roomRevision: number = 0;
+    public revision: number = 0;
 
     @Property()
     public name: string;
 
     @OneToMany(() => RoomOp, x => x.room, { orphanRemoval: true })
     public roomOperations = new Collection<RoomOp>(this);
+
+    @OneToMany(() => Partici, x => x.room, { orphanRemoval: true })
+    public particis = new Collection<Partici>(this);
 
     @OneToMany(() => ParamName, x => x.room, { orphanRemoval: true })
     public paramNames = new Collection<ParamName>(this);
@@ -80,19 +81,6 @@ export class Room {
 
     @OneToMany(() => RoomSe, x => x.room, { orphanRemoval: true })
     public roomSes = new Collection<RoomSe>(this);
-
-
-    // **** ParticiOpの管轄 ****
-
-    // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-    @Property()
-    public particiRevision: number = 0;
-
-    @OneToMany(() => Partici, x => x.room, { orphanRemoval: true })
-    public particis = new Collection<Partici>(this);
-
-    @OneToMany(() => ParticiOp, x => x.room, { orphanRemoval: true })
-    public particiOps = new Collection<ParticiOp>(this);
 }
 
 @Entity()
@@ -121,6 +109,16 @@ export class RoomOp {
 
     @ManyToOne(() => Room, { wrappedReference: true })
     public room!: IdentifiedReference<Room>;
+
+
+    @OneToMany(() => AddParticiOp, x => x.roomOp, { orphanRemoval: true })
+    public addParticiOps = new Collection<AddParticiOp>(this);
+
+    @OneToMany(() => RemoveParticiOp, x => x.roomOp, { orphanRemoval: true })
+    public removeParticiOps = new Collection<RemoveParticiOp>(this);
+
+    @OneToMany(() => UpdateParticiOp, x => x.roomOp, { orphanRemoval: true })
+    public updateParticiOps = new Collection<UpdateParticiOp>(this);
 
 
     @OneToMany(() => AddParamNameOp, x => x.roomOp, { orphanRemoval: true })
@@ -181,15 +179,36 @@ export const deleteRoom = async (em: EM, room: Room): Promise<void> => {
         await character.strParams.init();
         character.strParams.removeAll();
 
-        await character.pieceLocs.init();
-        character.pieceLocs.removeAll();
+        await character.charaPieces.init();
+        character.charaPieces.removeAll();
     }
     room.characters.removeAll();
+
+    for (const partici of await room.particis.loadItems()) {
+        await partici.myValues.init();
+        partici.myValues.removeAll();
+    }
+    room.particis.removeAll();
 
     await room.paramNames.init();
     room.paramNames.removeAll();
 
     for (const operation of await room.roomOperations.loadItems()) {
+        await operation.addParticiOps.init();
+        operation.addParticiOps.removeAll();
+
+        for (const updateParticiOp of await operation.updateParticiOps.loadItems()) {
+            await updateParticiOp.addMyValueOps.init();
+            updateParticiOp.addMyValueOps.removeAll();
+
+            await updateParticiOp.updateMyValueOps.init();
+            updateParticiOp.updateMyValueOps.removeAll();
+
+            await updateParticiOp.removeMyValueOps.init();
+            updateParticiOp.removeMyValueOps.removeAll();
+        }
+        operation.updateParticiOps.removeAll();
+
         await operation.addBoardOps.init();
         operation.addBoardOps.removeAll();
 
@@ -206,8 +225,6 @@ export const deleteRoom = async (em: EM, room: Room): Promise<void> => {
             await updateCharacterOp.updateBoolParamOps.init();
             updateCharacterOp.updateBoolParamOps.removeAll();
 
-            await updateCharacterOp.addNumParamOps.init();
-            updateCharacterOp.addNumParamOps.removeAll();
             await updateCharacterOp.updateNumParamOps.init();
             updateCharacterOp.updateNumParamOps.removeAll();
 
@@ -217,12 +234,12 @@ export const deleteRoom = async (em: EM, room: Room): Promise<void> => {
             await updateCharacterOp.updateStrParamOps.init();
             updateCharacterOp.updateStrParamOps.removeAll();
 
-            await updateCharacterOp.addPieceLocOps.init();
-            updateCharacterOp.addPieceLocOps.removeAll();
-            await updateCharacterOp.updatePieceLocOps.init();
-            updateCharacterOp.updatePieceLocOps.removeAll();
-            await updateCharacterOp.removePieceLocOps.init();
-            updateCharacterOp.removePieceLocOps.removeAll();
+            await updateCharacterOp.addCharaPieceOps.init();
+            updateCharacterOp.addCharaPieceOps.removeAll();
+            await updateCharacterOp.updateCharaPieceOps.init();
+            updateCharacterOp.updateCharaPieceOps.removeAll();
+            await updateCharacterOp.removeCharaPieceOps.init();
+            updateCharacterOp.removeCharaPieceOps.removeAll();
         }
         operation.updateCharacterOps.removeAll();
 
@@ -236,23 +253,12 @@ export const deleteRoom = async (em: EM, room: Room): Promise<void> => {
             await removeCharacterOp.removedStrParam.init();
             removeCharacterOp.removedStrParam.removeAll();
 
-            await removeCharacterOp.removedPieceLoc.init();
-            removeCharacterOp.removedPieceLoc.removeAll();
+            await removeCharacterOp.removedCharaPieces.init();
+            removeCharacterOp.removedCharaPieces.removeAll();
         }
         operation.removeCharacterOps.removeAll();
     }
     room.roomOperations.removeAll();
-
-    await room.particis.init();
-    room.particis.removeAll();
-    for (const operation of await room.particiOps.loadItems()) {
-        await operation.addParticiOps.init();
-        operation.addParticiOps.removeAll();
-
-        await operation.updateParticiOps.init();
-        operation.updateParticiOps.removeAll();
-    }
-    room.particiOps.removeAll();
 
     for (const roomChatCh of await room.roomChatChs.loadItems()) {
         await roomChatCh.roomPubMsgs.init();

@@ -1,17 +1,22 @@
+import { DualKeyMap, ReadonlyDualKeyMap } from '../../../@shared/DualKeyMap';
+import { StrIndex100, StrIndex5 } from '../../../@shared/indexes';
 import { Result, ResultModule } from '../../../@shared/Result';
-import { ReplaceStringDownOperation, ReplaceStringDownOperationModule, ReplaceStringTwoWayOperation, ReplaceStringTwoWayOperationModule } from '../../Operations';
-import * as Bgm$Global from './bgm/global';
-import * as ParamName$Global from './paramName/global';
-import * as Board$Global from '../board/global';
-import * as Character$Global from '../character/global';
-import * as Participant$GraphQL from '../participant/graphql';
-import * as Participant$MikroORM from '../participant/mikro-orm';
-import * as Participant$Global from '../participant/global';
-import * as GraphQL from './graphql';
-import * as $MikroORM from './mikro-orm';
+import { RoomParameterNameType } from '../../../enums/RoomParameterNameType';
 import { undefinedForAll } from '../../../utils/helpers';
+import { ReadonlyDualKeyMapDownOperation, ReadonlyDualKeyMapTwoWayOperation, ReadonlyDualKeyMapUpOperation } from '../../dualKeyMapOperations';
+import { ReadonlyMapDownOperation, ReadonlyMapTwoWayOperation, ReadonlyMapUpOperation } from '../../mapOperations';
+import { ReplaceStringDownOperation, ReplaceStringDownOperationModule, ReplaceStringTwoWayOperation, ReplaceStringTwoWayOperationModule, ReplaceStringUpOperation } from '../../Operations';
+import { GlobalBoard } from './board/global';
+import { GlobalCharacter } from './character/global';
+import { DualKeyMapTransformer, MapTransformer, TransformerFactory } from '../global';
+import { GlobalParticipant } from './participant/global';
+import { GlobalBgm } from './bgm/global';
+import { RoomGetState, RoomOperationInput, RoomOperationValue } from './graphql';
+import { Room, RoomOp } from './mikro-orm';
+import { GlobalParamName } from './paramName/global';
+import { RequestedBy, server } from '../../Types';
 import { EM } from '../../../utils/types';
-import { __ } from '../../../@shared/collection';
+import { Reference } from '@mikro-orm/core';
 
 type IsSequentialResult<T> = {
     type: 'DuplicateElement';
@@ -62,487 +67,607 @@ const isSequential = <T>(array: T[], getIndex: (elem: T) => number): IsSequentia
     };
 };
 
-type RoomType = {
-    name: string;
-    createdBy: string;
-}
-
-type RoomDownOperationType = {
-    name?: ReplaceStringDownOperation;
-}
-
-type MutableRoomTwoWayOperation = {
-    name?: ReplaceStringTwoWayOperation;
-}
-
-export class RoomDownOperation {
-    private constructor(private readonly params: {
-        boards: Board$Global.BoardsDownOperation;
-        characters: Character$Global.CharactersDownOperation;
-        bgms: Bgm$Global.RoomBgmsDownOperation;
-        paramNames: ParamName$Global.ParamNamesDownOperation;
-        valueProps: RoomDownOperationType;
-    }) { }
-
-    public static async create(entity: $MikroORM.RoomOp): Promise<Result<RoomDownOperation>> {
-        const bgms = await Bgm$Global.RoomBgmsDownOperation.create({
-            add: entity.addRoomBgmOps,
-            remove: entity.removeRoomBgmOps,
-            update: entity.updateRoomBgmOps,
-        });
-        if (bgms.isError) {
-            return bgms;
-        }
-
-        const paramNames = await ParamName$Global.ParamNamesDownOperation.create({
-            add: entity.addParamNameOps,
-            remove: entity.removeParamNameOps,
-            update: entity.updateParamNameOps,
-        });
-        if (paramNames.isError) {
-            return paramNames;
-        }
-
-        const boards = await Board$Global.BoardsDownOperation.create({
-            add: entity.addBoardOps,
-            remove: entity.removeBoardOps,
-            update: entity.updateBoardOps,
-        });
-        if (boards.isError) {
-            return boards;
-        }
-
-        const characters = await Character$Global.CharactersDownOperation.create({
-            add: entity.addCharacterOps,
-            remove: entity.removeCharacterOps,
-            update: entity.updateCharacterOps,
-        });
-        if (characters.isError) {
-            return characters;
-        }
-
-        const valueProps: RoomDownOperationType = {
-        };
-
-        valueProps.name = entity.name === undefined ? undefined : { oldValue: entity.name };
-
-        return ResultModule.ok(new RoomDownOperation({
-            boards: boards.value,
-            characters: characters.value,
-            bgms: bgms.value,
-            paramNames: paramNames.value,
-            valueProps,
-        }));
+export namespace GlobalRoom {
+    type StateTypeValue = {
+        name: string;
+        createdBy: string;
     }
 
-    public static async findRange(em: EM, roomState: RoomState, roomId: string, revisionRange: { from: number; expectedTo?: number }): Promise<Result<RoomDownOperation | undefined>> {
-        const operationEntities = await em.find($MikroORM.RoomOp, { room: { id: roomId }, prevRevision: { $gte: revisionRange.from } });
-        const isSequentialResult = isSequential(operationEntities, o => o.prevRevision);
-        if (isSequentialResult.type === 'NotSequential') {
-            return ResultModule.error('Database error. There are missing operations. Multiple server apps edit same database simultaneously?');
+    export type StateType = StateTypeValue & {
+        bgms: ReadonlyMap<StrIndex5, GlobalBgm.StateType>;
+        boards: ReadonlyDualKeyMap<string, string, GlobalBoard.StateType>;
+        characters: ReadonlyDualKeyMap<string, string, GlobalCharacter.StateType>;
+        paramNames: ReadonlyDualKeyMap<RoomParameterNameType, StrIndex100, GlobalParamName.StateType>;
+        participants: ReadonlyMap<string, GlobalParticipant.StateType>;
+    }
+
+    type DownOperationTypeValue = {
+        name?: ReplaceStringDownOperation;
+    }
+
+    export type DownOperationType = DownOperationTypeValue & {
+        bgms: ReadonlyMapDownOperation<StrIndex5, GlobalBgm.StateType, GlobalBgm.DownOperationType>;
+        boards: ReadonlyDualKeyMapDownOperation<string, string, GlobalBoard.StateType, GlobalBoard.DownOperationType>;
+        characters: ReadonlyDualKeyMapDownOperation<string, string, GlobalCharacter.StateType, GlobalCharacter.DownOperationType>;
+        paramNames: ReadonlyDualKeyMapDownOperation<RoomParameterNameType, StrIndex100, GlobalParamName.StateType, GlobalParamName.DownOperationType>;
+        participants: ReadonlyMapDownOperation<string, GlobalParticipant.StateType, GlobalParticipant.DownOperationType>;
+    }
+
+    type UpOperationTypeValue = {
+        name?: ReplaceStringUpOperation;
+    }
+
+    export type UpOperationType = UpOperationTypeValue & {
+        bgms: ReadonlyMapUpOperation<StrIndex5, GlobalBgm.StateType, GlobalBgm.UpOperationType>;
+        boards: ReadonlyDualKeyMapUpOperation<string, string, GlobalBoard.StateType, GlobalBoard.UpOperationType>;
+        characters: ReadonlyDualKeyMapUpOperation<string, string, GlobalCharacter.StateType, GlobalCharacter.UpOperationType>;
+        paramNames: ReadonlyDualKeyMapUpOperation<RoomParameterNameType, StrIndex100, GlobalParamName.StateType, GlobalParamName.UpOperationType>;
+        participants: ReadonlyMapUpOperation<string, GlobalParticipant.StateType, GlobalParticipant.UpOperationType>;
+    }
+
+    type TwoWayOperationTypeValue = {
+        name?: ReplaceStringTwoWayOperation;
+    }
+
+    export type TwoWayOperationType = TwoWayOperationTypeValue & {
+        bgms: ReadonlyMapTwoWayOperation<StrIndex5, GlobalBgm.StateType, GlobalBgm.TwoWayOperationType>;
+        boards: ReadonlyDualKeyMapTwoWayOperation<string, string, GlobalBoard.StateType, GlobalBoard.TwoWayOperationType>;
+        characters: ReadonlyDualKeyMapTwoWayOperation<string, string, GlobalCharacter.StateType, GlobalCharacter.TwoWayOperationType>;
+        paramNames: ReadonlyDualKeyMapTwoWayOperation<RoomParameterNameType, StrIndex100, GlobalParamName.StateType, GlobalParamName.TwoWayOperationType>;
+        participants: ReadonlyMapTwoWayOperation<string, GlobalParticipant.StateType, GlobalParticipant.TwoWayOperationType>;
+    }
+
+    export namespace MikroORM {
+        export namespace ToGlobal {
+            export const state = async (entity: Room): Promise<StateType> => {
+                const bgms = GlobalBgm.MikroORM.ToGlobal.stateMany(await entity.roomBgms.loadItems());
+                const boards = GlobalBoard.MikroORM.ToGlobal.stateMany(await entity.boards.loadItems());
+                const characters = await GlobalCharacter.MikroORM.ToGlobal.stateMany(await entity.characters.loadItems());
+                const paramNames = GlobalParamName.MikroORM.ToGlobal.stateMany(await entity.paramNames.loadItems());
+                const participants = await GlobalParticipant.MikroORM.ToGlobal.stateMany(await entity.particis.loadItems());
+
+                return {
+                    ...entity,
+                    bgms,
+                    boards,
+                    characters,
+                    paramNames,
+                    participants,
+                };
+            };
+
+            export const downOperation = async ({
+                op,
+            }: {
+                op: RoomOp;
+            }): Promise<Result<DownOperationType>> => {
+                const bgms = await GlobalBgm.MikroORM.ToGlobal.downOperationMany({
+                    add: op.addRoomBgmOps,
+                    remove: op.removeRoomBgmOps,
+                    update: op.updateRoomBgmOps,
+                });
+                if (bgms.isError) {
+                    return bgms;
+                }
+
+                const boards = await GlobalBoard.MikroORM.ToGlobal.downOperationMany({
+                    add: op.addBoardOps,
+                    remove: op.removeBoardOps,
+                    update: op.updateBoardOps,
+                });
+                if (boards.isError) {
+                    return boards;
+                }
+
+                const characters = await GlobalCharacter.MikroORM.ToGlobal.downOperationMany({
+                    add: op.addCharacterOps,
+                    remove: op.removeCharacterOps,
+                    update: op.updateCharacterOps,
+                });
+                if (characters.isError) {
+                    return characters;
+                }
+
+                const paramNames = await GlobalParamName.MikroORM.ToGlobal.downOperationMany({
+                    add: op.addParamNameOps,
+                    remove: op.removeParamNameOps,
+                    update: op.updateParamNameOps,
+                });
+                if (paramNames.isError) {
+                    return paramNames;
+                }
+
+                const participants = await GlobalParticipant.MikroORM.ToGlobal.downOperationMany({
+                    add: op.addParticiOps,
+                    remove: op.removeParticiOps,
+                    update: op.updateParticiOps,
+                });
+                if (participants.isError) {
+                    return participants;
+                }
+
+                return ResultModule.ok({
+                    bgms: bgms.value,
+                    boards: boards.value,
+                    characters: characters.value,
+                    paramNames: paramNames.value,
+                    participants: participants.value,
+                    name: op.name == null ? undefined : { oldValue: op.name },
+                });
+            };
+
+            export const downOperationMany = async ({
+                em,
+                roomId,
+                revisionRange,
+            }: {
+                em: EM;
+                roomId: string;
+                revisionRange: { from: number; expectedTo?: number };
+            }) => {
+                const operationEntities = await em.find(RoomOp, { room: { id: roomId }, prevRevision: { $gte: revisionRange.from } });
+                const isSequentialResult = isSequential(operationEntities, o => o.prevRevision);
+                if (isSequentialResult.type === 'NotSequential') {
+                    return ResultModule.error('Database error. There are missing operations. Multiple server apps edit same database simultaneously?');
+                }
+                if (isSequentialResult.type === 'DuplicateElement') {
+                    return ResultModule.error('Database error. There are duplicate operations. Multiple server apps edit same database simultaneously?');
+                }
+                if (isSequentialResult.type === 'EmptyArray') {
+                    return ResultModule.ok(undefined);
+                }
+                if (isSequentialResult.minIndex !== revisionRange.from) {
+                    return ResultModule.error('revision out of range(too small)');
+                }
+                if (revisionRange.expectedTo !== undefined) {
+                    if (isSequentialResult.maxIndex !== (revisionRange.expectedTo - 1)) {
+                        return ResultModule.error('Database error. Revision of latest operation is not same as revision of state. Multiple server apps edit same database simultaneously?');
+                    }
+                }
+
+                const sortedOperationEntities = operationEntities.sort((x, y) => x.prevRevision - y.prevRevision);
+                const operationResult = await MikroORM.ToGlobal.downOperation({ op: sortedOperationEntities[0] });
+                if (operationResult.isError) {
+                    return operationResult;
+                }
+                let operation: DownOperationType | undefined = operationResult.value;
+
+                let isFirst = false;
+                for (const model of sortedOperationEntities) {
+                    if (isFirst) {
+                        isFirst = true;
+                        continue;
+                    }
+                    const second = await MikroORM.ToGlobal.downOperation({ op: model });
+                    if (second.isError) {
+                        return second;
+                    }
+                    if (operation === undefined) {
+                        operation = second.value;
+                        continue;
+                    }
+                    // composeLooseではoperatedByは使われていないはずなので、適当な値を渡している。
+                    const composed = transformerFactory({ type: server }).composeLoose({ key: null, first: operation, second: second.value });
+                    if (composed.isError) {
+                        return composed;
+                    }
+                    operation = composed.value;
+                }
+                return ResultModule.ok(operation);
+            };
         }
-        if (isSequentialResult.type === 'DuplicateElement') {
-            return ResultModule.error('Database error. There are duplicate operations. Multiple server apps edit same database simultaneously?');
+    }
+
+    export namespace Global {
+        export namespace ToGraphQL {
+            export const state = ({ source, requestedBy }: { source: StateType; requestedBy: RequestedBy }): Omit<RoomGetState, 'revision' | 'createdBy'> => {
+                const bgms = GlobalBgm.Global.ToGraphQL.stateMany({ source: source.bgms });
+                const boards = GlobalBoard.Global.ToGraphQL.stateMany({ source: source.boards });
+                const characters = GlobalCharacter.Global.ToGraphQL.stateMany({ source: source.characters, requestedBy });
+                const paramNames = GlobalParamName.Global.ToGraphQL.stateMany({ source: source.paramNames });
+                const participants = GlobalParticipant.Global.ToGraphQL.stateMany({ source: source.participants, requestedBy });
+
+                return {
+                    name: source.name,
+                    bgms,
+                    boards,
+                    characters,
+                    paramNames,
+                    participants,
+                };
+            };
+
+            export const operation = ({
+                operation,
+                prevState,
+                nextState,
+                requestedBy,
+            }: {
+                operation: TwoWayOperationType;
+                prevState: StateType;
+                nextState: StateType;
+                requestedBy: RequestedBy;
+            }): RoomOperationValue => {
+                const bgms = GlobalBgm.Global.ToGraphQL.operation({ operation: operation.bgms });
+                const boards = GlobalBoard.Global.ToGraphQL.operation({ operation: operation.boards });
+                const characters = GlobalCharacter.Global.ToGraphQL.operation({ operation: operation.characters, prevState: prevState.characters, nextState: nextState.characters, requestedBy });
+                const paramNames = GlobalParamName.Global.ToGraphQL.operation({ operation: operation.paramNames });
+                const participants = GlobalParticipant.Global.ToGraphQL.operation({ operation: operation.participants, prevState: prevState.participants, nextState: nextState.participants, requestedBy });
+
+                return {
+                    name: operation.name,
+                    bgms,
+                    boards,
+                    characters,
+                    paramNames,
+                    participants,
+                };
+            };
         }
-        if (isSequentialResult.type === 'EmptyArray') {
-            return ResultModule.ok(undefined);
-        }
-        if (isSequentialResult.minIndex !== revisionRange.from) {
-            return ResultModule.error('revision out of range(too small)');
-        }
-        if (revisionRange.expectedTo !== undefined) {
-            if (isSequentialResult.maxIndex !== (revisionRange.expectedTo - 1)) {
-                return ResultModule.error('Database error. Revision of latest operation is not same as revision of state. Multiple server apps edit same database simultaneously?');
+
+        export const emptyTwoWayOperation = (): Readonly<TwoWayOperationType> => ({
+            bgms: new Map(),
+            boards: new DualKeyMap(),
+            characters: new DualKeyMap(),
+            paramNames: new DualKeyMap(),
+            participants: new Map(),
+        });
+
+        export const applyToEntity = async ({
+            em,
+            target,
+            operation,
+        }: {
+            em: EM;
+            target: Room;
+            operation: TwoWayOperationType;
+        }) => {
+            const prevRevision = target.revision;
+            target.revision += 1;
+            const op = new RoomOp({ prevRevision });
+            op.room = Reference.create<Room>(target);
+
+            await GlobalBgm.Global.applyToEntity({ em, parent: target, parentOp: op, operation: operation.bgms });
+            await GlobalBoard.Global.applyToEntity({ em, parent: target, parentOp: op, operation: operation.boards });
+            await GlobalCharacter.Global.applyToEntity({ em, parent: target, parentOp: op, operation: operation.characters });
+            await GlobalParamName.Global.applyToEntity({ em, parent: target, parentOp: op, operation: operation.paramNames });
+            await GlobalParticipant.Global.applyToEntity({ em, parent: target, parentOp: op, operation: operation.participants });
+
+            if (operation.name != null) {
+                target.name = operation.name.newValue;
+                op.name = operation.name.oldValue;
             }
-        }
-        const sortedOperationEntities = operationEntities.sort((x, y) => x.prevRevision - y.prevRevision);
-        const operationResult = await RoomDownOperation.create(sortedOperationEntities[0]);
-        if (operationResult.isError) {
-            return operationResult;
-        }
-        let operation = operationResult.value;
 
-        let isFirst = false;
-        for (const model of sortedOperationEntities) {
-            if (isFirst) {
-                isFirst = true;
-                continue;
+            em.persist(op);
+        };
+    }
+
+    export namespace GraphQL {
+        export namespace ToGlobal {
+            export const upOperation = (source: RoomOperationInput): Result<UpOperationType> => {
+                const bgms = GlobalBgm.GraphQL.ToGlobal.upOperationMany(source.value.bgms);
+                if (bgms.isError) {
+                    return bgms;
+                }
+                const boards = GlobalBoard.GraphQL.ToGlobal.upOperationMany(source.value.boards);
+                if (boards.isError) {
+                    return boards;
+                }
+                const characters = GlobalCharacter.GraphQL.ToGlobal.upOperationMany(source.value.characters);
+                if (characters.isError) {
+                    return characters;
+                }
+                const paramNames = GlobalParamName.GraphQL.ToGlobal.upOperationMany(source.value.paramNames);
+                if (paramNames.isError) {
+                    return paramNames;
+                }
+                const participants = GlobalParticipant.GraphQL.ToGlobal.upOperationManyFromInput(source.value.participants);
+                if (participants.isError) {
+                    return participants;
+                }
+
+                return ResultModule.ok({
+                    name: source.value.name,
+                    bgms: bgms.value,
+                    boards: boards.value,
+                    characters: characters.value,
+                    paramNames: paramNames.value,
+                    participants: participants.value,
+                });
+            };
+        }
+    }
+
+    const bgmTransformer = GlobalBgm.transformerFactory;
+    const bgmsTransformer = new MapTransformer(bgmTransformer);
+    const boardTransformer = GlobalBoard.transformerFactory;
+    const boardsTransformer = new DualKeyMapTransformer(boardTransformer);
+    const createCharacterTransformer = (operatedBy: RequestedBy) => GlobalCharacter.transformerFactory(operatedBy);
+    const createCharactersTransformer = (operatedBy: RequestedBy) => new DualKeyMapTransformer(createCharacterTransformer(operatedBy));
+    const paramNameTransformer = GlobalParamName.transformerFactory;
+    const paramNamesTransformer = new DualKeyMapTransformer(paramNameTransformer);
+    const createParticipantTransformer = (operatedBy: RequestedBy) => GlobalParticipant.transformerFactory(operatedBy);
+    const createParticipantsTransformer = (operatedBy: RequestedBy) => new MapTransformer(createParticipantTransformer(operatedBy));
+
+    export const transformerFactory = (operatedBy: RequestedBy): TransformerFactory<null, StateType, StateType, DownOperationType, UpOperationType, TwoWayOperationType> => ({
+        composeLoose: ({ first, second }) => {
+            const bgms = bgmsTransformer.composeLoose({
+                first: first.bgms,
+                second: second.bgms,
+            });
+            if (bgms.isError) {
+                return bgms;
             }
-            const second = await RoomDownOperation.create(model);
-            if (second.isError) {
-                return second;
+
+            const boards = boardsTransformer.composeLoose({
+                first: first.boards,
+                second: second.boards,
+            });
+            if (boards.isError) {
+                return boards;
             }
-            const composed = operation.compose(second.value, roomState);
-            if (composed.isError) {
-                return composed;
+
+            const characters = createCharactersTransformer(operatedBy).composeLoose({
+                first: first.characters,
+                second: second.characters,
+            });
+            if (characters.isError) {
+                return characters;
             }
-            operation = composed.value;
-        }
-        return ResultModule.ok(operation);
-    }
 
-    public get boards(): Board$Global.BoardsDownOperation {
-        return this.params.boards;
-    }
+            const paramNames = paramNamesTransformer.composeLoose({
+                first: first.paramNames,
+                second: second.paramNames,
+            });
+            if (paramNames.isError) {
+                return paramNames;
+            }
 
-    public get characters(): Character$Global.CharactersDownOperation {
-        return this.params.characters;
-    }
+            const participants = createParticipantsTransformer(operatedBy).composeLoose({
+                first: first.participants,
+                second: second.participants,
+            });
+            if (participants.isError) {
+                return participants;
+            }
 
-    public get bgms() {
-        return this.params.bgms;
-    }
+            const valueProps: DownOperationType = {
+                name: ReplaceStringDownOperationModule.compose(first.name, second.name),
+                bgms: bgms.value ?? new Map(),
+                boards: boards.value ?? new DualKeyMap(),
+                characters: characters.value ?? new DualKeyMap(),
+                paramNames: paramNames.value ?? new DualKeyMap(),
+                participants: participants.value ?? new Map(),
+            };
+            return ResultModule.ok(valueProps);
+        },
+        restore: ({ nextState, downOperation }) => {
+            if (downOperation === undefined) {
+                return ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
+            }
 
-    public get paramNames() {
-        return this.params.paramNames;
-    }
+            const bgms = bgmsTransformer.restore({
+                nextState: nextState.bgms,
+                downOperation: downOperation.bgms,
+            });
+            if (bgms.isError) {
+                return bgms;
+            }
 
-    public get valueProps(): Readonly<RoomDownOperationType> {
-        return this.params.valueProps;
-    }
+            const boards = boardsTransformer.restore({
+                nextState: nextState.boards,
+                downOperation: downOperation.boards,
+            });
+            if (boards.isError) {
+                return boards;
+            }
 
-    private compose(second: RoomDownOperation, state: RoomState): Result<RoomDownOperation> {
-        const boards = this.params.boards.compose(second.params.boards, state.boards);
-        if (boards.isError) {
-            return boards;
-        }
-        const characters = this.params.characters.compose(second.params.characters, state.characters);
-        if (characters.isError) {
-            return characters;
-        }
-        const bgms = this.params.bgms.compose(second.params.bgms, state.bgms);
-        if (bgms.isError) {
-            return bgms;
-        }
-        const paramNames = this.params.paramNames.compose(second.params.paramNames, state.paramNames);
-        if (paramNames.isError) {
-            return paramNames;
-        }
-        const valueProps: RoomDownOperationType = {
-            name: ReplaceStringDownOperationModule.compose(this.valueProps.name, second.valueProps.name),
-        };
+            const characters = createCharactersTransformer(operatedBy).restore({
+                nextState: nextState.characters,
+                downOperation: downOperation.characters,
+            });
+            if (characters.isError) {
+                return characters;
+            }
 
-        return ResultModule.ok(new RoomDownOperation({
-            boards: boards.value,
-            characters: characters.value,
-            bgms: bgms.value,
-            paramNames: paramNames.value,
-            valueProps,
-        }));
-    }
-}
+            const paramNames = paramNamesTransformer.restore({
+                nextState: nextState.paramNames,
+                downOperation: downOperation.paramNames,
+            });
+            if (paramNames.isError) {
+                return paramNames;
+            }
 
-export class RoomState {
-    public constructor(private readonly params: {
-        roomValue: RoomType;
-        boards: Board$Global.BoardsState;
-        characters: Character$Global.CharactersState;
-        bgms: Bgm$Global.RoomBgmsState;
-        paramNames: ParamName$Global.ParamNamesState;
-    }) { }
+            const participants = createParticipantsTransformer(operatedBy).restore({
+                nextState: nextState.participants,
+                downOperation: downOperation.participants,
+            });
+            if (participants.isError) {
+                return participants;
+            }
 
-    public static async create(entity: $MikroORM.Room): Promise<RoomState> {
-        const roomValue: RoomType = {
-            ...entity,
-        };
+            const prevState: StateType = {
+                ...nextState,
+                bgms: bgms.value.prevState,
+                boards: boards.value.prevState,
+                characters: characters.value.prevState,
+                paramNames: paramNames.value.prevState,
+                participants: participants.value.prevState,
+            };
+            const twoWayOperation: TwoWayOperationType = {
+                bgms: bgms.value.twoWayOperation,
+                boards: boards.value.twoWayOperation,
+                characters: characters.value.twoWayOperation,
+                paramNames: paramNames.value.twoWayOperation,
+                participants: participants.value.twoWayOperation,
+            };
 
-        return new RoomState({
-            roomValue,
-            boards: Board$Global.BoardsState.create(await entity.boards.loadItems()),
-            characters: await Character$Global.CharactersState.create(await entity.characters.loadItems()),
-            bgms: Bgm$Global.RoomBgmsState.create(await entity.roomBgms.loadItems()),
-            paramNames: ParamName$Global.ParamNamesState.create(await entity.paramNames.loadItems()),
-        });
-    }
+            if (downOperation.name !== undefined) {
+                prevState.name = downOperation.name.oldValue;
+                twoWayOperation.name = { ...downOperation.name, newValue: nextState.name };
+            }
 
-    public static restore({ downOperation, nextState }: { downOperation?: RoomDownOperation; nextState: RoomState }): Result<RestoredRoom> {
-        if (downOperation === undefined) {
-            return ResultModule.ok(new RestoredRoom({ prevState: nextState, nextState }));
-        }
-        const prevRoomValueState = { ...nextState.roomValue };
-        const twoWayOperationCore: MutableRoomTwoWayOperation = {
-        };
+            return ResultModule.ok({ prevState, twoWayOperation });
+        },
+        transform: ({ prevState, currentState, clientOperation, serverOperation }) => {
+            const bgms = bgmsTransformer.transform({
+                prevState: prevState.bgms,
+                currentState: currentState.bgms,
+                clientOperation: clientOperation.bgms,
+                serverOperation: serverOperation?.bgms ?? new Map(),
+            });
+            if (bgms.isError) {
+                return bgms;
+            }
 
-        if (downOperation.valueProps.name !== undefined) {
-            prevRoomValueState.name = downOperation.valueProps.name.oldValue;
-            twoWayOperationCore.name = { ...downOperation.valueProps.name, newValue: nextState.roomValue.name };
-        }
+            const boards = boardsTransformer.transform({
+                prevState: prevState.boards,
+                currentState: currentState.boards,
+                clientOperation: clientOperation.boards,
+                serverOperation: serverOperation?.boards ?? new DualKeyMap(),
+            });
+            if (boards.isError) {
+                return boards;
+            }
 
-        const prevBoardsState = Board$Global.BoardsState.restore({ downOperation: downOperation.boards, nextState: nextState.boards });
-        if (prevBoardsState.isError) {
-            return prevBoardsState;
-        }
+            const characters = createCharactersTransformer(operatedBy).transform({
+                prevState: prevState.characters,
+                currentState: currentState.characters,
+                clientOperation: clientOperation.characters,
+                serverOperation: serverOperation?.characters ?? new DualKeyMap(),
+            });
+            if (characters.isError) {
+                return characters;
+            }
 
-        const prevCharactersState = Character$Global.CharactersState.restore({ downOperation: downOperation.characters, nextState: nextState.characters });
-        if (prevCharactersState.isError) {
-            return prevCharactersState;
-        }
+            const paramNames = paramNamesTransformer.transform({
+                prevState: prevState.paramNames,
+                currentState: currentState.paramNames,
+                clientOperation: clientOperation.paramNames,
+                serverOperation: serverOperation?.paramNames ?? new DualKeyMap(),
+            });
+            if (paramNames.isError) {
+                return paramNames;
+            }
 
-        const prevBgmsState = Bgm$Global.RoomBgmsState.restore({ downOperation: downOperation.bgms, nextState: nextState.bgms });
-        if (prevBgmsState.isError) {
-            return prevBgmsState;
-        }
+            const participants = createParticipantsTransformer(operatedBy).transform({
+                prevState: prevState.participants,
+                currentState: currentState.participants,
+                clientOperation: clientOperation.participants,
+                serverOperation: serverOperation?.participants ?? new Map(),
+            });
+            if (participants.isError) {
+                return participants;
+            }
 
-        const prevParamNamesState = ParamName$Global.ParamNamesState.restore({ downOperation: downOperation.paramNames, nextState: nextState.paramNames });
-        if (prevParamNamesState.isError) {
-            return prevParamNamesState;
-        }
+            const twoWayOperation: TwoWayOperationTypeValue = {};
 
-        return ResultModule.ok(new RestoredRoom({
-            prevState: new RoomState({
-                roomValue: prevRoomValueState,
-                boards: prevBoardsState.value.prevState,
-                characters: prevCharactersState.value.prevState,
-                bgms: prevBgmsState.value.prevState,
-                paramNames: prevParamNamesState.value.prevState,
-            }),
-            nextState,
-            twoWayOperation: new RoomTwoWayOperation({
-                valueProps: twoWayOperationCore,
-                boards: prevBoardsState.value.twoWayOperation ?? Board$Global.BoardsTwoWayOperation.createEmpty(),
-                characters: prevCharactersState.value.twoWayOperation ?? Character$Global.CharactersTwoWayOperation.createEmpty(),
-                bgms: prevBgmsState.value.twoWayOperation ?? Bgm$Global.RoomBgmsTwoWayOperation.createEmpty(),
-                paramNames: prevParamNamesState.value.twoWayOperation ?? ParamName$Global.ParamNamesTwoWayOperation.createEmpty(),
-            })
-        }));
-    }
+            twoWayOperation.name = ReplaceStringTwoWayOperationModule.transform({
+                first: serverOperation?.name,
+                second: clientOperation.name,
+                prevState: prevState.name,
+            });
 
-    public get boards(): Board$Global.BoardsState {
-        return this.params.boards;
-    }
+            if (undefinedForAll(twoWayOperation) && bgms.value.size === 0 && boards.value.size === 0 && characters.value.size === 0 && paramNames.value.size === 0 && participants.value.size === 0) {
+                return ResultModule.ok(undefined);
+            }
 
-    public get characters(): Character$Global.CharactersState {
-        return this.params.characters;
-    }
+            return ResultModule.ok({
+                ...twoWayOperation,
+                bgms: bgms.value,
+                boards: boards.value,
+                characters: characters.value,
+                paramNames: paramNames.value,
+                participants: participants.value,
+            });
+        },
+        diff: ({ prevState, nextState }) => {
+            const bgms = bgmsTransformer.diff({
+                prevState: prevState.bgms,
+                nextState: nextState.bgms,
+            });
+            const boards = boardsTransformer.diff({
+                prevState: prevState.boards,
+                nextState: nextState.boards,
+            });
+            const characters = createCharactersTransformer(operatedBy).diff({
+                prevState: prevState.characters,
+                nextState: nextState.characters,
+            });
+            const paramNames = paramNamesTransformer.diff({
+                prevState: prevState.paramNames,
+                nextState: nextState.paramNames,
+            });
+            const participants = createParticipantsTransformer(operatedBy).diff({
+                prevState: prevState.participants,
+                nextState: nextState.participants,
+            });
+            const resultType: TwoWayOperationTypeValue = {};
+            if (prevState.name !== nextState.name) {
+                resultType.name = { oldValue: prevState.name, newValue: nextState.name };
+            }
+            if (undefinedForAll(resultType) && bgms.size === 0 && boards.size === 0 && characters.size === 0 && paramNames.size === 0 && participants.size === 0) {
+                return undefined;
+            }
+            return { ...resultType, bgms, boards, characters, paramNames, participants };
+        },
+        applyBack: ({ downOperation, nextState }) => {
+            const bgms = bgmsTransformer.applyBack({
+                downOperation: downOperation.bgms,
+                nextState: nextState.bgms,
+            });
+            if (bgms.isError) {
+                return bgms;
+            }
 
-    public get bgms() {
-        return this.params.bgms;
-    }
+            const boards = boardsTransformer.applyBack({
+                downOperation: downOperation.boards,
+                nextState: nextState.boards,
+            });
+            if (boards.isError) {
+                return boards;
+            }
 
-    public get paramNames() {
-        return this.params.paramNames;
-    }
+            const characters = createCharactersTransformer(operatedBy).applyBack({
+                downOperation: downOperation.characters,
+                nextState: nextState.characters,
+            });
+            if (characters.isError) {
+                return characters;
+            }
 
-    public get roomValue(): Readonly<RoomType> {
-        return this.params.roomValue;
-    }
+            const paramNames = paramNamesTransformer.applyBack({
+                downOperation: downOperation.paramNames,
+                nextState: nextState.paramNames,
+            });
+            if (paramNames.isError) {
+                return paramNames;
+            }
 
-    public clone(): RoomState {
-        return new RoomState({
-            roomValue: { ...this.params.roomValue },
-            boards: this.params.boards.clone(),
-            characters: this.params.characters.clone(),
-            bgms: this.params.bgms.clone(),
-            paramNames: this.params.paramNames.clone(),
-        });
-    }
+            const participants = createParticipantsTransformer(operatedBy).applyBack({
+                downOperation: downOperation.participants,
+                nextState: nextState.participants,
+            });
+            if (participants.isError) {
+                return participants;
+            }
 
-    public async toGraphQL({ revision, deliverTo }: { revision: number; deliverTo: string }): Promise<GraphQL.RoomGetState> {
-        return {
-            ...this.params.roomValue,
-            revision,
-            boards: this.params.boards.toGraphQL(),
-            characters: this.params.characters.toGraphQL({ deliverTo }),
-            bgms: this.params.bgms.toGraphQL(),
-            paramNames: this.params.paramNames.toGraphQL(),
-        };
-    }
-}
+            const result: StateType = {
+                ...nextState,
+                bgms: bgms.value,
+                boards: boards.value,
+                characters: characters.value,
+                paramNames: paramNames.value,
+                participants: participants.value,
+            };
 
-type RoomTwoWayOperationParameters = {
-    valueProps: MutableRoomTwoWayOperation;
-    boards: Board$Global.BoardsTwoWayOperation;
-    characters: Character$Global.CharactersTwoWayOperation;
-    bgms: Bgm$Global.RoomBgmsTwoWayOperation;
-    paramNames: ParamName$Global.ParamNamesTwoWayOperation;
-}
+            if (downOperation.name !== undefined) {
+                result.name = downOperation.name.oldValue;
+            }
 
-export class RoomTwoWayOperation {
-    public constructor(private readonly params: RoomTwoWayOperationParameters) {
-
-    }
-
-    public get valueProps(): Readonly<MutableRoomTwoWayOperation> {
-        return this.params.valueProps;
-    }
-
-    public get boards(): Board$Global.BoardsTwoWayOperation {
-        return this.params.boards;
-    }
-
-    public get characters(): Character$Global.CharactersTwoWayOperation {
-        return this.params.characters;
-    }
-
-    public get bgms() {
-        return this.params.bgms;
-    }
-
-    public get paramNames() {
-        return this.params.paramNames;
-    }
-
-    private toMikroORM(params: { prevRevision: number }): $MikroORM.RoomOp {
-        const result = new $MikroORM.RoomOp(params);
-        this.params.boards.setToMikroORM(result);
-        this.params.characters.setToMikroORM(result);
-        this.params.bgms.setToMikroORM(result);
-        this.params.paramNames.setToMikroORM(result);
-        if (this.valueProps.name !== undefined) {
-            result.name = this.valueProps.name.oldValue;
-        }
-        return result;
-    }
-
-    private async apply(entity: $MikroORM.Room): Promise<void> {
-        await this.boards.apply({ entity: entity.boards });
-        await this.characters.apply({ entity: entity.characters });
-        await this.bgms.apply({ entity: entity.roomBgms });
-        await this.paramNames.apply({ entity: entity.paramNames });
-        if (this.valueProps.name !== undefined) {
-            entity.name = this.valueProps.name.newValue;
-        }
-    }
-
-    public async applyAndCreateOperation(params: {
-        em: EM;
-        entity: $MikroORM.Room;
-    }): Promise<GraphQLOperationGenerator> {
-        const prevRevision = params.entity.roomRevision;
-        const prevState = await RoomState.create(params.entity);
-        await this.apply(params.entity);
-        params.entity.roomRevision = prevRevision + 1;
-        const operation = this.toMikroORM({ prevRevision });
-        params.entity.roomOperations.add(operation);
-        const nextState = await RoomState.create(params.entity);
-        return new GraphQLOperationGenerator({ prevState, nextState, twoWayOperation: this, currentRevision: prevRevision + 1 });
-    }
-}
-
-export class RestoredRoom {
-    // Make sure these:
-    // - apply(prevState, twoWayOperation.up) = nextState
-    // - apply(nextState, twoWayOperation.down) = prevState
-    public constructor(private readonly params: { prevState: RoomState; nextState: RoomState; twoWayOperation?: RoomTwoWayOperation }) { }
-
-    // ユーザーが行おうとしているRoomOperationValueをtransformする。
-    public transform({ clientOperation, operatedBy }: { clientOperation: GraphQL.RoomOperationValue; operatedBy: string }): Result<RoomTwoWayOperation | undefined> {
-        const boards = new Board$Global.RestoredBoards({
-            prevState: this.params.prevState.boards,
-            nextState: this.params.nextState.boards,
-            twoWayOperation: this.params.twoWayOperation?.boards,
-        });
-        const transformedBoards = boards.transform({ clientOperation: clientOperation.boards });
-        if (transformedBoards.isError) {
-            return transformedBoards;
-        }
-
-        const characters = new Character$Global.RestoredCharacters({
-            prevState: this.params.prevState.characters,
-            nextState: this.params.nextState.characters,
-            twoWayOperation: this.params.twoWayOperation?.characters,
-        });
-        const transformedCharacters = characters.transform({ clientOperation: clientOperation.characters, operatedBy });
-        if (transformedCharacters.isError) {
-            return transformedCharacters;
-        }
-
-        const bgms = new Bgm$Global.RestoredRoomBgms({
-            prevState: this.params.prevState.bgms,
-            nextState: this.params.nextState.bgms,
-            twoWayOperation: this.params.twoWayOperation?.bgms,
-        });
-        const transformedBgms = bgms.transform({ clientOperation: clientOperation.bgms });
-        if (transformedBgms.isError) {
-            return transformedBgms;
-        }
-
-        const paramNames = new ParamName$Global.RestoredParamNames({
-            prevState: this.params.prevState.paramNames,
-            nextState: this.params.nextState.paramNames,
-            twoWayOperation: this.params.twoWayOperation?.paramNames,
-        });
-        const transformedParamNames = paramNames.transform({ clientOperation: clientOperation.paramNames });
-        if (transformedParamNames.isError) {
-            return transformedParamNames;
-        }
-
-        const twoWayOperationCore: MutableRoomTwoWayOperation = {};
-
-        twoWayOperationCore.name = ReplaceStringTwoWayOperationModule.transform({
-            first: this.params.twoWayOperation?.valueProps.name,
-            second: clientOperation.name,
-            prevState: this.params.prevState.roomValue.name
-        });
-
-        if (undefinedForAll(twoWayOperationCore) && transformedBoards.value.isId && transformedCharacters.value.isId && transformedBgms.value.isId && transformedParamNames.value.isId) {
-            return ResultModule.ok(undefined);
-        }
-
-        return ResultModule.ok(new RoomTwoWayOperation({
-            valueProps: twoWayOperationCore,
-            boards: transformedBoards.value,
-            characters: transformedCharacters.value,
-            bgms: transformedBgms.value,
-            paramNames: transformedParamNames.value,
-        }));
-    }
-
-    public get prevState(): RoomState {
-        return this.params.prevState;
-    }
-
-    public get nextState(): RoomState {
-        return this.params.nextState;
-    }
-}
-
-export class GraphQLOperationGenerator {
-    // Make sure these:
-    // - apply(prevState, twoWayOperation.up) = nextState
-    // - apply(nextState, twoWayOperation.down) = prevState
-    public constructor(private readonly params: { prevState: RoomState; nextState: RoomState; twoWayOperation: RoomTwoWayOperation; currentRevision: number }) { }
-
-    public get currentRevision(): number {
-        return this.params.currentRevision;
-    }
-
-    public toGraphQLOperation(params: { operatedBy: string; deliverTo: string; nextRevision: number }): GraphQL.RoomOperation {
-        const boards = Board$Global.toGraphQLOperation({
-            prevState: this.params.prevState.boards,
-            nextState: this.params.nextState.boards,
-            twoWayOperation: this.params.twoWayOperation.boards,
-        });
-        const characters = Character$Global.toGraphQLOperation({
-            prevState: this.params.prevState.characters,
-            nextState: this.params.nextState.characters,
-            twoWayOperation: this.params.twoWayOperation.characters,
-            createdByMe: params.operatedBy === params.deliverTo,
-        });
-        const bgms = Bgm$Global.toGraphQLOperation({
-            prevState: this.params.prevState.bgms,
-            nextState: this.params.nextState.bgms,
-            twoWayOperation: this.params.twoWayOperation.bgms,
-        });
-        const paramNames = ParamName$Global.toGraphQLOperation({
-            prevState: this.params.prevState.paramNames,
-            nextState: this.params.nextState.paramNames,
-            twoWayOperation: this.params.twoWayOperation.paramNames,
-        });
-        const operationValue: GraphQL.RoomOperationValue = {
-            boards,
-            characters,
-            bgms,
-            paramNames,
-        };
-
-        operationValue.name = this.params.twoWayOperation.valueProps.name;
-
-        return {
-            __tstype: GraphQL.roomOperation,
-            revisionTo: params.nextRevision,
-            operatedBy: params.operatedBy,
-            value: operationValue
-        };
-    }
+            return ResultModule.ok(result);
+        },
+        toServerState: ({ clientState }) => clientState,
+        protectedValuePolicy: {}
+    });
 }

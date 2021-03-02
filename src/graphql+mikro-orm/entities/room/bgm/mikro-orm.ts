@@ -61,7 +61,7 @@ export class AddRoomBgmOp {
     public constructor({
         channelKey,
     }: {
-            channelKey: string;
+        channelKey: string;
     }) {
         this.channelKey = channelKey;
     }

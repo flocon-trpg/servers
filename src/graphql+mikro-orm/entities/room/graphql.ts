@@ -1,8 +1,8 @@
 import { createUnionType, Field, InputType, ObjectType } from 'type-graphql';
 import { ReplaceNullableStringUpOperation, ReplaceStringUpOperation } from '../../Operations';
-import { BoardsOperation, BoardState } from '../board/graphql';
-import { CharacterState, CharactersOperation } from '../character/graphql';
-import { participantsOperation, ParticipantsOperation, ParticipantState } from '../participant/graphql';
+import { BoardsOperation, BoardState } from './board/graphql';
+import { CharacterState, CharactersOperation } from './character/graphql';
+import { ParticipantsOperation, ParticipantsOperationInput, ParticipantState } from './participant/graphql';
 import { RoomBgmsOperation, RoomBgmState } from './bgm/graphql';
 import { ParamNamesOperation, ParamNameState } from './paramName/graphql';
 
@@ -29,10 +29,12 @@ export class RoomGetState {
 
     @Field(() => [ParamNameState])
     public paramNames!: ParamNameState[];
+
+    @Field(() => [ParticipantState])
+    public participants!: ParticipantState[];
 }
 
 @ObjectType()
-@InputType('RoomOperationValueInput')
 export class RoomOperationValue {
     @Field()
     public boards!: BoardsOperation;
@@ -46,6 +48,29 @@ export class RoomOperationValue {
     @Field()
     public paramNames!: ParamNamesOperation;
 
+    @Field()
+    public participants!: ParticipantsOperation;
+
+    @Field({ nullable: true })
+    public name?: ReplaceStringUpOperation;
+}
+
+@InputType()
+export class RoomOperationValueInput {
+    @Field()
+    public boards!: BoardsOperation;
+
+    @Field()
+    public characters!: CharactersOperation;
+
+    @Field()
+    public bgms!: RoomBgmsOperation;
+
+    @Field()
+    public paramNames!: ParamNamesOperation;
+
+    @Field()
+    public participants!: ParticipantsOperationInput;
 
     @Field({ nullable: true })
     public name?: ReplaceStringUpOperation;
@@ -70,7 +95,7 @@ export class RoomOperation {
 @InputType()
 export class RoomOperationInput {
     @Field()
-    public value!: RoomOperationValue;
+    public value!: RoomOperationValueInput;
 }
 
 export const deleteRoomOperation = 'DeleteRoomOperation';
@@ -85,13 +110,11 @@ export class DeleteRoomOperation {
 
 export const RoomOperated = createUnionType({
     name: 'RoomOperated',
-    types: () => [RoomOperation, ParticipantsOperation, DeleteRoomOperation] as const,
+    types: () => [RoomOperation, DeleteRoomOperation] as const,
     resolveType: value => {
         switch(value.__tstype) {
             case roomOperation:
                 return RoomOperation;
-            case participantsOperation:
-                return ParticipantsOperation;
             case deleteRoomOperation:
                 return DeleteRoomOperation;
         }

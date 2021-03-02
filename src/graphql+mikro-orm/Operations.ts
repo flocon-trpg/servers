@@ -6,9 +6,12 @@ import { TextDownOperation as TextDownOperationCore, TextUpOperation as TextUpOp
 import { CustomResult, ResultModule } from '../@shared/Result';
 import { __ } from '../@shared/collection';
 import { undefinedForAll } from '../utils/helpers';
+import { ParticipantRole } from '../enums/ParticipantRole';
 
 /* validateメソッドは、mikro-ormでJSONとして保存された値をチェックするために使われる。
  * 通常は型は常に正しいが、Entityのコードに変更があったり（おそらくマイグレーションも不可）、管理者がDBを直接いじったりしたときに型が異なるおそれがある。それに備えた対策。
+ */
+/* DownOperation系が T | undefined でなく T | null | undefined なのは、Mikro-ormによってJSONにシリアライズ、デシリアライズすることがあるため。
  */
 
 const validateFilePath = (source: GlobalFilePath): void => {
@@ -33,8 +36,8 @@ type TransformParameters<T> = {
     prevState: T;
 }
 type NullableTransformParameters<T> = {
-    first: { oldValue: T | undefined; newValue: T | undefined } | undefined;
-    second: { newValue: T | undefined } | undefined;
+    first: { oldValue?: T | null; newValue?: T | null } | undefined;
+    second: { newValue?: T | null } | undefined;
     prevState: T | undefined;
 }
 type TransformResult<T> = { oldValue: T; newValue: T } | undefined;
@@ -125,9 +128,9 @@ const ReplaceNullableValueOperationModule = {
     },
     transform<T>({ first, second, prevState }: NullableTransformParameters<T>): NullableTransformResult<T> {
         if (first === undefined && second !== undefined) {
-            const newOperation = { oldValue: prevState, newValue: second.newValue };
+            const newOperation = { oldValue: prevState, newValue: second.newValue ?? undefined };
             if (newOperation.oldValue !== newOperation.newValue) {
-                return { oldValue: prevState, newValue: second.newValue };
+                return { oldValue: prevState, newValue: second.newValue ?? undefined };
             }
         }
         return undefined;
@@ -402,6 +405,41 @@ export type ReplaceNullableNumberTwoWayOperation = {
 export const ReplaceNullableNumberTwoWayOperationModule = {
     transform: (params: NullableTransformParameters<number>): NullableTransformResult<number> => ReplaceNullableValueOperationModule.transform(params),
     toGraphQLOperation: (params: ToGraphQLOperationNullableParameters<number>) => ReplaceNullableValueOperationModule.toGraphQLOperation(params),
+};
+
+
+@ObjectType()
+@InputType('ReplaceNullableParticipantRoleUpOperationInput')
+export class ReplaceNullableParticipantRoleUpOperation {
+    @Field(() => ParticipantRole, { nullable: true })
+    public newValue?: ParticipantRole;
+}
+
+export type ReplaceNullableParticipantRoleDownOperation = {
+    oldValue: ParticipantRole | null | undefined;
+}
+
+export const ReplaceNullableParticipantRoleDownOperationModule = {
+    validate: (source: { oldValue: ParticipantRole | null | undefined } | null | undefined): { oldValue: ParticipantRole | undefined } | undefined => {
+        if (source == null) {
+            return undefined;
+        }
+        if (source.oldValue == null) {
+            return undefined;
+        }
+        return { oldValue: source.oldValue ?? undefined };
+    },
+    compose: (first: ReplaceNullableParticipantRoleDownOperation | undefined, second: ReplaceNullableParticipantRoleDownOperation | undefined): ReplaceNullableParticipantRoleDownOperation | undefined => ReplaceNullableValueOperationModule.compose(first, second)
+};
+
+export type ReplaceNullableParticipantRoleTwoWayOperation = {
+    oldValue: ParticipantRole | undefined;
+    newValue: ParticipantRole | undefined;
+}
+
+export const ReplaceNullableParticipantRoleTwoWayOperationModule = {
+    transform: (params: NullableTransformParameters<ParticipantRole>): NullableTransformResult<ParticipantRole> => ReplaceNullableValueOperationModule.transform(params),
+    toGraphQLOperation: (params: ToGraphQLOperationNullableParameters<ParticipantRole>) => ReplaceNullableValueOperationModule.toGraphQLOperation(params),
 };
 
 
@@ -749,5 +787,14 @@ export const TextTwoWayOperationModule = {
             };
         }
         return valueOperation.operation;
+    },
+    diff: (prev: string, next: string) => {
+        return TextTwoWayOperationCore.diff({ first: prev, second: next });
+    },
+};
+
+export const TextOperationErrorModule = {
+    toString: (error: ApplyError<unknown> | ComposeAndTransformError): string => {
+        return error.type;
     },
 };
