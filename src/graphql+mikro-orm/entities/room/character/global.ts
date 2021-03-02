@@ -88,6 +88,10 @@ export namespace GlobalCharacter {
 
                 return {
                     ...entity,
+                    image: entity.imagePath == null || entity.imageSourceType == null ? undefined : {
+                        path: entity.imagePath,
+                        sourceType: entity.imageSourceType,
+                    },
                     boolParams,
                     numParams,
                     numMaxParams,
@@ -298,6 +302,8 @@ export namespace GlobalCharacter {
                                 createdBy: key.first,
                                 stateId: key.second,
                             });
+                            op.imagePath = value.operation.oldValue.image?.path;
+                            op.imageSourceType = value.operation.oldValue.image?.sourceType;
                             parentOp.removeCharacterOps.add(op);
                             continue;
                         }
@@ -307,6 +313,8 @@ export namespace GlobalCharacter {
                             createdBy: key.first,
                             stateId: key.second,
                         });
+                        toAdd.imagePath = value.operation.newValue.image?.path;
+                        toAdd.imageSourceType = value.operation.newValue.image?.sourceType;
                         parent.characters.add(toAdd);
 
                         const op = new AddCharaOp({ createdBy: key.first, stateId: key.second });

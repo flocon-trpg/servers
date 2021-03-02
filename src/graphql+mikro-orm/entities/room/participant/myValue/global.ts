@@ -65,6 +65,8 @@ export namespace GlobalMyValue {
         export namespace ToGlobal {
             const stateCore = (entity: MyValueBase): StateTypeValue => {
                 return {
+                    // mikro-ormにより生成されたJSONを用いるのは避けたほうがいい気がする（具体的な根拠なし）ので、新しいオブジェクトを生成している。
+
                     isValuePrivate: entity.value.isValuePrivate,
                     valueRangeMin: entity.value.valueRangeMin ?? undefined,
                     valueRangeMax: entity.value.valueRangeMax ?? undefined,
@@ -257,9 +259,14 @@ export namespace GlobalMyValue {
                             const op = new RemoveMyValueOp({
                                 stateId: key,
                                 value: {
-                                    ...value.operation.oldValue,
+                                    // spread syntaxを使うと余計な値がJSONとして保存されるので、それを避けるため全て列挙して記述している。
+
                                     version: 1,
                                     type: 'number',
+                                    isValuePrivate: value.operation.oldValue.isValuePrivate,
+                                    value: value.operation.oldValue.value,
+                                    valueRangeMax: value.operation.oldValue.valueRangeMax,
+                                    valueRangeMin: value.operation.oldValue.valueRangeMin,
                                 },
                             });
                             value.operation.oldValue.pieces.forEach((piece, key) => {
@@ -276,9 +283,14 @@ export namespace GlobalMyValue {
                         const toAdd = new MyValue({
                             stateId: key,
                             value: {
-                                ...value.operation.newValue,
+                                // spread syntaxを使うと余計な値がJSONとして保存されるので、それを避けるため全て列挙して記述している。
+
                                 version: 1,
                                 type: 'number',
+                                isValuePrivate: value.operation.newValue.isValuePrivate,
+                                value: value.operation.newValue.value,
+                                valueRangeMax: value.operation.newValue.valueRangeMax,
+                                valueRangeMin: value.operation.newValue.valueRangeMin,
                             },
                         });
                         parent.myValues.add(toAdd);

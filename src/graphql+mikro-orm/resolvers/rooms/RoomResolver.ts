@@ -909,7 +909,7 @@ export class RoomResolver {
                 result: { failureType: OperateRoomFailureType.NotSignIn }
             };
         }
-
+        
         const queue = async (): Promise<Result<OperateCoreResult>> => {
             const em = context.createEm();
             const entry = await checkEntry({
