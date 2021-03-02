@@ -114,7 +114,7 @@ type RoomOperationPayload = {
     roomId: string;
     participants: ReadonlySet<string>; // UserUid
     generateOperation: (deliverTo: string) => RoomOperation;
-    operatedBy: RequestedBy;
+    notSendTo: string | undefined; // UserUid
 }
 
 type DeleteRoomPayload = {
@@ -216,8 +216,7 @@ const operateParticipantAndFlush = async ({
         return {
             __tstype: 'RoomOperation',
             revisionTo: prevRevision + 1,
-            // TODO: ''ではなく、サーバーによってoperateされたことを明確に示す
-            operatedBy: '',
+            operatedBy: undefined,
             value,
         };
     };
@@ -231,7 +230,7 @@ const operateParticipantAndFlush = async ({
             participants: participantUserUids,
             generateOperation,
             roomId: room.id,
-            operatedBy: { type: server },
+            notSendTo: undefined,
         },
     };
 };
@@ -1011,7 +1010,7 @@ export class RoomResolver {
                 roomId: args.id,
                 participants: participantUserUids,
                 generateOperation,
-                operatedBy: { type: client, userUid: decodedIdToken.uid },
+                notSendTo: decodedIdToken.uid,
             };
             const result: OperateCoreResult = {
                 type: 'success',
@@ -1062,7 +1061,7 @@ export class RoomResolver {
             return undefined;
         }
         if (payload.type === 'roomOperationPayload') {
-            if (RequestedBy.createdByMe({ requestedBy: payload.operatedBy, userUid })) {
+            if (payload.notSendTo === userUid) {
                 return undefined;
             }
 

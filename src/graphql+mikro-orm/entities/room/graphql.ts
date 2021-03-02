@@ -12,7 +12,7 @@ export class RoomGetState {
     public revision!: number;
 
 
-    @Field({description: 'この部屋の作成者。Firebase AuthenticationのUserUidで表現される。'})
+    @Field({ description: 'この部屋の作成者。Firebase AuthenticationのUserUidで表現される。' })
     public createdBy!: string;
 
     @Field()
@@ -85,8 +85,8 @@ export class RoomOperation {
     @Field()
     public revisionTo!: number;
 
-    @Field()
-    public operatedBy!: string;
+    @Field({ nullable: true, description: 'operateRoomを呼んだ人物。promoteなどの結果の場合はnullishになる。' })
+    public operatedBy?: string;
 
     @Field()
     public value!: RoomOperationValue;
@@ -112,7 +112,7 @@ export const RoomOperated = createUnionType({
     name: 'RoomOperated',
     types: () => [RoomOperation, DeleteRoomOperation] as const,
     resolveType: value => {
-        switch(value.__tstype) {
+        switch (value.__tstype) {
             case roomOperation:
                 return RoomOperation;
             case deleteRoomOperation:
