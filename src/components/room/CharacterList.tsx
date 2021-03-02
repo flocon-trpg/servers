@@ -1,9 +1,6 @@
 import React from 'react';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import { Table, Checkbox, Button, InputNumber, Input, Dropdown, Menu, Switch, Tooltip, Popover } from 'antd';
-import * as Room from '../../stateManagers/states/room';
-import * as Participant from '../../stateManagers/states/participant';
-import * as Character from '../../stateManagers/states/character';
 import { CompositeKey, compositeKeyToString, createStateMap, StateMap } from '../../@shared/StateMap';
 import { secureId, simpleId } from '../../utils/generators';
 import { replace, update } from '../../stateManagers/states/types';
@@ -22,18 +19,20 @@ import { useFirebaseStorageUrl } from '../../hooks/firebaseStorage';
 import * as Icon from '@ant-design/icons';
 import ToggleButton from '../../foundations/ToggleButton';
 import { characterIsPrivate, characterIsNotPrivate, parameterIsPrivateAndNotCreatedByMe, characterIsNotPrivateAndNotCreatedByMe } from '../../resource/text/main';
+import { Character } from '../../stateManagers/states/character';
+import { Room } from '../../stateManagers/states/room';
+import { Participant } from '../../stateManagers/states/participant';
 
 const characterOperationBase: Character.PostOperation = {
     boolParams: new Map(),
     numParams: new Map(),
     numMaxParams: new Map(),
     strParams: new Map(),
-    pieceLocations: createStateMap(),
+    pieces: createStateMap(),
 };
 
 type Props = {
     room: Room.State;
-    participants: Participant.State;
 }
 
 type DataSource = {
@@ -43,7 +42,7 @@ type DataSource = {
         state: Character.State;
         createdByMe: boolean | null;
     };
-    participants: Participant.State;
+    participants: ReadonlyMap<string, Participant.State>;
     operate: (operation: Room.PostOperationSetup) => void;
 }
 
@@ -176,7 +175,7 @@ const Image: React.FC<{ filePath?: FilePathFragment; iconSize: boolean }> = ({ f
     return (<img src={src} width={iconSize ? 25 : 150} height={iconSize ? 25 : 150} />);
 };
 
-const CharacterList: React.FC<Props> = ({ room, participants }: Props) => {
+const CharacterList: React.FC<Props> = ({ room }: Props) => {
     const myAuth = React.useContext(MyAuthContext);
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
     const dispatchRoomComponentsState = React.useContext(DispatchRoomComponentsStateContext);
@@ -192,7 +191,7 @@ const CharacterList: React.FC<Props> = ({ room, participants }: Props) => {
                     state: character,
                     createdByMe,
                 },
-                participants,
+                participants: room.participants,
                 operate,
             };
         });

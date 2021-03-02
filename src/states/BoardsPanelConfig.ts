@@ -3,9 +3,6 @@ import isObject from '../utils/isObject';
 import { chooseRecord } from '../utils/record';
 import { castToPartialDraggablePanelConfigBase, DraggablePanelConfigBase, toCompleteDraggablePanelConfigBase } from './DraggablePanelConfigBase';
 import * as generators from '../utils/generators';
-import { State } from '../stateManagers/states/board';
-import { compositeKeyToString, ReadonlyStateMap, StateMap } from '../@shared/StateMap';
-import { __ } from '../@shared/collection';
 
 export type BoardConfig = {
     offsetX: number;

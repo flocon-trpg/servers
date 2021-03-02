@@ -1,78 +1,118 @@
-// numberParameterなどのようにremoveが存在しないoperationに用いることを当初は想定していたが、サーバーからの応答を受け取ったときにdiffをとる必要があり、その際にremoveが出る。もしNonRemoveOperationElementを採用していると、NonRemoveOperationElementとOperationElementの2パターン採用しなければならないため、代わりにOperationElementのみを採用している。そのため、このコードは現在使われていない。
-
-import { DualKeyMap } from '../../@shared/DualKeyMap';
+import { __ } from '../../@shared/collection';
 import { groupJoin } from '../../@shared/Map';
-import { createStateMap, ReadonlyStateMap, StateMap } from '../../@shared/StateMap';
 import { both, left, right } from '../../@shared/Types';
 import { Apply, Diff, Transform } from '../StateManager';
+import { OperationElement, replace, update } from './types';
 import * as $Map from './map';
 
 export const apply = <TKey, TState, TOperation>({
     state,
     operation,
-    inner,
-    create,
+    inner
 }: {
     state: ReadonlyMap<TKey, TState>;
     operation: ReadonlyMap<TKey, TOperation>;
     inner: Apply<TState, TOperation>;
-    create: (operation: TOperation) => TState;
 }): Map<TKey, TState> => {
-    const result = new Map<TKey, TState>(state);
-    for (const [key, group] of groupJoin(state, operation)) {
-        switch (group.type) {
-            case left:
-                result.set(key, group.left);
-                continue;
-            case right:
-                result.set(key, create(group.right));
-                continue;
-            case both:
-                result.set(key, inner({ state: group.left, operation: group.right }));
-                continue;
-        }
-    }
-    return result;
+    return $Map.apply({
+        state,
+        operation: __(operation).toMap(([key, value]) => {
+            return {
+                key,
+                value: {
+                    type: update,
+                    operation: value,
+                }
+            };
+        }),
+        inner,
+    });
 };
 
-export const compose = <TKey, TOperation>({
+export const compose = <TKey, TState, TOperation>({
+    state,
     first,
     second,
     innerCompose,
 }: {
+    state: ReadonlyMap<TKey, TState>;
     first: ReadonlyMap<TKey, TOperation>;
     second: ReadonlyMap<TKey, TOperation>;
-    innerCompose: (params: { first: TOperation; second: TOperation }) => TOperation;
+    innerCompose: (params: { state: TState | undefined; first: TOperation; second: TOperation }) => TOperation;
 }): Map<TKey, TOperation> => {
     const result = new Map<TKey, TOperation>();
-    for (const [key, group] of groupJoin(first, second)) {
+    groupJoin(first, second).forEach((group, key) => {
         switch (group.type) {
             case left:
                 result.set(key, group.left);
-                continue;
+                return;
             case right:
                 result.set(key, group.right);
-                continue;
-            case both:
-                result.set(key, innerCompose({ first: group.left, second: group.right }));
-                continue;
+                return;
+            case both: {
+                const composed = innerCompose({
+                    state: state.get(key),
+                    first: group.left,
+                    second: group.right,
+                });
+                if (composed !== undefined) {
+                    result.set(key, composed);
+                }
+                return;
+            }
         }
-    }
+    });
     return result;
 };
 
-export const transform = <TKey, TFirstOperation, TSecondOperation>({
+const transformFirstElement = <TState, TFirstOperation, TSecondOperation>({
+    first,
+    second,
+    inner,
+}: {
+    first: TFirstOperation;
+    second: OperationElement<TState, TSecondOperation>;
+    inner: Transform<TFirstOperation, TSecondOperation>;
+}): { firstPrime: TFirstOperation | undefined; secondPrime: OperationElement<TState, TSecondOperation> | undefined } => {
+    switch (second.type) {
+        case replace: {
+            if (second.newValue !== undefined) {
+                throw 'Tried to add an element, but already exists another value.';
+            }
+
+            return {
+                firstPrime: undefined,
+                secondPrime: {
+                    type: replace,
+                    newValue: undefined
+                },
+            };
+        }
+        case update: {
+            const xform = inner({ first, second: second.operation });
+            return {
+                firstPrime: xform.firstPrime,
+                secondPrime: {
+                    type: update,
+                    operation: xform.secondPrime
+                },
+            };
+        }
+    }
+};
+
+export const transformFirst = <TKey, TState, TFirstOperation, TSecondOperation>({
     first,
     second,
     inner,
 }: {
     first: ReadonlyMap<TKey, TFirstOperation>;
-    second: ReadonlyMap<TKey, TSecondOperation>;
+    second: ReadonlyMap<TKey, OperationElement<TState, TSecondOperation>>;
     inner: Transform<TFirstOperation, TSecondOperation>;
-}): { firstPrime: Map<TKey, TFirstOperation>; secondPrime: Map<TKey, TSecondOperation> } => {
+}): { firstPrime: ReadonlyMap<TKey, TFirstOperation>; secondPrime: ReadonlyMap<TKey, OperationElement<TState, TSecondOperation>> } => {
     const firstPrime = new Map<TKey, TFirstOperation>();
-    const secondPrime = new Map<TKey, TSecondOperation>();
-
+    const secondPrime = new Map<TKey, OperationElement<TState, TSecondOperation>>();
+    
     groupJoin(first, second).forEach((group, key) => {
         switch (group.type) {
             case left: {
@@ -84,7 +124,7 @@ export const transform = <TKey, TFirstOperation, TSecondOperation>({
                 return;
             }
             case both: {
-                const xform = inner({ first: group.left, second: group.right });
+                const xform = transformFirstElement({ first: group.left, second: group.right, inner });
                 if (xform.firstPrime !== undefined) {
                     firstPrime.set(key, xform.firstPrime);
                 }
@@ -98,66 +138,67 @@ export const transform = <TKey, TFirstOperation, TSecondOperation>({
     return { firstPrime, secondPrime };
 };
 
-// removeされた要素が存在してはならない。
-export const diff = <TKey, TState, TOperation>({
-    prev,
-    next,
+const transformSecondElement = <TState, TFirstOperation, TSecondOperation>({
+    first,
+    second,
     inner,
 }: {
-    prev: ReadonlyMap<TKey, TState>;
-    next: ReadonlyMap<TKey, TState>;
-    inner: (params: { prev: TState; next: TState } | { prev: TState; next: undefined } | { prev: undefined; next: TState }) => TOperation | undefined;
-}): Map<TKey, TOperation> => {
-    const result = new Map<TKey, TOperation>();
+    first: OperationElement<TState, TFirstOperation>;
+    second: TSecondOperation;
+    inner: Transform<TFirstOperation, TSecondOperation>;
+}): { firstPrime: OperationElement<TState, TFirstOperation> | undefined; secondPrime: TSecondOperation | undefined } => {
+    switch (first.type) {
+        case replace:
+            return {
+                firstPrime: first,
+                secondPrime: undefined,
+            };
+        case update: {
+            const xform = inner({ first: first.operation, second });
+            return {
+                firstPrime: {
+                    type: update,
+                    operation: xform.firstPrime
+                },
+                secondPrime: xform.secondPrime,
+            };
+        }
+    }
+};
 
-    groupJoin(prev, next).forEach((group, key) => {
+export const transformSecond = <TKey, TState, TFirstOperation, TSecondOperation>({
+    first,
+    second,
+    inner,
+}: {
+    first: ReadonlyMap<TKey, OperationElement<TState, TFirstOperation>>;
+    second: ReadonlyMap<TKey, TSecondOperation>;
+    inner: Transform<TFirstOperation, TSecondOperation>;
+}): { firstPrime: ReadonlyMap<TKey, OperationElement<TState, TFirstOperation>>; secondPrime: ReadonlyMap<TKey, TSecondOperation> } => {
+    const firstPrime = new Map<TKey, OperationElement<TState, TFirstOperation>>();
+    const secondPrime = new Map<TKey, TSecondOperation>();
+
+    groupJoin(first, second).forEach((group, key) => {
         switch (group.type) {
             case left: {
-                const value = inner({ prev: group.left, next: undefined });
-                if (value !== undefined) {
-                    result.set(key, value);
-                }
+                firstPrime.set(key, group.left);
                 return;
             }
             case right: {
-                const value = inner({ prev: undefined, next: group.right });
-                if (value !== undefined) {
-                    result.set(key, value);
-                }
+                secondPrime.set(key, group.right);
                 return;
             }
             case both: {
-                const value = inner({ prev: group.left, next: group.right });
-                if (value !== undefined) {
-                    result.set(key, value);
+                const xform = transformSecondElement({ first: group.left, second: group.right, inner });
+                if (xform.firstPrime !== undefined) {
+                    firstPrime.set(key, xform.firstPrime);
+                }
+                if (xform.secondPrime !== undefined) {
+                    secondPrime.set(key, xform.secondPrime);
                 }
                 return;
             }
         }
     });
-
-    return result;
-};
-
-export const ofGraphQLOperation = <TKey, TGraphQLUpdate, TOperation>({
-    source,
-    toKey,
-    getOperation,
-}: {
-    source: {
-        update: TGraphQLUpdate[];
-    };
-    toKey: (source: TGraphQLUpdate) => TKey;
-    getOperation: (source: TGraphQLUpdate) => TOperation;
-}): Map<TKey, TOperation> => {
-    const result = new Map<TKey, TOperation>();
-
-    source.update.forEach(update => {
-        const key = toKey(update);
-        if (result.has(key)) {
-            throw `A duplicate key, ${key} was found at TGraphQLUpdate[]. Probably there is a bug at the server app.`;
-        }
-        result.set(key, getOperation(update));
-    });
-    return result;
+    return { firstPrime, secondPrime };
 };

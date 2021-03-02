@@ -5,14 +5,14 @@ import AlertDialog from './AlertDialog';
 import Loading from '../components/alerts/Loading';
 import ApolloErrorDialog from '../components/alerts/ApolloError';
 import { Howl } from 'howler';
-import * as Bgm from '../stateManagers/states/roomBgm';
 import { StrIndex5 } from '../@shared/indexes';
 import { useDeepCompareEffectNoCheck } from 'use-deep-compare-effect';
 import { useFirebaseStorageUrlArray } from '../hooks/firebaseStorage';
 import { __ } from '../@shared/collection';
+import { RoomBgm } from '../stateManagers/states/roomBgm';
 
 type PlayBgmBehaviorCoreProps = {
-    bgm: Bgm.State | null;
+    bgm: RoomBgm.State | null;
 }
 
 const PlayBgmBehaviorCore: React.FC<PlayBgmBehaviorCoreProps> = ({ bgm }: PlayBgmBehaviorCoreProps) => {
@@ -44,7 +44,7 @@ const PlayBgmBehaviorCore: React.FC<PlayBgmBehaviorCoreProps> = ({ bgm }: PlayBg
 };
 
 type Props = {
-    bgms: ReadonlyMap<StrIndex5, Bgm.State>;
+    bgms: ReadonlyMap<StrIndex5, RoomBgm.State>;
 }
 
 const PlayBgmBehavior: React.FC<Props> = ({ bgms }: Props) => {

@@ -6,11 +6,6 @@ import Link from 'next/link';
 import { Button, Col, Row, Space, Table, Tooltip } from 'antd';
 import { useRouter } from 'next/router';
 import QueryResultViewer from '../../foundations/QueryResultViewer';
-import { useSelector } from '../../store';
-import { StarOutlined, StarFilled } from '@ant-design/icons';
-import { useDispatch } from 'react-redux';
-import userConfigModule from '../../modules/userConfigModule';
-import MyAuthContext from '../../contexts/MyAuthContext';
 
 type Data = RoomAsListItemFragment;
 

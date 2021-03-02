@@ -1,7 +1,6 @@
 import { ApolloError } from '@apollo/client';
 import { GraphQLError } from 'graphql';
 import React from 'react';
-import * as Room from '../../../stateManagers/states/room';
 
 export const text = 'text';
 export const graphQLErrors = 'graphQLErrors';

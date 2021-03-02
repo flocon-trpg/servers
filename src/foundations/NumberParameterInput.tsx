@@ -1,13 +1,13 @@
 import React from 'react';
 import { Button, Checkbox, Input, InputNumber, Space, Switch, Tag, Tooltip } from 'antd';
-import * as Character from '../stateManagers/states/character';
-import * as NumParam from '../stateManagers/states/numParam';
 import { update } from '../stateManagers/states/types';
 import { createStateMap } from '../@shared/StateMap';
 import { StrIndex100 } from '../@shared/indexes';
 import { EyeInvisibleOutlined, EyeOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import ToggleButton from './ToggleButton';
 import { addParameter, deleteParameter, parameterIsPrivate, parameterIsNotPrivate, parameterIsPrivateAndNotCreatedByMe, parameterIsNotPrivateAndNotCreatedByMe } from '../resource/text/main';
+import { Character } from '../stateManagers/states/character';
+import { NumParam } from '../stateManagers/states/numParam';
 
 const inputWidth = 50;
 
@@ -23,7 +23,7 @@ type Props = {
 }
 
 const createCharacterOperationBase = (): Character.WritablePostOperation => ({
-    pieceLocations: createStateMap(),
+    pieces: createStateMap(),
     boolParams: new Map(),
     numParams: new Map(),
     numMaxParams: new Map(),

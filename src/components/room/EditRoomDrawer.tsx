@@ -1,13 +1,13 @@
 import { Checkbox, Col, Drawer, Form, Input, InputNumber, Row, Space } from 'antd';
 import React from 'react';
 import DrawerFooter from '../../layouts/DrawerFooter';
-import * as Room from '../../stateManagers/states/room';
 import ComponentsStateContext from './contexts/RoomComponentsStateContext';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import OperateContext from './contexts/OperateContext';
 import { DrawerProps } from 'antd/lib/drawer';
 import { editRoomDrawerVisibility } from './RoomComponentsState';
 import { Gutter } from 'antd/lib/grid/row';
+import { Room } from '../../stateManagers/states/room';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,

@@ -1,5 +1,4 @@
 import { CompositeKey } from '../../@shared/StateMap';
-import * as Character from '../../stateManagers/states/character';
 
 export const create = 'create';
 export const update = 'update';

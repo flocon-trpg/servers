@@ -1,7 +1,5 @@
 import React from 'react';
-import { Button, Checkbox, InputNumber, Space, Switch, Tag, Tooltip } from 'antd';
-import * as Character from '../stateManagers/states/character';
-import * as StrParam from '../stateManagers/states/strParam';
+import { Tooltip } from 'antd';
 import { update } from '../stateManagers/states/types';
 import { createStateMap } from '../@shared/StateMap';
 import { StrIndex100 } from '../@shared/indexes';
@@ -10,6 +8,8 @@ import ToggleButton from './ToggleButton';
 import { addParameter, deleteParameter, parameterIsPrivate, parameterIsNotPrivate, parameterIsPrivateAndNotCreatedByMe, parameterIsNotPrivateAndNotCreatedByMe } from '../resource/text/main';
 import { TextUpOperationModule } from '../utils/operations';
 import CollaborativeInput from './CollaborativeInput';
+import { StrParam } from '../stateManagers/states/strParam';
+import { Character } from '../stateManagers/states/character';
 
 const inputWidth = 150;
 
@@ -24,7 +24,7 @@ type Props = {
 }
 
 const createCharacterOperationBase = (): Character.WritablePostOperation => ({
-    pieceLocations: createStateMap(),
+    pieces: createStateMap(),
     boolParams: new Map(),
     numParams: new Map(),
     numMaxParams: new Map(),

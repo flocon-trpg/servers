@@ -1,101 +1,222 @@
-import { ParticipantOperation, ParticipantsGetState, ParticipantsOperationFragment, ParticipantValueStateFragment } from '../../generated/graphql';
+import { ParticipantOperation, ParticipantOperationInput, ParticipantsOperationInput, ParticipantValueStateFragment, UpdateParticipantOperationInput } from '../../generated/graphql';
 import produce from 'immer';
 import * as $Map from './map';
-import { OperationElement as OperationElementCore, replace, update } from './types';
+import { OperationElement, OperationElement as OperationElementCore, replace, update } from './types';
 import { ReplaceNullableValueOperationModule, ReplaceValueOperationModule } from './utils/replaceValueOperation';
+import { MyNumberValue } from './myNumberValue';
+import { transform as transformReplace, transformNullable as transformNullableReplace } from './replaceValue';
 
-export type StateElement = Omit<ParticipantValueStateFragment, '__typename'>
+export namespace Participant {
+    export type State = Omit<ParticipantValueStateFragment, '__typename' | 'myNumberValues'> & {
+        myNumberValues: ReadonlyMap<string, MyNumberValue.State>;
+    }
 
-export type State = ReadonlyMap<string, StateElement>
+    export type PostOperation = Omit<ParticipantOperationInput, '__typename' | 'myNumberValues'> & {
+        myNumberValues: ReadonlyMap<string, OperationElementCore<MyNumberValue.State, MyNumberValue.PostOperation>>;
+    }
 
-export type OperationElement = OperationElementCore<StateElement, Omit<ParticipantOperation, '__typename'>>
+    export type GetOperation = Omit<ParticipantOperation, '__typename' | 'myNumberValues'> & {
+        myNumberValues: ReadonlyMap<string, OperationElementCore<MyNumberValue.State, MyNumberValue.GetOperation>>;
+    }
 
-export type Operation = ReadonlyMap<string, OperationElement>
+    export const createState = (source: ParticipantValueStateFragment): State => {
+        const myNumberValues = new Map<string, MyNumberValue.State>();
+        source.myNumberValues.forEach(myNumberValue => {
+            myNumberValues.set(myNumberValue.stateId, MyNumberValue.createState(myNumberValue.value));
+        });
 
-export const createState = (source: ParticipantsGetState): State => {
-    // サーバーから受け取る値なので、キーの検証はしていない。
+        return {
+            ...source,
+            myNumberValues
+        };
+    };
 
-    const participants = new Map<string, StateElement>();
-    source.participants.forEach(participant => {
-        participants.set(participant.userUid, participant.value);
-    });
-    return participants;
-};
+    export const createGetOperation = (source: ParticipantOperationInput): GetOperation => {
+        // サーバーから受け取る値なので、キーの検証はしていない。
 
-export const createOperation = (source: ParticipantsOperationFragment): Operation => {
-    // サーバーから受け取る値なので、キーの検証はしていない。
+        const myNumberValues = new Map<string, OperationElement<MyNumberValue.State, MyNumberValue.PostOperation>>();
+        source.myNumberValues.replace.forEach(myNumberValue => {
+            myNumberValues.set(myNumberValue.stateId, { type: replace, newValue: myNumberValue.newValue == null ? undefined : MyNumberValue.createState(myNumberValue.newValue) });
+        });
+        source.myNumberValues.update.forEach(myNumberValue => {
+            myNumberValues.set(myNumberValue.stateId, { type: update, operation: MyNumberValue.createPostOperation(myNumberValue.operation) });
+        });
 
-    const participants = new Map<string, OperationElement>();
-    source.replace.forEach(participant => {
-        participants.set(participant.userUid, { type: replace, newValue: participant.newValue == null ? undefined : participant.newValue });
-    });
-    source.update.forEach(participant => {
-        participants.set(participant.userUid, { type: update, operation: participant.operation });
-    });
+        const result: GetOperation = {
+            ...source,
+            myNumberValues,
+        };
 
-    return participants;
-};
+        return result;
+    };
 
-const applyOperationElement = ({
-    state,
-    operation
-}: {
-    state: StateElement;
-    operation: Omit<ParticipantOperation, '__typename'>;
-}) => {
-    return produce(state, draft => {
-        if (operation.name != null) {
-            draft.name = operation.name.newValue;
-        }
-        if (operation.role != null) {
-            draft.role = operation.role.newValue;
-        }
-    });
-};
+    export const createPostOperation = (source: ParticipantOperationInput): PostOperation => {
+        return createGetOperation(source);
+    };
 
-export const applyOperation = ({
-    state,
-    operation
-}: {
-    state: State;
-    operation: Operation;
-}): State => {
-    return $Map.apply({
+    export const toGraphQLInput = (source: ReadonlyMap<string, PostOperation>): ParticipantsOperationInput => {
+        // replaceはParticipantsOperationInputに存在しないため、updateのみを処理している
+        const charactersUpdate: UpdateParticipantOperationInput[] = [];
+        source.forEach((operation, key) => {
+            const next: UpdateParticipantOperationInput = {
+                userUid: key,
+                operation: {
+                    ...operation,
+                    myNumberValues: MyNumberValue.toGraphQLInput(operation.myNumberValues),
+                }
+            };
+            charactersUpdate.push(next);
+        });
+        return {
+            update: charactersUpdate,
+        };
+    };
+
+    export const applyPostOperation = ({
         state,
-        operation,
-        inner: applyOperationElement,
-    });
-};
+        operation
+    }: {
+        state: State;
+        operation: PostOperation;
+    }) => {
+        const myNumberValues = $Map.apply({
+            state: state.myNumberValues,
+            operation: operation.myNumberValues,
+            inner: MyNumberValue.applyOperation,
+        });
 
-export const compose = ({
-    state,
-    first,
-    second
-}: {
-    state: State;
-    first: Operation;
-    second: Operation;
-}): Operation => {
-    return $Map.compose({
+        return produce(state, draft => {
+            draft.myNumberValues = myNumberValues;
+        });
+    };
+
+    export const applyGetOperation = ({
+        state,
+        operation
+    }: {
+        state: State;
+        operation: GetOperation;
+    }) => {
+        return produce(applyPostOperation({ state, operation }), draft => {
+            if (operation.name != null) {
+                draft.name = operation.name.newValue;
+            }
+            if (operation.role != null) {
+                draft.role = operation.role.newValue;
+            }
+        });
+    };
+
+    export const compose = ({
         state,
         first,
         second,
-        innerApply: applyOperationElement,
-        innerCompose: ({ first, second }) => {
-            return {
-                name: ReplaceValueOperationModule.compose(first.name, second.name),
-                role: ReplaceNullableValueOperationModule.compose(first.role, second.role),
-            };
-        },
-        innerDiff: ({prev, next}) => {
-            const result: Omit<ParticipantOperation, '__typename'> = {};
-            if (prev.name !== next.name) {
-                result.name = {newValue: next.name};
-            }
-            if (prev.role != next.role) {
-                result.role = { newValue: next.role };
-            }
-            return result;
-        },
-    });
-};
+    }: {
+        state: State;
+        first: PostOperation;
+        second: PostOperation;
+    }): PostOperation => {
+        // wrapするのはfirstとsecondのどちらでも問題ない。ここでは適当にfirstにしている。
+
+        const result: PostOperation = { ...first };
+
+        const myNumberValues = $Map.compose({
+            state: state.myNumberValues,
+            first: first.myNumberValues,
+            second: second.myNumberValues,
+            innerApply: MyNumberValue.applyOperation,
+            innerCompose: ({ state, first, second }) => {
+                if (state === undefined) {
+                    throw 'myNumberValue state not found';
+                }
+                return MyNumberValue.compose({ state, first, second });
+            },
+            innerDiff: MyNumberValue.diff,
+        });
+        result.myNumberValues = myNumberValues;
+        return result;
+    };
+
+    export const getFirstTransform = ({
+        first,
+        second
+    }: {
+        first: GetOperation;
+        second: PostOperation;
+    }): { firstPrime: GetOperation; secondPrime: PostOperation } => {
+        const myNumberValues = $Map.transform({
+            first: first.myNumberValues,
+            second: second.myNumberValues,
+            inner: MyNumberValue.transform,
+            diff: MyNumberValue.diff
+        });
+
+        const firstPrime: GetOperation = {
+            myNumberValues: myNumberValues.firstPrime,
+        };
+        const secondPrime: PostOperation = {
+            myNumberValues: myNumberValues.secondPrime,
+        };
+
+        firstPrime.role = transformNullableReplace({ first: first.role, second: undefined }).firstPrime;
+
+        firstPrime.name = transformReplace({ first: first.name, second: undefined }).firstPrime;
+
+        return { firstPrime, secondPrime };
+    };
+
+    export const postFirstTransform = ({
+        first,
+        second
+    }: {
+        first: PostOperation;
+        second: GetOperation;
+    }): { firstPrime: PostOperation; secondPrime: GetOperation } => {
+        const myNumberValues = $Map.transform({
+            first: first.myNumberValues,
+            second: second.myNumberValues,
+            inner: MyNumberValue.transform,
+            diff: MyNumberValue.diff
+        });
+
+        const firstPrime: PostOperation = {
+            myNumberValues: myNumberValues.firstPrime,
+        };
+        const secondPrime: GetOperation = {
+            myNumberValues: myNumberValues.secondPrime,
+        };
+
+        secondPrime.role = transformNullableReplace({ first: undefined, second: second.role }).secondPrime;
+
+        secondPrime.name = transformReplace({ first: undefined, second: second.name }).secondPrime;
+
+        return { firstPrime, secondPrime };
+    };
+
+    export const diff = ({
+        prev,
+        next
+    }: {
+        prev: State;
+        next: State;
+    }): GetOperation => {
+        const myNumberValues = $Map.diff({
+            prev: prev.myNumberValues,
+            next: next.myNumberValues,
+            inner: MyNumberValue.diff
+        });
+
+        const result: GetOperation = {
+            myNumberValues,
+        };
+
+        if (prev.role != next.role) {
+            result.role = { newValue: next.role };
+        }
+        if (prev.name != next.name) {
+            result.name = { newValue: next.name };
+        }
+
+        return result;
+    };
+}

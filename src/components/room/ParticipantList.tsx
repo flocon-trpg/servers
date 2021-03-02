@@ -1,19 +1,19 @@
 import React from 'react';
 import { Table } from 'antd';
-import * as Participant from '../../stateManagers/states/participant';
 import { __ } from '../../@shared/collection';
 import { ParticipantRole } from '../../generated/graphql';
 import Jdenticon from '../../foundations/Jdenticon';
+import { Participant } from '../../stateManagers/states/participant';
 
 type Props = {
-    participants: Participant.State;
+    participants: ReadonlyMap<string, Participant.State>;
 }
 
 type DataSource = {
     key: string;
     participant: {
         userUid: string;
-        state: Participant.StateElement;
+        state: Participant.State;
     };
 }
 

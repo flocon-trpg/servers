@@ -6,11 +6,9 @@ import { Alert, Button, Card, Input, Result, Spin, notification as antdNotificat
 import Layout from '../../layouts/Layout';
 import { ApolloProvider, FetchResult } from '@apollo/client';
 import MyAuthContext from '../../contexts/MyAuthContext';
-import { createState } from '../../stateManagers/states/room';
 import { deleted, getRoomFailure, joined, loading, mutationFailure, nonJoined, requiresLogin, useRoomState } from '../../hooks/useRoomState';
 import AlertDialog from '../../foundations/AlertDialog';
 import Loading from '../../components/alerts/Loading';
-import { State as ParticipantsState } from '../../stateManagers/states/participant';
 import Center from '../../foundations/Center';
 import NotificationContext, { TextNotification, toTextNotification, Notification } from '../../components/room/contexts/NotificationContext';
 
@@ -130,7 +128,7 @@ const RoomRouter: React.FC<{ id: string; allNotifications: ReadonlyArray<TextNot
             }
             return (
                 <Layout requiresLogin showEntryForm={false}>
-                    <RoomComponent roomId={id} roomState={state.roomState} participantsState={state.participantsState} operate={state.operateRoom} allNotifications={allNotifications} />
+                    <RoomComponent roomId={id} roomState={state.roomState} operate={state.operateRoom} allNotifications={allNotifications} />
                 </Layout>);
         }
         case nonJoined:

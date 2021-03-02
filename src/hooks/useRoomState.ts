@@ -4,11 +4,11 @@ import { GetRoomDocument, GetRoomFailureType, GetRoomQuery, GetRoomQueryVariable
 import * as Rx from 'rxjs/operators';
 import { ApolloError, FetchResult, useApolloClient } from '@apollo/client';
 import { GetOnlyStateManager, StateManager } from '../stateManagers/StateManager';
-import * as Room from '../stateManagers/states/room';
-import * as Participant from '../stateManagers/states/participant';
 import { create as createStateManager } from '../stateManagers/main';
 import MyAuthContext from '../contexts/MyAuthContext';
 import NotificationContext, { apolloError, text } from '../components/room/contexts/NotificationContext';
+import { Room } from '../stateManagers/states/room';
+import { Participant } from '../stateManagers/states/participant';
 
 const sampleTime = 3000;
 
@@ -72,7 +72,6 @@ export const useRoomState = (roomId: string): RoomStateResult => {
         }
 
         let roomStateManager: StateManager<Room.State, Room.GetOperation, Room.PostOperation> | null = null;
-        let participantStateManager: GetOnlyStateManager<Participant.State, Participant.Operation> | null = null;
 
         const onRoomStateManagerUpdate = () => {
             const $stateManager = roomStateManager;
@@ -92,26 +91,8 @@ export const useRoomState = (roomId: string): RoomStateResult => {
             });
         };
 
-        const onParticipantStateManagerUpdate = () => {
-            const $stateManager = participantStateManager;
-            if ($stateManager == null) {
-                return;
-            }
-            setState(oldValue => {
-                if (oldValue.type !== joined) {
-                    return oldValue;
-                }
-                const newState = $stateManager.uiState;
-                return {
-                    ...oldValue,
-                    participantsState: newState,
-                };
-            });
-        };
-
         const postTrigger = new Subject<void>();
         const roomOperationCache = new Map<number, RoomOperationFragment>(); // キーはrevisionTo
-        const participantOperationCache = new Map<number, ParticipantsOperationFragment>(); // キーはrevisionTo
         // TODO: GetRoomQueryを受信中にoperationを受け取り損ねるのをなるべく防ぐためにsubscriptionを先に行っているが、必要のない場面でもsubscribeするため非効率。もしパフォーマンス上の問題があるなら、getOperationのようなqueryをサーバー側に実装してからコードを変更すべきか。
         // そもそも、「subscribeの通信確立後にGetRoomQueryを実行」ということができればいいのだが、Apolloの仕様がまだわからないのでなんともいえない。
         const graphQLSubscriptionSubscription = apolloClient.subscribe<RoomOperatedSubscription, RoomOperatedSubscriptionVariables>({ query: RoomOperatedDocument, variables: { id: roomId } })
@@ -137,17 +118,6 @@ export const useRoomState = (roomId: string): RoomStateResult => {
                             roomStateManager.onOthersGet(getOperation, s.data.roomOperated.revisionTo);
                             onRoomStateManagerUpdate();
                         }
-                        return;
-                    }
-                    case 'ParticipantsOperation': {
-                        if (participantStateManager == null) {
-                            participantOperationCache.set(s.data.roomOperated.revisionTo, s.data.roomOperated);
-                            return;
-                        }
-                        // Participantは、すべてSubscriptionの結果を用いている。
-                        const operation = Participant.createOperation(s.data.roomOperated);
-                        participantStateManager.onGet(operation, s.data.roomOperated.revisionTo);
-                        onParticipantStateManagerUpdate();
                         return;
                     }
                 }
@@ -279,20 +249,11 @@ export const useRoomState = (roomId: string): RoomStateResult => {
             switch (q.data.result.__typename) {
                 case 'GetJoinedRoomResult': {
                     const newRoomStateManager = createStateManager(Room.createState(q.data.result.room), q.data.result.room.revision);
-                    const newParticipantManager = new GetOnlyStateManager<Participant.State, Participant.Operation>({
-                        revision: q.data.result.participants.revision,
-                        state: Participant.createState(q.data.result.participants),
-                        apply: Participant.applyOperation,
-                    });
                     roomOperationCache.forEach((operation, revisionTo) => {
                         // Roomは、他人が行った変更はSubscriptionの結果を用い、自分が行った変更はMutationの結果を用いている。
                         if (operation.operatedBy !== userUid) {
                             newRoomStateManager.onOthersGet(Room.createGetOperation(operation.value), revisionTo);
                         }
-                    });
-                    participantOperationCache.forEach((operation, revisionTo) => {
-                        // Participantは、すべてSubscriptionの結果を用いている。
-                        newParticipantManager.onGet(Participant.createOperation(operation), revisionTo);
                     });
 
                     roomOperationCache.clear(); // 早めのメモリ解放
@@ -319,15 +280,6 @@ export const useRoomState = (roomId: string): RoomStateResult => {
                         postTrigger.next();
                     };
 
-                    participantOperationCache.clear(); // 早めのメモリ解放
-                    participantStateManager = newParticipantManager;
-
-                    setState({
-                        type: joined,
-                        roomState: newRoomStateManager.uiState,
-                        operateRoom: newRoomStateManager.requiresReload ? undefined : operate,
-                        participantsState: newParticipantManager.uiState,
-                    });
                     break;
                 }
                 case 'GetNonJoinedRoomResult': {

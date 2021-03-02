@@ -1,5 +1,5 @@
-import * as Board from '../../stateManagers/states/board';
-import * as PieceLocation from '../../stateManagers/states/pieceLocation';
+import { Board } from '../../stateManagers/states/board';
+
 
 export const getCellPosition = ({
     board,

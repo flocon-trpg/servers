@@ -7,12 +7,11 @@ import { $system } from '../../@shared/Constants';
 import { useSelector } from '../../store';
 import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
-import * as Character from '../../stateManagers/states/character';
 import { ReadonlyStateMap } from '../../@shared/StateMap';
 import MyAuthContext from '../../contexts/MyAuthContext';
-import * as Participant from '../../stateManagers/states/participant';
 import NotificationContext, { graphQLErrors } from './contexts/NotificationContext';
 import { apolloError } from '../../hooks/useRoomMessages';
+import { Character } from '../../stateManagers/states/character';
 
 const defaultNameKey = 'defaultNameKey';
 const customNameKey = 'customNameKey';

@@ -26,7 +26,7 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
         this._core = new Map<TKey1, Map<TKey2, TValue>>();
     }
 
-    private static mapMap<TKey1, TKey2, TValue1, TValue2>(source: DualKeyMapSource<TKey1, TKey2, TValue1>, mapping: (source: TValue1) => TValue2): Map<TKey1, Map<TKey2, TValue2>> {
+    private static mapMap<TKey1, TKey2, TValue1, TValue2>(source: DualKeyMapSource<TKey1, TKey2, TValue1>, mapping: (source: TValue1, key: DualKey<TKey1, TKey2>) => TValue2): Map<TKey1, Map<TKey2, TValue2>> {
         const result = new Map<TKey1, Map<TKey2, TValue2>>();
         for (const [firstKey, first] of source) {
             if (first.size === 0) {
@@ -34,20 +34,20 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
             }
             const toSet = new Map<TKey2, TValue2>();
             for (const [secondKey, second] of first) {
-                toSet.set(secondKey, mapping(second));
+                toSet.set(secondKey, mapping(second, { first: firstKey, second: secondKey }));
             }
             result.set(firstKey, toSet);
         }
         return result;
     }
 
-    private static create<TKey1, TKey2, TValue1, TValue2>(source: DualKeyMapSource<TKey1, TKey2, TValue1> | DualKeyMap<TKey1, TKey2, TValue1>, mapping: (source: TValue1) => TValue2): DualKeyMap<TKey1, TKey2, TValue2> {
+    private static create<TKey1, TKey2, TValue1, TValue2>(source: DualKeyMapSource<TKey1, TKey2, TValue1> | DualKeyMap<TKey1, TKey2, TValue1>, mapping: (source: TValue1, key: DualKey<TKey1, TKey2>) => TValue2): DualKeyMap<TKey1, TKey2, TValue2> {
         const result = new DualKeyMap<TKey1, TKey2, TValue2>();
         result._core = DualKeyMap.mapMap(source instanceof DualKeyMap ? source._core : source, mapping);
         return result;
     }
 
-    public map<TResult>(mapping: (source: TValue) => TResult): DualKeyMap<TKey1, TKey2, TResult> {
+    public map<TResult>(mapping: (source: TValue, key: DualKey<TKey1, TKey2>) => TResult): DualKeyMap<TKey1, TKey2, TResult> {
         return DualKeyMap.create(this, mapping);
     }
 
@@ -136,8 +136,9 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
     }
 }
 
-export type ReadonlyDualKeyMap<TKey1, TKey2, TValue> = Omit<Readonly<DualKeyMap<TKey1, TKey2, TValue>>, 'set' | 'delete'> & {
+export type ReadonlyDualKeyMap<TKey1, TKey2, TValue> = Omit<Readonly<DualKeyMap<TKey1, TKey2, TValue>>, 'set' | 'delete' | 'getByFirst'> & {
     [Symbol.iterator](): IterableIterator<readonly [DualKey<TKey1, TKey2>, TValue]>;
+    getByFirst(key: TKey1): ReadonlyMap<TKey2, TValue> | undefined;
 }
 
 export const groupJoin = <TKey1, TKey2, TLeft, TRight>(left: ReadonlyDualKeyMap<TKey1, TKey2, TLeft>, right: ReadonlyDualKeyMap<TKey1, TKey2, TRight>): DualKeyMap<TKey1, TKey2, GroupJoinResult<TLeft, TRight>> => {

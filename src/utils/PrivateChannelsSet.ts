@@ -1,4 +1,4 @@
-import * as Participant from '../stateManagers/states/participant';
+import { Participant } from '../stateManagers/states/participant';
 
 const toString = (visibleTo: ReadonlySet<string>): string => {
     return [...visibleTo].sort().reduce((seed, elem) => seed === '' ? elem : `${seed};${elem}`, '');
@@ -20,7 +20,7 @@ export class PrivateChannelSet {
     }
 
     // participantsのkeyはUserUid
-    public toChannelNameBase(participants: Participant.State, skipMe?: { userUid: string }): string[] {
+    public toChannelNameBase(participants: ReadonlyMap<string, Participant.State>, skipMe?: { userUid: string }): string[] {
         const result: string[] = [];
         this._source.forEach(userUid => {
             if (userUid === skipMe?.userUid) {

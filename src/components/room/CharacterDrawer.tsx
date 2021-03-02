@@ -1,8 +1,6 @@
 import { Button, Checkbox, Col, Divider, Drawer, Form, Input, InputNumber, PageHeader, Row, Space } from 'antd';
 import React from 'react';
 import DrawerFooter from '../../layouts/DrawerFooter';
-import * as Room from '../../stateManagers/states/room';
-import * as Character from '../../stateManagers/states/character';
 import ComponentsStateContext from './contexts/RoomComponentsStateContext';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import OperateContext from './contexts/OperateContext';
@@ -15,7 +13,6 @@ import InputFile from '../InputFile';
 import { FilesManagerDrawerType } from '../../utils/types';
 import FilesManagerDrawer from '../FilesManagerDrawer';
 import { Gutter } from 'antd/lib/grid/row';
-import * as PieceLocation from '../../stateManagers/states/pieceLocation';
 import { strIndex20Array } from '../../@shared/indexes';
 import { RoomParameterNameType } from '../../generated/graphql';
 import MyAuthContext from '../../contexts/MyAuthContext';
@@ -25,6 +22,9 @@ import StringParameterInput from '../../foundations/StringParameterInput';
 import ToggleButton from '../../foundations/ToggleButton';
 import { SettingOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import { characterIsPrivate, characterIsNotPrivate, characterIsNotPrivateAndNotCreatedByMe } from '../../resource/text/main';
+import { Room } from '../../stateManagers/states/room';
+import { Character } from '../../stateManagers/states/character';
+import { Piece } from '../../stateManagers/states/piece';
 
 const notFound = 'notFound';
 
@@ -39,14 +39,14 @@ type Props = {
 const defaultCharacter: Character.State = {
     name: '',
     isPrivate: false,
-    pieceLocations: createStateMap(),
+    pieces: createStateMap(),
     boolParams: new Map(),
     numParams: new Map(),
     numMaxParams: new Map(),
     strParams: new Map(),
 };
 
-const defaultPieceLocation: PieceLocation.State = {
+const defaultPieceLocation: Piece.State = {
     x: 0,
     y: 0,
     w: 50,
@@ -121,7 +121,7 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
         if (drawerType?.type !== update || drawerType.boardKey == null) {
             return null;
         }
-        return character.pieceLocations.get(drawerType.boardKey) ?? null;
+        return character.pieces.get(drawerType.boardKey) ?? null;
     })();
 
     // createのときは、直接setCharacterが呼ばれることでcharacterが変わる。
@@ -156,13 +156,13 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
         }
     };
 
-    const updatePieceLocation = (partialState: Partial<PieceLocation.State>) => {
+    const updatePieceLocation = (partialState: Partial<Piece.State>) => {
         if (pieceLocation == null || drawerType?.type !== update || drawerType.boardKey == null) {
             return;
         }
-        const diffOperation = PieceLocation.diff({ prev: pieceLocation, next: { ...pieceLocation, ...partialState } });
-        const pieceLocations = createStateMap<OperationElement<PieceLocation.State, PieceLocation.PostOperation>>();
-        pieceLocations.set(drawerType.boardKey, {
+        const diffOperation = Piece.diff({ prev: pieceLocation, next: { ...pieceLocation, ...partialState } });
+        const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
+        pieces.set(drawerType.boardKey, {
             type: update,
             operation: diffOperation,
         });
@@ -170,7 +170,7 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
         operation.characters.set(drawerType.stateKey, {
             type: update,
             operation: {
-                pieceLocations,
+                pieces,
                 boolParams: new Map(),
                 numParams: new Map(),
                 numMaxParams: new Map(),

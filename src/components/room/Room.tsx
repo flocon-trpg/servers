@@ -6,8 +6,7 @@ import useRoomConfig from '../../hooks/localStorage/useRoomConfig';
 import { useSelector } from '../../store';
 import roomConfigModule from '../../modules/roomConfigModule';
 import { useDispatch } from 'react-redux';
-import * as RoomStates from '../../stateManagers/states/room';
-import * as Participant from '../../stateManagers/states/participant';
+import { Room as RoomStates } from '../../stateManagers/states/room';
 import Boards from './Boards';
 import { recordToArray } from '../../utils/record';
 import RoomMessages, { Tab } from './RoomMessages';
@@ -36,6 +35,7 @@ import MyAuthContext from '../../contexts/MyAuthContext';
 import Jdenticon from '../../foundations/Jdenticon';
 import ParticipantList from './ParticipantList';
 import NotificationContext, { graphQLErrors, Notification, text, TextNotification, toTextNotification } from './contexts/NotificationContext';
+import { Participant } from '../../stateManagers/states/participant';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -325,13 +325,12 @@ const bottomContainerPadding = `0px ${horizontalPadding}px`;
 
 type Props = {
     roomState: RoomStates.State;
-    participantsState: Participant.State;
     operate: ((operation: RoomStates.PostOperationSetup) => void);
     roomId: string;
     allNotifications: ReadonlyArray<TextNotification>;
 }
 
-const Room: React.FC<Props> = ({ roomState, participantsState, roomId, allNotifications, operate }: Props) => {
+const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }: Props) => {
     useRoomConfig(roomId);
     const myAuth = React.useContext(MyAuthContext);
     const roomConfig = useSelector(state => state.roomConfigModule);
@@ -346,14 +345,14 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, allNotifi
     const [getLogQuery, getLogQueryResult] = useGetLogLazyQuery({ variables: { roomId }, fetchPolicy: 'network-only' });
     const [leaveRoomMutation] = useLeaveRoomMutation({ variables: { id: roomId } });
     const roomStateRef = React.useRef(roomState);
-    const participantsStateRef = React.useRef(participantsState);
+    const participantsStateRef = React.useRef(roomState.participants);
 
     React.useEffect(() => {
         roomStateRef.current = roomState;
     }, [roomState]);
     React.useEffect(() => {
-        participantsStateRef.current = participantsState;
-    }, [participantsState]);
+        participantsStateRef.current = roomState.participants;
+    }, [roomState.participants]);
 
     React.useEffect(() => {
         const data = getLogQueryResult.data;
@@ -375,9 +374,9 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, allNotifi
         return (<div>loading config file...</div>);
     }
 
-    let me: Participant.StateElement | undefined = undefined;
+    let me: Participant.State | undefined = undefined;
     if (myAuth != null) {
-        me = participantsState.get(myAuth.uid);
+        me = roomState.participants.get(myAuth.uid);
     }
 
     // TODO: offset, zoom
@@ -558,7 +557,7 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, allNotifi
                                     minHeight={150}
                                     minWidth={150}
                                     zIndex={roomConfig.panels.charactersPanel.zIndex}>
-                                    <CharacterList room={roomState} participants={participantsState} />
+                                    <CharacterList room={roomState} />
                                 </DraggableCard>}
                                 {roomConfig.panels.gameEffectPanel.isMinimized ? null : <DraggableCard
                                     header="Game effect"
@@ -586,7 +585,7 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, allNotifi
                                     minHeight={150}
                                     minWidth={150}
                                     zIndex={roomConfig.panels.messagesPanel.zIndex}>
-                                    <RoomMessages roomId={roomId} participantsState={participantsState} characters={roomState.characters} notifications={allNotifications} />
+                                    <RoomMessages roomId={roomId} participants={roomState.participants} characters={roomState.characters} notifications={allNotifications} />
                                 </DraggableCard>}
                                 {roomConfig.panels.participantsPanel.isMinimized ? null : <DraggableCard
                                     header="Participants"
@@ -600,7 +599,7 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, allNotifi
                                     minHeight={150}
                                     minWidth={150}
                                     zIndex={roomConfig.panels.participantsPanel.zIndex}>
-                                    <ParticipantList participants={participantsState} />
+                                    <ParticipantList participants={roomState.participants} />
                                 </DraggableCard>}
                             </div>
 
@@ -635,7 +634,7 @@ const Room: React.FC<Props> = ({ roomState, participantsState, roomId, allNotifi
                             <BoardDrawer roomState={roomState} />
                             <CharacterDrawer roomState={roomState} />
                             <CharacterParameterNamesDrawer roomState={roomState} />
-                            <CreatePrivateMessageDrawer roomState={roomState} participantsState={participantsState} roomId={roomId} />
+                            <CreatePrivateMessageDrawer roomState={roomState} roomId={roomId} />
                             <EditRoomDrawer roomState={roomState} />
 
                             <PlayBgmBehavior bgms={roomState.bgms} />

@@ -1,30 +1,26 @@
 import React from 'react';
-import * as GraphQL from '../../generated/graphql';
-import { success, useImage, useImageFromGraphQL } from '../../hooks/image';
-import DraggableCore from 'react-draggable';
+import { success, useImageFromGraphQL } from '../../hooks/image';
 import * as ReactKonva from 'react-konva';
-import { State } from '../../stateManagers/states/board';
-import * as Character from '../../stateManagers/states/character';
-import { CompositeKey, compositeKeyToString, createStateMap, ReadonlyStateMap, StateMap, stringToCompositeKey, toJSONString } from '../../@shared/StateMap';
+import { CompositeKey, compositeKeyToString, createStateMap, ReadonlyStateMap, stringToCompositeKey, toJSONString } from '../../@shared/StateMap';
 import { Button, Dropdown, Menu } from 'antd';
 import { DownOutlined, PlusOutlined } from '@ant-design/icons';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import { boardDrawerType, characterDrawerType, create } from './RoomComponentsState';
 import { useDispatch } from 'react-redux';
-import roomConfigModule, { UpdateBoardAction } from '../../modules/roomConfigModule';
-import { BoardConfig, BoardsPanelConfig, createDefaultBoardConfig } from '../../states/BoardsPanelConfig';
-import { getStorageForce } from '../../utils/firebaseHelpers';
+import roomConfigModule from '../../modules/roomConfigModule';
+import { BoardsPanelConfig, createDefaultBoardConfig } from '../../states/BoardsPanelConfig';
 import Konva from 'konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import { FilePath } from '../../utils/types';
 import { __ } from '../../@shared/collection';
 import OperateContext from './contexts/OperateContext';
-import { createPostOperationSetup, setupPostOperation } from '../../stateManagers/states/room';
 import { OperationElement, replace, update } from '../../stateManagers/states/types';
-import * as PieceLocation from '../../stateManagers/states/pieceLocation';
-import MyAuthContext from '../../contexts/MyAuthContext';
 import * as Icon from '@ant-design/icons';
 import { getCellPosition, getCellSize } from './utils';
+import { Character } from '../../stateManagers/states/character';
+import { Piece } from '../../stateManagers/states/piece';
+import { Room } from '../../stateManagers/states/room';
+import { Board as StatesBoard } from '../../stateManagers/states/board';
 
 type Vector2 = {
     x: number;
@@ -170,7 +166,7 @@ type BoardProps = {
     roomId: string;
     boardKey: CompositeKey;
     boardsPanelConfigId: string;
-    board: State;
+    board: StatesBoard.State;
     boardsPanelConfig: BoardsPanelConfig;
     characters: ReadonlyStateMap<Character.State>;
     onClick?: (e: KonvaEventObject<MouseEvent>) => void;
@@ -215,19 +211,19 @@ const Board: React.FC<BoardProps> = ({ roomId, board, boardKey, boardsPanelConfi
 
     const pieces = (() => {
         const pieces = __(characters).compact(([characterKey, character]) => {
-            const pieceLocation = __(character.pieceLocations).find(([boardKey$]) => {
+            const piece = __(character.pieces).find(([boardKey$]) => {
                 return boardKey.createdBy === boardKey$.createdBy && boardKey.id === boardKey$.id;
             });
-            if (pieceLocation == null) {
+            if (piece == null) {
                 return null;
             }
-            const [, pieceLocationValue] = pieceLocation.value;
+            const [, pieceValue] = piece.value;
             if (character.image == null) {
                 // TODO: 画像なしでコマを表示する
                 return null;
             }
             return <IconImage
-                {...PieceLocation.getPosition({ ...board, state: pieceLocationValue })}
+                {...Piece.getPosition({ ...board, state: pieceValue })}
                 key={compositeKeyToString(characterKey)}
                 filePath={character.image}
                 draggable
@@ -235,34 +231,34 @@ const Board: React.FC<BoardProps> = ({ roomId, board, boardKey, boardsPanelConfi
                 isSelected={selectedPieceKey != null && (selectedPieceKey.createdBy === characterKey.createdBy && selectedPieceKey.id === characterKey.id)}
                 onClick={() => setSelectedPieceKey(characterKey)}
                 onDragEnd={e => {
-                    const pieceLocationOperation: PieceLocation.PostOperation = {};
+                    const pieceOperation: Piece.PostOperation = {};
                     if (e.newLocation != null) {
-                        pieceLocationOperation.x = { newValue: e.newLocation.x };
-                        pieceLocationOperation.y = { newValue: e.newLocation.y };
+                        pieceOperation.x = { newValue: e.newLocation.x };
+                        pieceOperation.y = { newValue: e.newLocation.y };
                     }
                     if (e.newSize != null) {
-                        pieceLocationOperation.w = { newValue: e.newSize.w };
-                        pieceLocationOperation.h = { newValue: e.newSize.h };
+                        pieceOperation.w = { newValue: e.newSize.w };
+                        pieceOperation.h = { newValue: e.newSize.h };
                     }
-                    if (pieceLocationValue.isCellMode) {
+                    if (pieceValue.isCellMode) {
                         if (e.newLocation != null) {
                             const position = getCellPosition({ ...e.newLocation, board });
-                            pieceLocationOperation.cellX = { newValue: position.cellX };
-                            pieceLocationOperation.cellY = { newValue: position.cellY };
+                            pieceOperation.cellX = { newValue: position.cellX };
+                            pieceOperation.cellY = { newValue: position.cellY };
                         }
                         if (e.newSize != null) {
                             const size = getCellSize({ ...e.newSize, board });
-                            pieceLocationOperation.cellW = { newValue: size.cellW };
-                            pieceLocationOperation.cellH = { newValue: size.cellH };
+                            pieceOperation.cellW = { newValue: size.cellW };
+                            pieceOperation.cellH = { newValue: size.cellH };
                         }
                     }
-                    const pieceLocations = createStateMap<OperationElement<PieceLocation.State, PieceLocation.PostOperation>>();
-                    pieceLocations.set(boardKey, { type: update, operation: pieceLocationOperation });
-                    const operation = createPostOperationSetup();
+                    const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
+                    pieces.set(boardKey, { type: update, operation: pieceOperation });
+                    const operation = Room.createPostOperationSetup();
                     operation.characters.set(characterKey, {
                         type: update,
                         operation: {
-                            pieceLocations,
+                            pieces,
                             boolParams: new Map(),
                             numParams: new Map(),
                             numMaxParams: new Map(),
@@ -371,11 +367,11 @@ const Board: React.FC<BoardProps> = ({ roomId, board, boardKey, boardsPanelConfi
 type ContextMenuState = {
     x: number;
     y: number;
-    valuesOnCursor: ReadonlyArray<{ characterKey: CompositeKey; character: Character.State; piece: PieceLocation.State }>;
+    valuesOnCursor: ReadonlyArray<{ characterKey: CompositeKey; character: Character.State; piece: Piece.State }>;
 }
 
 type Props = {
-    boards: ReadonlyStateMap<State>;
+    boards: ReadonlyStateMap<StatesBoard.State>;
     boardsPanelConfig: BoardsPanelConfig;
     boardsPanelConfigId: string;
     characters: ReadonlyStateMap<Character.State>;
@@ -440,12 +436,12 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                     y: e.evt.offsetY,
                     valuesOnCursor: __(characters.toArray())
                         .compact(([characterKey, character]) => {
-                            const found = character.pieceLocations.toArray()
+                            const found = character.pieces.toArray()
                                 .find(([boardKey, piece]) => {
                                     if (boardKey.createdBy !== activeBoardKey.createdBy || boardKey.id !== activeBoardKey.id) {
                                         return false;
                                     }
-                                    return PieceLocation.isCursorOnIcon({ ...board, state: piece, cursorPosition: stateOffset });
+                                    return Piece.isCursorOnIcon({ ...board, state: piece, cursorPosition: stateOffset });
                                 });
                             if (found === undefined) {
                                 return null;
@@ -511,16 +507,16 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                                 </Menu.Item>
                                 <Menu.Item
                                     onClick={() => {
-                                        const pieceLocations = createStateMap<OperationElement<PieceLocation.State, PieceLocation.PostOperation>>();
-                                        pieceLocations.set(activeBoardKey, {
+                                        const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
+                                        pieces.set(activeBoardKey, {
                                             type: replace,
                                             newValue: undefined,
                                         });
-                                        const operation = createPostOperationSetup();
+                                        const operation = Room.createPostOperationSetup();
                                         operation.characters.set(characterKey, {
                                             type: update,
                                             operation: {
-                                                pieceLocations,
+                                                pieces,
                                                 boolParams: new Map(),
                                                 numParams: new Map(),
                                                 numMaxParams: new Map(),
@@ -546,7 +542,7 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
             return (
                 <Menu.SubMenu title={title}>
                     {__(characters.toArray()).compact(([key, value]) => {
-                        const pieceLocationExists = __(value.pieceLocations).exists(([boardKey]) => activeBoardKey.id === boardKey.id && activeBoardKey.createdBy === boardKey.createdBy);
+                        const pieceLocationExists = __(value.pieces).exists(([boardKey]) => activeBoardKey.id === boardKey.id && activeBoardKey.createdBy === boardKey.createdBy);
 
                         const cellPosition = getCellPosition({ ...contextMenuState, board });
                         // TODO: x,y,w,h の値が適当
@@ -595,17 +591,17 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                                 </Menu.Item>
                                 <Menu.SubMenu disabled={pieceLocationExists} title="置く">
                                     <Menu.Item onClick={() => {
-                                        const pieceLocations = createStateMap<OperationElement<PieceLocation.State, PieceLocation.PostOperation>>();
+                                        const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
 
-                                        pieceLocations.set(activeBoardKey, {
+                                        pieces.set(activeBoardKey, {
                                             type: replace,
                                             newValue: pieceLocationWhichIsCellMode
                                         });
-                                        const operation = createPostOperationSetup();
+                                        const operation = Room.createPostOperationSetup();
                                         operation.characters.set(key, {
                                             type: update,
                                             operation: {
-                                                pieceLocations,
+                                                pieces,
                                                 boolParams: new Map(),
                                                 numParams: new Map(),
                                                 numMaxParams: new Map(),
@@ -618,16 +614,16 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                                         セルにスナップする
                                     </Menu.Item>
                                     <Menu.Item onClick={() => {
-                                        const pieceLocations = createStateMap<OperationElement<PieceLocation.State, PieceLocation.PostOperation>>();
-                                        pieceLocations.set(activeBoardKey, {
+                                        const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
+                                        pieces.set(activeBoardKey, {
                                             type: replace,
                                             newValue: pieceLocationWhichIsNotCellMode
                                         });
-                                        const operation = createPostOperationSetup();
+                                        const operation = Room.createPostOperationSetup();
                                         operation.characters.set(key, {
                                             type: update,
                                             operation: {
-                                                pieceLocations,
+                                                pieces,
                                                 boolParams: new Map(),
                                                 numParams: new Map(),
                                                 numMaxParams: new Map(),
@@ -643,16 +639,16 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                                 <Menu.Item
                                     disabled={!pieceLocationExists}
                                     onClick={() => {
-                                        const pieceLocations = createStateMap<OperationElement<PieceLocation.State, PieceLocation.PostOperation>>();
-                                        pieceLocations.set(activeBoardKey, {
+                                        const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
+                                        pieces.set(activeBoardKey, {
                                             type: replace,
                                             newValue: undefined,
                                         });
-                                        const operation = createPostOperationSetup();
+                                        const operation = Room.createPostOperationSetup();
                                         operation.characters.set(key, {
                                             type: update,
                                             operation: {
-                                                pieceLocations,
+                                                pieces,
                                                 boolParams: new Map(),
                                                 numParams: new Map(),
                                                 numMaxParams: new Map(),

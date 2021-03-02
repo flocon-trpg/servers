@@ -1,8 +1,6 @@
 import { Checkbox, Col, Drawer, Form, Input, InputNumber, Row, Space } from 'antd';
 import React from 'react';
 import DrawerFooter from '../../layouts/DrawerFooter';
-import * as Room from '../../stateManagers/states/room';
-import * as Board from '../../stateManagers/states/board';
 import * as Character from '../../stateManagers/states/character';
 import ComponentsStateContext from './contexts/RoomComponentsStateContext';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
@@ -16,6 +14,8 @@ import { boardDrawerType, create, update } from './RoomComponentsState';
 import FilesManagerDrawer from '../FilesManagerDrawer';
 import { FilesManagerDrawerType } from '../../utils/types';
 import { Gutter } from 'antd/lib/grid/row';
+import { Room } from '../../stateManagers/states/room';
+import { Board } from '../../stateManagers/states/board';
 
 const notFound = 'notFound';
 

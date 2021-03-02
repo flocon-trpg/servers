@@ -9,6 +9,15 @@ const errorMessages = {
 class $Iterator<T> {
     public constructor(private readonly iterate: () => IterableIterator<T>) { }
 
+    private toAsync(iterateSync: () => IterableIterator<T>): $AsyncIterator<T> {
+        async function* iterate() {
+            for (const elem of iterateSync()) {
+                yield elem;
+            }
+        }
+        return new $AsyncIterator(iterate);
+    }
+
     public compact<TResult>(mapping: (element: T, index: number) => TResult | null | undefined): $Iterator<Exclude<TResult, null | undefined>> {
         return this.flatMap((elem, index) => {
             const result = mapping(elem, index);
@@ -17,6 +26,10 @@ class $Iterator<T> {
             }
             return [result] as Exclude<TResult, null | undefined>[];
         });
+    }
+
+    public compactAsync<TResult>(mapping: (element: T, index: number) => PromiseLike<TResult | null | undefined>) {
+        return this.toAsync(this.iterate).compactAsync(mapping);
     }
 
     public count(): number {
@@ -86,6 +99,10 @@ class $Iterator<T> {
         return new $Iterator(iterate);
     }
 
+    public mapAsync<TResult>(mapping: (element: T, index: number) => PromiseLike<TResult>) {
+        return this.toAsync(this.iterate).mapAsync(mapping);
+    }
+
     public reduce<TResult>(mapping: (seed: TResult, element: T, index: number) => TResult, seed: TResult): TResult {
         let result = seed;
         let index = 0;
@@ -94,6 +111,10 @@ class $Iterator<T> {
             index++;
         }
         return result;
+    }
+
+    public reduceAsync<TResult>(mapping: (seed: TResult, element: T, index: number) => PromiseLike<TResult>, seed: TResult) {
+        return this.toAsync(this.iterate).reduceAsync(mapping, seed);
     }
 
     public skip(count: number): $Iterator<T> {
@@ -119,6 +140,69 @@ class $Iterator<T> {
         const result = new Map<TKey, TValue>();
         for (const elem of this.iterate()) {
             const { key, value } = mapping(elem);
+            result.set(key, value);
+        }
+        return result;
+    }
+
+    public toMapAsync<TKey, TValue>(mapping: (source: T) => Promise<{ key: TKey; value: TValue }>) {
+        return this.toAsync(this.iterate).toMapAsync(mapping);
+    }
+}
+
+class $AsyncIterator<T> {
+    public constructor(private readonly iterateAsync: () => AsyncIterableIterator<T>) { }
+
+    public compactAsync<TResult>(mapping: (element: T, index: number) => PromiseLike<TResult | null | undefined>): $AsyncIterator<Exclude<TResult, null | undefined>> {
+        const baseIterate = this.iterateAsync;
+        async function* iterateAsync() {
+            let index = 0;
+            for await (const elem of baseIterate()) {
+                const value = await mapping(elem, index);
+                if (value == null) {
+                    continue;
+                }
+                yield value as Exclude<TResult, null | undefined>;
+                index++;
+            }
+        }
+        return new $AsyncIterator(iterateAsync);
+    }
+
+    public mapAsync<TResult>(mapping: (element: T, index: number) => PromiseLike<TResult>): $AsyncIterator<TResult> {
+        const baseIterate = this.iterateAsync;
+        async function* iterate() {
+            let index = 0;
+            for await (const elem of baseIterate()) {
+                yield await mapping(elem, index);
+                index++;
+            }
+        }
+        return new $AsyncIterator(iterate);
+    }
+
+    public async reduceAsync<TResult>(mapping: (seed: TResult, element: T, index: number) => PromiseLike<TResult>, seed: TResult): Promise<TResult> {
+        let result = seed;
+        let index = 0;
+        for await (const elem of this.iterateAsync()) {
+            result = await mapping(result, elem, index);
+            index++;
+        }
+        return result;
+    }
+
+    public async toArrayAsync(): Promise<T[]> {
+        const result: T[] = [];
+        for await (const x of this.iterateAsync()) {
+            result.push(x);
+        }
+        return result;
+    }
+
+    public async toMapAsync<TKey, TValue>(mapping: (source: T) => PromiseLike<{ key: TKey; value: TValue }>): Promise< Map<TKey, TValue>> {
+        const result = new Map<TKey, TValue>();
+        for await (const elem of this.iterateAsync()) {
+            const { key, value } = await mapping(elem);
             result.set(key, value);
         }
         return result;
@@ -252,21 +336,25 @@ class $ReadonlyMap<TKey, TValue> extends $Iterator<[TKey, TValue]> {
     }
 }
 
-// lodash風のライブラリなので、当初は_にしようと思ったが、jestが@babel/coreに依存し、@babel/coreがlodashに依存しているため、lodashの_と被ってしまう。そのため、代わりに__を使うことにした。
-// $はVS codeがjQueryと勘違いしてしまいimportを手動で行う必要があるため却下。
+/*
+lodash風のライブラリなので、当初は_にしようと思ったが、jestが@babel/coreに依存し、@babel/coreがlodashに依存しているため、lodashの_と被ってしまう。そのため、代わりに__を使うことにした。
+$はVS codeがjQueryと勘違いしてしまいimportを手動で行う必要があるため却下。
+*/
+/*
+{ [Symbol.iterator](): AsyncIterableIterator<TValue> }は、{ [Symbol.iterator](): IterableIterator<TValue> }と区別する方法が思い浮かばなかったので、引数として受けつけないようになっている。
+*/
 export function __<TValue>(source: ReadonlyArray<TValue> | Array<TValue> | $ReadonlyArray<TValue>): $ReadonlyArray<TValue>;
 export function __<TValue>(source: ReadonlySet<TValue> | Set<TValue> | $ReadonlySet<TValue>): $ReadonlySet<TValue>;
 export function __<TKey, TValue>(source: ReadonlyMap<TKey, TValue> | Map<TKey, TValue> | $ReadonlyMap<TKey, TValue>): $ReadonlyMap<TKey, TValue>;
 export function __<TValue>(source: { [Symbol.iterator](): IterableIterator<TValue> } | $Iterator<TValue>): $Iterator<TValue>;
-export function __<TKey, TValue>(source:
-    { [Symbol.iterator](): IterableIterator<TValue> } |
-    $Iterator<TValue> |
-    ReadonlyArray<TValue> |
-    $ReadonlyArray<TValue> |
-    ReadonlySet<TValue> |
-    $ReadonlySet<TValue> |
-    ReadonlyMap<TKey, TValue> |
-    $ReadonlyMap<TKey, TValue>):
+export function __<TKey, TValue>(source: { [Symbol.iterator](): IterableIterator<TValue> } |
+$Iterator<TValue> |
+ReadonlyArray<TValue> |
+$ReadonlyArray<TValue> |
+ReadonlySet<TValue> |
+$ReadonlySet<TValue> |
+ReadonlyMap<TKey, TValue> |
+$ReadonlyMap<TKey, TValue>):
     $Iterator<TValue> |
     $ReadonlyArray<TValue> |
     $ReadonlySet<TValue> |

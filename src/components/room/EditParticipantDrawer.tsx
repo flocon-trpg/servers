@@ -1,21 +1,21 @@
 import React from 'react';
 import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
-import { StateElement as ParticipantStateElement } from '../../stateManagers/states/participant';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import OperateContext from './contexts/OperateContext';
 import ComponentsStateContext from './contexts/RoomComponentsStateContext';
 import { Col, Drawer, Input, Row } from 'antd';
 import DrawerFooter from '../../layouts/DrawerFooter';
 import { editParticipantDrawerVisibility } from './RoomComponentsState';
-import { createPostOperationSetup } from '../../stateManagers/states/room';
+import { Participant } from '../../stateManagers/states/participant';
+import { Room } from '../../stateManagers/states/room';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
 };
 
 type Props = {
-    me: ParticipantStateElement;
+    me: Participant.State;
 }
 
 const gutter: [Gutter, Gutter] = [16, 16];
@@ -26,6 +26,7 @@ const EditRoomDrawer: React.FC<Props> = ({ me }: Props) => {
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
     const operate = React.useContext(OperateContext);
 
+    // TODO: 作る
     return (
         <Drawer
             {...drawerBaseProps}
@@ -47,7 +48,7 @@ const EditRoomDrawer: React.FC<Props> = ({ me }: Props) => {
                         <Input size='small'
                             value={me.name}
                             onChange={e => {
-                                const operation = createPostOperationSetup();
+                                const operation = Room.createPostOperationSetup();
                                 operation.name = { newValue: e.target.value };
                                 operate(operation);
                             }} />

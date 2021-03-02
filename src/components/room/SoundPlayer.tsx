@@ -1,18 +1,18 @@
 import React from 'react';
-import { Button, Input, Select } from 'antd';
-import { FilePathInput, useWritePrivateMessageMutation, useWriteRoomSoundEffectMutation } from '../../generated/graphql';
+import { Button } from 'antd';
+import { FilePathInput, useWriteRoomSoundEffectMutation } from '../../generated/graphql';
 import * as Icon from '@ant-design/icons';
 import OperateContext from './contexts/OperateContext';
 import FilesManagerDrawer from '../FilesManagerDrawer';
 import { FilesManagerDrawerType, some } from '../../utils/types';
-import { createPostOperationSetup } from '../../stateManagers/states/room';
 import { replace, update } from '../../stateManagers/states/types';
 import { StrIndex5 } from '../../@shared/indexes';
-import { State } from '../../stateManagers/states/roomBgm';
+import { Room } from '../../stateManagers/states/room';
+import { RoomBgm } from '../../stateManagers/states/roomBgm';
 
 type Props = {
     roomId: string;
-    bgmsState: ReadonlyMap<StrIndex5, State>;
+    bgmsState: ReadonlyMap<StrIndex5, RoomBgm.State>;
 }
 
 const SoundPlayer: React.FC<Props> = ({ roomId, bgmsState }: Props) => {
@@ -33,7 +33,7 @@ const SoundPlayer: React.FC<Props> = ({ roomId, bgmsState }: Props) => {
             <Button onClick={() => setBgmDrawerType({ openFileType: some, onOpen: file => setFiles(x => [...x, file]) })}>BGMリストに追加</Button>
             <Button onClick={() => setFiles([])}>BGMリストをクリア</Button>
             <Button onClick={() => {
-                const operation = createPostOperationSetup();
+                const operation = Room.createPostOperationSetup();
                 if (bgmsState.has('1')) {
                     operation.bgms.set('1', {
                         type: update,
@@ -56,7 +56,7 @@ const SoundPlayer: React.FC<Props> = ({ roomId, bgmsState }: Props) => {
                 operate(operation);
             }}>BGMを再生</Button>
             <Button onClick={() => {
-                const operation = createPostOperationSetup();
+                const operation = Room.createPostOperationSetup();
                 if (bgmsState.has('1')) {
                     operation.bgms.set('1', {
                         type: replace,

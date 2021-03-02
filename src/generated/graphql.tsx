@@ -150,7 +150,7 @@ export type CharacterOperation = {
   name?: Maybe<ReplaceStringUpOperation>;
   numMaxParams: NumParamsOperation;
   numParams: NumParamsOperation;
-  pieceLocations: PieceLocationsOperation;
+  pieces: PiecesOperation;
   strParams: StrParamsOperation;
 };
 
@@ -161,7 +161,7 @@ export type CharacterOperationInput = {
   name?: Maybe<ReplaceStringUpOperationInput>;
   numMaxParams: NumParamsOperationInput;
   numParams: NumParamsOperationInput;
-  pieceLocations: PieceLocationsOperationInput;
+  pieces: PiecesOperationInput;
   strParams: StrParamsOperationInput;
 };
 
@@ -180,7 +180,7 @@ export type CharacterValueState = {
   name: Scalars['String'];
   numMaxParams: Array<NumParamState>;
   numParams: Array<NumParamState>;
-  pieceLocations: Array<PieceLocationState>;
+  pieces: Array<PieceState>;
   strParams: Array<StrParamState>;
 };
 
@@ -191,7 +191,7 @@ export type CharacterValueStateInput = {
   name: Scalars['String'];
   numMaxParams: Array<NumParamStateInput>;
   numParams: Array<NumParamStateInput>;
-  pieceLocations: Array<PieceLocationStateInput>;
+  pieces: Array<PieceStateInput>;
   strParams: Array<StrParamStateInput>;
 };
 
@@ -315,7 +315,6 @@ export enum FileSourceType {
 
 export type GetJoinedRoomResult = {
   __typename?: 'GetJoinedRoomResult';
-  participants: ParticipantsGetState;
   role: ParticipantRole;
   room: RoomGetState;
 };
@@ -402,7 +401,7 @@ export type JoinRoomResult = JoinRoomFailureResult | JoinRoomSuccessResult;
 
 export type JoinRoomSuccessResult = {
   __typename?: 'JoinRoomSuccessResult';
-  operation?: Maybe<ParticipantsOperation>;
+  operation?: Maybe<RoomOperation>;
 };
 
 export enum LeaveRoomFailureType {
@@ -562,6 +561,57 @@ export type MutationWriteRoomSoundEffectArgs = {
   volume: Scalars['Float'];
 };
 
+export type MyNumberValueOperation = {
+  __typename?: 'MyNumberValueOperation';
+  isValuePrivate?: Maybe<ReplaceBooleanUpOperation>;
+  pieces: PiecesOperation;
+  value?: Maybe<ReplaceNumberUpOperation>;
+  valueRangeMax?: Maybe<ReplaceNullableNumberUpOperation>;
+  valueRangeMin?: Maybe<ReplaceNullableNumberUpOperation>;
+};
+
+export type MyNumberValueOperationInput = {
+  isValuePrivate?: Maybe<ReplaceBooleanUpOperationInput>;
+  pieces: PiecesOperationInput;
+  value?: Maybe<ReplaceNumberUpOperationInput>;
+  valueRangeMax?: Maybe<ReplaceNullableNumberUpOperationInput>;
+  valueRangeMin?: Maybe<ReplaceNullableNumberUpOperationInput>;
+};
+
+export type MyNumberValueState = {
+  __typename?: 'MyNumberValueState';
+  stateId: Scalars['String'];
+  value: MyNumberValueStateValue;
+};
+
+export type MyNumberValueStateValue = {
+  __typename?: 'MyNumberValueStateValue';
+  isValuePrivate: Scalars['Boolean'];
+  pieces: Array<PieceState>;
+  value?: Maybe<Scalars['Float']>;
+  valueRangeMax?: Maybe<Scalars['Float']>;
+  valueRangeMin?: Maybe<Scalars['Float']>;
+};
+
+export type MyNumberValueStateValueInput = {
+  isValuePrivate: Scalars['Boolean'];
+  pieces: Array<PieceStateInput>;
+  value?: Maybe<Scalars['Float']>;
+  valueRangeMax?: Maybe<Scalars['Float']>;
+  valueRangeMin?: Maybe<Scalars['Float']>;
+};
+
+export type MyNumberValuesOperation = {
+  __typename?: 'MyNumberValuesOperation';
+  replace: Array<ReplaceMyNumberValueOperation>;
+  update: Array<UpdateMyNumberValueOperation>;
+};
+
+export type MyNumberValuesOperationInput = {
+  replace: Array<ReplaceMyNumberValueOperationInput>;
+  update: Array<UpdateMyNumberValueOperationInput>;
+};
+
 export type NumParamOperation = {
   __typename?: 'NumParamOperation';
   isValuePrivate?: Maybe<ReplaceBooleanUpOperation>;
@@ -672,8 +722,13 @@ export type ParamNamesOperationInput = {
 
 export type ParticipantOperation = {
   __typename?: 'ParticipantOperation';
+  myNumberValues: MyNumberValuesOperation;
   name?: Maybe<ReplaceStringUpOperation>;
   role?: Maybe<ReplaceNullableParticipantRoleUpOperation>;
+};
+
+export type ParticipantOperationInput = {
+  myNumberValues: MyNumberValuesOperationInput;
 };
 
 export enum ParticipantRole {
@@ -690,26 +745,23 @@ export type ParticipantState = {
 
 export type ParticipantValueState = {
   __typename?: 'ParticipantValueState';
+  myNumberValues: Array<MyNumberValueState>;
   name: Scalars['String'];
   role?: Maybe<ParticipantRole>;
 };
 
-export type ParticipantsGetState = {
-  __typename?: 'ParticipantsGetState';
-  participants: Array<ParticipantState>;
-  revision: Scalars['Float'];
-};
-
 export type ParticipantsOperation = {
   __typename?: 'ParticipantsOperation';
-  operatedBy: Scalars['String'];
   replace: Array<ReplaceParticipantOperation>;
-  revisionTo: Scalars['Float'];
   update: Array<UpdateParticipantOperation>;
 };
 
-export type PieceLocationOperation = {
-  __typename?: 'PieceLocationOperation';
+export type ParticipantsOperationInput = {
+  update: Array<UpdateParticipantOperationInput>;
+};
+
+export type PieceOperation = {
+  __typename?: 'PieceOperation';
   cellH?: Maybe<ReplaceNumberUpOperation>;
   cellW?: Maybe<ReplaceNumberUpOperation>;
   cellX?: Maybe<ReplaceNumberUpOperation>;
@@ -722,7 +774,7 @@ export type PieceLocationOperation = {
   y?: Maybe<ReplaceNumberUpOperation>;
 };
 
-export type PieceLocationOperationInput = {
+export type PieceOperationInput = {
   cellH?: Maybe<ReplaceNumberUpOperationInput>;
   cellW?: Maybe<ReplaceNumberUpOperationInput>;
   cellX?: Maybe<ReplaceNumberUpOperationInput>;
@@ -735,21 +787,21 @@ export type PieceLocationOperationInput = {
   y?: Maybe<ReplaceNumberUpOperationInput>;
 };
 
-export type PieceLocationState = {
-  __typename?: 'PieceLocationState';
+export type PieceState = {
+  __typename?: 'PieceState';
   boardCreatedBy: Scalars['String'];
   boardId: Scalars['String'];
-  value: PieceLocationValueState;
+  value: PieceValueState;
 };
 
-export type PieceLocationStateInput = {
+export type PieceStateInput = {
   boardCreatedBy: Scalars['String'];
   boardId: Scalars['String'];
-  value: PieceLocationValueStateInput;
+  value: PieceValueStateInput;
 };
 
-export type PieceLocationValueState = {
-  __typename?: 'PieceLocationValueState';
+export type PieceValueState = {
+  __typename?: 'PieceValueState';
   cellH: Scalars['Float'];
   cellW: Scalars['Float'];
   cellX: Scalars['Float'];
@@ -762,7 +814,7 @@ export type PieceLocationValueState = {
   y: Scalars['Float'];
 };
 
-export type PieceLocationValueStateInput = {
+export type PieceValueStateInput = {
   cellH: Scalars['Float'];
   cellW: Scalars['Float'];
   cellX: Scalars['Float'];
@@ -775,15 +827,15 @@ export type PieceLocationValueStateInput = {
   y: Scalars['Float'];
 };
 
-export type PieceLocationsOperation = {
-  __typename?: 'PieceLocationsOperation';
-  replace: Array<ReplacePieceLocationOperation>;
-  update: Array<UpdatePieceLocationOperation>;
+export type PiecesOperation = {
+  __typename?: 'PiecesOperation';
+  replace: Array<ReplacePieceOperation>;
+  update: Array<UpdatePieceOperation>;
 };
 
-export type PieceLocationsOperationInput = {
-  replace: Array<ReplacePieceLocationOperationInput>;
-  update: Array<UpdatePieceLocationOperationInput>;
+export type PiecesOperationInput = {
+  replace: Array<ReplacePieceOperationInput>;
+  update: Array<UpdatePieceOperationInput>;
 };
 
 export type Pong = {
@@ -880,6 +932,17 @@ export type ReplaceFilePathArrayUpOperationInput = {
   newValue: Array<FilePathInput>;
 };
 
+export type ReplaceMyNumberValueOperation = {
+  __typename?: 'ReplaceMyNumberValueOperation';
+  newValue?: Maybe<MyNumberValueStateValue>;
+  stateId: Scalars['String'];
+};
+
+export type ReplaceMyNumberValueOperationInput = {
+  newValue?: Maybe<MyNumberValueStateValueInput>;
+  stateId: Scalars['String'];
+};
+
 export type ReplaceNullableBooleanUpOperation = {
   __typename?: 'ReplaceNullableBooleanUpOperation';
   newValue?: Maybe<Scalars['Boolean']>;
@@ -936,21 +999,21 @@ export type ReplaceParamNameOperationInput = {
 
 export type ReplaceParticipantOperation = {
   __typename?: 'ReplaceParticipantOperation';
-  newValue: ParticipantValueState;
+  newValue?: Maybe<ParticipantValueState>;
   userUid: Scalars['String'];
 };
 
-export type ReplacePieceLocationOperation = {
-  __typename?: 'ReplacePieceLocationOperation';
+export type ReplacePieceOperation = {
+  __typename?: 'ReplacePieceOperation';
   boardCreatedBy: Scalars['String'];
   boardId: Scalars['String'];
-  newValue?: Maybe<PieceLocationValueState>;
+  newValue?: Maybe<PieceValueState>;
 };
 
-export type ReplacePieceLocationOperationInput = {
+export type ReplacePieceOperationInput = {
   boardCreatedBy: Scalars['String'];
   boardId: Scalars['String'];
-  newValue?: Maybe<PieceLocationValueStateInput>;
+  newValue?: Maybe<PieceValueStateInput>;
 };
 
 export type ReplaceRoomBgmOperation = {
@@ -1047,6 +1110,7 @@ export type RoomGetState = {
   createdBy: Scalars['String'];
   name: Scalars['String'];
   paramNames: Array<ParamNameState>;
+  participants: Array<ParticipantState>;
   revision: Scalars['Float'];
 };
 
@@ -1060,11 +1124,11 @@ export type RoomMessages = {
   soundEffects: Array<RoomSoundEffect>;
 };
 
-export type RoomOperated = DeleteRoomOperation | ParticipantsOperation | RoomOperation;
+export type RoomOperated = DeleteRoomOperation | RoomOperation;
 
 export type RoomOperation = {
   __typename?: 'RoomOperation';
-  operatedBy: Scalars['String'];
+  operatedBy?: Maybe<Scalars['String']>;
   revisionTo: Scalars['Float'];
   value: RoomOperationValue;
 };
@@ -1080,6 +1144,7 @@ export type RoomOperationValue = {
   characters: CharactersOperation;
   name?: Maybe<ReplaceStringUpOperation>;
   paramNames: ParamNamesOperation;
+  participants: ParticipantsOperation;
 };
 
 export type RoomOperationValueInput = {
@@ -1088,6 +1153,7 @@ export type RoomOperationValueInput = {
   characters: CharactersOperationInput;
   name?: Maybe<ReplaceStringUpOperationInput>;
   paramNames: ParamNamesOperationInput;
+  participants: ParticipantsOperationInput;
 };
 
 export enum RoomParameterNameType {
@@ -1280,6 +1346,17 @@ export type UpdateCharacterOperationInput = {
   operation: CharacterOperationInput;
 };
 
+export type UpdateMyNumberValueOperation = {
+  __typename?: 'UpdateMyNumberValueOperation';
+  operation: MyNumberValueOperation;
+  stateId: Scalars['String'];
+};
+
+export type UpdateMyNumberValueOperationInput = {
+  operation: MyNumberValueOperationInput;
+  stateId: Scalars['String'];
+};
+
 export type UpdateNumParamOperation = {
   __typename?: 'UpdateNumParamOperation';
   key: Scalars['String'];
@@ -1310,17 +1387,22 @@ export type UpdateParticipantOperation = {
   userUid: Scalars['String'];
 };
 
-export type UpdatePieceLocationOperation = {
-  __typename?: 'UpdatePieceLocationOperation';
-  boardCreatedBy: Scalars['String'];
-  boardId: Scalars['String'];
-  operation: PieceLocationOperation;
+export type UpdateParticipantOperationInput = {
+  operation: ParticipantOperationInput;
+  userUid: Scalars['String'];
 };
 
-export type UpdatePieceLocationOperationInput = {
+export type UpdatePieceOperation = {
+  __typename?: 'UpdatePieceOperation';
   boardCreatedBy: Scalars['String'];
   boardId: Scalars['String'];
-  operation: PieceLocationOperationInput;
+  operation: PieceOperation;
+};
+
+export type UpdatePieceOperationInput = {
+  boardCreatedBy: Scalars['String'];
+  boardId: Scalars['String'];
+  operation: PieceOperationInput;
 };
 
 export type UpdateRoomBgmOperation = {
@@ -1478,9 +1560,9 @@ export type CharacterValueStateFragment = (
   & { image?: Maybe<(
     { __typename?: 'FilePath' }
     & FilePathFragment
-  )>, pieceLocations: Array<(
-    { __typename?: 'PieceLocationState' }
-    & PieceLocationStateFragment
+  )>, pieces: Array<(
+    { __typename?: 'PieceState' }
+    & PieceStateFragment
   )>, boolParams: Array<(
     { __typename?: 'BoolParamState' }
     & Pick<BoolParamState, 'key'>
@@ -1609,9 +1691,9 @@ export type CharacterOperationFragment = (
       { __typename?: 'FilePath' }
       & FilePathFragment
     )> }
-  )>, pieceLocations: (
-    { __typename?: 'PieceLocationsOperation' }
-    & PieceLocationsOperationFragment
+  )>, pieces: (
+    { __typename?: 'PiecesOperation' }
+    & PiecesOperationFragment
   ) }
 );
 
@@ -1688,29 +1770,38 @@ type JoinRoomResult_JoinRoomFailureResult_Fragment = (
 type JoinRoomResult_JoinRoomSuccessResult_Fragment = (
   { __typename?: 'JoinRoomSuccessResult' }
   & { operation?: Maybe<(
-    { __typename?: 'ParticipantsOperation' }
-    & ParticipantsOperationFragment
+    { __typename?: 'RoomOperation' }
+    & RoomOperationFragment
   )> }
 );
 
 export type JoinRoomResultFragment = JoinRoomResult_JoinRoomFailureResult_Fragment | JoinRoomResult_JoinRoomSuccessResult_Fragment;
 
-export type PieceLocationValueStateFragment = (
-  { __typename?: 'PieceLocationValueState' }
-  & Pick<PieceLocationValueState, 'isPrivate' | 'isCellMode' | 'x' | 'y' | 'w' | 'h' | 'cellX' | 'cellY' | 'cellW' | 'cellH'>
+export type MyNumberValueStateValueFragment = (
+  { __typename?: 'MyNumberValueStateValue' }
+  & Pick<MyNumberValueStateValue, 'isValuePrivate' | 'value' | 'valueRangeMin' | 'valueRangeMax'>
+  & { pieces: Array<(
+    { __typename?: 'PieceState' }
+    & PieceStateFragment
+  )> }
 );
 
-export type PieceLocationStateFragment = (
-  { __typename?: 'PieceLocationState' }
-  & Pick<PieceLocationState, 'boardId' | 'boardCreatedBy'>
+export type PieceValueStateFragment = (
+  { __typename?: 'PieceValueState' }
+  & Pick<PieceValueState, 'isPrivate' | 'isCellMode' | 'x' | 'y' | 'w' | 'h' | 'cellX' | 'cellY' | 'cellW' | 'cellH'>
+);
+
+export type PieceStateFragment = (
+  { __typename?: 'PieceState' }
+  & Pick<PieceState, 'boardId' | 'boardCreatedBy'>
   & { value: (
-    { __typename?: 'PieceLocationValueState' }
-    & PieceLocationValueStateFragment
+    { __typename?: 'PieceValueState' }
+    & PieceValueStateFragment
   ) }
 );
 
-export type PieceLocationOperationFragment = (
-  { __typename?: 'PieceLocationOperation' }
+export type PieceOperationFragment = (
+  { __typename?: 'PieceOperation' }
   & { isPrivate?: Maybe<(
     { __typename?: 'ReplaceBooleanUpOperation' }
     & Pick<ReplaceBooleanUpOperation, 'newValue'>
@@ -1744,21 +1835,21 @@ export type PieceLocationOperationFragment = (
   )> }
 );
 
-export type PieceLocationsOperationFragment = (
-  { __typename?: 'PieceLocationsOperation' }
+export type PiecesOperationFragment = (
+  { __typename?: 'PiecesOperation' }
   & { replace: Array<(
-    { __typename?: 'ReplacePieceLocationOperation' }
-    & Pick<ReplacePieceLocationOperation, 'boardId' | 'boardCreatedBy'>
+    { __typename?: 'ReplacePieceOperation' }
+    & Pick<ReplacePieceOperation, 'boardId' | 'boardCreatedBy'>
     & { newValue?: Maybe<(
-      { __typename?: 'PieceLocationValueState' }
-      & PieceLocationValueStateFragment
+      { __typename?: 'PieceValueState' }
+      & PieceValueStateFragment
     )> }
   )>, update: Array<(
-    { __typename?: 'UpdatePieceLocationOperation' }
-    & Pick<UpdatePieceLocationOperation, 'boardId' | 'boardCreatedBy'>
+    { __typename?: 'UpdatePieceOperation' }
+    & Pick<UpdatePieceOperation, 'boardId' | 'boardCreatedBy'>
     & { operation: (
-      { __typename?: 'PieceLocationOperation' }
-      & PieceLocationOperationFragment
+      { __typename?: 'PieceOperation' }
+      & PieceOperationFragment
     ) }
   )> }
 );
@@ -1771,19 +1862,50 @@ export type ParticipantOperationFragment = (
   )>, role?: Maybe<(
     { __typename?: 'ReplaceNullableParticipantRoleUpOperation' }
     & Pick<ReplaceNullableParticipantRoleUpOperation, 'newValue'>
-  )> }
+  )>, myNumberValues: (
+    { __typename?: 'MyNumberValuesOperation' }
+    & { replace: Array<(
+      { __typename?: 'ReplaceMyNumberValueOperation' }
+      & Pick<ReplaceMyNumberValueOperation, 'stateId'>
+      & { newValue?: Maybe<(
+        { __typename?: 'MyNumberValueStateValue' }
+        & MyNumberValueStateValueFragment
+      )> }
+    )>, update: Array<(
+      { __typename?: 'UpdateMyNumberValueOperation' }
+      & Pick<UpdateMyNumberValueOperation, 'stateId'>
+      & { operation: (
+        { __typename?: 'MyNumberValueOperation' }
+        & { isValuePrivate?: Maybe<(
+          { __typename?: 'ReplaceBooleanUpOperation' }
+          & Pick<ReplaceBooleanUpOperation, 'newValue'>
+        )>, value?: Maybe<(
+          { __typename?: 'ReplaceNumberUpOperation' }
+          & Pick<ReplaceNumberUpOperation, 'newValue'>
+        )>, valueRangeMin?: Maybe<(
+          { __typename?: 'ReplaceNullableNumberUpOperation' }
+          & Pick<ReplaceNullableNumberUpOperation, 'newValue'>
+        )>, valueRangeMax?: Maybe<(
+          { __typename?: 'ReplaceNullableNumberUpOperation' }
+          & Pick<ReplaceNullableNumberUpOperation, 'newValue'>
+        )>, pieces: (
+          { __typename?: 'PiecesOperation' }
+          & PiecesOperationFragment
+        ) }
+      ) }
+    )> }
+  ) }
 );
 
 export type ParticipantsOperationFragment = (
   { __typename?: 'ParticipantsOperation' }
-  & Pick<ParticipantsOperation, 'revisionTo' | 'operatedBy'>
   & { replace: Array<(
     { __typename?: 'ReplaceParticipantOperation' }
     & Pick<ReplaceParticipantOperation, 'userUid'>
-    & { newValue: (
+    & { newValue?: Maybe<(
       { __typename?: 'ParticipantValueState' }
       & ParticipantValueStateFragment
-    ) }
+    )> }
   )>, update: Array<(
     { __typename?: 'UpdateParticipantOperation' }
     & Pick<UpdateParticipantOperation, 'userUid'>
@@ -1797,6 +1919,14 @@ export type ParticipantsOperationFragment = (
 export type ParticipantValueStateFragment = (
   { __typename?: 'ParticipantValueState' }
   & Pick<ParticipantValueState, 'name' | 'role'>
+  & { myNumberValues: Array<(
+    { __typename?: 'MyNumberValueState' }
+    & Pick<MyNumberValueState, 'stateId'>
+    & { value: (
+      { __typename?: 'MyNumberValueStateValue' }
+      & MyNumberValueStateValueFragment
+    ) }
+  )> }
 );
 
 export type RoomAsListItemFragment = (
@@ -1813,6 +1943,25 @@ export type RoomGetStateFragment = (
   )>, characters: Array<(
     { __typename?: 'CharacterState' }
     & CharacterStateFragment
+  )>, participants: Array<(
+    { __typename?: 'ParticipantState' }
+    & Pick<ParticipantState, 'userUid'>
+    & { value: (
+      { __typename?: 'ParticipantValueState' }
+      & Pick<ParticipantValueState, 'name'>
+      & { myNumberValues: Array<(
+        { __typename?: 'MyNumberValueState' }
+        & Pick<MyNumberValueState, 'stateId'>
+        & { value: (
+          { __typename?: 'MyNumberValueStateValue' }
+          & Pick<MyNumberValueStateValue, 'isValuePrivate' | 'valueRangeMin' | 'valueRangeMax' | 'value'>
+          & { pieces: Array<(
+            { __typename?: 'PieceState' }
+            & PieceStateFragment
+          )> }
+        ) }
+      )> }
+    ) }
   )>, paramNames: Array<(
     { __typename?: 'ParamNameState' }
     & Pick<ParamNameState, 'key' | 'type'>
@@ -1842,6 +1991,9 @@ export type RoomOperationValueFragment = (
   ), characters: (
     { __typename?: 'CharactersOperation' }
     & CharactersOperationFragment
+  ), participants: (
+    { __typename?: 'ParticipantsOperation' }
+    & ParticipantsOperationFragment
   ), name?: Maybe<(
     { __typename?: 'ReplaceStringUpOperation' }
     & Pick<ReplaceStringUpOperation, 'newValue'>
@@ -2002,17 +2154,6 @@ export type GetRoomQuery = (
     & { room: (
       { __typename?: 'RoomGetState' }
       & RoomGetStateFragment
-    ), participants: (
-      { __typename?: 'ParticipantsGetState' }
-      & Pick<ParticipantsGetState, 'revision'>
-      & { participants: Array<(
-        { __typename?: 'ParticipantState' }
-        & Pick<ParticipantState, 'userUid'>
-        & { value: (
-          { __typename?: 'ParticipantValueState' }
-          & ParticipantValueStateFragment
-        ) }
-      )> }
     ) }
   ) | (
     { __typename?: 'GetNonJoinedRoomResult' }
@@ -2402,9 +2543,6 @@ export type RoomOperatedSubscription = (
     { __typename?: 'DeleteRoomOperation' }
     & Pick<DeleteRoomOperation, 'deletedBy'>
   ) | (
-    { __typename?: 'ParticipantsOperation' }
-    & ParticipantsOperationFragment
-  ) | (
     { __typename?: 'RoomOperation' }
     & RoomOperationFragment
   )> }
@@ -2482,8 +2620,8 @@ export const BoardStateFragmentDoc = gql`
   }
 }
     ${BoardValueStateFragmentDoc}`;
-export const PieceLocationValueStateFragmentDoc = gql`
-    fragment PieceLocationValueState on PieceLocationValueState {
+export const PieceValueStateFragmentDoc = gql`
+    fragment PieceValueState on PieceValueState {
   isPrivate
   isCellMode
   x
@@ -2496,15 +2634,15 @@ export const PieceLocationValueStateFragmentDoc = gql`
   cellH
 }
     `;
-export const PieceLocationStateFragmentDoc = gql`
-    fragment PieceLocationState on PieceLocationState {
+export const PieceStateFragmentDoc = gql`
+    fragment PieceState on PieceState {
   boardId
   boardCreatedBy
   value {
-    ...PieceLocationValueState
+    ...PieceValueState
   }
 }
-    ${PieceLocationValueStateFragmentDoc}`;
+    ${PieceValueStateFragmentDoc}`;
 export const CharacterValueStateFragmentDoc = gql`
     fragment CharacterValueState on CharacterValueState {
   isPrivate
@@ -2512,8 +2650,8 @@ export const CharacterValueStateFragmentDoc = gql`
   image {
     ...FilePath
   }
-  pieceLocations {
-    ...PieceLocationState
+  pieces {
+    ...PieceState
   }
   boolParams {
     key
@@ -2545,7 +2683,7 @@ export const CharacterValueStateFragmentDoc = gql`
   }
 }
     ${FilePathFragmentDoc}
-${PieceLocationStateFragmentDoc}`;
+${PieceStateFragmentDoc}`;
 export const CharacterStateFragmentDoc = gql`
     fragment CharacterState on CharacterState {
   id
@@ -2566,6 +2704,24 @@ export const RoomGetStateFragmentDoc = gql`
   characters {
     ...CharacterState
   }
+  participants {
+    userUid
+    value {
+      name
+      myNumberValues {
+        stateId
+        value {
+          isValuePrivate
+          valueRangeMin
+          valueRangeMax
+          value
+          pieces {
+            ...PieceState
+          }
+        }
+      }
+    }
+  }
   paramNames {
     key
     type
@@ -2585,6 +2741,7 @@ export const RoomGetStateFragmentDoc = gql`
 }
     ${BoardStateFragmentDoc}
 ${CharacterStateFragmentDoc}
+${PieceStateFragmentDoc}
 ${FilePathFragmentDoc}`;
 export const CreateRoomResultFragmentDoc = gql`
     fragment CreateRoomResult on CreateRoomResult {
@@ -2644,53 +2801,6 @@ export const GetRoomResultFragmentDoc = gql`
 }
     ${RoomGetStateFragmentDoc}
 ${GetNonJoinedRoomResultFragmentDoc}`;
-export const ParticipantValueStateFragmentDoc = gql`
-    fragment ParticipantValueState on ParticipantValueState {
-  name
-  role
-}
-    `;
-export const ParticipantOperationFragmentDoc = gql`
-    fragment ParticipantOperation on ParticipantOperation {
-  name {
-    newValue
-  }
-  role {
-    newValue
-  }
-}
-    `;
-export const ParticipantsOperationFragmentDoc = gql`
-    fragment ParticipantsOperation on ParticipantsOperation {
-  revisionTo
-  operatedBy
-  replace {
-    userUid
-    newValue {
-      ...ParticipantValueState
-    }
-  }
-  update {
-    userUid
-    operation {
-      ...ParticipantOperation
-    }
-  }
-}
-    ${ParticipantValueStateFragmentDoc}
-${ParticipantOperationFragmentDoc}`;
-export const JoinRoomResultFragmentDoc = gql`
-    fragment JoinRoomResult on JoinRoomResult {
-  ... on JoinRoomSuccessResult {
-    operation {
-      ...ParticipantsOperation
-    }
-  }
-  ... on JoinRoomFailureResult {
-    failureType
-  }
-}
-    ${ParticipantsOperationFragmentDoc}`;
 export const BoardOperationFragmentDoc = gql`
     fragment BoardOperation on BoardOperation {
   name {
@@ -2750,8 +2860,8 @@ export const TextUpOperationUnitFragmentDoc = gql`
   delete
 }
     `;
-export const PieceLocationOperationFragmentDoc = gql`
-    fragment PieceLocationOperation on PieceLocationOperation {
+export const PieceOperationFragmentDoc = gql`
+    fragment PieceOperation on PieceOperation {
   isPrivate {
     newValue
   }
@@ -2784,25 +2894,25 @@ export const PieceLocationOperationFragmentDoc = gql`
   }
 }
     `;
-export const PieceLocationsOperationFragmentDoc = gql`
-    fragment PieceLocationsOperation on PieceLocationsOperation {
+export const PiecesOperationFragmentDoc = gql`
+    fragment PiecesOperation on PiecesOperation {
   replace {
     boardId
     boardCreatedBy
     newValue {
-      ...PieceLocationValueState
+      ...PieceValueState
     }
   }
   update {
     boardId
     boardCreatedBy
     operation {
-      ...PieceLocationOperation
+      ...PieceOperation
     }
   }
 }
-    ${PieceLocationValueStateFragmentDoc}
-${PieceLocationOperationFragmentDoc}`;
+    ${PieceValueStateFragmentDoc}
+${PieceOperationFragmentDoc}`;
 export const CharacterOperationFragmentDoc = gql`
     fragment CharacterOperation on CharacterOperation {
   isPrivate {
@@ -2868,13 +2978,13 @@ export const CharacterOperationFragmentDoc = gql`
       ...FilePath
     }
   }
-  pieceLocations {
-    ...PieceLocationsOperation
+  pieces {
+    ...PiecesOperation
   }
 }
     ${TextUpOperationUnitFragmentDoc}
 ${FilePathFragmentDoc}
-${PieceLocationsOperationFragmentDoc}`;
+${PiecesOperationFragmentDoc}`;
 export const CharactersOperationFragmentDoc = gql`
     fragment CharactersOperation on CharactersOperation {
   replace {
@@ -2894,6 +3004,85 @@ export const CharactersOperationFragmentDoc = gql`
 }
     ${CharacterValueStateFragmentDoc}
 ${CharacterOperationFragmentDoc}`;
+export const MyNumberValueStateValueFragmentDoc = gql`
+    fragment MyNumberValueStateValue on MyNumberValueStateValue {
+  isValuePrivate
+  value
+  valueRangeMin
+  valueRangeMax
+  pieces {
+    ...PieceState
+  }
+}
+    ${PieceStateFragmentDoc}`;
+export const ParticipantValueStateFragmentDoc = gql`
+    fragment ParticipantValueState on ParticipantValueState {
+  name
+  role
+  myNumberValues {
+    stateId
+    value {
+      ...MyNumberValueStateValue
+    }
+  }
+}
+    ${MyNumberValueStateValueFragmentDoc}`;
+export const ParticipantOperationFragmentDoc = gql`
+    fragment ParticipantOperation on ParticipantOperation {
+  name {
+    newValue
+  }
+  role {
+    newValue
+  }
+  myNumberValues {
+    replace {
+      stateId
+      newValue {
+        ...MyNumberValueStateValue
+      }
+    }
+    update {
+      stateId
+      operation {
+        isValuePrivate {
+          newValue
+        }
+        value {
+          newValue
+        }
+        valueRangeMin {
+          newValue
+        }
+        valueRangeMax {
+          newValue
+        }
+        pieces {
+          ...PiecesOperation
+        }
+      }
+    }
+  }
+}
+    ${MyNumberValueStateValueFragmentDoc}
+${PiecesOperationFragmentDoc}`;
+export const ParticipantsOperationFragmentDoc = gql`
+    fragment ParticipantsOperation on ParticipantsOperation {
+  replace {
+    userUid
+    newValue {
+      ...ParticipantValueState
+    }
+  }
+  update {
+    userUid
+    operation {
+      ...ParticipantOperation
+    }
+  }
+}
+    ${ParticipantValueStateFragmentDoc}
+${ParticipantOperationFragmentDoc}`;
 export const RoomOperationValueFragmentDoc = gql`
     fragment RoomOperationValue on RoomOperationValue {
   boards {
@@ -2901,6 +3090,9 @@ export const RoomOperationValueFragmentDoc = gql`
   }
   characters {
     ...CharactersOperation
+  }
+  participants {
+    ...ParticipantsOperation
   }
   name {
     newValue
@@ -2950,6 +3142,7 @@ export const RoomOperationValueFragmentDoc = gql`
 }
     ${BoardsOperationFragmentDoc}
 ${CharactersOperationFragmentDoc}
+${ParticipantsOperationFragmentDoc}
 ${FilePathFragmentDoc}`;
 export const RoomOperationFragmentDoc = gql`
     fragment RoomOperation on RoomOperation {
@@ -2960,6 +3153,18 @@ export const RoomOperationFragmentDoc = gql`
   }
 }
     ${RoomOperationValueFragmentDoc}`;
+export const JoinRoomResultFragmentDoc = gql`
+    fragment JoinRoomResult on JoinRoomResult {
+  ... on JoinRoomSuccessResult {
+    operation {
+      ...RoomOperation
+    }
+  }
+  ... on JoinRoomFailureResult {
+    failureType
+  }
+}
+    ${RoomOperationFragmentDoc}`;
 export const RoomSoundEffectFragmentDoc = gql`
     fragment RoomSoundEffect on RoomSoundEffect {
   messageId
@@ -3070,15 +3275,6 @@ export const GetRoomDocument = gql`
       room {
         ...RoomGetState
       }
-      participants {
-        revision
-        participants {
-          userUid
-          value {
-            ...ParticipantValueState
-          }
-        }
-      }
     }
     ... on GetNonJoinedRoomResult {
       roomAsListItem {
@@ -3091,7 +3287,6 @@ export const GetRoomDocument = gql`
   }
 }
     ${RoomGetStateFragmentDoc}
-${ParticipantValueStateFragmentDoc}
 ${RoomAsListItemFragmentDoc}`;
 
 /**
@@ -3930,16 +4125,12 @@ export const RoomOperatedDocument = gql`
     ... on RoomOperation {
       ...RoomOperation
     }
-    ... on ParticipantsOperation {
-      ...ParticipantsOperation
-    }
     ... on DeleteRoomOperation {
       deletedBy
     }
   }
 }
-    ${RoomOperationFragmentDoc}
-${ParticipantsOperationFragmentDoc}`;
+    ${RoomOperationFragmentDoc}`;
 
 /**
  * __useRoomOperatedSubscription__

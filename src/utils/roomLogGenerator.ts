@@ -1,11 +1,11 @@
 import { ReadonlyStateMap } from '../@shared/StateMap';
 import { RoomMessages, RoomPrivateMessageFragment, RoomPublicChannelFragment, RoomPublicMessageFragment, RoomSoundEffectFragment } from '../generated/graphql';
-import { State as CharacterState } from '../stateManagers/states/character';
-import { State as ParticipantState } from '../stateManagers/states/participant';
 import { PrivateChannelSet } from './PrivateChannelsSet';
 import { escape } from 'html-escaper';
 import { $free, $system } from '../@shared/Constants';
 import moment from 'moment';
+import { Participant } from '../stateManagers/states/participant';
+import { Character } from '../stateManagers/states/character';
 
 const privateMessage = 'privateMessage';
 const publicMessage = 'publicMessage';
@@ -56,8 +56,8 @@ const createRoomMessageArray = ({
     characters,
 }: {
     messages: RoomMessages;
-    participants: ParticipantState;
-    characters: ReadonlyStateMap<CharacterState>;
+    participants: ReadonlyMap<string, Participant.State>;
+    characters: ReadonlyStateMap<Character.State>;
 }) => {
     const result: RoomMessage[] = [];
     const publicChannels = new Map<string, RoomPublicChannelFragment>();
@@ -149,8 +149,8 @@ const createRoomMessageArray = ({
 
 export const generateAsStaticHtml = (params: {
     messages: RoomMessages;
-    participants: ParticipantState;
-    characters: ReadonlyStateMap<CharacterState>;
+    participants: ReadonlyMap<string, Participant.State>;
+    characters: ReadonlyStateMap<Character.State>;
 }) => {
     const elements = createRoomMessageArray(params).sort((x, y) => x.createdAt - y.createdAt).map(msg => {
         const left = msg.value.createdBy == null ?

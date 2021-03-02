@@ -1,7 +1,6 @@
 import { Button, Col, Collapse, Drawer, Form, Input, Row, Select, Space } from 'antd';
 import React from 'react';
 import DrawerFooter from '../../layouts/DrawerFooter';
-import * as Room from '../../stateManagers/states/room';
 import ComponentsStateContext from './contexts/RoomComponentsStateContext';
 import OperateContext from './contexts/OperateContext';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
@@ -13,6 +12,7 @@ import { RoomParameterNameType } from '../../generated/graphql';
 import { replace, update } from '../../stateManagers/states/types';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import CollaborativeInput from '../../foundations/CollaborativeInput';
+import { Room } from '../../stateManagers/states/room';
 
 type Props = {
     roomState: Room.State;

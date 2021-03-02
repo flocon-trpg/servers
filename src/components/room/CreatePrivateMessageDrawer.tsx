@@ -1,9 +1,6 @@
 import { Alert, Checkbox, Col, Drawer, Form, Input, InputNumber, Row, Space } from 'antd';
 import React from 'react';
 import DrawerFooter from '../../layouts/DrawerFooter';
-import * as Room from '../../stateManagers/states/room';
-import * as Participant from '../../stateManagers/states/participant';
-import * as PieceLocation from '../../stateManagers/states/pieceLocation';
 import ComponentsStateContext from './contexts/RoomComponentsStateContext';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import { create, update, createPrivateMessageDrawerVisibility } from './RoomComponentsState';
@@ -12,6 +9,8 @@ import { Gutter } from 'antd/lib/grid/row';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import { __ } from '../../@shared/collection';
 import { useWritePrivateMessageMutation } from '../../generated/graphql';
+import { Room } from '../../stateManagers/states/room';
+import { Participant } from '../../stateManagers/states/participant';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -20,14 +19,13 @@ const drawerBaseProps: Partial<DrawerProps> = {
 type Props = {
     roomId: string;
     roomState: Room.State;
-    participantsState: Participant.State;
 }
 
 const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 18;
 
 // TODO: playerの場合、characterの情報も一緒に載せたほうがわかりやすい
-const CreatePrivateMessageDrawer: React.FC<Props> = ({ roomId, roomState, participantsState: participants }: Props) => {
+const CreatePrivateMessageDrawer: React.FC<Props> = ({ roomId, roomState }: Props) => {
     const myAuth = React.useContext(MyAuthContext);
     const componentsState = React.useContext(ComponentsStateContext);
     const visible = componentsState.createPrivateMessageDrawerVisibility;
@@ -41,8 +39,8 @@ const CreatePrivateMessageDrawer: React.FC<Props> = ({ roomId, roomState, partic
         return null;
     }
 
-    const selectedParticipants = new Map<string, Participant.StateElement>(); // 存在しないユーザーや自分自身のUserUidは除かれる
-    participants.forEach((participant, userUid) => {
+    const selectedParticipants = new Map<string, Participant.State>(); // 存在しないユーザーや自分自身のUserUidは除かれる
+    roomState.participants.forEach((participant, userUid) => {
         if (userUid === myAuth.uid) {
             return;
         }
@@ -102,7 +100,7 @@ const CreatePrivateMessageDrawer: React.FC<Props> = ({ roomId, roomState, partic
                     <Col flex={0}>対象ユーザー</Col>
                     <Col span={inputSpan}>
                         <div>
-                            {__(participants).map(([userUid, participant]) => {
+                            {__(roomState.participants).map(([userUid, participant]) => {
                                 return (
                                     <>
                                         <Checkbox

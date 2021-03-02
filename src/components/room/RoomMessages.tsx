@@ -2,7 +2,6 @@ import React, { useCallback } from 'react';
 import { Comment, message, Tabs, Button, Menu, Dropdown, Tooltip } from 'antd';
 import moment from 'moment';
 import { AllRoomMessagesSuccessResult, apolloError, failure, loading, useAllRoomMessages, useFilteredRoomMessages, publicChannel, RoomMessage, publicMessage, privateMessage, soundEffect, newEvent } from '../../hooks/useRoomMessages';
-import * as Participant from '../../stateManagers/states/participant';
 import { __ } from '../../@shared/collection';
 import useConstant from 'use-constant';
 import { FixedSizeList } from 'react-window';
@@ -17,7 +16,6 @@ import { $free, $system } from '../../@shared/Constants';
 import { useSelector } from '../../store';
 import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
-import * as Character from '../../stateManagers/states/character';
 import { ReadonlyStateMap } from '../../@shared/StateMap';
 import { FilePathFragment, FilePathFragmentDoc, RoomPrivateMessageFragment, RoomPublicMessageFragment, RoomSoundEffectFragment, useDeleteMessageMutation, useEditMessageMutation, useMakeMessageNotSecretMutation } from '../../generated/graphql';
 import * as Icon from '@ant-design/icons';
@@ -27,6 +25,8 @@ import Jdenticon from '../../foundations/Jdenticon';
 import { Howl } from 'howler';
 import PlaySoundEffectBehavior from '../../foundations/PlaySoundEffectBehavior';
 import { Notification, TextNotification } from './contexts/NotificationContext';
+import { Character } from '../../stateManagers/states/character';
+import { Participant } from '../../stateManagers/states/participant';
 
 const Image: React.FC<{ filePath: FilePathFragment | undefined }> = ({ filePath }: { filePath: FilePathFragment | undefined }) => {
     const src = useFirebaseStorageUrl(filePath);
@@ -89,7 +89,7 @@ export type RoomUIMessage = {
 type RoomMessageProps = {
     roomId: string;
     message: RoomUIMessage;
-    participantsState: Participant.State | undefined;
+    participants: ReadonlyMap<string, Participant.State> | undefined;
     style?: React.CSSProperties;
     characters: ReadonlyStateMap<Character.State>;
 }
@@ -98,7 +98,7 @@ const deletedMessageStyle: React.CSSProperties = {
     opacity: 0.7,
 };
 
-const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, participantsState, style, characters }: RoomMessageProps) => {
+const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, participants, style, characters }: RoomMessageProps) => {
     const myAuth = React.useContext(MyAuthContext);
     const [editMessageMutation] = useEditMessageMutation();
     const [deleteMessageMutation] = useDeleteMessageMutation();
@@ -121,8 +121,8 @@ const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, par
             return <span style={({ color: 'gray' })}>(システムメッセージ)</span>;
         }
         let participantName: string | null = null;
-        if (participantsState != null) {
-            participantName = participantsState.get(message.value.createdBy)?.name ?? null;
+        if (participants != null) {
+            participantName = participants.get(message.value.createdBy)?.name ?? null;
         }
 
         let character: Character.State | undefined = undefined;
@@ -271,11 +271,11 @@ type PrivateChannelMessagesProps = {
     roomId: string;
     allRoomMessagesResult: AllRoomMessagesSuccessResult;
     visibleTo: PrivateChannelSet;
-    participantsState: Participant.State;
+    participants: ReadonlyMap<string, Participant.State>;
     characters: ReadonlyStateMap<Character.State>;
 }
 
-const PrivateChannelMessages: React.FC<PrivateChannelMessagesProps> = ({ roomId, allRoomMessagesResult, visibleTo, participantsState, characters }: PrivateChannelMessagesProps) => {
+const PrivateChannelMessages: React.FC<PrivateChannelMessagesProps> = ({ roomId, allRoomMessagesResult, visibleTo, participants, characters }: PrivateChannelMessagesProps) => {
     const visibleToAsString = visibleTo.toString();
     const filter = useCallback((message: RoomMessage) => {
         if (message.type !== privateMessage) {
@@ -287,7 +287,7 @@ const PrivateChannelMessages: React.FC<PrivateChannelMessagesProps> = ({ roomId,
     return (
         <div style={({ height: '100%', overflowY: 'scroll', display: 'flex', flexDirection: 'column' })}>
             {
-                messages.reverse().map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participantsState={participantsState} characters={characters} />))
+                messages.reverse().map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} characters={characters} />))
             }
         </div>
     );
@@ -329,7 +329,7 @@ const publicMessageFilters = {
 
 type ChannelMessageTabsProps = {
     allRoomMessagesResult: AllRoomMessagesSuccessResult;
-    participantsState: Participant.State;
+    participants: ReadonlyMap<string, Participant.State>;
     roomId: string;
     onActiveTabChange?: (activeTab: Tab) => void;
     style?: Omit<React.CSSProperties, 'height'>;
@@ -337,7 +337,7 @@ type ChannelMessageTabsProps = {
     notifications: ReadonlyArray<TextNotification>;
 }
 
-const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessagesResult, participantsState, roomId, onActiveTabChange, style, characters, notifications }: ChannelMessageTabsProps) => {
+const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessagesResult, participants, roomId, onActiveTabChange, style, characters, notifications }: ChannelMessageTabsProps) => {
     const myAuth = React.useContext(MyAuthContext);
     const roomConfig = useSelector(state => state.roomConfigModule);
     const dispatch = useDispatch();
@@ -404,7 +404,7 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
         return (
             <div style={({ height: '100%', overflowY: 'scroll', display: 'flex', flexDirection: 'column' })}>
                 {
-                    messages.reverse().map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participantsState={participantsState} characters={characters} />))
+                    messages.reverse().map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} characters={characters} />))
                 }
             </div>
         );
@@ -463,7 +463,7 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
     };
 
     const createPrivateChannelName = (channel: PrivateChannelSet, showIcon: boolean) => {
-        const channelNameBase = channel.toChannelNameBase(participantsState, { userUid: myAuth?.uid ?? '' });
+        const channelNameBase = channel.toChannelNameBase(participants, { userUid: myAuth?.uid ?? '' });
         if (channelNameBase.length === 0) {
             return '独り言';
         }
@@ -513,12 +513,12 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
 
     const privateChannelElements = allRoomMessagesResult.value.privateChannels.toArray()
         .map(channel => {
-            const channelNameBase = channel.toChannelNameBase(participantsState, { userUid: myAuth?.uid ?? '' });
+            const channelNameBase = channel.toChannelNameBase(participants, { userUid: myAuth?.uid ?? '' });
             const tab = createPrivateChannelName(channel, true);
             const tabPane = (
                 <TabPane tab={tab} key={channel.toString()}>
                     <ChatInput roomId={roomId} activeTab={channel} characters={characters} />
-                    <PrivateChannelMessages roomId={roomId} visibleTo={channel} allRoomMessagesResult={allRoomMessagesResult} participantsState={participantsState} characters={characters} />
+                    <PrivateChannelMessages roomId={roomId} visibleTo={channel} allRoomMessagesResult={allRoomMessagesResult} participants={participants} characters={characters} />
                 </TabPane>
             );
             return { key: channelNameBase, channel, tabPane, showTab: showChannel(channel.toString()), menuItemContent: createPrivateChannelName(channel, false) };
@@ -638,13 +638,13 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
 type Props = {
     roomId: string;
     // keyはUserUid
-    participantsState: Participant.State;
+    participants: ReadonlyMap<string, Participant.State>;
     onActiveTabChange?: (activeTab: Tab) => void;
     characters: ReadonlyStateMap<Character.State>;
     notifications: ReadonlyArray<TextNotification>;
 }
 
-const RoomMessages: React.FC<Props> = ({ roomId, participantsState: participants, onActiveTabChange, characters, notifications }: Props) => {
+const RoomMessages: React.FC<Props> = ({ roomId, participants, onActiveTabChange, characters, notifications }: Props) => {
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
     const allRoomMessages = useAllRoomMessages({ roomId });
     const [soundEffect, setSoundEffect] = React.useState<{ filePath: FilePathFragment; volume: number }>();
@@ -673,12 +673,12 @@ const RoomMessages: React.FC<Props> = ({ roomId, participantsState: participants
                         onClick={() => dispatch({ type: createPrivateMessageDrawerVisibility, newValue: true })}>
                         プライベートメッセージを作成
                     </Button>
-                    <ChannelMessageTabs 
-                        style={({ flex: 'auto' })} 
+                    <ChannelMessageTabs
+                        style={({ flex: 'auto' })}
                         allRoomMessagesResult={allRoomMessages}
-                        participantsState={participants} 
+                        participants={participants}
                         roomId={roomId}
-                        onActiveTabChange={onActiveTabChange} 
+                        onActiveTabChange={onActiveTabChange}
                         characters={characters}
                         notifications={notifications} />
                     <PlaySoundEffectBehavior value={soundEffect} />
