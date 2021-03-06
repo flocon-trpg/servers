@@ -131,11 +131,11 @@ export namespace GlobalStrParam {
             for (const [key, value] of operation) {
                 let target = await em.findOne(StrParam, { chara: { id: parent.id }, key });
                 if (target == null) {
-                    target = new StrParam({ key, isValuePrivate: false, value: '' });
-                    parent.strParams.add(target);
+                    target = new StrParam({ key, isValuePrivate: false, value: '', chara: parent });
+                    em.persist(target);
                 }
 
-                const op = new UpdateStrParamOp({ key });
+                const op = new UpdateStrParamOp({ key, updateCharaOp: parentOp });
 
                 if (value.isValuePrivate != null) {
                     target.isValuePrivate = value.isValuePrivate.newValue;
@@ -150,7 +150,7 @@ export namespace GlobalStrParam {
                     op.value = TextTwoWayOperationModule.toDownUnit(value.value);
                 }
 
-                parentOp.updateStrParamOps.add(op);
+                em.persist(op);
                 continue;
             }
         };

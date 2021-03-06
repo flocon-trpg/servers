@@ -1,7 +1,22 @@
-import { Entity, IdentifiedReference, Index, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/core';
+import { Entity, IdentifiedReference, Index, ManyToOne, PrimaryKey, Property, Reference, Unique } from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { RemoveParticiOp } from '../mikro-orm';
 import { RemoveMyValueOp, MyValue, UpdateMyValueOp, RemovedMyValue } from './mikro-orm_value';
+
+type MyValuePieceBaseParams = {
+    boardId: string;
+    boardCreatedBy: string;
+    isPrivate: boolean;
+    isCellMode: boolean;
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    cellX: number;
+    cellY: number;
+    cellW: number;
+    cellH: number;
+}
 
 // もしBoardが削除されたときに強制的に該当するPieceLocationが削除されるとOperational transformationの際に困ったことになりそうなので、Boardとのリレーションはない。JOINに相当する処理はブラウザ側で行う。
 
@@ -19,20 +34,7 @@ abstract class MyValuePieceBase {
         cellY,
         cellW,
         cellH,
-    }: {
-        boardId: string;
-        boardCreatedBy: string;
-        isPrivate: boolean;
-        isCellMode: boolean;
-        x: number;
-        y: number;
-        w: number;
-        h: number;
-        cellX: number;
-        cellY: number;
-        cellW: number;
-        cellH: number;
-    }) {
+    }: MyValuePieceBaseParams) {
         this.boardId = boardId;
         this.boardCreatedBy = boardCreatedBy;
         this.isPrivate = isPrivate;
@@ -94,36 +96,51 @@ abstract class MyValuePieceBase {
 }
 
 @Entity()
-@Unique({ properties: ['boardId', 'boardCreatedBy'] })
+@Unique({ properties: ['myValue', 'boardId', 'boardCreatedBy'] })
 export class MyValuePiece extends MyValuePieceBase {
+    public constructor(params: MyValuePieceBaseParams & { myValue: MyValue }) {
+        super(params);
+        this.myValue = Reference.create(params.myValue);
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ version: true })
     public version: number = 1;
 
     @ManyToOne(() => MyValue, { wrappedReference: true })
-    public myValue!: IdentifiedReference<MyValue>;
+    public myValue: IdentifiedReference<MyValue>;
 }
 
 @Entity()
 @Unique({ properties: ['boardId', 'boardCreatedBy', 'removedMyValue'] })
 export class RemovedMyValuePieceByPartici extends MyValuePieceBase {
+    public constructor(params: MyValuePieceBaseParams & { removedMyValue: RemovedMyValue }) {
+        super(params);
+        this.removedMyValue = Reference.create(params.removedMyValue);
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ version: true })
     public version: number = 1;
 
     @ManyToOne(() => RemovedMyValue, { wrappedReference: true })
-    public removedMyValue!: IdentifiedReference<RemovedMyValue>;
+    public removedMyValue: IdentifiedReference<RemovedMyValue>;
 }
 
 @Entity()
 @Unique({ properties: ['boardId', 'boardCreatedBy', 'removeMyValueOp'] })
 export class RemovedMyValuePieceByMyValue extends MyValuePieceBase {
+    public constructor(params: MyValuePieceBaseParams & { removeMyValueOp: RemoveMyValueOp }) {
+        super(params);
+        this.removeMyValueOp = Reference.create(params.removeMyValueOp);
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ version: true })
     public version: number = 1;
 
     @ManyToOne(() => RemoveMyValueOp, { wrappedReference: true })
-    public removeMyValueOp!: IdentifiedReference<RemoveMyValueOp>;
+    public removeMyValueOp: IdentifiedReference<RemoveMyValueOp>;
 }
 
 @Entity()
@@ -132,12 +149,15 @@ export class AddMyValuePieceOp {
     public constructor({
         boardId,
         boardCreatedBy,
+        updateMyValueOp,
     }: {
         boardId: string;
         boardCreatedBy: string;
+        updateMyValueOp: UpdateMyValueOp;
     }) {
         this.boardId = boardId;
         this.boardCreatedBy = boardCreatedBy;
+        this.updateMyValueOp = Reference.create(updateMyValueOp);
     }
 
     @PrimaryKey()
@@ -153,14 +173,19 @@ export class AddMyValuePieceOp {
 
 
     @ManyToOne(() => UpdateMyValueOp, { wrappedReference: true })
-    public updateMyValueOp!: IdentifiedReference<UpdateMyValueOp>;
+    public updateMyValueOp: IdentifiedReference<UpdateMyValueOp>;
 }
 
 @Entity()
 @Unique({ properties: ['boardId', 'boardCreatedBy', 'updateMyValueOp'] })
 export class RemoveMyValuePieceOp extends MyValuePieceBase {
+    public constructor(params: MyValuePieceBaseParams & { updateMyValueOp: UpdateMyValueOp }) {
+        super(params);
+        this.updateMyValueOp = Reference.create(params.updateMyValueOp);
+    }
+
     @ManyToOne(() => UpdateMyValueOp, { wrappedReference: true })
-    public updateMyValueOp!: IdentifiedReference<UpdateMyValueOp>;
+    public updateMyValueOp: IdentifiedReference<UpdateMyValueOp>;
 }
 
 @Entity()
@@ -169,12 +194,15 @@ export class UpdateMyValuePieceOp {
     public constructor({
         boardId,
         boardCreatedBy,
+        updateMyValueOp,
     }: {
         boardId: string;
         boardCreatedBy: string;
+        updateMyValueOp: UpdateMyValueOp;
     }) {
         this.boardId = boardId;
         this.boardCreatedBy = boardCreatedBy;
+        this.updateMyValueOp = Reference.create(updateMyValueOp);
     }
 
     @PrimaryKey()
@@ -221,5 +249,5 @@ export class UpdateMyValuePieceOp {
 
 
     @ManyToOne(() => UpdateMyValueOp, { wrappedReference: true })
-    public updateMyValueOp!: IdentifiedReference<UpdateMyValueOp>;
+    public updateMyValueOp: IdentifiedReference<UpdateMyValueOp>;
 }

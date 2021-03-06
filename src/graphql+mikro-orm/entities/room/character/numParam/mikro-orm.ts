@@ -1,8 +1,14 @@
-import { Entity, IdentifiedReference, Index, JsonType, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/core';
+import { Entity, IdentifiedReference, Index, JsonType, ManyToOne, PrimaryKey, Property, Reference, Unique } from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { AddCharaOp, Chara, RemoveCharaOp, UpdateCharaOp } from '../mikro-orm';
 import { Room, RoomOp } from '../../mikro-orm';
 import { ReplaceNullableNumberDownOperation } from '../../../../Operations';
+
+type BaseParams = {
+    key: string;
+    isValuePrivate: boolean;
+    value?: number;
+};
 
 // ****main value****
 
@@ -11,11 +17,7 @@ export abstract class NumParamBase {
         key,
         isValuePrivate,
         value,
-    }: {
-        key: string;
-        isValuePrivate: boolean;
-        value?: number;
-    }) {
+    }: BaseParams) {
         this.key = key;
         this.isValuePrivate = isValuePrivate;
         this.value = value;
@@ -39,23 +41,33 @@ export abstract class NumParamBase {
 @Entity()
 @Unique({ properties: ['chara', 'key'] })
 export class NumParam extends NumParamBase {
+    public constructor(params: BaseParams & { chara: Chara }) {
+        super(params);
+        this.chara = Reference.create(params.chara);
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ version: true })
     public version: number = 1;
 
     @ManyToOne(() => Chara, { wrappedReference: true })
-    public chara!: IdentifiedReference<Chara>;
+    public chara: IdentifiedReference<Chara>;
 }
 
 @Entity()
 @Unique({ properties: ['removeCharaOp', 'key'] })
 export class RemovedNumParam extends NumParamBase {
+    public constructor(params: BaseParams & { removeCharaOp: RemoveCharaOp }) {
+        super(params);
+        this.removeCharaOp = Reference.create(params.removeCharaOp);
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ version: true })
     public version: number = 1;
 
     @ManyToOne(() => RemoveCharaOp, { wrappedReference: true })
-    public removeCharaOp!: IdentifiedReference<RemoveCharaOp>;
+    public removeCharaOp: IdentifiedReference<RemoveCharaOp>;
 }
 
 @Entity()
@@ -63,10 +75,13 @@ export class RemovedNumParam extends NumParamBase {
 export class UpdateNumParamOp {
     public constructor({
         key,
+        updateCharaOp,
     }: {
         key: string;
+        updateCharaOp: UpdateCharaOp;
     }) {
         this.key = key;
+        this.updateCharaOp = Reference.create(updateCharaOp);
     }
 
     @PrimaryKey()
@@ -86,7 +101,7 @@ export class UpdateNumParamOp {
 
 
     @ManyToOne(() => UpdateCharaOp, { wrappedReference: true })
-    public updateCharaOp!: IdentifiedReference<UpdateCharaOp>;
+    public updateCharaOp: IdentifiedReference<UpdateCharaOp>;
 }
 
 // ****max value****
@@ -96,11 +111,7 @@ export abstract class NumMaxParamBase {
         key,
         isValuePrivate,
         value,
-    }: {
-        key: string;
-        isValuePrivate: boolean;
-        value?: number;
-    }) {
+    }: BaseParams) {
         this.key = key;
         this.isValuePrivate = isValuePrivate;
         this.value = value;
@@ -124,23 +135,33 @@ export abstract class NumMaxParamBase {
 @Entity()
 @Unique({ properties: ['chara', 'key'] })
 export class NumMaxParam extends NumMaxParamBase {
+    public constructor(params: BaseParams & { chara: Chara }) {
+        super(params);
+        this.chara = Reference.create(params.chara);
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ version: true })
     public version: number = 1;
 
     @ManyToOne(() => Chara, { wrappedReference: true })
-    public chara!: IdentifiedReference<Chara>;
+    public chara: IdentifiedReference<Chara>;
 }
 
 @Entity()
 @Unique({ properties: ['removeCharaOp', 'key'] })
 export class RemovedNumMaxParam extends NumMaxParamBase {
+    public constructor(params: BaseParams & { removeCharaOp: RemoveCharaOp }) {
+        super(params);
+        this.removeCharaOp = Reference.create(params.removeCharaOp);
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ version: true })
     public version: number = 1;
 
     @ManyToOne(() => RemoveCharaOp, { wrappedReference: true })
-    public removeCharaOp!: IdentifiedReference<RemoveCharaOp>;
+    public removeCharaOp: IdentifiedReference<RemoveCharaOp>;
 }
 
 @Entity()
@@ -148,10 +169,13 @@ export class RemovedNumMaxParam extends NumMaxParamBase {
 export class UpdateNumMaxParamOp {
     public constructor({
         key,
+        updateCharaOp,
     }: {
         key: string;
+        updateCharaOp: UpdateCharaOp;
     }) {
         this.key = key;
+        this.updateCharaOp = Reference.create(updateCharaOp);
     }
 
     @PrimaryKey()
@@ -171,5 +195,5 @@ export class UpdateNumMaxParamOp {
 
 
     @ManyToOne(() => UpdateCharaOp, { wrappedReference: true })
-    public updateCharaOp!: IdentifiedReference<UpdateCharaOp>;
+    public updateCharaOp: IdentifiedReference<UpdateCharaOp>;
 }

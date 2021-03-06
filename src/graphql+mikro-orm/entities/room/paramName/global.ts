@@ -147,8 +147,9 @@ export namespace GlobalParamName {
                                 type: key.first,
                                 key: key.second,
                                 name: value.operation.oldValue.name,
+                                roomOp: parentOp,
                             });
-                            parentOp.removeParamNameOps.add(op);
+                            em.persist(op);
                             continue;
                         }
 
@@ -156,23 +157,24 @@ export namespace GlobalParamName {
                             type: key.first,
                             key: key.second,
                             name: value.operation.newValue.name,
+                            room: parent,
                         });
-                        parent.paramNames.add(toAdd);
+                        em.persist(toAdd);
 
-                        const op = new AddParamNameOp({ type: key.first, key: key.second });
-                        parentOp.addParamNameOps.add(op);
+                        const op = new AddParamNameOp({ type: key.first, key: key.second, roomOp: parentOp });
+                        em.persist(op);
                         continue;
                     }
                     case update: {
                         const target = await em.findOneOrFail(ParamName, { room: { id: parent.id }, type: key.first, key: key.second });
-                        const op = new UpdateParamNameOp({ type: key.first, key: key.second });
+                        const op = new UpdateParamNameOp({ type: key.first, key: key.second, roomOp: parentOp  });
 
                         if (value.operation.name != null) {
                             target.name = value.operation.name.newValue;
                             op.name = value.operation.name.oldValue;
                         }
 
-                        parentOp.updateParamNameOps.add(op);
+                        em.persist(op);
                         continue;
                     }
                 }

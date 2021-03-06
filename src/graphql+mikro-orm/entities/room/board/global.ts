@@ -63,7 +63,15 @@ export namespace GlobalBoard {
 
     export namespace MikroORM {
         export namespace ToGlobal {
-            export const state = (entity: BoardBase): StateType => entity;
+            export const state = (entity: BoardBase): StateType => {
+                return {
+                    ...entity,
+                    backgroundImage: entity.backgroundImagePath != null && entity.backgroundImageSourceType != null ? {
+                        path: entity.backgroundImagePath,
+                        sourceType: entity.backgroundImageSourceType,
+                    } : undefined,
+                };
+            };
 
             export const stateMany = (entity: ReadonlyArray<BoardBase>): ReadonlyDualKeyMap<string, string, StateType> => {
                 const result = new DualKeyMap<string, string, StateType>();
@@ -91,6 +99,14 @@ export namespace GlobalBoard {
                     },
                     getState: async x => ResultModule.ok(state(x)),
                     getOperation: async entity => ResultModule.ok({
+                        backgroundImage: entity.backgroundImage == null ? undefined : entity.backgroundImage,
+                        backgroundImageZoom: entity.backgroundImageZoom == null ? undefined : { oldValue: entity.backgroundImageZoom},
+                        cellColumnCount: entity.cellColumnCount == null ? undefined : { oldValue: entity.cellColumnCount },
+                        cellHeight: entity.cellHeight == null ? undefined : { oldValue: entity.cellHeight },
+                        cellOffsetX: entity.cellOffsetX == null ? undefined : { oldValue: entity.cellOffsetX },
+                        cellOffsetY: entity.cellOffsetY == null ? undefined : { oldValue: entity.cellOffsetY },
+                        cellRowCount: entity.cellRowCount == null ? undefined : { oldValue: entity.cellRowCount },
+                        cellWidth: entity.cellWidth == null ? undefined : { oldValue: entity.cellWidth },
                         name: entity.name == null ? undefined : { oldValue: entity.name },
                     })
                 });
@@ -173,8 +189,11 @@ export namespace GlobalBoard {
                                 ...value.operation.oldValue,
                                 createdBy: key.first,
                                 stateId: key.second,
+                                roomOp: parentOp,
                             });
-                            parentOp.removeBoardOps.add(op);
+                            op.backgroundImagePath = value.operation.oldValue.backgroundImage?.path;
+                            op.backgroundImageSourceType = value.operation.oldValue.backgroundImage?.sourceType;
+                            em.persist(op);
                             continue;
                         }
 
@@ -182,16 +201,19 @@ export namespace GlobalBoard {
                             ...value.operation.newValue,
                             createdBy: key.first,
                             stateId: key.second,
+                            room: parent,
                         });
-                        parent.boards.add(toAdd);
+                        toAdd.backgroundImagePath = value.operation.newValue.backgroundImage?.path;
+                        toAdd.backgroundImageSourceType = value.operation.newValue.backgroundImage?.sourceType;
+                        em.persist(toAdd);
 
-                        const op = new AddBoardOp({ createdBy: key.first, stateId: key.second });
-                        parentOp.addBoardOps.add(op);
+                        const op = new AddBoardOp({ createdBy: key.first, stateId: key.second, roomOp: parentOp });
+                        em.persist(op);
                         continue;
                     }
                     case update: {
                         const target = await em.findOneOrFail(Board, { room: { id: parent.id }, createdBy: key.first, stateId: key.second });
-                        const op = new UpdateBoardOp({ createdBy: key.first, stateId: key.second });
+                        const op = new UpdateBoardOp({ createdBy: key.first, stateId: key.second, roomOp: parentOp });
 
                         if (value.operation.backgroundImage != null) {
                             target.backgroundImagePath = value.operation.backgroundImage.newValue?.path;
@@ -231,7 +253,7 @@ export namespace GlobalBoard {
                             op.name = value.operation.name.oldValue;
                         }
 
-                        parentOp.updateBoardOps.add(op);
+                        em.persist(op);
                         continue;
                     }
                 }
@@ -417,13 +439,13 @@ export namespace GlobalBoard {
                 resultType.cellOffsetX = { oldValue: prevState.cellOffsetX, newValue: nextState.cellOffsetX };
             }
             if (prevState.cellOffsetY !== nextState.cellOffsetY) {
-                resultType.cellOffsetY = { oldValue: prevState.cellOffsetY, newValue: nextState.cellOffsetY};
+                resultType.cellOffsetY = { oldValue: prevState.cellOffsetY, newValue: nextState.cellOffsetY };
             }
             if (prevState.cellRowCount !== nextState.cellRowCount) {
                 resultType.cellRowCount = { oldValue: prevState.cellRowCount, newValue: nextState.cellRowCount };
             }
             if (prevState.cellWidth !== nextState.cellWidth) {
-                resultType.cellWidth = { oldValue: prevState.cellWidth, newValue: nextState.cellWidth};
+                resultType.cellWidth = { oldValue: prevState.cellWidth, newValue: nextState.cellWidth };
             }
             if (prevState.name !== nextState.name) {
                 resultType.name = { oldValue: prevState.name, newValue: nextState.name };

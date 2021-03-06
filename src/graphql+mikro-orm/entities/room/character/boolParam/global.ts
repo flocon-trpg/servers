@@ -131,11 +131,10 @@ export namespace GlobalBoolParam {
             for (const [key, value] of operation) {
                 let target = await em.findOne(BoolParam, { chara: { id: parent.id }, key });
                 if (target == null) {
-                    target = new BoolParam({ key, isValuePrivate: false });
-                    parent.boolParams.add(target);
+                    target = new BoolParam({ key, isValuePrivate: false, chara: parent });
                 }
 
-                const op = new UpdateBoolParamOp({ key });
+                const op = new UpdateBoolParamOp({ key, updateCharaOp: parentOp });
 
                 if (value.isValuePrivate != null) {
                     target.isValuePrivate = value.isValuePrivate.newValue;
@@ -146,7 +145,7 @@ export namespace GlobalBoolParam {
                     op.value = value.value;
                 }
 
-                parentOp.updateBoolParamOps.add(op);
+                em.persist(op);
                 continue;
             }
         };

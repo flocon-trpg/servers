@@ -1,8 +1,13 @@
-import { Entity, IdentifiedReference, Index, JsonType, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/core';
+import { Entity, IdentifiedReference, Index, JsonType, ManyToOne, PrimaryKey, Property, Reference, Unique } from '@mikro-orm/core';
 import { v4 } from 'uuid';
-import { ReplaceFilePathArrayDownOperation } from '../../../Operations';
 import { FilePath } from '../../filePath/global';
 import { Room, RoomOp } from '../mikro-orm';
+
+type RoomBgmBaseParam = {
+    channelKey: string;
+    files: FilePath[];
+    volume: number;
+};
 
 @Entity()
 export abstract class RoomBgmBase {
@@ -10,11 +15,7 @@ export abstract class RoomBgmBase {
         channelKey,
         files,
         volume,
-    }: {
-        channelKey: string;
-        files: FilePath[];
-        volume: number;
-    }) {
+    }: RoomBgmBaseParam) {
         this.channelKey = channelKey;
         this.files = files;
         this.volume = volume;
@@ -38,21 +39,22 @@ export abstract class RoomBgmBase {
 
     @Property()
     public volume: number;
-
-
-    @ManyToOne(() => Room, { wrappedReference: true })
-    public room!: IdentifiedReference<Room>;
 }
 
 @Entity()
 @Unique({ properties: ['room', 'channelKey'] })
 export class RoomBgm extends RoomBgmBase {
+    public constructor(params: RoomBgmBaseParam & {room: Room}) {
+        super(params);
+        this.room = Reference.create(params.room);
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ version: true })
     public version: number = 1;
 
     @ManyToOne(() => Room, { wrappedReference: true })
-    public room!: IdentifiedReference<Room>;
+    public room: IdentifiedReference<Room>;
 }
 
 @Entity()
@@ -60,10 +62,13 @@ export class RoomBgm extends RoomBgmBase {
 export class AddRoomBgmOp {
     public constructor({
         channelKey,
+        roomOp,
     }: {
         channelKey: string;
+        roomOp: RoomOp;
     }) {
         this.channelKey = channelKey;
+        this.roomOp = Reference.create(roomOp);
     }
 
     @PrimaryKey()
@@ -76,14 +81,19 @@ export class AddRoomBgmOp {
 
 
     @ManyToOne(() => RoomOp, { wrappedReference: true })
-    public roomOp!: IdentifiedReference<RoomOp>;
+    public roomOp: IdentifiedReference<RoomOp>;
 }
 
 @Entity()
 @Unique({ properties: ['roomOp', 'channelKey'] })
 export class RemoveRoomBgmOp extends RoomBgmBase {
+    public constructor(params: RoomBgmBaseParam & { roomOp: RoomOp }) {
+        super(params);
+        this.roomOp = Reference.create(params.roomOp);
+    }
+
     @ManyToOne(() => RoomOp, { wrappedReference: true })
-    public roomOp!: IdentifiedReference<RoomOp>;
+    public roomOp: IdentifiedReference<RoomOp>;
 }
 
 @Entity()
@@ -91,10 +101,13 @@ export class RemoveRoomBgmOp extends RoomBgmBase {
 export class UpdateRoomBgmOp {
     public constructor({
         channelKey,
+        roomOp,
     }: {
         channelKey: string;
+        roomOp: RoomOp;
     }) {
         this.channelKey = channelKey;
+        this.roomOp = Reference.create(roomOp);
     }
 
     @PrimaryKey()
@@ -115,5 +128,5 @@ export class UpdateRoomBgmOp {
 
 
     @ManyToOne(() => RoomOp, { wrappedReference: true })
-    public roomOp!: IdentifiedReference<RoomOp>;
+    public roomOp: IdentifiedReference<RoomOp>;
 }

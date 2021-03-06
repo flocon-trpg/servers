@@ -144,25 +144,26 @@ export namespace GlobalBgm {
                             const toRemove = await em.findOneOrFail(RoomBgm, { room: { id: parent.id }, channelKey: key });
                             em.remove(toRemove);
 
-                            const op = new RemoveRoomBgmOp({ channelKey: key, files: value.operation.oldValue.files, volume: value.operation.oldValue.volume });
-                            parentOp.removeRoomBgmOps.add(op);
+                            const op = new RemoveRoomBgmOp({ channelKey: key, files: value.operation.oldValue.files, volume: value.operation.oldValue.volume, roomOp: parentOp });
+                            em.persist(op);
                             continue;
                         }
 
                         const toAdd = new RoomBgm({
                             channelKey: key,
                             files: value.operation.newValue.files,
-                            volume: value.operation.newValue.volume
+                            volume: value.operation.newValue.volume,
+                            room: parent,
                         });
-                        parent.roomBgms.add(toAdd);
+                        em.persist(toAdd);
 
-                        const op = new AddRoomBgmOp({ channelKey: key });
-                        parentOp.addRoomBgmOps.add(op);
+                        const op = new AddRoomBgmOp({ channelKey: key, roomOp: parentOp });
+                        em.persist(op);
                         continue;
                     }
                     case update: {
                         const target = await em.findOneOrFail(RoomBgm, { room: { id: parent.id }, channelKey: key });
-                        const op = new UpdateRoomBgmOp({ channelKey: key });
+                        const op = new UpdateRoomBgmOp({ channelKey: key, roomOp: parentOp });
 
                         if (value.operation.files != null) {
                             target.files = value.operation.files.newValue;
@@ -173,7 +174,7 @@ export namespace GlobalBgm {
                             op.volume = value.operation.volume.oldValue;
                         }
 
-                        parentOp.updateRoomBgmOps.add(op);
+                        em.persist(op);
                         continue;
                     }
                 }

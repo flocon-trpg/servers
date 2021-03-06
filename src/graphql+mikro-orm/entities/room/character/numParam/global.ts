@@ -136,22 +136,22 @@ export namespace GlobalNumParam {
                     case 'default': {
                         target = await em.findOne(NumParam, { chara: { id: parent.id }, key });
                         if (target == null) {
-                            target = new NumParam({ key, isValuePrivate: false });
-                            parent.numParams.add(target);
+                            target = new NumParam({ key, isValuePrivate: false, chara: parent });
+                            em.persist(target);
                         }
                         break;
                     }
                     case 'max': {
                         target = await em.findOne(NumMaxParam, { chara: { id: parent.id }, key });
                         if (target == null) {
-                            target = new NumMaxParam({ key, isValuePrivate: false });
-                            parent.numParams.add(target);
+                            target = new NumMaxParam({ key, isValuePrivate: false, chara: parent });
+                            em.persist(target);
                         }
                         break;
                     }
                 }
 
-                const op = type === 'max' ? new UpdateNumMaxParamOp({ key }) : new UpdateNumParamOp({ key });
+                const op = type === 'max' ? new UpdateNumMaxParamOp({ key, updateCharaOp: parentOp }) : new UpdateNumParamOp({ key, updateCharaOp: parentOp });
 
                 if (value.isValuePrivate != null) {
                     target.isValuePrivate = value.isValuePrivate.newValue;
@@ -171,6 +171,7 @@ export namespace GlobalNumParam {
                         break;
                 }
 
+                em.persist(op);
                 continue;
             }
         };

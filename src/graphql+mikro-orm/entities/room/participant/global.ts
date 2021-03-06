@@ -245,9 +245,10 @@ export namespace GlobalParticipant {
                             const op = new RemoveParticiOp({
                                 name: value.operation.oldValue.name,
                                 role: value.operation.oldValue.role,
+                                user,
+                                roomOp: parentOp,
                             });
-                            op.user = Reference.create<User, 'userUid'>(user);
-                            parentOp.removeParticiOps.add(op);
+                            em.persist(op);
                             continue;
                         }
 
@@ -256,21 +257,20 @@ export namespace GlobalParticipant {
                         const toAdd = new Partici({
                             name: value.operation.newValue.name,
                             role: value.operation.newValue.role,
+                            user,
+                            room: parent,
                         });
-                        toAdd.user = Reference.create<User, 'userUid'>(user);
-                        parent.particis.add(toAdd);
+                        em.persist(toAdd);
 
-                        const op = new AddParticiOp();
-                        op.user = Reference.create<User, 'userUid'>(user);
-                        parentOp.addParticiOps.add(op);
+                        const op = new AddParticiOp({ roomOp: parentOp, user });
+                        em.persist(op);
                         continue;
                     }
                     case update: {
                         const user = await em.findOneOrFail(User, { userUid: key });
 
                         const target = await em.findOneOrFail(Partici, { room: { id: parent.id }, user: { userUid: key } });
-                        const op = new UpdateParticiOp();
-                        op.user = Reference.create<User, 'userUid'>(user);
+                        const op = new UpdateParticiOp({roomOp: parentOp, user});
 
                         await GlobalMyValue.Global.applyToEntity({ em, parent: target, parentOp: op, operation: value.operation.myNumberValues });
 
@@ -294,7 +294,7 @@ export namespace GlobalParticipant {
                             })();
                         }
 
-                        parentOp.updateParticiOps.add(op);
+                        em.persist(op);
                         continue;
                     }
                 }

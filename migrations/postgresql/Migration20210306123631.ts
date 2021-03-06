@@ -1,6 +1,6 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20210302032626 extends Migration {
+export class Migration20210306123631 extends Migration {
 
   async up(): Promise<void> {
     this.addSql('create table "user" ("user_uid" varchar(255) not null, "is_entry" bool not null);');
@@ -31,7 +31,7 @@ export class Migration20210302032626 extends Migration {
     this.addSql('alter table "update_room_bgm_op" add constraint "update_room_bgm_op_pkey" primary key ("id");');
     this.addSql('create index "update_room_bgm_op_channel_key_index" on "update_room_bgm_op" ("channel_key");');
 
-    this.addSql('create table "remove_room_bgm_op" ("id" varchar(255) not null, "version" int4 not null default 1, "channel_key" varchar(255) not null, "files" jsonb not null, "volume" int4 not null, "room_id" varchar(255) not null, "room_op_id" varchar(255) not null);');
+    this.addSql('create table "remove_room_bgm_op" ("id" varchar(255) not null, "version" int4 not null default 1, "channel_key" varchar(255) not null, "files" jsonb not null, "volume" int4 not null, "room_op_id" varchar(255) not null);');
     this.addSql('alter table "remove_room_bgm_op" add constraint "remove_room_bgm_op_pkey" primary key ("id");');
     this.addSql('create index "remove_room_bgm_op_channel_key_index" on "remove_room_bgm_op" ("channel_key");');
 
@@ -43,7 +43,7 @@ export class Migration20210302032626 extends Migration {
     this.addSql('alter table "room_bgm" add constraint "room_bgm_pkey" primary key ("id");');
     this.addSql('create index "room_bgm_channel_key_index" on "room_bgm" ("channel_key");');
 
-    this.addSql('create table "room_bgm_base" ("id" varchar(255) not null, "version" int4 not null default 1, "channel_key" varchar(255) not null, "files" jsonb not null, "volume" int4 not null, "room_id" varchar(255) not null);');
+    this.addSql('create table "room_bgm_base" ("id" varchar(255) not null, "version" int4 not null default 1, "channel_key" varchar(255) not null, "files" jsonb not null, "volume" int4 not null);');
     this.addSql('alter table "room_bgm_base" add constraint "room_bgm_base_pkey" primary key ("id");');
     this.addSql('create index "room_bgm_base_channel_key_index" on "room_bgm_base" ("channel_key");');
 
@@ -260,14 +260,11 @@ export class Migration20210302032626 extends Migration {
 
     this.addSql('alter table "update_room_bgm_op" add constraint "update_room_bgm_op_room_op_id_foreign" foreign key ("room_op_id") references "room_op" ("id") on update cascade;');
 
-    this.addSql('alter table "remove_room_bgm_op" add constraint "remove_room_bgm_op_room_id_foreign" foreign key ("room_id") references "room" ("id") on update cascade;');
     this.addSql('alter table "remove_room_bgm_op" add constraint "remove_room_bgm_op_room_op_id_foreign" foreign key ("room_op_id") references "room_op" ("id") on update cascade;');
 
     this.addSql('alter table "add_room_bgm_op" add constraint "add_room_bgm_op_room_op_id_foreign" foreign key ("room_op_id") references "room_op" ("id") on update cascade;');
 
     this.addSql('alter table "room_bgm" add constraint "room_bgm_room_id_foreign" foreign key ("room_id") references "room" ("id") on update cascade;');
-
-    this.addSql('alter table "room_bgm_base" add constraint "room_bgm_base_room_id_foreign" foreign key ("room_id") references "room" ("id") on update cascade;');
 
     this.addSql('alter table "update_param_name_op" add constraint "update_param_name_op_room_op_id_foreign" foreign key ("room_op_id") references "room_op" ("id") on update cascade;');
 
@@ -409,7 +406,9 @@ export class Migration20210302032626 extends Migration {
 
     this.addSql('alter table "my_value" add constraint "my_value_partici_id_state_id_unique" unique ("partici_id", "state_id");');
 
-    this.addSql('alter table "my_value_piece" add constraint "my_value_piece_board_id_board_created_by_unique" unique ("board_id", "board_created_by");');
+    this.addSql('alter table "my_value_piece" add constraint "my_value_piece_my_value_id_board_id_board_created_by_unique" unique ("my_value_id", "board_id", "board_created_by");');
+
+    this.addSql('alter table "update_chara_op" add constraint "update_chara_op_room_op_id_created_by_state_id_unique" unique ("room_op_id", "created_by", "state_id");');
 
     this.addSql('alter table "update_bool_param_op" add constraint "update_bool_param_op_update_chara_op_id_key_unique" unique ("update_chara_op_id", "key");');
 
@@ -419,6 +418,14 @@ export class Migration20210302032626 extends Migration {
 
     this.addSql('alter table "update_str_param_op" add constraint "update_str_param_op_update_chara_op_id_key_unique" unique ("update_chara_op_id", "key");');
 
+    this.addSql('alter table "add_chara_piece_op" add constraint "add_chara_piece_op_update_chara_op_id_board_created_by_board_id_unique" unique ("update_chara_op_id", "board_created_by", "board_id");');
+
+    this.addSql('alter table "remove_chara_piece_op" add constraint "remove_chara_piece_op_update_chara_op_id_board_created_by_board_id_unique" unique ("update_chara_op_id", "board_created_by", "board_id");');
+
+    this.addSql('alter table "update_chara_piece_op" add constraint "update_chara_piece_op_update_chara_op_id_board_created_by_board_id_unique" unique ("update_chara_op_id", "board_created_by", "board_id");');
+
+    this.addSql('alter table "remove_chara_op" add constraint "remove_chara_op_room_op_id_created_by_state_id_unique" unique ("room_op_id", "created_by", "state_id");');
+
     this.addSql('alter table "removed_bool_param" add constraint "removed_bool_param_remove_chara_op_id_key_unique" unique ("remove_chara_op_id", "key");');
 
     this.addSql('alter table "removed_num_param" add constraint "removed_num_param_remove_chara_op_id_key_unique" unique ("remove_chara_op_id", "key");');
@@ -426,6 +433,10 @@ export class Migration20210302032626 extends Migration {
     this.addSql('alter table "removed_num_max_param" add constraint "removed_num_max_param_remove_chara_op_id_key_unique" unique ("remove_chara_op_id", "key");');
 
     this.addSql('alter table "removed_str_param" add constraint "removed_str_param_remove_chara_op_id_key_unique" unique ("remove_chara_op_id", "key");');
+
+    this.addSql('alter table "removed_chara_piece" add constraint "removed_chara_piece_remove_chara_op_id_board_created_by_board_id_unique" unique ("remove_chara_op_id", "board_created_by", "board_id");');
+
+    this.addSql('alter table "add_chara_op" add constraint "add_chara_op_room_op_id_created_by_state_id_unique" unique ("room_op_id", "created_by", "state_id");');
 
     this.addSql('alter table "chara" add constraint "chara_created_by_state_id_unique" unique ("created_by", "state_id");');
 
@@ -436,6 +447,8 @@ export class Migration20210302032626 extends Migration {
     this.addSql('alter table "num_max_param" add constraint "num_max_param_chara_id_key_unique" unique ("chara_id", "key");');
 
     this.addSql('alter table "str_param" add constraint "str_param_chara_id_key_unique" unique ("chara_id", "key");');
+
+    this.addSql('alter table "chara_piece" add constraint "chara_piece_chara_id_board_created_by_board_id_unique" unique ("chara_id", "board_created_by", "board_id");');
 
     this.addSql('alter table "update_board_op" add constraint "update_board_op_room_op_id_created_by_state_id_unique" unique ("room_op_id", "created_by", "state_id");');
 

@@ -524,12 +524,11 @@ export class RoomResolver {
             }
             const newRoom = new Room$MikroORM.Room({ name: input.roomName, createdBy: decodedIdToken.uid });
             // このRoomのroomOperatedを購読しているユーザーはいないので、roomOperatedは実行する必要がない。
-            const newParticipant = new Partici({ role: ParticipantRole.Master, name: input.participantName });
-            newRoom.particis.add(newParticipant);
-            entryUser.particis.add(newParticipant);
+            const newParticipant = new Partici({ role: ParticipantRole.Master, name: input.participantName, user: entryUser, room: newRoom });
             newRoom.joinAsPlayerPhrase = input.joinAsPlayerPhrase;
             newRoom.joinAsSpectatorPhrase = input.joinAsSpectatorPhrase;
             const revision = newRoom.revision;
+            em.persist(newParticipant);
             em.persist(newRoom);
             const roomState = await GlobalRoom.MikroORM.ToGlobal.state(newRoom);
             const graphqlState = GlobalRoom.Global.ToGraphQL.state({

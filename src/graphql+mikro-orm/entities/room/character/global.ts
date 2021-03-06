@@ -301,10 +301,11 @@ export namespace GlobalCharacter {
                                 ...value.operation.oldValue,
                                 createdBy: key.first,
                                 stateId: key.second,
+                                roomOp: parentOp,
                             });
                             op.imagePath = value.operation.oldValue.image?.path;
                             op.imageSourceType = value.operation.oldValue.image?.sourceType;
-                            parentOp.removeCharacterOps.add(op);
+                            em.persist(op);
                             continue;
                         }
 
@@ -312,18 +313,19 @@ export namespace GlobalCharacter {
                             ...value.operation.newValue,
                             createdBy: key.first,
                             stateId: key.second,
+                            room: parent,
                         });
                         toAdd.imagePath = value.operation.newValue.image?.path;
                         toAdd.imageSourceType = value.operation.newValue.image?.sourceType;
-                        parent.characters.add(toAdd);
+                        em.persist(toAdd);
 
-                        const op = new AddCharaOp({ createdBy: key.first, stateId: key.second });
-                        parentOp.addCharacterOps.add(op);
+                        const op = new AddCharaOp({ createdBy: key.first, stateId: key.second, roomOp: parentOp });
+                        em.persist(op);
                         continue;
                     }
                     case update: {
                         const target = await em.findOneOrFail(Chara, { room: { id: parent.id }, createdBy: key.first, stateId: key.second });
-                        const op = new UpdateCharaOp({ createdBy: key.first, stateId: key.second });
+                        const op = new UpdateCharaOp({ createdBy: key.first, stateId: key.second, roomOp: parentOp });
 
                         await GlobalBoolParam.Global.applyToEntity({ em, parent: target, parentOp: op, operation: value.operation.boolParams });
                         await GlobalNumParam.Global.applyToEntity({ em, parent: target, parentOp: op, operation: value.operation.numParams, type: 'default' });
@@ -345,7 +347,7 @@ export namespace GlobalCharacter {
                             op.name = value.operation.name.oldValue;
                         }
 
-                        parentOp.updateCharacterOps.add(op);
+                        em.persist(op);
                         continue;
                     }
                 }

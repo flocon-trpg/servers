@@ -40,7 +40,7 @@ type IntegratedTestStrategy = {
             operation: RoomValueOperation;
         };
         character?: {
-            setupState: (state: Character$MikroORM.Chara) => void;
+            setupState: (state: Character$MikroORM.Chara, em: EM) => void;
             operation: Character$GraphQL.CharacterOperation;
         };
     };
@@ -94,17 +94,17 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }: { em: EM; setupRoom
 
     // 現状はとりあえず全員がParticipantRole.Masterのケースのみを考えている。
     const creatorUser = new User$MikroORM({ userUid: creatorUserUid });
-    const creatorParticipant = new Partici({ name: creatorName, role: ParticipantRole.Master });
+    const creatorParticipant = new Partici({ name: creatorName, role: ParticipantRole.Master, user: creatorUser, room });
     creatorUser.isEntry = true;
-    creatorUser.particis.add(creatorParticipant);
+    em.persist(creatorParticipant);
     const nonCreatorUser = new User$MikroORM({ userUid: nonCreatorUserUid });
-    const nonCreatorParticipant = new Partici({ name: nonCreatorName, role: ParticipantRole.Master });
+    const nonCreatorParticipant = new Partici({ name: nonCreatorName, role: ParticipantRole.Master, user: nonCreatorUser, room });
     nonCreatorUser.isEntry = true;
-    nonCreatorUser.particis.add(nonCreatorParticipant);
+    em.persist(nonCreatorParticipant);
     const anotherUser = new User$MikroORM({ userUid: anotherUserUid });
-    const anotherParticipant = new Partici({ name: anotherName, role: ParticipantRole.Master });
+    const anotherParticipant = new Partici({ name: anotherName, role: ParticipantRole.Master, user: anotherUser, room });
     anotherUser.isEntry = true;
-    anotherUser.particis.add(anotherParticipant);
+    em.persist(anotherParticipant);
     room.particis.add(creatorParticipant, nonCreatorParticipant, anotherParticipant);
     em.persist([room]);
 
@@ -144,9 +144,9 @@ const operateThenGetRoomTestCore = async (strategy: IntegratedTestStrategy, orm:
                 stateId,
                 isPrivate: false,
                 name: '',
+                room: createRoomResult.room,
             });
-            strategy.source.character.setupState(characterState);
-            createRoomResult.room.characters.add(characterState);
+            strategy.source.character.setupState(characterState, em);
             em.persist(characterState);
             character = {
                 entity: characterState,
@@ -454,8 +454,8 @@ describe('operate then getRoom', () => {
                     stateId: characterStateId,
                     isPrivate: false,
                     name: '',
+                    room: createRoomResult.room,
                 });
-                createRoomResult.room.characters.add(characterState);
                 em.persist(characterState);
 
                 const boardStateId = v4();
@@ -469,8 +469,8 @@ describe('operate then getRoom', () => {
                     cellWidth: 0,
                     cellHeight: 0,
                     name: '',
+                    room: createRoomResult.room,
                 });
-                createRoomResult.room.boards.add(boardState);
                 em.persist(boardState);
 
                 await em.flush();
@@ -769,9 +769,9 @@ describe('operate then getRoom', () => {
             operateByCreator: false,
             source: {
                 character: {
-                    setupState: character => {
-                        const numMaxParam = new NumMaxParam({ key, isValuePrivate: false, value: oldValue });
-                        character.numMaxParams.add(numMaxParam);
+                    setupState: (character, em) => {
+                        const numMaxParam = new NumMaxParam({ key, isValuePrivate: false, value: oldValue, chara: character });
+                        em.persist(numMaxParam);
                     },
                     operation: {
                         pieces: { replace: [], update: [] },
@@ -828,8 +828,8 @@ describe('operate then getRoom', () => {
                     stateId: characterStateId,
                     isPrivate: false,
                     name: '',
+                    room: createRoomResult.room,
                 });
-                createRoomResult.room.characters.add(characterState);
                 em.persist(characterState);
 
                 const boardStateId = v4();
@@ -843,8 +843,8 @@ describe('operate then getRoom', () => {
                     cellWidth: 0,
                     cellHeight: 0,
                     name: '',
+                    room: createRoomResult.room,
                 });
-                createRoomResult.room.boards.add(boardState);
                 em.persist(boardState);
 
                 await em.flush();
@@ -947,8 +947,8 @@ describe('operate then getRoom', () => {
                     stateId: characterStateId,
                     isPrivate: false,
                     name: characterName0,
+                    room: createRoomResult.room,
                 });
-                createRoomResult.room.characters.add(characterState);
                 em.persist(characterState);
 
                 await em.flush();
@@ -1080,8 +1080,8 @@ describe('operate then getRoom', () => {
                     stateId: characterStateId,
                     isPrivate: false,
                     name: characterName0,
+                    room: createRoomResult.room,
                 });
-                createRoomResult.room.characters.add(characterState);
                 em.persist(characterState);
 
                 await em.flush();
@@ -1221,8 +1221,8 @@ describe('operate then getRoom', () => {
                     stateId: characterStateId,
                     isPrivate: false,
                     name: characterName0,
+                    room: createRoomResult.room,
                 });
-                createRoomResult.room.characters.add(characterState);
                 em.persist(characterState);
 
                 await em.flush();

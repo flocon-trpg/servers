@@ -45,7 +45,7 @@ export class Room {
 
     // userUid
     @Property()
-    public createdBy!: string;
+    public createdBy: string;
 
 
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types

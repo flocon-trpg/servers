@@ -1,8 +1,20 @@
-import { Entity, Enum, IdentifiedReference, Index, JsonType, ManyToOne, PrimaryKey, PrimaryKeyType, Property, Unique } from '@mikro-orm/core';
+import { Entity, Enum, IdentifiedReference, Index, JsonType, ManyToOne, PrimaryKey, PrimaryKeyType, Property, Reference, Unique } from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { FileSourceType } from '../../../../enums/FileSourceType';
 import { ReplaceNullableFilePathDownOperation, ReplaceNullableNumberDownOperation } from '../../../Operations';
 import { Room, RoomOp } from '../mikro-orm';
+
+type BoardBaseParams = {
+    createdBy: string;
+    stateId: string;
+    name: string;
+    cellWidth: number;
+    cellHeight: number;
+    cellRowCount: number;
+    cellColumnCount: number;
+    cellOffsetX: number;
+    cellOffsetY: number;
+}
 
 export abstract class BoardBase {
     public constructor({
@@ -15,17 +27,7 @@ export abstract class BoardBase {
         cellColumnCount,
         cellOffsetX,
         cellOffsetY,
-    }: {
-        createdBy: string;
-        stateId: string;
-        name: string;
-        cellWidth: number;
-        cellHeight: number;
-        cellRowCount: number;
-        cellColumnCount: number;
-        cellOffsetX: number;
-        cellOffsetY: number;
-    }) {
+    }: BoardBaseParams) {
         this.createdBy = createdBy;
         this.stateId = stateId;
         this.name = name;
@@ -86,12 +88,17 @@ export abstract class BoardBase {
 @Entity()
 @Unique({ properties: ['createdBy', 'stateId'] })
 export class Board extends BoardBase {
+    public constructor(params: BoardBaseParams & { room: Room }) {
+        super(params);
+        this.room = Reference.create(params.room);
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ version: true })
     public version: number = 1;
 
     @ManyToOne(() => Room, { wrappedReference: true })
-    public room!: IdentifiedReference<Room>;
+    public room: IdentifiedReference<Room>;
 }
 
 // DBにはDownOperationとして保存されるため、AddBoardOpはBoardの情報を持たない。
@@ -101,12 +108,15 @@ export class AddBoardOp {
     public constructor({
         createdBy,
         stateId,
+        roomOp,
     }: {
         createdBy: string;
         stateId: string;
+        roomOp: RoomOp;
     }) {
         this.createdBy = createdBy;
         this.stateId = stateId;
+        this.roomOp = Reference.create(roomOp);
     }
 
     @PrimaryKey()
@@ -123,14 +133,19 @@ export class AddBoardOp {
 
 
     @ManyToOne(() => RoomOp, { wrappedReference: true })
-    public roomOp!: IdentifiedReference<RoomOp>;
+    public roomOp: IdentifiedReference<RoomOp>;
 }
 
 @Entity()
 @Unique({ properties: ['roomOp', 'createdBy', 'stateId'] })
 export class RemoveBoardOp extends BoardBase {
+    public constructor(params: BoardBaseParams & { roomOp: RoomOp }) {
+        super(params);
+        this.roomOp = Reference.create(params.roomOp);
+    }
+
     @ManyToOne(() => RoomOp, { wrappedReference: true })
-    public roomOp!: IdentifiedReference<RoomOp>;
+    public roomOp: IdentifiedReference<RoomOp>;
 }
 
 @Entity()
@@ -139,12 +154,15 @@ export class UpdateBoardOp {
     public constructor({
         createdBy,
         stateId,
+        roomOp,
     }: {
         createdBy: string;
         stateId: string;
+        roomOp: RoomOp;
     }) {
         this.createdBy = createdBy;
         this.stateId = stateId;
+        this.roomOp = Reference.create(roomOp);
     }
 
     @PrimaryKey()
@@ -189,5 +207,5 @@ export class UpdateBoardOp {
 
 
     @ManyToOne(() => RoomOp, { wrappedReference: true })
-    public roomOp!: IdentifiedReference<RoomOp>;
+    public roomOp: IdentifiedReference<RoomOp>;
 }

@@ -1,6 +1,6 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20210302031917 extends Migration {
+export class Migration20210306020251 extends Migration {
 
   async up(): Promise<void> {
     this.addSql('create table `user` (`user_uid` varchar not null, `is_entry` integer not null, primary key (`user_uid`));');
@@ -211,9 +211,7 @@ export class Migration20210302031917 extends Migration {
     this.addSql('alter table `update_room_bgm_op` add column `room_op_id` varchar null;');
     this.addSql('create index `update_room_bgm_op_room_op_id_index` on `update_room_bgm_op` (`room_op_id`);');
 
-    this.addSql('alter table `remove_room_bgm_op` add column `room_id` varchar null;');
     this.addSql('alter table `remove_room_bgm_op` add column `room_op_id` varchar null;');
-    this.addSql('create index `remove_room_bgm_op_room_id_index` on `remove_room_bgm_op` (`room_id`);');
     this.addSql('create index `remove_room_bgm_op_room_op_id_index` on `remove_room_bgm_op` (`room_op_id`);');
 
     this.addSql('alter table `add_room_bgm_op` add column `room_op_id` varchar null;');
@@ -221,9 +219,6 @@ export class Migration20210302031917 extends Migration {
 
     this.addSql('alter table `room_bgm` add column `room_id` varchar null;');
     this.addSql('create index `room_bgm_room_id_index` on `room_bgm` (`room_id`);');
-
-    this.addSql('alter table `room_bgm_base` add column `room_id` varchar null;');
-    this.addSql('create index `room_bgm_base_room_id_index` on `room_bgm_base` (`room_id`);');
 
     this.addSql('alter table `update_param_name_op` add column `room_op_id` varchar null;');
     this.addSql('create index `update_param_name_op_room_op_id_index` on `update_param_name_op` (`room_op_id`);');
@@ -413,7 +408,9 @@ export class Migration20210302031917 extends Migration {
 
     this.addSql('create unique index `my_value_partici_id_state_id_unique` on `my_value` (`partici_id`, `state_id`);');
 
-    this.addSql('create unique index `my_value_piece_board_id_board_created_by_unique` on `my_value_piece` (`board_id`, `board_created_by`);');
+    this.addSql('create unique index `my_value_piece_my_value_id_board_id_board_created_by_unique` on `my_value_piece` (`my_value_id`, `board_id`, `board_created_by`);');
+
+    this.addSql('create unique index `update_chara_op_room_op_id_created_by_state_id_unique` on `update_chara_op` (`room_op_id`, `created_by`, `state_id`);');
 
     this.addSql('create unique index `update_bool_param_op_update_chara_op_id_key_unique` on `update_bool_param_op` (`update_chara_op_id`, `key`);');
 
@@ -423,6 +420,14 @@ export class Migration20210302031917 extends Migration {
 
     this.addSql('create unique index `update_str_param_op_update_chara_op_id_key_unique` on `update_str_param_op` (`update_chara_op_id`, `key`);');
 
+    this.addSql('create unique index `add_chara_piece_op_update_chara_op_id_board_created_by_board_id_unique` on `add_chara_piece_op` (`update_chara_op_id`, `board_created_by`, `board_id`);');
+
+    this.addSql('create unique index `remove_chara_piece_op_update_chara_op_id_board_created_by_board_id_unique` on `remove_chara_piece_op` (`update_chara_op_id`, `board_created_by`, `board_id`);');
+
+    this.addSql('create unique index `update_chara_piece_op_update_chara_op_id_board_created_by_board_id_unique` on `update_chara_piece_op` (`update_chara_op_id`, `board_created_by`, `board_id`);');
+
+    this.addSql('create unique index `remove_chara_op_room_op_id_created_by_state_id_unique` on `remove_chara_op` (`room_op_id`, `created_by`, `state_id`);');
+
     this.addSql('create unique index `removed_bool_param_remove_chara_op_id_key_unique` on `removed_bool_param` (`remove_chara_op_id`, `key`);');
 
     this.addSql('create unique index `removed_num_param_remove_chara_op_id_key_unique` on `removed_num_param` (`remove_chara_op_id`, `key`);');
@@ -430,6 +435,10 @@ export class Migration20210302031917 extends Migration {
     this.addSql('create unique index `removed_num_max_param_remove_chara_op_id_key_unique` on `removed_num_max_param` (`remove_chara_op_id`, `key`);');
 
     this.addSql('create unique index `removed_str_param_remove_chara_op_id_key_unique` on `removed_str_param` (`remove_chara_op_id`, `key`);');
+
+    this.addSql('create unique index `removed_chara_piece_remove_chara_op_id_board_created_by_board_id_unique` on `removed_chara_piece` (`remove_chara_op_id`, `board_created_by`, `board_id`);');
+
+    this.addSql('create unique index `add_chara_op_room_op_id_created_by_state_id_unique` on `add_chara_op` (`room_op_id`, `created_by`, `state_id`);');
 
     this.addSql('create unique index `chara_created_by_state_id_unique` on `chara` (`created_by`, `state_id`);');
 
@@ -440,6 +449,8 @@ export class Migration20210302031917 extends Migration {
     this.addSql('create unique index `num_max_param_chara_id_key_unique` on `num_max_param` (`chara_id`, `key`);');
 
     this.addSql('create unique index `str_param_chara_id_key_unique` on `str_param` (`chara_id`, `key`);');
+
+    this.addSql('create unique index `chara_piece_chara_id_board_created_by_board_id_unique` on `chara_piece` (`chara_id`, `board_created_by`, `board_id`);');
 
     this.addSql('create unique index `update_board_op_room_op_id_created_by_state_id_unique` on `update_board_op` (`room_op_id`, `created_by`, `state_id`);');
 

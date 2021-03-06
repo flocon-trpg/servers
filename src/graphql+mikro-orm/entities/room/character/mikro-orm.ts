@@ -1,15 +1,19 @@
-import { Cascade, Collection, Entity, Enum, IdentifiedReference, Index, JsonType, ManyToOne, OneToMany, PrimaryKey, PrimaryKeyType, Property, Reference, Unique } from '@mikro-orm/core';
+import { Collection, Entity, Enum, IdentifiedReference, Index, JsonType, ManyToOne, OneToMany, PrimaryKey, Property, Reference, Unique } from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { FileSourceType } from '../../../../enums/FileSourceType';
-import { ReplaceNullableBooleanDownOperation, ReplaceNullableFilePathDownOperation, ReplaceNullableNumberDownOperation, ReplaceNullableStringDownOperation, TextDownOperationUnit } from '../../../Operations';
+import { ReplaceNullableFilePathDownOperation } from '../../../Operations';
 import { BoolParam, RemovedBoolParam, UpdateBoolParamOp } from './boolParam/mikro-orm';
 import { NumMaxParam, NumParam, RemovedNumMaxParam, RemovedNumParam, UpdateNumMaxParamOp, UpdateNumParamOp } from './numParam/mikro-orm';
 import { AddCharaPieceOp, CharaPiece, RemovedCharaPiece, RemoveCharaPieceOp, UpdateCharaPieceOp } from './piece/mikro-orm';
 import { Room, RoomOp } from '../mikro-orm';
 import { RemovedStrParam, StrParam, UpdateStrParamOp } from './strParam/mikro-orm';
-import { RoomPrvMsg, RoomPubMsg } from '../../roomMessage/mikro-orm';
 
-// TODO: @Unique
+type CharaBaseParams = {
+    createdBy: string;
+    stateId: string;
+    isPrivate: boolean;
+    name: string;
+}
 
 // Chara = Character
 
@@ -19,12 +23,7 @@ export abstract class CharaBase {
         stateId,
         isPrivate,
         name,
-    }: {
-        createdBy: string;
-        stateId: string;
-        isPrivate: boolean;
-        name: string;
-    }) {
+    }: CharaBaseParams) {
         this.createdBy = createdBy;
         this.stateId = stateId;
         this.isPrivate = isPrivate;
@@ -61,6 +60,11 @@ export abstract class CharaBase {
 @Entity()
 @Unique({ properties: ['createdBy', 'stateId'] })
 export class Chara extends CharaBase {
+    public constructor(params: CharaBaseParams & { room: Room }) {
+        super(params);
+        this.room = Reference.create(params.room);
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ version: true })
     public version: number = 1;
@@ -81,21 +85,25 @@ export class Chara extends CharaBase {
     public charaPieces = new Collection<CharaPiece>(this);
 
     @ManyToOne(() => Room, { wrappedReference: true })
-    public room!: IdentifiedReference<Room>;
+    public room: IdentifiedReference<Room>;
 }
 
 // DBにはDownOperationとして保存されるため、AddCharaOpはCharaの情報を持たない。
 @Entity()
+@Unique({ properties: ['roomOp', 'createdBy', 'stateId'] })
 export class AddCharaOp {
     public constructor({
         createdBy,
         stateId,
+        roomOp,
     }: {
         createdBy: string;
         stateId: string;
+        roomOp: RoomOp;
     }) {
         this.createdBy = createdBy;
         this.stateId = stateId;
+        this.roomOp = Reference.create(roomOp);
     }
 
     @PrimaryKey()
@@ -112,11 +120,17 @@ export class AddCharaOp {
 
 
     @ManyToOne(() => RoomOp, { wrappedReference: true })
-    public roomOp!: IdentifiedReference<RoomOp>;
+    public roomOp: IdentifiedReference<RoomOp>;
 }
 
 @Entity()
+@Unique({ properties: ['roomOp', 'createdBy', 'stateId'] })
 export class RemoveCharaOp extends CharaBase {
+    public constructor(params: CharaBaseParams & { roomOp: RoomOp }) {
+        super(params);
+        this.roomOp = Reference.create(params.roomOp);
+    }
+
     @OneToMany(() => RemovedBoolParam, x => x.removeCharaOp, { orphanRemoval: true })
     public removedBoolParam = new Collection<RemovedBoolParam>(this);
 
@@ -133,20 +147,24 @@ export class RemoveCharaOp extends CharaBase {
     public removedCharaPieces = new Collection<RemovedCharaPiece>(this);
 
     @ManyToOne(() => RoomOp, { wrappedReference: true })
-    public roomOp!: IdentifiedReference<RoomOp>;
+    public roomOp: IdentifiedReference<RoomOp>;
 }
 
 @Entity()
+@Unique({ properties: ['roomOp', 'createdBy', 'stateId'] })
 export class UpdateCharaOp {
     public constructor({
         createdBy,
         stateId,
+        roomOp,
     }: {
         createdBy: string;
         stateId: string;
+        roomOp: RoomOp;
     }) {
         this.createdBy = createdBy;
         this.stateId = stateId;
+        this.roomOp = Reference.create(roomOp);
     }
 
     @PrimaryKey()
@@ -193,5 +211,5 @@ export class UpdateCharaOp {
 
 
     @ManyToOne(() => RoomOp, { wrappedReference: true })
-    public roomOp!: IdentifiedReference<RoomOp>;
+    public roomOp: IdentifiedReference<RoomOp>;
 }

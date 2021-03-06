@@ -1,7 +1,22 @@
-import { Entity, IdentifiedReference, Index, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
+import { Entity, IdentifiedReference, Index, ManyToOne, PrimaryKey, Property, Reference, Unique } from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { GlobalPiece } from '../../../piece/global';
 import { Chara, RemoveCharaOp, UpdateCharaOp } from '../mikro-orm';
+
+type CharaPieceBaseParams = {
+    boardId: string;
+    boardCreatedBy: string;
+    isPrivate: boolean;
+    isCellMode: boolean;
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    cellX: number;
+    cellY: number;
+    cellW: number;
+    cellH: number;
+}
 
 // PieceLocation → PieceLoc
 
@@ -21,20 +36,7 @@ export abstract class CharaPieceBase implements GlobalPiece.StateEntityBase {
         cellY,
         cellW,
         cellH,
-    }: {
-        boardId: string;
-        boardCreatedBy: string;
-        isPrivate: boolean;
-        isCellMode: boolean;
-        x: number;
-        y: number;
-        w: number;
-        h: number;
-        cellX: number;
-        cellY: number;
-        cellW: number;
-        cellH: number;
-    }) {
+    }: CharaPieceBaseParams) {
         this.boardId = boardId;
         this.boardCreatedBy = boardCreatedBy;
         this.isPrivate = isPrivate;
@@ -96,36 +98,52 @@ export abstract class CharaPieceBase implements GlobalPiece.StateEntityBase {
 }
 
 @Entity()
+@Unique({ properties: ['chara', 'boardCreatedBy', 'boardId']})
 export class CharaPiece extends CharaPieceBase {
+    public constructor(params: CharaPieceBaseParams & { chara: Chara}) {
+        super(params);
+        this.chara = Reference.create(params.chara);
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ version: true })
     public version: number = 1;
 
     @ManyToOne(() => Chara, { wrappedReference: true })
-    public chara!: IdentifiedReference<Chara>;
+    public chara: IdentifiedReference<Chara>;
 }
 
 @Entity()
+@Unique({ properties: ['removeCharaOp', 'boardCreatedBy', 'boardId'] })
 export class RemovedCharaPiece extends CharaPieceBase {
+    public constructor(params: CharaPieceBaseParams & { removeCharaOp: RemoveCharaOp }) {
+        super(params);
+        this.removeCharaOp = Reference.create(params.removeCharaOp);
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ version: true })
     public version: number = 1;
 
     @ManyToOne(() => RemoveCharaOp, { wrappedReference: true })
-    public removeCharaOp!: IdentifiedReference<RemoveCharaOp>;
+    public removeCharaOp: IdentifiedReference<RemoveCharaOp>;
 }
 
 @Entity()
+@Unique({ properties: ['updateCharaOp', 'boardCreatedBy', 'boardId'] })
 export class AddCharaPieceOp {
     public constructor({
         boardId,
         boardCreatedBy,
+        updateCharaOp,
     }: {
         boardId: string;
         boardCreatedBy: string;
+        updateCharaOp: UpdateCharaOp;
     }) {
         this.boardId = boardId;
         this.boardCreatedBy = boardCreatedBy;
+        this.updateCharaOp = Reference.create(updateCharaOp);
     }
 
     @PrimaryKey()
@@ -141,26 +159,36 @@ export class AddCharaPieceOp {
 
 
     @ManyToOne(() => UpdateCharaOp, { wrappedReference: true })
-    public updateCharaOp!: IdentifiedReference<UpdateCharaOp>;
+    public updateCharaOp: IdentifiedReference<UpdateCharaOp>;
 }
 
 @Entity()
+@Unique({ properties: ['updateCharaOp', 'boardCreatedBy', 'boardId'] })
 export class RemoveCharaPieceOp extends CharaPieceBase {
+    public constructor(params: CharaPieceBaseParams & { updateCharaOp: UpdateCharaOp }) {
+        super(params);
+        this.updateCharaOp = Reference.create(params.updateCharaOp);
+    }
+
     @ManyToOne(() => UpdateCharaOp, { wrappedReference: true })
-    public updateCharaOp!: IdentifiedReference<UpdateCharaOp>;
+    public updateCharaOp: IdentifiedReference<UpdateCharaOp>;
 }
 
 @Entity()
+@Unique({ properties: ['updateCharaOp', 'boardCreatedBy', 'boardId'] })
 export class UpdateCharaPieceOp implements GlobalPiece.DownOperationEntityBase {
     public constructor({
         boardId,
         boardCreatedBy,
+        updateCharaOp,
     }: {
         boardId: string;
         boardCreatedBy: string;
+        updateCharaOp: UpdateCharaOp;
     }) {
         this.boardId = boardId;
         this.boardCreatedBy = boardCreatedBy;
+        this.updateCharaOp = Reference.create(updateCharaOp);
     }
 
     @PrimaryKey()
@@ -207,5 +235,5 @@ export class UpdateCharaPieceOp implements GlobalPiece.DownOperationEntityBase {
 
 
     @ManyToOne(() => UpdateCharaOp, { wrappedReference: true })
-    public updateCharaOp!: IdentifiedReference<UpdateCharaOp>;
+    public updateCharaOp: IdentifiedReference<UpdateCharaOp>;
 }

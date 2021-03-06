@@ -263,8 +263,9 @@ export namespace GlobalPiece {
                                 ...value.operation.oldValue,
                                 boardCreatedBy: key.first,
                                 boardId: key.second,
+                                updateCharaOp: parentOp,
                             });
-                            parentOp.removeCharaPieceOps.add(op);
+                            em.persist(op);
                             continue;
                         }
 
@@ -272,20 +273,21 @@ export namespace GlobalPiece {
                             ...value.operation.newValue,
                             boardCreatedBy: key.first,
                             boardId: key.second,
+                            chara: parent,
                         });
-                        parent.charaPieces.add(toAdd);
+                        em.persist(toAdd);
 
-                        const op = new AddCharaPieceOp({ boardCreatedBy: key.first, boardId: key.second });
-                        parentOp.addCharaPieceOps.add(op);
+                        const op = new AddCharaPieceOp({ boardCreatedBy: key.first, boardId: key.second, updateCharaOp: parentOp });
+                        em.persist(op);
                         continue;
                     }
                     case update: {
                         const target = await em.findOneOrFail(CharaPiece, { chara: { id: parent.id }, boardCreatedBy: key.first, boardId: key.second });
-                        const op = new UpdateCharaPieceOp({ boardCreatedBy: key.first, boardId: key.second });
+                        const op = new UpdateCharaPieceOp({ boardCreatedBy: key.first, boardId: key.second, updateCharaOp: parentOp });
 
                         applyToCharaPieceEntity({ opEntity: op, stateEntity: target, globalOperation: value.operation });
 
-                        parentOp.updateCharaPieceOps.add(op);
+                        em.persist(op);
                         continue;
                     }
                 }
@@ -318,8 +320,9 @@ export namespace GlobalPiece {
                                 ...value.operation.oldValue,
                                 boardCreatedBy: key.first,
                                 boardId: key.second,
+                                updateMyValueOp: parentOp,
                             });
-                            parentOp.removePieceOps.add(op);
+                            em.persist(op);
                             continue;
                         }
 
@@ -327,20 +330,21 @@ export namespace GlobalPiece {
                             ...value.operation.newValue,
                             boardCreatedBy: key.first,
                             boardId: key.second,
+                            myValue: parent,
                         });
-                        parent.myValuePieces.add(toAdd);
+                        em.persist(toAdd);
 
-                        const op = new AddMyValuePieceOp({ boardCreatedBy: key.first, boardId: key.second });
-                        parentOp.addPieceOps.add(op);
+                        const op = new AddMyValuePieceOp({ boardCreatedBy: key.first, boardId: key.second, updateMyValueOp: parentOp });
+                        em.persist(op);
                         continue;
                     }
                     case update: {
                         const target = await em.findOneOrFail(MyValuePiece, { myValue: { id: parent.id }, boardCreatedBy: key.first, boardId: key.second });
-                        const op = new UpdateMyValuePieceOp({ boardCreatedBy: key.first, boardId: key.second });
+                        const op = new UpdateMyValuePieceOp({ boardCreatedBy: key.first, boardId: key.second, updateMyValueOp: parentOp });
 
                         applyToCharaPieceEntity({ opEntity: op, stateEntity: target, globalOperation: value.operation });
 
-                        parentOp.updatePieceOps.add(op);
+                        em.persist(op);
                         continue;
                     }
                 }

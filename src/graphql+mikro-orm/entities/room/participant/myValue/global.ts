@@ -11,7 +11,7 @@ import { ReplaceBooleanDownOperation, ReplaceBooleanDownOperationModule, Replace
 import { DualKeyMapTransformer, TransformerFactory } from '../../../global';
 import { GlobalPiece } from '../../../piece/global';
 import { Partici, UpdateParticiOp } from '../mikro-orm';
-import { RemovedMyValuePieceByMyValue } from './mikro-orm_piece';
+import { MyValuePiece, RemovedMyValuePieceByMyValue } from './mikro-orm_piece';
 import { AddMyValueOp, MyValue, MyValueBase, RemovedMyValue, RemoveMyValueOp, UpdateMyValueOp } from './mikro-orm_value';
 import { MyNumberValuesOperation, MyNumberValueState, MyNumberValueStateValue } from './number/graphql';
 import { isNumberValueStateJsonType, numberOperation, NumberValueOperationJsonType, NumberValueStateJsonType } from './number/jsonType';
@@ -172,6 +172,7 @@ export namespace GlobalMyValue {
             export const state = ({ source, createdByMe }: { source: StateType; createdByMe: boolean }): MyNumberValueStateValue => {
                 return {
                     ...source,
+                    value: createdByMe || !source.isValuePrivate ? source.value : undefined,
                     valueRangeMax: source.valueRangeMax ?? undefined,
                     valueRangeMin: source.valueRangeMin ?? undefined,
                     pieces: GlobalPiece.Global.ToGraphQL.stateMany({ source: source.pieces, createdByMe }),
@@ -268,15 +269,17 @@ export namespace GlobalMyValue {
                                     valueRangeMax: value.operation.oldValue.valueRangeMax,
                                     valueRangeMin: value.operation.oldValue.valueRangeMin,
                                 },
+                                updateParticiOp: parentOp,
                             });
                             value.operation.oldValue.pieces.forEach((piece, key) => {
                                 op.removedMyValuePieces.add(new RemovedMyValuePieceByMyValue({
                                     ...piece,
                                     boardCreatedBy: key.first,
                                     boardId: key.second,
+                                    removeMyValueOp: op,
                                 }));
                             });
-                            parentOp.removeMyValueOps.add(op);
+                            em.persist(op);
                             continue;
                         }
 
@@ -292,11 +295,22 @@ export namespace GlobalMyValue {
                                 valueRangeMax: value.operation.newValue.valueRangeMax,
                                 valueRangeMin: value.operation.newValue.valueRangeMin,
                             },
+                            partici: parent,
                         });
                         parent.myValues.add(toAdd);
+                        value.operation.newValue.pieces.forEach((piece, key) => {
+                            const newPiece = new MyValuePiece({
+                                ...piece,
+                                boardCreatedBy: key.first,
+                                boardId: key.second,
+                                myValue: toAdd,
+                            });
+                            em.persist(newPiece);
+                        });
 
-                        const op = new AddMyValueOp({ stateId: key });
-                        parentOp.addMyValueOps.add(op);
+                        const op = new AddMyValueOp({ stateId: key, updateParticiOp: parentOp });
+                        em.persist(op);
+
                         continue;
                     }
                     case update: {
@@ -324,11 +338,11 @@ export namespace GlobalMyValue {
                             opJson.valueRangeMin = value.operation.valueRangeMin;
                         }
 
-                        const op = new UpdateMyValueOp({ stateId: key, value: opJson });
+                        const op = new UpdateMyValueOp({ stateId: key, value: opJson, updateParticiOp: parentOp });
 
                         await GlobalPiece.Global.applyToMyValuePiecesEntity({ em, parent: target, parentOp: op, operation: value.operation.pieces });
 
-                        parentOp.updateMyValueOps.add(op);
+                        em.persist(op);
                         continue;
                     }
                 }
