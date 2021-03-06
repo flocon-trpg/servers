@@ -16,7 +16,7 @@ const Index: React.FC = () => {
             <div>
                 <Link href='/rooms'>部屋一覧</Link>
                 <Button onClick={() => setDrawerType({ openFileType: none })}>Open Files Manager</Button>
-                <Link href='/dev-memo'>制作メモ</Link>
+                <Link href='/dev-memo'>制作メモ、更新履歴など</Link>
                 <FilesManagerDrawer drawerType={drawerType} onClose={() => setDrawerType(null)} />
             </div>
         </Layout>

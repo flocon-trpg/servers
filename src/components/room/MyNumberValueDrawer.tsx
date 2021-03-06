@@ -64,7 +64,8 @@ const MyNumberValueDrawer: React.FC<Props> = ({ me, myUserUid }: Props) => {
     });
 
     let onCreate: (() => void) | undefined = undefined;
-    if (stateToCreate !== undefined) {
+    // drawerType != nullを付けていることで、updateから閉じる際に一瞬onCreateボタンが出るのを防いでいる。ただし、これで適切なのかどうかは吟味していない
+    if (drawerType != null && stateToCreate !== undefined) {
         onCreate = () => {
             if (componentsState.myNumberValueDrawerType?.type !== create) {
                 return;
@@ -95,7 +96,7 @@ const MyNumberValueDrawer: React.FC<Props> = ({ me, myUserUid }: Props) => {
             title={stateToCreate === undefined ? '数値コマの新規作成' : '数値コマの編集'}
             visible={drawerType != null}
             closable
-            onClose={() => dispatch({ type: boardDrawerType, newValue: null })}
+            onClose={() => dispatch({ type: myNumberValueDrawerType, newValue: null })}
             footer={(
                 <DrawerFooter
                     close={({
