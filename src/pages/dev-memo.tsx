@@ -17,6 +17,13 @@ const Index: React.FC = () => {
     return (
         <Layout requiresLogin={false} showEntryForm={false}>
             <div style={({ margin: 10 })}>
+                <Typography.Title level={2}>アップデート履歴</Typography.Title>
+                <Typography.Title level={3}>2021/03/06</Typography.Title>
+                <ul>
+                    <li>キャラクターの複製機能を実装</li>
+                    <li>数値コマを簡易的ではあるが実装</li>
+                    <li>エラー画面、読み込み画面などを改善</li>
+                </ul>
                 <Typography.Title level={2}>開発メモ</Typography.Title>
                 <Typography.Title level={3}>実装予定の機能</Typography.Title>
                 <ul>
@@ -26,7 +33,6 @@ const Index: React.FC = () => {
                 漏れがあるかも。また、優先度が非常に低いものは記載していない。
                 <Typography.Title level={4}>優先度中～高</Typography.Title>
                 <ul>
-                    <li>キャラクターの複製</li>
                     <li>ダイスコマなどのコマ</li>
                     <li>個々人のボリュームバー</li>
                     <li>カットイン画像</li>
