@@ -43,14 +43,6 @@ const createPiecePostOperation = ({
     board: StatesBoard.State;
 }): Piece.PostOperation => {
     const pieceOperation: Piece.PostOperation = {};
-    if (e.newLocation != null) {
-        pieceOperation.x = { newValue: e.newLocation.x };
-        pieceOperation.y = { newValue: e.newLocation.y };
-    }
-    if (e.newSize != null) {
-        pieceOperation.w = { newValue: e.newSize.w };
-        pieceOperation.h = { newValue: e.newSize.h };
-    }
     if (piece.isCellMode) {
         if (e.newLocation != null) {
             const position = getCellPosition({ ...e.newLocation, board });
@@ -61,6 +53,15 @@ const createPiecePostOperation = ({
             const size = getCellSize({ ...e.newSize, board });
             pieceOperation.cellW = { newValue: size.cellW };
             pieceOperation.cellH = { newValue: size.cellH };
+        }
+    } else {
+        if (e.newLocation != null) {
+            pieceOperation.x = { newValue: e.newLocation.x };
+            pieceOperation.y = { newValue: e.newLocation.y };
+        }
+        if (e.newSize != null) {
+            pieceOperation.w = { newValue: e.newSize.w };
+            pieceOperation.h = { newValue: e.newSize.h };
         }
     }
     return pieceOperation;

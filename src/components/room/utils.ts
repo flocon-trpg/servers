@@ -18,8 +18,8 @@ export const getCellPosition = ({
         return defaultResult;
     }
     return {
-        cellX: Math.round(x / board.cellWidth),
-        cellY: Math.round(y / board.cellHeight),
+        cellX: Math.round((x - board.cellOffsetX) / board.cellWidth),
+        cellY: Math.round((y - board.cellOffsetY) / board.cellHeight),
     };
 };
 
