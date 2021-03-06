@@ -1,4 +1,4 @@
-import { Button, Checkbox, Col, Divider, Drawer, Form, Input, InputNumber, PageHeader, Row, Space } from 'antd';
+import { Button, Checkbox, Col, Divider, Drawer, Form, Input, InputNumber, PageHeader, Row, Space, Tooltip } from 'antd';
 import React from 'react';
 import DrawerFooter from '../../layouts/DrawerFooter';
 import ComponentsStateContext from './contexts/RoomComponentsStateContext';
@@ -26,6 +26,7 @@ import { Room } from '../../stateManagers/states/room';
 import { Character } from '../../stateManagers/states/character';
 import { Piece } from '../../stateManagers/states/piece';
 import { getUserUid } from '../../hooks/useFirebaseUser';
+import { useStateEditor } from '../../hooks/useStateEditor';
 
 const notFound = 'notFound';
 
@@ -69,54 +70,23 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
     const drawerType = componentsState.characterDrawerType;
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
     const operate = React.useContext(OperateContext);
-    const [characterKey, setCharacterKey] = React.useState<CompositeKey>();
-    const [character, setCharacter] = React.useState<Character.State | typeof notFound>(defaultCharacter);
-
+    const { state: character, setState: setCharacter, stateToCreate: characterToCreate } = useStateEditor(drawerType?.type === update ? roomState.characters.get(drawerType.stateKey) : undefined, defaultCharacter, ({ prevState, nextState }) => {
+        if (drawerType?.type !== update) {
+            return;
+        }
+        const diffOperation = Character.diff({ prev: prevState, next: nextState });
+        const operation = Room.createPostOperationSetup();
+        operation.characters.set(drawerType.stateKey, { type: update, operation: diffOperation });
+        operate(operation);
+    });
     const [filesManagerDrawerType, setFilesManagerDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
 
     const createdByMe = (() => {
-        if (characterKey === undefined) {
+        if (drawerType?.type !== update) {
             return true;
         }
-        return characterKey.createdBy === getUserUid(myAuth);
+        return drawerType.stateKey.createdBy === getUserUid(myAuth);
     })();
-
-    const characterForUseEffect = (() => {
-        switch (drawerType?.type) {
-            case update: {
-                const state = roomState.characters.get(drawerType.stateKey);
-                if (state === undefined) {
-                    return notFound;
-                }
-                return { key: drawerType.stateKey, value: state };
-            }
-            case create:
-                return 'create' as const;
-            default:
-                return null;
-        }
-    })();
-
-    React.useEffect(() => {
-        if (characterForUseEffect == null) {
-            return;
-        }
-        if (characterForUseEffect === 'create' || characterForUseEffect === 'notFound') {
-            setCharacter(defaultCharacter);
-            return;
-        }
-        setCharacterKey(characterForUseEffect.key);
-        setCharacter(characterForUseEffect.value);
-    }, [characterForUseEffect]);
-
-    if (character === notFound) {
-        return (
-            <Drawer
-                {...drawerBaseProps}>
-                該当するCharacterが見つかりません。
-            </Drawer>
-        );
-    }
 
     const pieceLocation = (() => {
         if (drawerType?.type !== update || drawerType.boardKey == null) {
@@ -184,12 +154,13 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
     let onOkClick: (() => void) | undefined = undefined;
     if (drawerType?.type === create) {
         onOkClick = () => {
+            if (characterToCreate == null) {
+                return;
+            }
             const id = simpleId();
             const operation = Room.createPostOperationSetup();
-            operation.addCharacters.set(id, character);
+            operation.addCharacters.set(id, characterToCreate);
             operate(operation);
-            setCharacterKey(undefined);
-            setCharacter(defaultCharacter);
             dispatch({ type: characterDrawerType, newValue: null });
         };
     }
@@ -337,6 +308,38 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                 {pieceLocationElement}
 
                 <Divider />
+
+                {characterToCreate != null ? null :
+                    <>
+                        <PageHeader
+                            title="複製" />
+
+                        <Row gutter={gutter} align='middle'>
+                            <Col flex='auto' />
+                            <Col flex={0}></Col>
+                            <Col span={inputSpan}>
+                                {/* TODO: 複製したことを何らかの形で通知したほうがいい */}
+                                <Tooltip title='コマの情報を除き、このキャラクターを複製します。'>
+                                    <Button size='small' onClick={() => {
+                                        if (characterToCreate != null) {
+                                            return;
+                                        }
+                                        const id = simpleId();
+                                        const operation = Room.createPostOperationSetup();
+                                        operation.addCharacters.set(id, {
+                                            ...character,
+                                            name: `${character.name} (複製)`,
+                                            pieces: createStateMap(),
+                                        });
+                                        operate(operation);
+                                    }} >
+                                        このキャラクターを複製
+                                    </Button>
+                                </Tooltip>
+                            </Col>
+                        </Row>
+                    </>
+                }
 
                 <PageHeader
                     title="パラメーター" />

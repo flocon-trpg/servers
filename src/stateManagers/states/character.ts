@@ -164,7 +164,9 @@ export namespace Character {
                     charactersReplace.push({
                         ...key,
                         newValue: {
-                            ...operation.newValue,
+                            image: operation.newValue.image,
+                            isPrivate: operation.newValue.isPrivate,
+                            name: operation.newValue.name,
                             pieces: __(operation.newValue.pieces).map(([key, value]) => ({
                                 boardId: key.id,
                                 boardCreatedBy: key.createdBy,

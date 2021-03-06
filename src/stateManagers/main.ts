@@ -3,7 +3,7 @@ import { Room } from './states/room';
 
 type Parameters = StateManagerParameters<Room.State, Room.GetOperation, Room.PostOperation>;
 
-const createParmeters = (state: Room.State, revision: number): Parameters => {
+const createParameters = (state: Room.State, revision: number): Parameters => {
     return {
         state,
         revision,
@@ -17,5 +17,5 @@ const createParmeters = (state: Room.State, revision: number): Parameters => {
 };
 
 export const create = (state: Room.State, revision: number): StateManager<Room.State, Room.GetOperation, Room.PostOperation> => {
-    return new StateManager(createParmeters(state, revision));
+    return new StateManager(createParameters(state, revision));
 };
