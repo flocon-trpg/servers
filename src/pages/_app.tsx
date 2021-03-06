@@ -111,10 +111,10 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     const user = useFirebaseUser();
     const [apolloClient, setApolloClient] = React.useState<ApolloClient<NormalizedCacheObject>>();
     React.useEffect(() => {
-        const client = createApolloClient(config, user ?? undefined);
+        const client = createApolloClient(config, typeof user === 'string' ? undefined : user);
         setApolloClient(client);
     }, [user]);
-    useUserConfig(user?.uid ?? null, store.dispatch);
+    useUserConfig(typeof user === 'string' ? null : user.uid, store.dispatch);
 
     if (apolloClient == null) {
         return (<div style={({ padding: 5 })}>

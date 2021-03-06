@@ -30,7 +30,7 @@ const CreateRoomCore: React.FC = () => {
             labelCol={({ span: labelCol })}
             wrapperCol={({ span: wrapperCol })}
             style={({ width: 600 })}
-            initialValues={({ [participantName]: myAuth?.displayName })}
+            initialValues={({ [participantName]: typeof myAuth === 'string' ? undefined : myAuth.displayName })}
             onFinish={e => {
                 if (isSubmitting) {
                     return;

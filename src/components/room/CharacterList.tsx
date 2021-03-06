@@ -22,6 +22,7 @@ import { characterIsPrivate, characterIsNotPrivate, parameterIsPrivateAndNotCrea
 import { Character } from '../../stateManagers/states/character';
 import { Room } from '../../stateManagers/states/room';
 import { Participant } from '../../stateManagers/states/participant';
+import { getUserUid } from '../../hooks/useFirebaseUser';
 
 const characterOperationBase: Character.PostOperation = {
     boolParams: new Map(),
@@ -183,7 +184,7 @@ const CharacterList: React.FC<Props> = ({ room }: Props) => {
 
     const charactersDataSource: DataSource[] =
         room.characters.toArray().map(([key, character]) => {
-            const createdByMe = myAuth == null ? null : (myAuth.uid === key.createdBy);
+            const createdByMe = getUserUid(myAuth) === key.createdBy;
             return {
                 key: compositeKeyToString(key), // antdのtableのkeyとして必要
                 character: {

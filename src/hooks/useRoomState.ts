@@ -9,13 +9,14 @@ import MyAuthContext from '../contexts/MyAuthContext';
 import NotificationContext, { apolloError, text } from '../components/room/contexts/NotificationContext';
 import { Room } from '../stateManagers/states/room';
 import { Participant } from '../stateManagers/states/participant';
+import { authNotFound, FirebaseUserState, notSignIn } from './useFirebaseUser';
 
 const sampleTime = 3000;
 
 export const loading = 'loading';
 export const joined = 'joined';
 export const requiresReload = 'requiresReload';
-export const requiresLogin = 'requiresLogin';
+export const myAuthIsUnavailable = 'myAuthIsUnavailable';
 export const nonJoined = 'nonJoined';
 export const getRoomFailure = 'getRoomFailure';
 export const mutationFailure = 'mutationFailure';
@@ -30,7 +31,8 @@ type RoomState = {
     operateRoom: ((operation: Room.PostOperationSetup) => void) | undefined;
     // participantの更新は、mutationを直接呼び出すことで行う。
 } | {
-    type: typeof requiresLogin;
+    type: typeof myAuthIsUnavailable;
+    error: typeof loading | typeof notSignIn | typeof authNotFound;
 } | {
     type: typeof nonJoined;
     nonJoinedRoom: RoomAsListItemFragment;
@@ -61,13 +63,18 @@ export const useRoomState = (roomId: string): RoomStateResult => {
     // refetchとして単に () => setRefetchKey(refetchKey + 1) をそのまま返す（この値をfとする）と、レンダーのたびにfは変わるため、fをdepsに使用されたときに問題が起こる可能性が高いので、useMemoで軽減。
     const refetch = React.useMemo(() => () => setRefetchKey(refetchKey + 1), [refetchKey]);
 
+    const userUid = typeof myAuth === 'string' ? null : myAuth.uid;
+    const myAuthErrorType = typeof myAuth === 'string' ? myAuth : null;
+
     React.useEffect(() => {
         setState({ type: loading });
 
-        const userUid = myAuth?.uid;
-        if (userUid == null) {
-            setState({ type: requiresLogin });
+        if (myAuthErrorType != null) {
+            setState({ type: myAuthIsUnavailable, error: myAuthErrorType });
             return;
+        }
+        if (userUid == null) {
+            return; // This should not happen
         }
 
         let roomStateManager: StateManager<Room.State, Room.GetOperation, Room.PostOperation> | null = null;
@@ -311,7 +318,7 @@ export const useRoomState = (roomId: string): RoomStateResult => {
             graphQLSubscriptionSubscription.unsubscribe();
             postTriggerSubscription.unsubscribe();
         };
-    }, [refetchKey, apolloClient, roomId, myAuth?.uid, operateMutation, notificationContext]);
+    }, [refetchKey, apolloClient, roomId, userUid, myAuthErrorType, operateMutation, notificationContext]);
 
     return { refetch, state };
 };

@@ -12,6 +12,7 @@ import MyAuthContext from '../../contexts/MyAuthContext';
 import NotificationContext, { graphQLErrors } from './contexts/NotificationContext';
 import { apolloError } from '../../hooks/useRoomMessages';
 import { Character } from '../../stateManagers/states/character';
+import { getUserUid } from '../../hooks/useFirebaseUser';
 
 const defaultNameKey = 'defaultNameKey';
 const customNameKey = 'customNameKey';
@@ -47,12 +48,14 @@ const ChatInput: React.FC<Props> = ({ roomId, style, activeTab, characters }: Pr
     const [selectedCharacterStateId, setSelectedCharacterStateId] = React.useState<string>();
     const roomConfig = useSelector(state => state.roomConfigModule);
     const dispatch = useDispatch();
+
+    const userUid = getUserUid(myAuth);
     const myCharacters = React.useMemo(() => {
-        if (myAuth?.uid == null) {
+        if (userUid == null) {
             return [];
         }
         return characters.toArray().map(([key, character]) => {
-            if (key.createdBy === myAuth.uid) {
+            if (key.createdBy === userUid) {
                 return (
                     <Select.Option key={key.id} value={key.id}>
                         {character.name}
@@ -61,7 +64,7 @@ const ChatInput: React.FC<Props> = ({ roomId, style, activeTab, characters }: Pr
             }
             return null;
         });
-    }, [characters, myAuth?.uid]);
+    }, [characters, userUid]);
 
     const post = () => {
         if (text === '' || isPosting || activeTab == null) {
@@ -165,7 +168,7 @@ const ChatInput: React.FC<Props> = ({ roomId, style, activeTab, characters }: Pr
                     showSearch
                     placeholder="キャラクター"
                     optionFilterProp="children"
-                    value={(selectedCharacterStateId == null || myAuth == null ? undefined : characters.get({ createdBy: myAuth.uid, id: selectedCharacterStateId })?.name)}
+                    value={(selectedCharacterStateId == null || typeof myAuth === 'string' ? undefined : characters.get({ createdBy: myAuth.uid, id: selectedCharacterStateId })?.name)}
                     onSelect={(_, option) => {
                         const key = option.key;
                         if (typeof key !== 'string') {

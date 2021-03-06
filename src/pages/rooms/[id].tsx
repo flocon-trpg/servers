@@ -6,11 +6,11 @@ import { Alert, Button, Card, Input, Result, Spin, notification as antdNotificat
 import Layout from '../../layouts/Layout';
 import { ApolloProvider, FetchResult } from '@apollo/client';
 import MyAuthContext from '../../contexts/MyAuthContext';
-import { deleted, getRoomFailure, joined, loading, mutationFailure, nonJoined, requiresLogin, useRoomState } from '../../hooks/useRoomState';
-import AlertDialog from '../../foundations/AlertDialog';
-import Loading from '../../components/alerts/Loading';
+import { deleted, getRoomFailure, joined, loading, mutationFailure, myAuthIsUnavailable, nonJoined, useRoomState } from '../../hooks/useRoomState';
 import Center from '../../foundations/Center';
 import NotificationContext, { TextNotification, toTextNotification, Notification } from '../../components/room/contexts/NotificationContext';
+import LoadingResult from '../../foundations/Result/LoadingResult';
+import NotSignInResult from '../../foundations/Result/NotSignInResult';
 
 type JoinRoomFormProps = {
     roomState: RoomAsListItemFragment;
@@ -19,7 +19,7 @@ type JoinRoomFormProps = {
 
 const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRoomFormProps) => {
     const myAuth = React.useContext(MyAuthContext);
-    const [name, setName] = React.useState<string>(myAuth?.displayName ?? '');
+    const [name, setName] = React.useState<string>(typeof myAuth === 'string' ? '' : (myAuth.displayName ?? ''));
     const [playerPhrase, setPlayerPhrase] = React.useState<string>('');
     const [spectatorPhrase, setSpectatorPhrase] = React.useState<string>('');
     const [joinRoomAsPlayer, joinRoomAsPlayerResult] = useJoinRoomAsPlayerMutation();
@@ -123,7 +123,7 @@ const RoomRouter: React.FC<{ id: string; allNotifications: ReadonlyArray<TextNot
                 // TODO: Buttonなどを用いたreloadに対応させる。
                 return (
                     <Layout requiresLogin showEntryForm={false}>
-                        <AlertDialog alert={(<Alert type="error" message="Please reload browser" showIcon />)} />
+                        <Result status='error' title='サーバーから応答を受け取ることができませんでした。' subTitle='ブラウザを更新してください。' />
                     </Layout>);
             }
             return (
@@ -148,40 +148,36 @@ const RoomRouter: React.FC<{ id: string; allNotifications: ReadonlyArray<TextNot
                 case GetRoomFailureType.NotFound:
                     return (
                         <Layout requiresLogin showEntryForm={false}>
-                            <AlertDialog alert={(<Alert type="error" message="Room not found" showIcon />)} />
+                            <Result status='404' title='該当する部屋が見つかりませんでした。' subTitle='部屋が存在しているか、適切な権限があるかどうか確認してください。'/>
                         </Layout>);
                 case GetRoomFailureType.NotSignIn:
                     return (
                         <Layout requiresLogin showEntryForm={false}>
-                            <AlertDialog alert={(<Alert type="error" message="Need to sign in" showIcon />)} />
-                        </Layout>);
-                default:
-                    return (
-                        <Layout requiresLogin showEntryForm={false}>
-                            <AlertDialog alert={(<Alert type="error" message="Unknown failure type!" showIcon />)} />
+                            <NotSignInResult />
                         </Layout>);
             }
+            break;
         }
         case loading:
             return (
                 <Layout requiresLogin showEntryForm={false}>
-                    <AlertDialog alert={(<Loading />)} />
+                    <LoadingResult />
                 </Layout>);
-        case requiresLogin:
+        case myAuthIsUnavailable:
             return (
                 <Layout requiresLogin showEntryForm={false} />);
         case mutationFailure:
             // TODO: mutationFailureが細分化されたら、こちらも細分化する。
             return (
                 <Layout requiresLogin showEntryForm={false}>
-                    <AlertDialog alert={(<Alert type="error" message="Please reload browser" showIcon />)} />
+                    <Result status='error' title='mutationに失敗しました。' subTitle='ブラウザを更新してください。' />
                 </Layout>);
         case deleted:
             return (
                 <Layout requiresLogin={false} showEntryForm={false}>
                     <Result
                         status='warning'
-                        title='この部屋は削除されました'
+                        title='この部屋は削除されました。'
                     />
                 </Layout>);
     }
@@ -194,9 +190,9 @@ const RoomCore: React.FC<{ allNotifications: ReadonlyArray<TextNotification> }> 
     if (Array.isArray(id) || id == null) {
         return (
             <Layout requiresLogin showEntryForm={false}>
-                <Alert
-                    type="error"
-                    message="Invalid parameter" />
+                <Result
+                    status="error"
+                    title="パラメーターが不正です。" />
             </Layout>);
     }
 

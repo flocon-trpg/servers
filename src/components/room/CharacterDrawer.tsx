@@ -25,6 +25,7 @@ import { characterIsPrivate, characterIsNotPrivate, characterIsNotPrivateAndNotC
 import { Room } from '../../stateManagers/states/room';
 import { Character } from '../../stateManagers/states/character';
 import { Piece } from '../../stateManagers/states/piece';
+import { getUserUid } from '../../hooks/useFirebaseUser';
 
 const notFound = 'notFound';
 
@@ -77,7 +78,7 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
         if (characterKey === undefined) {
             return true;
         }
-        return characterKey.createdBy === myAuth?.uid;
+        return characterKey.createdBy === getUserUid(myAuth);
     })();
 
     const characterForUseEffect = (() => {

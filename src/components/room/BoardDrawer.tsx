@@ -76,7 +76,7 @@ const BoardDrawer: React.FC<Props> = ({ roomState }: Props) => {
             <Drawer
                 {...drawerBaseProps}
             >
-                該当するCharacterが見つかりません。
+                該当するBoardが見つかりません。
             </Drawer>
         );
     }

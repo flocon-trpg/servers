@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, Drawer, Dropdown, Menu, Modal, Radio, Table, Tabs, Tooltip, Upload } from 'antd';
+import { Button, Drawer, Dropdown, Menu, Modal, Radio, Result, Table, Tabs, Tooltip, Upload } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { ShowUploadListInterface } from 'antd/lib/upload/interface';
 import Link from 'next/link';
@@ -16,7 +16,6 @@ import { useDispatch } from 'react-redux';
 import { EllipsisOutlined, DeleteOutlined, MoreOutlined } from '@ant-design/icons';
 import FirebaseStorageLink from './FirebaseStorageLink';
 import { FilesManagerDrawerType, some } from '../utils/types';
-import FirebaseAppNotFound from './alerts/FirebaseAppNotFound';
 import ConfigContext from '../contexts/ConfigContext';
 import { __ } from '../@shared/collection';
 
@@ -310,8 +309,8 @@ const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => 
     const [forceReloadUnlistedListKey, setForceReloadUnlistedListKey] = React.useState(0);
 
     const child = (() => {
-        if (myAuth == null) {
-            return (<div>You have to sign in.</div>);
+        if (typeof myAuth === 'string') {
+            return (<Result status='warning' title='この機能を利用するにはログインする必要があります。' />);
         }
         let onFileOpen: ((path: FilePathFragment) => void) | undefined = undefined;
         if (drawerType?.openFileType === some) {

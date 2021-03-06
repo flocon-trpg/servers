@@ -17,6 +17,16 @@ export namespace MyNumberValue {
     };
     export type GetOperation = PostOperation;
 
+    export const stringify = (source: State): string => {
+        const range: string | null = (() => {
+            if (source.valueRangeMin == null && source.valueRangeMax == null) {
+                return null;
+            }
+            return `範囲: ${source.valueRangeMin ?? '？'}～${source.valueRangeMax ?? '？'}`;
+        })();
+        return `${source.value ?? '？'} ${range == null ? '' : `(${range})`} ${(source.value != null && source.isValuePrivate) ? '(値は非公開)' : ''}`;
+    };
+
     export const createState = (source: MyNumberValueStateValueFragment): State => {
         const pieces = createStateMap<Piece.State>();
         source.pieces.forEach(piece => {

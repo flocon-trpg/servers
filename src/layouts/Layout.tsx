@@ -1,14 +1,16 @@
 import React, { PropsWithChildren } from 'react';
 import MyAuthContext from '../contexts/MyAuthContext';
 import { useRouter } from 'next/router';
-import { Button, Layout as AntdLayout, Row, Col, Space, Form, Input, Spin, Card, Alert } from 'antd';
+import { Button, Layout as AntdLayout, Row, Col, Space, Form, Input, Spin, Card, Alert, Result } from 'antd';
 import { EntryToServerResultType, useEntryToServerMutation } from '../generated/graphql';
 import Center from '../foundations/Center';
 import useConstant from 'use-constant';
 import { getAuth } from '../utils/firebaseHelpers';
-import FirebaseAppNotFound from '../components/alerts/FirebaseAppNotFound';
 import Link from 'next/link';
 import ConfigContext from '../contexts/ConfigContext';
+import NotSignInResult from '../foundations/Result/NotSignInResult';
+import { authNotFound, loading, notSignIn } from '../hooks/useFirebaseUser';
+import LoadingResult from '../foundations/Result/LoadingResult';
 const { Header, Content } = AntdLayout;
 
 type EntryFormComponentProps = {
@@ -85,13 +87,16 @@ const Layout: React.FC<PropsWithChildren<Props>> = ({ children, showEntryForm, o
     const config = React.useContext(ConfigContext);
     const auth = getAuth(config);
 
-    if (auth == null) {
-        return <FirebaseAppNotFound />;
+    if (auth == null || myAuth === authNotFound) {
+        return <Result status='info' title='Firebase Authentication インスタンスが見つかりません。' />;
     }
 
     const content = (() => {
-        if (requiresLogin && myAuth == null) {
-            return (<Alert message='Login required' type='error' showIcon />);
+        if (myAuth === loading) {
+            return <LoadingResult title='Firebase Authentication による認証を行っています…' />;
+        }
+        if (requiresLogin && myAuth === notSignIn) {
+            return <NotSignInResult />;
         }
         if (showEntryForm) {
             return (
@@ -113,8 +118,8 @@ const Layout: React.FC<PropsWithChildren<Props>> = ({ children, showEntryForm, o
                     <Col flex={1} />
                     <Col flex={0}>
                         <Space>
-                            {myAuth == null ? null : <div style={({ color: 'white' })}>{myAuth?.displayName} - {myAuth?.uid}</div>}
-                            {myAuth == null
+                            {typeof myAuth === 'string' ? null : <div style={({ color: 'white' })}>{myAuth.displayName} - {myAuth.uid}</div>}
+                            {typeof myAuth === 'string'
                                 ? <Button key="2" onClick={() => router.push('/signin')}>Log in</Button>
                                 : <Button key="2" onClick={() => auth.signOut()}>Logout</Button>}
                         </Space>

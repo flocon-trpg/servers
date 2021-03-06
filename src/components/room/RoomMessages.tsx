@@ -27,6 +27,7 @@ import PlaySoundEffectBehavior from '../../foundations/PlaySoundEffectBehavior';
 import { Notification, TextNotification } from './contexts/NotificationContext';
 import { Character } from '../../stateManagers/states/character';
 import { Participant } from '../../stateManagers/states/participant';
+import { getUserUid } from '../../hooks/useFirebaseUser';
 
 const Image: React.FC<{ filePath: FilePathFragment | undefined }> = ({ filePath }: { filePath: FilePathFragment | undefined }) => {
     const src = useFirebaseStorageUrl(filePath);
@@ -110,7 +111,7 @@ const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, par
     }
 
     let createdByMe: boolean | null;
-    if (myAuth == null) {
+    if (typeof myAuth === 'string') {
         createdByMe = null;
     } else {
         createdByMe = (myAuth.uid === message.value.createdBy);
@@ -192,7 +193,7 @@ const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, par
             );
         }
     }
-    const notSecretMenuItem = (message.value.isSecret && message.value.createdBy != null && message.value.createdBy === myAuth?.uid) ?
+    const notSecretMenuItem = (message.value.isSecret && message.value.createdBy != null && message.value.createdBy === getUserUid(myAuth)) ?
         <Menu.Item
             onClick={() => {
                 makeMessageNotSecret({ variables: { messageId: message.value.messageId, roomId } });
@@ -463,7 +464,7 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
     };
 
     const createPrivateChannelName = (channel: PrivateChannelSet, showIcon: boolean) => {
-        const channelNameBase = channel.toChannelNameBase(participants, { userUid: myAuth?.uid ?? '' });
+        const channelNameBase = channel.toChannelNameBase(participants, { userUid: typeof myAuth === 'string' ? '' : myAuth.uid });
         if (channelNameBase.length === 0) {
             return '独り言';
         }
@@ -513,7 +514,7 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
 
     const privateChannelElements = allRoomMessagesResult.value.privateChannels.toArray()
         .map(channel => {
-            const channelNameBase = channel.toChannelNameBase(participants, { userUid: myAuth?.uid ?? '' });
+            const channelNameBase = channel.toChannelNameBase(participants, { userUid: typeof myAuth === 'string' ? '' : myAuth.uid });
             const tab = createPrivateChannelName(channel, true);
             const tabPane = (
                 <TabPane tab={tab} key={channel.toString()}>

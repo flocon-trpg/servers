@@ -1,9 +1,8 @@
 import React, { PropsWithChildren } from 'react';
 import { ApolloError } from '@apollo/client';
-import { Alert } from 'antd';
-import AlertDialog from './AlertDialog';
-import Loading from '../components/alerts/Loading';
-import ApolloErrorDialog from '../components/alerts/ApolloError';
+import { Result } from 'antd';
+import * as Icon from '@ant-design/icons';
+import LoadingResult from './Result/LoadingResult';
 
 type Props = {
     error?: ApolloError;
@@ -12,10 +11,10 @@ type Props = {
 
 const QueryResultViewer: React.FC<PropsWithChildren<Props>> = ({ children, error, loading: isLoading }: PropsWithChildren<Props>) => {
     if (error != null) {
-        return (<AlertDialog alert={(<ApolloErrorDialog error={error} />)} />);
+        return (<Result status='error' title='APIエラー' subTitle={error.message} />);
     }
     if (isLoading === true) {
-        return (<AlertDialog alert={(<Loading />)} />);
+        return <LoadingResult />;
     }
     return (<>{children}</>);
 };

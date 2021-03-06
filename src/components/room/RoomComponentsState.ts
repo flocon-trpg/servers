@@ -1,12 +1,13 @@
 import { CompositeKey } from '../../@shared/StateMap';
+import { Piece } from '../../stateManagers/states/piece';
 
 export const create = 'create';
 export const update = 'update';
 export const characterParameterNamesDrawerVisibility = 'characterParameterNamesDrawerVisibility';
 export const boardDrawerType = 'boardDrawerType';
 export const characterDrawerType = 'characterDrawerType';
+export const myNumberValueDrawerType = 'myNumberValueDrawerType';
 export const editRoomDrawerVisibility = 'editRoomDrawerVisibility';
-export const editParticipantDrawerVisibility = 'editParticipantDrawerVisibility';
 export const createPrivateMessageDrawerVisibility = 'createPrivateMessageDrawerVisibility';
 
 export type BoardEditorDrawerType = {
@@ -21,17 +22,27 @@ export type CharacterEditorDrawerType = {
 } | {
     type: typeof update;
     stateKey: CompositeKey;
-    // non-nullishならばPieceLocationの編集UIも表示される。
-    // PieceLocationの編集はcreateとupdate兼用。どちらの場合でもboardKeyとcharacterKeyの値は最初から決まっている。
+    // non-nullishならばPieceの編集UIも表示される。
+    // Pieceの編集はcreateとupdate兼用。どちらの場合でもboardKeyとcharacterKeyの値は最初から決まっている。
     boardKey?: CompositeKey;
+}
+
+export type MyNumberValueDrawerType = {
+    type: typeof create;
+    boardKey: CompositeKey;
+    piece: Piece.State;
+} | {
+    type: typeof update;
+    boardKey: CompositeKey;
+    stateKey: string;
 }
 
 export type RoomComponentsState = {
     characterParameterNamesDrawerVisibility: boolean;
     boardDrawerType: BoardEditorDrawerType | null;
     characterDrawerType: CharacterEditorDrawerType | null;
+    myNumberValueDrawerType: MyNumberValueDrawerType | null;
     editRoomDrawerVisibility: boolean;
-    editParticipantDrawerVisibility: boolean;
     createPrivateMessageDrawerVisibility: boolean;
 }
 
@@ -39,8 +50,8 @@ export const defaultRoomComponentsState: RoomComponentsState = {
     characterParameterNamesDrawerVisibility: false,
     boardDrawerType: null,
     characterDrawerType: null,
+    myNumberValueDrawerType: null,
     editRoomDrawerVisibility: false,
-    editParticipantDrawerVisibility: true,
     createPrivateMessageDrawerVisibility: false,
 };
 
@@ -54,12 +65,12 @@ export type RoomComponentsAction = {
     type: typeof characterDrawerType;
     newValue: CharacterEditorDrawerType | null;
 } | {
+    type: typeof myNumberValueDrawerType;
+    newValue: MyNumberValueDrawerType | null;
+} | {
     type: typeof editRoomDrawerVisibility;
     newValue: boolean;
-} | {
-    type: typeof editParticipantDrawerVisibility;
-    newValue: boolean;
-} | {
+} |  {
     type: typeof createPrivateMessageDrawerVisibility;
     newValue: boolean;
 }
@@ -76,6 +87,11 @@ export const reduceComponentsState = (state: RoomComponentsState, action: RoomCo
                 ...state,
                 characterDrawerType: action.newValue,
             };
+        case myNumberValueDrawerType:
+            return {
+                ...state,
+                myNumberValueDrawerType: action.newValue
+            };
         case characterParameterNamesDrawerVisibility:
             return {
                 ...state,
@@ -85,11 +101,6 @@ export const reduceComponentsState = (state: RoomComponentsState, action: RoomCo
             return {
                 ...state,
                 createPrivateMessageDrawerVisibility: action.newValue,
-            };
-        case editParticipantDrawerVisibility:
-            return {
-                ...state,
-                editParticipantDrawerVisibility: action.newValue,
             };
         case editRoomDrawerVisibility:
             return {

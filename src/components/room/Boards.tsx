@@ -1,11 +1,11 @@
 import React from 'react';
 import { success, useImageFromGraphQL } from '../../hooks/image';
 import * as ReactKonva from 'react-konva';
-import { CompositeKey, compositeKeyToString, createStateMap, ReadonlyStateMap, stringToCompositeKey, toJSONString } from '../../@shared/StateMap';
+import { CompositeKey, compositeKeyToString, createStateMap, equals, ReadonlyStateMap, stringToCompositeKey, toJSONString } from '../../@shared/StateMap';
 import { Button, Dropdown, Menu } from 'antd';
 import { DownOutlined, PlusOutlined } from '@ant-design/icons';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
-import { boardDrawerType, characterDrawerType, create } from './RoomComponentsState';
+import { boardDrawerType, characterDrawerType, create, myNumberValueDrawerType } from './RoomComponentsState';
 import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
 import { BoardsPanelConfig, createDefaultBoardConfig } from '../../states/BoardsPanelConfig';
@@ -21,146 +21,65 @@ import { Character } from '../../stateManagers/states/character';
 import { Piece } from '../../stateManagers/states/piece';
 import { Room } from '../../stateManagers/states/room';
 import { Board as StatesBoard } from '../../stateManagers/states/board';
+import { MyNumberValue } from '../../stateManagers/states/myNumberValue';
+import { Participant } from '../../stateManagers/states/participant';
+import { MyKonva } from '../../foundations/MyKonva';
 
-type Vector2 = {
-    x: number;
-    y: number;
-}
+const emptyCharacterOperation = (): Character.PostOperation => ({
+    boolParams: new Map(),
+    numParams: new Map(),
+    numMaxParams: new Map(),
+    strParams: new Map(),
+    pieces: createStateMap(),
+});
 
-type Size = {
-    w: number;
-    h: number;
-}
-
-type DragEndResult = {
-    readonly newLocation?: Vector2;
-    readonly newSize?: Size;
-}
-
-const iconImageMinimalSize = 10;
-
-type IconImageProps = {
-    filePath: FilePath;
-    isSelected: boolean;
-    draggable: boolean;
-    listening: boolean;
-
-    onDragEnd?: (resize: DragEndResult) => void;
-    onClick?: () => void;
-} & Vector2 & Size
-
-const IconImage: React.FC<IconImageProps> = (props: IconImageProps) => {
-    /*
-    リサイズや移動の実装方法についてはこちらを参照
-    https://konvajs.org/docs/react/Transformer.html
-    */
-
-    const image = useImageFromGraphQL(props.filePath);
-    const imageRef = React.useRef<Konva.Image | null>(null);
-    const transformerRef = React.useRef<Konva.Transformer | null>(null);
-
-    React.useEffect(() => {
-        if (!props.isSelected) {
-            return;
-        }
-        if (transformerRef.current == null) {
-            return;
-        }
-        transformerRef.current.nodes(imageRef.current == null ? [] : [imageRef.current]);
-        const layer = transformerRef.current.getLayer();
-        if (layer == null) {
-            return;
-        }
-        layer.batchDraw();
-    }); // deps=[props.isSelected]だと何故かうまくいかない(isSelectedは最初falseで、クリックなどの操作によって初めてtrueにならないとだめ？)のでdepsは空にしている
-
-    if (image.type !== success) {
-        return null;
+const createPiecePostOperation = ({
+    e,
+    piece,
+    board,
+}: {
+    e: MyKonva.DragEndResult;
+    piece: Piece.State;
+    board: StatesBoard.State;
+}): Piece.PostOperation => {
+    const pieceOperation: Piece.PostOperation = {};
+    if (e.newLocation != null) {
+        pieceOperation.x = { newValue: e.newLocation.x };
+        pieceOperation.y = { newValue: e.newLocation.y };
     }
-
-    const onDragEnd = (e: KonvaEventObject<unknown>) => {
-        if (!props.draggable) {
-            return;
+    if (e.newSize != null) {
+        pieceOperation.w = { newValue: e.newSize.w };
+        pieceOperation.h = { newValue: e.newSize.h };
+    }
+    if (piece.isCellMode) {
+        if (e.newLocation != null) {
+            const position = getCellPosition({ ...e.newLocation, board });
+            pieceOperation.cellX = { newValue: position.cellX };
+            pieceOperation.cellY = { newValue: position.cellY };
         }
-        const x = e.target.x();
-        const y = e.target.y();
-        // セルにスナップする設定の場合、このようにxy座標をリセットしないと少しだけ動かしたときにprops.xとprops.yの値が変わらないため再レンダリングされない。そのため、スナップしない。
-        e.target.x(props.x);
-        e.target.y(props.y);
-        if (props.onDragEnd == null) {
-            return;
+        if (e.newSize != null) {
+            const size = getCellSize({ ...e.newSize, board });
+            pieceOperation.cellW = { newValue: size.cellW };
+            pieceOperation.cellH = { newValue: size.cellH };
         }
-        props.onDragEnd({
-            newLocation: {
-                x,
-                y,
-            }
-        });
-    };
-
-    return (
-        <>
-            <ReactKonva.Image
-                listening={props.listening}
-                ref={imageRef}
-                x={props.x}
-                y={props.y}
-                width={props.w}
-                height={props.h}
-                image={image.image}
-                draggable={props.draggable}
-                onClick={e => {
-                    e.cancelBubble = true;
-                    props.onClick == null ? undefined : props.onClick();
-                }}
-                onDragEnd={e => onDragEnd(e)}
-                onTouchEnd={e => onDragEnd(e)}
-                onTransformEnd={() => {
-                    // transformer is changing scale of the node
-                    // and NOT its width or height
-                    // but in the store we have only width and height
-                    // to match the data better we will reset scale on transform end
-                    const node = imageRef.current;
-                    if (node == null) {
-                        return;
-                    }
-                    const scaleX = node.scaleX();
-                    const scaleY = node.scaleY();
-
-                    // we will reset it back
-                    node.scaleX(1);
-                    node.scaleY(1);
-                    if (props.onDragEnd == null) {
-                        return;
-                    }
-                    props.onDragEnd({
-                        newLocation: {
-                            x: node.x(),
-                            y: node.y(),
-                        },
-                        newSize: {
-                            // set minimal value
-                            w: Math.max(iconImageMinimalSize, node.width() * scaleX),
-                            h: Math.max(iconImageMinimalSize, node.height() * scaleY)
-                        },
-                    });
-                }} />
-            {props.isSelected && (
-                <ReactKonva.Transformer
-                    ref={transformerRef}
-                    rotateEnabled={false}
-                    boundBoxFunc={(oldBox, newBox) => {
-                        // limit resize
-                        if (newBox.width < iconImageMinimalSize || newBox.height < iconImageMinimalSize) {
-                            return oldBox;
-                        }
-                        return newBox;
-                    }}>
-                </ReactKonva.Transformer>
-            )}
-        </>
-    );
+    }
+    return pieceOperation;
 };
+
+const emptyMyNumberValueOperation = (): MyNumberValue.PostOperation => ({
+    pieces: createStateMap(),
+});
+
+const character = 'character';
+const myNumberValue = 'myNumberValue';
+
+type SelectedPieceKey = {
+    type: typeof character;
+    characterKey: CompositeKey;
+} | {
+    type: typeof myNumberValue;
+    stateId: string;
+}
 
 type BoardProps = {
     roomId: string;
@@ -169,14 +88,15 @@ type BoardProps = {
     board: StatesBoard.State;
     boardsPanelConfig: BoardsPanelConfig;
     characters: ReadonlyStateMap<Character.State>;
+    participants: ReadonlyMap<string, Participant.State>;
     onClick?: (e: KonvaEventObject<MouseEvent>) => void;
-    onContextMenu?: (e: KonvaEventObject<PointerEvent>, stateOffset: Vector2) => void; // stateOffsetは、configなどのxy座標を基準にした位置。
+    onContextMenu?: (e: KonvaEventObject<PointerEvent>, stateOffset: MyKonva.Vector2) => void; // stateOffsetは、configなどのxy座標を基準にした位置。
     canvasWidth: number;
     canvasHeight: number;
 }
 
-const Board: React.FC<BoardProps> = ({ roomId, board, boardKey, boardsPanelConfigId, boardsPanelConfig, characters, onClick, onContextMenu, canvasWidth, canvasHeight }: BoardProps) => {
-    const [selectedPieceKey, setSelectedPieceKey] = React.useState<CompositeKey>(); // keyはcharacter
+const Board: React.FC<BoardProps> = ({ roomId, board, boardKey, boardsPanelConfigId, boardsPanelConfig, characters, participants, onClick, onContextMenu, canvasWidth, canvasHeight }: BoardProps) => {
+    const [selectedPieceKey, setSelectedPieceKey] = React.useState<SelectedPieceKey>();
     const [isBackgroundDragging, setIsBackgroundDragging] = React.useState(false); // これがないと、pieceをドラッグでリサイズする際に背景が少し動いてしまう。
     const backgroundImage = useImageFromGraphQL(board.backgroundImage);
     const dispatch = useDispatch();
@@ -210,7 +130,7 @@ const Board: React.FC<BoardProps> = ({ roomId, board, boardKey, boardsPanelConfi
     })();
 
     const pieces = (() => {
-        const pieces = __(characters).compact(([characterKey, character]) => {
+        const characterPieces = __(characters).compact(([characterKey, character]) => {
             const piece = __(character.pieces).find(([boardKey$]) => {
                 return boardKey.createdBy === boardKey$.createdBy && boardKey.id === boardKey$.id;
             });
@@ -222,56 +142,72 @@ const Board: React.FC<BoardProps> = ({ roomId, board, boardKey, boardsPanelConfi
                 // TODO: 画像なしでコマを表示する
                 return null;
             }
-            return <IconImage
+            return <MyKonva.IconImage
                 {...Piece.getPosition({ ...board, state: pieceValue })}
                 key={compositeKeyToString(characterKey)}
                 filePath={character.image}
                 draggable
                 listening
-                isSelected={selectedPieceKey != null && (selectedPieceKey.createdBy === characterKey.createdBy && selectedPieceKey.id === characterKey.id)}
-                onClick={() => setSelectedPieceKey(characterKey)}
+                isSelected={selectedPieceKey?.type === 'character' && equals(selectedPieceKey.characterKey, characterKey)}
+                onClick={() => setSelectedPieceKey({ type: 'character', characterKey })}
                 onDragEnd={e => {
-                    const pieceOperation: Piece.PostOperation = {};
-                    if (e.newLocation != null) {
-                        pieceOperation.x = { newValue: e.newLocation.x };
-                        pieceOperation.y = { newValue: e.newLocation.y };
-                    }
-                    if (e.newSize != null) {
-                        pieceOperation.w = { newValue: e.newSize.w };
-                        pieceOperation.h = { newValue: e.newSize.h };
-                    }
-                    if (pieceValue.isCellMode) {
-                        if (e.newLocation != null) {
-                            const position = getCellPosition({ ...e.newLocation, board });
-                            pieceOperation.cellX = { newValue: position.cellX };
-                            pieceOperation.cellY = { newValue: position.cellY };
-                        }
-                        if (e.newSize != null) {
-                            const size = getCellSize({ ...e.newSize, board });
-                            pieceOperation.cellW = { newValue: size.cellW };
-                            pieceOperation.cellH = { newValue: size.cellH };
-                        }
-                    }
+                    const pieceOperation = createPiecePostOperation({e, piece: pieceValue, board});
                     const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
                     pieces.set(boardKey, { type: update, operation: pieceOperation });
                     const operation = Room.createPostOperationSetup();
                     operation.characters.set(characterKey, {
                         type: update,
                         operation: {
+                            ...emptyCharacterOperation(),
                             pieces,
-                            boolParams: new Map(),
-                            numParams: new Map(),
-                            numMaxParams: new Map(),
-                            strParams: new Map(),
                         }
                     });
                     operate(operation);
                 }} />;
         }).toArray();
 
+        const myNumberValuePieces = __([...participants])
+            .flatMap(([userUid, participant]) => [...participant.myNumberValues].map(x => [userUid, ...x] as const))
+            .compact(([userUid, stateId, myNumberValue]) => {
+                const piece = __(myNumberValue.pieces).find(([boardKey$, piece]) => {
+                    return boardKey.createdBy === boardKey$.createdBy && boardKey.id === boardKey$.id;
+                });
+                if (piece == null) {
+                    return null;
+                }
+                const [, pieceValue] = piece.value;
+                return <MyKonva.MyNumberValue
+                    {...Piece.getPosition({ ...board, state: pieceValue })}
+                    key={stateId}
+                    myNumberValue={myNumberValue}
+                    draggable
+                    listening
+                    isSelected={selectedPieceKey?.type === 'myNumberValue' && (selectedPieceKey.stateId === stateId)}
+                    onClick={() => setSelectedPieceKey({ type: 'myNumberValue', stateId })}
+                    onDragEnd={e => {
+                        const pieceOperation = createPiecePostOperation({ e, piece: pieceValue, board });
+                        const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
+                        pieces.set(boardKey, { type: update, operation: pieceOperation });
+                    
+                        const myNumberValuesOperation = new Map<string, OperationElement<MyNumberValue.State, MyNumberValue.PostOperation>>();
+                        myNumberValuesOperation.set(stateId, {
+                            type: update,
+                            operation: {
+                                pieces,
+                            },
+                        });
+                        const operation = Room.createPostOperationSetup();
+                        operation.participants.set(userUid, {
+                            myNumberValues: myNumberValuesOperation,
+                        });
+                        operate(operation);
+                    }} />;
+            }).toArray();
+
         return (
             <ReactKonva.Layer>
-                {pieces}
+                {characterPieces}
+                {myNumberValuePieces}
             </ReactKonva.Layer>);
     })();
 
@@ -367,7 +303,8 @@ const Board: React.FC<BoardProps> = ({ roomId, board, boardKey, boardsPanelConfi
 type ContextMenuState = {
     x: number;
     y: number;
-    valuesOnCursor: ReadonlyArray<{ characterKey: CompositeKey; character: Character.State; piece: Piece.State }>;
+    charactersOnCursor: ReadonlyArray<{ characterKey: CompositeKey; character: Character.State; piece: Piece.State }>;
+    myNumberValuesOnCursor: ReadonlyArray<{ myNumberValueKey: string; myNumberValue: MyNumberValue.State; piece: Piece.State }>;
 }
 
 type Props = {
@@ -375,9 +312,12 @@ type Props = {
     boardsPanelConfig: BoardsPanelConfig;
     boardsPanelConfigId: string;
     characters: ReadonlyStateMap<Character.State>;
+    participants: ReadonlyMap<string, Participant.State>;
     roomId: string;
     canvasWidth: number;
     canvasHeight: number;
+    me: Participant.State;
+    myUserUid: string;
 }
 
 const boardsDropDownStyle: React.CSSProperties = {
@@ -392,7 +332,7 @@ const zoomButtonStyle: React.CSSProperties = {
     right: 20,
 };
 
-const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigId, characters, roomId, canvasWidth: width, canvasHeight: height }: Props) => {
+const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigId, characters, participants, roomId, canvasWidth: width, canvasHeight: height, me, myUserUid }: Props) => {
     const dispatchRoomComponentsState = React.useContext(DispatchRoomComponentsStateContext);
     const dispatch = useDispatch();
     const [contextMenuState, setContextMenuState] = React.useState<ContextMenuState | null>(null);
@@ -428,13 +368,14 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
             boardsPanelConfig={boardsPanelConfig}
             boardsPanelConfigId={boardsPanelConfigId}
             characters={characters}
+            participants={participants}
             onClick={() => setContextMenuState(null)}
             onContextMenu={(e, stateOffset) => {
                 e.evt.preventDefault();
                 setContextMenuState({
                     x: e.evt.offsetX,
                     y: e.evt.offsetY,
-                    valuesOnCursor: __(characters.toArray())
+                    charactersOnCursor: __(characters.toArray())
                         .compact(([characterKey, character]) => {
                             const found = character.pieces.toArray()
                                 .find(([boardKey, piece]) => {
@@ -447,7 +388,24 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                                 return null;
                             }
                             return { characterKey, character, piece: found[1] };
-                        }).toArray(),
+                        })
+                        .toArray(),
+                    myNumberValuesOnCursor: __([...participants])
+                        .flatMap(([userUid, participant]) => [...participant.myNumberValues].map(x => [userUid, ...x] as const))
+                        .compact(([userUid, myNumberValueKey, myNumberValue]) => {
+                            const found = myNumberValue.pieces.toArray()
+                                .find(([boardKey, piece]) => {
+                                    if (boardKey.createdBy !== activeBoardKey.createdBy || boardKey.id !== activeBoardKey.id) {
+                                        return false;
+                                    }
+                                    return Piece.isCursorOnIcon({ ...board, state: piece, cursorPosition: stateOffset });
+                                });
+                            if (found === undefined) {
+                                return null;
+                            }
+                            return { myNumberValueKey, myNumberValue, piece: found[1] };
+                        })
+                        .toArray(),
                 });
             }} />);
     })();
@@ -482,13 +440,13 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
         }
         const board = activeBoardKey == null ? undefined : boards.get(activeBoardKey);
         const selectedCharactersMenu = (() => {
-            if (activeBoardKey == null || contextMenuState.valuesOnCursor.length === 0) {
+            if (activeBoardKey == null || contextMenuState.charactersOnCursor.length === 0) {
                 return null;
             }
             return (
                 <>
                     {
-                        contextMenuState.valuesOnCursor.map(({ characterKey, character, piece }) =>
+                        contextMenuState.charactersOnCursor.map(({ characterKey, character, piece }) =>
                             // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が下にもあるため、キーを互いに異なるものにするように文字列を付加している。
                             <Menu.SubMenu key={compositeKeyToString(characterKey) + '@selected'} title={character.name}>
                                 <Menu.Item
@@ -516,11 +474,8 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                                         operation.characters.set(characterKey, {
                                             type: update,
                                             operation: {
+                                                ...emptyCharacterOperation(),
                                                 pieces,
-                                                boolParams: new Map(),
-                                                numParams: new Map(),
-                                                numMaxParams: new Map(),
-                                                strParams: new Map(),
                                             }
                                         });
                                         operate(operation);
@@ -534,6 +489,7 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                     <Menu.Divider />
                 </>);
         })();
+
         const allCharactersListMenu = (() => {
             const title = 'キャラクター一覧';
             if (board == null || activeBoardKey == null) {
@@ -542,7 +498,7 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
             return (
                 <Menu.SubMenu title={title}>
                     {__(characters.toArray()).compact(([key, value]) => {
-                        const pieceLocationExists = __(value.pieces).exists(([boardKey]) => activeBoardKey.id === boardKey.id && activeBoardKey.createdBy === boardKey.createdBy);
+                        const pieceExists = __(value.pieces).exists(([boardKey]) => activeBoardKey.id === boardKey.id && activeBoardKey.createdBy === boardKey.createdBy);
 
                         const cellPosition = getCellPosition({ ...contextMenuState, board });
                         // TODO: x,y,w,h の値が適当
@@ -558,7 +514,7 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                             isCellMode: true,
                             isPrivate: false,
                         };
-                        
+
                         const pieceLocationWhichIsNotCellMode = {
                             x: contextMenuState.x,
                             y: contextMenuState.y,
@@ -573,9 +529,9 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                         };
 
                         return (
-                            <Menu.SubMenu key={compositeKeyToString(key)} title={<span>{pieceLocationExists ? <Icon.CheckOutlined /> : null} {value.name}</span>}>
+                            <Menu.SubMenu key={compositeKeyToString(key)} title={<span>{pieceExists ? <Icon.CheckOutlined /> : null} {value.name}</span>}>
                                 <Menu.Item
-                                    disabled={!pieceLocationExists}
+                                    disabled={!pieceExists}
                                     onClick={() => {
                                         dispatchRoomComponentsState({
                                             type: characterDrawerType,
@@ -589,7 +545,7 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                                     }}>
                                     編集
                                 </Menu.Item>
-                                <Menu.SubMenu disabled={pieceLocationExists} title="置く">
+                                <Menu.SubMenu disabled={pieceExists} title="置く">
                                     <Menu.Item onClick={() => {
                                         const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
 
@@ -601,11 +557,8 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                                         operation.characters.set(key, {
                                             type: update,
                                             operation: {
+                                                ...emptyCharacterOperation(),
                                                 pieces,
-                                                boolParams: new Map(),
-                                                numParams: new Map(),
-                                                numMaxParams: new Map(),
-                                                strParams: new Map(),
                                             }
                                         });
                                         operate(operation);
@@ -623,11 +576,8 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                                         operation.characters.set(key, {
                                             type: update,
                                             operation: {
+                                                ...emptyCharacterOperation(),
                                                 pieces,
-                                                boolParams: new Map(),
-                                                numParams: new Map(),
-                                                numMaxParams: new Map(),
-                                                strParams: new Map(),
                                             }
                                         });
                                         operate(operation);
@@ -637,7 +587,7 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                                     </Menu.Item>
                                 </Menu.SubMenu>
                                 <Menu.Item
-                                    disabled={!pieceLocationExists}
+                                    disabled={!pieceExists}
                                     onClick={() => {
                                         const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
                                         pieces.set(activeBoardKey, {
@@ -648,11 +598,8 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                                         operation.characters.set(key, {
                                             type: update,
                                             operation: {
+                                                ...emptyCharacterOperation(),
                                                 pieces,
-                                                boolParams: new Map(),
-                                                numParams: new Map(),
-                                                numMaxParams: new Map(),
-                                                strParams: new Map(),
                                             }
                                         });
                                         operate(operation);
@@ -666,11 +613,171 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                 </Menu.SubMenu>
             );
         })();
+
+        const selectedMyNumbersMenu = (() => {
+            if (activeBoardKey == null || contextMenuState.myNumberValuesOnCursor.length === 0) {
+                return null;
+            }
+            return (
+                <>
+                    {
+                        contextMenuState.myNumberValuesOnCursor.map(({ myNumberValueKey, myNumberValue, piece }) =>
+                            // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が下にもあるため、キーを互いに異なるものにするように文字列を付加している。
+                            <Menu.SubMenu key={myNumberValueKey + '@selected'} title={MyNumberValue.stringify(myNumberValue)}>
+                                <Menu.Item
+                                    onClick={() => {
+                                        dispatchRoomComponentsState({
+                                            type: myNumberValueDrawerType,
+                                            newValue: {
+                                                type: update,
+                                                boardKey: activeBoardKey,
+                                                stateKey: myNumberValueKey,
+                                            }
+                                        });
+                                        setContextMenuState(null);
+                                    }}>
+                                    編集
+                                </Menu.Item>
+                                <Menu.Item
+                                    onClick={() => {
+                                        const myNumberValues = new Map<string, OperationElement<MyNumberValue.State, MyNumberValue.PostOperation>>();
+                                        myNumberValues.set(myNumberValueKey, {
+                                            type: replace,
+                                            newValue: undefined,
+                                        });
+                                        const operation = Room.createPostOperationSetup();
+                                        operation.participants.set(myUserUid, {
+                                            myNumberValues,
+                                        });
+                                        operate(operation);
+                                        setContextMenuState(null);
+                                    }}>
+                                    削除
+                                </Menu.Item>
+                            </Menu.SubMenu>
+                        )
+                    }
+                    <Menu.Divider />
+                </>);
+        })();
+
+        const allMyNumbersMenu = (() => {
+            const title = '一時コマ（仮称）一覧';
+            if (board == null || activeBoardKey == null) {
+                return <Menu.SubMenu title={title} disabled />;
+            }
+
+            const cellPosition = getCellPosition({ ...contextMenuState, board });
+            // TODO: x,y,w,h の値が適当
+            const pieceLocationWhichIsCellMode = {
+                x: 0,
+                y: 0,
+                w: 50,
+                h: 50,
+                cellX: cellPosition.cellX,
+                cellY: cellPosition.cellY,
+                cellW: 1,
+                cellH: 1,
+                isCellMode: true,
+                isPrivate: false,
+            };
+
+            const pieceLocationWhichIsNotCellMode = {
+                x: contextMenuState.x,
+                y: contextMenuState.y,
+                w: 50,
+                h: 50,
+                isPrivate: false,
+                isCellMode: false,
+                cellX: 0,
+                cellY: 0,
+                cellW: 1,
+                cellH: 1,
+            };
+
+            return (
+                <Menu.SubMenu title={title}>
+                    <Menu.SubMenu title='数値'>
+                        {__(me.myNumberValues).compact(([key, value]) => {
+                            const pieceExists = __(value.pieces).exists(([boardKey]) => activeBoardKey.id === boardKey.id && activeBoardKey.createdBy === boardKey.createdBy);
+                            return (
+                                <Menu.SubMenu key={key} title={<span>{pieceExists ? <Icon.CheckOutlined /> : null} {MyNumberValue.stringify(value)}</span>}>
+                                    <Menu.Item
+                                        onClick={() => {
+                                            dispatchRoomComponentsState({
+                                                type: myNumberValueDrawerType,
+                                                newValue: {
+                                                    type: update,
+                                                    boardKey: activeBoardKey,
+                                                    stateKey: key,
+                                                }
+                                            });
+                                            setContextMenuState(null);
+                                        }}>
+                                        編集
+                                    </Menu.Item>
+                                    <Menu.Item
+                                        onClick={() => {
+                                            const myNumberValues = new Map<string, OperationElement<MyNumberValue.State, MyNumberValue.PostOperation>>();
+                                            myNumberValues.set(key, {
+                                                type: replace,
+                                                newValue: undefined,
+                                            });
+                                            const operation = Room.createPostOperationSetup();
+                                            operation.participants.set(myUserUid, {
+                                                myNumberValues,
+                                            });
+                                            operate(operation);
+                                            setContextMenuState(null);
+                                        }}>
+                                        削除
+                                    </Menu.Item>
+                                </Menu.SubMenu>
+                            );
+                        }).toArray()}
+                        <Menu.Divider />
+                        <Menu.SubMenu title='追加'>
+                            <Menu.Item
+                                onClick={() => {
+                                    dispatchRoomComponentsState({
+                                        type: myNumberValueDrawerType,
+                                        newValue: {
+                                            type: create,
+                                            boardKey: activeBoardKey,
+                                            piece: pieceLocationWhichIsCellMode,
+                                        }
+                                    });
+                                    setContextMenuState(null);
+                                }}>
+                                セルにスナップする
+                            </Menu.Item>
+                            <Menu.Item
+                                onClick={() => {
+                                    dispatchRoomComponentsState({
+                                        type: myNumberValueDrawerType,
+                                        newValue: {
+                                            type: create,
+                                            boardKey: activeBoardKey,
+                                            piece: pieceLocationWhichIsNotCellMode,
+                                        }
+                                    });
+                                    setContextMenuState(null);
+                                }}>
+                                セルにスナップしない
+                            </Menu.Item>
+                        </Menu.SubMenu>
+                    </Menu.SubMenu>
+                </Menu.SubMenu>
+            );
+        })();
+
         return (
             <div style={({ position: 'absolute', left: contextMenuState.x, top: contextMenuState.y })}>
                 <Menu>
                     {selectedCharactersMenu}
+                    {selectedMyNumbersMenu}
                     {allCharactersListMenu}
+                    {allMyNumbersMenu}
                 </Menu>
             </div>);
     }

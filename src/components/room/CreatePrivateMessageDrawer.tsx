@@ -11,6 +11,7 @@ import { __ } from '../../@shared/collection';
 import { useWritePrivateMessageMutation } from '../../generated/graphql';
 import { Room } from '../../stateManagers/states/room';
 import { Participant } from '../../stateManagers/states/participant';
+import { getUserUid } from '../../hooks/useFirebaseUser';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -35,13 +36,14 @@ const CreatePrivateMessageDrawer: React.FC<Props> = ({ roomId, roomState }: Prop
     const [writePrivateMessage] = useWritePrivateMessageMutation();
     const [isPosting, setIsPosting] = React.useState(false);
 
-    if (myAuth == null) {
+    const myUserUid = getUserUid(myAuth);
+    if (myUserUid == null) {
         return null;
     }
 
     const selectedParticipants = new Map<string, Participant.State>(); // 存在しないユーザーや自分自身のUserUidは除かれる
     roomState.participants.forEach((participant, userUid) => {
-        if (userUid === myAuth.uid) {
+        if (userUid === myUserUid) {
             return;
         }
         if (selectedUserIds.has(userUid)) {
@@ -105,8 +107,8 @@ const CreatePrivateMessageDrawer: React.FC<Props> = ({ roomId, roomState }: Prop
                                     <>
                                         <Checkbox
                                             key={userUid}
-                                            disabled={userUid === myAuth.uid}
-                                            checked={userUid === myAuth.uid || selectedParticipants.has(userUid)}
+                                            disabled={userUid === getUserUid(myAuth)}
+                                            checked={userUid === getUserUid(myAuth) || selectedParticipants.has(userUid)}
                                             onChange={newValue => {
                                                 const newSelectedUserIds = new Set(selectedUserIds);
                                                 if (newValue.target.checked) {

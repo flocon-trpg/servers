@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Layout as AntdLayout, notification as antdNotification, Input, Tooltip } from 'antd';
+import { Menu, Layout as AntdLayout, notification as antdNotification, Input, Tooltip, Result } from 'antd';
 import DraggableCard, { horizontalPadding } from '../../foundations/DraggableCard';
 import CharacterList from './CharacterList';
 import useRoomConfig from '../../hooks/localStorage/useRoomConfig';
@@ -36,6 +36,7 @@ import Jdenticon from '../../foundations/Jdenticon';
 import ParticipantList from './ParticipantList';
 import NotificationContext, { graphQLErrors, Notification, text, TextNotification, toTextNotification } from './contexts/NotificationContext';
 import { Participant } from '../../stateManagers/states/participant';
+import MyNumberValueDrawer from './MyNumberValueDrawer';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -374,9 +375,16 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
         return (<div>loading config file...</div>);
     }
 
-    let me: Participant.State | undefined = undefined;
-    if (myAuth != null) {
-        me = roomState.participants.get(myAuth.uid);
+    const me: Participant.State | undefined = typeof myAuth === 'string' ? undefined : roomState.participants.get(myAuth.uid);
+
+    if (typeof myAuth === 'string' || me == null) {
+        return <AntdLayout>
+            <AntdLayout.Content>
+                <Result
+                    status='warning'
+                    title='ログインしていないか、Participantの取得に失敗しました。' />
+            </AntdLayout.Content>
+        </AntdLayout>;
     }
 
     // TODO: offset, zoom
@@ -407,7 +415,10 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                     boardsPanelConfigId={pair.key}
                     boardsPanelConfig={pair.value}
                     roomId={roomId}
-                    characters={roomState.characters} />
+                    characters={roomState.characters}
+                    participants={roomState.participants}
+                    me={me}
+                    myUserUid={myAuth.uid} />
             </DraggableCard>
         );
     });
@@ -633,6 +644,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
 
                             <BoardDrawer roomState={roomState} />
                             <CharacterDrawer roomState={roomState} />
+                            <MyNumberValueDrawer myUserUid={myAuth.uid} me={me} />
                             <CharacterParameterNamesDrawer roomState={roomState} />
                             <CreatePrivateMessageDrawer roomState={roomState} roomId={roomId} />
                             <EditRoomDrawer roomState={roomState} />

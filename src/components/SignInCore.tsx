@@ -5,7 +5,6 @@
 import React from 'react';
 import firebase from 'firebase/app';
 import * as firebaseui from 'firebaseui';
-import { useFirebaseUser } from '../hooks/useFirebaseUser';
 import { getAuth } from '../utils/firebaseHelpers';
 import ConfigContext from '../contexts/ConfigContext';
 
