@@ -220,11 +220,24 @@ export namespace GlobalMyValue {
                             nextState: nextState.pieces,
                             createdByMe,
                         });
+                        const isPrevValuePrivate = prevState.isValuePrivate && !createdByMe;
+                        const isNextValuePrivate = nextState.isValuePrivate && !createdByMe;
                         return {
                             stateId: key,
                             operation: {
                                 isValuePrivate: operation.isValuePrivate ?? undefined,
-                                value: nextState.isValuePrivate && !createdByMe ? undefined : operation.value,
+                                value: ((): ReplaceNumberTwoWayOperation | undefined => {
+                                    if (isPrevValuePrivate) {
+                                        if (isNextValuePrivate) {
+                                            return undefined;
+                                        }
+                                        return { oldValue: 0, newValue: nextState.value };
+                                    }
+                                    if (isNextValuePrivate) {
+                                        return { oldValue: prevState.value, newValue: 0 };
+                                    }
+                                    return operation.value;
+                                })(),
                                 valueRangeMax: operation.valueRangeMax,
                                 valueRangeMin: operation.valueRangeMin,
                                 pieces,
