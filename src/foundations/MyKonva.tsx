@@ -5,6 +5,8 @@ import { success, useImageFromGraphQL } from '../hooks/image';
 import { FilePath } from '../utils/types';
 import * as ReactKonva from 'react-konva';
 import { MyNumberValue } from '../stateManagers/states/myNumberValue';
+import { usePrevious } from '../hooks/usePrevious';
+import { animated, useSpring } from 'react-spring/konva.cjs';
 
 export namespace MyKonva {
     export type Vector2 = {
@@ -149,6 +151,8 @@ export namespace MyKonva {
 
     type MyNumberValueProps = {
         myNumberValue: MyNumberValue.State;
+        createdByMe: boolean;
+
         isSelected: boolean;
         draggable: boolean;
         listening: boolean;
@@ -162,6 +166,69 @@ export namespace MyKonva {
         リサイズや移動の実装方法についてはこちらを参照
         https://konvajs.org/docs/react/Transformer.html
         */
+
+        const text = ((props.myNumberValue.isValuePrivate && !props.createdByMe) ? '?' : (props.myNumberValue.value?.toString() ?? 'null'));
+        const prevText = usePrevious(text);
+
+        const duration = 300;
+
+        const [textSpringProps] = useSpring(() => ({
+            config: {
+                duration: 300,
+            },
+            from: {
+                text: (prevText === '?' || text === '?') ? prevText : text,
+                scaleX: 1,
+                x: 0,
+
+            },
+            to: async (next, cancel) => {
+                if (prevText === '?' || text === '?') {
+                    await next({
+                        scaleX: 0,
+                        x: props.w / 2,
+                    });
+                } else {
+                    await next({
+                    });
+                }
+                await next({
+                    text,
+                    scaleX: 1,
+                    x: 0,
+                });
+            }
+        }), [text]);
+
+        const baseColor = '#B0B0B040';
+        const transitionColor = '#FFB0B080';
+        const [rectSpringProps] = useSpring(() => ({
+            config: {
+                duration: 300,
+            },
+            from: {
+                scaleX: 1,
+                x: 0,
+                fill: prevText === '?' || text === '?' ? baseColor : transitionColor,
+            },
+            to: async (next, cancel) => {
+                if (prevText === '?' || text === '?') {
+                    await next({
+                        scaleX: 0,
+                        x: props.w / 2,
+                        fill: baseColor,
+                    });
+                } else {
+                    await next({
+                    });
+                }
+                await next({
+                    scaleX: 1,
+                    x: 0,
+                    fill: baseColor,
+                });
+            }
+        }), [text]);
 
         const layerRef = React.useRef<Konva.Layer | null>(null);
         const transformerRef = React.useRef<Konva.Transformer | null>(null);
@@ -247,22 +314,20 @@ export namespace MyKonva {
                             },
                         });
                     }}>
-                    <ReactKonva.Rect
-                        x={0}
+                    <animated.Rect
+                        {...rectSpringProps}
                         y={0}
                         width={props.w}
-                        height={props.h}
-                        stroke=''
-                        fill='#80808080'/>
+                        height={props.h} />
                     {/* fontSizeの決め方は適当 */}
-                    <ReactKonva.Text
-                        x={0}
+                    <animated.Text
+                        {...textSpringProps}
                         y={0}
                         width={props.w}
                         height={props.h}
-                        text={props.myNumberValue.value?.toString() ?? '?'}
                         fontSize={props.w / 2}
-                        fill='#555'
+                        fontFamily='Noto Sans JP Regular'
+                        fill='black'
                         align='center'
                         verticalAlign='middle' />
                 </ReactKonva.Group>

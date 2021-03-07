@@ -84,6 +84,7 @@ type SelectedPieceKey = {
 
 type BoardProps = {
     roomId: string;
+    myUserUid: string;
     boardKey: CompositeKey;
     boardsPanelConfigId: string;
     board: StatesBoard.State;
@@ -96,7 +97,20 @@ type BoardProps = {
     canvasHeight: number;
 }
 
-const Board: React.FC<BoardProps> = ({ roomId, board, boardKey, boardsPanelConfigId, boardsPanelConfig, characters, participants, onClick, onContextMenu, canvasWidth, canvasHeight }: BoardProps) => {
+const Board: React.FC<BoardProps> = ({ 
+    roomId,
+    myUserUid,
+    board,
+    boardKey,
+    boardsPanelConfigId,
+    boardsPanelConfig,
+    characters,
+    participants, 
+    onClick,
+    onContextMenu, 
+    canvasWidth, 
+    canvasHeight 
+}: BoardProps) => {
     const [selectedPieceKey, setSelectedPieceKey] = React.useState<SelectedPieceKey>();
     const [isBackgroundDragging, setIsBackgroundDragging] = React.useState(false); // これがないと、pieceをドラッグでリサイズする際に背景が少し動いてしまう。
     const backgroundImage = useImageFromGraphQL(board.backgroundImage);
@@ -181,6 +195,7 @@ const Board: React.FC<BoardProps> = ({ roomId, board, boardKey, boardsPanelConfi
                     {...Piece.getPosition({ ...board, state: pieceValue })}
                     key={stateId}
                     myNumberValue={myNumberValue}
+                    createdByMe={userUid === myUserUid}
                     draggable
                     listening
                     isSelected={selectedPieceKey?.type === 'myNumberValue' && (selectedPieceKey.stateId === stateId)}
@@ -365,6 +380,7 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
             canvasHeight={height}
             board={board}
             roomId={roomId}
+            myUserUid={myUserUid}
             boardKey={activeBoardKey}
             boardsPanelConfig={boardsPanelConfig}
             boardsPanelConfigId={boardsPanelConfigId}
