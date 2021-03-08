@@ -588,7 +588,7 @@ export type MyNumberValueStateValue = {
   __typename?: 'MyNumberValueStateValue';
   isValuePrivate: Scalars['Boolean'];
   pieces: Array<PieceState>;
-  value?: Maybe<Scalars['Float']>;
+  value: Scalars['Float'];
   valueRangeMax?: Maybe<Scalars['Float']>;
   valueRangeMin?: Maybe<Scalars['Float']>;
 };
@@ -596,7 +596,7 @@ export type MyNumberValueStateValue = {
 export type MyNumberValueStateValueInput = {
   isValuePrivate: Scalars['Boolean'];
   pieces: Array<PieceStateInput>;
-  value?: Maybe<Scalars['Float']>;
+  value: Scalars['Float'];
   valueRangeMax?: Maybe<Scalars['Float']>;
   valueRangeMin?: Maybe<Scalars['Float']>;
 };
