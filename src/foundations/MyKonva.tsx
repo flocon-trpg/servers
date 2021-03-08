@@ -319,7 +319,10 @@ export namespace MyKonva {
                         y={0}
                         width={props.w}
                         height={props.h} />
-                    {/* fontSizeの決め方は適当 */}
+                    {
+                        /* fontSizeの決め方は適当 */
+                        /* CONSIDER: Noto Sans JP Regularがどのブラウザでも使えるのか？webフォントをダウンロードする処理が必要？ */
+                    }
                     <animated.Text
                         {...textSpringProps}
                         y={0}

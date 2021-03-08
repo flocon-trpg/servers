@@ -2,7 +2,7 @@ import React from 'react';
 import { success, useImageFromGraphQL } from '../../hooks/image';
 import * as ReactKonva from 'react-konva';
 import { CompositeKey, compositeKeyToString, createStateMap, equals, ReadonlyStateMap, stringToCompositeKey, toJSONString } from '../../@shared/StateMap';
-import { Button, Dropdown, Menu } from 'antd';
+import { Button, Dropdown, Menu, Tooltip } from 'antd';
 import { DownOutlined, PlusOutlined } from '@ant-design/icons';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import { boardDrawerType, characterDrawerType, create, myNumberValueDrawerType } from './RoomComponentsState';
@@ -97,7 +97,7 @@ type BoardProps = {
     canvasHeight: number;
 }
 
-const Board: React.FC<BoardProps> = ({ 
+const Board: React.FC<BoardProps> = ({
     roomId,
     myUserUid,
     board,
@@ -105,11 +105,11 @@ const Board: React.FC<BoardProps> = ({
     boardsPanelConfigId,
     boardsPanelConfig,
     characters,
-    participants, 
+    participants,
     onClick,
-    onContextMenu, 
-    canvasWidth, 
-    canvasHeight 
+    onContextMenu,
+    canvasWidth,
+    canvasHeight
 }: BoardProps) => {
     const [selectedPieceKey, setSelectedPieceKey] = React.useState<SelectedPieceKey>();
     const [isBackgroundDragging, setIsBackgroundDragging] = React.useState(false); // これがないと、pieceをドラッグでリサイズする際に背景が少し動いてしまう。
@@ -166,7 +166,7 @@ const Board: React.FC<BoardProps> = ({
                 isSelected={selectedPieceKey?.type === 'character' && equals(selectedPieceKey.characterKey, characterKey)}
                 onClick={() => setSelectedPieceKey({ type: 'character', characterKey })}
                 onDragEnd={e => {
-                    const pieceOperation = createPiecePostOperation({e, piece: pieceValue, board});
+                    const pieceOperation = createPiecePostOperation({ e, piece: pieceValue, board });
                     const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
                     pieces.set(boardKey, { type: update, operation: pieceOperation });
                     const operation = Room.createPostOperationSetup();
@@ -204,7 +204,7 @@ const Board: React.FC<BoardProps> = ({
                         const pieceOperation = createPiecePostOperation({ e, piece: pieceValue, board });
                         const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
                         pieces.set(boardKey, { type: update, operation: pieceOperation });
-                    
+
                         const myNumberValuesOperation = new Map<string, OperationElement<MyNumberValue.State, MyNumberValue.PostOperation>>();
                         myNumberValuesOperation.set(stateId, {
                             type: update,
@@ -320,7 +320,7 @@ type ContextMenuState = {
     x: number;
     y: number;
     charactersOnCursor: ReadonlyArray<{ characterKey: CompositeKey; character: Character.State; piece: Piece.State }>;
-    myNumberValuesOnCursor: ReadonlyArray<{ myNumberValueKey: string; myNumberValue: MyNumberValue.State; piece: Piece.State }>;
+    myNumberValuesOnCursor: ReadonlyArray<{ myNumberValueKey: string; myNumberValue: MyNumberValue.State; piece: Piece.State; userUid: string }>;
 }
 
 type Props = {
@@ -420,7 +420,7 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                             if (found === undefined) {
                                 return null;
                             }
-                            return { myNumberValueKey, myNumberValue, piece: found[1] };
+                            return { myNumberValueKey, myNumberValue, piece: found[1], userUid };
                         })
                         .toArray(),
                 });
@@ -638,10 +638,10 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
             return (
                 <>
                     {
-                        contextMenuState.myNumberValuesOnCursor.map(({ myNumberValueKey, myNumberValue, piece }) =>
+                        contextMenuState.myNumberValuesOnCursor.map(({ myNumberValueKey, myNumberValue, piece, userUid }) =>
                             // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が下にもあるため、キーを互いに異なるものにするように文字列を付加している。
                             <Menu.SubMenu key={myNumberValueKey + '@selected'} title={MyNumberValue.stringify(myNumberValue)}>
-                                <Menu.Item
+                                {userUid === myUserUid ? <Menu.Item
                                     onClick={() => {
                                         dispatchRoomComponentsState({
                                             type: myNumberValueDrawerType,
@@ -654,7 +654,12 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                                         setContextMenuState(null);
                                     }}>
                                     編集
-                                </Menu.Item>
+                                </Menu.Item> : 
+                                    <Menu.Item disabled>
+                                        <Tooltip title='自分以外が作成したコマでは、値を編集することはできません。'>
+                                            編集
+                                        </Tooltip>
+                                    </Menu.Item>}
                                 <Menu.Item
                                     onClick={() => {
                                         const myNumberValues = new Map<string, OperationElement<MyNumberValue.State, MyNumberValue.PostOperation>>();
