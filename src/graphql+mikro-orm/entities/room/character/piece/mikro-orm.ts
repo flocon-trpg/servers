@@ -96,9 +96,9 @@ export abstract class CharaPieceBase implements GlobalPiece.StateEntityBase {
 }
 
 @Entity()
-@Unique({ properties: ['chara', 'boardCreatedBy', 'boardId']})
+@Unique({ properties: ['chara', 'boardCreatedBy', 'boardId'], name: 'chara_piece_unique' })
 export class CharaPiece extends CharaPieceBase {
-    public constructor(params: CharaPieceBaseParams & { chara: Chara}) {
+    public constructor(params: CharaPieceBaseParams & { chara: Chara }) {
         super(params);
         this.chara = Reference.create(params.chara);
     }
@@ -112,7 +112,7 @@ export class CharaPiece extends CharaPieceBase {
 }
 
 @Entity()
-@Unique({ properties: ['removeCharaOp', 'boardCreatedBy', 'boardId'] })
+@Unique({ properties: ['removeCharaOp', 'boardCreatedBy', 'boardId'], name: 'removed_chara_piece_unique' })
 export class RemovedCharaPiece extends CharaPieceBase {
     public constructor(params: CharaPieceBaseParams & { removeCharaOp: RemoveCharaOp }) {
         super(params);
@@ -128,7 +128,7 @@ export class RemovedCharaPiece extends CharaPieceBase {
 }
 
 @Entity()
-@Unique({ properties: ['updateCharaOp', 'boardCreatedBy', 'boardId'] })
+@Unique({ properties: ['updateCharaOp', 'boardCreatedBy', 'boardId'], name: 'add_chara_piece_op_unique' })
 export class AddCharaPieceOp {
     public constructor({
         boardId,
@@ -161,7 +161,7 @@ export class AddCharaPieceOp {
 }
 
 @Entity()
-@Unique({ properties: ['updateCharaOp', 'boardCreatedBy', 'boardId'] })
+@Unique({ properties: ['updateCharaOp', 'boardCreatedBy', 'boardId'], name: 'remove_chara_piece_op_unique' })
 export class RemoveCharaPieceOp extends CharaPieceBase {
     public constructor(params: CharaPieceBaseParams & { updateCharaOp: UpdateCharaOp }) {
         super(params);
@@ -173,7 +173,7 @@ export class RemoveCharaPieceOp extends CharaPieceBase {
 }
 
 @Entity()
-@Unique({ properties: ['updateCharaOp', 'boardCreatedBy', 'boardId'] })
+@Unique({ properties: ['updateCharaOp', 'boardCreatedBy', 'boardId'], name: 'update_chara_piece_op_unique' })
 export class UpdateCharaPieceOp implements GlobalPiece.DownOperationEntityBase {
     public constructor({
         boardId,

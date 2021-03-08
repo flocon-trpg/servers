@@ -101,7 +101,7 @@ export class Chara extends CharaBase {
 
 // DBにはDownOperationとして保存されるため、AddCharaOpはCharaの情報を持たない。
 @Entity()
-@Unique({ properties: ['roomOp', 'createdBy', 'stateId'] })
+@Unique({ properties: ['roomOp', 'createdBy', 'stateId'], name: 'add_chara_op_unique' })
 export class AddCharaOp {
     public constructor({
         createdBy,
@@ -135,7 +135,7 @@ export class AddCharaOp {
 }
 
 @Entity()
-@Unique({ properties: ['roomOp', 'createdBy', 'stateId'] })
+@Unique({ properties: ['roomOp', 'createdBy', 'stateId'], name: 'remove_chara_op_unique' })
 export class RemoveCharaOp extends CharaBase {
     public constructor(params: CharaBaseParams & { roomOp: RoomOp }) {
         super(params);
@@ -165,7 +165,7 @@ export class RemoveCharaOp extends CharaBase {
 }
 
 @Entity()
-@Unique({ properties: ['roomOp', 'createdBy', 'stateId'] })
+@Unique({ properties: ['roomOp', 'createdBy', 'stateId'], name: 'update_chara_op_unique' })
 export class UpdateCharaOp {
     public constructor({
         createdBy,

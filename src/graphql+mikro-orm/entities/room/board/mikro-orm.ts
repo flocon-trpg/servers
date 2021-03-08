@@ -103,7 +103,7 @@ export class Board extends BoardBase {
 
 // DBにはDownOperationとして保存されるため、AddBoardOpはBoardの情報を持たない。
 @Entity()
-@Unique({ properties: ['roomOp', 'createdBy', 'stateId'] })
+@Unique({ properties: ['roomOp', 'createdBy', 'stateId'], name: 'add_board_op_unique' })
 export class AddBoardOp {
     public constructor({
         createdBy,
@@ -137,7 +137,7 @@ export class AddBoardOp {
 }
 
 @Entity()
-@Unique({ properties: ['roomOp', 'createdBy', 'stateId'] })
+@Unique({ properties: ['roomOp', 'createdBy', 'stateId'], name: 'remove_board_op_unique' })
 export class RemoveBoardOp extends BoardBase {
     public constructor(params: BoardBaseParams & { roomOp: RoomOp }) {
         super(params);
@@ -149,7 +149,7 @@ export class RemoveBoardOp extends BoardBase {
 }
 
 @Entity()
-@Unique({ properties: ['roomOp', 'createdBy', 'stateId'] })
+@Unique({ properties: ['roomOp', 'createdBy', 'stateId'], name: 'update_board_op_unique' })
 export class UpdateBoardOp {
     public constructor({
         createdBy,

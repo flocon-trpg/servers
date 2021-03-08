@@ -39,7 +39,7 @@ export abstract class BoolParamBase {
 @Entity()
 @Unique({ properties: ['chara', 'key'] })
 export class BoolParam extends BoolParamBase {
-    public constructor(params: BoolParamBaseParams & {chara: Chara}) {
+    public constructor(params: BoolParamBaseParams & { chara: Chara }) {
         super(params);
         this.chara = Reference.create(params.chara);
     }

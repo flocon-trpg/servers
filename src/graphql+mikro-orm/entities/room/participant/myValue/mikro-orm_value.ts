@@ -35,7 +35,7 @@ export abstract class MyValueBase {
 @Entity()
 @Unique({ properties: ['partici', 'stateId'] })
 export class MyValue extends MyValueBase {
-    public constructor(params: MyValueBaseParams & { partici: Partici}) {
+    public constructor(params: MyValueBaseParams & { partici: Partici }) {
         super(params);
         this.partici = Reference.create(params.partici);
     }

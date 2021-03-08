@@ -96,7 +96,7 @@ abstract class MyValuePieceBase {
 }
 
 @Entity()
-@Unique({ properties: ['myValue', 'boardId', 'boardCreatedBy'] })
+@Unique({ properties: ['myValue', 'boardId', 'boardCreatedBy'], name: 'my_value_piece_unique' })
 export class MyValuePiece extends MyValuePieceBase {
     public constructor(params: MyValuePieceBaseParams & { myValue: MyValue }) {
         super(params);
@@ -112,7 +112,7 @@ export class MyValuePiece extends MyValuePieceBase {
 }
 
 @Entity()
-@Unique({ properties: ['boardId', 'boardCreatedBy', 'removedMyValue'] })
+@Unique({ properties: ['boardId', 'boardCreatedBy', 'removedMyValue'], name: 'removed_my_value_piece_by_partici_unique'})
 export class RemovedMyValuePieceByPartici extends MyValuePieceBase {
     public constructor(params: MyValuePieceBaseParams & { removedMyValue: RemovedMyValue }) {
         super(params);
@@ -128,7 +128,7 @@ export class RemovedMyValuePieceByPartici extends MyValuePieceBase {
 }
 
 @Entity()
-@Unique({ properties: ['boardId', 'boardCreatedBy', 'removeMyValueOp'] })
+@Unique({ properties: ['boardId', 'boardCreatedBy', 'removeMyValueOp'], name: 'removed_my_value_piece_by_my_value_unique' })
 export class RemovedMyValuePieceByMyValue extends MyValuePieceBase {
     public constructor(params: MyValuePieceBaseParams & { removeMyValueOp: RemoveMyValueOp }) {
         super(params);
@@ -144,7 +144,7 @@ export class RemovedMyValuePieceByMyValue extends MyValuePieceBase {
 }
 
 @Entity()
-@Unique({ properties: ['boardId', 'boardCreatedBy', 'updateMyValueOp'] })
+@Unique({ properties: ['boardId', 'boardCreatedBy', 'updateMyValueOp'], name: 'add_my_value_piece_op_unique' })
 export class AddMyValuePieceOp {
     public constructor({
         boardId,
@@ -177,7 +177,7 @@ export class AddMyValuePieceOp {
 }
 
 @Entity()
-@Unique({ properties: ['boardId', 'boardCreatedBy', 'updateMyValueOp'] })
+@Unique({ properties: ['boardId', 'boardCreatedBy', 'updateMyValueOp'], name: 'remove_my_value_piece_op_unique' })
 export class RemoveMyValuePieceOp extends MyValuePieceBase {
     public constructor(params: MyValuePieceBaseParams & { updateMyValueOp: UpdateMyValueOp }) {
         super(params);
@@ -189,7 +189,7 @@ export class RemoveMyValuePieceOp extends MyValuePieceBase {
 }
 
 @Entity()
-@Unique({ properties: ['boardId', 'boardCreatedBy', 'updateMyValueOp'] })
+@Unique({ properties: ['boardId', 'boardCreatedBy', 'updateMyValueOp'], name: 'update_my_value_piece_op_unique' })
 export class UpdateMyValuePieceOp {
     public constructor({
         boardId,

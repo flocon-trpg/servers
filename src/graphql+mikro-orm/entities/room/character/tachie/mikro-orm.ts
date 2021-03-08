@@ -66,9 +66,9 @@ export abstract class TachieLocBase implements GlobalBoardLocation.StateEntityBa
 }
 
 @Entity()
-@Unique({ properties: ['chara', 'boardCreatedBy', 'boardId']})
+@Unique({ properties: ['chara', 'boardCreatedBy', 'boardId'], name: 'tachie_loc_unique' })
 export class TachieLoc extends TachieLocBase {
-    public constructor(params: TachieLocationBaseParams & { chara: Chara}) {
+    public constructor(params: TachieLocationBaseParams & { chara: Chara }) {
         super(params);
         this.chara = Reference.create(params.chara);
     }
@@ -82,7 +82,7 @@ export class TachieLoc extends TachieLocBase {
 }
 
 @Entity()
-@Unique({ properties: ['removeCharaOp', 'boardCreatedBy', 'boardId'] })
+@Unique({ properties: ['removeCharaOp', 'boardCreatedBy', 'boardId'], name: 'removed_tachie_loc_unique' })
 export class RemovedTachieLoc extends TachieLocBase {
     public constructor(params: TachieLocationBaseParams & { removeCharaOp: RemoveCharaOp }) {
         super(params);
@@ -98,7 +98,7 @@ export class RemovedTachieLoc extends TachieLocBase {
 }
 
 @Entity()
-@Unique({ properties: ['updateCharaOp', 'boardCreatedBy', 'boardId'] })
+@Unique({ properties: ['updateCharaOp', 'boardCreatedBy', 'boardId'], name: 'add_tachie_loc_op_unique' })
 export class AddTachieLocOp {
     public constructor({
         boardId,
@@ -131,7 +131,7 @@ export class AddTachieLocOp {
 }
 
 @Entity()
-@Unique({ properties: ['updateCharaOp', 'boardCreatedBy', 'boardId'] })
+@Unique({ properties: ['updateCharaOp', 'boardCreatedBy', 'boardId'], name: 'remove_tachie_loc_op_unique' })
 export class RemoveTachieLocOp extends TachieLocBase {
     public constructor(params: TachieLocationBaseParams & { updateCharaOp: UpdateCharaOp }) {
         super(params);
@@ -143,7 +143,7 @@ export class RemoveTachieLocOp extends TachieLocBase {
 }
 
 @Entity()
-@Unique({ properties: ['updateCharaOp', 'boardCreatedBy', 'boardId'] })
+@Unique({ properties: ['updateCharaOp', 'boardCreatedBy', 'boardId'], name: 'update_tachie_loc_op_unique' })
 export class UpdateTachieLocOp implements GlobalBoardLocation.DownOperationEntityBase {
     public constructor({
         boardId,

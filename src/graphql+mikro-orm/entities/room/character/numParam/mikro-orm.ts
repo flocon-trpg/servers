@@ -39,7 +39,7 @@ export abstract class NumParamBase {
 }
 
 @Entity()
-@Unique({ properties: ['chara', 'key'] })
+@Unique({ properties: ['chara', 'key']})
 export class NumParam extends NumParamBase {
     public constructor(params: BaseParams & { chara: Chara }) {
         super(params);
