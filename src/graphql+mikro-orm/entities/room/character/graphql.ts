@@ -5,6 +5,7 @@ import { FilePath } from '../../filePath/graphql';
 import { NumParamsOperation, NumParamState } from './numParam/graphql';
 import { PieceState, PiecesOperation } from '../../piece/graphql';
 import { StrParamsOperation, StrParamState } from './strParam/graphql';
+import { BoardLocationsOperation, BoardLocationState } from '../../boardLocation/graphql';
 
 @ObjectType()
 @InputType('CharacterValueStateInput')
@@ -17,6 +18,9 @@ export class CharacterValueState {
 
     @Field(() => FilePath, { nullable: true })
     public image?: FilePath;
+
+    @Field(() => FilePath, { nullable: true })
+    public tachieImage?: FilePath;
 
 
     @Field(() => [BoolParamState])
@@ -33,6 +37,9 @@ export class CharacterValueState {
 
     @Field(() => [PieceState])
     public pieces!: PieceState[];
+
+    @Field(() => [BoardLocationState])
+    public tachieLocations!: BoardLocationState[];
 }
 
 @ObjectType()
@@ -59,6 +66,9 @@ export class CharacterOperation {
     @Field({ nullable: true })
     public image?: ReplaceNullableFilePathUpOperation;
 
+    @Field({ nullable: true })
+    public tachieImage?: ReplaceNullableFilePathUpOperation;
+
     @Field()
     public boolParams!: BoolParamsOperation;
     
@@ -73,6 +83,9 @@ export class CharacterOperation {
 
     @Field()
     public pieces!: PiecesOperation;
+
+    @Field()
+    public tachieLocations!: BoardLocationsOperation;
 }
 
 @ObjectType()

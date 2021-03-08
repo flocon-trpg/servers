@@ -3,7 +3,7 @@ import { v4 } from 'uuid';
 import { FilePath } from '../../filePath/global';
 import { Room, RoomOp } from '../mikro-orm';
 
-type RoomBgmBaseParam = {
+type RoomBgmBaseParams = {
     channelKey: string;
     files: FilePath[];
     volume: number;
@@ -15,7 +15,7 @@ export abstract class RoomBgmBase {
         channelKey,
         files,
         volume,
-    }: RoomBgmBaseParam) {
+    }: RoomBgmBaseParams) {
         this.channelKey = channelKey;
         this.files = files;
         this.volume = volume;
@@ -44,7 +44,7 @@ export abstract class RoomBgmBase {
 @Entity()
 @Unique({ properties: ['room', 'channelKey'] })
 export class RoomBgm extends RoomBgmBase {
-    public constructor(params: RoomBgmBaseParam & {room: Room}) {
+    public constructor(params: RoomBgmBaseParams & {room: Room}) {
         super(params);
         this.room = Reference.create(params.room);
     }
@@ -87,7 +87,7 @@ export class AddRoomBgmOp {
 @Entity()
 @Unique({ properties: ['roomOp', 'channelKey'] })
 export class RemoveRoomBgmOp extends RoomBgmBase {
-    public constructor(params: RoomBgmBaseParam & { roomOp: RoomOp }) {
+    public constructor(params: RoomBgmBaseParams & { roomOp: RoomOp }) {
         super(params);
         this.roomOp = Reference.create(params.roomOp);
     }

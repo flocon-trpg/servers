@@ -335,6 +335,7 @@ describe('operate then getRoom', () => {
                         operation: {
                             name: { newValue: newCharacterName },
                             pieces: { replace: [], update: [] },
+                            tachieLocations: { replace: [], update: [] },
                             boolParams: { update: [] },
                             numParams: { update: [] },
                             numMaxParams: { update: [] },
@@ -378,6 +379,7 @@ describe('operate then getRoom', () => {
                     operation: {
                         name: { newValue: newCharacterName },
                         pieces: { replace: [], update: [] },
+                        tachieLocations: { replace: [], update: [] },
                         boolParams: { update: [] },
                         numParams: { update: [] },
                         numMaxParams: { update: [] },
@@ -418,6 +420,7 @@ describe('operate then getRoom', () => {
                     operation: {
                         name: { newValue: newCharacterName },
                         pieces: { replace: [], update: [] },
+                        tachieLocations: { replace: [], update: [] },
                         boolParams: { update: [] },
                         numParams: { update: [] },
                         numMaxParams: { update: [] },
@@ -514,6 +517,7 @@ describe('operate then getRoom', () => {
                                                 }],
                                                 update: [],
                                             },
+                                            tachieLocations: { replace: [], update: [] },
                                             boolParams: { update: [] },
                                             numParams: { update: [] },
                                             numMaxParams: { update: [] },
@@ -589,6 +593,7 @@ describe('operate then getRoom', () => {
                                                     }
                                                 }],
                                             },
+                                            tachieLocations: { replace: [], update: [] },
                                             boolParams: { update: [] },
                                             numParams: { update: [] },
                                             numMaxParams: { update: [] },
@@ -659,6 +664,7 @@ describe('operate then getRoom', () => {
                                                 }],
                                                 update: [],
                                             },
+                                            tachieLocations: { replace: [], update: [] },
                                             boolParams: { update: [] },
                                             numParams: { update: [] },
                                             numMaxParams: { update: [] },
@@ -728,6 +734,7 @@ describe('operate then getRoom', () => {
                     },
                     operation: {
                         pieces: { replace: [], update: [] },
+                        tachieLocations: { replace: [], update: [] },
                         boolParams: { update: [] },
                         numParams: { update: [] },
                         numMaxParams: {
@@ -775,6 +782,7 @@ describe('operate then getRoom', () => {
                     },
                     operation: {
                         pieces: { replace: [], update: [] },
+                        tachieLocations: { replace: [], update: [] },
                         boolParams: { update: [] },
                         numParams: { update: [] },
                         numMaxParams: {
@@ -888,6 +896,7 @@ describe('operate then getRoom', () => {
                                                 }],
                                                 update: [],
                                             },
+                                            tachieLocations: { replace: [], update: [] },
                                             boolParams: { update: [] },
                                             numParams: { update: [] },
                                             numMaxParams: { update: [] },
@@ -1016,6 +1025,7 @@ describe('operate then getRoom', () => {
                                                 replace: [],
                                                 update: [],
                                             },
+                                            tachieLocations: { replace: [], update: [] },
                                             boolParams: { update: [] },
                                             numParams: { update: [] },
                                             numMaxParams: { update: [] },
@@ -1111,6 +1121,7 @@ describe('operate then getRoom', () => {
                                                 replace: [],
                                                 update: [],
                                             },
+                                            tachieLocations: { replace: [], update: [] },
                                             boolParams: { update: [] },
                                             numParams: { update: [] },
                                             numMaxParams: { update: [] },
@@ -1159,6 +1170,7 @@ describe('operate then getRoom', () => {
                                                 replace: [],
                                                 update: [],
                                             },
+                                            tachieLocations: { replace: [], update: [] },
                                             boolParams: { update: [] },
                                             numParams: { update: [] },
                                             numMaxParams: { update: [] },

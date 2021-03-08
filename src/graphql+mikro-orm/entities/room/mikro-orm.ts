@@ -181,6 +181,9 @@ export const deleteRoom = async (em: EM, room: Room): Promise<void> => {
 
         await character.charaPieces.init();
         character.charaPieces.removeAll();
+
+        await character.tachieLocs.init();
+        character.tachieLocs.removeAll();
     }
     room.characters.removeAll();
 
@@ -240,6 +243,13 @@ export const deleteRoom = async (em: EM, room: Room): Promise<void> => {
             updateCharacterOp.updateCharaPieceOps.removeAll();
             await updateCharacterOp.removeCharaPieceOps.init();
             updateCharacterOp.removeCharaPieceOps.removeAll();
+
+            await updateCharacterOp.addTachieLocOps.init();
+            updateCharacterOp.addTachieLocOps.removeAll();
+            await updateCharacterOp.updateTachieLocOps.init();
+            updateCharacterOp.updateTachieLocOps.removeAll();
+            await updateCharacterOp.removeTachieLocOps.init();
+            updateCharacterOp.removeTachieLocOps.removeAll();
         }
         operation.updateCharacterOps.removeAll();
 
@@ -255,6 +265,9 @@ export const deleteRoom = async (em: EM, room: Room): Promise<void> => {
 
             await removeCharacterOp.removedCharaPieces.init();
             removeCharacterOp.removedCharaPieces.removeAll();
+
+            await removeCharacterOp.removedTachieLocs.init();
+            removeCharacterOp.removedTachieLocs.removeAll();
         }
         operation.removeCharacterOps.removeAll();
     }

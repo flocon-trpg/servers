@@ -7,6 +7,7 @@ import { NumMaxParam, NumParam, RemovedNumMaxParam, RemovedNumParam, UpdateNumMa
 import { AddCharaPieceOp, CharaPiece, RemovedCharaPiece, RemoveCharaPieceOp, UpdateCharaPieceOp } from './piece/mikro-orm';
 import { Room, RoomOp } from '../mikro-orm';
 import { RemovedStrParam, StrParam, UpdateStrParamOp } from './strParam/mikro-orm';
+import { AddTachieLocOp, RemovedTachieLoc, RemoveTachieLocOp, TachieLoc, UpdateTachieLocOp } from './tachie/mikro-orm';
 
 type CharaBaseParams = {
     createdBy: string;
@@ -55,6 +56,13 @@ export abstract class CharaBase {
 
     @Enum({ items: () => FileSourceType, nullable: true })
     public imageSourceType?: FileSourceType;
+
+    // CONSIDER: デフォルトではPostgreSQLの場合varchar(255)になるため、lengthを設定している。値は適当（MySQLの最大値）。
+    @Property({ nullable: true, length: 65535, default: null })
+    public tachieImagePath?: string;
+
+    @Enum({ items: () => FileSourceType, nullable: true, default: null })
+    public tachieImageSourceType?: FileSourceType;
 }
 
 @Entity()
@@ -83,6 +91,9 @@ export class Chara extends CharaBase {
 
     @OneToMany(() => CharaPiece, x => x.chara, { orphanRemoval: true })
     public charaPieces = new Collection<CharaPiece>(this);
+
+    @OneToMany(() => TachieLoc, x => x.chara, { orphanRemoval: true })
+    public tachieLocs = new Collection<TachieLoc>(this);
 
     @ManyToOne(() => Room, { wrappedReference: true })
     public room: IdentifiedReference<Room>;
@@ -146,6 +157,9 @@ export class RemoveCharaOp extends CharaBase {
     @OneToMany(() => RemovedCharaPiece, x => x.removeCharaOp, { orphanRemoval: true })
     public removedCharaPieces = new Collection<RemovedCharaPiece>(this);
 
+    @OneToMany(() => RemovedTachieLoc, x => x.removeCharaOp, { orphanRemoval: true })
+    public removedTachieLocs = new Collection<RemovedTachieLoc>(this);
+
     @ManyToOne(() => RoomOp, { wrappedReference: true })
     public roomOp: IdentifiedReference<RoomOp>;
 }
@@ -189,6 +203,8 @@ export class UpdateCharaOp {
     @Property({ type: JsonType, nullable: true })
     public image?: ReplaceNullableFilePathDownOperation;
 
+    @Property({ type: JsonType, nullable: true })
+    public tachieImage?: ReplaceNullableFilePathDownOperation;
 
     @OneToMany(() => UpdateBoolParamOp, x => x.updateCharaOp, { orphanRemoval: true })
     public updateBoolParamOps = new Collection<UpdateBoolParamOp>(this);
@@ -209,6 +225,12 @@ export class UpdateCharaOp {
     @OneToMany(() => UpdateCharaPieceOp, x => x.updateCharaOp, { orphanRemoval: true })
     public updateCharaPieceOps = new Collection<UpdateCharaPieceOp>(this);
 
+    @OneToMany(() => AddTachieLocOp, x => x.updateCharaOp, { orphanRemoval: true })
+    public addTachieLocOps = new Collection<AddTachieLocOp>(this);
+    @OneToMany(() => RemoveTachieLocOp, x => x.updateCharaOp, { orphanRemoval: true })
+    public removeTachieLocOps = new Collection<RemoveTachieLocOp>(this);
+    @OneToMany(() => UpdateTachieLocOp, x => x.updateCharaOp, { orphanRemoval: true })
+    public updateTachieLocOps = new Collection<UpdateTachieLocOp>(this);
 
     @ManyToOne(() => RoomOp, { wrappedReference: true })
     public roomOp: IdentifiedReference<RoomOp>;

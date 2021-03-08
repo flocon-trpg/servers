@@ -14,6 +14,7 @@ import { StrParamBase, StrParam, RemovedStrParam, UpdateStrParamOp } from './gra
 import { AddParticiOp, Partici, RemoveParticiOp, UpdateParticiOp } from './graphql+mikro-orm/entities/room/participant/mikro-orm';
 import { AddMyValueOp, MyValue, RemovedMyValue, RemoveMyValueOp, UpdateMyValueOp } from './graphql+mikro-orm/entities/room/participant/myValue/mikro-orm_value';
 import { AddMyValuePieceOp, MyValuePiece, RemovedMyValuePieceByMyValue, RemovedMyValuePieceByPartici, RemoveMyValuePieceOp, UpdateMyValuePieceOp } from './graphql+mikro-orm/entities/room/participant/myValue/mikro-orm_piece';
+import { AddTachieLocOp, RemovedTachieLoc, RemoveTachieLocOp, TachieLoc, TachieLocBase, UpdateTachieLocOp } from './graphql+mikro-orm/entities/room/character/tachie/mikro-orm';
 
 const entities = [
     BoardBase,
@@ -70,6 +71,13 @@ const entities = [
     AddCharaPieceOp,
     RemoveCharaPieceOp,
     UpdateCharaPieceOp,
+
+    TachieLocBase,
+    TachieLoc,
+    RemovedTachieLoc,
+    AddTachieLocOp,
+    RemoveTachieLocOp,
+    UpdateTachieLocOp,
 
     ParamNameBase,
     ParamName,

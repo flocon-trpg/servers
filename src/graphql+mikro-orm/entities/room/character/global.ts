@@ -19,12 +19,14 @@ import { AddCharaOp, Chara, CharaBase, RemoveCharaOp, UpdateCharaOp } from './mi
 import { GlobalNumParam } from './numParam/global';
 import { GlobalStrParam } from './strParam/global';
 import { RequestedBy, server } from '../../../Types';
+import { GlobalBoardLocation } from '../../boardLocation/global';
 
 export namespace GlobalCharacter {
     type StateTypeValue = {
         isPrivate: boolean;
         name: string;
         image?: FilePath;
+        tachieImage?: FilePath;
     }
 
     export type StateType = StateTypeValue & {
@@ -33,12 +35,14 @@ export namespace GlobalCharacter {
         numMaxParams: ReadonlyMap<StrIndex100, GlobalNumParam.StateType>;
         strParams: ReadonlyMap<StrIndex100, GlobalStrParam.StateType>;
         pieces: ReadonlyDualKeyMap<string, string, GlobalPiece.StateType>;
+        tachieLocations: ReadonlyDualKeyMap<string, string, GlobalBoardLocation.StateType>;
     }
 
     type DownOperationTypeValue = {
         isPrivate?: ReplaceBooleanDownOperation;
         name?: ReplaceStringDownOperation;
         image?: ReplaceNullableFilePathDownOperation;
+        tachieImage?: ReplaceNullableFilePathDownOperation;
     }
 
     export type DownOperationType = DownOperationTypeValue & {
@@ -47,12 +51,14 @@ export namespace GlobalCharacter {
         numMaxParams: ReadonlyMap<StrIndex100, GlobalNumParam.DownOperationType>;
         strParams: ReadonlyMap<StrIndex100, GlobalStrParam.DownOperationType>;
         pieces: ReadonlyDualKeyMapDownOperation<string, string, GlobalPiece.StateType, GlobalPiece.DownOperationType>;
+        tachieLocations: ReadonlyDualKeyMapDownOperation<string, string, GlobalBoardLocation.StateType, GlobalBoardLocation.DownOperationType>;
     }
 
     type UpOperationTypeValue = {
         isPrivate?: ReplaceBooleanUpOperation;
         name?: ReplaceStringUpOperation;
         image?: ReplaceNullableFilePathUpOperation;
+        tachieImage?: ReplaceNullableFilePathUpOperation;
     }
 
     export type UpOperationType = UpOperationTypeValue & {
@@ -61,12 +67,14 @@ export namespace GlobalCharacter {
         numMaxParams: ReadonlyMap<StrIndex100, GlobalNumParam.UpOperationType>;
         strParams: ReadonlyMap<StrIndex100, GlobalStrParam.UpOperationType>;
         pieces: ReadonlyDualKeyMapUpOperation<string, string, GlobalPiece.StateType, GlobalPiece.UpOperationType>;
+        tachieLocations: ReadonlyDualKeyMapUpOperation<string, string, GlobalBoardLocation.StateType, GlobalBoardLocation.UpOperationType>;
     }
 
     type TwoWayOperationTypeValue = {
         isPrivate?: ReplaceBooleanTwoWayOperation;
         name?: ReplaceStringTwoWayOperation;
         image?: ReplaceNullableFilePathTwoWayOperation;
+        tachieImage?: ReplaceNullableFilePathTwoWayOperation;
     }
 
     export type TwoWayOperationType = TwoWayOperationTypeValue & {
@@ -75,6 +83,7 @@ export namespace GlobalCharacter {
         numMaxParams: ReadonlyMap<StrIndex100, GlobalNumParam.TwoWayOperationType>;
         strParams: ReadonlyMap<StrIndex100, GlobalStrParam.TwoWayOperationType>;
         pieces: ReadonlyDualKeyMapTwoWayOperation<string, string, GlobalPiece.StateType, GlobalPiece.TwoWayOperationType>;
+        tachieLocations: ReadonlyDualKeyMapTwoWayOperation<string, string, GlobalBoardLocation.StateType, GlobalBoardLocation.TwoWayOperationType>;
     }
 
     export namespace MikroORM {
@@ -85,6 +94,7 @@ export namespace GlobalCharacter {
                 const numMaxParams = GlobalNumParam.MikroORM.ToGlobal.stateMany(await entity.numMaxParams.loadItems());
                 const strParams = GlobalStrParam.MikroORM.ToGlobal.stateMany(await entity.strParams.loadItems());
                 const pieces = GlobalPiece.MikroORM.ToGlobal.stateMany(await entity.charaPieces.loadItems(), x => ({ first: x.boardCreatedBy, second: x.boardId }));
+                const tachieLocations = GlobalBoardLocation.MikroORM.ToGlobal.stateMany(await entity.tachieLocs.loadItems(), x => ({ first: x.boardCreatedBy, second: x.boardId }));
 
                 return {
                     ...entity,
@@ -92,11 +102,16 @@ export namespace GlobalCharacter {
                         path: entity.imagePath,
                         sourceType: entity.imageSourceType,
                     },
+                    tachieImage: entity.tachieImagePath == null || entity.tachieImageSourceType == null ? undefined : {
+                        path: entity.tachieImagePath,
+                        sourceType: entity.tachieImageSourceType,
+                    },
                     boolParams,
                     numParams,
                     numMaxParams,
                     strParams,
                     pieces,
+                    tachieLocations,
                 };
             };
 
@@ -114,14 +129,24 @@ export namespace GlobalCharacter {
                 const numMaxParams = GlobalNumParam.MikroORM.ToGlobal.stateMany(await entity.removedNumParam.loadItems());
                 const strParams = GlobalStrParam.MikroORM.ToGlobal.stateMany(await entity.removedStrParam.loadItems());
                 const pieces = GlobalPiece.MikroORM.ToGlobal.stateMany(await entity.removedCharaPieces.loadItems(), x => ({ first: x.boardCreatedBy, second: x.boardId }));
+                const tachieLocations = GlobalBoardLocation.MikroORM.ToGlobal.stateMany(await entity.removedTachieLocs.loadItems(), x => ({ first: x.boardCreatedBy, second: x.boardId }));
 
                 return {
                     ...entity,
+                    image: entity.imagePath == null || entity.imageSourceType == null ? undefined : {
+                        path: entity.imagePath,
+                        sourceType: entity.imageSourceType,
+                    },
+                    tachieImage: entity.tachieImagePath == null || entity.tachieImageSourceType == null ? undefined : {
+                        path: entity.tachieImagePath,
+                        sourceType: entity.tachieImageSourceType,
+                    },
                     boolParams,
                     numParams,
                     numMaxParams,
                     strParams,
                     pieces,
+                    tachieLocations,
                 };
             };
 
@@ -176,6 +201,15 @@ export namespace GlobalCharacter {
                         if (pieces.isError) {
                             return pieces;
                         }
+                        const tachieLocations = await GlobalBoardLocation.MikroORM.ToGlobal.downOperationMany({
+                            add: entity.addTachieLocOps,
+                            remove: entity.removeTachieLocOps,
+                            update: entity.updateTachieLocOps,
+                            toDualKey: x => ({ first: x.boardCreatedBy, second: x.boardId }),
+                        });
+                        if (tachieLocations.isError) {
+                            return tachieLocations;
+                        }
 
                         return ResultModule.ok({
                             boolParams: boolParams.value,
@@ -183,9 +217,11 @@ export namespace GlobalCharacter {
                             numMaxParams: numMaxParams.value,
                             strParams: strParams.value,
                             pieces: pieces.value,
+                            tachieLocations: tachieLocations.value,
                             isPrivate: entity.isPrivate == null ? undefined : { oldValue: entity.isPrivate },
                             name: entity.name == null ? undefined : { oldValue: entity.name },
-                            image: entity.image == null ? undefined : entity.image,
+                            image: entity.image,
+                            tachieImage: entity.tachieImage
                         });
                     },
                 });
@@ -206,6 +242,7 @@ export namespace GlobalCharacter {
                     numMaxParams: GlobalNumParam.Global.ToGraphQL.stateMany({ source: source.numMaxParams, createdByMe }),
                     strParams: GlobalStrParam.Global.ToGraphQL.stateMany({ source: source.strParams, createdByMe }),
                     pieces: GlobalPiece.Global.ToGraphQL.stateMany({ source: source.pieces, createdByMe }),
+                    tachieLocations: GlobalBoardLocation.Global.ToGraphQL.stateMany({ source: source.pieces, createdByMe }),
                 };
             };
 
@@ -253,34 +290,40 @@ export namespace GlobalCharacter {
                     }),
                     toUpdateOperation: ({ operation, prevState, nextState, key }) => {
                         const createdByMe = RequestedBy.createdByMe({ requestedBy, userUid: key.first });
-                        const boolParams = GlobalBoolParam.Global.ToGraphQL.operation({ 
+                        const boolParams = GlobalBoolParam.Global.ToGraphQL.operation({
                             operation: operation.boolParams,
-                            prevState: prevState.boolParams, 
+                            prevState: prevState.boolParams,
                             nextState: nextState.boolParams,
                             createdByMe
                         });
                         const numParams = GlobalNumParam.Global.ToGraphQL.operation({
-                            operation: operation.numParams, 
-                            prevState: prevState.numParams, 
+                            operation: operation.numParams,
+                            prevState: prevState.numParams,
                             nextState: nextState.numParams,
                             createdByMe
                         });
                         const numMaxParams = GlobalNumParam.Global.ToGraphQL.operation({
-                            operation: operation.numMaxParams, 
-                            prevState: prevState.numMaxParams, 
+                            operation: operation.numMaxParams,
+                            prevState: prevState.numMaxParams,
                             nextState: nextState.numMaxParams,
-                            createdByMe 
+                            createdByMe
                         });
                         const strParams = GlobalStrParam.Global.ToGraphQL.operation({
                             operation: operation.strParams,
-                            prevState: prevState.strParams, 
+                            prevState: prevState.strParams,
                             nextState: nextState.strParams,
-                            createdByMe 
+                            createdByMe
                         });
-                        const pieces = GlobalPiece.Global.ToGraphQL.operation({ 
+                        const pieces = GlobalPiece.Global.ToGraphQL.operation({
                             operation: operation.pieces,
-                            prevState: prevState.pieces, 
-                            nextState: nextState.pieces, 
+                            prevState: prevState.pieces,
+                            nextState: nextState.pieces,
+                            createdByMe
+                        });
+                        const tachieLocations = GlobalBoardLocation.Global.ToGraphQL.operation({
+                            operation: operation.tachieLocations,
+                            prevState: prevState.tachieLocations,
+                            nextState: nextState.tachieLocations,
                             createdByMe
                         });
                         return {
@@ -293,6 +336,7 @@ export namespace GlobalCharacter {
                                 numMaxParams,
                                 strParams,
                                 pieces,
+                                tachieLocations,
                             },
                         };
                     },
@@ -330,6 +374,8 @@ export namespace GlobalCharacter {
                             });
                             op.imagePath = value.operation.oldValue.image?.path;
                             op.imageSourceType = value.operation.oldValue.image?.sourceType;
+                            op.tachieImagePath = value.operation.oldValue.tachieImage?.path;
+                            op.tachieImageSourceType = value.operation.oldValue.tachieImage?.sourceType;
                             em.persist(op);
                             continue;
                         }
@@ -342,6 +388,8 @@ export namespace GlobalCharacter {
                         });
                         toAdd.imagePath = value.operation.newValue.image?.path;
                         toAdd.imageSourceType = value.operation.newValue.image?.sourceType;
+                        toAdd.tachieImagePath = value.operation.newValue.tachieImage?.path;
+                        toAdd.tachieImageSourceType = value.operation.newValue.tachieImage?.sourceType;
                         em.persist(toAdd);
 
                         const op = new AddCharaOp({ createdBy: key.first, stateId: key.second, roomOp: parentOp });
@@ -357,11 +405,17 @@ export namespace GlobalCharacter {
                         await GlobalNumParam.Global.applyToEntity({ em, parent: target, parentOp: op, operation: value.operation.numMaxParams, type: 'max' });
                         await GlobalStrParam.Global.applyToEntity({ em, parent: target, parentOp: op, operation: value.operation.strParams });
                         await GlobalPiece.Global.applyToCharaPiecesEntity({ em, parent: target, parentOp: op, operation: value.operation.pieces });
+                        await GlobalBoardLocation.Global.applyToTachieLocsEntity({ em, parent: target, parentOp: op, operation: value.operation.tachieLocations });
 
                         if (value.operation.image != null) {
                             target.imagePath = value.operation.image.newValue?.path;
                             target.imageSourceType = value.operation.image.newValue?.sourceType;
                             op.image = value.operation.image;
+                        }
+                        if (value.operation.tachieImage != null) {
+                            target.tachieImagePath = value.operation.tachieImage.newValue?.path;
+                            target.tachieImageSourceType = value.operation.tachieImage.newValue?.sourceType;
+                            op.tachieImage = value.operation.tachieImage;
                         }
                         if (value.operation.isPrivate != null) {
                             target.isPrivate = value.operation.isPrivate.newValue;
@@ -389,6 +443,7 @@ export namespace GlobalCharacter {
                 const numMaxParams = GlobalNumParam.GraphQL.ToGlobal.stateMany(object.numMaxParams);
                 const strParams = GlobalStrParam.GraphQL.ToGlobal.stateMany(object.strParams);
                 const pieces = GlobalPiece.GraphQL.ToGlobal.stateMany(object.pieces);
+                const tachieLocations = GlobalBoardLocation.GraphQL.ToGlobal.stateMany(object.tachieLocations);
 
                 return {
                     ...object,
@@ -397,6 +452,7 @@ export namespace GlobalCharacter {
                     numMaxParams,
                     strParams,
                     pieces,
+                    tachieLocations,
                 };
             };
 
@@ -429,6 +485,10 @@ export namespace GlobalCharacter {
                         if (pieces.isError) {
                             return pieces;
                         }
+                        const tachieLocations = GlobalBoardLocation.GraphQL.ToGlobal.upOperationMany(x.operation.tachieLocations);
+                        if (tachieLocations.isError) {
+                            return tachieLocations;
+                        }
                         return ResultModule.ok({
                             ...x.operation,
                             boolParams: boolParams.value,
@@ -436,6 +496,7 @@ export namespace GlobalCharacter {
                             numMaxParams: numMaxParams.value,
                             strParams: strParams.value,
                             pieces: pieces.value,
+                            tachieLocations: tachieLocations.value,
                         });
                     },
                 });
@@ -451,6 +512,8 @@ export namespace GlobalCharacter {
     const createStrParamsTransformer = (createdByMe: boolean) => new ParamMapTransformer(createStrParamTransformer(createdByMe));
     const createPieceTransformer = (createdByMe: boolean) => GlobalPiece.transformerFactory<DualKey<string, string>>(createdByMe);
     const createPiecesTransformer = (createdByMe: boolean) => new DualKeyMapTransformer(createPieceTransformer(createdByMe));
+    const createTachieLocationTransformer = (createdByMe: boolean) => GlobalBoardLocation.transformerFactory<DualKey<string, string>>(createdByMe);
+    const createTachieLocationsTransformer = (createdByMe: boolean) => new DualKeyMapTransformer(createTachieLocationTransformer(createdByMe));
 
     export const transformerFactory = (operatedBy: RequestedBy): TransformerFactory<DualKey<string, string>, StateType, StateType, DownOperationType, UpOperationType, TwoWayOperationType> => ({
         composeLoose: ({ key, first, second }) => {
@@ -498,6 +561,15 @@ export namespace GlobalCharacter {
                 return pieces;
             }
 
+            const tachieLocationsTransformer = createTachieLocationsTransformer(RequestedBy.createdByMe({ requestedBy: operatedBy, userUid: key.first }));
+            const tachieLocations = tachieLocationsTransformer.composeLoose({
+                first: first.tachieLocations,
+                second: second.tachieLocations,
+            });
+            if (tachieLocations.isError) {
+                return tachieLocations;
+            }
+
             const valueProps: DownOperationType = {
                 isPrivate: ReplaceBooleanDownOperationModule.compose(first.isPrivate, second.isPrivate),
                 name: ReplaceStringDownOperationModule.compose(first.name, second.name),
@@ -507,6 +579,7 @@ export namespace GlobalCharacter {
                 numMaxParams: numMaxParams.value ?? new Map(),
                 strParams: strParams.value ?? new Map(),
                 pieces: pieces.value ?? new DualKeyMap(),
+                tachieLocations: tachieLocations.value ?? new DualKeyMap(),
             };
             return ResultModule.ok(valueProps);
         },
@@ -559,6 +632,15 @@ export namespace GlobalCharacter {
                 return pieces;
             }
 
+            const tachieLocationsTransformer = createTachieLocationsTransformer(RequestedBy.createdByMe({ requestedBy: operatedBy, userUid: key.first }));
+            const tachieLocations = tachieLocationsTransformer.restore({
+                nextState: nextState.tachieLocations,
+                downOperation: downOperation.tachieLocations,
+            });
+            if (tachieLocations.isError) {
+                return tachieLocations;
+            }
+
             const prevState: StateType = {
                 ...nextState,
                 boolParams: boolParams.value.prevState,
@@ -566,13 +648,15 @@ export namespace GlobalCharacter {
                 numMaxParams: numMaxParams.value.prevState,
                 strParams: strParams.value.prevState,
                 pieces: pieces.value.prevState,
+                tachieLocations: tachieLocations.value.prevState,
             };
             const twoWayOperation: TwoWayOperationType = {
                 boolParams: boolParams.value.twoWayOperation,
                 numParams: numParams.value.twoWayOperation,
                 numMaxParams: numMaxParams.value.twoWayOperation,
                 strParams: strParams.value.twoWayOperation,
-                pieces: pieces.value.twoWayOperation
+                pieces: pieces.value.twoWayOperation,
+                tachieLocations: tachieLocations.value.twoWayOperation,
             };
 
             if (downOperation.image !== undefined) {
@@ -649,6 +733,17 @@ export namespace GlobalCharacter {
                 return pieces;
             }
 
+            const tachieLocationsTransformer = createTachieLocationsTransformer(RequestedBy.createdByMe({ requestedBy: operatedBy, userUid: key.first }));
+            const tachieLocations = tachieLocationsTransformer.transform({
+                prevState: prevState.tachieLocations,
+                currentState: currentState.tachieLocations,
+                clientOperation: clientOperation.tachieLocations,
+                serverOperation: serverOperation?.tachieLocations ?? new DualKeyMap(),
+            });
+            if (tachieLocations.isError) {
+                return tachieLocations;
+            }
+
             const twoWayOperation: TwoWayOperationTypeValue = {};
 
             twoWayOperation.image = ReplaceNullableFilePathTwoWayOperationModule.transform({
@@ -667,7 +762,7 @@ export namespace GlobalCharacter {
                 prevState: prevState.name,
             });
 
-            if (undefinedForAll(twoWayOperation) && boolParams.value.size === 0 && numParams.value.size === 0 && numMaxParams.value.size === 0 && strParams.value.size === 0 && pieces.value.isEmpty) {
+            if (undefinedForAll(twoWayOperation) && boolParams.value.size === 0 && numParams.value.size === 0 && numMaxParams.value.size === 0 && strParams.value.size === 0 && pieces.value.isEmpty && tachieLocations.value.isEmpty) {
                 return ResultModule.ok(undefined);
             }
 
@@ -677,7 +772,8 @@ export namespace GlobalCharacter {
                 numParams: numParams.value,
                 numMaxParams: numMaxParams.value,
                 strParams: strParams.value,
-                pieces: pieces.value
+                pieces: pieces.value,
+                tachieLocations: tachieLocations.value,
             });
         },
         diff: ({ key, prevState, nextState }): TwoWayOperationType | undefined => {
@@ -705,6 +801,11 @@ export namespace GlobalCharacter {
                 prevState: prevState.pieces,
                 nextState: nextState.pieces,
             });
+            const tachieLocationsTransformer = createTachieLocationsTransformer(RequestedBy.createdByMe({ requestedBy: operatedBy, userUid: key.first }));
+            const tachieLocations = tachieLocationsTransformer.diff({
+                prevState: prevState.tachieLocations,
+                nextState: nextState.tachieLocations,
+            });
             const resultType: TwoWayOperationTypeValue = {};
             if (prevState.image !== nextState.image) {
                 resultType.image = { oldValue: prevState.image, newValue: nextState.image };
@@ -715,10 +816,10 @@ export namespace GlobalCharacter {
             if (prevState.name !== nextState.name) {
                 resultType.name = { oldValue: prevState.name, newValue: nextState.name };
             }
-            if (undefinedForAll(resultType) && boolParams.size === 0 && numParams.size === 0 && numMaxParams.size === 0 && strParams.size === 0 && pieces.isEmpty) {
+            if (undefinedForAll(resultType) && boolParams.size === 0 && numParams.size === 0 && numMaxParams.size === 0 && strParams.size === 0 && pieces.isEmpty && tachieLocations.isEmpty) {
                 return undefined;
             }
-            return { ...resultType, boolParams, numParams, numMaxParams, strParams, pieces };
+            return { ...resultType, boolParams, numParams, numMaxParams, strParams, pieces, tachieLocations };
         },
         applyBack: ({ key, downOperation, nextState }) => {
             const boolParamsTransformer = createBoolParamsTransformer(RequestedBy.createdByMe({ requestedBy: operatedBy, userUid: key.first }));
@@ -765,13 +866,23 @@ export namespace GlobalCharacter {
                 return pieces;
             }
 
+            const tachieLocationsTransformer = createTachieLocationsTransformer(RequestedBy.createdByMe({ requestedBy: operatedBy, userUid: key.first }));
+            const tachieLocations = tachieLocationsTransformer.applyBack({
+                downOperation: downOperation.tachieLocations,
+                nextState: nextState.tachieLocations,
+            });
+            if (tachieLocations.isError) {
+                return tachieLocations;
+            }
+
             const result: StateType = {
                 ...nextState,
                 boolParams: boolParams.value,
                 numParams: numParams.value,
                 numMaxParams: numMaxParams.value,
                 strParams: strParams.value,
-                pieces: pieces.value
+                pieces: pieces.value,
+                tachieLocations: tachieLocations.value,
             };
 
             if (downOperation.image !== undefined) {
