@@ -184,7 +184,7 @@ export namespace GlobalBgm {
 
     export namespace GraphQL {
         export namespace ToGlobal {
-            export const state = (entity: RoomBgmValueState): StateType => entity;
+            export const state = (entity: RoomBgmValueState): StateType => ({ ...entity });
 
             export const upOperationMany = (source: RoomBgmsOperation): Result<ReadonlyMapUpOperation<StrIndex5, StateType, UpOperationType>> => {
                 return createUpOperationFromGraphQL({

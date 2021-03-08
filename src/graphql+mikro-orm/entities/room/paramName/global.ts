@@ -184,7 +184,7 @@ export namespace GlobalParamName {
 
     export namespace GraphQL {
         export namespace ToGlobal {
-            export const state = (entity: ParamNameValueState): StateType => entity;
+            export const state = (entity: ParamNameValueState): StateType => ({ ...entity });
 
             export const upOperationMany = (source: ParamNamesOperation): Result<ReadonlyDualKeyMapUpOperation<RoomParameterNameType, StrIndex100, StateType, UpOperationType>> => {
                 return createUpOperationFromGraphQL({
