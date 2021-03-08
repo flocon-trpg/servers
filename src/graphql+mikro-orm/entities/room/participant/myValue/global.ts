@@ -172,7 +172,7 @@ export namespace GlobalMyValue {
             export const state = ({ source, createdByMe }: { source: StateType; createdByMe: boolean }): MyNumberValueStateValue => {
                 return {
                     ...source,
-                    value: createdByMe || !source.isValuePrivate ? source.value : undefined,
+                    value: createdByMe || !source.isValuePrivate ? source.value : 0,
                     valueRangeMax: source.valueRangeMax ?? undefined,
                     valueRangeMin: source.valueRangeMin ?? undefined,
                     pieces: GlobalPiece.Global.ToGraphQL.stateMany({ source: source.pieces, createdByMe }),

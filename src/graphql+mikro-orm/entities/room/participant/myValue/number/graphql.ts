@@ -14,9 +14,8 @@ export class MyNumberValueStateValue {
     @Field({ nullable: true })
     public valueRangeMax?: number;
 
-    // 自分が作成したケースだけを考えた場合はnullableである必要はないが、isValuePrivateの存在を考えてnullableにしている。自分の作成したものと自分以外が作成したものでGraphQL objectの定義をわけることも考えられるが、コードが肥大化を避けるため却下。
-    @Field({ nullable: true })
-    public value?: number;
+    @Field()
+    public value!: number;
 
     @Field(() => [PieceState])
     public pieces!: PieceState[];
