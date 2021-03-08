@@ -31,7 +31,7 @@ export namespace GlobalParamName {
 
     export namespace MikroORM {
         export namespace ToGlobal {
-            export const state = (entity: ParamNameBase): StateType => entity;
+            export const state = (entity: ParamNameBase): StateType => ({ ...entity });
 
             export const stateMany = (entity: ReadonlyArray<ParamNameBase>): ReadonlyDualKeyMap<RoomParameterNameType, StrIndex100, StateType> => {
                 const result = new DualKeyMap<RoomParameterNameType, StrIndex100, StateType>();

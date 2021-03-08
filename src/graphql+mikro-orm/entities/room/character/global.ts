@@ -253,11 +253,36 @@ export namespace GlobalCharacter {
                     }),
                     toUpdateOperation: ({ operation, prevState, nextState, key }) => {
                         const createdByMe = RequestedBy.createdByMe({ requestedBy, userUid: key.first });
-                        const boolParams = GlobalBoolParam.Global.ToGraphQL.operation({ operation: operation.boolParams, nextState: nextState.boolParams, createdByMe });
-                        const numParams = GlobalNumParam.Global.ToGraphQL.operation({ operation: operation.numParams, nextState: nextState.numParams, createdByMe });
-                        const numMaxParams = GlobalNumParam.Global.ToGraphQL.operation({ operation: operation.numMaxParams, nextState: nextState.numMaxParams, createdByMe });
-                        const strParams = GlobalStrParam.Global.ToGraphQL.operation({ operation: operation.strParams, nextState: nextState.strParams, createdByMe });
-                        const pieces = GlobalPiece.Global.ToGraphQL.operation({ operation: operation.pieces, prevState: prevState.pieces, nextState: nextState.pieces, createdByMe });
+                        const boolParams = GlobalBoolParam.Global.ToGraphQL.operation({ 
+                            operation: operation.boolParams,
+                            prevState: prevState.boolParams, 
+                            nextState: nextState.boolParams,
+                            createdByMe
+                        });
+                        const numParams = GlobalNumParam.Global.ToGraphQL.operation({
+                            operation: operation.numParams, 
+                            prevState: prevState.numParams, 
+                            nextState: nextState.numParams,
+                            createdByMe
+                        });
+                        const numMaxParams = GlobalNumParam.Global.ToGraphQL.operation({
+                            operation: operation.numMaxParams, 
+                            prevState: prevState.numMaxParams, 
+                            nextState: nextState.numMaxParams,
+                            createdByMe 
+                        });
+                        const strParams = GlobalStrParam.Global.ToGraphQL.operation({
+                            operation: operation.strParams,
+                            prevState: prevState.strParams, 
+                            nextState: nextState.strParams,
+                            createdByMe 
+                        });
+                        const pieces = GlobalPiece.Global.ToGraphQL.operation({ 
+                            operation: operation.pieces,
+                            prevState: prevState.pieces, 
+                            nextState: nextState.pieces, 
+                            createdByMe
+                        });
                         return {
                             createdBy: key.first,
                             id: key.second,

@@ -35,7 +35,7 @@ export namespace GlobalStrParam {
 
     export namespace MikroORM {
         export namespace ToGlobal {
-            export const state = (entity: StrParamBase): StateType => entity;
+            export const state = (entity: StrParamBase): StateType => ({ ...entity });
 
             export const stateMany = (entity: ReadonlyArray<StrParamBase>): ReadonlyMap<StrIndex100, StateType> => {
                 const result = new Map<StrIndex100, StateType>();
@@ -95,21 +95,37 @@ export namespace GlobalStrParam {
 
             export const operation = ({
                 operation,
+                prevState,
                 nextState,
                 createdByMe
             }: {
                 operation: ReadonlyMap<StrIndex100, TwoWayOperationType>;
+                prevState: ReadonlyMap<StrIndex100, StateType>;
                 nextState: ReadonlyMap<StrIndex100, StateType>;
                 createdByMe: boolean;
             }): StrParamsOperation => {
                 const result: StrParamsOperation = { update: [] };
                 for (const [key, value] of operation) {
-                    const isValuePrivate = nextState.get(key)?.isValuePrivate ?? createDefaultState().isValuePrivate;
+                    const isPrevValuePrivate = !createdByMe && (prevState.get(key)?.isValuePrivate ?? createDefaultState().isValuePrivate);
+                    const isNextValuePrivate = !createdByMe && (nextState.get(key)?.isValuePrivate ?? createDefaultState().isValuePrivate);
                     result.update.push({
                         key,
                         operation: {
                             isValuePrivate: value.isValuePrivate,
-                            value: isValuePrivate && !createdByMe ? undefined : (value.value == null ? undefined : TextTwoWayOperationModule.toUpUnit(value.value)),
+                            value: (() => {
+                                if (isPrevValuePrivate) {
+                                    if (isNextValuePrivate) {
+                                        return undefined;
+                                    }
+                                    const operation = TextTwoWayOperationModule.diff('', nextState.get(key)?.value ?? createDefaultState().value);
+                                    return TextTwoWayOperationModule.toUpUnit(operation);
+                                }
+                                if (isNextValuePrivate) {
+                                    const operation = TextTwoWayOperationModule.diff(prevState.get(key)?.value ?? createDefaultState().value, '');
+                                    return TextTwoWayOperationModule.toUpUnit(operation);
+                                }
+                                return value.value == null ? undefined : TextTwoWayOperationModule.toUpUnit(value.value);
+                            })(),
                         },
                     });
                 }

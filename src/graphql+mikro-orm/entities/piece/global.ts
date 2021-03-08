@@ -83,7 +83,7 @@ export namespace GlobalPiece {
 
     export namespace MikroORM {
         export namespace ToGlobal {
-            export const state = (entity: StateType): StateType => entity;
+            export const state = (entity: StateType): StateType => ({ ...entity });
 
             export const stateMany = <T extends StateType>(entity: ReadonlyArray<T>, toDualKey: (source: T) => DualKey<string, string>): ReadonlyDualKeyMap<string, string, StateType> => {
                 const result = new DualKeyMap<string, string, StateType>();

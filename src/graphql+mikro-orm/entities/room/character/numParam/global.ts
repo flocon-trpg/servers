@@ -35,7 +35,7 @@ export namespace GlobalNumParam {
 
     export namespace MikroORM {
         export namespace ToGlobal {
-            export const state = (entity: NumParamBase): StateType => entity;
+            export const state = (entity: NumParamBase): StateType => ({ ...entity });
 
             export const stateMany = (entity: ReadonlyArray<NumParamBase>): ReadonlyMap<StrIndex100, StateType> => {
                 const result = new Map<StrIndex100, StateType>();
@@ -95,21 +95,35 @@ export namespace GlobalNumParam {
 
             export const operation = ({
                 operation,
+                prevState,
                 nextState,
                 createdByMe
             }: {
                 operation: ReadonlyMap<StrIndex100, TwoWayOperationType>;
+                prevState: ReadonlyMap<StrIndex100, StateType>;
                 nextState: ReadonlyMap<StrIndex100, StateType>;
                 createdByMe: boolean;
             }): NumParamsOperation => {
                 const result: NumParamsOperation = { update: [] };
                 for (const [key, value] of operation) {
-                    const isValuePrivate = nextState.get(key)?.isValuePrivate ?? createDefaultState().isValuePrivate;
+                    const isPrevValuePrivate = !createdByMe && (prevState.get(key)?.isValuePrivate ?? createDefaultState().isValuePrivate);
+                    const isNextValuePrivate = !createdByMe && (nextState.get(key)?.isValuePrivate ?? createDefaultState().isValuePrivate);
                     result.update.push({
                         key,
                         operation: {
                             isValuePrivate: value.isValuePrivate,
-                            value: isValuePrivate && !createdByMe ? undefined : value.value,
+                            value: (() => {
+                                if (isPrevValuePrivate) {
+                                    if (isNextValuePrivate) {
+                                        return undefined;
+                                    }
+                                    return { oldValue: undefined, newValue: nextState.get(key)?.value ?? createDefaultState().value };
+                                }
+                                if (isNextValuePrivate) {
+                                    return { oldValue: prevState.get(key)?.value ?? createDefaultState().value, newValue: undefined };
+                                }
+                                return value.value;
+                            })(),
                         },
                     });
                 }

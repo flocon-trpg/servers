@@ -35,7 +35,7 @@ export namespace GlobalBgm {
 
     export namespace MikroORM {
         export namespace ToGlobal {
-            export const state = (entity: RoomBgmBase): StateType => entity;
+            export const state = (entity: RoomBgmBase): StateType => ({ ...entity });
 
             export const stateMany = (entity: ReadonlyArray<RoomBgmBase>): ReadonlyMap<StrIndex5, StateType> => {
                 const result = new Map<StrIndex5, StateType>();
