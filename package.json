@@ -1,9 +1,9 @@
 {
     "dependencies": {
-        "@graphql-codegen/cli": "^1.20.1",
-        "@graphql-codegen/typescript": "^1.21.0",
-        "@graphql-codegen/typescript-operations": "^1.17.14",
-        "@graphql-codegen/typescript-react-apollo": "^2.2.1",
+        "@graphql-codegen/cli": "^1.21.2",
+        "@graphql-codegen/typescript": "^1.21.1",
+        "@graphql-codegen/typescript-operations": "^1.17.15",
+        "@graphql-codegen/typescript-react-apollo": "^2.2.2",
         "@mikro-orm/core": "^4.4.3",
         "@mikro-orm/migrations": "^4.4.3",
         "@mikro-orm/postgresql": "^4.4.3",
