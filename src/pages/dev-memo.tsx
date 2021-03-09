@@ -20,6 +20,7 @@ const Index: React.FC = () => {
                 <Typography.Title level={2}>アップデート履歴</Typography.Title>
                 <Typography.Title level={3}>2021/03/10</Typography.Title>
                 <ul>
+                    <li>BoardとCharacterが削除可能になった</li>
                     <li>ボードが画面中央にズームするようになった</li>
                     <li>Participantがすべて退室済みになるバグを修正</li>
                 </ul>
