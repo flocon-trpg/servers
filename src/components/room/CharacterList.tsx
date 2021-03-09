@@ -30,6 +30,7 @@ const characterOperationBase: Character.PostOperation = {
     numMaxParams: new Map(),
     strParams: new Map(),
     pieces: createStateMap(),
+    tachieLocations: createStateMap(),
 };
 
 type Props = {

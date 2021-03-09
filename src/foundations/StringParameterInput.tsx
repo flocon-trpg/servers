@@ -25,6 +25,7 @@ type Props = {
 
 const createCharacterOperationBase = (): Character.WritablePostOperation => ({
     pieces: createStateMap(),
+    tachieLocations: createStateMap(),
     boolParams: new Map(),
     numParams: new Map(),
     numMaxParams: new Map(),

@@ -13,25 +13,29 @@ import { BoolParam } from './boolParam';
 import { NumParam } from './numParam';
 import { Piece } from './piece';
 import { StrParam } from './strParam';
+import { BoardLocation } from './boardLocation';
 
 export namespace Character {
-    export type State = Omit<CharacterValueStateFragment, '__typename' | 'pieces' | 'boolParams' | 'numParams' | 'numMaxParams' | 'strParams'> & {
+    export type State = Omit<CharacterValueStateFragment, '__typename' | 'pieces' | 'tachieLocations' | 'boolParams' | 'numParams' | 'numMaxParams' | 'strParams'> & {
         pieces: ReadonlyStateMap<Piece.State>;
+        tachieLocations: ReadonlyStateMap<BoardLocation.State>;
         boolParams: ReadonlyMap<StrIndex100, BoolParam.State>;
         numParams: ReadonlyMap<StrIndex100, NumParam.State>;
         numMaxParams: ReadonlyMap<StrIndex100, NumParam.State>;
         strParams: ReadonlyMap<StrIndex100, StrParam.State>;
     };
     // ***Paramsは削除不可能な要素なので、***Paramsの要素をremoveしてはならない。diffなどでremoveが出てくるケースは問題ない。
-    export type PostOperation = Omit<CharacterOperationInput, 'pieces' | 'boolParams' | 'numParams' | 'numMaxParams' | 'strParams'> & {
+    export type PostOperation = Omit<CharacterOperationInput, 'pieces' | 'tachieLocations' | 'boolParams' | 'numParams' | 'numMaxParams' | 'strParams'> & {
         pieces: ReadonlyStateMap<OperationElement<Piece.State, Piece.PostOperation>>;
+        tachieLocations: ReadonlyStateMap<OperationElement<BoardLocation.State, BoardLocation.PostOperation>>;
         boolParams: ReadonlyMap<StrIndex100, BoolParam.PostOperation>;
         numParams: ReadonlyMap<StrIndex100, NumParam.PostOperation>;
         numMaxParams: ReadonlyMap<StrIndex100, NumParam.PostOperation>;
         strParams: ReadonlyMap<StrIndex100, StrParam.PostOperation>;
     };
-    export type WritablePostOperation = Omit<CharacterOperationInput, 'pieces' | 'boolParams' | 'numParams' | 'numMaxParams' | 'strParams'> & {
+    export type WritablePostOperation = Omit<CharacterOperationInput, 'pieces' | 'tachieLocations' | 'boolParams' | 'numParams' | 'numMaxParams' | 'strParams'> & {
         pieces: StateMap<OperationElement<Piece.State, Piece.PostOperation>>;
+        tachieLocations: StateMap<OperationElement<BoardLocation.State, BoardLocation.PostOperation>>;
         boolParams: Map<StrIndex100, BoolParam.PostOperation>;
         numParams: Map<StrIndex100, NumParam.PostOperation>;
         numMaxParams: Map<StrIndex100, NumParam.PostOperation>;
@@ -45,6 +49,10 @@ export namespace Character {
         const pieces = createStateMap<Piece.State>();
         source.pieces.forEach(piece => {
             pieces.set({ id: piece.boardId, createdBy: piece.boardCreatedBy }, piece.value);
+        });
+        const tachieLocations = createStateMap<BoardLocation.State>();
+        source.tachieLocations.forEach(location => {
+            tachieLocations.set({ id: location.boardId, createdBy: location.boardCreatedBy }, location.value);
         });
         const boolParams = new Map<StrIndex100, BoolParam.State>();
         source.boolParams.forEach(boolParam => {
@@ -81,7 +89,8 @@ export namespace Character {
 
         return {
             ...source,
-            pieces: pieces,
+            pieces,
+            tachieLocations,
             boolParams,
             numParams,
             numMaxParams,
@@ -98,6 +107,14 @@ export namespace Character {
         });
         source.pieces.update.forEach(piece => {
             pieces.set({ createdBy: piece.boardCreatedBy, id: piece.boardId }, { type: update, operation: piece.operation });
+        });
+
+        const tachieLocations = createStateMap<OperationElement<BoardLocation.State, BoardLocation.GetOperation>>();
+        source.tachieLocations.replace.forEach(location => {
+            tachieLocations.set({ createdBy: location.boardCreatedBy, id: location.boardId }, { type: replace, newValue: location.newValue ?? undefined });
+        });
+        source.tachieLocations.update.forEach(location => {
+            tachieLocations.set({ createdBy: location.boardCreatedBy, id: location.boardId }, { type: update, operation: location.operation });
         });
 
         const boolParams = new Map<StrIndex100, BoolParam.GetOperation>();
@@ -139,6 +156,7 @@ export namespace Character {
         const result: GetOperation = {
             ...source,
             pieces,
+            tachieLocations,
             boolParams,
             numParams,
             numMaxParams,
@@ -165,9 +183,15 @@ export namespace Character {
                         ...key,
                         newValue: {
                             image: operation.newValue.image,
+                            tachieImage: operation.newValue.tachieImage,
                             isPrivate: operation.newValue.isPrivate,
                             name: operation.newValue.name,
                             pieces: __(operation.newValue.pieces).map(([key, value]) => ({
+                                boardId: key.id,
+                                boardCreatedBy: key.createdBy,
+                                value,
+                            })).toArray(),
+                            tachieLocations: __(operation.newValue.tachieLocations).map(([key, value]) => ({
                                 boardId: key.id,
                                 boardCreatedBy: key.createdBy,
                                 value,
@@ -198,6 +222,7 @@ export namespace Character {
                         operation: {
                             ...operation.operation,
                             pieces: Piece.toGraphQLInput(operation.operation.pieces),
+                            tachieLocations: BoardLocation.toGraphQLInput(operation.operation.tachieLocations),
                             boolParams: BoolParam.toGraphQLInput(operation.operation.boolParams),
                             numParams: NumParam.toGraphQLInput(operation.operation.numParams),
                             numMaxParams: NumParam.toGraphQLInput(operation.operation.numMaxParams),
@@ -221,7 +246,11 @@ export namespace Character {
             operation: operation.pieces.dualKeyMap,
             inner: Piece.applyOperation,
         });
-
+        const tachieLocations = $DualKeyMap.apply({
+            state: state.tachieLocations.dualKeyMap,
+            operation: operation.tachieLocations.dualKeyMap,
+            inner: BoardLocation.applyOperation,
+        });
         const boolParams = $UpdateMap.apply({
             state: state.boolParams,
             operation: operation.boolParams,
@@ -269,6 +298,7 @@ export namespace Character {
 
         return produce(state, state => {
             state.pieces = state.pieces.wrap(pieces);
+            state.tachieLocations = state.tachieLocations.wrap(tachieLocations);
             state.boolParams = boolParams;
             state.numParams = numParams;
             state.numMaxParams = numMaxParams;
@@ -276,6 +306,9 @@ export namespace Character {
 
             if (operation.image != null) {
                 state.image = operation.image.newValue;
+            }
+            if (operation.tachieImage != null) {
+                state.tachieImage = operation.tachieImage.newValue;
             }
             if (operation.isPrivate != null) {
                 state.isPrivate = operation.isPrivate.newValue;
@@ -309,6 +342,16 @@ export namespace Character {
         });
         result.pieces = first.pieces.wrap(pieces);
 
+        const tachieLocations = $DualKeyMap.compose({
+            state: state.tachieLocations.dualKeyMap,
+            first: first.tachieLocations.dualKeyMap,
+            second: second.tachieLocations.dualKeyMap,
+            innerApply: BoardLocation.applyOperation,
+            innerCompose: BoardLocation.compose,
+            innerDiff: BoardLocation.diff,
+        });
+        result.tachieLocations = first.tachieLocations.wrap(tachieLocations);
+
         result.boolParams = $UpdateMap.compose({
             first: first.boolParams,
             second: second.boolParams,
@@ -334,6 +377,7 @@ export namespace Character {
         });
 
         result.image = ReplaceNullableValueOperationModule.compose(first.image, second.image);
+        result.tachieImage = ReplaceNullableValueOperationModule.compose(first.tachieImage, second.tachieImage);
         result.isPrivate = ReplaceValueOperationModule.compose(first.isPrivate, second.isPrivate);
         result.name = ReplaceValueOperationModule.compose(first.name, second.name);
 
@@ -353,17 +397,28 @@ export namespace Character {
             inner: Piece.transform,
             diff: Piece.diff
         });
+        const tachieLocations = $DualKeyMap.transform({
+            first: first.tachieLocations.dualKeyMap,
+            second: second.tachieLocations.dualKeyMap,
+            inner: BoardLocation.transform,
+            diff: BoardLocation.diff
+        });
 
         // wrapの呼び出し元はfirstとsecondのどちらでもいい
         const firstPrime: Omit<GetOperation, 'boolParams' | 'numParams' | 'numMaxParams' | 'strParams'> = {
             pieces: first.pieces.wrap(pieces.firstPrime),
+            tachieLocations: first.tachieLocations.wrap(tachieLocations.firstPrime),
         };
         const secondPrime: Omit<PostOperation, 'boolParams' | 'numParams' | 'numMaxParams' | 'strParams'> = {
             pieces: second.pieces.wrap(pieces.secondPrime),
+            tachieLocations: second.tachieLocations.wrap(tachieLocations.secondPrime),
         };
 
         firstPrime.image = transformNullableReplace({ first: first.image, second: second.image }).firstPrime;
         secondPrime.image = transformNullableReplace({ first: first.image, second: second.image }).secondPrime;
+
+        firstPrime.tachieImage = transformNullableReplace({ first: first.tachieImage, second: second.tachieImage }).firstPrime;
+        secondPrime.tachieImage = transformNullableReplace({ first: first.tachieImage, second: second.tachieImage }).secondPrime;
 
         firstPrime.isPrivate = transformReplace({ first: first.isPrivate, second: second.isPrivate }).firstPrime;
         secondPrime.isPrivate = transformReplace({ first: first.isPrivate, second: second.isPrivate }).secondPrime;
@@ -435,14 +490,23 @@ export namespace Character {
             next: next.pieces.dualKeyMap,
             inner: Piece.diff
         });
+        const tachieLocations = $DualKeyMap.diff({
+            prev: prev.tachieLocations.dualKeyMap,
+            next: next.tachieLocations.dualKeyMap,
+            inner: BoardLocation.diff
+        });
 
         // wrapの呼び出し元はprevとnextのどちらでもいい
         const result: Omit<PostOperation, 'boolParams' | 'numParams' | 'numMaxParams' | 'strParams'> = {
             pieces: prev.pieces.wrap(pieces),
+            tachieLocations: prev.tachieLocations.wrap(tachieLocations),
         };
 
         if (prev.image != next.image) {
             result.image = { newValue: next.image };
+        }
+        if (prev.tachieImage != next.tachieImage) {
+            result.tachieImage = { newValue: next.tachieImage };
         }
         if (prev.isPrivate != next.isPrivate) {
             result.isPrivate = { newValue: next.isPrivate };

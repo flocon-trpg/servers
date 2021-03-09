@@ -1,6 +1,7 @@
 import produce from 'immer';
 import { ReadonlyStateMap } from '../../@shared/StateMap';
 import { PieceOperationInput, PiecesOperationInput, PieceValueState, ReplacePieceOperationInput, UpdatePieceOperationInput } from '../../generated/graphql';
+import { Board } from './board';
 import { transform as transformReplace, transformNullable as transformNullableReplace } from './replaceValue';
 import { OperationElement, replace } from './types';
 import { ReplaceValueOperationModule } from './utils/replaceValueOperation';
@@ -205,5 +206,50 @@ export namespace Piece {
     }): boolean => {
         const { x, y, w, h } = getPosition({ state, cellWidth, cellHeight, cellOffsetX, cellOffsetY });
         return x <= cursorPosition.x && cursorPosition.x <= (x + w) && y <= cursorPosition.y && cursorPosition.y <= (y + h);
+    };
+
+    // x,yはoffsetとzoomが0のときの値。
+    export const getCellPosition = ({
+        board,
+        x,
+        y,
+    }: {
+        board: Board.State;
+        x: number;
+        y: number;
+    }): { cellX: number; cellY: number } => {
+        const defaultResult = { cellX: 0, cellY: 0 };
+        if (board.cellWidth == null || board.cellWidth <= 0) {
+            return defaultResult;
+        }
+        if (board.cellHeight == null || board.cellHeight <= 0) {
+            return defaultResult;
+        }
+        return {
+            cellX: Math.round((x - board.cellOffsetX) / board.cellWidth),
+            cellY: Math.round((y - board.cellOffsetY) / board.cellHeight),
+        };
+    };
+
+    export const getCellSize = ({
+        board,
+        w,
+        h,
+    }: {
+        board: Board.State;
+        w: number;
+        h: number;
+    }): { cellW: number; cellH: number } => {
+        const defaultResult = { cellW: 1, cellH: 1 };
+        if (board.cellWidth == null || board.cellWidth <= 0) {
+            return defaultResult;
+        }
+        if (board.cellHeight == null || board.cellHeight <= 0) {
+            return defaultResult;
+        }
+        return {
+            cellW: Math.round(w / board.cellWidth),
+            cellH: Math.round(h / board.cellHeight),
+        };
     };
 }

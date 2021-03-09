@@ -27,6 +27,7 @@ import { Character } from '../../stateManagers/states/character';
 import { Piece } from '../../stateManagers/states/piece';
 import { getUserUid } from '../../hooks/useFirebaseUser';
 import { useStateEditor } from '../../hooks/useStateEditor';
+import { BoardLocation } from '../../stateManagers/states/boardLocation';
 
 const notFound = 'notFound';
 
@@ -42,6 +43,7 @@ const defaultCharacter: Character.State = {
     name: '',
     isPrivate: false,
     pieces: createStateMap(),
+    tachieLocations: createStateMap(),
     boolParams: new Map(),
     numParams: new Map(),
     numMaxParams: new Map(),
@@ -88,11 +90,18 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
         return drawerType.stateKey.createdBy === getUserUid(myAuth);
     })();
 
-    const pieceLocation = (() => {
+    const piece = (() => {
         if (drawerType?.type !== update || drawerType.boardKey == null) {
             return null;
         }
         return character.pieces.get(drawerType.boardKey) ?? null;
+    })();
+
+    const tachieLocation = (() => {
+        if (drawerType?.type !== update || drawerType.boardKey == null) {
+            return null;
+        }
+        return character.tachieLocations.get(drawerType.boardKey) ?? null;
     })();
 
     // createのときは、直接setCharacterが呼ばれることでcharacterが変わる。
@@ -127,11 +136,11 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
         }
     };
 
-    const updatePieceLocation = (partialState: Partial<Piece.State>) => {
-        if (pieceLocation == null || drawerType?.type !== update || drawerType.boardKey == null) {
+    const updatePiece = (partialState: Partial<Piece.State>) => {
+        if (piece == null || drawerType?.type !== update || drawerType.boardKey == null) {
             return;
         }
-        const diffOperation = Piece.diff({ prev: pieceLocation, next: { ...pieceLocation, ...partialState } });
+        const diffOperation = Piece.diff({ prev: piece, next: { ...piece, ...partialState } });
         const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
         pieces.set(drawerType.boardKey, {
             type: update,
@@ -142,6 +151,32 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
             type: update,
             operation: {
                 pieces,
+                tachieLocations: createStateMap(),
+                boolParams: new Map(),
+                numParams: new Map(),
+                numMaxParams: new Map(),
+                strParams: new Map(),
+            }
+        });
+        operate(operation);
+    };
+
+    const updateTachieLocation = (partialState: Partial<BoardLocation.State>) => {
+        if (tachieLocation == null || drawerType?.type !== update || drawerType.boardKey == null) {
+            return;
+        }
+        const diffOperation = BoardLocation.diff({ prev: tachieLocation, next: { ...tachieLocation, ...partialState } });
+        const tachieLocations = createStateMap<OperationElement<BoardLocation.State, BoardLocation.PostOperation>>();
+        tachieLocations.set(drawerType.boardKey, {
+            type: update,
+            operation: diffOperation,
+        });
+        const operation = Room.createPostOperationSetup();
+        operation.characters.set(drawerType.stateKey, {
+            type: update,
+            operation: {
+                tachieLocations,
+                pieces: createStateMap(),
                 boolParams: new Map(),
                 numParams: new Map(),
                 numMaxParams: new Map(),
@@ -165,22 +200,19 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
         };
     }
 
-    const pieceLocationElement = (() => {
-        if (pieceLocation == null) {
+    const pieceElement = (() => {
+        if (piece == null) {
             return null;
         }
         return (
             <>
-                <Divider />
-                <PageHeader
-                    title="コマ" />
                 <Row gutter={gutter} align='middle'>
                     <Col flex='auto' />
                     <Col flex={0}></Col>
                     <Col span={inputSpan}>
                         <Checkbox
-                            checked={pieceLocation.isPrivate}
-                            onChange={e => updatePieceLocation({ isPrivate: e.target.checked })}>
+                            checked={piece.isPrivate}
+                            onChange={e => updatePiece({ isPrivate: e.target.checked })}>
                             コマを非公開にする
                         </Checkbox>
                     </Col>
@@ -191,15 +223,15 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                     <Col flex={0}></Col>
                     <Col span={inputSpan}>
                         <Checkbox
-                            checked={pieceLocation.isCellMode}
-                            onChange={e => updatePieceLocation({ isCellMode: e.target.checked })}>
+                            checked={piece.isCellMode}
+                            onChange={e => updatePiece({ isCellMode: e.target.checked })}>
                             セルにスナップする
                         </Checkbox>
                     </Col>
                 </Row>
 
                 {
-                    pieceLocation.isCellMode ?
+                    piece.isCellMode ?
                         <>
                             <Row gutter={gutter} align='middle'>
                                 <Col flex='auto' />
@@ -207,12 +239,12 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                                 <Col span={inputSpan}>
                                     <Space>
                                         <InputNumber
-                                            value={pieceLocation.cellX}
-                                            onChange={newValue => typeof newValue === 'number' ? updatePieceLocation({ cellX: newValue }) : undefined} />
+                                            value={piece.cellX}
+                                            onChange={newValue => typeof newValue === 'number' ? updatePiece({ cellX: newValue }) : undefined} />
                                         <span>*</span>
                                         <InputNumber
-                                            value={pieceLocation.cellY}
-                                            onChange={newValue => typeof newValue === 'number' ? updatePieceLocation({ cellY: newValue }) : undefined} />
+                                            value={piece.cellY}
+                                            onChange={newValue => typeof newValue === 'number' ? updatePiece({ cellY: newValue }) : undefined} />
                                     </Space>
                                 </Col>
                             </Row>
@@ -222,12 +254,12 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                                 <Col span={inputSpan}>
                                     <Space>
                                         <InputNumber
-                                            value={pieceLocation.cellW}
-                                            onChange={newValue => typeof newValue === 'number' ? updatePieceLocation({ cellW: newValue }) : undefined} />
+                                            value={piece.cellW}
+                                            onChange={newValue => typeof newValue === 'number' ? updatePiece({ cellW: newValue }) : undefined} />
                                         <span>*</span>
                                         <InputNumber
-                                            value={pieceLocation.cellH}
-                                            onChange={newValue => typeof newValue === 'number' ? updatePieceLocation({ cellH: newValue }) : undefined} />
+                                            value={piece.cellH}
+                                            onChange={newValue => typeof newValue === 'number' ? updatePiece({ cellH: newValue }) : undefined} />
                                     </Space>
                                 </Col>
                             </Row>
@@ -238,12 +270,12 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                                 <Col span={inputSpan}>
                                     <Space>
                                         <InputNumber
-                                            value={pieceLocation.x}
-                                            onChange={newValue => typeof newValue === 'number' ? updatePieceLocation({ x: newValue }) : undefined} />
+                                            value={piece.x}
+                                            onChange={newValue => typeof newValue === 'number' ? updatePiece({ x: newValue }) : undefined} />
                                         <span>*</span>
                                         <InputNumber
-                                            value={pieceLocation.y}
-                                            onChange={newValue => typeof newValue === 'number' ? updatePieceLocation({ y: newValue }) : undefined} />
+                                            value={piece.y}
+                                            onChange={newValue => typeof newValue === 'number' ? updatePiece({ y: newValue }) : undefined} />
                                     </Space>
                                 </Col>
                             </Row>
@@ -253,16 +285,60 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                                 <Col span={inputSpan}>
                                     <Space>
                                         <InputNumber
-                                            value={pieceLocation.w}
-                                            onChange={newValue => typeof newValue === 'number' ? updatePieceLocation({ w: newValue }) : undefined} />
+                                            value={piece.w}
+                                            onChange={newValue => typeof newValue === 'number' ? updatePiece({ w: newValue }) : undefined} />
                                         <span>*</span>
                                         <InputNumber
-                                            value={pieceLocation.h}
-                                            onChange={newValue => typeof newValue === 'number' ? updatePieceLocation({ h: newValue }) : undefined} />
+                                            value={piece.h}
+                                            onChange={newValue => typeof newValue === 'number' ? updatePiece({ h: newValue }) : undefined} />
                                     </Space>
                                 </Col>
                             </Row>
                         </>
+                }
+            </>
+        );
+    })();
+
+    const tachieLocationElement = (() => {
+        if (tachieLocation == null) {
+            return null;
+        }
+        return (
+            <>
+                {
+                    <>
+                        <Row gutter={gutter} align='middle'>
+                            <Col flex='auto' />
+                            <Col flex={0}>位置</Col>
+                            <Col span={inputSpan}>
+                                <Space>
+                                    <InputNumber
+                                        value={tachieLocation.x}
+                                        onChange={newValue => typeof newValue === 'number' ? updateTachieLocation({ x: newValue }) : undefined} />
+                                    <span>*</span>
+                                    <InputNumber
+                                        value={tachieLocation.y}
+                                        onChange={newValue => typeof newValue === 'number' ? updateTachieLocation({ y: newValue }) : undefined} />
+                                </Space>
+                            </Col>
+                        </Row>
+                        <Row gutter={gutter} align='middle'>
+                            <Col flex='auto' />
+                            <Col flex={0}>大きさ</Col>
+                            <Col span={inputSpan}>
+                                <Space>
+                                    <InputNumber
+                                        value={tachieLocation.w}
+                                        onChange={newValue => typeof newValue === 'number' ? updateTachieLocation({ w: newValue }) : undefined} />
+                                    <span>*</span>
+                                    <InputNumber
+                                        value={tachieLocation.h}
+                                        onChange={newValue => typeof newValue === 'number' ? updateTachieLocation({ h: newValue }) : undefined} />
+                                </Space>
+                            </Col>
+                        </Row>
+                    </>
                 }
             </>
         );
@@ -299,13 +375,21 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                     </Col>
                 </Row>
 
-                {pieceLocationElement == null ? null : <>
+                {pieceElement == null ? null : <>
                     <Divider />
                     <PageHeader
                         title="コマ" />
                 </>}
 
-                {pieceLocationElement}
+                {pieceElement}
+
+                {tachieLocationElement == null ? null : <>
+                    <Divider />
+                    <PageHeader
+                        title="立ち絵" />
+                </>}
+
+                {tachieLocationElement}
 
                 <Divider />
 
@@ -359,6 +443,15 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                         <InputFile filePath={character.image ?? undefined} onPathChange={path => updateCharacter({ image: path ?? undefined })} openFilesManager={setFilesManagerDrawerType} showImage />
                     </Col>
                 </Row>
+
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
+                    <Col flex={0}>立ち絵画像</Col>
+                    <Col span={inputSpan}>
+                        <InputFile filePath={character.tachieImage ?? undefined} onPathChange={path => updateCharacter({ tachieImage: path ?? undefined })} openFilesManager={setFilesManagerDrawerType} showImage />
+                    </Col>
+                </Row>
+
                 {
                     strIndex20Array.map(key => {
                         const paramName = roomState.paramNames.get({ type: RoomParameterNameType.Num, key });

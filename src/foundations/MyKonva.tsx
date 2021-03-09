@@ -31,6 +31,7 @@ export namespace MyKonva {
         isSelected: boolean;
         draggable: boolean;
         listening: boolean;
+        opacity?: number;
 
         onDragEnd?: (resize: DragEndResult) => void;
         onClick?: () => void;
@@ -94,6 +95,7 @@ export namespace MyKonva {
                     y={props.y}
                     width={props.w}
                     height={props.h}
+                    opacity={props.opacity}
                     image={image.image}
                     draggable={props.draggable}
                     onClick={e => {

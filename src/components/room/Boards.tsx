@@ -8,7 +8,7 @@ import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponent
 import { boardDrawerType, characterDrawerType, create, myNumberValueDrawerType } from './RoomComponentsState';
 import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
-import { BoardsPanelConfig, createDefaultBoardConfig } from '../../states/BoardsPanelConfig';
+import { BoardConfig, BoardsPanelConfig, createDefaultBoardConfig } from '../../states/BoardsPanelConfig';
 import Konva from 'konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import { FilePath } from '../../utils/types';
@@ -16,7 +16,6 @@ import { __ } from '../../@shared/collection';
 import OperateContext from './contexts/OperateContext';
 import { OperationElement, replace, update } from '../../stateManagers/states/types';
 import * as Icon from '@ant-design/icons';
-import { getCellPosition, getCellSize } from './utils';
 import { Character } from '../../stateManagers/states/character';
 import { Piece } from '../../stateManagers/states/piece';
 import { Room } from '../../stateManagers/states/room';
@@ -24,6 +23,7 @@ import { Board as StatesBoard } from '../../stateManagers/states/board';
 import { MyNumberValue } from '../../stateManagers/states/myNumberValue';
 import { Participant } from '../../stateManagers/states/participant';
 import { MyKonva } from '../../foundations/MyKonva';
+import { BoardLocation } from '../../stateManagers/states/boardLocation';
 
 const emptyCharacterOperation = (): Character.PostOperation => ({
     boolParams: new Map(),
@@ -31,6 +31,7 @@ const emptyCharacterOperation = (): Character.PostOperation => ({
     numMaxParams: new Map(),
     strParams: new Map(),
     pieces: createStateMap(),
+    tachieLocations: createStateMap(),
 });
 
 const createPiecePostOperation = ({
@@ -45,12 +46,12 @@ const createPiecePostOperation = ({
     const pieceOperation: Piece.PostOperation = {};
     if (piece.isCellMode) {
         if (e.newLocation != null) {
-            const position = getCellPosition({ ...e.newLocation, board });
+            const position = Piece.getCellPosition({ ...e.newLocation, board });
             pieceOperation.cellX = { newValue: position.cellX };
             pieceOperation.cellY = { newValue: position.cellY };
         }
         if (e.newSize != null) {
-            const size = getCellSize({ ...e.newSize, board });
+            const size = Piece.getCellSize({ ...e.newSize, board });
             pieceOperation.cellW = { newValue: size.cellW };
             pieceOperation.cellH = { newValue: size.cellH };
         }
@@ -67,15 +68,32 @@ const createPiecePostOperation = ({
     return pieceOperation;
 };
 
-const emptyMyNumberValueOperation = (): MyNumberValue.PostOperation => ({
-    pieces: createStateMap(),
-});
+const createTachieLocationPostOperation = ({
+    e,
+}: {
+    e: MyKonva.DragEndResult;
+}): Piece.PostOperation => {
+    const pieceOperation: BoardLocation.PostOperation = {};
+    if (e.newLocation != null) {
+        pieceOperation.x = { newValue: e.newLocation.x };
+        pieceOperation.y = { newValue: e.newLocation.y };
+    }
+    if (e.newSize != null) {
+        pieceOperation.w = { newValue: e.newSize.w };
+        pieceOperation.h = { newValue: e.newSize.h };
+    }
+    return pieceOperation;
+};
 
 const character = 'character';
+const tachie = 'tachie';
 const myNumberValue = 'myNumberValue';
 
 type SelectedPieceKey = {
     type: typeof character;
+    characterKey: CompositeKey;
+} | {
+    type: typeof tachie;
     characterKey: CompositeKey;
 } | {
     type: typeof myNumberValue;
@@ -181,6 +199,46 @@ const Board: React.FC<BoardProps> = ({
                 }} />;
         }).toArray();
 
+        const tachieLocations = __(characters).compact(([characterKey, character]) => {
+            const tachieLocation = __(character.tachieLocations).find(([boardKey$]) => {
+                return boardKey.createdBy === boardKey$.createdBy && boardKey.id === boardKey$.id;
+            });
+            if (tachieLocation == null) {
+                return null;
+            }
+            const [, pieceValue] = tachieLocation.value;
+            if (character.tachieImage == null) {
+                // TODO: 画像なしでコマを表示する
+                return null;
+            }
+            return <MyKonva.IconImage
+                x={pieceValue.x}
+                y={pieceValue.y}
+                w={pieceValue.w}
+                h={pieceValue.h}
+                opacity={0.75 /* TODO: opacityの値が適当 */}
+                key={compositeKeyToString(characterKey)}
+                filePath={character.tachieImage}
+                draggable
+                listening
+                isSelected={selectedPieceKey?.type === 'tachie' && equals(selectedPieceKey.characterKey, characterKey)}
+                onClick={() => setSelectedPieceKey({ type: 'tachie', characterKey })}
+                onDragEnd={e => {
+                    const tachieLocationOperation = createTachieLocationPostOperation({ e });
+                    const tachieLocations = createStateMap<OperationElement<BoardLocation.State, BoardLocation.PostOperation>>();
+                    tachieLocations.set(boardKey, { type: update, operation: tachieLocationOperation });
+                    const operation = Room.createPostOperationSetup();
+                    operation.characters.set(characterKey, {
+                        type: update,
+                        operation: {
+                            ...emptyCharacterOperation(),
+                            tachieLocations,
+                        }
+                    });
+                    operate(operation);
+                }} />;
+        }).toArray();
+
         const myNumberValuePieces = __([...participants])
             .flatMap(([userUid, participant]) => [...participant.myNumberValues].map(x => [userUid, ...x] as const))
             .compact(([userUid, stateId, myNumberValue]) => {
@@ -222,6 +280,7 @@ const Board: React.FC<BoardProps> = ({
 
         return (
             <ReactKonva.Layer>
+                {tachieLocations}
                 {characterPieces}
                 {myNumberValuePieces}
             </ReactKonva.Layer>);
@@ -319,8 +378,25 @@ const Board: React.FC<BoardProps> = ({
 type ContextMenuState = {
     x: number;
     y: number;
-    charactersOnCursor: ReadonlyArray<{ characterKey: CompositeKey; character: Character.State; piece: Piece.State }>;
+    characterPiecesOnCursor: ReadonlyArray<{ characterKey: CompositeKey; character: Character.State; piece: Piece.State }>;
+    tachiesOnCursor: ReadonlyArray<{ characterKey: CompositeKey; character: Character.State; tachieLocation: BoardLocation.State }>;
     myNumberValuesOnCursor: ReadonlyArray<{ myNumberValueKey: string; myNumberValue: MyNumberValue.State; piece: Piece.State; userUid: string }>;
+}
+
+namespace ContextMenuState {
+    export const toKonvaPosition = ({
+        contextMenuState,
+        boardConfig,
+    }: {
+        contextMenuState: ContextMenuState;
+        boardConfig: BoardConfig;
+    }): { x: number; y: number } => {
+        const scale = Math.pow(2, boardConfig.zoom);
+        return {
+            x: (contextMenuState.x / scale) + boardConfig.offsetX,
+            y: (contextMenuState.y / scale) + boardConfig.offsetY,
+        };
+    };
 }
 
 type Props = {
@@ -360,6 +436,7 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
         }
         return stringToCompositeKey(boardsPanelConfig.activeBoardKey);
     })();
+    const boardConfig = (activeBoardKey == null ? null : boardsPanelConfig.boards[compositeKeyToString(activeBoardKey)]) ?? createDefaultBoardConfig();
     const boardComponent = (() => {
         if (boards.size === 0) {
             return (
@@ -392,7 +469,7 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                 setContextMenuState({
                     x: e.evt.offsetX,
                     y: e.evt.offsetY,
-                    charactersOnCursor: __(characters.toArray())
+                    characterPiecesOnCursor: __(characters.toArray())
                         .compact(([characterKey, character]) => {
                             const found = character.pieces.toArray()
                                 .find(([boardKey, piece]) => {
@@ -405,6 +482,21 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                                 return null;
                             }
                             return { characterKey, character, piece: found[1] };
+                        })
+                        .toArray(),
+                    tachiesOnCursor: __(characters.toArray())
+                        .compact(([characterKey, character]) => {
+                            const found = character.tachieLocations.toArray()
+                                .find(([boardKey, tachie]) => {
+                                    if (boardKey.createdBy !== activeBoardKey.createdBy || boardKey.id !== activeBoardKey.id) {
+                                        return false;
+                                    }
+                                    return BoardLocation.isCursorOnIcon({ state: tachie, cursorPosition: stateOffset });
+                                });
+                            if (found === undefined) {
+                                return null;
+                            }
+                            return { characterKey, character, tachieLocation: found[1] };
                         })
                         .toArray(),
                     myNumberValuesOnCursor: __([...participants])
@@ -456,16 +548,17 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
             return null;
         }
         const board = activeBoardKey == null ? undefined : boards.get(activeBoardKey);
-        const selectedCharactersMenu = (() => {
-            if (activeBoardKey == null || contextMenuState.charactersOnCursor.length === 0) {
+
+        const selectedCharacterPiecesMenu = (() => {
+            if (activeBoardKey == null || contextMenuState.characterPiecesOnCursor.length === 0) {
                 return null;
             }
             return (
                 <>
                     {
-                        contextMenuState.charactersOnCursor.map(({ characterKey, character, piece }) =>
-                            // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が下にもあるため、キーを互いに異なるものにするように文字列を付加している。
-                            <Menu.SubMenu key={compositeKeyToString(characterKey) + '@selected'} title={character.name}>
+                        contextMenuState.characterPiecesOnCursor.map(({ characterKey, character }) =>
+                            // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が他にもあるため、キーを互いに異なるものにするように文字列を付加している。
+                            <Menu.SubMenu key={compositeKeyToString(characterKey) + '@selected-piece'} title={`${character.name} (コマ)`}>
                                 <Menu.Item
                                     onClick={() => {
                                         dispatchRoomComponentsState({
@@ -507,6 +600,57 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                 </>);
         })();
 
+        const selectedTachiesMenu = (() => {
+            if (activeBoardKey == null || contextMenuState.tachiesOnCursor.length === 0) {
+                return null;
+            }
+            return (
+                <>
+                    {
+                        contextMenuState.tachiesOnCursor.map(({ characterKey, character }) =>
+                            // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が他にもあるため、キーを互いに異なるものにするように文字列を付加している。
+                            <Menu.SubMenu key={compositeKeyToString(characterKey) + '@selected-tachie'} title={`${character.name} (立ち絵)`}>
+                                <Menu.Item
+                                    onClick={() => {
+                                        dispatchRoomComponentsState({
+                                            type: characterDrawerType,
+                                            newValue: {
+                                                type: update,
+                                                boardKey: activeBoardKey,
+                                                stateKey: characterKey,
+                                            }
+                                        });
+                                        setContextMenuState(null);
+                                    }}>
+                                    編集
+                                </Menu.Item>
+                                <Menu.Item
+                                    onClick={() => {
+                                        const tachieLocations = createStateMap<OperationElement<BoardLocation.State, BoardLocation.PostOperation>>();
+                                        tachieLocations.set(activeBoardKey, {
+                                            type: replace,
+                                            newValue: undefined,
+                                        });
+                                        const operation = Room.createPostOperationSetup();
+                                        operation.characters.set(characterKey, {
+                                            type: update,
+                                            operation: {
+                                                ...emptyCharacterOperation(),
+                                                tachieLocations,
+                                            }
+                                        });
+                                        operate(operation);
+                                        setContextMenuState(null);
+                                    }}>
+                                    削除
+                                </Menu.Item>
+                            </Menu.SubMenu>
+                        )
+                    }
+                    <Menu.Divider />
+                </>);
+        })();
+
         const allCharactersListMenu = (() => {
             const title = 'キャラクター一覧';
             if (board == null || activeBoardKey == null) {
@@ -516,8 +660,10 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                 <Menu.SubMenu title={title}>
                     {__(characters.toArray()).compact(([key, value]) => {
                         const pieceExists = __(value.pieces).exists(([boardKey]) => activeBoardKey.id === boardKey.id && activeBoardKey.createdBy === boardKey.createdBy);
+                        const tachieExists = __(value.tachieLocations).exists(([boardKey]) => activeBoardKey.id === boardKey.id && activeBoardKey.createdBy === boardKey.createdBy);
 
-                        const cellPosition = getCellPosition({ ...contextMenuState, board });
+                        const { x, y } = ContextMenuState.toKonvaPosition({ contextMenuState, boardConfig });
+                        const cellPosition = Piece.getCellPosition({ x, y, board });
                         // TODO: x,y,w,h の値が適当
                         const pieceLocationWhichIsCellMode = {
                             x: 0,
@@ -533,8 +679,8 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                         };
 
                         const pieceLocationWhichIsNotCellMode = {
-                            x: contextMenuState.x,
-                            y: contextMenuState.y,
+                            x,
+                            y,
                             w: 50,
                             h: 50,
                             isPrivate: false,
@@ -545,85 +691,154 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                             cellH: 1,
                         };
 
-                        return (
-                            <Menu.SubMenu key={compositeKeyToString(key)} title={<span>{pieceExists ? <Icon.CheckOutlined /> : null} {value.name}</span>}>
-                                <Menu.Item
-                                    disabled={!pieceExists}
-                                    onClick={() => {
-                                        dispatchRoomComponentsState({
-                                            type: characterDrawerType,
-                                            newValue: {
-                                                type: update,
-                                                boardKey: activeBoardKey,
-                                                stateKey: key,
-                                            }
-                                        });
-                                        setContextMenuState(null);
-                                    }}>
-                                    編集
-                                </Menu.Item>
-                                <Menu.SubMenu disabled={pieceExists} title="置く">
-                                    <Menu.Item onClick={() => {
-                                        const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
+                        const tachieLocationWhichIsNotCellMode = {
+                            x,
+                            y,
+                            w: 100,
+                            h: 150,
+                            isPrivate: false,
+                        };
 
-                                        pieces.set(activeBoardKey, {
-                                            type: replace,
-                                            newValue: pieceLocationWhichIsCellMode
-                                        });
-                                        const operation = Room.createPostOperationSetup();
-                                        operation.characters.set(key, {
-                                            type: update,
-                                            operation: {
-                                                ...emptyCharacterOperation(),
-                                                pieces,
-                                            }
-                                        });
-                                        operate(operation);
-                                        setContextMenuState(null);
-                                    }}>
-                                        セルにスナップする
+                        return (
+                            <Menu.SubMenu key={compositeKeyToString(key)} title={value.name}>
+                                <Menu.SubMenu title={<span>{pieceExists ? <Icon.CheckOutlined /> : null} {'コマ'}</span>}>
+                                    <Menu.Item
+                                        disabled={!pieceExists}
+                                        onClick={() => {
+                                            dispatchRoomComponentsState({
+                                                type: characterDrawerType,
+                                                newValue: {
+                                                    type: update,
+                                                    boardKey: activeBoardKey,
+                                                    stateKey: key,
+                                                }
+                                            });
+                                            setContextMenuState(null);
+                                        }}>
+                                        編集
                                     </Menu.Item>
-                                    <Menu.Item onClick={() => {
-                                        const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
-                                        pieces.set(activeBoardKey, {
-                                            type: replace,
-                                            newValue: pieceLocationWhichIsNotCellMode
-                                        });
-                                        const operation = Room.createPostOperationSetup();
-                                        operation.characters.set(key, {
-                                            type: update,
-                                            operation: {
-                                                ...emptyCharacterOperation(),
-                                                pieces,
-                                            }
-                                        });
-                                        operate(operation);
-                                        setContextMenuState(null);
-                                    }}>
-                                        セルにスナップしない
+                                    <Menu.SubMenu disabled={pieceExists} title="置く">
+                                        <Menu.Item onClick={() => {
+                                            const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
+
+                                            pieces.set(activeBoardKey, {
+                                                type: replace,
+                                                newValue: pieceLocationWhichIsCellMode
+                                            });
+                                            const operation = Room.createPostOperationSetup();
+                                            operation.characters.set(key, {
+                                                type: update,
+                                                operation: {
+                                                    ...emptyCharacterOperation(),
+                                                    pieces,
+                                                }
+                                            });
+                                            operate(operation);
+                                            setContextMenuState(null);
+                                        }}>
+                                            セルにスナップする
+                                        </Menu.Item>
+                                        <Menu.Item onClick={() => {
+                                            const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
+                                            pieces.set(activeBoardKey, {
+                                                type: replace,
+                                                newValue: pieceLocationWhichIsNotCellMode
+                                            });
+                                            const operation = Room.createPostOperationSetup();
+                                            operation.characters.set(key, {
+                                                type: update,
+                                                operation: {
+                                                    ...emptyCharacterOperation(),
+                                                    pieces,
+                                                }
+                                            });
+                                            operate(operation);
+                                            setContextMenuState(null);
+                                        }}>
+                                            セルにスナップしない
+                                        </Menu.Item>
+                                    </Menu.SubMenu>
+                                    <Menu.Item
+                                        disabled={!pieceExists}
+                                        onClick={() => {
+                                            const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
+                                            pieces.set(activeBoardKey, {
+                                                type: replace,
+                                                newValue: undefined,
+                                            });
+                                            const operation = Room.createPostOperationSetup();
+                                            operation.characters.set(key, {
+                                                type: update,
+                                                operation: {
+                                                    ...emptyCharacterOperation(),
+                                                    pieces,
+                                                }
+                                            });
+                                            operate(operation);
+                                            setContextMenuState(null);
+                                        }}>
+                                        削除
                                     </Menu.Item>
                                 </Menu.SubMenu>
-                                <Menu.Item
-                                    disabled={!pieceExists}
-                                    onClick={() => {
-                                        const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
-                                        pieces.set(activeBoardKey, {
-                                            type: replace,
-                                            newValue: undefined,
-                                        });
-                                        const operation = Room.createPostOperationSetup();
-                                        operation.characters.set(key, {
-                                            type: update,
-                                            operation: {
-                                                ...emptyCharacterOperation(),
-                                                pieces,
-                                            }
-                                        });
-                                        operate(operation);
-                                        setContextMenuState(null);
-                                    }}>
-                                    削除
-                                </Menu.Item>
+                                <Menu.SubMenu title={<span>{tachieExists ? <Icon.CheckOutlined /> : null} {'立ち絵'}</span>}>
+                                    <Menu.Item
+                                        disabled={!tachieExists}
+                                        onClick={() => {
+                                            dispatchRoomComponentsState({
+                                                type: characterDrawerType,
+                                                newValue: {
+                                                    type: update,
+                                                    boardKey: activeBoardKey,
+                                                    stateKey: key,
+                                                }
+                                            });
+                                            setContextMenuState(null);
+                                        }}>
+                                        編集
+                                    </Menu.Item>
+                                    <Menu.Item
+                                        disabled={tachieExists}
+                                        onClick={() => {
+                                            const tachieLocations = createStateMap<OperationElement<BoardLocation.State, BoardLocation.PostOperation>>();
+                                            tachieLocations.set(activeBoardKey, {
+                                                type: replace,
+                                                newValue: tachieLocationWhichIsNotCellMode
+                                            });
+                                            const operation = Room.createPostOperationSetup();
+                                            operation.characters.set(key, {
+                                                type: update,
+                                                operation: {
+                                                    ...emptyCharacterOperation(),
+                                                    tachieLocations,
+                                                }
+                                            });
+                                            operate(operation);
+                                            setContextMenuState(null);
+                                        }}>
+                                        置く
+                                    </Menu.Item>
+                                    <Menu.Item
+                                        disabled={!tachieExists}
+                                        onClick={() => {
+                                            const tachieLocations = createStateMap<OperationElement<BoardLocation.State, BoardLocation.PostOperation>>();
+                                            tachieLocations.set(activeBoardKey, {
+                                                type: replace,
+                                                newValue: undefined,
+                                            });
+                                            const operation = Room.createPostOperationSetup();
+                                            operation.characters.set(key, {
+                                                type: update,
+                                                operation: {
+                                                    ...emptyCharacterOperation(),
+                                                    tachieLocations,
+                                                }
+                                            });
+                                            operate(operation);
+                                            setContextMenuState(null);
+                                        }}>
+                                        削除
+                                    </Menu.Item>
+                                </Menu.SubMenu>
                             </Menu.SubMenu>
                         );
                     }).toArray()}
@@ -654,7 +869,7 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                                         setContextMenuState(null);
                                     }}>
                                     編集
-                                </Menu.Item> : 
+                                </Menu.Item> :
                                     <Menu.Item disabled>
                                         <Tooltip title='自分以外が作成したコマでは、値を編集することはできません。'>
                                             編集
@@ -689,7 +904,7 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                 return <Menu.SubMenu title={title} disabled />;
             }
 
-            const cellPosition = getCellPosition({ ...contextMenuState, board });
+            const cellPosition = Piece.getCellPosition({ ...contextMenuState, board });
             // TODO: x,y,w,h の値が適当
             const pieceLocationWhichIsCellMode = {
                 x: 0,
@@ -796,7 +1011,8 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
         return (
             <div style={({ position: 'absolute', left: contextMenuState.x, top: contextMenuState.y })}>
                 <Menu>
-                    {selectedCharactersMenu}
+                    {selectedCharacterPiecesMenu}
+                    {selectedTachiesMenu}
                     {selectedMyNumbersMenu}
                     {allCharactersListMenu}
                     {allMyNumbersMenu}

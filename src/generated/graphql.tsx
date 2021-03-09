@@ -20,6 +20,64 @@ export type AvailableGameSystem = {
   sortKey: Scalars['String'];
 };
 
+export type BoardLocationOperation = {
+  __typename?: 'BoardLocationOperation';
+  h?: Maybe<ReplaceNumberUpOperation>;
+  isPrivate?: Maybe<ReplaceBooleanUpOperation>;
+  w?: Maybe<ReplaceNumberUpOperation>;
+  x?: Maybe<ReplaceNumberUpOperation>;
+  y?: Maybe<ReplaceNumberUpOperation>;
+};
+
+export type BoardLocationOperationInput = {
+  h?: Maybe<ReplaceNumberUpOperationInput>;
+  isPrivate?: Maybe<ReplaceBooleanUpOperationInput>;
+  w?: Maybe<ReplaceNumberUpOperationInput>;
+  x?: Maybe<ReplaceNumberUpOperationInput>;
+  y?: Maybe<ReplaceNumberUpOperationInput>;
+};
+
+export type BoardLocationState = {
+  __typename?: 'BoardLocationState';
+  boardCreatedBy: Scalars['String'];
+  boardId: Scalars['String'];
+  value: BoardLocationValueState;
+};
+
+export type BoardLocationStateInput = {
+  boardCreatedBy: Scalars['String'];
+  boardId: Scalars['String'];
+  value: BoardLocationValueStateInput;
+};
+
+export type BoardLocationValueState = {
+  __typename?: 'BoardLocationValueState';
+  h: Scalars['Float'];
+  isPrivate: Scalars['Boolean'];
+  w: Scalars['Float'];
+  x: Scalars['Float'];
+  y: Scalars['Float'];
+};
+
+export type BoardLocationValueStateInput = {
+  h: Scalars['Float'];
+  isPrivate: Scalars['Boolean'];
+  w: Scalars['Float'];
+  x: Scalars['Float'];
+  y: Scalars['Float'];
+};
+
+export type BoardLocationsOperation = {
+  __typename?: 'BoardLocationsOperation';
+  replace: Array<ReplaceBoardLocationOperation>;
+  update: Array<UpdateBoardLocationOperation>;
+};
+
+export type BoardLocationsOperationInput = {
+  replace: Array<ReplaceBoardLocationOperationInput>;
+  update: Array<UpdateBoardLocationOperationInput>;
+};
+
 export type BoardOperation = {
   __typename?: 'BoardOperation';
   backgroundImage?: Maybe<ReplaceNullableFilePathUpOperation>;
@@ -152,6 +210,8 @@ export type CharacterOperation = {
   numParams: NumParamsOperation;
   pieces: PiecesOperation;
   strParams: StrParamsOperation;
+  tachieImage?: Maybe<ReplaceNullableFilePathUpOperation>;
+  tachieLocations: BoardLocationsOperation;
 };
 
 export type CharacterOperationInput = {
@@ -163,6 +223,8 @@ export type CharacterOperationInput = {
   numParams: NumParamsOperationInput;
   pieces: PiecesOperationInput;
   strParams: StrParamsOperationInput;
+  tachieImage?: Maybe<ReplaceNullableFilePathUpOperationInput>;
+  tachieLocations: BoardLocationsOperationInput;
 };
 
 export type CharacterState = {
@@ -182,6 +244,8 @@ export type CharacterValueState = {
   numParams: Array<NumParamState>;
   pieces: Array<PieceState>;
   strParams: Array<StrParamState>;
+  tachieImage?: Maybe<FilePath>;
+  tachieLocations: Array<BoardLocationState>;
 };
 
 export type CharacterValueStateInput = {
@@ -193,6 +257,8 @@ export type CharacterValueStateInput = {
   numParams: Array<NumParamStateInput>;
   pieces: Array<PieceStateInput>;
   strParams: Array<StrParamStateInput>;
+  tachieImage?: Maybe<FilePathInput>;
+  tachieLocations: Array<BoardLocationStateInput>;
 };
 
 export type CharactersOperation = {
@@ -888,6 +954,19 @@ export type QueryRequiresPhraseToJoinAsPlayerArgs = {
   roomId: Scalars['String'];
 };
 
+export type ReplaceBoardLocationOperation = {
+  __typename?: 'ReplaceBoardLocationOperation';
+  boardCreatedBy: Scalars['String'];
+  boardId: Scalars['String'];
+  newValue?: Maybe<BoardLocationValueState>;
+};
+
+export type ReplaceBoardLocationOperationInput = {
+  boardCreatedBy: Scalars['String'];
+  boardId: Scalars['String'];
+  newValue?: Maybe<BoardLocationValueStateInput>;
+};
+
 export type ReplaceBoardOperation = {
   __typename?: 'ReplaceBoardOperation';
   createdBy: Scalars['String'];
@@ -1309,6 +1388,19 @@ export type TextUpOperationUnitInput = {
   retain?: Maybe<Scalars['Float']>;
 };
 
+export type UpdateBoardLocationOperation = {
+  __typename?: 'UpdateBoardLocationOperation';
+  boardCreatedBy: Scalars['String'];
+  boardId: Scalars['String'];
+  operation: BoardLocationOperation;
+};
+
+export type UpdateBoardLocationOperationInput = {
+  boardCreatedBy: Scalars['String'];
+  boardId: Scalars['String'];
+  operation: BoardLocationOperationInput;
+};
+
 export type UpdateBoardOperation = {
   __typename?: 'UpdateBoardOperation';
   createdBy: Scalars['String'];
@@ -1545,6 +1637,59 @@ export type BoardOperationFragment = (
   )> }
 );
 
+export type BoardLocationValueStateFragment = (
+  { __typename?: 'BoardLocationValueState' }
+  & Pick<BoardLocationValueState, 'isPrivate' | 'x' | 'y' | 'w' | 'h'>
+);
+
+export type BoardLocationStateFragment = (
+  { __typename?: 'BoardLocationState' }
+  & Pick<BoardLocationState, 'boardId' | 'boardCreatedBy'>
+  & { value: (
+    { __typename?: 'BoardLocationValueState' }
+    & BoardLocationValueStateFragment
+  ) }
+);
+
+export type BoardLocationOperationFragment = (
+  { __typename?: 'BoardLocationOperation' }
+  & { isPrivate?: Maybe<(
+    { __typename?: 'ReplaceBooleanUpOperation' }
+    & Pick<ReplaceBooleanUpOperation, 'newValue'>
+  )>, x?: Maybe<(
+    { __typename?: 'ReplaceNumberUpOperation' }
+    & Pick<ReplaceNumberUpOperation, 'newValue'>
+  )>, y?: Maybe<(
+    { __typename?: 'ReplaceNumberUpOperation' }
+    & Pick<ReplaceNumberUpOperation, 'newValue'>
+  )>, w?: Maybe<(
+    { __typename?: 'ReplaceNumberUpOperation' }
+    & Pick<ReplaceNumberUpOperation, 'newValue'>
+  )>, h?: Maybe<(
+    { __typename?: 'ReplaceNumberUpOperation' }
+    & Pick<ReplaceNumberUpOperation, 'newValue'>
+  )> }
+);
+
+export type BoardLocationsOperationFragment = (
+  { __typename?: 'BoardLocationsOperation' }
+  & { replace: Array<(
+    { __typename?: 'ReplaceBoardLocationOperation' }
+    & Pick<ReplaceBoardLocationOperation, 'boardId' | 'boardCreatedBy'>
+    & { newValue?: Maybe<(
+      { __typename?: 'BoardLocationValueState' }
+      & BoardLocationValueStateFragment
+    )> }
+  )>, update: Array<(
+    { __typename?: 'UpdateBoardLocationOperation' }
+    & Pick<UpdateBoardLocationOperation, 'boardId' | 'boardCreatedBy'>
+    & { operation: (
+      { __typename?: 'BoardLocationOperation' }
+      & BoardLocationOperationFragment
+    ) }
+  )> }
+);
+
 export type CharacterStateFragment = (
   { __typename?: 'CharacterState' }
   & Pick<CharacterState, 'id' | 'createdBy'>
@@ -1560,9 +1705,15 @@ export type CharacterValueStateFragment = (
   & { image?: Maybe<(
     { __typename?: 'FilePath' }
     & FilePathFragment
+  )>, tachieImage?: Maybe<(
+    { __typename?: 'FilePath' }
+    & FilePathFragment
   )>, pieces: Array<(
     { __typename?: 'PieceState' }
     & PieceStateFragment
+  )>, tachieLocations: Array<(
+    { __typename?: 'BoardLocationState' }
+    & BoardLocationStateFragment
   )>, boolParams: Array<(
     { __typename?: 'BoolParamState' }
     & Pick<BoolParamState, 'key'>
@@ -1691,9 +1842,18 @@ export type CharacterOperationFragment = (
       { __typename?: 'FilePath' }
       & FilePathFragment
     )> }
+  )>, tachieImage?: Maybe<(
+    { __typename?: 'ReplaceNullableFilePathUpOperation' }
+    & { newValue?: Maybe<(
+      { __typename?: 'FilePath' }
+      & FilePathFragment
+    )> }
   )>, pieces: (
     { __typename?: 'PiecesOperation' }
     & PiecesOperationFragment
+  ), tachieLocations: (
+    { __typename?: 'BoardLocationsOperation' }
+    & BoardLocationsOperationFragment
   ) }
 );
 
@@ -2643,6 +2803,24 @@ export const PieceStateFragmentDoc = gql`
   }
 }
     ${PieceValueStateFragmentDoc}`;
+export const BoardLocationValueStateFragmentDoc = gql`
+    fragment BoardLocationValueState on BoardLocationValueState {
+  isPrivate
+  x
+  y
+  w
+  h
+}
+    `;
+export const BoardLocationStateFragmentDoc = gql`
+    fragment BoardLocationState on BoardLocationState {
+  boardId
+  boardCreatedBy
+  value {
+    ...BoardLocationValueState
+  }
+}
+    ${BoardLocationValueStateFragmentDoc}`;
 export const CharacterValueStateFragmentDoc = gql`
     fragment CharacterValueState on CharacterValueState {
   isPrivate
@@ -2650,8 +2828,14 @@ export const CharacterValueStateFragmentDoc = gql`
   image {
     ...FilePath
   }
+  tachieImage {
+    ...FilePath
+  }
   pieces {
     ...PieceState
+  }
+  tachieLocations {
+    ...BoardLocationState
   }
   boolParams {
     key
@@ -2683,7 +2867,8 @@ export const CharacterValueStateFragmentDoc = gql`
   }
 }
     ${FilePathFragmentDoc}
-${PieceStateFragmentDoc}`;
+${PieceStateFragmentDoc}
+${BoardLocationStateFragmentDoc}`;
 export const CharacterStateFragmentDoc = gql`
     fragment CharacterState on CharacterState {
   id
@@ -2913,6 +3098,44 @@ export const PiecesOperationFragmentDoc = gql`
 }
     ${PieceValueStateFragmentDoc}
 ${PieceOperationFragmentDoc}`;
+export const BoardLocationOperationFragmentDoc = gql`
+    fragment BoardLocationOperation on BoardLocationOperation {
+  isPrivate {
+    newValue
+  }
+  x {
+    newValue
+  }
+  y {
+    newValue
+  }
+  w {
+    newValue
+  }
+  h {
+    newValue
+  }
+}
+    `;
+export const BoardLocationsOperationFragmentDoc = gql`
+    fragment BoardLocationsOperation on BoardLocationsOperation {
+  replace {
+    boardId
+    boardCreatedBy
+    newValue {
+      ...BoardLocationValueState
+    }
+  }
+  update {
+    boardId
+    boardCreatedBy
+    operation {
+      ...BoardLocationOperation
+    }
+  }
+}
+    ${BoardLocationValueStateFragmentDoc}
+${BoardLocationOperationFragmentDoc}`;
 export const CharacterOperationFragmentDoc = gql`
     fragment CharacterOperation on CharacterOperation {
   isPrivate {
@@ -2978,13 +3201,22 @@ export const CharacterOperationFragmentDoc = gql`
       ...FilePath
     }
   }
+  tachieImage {
+    newValue {
+      ...FilePath
+    }
+  }
   pieces {
     ...PiecesOperation
+  }
+  tachieLocations {
+    ...BoardLocationsOperation
   }
 }
     ${TextUpOperationUnitFragmentDoc}
 ${FilePathFragmentDoc}
-${PiecesOperationFragmentDoc}`;
+${PiecesOperationFragmentDoc}
+${BoardLocationsOperationFragmentDoc}`;
 export const CharactersOperationFragmentDoc = gql`
     fragment CharactersOperation on CharactersOperation {
   replace {
