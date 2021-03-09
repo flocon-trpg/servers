@@ -110,6 +110,16 @@ const BoardDrawer: React.FC<Props> = ({ roomState }: Props) => {
         };
     }
 
+    let onDestroy: (() => void) | undefined = undefined;
+    if (drawerType?.type === update) {
+        onDestroy = () => {
+            const operation = Room.createPostOperationSetup();
+            operation.boards.set(drawerType.stateKey, { type: replace, newValue: undefined });
+            operate(operation);
+            dispatch({ type: boardDrawerType, newValue: null });
+        };
+    }
+
     return (
         <Drawer
             {...drawerBaseProps}
@@ -123,7 +133,15 @@ const BoardDrawer: React.FC<Props> = ({ roomState }: Props) => {
                         textType: drawerType?.type === create ? 'cancel' : 'close',
                         onClick: () => dispatch({ type: boardDrawerType, newValue: null })
                     })}
-                    ok={onOkClick == null ? undefined : ({ textType: 'create', onClick: onOkClick })} />)}>
+                    ok={onOkClick == null ? undefined : ({ textType: 'create', onClick: onOkClick })}
+                    destroy={onDestroy == null ? undefined : {
+                        modal: {
+                            title: 'Boardの削除の確認',
+                            content: `このBoard "${board.name}" を削除します。よろしいですか？`,
+                        },
+                        onClick: onDestroy,
+                    }}
+                />)}>
             <div>
                 <Row gutter={gutter} align='middle'>
                     <Col flex='auto' />
