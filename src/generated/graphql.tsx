@@ -4,6 +4,7 @@ export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+const defaultOptions =  {}
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -2108,7 +2109,7 @@ export type RoomGetStateFragment = (
     & Pick<ParticipantState, 'userUid'>
     & { value: (
       { __typename?: 'ParticipantValueState' }
-      & Pick<ParticipantValueState, 'name'>
+      & Pick<ParticipantValueState, 'name' | 'role'>
       & { myNumberValues: Array<(
         { __typename?: 'MyNumberValueState' }
         & Pick<MyNumberValueState, 'stateId'>
@@ -2893,6 +2894,7 @@ export const RoomGetStateFragmentDoc = gql`
     userUid
     value {
       name
+      role
       myNumberValues {
         stateId
         value {
@@ -3538,10 +3540,12 @@ ${RoomAsListItemFragmentDoc}`;
  * });
  */
 export function useGetRoomQuery(baseOptions: Apollo.QueryHookOptions<GetRoomQuery, GetRoomQueryVariables>) {
-        return Apollo.useQuery<GetRoomQuery, GetRoomQueryVariables>(GetRoomDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetRoomQuery, GetRoomQueryVariables>(GetRoomDocument, options);
       }
 export function useGetRoomLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetRoomQuery, GetRoomQueryVariables>) {
-          return Apollo.useLazyQuery<GetRoomQuery, GetRoomQueryVariables>(GetRoomDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetRoomQuery, GetRoomQueryVariables>(GetRoomDocument, options);
         }
 export type GetRoomQueryHookResult = ReturnType<typeof useGetRoomQuery>;
 export type GetRoomLazyQueryHookResult = ReturnType<typeof useGetRoomLazyQuery>;
@@ -3577,10 +3581,12 @@ export const GetRoomsListDocument = gql`
  * });
  */
 export function useGetRoomsListQuery(baseOptions?: Apollo.QueryHookOptions<GetRoomsListQuery, GetRoomsListQueryVariables>) {
-        return Apollo.useQuery<GetRoomsListQuery, GetRoomsListQueryVariables>(GetRoomsListDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetRoomsListQuery, GetRoomsListQueryVariables>(GetRoomsListDocument, options);
       }
 export function useGetRoomsListLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetRoomsListQuery, GetRoomsListQueryVariables>) {
-          return Apollo.useLazyQuery<GetRoomsListQuery, GetRoomsListQueryVariables>(GetRoomsListDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetRoomsListQuery, GetRoomsListQueryVariables>(GetRoomsListDocument, options);
         }
 export type GetRoomsListQueryHookResult = ReturnType<typeof useGetRoomsListQuery>;
 export type GetRoomsListLazyQueryHookResult = ReturnType<typeof useGetRoomsListLazyQuery>;
@@ -3626,10 +3632,12 @@ ${RoomSoundEffectFragmentDoc}`;
  * });
  */
 export function useGetMessagesQuery(baseOptions: Apollo.QueryHookOptions<GetMessagesQuery, GetMessagesQueryVariables>) {
-        return Apollo.useQuery<GetMessagesQuery, GetMessagesQueryVariables>(GetMessagesDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetMessagesQuery, GetMessagesQueryVariables>(GetMessagesDocument, options);
       }
 export function useGetMessagesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetMessagesQuery, GetMessagesQueryVariables>) {
-          return Apollo.useLazyQuery<GetMessagesQuery, GetMessagesQueryVariables>(GetMessagesDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetMessagesQuery, GetMessagesQueryVariables>(GetMessagesDocument, options);
         }
 export type GetMessagesQueryHookResult = ReturnType<typeof useGetMessagesQuery>;
 export type GetMessagesLazyQueryHookResult = ReturnType<typeof useGetMessagesLazyQuery>;
@@ -3678,10 +3686,12 @@ ${RoomSoundEffectFragmentDoc}`;
  * });
  */
 export function useGetLogQuery(baseOptions: Apollo.QueryHookOptions<GetLogQuery, GetLogQueryVariables>) {
-        return Apollo.useQuery<GetLogQuery, GetLogQueryVariables>(GetLogDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetLogQuery, GetLogQueryVariables>(GetLogDocument, options);
       }
 export function useGetLogLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetLogQuery, GetLogQueryVariables>) {
-          return Apollo.useLazyQuery<GetLogQuery, GetLogQueryVariables>(GetLogDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetLogQuery, GetLogQueryVariables>(GetLogDocument, options);
         }
 export type GetLogQueryHookResult = ReturnType<typeof useGetLogQuery>;
 export type GetLogLazyQueryHookResult = ReturnType<typeof useGetLogLazyQuery>;
@@ -3714,10 +3724,12 @@ export const ListAvailableGameSystemsDocument = gql`
  * });
  */
 export function useListAvailableGameSystemsQuery(baseOptions?: Apollo.QueryHookOptions<ListAvailableGameSystemsQuery, ListAvailableGameSystemsQueryVariables>) {
-        return Apollo.useQuery<ListAvailableGameSystemsQuery, ListAvailableGameSystemsQueryVariables>(ListAvailableGameSystemsDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ListAvailableGameSystemsQuery, ListAvailableGameSystemsQueryVariables>(ListAvailableGameSystemsDocument, options);
       }
 export function useListAvailableGameSystemsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ListAvailableGameSystemsQuery, ListAvailableGameSystemsQueryVariables>) {
-          return Apollo.useLazyQuery<ListAvailableGameSystemsQuery, ListAvailableGameSystemsQueryVariables>(ListAvailableGameSystemsDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ListAvailableGameSystemsQuery, ListAvailableGameSystemsQueryVariables>(ListAvailableGameSystemsDocument, options);
         }
 export type ListAvailableGameSystemsQueryHookResult = ReturnType<typeof useListAvailableGameSystemsQuery>;
 export type ListAvailableGameSystemsLazyQueryHookResult = ReturnType<typeof useListAvailableGameSystemsLazyQuery>;
@@ -3752,10 +3764,12 @@ export const RequiresPhraseToJoinAsPlayerDocument = gql`
  * });
  */
 export function useRequiresPhraseToJoinAsPlayerQuery(baseOptions: Apollo.QueryHookOptions<RequiresPhraseToJoinAsPlayerQuery, RequiresPhraseToJoinAsPlayerQueryVariables>) {
-        return Apollo.useQuery<RequiresPhraseToJoinAsPlayerQuery, RequiresPhraseToJoinAsPlayerQueryVariables>(RequiresPhraseToJoinAsPlayerDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<RequiresPhraseToJoinAsPlayerQuery, RequiresPhraseToJoinAsPlayerQueryVariables>(RequiresPhraseToJoinAsPlayerDocument, options);
       }
 export function useRequiresPhraseToJoinAsPlayerLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RequiresPhraseToJoinAsPlayerQuery, RequiresPhraseToJoinAsPlayerQueryVariables>) {
-          return Apollo.useLazyQuery<RequiresPhraseToJoinAsPlayerQuery, RequiresPhraseToJoinAsPlayerQueryVariables>(RequiresPhraseToJoinAsPlayerDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<RequiresPhraseToJoinAsPlayerQuery, RequiresPhraseToJoinAsPlayerQueryVariables>(RequiresPhraseToJoinAsPlayerDocument, options);
         }
 export type RequiresPhraseToJoinAsPlayerQueryHookResult = ReturnType<typeof useRequiresPhraseToJoinAsPlayerQuery>;
 export type RequiresPhraseToJoinAsPlayerLazyQueryHookResult = ReturnType<typeof useRequiresPhraseToJoinAsPlayerLazyQuery>;
@@ -3788,7 +3802,8 @@ export type ChangeParticipantNameMutationFn = Apollo.MutationFunction<ChangePart
  * });
  */
 export function useChangeParticipantNameMutation(baseOptions?: Apollo.MutationHookOptions<ChangeParticipantNameMutation, ChangeParticipantNameMutationVariables>) {
-        return Apollo.useMutation<ChangeParticipantNameMutation, ChangeParticipantNameMutationVariables>(ChangeParticipantNameDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ChangeParticipantNameMutation, ChangeParticipantNameMutationVariables>(ChangeParticipantNameDocument, options);
       }
 export type ChangeParticipantNameMutationHookResult = ReturnType<typeof useChangeParticipantNameMutation>;
 export type ChangeParticipantNameMutationResult = Apollo.MutationResult<ChangeParticipantNameMutation>;
@@ -3825,7 +3840,8 @@ export type CreateRoomMutationFn = Apollo.MutationFunction<CreateRoomMutation, C
  * });
  */
 export function useCreateRoomMutation(baseOptions?: Apollo.MutationHookOptions<CreateRoomMutation, CreateRoomMutationVariables>) {
-        return Apollo.useMutation<CreateRoomMutation, CreateRoomMutationVariables>(CreateRoomDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateRoomMutation, CreateRoomMutationVariables>(CreateRoomDocument, options);
       }
 export type CreateRoomMutationHookResult = ReturnType<typeof useCreateRoomMutation>;
 export type CreateRoomMutationResult = Apollo.MutationResult<CreateRoomMutation>;
@@ -3857,7 +3873,8 @@ export type DeleteRoomMutationFn = Apollo.MutationFunction<DeleteRoomMutation, D
  * });
  */
 export function useDeleteRoomMutation(baseOptions?: Apollo.MutationHookOptions<DeleteRoomMutation, DeleteRoomMutationVariables>) {
-        return Apollo.useMutation<DeleteRoomMutation, DeleteRoomMutationVariables>(DeleteRoomDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteRoomMutation, DeleteRoomMutationVariables>(DeleteRoomDocument, options);
       }
 export type DeleteRoomMutationHookResult = ReturnType<typeof useDeleteRoomMutation>;
 export type DeleteRoomMutationResult = Apollo.MutationResult<DeleteRoomMutation>;
@@ -3891,7 +3908,8 @@ export type JoinRoomAsPlayerMutationFn = Apollo.MutationFunction<JoinRoomAsPlaye
  * });
  */
 export function useJoinRoomAsPlayerMutation(baseOptions?: Apollo.MutationHookOptions<JoinRoomAsPlayerMutation, JoinRoomAsPlayerMutationVariables>) {
-        return Apollo.useMutation<JoinRoomAsPlayerMutation, JoinRoomAsPlayerMutationVariables>(JoinRoomAsPlayerDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<JoinRoomAsPlayerMutation, JoinRoomAsPlayerMutationVariables>(JoinRoomAsPlayerDocument, options);
       }
 export type JoinRoomAsPlayerMutationHookResult = ReturnType<typeof useJoinRoomAsPlayerMutation>;
 export type JoinRoomAsPlayerMutationResult = Apollo.MutationResult<JoinRoomAsPlayerMutation>;
@@ -3925,7 +3943,8 @@ export type JoinRoomAsSpectatorMutationFn = Apollo.MutationFunction<JoinRoomAsSp
  * });
  */
 export function useJoinRoomAsSpectatorMutation(baseOptions?: Apollo.MutationHookOptions<JoinRoomAsSpectatorMutation, JoinRoomAsSpectatorMutationVariables>) {
-        return Apollo.useMutation<JoinRoomAsSpectatorMutation, JoinRoomAsSpectatorMutationVariables>(JoinRoomAsSpectatorDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<JoinRoomAsSpectatorMutation, JoinRoomAsSpectatorMutationVariables>(JoinRoomAsSpectatorDocument, options);
       }
 export type JoinRoomAsSpectatorMutationHookResult = ReturnType<typeof useJoinRoomAsSpectatorMutation>;
 export type JoinRoomAsSpectatorMutationResult = Apollo.MutationResult<JoinRoomAsSpectatorMutation>;
@@ -3957,7 +3976,8 @@ export type EntryToServerMutationFn = Apollo.MutationFunction<EntryToServerMutat
  * });
  */
 export function useEntryToServerMutation(baseOptions?: Apollo.MutationHookOptions<EntryToServerMutation, EntryToServerMutationVariables>) {
-        return Apollo.useMutation<EntryToServerMutation, EntryToServerMutationVariables>(EntryToServerDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EntryToServerMutation, EntryToServerMutationVariables>(EntryToServerDocument, options);
       }
 export type EntryToServerMutationHookResult = ReturnType<typeof useEntryToServerMutation>;
 export type EntryToServerMutationResult = Apollo.MutationResult<EntryToServerMutation>;
@@ -3989,7 +4009,8 @@ export type LeaveRoomMutationFn = Apollo.MutationFunction<LeaveRoomMutation, Lea
  * });
  */
 export function useLeaveRoomMutation(baseOptions?: Apollo.MutationHookOptions<LeaveRoomMutation, LeaveRoomMutationVariables>) {
-        return Apollo.useMutation<LeaveRoomMutation, LeaveRoomMutationVariables>(LeaveRoomDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LeaveRoomMutation, LeaveRoomMutationVariables>(LeaveRoomDocument, options);
       }
 export type LeaveRoomMutationHookResult = ReturnType<typeof useLeaveRoomMutation>;
 export type LeaveRoomMutationResult = Apollo.MutationResult<LeaveRoomMutation>;
@@ -4045,7 +4066,8 @@ export type OperateMutationFn = Apollo.MutationFunction<OperateMutation, Operate
  * });
  */
 export function useOperateMutation(baseOptions?: Apollo.MutationHookOptions<OperateMutation, OperateMutationVariables>) {
-        return Apollo.useMutation<OperateMutation, OperateMutationVariables>(OperateDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<OperateMutation, OperateMutationVariables>(OperateDocument, options);
       }
 export type OperateMutationHookResult = ReturnType<typeof useOperateMutation>;
 export type OperateMutationResult = Apollo.MutationResult<OperateMutation>;
@@ -4078,7 +4100,8 @@ export type PingMutationFn = Apollo.MutationFunction<PingMutation, PingMutationV
  * });
  */
 export function usePingMutation(baseOptions?: Apollo.MutationHookOptions<PingMutation, PingMutationVariables>) {
-        return Apollo.useMutation<PingMutation, PingMutationVariables>(PingDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<PingMutation, PingMutationVariables>(PingDocument, options);
       }
 export type PingMutationHookResult = ReturnType<typeof usePingMutation>;
 export type PingMutationResult = Apollo.MutationResult<PingMutation>;
@@ -4111,7 +4134,8 @@ export type PromoteToPlayerMutationFn = Apollo.MutationFunction<PromoteToPlayerM
  * });
  */
 export function usePromoteToPlayerMutation(baseOptions?: Apollo.MutationHookOptions<PromoteToPlayerMutation, PromoteToPlayerMutationVariables>) {
-        return Apollo.useMutation<PromoteToPlayerMutation, PromoteToPlayerMutationVariables>(PromoteToPlayerDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<PromoteToPlayerMutation, PromoteToPlayerMutationVariables>(PromoteToPlayerDocument, options);
       }
 export type PromoteToPlayerMutationHookResult = ReturnType<typeof usePromoteToPlayerMutation>;
 export type PromoteToPlayerMutationResult = Apollo.MutationResult<PromoteToPlayerMutation>;
@@ -4160,7 +4184,8 @@ export type WritePublicMessageMutationFn = Apollo.MutationFunction<WritePublicMe
  * });
  */
 export function useWritePublicMessageMutation(baseOptions?: Apollo.MutationHookOptions<WritePublicMessageMutation, WritePublicMessageMutationVariables>) {
-        return Apollo.useMutation<WritePublicMessageMutation, WritePublicMessageMutationVariables>(WritePublicMessageDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<WritePublicMessageMutation, WritePublicMessageMutationVariables>(WritePublicMessageDocument, options);
       }
 export type WritePublicMessageMutationHookResult = ReturnType<typeof useWritePublicMessageMutation>;
 export type WritePublicMessageMutationResult = Apollo.MutationResult<WritePublicMessageMutation>;
@@ -4207,7 +4232,8 @@ export type WritePrivateMessageMutationFn = Apollo.MutationFunction<WritePrivate
  * });
  */
 export function useWritePrivateMessageMutation(baseOptions?: Apollo.MutationHookOptions<WritePrivateMessageMutation, WritePrivateMessageMutationVariables>) {
-        return Apollo.useMutation<WritePrivateMessageMutation, WritePrivateMessageMutationVariables>(WritePrivateMessageDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<WritePrivateMessageMutation, WritePrivateMessageMutationVariables>(WritePrivateMessageDocument, options);
       }
 export type WritePrivateMessageMutationHookResult = ReturnType<typeof useWritePrivateMessageMutation>;
 export type WritePrivateMessageMutationResult = Apollo.MutationResult<WritePrivateMessageMutation>;
@@ -4246,7 +4272,8 @@ export type WriteRoomSoundEffectMutationFn = Apollo.MutationFunction<WriteRoomSo
  * });
  */
 export function useWriteRoomSoundEffectMutation(baseOptions?: Apollo.MutationHookOptions<WriteRoomSoundEffectMutation, WriteRoomSoundEffectMutationVariables>) {
-        return Apollo.useMutation<WriteRoomSoundEffectMutation, WriteRoomSoundEffectMutationVariables>(WriteRoomSoundEffectDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<WriteRoomSoundEffectMutation, WriteRoomSoundEffectMutationVariables>(WriteRoomSoundEffectDocument, options);
       }
 export type WriteRoomSoundEffectMutationHookResult = ReturnType<typeof useWriteRoomSoundEffectMutation>;
 export type WriteRoomSoundEffectMutationResult = Apollo.MutationResult<WriteRoomSoundEffectMutation>;
@@ -4280,7 +4307,8 @@ export type EditMessageMutationFn = Apollo.MutationFunction<EditMessageMutation,
  * });
  */
 export function useEditMessageMutation(baseOptions?: Apollo.MutationHookOptions<EditMessageMutation, EditMessageMutationVariables>) {
-        return Apollo.useMutation<EditMessageMutation, EditMessageMutationVariables>(EditMessageDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EditMessageMutation, EditMessageMutationVariables>(EditMessageDocument, options);
       }
 export type EditMessageMutationHookResult = ReturnType<typeof useEditMessageMutation>;
 export type EditMessageMutationResult = Apollo.MutationResult<EditMessageMutation>;
@@ -4313,7 +4341,8 @@ export type DeleteMessageMutationFn = Apollo.MutationFunction<DeleteMessageMutat
  * });
  */
 export function useDeleteMessageMutation(baseOptions?: Apollo.MutationHookOptions<DeleteMessageMutation, DeleteMessageMutationVariables>) {
-        return Apollo.useMutation<DeleteMessageMutation, DeleteMessageMutationVariables>(DeleteMessageDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteMessageMutation, DeleteMessageMutationVariables>(DeleteMessageDocument, options);
       }
 export type DeleteMessageMutationHookResult = ReturnType<typeof useDeleteMessageMutation>;
 export type DeleteMessageMutationResult = Apollo.MutationResult<DeleteMessageMutation>;
@@ -4346,7 +4375,8 @@ export type MakeMessageNotSecretMutationFn = Apollo.MutationFunction<MakeMessage
  * });
  */
 export function useMakeMessageNotSecretMutation(baseOptions?: Apollo.MutationHookOptions<MakeMessageNotSecretMutation, MakeMessageNotSecretMutationVariables>) {
-        return Apollo.useMutation<MakeMessageNotSecretMutation, MakeMessageNotSecretMutationVariables>(MakeMessageNotSecretDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<MakeMessageNotSecretMutation, MakeMessageNotSecretMutationVariables>(MakeMessageNotSecretDocument, options);
       }
 export type MakeMessageNotSecretMutationHookResult = ReturnType<typeof useMakeMessageNotSecretMutation>;
 export type MakeMessageNotSecretMutationResult = Apollo.MutationResult<MakeMessageNotSecretMutation>;
@@ -4381,7 +4411,8 @@ export const RoomOperatedDocument = gql`
  * });
  */
 export function useRoomOperatedSubscription(baseOptions: Apollo.SubscriptionHookOptions<RoomOperatedSubscription, RoomOperatedSubscriptionVariables>) {
-        return Apollo.useSubscription<RoomOperatedSubscription, RoomOperatedSubscriptionVariables>(RoomOperatedDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<RoomOperatedSubscription, RoomOperatedSubscriptionVariables>(RoomOperatedDocument, options);
       }
 export type RoomOperatedSubscriptionHookResult = ReturnType<typeof useRoomOperatedSubscription>;
 export type RoomOperatedSubscriptionResult = Apollo.SubscriptionResult<RoomOperatedSubscription>;
@@ -4410,7 +4441,8 @@ export const MessageEventDocument = gql`
  * });
  */
 export function useMessageEventSubscription(baseOptions: Apollo.SubscriptionHookOptions<MessageEventSubscription, MessageEventSubscriptionVariables>) {
-        return Apollo.useSubscription<MessageEventSubscription, MessageEventSubscriptionVariables>(MessageEventDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<MessageEventSubscription, MessageEventSubscriptionVariables>(MessageEventDocument, options);
       }
 export type MessageEventSubscriptionHookResult = ReturnType<typeof useMessageEventSubscription>;
 export type MessageEventSubscriptionResult = Apollo.SubscriptionResult<MessageEventSubscription>;
@@ -4439,7 +4471,8 @@ export const PongDocument = gql`
  * });
  */
 export function usePongSubscription(baseOptions?: Apollo.SubscriptionHookOptions<PongSubscription, PongSubscriptionVariables>) {
-        return Apollo.useSubscription<PongSubscription, PongSubscriptionVariables>(PongDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<PongSubscription, PongSubscriptionVariables>(PongDocument, options);
       }
 export type PongSubscriptionHookResult = ReturnType<typeof usePongSubscription>;
 export type PongSubscriptionResult = Apollo.SubscriptionResult<PongSubscription>;

@@ -166,6 +166,7 @@ const bringPanelToFront = (state: RoomConfig | null, action: PanelAction): void 
     }
 };
 
+// CONSIDER: 各panelのmoveとresizeは、細分化する必要性が薄いため統合したほうがよさそう。
 const roomConfigModule = createSlice({
     name: 'roomConfig',
     initialState: null as RoomConfig | null,
@@ -225,7 +226,7 @@ const roomConfigModule = createSlice({
                 return;
             }
             const panelId = generators.simpleId();
-            state.panels.boardsPanels[panelId] = {...action.payload.panel, zIndex: -1 };
+            state.panels.boardsPanels[panelId] = { ...action.payload.panel, zIndex: -1 };
             bringPanelToFront(state, { roomId: action.payload.roomId, target: { type: boardsPanel, panelId } });
         },
         updateBoardPanel: (state: RoomConfig | null, action: PayloadAction<UpdateBoardPanelAction>) => {
@@ -304,7 +305,16 @@ const roomConfigModule = createSlice({
                 return;
             }
             const board = targetPanel.boards[compositeKeyToString(action.payload.boardKey)] ?? createDefaultBoardConfig();
-            board.zoom = board.zoom + action.payload.zoomDelta;
+
+            const prevZoom = board.zoom;
+            const nextZoom = prevZoom + action.payload.zoomDelta;
+            const prevScale = Math.pow(2, prevZoom);
+            const nextScale = Math.pow(2, nextZoom);
+
+            board.zoom = nextZoom;
+            board.offsetX -= (action.payload.prevCanvasWidth / 2 * (1 / nextScale - 1 / prevScale));
+            board.offsetY -= (action.payload.prevCanvasHeight / 2 * (1 / nextScale - 1 / prevScale));
+
             targetPanel.boards[compositeKeyToString(action.payload.boardKey)] = board;
         },
         resetBoard: (state: RoomConfig | null, action: PayloadAction<ResetBoardAction>) => {

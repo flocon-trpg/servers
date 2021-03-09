@@ -18,6 +18,15 @@ const Index: React.FC = () => {
         <Layout requiresLogin={false} showEntryForm={false}>
             <div style={({ margin: 10 })}>
                 <Typography.Title level={2}>アップデート履歴</Typography.Title>
+                <Typography.Title level={3}>2021/03/10</Typography.Title>
+                <ul>
+                    <li>ボードが画面中央にズームするようになった</li>
+                    <li>Participantがすべて退室済みになるバグを修正</li>
+                </ul>
+                <Typography.Title level={3}>2021/03/09</Typography.Title>
+                <ul>
+                    <li>立ち絵機能を実装</li>
+                </ul>
                 <Typography.Title level={3}>2021/03/06</Typography.Title>
                 <ul>
                     <li>キャラクターの複製機能を実装</li>
@@ -46,7 +55,6 @@ const Index: React.FC = () => {
                     <li>デザインはまだ洗練されてない場所が多い。例えば全体的に白背景で殺風景。また、出力したログやチャットの見た目（特にダイスを振ったとき）も現段階ではおそらく不格好でわかりにくい。</li>
                     <li>部屋のブックマーク</li>
                     <li>（一般公開するまでに）マニュアルおよび配布サイトの作成</li>
-                    <li>立ち絵（画像を表示すること自体はそこまで難しくないが、どのような形で立ち絵を表現するのかが悩みどころ）</li>
                 </ul>
                 <Typography.Title level={4}>優先度低</Typography.Title>
                 <ul>

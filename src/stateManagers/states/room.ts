@@ -263,7 +263,7 @@ export namespace Room {
         });
 
         return {
-            ...applyOperationCore({state, operation}),
+            ...applyOperationCore({ state, operation }),
             participants
         };
     };
@@ -346,11 +346,11 @@ export namespace Room {
             state: state.participants,
             first: first.participants,
             second: second.participants,
-            innerCompose: ({state, first, second}) => {
+            innerCompose: ({ state, first, second }) => {
                 if (state === undefined) {
                     throw 'Participant state not found.';
                 }
-                return Participant.compose({state, first, second});
+                return Participant.compose({ state, first, second });
             },
         });
 
@@ -390,7 +390,7 @@ export namespace Room {
             inner: ParamName.transform,
             diff: ParamName.diff
         });
-        
+
 
         const firstPrime: Omit<GetOperation, 'participants'> = {
             boards: first.boards.wrap(boards.firstPrime),
@@ -399,7 +399,7 @@ export namespace Room {
             paramNames: first.paramNames.wrap(paramNames.firstPrime),
 
         };
-        const secondPrime: Omit<GetOperation, 'participants' > = {
+        const secondPrime: Omit<GetOperation, 'participants'> = {
             boards: first.boards.wrap(boards.secondPrime),
             bgms: bgms.secondPrime,
             characters: first.characters.wrap(characters.secondPrime),
