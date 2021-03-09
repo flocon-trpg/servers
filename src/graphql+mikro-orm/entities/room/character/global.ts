@@ -242,7 +242,7 @@ export namespace GlobalCharacter {
                     numMaxParams: GlobalNumParam.Global.ToGraphQL.stateMany({ source: source.numMaxParams, createdByMe }),
                     strParams: GlobalStrParam.Global.ToGraphQL.stateMany({ source: source.strParams, createdByMe }),
                     pieces: GlobalPiece.Global.ToGraphQL.stateMany({ source: source.pieces, createdByMe }),
-                    tachieLocations: GlobalBoardLocation.Global.ToGraphQL.stateMany({ source: source.pieces, createdByMe }),
+                    tachieLocations: GlobalBoardLocation.Global.ToGraphQL.stateMany({ source: source.tachieLocations, createdByMe }),
                 };
             };
 
@@ -574,6 +574,7 @@ export namespace GlobalCharacter {
                 isPrivate: ReplaceBooleanDownOperationModule.compose(first.isPrivate, second.isPrivate),
                 name: ReplaceStringDownOperationModule.compose(first.name, second.name),
                 image: ReplaceNullableFilePathDownOperationModule.compose(first.image, second.image),
+                tachieImage: ReplaceNullableFilePathDownOperationModule.compose(first.tachieImage, second.tachieImage),
                 boolParams: boolParams.value ?? new Map(),
                 numParams: numParams.value ?? new Map(),
                 numMaxParams: numMaxParams.value ?? new Map(),
@@ -663,6 +664,10 @@ export namespace GlobalCharacter {
                 prevState.image = downOperation.image.oldValue ?? undefined;
                 twoWayOperation.image = { oldValue: downOperation.image.oldValue ?? undefined, newValue: nextState.image };
             }
+            if (downOperation.tachieImage !== undefined) {
+                prevState.tachieImage = downOperation.tachieImage.oldValue ?? undefined;
+                twoWayOperation.tachieImage = { oldValue: downOperation.tachieImage.oldValue ?? undefined, newValue: nextState.tachieImage };
+            }
             if (downOperation.isPrivate !== undefined) {
                 prevState.isPrivate = downOperation.isPrivate.oldValue;
                 twoWayOperation.isPrivate = { ...downOperation.isPrivate, newValue: nextState.isPrivate };
@@ -751,6 +756,11 @@ export namespace GlobalCharacter {
                 second: clientOperation.image,
                 prevState: prevState.image,
             });
+            twoWayOperation.tachieImage = ReplaceNullableFilePathTwoWayOperationModule.transform({
+                first: serverOperation?.tachieImage,
+                second: clientOperation.tachieImage,
+                prevState: prevState.tachieImage,
+            });
             twoWayOperation.isPrivate = ReplaceBooleanTwoWayOperationModule.transform({
                 first: serverOperation?.isPrivate,
                 second: clientOperation.isPrivate,
@@ -809,6 +819,9 @@ export namespace GlobalCharacter {
             const resultType: TwoWayOperationTypeValue = {};
             if (prevState.image !== nextState.image) {
                 resultType.image = { oldValue: prevState.image, newValue: nextState.image };
+            }
+            if (prevState.tachieImage !== nextState.tachieImage) {
+                resultType.tachieImage = { oldValue: prevState.tachieImage, newValue: nextState.tachieImage };
             }
             if (prevState.isPrivate !== nextState.isPrivate) {
                 resultType.isPrivate = { oldValue: prevState.isPrivate, newValue: nextState.isPrivate };
@@ -887,6 +900,9 @@ export namespace GlobalCharacter {
 
             if (downOperation.image !== undefined) {
                 result.image = downOperation.image.oldValue ?? undefined;
+            }
+            if (downOperation.tachieImage !== undefined) {
+                result.tachieImage = downOperation.tachieImage.oldValue ?? undefined;
             }
             if (downOperation.isPrivate !== undefined) {
                 result.isPrivate = downOperation.isPrivate.oldValue;

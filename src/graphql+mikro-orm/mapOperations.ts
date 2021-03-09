@@ -35,17 +35,17 @@ type UpdateUp<TUpOperation> = {
 
 export type MapUpOperationElementUnion<TState, TUpOperation> = ReplaceUp<TState> | UpdateUp<TUpOperation>;
 
-type ReplaceFull<TState> = {
+type ReplaceTwoWay<TState> = {
     type: typeof replace;
     operation: { oldValue: TState | undefined; newValue: TState | undefined };
 }
 
-type UpdateFull<TDownOperation> = {
+type UpdateTwoWay<TOperation> = {
     type: typeof update;
-    operation: TDownOperation;
+    operation: TOperation;
 }
 
-export type MapTwoWayOperationElementUnion<TState, TDownOperation> = ReplaceFull<TState> | UpdateFull<TDownOperation>;
+export type MapTwoWayOperationElementUnion<TState, TOperation> = ReplaceTwoWay<TState> | UpdateTwoWay<TOperation>;
 
 export type MapDownOperation<TKey, TState, TDownOperation> = Map<TKey, MapDownOperationElementUnion<TState, TDownOperation>>;
 
@@ -228,8 +228,9 @@ export const toGraphQL = <TKey, TSourceState, TReplaceOperation, TSourceOperatio
     toReplaceOperation: (params: { prevState?: TSourceState; nextState?: TSourceState; key: TKey }) => TReplaceOperation | null | undefined;
     toUpdateOperation: (params: { operation: TSourceOperation; key: TKey }) => TUpdateOperation;
 }): GraphQLOperation<TReplaceOperation, TUpdateOperation> => {
+    const sourceAsDualKey: DualKeyMapOperations.ReadonlyDualKeyMapTwoWayOperation<string, TKey, TSourceState, TSourceOperation> = toDualKeyMap(source);
     return DualKeyMapOperations.toGraphQL({
-        source: toDualKeyMap(source),
+        source: sourceAsDualKey,
         toReplaceOperation: ({ prevState, nextState, key: dualKey }) => toReplaceOperation({ prevState, nextState, key: dualKey.second }),
         toUpdateOperation: ({ operation, key: dualKey }) => toUpdateOperation({ operation, key: dualKey.second }),
     });
@@ -250,8 +251,9 @@ export const toGraphQLWithState = <TKey, TSourceState, TReplaceOperation, TSourc
     toReplaceOperation: (params: { prevState?: TSourceState; nextState?: TSourceState; key: TKey }) => TReplaceOperation | null | undefined;
     toUpdateOperation: (params: { operation: TSourceOperation; key: TKey; prevState: TSourceState; nextState: TSourceState }) => TUpdateOperation | null | undefined;
 }): GraphQLOperation<TReplaceOperation, TUpdateOperation> => {
+    const sourceAsDualKey: DualKeyMapOperations.ReadonlyDualKeyMapTwoWayOperation<string, TKey, TSourceState, TSourceOperation> = toDualKeyMap(source);
     return DualKeyMapOperations.toGraphQLWithState({
-        source: toDualKeyMap(source),
+        source: sourceAsDualKey,
         isPrivate: (state, key) => isPrivate(state, key.second),
         prevState: toDualKeyMap(prevState),
         nextState: toDualKeyMap(nextState),
@@ -303,9 +305,11 @@ export const transform = <TKey, TServerState, TClientState, TFirstOperation, TSe
 }: TransformParameters<TKey, TServerState, TClientState, TFirstOperation, TSecondOperation>): Result<MapTwoWayOperation<TKey, TServerState, TFirstOperation>> => {
     const cancelRemove = protectedValuePolicy.cancelRemove;
     const cancelCreate = protectedValuePolicy.cancelCreate;
+    const firstAsDualKey: DualKeyMapOperations.ReadonlyDualKeyMapTwoWayOperation<string, TKey, TServerState, TFirstOperation> | undefined = first === undefined ? undefined : toDualKeyMap(first);
+    const secondAsDualKey: DualKeyMapOperations.ReadonlyDualKeyMapUpOperation<string, TKey, TClientState, TSecondOperation> = toDualKeyMap(second);
     const stateMapResult = DualKeyMapOperations.transform({
-        first: first === undefined ? undefined : toDualKeyMap(first),
-        second: toDualKeyMap(second),
+        first: firstAsDualKey,
+        second: secondAsDualKey,
         prevState: toDualKeyMap(prevState),
         nextState: toDualKeyMap(nextState),
         innerTransform: params => innerTransform({ ...params, key: params.key.second }),

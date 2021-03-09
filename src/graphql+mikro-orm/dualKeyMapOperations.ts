@@ -44,12 +44,12 @@ type ReplaceTwoWay<TState> = {
     operation: { oldValue: TState | undefined; newValue: TState | undefined };
 }
 
-type UpdateTwoWay<TDownOperation> = {
+type UpdateTwoWay<TOperation> = {
     type: typeof update;
-    operation: TDownOperation;
+    operation: TOperation;
 }
 
-export type DualKeyMapTwoWayOperationElementUnion<TState, TDownOperation> = ReplaceTwoWay<TState> | UpdateTwoWay<TDownOperation>;
+export type DualKeyMapTwoWayOperationElementUnion<TState, TOperation> = ReplaceTwoWay<TState> | UpdateTwoWay<TOperation>;
 
 export type DualKeyMapDownOperation<TKey1, TKey2, TState, TDownOperation> = DualKeyMap<TKey1, TKey2, DualKeyMapDownOperationElementUnion<TState, TDownOperation>>;
 export type StateMapDownOperation<TState, TDownOperation> = CustomDualKeyMap<CompositeKey, string, string, DualKeyMapDownOperationElementUnion<TState, TDownOperation>>;
