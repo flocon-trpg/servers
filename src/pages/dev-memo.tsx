@@ -18,6 +18,13 @@ const Index: React.FC = () => {
         <Layout requiresLogin={false} showEntryForm={false}>
             <div style={({ margin: 10 })}>
                 <Typography.Title level={2}>アップデート履歴</Typography.Title>
+                <Typography.Title level={3}>2021/03/11</Typography.Title>
+                <ul>
+                    <li>キャラクターとして発言したとき、立ち絵に💬が出る機能とそのときに半透明化が解除される機能を追加（暫定的な措置として、フリーチャンネルでは無効化しています。また、秘話 a.k.a. プライペートメッセージでは💬や半透明化解除はトリガーされません）</li>
+                    <li>数値コマの視認性を取り急ぎ上げた</li>
+                    <li>数値コマの置かれる位置がずれていたバグを修正</li>
+                    <li>数値コマにwebフォント(Noto Sans JP Regular)を設定</li>
+                </ul>
                 <Typography.Title level={3}>2021/03/10</Typography.Title>
                 <ul>
                     <li>BoardとCharacterが削除可能になった</li>
