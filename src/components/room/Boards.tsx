@@ -24,6 +24,8 @@ import { MyNumberValue } from '../../stateManagers/states/myNumberValue';
 import { Participant } from '../../stateManagers/states/participant';
 import { MyKonva } from '../../foundations/MyKonva';
 import { BoardLocation } from '../../stateManagers/states/boardLocation';
+import { AllRoomMessagesResult, publicMessage, RoomMessage, useFilteredRoomMessages } from '../../hooks/useRoomMessages';
+import { $free } from '../../@shared/Constants';
 
 const emptyCharacterOperation = (): Character.PostOperation => ({
     boolParams: new Map(),
@@ -100,6 +102,10 @@ type SelectedPieceKey = {
     stateId: string;
 }
 
+const publicMessageFilter = (message: RoomMessage): boolean => {
+    return message.type === publicMessage;
+};
+
 type BoardProps = {
     roomId: string;
     myUserUid: string;
@@ -109,6 +115,7 @@ type BoardProps = {
     boardsPanelConfig: BoardsPanelConfig;
     characters: ReadonlyStateMap<Character.State>;
     participants: ReadonlyMap<string, Participant.State>;
+    allRoomMessages: AllRoomMessagesResult;
     onClick?: (e: KonvaEventObject<MouseEvent>) => void;
     onContextMenu?: (e: KonvaEventObject<PointerEvent>, stateOffset: MyKonva.Vector2) => void; // stateOffsetは、configなどのxy座標を基準にした位置。
     canvasWidth: number;
@@ -124,6 +131,7 @@ const Board: React.FC<BoardProps> = ({
     boardsPanelConfig,
     characters,
     participants,
+    allRoomMessages,
     onClick,
     onContextMenu,
     canvasWidth,
@@ -134,8 +142,20 @@ const Board: React.FC<BoardProps> = ({
     const backgroundImage = useImageFromGraphQL(board.backgroundImage);
     const dispatch = useDispatch();
     const operate = React.useContext(OperateContext);
+    const publicMessages = useFilteredRoomMessages({ allRoomMessagesResult: allRoomMessages, filter: publicMessageFilter });
 
     const boardConfig = boardsPanelConfig.boards[compositeKeyToString(boardKey)] ?? createDefaultBoardConfig();
+
+    const lastPublicMessage = (() => {
+        if (publicMessages.length === 0) {
+            return undefined;
+        }
+        const lastMessage = publicMessages[publicMessages.length - 1];
+        if (lastMessage.type !== publicMessage) {
+            return undefined;
+        }
+        return lastMessage.value;
+    })();
 
     const grid = (() => {
         if (board.cellRowCount <= 0 ||
@@ -175,7 +195,7 @@ const Board: React.FC<BoardProps> = ({
                 // TODO: 画像なしでコマを表示する
                 return null;
             }
-            return <MyKonva.IconImage
+            return <MyKonva.Image
                 {...Piece.getPosition({ ...board, state: pieceValue })}
                 key={compositeKeyToString(characterKey)}
                 filePath={character.image}
@@ -211,7 +231,11 @@ const Board: React.FC<BoardProps> = ({
                 // TODO: 画像なしでコマを表示する
                 return null;
             }
-            return <MyKonva.IconImage
+            return <MyKonva.Image
+                message={lastPublicMessage}
+                messageFilter={msg => {
+                    return msg.createdBy === characterKey.createdBy && msg.characterStateId === characterKey.id && msg.channelKey !== $free;
+                }}
                 x={pieceValue.x}
                 y={pieceValue.y}
                 w={pieceValue.w}
@@ -410,6 +434,7 @@ type Props = {
     canvasHeight: number;
     me: Participant.State;
     myUserUid: string;
+    allRoomMessages: AllRoomMessagesResult;
 }
 
 const boardsDropDownStyle: React.CSSProperties = {
@@ -424,7 +449,19 @@ const zoomButtonStyle: React.CSSProperties = {
     right: 20,
 };
 
-const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigId, characters, participants, roomId, canvasWidth: width, canvasHeight: height, me, myUserUid }: Props) => {
+const Boards: React.FC<Props> = ({
+    boards,
+    boardsPanelConfig,
+    boardsPanelConfigId,
+    characters,
+    participants,
+    roomId,
+    canvasWidth: width,
+    canvasHeight: height,
+    me,
+    myUserUid,
+    allRoomMessages,
+}: Props) => {
     const dispatchRoomComponentsState = React.useContext(DispatchRoomComponentsStateContext);
     const dispatch = useDispatch();
     const [contextMenuState, setContextMenuState] = React.useState<ContextMenuState | null>(null);
@@ -463,6 +500,7 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
             boardsPanelConfigId={boardsPanelConfigId}
             characters={characters}
             participants={participants}
+            allRoomMessages={allRoomMessages}
             onClick={() => setContextMenuState(null)}
             onContextMenu={(e, stateOffset) => {
                 e.evt.preventDefault();
@@ -904,7 +942,10 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
                 return <Menu.SubMenu title={title} disabled />;
             }
 
-            const cellPosition = Piece.getCellPosition({ ...contextMenuState, board });
+            const nonCellPosition = ContextMenuState.toKonvaPosition({ contextMenuState, boardConfig });
+            const cellPosition = Piece.getCellPosition({ x: nonCellPosition.x, y: nonCellPosition.y, board });
+
+
             // TODO: x,y,w,h の値が適当
             const pieceLocationWhichIsCellMode = {
                 x: 0,
@@ -920,8 +961,8 @@ const Boards: React.FC<Props> = ({ boards, boardsPanelConfig, boardsPanelConfigI
             };
 
             const pieceLocationWhichIsNotCellMode = {
-                x: contextMenuState.x,
-                y: contextMenuState.y,
+                x: nonCellPosition.x,
+                y: nonCellPosition.y,
                 w: 50,
                 h: 50,
                 isPrivate: false,

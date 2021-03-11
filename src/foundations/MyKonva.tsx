@@ -6,7 +6,11 @@ import { FilePath } from '../utils/types';
 import * as ReactKonva from 'react-konva';
 import { MyNumberValue } from '../stateManagers/states/myNumberValue';
 import { usePrevious } from '../hooks/usePrevious';
-import { animated, useSpring } from 'react-spring/konva.cjs';
+import { animated, useSpring, useTransition } from 'react-spring/konva.cjs';
+import { RoomPublicMessageFragment } from '../generated/graphql';
+import produce from 'immer';
+import { __ } from '../@shared/collection';
+import { interval } from 'rxjs';
 
 export namespace MyKonva {
     export type Vector2 = {
@@ -24,27 +28,235 @@ export namespace MyKonva {
         readonly newSize?: Size;
     }
 
-    const iconImageMinimalSize = 10;
+    type BalloonCoreProps = {
+        text0?: string;
+        text1?: string;
+        text2?: string;
+        text3?: string;
+        text4?: string;
+        x: number;
+        y: number;
+        width: number;
+    }
 
-    type IconImageProps = {
+    // BalloonCoreにおける1つのtextのheight。BalloonCore全体のheightはtextHeight*5になる
+    const balloonCoreTextHeight = 58;
+
+    const BalloonCore: React.FC<BalloonCoreProps> = ({
+        text0,
+        text1,
+        text2,
+        text3,
+        text4,
+        x,
+        y,
+        width,
+    }: BalloonCoreProps) => {
+        const labelOpacity = 0.8;
+
+        const transitions0 = useTransition(text0, {
+            from: { opacity: 0 },
+            enter: { opacity: labelOpacity},
+            leave: { opacity: 0 },
+        });
+        const transitions1 = useTransition(text1, {
+            from: { opacity: 0 },
+            enter: { opacity: labelOpacity},
+            leave: { opacity: 0 },
+        });
+        const transitions2 = useTransition(text2, {
+            from: { opacity: 0 },
+            enter: { opacity: labelOpacity },
+            leave: { opacity: 0 },
+        });
+        const transitions3 = useTransition(text3, {
+            from: { opacity: 0 },
+            enter: { opacity: labelOpacity },
+            leave: { opacity: 0 },
+        });
+        const transitions4 = useTransition(text4, {
+            from: { opacity: 0 },
+            enter: { opacity: labelOpacity },
+            leave: { opacity: 0 },
+        });
+
+        const createLabel = (textIndex: 0 | 1 | 2 | 3 | 4) => {
+            const transitions = [transitions0, transitions1, transitions2, transitions3, transitions4][textIndex];
+            return transitions((style, item) => {
+                return <animated.Group
+                    {...style}>
+                    {<ReactKonva.Label
+                        x={width / 2}
+                        y={balloonCoreTextHeight * (textIndex + 1)}
+                        width={width}
+                        height={balloonCoreTextHeight}>
+                        <ReactKonva.Tag
+                            strokeWidth={0}
+                            fill='#303030'
+                            shadowColor='black'
+                            shadowBlur={5}
+                            shadowOffsetX={5}
+                            shadowOffsetY={5}
+                            shadowOpacity={0.3}
+                            pointerWidth={6}
+                            pointerHeight={6}
+                            pointerDirection='down'
+                            lineJoin='round'/>
+                        <ReactKonva.Text
+                            text={item}
+                            fontFamily='Noto Sans JP Regular'
+                            fontSize={14}
+                            padding={4}
+                            fill='white'
+                            verticalAlign='middle'
+                            width={width}
+                            height={balloonCoreTextHeight - 7}
+                            wrap='word'
+                            ellipsis />
+                    </ReactKonva.Label>}
+                </animated.Group>;
+            });
+        };
+
+        return <animated.Group
+            x={x}
+            y={y}
+            width={width}
+            height={balloonCoreTextHeight * 5}>
+            {createLabel(0)}
+            {createLabel(1)}
+            {createLabel(2)}
+            {createLabel(3)}
+            {createLabel(4)}
+        </animated.Group>;
+    };
+
+    type BalloonProps = {
+        message?: { messageId: string; text?: string | null; createdAt: number };
+        x: number;
+        y: number;
+        width: number;
+        onBalloonChange: (balloonExists: boolean) => void;
+    }
+
+    // 💬を表すコンポーネント。
+    const Balloon: React.FC<BalloonProps> = ({
+        message,
+        x,
+        y,
+        width,
+        onBalloonChange,
+    }: BalloonProps) => {
+        const onTextsChangeRef = React.useRef(onBalloonChange);
+        React.useEffect(() => {
+            onTextsChangeRef.current = onBalloonChange;
+        }, [onBalloonChange]);
+
+        // indexが小さいほどcreatedAtが大きい(新しい)。
+        const [recentMessages, setRecentMessages] = React.useState<ReadonlyArray<{ messageId: string; text?: string | null; createdAt: number }>>([]);
+
+        // 書き込みがあってから💬を画面上にどれだけの期間表示させるか。ただし、サーバーやクライアントの時刻のずれに影響されるため、これらが合っていないと表示期間がゼロになったり短くなったり長くなったりする。
+        const timeWindow = 15 * 1000;
+
+        React.useEffect(() => {
+            if (message == null) {
+                return;
+            }
+
+            const now = new Date().getTime();
+            setRecentMessages(recentMessages => {
+                if (recentMessages.some(msg => msg.messageId === message.messageId) || now - message.createdAt > timeWindow) {
+                    return recentMessages;
+                }
+                return [...recentMessages, message].sort((x, y) => y.createdAt - x.createdAt);
+            });
+        }, [message, timeWindow]);
+
+        // このuseEffectで、recentMessagesの要素数が大きくなることで負荷がかかることを防いでいる。
+        React.useEffect(() => {
+            const unsubscribe = interval(2000).subscribe(() => {
+                setRecentMessages(recentMessages => {
+                    const now = new Date().getTime();
+                    return [...recentMessages].filter(msg => now - msg.createdAt <= timeWindow);
+                });
+            });
+            return () => unsubscribe.unsubscribe();
+        }, [timeWindow]);
+
+        const texts = [...recentMessages]
+            .filter(msg => msg.text != null)
+            .sort((x, y) => y.createdAt - x.createdAt);
+            
+        const [text0, text1, text2, text3, text4] = [
+            texts[4]?.text ?? undefined,
+            texts[3]?.text ?? undefined, 
+            texts[2]?.text ?? undefined, 
+            texts[1]?.text ?? undefined,
+            texts[0]?.text ?? undefined
+        ];
+
+        const [areAllTextsUndefined, setAreAllTextUndefined] = React.useState([text0, text1, text2, text3, text4].every(t => t === undefined));
+        React.useEffect(() => {
+            setAreAllTextUndefined([text0, text1, text2, text3, text4].every(t => t === undefined));
+        }, [text0, text1, text2, text3, text4]);
+        React.useEffect(() => {
+            onTextsChangeRef.current(!areAllTextsUndefined);
+        }, [areAllTextsUndefined]);
+
+        return <BalloonCore
+            x={x}
+            y={y}
+            width={width}
+            text0={text0}
+            text1={text1}
+            text2={text2}
+            text3={text3}
+            text4={text4} />;
+    };
+
+    const imageMinimalSize = 10;
+
+    type ImageProps = {
         filePath: FilePath;
         isSelected: boolean;
         draggable: boolean;
         listening: boolean;
         opacity?: number;
 
+        // これが変わるたび、そのメッセージが💬として表示される。ただし、undefinedになったときは何も起こらない(💬が消えることもない)。
+        // 💬を使いたくない場合は常にundefinedにすればよい。
+        message?: RoomPublicMessageFragment;
+
+        // messageが常にundefinedならばこれもundefinedにしてよい。
+        // re-renderのたびに実行されるため、軽量なおかつ副作用のない関数を用いることを強く推奨。
+        messageFilter?: (message: RoomPublicMessageFragment) => boolean;
+
         onDragEnd?: (resize: DragEndResult) => void;
         onClick?: () => void;
     } & Vector2 & Size
 
-    export const IconImage: React.FC<IconImageProps> = (props: IconImageProps) => {
+    export const Image: React.FC<ImageProps> = (props: ImageProps) => {
         /*
         リサイズや移動の実装方法についてはこちらを参照
         https://konvajs.org/docs/react/Transformer.html
         */
 
+        const [opacitySpringProps, setOpacitySpringProps] = useSpring(() => ({
+            config: {
+                duration: 100,
+            },
+            to: {
+                opacity: props.opacity ?? 1,
+            }
+        }), []);
+
+        const messageFilterRef = React.useRef(props.messageFilter ?? (() => true));
+        React.useEffect(() => {
+            messageFilterRef.current = props.messageFilter ?? (() => true);
+        }, [props.messageFilter]);
+
         const image = useImageFromGraphQL(props.filePath);
-        const imageRef = React.useRef<Konva.Image | null>(null);
+        const groupRef = React.useRef<Konva.Group | null>(null);
         const transformerRef = React.useRef<Konva.Transformer | null>(null);
 
         React.useEffect(() => {
@@ -54,7 +266,7 @@ export namespace MyKonva {
             if (transformerRef.current == null) {
                 return;
             }
-            transformerRef.current.nodes(imageRef.current == null ? [] : [imageRef.current]);
+            transformerRef.current.nodes(groupRef.current == null ? [] : [groupRef.current]);
             const layer = transformerRef.current.getLayer();
             if (layer == null) {
                 return;
@@ -88,15 +300,13 @@ export namespace MyKonva {
 
         return (
             <>
-                <ReactKonva.Image
+                <ReactKonva.Group
                     listening={props.listening}
-                    ref={imageRef}
+                    ref={groupRef}
                     x={props.x}
                     y={props.y}
                     width={props.w}
                     height={props.h}
-                    opacity={props.opacity}
-                    image={image.image}
                     draggable={props.draggable}
                     onClick={e => {
                         e.cancelBubble = true;
@@ -109,7 +319,7 @@ export namespace MyKonva {
                         // and NOT its width or height
                         // but in the store we have only width and height
                         // to match the data better we will reset scale on transform end
-                        const node = imageRef.current;
+                        const node = groupRef.current;
                         if (node == null) {
                             return;
                         }
@@ -129,24 +339,41 @@ export namespace MyKonva {
                             },
                             newSize: {
                                 // set minimal value
-                                w: Math.max(iconImageMinimalSize, node.width() * scaleX),
-                                h: Math.max(iconImageMinimalSize, node.height() * scaleY)
+                                w: Math.max(imageMinimalSize, node.width() * scaleX),
+                                h: Math.max(imageMinimalSize, node.height() * scaleY)
                             },
                         });
-                    }} />
+                    }}>
+                    <animated.Image
+                        {...opacitySpringProps}
+                        x={0}
+                        y={0}
+                        width={props.w}
+                        height={props.h}
+                        image={image.image}
+                    />
+                </ReactKonva.Group>
                 {props.isSelected && (
                     <ReactKonva.Transformer
                         ref={transformerRef}
                         rotateEnabled={false}
                         boundBoxFunc={(oldBox, newBox) => {
                             // limit resize
-                            if (newBox.width < iconImageMinimalSize || newBox.height < iconImageMinimalSize) {
+                            if (newBox.width < imageMinimalSize || newBox.height < imageMinimalSize) {
                                 return oldBox;
                             }
                             return newBox;
                         }}>
                     </ReactKonva.Transformer>
                 )}
+                <Balloon
+                    x={props.x}
+                    y={props.y - (balloonCoreTextHeight * 5)}
+                    width={props.w}
+                    message={props.message == null ? undefined : (messageFilterRef.current(props.message) ? props.message : undefined)}
+                    onBalloonChange={balloonExists => {
+                        setOpacitySpringProps({ opacity: balloonExists ? 1 : (props.opacity ?? 1) });
+                    }} />
             </>
         );
     };
@@ -161,6 +388,7 @@ export namespace MyKonva {
 
         onDragEnd?: (resize: DragEndResult) => void;
         onClick?: () => void;
+
     } & Vector2 & Size
 
     export const MyNumberValue: React.FC<MyNumberValueProps> = (props: MyNumberValueProps) => {
@@ -182,7 +410,6 @@ export namespace MyKonva {
                 text: (prevText === '?' || text === '?') ? prevText : text,
                 scaleX: 1,
                 x: 0,
-
             },
             to: async (next, cancel) => {
                 if (prevText === '?' || text === '?') {
@@ -202,8 +429,8 @@ export namespace MyKonva {
             }
         }), [text]);
 
-        const baseColor = '#B0B0B040';
-        const transitionColor = '#FFB0B080';
+        const baseColor = '#F0F0F0FF';
+        const transitionColor = '#A0F0F0FF';
         const [rectSpringProps] = useSpring(() => ({
             config: {
                 duration: 300,
@@ -232,7 +459,7 @@ export namespace MyKonva {
             }
         }), [text]);
 
-        const layerRef = React.useRef<Konva.Layer | null>(null);
+        const groupRef = React.useRef<Konva.Group | null>(null);
         const transformerRef = React.useRef<Konva.Transformer | null>(null);
 
         React.useEffect(() => {
@@ -242,7 +469,7 @@ export namespace MyKonva {
             if (transformerRef.current == null) {
                 return;
             }
-            transformerRef.current.nodes(layerRef.current == null ? [] : [layerRef.current]);
+            transformerRef.current.nodes(groupRef.current == null ? [] : [groupRef.current]);
             const layer = transformerRef.current.getLayer();
             if (layer == null) {
                 return;
@@ -274,7 +501,7 @@ export namespace MyKonva {
             <>
                 <ReactKonva.Group
                     listening={props.listening}
-                    ref={layerRef}
+                    ref={groupRef}
                     x={props.x}
                     y={props.y}
                     width={props.w}
@@ -291,7 +518,7 @@ export namespace MyKonva {
                         // and NOT its width or height
                         // but in the store we have only width and height
                         // to match the data better we will reset scale on transform end
-                        const node = layerRef.current;
+                        const node = groupRef.current;
                         if (node == null) {
                             return;
                         }
@@ -311,8 +538,8 @@ export namespace MyKonva {
                             },
                             newSize: {
                                 // set minimal value
-                                w: Math.max(iconImageMinimalSize, node.width() * scaleX),
-                                h: Math.max(iconImageMinimalSize, node.height() * scaleY)
+                                w: Math.max(imageMinimalSize, node.width() * scaleX),
+                                h: Math.max(imageMinimalSize, node.height() * scaleY)
                             },
                         });
                     }}>
@@ -320,7 +547,10 @@ export namespace MyKonva {
                         {...rectSpringProps}
                         y={0}
                         width={props.w}
-                        height={props.h} />
+                        height={props.h}
+                        strokeWidth={2}
+                        stroke='#606060B0'
+                        cornerRadius={5} />
                     {
                         /* fontSizeの決め方は適当 */
                         /* CONSIDER: Noto Sans JP Regularがどのブラウザでも使えるのか？webフォントをダウンロードする処理が必要？ */
@@ -342,7 +572,7 @@ export namespace MyKonva {
                         rotateEnabled={false}
                         boundBoxFunc={(oldBox, newBox) => {
                             // limit resize
-                            if (newBox.width < iconImageMinimalSize || newBox.height < iconImageMinimalSize) {
+                            if (newBox.width < imageMinimalSize || newBox.height < imageMinimalSize) {
                                 return oldBox;
                             }
                             return newBox;

@@ -37,6 +37,7 @@ import ParticipantList from './ParticipantList';
 import NotificationContext, { graphQLErrors, Notification, text, TextNotification, toTextNotification } from './contexts/NotificationContext';
 import { Participant } from '../../stateManagers/states/participant';
 import MyNumberValueDrawer from './MyNumberValueDrawer';
+import { useAllRoomMessages } from '../../hooks/useRoomMessages';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -335,6 +336,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
     useRoomConfig(roomId);
     const myAuth = React.useContext(MyAuthContext);
     const roomConfig = useSelector(state => state.roomConfigModule);
+    const allRoomMessages = useAllRoomMessages({ roomId });
     const [confirmModalState, setConfirmModalState] = React.useState<ConfirmModalState>();
     const [isBecomePlayerModalVisible, setIsBecomePlayerModalVisible] = React.useState(false);
     const [isChangeMyParticipantNameModalVisible, setIsChangeMyParticipantNameModalVisible] = React.useState(false);
@@ -418,7 +420,8 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                     characters={roomState.characters}
                     participants={roomState.participants}
                     me={me}
-                    myUserUid={myAuth.uid} />
+                    myUserUid={myAuth.uid}
+                    allRoomMessages={allRoomMessages} />
             </DraggableCard>
         );
     });
@@ -596,7 +599,12 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                                     minHeight={150}
                                     minWidth={150}
                                     zIndex={roomConfig.panels.messagesPanel.zIndex}>
-                                    <RoomMessages roomId={roomId} participants={roomState.participants} characters={roomState.characters} notifications={allNotifications} />
+                                    <RoomMessages 
+                                        roomId={roomId}
+                                        allRoomMessages={allRoomMessages}
+                                        participants={roomState.participants} 
+                                        characters={roomState.characters} 
+                                        notifications={allNotifications} />
                                 </DraggableCard>}
                                 {roomConfig.panels.participantsPanel.isMinimized ? null : <DraggableCard
                                     header="Participants"

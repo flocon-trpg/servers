@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { Comment, message, Tabs, Button, Menu, Dropdown, Tooltip } from 'antd';
 import moment from 'moment';
-import { AllRoomMessagesSuccessResult, apolloError, failure, loading, useAllRoomMessages, useFilteredRoomMessages, publicChannel, RoomMessage, publicMessage, privateMessage, soundEffect, newEvent } from '../../hooks/useRoomMessages';
+import { AllRoomMessagesSuccessResult, apolloError, failure, loading, useAllRoomMessages, useFilteredRoomMessages, publicChannel, RoomMessage, publicMessage, privateMessage, soundEffect, newEvent, AllRoomMessagesResult } from '../../hooks/useRoomMessages';
 import { __ } from '../../@shared/collection';
 import useConstant from 'use-constant';
 import { FixedSizeList } from 'react-window';
@@ -638,6 +638,7 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
 
 type Props = {
     roomId: string;
+    allRoomMessages: AllRoomMessagesResult;
     // keyはUserUid
     participants: ReadonlyMap<string, Participant.State>;
     onActiveTabChange?: (activeTab: Tab) => void;
@@ -645,9 +646,8 @@ type Props = {
     notifications: ReadonlyArray<TextNotification>;
 }
 
-const RoomMessages: React.FC<Props> = ({ roomId, participants, onActiveTabChange, characters, notifications }: Props) => {
+const RoomMessages: React.FC<Props> = ({ roomId, allRoomMessages, participants, onActiveTabChange, characters, notifications }: Props) => {
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
-    const allRoomMessages = useAllRoomMessages({ roomId });
     const [soundEffect, setSoundEffect] = React.useState<{ filePath: FilePathFragment; volume: number }>();
 
     React.useEffect(() => {

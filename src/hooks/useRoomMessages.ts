@@ -398,7 +398,7 @@ export const useAllRoomMessages = ({ roomId }: { roomId: string }): AllRoomMessa
 const emptyArray: RoomMessage[] = [];
 
 // filterは、常に同じ参照にするかuseMemoなどを使うのを忘れずに。
-export const useFilteredRoomMessages = ({ allRoomMessagesResult, filter }: { allRoomMessagesResult: AllRoomMessagesSuccessResult; filter?: (message: RoomMessage) => boolean }): RoomMessage[] => {
+export const useFilteredRoomMessages = ({ allRoomMessagesResult, filter }: { allRoomMessagesResult: AllRoomMessagesResult; filter?: (message: RoomMessage) => boolean }): RoomMessage[] => {
     const [result, setResult] = React.useState<RoomMessage[] | null>(null);
     const prevFilterRef = React.useRef(filter);
     React.useEffect(() => {
@@ -419,7 +419,9 @@ export const useFilteredRoomMessages = ({ allRoomMessagesResult, filter }: { all
                     // RoomMessage[]を更新し、以後は（filterが変更されない限り）eventを利用して差分のみが更新される。
                     return allRoomMessagesResult.value.messages.filter(filter ?? (() => true));
                 });
-
+                return;
+            default:
+                return;
         }
     }, [allRoomMessagesResult, filter]);
     return result ?? emptyArray;
