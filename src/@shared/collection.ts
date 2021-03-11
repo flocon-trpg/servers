@@ -40,7 +40,7 @@ class $Iterator<T> {
         return result;
     }
 
-    public exists(predicate: (elem: T, index: number) => boolean): boolean {
+    public some(predicate: (elem: T, index: number) => boolean): boolean {
         return this.find(predicate) !== undefined;
     }
 

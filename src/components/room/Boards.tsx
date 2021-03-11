@@ -697,8 +697,8 @@ const Boards: React.FC<Props> = ({
             return (
                 <Menu.SubMenu title={title}>
                     {__(characters.toArray()).compact(([key, value]) => {
-                        const pieceExists = __(value.pieces).exists(([boardKey]) => activeBoardKey.id === boardKey.id && activeBoardKey.createdBy === boardKey.createdBy);
-                        const tachieExists = __(value.tachieLocations).exists(([boardKey]) => activeBoardKey.id === boardKey.id && activeBoardKey.createdBy === boardKey.createdBy);
+                        const pieceExists = __(value.pieces).some(([boardKey]) => activeBoardKey.id === boardKey.id && activeBoardKey.createdBy === boardKey.createdBy);
+                        const tachieExists = __(value.tachieLocations).some(([boardKey]) => activeBoardKey.id === boardKey.id && activeBoardKey.createdBy === boardKey.createdBy);
 
                         const { x, y } = ContextMenuState.toKonvaPosition({ contextMenuState, boardConfig });
                         const cellPosition = Piece.getCellPosition({ x, y, board });
@@ -977,7 +977,7 @@ const Boards: React.FC<Props> = ({
                 <Menu.SubMenu title={title}>
                     <Menu.SubMenu title='数値'>
                         {__(me.myNumberValues).compact(([key, value]) => {
-                            const pieceExists = __(value.pieces).exists(([boardKey]) => activeBoardKey.id === boardKey.id && activeBoardKey.createdBy === boardKey.createdBy);
+                            const pieceExists = __(value.pieces).some(([boardKey]) => activeBoardKey.id === boardKey.id && activeBoardKey.createdBy === boardKey.createdBy);
                             return (
                                 <Menu.SubMenu key={key} title={<span>{pieceExists ? <Icon.CheckOutlined /> : null} {MyNumberValue.stringify(value)}</span>}>
                                     <Menu.Item
