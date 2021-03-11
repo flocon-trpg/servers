@@ -1,13 +1,10 @@
 import { User } from '../../user/mikro-orm';
 import { Collection, Entity, Enum, IdentifiedReference, Index, JsonType, ManyToOne, OneToMany, OneToOne, PrimaryKey, PrimaryKeyType, Property, Reference, Unique } from '@mikro-orm/core';
 import { v4 } from 'uuid';
-import { FileSourceType } from '../../../../enums/FileSourceType';
-import { ReplaceNullableFilePathDownOperation, ReplaceNullableNumberDownOperation } from '../../../Operations';
 import { Room, RoomOp } from '../mikro-orm';
 import { ParticipantRoleOperation } from '../../../../enums/ParticipantRoleOperation';
 import { ParticipantRole } from '../../../../enums/ParticipantRole';
 import { AddMyValueOp, MyValue, RemovedMyValue, RemoveMyValueOp, UpdateMyValueOp } from './myValue/mikro-orm_value';
-import { RemovedMyValuePieceByPartici } from './myValue/mikro-orm_piece';
 
 type ParticiBaseParams = {
     role: ParticipantRole | undefined;

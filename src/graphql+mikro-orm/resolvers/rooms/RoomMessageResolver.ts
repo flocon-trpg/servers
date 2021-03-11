@@ -1300,7 +1300,7 @@ export class RoomMessageResolver {
         const userUid: string = context.decodedIdToken.value.uid;
 
         if (payload.value.__tstype === RoomPrivateMessageType) {
-            if (payload.value.visibleTo.find(vt => vt === userUid) === undefined) {
+            if (payload.value.visibleTo.every(vt => vt !== userUid)) {
                 return undefined;
             }
         }
@@ -1308,7 +1308,7 @@ export class RoomMessageResolver {
             if (payload.visibleTo == null) {
                 throw 'payload.visibleTo is required.';
             }
-            if (payload.visibleTo.find(vt => vt === userUid) === undefined) {
+            if (payload.visibleTo.every(vt => vt !== userUid)) {
                 return undefined;
             }
         }

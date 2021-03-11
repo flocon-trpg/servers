@@ -5,7 +5,6 @@ import { FilePath as GlobalFilePath } from './entities/filePath/global';
 import { TextDownOperation as TextDownOperationCore, TextUpOperation as TextUpOperationCore, TextTwoWayOperation as TextTwoWayOperationCore, ApplyError, PositiveInt, ComposeAndTransformError, retain, insert$, delete$, NonEmptyString, TextUpOperation } from '../@shared/textOperation';
 import { CustomResult, ResultModule } from '../@shared/Result';
 import { __ } from '../@shared/collection';
-import { undefinedForAll } from '../utils/helpers';
 import { ParticipantRole } from '../enums/ParticipantRole';
 
 /* validateメソッドは、mikro-ormでJSONとして保存された値をチェックするために使われる。
