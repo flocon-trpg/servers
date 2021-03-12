@@ -156,7 +156,7 @@ export namespace MyKonva {
         const [recentMessages, setRecentMessages] = React.useState<ReadonlyArray<{ messageId: string; text?: string | null; createdAt: number }>>([]);
 
         // 書き込みがあってから💬を画面上にどれだけの期間表示させるか。ただし、サーバーやクライアントの時刻のずれに影響されるため、これらが合っていないと表示期間がゼロになったり短くなったり長くなったりする。
-        const timeWindow = 15 * 1000;
+        const timeWindow = 30 * 1000;
 
         React.useEffect(() => {
             if (message == null) {

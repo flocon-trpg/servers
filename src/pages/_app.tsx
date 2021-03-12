@@ -61,11 +61,13 @@ const createApolloClient = (config: Config, signedInAs?: firebase.User, omitWebS
                 connectionParams: createConnectionParams(),
 
                 // herokuのfree planでwssを使う（wsだと問題ない模様）と、"WebSocket connection to 'wss://xxxxxx/graphql' failed: WebSocket is closed before the connection is established."というエラーが出ることが多い（herokuやfree planが理由の1つなのかどうかは不明）。
-                // https://github.com/apollographql/subscriptions-transport-ws/issues/377 をヒントに、おそらくタイムアウトが早すぎるのが原因だと考えた。そこで、下のようにタイムアウトを適当な値であるが少し長めにとってみたところ、エラーはなくなった。
-                // TODO: タイムアウトに関わりそうなプロパティを手当たり次第5000という適当な値に設定しているので、必要のない設定を削除したり、5000という値を調整したほうがいい。
-                timeout: 5000,
-                minTimeout: 5000,
+                // https://github.com/apollographql/subscriptions-transport-ws/issues/377 をヒントに、おそらくタイムアウトが早すぎるのが原因だと考えた。そこで、タイムアウトを適当な値であるが5000程度にとってみたところ、エラーはなくなった。
+                // その後、Google Compute Engineで試してみたところ1hにつき1回ほど接続が切れる現象が発生したので、とりあえず10000に伸ばし、inactivityTimeoutも設定した。
+                // TODO: タイムアウトに関する各値が適当。
+                timeout: 10000,
+                minTimeout: 10000,
                 reconnect: true,
+                inactivityTimeout: 10 * 60 * 60 * 1000,
             }
         });
         // The split function takes three parameters:
