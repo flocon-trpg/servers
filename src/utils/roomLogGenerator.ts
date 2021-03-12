@@ -20,6 +20,7 @@ type RoomMessage = {
         text: null;
         channelName: string;
         createdBy: CreatedBy;
+        commandResult: string | null;
     };
 } | {
     type: typeof privateMessage;
@@ -29,6 +30,7 @@ type RoomMessage = {
         text: string;
         channelName: string;
         createdBy: CreatedBy | null;
+        commandResult: string | null;
     };
 } | {
     type: typeof publicMessage;
@@ -38,6 +40,7 @@ type RoomMessage = {
         text: null;
         channelName: string;
         createdBy: CreatedBy;
+        commandResult: string | null;
     };
 } | {
     type: typeof publicMessage;
@@ -47,6 +50,7 @@ type RoomMessage = {
         text: string;
         channelName: string;
         createdBy: CreatedBy | null;
+        commandResult: string | null;
     };
 };
 
@@ -90,6 +94,7 @@ const createRoomMessageArray = ({
                     text: null,
                     createdBy: createCreatedBy({ createdBy: msg.createdBy, characterStateId: msg.characterStateId ?? undefined, customName: msg.customName ?? undefined }),
                     channelName,
+                    commandResult: msg.commandResult?.text ?? null,
                 }
             });
             return;
@@ -102,6 +107,7 @@ const createRoomMessageArray = ({
                 text: msg.text,
                 createdBy: msg.createdBy == null ? null : createCreatedBy({ createdBy: msg.createdBy, characterStateId: msg.characterStateId ?? undefined, customName: msg.customName ?? undefined }),
                 channelName,
+                commandResult: msg.commandResult?.text ?? null,
             }
         });
     });
@@ -128,6 +134,7 @@ const createRoomMessageArray = ({
                     text: null,
                     createdBy: createCreatedBy({ createdBy: msg.createdBy, characterStateId: msg.characterStateId ?? undefined, customName: msg.customName ?? undefined }),
                     channelName,
+                    commandResult: msg.commandResult?.text ?? null,
                 }
             });
             return;
@@ -140,6 +147,7 @@ const createRoomMessageArray = ({
                 text: msg.text,
                 createdBy: msg.createdBy == null ? null : createCreatedBy({ createdBy: msg.createdBy, characterStateId: msg.characterStateId ?? undefined, customName: msg.customName ?? undefined }),
                 channelName,
+                commandResult: msg.commandResult?.text ?? null,
             }
         });
     });
@@ -164,7 +172,7 @@ ${(msg.value.createdBy.rolePlayPart == null) ? '' : '<span> - <span>'}
         return `<div class="message">
 ${left}
 <span> @ ${moment(new Date(msg.createdAt)).format('MM/DD HH:mm:ss')} </span>
-${msg.value.text == null ? '<span class="text gray">(削除済み)</span>' : `<span class="text">${escape(msg.value.text ?? '')}</span>`}
+${msg.value.text == null ? '<span class="text gray">(削除済み)</span>' : `<span class="text">${escape(msg.value.text ?? '')} ${escape(msg.value.commandResult ?? '')}</span>`}
 </div>`;
     }).reduce((seed, elem) => seed + elem, '');
 
