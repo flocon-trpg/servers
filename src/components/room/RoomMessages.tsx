@@ -405,7 +405,7 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
         return (
             <div style={({ height: '100%', overflowY: 'scroll', display: 'flex', flexDirection: 'column' })}>
                 {
-                    messages.reverse().map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} characters={characters} />))
+                    [...messages].reverse().map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} characters={characters} />))
                 }
             </div>
         );
