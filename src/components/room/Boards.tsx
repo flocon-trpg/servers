@@ -456,8 +456,8 @@ const Boards: React.FC<Props> = ({
     characters,
     participants,
     roomId,
-    canvasWidth: width,
-    canvasHeight: height,
+    canvasWidth,
+    canvasHeight,
     me,
     myUserUid,
     allRoomMessages,
@@ -490,8 +490,8 @@ const Boards: React.FC<Props> = ({
             return (<div>{`キーが ${toJSONString(activeBoardKey)} であるBoardが見つかりません。他のBoardを選択してください。`}</div>);
         }
         return (<Board
-            canvasWidth={width}
-            canvasHeight={height}
+            canvasWidth={canvasWidth}
+            canvasHeight={canvasHeight}
             board={board}
             roomId={roomId}
             myUserUid={myUserUid}
@@ -1090,11 +1090,13 @@ const Boards: React.FC<Props> = ({
                         if (activeBoardKey == null) {
                             return;
                         }
-                        dispatch(roomConfigModule.actions.updateBoard({
+                        dispatch(roomConfigModule.actions.zoomBoard({
                             roomId,
                             boardKey: activeBoardKey,
                             panelId: boardsPanelConfigId,
                             zoomDelta: 0.25,
+                            prevCanvasWidth: canvasWidth,
+                            prevCanvasHeight: canvasHeight,
                         }));
                     }}>
                         <Icon.ZoomInOutlined />
@@ -1103,11 +1105,13 @@ const Boards: React.FC<Props> = ({
                         if (activeBoardKey == null) {
                             return;
                         }
-                        dispatch(roomConfigModule.actions.updateBoard({
+                        dispatch(roomConfigModule.actions.zoomBoard({
                             roomId,
                             boardKey: activeBoardKey,
                             panelId: boardsPanelConfigId,
                             zoomDelta: -0.25,
+                            prevCanvasWidth: canvasWidth,
+                            prevCanvasHeight: canvasHeight,
                         }));
                     }}>
                         <Icon.ZoomOutOutlined />

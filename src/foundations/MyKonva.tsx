@@ -397,14 +397,24 @@ export namespace MyKonva {
         https://konvajs.org/docs/react/Transformer.html
         */
 
-        const text = ((props.myNumberValue.isValuePrivate && !props.createdByMe) ? '?' : (props.myNumberValue.value?.toString() ?? 'null'));
+        let text: string;
+        if (props.myNumberValue.isValuePrivate && !props.createdByMe) {
+            text = '?';
+        } else {
+            const number = props.myNumberValue.value?.toString() ?? 'null';
+            if (props.myNumberValue.isValuePrivate) {
+                text = `(${number})`;
+            } else {
+                text = number;
+            }
+        }
         const prevText = usePrevious(text);
 
         const duration = 300;
 
         const [textSpringProps] = useSpring(() => ({
             config: {
-                duration: 300,
+                duration,
             },
             from: {
                 text: (prevText === '?' || text === '?') ? prevText : text,
@@ -433,7 +443,7 @@ export namespace MyKonva {
         const transitionColor = '#A0F0F0FF';
         const [rectSpringProps] = useSpring(() => ({
             config: {
-                duration: 300,
+                duration,
             },
             from: {
                 scaleX: 1,
@@ -553,14 +563,13 @@ export namespace MyKonva {
                         cornerRadius={5} />
                     {
                         /* fontSizeの決め方は適当 */
-                        /* CONSIDER: Noto Sans JP Regularがどのブラウザでも使えるのか？webフォントをダウンロードする処理が必要？ */
                     }
                     <animated.Text
                         {...textSpringProps}
                         y={0}
                         width={props.w}
                         height={props.h}
-                        fontSize={props.w / 2}
+                        fontSize={props.w / 2.5}
                         fontFamily='Noto Sans JP Regular'
                         fill='black'
                         align='center'
