@@ -105,7 +105,7 @@ const ChatInput: React.FC<Props> = ({ roomId, style, activeTab, characters }: Pr
             }
         }).then(e => {
             setIsPosting(false);
-            if (e.data?.result.__typename === 'WritePrivateRoomMessageFailureResult') {
+            if (e.data?.result.__typename === 'RoomPrivateMessage') {
                 setText('');
             }
         });
