@@ -40,7 +40,7 @@ export namespace MyKonva {
     }
 
     // BalloonCoreにおける1つのtextのheight。BalloonCore全体のheightはtextHeight*5になる
-    const balloonCoreTextHeight = 58;
+    const balloonCoreTextHeight = 72;
 
     const BalloonCore: React.FC<BalloonCoreProps> = ({
         text0,
@@ -132,7 +132,7 @@ export namespace MyKonva {
     };
 
     type BalloonProps = {
-        message?: { messageId: string; text?: string | null; createdAt: number };
+        message?: RoomPublicMessageFragment;
         x: number;
         y: number;
         width: number;
@@ -153,7 +153,7 @@ export namespace MyKonva {
         }, [onBalloonChange]);
 
         // indexが小さいほどcreatedAtが大きい(新しい)。
-        const [recentMessages, setRecentMessages] = React.useState<ReadonlyArray<{ messageId: string; text?: string | null; createdAt: number }>>([]);
+        const [recentMessages, setRecentMessages] = React.useState<ReadonlyArray<RoomPublicMessageFragment>>([]);
 
         // 書き込みがあってから💬を画面上にどれだけの期間表示させるか。ただし、サーバーやクライアントの時刻のずれに影響されるため、これらが合っていないと表示期間がゼロになったり短くなったり長くなったりする。
         const timeWindow = 30 * 1000;
@@ -187,12 +187,19 @@ export namespace MyKonva {
             .filter(msg => msg.text != null)
             .sort((x, y) => y.createdAt - x.createdAt);
             
+        const toText = (message: RoomPublicMessageFragment | null | undefined): string | undefined => {
+            if (message?.text == null) {
+                return undefined;
+            }
+            return `${message.text} ${message.commandResult?.text ?? ''}`;
+        };
+
         const [text0, text1, text2, text3, text4] = [
-            texts[4]?.text ?? undefined,
-            texts[3]?.text ?? undefined, 
-            texts[2]?.text ?? undefined, 
-            texts[1]?.text ?? undefined,
-            texts[0]?.text ?? undefined
+            toText(texts[4]),
+            toText(texts[3]),
+            toText(texts[2]),
+            toText(texts[1]),
+            toText(texts[0]),
         ];
 
         const [areAllTextsUndefined, setAreAllTextUndefined] = React.useState([text0, text1, text2, text3, text4].every(t => t === undefined));
