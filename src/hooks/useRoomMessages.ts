@@ -398,7 +398,7 @@ export const useAllRoomMessages = ({ roomId }: { roomId: string }): AllRoomMessa
 const emptyArray: RoomMessage[] = [];
 
 // filterは、常に同じ参照にするかuseMemoなどを使うのを忘れずに。
-export const useFilteredRoomMessages = ({ allRoomMessagesResult, filter }: { allRoomMessagesResult: AllRoomMessagesResult; filter?: (message: RoomMessage) => boolean }): RoomMessage[] => {
+export const useFilteredRoomMessages = ({ allRoomMessagesResult, filter }: { allRoomMessagesResult: AllRoomMessagesResult; filter?: (message: RoomMessage) => boolean }): ReadonlyArray<RoomMessage> => {
     const [result, setResult] = React.useState<RoomMessage[] | null>(null);
     const prevFilterRef = React.useRef(filter);
     React.useEffect(() => {
@@ -425,4 +425,22 @@ export const useFilteredRoomMessages = ({ allRoomMessagesResult, filter }: { all
         }
     }, [allRoomMessagesResult, filter]);
     return result ?? emptyArray;
+};
+
+// filterとthenMapは、常に同じ参照にするかuseMemoなどを使うのを忘れずに。
+export const useFilteredAndMapRoomMessages = <TResult>({
+    allRoomMessagesResult,
+    filter,
+    thenMap,
+}: {
+    allRoomMessagesResult: AllRoomMessagesResult;
+    filter?: (message: RoomMessage) => boolean;
+    thenMap: (message: ReadonlyArray<RoomMessage>) => ReadonlyArray<TResult>;
+}): ReadonlyArray<TResult> => {
+    const nonMappedResult = useFilteredRoomMessages({ allRoomMessagesResult, filter });
+    const [result, setResult] = React.useState<ReadonlyArray<TResult>>([]);
+    React.useEffect(() => {
+        setResult(thenMap(nonMappedResult));
+    }, [nonMappedResult, thenMap]);
+    return result;
 };

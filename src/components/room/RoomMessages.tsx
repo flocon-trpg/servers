@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { Comment, message, Tabs, Button, Menu, Dropdown, Tooltip } from 'antd';
 import moment from 'moment';
-import { AllRoomMessagesSuccessResult, apolloError, failure, loading, useAllRoomMessages, useFilteredRoomMessages, publicChannel, RoomMessage, publicMessage, privateMessage, soundEffect, newEvent, AllRoomMessagesResult } from '../../hooks/useRoomMessages';
+import { AllRoomMessagesSuccessResult, apolloError, failure, loading, useAllRoomMessages, useFilteredRoomMessages, publicChannel, RoomMessage, publicMessage, privateMessage, soundEffect, newEvent, AllRoomMessagesResult, useFilteredAndMapRoomMessages } from '../../hooks/useRoomMessages';
 import { __ } from '../../@shared/collection';
 import useConstant from 'use-constant';
 import { FixedSizeList } from 'react-window';
@@ -343,20 +343,28 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
     const roomConfig = useSelector(state => state.roomConfigModule);
     const dispatch = useDispatch();
 
-    const channelFreeMessages$ = useFilteredRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[$free] });
-    const channelSystemMessages$ = useFilteredRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[$system] });
-    const channel1Messages$ = useFilteredRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[1] });
-    const channel2Messages = useFilteredRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[2] });
-    const channel3Messages = useFilteredRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[3] });
-    const channel4Messages = useFilteredRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[4] });
-    const channel5Messages = useFilteredRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[5] });
-    const channel6Messages = useFilteredRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[6] });
-    const channel7Messages = useFilteredRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[7] });
-    const channel8Messages = useFilteredRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[8] });
-    const channel9Messages = useFilteredRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[9] });
-    const channel10Messages = useFilteredRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[10] });
+    const generalMapping = React.useCallback((messages: ReadonlyArray<RoomMessage>) => {
+        return [...messages]
+            .sort((x, y) => y.value.createdAt - x.value.createdAt)
+            .map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} characters={characters} />));
+    }, [roomId, participants, characters]);
 
-    const channelSystemMessages: RoomUIMessage[] = (() => {
+    const freeMessageMapping = React.useCallback((messages: ReadonlyArray<RoomMessage>) => {
+        return [
+            ...[...messages].sort((x, y) => y.value.createdAt - x.value.createdAt),
+            {
+                type: publicMessage,
+                value: {
+                    channelKey: $free,
+                    messageId: 'free0',
+                    text: 'ここは参加者と観戦者の全員が書き込めるチャンネルです。',
+                    isSecret: false,
+                }
+            } as const]
+            .map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} characters={characters} />));
+    }, [roomId, participants, characters]);
+
+    const systemMessageMapping = React.useCallback((messages: ReadonlyArray<RoomMessage>) => {
         const $notifications = notifications.map(notification => {
             return {
                 type: publicMessage,
@@ -369,71 +377,47 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
                 },
             } as const;
         });
-        const base = [...$notifications, ...channelSystemMessages$].sort((x, y) => y.value.createdAt - x.value.createdAt);
-
-        return [{
-            type: publicMessage,
-            value: {
-                channelKey: $system,
-                messageId: 'system0',
-                text: '（仮メッセージ）ようこそ！',
-                isSecret: false,
-            }
-        } as const, ...base];
-    })();
-    // 説明用メッセージを付加している。channel1のメッセージを1個以上にすることで、（デフォルトの設定であれば）channel1を必ずUIに表示させるという狙いもある。
-    const channelFreeMessages: RoomUIMessage[] = [{
-        type: publicMessage,
-        value: {
-            channelKey: $free,
-            messageId: 'free0',
-            text: 'ここは参加者と観戦者の全員が書き込めるチャンネルです。',
-            isSecret: false,
-        }
-    }, ...channelFreeMessages$];
-    const channel1Messages: RoomUIMessage[] = [{
-        type: publicMessage,
-        value: {
-            channelKey: '1',
-            messageId: 'channel0',
-            text: 'ここは参加者のみが書き込めるチャンネルです。観戦者は書き込むことはできませんが見ることはできます。',
-            isSecret: false,
-        }
-    }, ...channel1Messages$];
-
-    const createList = (messages: RoomUIMessage[]) => {
-        return (
-            <div style={({ height: '100%', overflowY: 'scroll', display: 'flex', flexDirection: 'column' })}>
-                {
-                    [...messages].reverse().map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} characters={characters} />))
+        return [
+            ...[...messages, ...$notifications].sort((x, y) => y.value.createdAt - x.value.createdAt),
+            {
+                type: publicMessage,
+                value: {
+                    channelKey: $system,
+                    messageId: 'system0',
+                    text: '（仮メッセージ）ようこそ！',
+                    isSecret: false,
                 }
-            </div>
-        );
-        // TODO: AutoSizer&FixedSizeListを使うと、RoomMessageComponentのボタンのonClickが何故か実行されないのでとりあえず無効化している。
-        // CO:
-        // return (
-        //     <div style={({ ...style, flex: 'auto' })}>
-        //         <AutoSizer>
-        //             {({ height, width }) => (
-        //                 <FixedSizeList
-        //                     layout='vertical'
-        //                     itemCount={messages.length}
-        //                     itemSize={messageItemSize}
-        //                     width={width}
-        //                     height={height}>
-        //                     {({ index, style }) => {
-        //                         const message = messages[messages.length - index - 1];
-        //                         if (message == null) {
-        //                             return null;
-        //                         }
-        //                         return (<RoomMessageComponent key={message.value.messageId} roomId={roomId} style={style} message={message} participants={participants} characters={characters} />);
-        //                     }}
-        //                 </FixedSizeList>
-        //             )}
-        //         </AutoSizer>
-        //     </div>
-        // );
-    };
+            } as const]
+            .map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} characters={characters} />));
+    }, [roomId, participants, characters, notifications]);
+
+    const channel1MessageMapping = React.useCallback((messages: ReadonlyArray<RoomMessage>) => {
+        return [
+            ...[...messages].sort((x, y) => y.value.createdAt - x.value.createdAt),
+            {
+                type: publicMessage,
+                value: {
+                    channelKey: '1',
+                    messageId: 'channel0',
+                    text: 'ここは参加者のみが書き込めるチャンネルです。観戦者は書き込むことはできませんが見ることはできます。',
+                    isSecret: false,
+                }
+            } as const]
+            .map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} characters={characters} />));
+    }, [roomId, participants, characters]);
+
+    const channelFreeMessages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[$free], thenMap: freeMessageMapping });
+    const channelSystemMessages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[$system], thenMap: systemMessageMapping });
+    const channel1Messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[1], thenMap: channel1MessageMapping });
+    const channel2Messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[2], thenMap: generalMapping });
+    const channel3Messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[3], thenMap: generalMapping });
+    const channel4Messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[4], thenMap: generalMapping });
+    const channel5Messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[5], thenMap: generalMapping });
+    const channel6Messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[6], thenMap: generalMapping });
+    const channel7Messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[7], thenMap: generalMapping });
+    const channel8Messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[8], thenMap: generalMapping });
+    const channel9Messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[9], thenMap: generalMapping });
+    const channel10Messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[10], thenMap: generalMapping });
 
     const createPublicChannelName = (publicChannelKey: PublicChannelKey) => {
         if (publicChannelKey === $system) {
@@ -445,7 +429,7 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
         return allRoomMessagesResult.value.publicChannels.get(publicChannelKey)?.name ?? `(チャンネル${publicChannelKey})`;
     };
 
-    const createPublicMessagesTabPane = (messages: RoomUIMessage[], publicChannelKey: PublicChannelKey) => {
+    const createPublicMessagesTabPane = (messages: ReadonlyArray<JSX.Element>, publicChannelKey: PublicChannelKey) => {
         const channelName = (() => {
             const name = createPublicChannelName(publicChannelKey);
             if (publicChannelKey === $system) {
@@ -453,11 +437,14 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
             }
             return <span><CommentOutlined />{name}</span>;
         })();
+        // TODO: AutoSizer&FixedSizeListを使うと、RoomMessageComponentのボタンのonClickが何故か実行されないのでとりあえず無効化している。
         return (
             <TabPane tab={channelName} key={publicChannelKey}>
                 <div style={({ height: '100%', display: 'flex', flexDirection: 'column' })}>
                     <ChatInput style={({ flex: 0 })} roomId={roomId} activeTab={publicChannelKey} characters={characters} />
-                    {createList(messages)}
+                    <div style={({height: '100%', overflowY: 'scroll', display: 'flex', flexDirection: 'column' })}>
+                        {messages}
+                    </div>
                 </div>
             </TabPane>
         );
