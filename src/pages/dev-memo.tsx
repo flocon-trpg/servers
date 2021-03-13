@@ -18,6 +18,18 @@ const Index: React.FC = () => {
         <Layout requiresLogin={false} showEntryForm={false}>
             <div style={({ margin: 10 })}>
                 <Typography.Title level={2}>アップデート履歴</Typography.Title>
+                <Typography.Title level={3}>2021/03/13</Typography.Title>
+                <ul>
+                    <li>接続切れを起こりにくくしたつもり</li>
+                    <li>メッセージが荒ぶるバグを修正</li>
+                    <li>大量のメッセージの表示処理をある程度軽量化</li>
+                    <li>ログにダイスの結果が出力されないバグを修正</li>
+                    <li>非公開にした自分の数値コマを、暫定的に括弧で囲んで表示させることでわかりやすくした</li>
+                    <li>立ち絵の💬にダイスの結果が含まれるようにした</li>
+                    <li>立ち絵の💬の最大行数を3程度から4程度に増加</li>
+                    <li>立ち絵に💬が残る時間を15sから30sに増加</li>
+                    <li>マウスホイールでなくボタンでボードを拡大縮小したとき、中央ではなく左上を基準として拡大縮小されていたバグを修正</li>
+                </ul>
                 <Typography.Title level={3}>2021/03/11</Typography.Title>
                 <ul>
                     <li>キャラクターとして発言したとき、立ち絵に💬が出る機能とそのときに半透明化が解除される機能を追加（暫定的な措置として、フリーチャンネルでは無効化しています。また、秘話 a.k.a. プライペートメッセージでは💬や半透明化解除はトリガーされません）</li>
