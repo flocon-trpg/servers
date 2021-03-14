@@ -3,11 +3,9 @@ import '../css/main.scss';
 
 import React from 'react';
 import { AppProps } from 'next/app';
-import { ApolloClient, ApolloLink, ApolloProvider, HttpLink, InMemoryCache, NormalizedCacheObject, split } from '@apollo/client';
+import { ApolloClient, ApolloLink, ApolloProvider, FetchResult, HttpLink, InMemoryCache, NormalizedCacheObject, Operation, split, Observable } from '@apollo/client';
 import 'firebase/auth';
 import 'firebase/storage';
-import { ConnectionParams } from 'subscriptions-transport-ws';
-import { WebSocketLink } from '@apollo/client/link/ws';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { setContext } from '@apollo/client/link/context';
 import { Provider } from 'react-redux';
@@ -21,8 +19,54 @@ import { useFirebaseUser } from '../hooks/useFirebaseUser';
 import useUserConfig from '../hooks/localStorage/useUserConfig';
 import { Config, getConfig } from '../config';
 import ConfigContext from '../contexts/ConfigContext';
+import { Client, ClientOptions, createClient } from 'graphql-ws';
+import { print, GraphQLError } from 'graphql';
 
 const config = getConfig();
+
+// https://github.com/enisdenjo/graphql-ws のコードを使用
+class WebSocketLink extends ApolloLink {
+    private client: Client;
+
+    constructor(options: ClientOptions) {
+        super();
+        this.client = createClient(options);
+    }
+
+    public request(operation: Operation): Observable<FetchResult> {
+        return new Observable((sink) => {
+            return this.client.subscribe<FetchResult>(
+                { ...operation, query: print(operation.query) },
+                {
+                    next: sink.next.bind(sink),
+                    complete: sink.complete.bind(sink),
+                    error: (err) => {
+                        if (err instanceof Error) {
+                            return sink.error(err);
+                        }
+
+                        if (err instanceof CloseEvent) {
+                            return sink.error(
+                                // reason will be available on clean closes
+                                new Error(
+                                    `Socket closed with event ${err.code} ${err.reason || ''}`,
+                                ),
+                            );
+                        }
+
+                        return sink.error(
+                            new Error(
+                                (err as GraphQLError[])
+                                    .map(({ message }) => message)
+                                    .join(', '),
+                            ),
+                        );
+                    },
+                },
+            );
+        });
+    }
+}
 
 // サーバーでWebSocket（GraphQL subscriptionsで使っている）を呼び出そうとすると"Error: Unable to find native implementation, or alternative implementation for WebSocket!"というエラーが出るので、サーバー側で呼び出されるときはomitWebSocket===trueにすることでそれを回避できる。
 const createApolloClient = (config: Config, signedInAs?: firebase.User, omitWebSocket?: boolean) => {
@@ -53,13 +97,6 @@ const createApolloClient = (config: Config, signedInAs?: firebase.User, omitWebS
         uri,
     });
 
-    const createConnectionParams = async () => {
-        const token = await signedInAs?.getIdToken();
-        const result: ConnectionParams = {};
-        result[authToken] = token ? `Bearer ${token}` : '';
-        return result;
-    };
-
     const link: ApolloLink = (() => {
         if (omitWebSocket === true) {
             return httpLink;
@@ -70,20 +107,15 @@ const createApolloClient = (config: Config, signedInAs?: firebase.User, omitWebS
         }
         appConsole.log(`GraphQL WebSocket URL: ${uri}`);
         const wsLink = new WebSocketLink({
-            uri,
-            options: {
-                // https://github.com/apollographql/apollo-server/issues/1597#issuecomment-442534421
-                connectionParams: createConnectionParams(),
-
-                // herokuのfree planでwssを使う（wsだと問題ない模様）と、"WebSocket connection to 'wss://xxxxxx/graphql' failed: WebSocket is closed before the connection is established."というエラーが出ることが多い（herokuやfree planが理由の1つなのかどうかは不明）。
-                // https://github.com/apollographql/subscriptions-transport-ws/issues/377 をヒントに、おそらくタイムアウトが早すぎるのが原因だと考えた。そこで、タイムアウトを適当な値であるが5000程度にとってみたところ、エラーはなくなった。
-                // その後、Google Compute Engineで試してみたところ1hにつき1回ほど接続が切れる現象が発生したので、とりあえず10000に伸ばし、inactivityTimeoutも設定した。
-                // TODO: タイムアウトに関する各値が適当。
-                timeout: 10000,
-                minTimeout: 10000,
-                reconnect: true,
-                inactivityTimeout: 10 * 60 * 60 * 1000,
-                reconnectionAttempts: 3,
+            url: uri,
+            connectionParams: async () => {
+                const token = await signedInAs?.getIdToken();
+                if (token == null) {
+                    return {};
+                }
+                return {
+                    [authToken]: token,
+                };
             },
         });
         // The split function takes three parameters:
