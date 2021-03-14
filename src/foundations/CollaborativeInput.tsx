@@ -54,8 +54,9 @@ const CollaborativeInput: React.FC<Props> = (props: Props) => {
             return;
         }
 
-        const currentValue = ref.current.input.value;
-        if (currentValue !== value) {
+        const inputValue = ref.current.input.value;
+        if (inputValue !== value) {
+            setChangeParams({ currentValue: value });
             ref.current.setValue(value);
         }
     }, [value]);
