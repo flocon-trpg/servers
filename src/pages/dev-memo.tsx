@@ -18,6 +18,12 @@ const Index: React.FC = () => {
         <Layout requiresLogin={false} showEntryForm={false}>
             <div style={({ margin: 10 })}>
                 <Typography.Title level={2}>アップデート履歴</Typography.Title>
+                <Typography.Title level={3}>2021/03/14</Typography.Title>
+                <ul>
+                    <li>接続切れを起こりにくくするため、リアルタイム通信ライブラリを別のものに置き換え</li>
+                    <li>プライベートメッセージの書き込みに成功したとき、書き込んだ文字列が自動的に消えなかったバグを修正</li>
+                    <li>キャラクターの文字列パラメーターを編集画面で変更しようとすると落ちるバグを修正</li>
+                </ul>
                 <Typography.Title level={3}>2021/03/13</Typography.Title>
                 <ul>
                     <li>接続切れを起こりにくくしたつもり</li>
