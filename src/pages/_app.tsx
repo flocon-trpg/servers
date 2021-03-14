@@ -28,6 +28,21 @@ const config = getConfig();
 const createApolloClient = (config: Config, signedInAs?: firebase.User, omitWebSocket?: boolean) => {
     // headerについては https://hasura.io/blog/authentication-and-authorization-using-hasura-and-firebase/ を参考にした
 
+    // https://www.apollographql.com/docs/react/networking/authentication/#header
+    const authLink = setContext(async (_, { headers }) => {
+        const token = await signedInAs?.getIdToken();
+        if (token === undefined) {
+            return headers;
+        }
+        // return the headers to the context so httpLink can read them
+        return {
+            headers: {
+                ...headers,
+                authorization: `Bearer ${token}`,
+            }
+        };
+    });
+
     // https://www.apollographql.com/docs/react/data/subscriptions/
     let uri: string | undefined = config.web.server.url.http;
     if (uri === undefined) {
@@ -68,7 +83,8 @@ const createApolloClient = (config: Config, signedInAs?: firebase.User, omitWebS
                 minTimeout: 10000,
                 reconnect: true,
                 inactivityTimeout: 10 * 60 * 60 * 1000,
-            }
+                reconnectionAttempts: 3,
+            },
         });
         // The split function takes three parameters:
         //
@@ -84,27 +100,12 @@ const createApolloClient = (config: Config, signedInAs?: firebase.User, omitWebS
                 );
             },
             wsLink,
-            httpLink,
+            authLink.concat(httpLink), // WebSocketLinkのほうはheaderを設定済みなので、httpLinkのほうにだけheaderを設定している
         );
     })();
 
-    // https://www.apollographql.com/docs/react/networking/authentication/#header
-    const authLink = setContext(async (_, { headers }) => {
-        const token = await signedInAs?.getIdToken();
-        if (token === undefined) {
-            return headers;
-        }
-        // return the headers to the context so httpLink can read them
-        return {
-            headers: {
-                ...headers,
-                authorization: `Bearer ${token}`,
-            }
-        };
-    });
-
     return new ApolloClient({
-        link: authLink.concat(link),
+        link,
         cache: new InMemoryCache(),
     });
 };
@@ -115,6 +116,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     React.useEffect(() => {
         const client = createApolloClient(config, typeof user === 'string' ? undefined : user);
         setApolloClient(client);
+        
     }, [user]);
     useUserConfig(typeof user === 'string' ? null : user.uid, store.dispatch);
 
