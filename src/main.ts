@@ -1,7 +1,6 @@
 import { ApolloServer } from 'apollo-server-express';
 import express from 'express';
 import path from 'path';
-import * as http from 'http';
 import admin from 'firebase-admin';
 import { ExpressContext } from 'apollo-server-express/dist/ApolloServer';
 import { authToken } from './@shared/Constants';
@@ -12,6 +11,9 @@ import { PromiseQueue } from './utils/PromiseQueue';
 import { createPostgreSQL, createSQLite } from './mikro-orm';
 import { firebaseConfig, loadServerConfigAsMain, postgresql, sqlite } from './config';
 import { CustomResult, ResultModule } from './@shared/Result';
+import ws from 'ws';
+import { useServer } from 'graphql-ws/lib/use/ws';
+import { execute, subscribe } from 'graphql';
 
 const main = async (params: { debug: boolean }): Promise<void> => {
     admin.initializeApp({
@@ -37,15 +39,19 @@ const main = async (params: { debug: boolean }): Promise<void> => {
         }
     })();
 
-    const getDecodedIdToken = async (bearer: string | undefined): Promise<CustomResult<admin.auth.DecodedIdToken, any> | undefined> => {
+    const getDecodedIdToken = async (idToken: string): Promise<CustomResult<admin.auth.DecodedIdToken, any>> => {
+        const decodedIdToken = await admin.auth().verifyIdToken(idToken).then(ResultModule.ok).catch(ResultModule.error);
+        return decodedIdToken;
+    };
+
+    const getDecodedIdTokenFromBearer = async (bearer: string | undefined): Promise<CustomResult<admin.auth.DecodedIdToken, any> | undefined> => {
         // bearerのフォーマットはだいたいこんな感じ
         // 'Bearer aNGoGo3ngC.oepGJoGoeo34Ha.Oge03mvQgeo4H'
         if (bearer == null || !bearer.startsWith('Bearer ')) {
             return undefined;
         }
         const idToken = bearer.replace('Bearer ', '');
-        const decodedIdToken = await admin.auth().verifyIdToken(idToken).then(ResultModule.ok).catch(ResultModule.error);
-        return decodedIdToken;
+        return await getDecodedIdToken(idToken);
     };
 
     // TODO: queueLimitの値をきちんと決める
@@ -53,20 +59,8 @@ const main = async (params: { debug: boolean }): Promise<void> => {
 
     // 戻り値はTだけでなくPromise<T>でもいいのでasyncを使っている
     const context = async (context: ExpressContext): Promise<ResolverContext> => {
-        // context.connection != nullの場合はwebsocketによる接続
-        // client側でconnectionParams[authToken]にJWTがセットされている。connectionParamsはcontext.connection.contextに入っているので、それを利用してDecodedIdTokenを取得している。
-        // https://github.com/apollographql/apollo-server/issues/1597#issuecomment-423641175
-        // https://github.com/apollographql/apollo-server/issues/1597#issuecomment-442534421
-        if (context.connection) {
-            return {
-                decodedIdToken: await getDecodedIdToken(context.connection.context[authToken]),
-                promiseQueue,
-                createEm: () => orm.em.fork(),
-            };
-        }
-
         return {
-            decodedIdToken: await getDecodedIdToken(context.req.headers.authorization),
+            decodedIdToken: await getDecodedIdTokenFromBearer(context.req.headers.authorization),
             promiseQueue,
             createEm: () => orm.em.fork(),
         };
@@ -89,16 +83,37 @@ const main = async (params: { debug: boolean }): Promise<void> => {
     apolloServer.applyMiddleware({ app });
     app.use(express.static(path.join(process.cwd(), 'root'))); // expressにアップローダー機能をつけてroot配下に置く機能を実装するときに使う。ただ優先度は低い
 
-    // https://www.apollographql.com/docs/apollo-server/data/subscriptions/#subscriptions-with-additional-middleware の方法でSubscriptionを有効にしている。
-    // 当初は代わりに https://www.apollographql.com/docs/graphql-subscriptions/express/ の方法を使っていたが、onConnectが呼ばれないという現象が発生したのでボツ。
-    const server = http.createServer(app);
-    apolloServer.installSubscriptionHandlers(server);
-
-    // google app engineでは、ポートとしてprocess.env.PORTを使わなければならない
-    // https://cloud.google.com/appengine/docs/standard/nodejs/how-requests-are-handled?hl=ja#handling_requests
     const PORT = process.env.PORT ?? 4000;
-    // The `listen` method launches a web server.
-    server.listen(PORT, () => {
+
+    // https://github.com/enisdenjo/graphql-ws のコードを使用
+    const server = app.listen(PORT, () => {
+        // create and use the websocket server
+        const wsServer = new ws.Server({
+            server,
+            path: '/graphql',
+        });
+
+        useServer({
+            schema,
+            execute,
+            subscribe,
+            context: async ctx => {
+                let decodedIdToken: string | undefined;
+                if (ctx.connectionParams != null) {
+                    const authTokenValue = ctx.connectionParams[authToken];
+                    if (typeof authTokenValue === 'string') {
+                        decodedIdToken = authTokenValue;
+                    }
+                }
+                return {
+                    decodedIdToken: decodedIdToken == null ? undefined : await getDecodedIdToken(decodedIdToken),
+                    promiseQueue,
+                    createEm: () => orm.em.fork(),
+                };
+            },
+        },
+        wsServer);
+
         console.log(`🚀 Server ready at http://localhost:${PORT}${apolloServer.graphqlPath}`);
         console.log(`🚀 Subscriptions ready at ws://localhost:${PORT}${apolloServer.subscriptionsPath}`);
     });
