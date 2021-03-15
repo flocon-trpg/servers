@@ -27,6 +27,10 @@ import { BoardLocation } from '../../stateManagers/states/boardLocation';
 import { AllRoomMessagesResult, publicMessage, RoomMessage, useFilteredRoomMessages } from '../../hooks/useRoomMessages';
 import { $free } from '../../@shared/Constants';
 
+namespace Resource {
+    export const cellSizeIsTooSmall = 'セルが小さすぎるため、無効化されています';
+}
+
 const emptyCharacterOperation = (): Character.PostOperation => ({
     boolParams: new Map(),
     numParams: new Map(),
@@ -756,25 +760,29 @@ const Boards: React.FC<Props> = ({
                                         編集
                                     </Menu.Item>
                                     <Menu.SubMenu disabled={pieceExists} title="置く">
-                                        <Menu.Item onClick={() => {
-                                            const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
+                                        <Menu.Item
+                                            disabled={Math.min(board.cellHeight, board.cellWidth) <= 0}
+                                            onClick={() => {
+                                                const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
 
-                                            pieces.set(activeBoardKey, {
-                                                type: replace,
-                                                newValue: pieceLocationWhichIsCellMode
-                                            });
-                                            const operation = Room.createPostOperationSetup();
-                                            operation.characters.set(key, {
-                                                type: update,
-                                                operation: {
-                                                    ...emptyCharacterOperation(),
-                                                    pieces,
-                                                }
-                                            });
-                                            operate(operation);
-                                            setContextMenuState(null);
-                                        }}>
-                                            セルにスナップする
+                                                pieces.set(activeBoardKey, {
+                                                    type: replace,
+                                                    newValue: pieceLocationWhichIsCellMode
+                                                });
+                                                const operation = Room.createPostOperationSetup();
+                                                operation.characters.set(key, {
+                                                    type: update,
+                                                    operation: {
+                                                        ...emptyCharacterOperation(),
+                                                        pieces,
+                                                    }
+                                                });
+                                                operate(operation);
+                                                setContextMenuState(null);
+                                            }}>
+                                            <Tooltip title={Math.min(board.cellHeight, board.cellWidth) <= 0 ? Resource.cellSizeIsTooSmall : undefined}>
+                                                セルにスナップする
+                                            </Tooltip>
                                         </Menu.Item>
                                         <Menu.Item onClick={() => {
                                             const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
@@ -1016,6 +1024,7 @@ const Boards: React.FC<Props> = ({
                         <Menu.Divider />
                         <Menu.SubMenu title='追加'>
                             <Menu.Item
+                                disabled={Math.min(board.cellHeight, board.cellWidth) <= 0}
                                 onClick={() => {
                                     dispatchRoomComponentsState({
                                         type: myNumberValueDrawerType,
@@ -1027,7 +1036,9 @@ const Boards: React.FC<Props> = ({
                                     });
                                     setContextMenuState(null);
                                 }}>
-                                セルにスナップする
+                                <Tooltip title={Math.min(board.cellHeight, board.cellWidth) <= 0 ? Resource.cellSizeIsTooSmall : undefined}>
+                                    セルにスナップする
+                                </Tooltip>
                             </Menu.Item>
                             <Menu.Item
                                 onClick={() => {
