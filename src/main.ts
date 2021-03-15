@@ -14,6 +14,7 @@ import { CustomResult, ResultModule } from './@shared/Result';
 import ws from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import { execute, subscribe } from 'graphql';
+import { checkMigrationsBeforeStart } from './migrate';
 
 const main = async (params: { debug: boolean }): Promise<void> => {
     admin.initializeApp({
@@ -23,9 +24,9 @@ const main = async (params: { debug: boolean }): Promise<void> => {
     registerEnumTypes();
 
     const schema = await buildSchema({ emitSchemaFile: false });
-
+    const serverConfig = loadServerConfigAsMain();
+    const dbType = serverConfig.database.__type;
     const orm = await (async () => {
-        const serverConfig = loadServerConfigAsMain();
         try {
             switch (serverConfig.database.__type) {
                 case postgresql:
@@ -34,10 +35,12 @@ const main = async (params: { debug: boolean }): Promise<void> => {
                     return await createSQLite({ ...serverConfig.database.sqlite, debug: params.debug } );
             }
         } catch (error) {
-            console.error('📌 Could not connect to the database', error);
-            throw Error(error);
+            console.error('Could not connect to the database!');
+            throw error;
         }
     })();
+
+    await checkMigrationsBeforeStart(orm, dbType);
 
     const getDecodedIdToken = async (idToken: string): Promise<CustomResult<admin.auth.DecodedIdToken, any>> => {
         const decodedIdToken = await admin.auth().verifyIdToken(idToken).then(ResultModule.ok).catch(ResultModule.error);
