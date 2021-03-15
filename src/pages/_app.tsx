@@ -1,4 +1,4 @@
-import 'antd/dist/antd.css';
+import '../css/antd.css';
 import '../css/main.scss';
 
 import React from 'react';

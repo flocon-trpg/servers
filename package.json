@@ -22,6 +22,7 @@
         "jdenticon": "^3.1.0",
         "js-file-download": "^0.4.12",
         "konva": "^7.2.3",
+        "less": "^4.1.1",
         "localforage": "^1.9.0",
         "moment": "^2.29.1",
         "next": "^10.0.7",
@@ -57,9 +58,10 @@
         "ts-jest": "^26.5.1"
     },
     "scripts": {
-        "dev": "run-s dev:next",
-        "dev:next": "next",
-        "build": "next build",
+        "dev": "next",
+        "build": "run-s build:less build:next",
+        "build:less": "lessc ./src/css/antd.less ./src/css/antd.css --js",
+        "build:next": "next build",
         "export": "run-s build export:next",
         "export:next": "next export",
         "start": "next start",
