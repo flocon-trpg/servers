@@ -11,18 +11,19 @@ import { CloseOutlined } from '@ant-design/icons';
 const defaultBottomElementContainerHeight = 60;
 const defaultTopElementContainerHeight = 60;
 export const horizontalPadding = 24;
-const headerBackgroundColor = 'rgba(214,228,255,1)'; // antdのgeekblue-2と等しい
-const borderColor = 'rgba(214,228,255,0.4)';
+const headerBackgroundColor = 'rgba(32, 49, 117, 1)'; // antdのgeekblue-4と等しい
+const borderColor = 'rgba(32, 49, 117, 0.4)';
 const headerColor = undefined;
-const defaultHeaderHeight = 40;
+const backgroundColor = '#141414';
+const defaultHeaderHeight = 28;
 const borderWidth = 2;
 
 type Props = {
     bottomElement?: React.ReactNode;
     bottomElementContainerHeight?: number;
-    bottomElementContainerStyle?: Omit<React.CSSProperties, 'height'>;
+    bottomElementContainerStyle?: Omit<React.CSSProperties, 'height' | 'backgroundColor'>;
     bounds?: string;
-    childrenContainerStyle?: Omit<React.CSSProperties, 'height'>;
+    childrenContainerStyle?: Omit<React.CSSProperties, 'height' | 'backgroundColor'>;
     position: RndProps['position'];
     size: RndProps['size'];
     onDragStop: (data: Position) => void;
@@ -36,7 +37,7 @@ type Props = {
     minWidth?: string | number;
     topElement?: React.ReactNode;
     topElementContainerHeight?: number;
-    topElementContainerStyle?: Omit<React.CSSProperties, 'height'>;
+    topElementContainerStyle?: Omit<React.CSSProperties, 'height' | 'backgroundColor'>;
     zIndex: number;
 }
 
@@ -65,7 +66,8 @@ const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) => {
                 style={({
                     borderWidth: `0 ${borderWidth}px ${borderWidth}px ${borderWidth}px`,
                     borderStyle: 'solid',
-                    borderColor: borderColor,
+                    borderColor,
+                    backgroundColor,
                     height: '100%', // heightとwidthを設定することで、childrenの（親要素の）大きさがDraggableCardの大きさに連動するようになる
                     width: '100%',
                 })}>
@@ -75,7 +77,7 @@ const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) => {
                         background: headerBackgroundColor,
                         color: headerColor,
                         display: 'flex', // display: flexとalignItems: centerを組み合わせることで、headerが中央に表示されるようにしている
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: 500,
                         height: props.headerHeight ?? defaultHeaderHeight,
                         padding: `0 ${horizontalPadding}px`,
@@ -88,6 +90,7 @@ const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) => {
                     className="cancel-rnd"
                     style={({
                         ...props.topElementContainerStyle,
+                        backgroundColor,
                         height: `${topElementContainerHeight}px`,
                         //padding: `6px ${horizontalPadding}px`
                     })}>
@@ -97,6 +100,7 @@ const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) => {
                     className="cancel-rnd"
                     style={({
                         ...props.childrenContainerStyle,
+                        backgroundColor,
                         height: `calc(100% - ${props.headerHeight ?? defaultHeaderHeight}px - ${topElementContainerHeight}px - ${bottomElementContainerHeight}px)`,
                         //padding: `12px ${horizontalPadding}px`,
                     })}>
@@ -106,6 +110,7 @@ const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) => {
                     className="cancel-rnd"
                     style={({
                         ...props.bottomElementContainerStyle,
+                        backgroundColor,
                         height: `${bottomElementContainerHeight}px`,
                         //padding: `6px ${horizontalPadding}px`
                     })}>

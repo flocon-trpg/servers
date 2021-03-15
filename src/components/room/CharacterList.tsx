@@ -174,7 +174,7 @@ const Image: React.FC<{ filePath?: FilePathFragment; iconSize: boolean }> = ({ f
     if (src == null) {
         return null;
     }
-    return (<img src={src} width={iconSize ? 25 : 150} height={iconSize ? 25 : 150} />);
+    return (<img src={src} width={iconSize ? 20 : 150} height={iconSize ? 20 : 150} />);
 };
 
 const CharacterList: React.FC<Props> = ({ room }: Props) => {
@@ -202,7 +202,7 @@ const CharacterList: React.FC<Props> = ({ room }: Props) => {
         {
             title: '',
             key: 'menu',
-            width: 44,
+            width: 36,
             // eslint-disable-next-line react/display-name
             render: (_: unknown, { character }: DataSource) => (
                 <Tooltip title='編集'>
@@ -215,9 +215,9 @@ const CharacterList: React.FC<Props> = ({ room }: Props) => {
                 </Tooltip>),
         },
         {
-            title: '全体公開',
+            title: '',
             key: '全体公開',
-            width: 80,
+            width: 36,
             // eslint-disable-next-line react/display-name
             render: (_: unknown, { character, operate }: DataSource) => (
                 <ToggleButton

@@ -38,6 +38,7 @@ import NotificationContext, { graphQLErrors, Notification, text, TextNotificatio
 import { Participant } from '../../stateManagers/states/participant';
 import MyNumberValueDrawer from './MyNumberValueDrawer';
 import { useAllRoomMessages } from '../../hooks/useRoomMessages';
+import LoadingResult from '../../foundations/Result/LoadingResult';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -374,7 +375,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
     }, [getLogQueryResult.data]);
 
     if (roomConfig == null || roomConfig.roomId !== roomId) {
-        return (<div>loading config file...</div>);
+        return (<LoadingResult title='個人設定のデータをブラウザから読み込んでいます…' />);
     }
 
     const me: Participant.State | undefined = typeof myAuth === 'string' ? undefined : roomState.participants.get(myAuth.uid);
@@ -404,7 +405,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                 onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeBoardPanel({ roomId, panelId: pair.key, dir, delta }))}
                 onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: boardsPanel, panelId: pair.key } }))}
                 onClose={() => dispatch(roomConfigModule.actions.removeBoardPanel({ roomId, panelId: pair.key }))}
-                childrenContainerStyle={({ overflow: 'hidden', backgroundColor: 'white' })}
+                childrenContainerStyle={({ overflow: 'hidden' })}
                 position={pair.value}
                 size={pair.value}
                 minHeight={150}
@@ -565,7 +566,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                                     onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeCharactersPanel({ roomId, dir, delta }))}
                                     onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: charactersPanel } }))}
                                     onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: charactersPanel }, newValue: true }))}
-                                    childrenContainerStyle={({ padding: childrenContainerPadding, overflowY: 'scroll', backgroundColor: 'white' })}
+                                    childrenContainerStyle={({ padding: childrenContainerPadding, overflowY: 'scroll' })}
                                     position={roomConfig.panels.charactersPanel}
                                     size={roomConfig.panels.charactersPanel}
                                     minHeight={150}
@@ -579,7 +580,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                                     onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeGameEffectPanel({ roomId, dir, delta }))}
                                     onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: gameEffectPanel } }))}
                                     onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: gameEffectPanel }, newValue: true }))}
-                                    childrenContainerStyle={({ padding: childrenContainerPadding, overflowY: 'scroll', backgroundColor: 'white' })}
+                                    childrenContainerStyle={({ padding: childrenContainerPadding, overflowY: 'scroll' })}
                                     position={roomConfig.panels.gameEffectPanel}
                                     size={roomConfig.panels.gameEffectPanel}
                                     minHeight={150}
@@ -593,17 +594,17 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                                     onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeMessagesPanel({ roomId, dir, delta }))}
                                     onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: messagesPanel } }))}
                                     onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: messagesPanel }, newValue: true }))}
-                                    childrenContainerStyle={({ padding: childrenContainerPadding, backgroundColor: 'white' })}
+                                    childrenContainerStyle={({ padding: childrenContainerPadding })}
                                     position={roomConfig.panels.messagesPanel}
                                     size={roomConfig.panels.messagesPanel}
                                     minHeight={150}
                                     minWidth={150}
                                     zIndex={roomConfig.panels.messagesPanel.zIndex}>
-                                    <RoomMessages 
+                                    <RoomMessages
                                         roomId={roomId}
                                         allRoomMessages={allRoomMessages}
-                                        participants={roomState.participants} 
-                                        characters={roomState.characters} 
+                                        participants={roomState.participants}
+                                        characters={roomState.characters}
                                         notifications={allNotifications} />
                                 </DraggableCard>}
                                 {roomConfig.panels.participantsPanel.isMinimized ? null : <DraggableCard
@@ -612,7 +613,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                                     onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeParticipantsPanel({ roomId, dir, delta }))}
                                     onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: participantsPanel } }))}
                                     onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: participantsPanel }, newValue: true }))}
-                                    childrenContainerStyle={({ padding: childrenContainerPadding, backgroundColor: 'white' })}
+                                    childrenContainerStyle={({ padding: childrenContainerPadding })}
                                     position={roomConfig.panels.participantsPanel}
                                     size={roomConfig.panels.participantsPanel}
                                     minHeight={150}

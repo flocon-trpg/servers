@@ -3,6 +3,21 @@
 html {
     position: relative;
     min-height: 100%;
+
+    // Firefoxにおけるスクロールバーの設定
+    scrollbar-color: dark;
+}
+
+// webkitにおけるスクロールバーの設定
+// Firefoxとは見た目が違う。上下にある三角のボタンの有無、スクロールバーにマウスを合わせたときの色の変化など
+::-webkit-scrollbar {
+    background-color: #141414;
+}
+::-webkit-scrollbar-corner {
+    background-color: #141414;
+}
+::-webkit-scrollbar-thumb {
+    background-color: #686868;
 }
 
 // body {

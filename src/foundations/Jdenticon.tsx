@@ -1,6 +1,6 @@
 import React from 'react';
 import * as jdenticon from 'jdenticon';
-import { Tooltip } from 'antd';
+import { Popover, Tooltip } from 'antd';
 
 const userUid = 'userUid';
 
@@ -22,7 +22,15 @@ const Jdenticon: React.FC<Props> = ({ hashOrValue, size, tooltipMode }: Props) =
     } else {
         tooltipTitle = hashOrValue;
     }
-    return <Tooltip title={tooltipTitle}><img src={src} width={size} height={size} /></Tooltip>;
+    return <Popover
+        trigger='hover'
+        content={
+            <div style={({ display: 'flex', flexDirection: 'column' })}>
+                <img src={src} width={70} height={70} />
+                <p>{tooltipTitle}</p>
+            </div>}>
+        <img src={src} width={size} height={size} />
+    </Popover>;
 };
 
 export default Jdenticon;

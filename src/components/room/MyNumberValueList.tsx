@@ -18,7 +18,6 @@ import StringParameterInput from '../../foundations/StringParameterInput';
 import { useFirebaseStorageUrl } from '../../hooks/firebaseStorage';
 import * as Icon from '@ant-design/icons';
 import ToggleButton from '../../foundations/ToggleButton';
-import { characterIsPrivate, characterIsNotPrivate, parameterIsPrivateAndNotCreatedByMe, characterIsNotPrivateAndNotCreatedByMe } from '../../resource/text/main';
 import { Character } from '../../stateManagers/states/character';
 import { Room } from '../../stateManagers/states/room';
 import { Participant } from '../../stateManagers/states/participant';
