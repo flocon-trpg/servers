@@ -58,7 +58,8 @@
         "ts-jest": "^26.5.1"
     },
     "scripts": {
-        "dev": "next",
+        "dev": "run-s build:less dev:next",
+        "dev:next": "next",
         "build": "run-s build:less build:next",
         "build:less": "lessc ./src/css/antd.less ./src/css/antd.css --js",
         "build:next": "next build",
