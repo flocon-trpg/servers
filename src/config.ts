@@ -39,9 +39,9 @@ const loadFirebaseConfig = (): FirebaseConfig => {
 };
 
 const loadServerConfig = ({ databaseArg }: { databaseArg: typeof postgresql | typeof sqlite | null }): ServerConfig => {
-    const env = process.env['FLOCON_SERVER_CONFIG'];
+    const env = process.env['FLOCON_API_CONFIG'];
     if (env == null) {
-        throw 'Server config is not found. Set FLOCON_SERVER_CONFIG environment variable.';
+        throw 'Server config is not found. Set FLOCON_API_CONFIG environment variable.';
     }
     const json = JSON.parse(env);
 
