@@ -11,7 +11,7 @@ import { isStrIndex20, StrIndex100, strIndex100Array, StrIndex20, strIndex20Arra
 import { RoomParameterNameType } from '../../generated/graphql';
 import { replace, update } from '../../stateManagers/states/types';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-import CollaborativeInput from '../../foundations/CollaborativeInput';
+import BufferedInput from '../../foundations/BufferedInput';
 import { Room } from '../../stateManagers/states/room';
 
 type Props = {
@@ -133,7 +133,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                 label={`文字列パラメーター${key}`}
                 name={`strParameter${key}`}>
                 <Space>
-                    <CollaborativeInput
+                    <BufferedInput
                         size='small'
                         value={state.name}
                         bufferDuration={200}

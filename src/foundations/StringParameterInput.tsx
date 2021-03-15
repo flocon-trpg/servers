@@ -7,7 +7,7 @@ import { EyeInvisibleOutlined, EyeOutlined, PlusOutlined, DeleteOutlined } from 
 import ToggleButton from './ToggleButton';
 import { addParameter, deleteParameter, parameterIsPrivate, parameterIsNotPrivate, parameterIsPrivateAndNotCreatedByMe, parameterIsNotPrivateAndNotCreatedByMe } from '../resource/text/main';
 import { TextUpOperationModule } from '../utils/operations';
-import CollaborativeInput from './CollaborativeInput';
+import BufferedInput from './BufferedInput';
 import { StrParam } from '../stateManagers/states/strParam';
 import { Character } from '../stateManagers/states/character';
 
@@ -42,7 +42,7 @@ const StringParameterInput: React.FC<Props> = ({
     compact,
 }: Props) => {
     const input = ({ disabled }: { disabled: boolean }) => (
-        <CollaborativeInput
+        <BufferedInput
             style={({ width: inputWidth })}
             size='small'
             bufferDuration='default'

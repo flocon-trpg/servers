@@ -2,7 +2,7 @@ import { Drawer } from 'antd';
 import React from 'react';
 import { interval } from 'rxjs';
 import useConstant from 'use-constant';
-import CollaborativeInput, { OnChangeParams } from '../../foundations/CollaborativeInput';
+import BufferedInput, { OnChangeParams } from '../../foundations/BufferedInput';
 
 const Main: React.FC = () => {
     const [changelog, setChangelog] = React.useState<OnChangeParams[]>([]);
@@ -14,7 +14,7 @@ const Main: React.FC = () => {
     }, []);
 
     return <div>
-        <CollaborativeInput value={value} bufferDuration='default' onChange={e => {
+        <BufferedInput value={value} bufferDuration='default' onChange={e => {
             setChangelog(state => [...state, e]);
         }} />
         <div>
