@@ -1,3 +1,4 @@
+import 'firebaseui/dist/firebaseui.css';
 import '../css/antd.css';
 import '../css/main.scss';
 
