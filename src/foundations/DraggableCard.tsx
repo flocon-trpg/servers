@@ -78,7 +78,6 @@ const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) => {
                         color: headerColor,
                         display: 'flex', // display: flexとalignItems: centerを組み合わせることで、headerが中央に表示されるようにしている
                         fontSize: 14,
-                        fontWeight: 500,
                         height: props.headerHeight ?? defaultHeaderHeight,
                         padding: `0 ${horizontalPadding}px`,
                     })}>
