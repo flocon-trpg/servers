@@ -92,14 +92,13 @@ type RoomMessageProps = {
     message: RoomUIMessage;
     participants: ReadonlyMap<string, Participant.State> | undefined;
     style?: React.CSSProperties;
-    characters: ReadonlyStateMap<Character.State>;
 }
 
 const deletedMessageStyle: React.CSSProperties = {
     opacity: 0.7,
 };
 
-const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, participants, style, characters }: RoomMessageProps) => {
+const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, participants, style }: RoomMessageProps) => {
     const myAuth = React.useContext(MyAuthContext);
     const [editMessageMutation] = useEditMessageMutation();
     const [deleteMessageMutation] = useDeleteMessageMutation();
@@ -126,8 +125,7 @@ const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, par
             participantName = participants.get(message.value.createdBy)?.name ?? null;
         }
 
-        let character: Character.State | undefined = undefined;
-        if (message.value.characterStateId == null) {
+        if (message.value.character == null) {
             if (message.value.customName == null) {
                 return (
                     <div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
@@ -144,15 +142,13 @@ const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, par
                         {message.value.customName}
                     </Tooltip>
                 </div>);
-        } else {
-            character = characters.get({ createdBy: message.value.createdBy, id: message.value.characterStateId });
         }
         return (
             <div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
                 {message.value.createdBy != null && <Jdenticon hashOrValue={message.value.createdBy} size={16} tooltipMode='userUid' />}
-                <Image filePath={character?.image ?? undefined} />
+                <Image filePath={message.value.character.image ?? undefined} />
                 <Tooltip title={participantName ?? message.value.createdBy}>
-                    {character?.name == null ? message.value.characterName : character.name}
+                    {message.value.character.name}
                 </Tooltip>
             </div>);
     })();
@@ -273,10 +269,9 @@ type PrivateChannelMessagesProps = {
     allRoomMessagesResult: AllRoomMessagesSuccessResult;
     visibleTo: PrivateChannelSet;
     participants: ReadonlyMap<string, Participant.State>;
-    characters: ReadonlyStateMap<Character.State>;
 }
 
-const PrivateChannelMessages: React.FC<PrivateChannelMessagesProps> = ({ roomId, allRoomMessagesResult, visibleTo, participants, characters }: PrivateChannelMessagesProps) => {
+const PrivateChannelMessages: React.FC<PrivateChannelMessagesProps> = ({ roomId, allRoomMessagesResult, visibleTo, participants }: PrivateChannelMessagesProps) => {
     const visibleToAsString = visibleTo.toString();
     const filter = useCallback((message: RoomMessage) => {
         if (message.type !== privateMessage) {
@@ -288,7 +283,7 @@ const PrivateChannelMessages: React.FC<PrivateChannelMessagesProps> = ({ roomId,
     return (
         <div style={({ height: '100%', overflowY: 'scroll', display: 'flex', flexDirection: 'column' })}>
             {
-                [...messages].reverse().map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} characters={characters} />))
+                [...messages].reverse().map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} />))
             }
         </div>
     );
@@ -334,8 +329,8 @@ type ChannelMessageTabsProps = {
     roomId: string;
     onActiveTabChange?: (activeTab: Tab) => void;
     style?: Omit<React.CSSProperties, 'height'>;
-    characters: ReadonlyStateMap<Character.State>;
     notifications: ReadonlyArray<TextNotification>;
+    characters: ReadonlyStateMap<Character.State>;
 }
 
 const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessagesResult, participants, roomId, onActiveTabChange, style, characters, notifications }: ChannelMessageTabsProps) => {
@@ -346,8 +341,8 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
     const generalMapping = React.useCallback((messages: ReadonlyArray<RoomMessage>) => {
         return [...messages]
             .sort((x, y) => y.value.createdAt - x.value.createdAt)
-            .map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} characters={characters} />));
-    }, [roomId, participants, characters]);
+            .map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants}/>));
+    }, [roomId, participants]);
 
     const freeMessageMapping = React.useCallback((messages: ReadonlyArray<RoomMessage>) => {
         return [
@@ -361,8 +356,8 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
                     isSecret: false,
                 }
             } as const]
-            .map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} characters={characters} />));
-    }, [roomId, participants, characters]);
+            .map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} />));
+    }, [roomId, participants]);
 
     const systemMessageMapping = React.useCallback((messages: ReadonlyArray<RoomMessage>) => {
         const $notifications = notifications.map(notification => {
@@ -388,8 +383,8 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
                     isSecret: false,
                 }
             } as const]
-            .map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} characters={characters} />));
-    }, [roomId, participants, characters, notifications]);
+            .map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} />));
+    }, [roomId, participants, notifications]);
 
     const channel1MessageMapping = React.useCallback((messages: ReadonlyArray<RoomMessage>) => {
         return [
@@ -403,8 +398,8 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
                     isSecret: false,
                 }
             } as const]
-            .map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} characters={characters} />));
-    }, [roomId, participants, characters]);
+            .map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} />));
+    }, [roomId, participants]);
 
     const channelFreeMessages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[$free], thenMap: freeMessageMapping });
     const channelSystemMessages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[$system], thenMap: systemMessageMapping });
@@ -506,7 +501,7 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
             const tabPane = (
                 <TabPane tab={tab} key={channel.toString()}>
                     <ChatInput roomId={roomId} activeTab={channel} characters={characters} />
-                    <PrivateChannelMessages roomId={roomId} visibleTo={channel} allRoomMessagesResult={allRoomMessagesResult} participants={participants} characters={characters} />
+                    <PrivateChannelMessages roomId={roomId} visibleTo={channel} allRoomMessagesResult={allRoomMessagesResult} participants={participants} />
                 </TabPane>
             );
             return { key: channelNameBase, channel, tabPane, showTab: showChannel(channel.toString()), menuItemContent: createPrivateChannelName(channel, false) };

@@ -235,6 +235,15 @@ export type CharacterState = {
   value: CharacterValueState;
 };
 
+export type CharacterValueForMessage = {
+  __typename?: 'CharacterValueForMessage';
+  image?: Maybe<FilePath>;
+  isPrivate: Scalars['Boolean'];
+  name: Scalars['String'];
+  stateId: Scalars['String'];
+  tachieImage?: Maybe<FilePath>;
+};
+
 export type CharacterValueState = {
   __typename?: 'CharacterValueState';
   boolParams: Array<BoolParamState>;
@@ -1245,8 +1254,7 @@ export enum RoomParameterNameType {
 export type RoomPrivateMessage = {
   __typename?: 'RoomPrivateMessage';
   altTextToSecret?: Maybe<Scalars['String']>;
-  characterName?: Maybe<Scalars['String']>;
-  characterStateId?: Maybe<Scalars['String']>;
+  character?: Maybe<CharacterValueForMessage>;
   commandResult?: Maybe<CommandResult>;
   createdAt: Scalars['Float'];
   createdBy?: Maybe<Scalars['String']>;
@@ -1285,8 +1293,7 @@ export type RoomPublicMessage = {
   __typename?: 'RoomPublicMessage';
   altTextToSecret?: Maybe<Scalars['String']>;
   channelKey: Scalars['String'];
-  characterName?: Maybe<Scalars['String']>;
-  characterStateId?: Maybe<Scalars['String']>;
+  character?: Maybe<CharacterValueForMessage>;
   commandResult?: Maybe<CommandResult>;
   createdAt: Scalars['Float'];
   createdBy?: Maybe<Scalars['String']>;
@@ -1743,6 +1750,18 @@ export type CharacterValueStateFragment = (
       { __typename?: 'StrParamValueState' }
       & Pick<StrParamValueState, 'isValuePrivate' | 'value'>
     ) }
+  )> }
+);
+
+export type CharacterValueForMessageFragment = (
+  { __typename?: 'CharacterValueForMessage' }
+  & Pick<CharacterValueForMessage, 'stateId' | 'isPrivate' | 'name'>
+  & { image?: Maybe<(
+    { __typename?: 'FilePath' }
+    & FilePathFragment
+  )>, tachieImage?: Maybe<(
+    { __typename?: 'FilePath' }
+    & FilePathFragment
   )> }
 );
 
@@ -2227,19 +2246,25 @@ export type RoomPublicChannelFragment = (
 
 export type RoomPublicMessageFragment = (
   { __typename?: 'RoomPublicMessage' }
-  & Pick<RoomPublicMessage, 'messageId' | 'channelKey' | 'text' | 'textColor' | 'altTextToSecret' | 'isSecret' | 'createdBy' | 'characterStateId' | 'characterName' | 'customName' | 'createdAt' | 'updatedAt'>
+  & Pick<RoomPublicMessage, 'messageId' | 'channelKey' | 'text' | 'textColor' | 'altTextToSecret' | 'isSecret' | 'createdBy' | 'customName' | 'createdAt' | 'updatedAt'>
   & { commandResult?: Maybe<(
     { __typename?: 'CommandResult' }
     & Pick<CommandResult, 'text' | 'isSuccess'>
+  )>, character?: Maybe<(
+    { __typename?: 'CharacterValueForMessage' }
+    & CharacterValueForMessageFragment
   )> }
 );
 
 export type RoomPrivateMessageFragment = (
   { __typename?: 'RoomPrivateMessage' }
-  & Pick<RoomPrivateMessage, 'messageId' | 'visibleTo' | 'text' | 'textColor' | 'altTextToSecret' | 'isSecret' | 'createdBy' | 'characterStateId' | 'characterName' | 'customName' | 'createdAt' | 'updatedAt'>
+  & Pick<RoomPrivateMessage, 'messageId' | 'visibleTo' | 'text' | 'textColor' | 'altTextToSecret' | 'isSecret' | 'createdBy' | 'customName' | 'createdAt' | 'updatedAt'>
   & { commandResult?: Maybe<(
     { __typename?: 'CommandResult' }
     & Pick<CommandResult, 'text' | 'isSuccess'>
+  )>, character?: Maybe<(
+    { __typename?: 'CharacterValueForMessage' }
+    & CharacterValueForMessageFragment
   )> }
 );
 
@@ -3410,6 +3435,19 @@ export const RoomSoundEffectFragmentDoc = gql`
   volume
 }
     ${FilePathFragmentDoc}`;
+export const CharacterValueForMessageFragmentDoc = gql`
+    fragment CharacterValueForMessage on CharacterValueForMessage {
+  stateId
+  isPrivate
+  name
+  image {
+    ...FilePath
+  }
+  tachieImage {
+    ...FilePath
+  }
+}
+    ${FilePathFragmentDoc}`;
 export const RoomPublicMessageFragmentDoc = gql`
     fragment RoomPublicMessage on RoomPublicMessage {
   messageId
@@ -3423,13 +3461,14 @@ export const RoomPublicMessageFragmentDoc = gql`
   altTextToSecret
   isSecret
   createdBy
-  characterStateId
-  characterName
+  character {
+    ...CharacterValueForMessage
+  }
   customName
   createdAt
   updatedAt
 }
-    `;
+    ${CharacterValueForMessageFragmentDoc}`;
 export const RoomPublicChannelFragmentDoc = gql`
     fragment RoomPublicChannel on RoomPublicChannel {
   key
@@ -3449,13 +3488,14 @@ export const RoomPrivateMessageFragmentDoc = gql`
   altTextToSecret
   isSecret
   createdBy
-  characterStateId
-  characterName
+  character {
+    ...CharacterValueForMessage
+  }
   customName
   createdAt
   updatedAt
 }
-    `;
+    ${CharacterValueForMessageFragmentDoc}`;
 export const RoomMessageEventFragmentDoc = gql`
     fragment RoomMessageEvent on RoomMessageEvent {
   ... on RoomSoundEffect {
