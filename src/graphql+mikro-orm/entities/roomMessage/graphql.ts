@@ -62,6 +62,24 @@ export class RoomPublicChannel {
     public name?: string;
 }
 
+@ObjectType()
+export class CharacterValueForMessage {
+    @Field()
+    public stateId!: string;
+
+    @Field()
+    public isPrivate!: boolean;
+
+    @Field()
+    public name!: string;
+
+    @Field(() => FilePath, { nullable: true })
+    public image?: FilePath;
+
+    @Field(() => FilePath, { nullable: true })
+    public tachieImage?: FilePath;
+}
+
 export const RoomPublicMessageType = 'RoomPublicMessage';
 
 @ObjectType()
@@ -95,10 +113,7 @@ export class RoomPublicMessage {
     public createdBy?: string;
 
     @Field({ nullable: true, description: '発言がCharacterと紐付いているときはnon-nullish。PLとしての発言、もしくはcreatedByがnullishのときはnullish。' })
-    public characterStateId?: string;
-
-    @Field({ nullable: true })
-    public characterName?: string;
+    public character?: CharacterValueForMessage;
 
     @Field({ nullable: true })
     public customName?: string;
@@ -143,11 +158,8 @@ export class RoomPrivateMessage {
     @Field({ nullable: true })
     public createdBy?: string;
 
-    @Field({ nullable: true })
-    public characterStateId?: string;
-
-    @Field({ nullable: true })
-    public characterName?: string;
+    @Field({ nullable: true, description: '発言がCharacterと紐付いているときはnon-nullish。PLとしての発言、もしくはcreatedByがnullishのときはnullish。後からCharacterの値が更新されても、この値が更新されることはない。' })
+    public character?: CharacterValueForMessage;
 
     @Field({ nullable: true })
     public customName?: string;

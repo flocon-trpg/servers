@@ -109,13 +109,35 @@ export class RoomPubMsg {
     public isSecret: boolean = false;
 
     // 発言がキャラクターに紐付いているときはnon-nullish、PLとして発言もしくはcreatedByがnullishの場合はnullishという想定。
-    // キャラクターが削除/削除をUndoされるケースを考慮して、リレーションにはしていない。
+    // キャラクターが削除/削除をUndoされるケースを考慮して、リレーションは付けていない。
     @Property({ nullable: true })
     public charaStateId?: string;
 
-    // 後から該当するcharacterが削除されたときでも、nameは簡単に取得できるようにするために定義している。
+    // 「書き込んだとき」のCharaのname
     @Property({ nullable: true })
     public charaName?: string;
+
+    // 「書き込んだとき」のCharaのisPrivate
+    @Property({ nullable: true, default: null })
+    public charaIsPrivate?: boolean;
+
+    // 「書き込んだとき」のCharaのimagePath
+    // CONSIDER: デフォルトではPostgreSQLの場合varchar(255)になるため、lengthを設定している。値は適当（MySQLの最大値）。
+    @Property({ nullable: true, length: 65535, default: null })
+    public charaImagePath?: string;
+
+    // 「書き込んだとき」のCharaのimageSourceType
+    @Enum({ items: () => FileSourceType, nullable: true, default: null })
+    public charaImageSourceType?: FileSourceType;
+
+    // 「書き込んだとき」のCharaのimagePath
+    // CONSIDER: デフォルトではPostgreSQLの場合varchar(255)になるため、lengthを設定している。値は適当（MySQLの最大値）。
+    @Property({ nullable: true, length: 65535, default: null })
+    public charaTachieImagePath?: string;
+
+    // 「書き込んだとき」のCharaのimageSourceType
+    @Enum({ items: () => FileSourceType, nullable: true, default: null })
+    public charaTachieImageSourceType?: FileSourceType;
 
     @Property({ nullable: true })
     public customName?: string;
@@ -176,9 +198,31 @@ export class RoomPrvMsg {
     @Property({ nullable: true })
     public charaStateId?: string;
 
-    // 後から該当するcharacterが削除されたときでも、nameは簡単に取得できるようにするために定義している。
+    // 「書き込んだとき」のCharaのname
     @Property({ nullable: true })
     public charaName?: string;
+
+    // 「書き込んだとき」のCharaのisPrivate
+    @Property({ nullable: true, default: null})
+    public charaIsPrivate?: boolean;
+
+    // 「書き込んだとき」のCharaのimagePath
+    // CONSIDER: デフォルトではPostgreSQLの場合varchar(255)になるため、lengthを設定している。値は適当（MySQLの最大値）。
+    @Property({ nullable: true, length: 65535, default: null })
+    public charaImagePath?: string;
+
+    // 「書き込んだとき」のCharaのimageSourceType
+    @Enum({ items: () => FileSourceType, nullable: true, default: null })
+    public charaImageSourceType?: FileSourceType;
+
+    // 「書き込んだとき」のCharaのimagePath
+    // CONSIDER: デフォルトではPostgreSQLの場合varchar(255)になるため、lengthを設定している。値は適当（MySQLの最大値）。
+    @Property({ nullable: true, length: 65535, default: null })
+    public charaTachieImagePath?: string;
+
+    // 「書き込んだとき」のCharaのimageSourceType
+    @Enum({ items: () => FileSourceType, nullable: true, default: null })
+    public charaTachieImageSourceType?: FileSourceType;
 
     @Property({ nullable: true })
     public customName?: string;
