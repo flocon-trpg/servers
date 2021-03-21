@@ -16,12 +16,13 @@ const isNotNullOrUndefined = <T>(source: T | null | undefined): source is T => {
     return true;
 };
 
-const updatePanelsEpic = (action$: ActionsObservable<AnyAction>, state$: StateObservable<RootState>): Observable<AnyAction> => {
+const roomConfigEpicCore = (action$: ActionsObservable<AnyAction>, state$: StateObservable<RootState>): Observable<AnyAction> => {
     return new Observable<AnyAction>(observer => {
         return action$.pipe(
             Rx.map(action => {
                 if (
-                    roomConfigModule.actions.setGameType.match(action)
+                    roomConfigModule.actions.setOtherValues.match(action)
+                    || roomConfigModule.actions.setGameType.match(action)
                     || roomConfigModule.actions.bringPanelToFront.match(action)
                     || roomConfigModule.actions.setIsMinimized.match(action)
 
@@ -72,6 +73,6 @@ const updatePanelsEpic = (action$: ActionsObservable<AnyAction>, state$: StateOb
     });
 };
 
-export const panelsEpic = combineEpics(
-    updatePanelsEpic,
+export const roomConfigEpic = combineEpics(
+    roomConfigEpicCore,
 );

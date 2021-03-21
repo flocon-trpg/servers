@@ -92,7 +92,7 @@ const createRoomMessageArray = ({
                 createdAt: msg.createdAt,
                 value: {
                     text: null,
-                    createdBy: createCreatedBy({ createdBy: msg.createdBy, characterStateId: msg.characterStateId ?? undefined, customName: msg.customName ?? undefined }),
+                    createdBy: createCreatedBy({ createdBy: msg.createdBy, characterStateId: msg.character?.stateId ?? undefined, customName: msg.customName ?? undefined }),
                     channelName,
                     commandResult: msg.commandResult?.text ?? null,
                 }
@@ -105,7 +105,7 @@ const createRoomMessageArray = ({
             createdAt: msg.createdAt,
             value: {
                 text: msg.text,
-                createdBy: msg.createdBy == null ? null : createCreatedBy({ createdBy: msg.createdBy, characterStateId: msg.characterStateId ?? undefined, customName: msg.customName ?? undefined }),
+                createdBy: msg.createdBy == null ? null : createCreatedBy({ createdBy: msg.createdBy, characterStateId: msg.character?.stateId ?? undefined, customName: msg.customName ?? undefined }),
                 channelName,
                 commandResult: msg.commandResult?.text ?? null,
             }
@@ -132,7 +132,7 @@ const createRoomMessageArray = ({
                 createdAt: msg.createdAt,
                 value: {
                     text: null,
-                    createdBy: createCreatedBy({ createdBy: msg.createdBy, characterStateId: msg.characterStateId ?? undefined, customName: msg.customName ?? undefined }),
+                    createdBy: createCreatedBy({ createdBy: msg.createdBy, characterStateId: msg.character?.stateId ?? undefined, customName: msg.customName ?? undefined }),
                     channelName,
                     commandResult: msg.commandResult?.text ?? null,
                 }
@@ -145,7 +145,7 @@ const createRoomMessageArray = ({
             createdAt: msg.createdAt,
             value: {
                 text: msg.text,
-                createdBy: msg.createdBy == null ? null : createCreatedBy({ createdBy: msg.createdBy, characterStateId: msg.characterStateId ?? undefined, customName: msg.customName ?? undefined }),
+                createdBy: msg.createdBy == null ? null : createCreatedBy({ createdBy: msg.createdBy, characterStateId: msg.character?.stateId ?? undefined, customName: msg.customName ?? undefined }),
                 channelName,
                 commandResult: msg.commandResult?.text ?? null,
             }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Layout as AntdLayout, notification as antdNotification, Input, Tooltip, Result } from 'antd';
+import { Menu, Layout as AntdLayout, notification as antdNotification, Input, Tooltip, Result, Button, Popover } from 'antd';
 import DraggableCard, { horizontalPadding } from '../../foundations/DraggableCard';
 import CharacterList from './CharacterList';
 import useRoomConfig from '../../hooks/localStorage/useRoomConfig';
@@ -39,6 +39,7 @@ import { Participant } from '../../stateManagers/states/participant';
 import MyNumberValueDrawer from './MyNumberValueDrawer';
 import { useAllRoomMessages } from '../../hooks/useRoomMessages';
 import LoadingResult from '../../foundations/Result/LoadingResult';
+import VolumeBarPanel from './VolumeBarPanel';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -543,7 +544,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                                     </Menu.Item>
                                 </Menu.SubMenu>
                                 {(me == null || myAuth == null) || <Menu.SubMenu
-                                    title={<div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
+                                    title={<div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                                         <Jdenticon hashOrValue={myAuth.uid} size={20} tooltipMode='userUid' />
                                         <span style={({ marginLeft: 4 })}>{me.name}</span>
                                     </div>}>
@@ -557,6 +558,11 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                                         {me.role === ParticipantRole.Player || me.role === ParticipantRole.Master ? <Tooltip title='すでに昇格済みです。'>参加者に昇格</Tooltip> : '参加者に昇格'}
                                     </Menu.Item>
                                 </Menu.SubMenu>}
+                                <Menu.Item>
+                                    <Popover trigger='click' content={<VolumeBarPanel roomId={roomId} />}>
+                                        ボリューム
+                                    </Popover>
+                                </Menu.Item>
                             </Menu>
                             <div>
                                 {boardsPanels}

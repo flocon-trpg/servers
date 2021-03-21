@@ -1,4 +1,4 @@
-import { castToString } from '../utils/cast';
+import { castToNumber, castToRecord, castToString } from '../utils/cast';
 import isObject from '../utils/isObject';
 import { castToPartialPanelsConfig, defaultPanelsConfig, PanelsConfig, PartialPanelsConfig, toCompletePanelsConfig } from './PanelsConfig';
 import * as Room from '../stateManagers/states/room';
@@ -10,6 +10,9 @@ export type RoomConfig = {
     gameTypeId?: string;
     gameTypeName?: string;
     panels: PanelsConfig;
+    masterVolume: number;
+    channelVolumes: Record<string, number>;
+    seVolume: number;
 }
 
 export type PartialRoomConfig = {
@@ -21,6 +24,9 @@ export type PartialRoomConfig = {
     gameTypeId?: string;
     gameTypeName?: string;
     panels?: PartialPanelsConfig;
+    masterVolume?: number;
+    channelVolumes?: Record<string, number>;
+    seVolume?: number;
 }
 
 export type UpdateGameTypeAction = {
@@ -62,6 +68,9 @@ export const castToPartialRoomConfig = (source: unknown): PartialRoomConfig | un
         panels: castToPartialPanelsConfig(source.panels),
         gameTypeId: castToString(source.gameTypeId),
         gameTypeName: castToString(source.gameTypeName),
+        masterVolume: castToNumber(source.masterVolume),
+        channelVolumes: castToRecord(source.channelVolumes, castToNumber),
+        seVolume: castToNumber(source.seVolume),
     };
 };
 
@@ -77,6 +86,9 @@ export const toCompleteRoomConfig = (source: PartialRoomConfig, roomId: string):
         panels: source.panels == null ? defaultPanelsConfig() : toCompletePanelsConfig(source.panels),
         gameTypeId: source.gameTypeId,
         gameTypeName: source.gameTypeName,
+        masterVolume: source.masterVolume ?? 0.5,
+        channelVolumes: source.channelVolumes ?? {},
+        seVolume: source.seVolume ?? 1,
     };
 };
 
@@ -85,5 +97,8 @@ export const defaultRoomConfig = (roomId: string): RoomConfig => {
         roomId,
         version: 1,
         panels: defaultPanelsConfig(),
+        masterVolume: 0.5,
+        channelVolumes: {},
+        seVolume: 1,
     };
 };

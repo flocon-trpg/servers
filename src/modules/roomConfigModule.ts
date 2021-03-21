@@ -7,6 +7,19 @@ import { ResizeDirection } from 're-resizable';
 import { recordToArray } from '../utils/record';
 import { BoardConfig, BoardsPanelConfig, createDefaultBoardConfig } from '../states/BoardsPanelConfig';
 import { CompositeKey, compositeKeyToString } from '../@shared/StateMap';
+import { StrIndex5 } from '../@shared/indexes';
+
+export type SetOtherValuesAction = {
+    roomId: string;
+    masterVolume?: number;
+    seVolume?: number;
+}
+
+export type SetChannelVolumeAction = {
+    roomId: string;
+    channelKey: StrIndex5;
+    volume: number;
+};
 
 export type MovePanelAction = {
     roomId: string;
@@ -178,6 +191,17 @@ const roomConfigModule = createSlice({
             fixRoomConfig(action.payload);
             return action.payload;
         },
+        setOtherValues: (state: RoomConfig | null, action: PayloadAction<SetOtherValuesAction>) => {
+            if (state == null || state.roomId !== action.payload.roomId) {
+                return;
+            }
+            if (action.payload.masterVolume != null) {
+                state.masterVolume = action.payload.masterVolume;
+            }
+            if (action.payload.seVolume != null) {
+                state.seVolume = action.payload.seVolume;
+            }
+        },
         setGameType: (state: RoomConfig | null, action: PayloadAction<UpdateGameTypeAction>) => {
             if (state == null || state.roomId !== action.payload.roomId) {
                 return;
@@ -185,6 +209,13 @@ const roomConfigModule = createSlice({
             state.gameTypeId = action.payload.gameType?.id;
             state.gameTypeName = action.payload.gameType?.name;
         },
+        setChannelVolume: (state: RoomConfig | null, action: PayloadAction<SetChannelVolumeAction>) => {
+            if (state == null || state.roomId !== action.payload.roomId) {
+                return;
+            }
+            state.channelVolumes[action.payload.channelKey] = action.payload.volume;
+        },
+
         bringPanelToFront: (state: RoomConfig | null, action: PayloadAction<PanelAction>) => {
             bringPanelToFront(state, action.payload);
         },

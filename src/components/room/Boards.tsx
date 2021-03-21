@@ -238,7 +238,7 @@ const Board: React.FC<BoardProps> = ({
             return <MyKonva.Image
                 message={lastPublicMessage}
                 messageFilter={msg => {
-                    return msg.createdBy === characterKey.createdBy && msg.characterStateId === characterKey.id && msg.channelKey !== $free;
+                    return msg.createdBy === characterKey.createdBy && msg.character?.stateId === characterKey.id && msg.channelKey !== $free;
                 }}
                 x={pieceValue.x}
                 y={pieceValue.y}

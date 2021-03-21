@@ -5,17 +5,28 @@ import { useDeepCompareEffectNoCheck } from 'use-deep-compare-effect';
 import { useFirebaseStorageUrlArray } from '../hooks/firebaseStorage';
 import { __ } from '../@shared/collection';
 import { RoomBgm } from '../stateManagers/states/roomBgm';
+import { useSelector } from '../store';
 
 type PlayBgmBehaviorCoreProps = {
     bgm: RoomBgm.State | null;
+    volumeConfig: number;
 }
 
-const PlayBgmBehaviorCore: React.FC<PlayBgmBehaviorCoreProps> = ({ bgm }: PlayBgmBehaviorCoreProps) => {
+const PlayBgmBehaviorCore: React.FC<PlayBgmBehaviorCoreProps> = ({ bgm, volumeConfig }: PlayBgmBehaviorCoreProps) => {
+    const getVolume = () => {
+        return (bgm?.volume ?? 1) * volumeConfig;
+    };
+    const volume = getVolume();
+    const volumeRef = React.useRef(volume);
+    React.useEffect(() => {
+        volumeRef.current = volume;
+    }, [volume]);
+
     const urlArray = useFirebaseStorageUrlArray(bgm?.files);
-    const volume = bgm?.volume;
+    const howlRef = React.useRef<Howl>();
 
     useDeepCompareEffectNoCheck(() => {
-        if (urlArray == null || volume == null) {
+        if (urlArray == null || volumeRef == null) {
             return;
         }
 
@@ -26,14 +37,23 @@ const PlayBgmBehaviorCore: React.FC<PlayBgmBehaviorCoreProps> = ({ bgm }: PlayBg
         const howl = new Howl({
             src,
             loop: true,
-            volume,
+            volume: volumeRef.current,
         });
+        howlRef.current = howl;
         howl.play();
         return (() => {
-            howl.fade(volume, 0, 1000);
+            howl.fade(howl.volume(), 0, 1000);
             setTimeout(() => howl.stop(), 1000);
         });
-    }, [urlArray, volume]);
+    }, [urlArray, volumeRef]);
+
+    React.useEffect(() => {
+        const howl = howlRef.current;
+        if (howl == null) {
+            return;
+        }
+        howl.volume(volume);
+    }, [volume]);
 
     return null;
 };
@@ -43,9 +63,12 @@ type Props = {
 }
 
 const PlayBgmBehavior: React.FC<Props> = ({ bgms }: Props) => {
+    const masterVolume = useSelector(state => state.roomConfigModule?.masterVolume) ?? 0;
+    const channelVolumes = useSelector(state => state.roomConfigModule?.channelVolumes) ?? {};
+
     return (
         <div>
-            {[...bgms].map(([key, bgm]) => <PlayBgmBehaviorCore key={key} bgm={bgm} />)}
+            {[...bgms].map(([key, bgm]) => <PlayBgmBehaviorCore key={key} bgm={bgm} volumeConfig={masterVolume * (channelVolumes[key] ?? 0)} />)}
         </div>
     );
 };

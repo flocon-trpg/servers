@@ -1,6 +1,6 @@
 import { combineEpics } from 'redux-observable';
-import { panelsEpic } from './panelsEpic';
+import { roomConfigEpic } from './roomConfigEpic';
 
 export const rootEpic = combineEpics(
-    panelsEpic,
+    roomConfigEpic,
 );

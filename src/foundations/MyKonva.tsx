@@ -230,10 +230,11 @@ export namespace MyKonva {
         listening: boolean;
         opacity?: number;
 
-        // これが変わるたび、そのメッセージが💬として表示される。ただし、undefinedになったときは何も起こらない(💬が消えることもない)。
+        // (messageFilter(message) ? message : undefined)の値をxとする。xが変わるたび、そのメッセージが💬として表示される。ただし、undefinedになったときは何も起こらない(💬が消えることもない)。
         // 💬を使いたくない場合は常にundefinedにすればよい。
         message?: RoomPublicMessageFragment;
 
+        // undefinedならば(x => true)とみなされる。
         // messageが常にundefinedならばこれもundefinedにしてよい。
         // re-renderのたびに実行されるため、軽量なおかつ副作用のない関数を用いることを強く推奨。
         messageFilter?: (message: RoomPublicMessageFragment) => boolean;
