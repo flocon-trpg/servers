@@ -265,6 +265,20 @@ class $ReadonlyArray<T> extends $Iterator<T> {
         return this.source[0];
     }
 
+    public last(): T {
+        if (this.source.length === 0) {
+            throw 'array is empty.';
+        }
+        return this.source[this.source.length - 1];
+    }
+
+    public lastOrDefault<TDefault>(defaultValue: TDefault): T | TDefault {
+        if (this.source.length === 0) {
+            return defaultValue;
+        }
+        return this.source[this.source.length - 1];
+    }
+
     public single(): T {
         if (this.source.length !== 1) {
             throw 'array.length !== 1';
