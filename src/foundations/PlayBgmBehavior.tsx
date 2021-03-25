@@ -6,6 +6,7 @@ import { useFirebaseStorageUrlArray } from '../hooks/firebaseStorage';
 import { __ } from '../@shared/collection';
 import { RoomBgm } from '../stateManagers/states/roomBgm';
 import { useSelector } from '../store';
+import { defaultChannelVolume, defaultMasterVolume } from '../states/RoomConfig';
 
 type PlayBgmBehaviorCoreProps = {
     bgm: RoomBgm.State | null;
@@ -63,12 +64,12 @@ type Props = {
 }
 
 const PlayBgmBehavior: React.FC<Props> = ({ bgms }: Props) => {
-    const masterVolume = useSelector(state => state.roomConfigModule?.masterVolume) ?? 0;
+    const masterVolume = useSelector(state => state.roomConfigModule?.masterVolume) ?? defaultMasterVolume;
     const channelVolumes = useSelector(state => state.roomConfigModule?.channelVolumes) ?? {};
 
     return (
         <div>
-            {[...bgms].map(([key, bgm]) => <PlayBgmBehaviorCore key={key} bgm={bgm} volumeConfig={masterVolume * (channelVolumes[key] ?? 0)} />)}
+            {[...bgms].map(([key, bgm]) => <PlayBgmBehaviorCore key={key} bgm={bgm} volumeConfig={masterVolume * (channelVolumes[key] ?? defaultChannelVolume)} />)}
         </div>
     );
 };

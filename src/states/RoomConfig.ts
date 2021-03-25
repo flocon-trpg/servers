@@ -3,6 +3,9 @@ import isObject from '../utils/isObject';
 import { castToPartialPanelsConfig, defaultPanelsConfig, PanelsConfig, PartialPanelsConfig, toCompletePanelsConfig } from './PanelsConfig';
 import * as Room from '../stateManagers/states/room';
 
+export const defaultMasterVolume = 0.5;
+export const defaultChannelVolume = 1;
+
 export type RoomConfig = {
     roomId: string;
 

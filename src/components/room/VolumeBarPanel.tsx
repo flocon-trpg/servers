@@ -2,6 +2,7 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import VolumeBar from '../../foundations/VolumeBar';
 import roomConfigModule from '../../modules/roomConfigModule';
+import { defaultChannelVolume } from '../../states/RoomConfig';
 import { useSelector } from '../../store';
 
 type Props = {
@@ -27,11 +28,11 @@ const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
 
     // Math.roundがないと60.000000001のような中途半端な値が表示されることがある
     const masterVolumeBar = <VolumeBar inputNumberType='0-1' readonly={false} value={masterVolume} onChange={i => dispatch(roomConfigModule.actions.setOtherValues({ roomId, masterVolume: i }))} />;
-    const channel1VolumeBar = <VolumeBar inputNumberType='0-1' readonly={false} value={channelVolumes['1'] ?? 1} onChange={i => dispatch(roomConfigModule.actions.setChannelVolume({ roomId, channelKey: '1', volume: i }))} />;
-    const channel2VolumeBar = <VolumeBar inputNumberType='0-1' readonly={false} value={channelVolumes['2'] ?? 1} onChange={i => dispatch(roomConfigModule.actions.setChannelVolume({ roomId, channelKey: '2', volume: i }))} />;
-    const channel3VolumeBar = <VolumeBar inputNumberType='0-1' readonly={false} value={channelVolumes['3'] ?? 1} onChange={i => dispatch(roomConfigModule.actions.setChannelVolume({ roomId, channelKey: '3', volume: i }))} />;
-    const channel4VolumeBar = <VolumeBar inputNumberType='0-1' readonly={false} value={channelVolumes['4'] ?? 1} onChange={i => dispatch(roomConfigModule.actions.setChannelVolume({ roomId, channelKey: '4', volume: i }))} />;
-    const channel5VolumeBar = <VolumeBar inputNumberType='0-1' readonly={false} value={channelVolumes['5'] ?? 1} onChange={i => dispatch(roomConfigModule.actions.setChannelVolume({ roomId, channelKey: '5', volume: i }))} />;
+    const channel1VolumeBar = <VolumeBar inputNumberType='0-1' readonly={false} value={channelVolumes['1'] ?? defaultChannelVolume} onChange={i => dispatch(roomConfigModule.actions.setChannelVolume({ roomId, channelKey: '1', volume: i }))} />;
+    const channel2VolumeBar = <VolumeBar inputNumberType='0-1' readonly={false} value={channelVolumes['2'] ?? defaultChannelVolume} onChange={i => dispatch(roomConfigModule.actions.setChannelVolume({ roomId, channelKey: '2', volume: i }))} />;
+    const channel3VolumeBar = <VolumeBar inputNumberType='0-1' readonly={false} value={channelVolumes['3'] ?? defaultChannelVolume} onChange={i => dispatch(roomConfigModule.actions.setChannelVolume({ roomId, channelKey: '3', volume: i }))} />;
+    const channel4VolumeBar = <VolumeBar inputNumberType='0-1' readonly={false} value={channelVolumes['4'] ?? defaultChannelVolume} onChange={i => dispatch(roomConfigModule.actions.setChannelVolume({ roomId, channelKey: '4', volume: i }))} />;
+    const channel5VolumeBar = <VolumeBar inputNumberType='0-1' readonly={false} value={channelVolumes['5'] ?? defaultChannelVolume} onChange={i => dispatch(roomConfigModule.actions.setChannelVolume({ roomId, channelKey: '5', volume: i }))} />;
     const seVolumeBar = <VolumeBar inputNumberType='0-1' readonly={false} value={seVolume} onChange={i => dispatch(roomConfigModule.actions.setOtherValues({ roomId, seVolume: i }))} />;
 
     return (<div style={({ display: 'flex', flexDirection: 'column' })}>
