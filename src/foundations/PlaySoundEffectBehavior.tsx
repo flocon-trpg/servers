@@ -5,14 +5,18 @@ import { useFirebaseStorageUrl } from '../hooks/firebaseStorage';
 import { FilePathFragment } from '../generated/graphql';
 import { useSelector } from '../store';
 
-// 暫定的な措置として、長過ぎる曲をSEにしようとした場合でも最大10秒までしか流れない。
-const musicLengthLimit = 10 * 1000;
+// 長過ぎる曲をSEにしようとした場合、何もしないと部屋に再入室しない限りその曲を止めることができない。それを防ぐため、最大15秒までしか流れないようにしている。15秒という長さは適当。
+const musicLengthLimit = 15 * 1000;
 const fadeout = 1 * 1000;
 
 type PlaySoundEffectProps = {
     value?: {
         filePath: FilePathFragment;
         volume: number;
+
+        // これがないと、同じSEを複数回流そうとしたとき、urlが変わらないため2回目以降のSEが流れない。これがあることでdepsの中身が変わり、SEが複数回流れるようになる。
+        // depsの中身を変えるだけであればなんでもいいが、messageIdが使いやすいと思って採用している。
+        messageId: string;
     };
 }
 
@@ -47,11 +51,7 @@ const PlaySoundEffectBehavior: React.FC<PlaySoundEffectProps> = ({ value }: Play
         howl.play();
         setTimeout(() => howl.fade(howl.volume(), 0, fadeout), musicLengthLimit);
         setTimeout(() => howl.stop(), musicLengthLimit + fadeout);
-        return (() => {
-            howl.fade(howl.volume(), 0, fadeout);
-            setTimeout(() => howl.stop(), fadeout);
-        });
-    }, [url]);
+    }, [url, value?.messageId]);
 
     React.useEffect(() => {
         const howl = howlRef.current;

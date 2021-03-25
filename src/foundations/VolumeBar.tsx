@@ -1,40 +1,54 @@
 import React from 'react';
-import { Row, Col, Slider, InputNumber } from 'antd';
+import { Row, Col, Slider, InputNumber, Typography } from 'antd';
+
+// '0-1'の場合、Props.valueの値の範囲が0～1だとみなされる。VolumeBarではProps.valueの値を100倍した値が表示される。onChangeの引数には0～1の範囲に変換されてから渡される。
+// '0-100'の場合、Props.valueの値の範囲が0～100だとみなされる。VolumeBarはProps.valueの値をそのまま表示する。
+type InputNumberType =
+    | '0-1'
+    | '0-100'
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 type Props = {
     value: number;
     onChange: (newValue: number) => void;
+    readonly: boolean;
+    inputNumberType: InputNumberType;
 };
 
-const VolumeBar: React.FC<Props> = ({ value, onChange }: Props) => {
-    return <div style={{ display: 'flex', flexDirection: 'row' }}>
+const textStyle: React.CSSProperties = { flex: '100px', margin: '0 4px', width: 50 };
+
+const VolumeBar: React.FC<Props> = ({ value, onChange, readonly, inputNumberType }: Props) => {
+    const roundedValue = Math.round(inputNumberType === '0-1' ? value * 100 : value);
+    return <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
         <Slider
+            disabled={readonly}
             style={{ flex: 1, minWidth: 50 }}
             min={0}
-            max={100}
+            max={inputNumberType === '0-1' ? 100 : 1}
             step={1}
             onChange={(newValue: unknown) => {
                 if (typeof newValue !== 'number') {
                     return;
                 }
-                onChange(newValue);
+                const rounded = Math.round(newValue);
+                onChange(inputNumberType === '0-1' ? (rounded / 100) : rounded);
             }}
-            value={value}
+            value={roundedValue}
         />
-        <InputNumber
+        {readonly ? <Typography.Text style={textStyle}>{value}</Typography.Text> : <InputNumber
+            size='small'
             min={0}
             max={100}
             step={1}
-            style={{ flex: '100px', margin: '0 16px', minWidth: 50 }}
-            value={value}
+            style={textStyle}
+            value={roundedValue}
             onChange={newValue => {
                 if (typeof newValue !== 'number') {
                     return;
                 }
-                onChange(newValue);
+                onChange(inputNumberType === '0-1' ? (newValue / 100) : newValue);
             }}
-        />
+        />}
     </div>;
 };
 

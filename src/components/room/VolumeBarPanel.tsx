@@ -26,22 +26,22 @@ const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
     </div>);
 
     // Math.roundがないと60.000000001のような中途半端な値が表示されることがある
-    const masterVolumeBar = <VolumeBar value={Math.round(masterVolume * 100)} onChange={i => dispatch(roomConfigModule.actions.setOtherValues({ roomId, masterVolume: i / 100 }))} />;
-    const channel1VolumeBar = <VolumeBar value={Math.round((channelVolumes['1'] ?? 1) * 100)} onChange={i => dispatch(roomConfigModule.actions.setChannelVolume({ roomId, channelKey: '1', volume: i / 100 }))} />;
-    const channel2VolumeBar = <VolumeBar value={Math.round((channelVolumes['2'] ?? 1) * 100)} onChange={i => dispatch(roomConfigModule.actions.setChannelVolume({ roomId, channelKey: '2', volume: i / 100 }))} />;
-    const channel3VolumeBar = <VolumeBar value={Math.round((channelVolumes['3'] ?? 1) * 100)} onChange={i => dispatch(roomConfigModule.actions.setChannelVolume({ roomId, channelKey: '3', volume: i / 100 }))} />;
-    const channel4VolumeBar = <VolumeBar value={Math.round((channelVolumes['4'] ?? 1) * 100)} onChange={i => dispatch(roomConfigModule.actions.setChannelVolume({ roomId, channelKey: '4', volume: i / 100 }))} />;
-    const channel5VolumeBar = <VolumeBar value={Math.round((channelVolumes['5'] ?? 1) * 100)} onChange={i => dispatch(roomConfigModule.actions.setChannelVolume({ roomId, channelKey: '5', volume: i / 100 }))} />;
-    const seVolumeBar = <VolumeBar value={Math.round(seVolume * 100)} onChange={i => dispatch(roomConfigModule.actions.setOtherValues({ roomId, seVolume: i / 100 }))} />;
+    const masterVolumeBar = <VolumeBar inputNumberType='0-1' readonly={false} value={masterVolume} onChange={i => dispatch(roomConfigModule.actions.setOtherValues({ roomId, masterVolume: i }))} />;
+    const channel1VolumeBar = <VolumeBar inputNumberType='0-1' readonly={false} value={channelVolumes['1'] ?? 1} onChange={i => dispatch(roomConfigModule.actions.setChannelVolume({ roomId, channelKey: '1', volume: i }))} />;
+    const channel2VolumeBar = <VolumeBar inputNumberType='0-1' readonly={false} value={channelVolumes['2'] ?? 1} onChange={i => dispatch(roomConfigModule.actions.setChannelVolume({ roomId, channelKey: '2', volume: i }))} />;
+    const channel3VolumeBar = <VolumeBar inputNumberType='0-1' readonly={false} value={channelVolumes['3'] ?? 1} onChange={i => dispatch(roomConfigModule.actions.setChannelVolume({ roomId, channelKey: '3', volume: i }))} />;
+    const channel4VolumeBar = <VolumeBar inputNumberType='0-1' readonly={false} value={channelVolumes['4'] ?? 1} onChange={i => dispatch(roomConfigModule.actions.setChannelVolume({ roomId, channelKey: '4', volume: i }))} />;
+    const channel5VolumeBar = <VolumeBar inputNumberType='0-1' readonly={false} value={channelVolumes['5'] ?? 1} onChange={i => dispatch(roomConfigModule.actions.setChannelVolume({ roomId, channelKey: '5', volume: i }))} />;
+    const seVolumeBar = <VolumeBar inputNumberType='0-1' readonly={false} value={seVolume} onChange={i => dispatch(roomConfigModule.actions.setOtherValues({ roomId, seVolume: i }))} />;
 
     return (<div style={({ display: 'flex', flexDirection: 'column' })}>
         {toRow(masterVolumeBar, 'マスター音量')}
+        {toRow(seVolumeBar, 'SE音量')}
         {toRow(channel1VolumeBar, 'BGMチャンネル1音量')}
         {toRow(channel2VolumeBar, 'BGMチャンネル2音量')}
         {toRow(channel3VolumeBar, 'BGMチャンネル3音量')}
         {toRow(channel4VolumeBar, 'BGMチャンネル4音量')}
         {toRow(channel5VolumeBar, 'BGMチャンネル5音量')}
-        {toRow(seVolumeBar, 'SE音量')}
     </div>);
 };
 

@@ -530,7 +530,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                                     }}>
                                         <div>
                                             <span>{roomConfig.panels.gameEffectPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
-                                            <span>エフェクト</span>
+                                            <span>SE, BGM</span>
                                         </div>
                                     </Menu.Item>
                                     <Menu.Item onClick={() => {
@@ -581,7 +581,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                                     <CharacterList room={roomState} />
                                 </DraggableCard>}
                                 {roomConfig.panels.gameEffectPanel.isMinimized ? null : <DraggableCard
-                                    header="Game effect"
+                                    header="SE, BGM"
                                     onDragStop={e => dispatch(roomConfigModule.actions.moveGameEffectPanel({ ...e, roomId }))}
                                     onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeGameEffectPanel({ roomId, dir, delta }))}
                                     onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: gameEffectPanel } }))}

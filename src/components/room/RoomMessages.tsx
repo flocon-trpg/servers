@@ -341,7 +341,7 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
     const generalMapping = React.useCallback((messages: ReadonlyArray<RoomMessage>) => {
         return [...messages]
             .sort((x, y) => y.value.createdAt - x.value.createdAt)
-            .map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants}/>));
+            .map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} />));
     }, [roomId, participants]);
 
     const freeMessageMapping = React.useCallback((messages: ReadonlyArray<RoomMessage>) => {
@@ -437,7 +437,7 @@ const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessages
             <TabPane tab={channelName} key={publicChannelKey}>
                 <div style={({ height: '100%', display: 'flex', flexDirection: 'column' })}>
                     <ChatInput style={({ flex: 0 })} roomId={roomId} activeTab={publicChannelKey} characters={characters} />
-                    <div style={({height: '100%', overflowY: 'scroll', display: 'flex', flexDirection: 'column' })}>
+                    <div style={({ height: '100%', overflowY: 'scroll', display: 'flex', flexDirection: 'column' })}>
                         {messages}
                     </div>
                 </div>
@@ -630,7 +630,7 @@ type Props = {
 
 const RoomMessages: React.FC<Props> = ({ roomId, allRoomMessages, participants, onActiveTabChange, characters, notifications }: Props) => {
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
-    const [soundEffect, setSoundEffect] = React.useState<{ filePath: FilePathFragment; volume: number }>();
+    const [soundEffect, setSoundEffect] = React.useState<{ filePath: FilePathFragment; volume: number; messageId: string }>();
 
     React.useEffect(() => {
         if (allRoomMessages.type !== newEvent) {
@@ -642,6 +642,7 @@ const RoomMessages: React.FC<Props> = ({ roomId, allRoomMessages, participants, 
         setSoundEffect({
             filePath: allRoomMessages.event.file,
             volume: allRoomMessages.event.volume,
+            messageId: allRoomMessages.event.messageId,
         });
     }, [allRoomMessages]);
 

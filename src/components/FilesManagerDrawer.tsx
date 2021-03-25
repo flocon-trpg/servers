@@ -90,7 +90,7 @@ const FirebaseUploader: React.FC<FirebaseUploaderProps> = ({ authUser, onUploade
                 });
             }}
             multiple>
-            Click or drag file to this area
+            アップロードしたいファイルをここにドラッグするか、クリックしてください
         </Upload.Dragger>
     );
 };
