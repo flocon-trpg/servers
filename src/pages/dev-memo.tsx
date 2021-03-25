@@ -16,6 +16,17 @@ const Index: React.FC = () => {
         <Layout requiresLogin={false} showEntryForm={false}>
             <div style={({ margin: 10 })}>
                 <Typography.Title level={2}>アップデート履歴</Typography.Title>
+                <Typography.Text>※ 現在、一部のコードは変更が即時にこのサーバーに反映される設定になっているため、新しい変更点はこのアップデート履歴に記載されていないことがあります。</Typography.Text>
+                <Typography.Title level={3}>(2021/03/25時点)</Typography.Title>
+                <ul>
+                    <li>より直感的に操作できるように、Boardのセルの大きさの初期値を0から50に変更</li>
+                    <li>ダークテーマとコンパクトテーマを採用</li>
+                    <li>アカウント登録とログインの画面にCSSを適用できていなかったため、見た目が殺風景だった問題を修正</li>
+                    <li>メッセージにおけるキャラクター情報を自動連動させないようにした。メッセージに表示されるキャラクター情報は、書き込まれた時点のものが使われる</li>
+                    <li>ボリュームバーを実装</li>
+                    <li>SE,BGMを再生するウィンドウをちゃんとした。これにより、BGMが複数チャンネルで再生できる機能と、全員にSEやBGMを流す前にボリュームを調整できる機能が使えるようになった</li>
+                    <li>同じSEを連続して流そうとすると、2回目以降は再生されないバグを修正</li>
+                </ul>
                 <Typography.Title level={3}>2021/03/14</Typography.Title>
                 <ul>
                     <li>接続切れを起こりにくくするため、リアルタイム通信ライブラリを別のものに置き換え</li>

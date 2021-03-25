@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, Drawer, Dropdown, Menu, Modal, Radio, Result, Table, Tabs, Tooltip, Upload } from 'antd';
+import { Button, Drawer, Dropdown, Input, Menu, Modal, Radio, Result, Table, Tabs, Tooltip, Upload } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { ShowUploadListInterface } from 'antd/lib/upload/interface';
 import Link from 'next/link';
@@ -132,7 +132,7 @@ const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({ reference, storageTyp
                         title: `${storageType} の ${reference.name} を削除します。よろしいですか？`,
                         onOk() {
                             reference.delete().then(() => {
-                                switch(storageType) {
+                                switch (storageType) {
                                     case $public:
                                         setForceReloadPublicListKey(oldValue => oldValue + 1);
                                         break;
@@ -150,7 +150,7 @@ const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({ reference, storageTyp
                         maskClosable: true,
                     });
                 }}>
-                削除
+                    削除
                 </Menu.Item>
             </Menu>
         </div>
@@ -307,6 +307,7 @@ const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => 
     const myAuth = React.useContext(MyAuthContext);
     const [forceReloadPublicListKey, setForceReloadPublicListKey] = React.useState(0);
     const [forceReloadUnlistedListKey, setForceReloadUnlistedListKey] = React.useState(0);
+    const [input, setInput] = React.useState<string>('');
 
     const child = (() => {
         if (typeof myAuth === 'string') {
@@ -324,6 +325,20 @@ const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => 
                 <Tabs.TabPane tab="Firebase Storage" key="1">
                     <FirebaseFilesManager myAuth={myAuth} onFlieOpen={onFileOpen} />
                 </Tabs.TabPane>
+                {drawerType?.openFileType === some && <Tabs.TabPane tab="URL" key="2">
+                    <div>
+                        <Input value={input} onChange={e => setInput(e.target.value)} />
+                        <Button
+                            type='primary'
+                            style={{ marginTop: 2 }}
+                            disabled={input.trim() === '' /* このチェックはかなり簡易的 */}
+                            onClick={() => {
+                                drawerType.onOpen({ sourceType: FileSourceType.Default, path: input.trim() });
+                                setInput('');
+                                onClose();
+                            }}>OK</Button>
+                    </div>
+                </Tabs.TabPane>}
             </Tabs>
         );
     })();
