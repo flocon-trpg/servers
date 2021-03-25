@@ -37,7 +37,10 @@ export function useBuffer<TValue, TComponent>({
 
     const ref = React.useRef<TComponent>(null);
     const subject = useConstant(() => new Subject<TValue>());
-    const subjectNext: ((value: TValue) => void) = useConstant(() => subject.next);
+    const subjectNext: ((value: TValue) => void) = useConstant(() => {
+        // もし return subect.next としてしまうとsubject.next内でthisがundefinedであるというエラーが出る
+        return (x => subject.next(x));
+    });
     const [, setSubscription] = React.useState<Subscription>();
     const [changeParams, setChangeParams] = React.useState<{ previousValue?: TValue; currentValue: TValue }>({ currentValue: value });
 
@@ -54,12 +57,14 @@ export function useBuffer<TValue, TComponent>({
     }, [value]);
 
     React.useEffect(() => {
-        const newSubscription = (bufferDuration == null ? subject : subject.pipe(debounceTime(bufferDuration))).subscribe(newValue => setChangeParams(oldResult => {
-            return {
-                previousValue: oldResult.currentValue,
-                currentValue: newValue,
-            };
-        }));
+        const newSubscription = (bufferDuration == null ? subject : subject.pipe(debounceTime(bufferDuration))).subscribe(newValue => {
+            setChangeParams(oldResult => {
+                return {
+                    previousValue: oldResult.currentValue,
+                    currentValue: newValue,
+                };
+            });
+        });
         setSubscription(oldSubscription => {
             oldSubscription?.unsubscribe();
             return newSubscription;
