@@ -349,6 +349,7 @@ const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => 
                 <ForceReloadUnlistedListKeyContext.Provider value={forceReloadUnlistedListKey}>
                     <SetForceReloadUnlistedListKeyContext.Provider value={setForceReloadUnlistedListKey}>
                         <Drawer
+                            className='cancel-rnd'
                             closable
                             visible={drawerType != null}
                             onClose={() => onClose()}
