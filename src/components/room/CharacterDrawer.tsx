@@ -72,7 +72,7 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
     const drawerType = componentsState.characterDrawerType;
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
     const operate = React.useContext(OperateContext);
-    const { state: character, setState: setCharacter, stateToCreate: characterToCreate } = useStateEditor(drawerType?.type === update ? roomState.characters.get(drawerType.stateKey) : undefined, defaultCharacter, ({ prevState, nextState }) => {
+    const { state: character, setState: setCharacter, stateToCreate: characterToCreate, resetStateToCreate: resetCharacterToCreate } = useStateEditor(drawerType?.type === update ? roomState.characters.get(drawerType.stateKey) : undefined, defaultCharacter, ({ prevState, nextState }) => {
         if (drawerType?.type !== update) {
             return;
         }
@@ -104,8 +104,6 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
         return character.tachieLocations.get(drawerType.boardKey) ?? null;
     })();
 
-    // createのときは、直接setCharacterが呼ばれることでcharacterが変わる。
-    // updateのときは、operateが実行されることでroomStateが変わり、useEffectによって変更が検知されてsetCharacterが呼ばれることでcharacterが変わる。
     const updateCharacter = (partialState: Partial<Character.State>) => {
         switch (drawerType?.type) {
             case create:
@@ -196,6 +194,7 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
             const operation = Room.createPostOperationSetup();
             operation.addCharacters.set(id, characterToCreate);
             operate(operation);
+            resetCharacterToCreate();
             dispatch({ type: characterDrawerType, newValue: null });
         };
     }

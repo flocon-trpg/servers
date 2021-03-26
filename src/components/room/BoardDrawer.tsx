@@ -16,6 +16,7 @@ import { FilesManagerDrawerType } from '../../utils/types';
 import { Gutter } from 'antd/lib/grid/row';
 import { Room } from '../../stateManagers/states/room';
 import { Board } from '../../stateManagers/states/board';
+import { useStateEditor } from '../../hooks/useStateEditor';
 
 const notFound = 'notFound';
 
@@ -45,10 +46,19 @@ const BoardDrawer: React.FC<Props> = ({ roomState }: Props) => {
     const componentsState = React.useContext(ComponentsStateContext);
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
     const operate = React.useContext(OperateContext);
-    const [board, setBoard] = React.useState<Board.State | typeof notFound>(defaultBoard);
+    const drawerType = componentsState.boardDrawerType;
+    const { state: board, setState: setBoard, stateToCreate: boardToCreate, resetStateToCreate: resetBoardToCreate } = useStateEditor(drawerType?.type === update ? roomState.boards.get(drawerType.stateKey) : undefined, defaultBoard, ({ prevState, nextState }) => {
+        if (drawerType?.type !== update) {
+            return;
+        }
+        const diffOperation = Board.diff({ prev: prevState, next: nextState });
+        const operation = Room.createPostOperationSetup();
+        operation.boards.set(drawerType.stateKey, { type: update, operation: diffOperation });
+        operate(operation);
+    });
     const [filesManagerDrawerType, setFilesManagerDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
 
-    const drawerType = componentsState.boardDrawerType;
+    
     const boardForUseEffect = (() => {
         switch (drawerType?.type) {
             case update:
@@ -60,29 +70,6 @@ const BoardDrawer: React.FC<Props> = ({ roomState }: Props) => {
         }
     })();
 
-    React.useEffect(() => {
-        if (boardForUseEffect == null) {
-            return;
-        }
-        if (boardForUseEffect === 'create') {
-            setBoard(defaultBoard);
-            return;
-        }
-        setBoard(boardForUseEffect);
-    }, [boardForUseEffect]);
-
-    if (board === notFound) {
-        return (
-            <Drawer
-                {...drawerBaseProps}
-            >
-                該当するBoardが見つかりません。
-            </Drawer>
-        );
-    }
-
-    // createのときは、直接setCharacterが呼ばれることでcharacterが変わる。
-    // updateのときは、operateが実行されることでroomStateが変わり、useEffectによって変更が検知されてsetCharacterが呼ばれることでcharacterが変わる。
     const updateBoard = (partialState: Partial<Board.State>) => {
         switch (drawerType?.type) {
             case create:
@@ -106,6 +93,7 @@ const BoardDrawer: React.FC<Props> = ({ roomState }: Props) => {
             operation.addBoards.set(id, board);
             operate(operation);
             setBoard(defaultBoard);
+            resetBoardToCreate();
             dispatch({ type: boardDrawerType, newValue: null });
         };
     }

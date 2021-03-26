@@ -2,7 +2,7 @@ import React from 'react';
 
 function useStateEditorCore<T>(state: T | undefined, defaultState: T, onUpdate: (params: { prevState: T; nextState: T }) => void) {
     const [result, setResultCore] = React.useState<T>(defaultState);
-
+    
     const stateRef = React.useRef(state);
     React.useEffect(() => {
         stateRef.current = state;
@@ -12,6 +12,14 @@ function useStateEditorCore<T>(state: T | undefined, defaultState: T, onUpdate: 
     React.useEffect(() => {
         defaultStateRef.current = defaultState;
     }, [defaultState]);
+
+    const resetStateToCreate = React.useCallback(() => {
+        if (stateRef.current !== undefined) {
+            return false;
+        }
+        setResultCore(defaultStateRef.current);
+        return true;
+    }, []);
 
     const onUpdateRef = React.useRef(onUpdate);
     React.useEffect(() => {
@@ -34,7 +42,12 @@ function useStateEditorCore<T>(state: T | undefined, defaultState: T, onUpdate: 
         setResultCore(state);
     }, [state]);
 
-    return { state: result, setState: setResult, stateToCreate: state === undefined ? result : undefined };
+    return {
+        state: result,
+        setState: setResult,
+        stateToCreate: state === undefined ? result : undefined,
+        resetStateToCreate,
+    };
 }
 
 /**
@@ -63,7 +76,7 @@ function useStateEditorCore<T>(state: T | undefined, defaultState: T, onUpdate: 
  * @param defaultState - createする際、初期状態を表すstate。
  * @param onUpdate - updateの際に行われる処理。通常は、これによりstateの変更を誘発させうる処理を書く。
  * 
- * @returns stateは、UIに表示させる値。updateの場合はstateが、createの場合は内部のuseStateで保存されている値が返される。stateToCreateは、createさせたい際に用いる値。updateモードならばundefinedとなる。
+ * @returns stateは、UIに表示させる値。updateの場合はstateが、createの場合は内部のuseStateで保存されている値が返される。stateToCreateは、createさせたい際に用いる値。updateモードならばundefinedとなる。resetStateToCreateを実行すると、createモードならば戻り値のstateがdefaultStateになる。updateモードならば何も起こらない。
  */
 export function useStateEditor<T>(state: T | null | undefined, defaultState: T, onUpdate: (params: { prevState: T; nextState: T }) => void) {
     return useStateEditorCore(state ?? undefined, defaultState, onUpdate);
