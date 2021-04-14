@@ -56,6 +56,7 @@
         "migration-check": "ts-node run-migrationCheck.ts",
         "migration-create": "ts-node run-migrationCreate.ts",
         "migration-up": "ts-node run-migrationUp.ts",
+        "migration-down": "ts-node run-migrationDown.ts",
         "test": "jest",
         "watch": "run-p watch:*",
         "watch:codegen": "graphql-codegen --config codegen.yml --watch",

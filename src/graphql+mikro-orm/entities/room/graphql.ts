@@ -32,6 +32,27 @@ export class RoomGetState {
 
     @Field(() => [ParticipantState])
     public participants!: ParticipantState[];
+
+    @Field()
+    public publicChannel1Name!: string;
+    @Field()
+    public publicChannel2Name!: string;
+    @Field()
+    public publicChannel3Name!: string;
+    @Field()
+    public publicChannel4Name!: string;
+    @Field()
+    public publicChannel5Name!: string;
+    @Field()
+    public publicChannel6Name!: string;
+    @Field()
+    public publicChannel7Name!: string;
+    @Field()
+    public publicChannel8Name!: string;
+    @Field()
+    public publicChannel9Name!: string;
+    @Field()
+    public publicChannel10Name!: string;
 }
 
 @ObjectType()
@@ -53,6 +74,27 @@ export class RoomOperationValue {
 
     @Field({ nullable: true })
     public name?: ReplaceStringUpOperation;
+
+    @Field({ nullable: true })
+    public publicChannel1Name?: ReplaceStringUpOperation;
+    @Field({ nullable: true })
+    public publicChannel2Name?: ReplaceStringUpOperation;
+    @Field({ nullable: true })
+    public publicChannel3Name?: ReplaceStringUpOperation;
+    @Field({ nullable: true })
+    public publicChannel4Name?: ReplaceStringUpOperation;
+    @Field({ nullable: true })
+    public publicChannel5Name?: ReplaceStringUpOperation;
+    @Field({ nullable: true })
+    public publicChannel6Name?: ReplaceStringUpOperation;
+    @Field({ nullable: true })
+    public publicChannel7Name?: ReplaceStringUpOperation;
+    @Field({ nullable: true })
+    public publicChannel8Name?: ReplaceStringUpOperation;
+    @Field({ nullable: true })
+    public publicChannel9Name?: ReplaceStringUpOperation;
+    @Field({ nullable: true })
+    public publicChannel10Name?: ReplaceStringUpOperation;
 }
 
 @InputType()
@@ -74,6 +116,27 @@ export class RoomOperationValueInput {
 
     @Field({ nullable: true })
     public name?: ReplaceStringUpOperation;
+
+    @Field({ nullable: true })
+    public publicChannel1Name?: ReplaceStringUpOperation;
+    @Field({ nullable: true })
+    public publicChannel2Name?: ReplaceStringUpOperation;
+    @Field({ nullable: true })
+    public publicChannel3Name?: ReplaceStringUpOperation;
+    @Field({ nullable: true })
+    public publicChannel4Name?: ReplaceStringUpOperation;
+    @Field({ nullable: true })
+    public publicChannel5Name?: ReplaceStringUpOperation;
+    @Field({ nullable: true })
+    public publicChannel6Name?: ReplaceStringUpOperation;
+    @Field({ nullable: true })
+    public publicChannel7Name?: ReplaceStringUpOperation;
+    @Field({ nullable: true })
+    public publicChannel8Name?: ReplaceStringUpOperation;
+    @Field({ nullable: true })
+    public publicChannel9Name?: ReplaceStringUpOperation;
+    @Field({ nullable: true })
+    public publicChannel10Name?: ReplaceStringUpOperation;
 }
 
 export const roomOperation = 'RoomOperation';

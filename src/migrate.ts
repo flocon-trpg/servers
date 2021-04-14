@@ -1,12 +1,13 @@
 
 import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
-import { loadServerConfigAsMain, loadServerConfigAsMigrationCreate, loadServerConfigAsMigrationUp } from './config';
+import { loadServerConfigAsMain, loadServerConfigAsMigrationCreate, loadServerConfigAsMigrationDown, loadServerConfigAsMigrationUp } from './config';
 import { createPostgreSQL, createSQLite } from './mikro-orm';
 
 const check = 'check';
 const create = 'create';
 const createInitial = 'create-initial';
 const up = 'up';
+const down = 'down';
 
 const sqlite = 'sqlite';
 const postgresql = 'postgresql';
@@ -40,11 +41,13 @@ export const checkMigrationsBeforeStart = async (orm: MikroORM<IDatabaseDriver<C
     console.log(migrationCheckOkMessage(dbType));
 };
 
-export const migrate = async (type: typeof check | typeof create | typeof createInitial | typeof up) => {
+export const migrate = async (type: typeof check | typeof create | typeof createInitial | typeof up | typeof down) => {
     const serverConfig = (() => {
         switch (type) {
             case up:
                 return loadServerConfigAsMigrationUp();
+            case down:
+                return loadServerConfigAsMigrationDown();
             case check:
                 return loadServerConfigAsMain();
             default:
@@ -75,7 +78,7 @@ export const migrate = async (type: typeof check | typeof create | typeof create
             }
             finally {
                 // これがないとターミナルなどで実行したときに自動で終わらない。
-                await orm.close();
+                await orm.close(true);
             }
             console.log(`😊 Migration-create has been successfully finished. DB is ${prettify(dbType)}. / マイグレーションの作成が正常に完了しました。DBは${prettify(dbType)}です。`);
             return;
@@ -88,7 +91,7 @@ export const migrate = async (type: typeof check | typeof create | typeof create
             }
             finally {
                 // これがないとターミナルなどで実行したときに自動で終わらない。
-                await orm.close();
+                await orm.close(true);
             }
             console.log(`😊 Migration-create-init has been successfully finished. DB is ${prettify(dbType)}. / マイグレーションの新規作成が正常に完了しました。DBは${prettify(dbType)}です。`);
             return;
@@ -107,9 +110,36 @@ export const migrate = async (type: typeof check | typeof create | typeof create
             }
             finally {
                 // これがないとターミナルなどで実行したときに自動で終わらない。
-                await orm.close();
+                await orm.close(true);
             }
             console.log(`😊 Migration-up has been successfully finished. DB is ${prettify(dbType)}. / マイグレーションのupが正常に完了しました。DBは${prettify(dbType)}です。`);
+            return;
+        }
+        case down: {
+            console.log(`Migration-down is started. DB is ${prettify(dbType)}. / マイグレーションのdownを開始します。DBは${prettify(dbType)}です。`);
+            
+            const config = loadServerConfigAsMigrationDown();
+            if (!Number.isInteger(config.count)) {
+                console.log('❌ "--count" must be integer');
+                return;
+            }
+            if (config.count < 0) {
+                console.log('❌ "--count" must not be negative');
+                return;
+            }
+            
+            try {
+                const migrator = orm.getMigrator();
+                for (const _ of new Array(config.count).fill('')) {
+                    await migrator.down();
+                    console.log('A migration-down is finished.');
+                }
+            }
+            finally {
+                // これがないとターミナルなどで実行したときに自動で終わらない。
+                await orm.close(true);
+            }
+            console.log(`😊 Migration-down has been successfully finished. DB is ${prettify(dbType)}. / マイグレーションのdownが正常に完了しました。DBは${prettify(dbType)}です。`);
             return;
         }
         case check: {
@@ -122,7 +152,7 @@ export const migrate = async (type: typeof check | typeof create | typeof create
             }
             finally {
                 // これがないとターミナルなどで実行したときに自動で終わらない。
-                await orm.close();
+                await orm.close(true);
             }
             return;
         }

@@ -87,7 +87,20 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }: { em: EM; setupRoom
     const anotherUserUid = 'ANOTHER_USER_ID';
     const anotherName = 'ANOTHER_USER_NAME';
 
-    const room = new $MikroORM.Room({ name: roomName, createdBy: creatorUserUid });
+    const room = new $MikroORM.Room({
+        name: roomName,
+        createdBy: creatorUserUid,
+        publicChannel1Name: 'メイン',
+        publicChannel2Name: 'メイン2',
+        publicChannel3Name: 'メイン3',
+        publicChannel4Name: 'メイン4',
+        publicChannel5Name: 'メイン5',
+        publicChannel6Name: 'メイン6',
+        publicChannel7Name: 'メイン7',
+        publicChannel8Name: 'メイン8',
+        publicChannel9Name: 'メイン9',
+        publicChannel10Name: 'メイン10',
+    });
     if (setupRoom != null) {
         setupRoom(room);
     }

@@ -17,12 +17,42 @@ import { AddParticiOp, Partici, RemoveParticiOp, UpdateParticiOp } from './parti
 export class Room {
     public constructor({
         name,
+        publicChannel1Name,
+        publicChannel2Name,
+        publicChannel3Name,
+        publicChannel4Name,
+        publicChannel5Name,
+        publicChannel6Name,
+        publicChannel7Name,
+        publicChannel8Name,
+        publicChannel9Name,
+        publicChannel10Name,
         createdBy,
     }: {
         name: string;
+        publicChannel1Name: string;
+        publicChannel2Name: string;
+        publicChannel3Name: string;
+        publicChannel4Name: string;
+        publicChannel5Name: string;
+        publicChannel6Name: string;
+        publicChannel7Name: string;
+        publicChannel8Name: string;
+        publicChannel9Name: string;
+        publicChannel10Name: string;
         createdBy: string;
     }) {
         this.name = name;
+        this.publicChannel1Name = publicChannel1Name;
+        this.publicChannel2Name = publicChannel2Name;
+        this.publicChannel3Name = publicChannel3Name;
+        this.publicChannel4Name = publicChannel4Name;
+        this.publicChannel5Name = publicChannel5Name;
+        this.publicChannel6Name = publicChannel6Name;
+        this.publicChannel7Name = publicChannel7Name;
+        this.publicChannel8Name = publicChannel8Name;
+        this.publicChannel9Name = publicChannel9Name;
+        this.publicChannel10Name = publicChannel10Name;
         this.createdBy = createdBy;
     }
 
@@ -54,6 +84,27 @@ export class Room {
 
     @Property()
     public name: string;
+
+    @Property({ default: '' })
+    public publicChannel1Name: string;
+    @Property({ default: '' })
+    public publicChannel2Name: string;
+    @Property({ default: '' })
+    public publicChannel3Name: string;
+    @Property({ default: '' })
+    public publicChannel4Name: string;
+    @Property({ default: '' })
+    public publicChannel5Name: string;
+    @Property({ default: '' })
+    public publicChannel6Name: string;
+    @Property({ default: '' })
+    public publicChannel7Name: string;
+    @Property({ default: '' })
+    public publicChannel8Name: string;
+    @Property({ default: '' })
+    public publicChannel9Name: string;
+    @Property({ default: '' })
+    public publicChannel10Name: string;
 
     @OneToMany(() => RoomOp, x => x.room, { orphanRemoval: true })
     public roomOperations = new Collection<RoomOp>(this);
@@ -105,6 +156,27 @@ export class RoomOp {
 
     @Property({ nullable: true })
     public name?: string;
+
+    @Property({ nullable: true })
+    public publicChannel1Name?: string;
+    @Property({ nullable: true })
+    public publicChannel2Name?: string;
+    @Property({ nullable: true })
+    public publicChannel3Name?: string;
+    @Property({ nullable: true })
+    public publicChannel4Name?: string;
+    @Property({ nullable: true })
+    public publicChannel5Name?: string;
+    @Property({ nullable: true })
+    public publicChannel6Name?: string;
+    @Property({ nullable: true })
+    public publicChannel7Name?: string;
+    @Property({ nullable: true })
+    public publicChannel8Name?: string;
+    @Property({ nullable: true })
+    public publicChannel9Name?: string;
+    @Property({ nullable: true })
+    public publicChannel10Name?: string;
 
 
     @ManyToOne(() => Room, { wrappedReference: true })

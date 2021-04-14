@@ -34,7 +34,7 @@ const getMain = (): Main => {
                     type: 'boolean',
                 }
             }).argv;
-    
+
     const result: Main = {
         debug: options.debug === true,
     };
@@ -92,6 +92,61 @@ export const loadMigrationUp = (): MigrationUp => {
         migrationUpCache = getMigrationUp();
     }
     return migrationUpCache;
+};
+
+type MigrationDown = {
+    db: DbType;
+    count: number;
+}
+
+const getMigrationDown = (): MigrationDown => {
+    const options =
+        yargs(process.argv.slice(2))
+            .options({
+                'db': {
+                    type: 'string',
+                    demandOption: true,
+                    nargs: 1,
+                    choices: [postgresql, sqlite],
+                },
+                'count': {
+                    type: 'number',
+                    demandOption: true,
+                    nargs: 1,
+                },
+            }).argv;
+
+    const databaseOption = options.db;
+    let database: DbType;
+    if (typeof databaseOption === 'string') {
+        const result = toDbType(databaseOption);
+        if (result == null) {
+            throw 'This should not happen';
+        }
+        database = result;
+    } else {
+        throw 'This should not happen';
+    }
+
+    const countOption = options.count;
+    let count: number;
+    if (typeof countOption === 'number') {
+        count = countOption;
+    } else {
+        throw 'This should not happen';
+    }
+
+    return {
+        db: database,
+        count,
+    };
+};
+let migrationDownCache: MigrationDown | null = null;
+export const loadMigrationDown = (): MigrationDown => {
+    if (migrationDownCache == null) {
+        migrationDownCache = getMigrationDown();
+    }
+    return migrationDownCache;
 };
 
 type MigrationCreate = {

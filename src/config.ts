@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { createFirebaseConfig, FirebaseConfig } from './@shared/config';
 import { JSONObject } from './@shared/JSONObject';
-import { loadAsMain, loadMigrationCreate, loadMigrationUp } from './utils/commandLineArgs';
+import { loadAsMain, loadMigrationCreate, loadMigrationDown, loadMigrationUp } from './utils/commandLineArgs';
 
 export const postgresql = 'postgresql';
 export const sqlite = 'sqlite';
@@ -123,7 +123,7 @@ export const loadServerConfigAsMain = (): ServerConfig => {
 let serverConfigAsMigrationCreateCache: ServerConfig | null = null;
 export const loadServerConfigAsMigrationCreate = (): ServerConfig => {
     if (serverConfigAsMigrationCreateCache == null) {
-        serverConfigAsMigrationCreateCache = loadServerConfig({ databaseArg: loadMigrationCreate().db ?? null });
+        serverConfigAsMigrationCreateCache = loadServerConfig({ databaseArg: loadMigrationCreate().db });
     }
     return serverConfigAsMigrationCreateCache;
 };
@@ -131,7 +131,19 @@ export const loadServerConfigAsMigrationCreate = (): ServerConfig => {
 let serverConfigAsMigrationUpCache: ServerConfig | null = null;
 export const loadServerConfigAsMigrationUp = (): ServerConfig => {
     if (serverConfigAsMigrationUpCache == null) {
-        serverConfigAsMigrationUpCache = loadServerConfig({ databaseArg: loadMigrationUp().db ?? null });
+        serverConfigAsMigrationUpCache = loadServerConfig({ databaseArg: loadMigrationUp().db });
     }
     return serverConfigAsMigrationUpCache;
+};
+
+let serverConfigAsMigrationDownCache: ServerConfig & { count: number } | null = null;
+export const loadServerConfigAsMigrationDown = (): ServerConfig & { count: number } => {
+    if (serverConfigAsMigrationDownCache == null) {
+        const loaded = loadMigrationDown();
+        serverConfigAsMigrationDownCache = {
+            ...loadServerConfig({ databaseArg: loaded.db }),
+            count: loaded.count,
+        };
+    }
+    return serverConfigAsMigrationDownCache;
 };

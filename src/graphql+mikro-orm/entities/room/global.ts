@@ -71,6 +71,16 @@ export namespace GlobalRoom {
     type StateTypeValue = {
         name: string;
         createdBy: string;
+        publicChannel1Name: string;
+        publicChannel2Name: string;
+        publicChannel3Name: string;
+        publicChannel4Name: string;
+        publicChannel5Name: string;
+        publicChannel6Name: string;
+        publicChannel7Name: string;
+        publicChannel8Name: string;
+        publicChannel9Name: string;
+        publicChannel10Name: string;
     }
 
     export type StateType = StateTypeValue & {
@@ -83,6 +93,16 @@ export namespace GlobalRoom {
 
     type DownOperationTypeValue = {
         name?: ReplaceStringDownOperation;
+        publicChannel1Name?: ReplaceStringDownOperation;
+        publicChannel2Name?: ReplaceStringDownOperation;
+        publicChannel3Name?: ReplaceStringDownOperation;
+        publicChannel4Name?: ReplaceStringDownOperation;
+        publicChannel5Name?: ReplaceStringDownOperation;
+        publicChannel6Name?: ReplaceStringDownOperation;
+        publicChannel7Name?: ReplaceStringDownOperation;
+        publicChannel8Name?: ReplaceStringDownOperation;
+        publicChannel9Name?: ReplaceStringDownOperation;
+        publicChannel10Name?: ReplaceStringDownOperation;
     }
 
     export type DownOperationType = DownOperationTypeValue & {
@@ -95,6 +115,16 @@ export namespace GlobalRoom {
 
     type UpOperationTypeValue = {
         name?: ReplaceStringUpOperation;
+        publicChannel1Name?: ReplaceStringUpOperation;
+        publicChannel2Name?: ReplaceStringUpOperation;
+        publicChannel3Name?: ReplaceStringUpOperation;
+        publicChannel4Name?: ReplaceStringUpOperation;
+        publicChannel5Name?: ReplaceStringUpOperation;
+        publicChannel6Name?: ReplaceStringUpOperation;
+        publicChannel7Name?: ReplaceStringUpOperation;
+        publicChannel8Name?: ReplaceStringUpOperation;
+        publicChannel9Name?: ReplaceStringUpOperation;
+        publicChannel10Name?: ReplaceStringUpOperation;
     }
 
     export type UpOperationType = UpOperationTypeValue & {
@@ -107,6 +137,16 @@ export namespace GlobalRoom {
 
     type TwoWayOperationTypeValue = {
         name?: ReplaceStringTwoWayOperation;
+        publicChannel1Name?: ReplaceStringTwoWayOperation;
+        publicChannel2Name?: ReplaceStringTwoWayOperation;
+        publicChannel3Name?: ReplaceStringTwoWayOperation;
+        publicChannel4Name?: ReplaceStringTwoWayOperation;
+        publicChannel5Name?: ReplaceStringTwoWayOperation;
+        publicChannel6Name?: ReplaceStringTwoWayOperation;
+        publicChannel7Name?: ReplaceStringTwoWayOperation;
+        publicChannel8Name?: ReplaceStringTwoWayOperation;
+        publicChannel9Name?: ReplaceStringTwoWayOperation;
+        publicChannel10Name?: ReplaceStringTwoWayOperation;
     }
 
     export type TwoWayOperationType = TwoWayOperationTypeValue & {
@@ -193,6 +233,16 @@ export namespace GlobalRoom {
                     paramNames: paramNames.value,
                     participants: participants.value,
                     name: op.name == null ? undefined : { oldValue: op.name },
+                    publicChannel1Name: op.publicChannel1Name == null ? undefined : { oldValue: op.publicChannel1Name },
+                    publicChannel2Name: op.publicChannel2Name == null ? undefined : { oldValue: op.publicChannel2Name },
+                    publicChannel3Name: op.publicChannel3Name == null ? undefined : { oldValue: op.publicChannel3Name },
+                    publicChannel4Name: op.publicChannel4Name == null ? undefined : { oldValue: op.publicChannel4Name },
+                    publicChannel5Name: op.publicChannel5Name == null ? undefined : { oldValue: op.publicChannel5Name },
+                    publicChannel6Name: op.publicChannel6Name == null ? undefined : { oldValue: op.publicChannel6Name },
+                    publicChannel7Name: op.publicChannel7Name == null ? undefined : { oldValue: op.publicChannel7Name },
+                    publicChannel8Name: op.publicChannel8Name == null ? undefined : { oldValue: op.publicChannel8Name },
+                    publicChannel9Name: op.publicChannel9Name == null ? undefined : { oldValue: op.publicChannel9Name },
+                    publicChannel10Name: op.publicChannel10Name == null ? undefined : { oldValue: op.publicChannel10Name },
                 });
             };
 
@@ -269,6 +319,16 @@ export namespace GlobalRoom {
 
                 return {
                     name: source.name,
+                    publicChannel1Name: source.publicChannel1Name,
+                    publicChannel2Name: source.publicChannel2Name,
+                    publicChannel3Name: source.publicChannel3Name,
+                    publicChannel4Name: source.publicChannel4Name,
+                    publicChannel5Name: source.publicChannel5Name,
+                    publicChannel6Name: source.publicChannel6Name,
+                    publicChannel7Name: source.publicChannel7Name,
+                    publicChannel8Name: source.publicChannel8Name,
+                    publicChannel9Name: source.publicChannel9Name,
+                    publicChannel10Name: source.publicChannel10Name,
                     bgms,
                     boards,
                     characters,
@@ -296,6 +356,16 @@ export namespace GlobalRoom {
 
                 return {
                     name: operation.name,
+                    publicChannel1Name: operation.publicChannel1Name,
+                    publicChannel2Name: operation.publicChannel2Name,
+                    publicChannel3Name: operation.publicChannel3Name,
+                    publicChannel4Name: operation.publicChannel4Name,
+                    publicChannel5Name: operation.publicChannel5Name,
+                    publicChannel6Name: operation.publicChannel6Name,
+                    publicChannel7Name: operation.publicChannel7Name,
+                    publicChannel8Name: operation.publicChannel8Name,
+                    publicChannel9Name: operation.publicChannel9Name,
+                    publicChannel10Name: operation.publicChannel10Name,
                     bgms,
                     boards,
                     characters,
@@ -338,6 +408,15 @@ export namespace GlobalRoom {
                 op.name = operation.name.oldValue;
             }
 
+            (['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'] as const).forEach(i => {
+                const key = `publicChannel${i}Name` as const;
+                const operationElement = operation[key];
+                if (operationElement != null) {
+                    target[key] = operationElement.newValue;
+                    op[key] = operationElement.oldValue;
+                }
+            });
+
             em.persist(op);
         };
     }
@@ -368,6 +447,16 @@ export namespace GlobalRoom {
 
                 return ResultModule.ok({
                     name: source.value.name,
+                    publicChannel1Name: source.value.publicChannel1Name,
+                    publicChannel2Name: source.value.publicChannel2Name,
+                    publicChannel3Name: source.value.publicChannel3Name,
+                    publicChannel4Name: source.value.publicChannel4Name,
+                    publicChannel5Name: source.value.publicChannel5Name,
+                    publicChannel6Name: source.value.publicChannel6Name,
+                    publicChannel7Name: source.value.publicChannel7Name,
+                    publicChannel8Name: source.value.publicChannel8Name,
+                    publicChannel9Name: source.value.publicChannel9Name,
+                    publicChannel10Name: source.value.publicChannel10Name,
                     bgms: bgms.value,
                     boards: boards.value,
                     characters: characters.value,

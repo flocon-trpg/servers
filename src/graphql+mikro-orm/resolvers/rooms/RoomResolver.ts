@@ -522,7 +522,20 @@ export class RoomResolver {
                     failureType: CreateRoomFailureType.NotEntry,
                 };
             }
-            const newRoom = new Room$MikroORM.Room({ name: input.roomName, createdBy: decodedIdToken.uid });
+            const newRoom = new Room$MikroORM.Room({ 
+                name: input.roomName, 
+                createdBy: decodedIdToken.uid,
+                publicChannel1Name: 'メイン',
+                publicChannel2Name: 'メイン2',
+                publicChannel3Name: 'メイン3',
+                publicChannel4Name: 'メイン4',
+                publicChannel5Name: 'メイン5',
+                publicChannel6Name: 'メイン6',
+                publicChannel7Name: 'メイン7',
+                publicChannel8Name: 'メイン8',
+                publicChannel9Name: 'メイン9',
+                publicChannel10Name: 'メイン10',
+            });
             // このRoomのroomOperatedを購読しているユーザーはいないので、roomOperatedは実行する必要がない。
             const newParticipant = new Partici({ role: ParticipantRole.Master, name: input.participantName, user: entryUser, room: newRoom });
             newRoom.joinAsPlayerPhrase = input.joinAsPlayerPhrase;
