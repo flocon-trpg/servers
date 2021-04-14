@@ -55,7 +55,7 @@ const Index: React.FC = () => {
             <div>{`WEBサーバー: ${VERSION.toString()}`}</div>
             {checkResult === apiServerRequiresUpdate && <Alert type='error' showIcon message='APIサーバーのバージョンがWEBサーバーのバージョンと比べて古いため、正常に動作しない可能性があります。' />}
             {checkResult === webServerRequiresUpdate && <Alert type='error' showIcon message='WEBサーバーのバージョンがAPIサーバーのバージョンと比べて古いため、正常に動作しない可能性があります。' />}
-            {checkResult === differentPrereleaseVersion && <Alert type='warning' showIcon message='APIサーバーとWEBサーバーの少なくとも一方がα版もしくはβ版ですが、バージョンが完全に一致していないため、互換性は保証されません。' />}
+            {checkResult === differentPrereleaseVersion && <Alert type='warning' showIcon message='APIサーバーとWEBサーバーのうち少なくとも一方がalpha版ですが、バージョンが完全に一致していないため、互換性は保証されません。' />}
         </div>;
     })();
 
