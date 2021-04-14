@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Col, Drawer, DrawerProps, Input, Select, Tabs, Row, Checkbox, Alert } from 'antd';
+import { Button, Col, Drawer, Input, Select, Row, Checkbox, Alert } from 'antd';
 import { isPublicChannelKey } from './RoomMessages';
 import { useListAvailableGameSystemsQuery, useWritePrivateMessageMutation, useWritePublicMessageMutation } from '../../generated/graphql';
 import { $free, $system } from '../../@shared/Constants';
@@ -102,11 +102,6 @@ const privateChannelKey = '2';
 
 const titleStyle: React.CSSProperties = {
     flexBasis: '80px',
-};
-
-const selectorStyle: React.CSSProperties = {
-    flex: 1,
-    alignSelf: 'start',
 };
 
 const none = 'none';

@@ -353,9 +353,9 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
         if (message.value.createdBy == null) {
             return 'システムメッセージ';
         }
-        switch(message.type) {
+        switch (message.type) {
             case publicMessage: {
-                switch(message.value.channelKey) {
+                switch (message.value.channelKey) {
                     case $free:
                         return '雑談';
                     case '1':
@@ -661,8 +661,9 @@ const RoomMessages: React.FC<Props> = (props: Props) => {
                 <div style={{ flex: 1 }} />
                 <div style={{ flex: '0 0 auto', marginLeft: 15 }} >
                     <Dropdown trigger={['click']} overlay={<Menu>
-                        <Menu.Item onClick={() => setEditingTabConfigKey(tab)}>編集</Menu.Item>
+                        <Menu.Item icon={<Icon.SettingOutlined />} onClick={() => setEditingTabConfigKey(tab)}>編集</Menu.Item>
                         <Menu.Item
+                            icon={<Icon.DeleteOutlined />}
                             onClick={() => {
                                 Modal.warning({
                                     onOk: () => {
@@ -678,7 +679,7 @@ const RoomMessages: React.FC<Props> = (props: Props) => {
                                 });
                             }}>削除</Menu.Item>
                     </Menu>}>
-                        <Button style={{ width: 16 }} type='text' size='small' icon={<Icon.SettingOutlined style={{ opacity: 0.6 }} />} onClick={e => e.stopPropagation()}>
+                        <Button style={{ width: 16 }} type='text' size='small' icon={<Icon.EllipsisOutlined style={{ opacity: 0.6 }} />} onClick={e => e.stopPropagation()}>
                         </Button>
                     </Dropdown>
                 </div>
