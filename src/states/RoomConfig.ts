@@ -10,8 +10,8 @@ export type RoomConfig = {
     roomId: string;
 
     version: 1;
-    gameTypeId?: string;
-    gameTypeName?: string;
+    chatGameSystemId?: string;
+    chatSelectedCharacterStateId?: string;
     panels: PanelsConfig;
     masterVolume: number;
     channelVolumes: Record<string, number>;
@@ -24,41 +24,42 @@ export type PartialRoomConfig = {
     // そのため、RoomConfigのほうでは定義しているroomIdは、こちらでは定義していない。
 
     version?: number;
-    gameTypeId?: string;
-    gameTypeName?: string;
+    chatGameSystemId?: string;
+    chatSelectedCharacterStateId?: string;
     panels?: PartialPanelsConfig;
     masterVolume?: number;
     channelVolumes?: Record<string, number>;
     seVolume?: number;
 }
 
-export type UpdateGameTypeAction = {
+export type UpdateGameSystemAction = {
     roomId: string;
-    gameType: {
+    gameSystem: {
         id: string;
         name: string;
     } | undefined;
 }
 
-export const boardsPanel = 'boardsPanel';
-export const charactersPanel = 'charactersPanel';
+export const boardPanel = 'boardPanel';
+export const characterPanel = 'characterPanel';
 export const gameEffectPanel = 'gameEffectPanel';
-export const messagesPanel = 'messagesPanel';
-export const participantsPanel = 'participantsPanel';
+export const messagePanel = 'messagePanel';
+export const participantPanel = 'participantPanel';
 
 export type PanelAction = {
     roomId: string;
     target: {
-        type: typeof boardsPanel;
+        type: typeof boardPanel;
         panelId: string;
     } | {
-        type: typeof charactersPanel;
+        type: typeof characterPanel;
     } | {
         type: typeof gameEffectPanel;
     } | {
-        type: typeof messagesPanel;
+        type: typeof messagePanel;
+        panelId: string;
     } | {
-        type: typeof participantsPanel;
+        type: typeof participantPanel;
     };
 }
 
@@ -69,8 +70,8 @@ export const castToPartialRoomConfig = (source: unknown): PartialRoomConfig | un
     return {
         version: 1,
         panels: castToPartialPanelsConfig(source.panels),
-        gameTypeId: castToString(source.gameTypeId),
-        gameTypeName: castToString(source.gameTypeName),
+        chatGameSystemId: castToString(source.chatGameSystemId),
+        chatSelectedCharacterStateId: castToString(source.chatSelectedCharacterStateId),
         masterVolume: castToNumber(source.masterVolume),
         channelVolumes: castToRecord(source.channelVolumes, castToNumber),
         seVolume: castToNumber(source.seVolume),
@@ -87,8 +88,8 @@ export const toCompleteRoomConfig = (source: PartialRoomConfig, roomId: string):
         roomId,
         version: source.version,
         panels: source.panels == null ? defaultPanelsConfig() : toCompletePanelsConfig(source.panels),
-        gameTypeId: source.gameTypeId,
-        gameTypeName: source.gameTypeName,
+        chatGameSystemId: source.chatGameSystemId,
+        chatSelectedCharacterStateId: source.chatSelectedCharacterStateId,
         masterVolume: source.masterVolume ?? 0.5,
         channelVolumes: source.channelVolumes ?? {},
         seVolume: source.seVolume ?? 1,

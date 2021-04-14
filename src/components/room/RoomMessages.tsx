@@ -1,41 +1,32 @@
-import React, { useCallback } from 'react';
-import { Comment, message, Tabs, Button, Menu, Dropdown, Tooltip } from 'antd';
+import React from 'react';
+import { Tabs, Button, Menu, Dropdown, Tooltip, Popover, Drawer, Col, Row, Checkbox, Divider, Radio, Alert, Input, Modal } from 'antd';
 import moment from 'moment';
-import { AllRoomMessagesSuccessResult, apolloError, failure, loading, useAllRoomMessages, useFilteredRoomMessages, publicChannel, RoomMessage, publicMessage, privateMessage, soundEffect, newEvent, AllRoomMessagesResult, useFilteredAndMapRoomMessages } from '../../hooks/useRoomMessages';
+import { AllRoomMessagesSuccessResult, apolloError, failure, loading, RoomMessage, publicMessage, privateMessage, soundEffect, AllRoomMessagesResult, useFilteredAndMapRoomMessages } from '../../hooks/useRoomMessages';
 import { __ } from '../../@shared/collection';
-import useConstant from 'use-constant';
-import { FixedSizeList } from 'react-window';
-import AutoSizer from 'react-virtualized-auto-sizer';
-import { PrivateChannelSet } from '../../utils/PrivateChannelsSet';
+import { PrivateChannelSet, PrivateChannelSets } from '../../utils/PrivateChannelSet';
 import ChatInput from './ChatInput';
-import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
-import { createPrivateMessageDrawerVisibility } from './RoomComponentsState';
 import MyAuthContext from '../../contexts/MyAuthContext';
-import { UserOutlined, CommentOutlined, EyeInvisibleOutlined, PlusOutlined } from '@ant-design/icons';
 import { $free, $system } from '../../@shared/Constants';
-import { useSelector } from '../../store';
 import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
 import { ReadonlyStateMap } from '../../@shared/StateMap';
-import { FilePathFragment, FilePathFragmentDoc, RoomPrivateMessageFragment, RoomPublicMessageFragment, RoomSoundEffectFragment, useDeleteMessageMutation, useEditMessageMutation, useMakeMessageNotSecretMutation } from '../../generated/graphql';
+import { FilePathFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment, useDeleteMessageMutation, useEditMessageMutation, useMakeMessageNotSecretMutation } from '../../generated/graphql';
 import * as Icon from '@ant-design/icons';
 import { useFirebaseStorageUrl } from '../../hooks/firebaseStorage';
 import InputModal from '../InputModal';
 import Jdenticon from '../../foundations/Jdenticon';
-import { Howl } from 'howler';
-import PlaySoundEffectBehavior from '../../foundations/PlaySoundEffectBehavior';
-import { Notification, TextNotification } from './contexts/NotificationContext';
 import { Character } from '../../stateManagers/states/character';
 import { Participant } from '../../stateManagers/states/participant';
 import { getUserUid } from '../../hooks/useFirebaseUser';
+import PagenationScroll from '../PagenationScroll';
+import { MessagePanelConfig, TabConfig } from '../../states/MessagesPanelConfig';
+import { Gutter } from 'antd/lib/grid/row';
+import { PublicChannelNames } from '../../utils/types';
+import DrawerFooter from '../../layouts/DrawerFooter';
 
-const Image: React.FC<{ filePath: FilePathFragment | undefined }> = ({ filePath }: { filePath: FilePathFragment | undefined }) => {
-    const src = useFirebaseStorageUrl(filePath);
-    if (src == null) {
-        return <Icon.UserOutlined style={({ width: 16, height: 16 })} />;
-    }
-    return (<img src={src} width={16} height={16} />);
-};
+const minHeight = 50;
+const drawerGutter: [Gutter, Gutter] = [16, 16];
+const drawerInputSpan = 18;
 
 type PublicChannelKey =
     | typeof $free
@@ -66,48 +57,233 @@ const publicChannelKeys: PublicChannelKey[] = [
     '10',
 ];
 
-export const isPublicChannelKey = (source: string): source is PublicChannelKey => {
+export const isPublicChannelKey = (source: unknown): source is PublicChannelKey => {
     return publicChannelKeys.find(key => key === source) !== undefined;
 };
 
-export type Tab =
-    | PublicChannelKey
-    | PrivateChannelSet
+const none = 'none';
+const some = 'some';
+const custom = 'custom';
+type HiwaSelectValueType = typeof none | typeof some | typeof custom;
 
-const { TabPane } = Tabs;
+type TabEditorDrawerProps = {
+    // これがundefinedの場合、Drawerのvisibleがfalseとみなされる。
+    config?: TabConfig;
 
-export type RoomUIMessage = {
+    onChange: (newValue: TabConfig) => void;
+    onClose: () => void;
+    participants: ReadonlyMap<string, Participant.State>;
+} & PublicChannelNames
+
+const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerProps) => {
+    const { config, onChange: onChangeCore, participants, onClose } = props;
+
+    const myAuth = React.useContext(MyAuthContext);
+    const hiwaSelectValue: HiwaSelectValueType = (() => {
+        // config == null のケースは本来考慮する必要はないが、とりあえずnoneにしている。
+        if (config == null || config.privateChannels === false) {
+            return none;
+        }
+        if (config.privateChannels === true) {
+            return some;
+        }
+        return custom;
+    })();
+    const selectedParticipants = React.useMemo<ReadonlySet<string>>(() => {
+        if (typeof config?.privateChannels !== 'string') {
+            return new Set();
+        }
+        const array = new PrivateChannelSets(config.privateChannels).toArray();
+        if (array.length === 0) {
+            return new Set();
+        }
+        return array[0].toStringSet();
+    }, [config?.privateChannels]);
+
+    const onChange = (newValue: Partial<TabConfig>): void => {
+        if (config == null) {
+            return;
+        }
+        onChangeCore({ ...config, ...newValue });
+    };
+
+    return (<Drawer
+        className='cancel-rnd'
+        visible={config != null}
+        title='タブの編集'
+        closable
+        onClose={() => onClose()}
+        width={500}
+        footer={(
+            <DrawerFooter
+                close={({
+                    textType: 'close',
+                    onClick: () => onClose()
+                })} />)}>
+        <Row gutter={drawerGutter} align='middle'>
+            <Col flex='auto' />
+            <Col flex={0}>タブ名</Col>
+            <Col span={drawerInputSpan}>
+                <Input value={config?.tabName ?? ''} onChange={e => onChange({ tabName: e.target.value })} />
+                {config?.tabName ?? '' !== '' ? null : <>
+                    <br />
+                    <Alert type='info' showIcon message='タブ名が空白であるため、自動的に決定された名前が表示されます。' />
+                </>}
+            </Col>
+        </Row>
+        <Divider />
+        <Row gutter={drawerGutter} align='middle'>
+            <Col flex='auto' />
+            <Col flex={0}>特殊チャンネル</Col>
+            <Col span={drawerInputSpan}>
+                <Checkbox checked={config?.showSystem ?? false} onChange={e => onChange({ showSystem: e.target.checked })}>
+                    <span>システムメッセージ</span>
+                </Checkbox>
+                <br />
+                <Checkbox checked={config?.showFree ?? false} onChange={e => onChange({ showFree: e.target.checked })}>
+                    <span>雑談</span>
+                </Checkbox>
+            </Col>
+        </Row>
+        <Divider dashed />
+        <Row gutter={drawerGutter} align='middle'>
+            <Col flex='auto' />
+            <Col flex={0}>一般チャンネル</Col>
+            <Col span={drawerInputSpan}>
+                <Checkbox checked={config?.showPublic1 ?? false} onChange={e => onChange({ showPublic1: e.target.checked })}>
+                    <span>{props.publicChannel1Name}</span>
+                </Checkbox>
+                <br />
+                <Checkbox checked={config?.showPublic2 ?? false} onChange={e => onChange({ showPublic2: e.target.checked })}>
+                    <span>{props.publicChannel2Name}</span>
+                </Checkbox>
+                <br />
+                <Checkbox checked={config?.showPublic3 ?? false} onChange={e => onChange({ showPublic3: e.target.checked })}>
+                    <span>{props.publicChannel3Name}</span>
+                </Checkbox>
+                <br />
+                <Checkbox checked={config?.showPublic4 ?? false} onChange={e => onChange({ showPublic4: e.target.checked })}>
+                    <span>{props.publicChannel4Name}</span>
+                </Checkbox>
+                <br />
+                <Checkbox checked={config?.showPublic5 ?? false} onChange={e => onChange({ showPublic5: e.target.checked })}>
+                    <span>{props.publicChannel5Name}</span>
+                </Checkbox>
+                <br />
+                <Checkbox checked={config?.showPublic6 ?? false} onChange={e => onChange({ showPublic6: e.target.checked })}>
+                    <span>{props.publicChannel6Name}</span>
+                </Checkbox>
+                <br />
+                <Checkbox checked={config?.showPublic7 ?? false} onChange={e => onChange({ showPublic7: e.target.checked })}>
+                    <span>{props.publicChannel7Name}</span>
+                </Checkbox>
+                <br />
+                <Checkbox checked={config?.showPublic8 ?? false} onChange={e => onChange({ showPublic8: e.target.checked })}>
+                    <span>{props.publicChannel8Name}</span>
+                </Checkbox>
+                <br />
+                <Checkbox checked={config?.showPublic9 ?? false} onChange={e => onChange({ showPublic9: e.target.checked })}>
+                    <span>{props.publicChannel9Name}</span>
+                </Checkbox>
+                <br />
+                <Checkbox checked={config?.showPublic10 ?? false} onChange={e => onChange({ showPublic10: e.target.checked })}>
+                    <span>{props.publicChannel10Name}</span>
+                </Checkbox>
+            </Col>
+        </Row>
+        <Divider dashed />
+        <Row gutter={drawerGutter} align='middle'>
+            <Col flex='auto' />
+            <Col flex={0}>秘話</Col>
+            <Col span={drawerInputSpan}>
+                <Radio.Group
+                    style={{ marginBottom: 5 }}
+                    value={hiwaSelectValue}
+                    onChange={e => {
+                        switch (e.target.value) {
+                            case none:
+                                onChange({ privateChannels: false });
+                                return;
+                            case some:
+                                onChange({ privateChannels: true });
+                                return;
+                            case custom:
+                                onChange({ privateChannels: new PrivateChannelSets().toString() });
+                                return;
+                        }
+                    }}>
+                    <Radio value={none}>含めない</Radio>
+                    <br />
+                    <Radio value={some}>全て含める</Radio>
+                    <br />
+                    <Radio value={custom}>カスタム(完全一致)</Radio>
+                </Radio.Group>
+                <br />
+                {(hiwaSelectValue === custom && participants.size <= 1) && [...participants]
+                    .filter(([userUid]) => getUserUid(myAuth) !== userUid)
+                    .sort(([, x], [, y]) => x.name.localeCompare(y.name))
+                    .map(([userUid, participant]) => {
+                        return (
+                            <>
+                                <Checkbox
+                                    key={userUid}
+                                    checked={selectedParticipants.has(userUid)}
+                                    onChange={newValue => {
+                                        const newSelectedParticipants = new Set(selectedParticipants);
+                                        if (newValue.target.checked) {
+                                            newSelectedParticipants.add(userUid);
+                                        } else {
+                                            newSelectedParticipants.delete(userUid);
+                                        }
+                                        onChange({ privateChannels: new PrivateChannelSet(newSelectedParticipants).toString() });
+                                    }}>
+                                    {participant.name}
+                                </Checkbox>
+                                <br key={userUid + '<br>'} />
+                            </>);
+                    })}
+                {(hiwaSelectValue === custom && participants.size <= 1) && <Alert type='info' showIcon message='自分以外の入室者がいません。' />}
+            </Col>
+        </Row>
+    </Drawer >);
+};
+
+const Image: React.FC<{ filePath: FilePathFragment | undefined }> = ({ filePath }: { filePath: FilePathFragment | undefined }) => {
+    const src = useFirebaseStorageUrl(filePath);
+    if (src == null) {
+        return <Icon.UserOutlined style={({ width: 16, height: 16 })} />;
+    }
+    return (<img src={src} width={16} height={16} />);
+};
+
+export type RoomMessageComponentState = {
     type: typeof privateMessage;
     value: Omit<RoomPrivateMessageFragment, 'createdAt'> & { createdAt?: number };
 } | {
     type: typeof publicMessage;
     value: Omit<RoomPublicMessageFragment, 'createdAt'> & { createdAt?: number };
-} | {
-    type: typeof soundEffect;
-    value: { messageId: string };
-}
-
-type RoomMessageProps = {
-    roomId: string;
-    message: RoomUIMessage;
-    participants: ReadonlyMap<string, Participant.State> | undefined;
-    style?: React.CSSProperties;
 }
 
 const deletedMessageStyle: React.CSSProperties = {
     opacity: 0.7,
 };
 
-const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, participants, style }: RoomMessageProps) => {
+type RoomMessageComponentProps = {
+    roomId: string;
+    message: RoomMessageComponentState;
+    participants: ReadonlyMap<string, Participant.State> | undefined;
+    showPrivateMessageMembers?: boolean;
+    style?: React.CSSProperties;
+} & PublicChannelNames
+
+const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMessageComponentProps) => {
+    const { roomId, message, participants, showPrivateMessageMembers, style } = props;
+
     const myAuth = React.useContext(MyAuthContext);
     const [editMessageMutation] = useEditMessageMutation();
     const [deleteMessageMutation] = useDeleteMessageMutation();
     const [makeMessageNotSecret] = useMakeMessageNotSecretMutation();
     const [isEditModalVisible, setIsEditModalVisible] = React.useState(false);
-
-    if (message.type == soundEffect) {
-        return null;
-    }
 
     let createdByMe: boolean | null;
     if (typeof myAuth === 'string') {
@@ -173,6 +349,49 @@ const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, par
     if (createdAt != null) {
         datetime = moment(new Date(createdAt)).format('YYYY/MM/DD HH:mm:ss');
     }
+    const channelName: string = (() => {
+        if (message.value.createdBy == null) {
+            return 'システムメッセージ';
+        }
+        switch(message.type) {
+            case publicMessage: {
+                switch(message.value.channelKey) {
+                    case $free:
+                        return '雑談';
+                    case '1':
+                        return props.publicChannel1Name;
+                    case '2':
+                        return props.publicChannel2Name;
+                    case '3':
+                        return props.publicChannel3Name;
+                    case '4':
+                        return props.publicChannel4Name;
+                    case '5':
+                        return props.publicChannel5Name;
+                    case '6':
+                        return props.publicChannel6Name;
+                    case '7':
+                        return props.publicChannel7Name;
+                    case '8':
+                        return props.publicChannel8Name;
+                    case '9':
+                        return props.publicChannel9Name;
+                    case '10':
+                        return props.publicChannel10Name;
+                    default:
+                        return '?';
+                }
+            }
+            case privateMessage: {
+                const userNames = new PrivateChannelSet(message.value.visibleTo).toChannelNameBase(participants ?? new Map());
+                if (userNames.length === 0) {
+                    return '秘話:(自分のみ)';
+                }
+                return userNames.reduce((seed, userName, i) => i === 0 ? `${seed}${userName}` : `${seed},${userName}`, '秘話:');
+            }
+        }
+    })();
+
     let updatedInfo: JSX.Element | null = null;
     if (message.value.updatedAt != null) {
         if (message.value.text == null) {
@@ -187,6 +406,19 @@ const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, par
                     <span style={({ color: 'gray' })}>(編集済み)</span>
                 </Tooltip>
             );
+        }
+    }
+
+    let privateMessageMembersInfo: JSX.Element | null = null;
+    if (showPrivateMessageMembers && message.type === privateMessage) {
+        if (message.value.visibleTo.length === 0) {
+            privateMessageMembersInfo = <div>(独り言)</div>;
+
+        } else {
+            const visibleTo = message.value.visibleTo.map(v => participants?.get(v)?.name ?? v).sort((x, y) => x.localeCompare(y));
+            privateMessageMembersInfo = <Popover content={<ul>{visibleTo.map((str, i) => <li key={i}>{str}</li>)}</ul>}>
+                <div style={{ maxWidth: 100, textOverflow: 'ellipsis' }}>{visibleTo.reduce((seed, elem, i) => i === 0 ? elem : `${seed}, ${elem}`, '')}</div>
+            </Popover>;
         }
     }
     const notSecretMenuItem = (message.value.isSecret && message.value.createdBy != null && message.value.createdBy === getUserUid(myAuth)) ?
@@ -219,14 +451,16 @@ const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, par
             {deleteMenuItem}
         </>;
     return (
-        <div style={({ ...style, display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 4, marginTop: 4 })}>
+        <div style={({ ...style, minHeight, display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 4, marginTop: 4 })}>
             <div style={({ flex: '0 0 auto', display: 'flex', flexDirection: 'column' })}>
                 <div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
                     <div style={({ flex: '0 0 auto' })}>
                         {nameElement}
                     </div>
-                    <div style={({ flex: '0 0 auto', width: 6 })} />
-                    <div style={({ flex: '0 0 auto', color: 'gray' })}>{datetime}</div>
+                    <div style={({ flex: '0 0 auto', color: 'gray', marginLeft: 6 })}>{channelName}</div>
+                    <div style={({ flex: '0 0 auto', color: 'gray', marginLeft: 6 })}>{datetime}</div>
+                    {privateMessageMembersInfo != null && <div style={{ flex: '0 0 auto', width: 6 }} />}
+                    {privateMessageMembersInfo}
                     {updatedInfo == null ? null : <div style={({ flex: '0 0 auto', width: 6 })} />}
                     {updatedInfo}
                     <div style={({ flex: 1 })} />
@@ -261,424 +495,251 @@ const RoomMessageComponent: React.FC<RoomMessageProps> = ({ roomId, message, par
     );
 };
 
-// TODO: itemSizeが適当
-const messageItemSize = 60;
-
-type PrivateChannelMessagesProps = {
-    roomId: string;
+type MessageTabPaneProps = {
     allRoomMessagesResult: AllRoomMessagesSuccessResult;
-    visibleTo: PrivateChannelSet;
     participants: ReadonlyMap<string, Participant.State>;
-}
+    roomId: string;
+    contentHeight: number;
+    config: TabConfig;
+} & PublicChannelNames
 
-const PrivateChannelMessages: React.FC<PrivateChannelMessagesProps> = ({ roomId, allRoomMessagesResult, visibleTo, participants }: PrivateChannelMessagesProps) => {
-    const visibleToAsString = visibleTo.toString();
-    const filter = useCallback((message: RoomMessage) => {
-        if (message.type !== privateMessage) {
-            return false;
-        }
-        return __(new PrivateChannelSet(visibleToAsString).toStringSet()).equal(new Set(message.value.visibleTo));
-    }, [visibleToAsString]);
-    const messages = useFilteredRoomMessages({ allRoomMessagesResult, filter });
-    return (
-        <div style={({ height: '100%', overflowY: 'scroll', display: 'flex', flexDirection: 'column' })}>
-            {
-                [...messages].reverse().map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} />))
+const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProps) => {
+    const {
+        allRoomMessagesResult,
+        participants,
+        roomId,
+        contentHeight,
+        config,
+    } = props;
+    const {
+
+        showSystem,
+        showFree,
+        showPublic1,
+        showPublic2,
+        showPublic3,
+        showPublic4,
+        showPublic5,
+        showPublic6,
+        showPublic7,
+        showPublic8,
+        showPublic9,
+        showPublic10,
+        privateChannels: privateChannelsAsString,
+    } = config;
+    const filter = React.useCallback((message: RoomMessage) => {
+        switch (message.type) {
+            case publicMessage: {
+                if (showSystem && message.value.channelKey === $system) {
+                    return true;
+                }
+                if (showFree && message.value.channelKey === $free) {
+                    return true;
+                }
+                if (showPublic1 && message.value.channelKey === '1') {
+                    return true;
+                }
+                if (showPublic2 && message.value.channelKey === '2') {
+                    return true;
+                }
+                if (showPublic3 && message.value.channelKey === '3') {
+                    return true;
+                }
+                if (showPublic4 && message.value.channelKey === '4') {
+                    return true;
+                }
+                if (showPublic5 && message.value.channelKey === '5') {
+                    return true;
+                }
+                if (showPublic6 && message.value.channelKey === '6') {
+                    return true;
+                }
+                if (showPublic7 && message.value.channelKey === '7') {
+                    return true;
+                }
+                if (showPublic8 && message.value.channelKey === '8') {
+                    return true;
+                }
+                if (showPublic9 && message.value.channelKey === '9') {
+                    return true;
+                }
+                if (showPublic10 && message.value.channelKey === '10') {
+                    return true;
+                }
+                return false;
             }
-        </div>
-    );
-    // TODO: AutoSizer&FixedSizeListを使うと、RoomMessageComponentのボタンのonClickが何故か実行されないのでとりあえず無効化している。
-    // CO:
-    // return (
-    //     <AutoSizer>
-    //         {({ height, width }) => (
-    //             <FixedSizeList
-    //                 layout="vertical"
-    //                 itemCount={messages.length}
-    //                 itemSize={messageItemSize}
-    //                 width={width}
-    //                 height={height}>
-    //                 {({ index, style }) => {
-    //                     const message = messages[messages.length - index - 1];
-    //                     return (<RoomMessageComponent key={message.value.messageId} roomId={roomId} style={style} message={message} participants={participants} characters={characters} />);
-    //                 }}
-    //             </FixedSizeList>
-    //         )}
-    //     </AutoSizer>);
-};
+            case privateMessage: {
+                if (privateChannelsAsString === true) {
+                    return true;
+                }
+                if (privateChannelsAsString === false) {
+                    return false;
+                }
+                const privateChannelSets = new PrivateChannelSets(privateChannelsAsString);
+                return privateChannelSets.toArray().some(set => {
+                    return __(set.toStringSet()).equal(new Set(message.value.visibleTo));
+                });
+            }
+            case soundEffect:
+                return false;
+        }
+    }, [showSystem, showFree, showPublic1, showPublic2, showPublic3, showPublic4, showPublic5, showPublic6, showPublic7, showPublic8, showPublic9, showPublic10, privateChannelsAsString]);
 
-// useFilteredRoomMessagesの再実行回数を減らすため、ここでfilterをすべて定義している
-const publicMessageFilters = {
-    $free: (message: RoomMessage) => message.type === publicMessage && message.value.channelKey === $free,
-    $system: (message: RoomMessage) => message.type === publicMessage && message.value.channelKey === $system,
-    1: (message: RoomMessage) => message.type === publicMessage && message.value.channelKey === '1',
-    2: (message: RoomMessage) => message.type === publicMessage && message.value.channelKey === '2',
-    3: (message: RoomMessage) => message.type === publicMessage && message.value.channelKey === '3',
-    4: (message: RoomMessage) => message.type === publicMessage && message.value.channelKey === '4',
-    5: (message: RoomMessage) => message.type === publicMessage && message.value.channelKey === '5',
-    6: (message: RoomMessage) => message.type === publicMessage && message.value.channelKey === '6',
-    7: (message: RoomMessage) => message.type === publicMessage && message.value.channelKey === '7',
-    8: (message: RoomMessage) => message.type === publicMessage && message.value.channelKey === '8',
-    9: (message: RoomMessage) => message.type === publicMessage && message.value.channelKey === '9',
-    10: (message: RoomMessage) => message.type === publicMessage && message.value.channelKey === '10',
-};
-
-type ChannelMessageTabsProps = {
-    allRoomMessagesResult: AllRoomMessagesSuccessResult;
-    participants: ReadonlyMap<string, Participant.State>;
-    roomId: string;
-    onActiveTabChange?: (activeTab: Tab) => void;
-    style?: Omit<React.CSSProperties, 'height'>;
-    notifications: ReadonlyArray<TextNotification>;
-    characters: ReadonlyStateMap<Character.State>;
-}
-
-const ChannelMessageTabs: React.FC<ChannelMessageTabsProps> = ({ allRoomMessagesResult, participants, roomId, onActiveTabChange, style, characters, notifications }: ChannelMessageTabsProps) => {
-    const myAuth = React.useContext(MyAuthContext);
-    const roomConfig = useSelector(state => state.roomConfigModule);
-    const dispatch = useDispatch();
-
-    const generalMapping = React.useCallback((messages: ReadonlyArray<RoomMessage>) => {
+    const thenMap = React.useCallback((messages: ReadonlyArray<RoomMessage>) => {
         return [...messages]
             .sort((x, y) => y.value.createdAt - x.value.createdAt)
-            .map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} />));
-    }, [roomId, participants]);
-
-    const freeMessageMapping = React.useCallback((messages: ReadonlyArray<RoomMessage>) => {
-        return [
-            ...[...messages].sort((x, y) => y.value.createdAt - x.value.createdAt),
-            {
-                type: publicMessage,
-                value: {
-                    channelKey: $free,
-                    messageId: 'free0',
-                    text: 'ここは参加者と観戦者の全員が書き込めるチャンネルです。',
-                    isSecret: false,
+            .map(message => {
+                if (message.type === soundEffect) {
+                    // soundEffectはfilterで弾いていなければならない。
+                    throw 'soundEffect is not supported';
                 }
-            } as const]
-            .map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} />));
-    }, [roomId, participants]);
+                return (<RoomMessageComponent
+                    publicChannel1Name={props.publicChannel1Name}
+                    publicChannel2Name={props.publicChannel2Name}
+                    publicChannel3Name={props.publicChannel3Name}
+                    publicChannel4Name={props.publicChannel4Name}
+                    publicChannel5Name={props.publicChannel5Name}
+                    publicChannel6Name={props.publicChannel6Name}
+                    publicChannel7Name={props.publicChannel7Name}
+                    publicChannel8Name={props.publicChannel8Name}
+                    publicChannel9Name={props.publicChannel9Name}
+                    publicChannel10Name={props.publicChannel10Name}
+                    key={message.value.messageId}
+                    style={{ minHeight }}
+                    roomId={roomId}
+                    message={message}
+                    participants={participants} />);
+            });
+    }, [roomId, participants, props.publicChannel1Name, props.publicChannel2Name, props.publicChannel3Name, props.publicChannel4Name, props.publicChannel5Name, props.publicChannel6Name, props.publicChannel7Name, props.publicChannel8Name, props.publicChannel9Name, props.publicChannel10Name]);
 
-    const systemMessageMapping = React.useCallback((messages: ReadonlyArray<RoomMessage>) => {
-        const $notifications = notifications.map(notification => {
-            return {
-                type: publicMessage,
-                value: {
-                    channelKey: $system,
-                    messageId: `${notification.message}@${notification.createdAt}`,
-                    text: `通知: ${notification.message} ${notification.description}`,
-                    isSecret: false,
-                    createdAt: notification.createdAt,
-                },
-            } as const;
-        });
-        return [
-            ...[...messages, ...$notifications].sort((x, y) => y.value.createdAt - x.value.createdAt),
-            {
-                type: publicMessage,
-                value: {
-                    channelKey: $system,
-                    messageId: 'system0',
-                    text: '（仮メッセージ）ようこそ！',
-                    isSecret: false,
-                }
-            } as const]
-            .map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} />));
-    }, [roomId, participants, notifications]);
-
-    const channel1MessageMapping = React.useCallback((messages: ReadonlyArray<RoomMessage>) => {
-        return [
-            ...[...messages].sort((x, y) => y.value.createdAt - x.value.createdAt),
-            {
-                type: publicMessage,
-                value: {
-                    channelKey: '1',
-                    messageId: 'channel0',
-                    text: 'ここは参加者のみが書き込めるチャンネルです。観戦者は書き込むことはできませんが見ることはできます。',
-                    isSecret: false,
-                }
-            } as const]
-            .map(message => (<RoomMessageComponent key={message.value.messageId} roomId={roomId} message={message} participants={participants} />));
-    }, [roomId, participants]);
-
-    const channelFreeMessages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[$free], thenMap: freeMessageMapping });
-    const channelSystemMessages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[$system], thenMap: systemMessageMapping });
-    const channel1Messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[1], thenMap: channel1MessageMapping });
-    const channel2Messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[2], thenMap: generalMapping });
-    const channel3Messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[3], thenMap: generalMapping });
-    const channel4Messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[4], thenMap: generalMapping });
-    const channel5Messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[5], thenMap: generalMapping });
-    const channel6Messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[6], thenMap: generalMapping });
-    const channel7Messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[7], thenMap: generalMapping });
-    const channel8Messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[8], thenMap: generalMapping });
-    const channel9Messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[9], thenMap: generalMapping });
-    const channel10Messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter: publicMessageFilters[10], thenMap: generalMapping });
-
-    const createPublicChannelName = (publicChannelKey: PublicChannelKey) => {
-        if (publicChannelKey === $system) {
-            return 'システムメッセージ';
-        }
-        if (publicChannelKey === $free) {
-            return 'フリー';
-        }
-        return allRoomMessagesResult.value.publicChannels.get(publicChannelKey)?.name ?? `(チャンネル${publicChannelKey})`;
-    };
-
-    const createPublicMessagesTabPane = (messages: ReadonlyArray<JSX.Element>, publicChannelKey: PublicChannelKey) => {
-        const channelName = (() => {
-            const name = createPublicChannelName(publicChannelKey);
-            if (publicChannelKey === $system) {
-                return name;
-            }
-            return <span><CommentOutlined />{name}</span>;
-        })();
-        // TODO: AutoSizer&FixedSizeListを使うと、RoomMessageComponentのボタンのonClickが何故か実行されないのでとりあえず無効化している。
-        return (
-            <TabPane tab={channelName} key={publicChannelKey}>
-                <div style={({ height: '100%', display: 'flex', flexDirection: 'column' })}>
-                    <ChatInput style={({ flex: 0 })} roomId={roomId} activeTab={publicChannelKey} characters={characters} />
-                    <div style={({ height: '100%', overflowY: 'scroll', display: 'flex', flexDirection: 'column' })}>
-                        {messages}
-                    </div>
-                </div>
-            </TabPane>
-        );
-    };
-
-    const createPrivateChannelName = (channel: PrivateChannelSet, showIcon: boolean) => {
-        const channelNameBase = channel.toChannelNameBase(participants, { userUid: typeof myAuth === 'string' ? '' : myAuth.uid });
-        if (channelNameBase.length === 0) {
-            return '独り言';
-        }
-        const children = __(channelNameBase).flatMap((name, i) => {
-            if (i !== 0) {
-                return [(<span key={i * 3} style={({ fontStyle: 'italic' })}>{'&'}</span>), (<span key={i * 3 + 1}>{name}</span>)];
-            }
-            if (showIcon) {
-                return [(<UserOutlined key={i * 3} />), (<span key={i * 3 + 2}>{name}</span>)];
-            }
-            return [(<span key={i * 3 + 2}>{name}</span>)];
-        }).toArray();
-        return <span>{children}</span>;
-    };
-
-    const channelsConfig = roomConfig?.panels.messagesPanel.channels ?? {};
-    const showChannel = (channelKey: string): boolean => {
-        const show = channelsConfig[channelKey]?.show;
-        if (show == null) {
-            switch (channelKey) {
-                case '1':
-                    return channel1Messages.length !== 0;
-                case '2':
-                    return channel2Messages.length !== 0;
-                case '3':
-                    return channel3Messages.length !== 0;
-                case '4':
-                    return channel4Messages.length !== 0;
-                case '5':
-                    return channel5Messages.length !== 0;
-                case '6':
-                    return channel6Messages.length !== 0;
-                case '7':
-                    return channel7Messages.length !== 0;
-                case '8':
-                    return channel8Messages.length !== 0;
-                case '9':
-                    return channel9Messages.length !== 0;
-                case '10':
-                    return channel10Messages.length !== 0;
-                default:
-                    return true;
-            }
-        }
-        return show;
-    };
-
-    const privateChannelElements = allRoomMessagesResult.value.privateChannels.toArray()
-        .map(channel => {
-            const channelNameBase = channel.toChannelNameBase(participants, { userUid: typeof myAuth === 'string' ? '' : myAuth.uid });
-            const tab = createPrivateChannelName(channel, true);
-            const tabPane = (
-                <TabPane tab={tab} key={channel.toString()}>
-                    <ChatInput roomId={roomId} activeTab={channel} characters={characters} />
-                    <PrivateChannelMessages roomId={roomId} visibleTo={channel} allRoomMessagesResult={allRoomMessagesResult} participants={participants} />
-                </TabPane>
-            );
-            return { key: channelNameBase, channel, tabPane, showTab: showChannel(channel.toString()), menuItemContent: createPrivateChannelName(channel, false) };
-        })
-        .sort((x, y) => {
-            let i = 0;
-            // eslint-disable-next-line no-constant-condition
-            while (true) {
-                const l = x.key[i];
-                const r = y.key[i];
-                if (l == null) {
-                    if (r == null) {
-                        return 0;
-                    }
-                    return -1;
-                }
-                if (l !== r) {
-                    return l.localeCompare(r);
-                }
-                i++;
-            }
-        })
-        .map(({ channel, tabPane, showTab, menuItemContent }) => ({ channel, tabPane, showTab, menuItemContent }));
-
-    const publicChannelKeys: PublicChannelKey[] = [
-        $system,
-        $free,
-        '1',
-        '2',
-        '3',
-        '4',
-        '5',
-        '6',
-        '7',
-        '8',
-        '9',
-        '10',
-    ];
-    const addPublicChannelMenuItems = __(publicChannelKeys)
-        .compact(channelKey => {
-            if (showChannel(channelKey)) {
-                return null;
-            }
-            return <Menu.Item
-                key={channelKey}
-                onClick={() => dispatch(roomConfigModule.actions.updateChannelVisibility({ roomId, channelKey, newValue: true }))}>
-                {createPublicChannelName(channelKey)}
-            </Menu.Item>;
-        })
-        .toArray();
-    const addPrivateChannelMenuItems = __(privateChannelElements)
-        .compact(({ channel, showTab, menuItemContent }) => {
-            if (showTab) {
-                return null;
-            }
-            return <Menu.Item
-                key={channel.toString()}
-                onClick={() => dispatch(roomConfigModule.actions.updateChannelVisibility({ roomId, channelKey: channel.toString(), newValue: true }))}>
-                {menuItemContent}
-            </Menu.Item>;
-        })
-        .toArray();
-    const addIconMenuItems = [...addPublicChannelMenuItems, ...addPrivateChannelMenuItems];
-
-    return (
-        <Tabs
-            type="editable-card"
-            size='small'
-            hideAdd={addIconMenuItems.length === 0}
-            addIcon={(<Dropdown trigger={['click']} overlay={<Menu>{addIconMenuItems}</Menu>}>
-                <PlusOutlined />
-            </Dropdown>)}
-            style={({ height: '100%' })}
-            defaultActiveKey={$free}
-            onChange={activeTabKey => {
-                if (onActiveTabChange == null) {
-                    return;
-                }
-                if (isPublicChannelKey(activeTabKey)) {
-                    onActiveTabChange(activeTabKey);
-                    return;
-                }
-                onActiveTabChange(new PrivateChannelSet(activeTabKey));
-                return;
-            }}
-            onEdit={(e, action) => {
-                if (typeof e !== 'string') {
-                    return;
-                }
-                if (action === 'add') {
-                    return;
-                }
-                dispatch(roomConfigModule.actions.updateChannelVisibility({ roomId, channelKey: e, newValue: false }));
-            }}>
-            {showChannel($system) ? createPublicMessagesTabPane(channelSystemMessages, $system) : null}
-            {showChannel($free) ? createPublicMessagesTabPane(channelFreeMessages, $free) : null}
-            {showChannel('1') ? createPublicMessagesTabPane(channel1Messages, '1') : null}
-            {showChannel('2') ? createPublicMessagesTabPane(channel2Messages, '2') : null}
-            {showChannel('3') ? createPublicMessagesTabPane(channel3Messages, '3') : null}
-            {showChannel('4') ? createPublicMessagesTabPane(channel4Messages, '4') : null}
-            {showChannel('5') ? createPublicMessagesTabPane(channel5Messages, '5') : null}
-            {showChannel('6') ? createPublicMessagesTabPane(channel6Messages, '6') : null}
-            {showChannel('7') ? createPublicMessagesTabPane(channel7Messages, '7') : null}
-            {showChannel('8') ? createPublicMessagesTabPane(channel8Messages, '8') : null}
-            {showChannel('9') ? createPublicMessagesTabPane(channel9Messages, '9') : null}
-            {showChannel('10') ? createPublicMessagesTabPane(channel10Messages, '10') : null}
-            {privateChannelElements.map(({ tabPane, showTab }) => {
-                if (!showTab) {
-                    return null;
-                }
-                return tabPane;
-            })}
-        </Tabs>
-    );
+    const messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter, thenMap });
+    return <PagenationScroll source={messages} elementMinHeight={minHeight} height={contentHeight} />;
 };
 
 type Props = {
-    roomId: string;
-    allRoomMessages: AllRoomMessagesResult;
-    // keyはUserUid
-    participants: ReadonlyMap<string, Participant.State>;
-    onActiveTabChange?: (activeTab: Tab) => void;
+    allRoomMessagesResult: AllRoomMessagesResult;
     characters: ReadonlyStateMap<Character.State>;
-    notifications: ReadonlyArray<TextNotification>;
-}
+    participants: ReadonlyMap<string, Participant.State>;
+    roomId: string;
+    height: number;
+    panelId: string;
+    config: MessagePanelConfig;
+} & PublicChannelNames
 
-const RoomMessages: React.FC<Props> = ({ roomId, allRoomMessages, participants, onActiveTabChange, characters, notifications }: Props) => {
-    const dispatch = React.useContext(DispatchRoomComponentsStateContext);
-    const [soundEffect, setSoundEffect] = React.useState<{ filePath: FilePathFragment; volume: number; messageId: string }>();
+const RoomMessages: React.FC<Props> = (props: Props) => {
+    const { allRoomMessagesResult, characters, participants, roomId, height, panelId, config } = props;
 
-    React.useEffect(() => {
-        if (allRoomMessages.type !== newEvent) {
-            return;
-        }
-        if (allRoomMessages.event.__typename !== 'RoomSoundEffect') {
-            return;
-        }
-        setSoundEffect({
-            filePath: allRoomMessages.event.file,
-            volume: allRoomMessages.event.volume,
-            messageId: allRoomMessages.event.messageId,
-        });
-    }, [allRoomMessages]);
+    const contentHeight = Math.max(0, height - 210);
+    const tabsHeight = Math.max(0, height - 180);
 
-    switch (allRoomMessages.type) {
-        case 'loaded':
-        case 'newEvent': {
-            return (
-                <div style={({ height: '100%', overflowY: 'hidden', display: 'flex', flexDirection: 'column' })}>
-                    <Button
-                        style={({ flex: 0 })}
-                        size='small'
-                        onClick={() => dispatch({ type: createPrivateMessageDrawerVisibility, newValue: true })}>
-                        プライベートメッセージを作成
-                    </Button>
-                    <ChannelMessageTabs
-                        style={({ flex: 'auto' })}
-                        allRoomMessagesResult={allRoomMessages}
-                        participants={participants}
-                        roomId={roomId}
-                        onActiveTabChange={onActiveTabChange}
-                        characters={characters}
-                        notifications={notifications} />
-                    <PlaySoundEffectBehavior value={soundEffect} />
-                </div>
-            );
-        }
-        case apolloError:
-            // TODO:ちゃんとした見た目にする
-            return (<>{allRoomMessages.error.message}</>);
+    const dispatch = useDispatch();
+
+    const [editingTabConfigKey, setEditingTabConfigKey] = React.useState<{ key: string; createdAt: number }>();
+    const editingTabConfig = React.useMemo(() => {
+        return config.tabs.find(x => x.createdAt === editingTabConfigKey?.createdAt && x.key === editingTabConfigKey?.key);
+    }, [config.tabs, editingTabConfigKey?.createdAt, editingTabConfigKey?.key]);
+
+
+    switch (allRoomMessagesResult.type) {
         case loading:
-            // TODO:ちゃんとした見た目にする
-            return (<>loading...</>);
+        case apolloError:
         case failure:
-            // TODO:ちゃんとした見た目にする
-            return (<>failure</>);
+            // TODO: 読み込み中の画面やエラーメッセージを出すようにする
+            return null;
+        default:
+            break;
     }
+
+    const tabPanels = contentHeight <= 0 ? null : config.tabs.map(tab => {
+        return <Tabs.TabPane
+            key={tab.key}
+            tabKey={tab.key}
+            closable={false}
+            style={{ backgroundColor: '#FFFFFF08', padding: '0 4px' }}
+            tab={<div style={{ display: 'flex', flexDirection: 'row', justifyItems: 'center' }}>
+                <div style={{ flex: '0 0 auto', maxWidth: 100 }}>{TabConfig.toTabName(tab)}</div>
+                <div style={{ flex: 1 }} />
+                <div style={{ flex: '0 0 auto', marginLeft: 15 }} >
+                    <Dropdown trigger={['click']} overlay={<Menu>
+                        <Menu.Item onClick={() => setEditingTabConfigKey(tab)}>編集</Menu.Item>
+                        <Menu.Item
+                            onClick={() => {
+                                Modal.warning({
+                                    onOk: () => {
+                                        dispatch(roomConfigModule.actions.updateMessagePanel({
+                                            roomId,
+                                            panelId,
+                                            panel: {
+                                                tabs: config.tabs.filter(elem => elem.key !== tab.key || elem.createdAt !== tab.createdAt)
+                                            }
+                                        }));
+                                    },
+                                    content: 'タブを削除します。よろしいですか？'
+                                });
+                            }}>削除</Menu.Item>
+                    </Menu>}>
+                        <Button style={{ width: 16 }} type='text' size='small' icon={<Icon.SettingOutlined style={{ opacity: 0.6 }} />} onClick={e => e.stopPropagation()}>
+                        </Button>
+                    </Dropdown>
+                </div>
+            </div>}>
+            <MessageTabPane
+                {...props}
+                allRoomMessagesResult={allRoomMessagesResult}
+                participants={participants}
+                roomId={roomId}
+                config={tab}
+                contentHeight={contentHeight} />
+        </Tabs.TabPane>;
+    });
+
+    const marginX = 5;
+
+    return (<div style={{ display: 'flex', flexDirection: 'column', height: '100%', margin: '2px 4px' }}>
+        <TabEditorDrawer
+            {...props}
+            config={editingTabConfig}
+            onClose={() => setEditingTabConfigKey(undefined)}
+            onChange={newValue => {
+                dispatch(roomConfigModule.actions.updateMessagePanel({
+                    roomId,
+                    panelId,
+                    panel: {
+                        tabs: config.tabs.map(oldValue => oldValue.key === newValue.key && oldValue.createdAt === newValue.createdAt ? newValue : oldValue)
+                    }
+                }));
+            }}
+            participants={participants} />
+        <Tabs
+            style={{ flexBasis: `${tabsHeight}px`, margin: `4px ${marginX}px 4px ${marginX}px` }}
+            type='editable-card'
+            onEdit={(e, type) => {
+                if (type === 'remove') {
+                    if (typeof e !== 'string') {
+                        return;
+                    }
+                    dispatch(roomConfigModule.actions.updateMessagePanel({
+                        roomId,
+                        panelId,
+                        panel: {
+                            tabs: config.tabs.filter(tab => tab.key !== e),
+                        }
+                    }));
+                    return;
+                }
+                dispatch(roomConfigModule.actions.updateMessagePanel({
+                    roomId,
+                    panelId,
+                    panel: {
+                        tabs: [...config.tabs, TabConfig.createEmpty({})],
+                    }
+                }));
+            }}>
+            {tabPanels}
+        </Tabs>
+        <div style={{ flex: 1 }} />
+        <ChatInput style={{ flex: 'auto', margin: '0 4px' }} roomId={roomId} characters={characters} participants={participants} config={config} />
+    </div>);
 };
 
 export default RoomMessages;

@@ -1,6 +1,6 @@
 import { ReadonlyStateMap } from '../@shared/StateMap';
 import { RoomMessages, RoomPrivateMessageFragment, RoomPublicChannelFragment, RoomPublicMessageFragment, RoomSoundEffectFragment } from '../generated/graphql';
-import { PrivateChannelSet } from './PrivateChannelsSet';
+import { PrivateChannelSet } from './PrivateChannelSet';
 import { escape } from 'html-escaper';
 import { $free, $system } from '../@shared/Constants';
 import moment from 'moment';

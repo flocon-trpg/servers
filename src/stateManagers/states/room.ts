@@ -245,6 +245,13 @@ export namespace Room {
         if (operation.name != null) {
             result.name = operation.name.newValue;
         }
+        (['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'] as const).forEach(i => {
+            const key = `publicChannel${i}Name` as const;
+            const operationElement = operation[key];
+            if (operationElement != null) {
+                result[key] = operationElement.newValue;
+            }
+        });
 
         return result;
     };
@@ -355,6 +362,10 @@ export namespace Room {
         });
 
         result.name = ReplaceValueOperationModule.compose(first.name, second.name);
+        (['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'] as const).forEach(i => {
+            const key = `publicChannel${i}Name` as const;
+            result[key] = ReplaceValueOperationModule.compose(first[key], second[key]);
+        });
 
         return result;
     };
@@ -408,6 +419,12 @@ export namespace Room {
 
         firstPrime.name = transformReplace({ first: first.name, second: second.name }).firstPrime;
         secondPrime.name = transformReplace({ first: first.name, second: second.name }).secondPrime;
+
+        (['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'] as const).forEach(i => {
+            const key = `publicChannel${i}Name` as const;
+            firstPrime[key] = transformReplace({ first: first[key], second: second[key] }).firstPrime;
+            secondPrime[key] = transformReplace({ first: first[key], second: second[key] }).secondPrime;
+        });
 
         return { firstPrime, secondPrime };
     };
@@ -492,6 +509,13 @@ export namespace Room {
         if (prev.name !== next.name) {
             result.name = { newValue: next.name };
         }
+
+        (['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'] as const).forEach(i => {
+            const key = `publicChannel${i}Name` as const;
+            if (prev[key] !== next[key]) {
+                result[key] = { newValue: next[key] };
+            }
+        });
 
         return result;
     };

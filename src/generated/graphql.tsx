@@ -1200,6 +1200,16 @@ export type RoomGetState = {
   name: Scalars['String'];
   paramNames: Array<ParamNameState>;
   participants: Array<ParticipantState>;
+  publicChannel1Name: Scalars['String'];
+  publicChannel2Name: Scalars['String'];
+  publicChannel3Name: Scalars['String'];
+  publicChannel4Name: Scalars['String'];
+  publicChannel5Name: Scalars['String'];
+  publicChannel6Name: Scalars['String'];
+  publicChannel7Name: Scalars['String'];
+  publicChannel8Name: Scalars['String'];
+  publicChannel9Name: Scalars['String'];
+  publicChannel10Name: Scalars['String'];
   revision: Scalars['Float'];
 };
 
@@ -1234,6 +1244,16 @@ export type RoomOperationValue = {
   name?: Maybe<ReplaceStringUpOperation>;
   paramNames: ParamNamesOperation;
   participants: ParticipantsOperation;
+  publicChannel1Name?: Maybe<ReplaceStringUpOperation>;
+  publicChannel2Name?: Maybe<ReplaceStringUpOperation>;
+  publicChannel3Name?: Maybe<ReplaceStringUpOperation>;
+  publicChannel4Name?: Maybe<ReplaceStringUpOperation>;
+  publicChannel5Name?: Maybe<ReplaceStringUpOperation>;
+  publicChannel6Name?: Maybe<ReplaceStringUpOperation>;
+  publicChannel7Name?: Maybe<ReplaceStringUpOperation>;
+  publicChannel8Name?: Maybe<ReplaceStringUpOperation>;
+  publicChannel9Name?: Maybe<ReplaceStringUpOperation>;
+  publicChannel10Name?: Maybe<ReplaceStringUpOperation>;
 };
 
 export type RoomOperationValueInput = {
@@ -1243,6 +1263,16 @@ export type RoomOperationValueInput = {
   name?: Maybe<ReplaceStringUpOperationInput>;
   paramNames: ParamNamesOperationInput;
   participants: ParticipantsOperationInput;
+  publicChannel1Name?: Maybe<ReplaceStringUpOperationInput>;
+  publicChannel2Name?: Maybe<ReplaceStringUpOperationInput>;
+  publicChannel3Name?: Maybe<ReplaceStringUpOperationInput>;
+  publicChannel4Name?: Maybe<ReplaceStringUpOperationInput>;
+  publicChannel5Name?: Maybe<ReplaceStringUpOperationInput>;
+  publicChannel6Name?: Maybe<ReplaceStringUpOperationInput>;
+  publicChannel7Name?: Maybe<ReplaceStringUpOperationInput>;
+  publicChannel8Name?: Maybe<ReplaceStringUpOperationInput>;
+  publicChannel9Name?: Maybe<ReplaceStringUpOperationInput>;
+  publicChannel10Name?: Maybe<ReplaceStringUpOperationInput>;
 };
 
 export enum RoomParameterNameType {
@@ -2116,7 +2146,7 @@ export type RoomAsListItemFragment = (
 
 export type RoomGetStateFragment = (
   { __typename?: 'RoomGetState' }
-  & Pick<RoomGetState, 'revision' | 'name' | 'createdBy'>
+  & Pick<RoomGetState, 'revision' | 'name' | 'createdBy' | 'publicChannel1Name' | 'publicChannel2Name' | 'publicChannel3Name' | 'publicChannel4Name' | 'publicChannel5Name' | 'publicChannel6Name' | 'publicChannel7Name' | 'publicChannel8Name' | 'publicChannel9Name' | 'publicChannel10Name'>
   & { boards: Array<(
     { __typename?: 'BoardState' }
     & BoardStateFragment
@@ -2175,6 +2205,36 @@ export type RoomOperationValueFragment = (
     { __typename?: 'ParticipantsOperation' }
     & ParticipantsOperationFragment
   ), name?: Maybe<(
+    { __typename?: 'ReplaceStringUpOperation' }
+    & Pick<ReplaceStringUpOperation, 'newValue'>
+  )>, publicChannel1Name?: Maybe<(
+    { __typename?: 'ReplaceStringUpOperation' }
+    & Pick<ReplaceStringUpOperation, 'newValue'>
+  )>, publicChannel2Name?: Maybe<(
+    { __typename?: 'ReplaceStringUpOperation' }
+    & Pick<ReplaceStringUpOperation, 'newValue'>
+  )>, publicChannel3Name?: Maybe<(
+    { __typename?: 'ReplaceStringUpOperation' }
+    & Pick<ReplaceStringUpOperation, 'newValue'>
+  )>, publicChannel4Name?: Maybe<(
+    { __typename?: 'ReplaceStringUpOperation' }
+    & Pick<ReplaceStringUpOperation, 'newValue'>
+  )>, publicChannel5Name?: Maybe<(
+    { __typename?: 'ReplaceStringUpOperation' }
+    & Pick<ReplaceStringUpOperation, 'newValue'>
+  )>, publicChannel6Name?: Maybe<(
+    { __typename?: 'ReplaceStringUpOperation' }
+    & Pick<ReplaceStringUpOperation, 'newValue'>
+  )>, publicChannel7Name?: Maybe<(
+    { __typename?: 'ReplaceStringUpOperation' }
+    & Pick<ReplaceStringUpOperation, 'newValue'>
+  )>, publicChannel8Name?: Maybe<(
+    { __typename?: 'ReplaceStringUpOperation' }
+    & Pick<ReplaceStringUpOperation, 'newValue'>
+  )>, publicChannel9Name?: Maybe<(
+    { __typename?: 'ReplaceStringUpOperation' }
+    & Pick<ReplaceStringUpOperation, 'newValue'>
+  )>, publicChannel10Name?: Maybe<(
     { __typename?: 'ReplaceStringUpOperation' }
     & Pick<ReplaceStringUpOperation, 'newValue'>
   )>, bgms: (
@@ -2909,6 +2969,16 @@ export const RoomGetStateFragmentDoc = gql`
   revision
   name
   createdBy
+  publicChannel1Name
+  publicChannel2Name
+  publicChannel3Name
+  publicChannel4Name
+  publicChannel5Name
+  publicChannel6Name
+  publicChannel7Name
+  publicChannel8Name
+  publicChannel9Name
+  publicChannel10Name
   boards {
     ...BoardState
   }
@@ -3354,6 +3424,36 @@ export const RoomOperationValueFragmentDoc = gql`
     ...ParticipantsOperation
   }
   name {
+    newValue
+  }
+  publicChannel1Name {
+    newValue
+  }
+  publicChannel2Name {
+    newValue
+  }
+  publicChannel3Name {
+    newValue
+  }
+  publicChannel4Name {
+    newValue
+  }
+  publicChannel5Name {
+    newValue
+  }
+  publicChannel6Name {
+    newValue
+  }
+  publicChannel7Name {
+    newValue
+  }
+  publicChannel8Name {
+    newValue
+  }
+  publicChannel9Name {
+    newValue
+  }
+  publicChannel10Name {
     newValue
   }
   bgms {

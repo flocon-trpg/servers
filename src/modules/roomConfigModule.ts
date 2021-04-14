@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 //import { BoardConfig, BoardsPanelConfig } from '../states/BoardsPanelConfig';
-import { boardsPanel, charactersPanel, gameEffectPanel, messagesPanel, PanelAction, participantsPanel, RoomConfig, UpdateGameTypeAction } from '../states/RoomConfig';
+import { boardPanel, characterPanel, gameEffectPanel, messagePanel, PanelAction, participantPanel, RoomConfig, UpdateGameSystemAction } from '../states/RoomConfig';
 import * as generators from '../utils/generators';
 import { ResizableDelta } from 'react-rnd';
 import { ResizeDirection } from 're-resizable';
@@ -8,11 +8,14 @@ import { recordToArray } from '../utils/record';
 import { BoardConfig, BoardsPanelConfig, createDefaultBoardConfig } from '../states/BoardsPanelConfig';
 import { CompositeKey, compositeKeyToString } from '../@shared/StateMap';
 import { StrIndex5 } from '../@shared/indexes';
+import { MessagePanelConfig } from '../states/MessagesPanelConfig';
 
 export type SetOtherValuesAction = {
     roomId: string;
     masterVolume?: number;
     seVolume?: number;
+    chatGameSystemId?: string;
+    chatSelectedCharacterStateId?: string;
 }
 
 export type SetChannelVolumeAction = {
@@ -86,6 +89,22 @@ export type UpdateChannelVisibilityAction = {
     newValue: boolean | undefined;
 }
 
+export type AddMessagePanelConfigAction = {
+    roomId: string;
+    panel: Omit<MessagePanelConfig, 'zIndex'>;
+}
+
+export type UpdateMessagePanelAction = {
+    roomId: string;
+    panelId: string;
+    panel: Partial<MessagePanelConfig>;
+}
+
+export type RemoveMessagePanelAction = {
+    roomId: string;
+    panelId: string;
+}
+
 // DraggablePanelが移動できない位置に行くのを防ぐ処理。
 // Redux側ではなくUI側にこの処理を任せるとReduxとUIの独立性が高まるので一見良さそうだが、localforageからデータを読み込むときも似たような処理をしているため、もしRedux外に任せても結局Configを読み込むときにこの処理を行わなければならず、トータルで見たときの独立性は高くなっていない。UI側でデータの調整をしてdispatchする手もあるが、UI画面を開き直すたびにこの処理が走るので無駄。そのため、Redux側でこの処理を取り扱うことにしている。
 const movePanel = (state: { x: number; y: number }, newPosition: { x: number; y: number }): void => {
@@ -124,9 +143,9 @@ const fixRoomConfig = (config: RoomConfig): void => {
         position.x = Math.max(0, position.x);
         position.y = Math.max(0, position.y);
     };
-    recordToArray(config.panels.boardsPanels).forEach(pair => fixPosition(pair.value));
-    fixPosition(config.panels.charactersPanel);
-    fixPosition(config.panels.messagesPanel);
+    recordToArray(config.panels.boardPanels).forEach(pair => fixPosition(pair.value));
+    fixPosition(config.panels.characterPanel);
+    recordToArray(config.panels.messagePanels).forEach(pair => fixPosition(pair.value));
 };
 
 const bringPanelToFront = (state: RoomConfig | null, action: PanelAction): void => {
@@ -135,14 +154,17 @@ const bringPanelToFront = (state: RoomConfig | null, action: PanelAction): void 
     }
 
     const panels: { zIndex: number }[] = [];
-    for (const panelId in state.panels.boardsPanels) {
-        const panel = state.panels.boardsPanels[panelId];
+    for (const panelId in state.panels.boardPanels) {
+        const panel = state.panels.boardPanels[panelId];
         panels.push(panel);
     }
-    panels.push(state.panels.charactersPanel);
+    panels.push(state.panels.characterPanel);
     panels.push(state.panels.gameEffectPanel);
-    panels.push(state.panels.messagesPanel);
-    panels.push(state.panels.participantsPanel);
+    for (const panelId in state.panels.messagePanels) {
+        const panel = state.panels.messagePanels[panelId];
+        panels.push(panel);
+    }
+    panels.push(state.panels.participantPanel);
 
     // まずzIndexが小さい順に0,1,2,…と割り振っていく。こうすることで、例えば[-100, 5, 10000]のように飛び飛びになっている状態を修正する。zIndexが同一であるパネルが複数ある場合でも異なるzIndexになるため、場合によっては前面に来るパネルが変わる可能性もあるが、直接Configを編集したりしていない限りすべてが異なるzIndexであるはずなので無視している。
     // 次に、最前面にさせたいパネルのzIndexに(max(割り振ったzIndex) + 1)を代入して完了。
@@ -152,28 +174,32 @@ const bringPanelToFront = (state: RoomConfig | null, action: PanelAction): void 
     });
 
     switch (action.target.type) {
-        case boardsPanel: {
-            const targetPanel = state.panels.boardsPanels[action.target.panelId];
+        case boardPanel: {
+            const targetPanel = state.panels.boardPanels[action.target.panelId];
             if (targetPanel == null) {
                 return;
             }
             targetPanel.zIndex = panels.length;
             return;
         }
-        case charactersPanel: {
-            state.panels.charactersPanel.zIndex = panels.length;
+        case characterPanel: {
+            state.panels.characterPanel.zIndex = panels.length;
             return;
         }
         case gameEffectPanel: {
             state.panels.gameEffectPanel.zIndex = panels.length;
             return;
         }
-        case messagesPanel: {
-            state.panels.messagesPanel.zIndex = panels.length;
+        case messagePanel: {
+            const targetPanel = state.panels.messagePanels[action.target.panelId];
+            if (targetPanel == null) {
+                return;
+            }
+            targetPanel.zIndex = panels.length;
             return;
         }
-        case participantsPanel: {
-            state.panels.participantsPanel.zIndex = panels.length;
+        case participantPanel: {
+            state.panels.participantPanel.zIndex = panels.length;
             return;
         }
     }
@@ -201,13 +227,12 @@ const roomConfigModule = createSlice({
             if (action.payload.seVolume != null) {
                 state.seVolume = action.payload.seVolume;
             }
-        },
-        setGameType: (state: RoomConfig | null, action: PayloadAction<UpdateGameTypeAction>) => {
-            if (state == null || state.roomId !== action.payload.roomId) {
-                return;
+            if (action.payload.chatSelectedCharacterStateId != null) {
+                state.chatSelectedCharacterStateId = action.payload.chatSelectedCharacterStateId;
             }
-            state.gameTypeId = action.payload.gameType?.id;
-            state.gameTypeName = action.payload.gameType?.name;
+            if (action.payload.chatGameSystemId != null) {
+                state.chatGameSystemId = action.payload.chatGameSystemId;
+            }
         },
         setChannelVolume: (state: RoomConfig | null, action: PayloadAction<SetChannelVolumeAction>) => {
             if (state == null || state.roomId !== action.payload.roomId) {
@@ -225,28 +250,32 @@ const roomConfigModule = createSlice({
             }
 
             switch (action.payload.target.type) {
-                case boardsPanel: {
-                    const targetPanel = state.panels.boardsPanels[action.payload.target.panelId];
+                case boardPanel: {
+                    const targetPanel = state.panels.boardPanels[action.payload.target.panelId];
                     if (targetPanel == null) {
                         return;
                     }
                     targetPanel.isMinimized = action.payload.newValue;
                     return;
                 }
-                case charactersPanel: {
-                    state.panels.charactersPanel.isMinimized = action.payload.newValue;
+                case characterPanel: {
+                    state.panels.characterPanel.isMinimized = action.payload.newValue;
                     return;
                 }
                 case gameEffectPanel: {
                     state.panels.gameEffectPanel.isMinimized = action.payload.newValue;
                     return;
                 }
-                case messagesPanel: {
-                    state.panels.messagesPanel.isMinimized = action.payload.newValue;
+                case messagePanel: {
+                    const targetPanel = state.panels.messagePanels[action.payload.target.panelId];
+                    if (targetPanel == null) {
+                        return;
+                    }
+                    targetPanel.isMinimized = action.payload.newValue;
                     return;
                 }
-                case participantsPanel: {
-                    state.panels.participantsPanel.isMinimized = action.payload.newValue;
+                case participantPanel: {
+                    state.panels.participantPanel.isMinimized = action.payload.newValue;
                     return;
                 }
             }
@@ -257,18 +286,18 @@ const roomConfigModule = createSlice({
                 return;
             }
             const panelId = generators.simpleId();
-            state.panels.boardsPanels[panelId] = { ...action.payload.panel, zIndex: -1 };
-            bringPanelToFront(state, { roomId: action.payload.roomId, target: { type: boardsPanel, panelId } });
+            state.panels.boardPanels[panelId] = { ...action.payload.panel, zIndex: -1 };
+            bringPanelToFront(state, { roomId: action.payload.roomId, target: { type: boardPanel, panelId } });
         },
         updateBoardPanel: (state: RoomConfig | null, action: PayloadAction<UpdateBoardPanelAction>) => {
             if (state == null || state.roomId !== action.payload.roomId) {
                 return;
             }
-            const targetPanel = state.panels.boardsPanels[action.payload.panelId];
+            const targetPanel = state.panels.boardPanels[action.payload.panelId];
             if (targetPanel == null) {
                 return;
             }
-            state.panels.boardsPanels[action.payload.panelId] = {
+            state.panels.boardPanels[action.payload.panelId] = {
                 ...targetPanel,
                 activeBoardKey: action.payload.panel.activeBoardKey ?? targetPanel.activeBoardKey,
                 isMinimized: action.payload.panel.isMinimized ?? targetPanel.isMinimized,
@@ -283,7 +312,7 @@ const roomConfigModule = createSlice({
             if (state == null || state.roomId !== action.payload.roomId) {
                 return;
             }
-            const targetPanel = state.panels.boardsPanels[action.payload.panelId];
+            const targetPanel = state.panels.boardPanels[action.payload.panelId];
             if (targetPanel == null) {
                 return;
             }
@@ -293,7 +322,7 @@ const roomConfigModule = createSlice({
             if (state == null || state.roomId !== action.payload.roomId) {
                 return;
             }
-            const targetPanel = state.panels.boardsPanels[action.payload.panelId];
+            const targetPanel = state.panels.boardPanels[action.payload.panelId];
             if (targetPanel == null) {
                 return;
             }
@@ -303,14 +332,14 @@ const roomConfigModule = createSlice({
             if (state == null) {
                 return;
             }
-            delete state.panels.boardsPanels[action.payload.panelId];
+            delete state.panels.boardPanels[action.payload.panelId];
         },
         // BoardConfigが存在しない場合、createDefaultBoardConfig()の値がデフォルト値であるという認識が呼び出し側でも共有されているという前提。
         updateBoard: (state: RoomConfig | null, action: PayloadAction<UpdateBoardAction>) => {
             if (state == null) {
                 return;
             }
-            const targetPanel = state.panels.boardsPanels[action.payload.panelId];
+            const targetPanel = state.panels.boardPanels[action.payload.panelId];
             if (targetPanel == null) {
                 return;
             }
@@ -331,7 +360,7 @@ const roomConfigModule = createSlice({
             if (state == null) {
                 return;
             }
-            const targetPanel = state.panels.boardsPanels[action.payload.panelId];
+            const targetPanel = state.panels.boardPanels[action.payload.panelId];
             if (targetPanel == null) {
                 return;
             }
@@ -352,7 +381,7 @@ const roomConfigModule = createSlice({
             if (state == null) {
                 return;
             }
-            const targetPanel = state.panels.boardsPanels[action.payload.panelId];
+            const targetPanel = state.panels.boardPanels[action.payload.panelId];
             if (targetPanel == null) {
                 return;
             }
@@ -363,28 +392,28 @@ const roomConfigModule = createSlice({
             if (state == null) {
                 return;
             }
-            const targetPanel = state.panels.boardsPanels[action.payload.panelId];
+            const targetPanel = state.panels.boardPanels[action.payload.panelId];
             if (targetPanel == null) {
                 return;
             }
             delete targetPanel.boards[compositeKeyToString(action.payload.boardKey)];
         },
 
-        moveCharactersPanel: (state: RoomConfig | null, action: PayloadAction<MovePanelAction>) => {
+        moveCharacterPanel: (state: RoomConfig | null, action: PayloadAction<MovePanelAction>) => {
             if (state == null || state.roomId !== action.payload.roomId) {
                 return;
             }
-            const targetPanel = state.panels.charactersPanel;
+            const targetPanel = state.panels.characterPanel;
             if (targetPanel == null) {
                 return;
             }
             movePanel(targetPanel, action.payload);
         },
-        resizeCharactersPanel: (state: RoomConfig | null, action: PayloadAction<ResizePanelAction>) => {
+        resizeCharacterPanel: (state: RoomConfig | null, action: PayloadAction<ResizePanelAction>) => {
             if (state == null || state.roomId !== action.payload.roomId) {
                 return;
             }
-            const targetPanel = state.panels.charactersPanel;
+            const targetPanel = state.panels.characterPanel;
             if (targetPanel == null) {
                 return;
             }
@@ -412,64 +441,79 @@ const roomConfigModule = createSlice({
             resizePanel(targetPanel, action.payload.dir, action.payload.delta);
         },
 
-        moveMessagesPanel: (state: RoomConfig | null, action: PayloadAction<MovePanelAction>) => {
+        addMessagePanelConfig: (state: RoomConfig | null, action: PayloadAction<AddMessagePanelConfigAction>) => {
             if (state == null || state.roomId !== action.payload.roomId) {
                 return;
             }
-            const targetPanel = state.panels.messagesPanel;
+            const panelId = generators.simpleId();
+            state.panels.messagePanels[panelId] = { ...action.payload.panel, zIndex: -1 };
+            bringPanelToFront(state, { roomId: action.payload.roomId, target: { type: messagePanel, panelId } });
+        },
+        updateMessagePanel: (state: RoomConfig | null, action: PayloadAction<UpdateMessagePanelAction>) => {
+            if (state == null || state.roomId !== action.payload.roomId) {
+                return;
+            }
+            const targetPanel = state.panels.messagePanels[action.payload.panelId];
+            if (targetPanel == null) {
+                return;
+            }
+            state.panels.messagePanels[action.payload.panelId] = {
+                ...targetPanel,
+                isMinimized: action.payload.panel.isMinimized ?? targetPanel.isMinimized,
+                x: action.payload.panel.x ?? targetPanel.x,
+                y: action.payload.panel.y ?? targetPanel.y,
+                width: action.payload.panel.width ?? targetPanel.width,
+                height: action.payload.panel.height ?? targetPanel.height,
+                zIndex: action.payload.panel.zIndex ?? targetPanel.zIndex,
+                tabs: action.payload.panel.tabs ?? targetPanel.tabs,
+            };
+        },
+        moveMessagePanel: (state: RoomConfig | null, action: PayloadAction<MovePanelAction & { panelId: string }>) => {
+            if (state == null || state.roomId !== action.payload.roomId) {
+                return;
+            }
+            const targetPanel = state.panels.messagePanels[action.payload.panelId];
             if (targetPanel == null) {
                 return;
             }
             movePanel(targetPanel, action.payload);
         },
-        resizeMessagesPanel: (state: RoomConfig | null, action: PayloadAction<ResizePanelAction>) => {
+        resizeMessagePanel: (state: RoomConfig | null, action: PayloadAction<ResizePanelAction & { panelId: string }>) => {
             if (state == null || state.roomId !== action.payload.roomId) {
                 return;
             }
-            const targetPanel = state.panels.messagesPanel;
+            const targetPanel = state.panels.messagePanels[action.payload.panelId];
             if (targetPanel == null) {
                 return;
             }
             resizePanel(targetPanel, action.payload.dir, action.payload.delta);
         },
+        removeMessagePanel: (state: RoomConfig | null, action: PayloadAction<RemoveMessagePanelAction>) => {
+            if (state == null) {
+                return;
+            }
+            delete state.panels.messagePanels[action.payload.panelId];
+        },
 
-        moveParticipantsPanel: (state: RoomConfig | null, action: PayloadAction<MovePanelAction>) => {
+        moveParticipantPanel: (state: RoomConfig | null, action: PayloadAction<MovePanelAction>) => {
             if (state == null || state.roomId !== action.payload.roomId) {
                 return;
             }
-            const targetPanel = state.panels.participantsPanel;
+            const targetPanel = state.panels.participantPanel;
             if (targetPanel == null) {
                 return;
             }
             movePanel(targetPanel, action.payload);
         },
-        resizeParticipantsPanel: (state: RoomConfig | null, action: PayloadAction<ResizePanelAction>) => {
+        resizeParticipantPanel: (state: RoomConfig | null, action: PayloadAction<ResizePanelAction>) => {
             if (state == null || state.roomId !== action.payload.roomId) {
                 return;
             }
-            const targetPanel = state.panels.participantsPanel;
+            const targetPanel = state.panels.participantPanel;
             if (targetPanel == null) {
                 return;
             }
             resizePanel(targetPanel, action.payload.dir, action.payload.delta);
-        },
-
-        updateChannelVisibility: (state: RoomConfig | null, action: PayloadAction<UpdateChannelVisibilityAction>) => {
-            if (state == null || state.roomId !== action.payload.roomId) {
-                return;
-            }
-            const targetPanel = state.panels.messagesPanel;
-            if (targetPanel == null) {
-                return;
-            }
-            const targetConfig = targetPanel.channels[action.payload.channelKey];
-            if (targetConfig == null) {
-                targetPanel.channels[action.payload.channelKey] = {
-                    show: action.payload.newValue,
-                };
-                return;
-            }
-            targetConfig.show = action.payload.newValue;
         },
     }
 });

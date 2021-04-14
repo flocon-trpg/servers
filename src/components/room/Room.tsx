@@ -9,7 +9,7 @@ import { useDispatch } from 'react-redux';
 import { Room as RoomStates } from '../../stateManagers/states/room';
 import Boards from './Boards';
 import { recordToArray } from '../../utils/record';
-import RoomMessages, { Tab } from './RoomMessages';
+import RoomMessages from './RoomMessages';
 import CharacterParameterNamesDrawer from './CharacterParameterNamesDrawer';
 import { RoomComponentsState, defaultRoomComponentsState, reduceComponentsState, editRoomDrawerVisibility } from './RoomComponentsState';
 import DrawerFooter from '../../layouts/DrawerFooter';
@@ -18,8 +18,7 @@ import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponent
 import OperateContext from './contexts/OperateContext';
 import CharacterDrawer from './CharacterDrawer';
 import BoardDrawer from './BoardDrawer';
-import CreatePrivateMessageDrawer from './CreatePrivateMessageDrawer';
-import { boardsPanel, charactersPanel, gameEffectPanel, messagesPanel, participantsPanel } from '../../states/RoomConfig';
+import { boardPanel, characterPanel, gameEffectPanel, messagePanel, participantPanel } from '../../states/RoomConfig';
 import * as Icon from '@ant-design/icons';
 import { ChangeParticipantNameFailureType, DeleteRoomFailureType, ParticipantRole, PromoteFailureType, useChangeParticipantNameMutation, useDeleteRoomMutation, useGetLogLazyQuery, useGetLogQuery, useJoinRoomAsPlayerMutation, useLeaveRoomMutation, usePromoteToPlayerMutation, useRequiresPhraseToJoinAsPlayerLazyQuery, useRequiresPhraseToJoinAsPlayerQuery } from '../../generated/graphql';
 import { useRouter } from 'next/router';
@@ -40,6 +39,7 @@ import MyNumberValueDrawer from './MyNumberValueDrawer';
 import { useAllRoomMessages } from '../../hooks/useRoomMessages';
 import LoadingResult from '../../foundations/Result/LoadingResult';
 import VolumeBarPanel from './VolumeBarPanel';
+import { TabConfig } from '../../states/MessagesPanelConfig';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -391,8 +391,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
         </AntdLayout>;
     }
 
-    // TODO: offset, zoom
-    const boardsPanels = recordToArray(roomConfig.panels.boardsPanels).map(pair => {
+    const boardsPanels = recordToArray(roomConfig.panels.boardPanels).map(pair => {
         if (pair.value.isMinimized) {
             return null;
         }
@@ -404,7 +403,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                 header="Board"
                 onDragStop={e => dispatch(roomConfigModule.actions.moveBoardPanel({ ...e, roomId, panelId: pair.key }))}
                 onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeBoardPanel({ roomId, panelId: pair.key, dir, delta }))}
-                onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: boardsPanel, panelId: pair.key } }))}
+                onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: boardPanel, panelId: pair.key } }))}
                 onClose={() => dispatch(roomConfigModule.actions.removeBoardPanel({ roomId, panelId: pair.key }))}
                 childrenContainerStyle={({ overflow: 'hidden' })}
                 position={pair.value}
@@ -424,6 +423,37 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                     me={me}
                     myUserUid={myAuth.uid}
                     allRoomMessages={allRoomMessages} />
+            </DraggableCard>
+        );
+    });
+
+    const messagePanels = recordToArray(roomConfig.panels.messagePanels).map(pair => {
+        if (pair.value.isMinimized) {
+            return null;
+        }
+
+        // canvasWidthとcanvasHeightはDraggableCardのchildrenの表示領域より大きい値
+        return (
+            <DraggableCard
+                key={pair.key}
+                header="Message"
+                onDragStop={e => dispatch(roomConfigModule.actions.moveMessagePanel({ ...e, roomId, panelId: pair.key }))}
+                onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeMessagePanel({ roomId, panelId: pair.key, dir, delta }))}
+                onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: messagePanel, panelId: pair.key } }))}
+                onClose={() => dispatch(roomConfigModule.actions.removeMessagePanel({ roomId, panelId: pair.key }))}
+                childrenContainerStyle={({ overflow: 'hidden' })}
+                position={pair.value}
+                size={pair.value}
+                minHeight={150}
+                minWidth={150}
+                zIndex={pair.value.zIndex}>
+                <RoomMessages
+                    {...roomState}
+                    roomId={roomId}
+                    allRoomMessagesResult={allRoomMessages}
+                    panelId={pair.key}
+                    config={pair.value}
+                    height={pair.value.height} />
             </DraggableCard>
         );
     });
@@ -467,25 +497,25 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                                 </Menu.SubMenu>
                                 <Menu.SubMenu title="ウィンドウ">
                                     <Menu.Item onClick={() => {
-                                        dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: charactersPanel }, newValue: false }));
-                                        dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: charactersPanel } }));
+                                        dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: characterPanel }, newValue: false }));
+                                        dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: characterPanel } }));
                                     }}>
                                         <div>
-                                            <span>{roomConfig.panels.charactersPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
+                                            <span>{roomConfig.panels.characterPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
                                             <span>キャラクター一覧</span>
                                         </div>
                                     </Menu.Item>
                                     <Menu.SubMenu title="ボード">
                                         {
-                                            recordToArray(roomConfig.panels.boardsPanels).map((pair, i) => {
+                                            recordToArray(roomConfig.panels.boardPanels).map((pair, i) => {
                                                 return (
                                                     <Menu.Item
                                                         key={pair.key}
                                                         onClick={() => {
                                                             // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
-                                                            dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: boardsPanel, panelId: pair.key }, newValue: false }));
+                                                            dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: boardPanel, panelId: pair.key }, newValue: false }));
 
-                                                            dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: boardsPanel, panelId: pair.key } }));
+                                                            dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: boardPanel, panelId: pair.key } }));
                                                         }}>
                                                         <div>
                                                             <span>{pair.value.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
@@ -510,20 +540,50 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                                             }));
                                         }}>
                                             <div>
-                                                <span>{roomConfig.panels.messagesPanel.isMinimized ? null : <Icon.PlusOutlined />}</span>
+                                                <span><Icon.PlusOutlined /></span>
                                                 <span>新規作成</span>
                                             </div>
                                         </Menu.Item>
                                     </Menu.SubMenu>
-                                    <Menu.Item onClick={() => {
-                                        dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: messagesPanel }, newValue: false }));
-                                        dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: messagesPanel } }));
-                                    }}>
-                                        <div>
-                                            <span>{roomConfig.panels.messagesPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
-                                            <span>メッセージ</span>
-                                        </div>
-                                    </Menu.Item>
+                                    <Menu.SubMenu title="メッセージ">
+                                        {
+                                            recordToArray(roomConfig.panels.boardPanels).map((pair, i) => {
+                                                return (
+                                                    <Menu.Item
+                                                        key={pair.key}
+                                                        onClick={() => {
+                                                            // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
+                                                            dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: messagePanel, panelId: pair.key }, newValue: false }));
+
+                                                            dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: messagePanel, panelId: pair.key } }));
+                                                        }}>
+                                                        <div>
+                                                            <span>{pair.value.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
+                                                            <span>{`パネル${i}`}</span>
+                                                        </div>
+                                                    </Menu.Item>);
+                                            })
+                                        }
+                                        <Menu.Divider />
+                                        <Menu.Item onClick={() => {
+                                            dispatch(roomConfigModule.actions.addMessagePanelConfig({
+                                                roomId,
+                                                panel: {
+                                                    tabs: [TabConfig.createAll({})],
+                                                    isMinimized: false,
+                                                    x: 10,
+                                                    y: 10,
+                                                    width: 400,
+                                                    height: 300,
+                                                },
+                                            }));
+                                        }}>
+                                            <div>
+                                                <span><Icon.PlusOutlined /></span>
+                                                <span>新規作成</span>
+                                            </div>
+                                        </Menu.Item>
+                                    </Menu.SubMenu>
                                     <Menu.Item onClick={() => {
                                         dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: gameEffectPanel }, newValue: false }));
                                         dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: gameEffectPanel } }));
@@ -534,11 +594,11 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                                         </div>
                                     </Menu.Item>
                                     <Menu.Item onClick={() => {
-                                        dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: participantsPanel }, newValue: false }));
-                                        dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: participantsPanel } }));
+                                        dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: participantPanel }, newValue: false }));
+                                        dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: participantPanel } }));
                                     }}>
                                         <div>
-                                            <span>{roomConfig.panels.participantsPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
+                                            <span>{roomConfig.panels.participantPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
                                             <span>入室者</span>
                                         </div>
                                     </Menu.Item>
@@ -566,18 +626,19 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                             </Menu>
                             <div>
                                 {boardsPanels}
-                                {roomConfig.panels.charactersPanel.isMinimized ? null : <DraggableCard
+                                {messagePanels}
+                                {roomConfig.panels.characterPanel.isMinimized ? null : <DraggableCard
                                     header="Characters"
-                                    onDragStop={e => dispatch(roomConfigModule.actions.moveCharactersPanel({ ...e, roomId }))}
-                                    onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeCharactersPanel({ roomId, dir, delta }))}
-                                    onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: charactersPanel } }))}
-                                    onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: charactersPanel }, newValue: true }))}
+                                    onDragStop={e => dispatch(roomConfigModule.actions.moveCharacterPanel({ ...e, roomId }))}
+                                    onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeCharacterPanel({ roomId, dir, delta }))}
+                                    onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: characterPanel } }))}
+                                    onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: characterPanel }, newValue: true }))}
                                     childrenContainerStyle={({ padding: childrenContainerPadding, overflowY: 'scroll' })}
-                                    position={roomConfig.panels.charactersPanel}
-                                    size={roomConfig.panels.charactersPanel}
+                                    position={roomConfig.panels.characterPanel}
+                                    size={roomConfig.panels.characterPanel}
                                     minHeight={150}
                                     minWidth={150}
-                                    zIndex={roomConfig.panels.charactersPanel.zIndex}>
+                                    zIndex={roomConfig.panels.characterPanel.zIndex}>
                                     <CharacterList room={roomState} />
                                 </DraggableCard>}
                                 {roomConfig.panels.gameEffectPanel.isMinimized ? null : <DraggableCard
@@ -594,37 +655,18 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                                     zIndex={roomConfig.panels.gameEffectPanel.zIndex}>
                                     <SoundPlayer roomId={roomId} bgmsState={roomState.bgms} />
                                 </DraggableCard>}
-                                {roomConfig.panels.messagesPanel.isMinimized ? null : <DraggableCard
-                                    header="Messages"
-                                    onDragStop={e => dispatch(roomConfigModule.actions.moveMessagesPanel({ ...e, roomId }))}
-                                    onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeMessagesPanel({ roomId, dir, delta }))}
-                                    onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: messagesPanel } }))}
-                                    onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: messagesPanel }, newValue: true }))}
-                                    childrenContainerStyle={({ padding: childrenContainerPadding })}
-                                    position={roomConfig.panels.messagesPanel}
-                                    size={roomConfig.panels.messagesPanel}
-                                    minHeight={150}
-                                    minWidth={150}
-                                    zIndex={roomConfig.panels.messagesPanel.zIndex}>
-                                    <RoomMessages
-                                        roomId={roomId}
-                                        allRoomMessages={allRoomMessages}
-                                        participants={roomState.participants}
-                                        characters={roomState.characters}
-                                        notifications={allNotifications} />
-                                </DraggableCard>}
-                                {roomConfig.panels.participantsPanel.isMinimized ? null : <DraggableCard
+                                {roomConfig.panels.participantPanel.isMinimized ? null : <DraggableCard
                                     header="Participants"
-                                    onDragStop={e => dispatch(roomConfigModule.actions.moveParticipantsPanel({ ...e, roomId }))}
-                                    onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeParticipantsPanel({ roomId, dir, delta }))}
-                                    onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: participantsPanel } }))}
-                                    onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: participantsPanel }, newValue: true }))}
+                                    onDragStop={e => dispatch(roomConfigModule.actions.moveParticipantPanel({ ...e, roomId }))}
+                                    onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeParticipantPanel({ roomId, dir, delta }))}
+                                    onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: participantPanel } }))}
+                                    onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: participantPanel }, newValue: true }))}
                                     childrenContainerStyle={({ padding: childrenContainerPadding })}
-                                    position={roomConfig.panels.participantsPanel}
-                                    size={roomConfig.panels.participantsPanel}
+                                    position={roomConfig.panels.participantPanel}
+                                    size={roomConfig.panels.participantPanel}
                                     minHeight={150}
                                     minWidth={150}
-                                    zIndex={roomConfig.panels.participantsPanel.zIndex}>
+                                    zIndex={roomConfig.panels.participantPanel.zIndex}>
                                     <ParticipantList participants={roomState.participants} />
                                 </DraggableCard>}
                             </div>
@@ -661,7 +703,6 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                             <CharacterDrawer roomState={roomState} />
                             <MyNumberValueDrawer myUserUid={myAuth.uid} me={me} />
                             <CharacterParameterNamesDrawer roomState={roomState} />
-                            <CreatePrivateMessageDrawer roomState={roomState} roomId={roomId} />
                             <EditRoomDrawer roomState={roomState} />
 
                             <PlayBgmBehavior bgms={roomState.bgms} />

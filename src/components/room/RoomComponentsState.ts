@@ -8,7 +8,6 @@ export const boardDrawerType = 'boardDrawerType';
 export const characterDrawerType = 'characterDrawerType';
 export const myNumberValueDrawerType = 'myNumberValueDrawerType';
 export const editRoomDrawerVisibility = 'editRoomDrawerVisibility';
-export const createPrivateMessageDrawerVisibility = 'createPrivateMessageDrawerVisibility';
 
 export type BoardEditorDrawerType = {
     type: typeof create;
@@ -43,7 +42,6 @@ export type RoomComponentsState = {
     characterDrawerType: CharacterEditorDrawerType | null;
     myNumberValueDrawerType: MyNumberValueDrawerType | null;
     editRoomDrawerVisibility: boolean;
-    createPrivateMessageDrawerVisibility: boolean;
 }
 
 export const defaultRoomComponentsState: RoomComponentsState = {
@@ -52,7 +50,6 @@ export const defaultRoomComponentsState: RoomComponentsState = {
     characterDrawerType: null,
     myNumberValueDrawerType: null,
     editRoomDrawerVisibility: false,
-    createPrivateMessageDrawerVisibility: false,
 };
 
 export type RoomComponentsAction = {
@@ -69,9 +66,6 @@ export type RoomComponentsAction = {
     newValue: MyNumberValueDrawerType | null;
 } | {
     type: typeof editRoomDrawerVisibility;
-    newValue: boolean;
-} |  {
-    type: typeof createPrivateMessageDrawerVisibility;
     newValue: boolean;
 }
 
@@ -96,11 +90,6 @@ export const reduceComponentsState = (state: RoomComponentsState, action: RoomCo
             return {
                 ...state,
                 characterParameterNamesDrawerVisibility: action.newValue
-            };
-        case createPrivateMessageDrawerVisibility:
-            return {
-                ...state,
-                createPrivateMessageDrawerVisibility: action.newValue,
             };
         case editRoomDrawerVisibility:
             return {

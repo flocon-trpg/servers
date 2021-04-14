@@ -1,8 +1,9 @@
+import { __ } from '../@shared/collection';
 import isObject from './isObject';
 
-export const castToArray = <T>(source: unknown, inner: (x: unknown) => T | undefined): (T | undefined)[] | undefined => {
+export const castToArray = <T>(source: unknown, inner: (x: unknown) => T | undefined): T[] | undefined => {
     if (Array.isArray(source)) {
-        return source.map(inner);
+        return __(source.map(inner)).compact(x => x).toArray();
     }
     return undefined;
 };

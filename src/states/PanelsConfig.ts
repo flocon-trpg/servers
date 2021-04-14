@@ -1,28 +1,28 @@
 import { castToRecord } from '../utils/cast';
 import isObject from '../utils/isObject';
 import { chooseRecord } from '../utils/record';
-import { castToPartialCharactersPanelConfig, CharactersPanelConfig, defaultCharactersPanelConfig, PartialCharactersPanelConfig, toCompleteCharactersPanelConfig } from './CharactersPanelConfig';
+import { castToPartialCharactersPanelConfig, CharactersPanelConfig as CharacterPanelConfig, defaultCharactersPanelConfig as defaultCharacterPanelConfig, PartialCharactersPanelConfig as PartialCharacterPanelConfig, toCompleteCharactersPanelConfig } from './CharactersPanelConfig';
 import * as Room from '../stateManagers/states/room';
-import { BoardsPanelConfig, castToPartialBoardsPanelConfig, defaultBoardsPanelsConfig, PartialBoardsPanelConfig, toCompleteBoardsPanelConfig } from './BoardsPanelConfig';
-import { castToPartialMessagesPanelConfig, defaultMessagesPanelConfig, MessagesPanelConfig, PartialMessagesPanelConfig, toCompleteMessagesPanelConfig } from './MessagesPanelConfig';
+import { BoardsPanelConfig as BoardPanelConfig, castToPartialBoardPanelConfig, defaultBoardPanelsConfig as defaultBoardPanelsConfig, PartialBoardPanelConfig, toCompleteBoardPanelConfig } from './BoardsPanelConfig';
+import { castToPartialMessagePanelConfig, defaultMessagePanelsConfig, MessagePanelConfig, PartialMessagePanelConfig, toCompleteMessagePanelConfig } from './MessagesPanelConfig';
 import { ReadonlyStateToReduce } from '../hooks/useRoomMessages';
 import { castToPartialGameEffectPanelConfig, defaultGameEffectPanelConfig, GameEffectPanelConfig, PartialGameEffectPanelConfig, toCompleteGameEffectPanelConfig } from './GameEffectPanelConfig';
-import { castToPartialParticipantsPanelConfig, defaultParticipantsPanelConfig, PartialParticipantsPanelConfig, ParticipantsPanelConfig, toCompleteParticipantsPanelConfig } from './ParticipantsPanelConfig';
+import { castToPartialParticipantPanelConfig, defaultParticipantPanelConfig, PartialParticipantPanelConfig, ParticipantPanelConfig, toCompleteParticipantsPanelConfig } from './ParticipantsPanelConfig';
 
 export type PanelsConfig = {
-    boardsPanels: Record<string, BoardsPanelConfig>;
-    charactersPanel: CharactersPanelConfig;
+    boardPanels: Record<string, BoardPanelConfig>;
+    characterPanel: CharacterPanelConfig;
     gameEffectPanel: GameEffectPanelConfig;
-    messagesPanel: MessagesPanelConfig;
-    participantsPanel: ParticipantsPanelConfig;
+    messagePanels: Record<string, MessagePanelConfig>;
+    participantPanel: ParticipantPanelConfig;
 }
 
 export type PartialPanelsConfig = {
-    boardsPanels?: Record<string, PartialBoardsPanelConfig>;
-    charactersPanel?: PartialCharactersPanelConfig;
+    boardPanels?: Record<string, PartialBoardPanelConfig>;
+    characterPanel?: PartialCharacterPanelConfig;
     gameEffectPanel?: PartialGameEffectPanelConfig;
-    messagesPanel?: PartialMessagesPanelConfig;
-    participantsPanel?: PartialParticipantsPanelConfig;
+    messagePanels?: Record<string, PartialMessagePanelConfig>;
+    participantPanel?: PartialParticipantPanelConfig;
 }
 
 export const castToPartialPanelsConfig = (source: unknown): PartialPanelsConfig | undefined => {
@@ -30,30 +30,30 @@ export const castToPartialPanelsConfig = (source: unknown): PartialPanelsConfig 
         return;
     }
     return {
-        boardsPanels: castToRecord(source.boardsPanels, castToPartialBoardsPanelConfig),
-        charactersPanel: castToPartialCharactersPanelConfig(source.charactersPanel),
+        boardPanels: castToRecord(source.boardPanels, castToPartialBoardPanelConfig),
+        characterPanel: castToPartialCharactersPanelConfig(source.characterPanel),
         gameEffectPanel: castToPartialGameEffectPanelConfig(source.gameEffectPanel),
-        messagesPanel: castToPartialMessagesPanelConfig(source.messagesPanel),
-        participantsPanel: castToPartialParticipantsPanelConfig(source.participantsPanel),
+        messagePanels: castToRecord(source.messagePanels, castToPartialMessagePanelConfig),
+        participantPanel: castToPartialParticipantPanelConfig(source.participantPanel),
     };
 };
 
 export const toCompletePanelsConfig = (source: PartialPanelsConfig): PanelsConfig => {
     return {
-        boardsPanels: chooseRecord(source.boardsPanels ?? {}, toCompleteBoardsPanelConfig),
-        charactersPanel: toCompleteCharactersPanelConfig(source.charactersPanel ?? {}),
+        boardPanels: chooseRecord(source.boardPanels ?? {}, toCompleteBoardPanelConfig),
+        characterPanel: toCompleteCharactersPanelConfig(source.characterPanel ?? {}),
         gameEffectPanel: toCompleteGameEffectPanelConfig(source.gameEffectPanel ?? {}),
-        messagesPanel: toCompleteMessagesPanelConfig(source.messagesPanel ?? {}),
-        participantsPanel: toCompleteParticipantsPanelConfig(source.participantsPanel ?? {}),
+        messagePanels: chooseRecord(source.messagePanels ?? {}, toCompleteMessagePanelConfig),
+        participantPanel: toCompleteParticipantsPanelConfig(source.participantPanel ?? {}),
     };
 };
 
 export const defaultPanelsConfig = (): PanelsConfig => {
     return {
-        boardsPanels: defaultBoardsPanelsConfig(),
-        charactersPanel: defaultCharactersPanelConfig(),
+        boardPanels: defaultBoardPanelsConfig(),
+        characterPanel: defaultCharacterPanelConfig(),
         gameEffectPanel: defaultGameEffectPanelConfig(),
-        messagesPanel: defaultMessagesPanelConfig(),
-        participantsPanel: defaultParticipantsPanelConfig(),
+        messagePanels: defaultMessagePanelsConfig(),
+        participantPanel: defaultParticipantPanelConfig(),
     };
 };

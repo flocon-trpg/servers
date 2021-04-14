@@ -22,7 +22,6 @@ const roomConfigEpicCore = (action$: ActionsObservable<AnyAction>, state$: State
             Rx.map(action => {
                 if (
                     roomConfigModule.actions.setOtherValues.match(action)
-                    || roomConfigModule.actions.setGameType.match(action)
                     || roomConfigModule.actions.bringPanelToFront.match(action)
                     || roomConfigModule.actions.setIsMinimized.match(action)
 
@@ -36,19 +35,20 @@ const roomConfigEpicCore = (action$: ActionsObservable<AnyAction>, state$: State
                     || roomConfigModule.actions.removeBoard.match(action)
                     || roomConfigModule.actions.updateBoardPanel.match(action)
 
-                    || roomConfigModule.actions.moveCharactersPanel.match(action)
-                    || roomConfigModule.actions.resizeCharactersPanel.match(action)
+                    || roomConfigModule.actions.addMessagePanelConfig.match(action)
+                    || roomConfigModule.actions.moveMessagePanel.match(action)
+                    || roomConfigModule.actions.resizeMessagePanel.match(action)
+                    || roomConfigModule.actions.removeMessagePanel.match(action)
+                    || roomConfigModule.actions.updateMessagePanel.match(action)
+
+                    || roomConfigModule.actions.moveCharacterPanel.match(action)
+                    || roomConfigModule.actions.resizeCharacterPanel.match(action)
 
                     || roomConfigModule.actions.moveGameEffectPanel.match(action)
                     || roomConfigModule.actions.resizeGameEffectPanel.match(action)
 
-                    || roomConfigModule.actions.moveMessagesPanel.match(action)
-                    || roomConfigModule.actions.resizeMessagesPanel.match(action)
-
-                    || roomConfigModule.actions.moveParticipantsPanel.match(action)
-                    || roomConfigModule.actions.resizeParticipantsPanel.match(action)
-
-                    || roomConfigModule.actions.updateChannelVisibility.match(action)
+                    || roomConfigModule.actions.moveParticipantPanel.match(action)
+                    || roomConfigModule.actions.resizeParticipantPanel.match(action)
                 ) {
                     return action;
                 }

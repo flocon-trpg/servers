@@ -5,7 +5,7 @@ import { __ } from '../@shared/collection';
 import NotificationContext, { text } from '../components/room/contexts/NotificationContext';
 import { useMessageEventSubscription, useGetMessagesQuery, RoomMessageEventFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment, RoomPublicChannelFragment, RoomSoundEffectFragment } from '../generated/graphql';
 import { appConsole } from '../utils/appConsole';
-import { PrivateChannelSet, PrivateChannelsSet } from '../utils/PrivateChannelsSet';
+import { PrivateChannelSet, PrivateChannelSets } from '../utils/PrivateChannelSet';
 
 // 使い方:
 // 1. どこかでuseAllRoomMessagesを呼ぶ。冗長な通信を避けるため、useAllRoomMessagesを呼ぶ箇所はなるべく少なくする。
@@ -59,7 +59,7 @@ export type RoomMessageEvent = {
 type StateToReduce = {
     messages: RoomMessage[];
     publicChannels: Map<string, RoomPublicChannelFragment>;
-    privateChannels: PrivateChannelsSet;
+    privateChannels: PrivateChannelSets;
 }
 
 export type ReadonlyStateToReduce = {
@@ -74,7 +74,7 @@ export type ReadonlyStateToReduce = {
 const reduceInit = (actions: RoomMessageEventFragment[]): StateToReduce => {
     const messages = new Map<string, RoomMessage>();
     const publicChannels = new Map<string, RoomPublicChannelFragment>();
-    const privateChannels = new PrivateChannelsSet();
+    const privateChannels = new PrivateChannelSets();
 
     for (const action of actions) {
         switch (action.__typename) {

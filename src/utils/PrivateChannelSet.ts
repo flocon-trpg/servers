@@ -7,9 +7,13 @@ const toString = (visibleTo: ReadonlySet<string>): string => {
 export class PrivateChannelSet {
     private readonly _source: ReadonlySet<string>
 
-    public constructor(userUid: string | ReadonlySet<string>) {
+    public constructor(userUid: string | ReadonlySet<string> | ReadonlyArray<string>) {
         if (typeof userUid === 'string') {
             this._source = new Set<string>(userUid.split(';').filter(x => x !== ''));
+            return;
+        }
+        if (userUid instanceof Array) {
+            this._source = new Set(userUid);
             return;
         }
         this._source = userUid;
@@ -46,21 +50,38 @@ export class PrivateChannelSet {
     }
 }
 
-export class PrivateChannelsSet {
+export class PrivateChannelSets {
     private core = new Map<string, PrivateChannelSet>();
 
-    public add(visibleTo: string[]): void {
-        const set = new Set(visibleTo);
-        this.core.set(toString(set), new PrivateChannelSet(set));
+    public constructor(source?: string) {
+        if (source != null) {
+            source.split(',').filter(x => x !== '').forEach(set => {
+                const newValue = new PrivateChannelSet(set);
+                this.add(newValue);
+            });
+        }
     }
 
-    public clone(): PrivateChannelsSet {
-        const result = new PrivateChannelsSet();
+    public add(visibleTo: string[] | PrivateChannelSet): void {
+        if (Array.isArray(visibleTo)) {
+            const set = new Set(visibleTo);
+            this.core.set(toString(set), new PrivateChannelSet(set));
+            return;
+        }
+        this.core.set(visibleTo.toString(), visibleTo);
+    }
+
+    public clone(): PrivateChannelSets {
+        const result = new PrivateChannelSets();
         result.core = new Map(this.core);
         return result;
     }
 
     public toArray(): PrivateChannelSet[] {
         return [...this.core.values()];
+    }
+
+    public toString(): string {
+        return [...this.core.keys()].sort().reduce((seed, elem, i) => i === 0 ? elem : `${seed},${elem}`, '');
     }
 }

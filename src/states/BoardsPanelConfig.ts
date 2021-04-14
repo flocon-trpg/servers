@@ -44,10 +44,10 @@ export type BoardsPanelConfig = {
     isMinimized: boolean;
 } & DraggablePanelConfigBase
 
-export type PartialBoardsPanelConfig = Omit<Partial<BoardsPanelConfig>, 'boards'> & { boards?: Record<string, PartialBoardConfig> };
+export type PartialBoardPanelConfig = Omit<Partial<BoardsPanelConfig>, 'boards'> & { boards?: Record<string, PartialBoardConfig> };
 
-export const castToPartialBoardsPanelConfig = (source: unknown): PartialBoardsPanelConfig | undefined => {
-    if (!isObject<PartialBoardsPanelConfig>(source)) {
+export const castToPartialBoardPanelConfig = (source: unknown): PartialBoardPanelConfig | undefined => {
+    if (!isObject<PartialBoardPanelConfig>(source)) {
         return;
     }
     
@@ -59,7 +59,7 @@ export const castToPartialBoardsPanelConfig = (source: unknown): PartialBoardsPa
     };
 };
 
-export const toCompleteBoardsPanelConfig = (source: PartialBoardsPanelConfig): BoardsPanelConfig => {
+export const toCompleteBoardPanelConfig = (source: PartialBoardPanelConfig): BoardsPanelConfig => {
     return {
         ...toCompleteDraggablePanelConfigBase(source),
         activeBoardKey: source.activeBoardKey ?? null,
@@ -68,7 +68,7 @@ export const toCompleteBoardsPanelConfig = (source: PartialBoardsPanelConfig): B
     };
 };
 
-export const defaultBoardsPanelsConfig = (): Record<string, BoardsPanelConfig> => {
+export const defaultBoardPanelsConfig = (): Record<string, BoardsPanelConfig> => {
     const config: BoardsPanelConfig = {
         x: 0,
         y: 0,

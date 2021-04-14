@@ -1,8 +1,4 @@
-import { castToArray, castToRecord, castToString } from '../utils/cast';
 import isObject from '../utils/isObject';
-import { castToPartialPanelsConfig, defaultPanelsConfig, PanelsConfig, PartialPanelsConfig, toCompletePanelsConfig } from './PanelsConfig';
-import * as Room from '../stateManagers/states/room';
-import { __ } from '../@shared/collection';
 
 // UserConfigは現在は使用されていない。これからも使用されないようならば削除して構わない。
 

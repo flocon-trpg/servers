@@ -117,19 +117,28 @@ class $Iterator<T> {
         return this.toAsync(this.iterate).reduceAsync(mapping, seed);
     }
 
-    public skip(count: number): $Iterator<T> {
+    private skipAndTake(skipCount: number, thenTakeCount?: number): $Iterator<T> {
         const baseIterate = this.iterate;
         function* iterate() {
-            let skippedCount = 0;
+            let index = 0;
             for (const elem of baseIterate()) {
-                if (count <= skippedCount) {
-                    yield elem;
-                    continue;
+                if (skipCount <= index) {
+                    if (thenTakeCount == null || index < (skipCount + thenTakeCount)) {
+                        yield elem;
+                    }
                 }
-                skippedCount++;
+                index++;
             }
         }
         return new $Iterator(iterate);
+    }
+
+    public skip(count: number): $Iterator<T> {
+        return this.skipAndTake(count, undefined);
+    }
+
+    public take(count: number): $Iterator<T> {
+        return this.skipAndTake(0, count);
     }
 
     public toArray(): T[] {
@@ -199,7 +208,7 @@ class $AsyncIterator<T> {
         return result;
     }
 
-    public async toMapAsync<TKey, TValue>(mapping: (source: T) => PromiseLike<{ key: TKey; value: TValue }>): Promise< Map<TKey, TValue>> {
+    public async toMapAsync<TKey, TValue>(mapping: (source: T) => PromiseLike<{ key: TKey; value: TValue }>): Promise<Map<TKey, TValue>> {
         const result = new Map<TKey, TValue>();
         for await (const elem of this.iterateAsync()) {
             const { key, value } = await mapping(elem);
