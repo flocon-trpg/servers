@@ -39,6 +39,7 @@
         "eslint": "^7.20.0",
         "eslint-config-prettier": "^7.2.0",
         "eslint-plugin-prettier": "^3.3.1",
+        "husky": "^6.0.0",
         "jest": "^26.6.3",
         "prettier": "^2.2.1",
         "rimraf": "^3.0.2",
@@ -63,7 +64,8 @@
         "watch": "run-p watch:*",
         "watch:codegen": "graphql-codegen --config codegen.yml --watch",
         "watch:schema": "nodemon --config nodemon.buildSchema.json",
-        "watch:node": "nodemon --config nodemon.node.json"
+        "watch:node": "nodemon --config nodemon.node.json",
+        "prepare": "husky install"
     },
     "license": "MIT"
 }

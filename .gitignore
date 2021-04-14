@@ -1,5 +1,3 @@
 npm-debug.log*
 /node_modules
-# jsonファイルの内容が含まれているので、/distをignoreしている
-/dist
 *.sqlite3
