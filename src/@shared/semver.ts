@@ -1,6 +1,15 @@
-// alphaの場合、minor=patch=0にすることを推奨。
-// rcの場合、patch=0にすることを推奨。ただし、コードの変更量が多い場合などではOK。
-// alphaやbetaの場合は、互換性のない変更があってもmajorとminorの規則に従わなくてよく、いかなる変更でも起こりうる状態。いっぽう、rcの場合はmajorとminorの規則に従わなければならない。
+// # alpha
+// いかなる変更でも起こりうる状態。ソースコードの内容を理解している方向け。
+// 互換性のない変更があってもmajorとminorの規則に従わなくてもいいという特殊な規則がある。
+// minor=patch=0にすることを推奨。ただし、コードの変更量が非常に多い場合などは従わなくてもよい。
+//
+// # beta
+// 安定性と引き換えになるべく新しいバージョンに触れてみたい方向け。バグ報告やフィードバックを開発者以外からも受け取りたい場合に用いる。
+// x.y.z-beta.nからbetaを外すとき、次のバージョンはx.y.(z+1)ではなくx.y.zにする。理由は、例えば2.0.0-alpha.n→2.0.0-beta.n→2.0.0-rc.nのように用いる場合と整合性を持たせるため。
+// 
+// # rc
+// 大規模なアップデートの正式版リリース直前に用いられる。betaのような不安定さは望まないが、新バージョンに早く触れてみたい方向け。betaと役割が被っているため、rcは一切用いず、betaで全て済ませてしまうかもしれない。
+// minor=patch=0にすることを推奨。ただし、コードの変更量が非常に多い場合などは従わなくてもよい。
 export const alpha = 'alpha';
 export const beta = 'beta';
 export const rc = 'rc';
@@ -136,7 +145,7 @@ export class SemVer {
 
     /**
      * 
-     * @returns apiサーバーとwebサーバーのバージョンの関係に問題がないならば"ok"。alphaもしくはbetaの場合、majorとminorが同じでも互換性がある保証はないため、完全にバージョンが一致する場合を除き"differentPrereleaseVersion"が返される。
+     * @returns apiサーバーとwebサーバーのバージョンの関係に問題がないならば"ok"。alphaの場合、majorとminorが同じでも互換性がある保証はないため、完全にバージョンが一致する場合を除き"differentPrereleaseVersion"が返される。
     */
     public static check({ api, web }: { api: SemVer; web: SemVer }): CheckResult {
         if (SemVer.compare(api, '=', web)) {
@@ -146,7 +155,7 @@ export class SemVer {
             if (api.minor < web.minor) {
                 return apiServerRequiresUpdate;
             }
-            if (api.prerelease?.type === alpha || api.prerelease?.type === beta || web.prerelease?.type === alpha || web.prerelease?.type === beta) {
+            if (api.prerelease?.type === alpha || web.prerelease?.type === alpha) {
                 return differentPrereleaseVersion;
             }
             return ok;

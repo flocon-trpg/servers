@@ -51,8 +51,8 @@ const Index: React.FC = () => {
         const checkResult = SemVer.check({ api: apiServerSemVer, web: VERSION });
 
         return <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div>{`APIサーバーのバージョン: ${apiServerSemVer.toString()}`}</div>
-            <div>{`WEBサーバーのバージョン: ${VERSION.toString()}`}</div>
+            <div>{`APIサーバー: ${apiServerSemVer.toString()}`}</div>
+            <div>{`WEBサーバー: ${VERSION.toString()}`}</div>
             {checkResult === apiServerRequiresUpdate && <Alert type='error' showIcon message='APIサーバーのバージョンがWEBサーバーのバージョンと比べて古いため、正常に動作しない可能性があります。' />}
             {checkResult === webServerRequiresUpdate && <Alert type='error' showIcon message='WEBサーバーのバージョンがAPIサーバーのバージョンと比べて古いため、正常に動作しない可能性があります。' />}
             {checkResult === differentPrereleaseVersion && <Alert type='warning' showIcon message='APIサーバーとWEBサーバーの少なくとも一方がα版もしくはβ版ですが、バージョンが完全に一致していないため、互換性は保証されません。' />}
@@ -67,7 +67,8 @@ const Index: React.FC = () => {
                 <Link href='/dev-memo'>制作メモ、更新履歴など</Link>
                 <FilesManagerDrawer drawerType={drawerType} onClose={() => setDrawerType(null)} />
             </div>
-            <QueryResultViewer error={error} loading={loading}>
+            <h2>バージョン情報</h2>
+            <QueryResultViewer error={error} loading={loading} compact>
                 {versionInfo}
             </QueryResultViewer>
         </Layout>
