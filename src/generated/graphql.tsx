@@ -920,6 +920,18 @@ export type Pong = {
   value: Scalars['Float'];
 };
 
+export type Prerelease = {
+  __typename?: 'Prerelease';
+  type: PrereleaseType;
+  version: Scalars['Float'];
+};
+
+export enum PrereleaseType {
+  Alpha = 'Alpha',
+  Beta = 'Beta',
+  Rc = 'Rc'
+}
+
 export enum PromoteFailureType {
   NoNeedToPromote = 'NoNeedToPromote',
   NotEntry = 'NotEntry',
@@ -940,6 +952,7 @@ export type Query = {
   getMessages: GetRoomMessagesResult;
   getRoom: GetRoomResult;
   getRoomsList: GetRoomsListResult;
+  getServerInfo: ServerInfo;
   listAvailableGameSystems: ListAvailableGameSystemsResult;
   requiresPhraseToJoinAsPlayer: RequiresPhraseResult;
 };
@@ -1352,6 +1365,19 @@ export type RoomSoundEffect = {
   file: FilePath;
   messageId: Scalars['String'];
   volume: Scalars['Float'];
+};
+
+export type SemVer = {
+  __typename?: 'SemVer';
+  major: Scalars['Float'];
+  minor: Scalars['Float'];
+  patch: Scalars['Float'];
+  prerelease?: Maybe<Prerelease>;
+};
+
+export type ServerInfo = {
+  __typename?: 'ServerInfo';
+  version: SemVer;
 };
 
 export type StrParamOperation = {
@@ -2382,6 +2408,15 @@ type RoomMessageEvent_RoomSoundEffect_Fragment = (
 
 export type RoomMessageEventFragment = RoomMessageEvent_RoomPrivateMessage_Fragment | RoomMessageEvent_RoomPrivateMessageUpdate_Fragment | RoomMessageEvent_RoomPublicChannel_Fragment | RoomMessageEvent_RoomPublicChannelUpdate_Fragment | RoomMessageEvent_RoomPublicMessage_Fragment | RoomMessageEvent_RoomPublicMessageUpdate_Fragment | RoomMessageEvent_RoomSoundEffect_Fragment;
 
+export type SemVerFragment = (
+  { __typename?: 'SemVer' }
+  & Pick<SemVer, 'major' | 'minor' | 'patch'>
+  & { prerelease?: Maybe<(
+    { __typename?: 'Prerelease' }
+    & Pick<Prerelease, 'type' | 'version'>
+  )> }
+);
+
 export type TextUpOperationUnitFragment = (
   { __typename?: 'TextUpOperationUnit' }
   & Pick<TextUpOperationUnit, 'retain' | 'insert' | 'delete'>
@@ -2480,6 +2515,20 @@ export type GetLogQuery = (
       { __typename?: 'RoomSoundEffect' }
       & RoomSoundEffectFragment
     )> }
+  ) }
+);
+
+export type GetServerInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetServerInfoQuery = (
+  { __typename?: 'Query' }
+  & { result: (
+    { __typename?: 'ServerInfo' }
+    & { version: (
+      { __typename?: 'SemVer' }
+      & SemVerFragment
+    ) }
   ) }
 );
 
@@ -3641,6 +3690,17 @@ export const RoomMessageEventFragmentDoc = gql`
 ${RoomPublicMessageFragmentDoc}
 ${RoomPublicChannelFragmentDoc}
 ${RoomPrivateMessageFragmentDoc}`;
+export const SemVerFragmentDoc = gql`
+    fragment SemVer on SemVer {
+  major
+  minor
+  patch
+  prerelease {
+    type
+    version
+  }
+}
+    `;
 export const GetRoomDocument = gql`
     query GetRoom($id: String!) {
   result: getRoom(id: $id) {
@@ -3836,6 +3896,42 @@ export function useGetLogLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Get
 export type GetLogQueryHookResult = ReturnType<typeof useGetLogQuery>;
 export type GetLogLazyQueryHookResult = ReturnType<typeof useGetLogLazyQuery>;
 export type GetLogQueryResult = Apollo.QueryResult<GetLogQuery, GetLogQueryVariables>;
+export const GetServerInfoDocument = gql`
+    query GetServerInfo {
+  result: getServerInfo {
+    version {
+      ...SemVer
+    }
+  }
+}
+    ${SemVerFragmentDoc}`;
+
+/**
+ * __useGetServerInfoQuery__
+ *
+ * To run a query within a React component, call `useGetServerInfoQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetServerInfoQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetServerInfoQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetServerInfoQuery(baseOptions?: Apollo.QueryHookOptions<GetServerInfoQuery, GetServerInfoQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetServerInfoQuery, GetServerInfoQueryVariables>(GetServerInfoDocument, options);
+      }
+export function useGetServerInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetServerInfoQuery, GetServerInfoQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetServerInfoQuery, GetServerInfoQueryVariables>(GetServerInfoDocument, options);
+        }
+export type GetServerInfoQueryHookResult = ReturnType<typeof useGetServerInfoQuery>;
+export type GetServerInfoLazyQueryHookResult = ReturnType<typeof useGetServerInfoLazyQuery>;
+export type GetServerInfoQueryResult = Apollo.QueryResult<GetServerInfoQuery, GetServerInfoQueryVariables>;
 export const ListAvailableGameSystemsDocument = gql`
     query ListAvailableGameSystems {
   result: listAvailableGameSystems {

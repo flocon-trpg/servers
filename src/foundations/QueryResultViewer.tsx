@@ -7,14 +7,15 @@ import LoadingResult from './Result/LoadingResult';
 type Props = {
     error?: ApolloError;
     loading?: boolean;
+    loadingTitle?: string;
 }
 
-const QueryResultViewer: React.FC<PropsWithChildren<Props>> = ({ children, error, loading: isLoading }: PropsWithChildren<Props>) => {
+const QueryResultViewer: React.FC<PropsWithChildren<Props>> = ({ children, error, loading, loadingTitle }: PropsWithChildren<Props>) => {
     if (error != null) {
         return (<Result status='error' title='APIエラー' subTitle={error.message} />);
     }
-    if (isLoading === true) {
-        return <LoadingResult />;
+    if (loading === true) {
+        return <LoadingResult title={loadingTitle} />;
     }
     return (<>{children}</>);
 };
