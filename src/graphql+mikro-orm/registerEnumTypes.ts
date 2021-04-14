@@ -21,6 +21,7 @@ import { RequiresPhraseFailureType } from '../enums/RequiresPhraseFailureType';
 import { PromoteFailureType } from '../enums/PromoteFailureType';
 import { ChangeParticipantNameFailureType } from '../enums/ChangeParticipantNameFailureType';
 import { DeleteRoomFailureType } from '../enums/DeleteRoomFailureType';
+import { PrereleaseType } from '../enums/PrereleaseType';
 
 let hasRegistered = false;
 const registerEnumTypes = (): void => {
@@ -75,6 +76,9 @@ const registerEnumTypes = (): void => {
     });
     registerEnumType(ParticipantRole, {
         name: 'ParticipantRole'
+    });
+    registerEnumType(PrereleaseType, {
+        name: 'PrereleaseType'
     });
     registerEnumType(PromoteFailureType, {
         name: 'PromoteFailureType'

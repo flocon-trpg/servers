@@ -11,6 +11,10 @@ import { loadServerConfigAsMain } from '../../config';
 import { EntryToServerResult } from '../results/EntryToServerResult';
 import { ListAvailableGameSystemsResult } from '../results/ListAvailableGameSystemsResult';
 import { listAvailableGameSystems } from '../../messageAnalyzer/main';
+import { ServerInfo } from '../entities/serverInfo/graphql';
+import VERSION from '../../VERSION';
+import { alpha, beta, rc } from '../../@shared/semver';
+import { PrereleaseType } from '../../enums/PrereleaseType';
 
 
 export type PongPayload = {
@@ -24,6 +28,38 @@ export class MainResolver {
     public async listAvailableGameSystems(): Promise<ListAvailableGameSystemsResult> {
         return {
             value: listAvailableGameSystems(),
+        };
+    }
+
+    @Query(() => ServerInfo)
+    public async getServerInfo(): Promise<ServerInfo> {
+        const prerelease = (() => {
+            if (VERSION.prerelease == null) {
+                return undefined;
+            }
+            switch (VERSION.prerelease.type) {
+                case alpha:
+                    return {
+                        ...VERSION.prerelease,
+                        type: PrereleaseType.Alpha,
+                    };
+                case beta:
+                    return {
+                        ...VERSION.prerelease,
+                        type: PrereleaseType.Beta,
+                    };
+                case rc:
+                    return {
+                        ...VERSION.prerelease,
+                        type: PrereleaseType.Rc,
+                    };
+            }
+        })();
+        return {
+            version: {
+                ...VERSION,
+                prerelease,
+            },
         };
     }
 
