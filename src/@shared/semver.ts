@@ -28,8 +28,7 @@ export type SemverOption = {
 export const ok = 'ok';
 export const apiServerRequiresUpdate = 'apiServerRequiresUpdate';
 export const webServerRequiresUpdate = 'webServerRequiresUpdate';
-export const differentPrereleaseVersion = 'differentPrereleaseVersion';
-type CheckResult = typeof ok | typeof apiServerRequiresUpdate | typeof webServerRequiresUpdate | typeof differentPrereleaseVersion;
+type CheckResult = typeof ok | typeof apiServerRequiresUpdate | typeof webServerRequiresUpdate | typeof alpha;
 
 export class SemVer {
     public readonly major: number;
@@ -145,18 +144,16 @@ export class SemVer {
 
     /**
      * 
-     * @returns apiサーバーとwebサーバーのバージョンの関係に問題がないならば"ok"。alphaの場合、majorとminorが同じでも互換性がある保証はないため、完全にバージョンが一致する場合を除き"differentPrereleaseVersion"が返される。
+     * @returns apiサーバーとwebサーバーのバージョンの関係に問題がないならば"ok"。alphaの場合、majorとminorが同じでも互換性がある保証はないため、"alpha"が返される。
     */
     public static check({ api, web }: { api: SemVer; web: SemVer }): CheckResult {
-        if (SemVer.compare(api, '=', web)) {
-            return ok;
-        }
         if (api.major === web.major) {
             if (api.minor < web.minor) {
                 return apiServerRequiresUpdate;
             }
             if (api.prerelease?.type === alpha || web.prerelease?.type === alpha) {
-                return differentPrereleaseVersion;
+                
+                return alpha;
             }
             return ok;
         }

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { alpha, apiServerRequiresUpdate, beta, differentPrereleaseVersion, rc, SemVer, webServerRequiresUpdate } from '../@shared/semver';
+import { alpha, apiServerRequiresUpdate, beta, rc, SemVer, webServerRequiresUpdate } from '../@shared/semver';
 import FilesManagerDrawer from '../components/FilesManagerDrawer';
 import QueryResultViewer from '../foundations/QueryResultViewer';
 import LoadingResult from '../foundations/Result/LoadingResult';
@@ -60,7 +60,7 @@ const Index: React.FC = () => {
         return <div style={{ display: 'flex', flexDirection: 'column' }}>
             {checkResult === apiServerRequiresUpdate && <Alert type='error' showIcon message='APIサーバーのバージョンがWEBサーバーのバージョンと比べて古いため、正常に動作しない可能性があります。' />}
             {checkResult === webServerRequiresUpdate && <Alert type='error' showIcon message='WEBサーバーのバージョンがAPIサーバーのバージョンと比べて古いため、正常に動作しない可能性があります。' />}
-            {checkResult === differentPrereleaseVersion && <Alert type='warning' showIcon message='APIサーバーとWEBサーバーのうち少なくとも一方がalpha版であり、なおかつバージョンが完全に一致していないため、互換性は保証されません。' />}
+            {checkResult === alpha && <Alert type='warning' showIcon message='APIサーバーとWEBサーバーのうち少なくとも一方がalpha版であるため、互換性は保証されません。' />}
         </div>;
     })();
 
