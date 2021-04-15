@@ -7,6 +7,7 @@ import { __ } from '../@shared/collection';
 import { RoomBgm } from '../stateManagers/states/roomBgm';
 import { useSelector } from '../store';
 import { defaultChannelVolume, defaultMasterVolume } from '../states/RoomConfig';
+import { volumeCap } from '../utils/variables';
 
 type PlayBgmBehaviorCoreProps = {
     bgm: RoomBgm.State | null;
@@ -38,7 +39,7 @@ const PlayBgmBehaviorCore: React.FC<PlayBgmBehaviorCoreProps> = ({ bgm, volumeCo
         const howl = new Howl({
             src,
             loop: true,
-            volume: volumeRef.current,
+            volume: Math.max(volumeRef.current, volumeCap),
         });
         howlRef.current = howl;
         howl.play();

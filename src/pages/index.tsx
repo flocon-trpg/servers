@@ -59,7 +59,7 @@ const Index: React.FC = () => {
 
         return <div style={{ display: 'flex', flexDirection: 'column' }}>
             {(checkResult === apiServerRequiresUpdate || checkResult === webServerRequiresUpdate) && <Alert type='error' showIcon message='クライアントとAPIサーバーの間に互換性がありません。' />}
-            {checkResult === alpha && <Alert type='warning' showIcon message='APIサーバーとWEBサーバーのうち少なくとも一方がalpha版であるため、バージョンに基づく互換性は保証されません。' />}
+            {checkResult === alpha && <Alert type='warning' showIcon message='クライアントとAPIサーバーのうち少なくとも一方がalpha版であるため、バージョンに基づく互換性は保証されません。' />}
         </div>;
     })();
 

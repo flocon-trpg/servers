@@ -4,6 +4,7 @@ import { useDeepCompareEffectNoCheck } from 'use-deep-compare-effect';
 import { useFirebaseStorageUrl } from '../hooks/firebaseStorage';
 import { FilePathFragment } from '../generated/graphql';
 import { useSelector } from '../store';
+import { volumeCap } from '../utils/variables';
 
 // 長過ぎる曲をSEにしようとした場合、何もしないと部屋に再入室しない限りその曲を止めることができない。それを防ぐため、最大15秒までしか流れないようにしている。15秒という長さは適当。
 const musicLengthLimit = 15 * 1000;
@@ -45,7 +46,7 @@ const PlaySoundEffectBehavior: React.FC<PlaySoundEffectProps> = ({ value }: Play
         const howl = new Howl({
             src: [url],
             loop: false,
-            volume: volumeRef.current,
+            volume: Math.max(volumeRef.current, volumeCap),
         });
         howlRef.current = howl;
         howl.play();
