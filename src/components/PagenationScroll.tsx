@@ -33,7 +33,7 @@ function PagenationScroll({ source, height, elementMinHeight }: Props): JSX.Elem
 
     const { result, hasMore } = useSkipAndTake(source, skipCount, countPerPage * heightMultiplier);
 
-    return (<div style={{ display: 'flex', flexDirection: 'column', height, overflowY: 'scroll' }} onScroll={e => {
+    return (<div style={{ display: 'flex', flexDirection: 'column', height, overflowX: 'hidden', overflowY: 'scroll', overscrollBehavior: 'contain' }} onScroll={e => {
         const target = e.target as HTMLTextAreaElement;
         if (target.scrollHeight - target.scrollTop <= target.clientHeight + threshold) {
             if (hasMore) {

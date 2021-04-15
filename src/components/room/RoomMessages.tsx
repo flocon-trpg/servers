@@ -24,7 +24,8 @@ import { Gutter } from 'antd/lib/grid/row';
 import { PublicChannelNames } from '../../utils/types';
 import DrawerFooter from '../../layouts/DrawerFooter';
 
-const minHeight = 50;
+const headerHeight = 20;
+const contentMinHeight = 22;
 const drawerGutter: [Gutter, Gutter] = [16, 16];
 const drawerInputSpan = 18;
 
@@ -273,11 +274,10 @@ type RoomMessageComponentProps = {
     message: RoomMessageComponentState;
     participants: ReadonlyMap<string, Participant.State> | undefined;
     showPrivateMessageMembers?: boolean;
-    style?: React.CSSProperties;
 } & PublicChannelNames
 
 const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMessageComponentProps) => {
-    const { roomId, message, participants, showPrivateMessageMembers, style } = props;
+    const { roomId, message, participants, showPrivateMessageMembers } = props;
 
     const myAuth = React.useContext(MyAuthContext);
     const [editMessageMutation] = useEditMessageMutation();
@@ -333,16 +333,16 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
         // 当初、削除された場合斜体にして表そうと考えたが、現状はボツにしている。
         // まず、italicなどでは対応してない日本語フォントの場合斜体にならない（対応しているフォントを選べばいいだけの話だが）。なのでtransform: skewX(-15deg)を使おうとしたが、文字列が斜めになることで横幅が少し増えるため、横のスクロールバーが出てしまう問題が出たので却下（x方向のスクロールバーを常に非表示にすれば解決しそうだが、x方向のスクロールバーを表示させたい場合は困る）。
         // ただ、解決策はありそうなのでのちのち斜体にするかもしれない。
-        content = (<span style={deletedMessageStyle}>(このメッセージは削除されました)</span>);
+        content = (<div style={{ ...deletedMessageStyle, overflowWrap: 'break-word', gridRow: '2 / 3', gridColumn: '1 / 2', minHeight: contentMinHeight }}>(このメッセージは削除されました)</div>);
     } else {
         content = (
-            <span>
+            <div style={{ overflowWrap: 'break-word', gridRow: '2 / 3', gridColumn: '1 / 2', minHeight: contentMinHeight }}>
                 {message.value.text ?? message.value.altTextToSecret}
                 <span> </span>
                 {message.value.commandResult != null && <span style={({ fontWeight: 'bold' })}>{`${message.value.commandResult.text}${message.value.commandResult.isSuccess === true ? ' (成功)' : ''}${message.value.commandResult.isSuccess === false ? ' (失敗)' : ''}`}</span>}
                 <span> </span>
                 <span style={({ fontWeight: 'bold' })}>{message.value.isSecret ? 'Secret' : ''}</span>
-            </span>);
+            </div>);
     }
     const createdAt = message.value.createdAt as number | null | undefined;
     let datetime: string | null = null;
@@ -451,26 +451,21 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
             {deleteMenuItem}
         </>;
     return (
-        <div style={({ ...style, minHeight, display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 4, marginTop: 4 })}>
-            <div style={({ flex: '0 0 auto', display: 'flex', flexDirection: 'column' })}>
-                <div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
-                    <div style={({ flex: '0 0 auto' })}>
-                        {nameElement}
-                    </div>
-                    <div style={({ flex: '0 0 auto', color: 'gray', marginLeft: 6 })}>{channelName}</div>
-                    <div style={({ flex: '0 0 auto', color: 'gray', marginLeft: 6 })}>{datetime}</div>
-                    {privateMessageMembersInfo != null && <div style={{ flex: '0 0 auto', width: 6 }} />}
-                    {privateMessageMembersInfo}
-                    {updatedInfo == null ? null : <div style={({ flex: '0 0 auto', width: 6 })} />}
-                    {updatedInfo}
-                    <div style={({ flex: 1 })} />
+        <div style={({ display: 'grid', gridTemplateRows: `${headerHeight}px 1fr`, gridTemplateColumns: '1fr 40px', marginBottom: 4, marginTop: 4 })}>
+            <div style={({ gridRow: '1 / 2', gridColumn: '1 / 2', display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
+                <div style={({ flex: '0 0 auto' })}>
+                    {nameElement}
                 </div>
-                <div>
-                    {content}
-                </div>
+                <div style={({ flex: '0 0 auto', color: 'gray', marginLeft: 6 })}>{channelName}</div>
+                <div style={({ flex: '0 0 auto', color: 'gray', marginLeft: 6 })}>{datetime}</div>
+                {privateMessageMembersInfo != null && <div style={{ flex: '0 0 auto', width: 6 }} />}
+                {privateMessageMembersInfo}
+                {updatedInfo == null ? null : <div style={({ flex: '0 0 auto', width: 6 })} />}
+                {updatedInfo}
+                <div style={({ flex: 1 })} />
             </div>
-            <div style={({ flex: 1 })} />
-            <div style={({ flex: '0 0 auto' })} >
+            {content}
+            <div style={({ gridRow: '1 / 3', gridColumn: '2 / 3', justifySelf: 'center', alignSelf: 'center' })} >
                 {allMenuItemsAreNull ? null : <Dropdown overlay={<Menu>{menuItems}</Menu>} trigger={['click']}>
                     <Button type='text' size='small'><Icon.EllipsisOutlined /></Button>
                 </Dropdown>}
@@ -605,7 +600,6 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
                     publicChannel9Name={props.publicChannel9Name}
                     publicChannel10Name={props.publicChannel10Name}
                     key={message.value.messageId}
-                    style={{ minHeight }}
                     roomId={roomId}
                     message={message}
                     participants={participants} />);
@@ -613,7 +607,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
     }, [roomId, participants, props.publicChannel1Name, props.publicChannel2Name, props.publicChannel3Name, props.publicChannel4Name, props.publicChannel5Name, props.publicChannel6Name, props.publicChannel7Name, props.publicChannel8Name, props.publicChannel9Name, props.publicChannel10Name]);
 
     const messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter, thenMap });
-    return <PagenationScroll source={messages} elementMinHeight={minHeight} height={contentHeight} />;
+    return <PagenationScroll source={messages} elementMinHeight={headerHeight + contentMinHeight} height={contentHeight} />;
 };
 
 type Props = {
@@ -629,7 +623,7 @@ type Props = {
 const RoomMessages: React.FC<Props> = (props: Props) => {
     const { allRoomMessagesResult, characters, participants, roomId, height, panelId, config } = props;
 
-    const contentHeight = Math.max(0, height - 210);
+    const contentHeight = Math.max(0, height - 220);
     const tabsHeight = Math.max(0, height - 180);
 
     const dispatch = useDispatch();
