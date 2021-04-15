@@ -23,7 +23,7 @@ import * as Icon from '@ant-design/icons';
 import { ChangeParticipantNameFailureType, DeleteRoomFailureType, ParticipantRole, PromoteFailureType, useChangeParticipantNameMutation, useDeleteRoomMutation, useGetLogLazyQuery, useGetLogQuery, useJoinRoomAsPlayerMutation, useLeaveRoomMutation, usePromoteToPlayerMutation, useRequiresPhraseToJoinAsPlayerLazyQuery, useRequiresPhraseToJoinAsPlayerQuery } from '../../generated/graphql';
 import { useRouter } from 'next/router';
 import path from '../../utils/path';
-import PlayBgmBehavior from '../../foundations/PlayBgmBehavior';
+import PlayBgmBehavior from '../../foundations/Behavior/PlayBgmBehavior';
 import SoundPlayer from './SoundPlayer';
 import Modal from 'antd/lib/modal/Modal';
 import fileDownload from 'js-file-download';
@@ -36,10 +36,11 @@ import ParticipantList from './ParticipantList';
 import NotificationContext, { graphQLErrors, Notification, text, TextNotification, toTextNotification } from './contexts/NotificationContext';
 import { Participant } from '../../stateManagers/states/participant';
 import MyNumberValueDrawer from './MyNumberValueDrawer';
-import { useAllRoomMessages } from '../../hooks/useRoomMessages';
+import { newEvent, useAllRoomMessages } from '../../hooks/useRoomMessages';
 import LoadingResult from '../../foundations/Result/LoadingResult';
 import VolumeBarPanel from './VolumeBarPanel';
 import { TabConfig } from '../../states/MessagesPanelConfig';
+import PlaySoundEffectBehavior from '../../foundations/Behavior/PlaySoundEffectBehavior';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -706,6 +707,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                             <EditRoomDrawer roomState={roomState} />
 
                             <PlayBgmBehavior bgms={roomState.bgms} />
+                            <PlaySoundEffectBehavior allRoomMesssagesResult={allRoomMessages} />
                         </AntdLayout.Content>
                     </AntdLayout>
                 </OperateContext.Provider>

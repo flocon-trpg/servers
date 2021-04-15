@@ -1,13 +1,13 @@
 import React from 'react';
 import { Howl } from 'howler';
-import { StrIndex5 } from '../@shared/indexes';
+import { StrIndex5 } from '../../@shared/indexes';
 import { useDeepCompareEffectNoCheck } from 'use-deep-compare-effect';
-import { useFirebaseStorageUrlArray } from '../hooks/firebaseStorage';
-import { __ } from '../@shared/collection';
-import { RoomBgm } from '../stateManagers/states/roomBgm';
-import { useSelector } from '../store';
-import { defaultChannelVolume, defaultMasterVolume } from '../states/RoomConfig';
-import { volumeCap } from '../utils/variables';
+import { useFirebaseStorageUrlArray } from '../../hooks/firebaseStorage';
+import { __ } from '../../@shared/collection';
+import { RoomBgm } from '../../stateManagers/states/roomBgm';
+import { useSelector } from '../../store';
+import { defaultChannelVolume, defaultMasterVolume } from '../../states/RoomConfig';
+import { volumeCap } from '../../utils/variables';
 
 type PlayBgmBehaviorCoreProps = {
     bgm: RoomBgm.State | null;
@@ -39,7 +39,7 @@ const PlayBgmBehaviorCore: React.FC<PlayBgmBehaviorCoreProps> = ({ bgm, volumeCo
         const howl = new Howl({
             src,
             loop: true,
-            volume: Math.max(volumeRef.current, volumeCap),
+            volume: Math.min(volumeRef.current, volumeCap),
         });
         howlRef.current = howl;
         howl.play();
@@ -54,7 +54,7 @@ const PlayBgmBehaviorCore: React.FC<PlayBgmBehaviorCoreProps> = ({ bgm, volumeCo
         if (howl == null) {
             return;
         }
-        howl.volume(Math.max(volume, volumeCap));
+        howl.volume(Math.min(volume, volumeCap));
     }, [volume]);
 
     return null;
