@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tabs, Button, Menu, Dropdown, Tooltip, Popover, Drawer, Col, Row, Checkbox, Divider, Radio, Alert, Input, Modal } from 'antd';
+import { Tabs, Button, Menu, Dropdown, Tooltip, Popover, Drawer, Col, Row, Checkbox, Divider, Radio, Alert, Input, Modal, Result } from 'antd';
 import moment from 'moment';
 import { AllRoomMessagesSuccessResult, apolloError, failure, loading, RoomMessage, publicMessage, privateMessage, soundEffect, AllRoomMessagesResult, useFilteredAndMapRoomMessages } from '../../hooks/useRoomMessages';
 import { __ } from '../../@shared/collection';
@@ -26,6 +26,8 @@ import DrawerFooter from '../../layouts/DrawerFooter';
 import OperateContext from './contexts/OperateContext';
 import BufferedInput from '../../foundations/BufferedInput';
 import { Room } from '../../stateManagers/states/room';
+import LoadingResult from '../../foundations/Result/LoadingResult';
+import QueryResultViewer from '../../foundations/QueryResultViewer';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -684,10 +686,11 @@ const RoomMessages: React.FC<Props> = (props: Props) => {
 
     switch (allRoomMessagesResult.type) {
         case loading:
+            return <QueryResultViewer loading compact={false} />;
         case apolloError:
+            return <QueryResultViewer loading={false} error={allRoomMessagesResult.error} compact={false} />;
         case failure:
-            // TODO: 読み込み中の画面やエラーメッセージを出すようにする
-            return null;
+            return <Result status='error' title='エラー' />;
         default:
             break;
     }

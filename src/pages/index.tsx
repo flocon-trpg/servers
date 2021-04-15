@@ -58,9 +58,8 @@ const Index: React.FC = () => {
         const checkResult = SemVer.check({ api: apiServerSemVer, web: VERSION });
 
         return <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {checkResult === apiServerRequiresUpdate && <Alert type='error' showIcon message='APIサーバーのバージョンがWEBサーバーのバージョンと比べて古いため、正常に動作しない可能性があります。' />}
-            {checkResult === webServerRequiresUpdate && <Alert type='error' showIcon message='WEBサーバーのバージョンがAPIサーバーのバージョンと比べて古いため、正常に動作しない可能性があります。' />}
-            {checkResult === alpha && <Alert type='warning' showIcon message='APIサーバーとWEBサーバーのうち少なくとも一方がalpha版であるため、互換性は保証されません。' />}
+            {(checkResult === apiServerRequiresUpdate || checkResult === webServerRequiresUpdate) && <Alert type='error' showIcon message='クライアントとAPIサーバーの間に互換性がありません。' />}
+            {checkResult === alpha && <Alert type='warning' showIcon message='APIサーバーとWEBサーバーのうち少なくとも一方がalpha版であるため、バージョンに基づく互換性は保証されません。' />}
         </div>;
     })();
 
