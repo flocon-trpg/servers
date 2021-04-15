@@ -102,7 +102,7 @@ class SemVer {
         }
     }
     static check({ api, web }) {
-        var _a, _b, _c, _d;
+        var _a, _b;
         if (SemVer.compare(api, '=', web)) {
             return exports.ok;
         }
@@ -110,7 +110,7 @@ class SemVer {
             if (api.minor < web.minor) {
                 return exports.apiServerRequiresUpdate;
             }
-            if (((_a = api.prerelease) === null || _a === void 0 ? void 0 : _a.type) === exports.alpha || ((_b = api.prerelease) === null || _b === void 0 ? void 0 : _b.type) === exports.beta || ((_c = web.prerelease) === null || _c === void 0 ? void 0 : _c.type) === exports.alpha || ((_d = web.prerelease) === null || _d === void 0 ? void 0 : _d.type) === exports.beta) {
+            if (((_a = api.prerelease) === null || _a === void 0 ? void 0 : _a.type) === exports.alpha || ((_b = web.prerelease) === null || _b === void 0 ? void 0 : _b.type) === exports.alpha) {
                 return exports.differentPrereleaseVersion;
             }
             return exports.ok;

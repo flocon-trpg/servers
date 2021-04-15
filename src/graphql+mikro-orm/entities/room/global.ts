@@ -408,7 +408,7 @@ export namespace GlobalRoom {
                 op.name = operation.name.oldValue;
             }
 
-            (['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'] as const).forEach(i => {
+            ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).forEach(i => {
                 const key = `publicChannel${i}Name` as const;
                 const operationElement = operation[key];
                 if (operationElement != null) {
@@ -522,6 +522,16 @@ export namespace GlobalRoom {
 
             const valueProps: DownOperationType = {
                 name: ReplaceStringDownOperationModule.compose(first.name, second.name),
+                publicChannel1Name: ReplaceStringDownOperationModule.compose(first.publicChannel1Name, second.publicChannel1Name),
+                publicChannel2Name: ReplaceStringDownOperationModule.compose(first.publicChannel2Name, second.publicChannel2Name),
+                publicChannel3Name: ReplaceStringDownOperationModule.compose(first.publicChannel3Name, second.publicChannel3Name),
+                publicChannel4Name: ReplaceStringDownOperationModule.compose(first.publicChannel4Name, second.publicChannel4Name),
+                publicChannel5Name: ReplaceStringDownOperationModule.compose(first.publicChannel5Name, second.publicChannel5Name),
+                publicChannel6Name: ReplaceStringDownOperationModule.compose(first.publicChannel6Name, second.publicChannel6Name),
+                publicChannel7Name: ReplaceStringDownOperationModule.compose(first.publicChannel7Name, second.publicChannel7Name),
+                publicChannel8Name: ReplaceStringDownOperationModule.compose(first.publicChannel8Name, second.publicChannel8Name),
+                publicChannel9Name: ReplaceStringDownOperationModule.compose(first.publicChannel9Name, second.publicChannel9Name),
+                publicChannel10Name: ReplaceStringDownOperationModule.compose(first.publicChannel10Name, second.publicChannel10Name),
                 bgms: bgms.value ?? new Map(),
                 boards: boards.value ?? new DualKeyMap(),
                 characters: characters.value ?? new DualKeyMap(),
@@ -596,6 +606,15 @@ export namespace GlobalRoom {
                 twoWayOperation.name = { ...downOperation.name, newValue: nextState.name };
             }
 
+            ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).forEach(i => {
+                const key = `publicChannel${i}Name` as const;
+                const downOperationValue = downOperation[key];
+                if (downOperationValue !== undefined) {
+                    prevState[key] = downOperationValue.oldValue;
+                    twoWayOperation[key] = { ...downOperationValue, newValue: nextState[key] };
+                }
+            });
+
             return ResultModule.ok({ prevState, twoWayOperation });
         },
         transform: ({ prevState, currentState, clientOperation, serverOperation }) => {
@@ -657,6 +676,15 @@ export namespace GlobalRoom {
                 prevState: prevState.name,
             });
 
+            ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).forEach(i => {
+                const key = `publicChannel${i}Name` as const;
+                twoWayOperation[key] = ReplaceStringTwoWayOperationModule.transform({
+                    first: serverOperation == null ? undefined : serverOperation[key],
+                    second: clientOperation[key],
+                    prevState: prevState[key],
+                });
+            });
+
             if (undefinedForAll(twoWayOperation) && bgms.value.size === 0 && boards.value.size === 0 && characters.value.size === 0 && paramNames.value.size === 0 && participants.value.size === 0) {
                 return ResultModule.ok(undefined);
             }
@@ -695,6 +723,12 @@ export namespace GlobalRoom {
             if (prevState.name !== nextState.name) {
                 resultType.name = { oldValue: prevState.name, newValue: nextState.name };
             }
+            ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).forEach(i => {
+                const key = `publicChannel${i}Name` as const;
+                if (prevState[key] !== nextState[key]) {
+                    resultType[key] = { oldValue: prevState[key], newValue: nextState[key] };
+                }
+            });
             if (undefinedForAll(resultType) && bgms.size === 0 && boards.size === 0 && characters.size === 0 && paramNames.size === 0 && participants.size === 0) {
                 return undefined;
             }
@@ -753,6 +787,14 @@ export namespace GlobalRoom {
             if (downOperation.name !== undefined) {
                 result.name = downOperation.name.oldValue;
             }
+
+            ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).forEach(i => {
+                const key = `publicChannel${i}Name` as const;
+                const downOperationValue = downOperation[key];
+                if (downOperationValue !== undefined) {
+                    result[key] = downOperationValue.oldValue;
+                }
+            });
 
             return ResultModule.ok(result);
         },

@@ -251,7 +251,7 @@ var GlobalRoom;
                 target.name = operation.name.newValue;
                 op.name = operation.name.oldValue;
             }
-            ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'].forEach(i => {
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach(i => {
                 const key = `publicChannel${i}Name`;
                 const operationElement = operation[key];
                 if (operationElement != null) {
@@ -358,6 +358,16 @@ var GlobalRoom;
             }
             const valueProps = {
                 name: Operations_1.ReplaceStringDownOperationModule.compose(first.name, second.name),
+                publicChannel1Name: Operations_1.ReplaceStringDownOperationModule.compose(first.publicChannel1Name, second.publicChannel1Name),
+                publicChannel2Name: Operations_1.ReplaceStringDownOperationModule.compose(first.publicChannel2Name, second.publicChannel2Name),
+                publicChannel3Name: Operations_1.ReplaceStringDownOperationModule.compose(first.publicChannel3Name, second.publicChannel3Name),
+                publicChannel4Name: Operations_1.ReplaceStringDownOperationModule.compose(first.publicChannel4Name, second.publicChannel4Name),
+                publicChannel5Name: Operations_1.ReplaceStringDownOperationModule.compose(first.publicChannel5Name, second.publicChannel5Name),
+                publicChannel6Name: Operations_1.ReplaceStringDownOperationModule.compose(first.publicChannel6Name, second.publicChannel6Name),
+                publicChannel7Name: Operations_1.ReplaceStringDownOperationModule.compose(first.publicChannel7Name, second.publicChannel7Name),
+                publicChannel8Name: Operations_1.ReplaceStringDownOperationModule.compose(first.publicChannel8Name, second.publicChannel8Name),
+                publicChannel9Name: Operations_1.ReplaceStringDownOperationModule.compose(first.publicChannel9Name, second.publicChannel9Name),
+                publicChannel10Name: Operations_1.ReplaceStringDownOperationModule.compose(first.publicChannel10Name, second.publicChannel10Name),
                 bgms: (_a = bgms.value) !== null && _a !== void 0 ? _a : new Map(),
                 boards: (_b = boards.value) !== null && _b !== void 0 ? _b : new DualKeyMap_1.DualKeyMap(),
                 characters: (_c = characters.value) !== null && _c !== void 0 ? _c : new DualKeyMap_1.DualKeyMap(),
@@ -417,6 +427,14 @@ var GlobalRoom;
                 prevState.name = downOperation.name.oldValue;
                 twoWayOperation.name = Object.assign(Object.assign({}, downOperation.name), { newValue: nextState.name });
             }
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach(i => {
+                const key = `publicChannel${i}Name`;
+                const downOperationValue = downOperation[key];
+                if (downOperationValue !== undefined) {
+                    prevState[key] = downOperationValue.oldValue;
+                    twoWayOperation[key] = Object.assign(Object.assign({}, downOperationValue), { newValue: nextState[key] });
+                }
+            });
             return Result_1.ResultModule.ok({ prevState, twoWayOperation });
         },
         transform: ({ prevState, currentState, clientOperation, serverOperation }) => {
@@ -472,6 +490,14 @@ var GlobalRoom;
                 second: clientOperation.name,
                 prevState: prevState.name,
             });
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach(i => {
+                const key = `publicChannel${i}Name`;
+                twoWayOperation[key] = Operations_1.ReplaceStringTwoWayOperationModule.transform({
+                    first: serverOperation == null ? undefined : serverOperation[key],
+                    second: clientOperation[key],
+                    prevState: prevState[key],
+                });
+            });
             if (helpers_1.undefinedForAll(twoWayOperation) && bgms.value.size === 0 && boards.value.size === 0 && characters.value.size === 0 && paramNames.value.size === 0 && participants.value.size === 0) {
                 return Result_1.ResultModule.ok(undefined);
             }
@@ -502,6 +528,12 @@ var GlobalRoom;
             if (prevState.name !== nextState.name) {
                 resultType.name = { oldValue: prevState.name, newValue: nextState.name };
             }
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach(i => {
+                const key = `publicChannel${i}Name`;
+                if (prevState[key] !== nextState[key]) {
+                    resultType[key] = { oldValue: prevState[key], newValue: nextState[key] };
+                }
+            });
             if (helpers_1.undefinedForAll(resultType) && bgms.size === 0 && boards.size === 0 && characters.size === 0 && paramNames.size === 0 && participants.size === 0) {
                 return undefined;
             }
@@ -547,6 +579,13 @@ var GlobalRoom;
             if (downOperation.name !== undefined) {
                 result.name = downOperation.name.oldValue;
             }
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach(i => {
+                const key = `publicChannel${i}Name`;
+                const downOperationValue = downOperation[key];
+                if (downOperationValue !== undefined) {
+                    result[key] = downOperationValue.oldValue;
+                }
+            });
             return Result_1.ResultModule.ok(result);
         },
         toServerState: ({ clientState }) => clientState,
