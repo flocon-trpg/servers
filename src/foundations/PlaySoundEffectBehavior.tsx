@@ -1,6 +1,5 @@
 import React from 'react';
 import { Howl } from 'howler';
-import { useDeepCompareEffectNoCheck } from 'use-deep-compare-effect';
 import { useFirebaseStorageUrl } from '../hooks/firebaseStorage';
 import { FilePathFragment } from '../generated/graphql';
 import { useSelector } from '../store';
@@ -59,7 +58,7 @@ const PlaySoundEffectBehavior: React.FC<PlaySoundEffectProps> = ({ value }: Play
         if (howl == null) {
             return;
         }
-        howl.volume(volume);
+        howl.volume(Math.max(volume, volumeCap));
     }, [volume]);
 
     return null;

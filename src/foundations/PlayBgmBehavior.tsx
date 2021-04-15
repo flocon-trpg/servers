@@ -1,4 +1,4 @@
-import React, { PropsWithChildren } from 'react';
+import React from 'react';
 import { Howl } from 'howler';
 import { StrIndex5 } from '../@shared/indexes';
 import { useDeepCompareEffectNoCheck } from 'use-deep-compare-effect';
@@ -54,7 +54,7 @@ const PlayBgmBehaviorCore: React.FC<PlayBgmBehaviorCoreProps> = ({ bgm, volumeCo
         if (howl == null) {
             return;
         }
-        howl.volume(volume);
+        howl.volume(Math.max(volume, volumeCap));
     }, [volume]);
 
     return null;
