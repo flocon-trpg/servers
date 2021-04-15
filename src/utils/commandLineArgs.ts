@@ -1,4 +1,5 @@
 import yargs from 'yargs';
+import VERSION from '../VERSION';
 
 export const postgresql = 'postgresql';
 export const sqlite = 'sqlite';
@@ -33,7 +34,9 @@ const getMain = (): Main => {
                 'debug': {
                     type: 'boolean',
                 }
-            }).argv;
+            })
+            .version(VERSION.toString())
+            .argv;
 
     const result: Main = {
         debug: options.debug === true,
