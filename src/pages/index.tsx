@@ -11,13 +11,14 @@ import { PrereleaseType, useCreateRoomMutation, useGetServerInfoQuery } from '..
 import Layout from '../layouts/Layout';
 import { FilesManagerDrawerType, none } from '../utils/types';
 import VERSION from '../VERSION';
+import * as Icon from '@ant-design/icons';
 
 const Index: React.FC = () => {
     const [drawerType, setDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
 
     const { data: serverInfo, loading, error } = useGetServerInfoQuery();
 
-    const versionInfo = (() => {
+    const apiServerSemVer = (() => {
         if (serverInfo == null) {
             return null;
         }
@@ -43,19 +44,23 @@ const Index: React.FC = () => {
                     } as const;
             }
         })();
-        const apiServerSemVer = new SemVer({
+        return new SemVer({
             ...serverInfo.result.version,
             prerelease,
         });
+    })();
+
+    const versionInfo = (() => {
+        if (apiServerSemVer == null) {
+            return null;
+        }
 
         const checkResult = SemVer.check({ api: apiServerSemVer, web: VERSION });
 
         return <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div>{`APIサーバー: ${apiServerSemVer.toString()}`}</div>
-            <div>{`WEBサーバー: ${VERSION.toString()}`}</div>
             {checkResult === apiServerRequiresUpdate && <Alert type='error' showIcon message='APIサーバーのバージョンがWEBサーバーのバージョンと比べて古いため、正常に動作しない可能性があります。' />}
             {checkResult === webServerRequiresUpdate && <Alert type='error' showIcon message='WEBサーバーのバージョンがAPIサーバーのバージョンと比べて古いため、正常に動作しない可能性があります。' />}
-            {checkResult === differentPrereleaseVersion && <Alert type='warning' showIcon message='APIサーバーとWEBサーバーのうち少なくとも一方がalpha版ですが、バージョンが完全に一致していないため、互換性は保証されません。' />}
+            {checkResult === differentPrereleaseVersion && <Alert type='warning' showIcon message='APIサーバーとWEBサーバーのうち少なくとも一方がalpha版であり、なおかつバージョンが完全に一致していないため、互換性は保証されません。' />}
         </div>;
     })();
 
@@ -68,7 +73,9 @@ const Index: React.FC = () => {
                 <FilesManagerDrawer drawerType={drawerType} onClose={() => setDrawerType(null)} />
             </div>
             <h2>バージョン情報</h2>
-            <QueryResultViewer error={error} loading={loading} compact>
+            <div>{`クライアント: ${VERSION.toString()}`}</div>
+            <div>APIサーバー: {loading ? <span><Icon.LoadingOutlined />取得中…</span> : (apiServerSemVer == null ? '(エラーが発生しました)' : apiServerSemVer.toString())}</div>
+            <QueryResultViewer error={error} loading={false} compact>
                 {versionInfo}
             </QueryResultViewer>
         </Layout>
