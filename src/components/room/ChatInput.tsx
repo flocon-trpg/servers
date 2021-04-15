@@ -64,9 +64,8 @@ const PrivateMessageDrawer: React.FC<PrivateMessageDrawerProps> = ({ visible, pa
                                 .sort(([, x], [, y]) => x.name.localeCompare(y.name))
                                 .map(([userUid, participant]) => {
                                     return (
-                                        <>
+                                        <React.Fragment key={userUid}>
                                             <Checkbox
-                                                key={userUid}
                                                 checked={selectedParticipants.has(userUid)}
                                                 onChange={newValue => {
                                                     const newSelectedParticipants = new Set(selectedParticipants);
@@ -79,8 +78,8 @@ const PrivateMessageDrawer: React.FC<PrivateMessageDrawerProps> = ({ visible, pa
                                                 }}>
                                                 {participant.name}
                                             </Checkbox>
-                                            <br key={userUid + '<br>'} />
-                                        </>);
+                                            <br />
+                                        </React.Fragment>);
                                 })}
                         </div>
                     </Col>
