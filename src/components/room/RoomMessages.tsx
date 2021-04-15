@@ -23,6 +23,9 @@ import { MessagePanelConfig, TabConfig } from '../../states/MessagesPanelConfig'
 import { Gutter } from 'antd/lib/grid/row';
 import { PublicChannelNames } from '../../utils/types';
 import DrawerFooter from '../../layouts/DrawerFooter';
+import OperateContext from './contexts/OperateContext';
+import BufferedInput from '../../foundations/BufferedInput';
+import { Room } from '../../stateManagers/states/room';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -246,6 +249,50 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
                 {(hiwaSelectValue === custom && participants.size <= 1) && <Alert type='info' showIcon message='自分以外の入室者がいません。' />}
             </Col>
         </Row>
+    </Drawer >);
+};
+
+type ChannelNameEditorDrawerProps = {
+    visible: boolean;
+
+    onClose: () => void;
+} & PublicChannelNames
+
+const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (props: ChannelNameEditorDrawerProps) => {
+    const { visible, onClose } = props;
+
+    const operate = React.useContext(OperateContext);
+
+    return (<Drawer
+        className='cancel-rnd'
+        visible={visible}
+        title='チャンネル名の編集'
+        closable
+        onClose={() => onClose()}
+        width={500}
+        footer={(
+            <DrawerFooter
+                close={({
+                    textType: 'close',
+                    onClick: () => onClose()
+                })} />)}>
+        {([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).map(i => {
+            const key = `publicChannel${i}Name` as const;
+            return <Row key={i} gutter={drawerGutter} align='middle'>
+                <Col flex='auto' />
+                <Col flex={0}>チャンネル{i}</Col>
+                <Col span={drawerInputSpan}>
+                    <BufferedInput bufferDuration='default' value={props[key]} onChange={e => {
+                        if (e.previousValue === e.currentValue) {
+                            return;
+                        }
+                        const setup = Room.createPostOperationSetup();
+                        setup[key] = { newValue: e.currentValue };
+                        operate(setup);
+                    }} />
+                </Col>
+            </Row>;
+        })}
     </Drawer >);
 };
 
@@ -623,8 +670,8 @@ type Props = {
 const RoomMessages: React.FC<Props> = (props: Props) => {
     const { allRoomMessagesResult, characters, participants, roomId, height, panelId, config } = props;
 
-    const contentHeight = Math.max(0, height - 220);
-    const tabsHeight = Math.max(0, height - 180);
+    const contentHeight = Math.max(0, height - 250);
+    const tabsHeight = Math.max(0, height - 210);
 
     const dispatch = useDispatch();
 
@@ -633,6 +680,7 @@ const RoomMessages: React.FC<Props> = (props: Props) => {
         return config.tabs.find(x => x.createdAt === editingTabConfigKey?.createdAt && x.key === editingTabConfigKey?.key);
     }, [config.tabs, editingTabConfigKey?.createdAt, editingTabConfigKey?.key]);
 
+    const [isChannelNamesEditorVisible, setIsChannelNamesEditorVisible] = React.useState(false);
 
     switch (allRoomMessagesResult.type) {
         case loading:
@@ -705,8 +753,10 @@ const RoomMessages: React.FC<Props> = (props: Props) => {
                 }));
             }}
             participants={participants} />
+        <ChannelNamesEditor {...props} visible={isChannelNamesEditorVisible} onClose={() => setIsChannelNamesEditorVisible(false)} />
+        <Button style={{ margin: `4px ${marginX}px 4px ${marginX}px`, width: 170 }} size='small' onClick={() => setIsChannelNamesEditorVisible(true)}>チャンネルの名前を編集</Button>
         <Tabs
-            style={{ flexBasis: `${tabsHeight}px`, margin: `4px ${marginX}px 4px ${marginX}px` }}
+            style={{ flexBasis: `${tabsHeight}px`, margin: `0 ${marginX}px 4px ${marginX}px` }}
             type='editable-card'
             onEdit={(e, type) => {
                 if (type === 'remove') {
