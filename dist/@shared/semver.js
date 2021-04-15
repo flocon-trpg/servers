@@ -1,13 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SemVer = exports.differentPrereleaseVersion = exports.webServerRequiresUpdate = exports.apiServerRequiresUpdate = exports.ok = exports.rc = exports.beta = exports.alpha = void 0;
+exports.SemVer = exports.webServerRequiresUpdate = exports.apiServerRequiresUpdate = exports.ok = exports.rc = exports.beta = exports.alpha = void 0;
 exports.alpha = 'alpha';
 exports.beta = 'beta';
 exports.rc = 'rc';
 exports.ok = 'ok';
 exports.apiServerRequiresUpdate = 'apiServerRequiresUpdate';
 exports.webServerRequiresUpdate = 'webServerRequiresUpdate';
-exports.differentPrereleaseVersion = 'differentPrereleaseVersion';
 class SemVer {
     constructor(option) {
         var _a;
@@ -103,15 +102,12 @@ class SemVer {
     }
     static check({ api, web }) {
         var _a, _b;
-        if (SemVer.compare(api, '=', web)) {
-            return exports.ok;
-        }
         if (api.major === web.major) {
             if (api.minor < web.minor) {
                 return exports.apiServerRequiresUpdate;
             }
             if (((_a = api.prerelease) === null || _a === void 0 ? void 0 : _a.type) === exports.alpha || ((_b = web.prerelease) === null || _b === void 0 ? void 0 : _b.type) === exports.alpha) {
-                return exports.differentPrereleaseVersion;
+                return exports.alpha;
             }
             return exports.ok;
         }
