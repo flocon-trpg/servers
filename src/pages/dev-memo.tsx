@@ -16,7 +16,7 @@ const Index: React.FC = () => {
         <Layout requiresLogin={false} showEntryForm={false}>
             <div style={({ margin: 10 })}>
                 <Typography.Title level={2}>アップデート履歴</Typography.Title>
-                <Typography.Text>※ 現在、一部のコードは変更が即時にこのサーバーに反映される設定になっているため、新しい変更点はこのアップデート履歴に記載されていないことがあります。</Typography.Text>
+                <Typography.Text strong>※ アップデート履歴の記述の手間を省くため、最近のアップデート内容はこのページに記載されていません。正式リリースまではDiscordに貼ってあるTrelloというサイトのほうで管理しています。</Typography.Text>
                 <Typography.Title level={3}>(2021/03/25時点)</Typography.Title>
                 <ul>
                     <li>より直感的に操作できるように、Boardのセルの大きさの初期値を0から50に変更</li>
@@ -68,28 +68,6 @@ const Index: React.FC = () => {
                     <li>数値コマを簡易的ではあるが実装</li>
                     <li>エラー画面、読み込み画面などを改善</li>
                 </ul>
-                <Typography.Title level={2}>開発メモ</Typography.Title>
-                <Typography.Title level={3}>実装予定の機能</Typography.Title>
-                <ul>
-                    <li>管理者機能<br />管理者は専用のメニューやボタンなどが画面に追加され、部屋を無制限に削除できるなどの権限を持つ予定。</li>
-                </ul>
-                <Typography.Title level={3}>未決定事項</Typography.Title>
-                <Typography.Title level={4}>大きさ</Typography.Title>
-                現在はボタンなどは全体的に小さめにしているが、コードを変えてコンパクトモードをONにすることでさらに小さくできる。コンパクトモードをONにしたうえで、小さすぎて見にくい部分だけ大きくすることもできる。
-                <Typography.Title level={5}>現在の設定</Typography.Title>
-                <img src='/images/rooms/default.png' />
-                <Typography.Title level={5}>コンパクトモードON</Typography.Title>
-                <img src='/images/rooms/compact.png' />
-                <Typography.Title level={4}>ダークテーマ</Typography.Title>
-                使っているライブラリにはダークテーマもある。ダークテーマだと画面が全体的に暗めなので目が疲れにくいらしいが、ココフォリアっぽさが強い気がする。なお、↓の画像は見ての通りただ単にダークテーマをONにしただけで調整は一切していない状態。もしダークテーマを採用する場合はちゃんと全部暗くする。可能であればダークテーマのON/OFFをサーバー管理者もしくはユーザーが自由に切り替えられるのが理想だが、チャットの文字色など課題もある。
-                <img src='/images/rooms/dark.png' />
-                <Typography.Title level={4}>その他</Typography.Title>
-                <ul>
-                    <li>どどんとふなどではトップページに部屋一覧があるが、Floconではトップページからいったん部屋一覧ページを経由して部屋に入る必要があるため少し煩わしい。ただ、将来floconの機能が拡充していってページの情報量が非常に多くなり、結局これらのページはわけたままのほうがいい状態になる可能性もなくはないためまだなんともいえない。</li>
-                    <li>誰かがチャットで発言したときに出る通知。どのような形、条件で通知するかが悩みどころ。</li>
-                    <li>チャットパレットもしくはそれに相当する機能の仕様。チャットの末尾発動も同様。どどんとふの仕様は見た感じだとグダり気味なので、刷新した形で実装するのが理想。</li>
-                    <li>どどんとふにおける$choiceなどといったスクリプト的なもの。もし実装するならこちらも刷新した形でやりたい。</li>
-                </ul>
                 <Typography.Title level={3}>仕様</Typography.Title>
                 <ul>
                     <li>[軽度] 部屋をURLから直接開いたり、新規タブで開こうとするとNot Foundになるが、これはexportモードの仕様。</li>
@@ -97,7 +75,6 @@ const Index: React.FC = () => {
                 <Typography.Title level={3}>Tips的なもの</Typography.Title>
                 <p>ダイスは全角でもOK（この仕様は将来変わる可能性もあり）。例えば、{'1d100<={SAN} と 1d100≦{SAN} と １ｄ１００≦｛SAN｝ '}は同じ意味になる。ただし、この例におけるSANのようなパラメーター名の部分は全角と半角をしっかり区別する必要がある。また、仕様がまだ固まりきっていない部分もある（例: {'<='} の代わりに＜＝は使えるのか？）。</p>
                 <p>例えば{'1d100 {SAN}'}は現在の仕様だと1d100とみなされるが、この仕様は将来少し変わる可能性あり。</p>
-                <p>以前の仕様では、ゲームの種類を指定しないとダイスを振ることはできなかったが、現在は指定していない場合diceBotが使われるようになっている。</p>
                 <p>現在の仕様では、「参加者（マスター）」と通常の「参加者」は全く差がない。マスターが退室してから再入室するとその部屋にはマスターがいなくなるが、問題ない。</p>
             </div>
         </Layout>
