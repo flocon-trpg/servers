@@ -23,7 +23,6 @@ import * as Icon from '@ant-design/icons';
 import { ChangeParticipantNameFailureType, DeleteRoomFailureType, ParticipantRole, PromoteFailureType, useChangeParticipantNameMutation, useDeleteRoomMutation, useGetLogLazyQuery, useGetLogQuery, useJoinRoomAsPlayerMutation, useLeaveRoomMutation, usePromoteToPlayerMutation, useRequiresPhraseToJoinAsPlayerLazyQuery, useRequiresPhraseToJoinAsPlayerQuery } from '../../generated/graphql';
 import { useRouter } from 'next/router';
 import path from '../../utils/path';
-import PlayBgmBehavior from '../../foundations/Behavior/PlayBgmBehavior';
 import SoundPlayer from './SoundPlayer';
 import Modal from 'antd/lib/modal/Modal';
 import fileDownload from 'js-file-download';
@@ -40,7 +39,8 @@ import { newEvent, useAllRoomMessages } from '../../hooks/useRoomMessages';
 import LoadingResult from '../../foundations/Result/LoadingResult';
 import VolumeBarPanel from './VolumeBarPanel';
 import { TabConfig } from '../../states/MessagesPanelConfig';
-import PlaySoundEffectBehavior from '../../foundations/Behavior/PlaySoundEffectBehavior';
+import { usePlayBgm } from '../../hooks/usePlayBgm';
+import { usePlaySoundEffect } from '../../hooks/usePlaySoundEffect';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -376,6 +376,9 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
         }), `log_${moment(new Date()).format('YYYYMMDDHHmmss')}.html`);
     }, [getLogQueryResult.data]);
 
+    usePlayBgm(roomState.bgms);
+    usePlaySoundEffect(allRoomMessages);
+
     if (roomConfig == null || roomConfig.roomId !== roomId) {
         return (<LoadingResult title='個人設定のデータをブラウザから読み込んでいます…' />);
     }
@@ -705,9 +708,6 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                             <MyNumberValueDrawer myUserUid={myAuth.uid} me={me} />
                             <CharacterParameterNamesDrawer roomState={roomState} />
                             <EditRoomDrawer roomState={roomState} />
-
-                            <PlayBgmBehavior bgms={roomState.bgms} />
-                            <PlaySoundEffectBehavior allRoomMesssagesResult={allRoomMessages} />
                         </AntdLayout.Content>
                     </AntdLayout>
                 </OperateContext.Provider>

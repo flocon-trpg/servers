@@ -12,5 +12,4 @@ export function usePrevious<T>(value: T) {
 
     // Return previous value (happens before update in useEffect above)
     return ref.current;
-
 }
