@@ -1,11 +1,11 @@
 import React from 'react';
 import { __ } from '../@shared/collection';
 import { $free, $system } from '../@shared/Constants';
-import { TabConfig } from '../states/MessagesPanelConfig';
+import { MessageFilter } from '../states/MessagesPanelConfig';
 import { PrivateChannelSets } from '../utils/PrivateChannelSet';
 import { privateMessage, publicMessage, RoomMessage, soundEffect } from './useRoomMessages';
 
-export function useMessageFilter(config: TabConfig) {
+export function useMessageFilter(config: MessageFilter) {
     const {
         showSystem,
         showFree,

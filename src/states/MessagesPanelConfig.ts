@@ -6,14 +6,7 @@ import { castToPartialDraggablePanelConfigBase, DraggablePanelConfigBase, toComp
 import * as generators from '../utils/generators';
 import { __ } from '../@shared/collection';
 
-export type TabConfig = {
-    // keyとcreatedAtはReactのkeyに使われる
-    key: string;
-    createdAt: number;
-
-    // nullishならば自動で名付けられる
-    tabName?: string;
-
+export type MessageFilter = {
     showSystem: boolean;
     showFree: boolean;
     showPublic1: boolean;
@@ -30,8 +23,17 @@ export type TabConfig = {
     privateChannels: string | boolean;
 }
 
-export namespace TabConfig {
-    export const isEmpty = (source: TabConfig): boolean => {
+export type TabConfig = {
+    // keyとcreatedAtはReactのkeyに使われる
+    key: string;
+    createdAt: number;
+
+    // nullishならば自動で名付けられる
+    tabName?: string;
+} & MessageFilter;
+
+export namespace MessageFilter {
+    export const isEmpty = (source: MessageFilter): boolean => {
         return source.privateChannels === false
             && !source.showFree
             && !source.showPublic1
@@ -47,7 +49,7 @@ export namespace TabConfig {
             && !source.showSystem;
     };
 
-    export const isAll = (source: TabConfig): boolean => {
+    export const isAll = (source: MessageFilter): boolean => {
         return source.privateChannels === true
             && source.showFree
             && source.showPublic1
@@ -63,15 +65,8 @@ export namespace TabConfig {
             && source.showSystem;
     };
 
-    export const createEmpty = ({
-        tabName,
-    }: {
-        tabName?: string;
-    }): TabConfig => {
+    export const createEmpty = (): MessageFilter => {
         return {
-            key: generators.simpleId(),
-            createdAt: new Date().getTime(),
-            tabName,
             privateChannels: false,
             showFree: false,
             showPublic1: false,
@@ -88,15 +83,8 @@ export namespace TabConfig {
         };
     };
 
-    export const createAll = ({
-        tabName,
-    }: {
-        tabName?: string;
-    }): TabConfig => {
+    export const createAll = (): MessageFilter => {
         return {
-            key: generators.simpleId(),
-            createdAt: new Date().getTime(),
-            tabName,
             privateChannels: true,
             showFree: true,
             showPublic1: true,
@@ -112,15 +100,35 @@ export namespace TabConfig {
             showSystem: true,
         };
     };
+}
+
+export namespace TabConfig {
+    export const createEmpty = ({ tabName }: { tabName?: string }): TabConfig => {
+        return {
+            ...MessageFilter.createEmpty(),
+            tabName,
+            key: generators.simpleId(),
+            createdAt: new Date().getTime(),
+        };
+    };
+
+    export const createAll = ({ tabName }: { tabName?: string }): TabConfig => {
+        return {
+            ...MessageFilter.createAll(),
+            tabName,
+            key: generators.simpleId(),
+            createdAt: new Date().getTime(),
+        };
+    };
 
     export const toTabName = (source: TabConfig): string => {
         if (source.tabName != null && source.tabName !== '') {
             return source.tabName;
         }
-        if (isAll(source)) {
+        if (MessageFilter.isAll(source)) {
             return '全てのメッセージ';
         }
-        if (isEmpty(source)) {
+        if (MessageFilter.isEmpty(source)) {
             return '(空のタブ)';
         }
         const elements: string[] = [];
@@ -134,16 +142,16 @@ export namespace TabConfig {
         // TODO: 現在はビルドを通すためだけに暫定の名前を返している
         return '(タブ)';
     };
-
 }
+
+export type PartialMessageFilter = Partial<MessageFilter>;
 export type PartialTabConfig = Partial<TabConfig>;
 
-export const castToPartialTabConfig = (source: unknown): PartialTabConfig | undefined => {
-    if (!isObject<PartialTabConfig>(source)) {
+export const castToPartialMessageFilter = (source: unknown): PartialMessageFilter | undefined => {
+    if (!isObject<PartialMessageFilter>(source)) {
         return;
     }
     return {
-        createdAt: castToNumber(source.createdAt),
         privateChannels: castToBoolean(source.privateChannels) ?? castToString(source.privateChannels),
         showFree: castToBoolean(source.showFree),
         showPublic10: castToBoolean(source.showPublic10),
@@ -157,14 +165,11 @@ export const castToPartialTabConfig = (source: unknown): PartialTabConfig | unde
         showPublic8: castToBoolean(source.showPublic8),
         showPublic9: castToBoolean(source.showPublic9),
         showSystem: castToBoolean(source.showSystem),
-        key: castToString(source.key),
-        tabName: castToString(source.tabName),
     };
 };
 
-export const toCompleteTabConfig = (source: PartialTabConfig): TabConfig => {
+export const toCompleteMessageFilter = (source: PartialMessageFilter): MessageFilter=> {
     return {
-        createdAt: source.createdAt ?? new Date().getTime(),
         privateChannels: source.privateChannels ?? false,
         showFree: source.showFree ?? false,
         showPublic10: source.showPublic10 ?? false,
@@ -178,10 +183,30 @@ export const toCompleteTabConfig = (source: PartialTabConfig): TabConfig => {
         showPublic8: source.showPublic8 ?? false,
         showPublic9: source.showPublic9 ?? false,
         showSystem: source.showSystem ?? false,
+    };
+};
+
+export const castToPartialTabConfig = (source: unknown): PartialTabConfig | undefined => {
+    if (!isObject<PartialTabConfig>(source)) {
+        return;
+    }
+    return {
+        ...castToPartialMessageFilter(source),
+        createdAt: castToNumber(source.createdAt),
+        key: castToString(source.key),
+        tabName: castToString(source.tabName),
+    };
+};
+
+export const toCompleteTabConfig = (source: PartialTabConfig): TabConfig=> {
+    return {
+        ...toCompleteMessageFilter(source),
+        createdAt: source.createdAt ?? new Date().getTime(),
         key: source.key ?? generators.simpleId(),
         tabName: source.tabName,
     };
 };
+
 export type MessagePanelConfig = {
     isMinimized: boolean;
     tabs: TabConfig[];

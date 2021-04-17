@@ -19,7 +19,7 @@ import { Character } from '../../stateManagers/states/character';
 import { Participant } from '../../stateManagers/states/participant';
 import { getUserUid } from '../../hooks/useFirebaseUser';
 import PagenationScroll from '../PagenationScroll';
-import { MessagePanelConfig, TabConfig } from '../../states/MessagesPanelConfig';
+import { MessagePanelConfig, MessageFilter, TabConfig } from '../../states/MessagesPanelConfig';
 import { Gutter } from 'antd/lib/grid/row';
 import { PublicChannelNames } from '../../utils/types';
 import DrawerFooter from '../../layouts/DrawerFooter';
@@ -29,6 +29,7 @@ import { Room } from '../../stateManagers/states/room';
 import LoadingResult from '../../foundations/Result/LoadingResult';
 import QueryResultViewer from '../../foundations/QueryResultViewer';
 import { useMessageFilter } from '../../hooks/useMessageFilter';
+import { RoomMessage as RoomMessageNameSpace } from './RoomMessage';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -299,29 +300,9 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (props: Chann
     </Drawer >);
 };
 
-const Image: React.FC<{ filePath: FilePathFragment | undefined }> = ({ filePath }: { filePath: FilePathFragment | undefined }) => {
-    const src = useFirebaseStorageUrl(filePath);
-    if (src == null) {
-        return <Icon.UserOutlined style={({ width: 16, height: 16 })} />;
-    }
-    return (<img src={src} width={16} height={16} />);
-};
-
-export type RoomMessageComponentState = {
-    type: typeof privateMessage;
-    value: Omit<RoomPrivateMessageFragment, 'createdAt'> & { createdAt?: number };
-} | {
-    type: typeof publicMessage;
-    value: Omit<RoomPublicMessageFragment, 'createdAt'> & { createdAt?: number };
-}
-
-const deletedMessageStyle: React.CSSProperties = {
-    opacity: 0.7,
-};
-
 type RoomMessageComponentProps = {
     roomId: string;
-    message: RoomMessageComponentState;
+    message: RoomMessageNameSpace.MessageState;
     participants: ReadonlyMap<string, Participant.State> | undefined;
     showPrivateMessageMembers?: boolean;
 } & PublicChannelNames
@@ -342,105 +323,11 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
         createdByMe = (myAuth.uid === message.value.createdBy);
     }
 
-    const nameElement = (() => {
-        if (message.value.createdBy == null) {
-            return <span style={({ color: 'gray' })}>(システムメッセージ)</span>;
-        }
-        let participantName: string | null = null;
-        if (participants != null) {
-            participantName = participants.get(message.value.createdBy)?.name ?? null;
-        }
-
-        if (message.value.character == null) {
-            if (message.value.customName == null) {
-                return (
-                    <div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
-                        {message.value.createdBy != null && <Jdenticon hashOrValue={message.value.createdBy} size={16} tooltipMode='userUid' />}
-                        <Tooltip title={participantName ?? message.value.createdBy}>
-                            {participantName ?? message.value.createdBy}
-                        </Tooltip>
-                    </div>);
-            }
-            return (
-                <div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
-                    {message.value.createdBy != null && <Jdenticon hashOrValue={message.value.createdBy} size={16} tooltipMode='userUid' />}
-                    <Tooltip title={participantName ?? message.value.createdBy}>
-                        {message.value.customName}
-                    </Tooltip>
-                </div>);
-        }
-        return (
-            <div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
-                {message.value.createdBy != null && <Jdenticon hashOrValue={message.value.createdBy} size={16} tooltipMode='userUid' />}
-                <Image filePath={message.value.character.image ?? undefined} />
-                <Tooltip title={participantName ?? message.value.createdBy}>
-                    {message.value.character.name}
-                </Tooltip>
-            </div>);
-    })();
-    let content: JSX.Element;
-    if (message.value.text == null && message.value.altTextToSecret == null) {
-        // 当初、削除された場合斜体にして表そうと考えたが、現状はボツにしている。
-        // まず、italicなどでは対応してない日本語フォントの場合斜体にならない（対応しているフォントを選べばいいだけの話だが）。なのでtransform: skewX(-15deg)を使おうとしたが、文字列が斜めになることで横幅が少し増えるため、横のスクロールバーが出てしまう問題が出たので却下（x方向のスクロールバーを常に非表示にすれば解決しそうだが、x方向のスクロールバーを表示させたい場合は困る）。
-        // ただ、解決策はありそうなのでのちのち斜体にするかもしれない。
-        content = (<div style={{ ...deletedMessageStyle, overflowWrap: 'break-word', gridRow: '2 / 3', gridColumn: '1 / 2', minHeight: contentMinHeight }}>(このメッセージは削除されました)</div>);
-    } else {
-        content = (
-            <div style={{ overflowWrap: 'break-word', gridRow: '2 / 3', gridColumn: '1 / 2', minHeight: contentMinHeight }}>
-                {message.value.text ?? message.value.altTextToSecret}
-                <span> </span>
-                {message.value.commandResult != null && <span style={({ fontWeight: 'bold' })}>{`${message.value.commandResult.text}${message.value.commandResult.isSuccess === true ? ' (成功)' : ''}${message.value.commandResult.isSuccess === false ? ' (失敗)' : ''}`}</span>}
-                <span> </span>
-                <span style={({ fontWeight: 'bold' })}>{message.value.isSecret ? 'Secret' : ''}</span>
-            </div>);
-    }
-    const createdAt = message.value.createdAt as number | null | undefined;
+    const createdAt = message.value.createdAt as number | undefined;
     let datetime: string | null = null;
     if (createdAt != null) {
         datetime = moment(new Date(createdAt)).format('YYYY/MM/DD HH:mm:ss');
     }
-    const channelName: string = (() => {
-        if (message.value.createdBy == null) {
-            return 'システムメッセージ';
-        }
-        switch (message.type) {
-            case publicMessage: {
-                switch (message.value.channelKey) {
-                    case $free:
-                        return '雑談';
-                    case '1':
-                        return props.publicChannel1Name;
-                    case '2':
-                        return props.publicChannel2Name;
-                    case '3':
-                        return props.publicChannel3Name;
-                    case '4':
-                        return props.publicChannel4Name;
-                    case '5':
-                        return props.publicChannel5Name;
-                    case '6':
-                        return props.publicChannel6Name;
-                    case '7':
-                        return props.publicChannel7Name;
-                    case '8':
-                        return props.publicChannel8Name;
-                    case '9':
-                        return props.publicChannel9Name;
-                    case '10':
-                        return props.publicChannel10Name;
-                    default:
-                        return '?';
-                }
-            }
-            case privateMessage: {
-                const userNames = new PrivateChannelSet(message.value.visibleTo).toChannelNameBase(participants ?? new Map());
-                if (userNames.length === 0) {
-                    return '秘話:(自分のみ)';
-                }
-                return userNames.reduce((seed, userName, i) => i === 0 ? `${seed}${userName}` : `${seed},${userName}`, '秘話:');
-            }
-        }
-    })();
 
     let updatedInfo: JSX.Element | null = null;
     if (message.value.updatedAt != null) {
@@ -504,9 +391,9 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
         <div style={({ display: 'grid', gridTemplateRows: `${headerHeight}px 1fr`, gridTemplateColumns: '1fr 40px', marginBottom: 4, marginTop: 4 })}>
             <div style={({ gridRow: '1 / 2', gridColumn: '1 / 2', display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
                 <div style={({ flex: '0 0 auto' })}>
-                    {nameElement}
+                    {RoomMessageNameSpace.userName(message, participants ?? new Map())}
                 </div>
-                <div style={({ flex: '0 0 auto', color: 'gray', marginLeft: 6 })}>{channelName}</div>
+                <div style={({ flex: '0 0 auto', color: 'gray', marginLeft: 6 })}>{RoomMessageNameSpace.toChannelName(message, props, participants ?? new Map())}</div>
                 <div style={({ flex: '0 0 auto', color: 'gray', marginLeft: 6 })}>{datetime}</div>
                 {privateMessageMembersInfo != null && <div style={{ flex: '0 0 auto', width: 6 }} />}
                 {privateMessageMembersInfo}
@@ -514,7 +401,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
                 {updatedInfo}
                 <div style={({ flex: 1 })} />
             </div>
-            {content}
+            <RoomMessageNameSpace.Content style={{ overflowWrap: 'break-word', gridRow: '2 / 3', gridColumn: '1 / 2', minHeight: contentMinHeight }} message={message} />
             <div style={({ gridRow: '1 / 3', gridColumn: '2 / 3', justifySelf: 'center', alignSelf: 'center' })} >
                 {allMenuItemsAreNull ? null : <Dropdown overlay={<Menu>{menuItems}</Menu>} trigger={['click']}>
                     <Button type='text' size='small'><Icon.EllipsisOutlined /></Button>
@@ -545,7 +432,7 @@ type MessageTabPaneProps = {
     participants: ReadonlyMap<string, Participant.State>;
     roomId: string;
     contentHeight: number;
-    config: TabConfig;
+    config: MessageFilter;
 } & PublicChannelNames
 
 const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProps) => {

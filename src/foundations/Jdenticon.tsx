@@ -7,7 +7,10 @@ const userUid = 'userUid';
 type Props = {
     hashOrValue: string;
     size: number;
-    tooltipMode?: typeof userUid;
+    tooltipMode?: {
+        type: typeof userUid;
+        userName?: string;
+    };
 };
 
 const Jdenticon: React.FC<Props> = ({ hashOrValue, size, tooltipMode }: Props) => {
@@ -17,8 +20,12 @@ const Jdenticon: React.FC<Props> = ({ hashOrValue, size, tooltipMode }: Props) =
     }, [hashOrValue, size]);
 
     let tooltipTitle: string;
-    if (tooltipMode === userUid) {
+    let tooltipTitle2: string | null = null;
+    if (tooltipMode?.type === userUid) {
         tooltipTitle = `ユーザーID: ${hashOrValue}`;
+        if (tooltipMode.userName != null) {
+            tooltipTitle2 = `ユーザー名: ${tooltipMode.userName}`;
+        }
     } else {
         tooltipTitle = hashOrValue;
     }
@@ -27,7 +34,10 @@ const Jdenticon: React.FC<Props> = ({ hashOrValue, size, tooltipMode }: Props) =
         content={
             <div style={({ display: 'flex', flexDirection: 'column' })}>
                 <img src={src} width={70} height={70} />
-                <p>{tooltipTitle}</p>
+                <span>
+                    {tooltipTitle}
+                    {tooltipTitle2 && <><br /><span>{tooltipTitle2}</span></>}
+                </span>
             </div>}>
         <img src={src} width={size} height={size} />
     </Popover>;

@@ -36,7 +36,7 @@ const ParticipantList: React.FC<Props> = ({ participants }: Props) => {
             width: 30,
             // eslint-disable-next-line react/display-name
             render: (_: unknown, { participant }: DataSource) => (
-                <Jdenticon hashOrValue={participant.userUid} size={24} tooltipMode='userUid' />),
+                <Jdenticon hashOrValue={participant.userUid} size={24} tooltipMode={{ type: 'userUid', userName: participant.state.name }} />),
         },
         {
             title: '名前',

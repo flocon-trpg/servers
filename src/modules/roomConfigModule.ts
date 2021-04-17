@@ -8,7 +8,7 @@ import { recordToArray } from '../utils/record';
 import { BoardConfig, BoardsPanelConfig, createDefaultBoardConfig } from '../states/BoardsPanelConfig';
 import { CompositeKey, compositeKeyToString } from '../@shared/StateMap';
 import { StrIndex5 } from '../@shared/indexes';
-import { MessagePanelConfig } from '../states/MessagesPanelConfig';
+import { MessageFilter, MessagePanelConfig } from '../states/MessagesPanelConfig';
 
 export type SetOtherValuesAction = {
     roomId: string;
@@ -16,6 +16,7 @@ export type SetOtherValuesAction = {
     seVolume?: number;
     chatGameSystemId?: string;
     chatSelectedCharacterStateId?: string;
+    messageNotificationFilter?: MessageFilter;
 }
 
 export type SetChannelVolumeAction = {
@@ -232,6 +233,9 @@ const roomConfigModule = createSlice({
             }
             if (action.payload.chatGameSystemId != null) {
                 state.chatGameSystemId = action.payload.chatGameSystemId;
+            }
+            if (action.payload.messageNotificationFilter != null) {
+                state.messageNotificationFilter = action.payload.messageNotificationFilter;
             }
         },
         setChannelVolume: (state: RoomConfig | null, action: PayloadAction<SetChannelVolumeAction>) => {

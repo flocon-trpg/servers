@@ -2,6 +2,7 @@ import { castToNumber, castToRecord, castToString } from '../utils/cast';
 import isObject from '../utils/isObject';
 import { castToPartialPanelsConfig, defaultPanelsConfig, PanelsConfig, PartialPanelsConfig, toCompletePanelsConfig } from './PanelsConfig';
 import * as Room from '../stateManagers/states/room';
+import { MessageFilter } from './MessagesPanelConfig';
 
 export const defaultMasterVolume = 0.5;
 export const defaultChannelVolume = 1;
@@ -12,6 +13,7 @@ export type RoomConfig = {
     version: 1;
     chatGameSystemId?: string;
     chatSelectedCharacterStateId?: string;
+    messageNotificationFilter: MessageFilter;
     panels: PanelsConfig;
     masterVolume: number;
     channelVolumes: Record<string, number>;
@@ -26,6 +28,7 @@ export type PartialRoomConfig = {
     version?: number;
     chatGameSystemId?: string;
     chatSelectedCharacterStateId?: string;
+    messageNotificationFilter?: MessageFilter;
     panels?: PartialPanelsConfig;
     masterVolume?: number;
     channelVolumes?: Record<string, number>;
@@ -90,6 +93,7 @@ export const toCompleteRoomConfig = (source: PartialRoomConfig, roomId: string):
         panels: source.panels == null ? defaultPanelsConfig() : toCompletePanelsConfig(source.panels),
         chatGameSystemId: source.chatGameSystemId,
         chatSelectedCharacterStateId: source.chatSelectedCharacterStateId,
+        messageNotificationFilter: source.messageNotificationFilter ?? MessageFilter.createAll(),
         masterVolume: source.masterVolume ?? 0.5,
         channelVolumes: source.channelVolumes ?? {},
         seVolume: source.seVolume ?? 1,
@@ -101,6 +105,7 @@ export const defaultRoomConfig = (roomId: string): RoomConfig => {
         roomId,
         version: 1,
         panels: defaultPanelsConfig(),
+        messageNotificationFilter: MessageFilter.createAll(),
         masterVolume: 0.5,
         channelVolumes: {},
         seVolume: 1,

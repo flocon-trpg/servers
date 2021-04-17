@@ -38,9 +38,11 @@ import MyNumberValueDrawer from './MyNumberValueDrawer';
 import { newEvent, useAllRoomMessages } from '../../hooks/useRoomMessages';
 import LoadingResult from '../../foundations/Result/LoadingResult';
 import VolumeBarPanel from './VolumeBarPanel';
-import { TabConfig } from '../../states/MessagesPanelConfig';
+import { MessageFilter, TabConfig } from '../../states/MessagesPanelConfig';
 import { usePlayBgm } from '../../hooks/usePlayBgm';
 import { usePlaySoundEffect } from '../../hooks/usePlaySoundEffect';
+import { useMessageNotification } from '../../hooks/useMessageNotification';
+import { getUserUid } from '../../hooks/useFirebaseUser';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -378,6 +380,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
 
     usePlayBgm(roomState.bgms);
     usePlaySoundEffect(allRoomMessages);
+    useMessageNotification(allRoomMessages, getUserUid(myAuth) ?? null, roomState, roomState.participants);
 
     if (roomConfig == null || roomConfig.roomId !== roomId) {
         return (<LoadingResult title='個人設定のデータをブラウザから読み込んでいます…' />);
@@ -609,7 +612,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                                 </Menu.SubMenu>
                                 {(me == null || myAuth == null) || <Menu.SubMenu
                                     title={<div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                                        <Jdenticon hashOrValue={myAuth.uid} size={20} tooltipMode='userUid' />
+                                        <Jdenticon hashOrValue={myAuth.uid} size={20} tooltipMode={{ type: 'userUid' }} />
                                         <span style={({ marginLeft: 4 })}>{me.name}</span>
                                     </div>}>
                                     <Menu.Item
