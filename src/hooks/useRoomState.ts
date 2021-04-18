@@ -10,6 +10,7 @@ import NotificationContext, { apolloError, text } from '../components/room/conte
 import { Room } from '../stateManagers/states/room';
 import { Participant } from '../stateManagers/states/participant';
 import { authNotFound, FirebaseUserState, notSignIn } from './useFirebaseUser';
+import { useClientId } from './useClientId';
 
 const sampleTime = 3000;
 
@@ -54,6 +55,7 @@ type RoomStateResult = {
 
 export const useRoomState = (roomId: string): RoomStateResult => {
     const myAuth = React.useContext(MyAuthContext);
+    const clientId = useClientId();
     const notificationContext = React.useContext(NotificationContext);
     const apolloClient = useApolloClient();
     const [operateMutation] = useOperateMutation();
@@ -118,10 +120,10 @@ export const useRoomState = (roomId: string): RoomStateResult => {
                             roomOperationCache.set(s.data.roomOperated.revisionTo, s.data.roomOperated);
                             return;
                         }
-                        // Roomは、他人が行った変更はSubscriptionの結果を用い、自分が行った変更はMutationの結果を用いている。
-                        if (s.data.roomOperated.operatedBy !== userUid) {
+                        // Roomは、他のクライアントが行った変更はSubscriptionの結果を用い、自分のクライアントが行った変更はMutationの結果を用いている。
+                        if (s.data.roomOperated.operatedBy?.userUid !== userUid || s.data.roomOperated.operatedBy.clientId !== clientId) {
                             const getOperation = Room.createGetOperation(s.data.roomOperated.value);
-                            roomStateManager.onOthersGet(getOperation, s.data.roomOperated.revisionTo);
+                            roomStateManager.onOtherClientsGet(getOperation, s.data.roomOperated.revisionTo);
                             onRoomStateManagerUpdate();
                         }
                         return;
@@ -165,7 +167,7 @@ export const useRoomState = (roomId: string): RoomStateResult => {
                     result = await operateMutation({
                         variables: {
                             id: roomId,
-                            operation: { value: valueInput },
+                            operation: { value: valueInput, clientId },
                             revisionFrom: toPost.revision,
                             requestId: toPost.requestId,
                         }
@@ -256,9 +258,8 @@ export const useRoomState = (roomId: string): RoomStateResult => {
                 case 'GetJoinedRoomResult': {
                     const newRoomStateManager = createStateManager(Room.createState(q.data.result.room), q.data.result.room.revision);
                     roomOperationCache.forEach((operation, revisionTo) => {
-                        // Roomは、他人が行った変更はSubscriptionの結果を用い、自分が行った変更はMutationの結果を用いている。
-                        if (operation.operatedBy !== userUid) {
-                            newRoomStateManager.onOthersGet(Room.createGetOperation(operation.value), revisionTo);
+                        if (operation.operatedBy?.userUid !== userUid || operation.operatedBy.clientId !== clientId) {
+                            newRoomStateManager.onOtherClientsGet(Room.createGetOperation(operation.value), revisionTo);
                         }
                     });
 

@@ -22,6 +22,8 @@ import { Config, getConfig } from '../config';
 import ConfigContext from '../contexts/ConfigContext';
 import { Client, ClientOptions, createClient } from 'graphql-ws';
 import { print, GraphQLError } from 'graphql';
+import { simpleId } from '../utils/generators';
+import ClientIdContext from '../contexts/ClientIdContext';
 
 const config = getConfig();
 
@@ -149,23 +151,26 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     React.useEffect(() => {
         const client = createApolloClient(config, typeof user === 'string' ? undefined : user);
         setApolloClient(client);
-        
     }, [user]);
     useUserConfig(typeof user === 'string' ? null : user.uid, store.dispatch);
 
+    const clientId = useConstant(() => simpleId());
+
     if (apolloClient == null) {
         return (<div style={({ padding: 5 })}>
-            {'しばらくお待ち下さい… / Please wait…'/*しばらくお待ち下さい…。もし約20秒以上この画面のままの場合、どこかで問題が発生している可能性があります。 / Please wait... If you have waited for more than about 20 seconds, something might be wrong.*/}
+            {'しばらくお待ち下さい… / Please wait…'}
         </div>);
     }
     return (
-        <ApolloProvider client={apolloClient}>
-            <Provider store={store}>
-                <MyAuthContext.Provider value={user}>
-                    <Component {...pageProps} />
-                </MyAuthContext.Provider>
-            </Provider>
-        </ApolloProvider>
+        <ClientIdContext.Provider value={clientId}>
+            <ApolloProvider client={apolloClient}>
+                <Provider store={store}>
+                    <MyAuthContext.Provider value={user}>
+                        <Component {...pageProps} />
+                    </MyAuthContext.Provider>
+                </Provider>
+            </ApolloProvider>
+        </ClientIdContext.Provider>
     );
 };
 

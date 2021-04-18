@@ -44,7 +44,7 @@ class StateManagerCore<TState, TGetOperation, TPostOperation> {
     // apply(apply(_actualState, _postingOperation), _localOperation) の結果をキャッシュする。_actualStateか_postingOperationか_localOperationのいずれかが変化したらundefinedを代入してキャッシュを削除する。
     private _uiStateCache: TState | undefined;
 
-    private readonly _pendingGetOperations = new Map<number, { operation: TGetOperation; isMine: boolean; addedAt: Date }>(); // keyはrevision。isMine===trueである要素は1個以下になるはず。
+    private readonly _pendingGetOperations = new Map<number, { operation: TGetOperation; isByMyClient: boolean; addedAt: Date }>(); // keyはrevision。isByMyClient===trueである要素は1個以下になるはず。
 
     public constructor(private readonly params: StateManagerParameters<TState, TGetOperation, TPostOperation>) {
         this._revision = params.revision;
@@ -111,7 +111,7 @@ class StateManagerCore<TState, TGetOperation, TPostOperation> {
         }
         this._pendingGetOperations.delete(this._revision + 1);
 
-        if (toApply.isMine) {
+        if (toApply.isByMyClient) {
             /*                                      prev actualState
              *                                          /        \
              *                                         /          \
@@ -183,8 +183,8 @@ class StateManagerCore<TState, TGetOperation, TPostOperation> {
         this.tryApplyPendingGetOperations();
     }
 
-    // isMine === true の場合、revisionToで対応関係がわかるため、requestIdは必要ない。
-    public onGet(operation: TGetOperation, revisionTo: number, isMine: boolean) {
+    //  === true の場合、revisionToで対応関係がわかるため、requestIdは必要ない。
+    public onGet(operation: TGetOperation, revisionTo: number, isByMyClient: boolean) {
         if (!Number.isInteger(revisionTo)) {
             appConsole.warn(`${revisionTo} is not an integer. onGet is cancelled.`);
             return;
@@ -196,7 +196,7 @@ class StateManagerCore<TState, TGetOperation, TPostOperation> {
         if (this._pendingGetOperations.has(revisionTo)) {
             appConsole.warn(`stateManagerCore.__pendingGetOperations already contains ${revisionTo}`);
         }
-        this._pendingGetOperations.set(revisionTo, { operation, isMine, addedAt: new Date() });
+        this._pendingGetOperations.set(revisionTo, { operation, isByMyClient, addedAt: new Date() });
         this.tryApplyPendingGetOperations();
     }
 
@@ -310,7 +310,7 @@ export class StateManager<TState, TGetOperation, TPostOperation> {
         return this.core.waitingResponseSince();
     }
 
-    public onOthersGet(operation: TGetOperation, revisionTo: number): void {
+    public onOtherClientsGet(operation: TGetOperation, revisionTo: number): void {
         if (this.requiresReload) {
             throw 'this.requiresReload === true';
         }
@@ -414,6 +414,6 @@ export class GetOnlyStateManager<TState, TOperation> {
     }
 
     public onGet(operation: TOperation, revisionTo: number): void {
-        this.core.onOthersGet(operation, revisionTo);
+        this.core.onOtherClientsGet(operation, revisionTo);
     }
 }

@@ -199,7 +199,7 @@ it('tests StateManager.onOthersGet(initRevision + 1)', () => {
 
     const target = createStateManager();
 
-    target.onOthersGet(operation, initRevision + 1);
+    target.onOtherClientsGet(operation, initRevision + 1);
 
     expect(target.isPosting).toBe(false);
     expect(target.requiresReload).toBe(false);
@@ -213,7 +213,7 @@ test.each([initRevision - 1, initRevision])('tests StateManager.onOthersGet(%i)'
 
     const target = createStateManager();
 
-    target.onOthersGet(operation, revision);
+    target.onOtherClientsGet(operation, revision);
 
     expect(target.isPosting).toBe(false);
     expect(target.requiresReload).toBe(false);
@@ -227,7 +227,7 @@ test('tests StateManager: onOthersGet(initRevision + 2)', () => {
 
     const target = createStateManager();
 
-    target.onOthersGet(operation, initRevision + 2);
+    target.onOtherClientsGet(operation, initRevision + 2);
 
     expect(target.isPosting).toBe(false);
     expect(target.requiresReload).toBe(false);
@@ -242,8 +242,8 @@ test('tests StateManager.onOthersGet(initRevision + 2) -> onOthersGet(initRevisi
 
     const target = createStateManager();
 
-    target.onOthersGet(secondOperation, initRevision + 2);
-    target.onOthersGet(firstOperation, initRevision + 1);
+    target.onOtherClientsGet(secondOperation, initRevision + 2);
+    target.onOtherClientsGet(firstOperation, initRevision + 1);
 
     expect(target.isPosting).toBe(false);
     expect(target.requiresReload).toBe(false);
@@ -265,7 +265,7 @@ test('tests StateManager: post -> onOthersGet(initRevision + 2) -> onPosted', ()
         throw 'Guard';
     }
 
-    target.onOthersGet(secondOperation, initRevision + 2);
+    target.onOtherClientsGet(secondOperation, initRevision + 2);
     postResult.onPosted({
         isSuccess: true,
         isId: false,

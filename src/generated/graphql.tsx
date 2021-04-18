@@ -760,6 +760,12 @@ export type OperateRoomSuccessResult = {
   operation: RoomOperation;
 };
 
+export type OperatedBy = {
+  __typename?: 'OperatedBy';
+  clientId: Scalars['String'];
+  userUid: Scalars['String'];
+};
+
 export type ParamNameOperation = {
   __typename?: 'ParamNameOperation';
   name?: Maybe<ReplaceStringUpOperation>;
@@ -1240,12 +1246,13 @@ export type RoomOperated = DeleteRoomOperation | RoomOperation;
 
 export type RoomOperation = {
   __typename?: 'RoomOperation';
-  operatedBy?: Maybe<Scalars['String']>;
+  operatedBy?: Maybe<OperatedBy>;
   revisionTo: Scalars['Float'];
   value: RoomOperationValue;
 };
 
 export type RoomOperationInput = {
+  clientId: Scalars['String'];
   value: RoomOperationValueInput;
 };
 
@@ -2318,8 +2325,11 @@ export type RoomOperationValueFragment = (
 
 export type RoomOperationFragment = (
   { __typename?: 'RoomOperation' }
-  & Pick<RoomOperation, 'revisionTo' | 'operatedBy'>
-  & { value: (
+  & Pick<RoomOperation, 'revisionTo'>
+  & { operatedBy?: Maybe<(
+    { __typename?: 'OperatedBy' }
+    & Pick<OperatedBy, 'userUid' | 'clientId'>
+  )>, value: (
     { __typename?: 'RoomOperationValue' }
     & RoomOperationValueFragment
   ) }
@@ -3555,7 +3565,10 @@ ${FilePathFragmentDoc}`;
 export const RoomOperationFragmentDoc = gql`
     fragment RoomOperation on RoomOperation {
   revisionTo
-  operatedBy
+  operatedBy {
+    userUid
+    clientId
+  }
   value {
     ...RoomOperationValue
   }
