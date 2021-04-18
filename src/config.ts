@@ -22,7 +22,7 @@ const loadConfig = () => {
 
     const webConfigJson = JSON.parse(webConfigFile.toString());
     const webJSONObject = JSONObject.init(webConfigJson);
-    const url = webJSONObject.tryGet('server')?.tryGet('url');
+    const url = webJSONObject.tryGet('api')?.tryGet('url');
     const storage = webJSONObject.get('firebase').get('storage');
 
     return {
@@ -37,7 +37,7 @@ const loadConfig = () => {
             storageBucket: firebaseConfig.storageBucket,
         },
         web: {
-            server: {
+            api: {
                 url: {
                     http: url?.tryGet('http')?.valueAsNullableString() ?? undefined,
                     ws: url?.tryGet('ws')?.valueAsNullableString() ?? undefined,

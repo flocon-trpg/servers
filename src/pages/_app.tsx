@@ -89,7 +89,7 @@ const createApolloClient = (config: Config, signedInAs?: firebase.User, omitWebS
     });
 
     // https://www.apollographql.com/docs/react/data/subscriptions/
-    let uri: string | undefined = config.web.server.url.http;
+    let uri: string | undefined = config.web.api.url.http;
     if (uri === undefined) {
         uri = `${location.protocol}//${location.host}/graphql`;
     }
@@ -102,7 +102,7 @@ const createApolloClient = (config: Config, signedInAs?: firebase.User, omitWebS
         if (omitWebSocket === true) {
             return httpLink;
         }
-        let uri: string | undefined = config.web.server.url.ws;
+        let uri: string | undefined = config.web.api.url.ws;
         if (uri === undefined) {
             uri = `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/graphql`;
         }
