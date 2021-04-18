@@ -36,6 +36,7 @@ import { client, RequestedBy, server } from '../../Types';
 import { GlobalParticipant } from '../../entities/room/participant/global';
 import { MapTwoWayOperationElementUnion, replace, update } from '../../mapOperations';
 import { EM } from '../../../utils/types';
+import { MaxLength } from 'class-validator';
 
 @InputType()
 class CreateRoomInput {
@@ -100,6 +101,7 @@ class OperateArgs {
     public operation!: RoomOperationInput;
 
     @Field()
+    @MaxLength(10)
     public requestId!: string;
 }
 
@@ -114,7 +116,6 @@ type RoomOperationPayload = {
     roomId: string;
     participants: ReadonlySet<string>; // UserUid
     generateOperation: (deliverTo: string) => RoomOperation;
-    notSendTo: string | undefined; // UserUid
 }
 
 type DeleteRoomPayload = {
@@ -230,7 +231,6 @@ const operateParticipantAndFlush = async ({
             participants: participantUserUids,
             generateOperation,
             roomId: room.id,
-            notSendTo: undefined,
         },
     };
 };
@@ -1012,7 +1012,10 @@ export class RoomResolver {
                 return {
                     __tstype: 'RoomOperation',
                     revisionTo: prevRevision + 1,
-                    operatedBy: decodedIdToken.uid,
+                    operatedBy: {
+                        userUid: decodedIdToken.uid,
+                        clientId: args.operation.clientId,
+                    },
                     value,
                 };
             };
@@ -1022,7 +1025,6 @@ export class RoomResolver {
                 roomId: args.id,
                 participants: participantUserUids,
                 generateOperation,
-                notSendTo: decodedIdToken.uid,
             };
             const result: OperateCoreResult = {
                 type: 'success',
@@ -1055,6 +1057,8 @@ export class RoomResolver {
 
     @Subscription(() => RoomOperated, { topics: ROOM_OPERATED, nullable: true })
     public roomOperated(@Root() payload: RoomOperatedPayload, @Arg('id') id: string, @Ctx() context: ResolverContext): typeof RoomOperated | undefined {
+        // userUidが同じでも例えば異なるタブで同じRoomを開いているケースがある。そのため、Mutationを行ったuserUidにだけSubscriptionを送信しないことで通信量を節約、ということはできない。 
+
         if (context.decodedIdToken == null || context.decodedIdToken.isError) {
             return undefined;
         }
@@ -1073,10 +1077,6 @@ export class RoomResolver {
             return undefined;
         }
         if (payload.type === 'roomOperationPayload') {
-            if (payload.notSendTo === userUid) {
-                return undefined;
-            }
-
             // TODO: DeleteRoomGetOperationも返す
             return payload.generateOperation(userUid);
         }

@@ -68,6 +68,7 @@ const global_2 = require("../../entities/room/global");
 const Types_1 = require("../../Types");
 const global_3 = require("../../entities/room/participant/global");
 const mapOperations_1 = require("../../mapOperations");
+const class_validator_1 = require("class-validator");
 let CreateRoomInput = class CreateRoomInput {
 };
 __decorate([
@@ -157,6 +158,7 @@ __decorate([
 ], OperateArgs.prototype, "operation", void 0);
 __decorate([
     type_graphql_1.Field(),
+    class_validator_1.MaxLength(10),
     __metadata("design:type", String)
 ], OperateArgs.prototype, "requestId", void 0);
 OperateArgs = __decorate([
@@ -233,7 +235,6 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
             participants: participantUserUids,
             generateOperation,
             roomId: room.id,
-            notSendTo: undefined,
         },
     };
 };
@@ -906,7 +907,10 @@ let RoomResolver = class RoomResolver {
                 return {
                     __tstype: 'RoomOperation',
                     revisionTo: prevRevision + 1,
-                    operatedBy: decodedIdToken.uid,
+                    operatedBy: {
+                        userUid: decodedIdToken.uid,
+                        clientId: args.operation.clientId,
+                    },
                     value,
                 };
             };
@@ -915,7 +919,6 @@ let RoomResolver = class RoomResolver {
                 roomId: args.id,
                 participants: participantUserUids,
                 generateOperation,
-                notSendTo: decodedIdToken.uid,
             };
             const result = {
                 type: 'success',
@@ -960,9 +963,6 @@ let RoomResolver = class RoomResolver {
             return undefined;
         }
         if (payload.type === 'roomOperationPayload') {
-            if (payload.notSendTo === userUid) {
-                return undefined;
-            }
             return payload.generateOperation(userUid);
         }
     }

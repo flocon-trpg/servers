@@ -28,6 +28,8 @@ const PostgreSQL = {
 
 const SQLite = { dbName: './test.sqlite3' };
 
+const clientId = (i?: number) => `CLIENT_ID${i ?? ''}`;
+
 type RoomValueOperation = Omit<GraphQL.RoomOperationValue, | 'boards' | 'characters' | 'bgms' | 'paramNames' | 'participants'>;
 
 type IntegratedTestStrategy = {
@@ -182,6 +184,7 @@ const operateThenGetRoomTestCore = async (strategy: IntegratedTestStrategy, orm:
                 prevRevision: roomPrevRevision,
                 requestId,
                 operation: {
+                    clientId: clientId(),
                     value: {
                         ...strategy.source.roomValue?.operation,
                         boards: {
@@ -216,6 +219,10 @@ const operateThenGetRoomTestCore = async (strategy: IntegratedTestStrategy, orm:
 
         if (strategy.test.operation === 'id') {
             expect(operateResult.type).toBe('id');
+            if (operateResult.type !== 'id') {
+                throw 'This must not happen';
+            }
+            expect(operateResult.result.requestId).toBe(requestId);
             return;
         }
 
@@ -224,6 +231,8 @@ const operateThenGetRoomTestCore = async (strategy: IntegratedTestStrategy, orm:
             expect(operateResult.type).toBe('success');
             return;
         }
+
+        expect(operateResult.result.operation.operatedBy?.clientId).toBe(clientId());
 
         strategy.test.operation({
             operatedByMe: operateResult.result.operation.value,
@@ -500,6 +509,7 @@ describe('operate then getRoom', () => {
                         prevRevision: roomPrevRevision,
                         requestId,
                         operation: {
+                            clientId: clientId(),
                             value: {
                                 boards: {
                                     replace: [],
@@ -585,6 +595,7 @@ describe('operate then getRoom', () => {
                         prevRevision: roomPrevRevision + 1,
                         requestId,
                         operation: {
+                            clientId: clientId(),
                             value: {
                                 boards: {
                                     replace: [],
@@ -658,6 +669,7 @@ describe('operate then getRoom', () => {
                         prevRevision: roomPrevRevision + 2,
                         requestId,
                         operation: {
+                            clientId: clientId(),
                             value: {
                                 boards: {
                                     replace: [],
@@ -879,6 +891,7 @@ describe('operate then getRoom', () => {
                         prevRevision: roomPrevRevision,
                         requestId,
                         operation: {
+                            clientId: clientId(),
                             value: {
                                 boards: {
                                     replace: [],
@@ -984,6 +997,7 @@ describe('operate then getRoom', () => {
                         prevRevision: roomFirstRevision,
                         requestId,
                         operation: {
+                            clientId: clientId(),
                             value: {
                                 boards: {
                                     replace: [],
@@ -1022,6 +1036,7 @@ describe('operate then getRoom', () => {
                         prevRevision: roomFirstRevision,
                         requestId,
                         operation: {
+                            clientId: clientId(),
                             value: {
                                 boards: {
                                     replace: [],
@@ -1118,6 +1133,7 @@ describe('operate then getRoom', () => {
                         prevRevision: roomFirstRevision,
                         requestId,
                         operation: {
+                            clientId: clientId(),
                             value: {
                                 boards: {
                                     replace: [],
@@ -1167,6 +1183,7 @@ describe('operate then getRoom', () => {
                         prevRevision: roomFirstRevision,
                         requestId,
                         operation: {
+                            clientId: clientId(),
                             value: {
                                 boards: {
                                     replace: [],
@@ -1261,6 +1278,7 @@ describe('operate then getRoom', () => {
                         prevRevision: roomFirstRevision,
                         requestId,
                         operation: {
+                            clientId: clientId(),
                             value: {
                                 boards: {
                                     replace: [],
@@ -1299,6 +1317,7 @@ describe('operate then getRoom', () => {
                         prevRevision: roomFirstRevision,
                         requestId,
                         operation: {
+                            clientId: clientId(),
                             value: {
                                 boards: {
                                     replace: [],

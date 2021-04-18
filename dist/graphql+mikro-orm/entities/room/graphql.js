@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RoomOperated = exports.DeleteRoomOperation = exports.deleteRoomOperation = exports.RoomOperationInput = exports.RoomOperation = exports.roomOperation = exports.RoomOperationValueInput = exports.RoomOperationValue = exports.RoomGetState = void 0;
+exports.RoomOperated = exports.DeleteRoomOperation = exports.deleteRoomOperation = exports.RoomOperationInput = exports.RoomOperation = exports.roomOperation = exports.OperatedBy = exports.RoomOperationValueInput = exports.RoomOperationValue = exports.RoomGetState = void 0;
 const type_graphql_1 = require("type-graphql");
 const Operations_1 = require("../../Operations");
 const graphql_1 = require("./board/graphql");
@@ -17,6 +17,7 @@ const graphql_2 = require("./character/graphql");
 const graphql_3 = require("./participant/graphql");
 const graphql_4 = require("./bgm/graphql");
 const graphql_5 = require("./paramName/graphql");
+const class_validator_1 = require("class-validator");
 let RoomGetState = class RoomGetState {
 };
 __decorate([
@@ -235,6 +236,20 @@ RoomOperationValueInput = __decorate([
     type_graphql_1.InputType()
 ], RoomOperationValueInput);
 exports.RoomOperationValueInput = RoomOperationValueInput;
+let OperatedBy = class OperatedBy {
+};
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
+], OperatedBy.prototype, "userUid", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
+], OperatedBy.prototype, "clientId", void 0);
+OperatedBy = __decorate([
+    type_graphql_1.ObjectType()
+], OperatedBy);
+exports.OperatedBy = OperatedBy;
 exports.roomOperation = 'RoomOperation';
 let RoomOperation = class RoomOperation {
 };
@@ -243,8 +258,8 @@ __decorate([
     __metadata("design:type", Number)
 ], RoomOperation.prototype, "revisionTo", void 0);
 __decorate([
-    type_graphql_1.Field({ nullable: true, description: 'operateRoomを呼んだ人物。promoteなどの結果の場合はnullishになる。' }),
-    __metadata("design:type", String)
+    type_graphql_1.Field(() => OperatedBy, { nullable: true, description: 'operateRoomを呼んだ人物。promoteなどの結果の場合はnullishになる。' }),
+    __metadata("design:type", OperatedBy)
 ], RoomOperation.prototype, "operatedBy", void 0);
 __decorate([
     type_graphql_1.Field(),
@@ -260,6 +275,11 @@ __decorate([
     type_graphql_1.Field(),
     __metadata("design:type", RoomOperationValueInput)
 ], RoomOperationInput.prototype, "value", void 0);
+__decorate([
+    type_graphql_1.Field({ description: 'クライアントを識別するID。適当なIDをクライアント側で生成して渡す。Operationごとに変える必要はない' }),
+    class_validator_1.MaxLength(10),
+    __metadata("design:type", String)
+], RoomOperationInput.prototype, "clientId", void 0);
 RoomOperationInput = __decorate([
     type_graphql_1.InputType()
 ], RoomOperationInput);
