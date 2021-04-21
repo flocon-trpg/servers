@@ -266,7 +266,7 @@ export const defaultMessagePanelConfig = (): MessagePanelConfig => {
         height: 300,
         zIndex: 0,
         isMinimized: false,
-        tabs: [],
+        tabs: [TabConfig.createAll({})],
         customCharacterName: '',
     };
 }

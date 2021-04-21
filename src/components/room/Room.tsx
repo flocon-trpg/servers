@@ -37,7 +37,7 @@ import MyNumberValueDrawer from './MyNumberValueDrawer';
 import { useAllRoomMessages } from '../../hooks/useRoomMessages';
 import LoadingResult from '../../foundations/Result/LoadingResult';
 import VolumeBarPanel from './VolumeBarPanel';
-import { defaultMessagePanelConfig, TabConfig } from '../../states/MessagesPanelConfig';
+import { defaultMessagePanelConfig } from '../../states/MessagesPanelConfig';
 import { usePlayBgm } from '../../hooks/usePlayBgm';
 import { usePlaySoundEffect } from '../../hooks/usePlaySoundEffect';
 import { useMessageNotification } from '../../hooks/useMessageNotification';
@@ -580,7 +580,6 @@ const RoomCore: React.FC<RoomCoreProps> = ({ roomState, roomId, operate, logNoti
                                                 roomId,
                                                 panel: {
                                                     ...defaultMessagePanelConfig(),
-                                                    tabs: [TabConfig.createAll({})],
                                                 },
                                             }));
                                         }}>
