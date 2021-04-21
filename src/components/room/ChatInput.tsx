@@ -8,7 +8,7 @@ import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
 import { ReadonlyStateMap } from '../../@shared/StateMap';
 import MyAuthContext from '../../contexts/MyAuthContext';
-import NotificationContext from './contexts/NotificationContext';
+import LogNotificationContext from './contexts/LogNotificationContext';
 import { apolloError } from '../../hooks/useRoomMessages';
 import { Character } from '../../stateManagers/states/character';
 import { getUserUid } from '../../hooks/useFirebaseUser';
@@ -118,7 +118,7 @@ type Props = {
 export const ChatInput: React.FC<Props> = ({ roomId, style, characters, participants, config }: Props) => {
     const miniInputMaxWidth = 200;
 
-    const notificationContext = React.useContext(NotificationContext);
+    const notificationContext = React.useContext(LogNotificationContext);
     const availableGameSystems = useListAvailableGameSystemsQuery();
     React.useEffect(() => {
         if (availableGameSystems.error == null) {

@@ -48,5 +48,10 @@ export const toTextNotification = (source: Notification): TextNotification => {
     };
 };
 
-const NotificationContext = React.createContext<(notification: Notification) => void>(() => { throw 'NotificationContext is empty'; });
-export default NotificationContext;
+export type TextNotificationsState = {
+    readonly values: ReadonlyArray<TextNotification>;
+    readonly newValue: TextNotification | null;
+}
+
+const LogNotificationContext = React.createContext<(notification: Notification) => void>(() => { throw 'LogNotificationContext is empty'; });
+export default LogNotificationContext;

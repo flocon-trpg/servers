@@ -6,7 +6,7 @@ import { ApolloError, FetchResult, useApolloClient } from '@apollo/client';
 import { GetOnlyStateManager, StateManager } from '../stateManagers/StateManager';
 import { create as createStateManager } from '../stateManagers/main';
 import MyAuthContext from '../contexts/MyAuthContext';
-import NotificationContext, { apolloError, text } from '../components/room/contexts/NotificationContext';
+import LogNotificationContext, { apolloError, text } from '../components/room/contexts/LogNotificationContext';
 import { Room } from '../stateManagers/states/room';
 import { Participant } from '../stateManagers/states/participant';
 import { authNotFound, FirebaseUserState, notSignIn } from './useFirebaseUser';
@@ -56,7 +56,7 @@ type RoomStateResult = {
 export const useRoomState = (roomId: string): RoomStateResult => {
     const myAuth = React.useContext(MyAuthContext);
     const clientId = useClientId();
-    const notificationContext = React.useContext(NotificationContext);
+    const notificationContext = React.useContext(LogNotificationContext);
     const apolloClient = useApolloClient();
     const [operateMutation] = useOperateMutation();
     const [state, setState] = React.useState<RoomState>({ type: loading });

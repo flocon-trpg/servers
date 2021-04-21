@@ -65,6 +65,9 @@ const FirebaseUploader: React.FC<FirebaseUploaderProps> = ({ authUser, onUploade
         <Upload.Dragger
             accept={accept}
             customRequest={options => {
+                if (typeof options.file === 'string' || !('name' in options.file)) {
+                    return;
+                }
                 const storageRef = (() => {
                     if (!webConfig.firebase.storage.enableUnlisted) {
                         return null;

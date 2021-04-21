@@ -7,6 +7,7 @@ import * as generators from '../utils/generators';
 import { __ } from '../@shared/collection';
 
 export type MessageFilter = {
+    showLog: boolean;
     showSystem: boolean;
     showFree: boolean;
     showPublic1: boolean;
@@ -35,6 +36,7 @@ export type TabConfig = {
 export namespace MessageFilter {
     export const isEmpty = (source: MessageFilter): boolean => {
         return source.privateChannels === false
+            && !source.showLog
             && !source.showFree
             && !source.showPublic1
             && !source.showPublic10
@@ -51,6 +53,7 @@ export namespace MessageFilter {
 
     export const isAll = (source: MessageFilter): boolean => {
         return source.privateChannels === true
+            && source.showLog
             && source.showFree
             && source.showPublic1
             && source.showPublic10
@@ -68,6 +71,7 @@ export namespace MessageFilter {
     export const createEmpty = (): MessageFilter => {
         return {
             privateChannels: false,
+            showLog: false,
             showFree: false,
             showPublic1: false,
             showPublic10: false,
@@ -86,6 +90,7 @@ export namespace MessageFilter {
     export const createAll = (): MessageFilter => {
         return {
             privateChannels: true,
+            showLog: true,
             showFree: true,
             showPublic1: true,
             showPublic10: true,
@@ -153,6 +158,7 @@ export const castToPartialMessageFilter = (source: unknown): PartialMessageFilte
     }
     return {
         privateChannels: castToBoolean(source.privateChannels) ?? castToString(source.privateChannels),
+        showLog: castToBoolean(source.showLog),
         showFree: castToBoolean(source.showFree),
         showPublic10: castToBoolean(source.showPublic10),
         showPublic1: castToBoolean(source.showPublic1),
@@ -171,6 +177,7 @@ export const castToPartialMessageFilter = (source: unknown): PartialMessageFilte
 export const toCompleteMessageFilter = (source: PartialMessageFilter): MessageFilter=> {
     return {
         privateChannels: source.privateChannels ?? false,
+        showLog: source.showLog ?? false,
         showFree: source.showFree ?? false,
         showPublic10: source.showPublic10 ?? false,
         showPublic1: source.showPublic1 ?? false,

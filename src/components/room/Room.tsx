@@ -32,7 +32,7 @@ import EditRoomDrawer from './EditRoomDrawer';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import Jdenticon from '../../foundations/Jdenticon';
 import ParticipantList from './ParticipantList';
-import NotificationContext, { graphQLErrors, Notification, text, TextNotification, toTextNotification } from './contexts/NotificationContext';
+import LogNotificationContext, { graphQLErrors, Notification, text, TextNotification, TextNotificationsState, toTextNotification } from './contexts/LogNotificationContext';
 import { Participant } from '../../stateManagers/states/participant';
 import MyNumberValueDrawer from './MyNumberValueDrawer';
 import { newEvent, useAllRoomMessages } from '../../hooks/useRoomMessages';
@@ -52,7 +52,7 @@ type BecomePlayerModalProps = {
 }
 
 const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, onOk, onCancel }: BecomePlayerModalProps) => {
-    const notificationContext = React.useContext(NotificationContext);
+    const notificationContext = React.useContext(LogNotificationContext);
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
     const [promoteToPlayer] = usePromoteToPlayerMutation();
@@ -195,7 +195,7 @@ type DeleteRoomModalProps = {
 }
 
 const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({ roomId, visible, onOk, onCancel, roomCreatedByMe }: DeleteRoomModalProps) => {
-    const notificationContext = React.useContext(NotificationContext);
+    const notificationContext = React.useContext(LogNotificationContext);
     const [isPosting, setIsPosting] = React.useState(false);
     const [deleteRoom] = useDeleteRoomMutation();
     React.useEffect(() => {
@@ -270,7 +270,7 @@ type ChangeMyParticipantNameModalProps = {
 }
 
 const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> = ({ roomId, visible, onOk: onOkCore, onCancel }: ChangeMyParticipantNameModalProps) => {
-    const notificationContext = React.useContext(NotificationContext);
+    const notificationContext = React.useContext(LogNotificationContext);
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
     const [changeParticipantName] = useChangeParticipantNameMutation();
@@ -334,10 +334,13 @@ type Props = {
     roomState: RoomStates.State;
     operate: ((operation: RoomStates.PostOperationSetup) => void);
     roomId: string;
-    allNotifications: ReadonlyArray<TextNotification>;
 }
 
-const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }: Props) => {
+type RoomCoreProps = {
+    logNotifications: TextNotificationsState;
+} & Props
+
+const RoomCore: React.FC<RoomCoreProps> = ({ roomState, roomId, operate, logNotifications }: RoomCoreProps) => {
     useRoomConfig(roomId);
     const myAuth = React.useContext(MyAuthContext);
     const roomConfig = useSelector(state => state.roomConfigModule);
@@ -458,6 +461,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
                     {...roomState}
                     roomId={roomId}
                     allRoomMessagesResult={allRoomMessages}
+                    logNotifications={logNotifications}
                     panelId={pair.key}
                     config={pair.value}
                     height={pair.value.height} />
@@ -717,5 +721,31 @@ const Room: React.FC<Props> = ({ roomState, roomId, allNotifications, operate }:
             </DispatchRoomComponentsStateContext.Provider>
         </ComponentsStateContext.Provider>);
 };
+
+const Room: React.FC<Props> = (props: Props) => {
+    const [logNotification, setLogNotification] = React.useState<Notification>();
+    const [logNotifications, setLogNotifications] = React.useState<TextNotificationsState>({ values: [], newValue: null });
+    React.useEffect(() => {
+        if (logNotification == null) {
+            return;
+        }
+        const textNotification = toTextNotification(logNotification);
+        antdNotification[textNotification.type]({
+            message: textNotification.message,
+            description: textNotification.description,
+            placement: 'bottomRight',
+        });
+        setLogNotifications(oldValue => {
+            return {
+                values: [...oldValue.values, textNotification],
+                newValue: textNotification,
+            }
+        });
+    }, [logNotification]);
+
+    return <LogNotificationContext.Provider value={setLogNotification}>
+        <RoomCore {...props} logNotifications={logNotifications} />
+    </LogNotificationContext.Provider>
+}
 
 export default Room;

@@ -3,10 +3,11 @@ import { __ } from '../@shared/collection';
 import { $free, $system } from '../@shared/Constants';
 import { MessageFilter } from '../states/MessagesPanelConfig';
 import { PrivateChannelSets } from '../utils/PrivateChannelSet';
-import { privateMessage, publicMessage, RoomMessage, soundEffect } from './useRoomMessages';
+import { Message, notification, privateMessage, publicMessage, RoomMessage, soundEffect } from './useRoomMessages';
 
 export function useMessageFilter(config: MessageFilter) {
     const {
+        showLog,
         showSystem,
         showFree,
         showPublic1,
@@ -21,8 +22,10 @@ export function useMessageFilter(config: MessageFilter) {
         showPublic10,
         privateChannels: privateChannelsAsString,
     } = config;
-    return React.useCallback((message: RoomMessage) => {
+    return React.useCallback((message: Message) => {
         switch (message.type) {
+            case notification:
+                return showLog;
             case publicMessage: {
                 if (showSystem && message.value.channelKey === $system) {
                     return true;

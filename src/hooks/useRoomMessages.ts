@@ -2,10 +2,11 @@ import { ApolloError } from '@apollo/client';
 import produce from 'immer';
 import React from 'react';
 import { __ } from '../@shared/collection';
-import NotificationContext, { text } from '../components/room/contexts/NotificationContext';
+import LogNotificationContext, { text, TextNotification, TextNotificationsState } from '../components/room/contexts/LogNotificationContext';
 import { useMessageEventSubscription, useGetMessagesQuery, RoomMessageEventFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment, RoomPublicChannelFragment, RoomSoundEffectFragment } from '../generated/graphql';
 import { appConsole } from '../utils/appConsole';
 import { PrivateChannelSet, PrivateChannelSets } from '../utils/PrivateChannelSet';
+import { usePrevious } from './usePrevious';
 
 // 使い方:
 // 1. どこかでuseAllRoomMessagesを呼ぶ。冗長な通信を避けるため、useAllRoomMessagesを呼ぶ箇所はなるべく少なくする。
@@ -57,13 +58,13 @@ export type RoomMessageEvent = {
 
 
 type StateToReduce = {
-    messages: RoomMessage[];
+    messages: Message[];
     publicChannels: Map<string, RoomPublicChannelFragment>;
     privateChannels: PrivateChannelSets;
 }
 
 export type ReadonlyStateToReduce = {
-    messages: ReadonlyArray<RoomMessage>;
+    messages: ReadonlyArray<Message>;
     publicChannels: ReadonlyMap<string, RoomPublicChannelFragment>;
     privateChannels: {
         toArray(): PrivateChannelSet[];
@@ -172,8 +173,8 @@ const reduceInit = (actions: RoomMessageEventFragment[]): StateToReduce => {
 // Addが来る順に依存するので、時系列は多少ずれるかもしれないが、それは仕様ということにしている。ただし、stateの末尾の要素を数十個程度だけ見ることで、あまり重くせずに時系列を事実上完全に揃えることができると思われる。
 // Updateのときは同じmessageIdがないかどうか探すため、重さはreduceInitと同じ。ただし、UpdateはAddと比べて発生する頻度が少ないと想定している。
 //
-// UpdateによってRoomMessageの状態が変わったときでも、filterは再実行されない。理由は、現状ではChannelの振り分けなどにのみ使われるため必要性が薄いから。ユーザーによる検索はantdのComponentなどのほうで行う。
-const reduceMessages = (state: RoomMessage[], action: RoomMessageEventFragment, filter: (message: RoomMessage) => boolean): RoomMessage[] => {
+// UpdateによってRoomMessageの状態が変わったときでも、filterは再実行されない。理由は、現状ではChannelの振り分けなどにのみ使われるため必要性が薄いから(ChannelはUpdateによって変わることはない)。ユーザーによる検索はantdのComponentなどのほうで行う。
+const reduceMessages = (state: Message[], action: RoomMessageEventFragment, filter: (message: RoomMessage) => boolean): Message[] => {
     switch (action.__typename) {
         case 'RoomPrivateMessage':
         case 'RoomPublicMessage':
@@ -192,13 +193,13 @@ const reduceMessages = (state: RoomMessage[], action: RoomMessageEventFragment, 
             return state;
         case 'RoomPrivateMessageUpdate':
         case 'RoomPublicMessageUpdate': {
-            const index = state.findIndex(msg => msg.value.messageId === action.messageId);
+            const index = state.findIndex(msg => msg.type !== notification && msg.value.messageId === action.messageId);
             if (index === -1) {
                 return state;
             }
             return produce(state, draft => {
                 const target = draft[index];
-                if (target.type === soundEffect) {
+                if (target.type === soundEffect || target.type === notification) {
                     return;
                 }
                 target.value.altTextToSecret = action.altTextToSecret;
@@ -311,7 +312,7 @@ export type AllRoomMessagesResult = {
 
 export const useAllRoomMessages = ({ roomId }: { roomId: string }): AllRoomMessagesResult => {
     const [result, setResult] = React.useState<AllRoomMessagesResultCore>({ type: loading, events: [] });
-    const notificationContext = React.useContext(NotificationContext);
+    const logNotificationContext = React.useContext(LogNotificationContext);
     const messages = useGetMessagesQuery({ variables: { roomId }, fetchPolicy: 'network-only' });
     const messageEventSubscription = useMessageEventSubscription({ variables: { roomId } });
 
@@ -385,59 +386,101 @@ export const useAllRoomMessages = ({ roomId }: { roomId: string }): AllRoomMessa
         if (messageEventSubscription.error == null) {
             return;
         }
-        notificationContext({
+        logNotificationContext({
             type: apolloError,
             error: messageEventSubscription.error,
             createdAt: new Date().getTime(),
         });
-    }, [notificationContext, messageEventSubscription.error]);
+    }, [logNotificationContext, messageEventSubscription.error]);
 
     return result;
 };
 
-const emptyArray: RoomMessage[] = [];
+export const notification = 'notification';
 
-// filterは、常に同じ参照にするかuseMemoなどを使うのを忘れずに。
-export const useFilteredRoomMessages = ({ allRoomMessagesResult, filter }: { allRoomMessagesResult: AllRoomMessagesResult; filter?: (message: RoomMessage) => boolean }): ReadonlyArray<RoomMessage> => {
-    const [result, setResult] = React.useState<RoomMessage[] | null>(null);
-    const prevFilterRef = React.useRef(filter);
+export type Message = {
+    type: typeof notification;
+    value: TextNotification;
+} | RoomMessage
+
+const emptyArray: Message[] = [];
+
+// filterは、常に同じ参照にするかuseCallbackなどを使うのを忘れずに。
+// 仕様として、Roomが変わるなどでallRoomMessagesResult.valueの中身が大きく変わった場合でもそれは正常に反映されない。そのため、常に同じRoomに対するallRoomMessageResultを渡さなければならない。logNotificationsも同様。
+export const useFilteredRoomMessages = ({
+    allRoomMessagesResult,
+    logNotifications,
+    filter,
+}: {
+    allRoomMessagesResult: AllRoomMessagesResult;
+    logNotifications?: TextNotificationsState;
+    filter?: (message: Message) => boolean
+}): ReadonlyArray<Message> => {
+    const [result, setResult] = React.useState<Message[] | null>(null);
+
+    const prevAllRoomMessagesResult = usePrevious(allRoomMessagesResult);
+    const prevLogNotifications = usePrevious(logNotifications);
+    const prevFilter = usePrevious(filter);
+
+    const sort = (x: Message, y: Message): number => {
+        return x.value.createdAt - y.value.createdAt;
+    }
+
     React.useEffect(() => {
-        const prevFilter = prevFilterRef.current;
-        prevFilterRef.current = filter;
-        switch (allRoomMessagesResult.type) {
-            case loaded:
-                setResult(allRoomMessagesResult.value.messages.filter(filter ?? (() => true)));
-                return;
-            case newEvent:
-                setResult(oldValue => {
-                    // すでにRoomMessage[]を求めていた場合、RoomMessage[]全体に対してfilterを呼ぶのではなく、eventが示す差分のみを更新することで動作を軽量化している。
-                    // ReactのdepsはObject.isに相当する操作で等価比較しているようなので、Object.isを用いている。
-                    if (oldValue != null && Object.is(prevFilter, filter)) {
-                        return reduceMessages(oldValue, allRoomMessagesResult.event, filter ?? (() => true));
-                    }
-                    // RoomMessage[]がない、もしくはfilterが変更された場合にここに来る。
-                    // RoomMessage[]を更新し、以後は（filterが変更されない限り）eventを利用して差分のみが更新される。
-                    return allRoomMessagesResult.value.messages.filter(filter ?? (() => true));
-                });
-                return;
-            default:
-                return;
-        }
-    }, [allRoomMessagesResult, filter]);
+        const toRoomMessages = () => allRoomMessagesResult.type === loaded || allRoomMessagesResult.type === newEvent ? allRoomMessagesResult.value.messages : [];
+        const toNotificationMessages = () => {
+            if (logNotifications == null) {
+                return [];
+            }
+            return logNotifications.values.map(n => ({ type: notification, value: n } as const));
+        };
+
+        setResult(oldValue => {
+            if (oldValue == null || prevFilter !== filter) {
+                // RoomMessage[]がない、もしくはfilterが変更された場合にここに来る。
+                // RoomMessage[]を更新し、以後は（filterが変更されない限り）eventを利用して差分のみが更新される
+                return ([...toRoomMessages(), ...toNotificationMessages()].filter(filter ?? (() => true)).sort(sort));
+            }
+
+            let result = oldValue;
+            if (allRoomMessagesResult !== prevAllRoomMessagesResult) {
+                switch (allRoomMessagesResult.type) {
+                    case newEvent:
+                        result = reduceMessages(result, allRoomMessagesResult.event, filter ?? (() => true));
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (logNotifications !== prevLogNotifications && logNotifications?.newValue != null) {
+                const newMessage = { type: notification, value: logNotifications.newValue } as const;
+                if (filter == null || filter(newMessage)) {
+                    // RoomMessageは通信のラグがあるため、createdAtの時系列は多少ずれるかもしれないが、それは仕様ということにしている。ただし、oldValueの末尾の要素を数十個程度だけ見ることで、あまり重くせずに時系列を事実上完全に揃えることができると思われる。
+                    result = [...oldValue, newMessage];
+                }
+            }
+
+            return result;
+        });
+    }, [allRoomMessagesResult, prevAllRoomMessagesResult, logNotifications, prevLogNotifications, filter, prevFilter]);
+
     return result ?? emptyArray;
 };
 
-// filterとthenMapは、常に同じ参照にするかuseMemoなどを使うのを忘れずに。
+// filterとthenMapは、常に同じ参照にするかuseCallbackなどを使うのを忘れずに。
 export const useFilteredAndMapRoomMessages = <TResult>({
     allRoomMessagesResult,
+    logNotifications,
     filter,
     thenMap,
 }: {
     allRoomMessagesResult: AllRoomMessagesResult;
-    filter?: (message: RoomMessage) => boolean;
-    thenMap: (message: ReadonlyArray<RoomMessage>) => ReadonlyArray<TResult>;
+    logNotifications: TextNotificationsState;
+    filter?: (message: Message) => boolean;
+    thenMap: (message: ReadonlyArray<Message>) => ReadonlyArray<TResult>;
 }): ReadonlyArray<TResult> => {
-    const nonMappedResult = useFilteredRoomMessages({ allRoomMessagesResult, filter });
+    const nonMappedResult = useFilteredRoomMessages({ allRoomMessagesResult, logNotifications, filter });
     const [result, setResult] = React.useState<ReadonlyArray<TResult>>([]);
     React.useEffect(() => {
         setResult(thenMap(nonMappedResult));

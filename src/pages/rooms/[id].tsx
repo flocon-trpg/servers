@@ -8,7 +8,7 @@ import { ApolloProvider, FetchResult } from '@apollo/client';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import { deleted, getRoomFailure, joined, loading, mutationFailure, myAuthIsUnavailable, nonJoined, useRoomState } from '../../hooks/useRoomState';
 import Center from '../../foundations/Center';
-import NotificationContext, { TextNotification, toTextNotification, Notification } from '../../components/room/contexts/NotificationContext';
+import LogNotificationContext, { TextNotification, toTextNotification, Notification } from '../../components/room/contexts/LogNotificationContext';
 import LoadingResult from '../../foundations/Result/LoadingResult';
 import NotSignInResult from '../../foundations/Result/NotSignInResult';
 
@@ -114,7 +114,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
     );
 };
 
-const RoomRouter: React.FC<{ id: string; allNotifications: ReadonlyArray<TextNotification> }> = ({ id, allNotifications }: { id: string; allNotifications: ReadonlyArray<TextNotification> }) => {
+const RoomRouter: React.FC<{ id: string }> = ({ id }: { id: string }) => {
     const { refetch, state } = useRoomState(id);
 
     switch (state.type) {
@@ -128,7 +128,7 @@ const RoomRouter: React.FC<{ id: string; allNotifications: ReadonlyArray<TextNot
             }
             return (
                 <Layout requiresLogin showEntryForm={false}>
-                    <RoomComponent roomId={id} roomState={state.roomState} operate={state.operateRoom} allNotifications={allNotifications} />
+                    <RoomComponent roomId={id} roomState={state.roomState} operate={state.operateRoom} />
                 </Layout>);
         }
         case nonJoined:
@@ -148,7 +148,7 @@ const RoomRouter: React.FC<{ id: string; allNotifications: ReadonlyArray<TextNot
                 case GetRoomFailureType.NotFound:
                     return (
                         <Layout requiresLogin showEntryForm={false}>
-                            <Result status='404' title='該当する部屋が見つかりませんでした。' subTitle='部屋が存在しているか、適切な権限があるかどうか確認してください。'/>
+                            <Result status='404' title='該当する部屋が見つかりませんでした。' subTitle='部屋が存在しているか、適切な権限があるかどうか確認してください。' />
                         </Layout>);
                 case GetRoomFailureType.NotSignIn:
                     return (
@@ -183,9 +183,9 @@ const RoomRouter: React.FC<{ id: string; allNotifications: ReadonlyArray<TextNot
     }
 };
 
-const RoomCore: React.FC<{ allNotifications: ReadonlyArray<TextNotification> }> = ({ allNotifications }: { allNotifications: ReadonlyArray<TextNotification> }) => {
+const Room: React.FC = () => {
     const router = useRouter();
-    const id = router.query.id;
+    const id = router.query.id
 
     if (Array.isArray(id) || id == null) {
         return (
@@ -195,30 +195,7 @@ const RoomCore: React.FC<{ allNotifications: ReadonlyArray<TextNotification> }> 
                     title="パラメーターが不正です。" />
             </Layout>);
     }
-
-    return (<RoomRouter id={id} allNotifications={allNotifications} />);
-};
-
-const Room: React.FC = () => {
-    const [notification, setNotification] = React.useState<Notification>();
-    const [allNotifications, setAllNotifications] = React.useState<TextNotification[]>([]);
-    React.useEffect(() => {
-        if (notification == null) {
-            return;
-        }
-        const textNotification = toTextNotification(notification);
-        antdNotification[textNotification.type]({
-            message: textNotification.message,
-            description: textNotification.description,
-            placement: 'bottomRight',
-        });
-        setAllNotifications(oldValue => {
-            return [...oldValue, textNotification];
-        });
-    }, [notification]);
-    return (<NotificationContext.Provider value={setNotification}>
-        <RoomCore allNotifications={allNotifications} />
-    </NotificationContext.Provider>);
+    return (<RoomRouter id={id} />);
 };
 
 export default Room;

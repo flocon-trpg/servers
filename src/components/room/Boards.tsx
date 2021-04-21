@@ -24,7 +24,7 @@ import { MyNumberValue } from '../../stateManagers/states/myNumberValue';
 import { Participant } from '../../stateManagers/states/participant';
 import { MyKonva } from '../../foundations/MyKonva';
 import { BoardLocation } from '../../stateManagers/states/boardLocation';
-import { AllRoomMessagesResult, publicMessage, RoomMessage, useFilteredRoomMessages } from '../../hooks/useRoomMessages';
+import { AllRoomMessagesResult, Message, publicMessage, RoomMessage, useFilteredRoomMessages } from '../../hooks/useRoomMessages';
 import { $free } from '../../@shared/Constants';
 
 namespace Resource {
@@ -106,7 +106,7 @@ type SelectedPieceKey = {
     stateId: string;
 }
 
-const publicMessageFilter = (message: RoomMessage): boolean => {
+const publicMessageFilter = (message: Message): boolean => {
     return message.type === publicMessage;
 };
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tabs, Button, Menu, Dropdown, Tooltip, Popover, Drawer, Col, Row, Checkbox, Divider, Radio, Alert, Input, Modal, Result } from 'antd';
 import moment from 'moment';
-import { AllRoomMessagesSuccessResult, apolloError, failure, loading, RoomMessage, publicMessage, privateMessage, soundEffect, AllRoomMessagesResult, useFilteredAndMapRoomMessages } from '../../hooks/useRoomMessages';
+import { AllRoomMessagesSuccessResult, apolloError, failure, loading, RoomMessage, publicMessage, privateMessage, soundEffect, AllRoomMessagesResult, useFilteredAndMapRoomMessages, Message } from '../../hooks/useRoomMessages';
 import { __ } from '../../@shared/collection';
 import { PrivateChannelSet, PrivateChannelSets } from '../../utils/PrivateChannelSet';
 import ChatInput from './ChatInput';
@@ -30,6 +30,7 @@ import LoadingResult from '../../foundations/Result/LoadingResult';
 import QueryResultViewer from '../../foundations/QueryResultViewer';
 import { useMessageFilter } from '../../hooks/useMessageFilter';
 import { RoomMessage as RoomMessageNameSpace } from './RoomMessage';
+import { TextNotification, TextNotificationsState } from './contexts/LogNotificationContext';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -144,6 +145,10 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
             <Col flex='auto' />
             <Col flex={0}>特殊チャンネル</Col>
             <Col span={drawerInputSpan}>
+                <Checkbox checked={config?.showLog ?? false} onChange={e => onChange({ showLog: e.target.checked })}>
+                    <span>ログ</span>
+                </Checkbox>
+                <br />
                 <Checkbox checked={config?.showSystem ?? false} onChange={e => onChange({ showSystem: e.target.checked })}>
                     <span>システムメッセージ</span>
                 </Checkbox>
@@ -302,7 +307,7 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (props: Chann
 
 type RoomMessageComponentProps = {
     roomId: string;
-    message: RoomMessageNameSpace.MessageState;
+    message: RoomMessageNameSpace.MessageState | TextNotification;
     participants: ReadonlyMap<string, Participant.State> | undefined;
     showPrivateMessageMembers?: boolean;
 } & PublicChannelNames
@@ -316,30 +321,32 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
     const [makeMessageNotSecret] = useMakeMessageNotSecretMutation();
     const [isEditModalVisible, setIsEditModalVisible] = React.useState(false);
 
+    const roomMessage = message.type === privateMessage || message.type === publicMessage ? message.value : null;
+
     let createdByMe: boolean | null;
-    if (typeof myAuth === 'string') {
+    if (typeof myAuth === 'string' || roomMessage == null) {
         createdByMe = null;
     } else {
-        createdByMe = (myAuth.uid === message.value.createdBy);
+        createdByMe = (myAuth.uid === roomMessage.createdBy);
     }
 
-    const createdAt = message.value.createdAt as number | undefined;
+    const createdAt = message.type === privateMessage || message.type === publicMessage ? message.value.createdAt : message.createdAt as number | undefined;
     let datetime: string | null = null;
     if (createdAt != null) {
         datetime = moment(new Date(createdAt)).format('YYYY/MM/DD HH:mm:ss');
     }
 
     let updatedInfo: JSX.Element | null = null;
-    if (message.value.updatedAt != null) {
-        if (message.value.text == null) {
+    if (roomMessage?.updatedAt != null) {
+        if (roomMessage.text == null) {
             updatedInfo = (
-                <Tooltip title={`${moment(new Date(message.value.updatedAt)).format('YYYY/MM/DD HH:mm:ss')}に削除されました`}>
+                <Tooltip title={`${moment(new Date(roomMessage.updatedAt)).format('YYYY/MM/DD HH:mm:ss')}に削除されました`}>
                     <span style={({ color: 'gray' })}>(削除済み)</span>
                 </Tooltip>
             );
         } else {
             updatedInfo = (
-                <Tooltip title={`${moment(new Date(message.value.updatedAt)).format('YYYY/MM/DD HH:mm:ss')}に編集されました`}>
+                <Tooltip title={`${moment(new Date(roomMessage.updatedAt)).format('YYYY/MM/DD HH:mm:ss')}に編集されました`}>
                     <span style={({ color: 'gray' })}>(編集済み)</span>
                 </Tooltip>
             );
@@ -350,7 +357,6 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
     if (showPrivateMessageMembers && message.type === privateMessage) {
         if (message.value.visibleTo.length === 0) {
             privateMessageMembersInfo = <div>(独り言)</div>;
-
         } else {
             const visibleTo = message.value.visibleTo.map(v => participants?.get(v)?.name ?? v).sort((x, y) => x.localeCompare(y));
             privateMessageMembersInfo = <Popover content={<ul>{visibleTo.map((str, i) => <li key={i}>{str}</li>)}</ul>}>
@@ -358,24 +364,24 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
             </Popover>;
         }
     }
-    const notSecretMenuItem = (message.value.isSecret && message.value.createdBy != null && message.value.createdBy === getUserUid(myAuth)) ?
+    const notSecretMenuItem = (roomMessage?.isSecret === true && roomMessage.createdBy != null && roomMessage.createdBy === getUserUid(myAuth)) ?
         <Menu.Item
             onClick={() => {
-                makeMessageNotSecret({ variables: { messageId: message.value.messageId, roomId } });
+                makeMessageNotSecret({ variables: { messageId: roomMessage.messageId, roomId } });
             }}>
             公開
         </Menu.Item>
         : null;
-    const editMenuItem = (createdByMe === true && message.value.commandResult == null) ?
+    const editMenuItem = (roomMessage != null && createdByMe === true && roomMessage.commandResult == null) ?
         <Menu.Item onClick={() => {
             setIsEditModalVisible(true);
         }}>
             編集
         </Menu.Item> :
         null;
-    const deleteMenuItem = createdByMe === true ?
+    const deleteMenuItem = (roomMessage != null && createdByMe === true) ?
         <Menu.Item onClick={() => {
-            deleteMessageMutation({ variables: { messageId: message.value.messageId, roomId } });
+            deleteMessageMutation({ variables: { messageId: roomMessage.messageId, roomId } });
         }}>
             削除
         </Menu.Item> :
@@ -391,9 +397,9 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
         <div style={({ display: 'grid', gridTemplateRows: `${headerHeight}px 1fr`, gridTemplateColumns: '1fr 40px', marginBottom: 4, marginTop: 4 })}>
             <div style={({ gridRow: '1 / 2', gridColumn: '1 / 2', display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
                 <div style={({ flex: '0 0 auto' })}>
-                    {RoomMessageNameSpace.userName(message, participants ?? new Map())}
+                    {message.type === privateMessage || message.type === publicMessage && RoomMessageNameSpace.userName(message, participants ?? new Map())}
                 </div>
-                <div style={({ flex: '0 0 auto', color: 'gray', marginLeft: 6 })}>{RoomMessageNameSpace.toChannelName(message, props, participants ?? new Map())}</div>
+                <div style={({ flex: '0 0 auto', color: 'gray', marginLeft: 6 })}>{message.type !== privateMessage && message.type !== publicMessage ? '(ログ)' : RoomMessageNameSpace.toChannelName(message, props, participants ?? new Map())}</div>
                 <div style={({ flex: '0 0 auto', color: 'gray', marginLeft: 6 })}>{datetime}</div>
                 {privateMessageMembersInfo != null && <div style={{ flex: '0 0 auto', width: 6 }} />}
                 {privateMessageMembersInfo}
@@ -401,7 +407,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
                 {updatedInfo}
                 <div style={({ flex: 1 })} />
             </div>
-            <RoomMessageNameSpace.Content style={{ overflowWrap: 'break-word', gridRow: '2 / 3', gridColumn: '1 / 2', minHeight: contentMinHeight }} message={message} />
+            {message.type === privateMessage || message.type === publicMessage ? <RoomMessageNameSpace.Content style={{ overflowWrap: 'break-word', gridRow: '2 / 3', gridColumn: '1 / 2', minHeight: contentMinHeight }} message={message} /> : <div style={{ overflowWrap: 'break-word', gridRow: '2 / 3', gridColumn: '1 / 2', minHeight: contentMinHeight }}>{message.message}</div>}
             <div style={({ gridRow: '1 / 3', gridColumn: '2 / 3', justifySelf: 'center', alignSelf: 'center' })} >
                 {allMenuItemsAreNull ? null : <Dropdown overlay={<Menu>{menuItems}</Menu>} trigger={['click']}>
                     <Button type='text' size='small'><Icon.EllipsisOutlined /></Button>
@@ -411,7 +417,10 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
                 title='メッセージの編集'
                 visible={isEditModalVisible}
                 onOk={(value, setValue) => {
-                    editMessageMutation({ variables: { messageId: message.value.messageId, roomId, text: value } }).then(() => {
+                    if (roomMessage == null) {
+                        return;
+                    }
+                    editMessageMutation({ variables: { messageId: roomMessage.messageId, roomId, text: value } }).then(() => {
                         setIsEditModalVisible(false);
                         setValue('');
                     });
@@ -421,7 +430,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
                     setValue('');
                 }}
                 onOpen={setValue => {
-                    setValue(message.value.text ?? '');
+                    setValue(roomMessage?.text ?? '');
                 }} />
         </div>
     );
@@ -429,6 +438,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
 
 type MessageTabPaneProps = {
     allRoomMessagesResult: AllRoomMessagesSuccessResult;
+    logNotifications: TextNotificationsState;
     participants: ReadonlyMap<string, Participant.State>;
     roomId: string;
     contentHeight: number;
@@ -438,15 +448,16 @@ type MessageTabPaneProps = {
 const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProps) => {
     const {
         allRoomMessagesResult,
+        logNotifications,
         participants,
         roomId,
         contentHeight,
         config,
     } = props;
 
-    const filter = useMessageFilter(config); 
+    const filter = useMessageFilter(config);
 
-    const thenMap = React.useCallback((messages: ReadonlyArray<RoomMessage>) => {
+    const thenMap = React.useCallback((messages: ReadonlyArray<Message>) => {
         return [...messages]
             .sort((x, y) => y.value.createdAt - x.value.createdAt)
             .map(message => {
@@ -465,19 +476,20 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
                     publicChannel8Name={props.publicChannel8Name}
                     publicChannel9Name={props.publicChannel9Name}
                     publicChannel10Name={props.publicChannel10Name}
-                    key={message.value.messageId}
+                    key={message.type === privateMessage || message.type === publicMessage ? message.value.messageId : message.value.createdAt}
                     roomId={roomId}
-                    message={message}
+                    message={message.type === publicMessage || message.type === privateMessage ? message : message.value}
                     participants={participants} />);
             });
     }, [roomId, participants, props.publicChannel1Name, props.publicChannel2Name, props.publicChannel3Name, props.publicChannel4Name, props.publicChannel5Name, props.publicChannel6Name, props.publicChannel7Name, props.publicChannel8Name, props.publicChannel9Name, props.publicChannel10Name]);
 
-    const messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, filter, thenMap });
+    const messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, logNotifications, filter, thenMap });
     return <PagenationScroll source={messages} elementMinHeight={headerHeight + contentMinHeight} height={contentHeight} />;
 };
 
 type Props = {
     allRoomMessagesResult: AllRoomMessagesResult;
+    logNotifications: TextNotificationsState;
     characters: ReadonlyStateMap<Character.State>;
     participants: ReadonlyMap<string, Participant.State>;
     roomId: string;
@@ -487,7 +499,7 @@ type Props = {
 } & PublicChannelNames
 
 const RoomMessages: React.FC<Props> = (props: Props) => {
-    const { allRoomMessagesResult, characters, participants, roomId, height, panelId, config } = props;
+    const { allRoomMessagesResult, logNotifications, characters, participants, roomId, height, panelId, config } = props;
 
     const contentHeight = Math.max(0, height - 250);
     const tabsHeight = Math.max(0, height - 210);
