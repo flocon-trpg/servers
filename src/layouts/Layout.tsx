@@ -101,7 +101,7 @@ const Layout: React.FC<PropsWithChildren<Props>> = ({ children, showEntryForm, o
         if (showEntryForm) {
             return (
                 <Center>
-                    <Card title="Entry form" >
+                    <Card title="サーバーのパスフレーズ入力" >
                         <EntryFormComponent onEntry={onEntry} />
                     </Card>
                 </Center>

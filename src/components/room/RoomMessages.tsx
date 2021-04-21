@@ -615,7 +615,7 @@ const RoomMessages: React.FC<Props> = (props: Props) => {
             {tabPanels}
         </Tabs>
         <div style={{ flex: 1 }} />
-        <ChatInput style={{ flex: 'auto', margin: '0 4px' }} roomId={roomId} characters={characters} participants={participants} config={config} />
+        <ChatInput {...props} style={{ flex: 'auto', margin: '0 4px' }} roomId={roomId} characters={characters} participants={participants} config={config} />
     </div>);
 };
 

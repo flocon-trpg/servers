@@ -18,6 +18,7 @@ import { Participant } from '../../stateManagers/states/participant';
 import { Gutter } from 'antd/lib/grid/row';
 import DrawerFooter from '../../layouts/DrawerFooter';
 import { __ } from '../../@shared/collection';
+import { PublicChannelNames } from '../../utils/types';
 
 type PrivateMessageDrawerProps = {
     visible: boolean;
@@ -113,9 +114,25 @@ type Props = {
     characters: ReadonlyStateMap<Character.State>;
     participants: ReadonlyMap<string, Participant.State>;
     config: MessagePanelConfig;
-}
+} & PublicChannelNames
 
-export const ChatInput: React.FC<Props> = ({ roomId, style, characters, participants, config }: Props) => {
+export const ChatInput: React.FC<Props> = ({ 
+    roomId, 
+    style, 
+    characters, 
+    participants, 
+    config,
+    publicChannel1Name,
+    publicChannel2Name,
+    publicChannel3Name,
+    publicChannel4Name,
+    publicChannel5Name,
+    publicChannel6Name,
+    publicChannel7Name,
+    publicChannel8Name,
+    publicChannel9Name,
+    publicChannel10Name,
+}: Props) => {
     const miniInputMaxWidth = 200;
 
     const notificationContext = React.useContext(LogNotificationContext);
@@ -283,34 +300,34 @@ export const ChatInput: React.FC<Props> = ({ roomId, style, characters, particip
                             setSelectedPublicChannel(option.key);
                         }}>
                         <Select.Option key='1' value='1'>
-                            1
+                            {publicChannel1Name}
                         </Select.Option>
                         <Select.Option key='2' value='2'>
-                            2
+                            {publicChannel2Name}
                         </Select.Option>
                         <Select.Option key='3' value='3'>
-                            3
+                            {publicChannel3Name}
                         </Select.Option>
                         <Select.Option key='4' value='4'>
-                            4
+                            {publicChannel4Name}
                         </Select.Option>
                         <Select.Option key='5' value='5'>
-                            5
+                            {publicChannel5Name}
                         </Select.Option>
                         <Select.Option key='6' value='6'>
-                            6
+                            {publicChannel6Name}
                         </Select.Option>
                         <Select.Option key='7' value='7'>
-                            7
+                            {publicChannel7Name}
                         </Select.Option>
                         <Select.Option key='8' value='8'>
-                            8
+                            {publicChannel8Name}
                         </Select.Option>
                         <Select.Option key='9' value='9'>
-                            9
+                            {publicChannel9Name}
                         </Select.Option>
                         <Select.Option key='10' value='10'>
-                            10
+                            {publicChannel10Name}
                         </Select.Option>
                     </Select>}
                     {selectedChannelType === privateChannelKey && <>
