@@ -499,7 +499,7 @@ type Props = {
 } & PublicChannelNames
 
 const RoomMessages: React.FC<Props> = (props: Props) => {
-    const { allRoomMessagesResult, logNotifications, characters, participants, roomId, height, panelId, config } = props;
+    const { allRoomMessagesResult, characters, participants, roomId, height, panelId, config } = props;
 
     const contentHeight = Math.max(0, height - 250);
     const tabsHeight = Math.max(0, height - 210);

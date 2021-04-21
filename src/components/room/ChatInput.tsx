@@ -153,14 +153,9 @@ export const ChatInput: React.FC<Props> = ({
     const [writePublicMessage] = useWritePublicMessageMutation();
     const [writePrivateMessage] = useWritePrivateMessageMutation();
     const [isPosting, setIsPosting] = React.useState(false); // 現状、チャンネルごとに並列的に投稿することはできないが、この制限はstateを増やすなどにより取り除くことができる。
-    const [selectedChannelType, setSelectedChannelType] = React.useState<typeof freeChannelKey | typeof publicChannelKey | typeof privateChannelKey>(freeChannelKey);
-    const [selectedCharacterType, setSelectedCharacterType] = React.useState<typeof none | typeof some | typeof custom>(none);
-    const [selectedPublicChannel, setSelectedPublicChannel] = React.useState<'1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10'>('1');
     const [selectedParticipantIds, setSelectedParticipantIds] = React.useState<ReadonlySet<string>>(new Set());
     const [text, setText] = React.useState('');
-    const [customName, setCustomName] = React.useState('');
     const [isDrawerVisible, setIsDrawerVisible] = React.useState(false);
-    const roomConfig = useSelector(state => state.roomConfigModule);
     const dispatch = useDispatch();
 
     const myUserUid = getUserUid(myAuth);
@@ -199,6 +194,39 @@ export const ChatInput: React.FC<Props> = ({
         });
     }, [characters, myUserUid]);
 
+    let selectedCharacterType: typeof some | typeof none | typeof custom = none;
+    switch (config.selectedCharacterType) {
+        case 'some':
+        case 'none':
+        case 'custom':
+            selectedCharacterType = config.selectedCharacterType;
+            break;
+    }
+
+    let selectedChannelType: typeof publicChannelKey | typeof privateChannelKey | typeof freeChannelKey = freeChannelKey;
+    switch (config.selectedChannelType) {
+        case publicChannelKey:
+        case privateChannelKey:
+        case freeChannelKey:
+            selectedChannelType = config.selectedChannelType;
+    }
+
+    let selectedPublicChannel: '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' = '1';
+    switch (config.selectedPublicChannelKey) {
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+        case '10':
+            selectedPublicChannel = config.selectedPublicChannelKey;
+            break;
+    }
+
     const onPost = () => {
         if (isPosting || text.trim() === '') {
             return;
@@ -211,7 +239,7 @@ export const ChatInput: React.FC<Props> = ({
         }
         let customNameVariable: string | undefined;
         if (selectedCharacterType === custom) {
-            customNameVariable = customName;
+            customNameVariable = config.customCharacterName;
         } else {
             customNameVariable = undefined;
         }
@@ -277,7 +305,10 @@ export const ChatInput: React.FC<Props> = ({
                     <div style={titleStyle}>
                         送信先
                     </div>
-                    <Select style={{ flex: 1, maxWidth: miniInputMaxWidth }} value={selectedChannelType} onSelect={newValue => setSelectedChannelType(newValue)}>
+                    <Select
+                        style={{ flex: 1, maxWidth: miniInputMaxWidth }}
+                        value={selectedChannelType}
+                        onSelect={newValue => dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { selectedChannelType: newValue } }))}>
                         <Select.Option value={publicChannelKey}>
                             メイン
                         </Select.Option>
@@ -299,7 +330,7 @@ export const ChatInput: React.FC<Props> = ({
                             if (option.key === $free || option.key === $system) {
                                 return;
                             }
-                            setSelectedPublicChannel(option.key);
+                            dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { selectedPublicChannelKey: option.key } }));
                         }}>
                         <Select.Option key='1' value='1'>
                             {publicChannel1Name}
@@ -344,7 +375,10 @@ export const ChatInput: React.FC<Props> = ({
                     <div style={titleStyle}>
                         キャラクター
                     </div>
-                    <Select style={{ flex: 1, maxWidth: miniInputMaxWidth }} value={selectedCharacterType} onSelect={newValue => setSelectedCharacterType(newValue)}>
+                    <Select
+                        style={{ flex: 1, maxWidth: miniInputMaxWidth }}
+                        value={selectedCharacterType}
+                        onSelect={newValue => dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { selectedCharacterType: newValue } }))}>
                         <Select.Option value={none}>
                             なし
                         </Select.Option>
@@ -374,7 +408,7 @@ export const ChatInput: React.FC<Props> = ({
                         }}>
                         {myCharacters}
                     </Select>}
-                    {selectedCharacterType === custom && <Input style={{ flex: 1, maxWidth: miniInputMaxWidth }} placeholder='名前' value={customName} onChange={e => setCustomName(e.target.value)} />}
+                    {selectedCharacterType === custom && <Input style={{ flex: 1, maxWidth: miniInputMaxWidth }} placeholder='名前' value={config.customCharacterName} onChange={e => dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { customCharacterName: e.target.value } }))} />}
                     <div style={{ flex: 1 }} />
                 </div>
                 <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>

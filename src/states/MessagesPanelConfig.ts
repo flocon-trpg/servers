@@ -174,7 +174,7 @@ export const castToPartialMessageFilter = (source: unknown): PartialMessageFilte
     };
 };
 
-export const toCompleteMessageFilter = (source: PartialMessageFilter): MessageFilter=> {
+export const toCompleteMessageFilter = (source: PartialMessageFilter): MessageFilter => {
     return {
         privateChannels: source.privateChannels ?? false,
         showLog: source.showLog ?? false,
@@ -205,7 +205,7 @@ export const castToPartialTabConfig = (source: unknown): PartialTabConfig | unde
     };
 };
 
-export const toCompleteTabConfig = (source: PartialTabConfig): TabConfig=> {
+export const toCompleteTabConfig = (source: PartialTabConfig): TabConfig => {
     return {
         ...toCompleteMessageFilter(source),
         createdAt: source.createdAt ?? new Date().getTime(),
@@ -217,7 +217,11 @@ export const toCompleteTabConfig = (source: PartialTabConfig): TabConfig=> {
 export type MessagePanelConfig = {
     isMinimized: boolean;
     tabs: TabConfig[];
+    selectedChannelType?: string;
+    selectedPublicChannelKey?: string;
+    selectedCharacterType?: string;
     selectedCharacterStateId?: string;
+    customCharacterName: string;
     selectedGameSystem?: string;
 } & DraggablePanelConfigBase
 
@@ -231,7 +235,11 @@ export const castToPartialMessagePanelConfig = (source: unknown): PartialMessage
         ...castToPartialDraggablePanelConfigBase(source),
         isMinimized: castToBoolean(source.isMinimized),
         tabs: castToArray(source.tabs, castToPartialTabConfig)?.map(toCompleteTabConfig),
+        selectedChannelType: castToString(source.selectedChannelType),
+        selectedPublicChannelKey: castToString(source.selectedPublicChannelKey),
+        selectedCharacterType: castToString(source.selectedCharacterType),
         selectedCharacterStateId: castToString(source.selectedCharacterStateId),
+        customCharacterName: castToString(source.customCharacterName),
         selectedGameSystem: castToString(source.selectedGameSystem),
     };
 };
@@ -241,13 +249,17 @@ export const toCompleteMessagePanelConfig = (source: PartialMessagePanelConfig):
         ...toCompleteDraggablePanelConfigBase(source),
         isMinimized: source.isMinimized ?? false,
         tabs: source.tabs ?? [],
+        selectedChannelType: source.selectedChannelType,
+        selectedPublicChannelKey: source.selectedPublicChannelKey,
+        selectedCharacterType: source.selectedCharacterType,
         selectedCharacterStateId: source.selectedCharacterStateId,
+        customCharacterName: source.customCharacterName ?? '',
         selectedGameSystem: source.selectedGameSystem,
     };
 };
 
-export const defaultMessagePanelsConfig = (): Record<string, MessagePanelConfig> => {
-    const config: MessagePanelConfig = {
+export const defaultMessagePanelConfig = (): MessagePanelConfig => {
+    return {
         x: 0,
         y: 400,
         width: 300,
@@ -255,9 +267,13 @@ export const defaultMessagePanelsConfig = (): Record<string, MessagePanelConfig>
         zIndex: 0,
         isMinimized: false,
         tabs: [],
+        customCharacterName: '',
     };
+}
+
+export const defaultMessagePanelsConfig = (): Record<string, MessagePanelConfig> => {
     const result: Record<string, MessagePanelConfig> = {};
     const id = generators.simpleId();
-    result[id] = config;
+    result[id] = defaultMessagePanelConfig();
     return result;
 };

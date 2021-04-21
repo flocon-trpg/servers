@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Layout as AntdLayout, notification as antdNotification, Input, Tooltip, Result, Button, Popover } from 'antd';
+import { Menu, Layout as AntdLayout, notification as antdNotification, Input, Tooltip, Result, Popover } from 'antd';
 import DraggableCard, { horizontalPadding } from '../../foundations/DraggableCard';
 import CharacterList from './CharacterList';
 import useRoomConfig from '../../hooks/localStorage/useRoomConfig';
@@ -11,8 +11,7 @@ import Boards from './Boards';
 import { recordToArray } from '../../utils/record';
 import RoomMessages from './RoomMessages';
 import CharacterParameterNamesDrawer from './CharacterParameterNamesDrawer';
-import { RoomComponentsState, defaultRoomComponentsState, reduceComponentsState, editRoomDrawerVisibility } from './RoomComponentsState';
-import DrawerFooter from '../../layouts/DrawerFooter';
+import { defaultRoomComponentsState, reduceComponentsState, editRoomDrawerVisibility } from './RoomComponentsState';
 import ComponentsStateContext from './contexts/RoomComponentsStateContext';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import OperateContext from './contexts/OperateContext';
@@ -20,7 +19,7 @@ import CharacterDrawer from './CharacterDrawer';
 import BoardDrawer from './BoardDrawer';
 import { boardPanel, characterPanel, gameEffectPanel, messagePanel, participantPanel } from '../../states/RoomConfig';
 import * as Icon from '@ant-design/icons';
-import { ChangeParticipantNameFailureType, DeleteRoomFailureType, ParticipantRole, PromoteFailureType, useChangeParticipantNameMutation, useDeleteRoomMutation, useGetLogLazyQuery, useGetLogQuery, useJoinRoomAsPlayerMutation, useLeaveRoomMutation, usePromoteToPlayerMutation, useRequiresPhraseToJoinAsPlayerLazyQuery, useRequiresPhraseToJoinAsPlayerQuery } from '../../generated/graphql';
+import { DeleteRoomFailureType, ParticipantRole, PromoteFailureType, useChangeParticipantNameMutation, useDeleteRoomMutation, useGetLogLazyQuery, useLeaveRoomMutation, usePromoteToPlayerMutation, useRequiresPhraseToJoinAsPlayerLazyQuery } from '../../generated/graphql';
 import { useRouter } from 'next/router';
 import path from '../../utils/path';
 import SoundPlayer from './SoundPlayer';
@@ -32,13 +31,13 @@ import EditRoomDrawer from './EditRoomDrawer';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import Jdenticon from '../../foundations/Jdenticon';
 import ParticipantList from './ParticipantList';
-import LogNotificationContext, { graphQLErrors, Notification, text, TextNotification, TextNotificationsState, toTextNotification } from './contexts/LogNotificationContext';
+import LogNotificationContext, { graphQLErrors, Notification, text, TextNotificationsState, toTextNotification } from './contexts/LogNotificationContext';
 import { Participant } from '../../stateManagers/states/participant';
 import MyNumberValueDrawer from './MyNumberValueDrawer';
-import { newEvent, useAllRoomMessages } from '../../hooks/useRoomMessages';
+import { useAllRoomMessages } from '../../hooks/useRoomMessages';
 import LoadingResult from '../../foundations/Result/LoadingResult';
 import VolumeBarPanel from './VolumeBarPanel';
-import { MessageFilter, TabConfig } from '../../states/MessagesPanelConfig';
+import { defaultMessagePanelConfig, TabConfig } from '../../states/MessagesPanelConfig';
 import { usePlayBgm } from '../../hooks/usePlayBgm';
 import { usePlaySoundEffect } from '../../hooks/usePlaySoundEffect';
 import { useMessageNotification } from '../../hooks/useMessageNotification';
@@ -580,12 +579,8 @@ const RoomCore: React.FC<RoomCoreProps> = ({ roomState, roomId, operate, logNoti
                                             dispatch(roomConfigModule.actions.addMessagePanelConfig({
                                                 roomId,
                                                 panel: {
+                                                    ...defaultMessagePanelConfig(),
                                                     tabs: [TabConfig.createAll({})],
-                                                    isMinimized: false,
-                                                    x: 10,
-                                                    y: 10,
-                                                    width: 400,
-                                                    height: 300,
                                                 },
                                             }));
                                         }}>

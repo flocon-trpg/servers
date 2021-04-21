@@ -462,7 +462,11 @@ const roomConfigModule = createSlice({
                 height: action.payload.panel.height ?? targetPanel.height,
                 zIndex: action.payload.panel.zIndex ?? targetPanel.zIndex,
                 tabs: action.payload.panel.tabs ?? targetPanel.tabs,
+                selectedChannelType: action.payload.panel.selectedChannelType ?? targetPanel.selectedChannelType,
+                selectedPublicChannelKey: action.payload.panel.selectedPublicChannelKey ?? targetPanel.selectedPublicChannelKey,
+                selectedCharacterType: action.payload.panel.selectedCharacterType ?? targetPanel.selectedCharacterType,
                 selectedCharacterStateId: action.payload.panel.selectedCharacterStateId ?? targetPanel.selectedCharacterStateId,
+                customCharacterName: action.payload.panel.customCharacterName ?? targetPanel.customCharacterName,
                 selectedGameSystem: action.payload.panel.selectedGameSystem ?? targetPanel.selectedGameSystem,
             };
         },
