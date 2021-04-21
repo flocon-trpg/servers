@@ -14,8 +14,6 @@ export type SetOtherValuesAction = {
     roomId: string;
     masterVolume?: number;
     seVolume?: number;
-    chatGameSystemId?: string;
-    chatSelectedCharacterStateId?: string;
     messageNotificationFilter?: MessageFilter;
 }
 
@@ -227,12 +225,6 @@ const roomConfigModule = createSlice({
             }
             if (action.payload.seVolume != null) {
                 state.seVolume = action.payload.seVolume;
-            }
-            if (action.payload.chatSelectedCharacterStateId != null) {
-                state.chatSelectedCharacterStateId = action.payload.chatSelectedCharacterStateId;
-            }
-            if (action.payload.chatGameSystemId != null) {
-                state.chatGameSystemId = action.payload.chatGameSystemId;
             }
             if (action.payload.messageNotificationFilter != null) {
                 state.messageNotificationFilter = action.payload.messageNotificationFilter;
@@ -470,6 +462,8 @@ const roomConfigModule = createSlice({
                 height: action.payload.panel.height ?? targetPanel.height,
                 zIndex: action.payload.panel.zIndex ?? targetPanel.zIndex,
                 tabs: action.payload.panel.tabs ?? targetPanel.tabs,
+                selectedCharacterStateId: action.payload.panel.selectedCharacterStateId ?? targetPanel.selectedCharacterStateId,
+                selectedGameSystem: action.payload.panel.selectedGameSystem ?? targetPanel.selectedGameSystem,
             };
         },
         moveMessagePanel: (state: RoomConfig | null, action: PayloadAction<MovePanelAction & { panelId: string }>) => {

@@ -114,14 +114,16 @@ type Props = {
     characters: ReadonlyStateMap<Character.State>;
     participants: ReadonlyMap<string, Participant.State>;
     config: MessagePanelConfig;
+    panelId: string;
 } & PublicChannelNames
 
-export const ChatInput: React.FC<Props> = ({ 
-    roomId, 
-    style, 
-    characters, 
-    participants, 
+export const ChatInput: React.FC<Props> = ({
+    roomId,
+    style,
+    characters,
+    participants,
     config,
+    panelId,
     publicChannel1Name,
     publicChannel2Name,
     publicChannel3Name,
@@ -179,7 +181,7 @@ export const ChatInput: React.FC<Props> = ({
                     {participant.name}
                 </div>);
             }),
-    [selectedParticipantIds, participants]);
+        [selectedParticipantIds, participants]);
 
     const myCharacters = React.useMemo(() => {
         if (myUserUid == null) {
@@ -362,9 +364,12 @@ export const ChatInput: React.FC<Props> = ({
                             if (typeof option.key !== 'string') {
                                 return;
                             }
-                            dispatch(roomConfigModule.actions.setOtherValues({
+                            dispatch(roomConfigModule.actions.updateMessagePanel({
                                 roomId,
-                                chatSelectedCharacterStateId: option.key,
+                                panelId,
+                                panel: {
+                                    selectedCharacterStateId: option.key,
+                                }
                             }));
                         }}>
                         {myCharacters}
@@ -380,12 +385,12 @@ export const ChatInput: React.FC<Props> = ({
                         style={{ flex: 1, maxWidth: miniInputMaxWidth }}
                         placeholder='ゲームの種類'
                         showSearch
-                        value={roomConfig?.chatGameSystemId}
+                        value={config.selectedGameSystem}
                         onSelect={(value, option) => {
                             if (typeof option.key !== 'string') {
                                 return;
                             }
-                            dispatch(roomConfigModule.actions.setOtherValues({ roomId, chatGameSystemId: option.key }));
+                            dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { selectedGameSystem: option.key } }));
                         }}
                         filterOption={(input, option) => {
                             const value: unknown = option?.value;

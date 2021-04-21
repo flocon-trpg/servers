@@ -11,8 +11,6 @@ export type RoomConfig = {
     roomId: string;
 
     version: 1;
-    chatGameSystemId?: string;
-    chatSelectedCharacterStateId?: string;
     messageNotificationFilter: MessageFilter;
     panels: PanelsConfig;
     masterVolume: number;
@@ -26,8 +24,6 @@ export type PartialRoomConfig = {
     // そのため、RoomConfigのほうでは定義しているroomIdは、こちらでは定義していない。
 
     version?: number;
-    chatGameSystemId?: string;
-    chatSelectedCharacterStateId?: string;
     messageNotificationFilter?: MessageFilter;
     panels?: PartialPanelsConfig;
     masterVolume?: number;
@@ -73,8 +69,6 @@ export const castToPartialRoomConfig = (source: unknown): PartialRoomConfig | un
     return {
         version: 1,
         panels: castToPartialPanelsConfig(source.panels),
-        chatGameSystemId: castToString(source.chatGameSystemId),
-        chatSelectedCharacterStateId: castToString(source.chatSelectedCharacterStateId),
         masterVolume: castToNumber(source.masterVolume),
         channelVolumes: castToRecord(source.channelVolumes, castToNumber),
         seVolume: castToNumber(source.seVolume),
@@ -91,8 +85,6 @@ export const toCompleteRoomConfig = (source: PartialRoomConfig, roomId: string):
         roomId,
         version: source.version,
         panels: source.panels == null ? defaultPanelsConfig() : toCompletePanelsConfig(source.panels),
-        chatGameSystemId: source.chatGameSystemId,
-        chatSelectedCharacterStateId: source.chatSelectedCharacterStateId,
         messageNotificationFilter: source.messageNotificationFilter ?? MessageFilter.createAll(),
         masterVolume: source.masterVolume ?? 0.5,
         channelVolumes: source.channelVolumes ?? {},
