@@ -67,7 +67,7 @@ const ParticipantList: React.FC<Props> = ({ participants }: Props) => {
 
     return (
         <div>
-            <Table columns={columns} dataSource={dataSource} size='small' />
+            <Table columns={columns} dataSource={dataSource} size='small' pagination={false} />
         </div>);
 };
 

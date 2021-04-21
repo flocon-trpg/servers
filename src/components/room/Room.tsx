@@ -672,7 +672,7 @@ const RoomCore: React.FC<RoomCoreProps> = ({ roomState, roomId, operate, logNoti
                                     onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeParticipantPanel({ roomId, dir, delta }))}
                                     onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: participantPanel } }))}
                                     onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: participantPanel }, newValue: true }))}
-                                    childrenContainerStyle={({ padding: childrenContainerPadding })}
+                                    childrenContainerStyle={({ padding: childrenContainerPadding, overflowY: 'scroll' })}
                                     position={roomConfig.panels.participantPanel}
                                     size={roomConfig.panels.participantPanel}
                                     minHeight={150}

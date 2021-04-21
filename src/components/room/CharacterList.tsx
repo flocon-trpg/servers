@@ -307,7 +307,7 @@ const CharacterList: React.FC<Props> = ({ room }: Props) => {
             <Button size='small' onClick={() => dispatch({ type: characterParameterNamesDrawerVisibility, newValue: true })}>
                 パラメーターを追加・編集・削除
             </Button>
-            <Table columns={columns} dataSource={charactersDataSource} size='small' />
+            <Table columns={columns} dataSource={charactersDataSource} size='small' pagination={false} />
         </div>);
 };
 
