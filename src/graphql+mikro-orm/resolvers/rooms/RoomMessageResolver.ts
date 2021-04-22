@@ -32,6 +32,7 @@ import { ROOM_MESSAGE_UPDATE } from '../../utils/Topics';
 import { checkEntry, checkSignIn, findRoomAndMyParticipant, findRoomAndMyParticipantAndParitipantUserUids, NotSignIn } from '../utils/helpers';
 import { serverTooBusyMessage } from '../utils/messages';
 import { writeSystemMessage } from '../utils/roomMessage';
+import { MaxLength } from 'class-validator';
 
 @ArgsType()
 class WritePublicMessageArgs {
@@ -42,6 +43,7 @@ class WritePublicMessageArgs {
     public text!: string;
 
     @Field({ nullable: true })
+    @MaxLength(10)
     public textColor?: string;
 
     @Field()
@@ -69,6 +71,7 @@ class WritePrivateMessageArgs {
     public text!: string;
 
     @Field({ nullable: true })
+    @MaxLength(10)
     public textColor?: string;
 
     @Field({ nullable: true })
@@ -273,7 +276,11 @@ const createRoomPrivateMessage = async ({
 };
 
 const fixTextColor = (color: string) => {
-    return Color(color).rgb().string();
+    try {
+        return Color(color).hex();
+    } catch {
+        return undefined
+    }
 };
 
 @Resolver()

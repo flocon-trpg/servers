@@ -44,6 +44,7 @@ const Topics_1 = require("../../utils/Topics");
 const helpers_1 = require("../utils/helpers");
 const messages_1 = require("../utils/messages");
 const roomMessage_1 = require("../utils/roomMessage");
+const class_validator_1 = require("class-validator");
 let WritePublicMessageArgs = class WritePublicMessageArgs {
 };
 __decorate([
@@ -56,6 +57,7 @@ __decorate([
 ], WritePublicMessageArgs.prototype, "text", void 0);
 __decorate([
     type_graphql_1.Field({ nullable: true }),
+    class_validator_1.MaxLength(10),
     __metadata("design:type", String)
 ], WritePublicMessageArgs.prototype, "textColor", void 0);
 __decorate([
@@ -93,6 +95,7 @@ __decorate([
 ], WritePrivateMessageArgs.prototype, "text", void 0);
 __decorate([
     type_graphql_1.Field({ nullable: true }),
+    class_validator_1.MaxLength(10),
     __metadata("design:type", String)
 ], WritePrivateMessageArgs.prototype, "textColor", void 0);
 __decorate([
@@ -284,7 +287,12 @@ const createRoomPrivateMessage = async ({ msg, myUserUid, visibleTo: visibleToCo
     };
 };
 const fixTextColor = (color) => {
-    return color_1.default(color).rgb().string();
+    try {
+        return color_1.default(color).hex();
+    }
+    catch (_a) {
+        return undefined;
+    }
 };
 let RoomMessageResolver = class RoomMessageResolver {
     async getMessagesCore({ args, context }) {

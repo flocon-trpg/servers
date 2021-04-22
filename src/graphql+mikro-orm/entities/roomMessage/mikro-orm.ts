@@ -88,7 +88,7 @@ export class RoomPubMsg {
     public textUpdatedAt?: number;
 
     // フォーマットは#nnnnnn。
-    // nullishの場合はblackとみなす。もしダークテーマに対応したときは場合に応じてwhiteとみなすのもありかも？
+    // nullishの場合はwhite
     @Property({ nullable: true })
     public textColor?: string;
 
@@ -173,7 +173,7 @@ export class RoomPrvMsg {
     public textUpdatedAt?: number;
 
     // フォーマットは#nnnnnn。
-    // nullishの場合はblackとみなす。もしダークテーマに対応したときは場合に応じてwhiteとみなすのもありかも？
+    // nullishの場合はwhite
     @Property({ nullable: true })
     public textColor?: string;
 
