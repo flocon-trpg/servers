@@ -35,6 +35,11 @@ html {
     cursor: auto;
 }
 
+// antdをダークテーマにしている影響で、react-colorのinputの文字色が白になってしまい文字が読めなくなってしまう。それを回避するためにblackを指定している。
+.colorpicker {
+    color: black;
+}
+
 // これがあることで、antdのTabPaneの子要素のheightを100%にできる（Chrome DevToolsを用いて特定。代わりに.ant-tabs-content-topを対象にしてもよさそう）。
 // これによりy方向のスクロールバーを用いて表示することが可能になる。
 .ant-tabs-content {

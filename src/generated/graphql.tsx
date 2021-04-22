@@ -2738,6 +2738,7 @@ export type PromoteToPlayerMutation = (
 export type WritePublicMessageMutationVariables = Exact<{
   roomId: Scalars['String'];
   text: Scalars['String'];
+  textColor?: Maybe<Scalars['String']>;
   channelKey: Scalars['String'];
   characterStateId?: Maybe<Scalars['String']>;
   customName?: Maybe<Scalars['String']>;
@@ -2760,6 +2761,7 @@ export type WritePrivateMessageMutationVariables = Exact<{
   roomId: Scalars['String'];
   visibleTo: Array<Scalars['String']> | Scalars['String'];
   text: Scalars['String'];
+  textColor?: Maybe<Scalars['String']>;
   characterStateId?: Maybe<Scalars['String']>;
   customName?: Maybe<Scalars['String']>;
 }>;
@@ -4390,10 +4392,11 @@ export type PromoteToPlayerMutationHookResult = ReturnType<typeof usePromoteToPl
 export type PromoteToPlayerMutationResult = Apollo.MutationResult<PromoteToPlayerMutation>;
 export type PromoteToPlayerMutationOptions = Apollo.BaseMutationOptions<PromoteToPlayerMutation, PromoteToPlayerMutationVariables>;
 export const WritePublicMessageDocument = gql`
-    mutation WritePublicMessage($roomId: String!, $text: String!, $channelKey: String!, $characterStateId: String, $customName: String, $gameType: String) {
+    mutation WritePublicMessage($roomId: String!, $text: String!, $textColor: String, $channelKey: String!, $characterStateId: String, $customName: String, $gameType: String) {
   result: writePublicMessage(
     roomId: $roomId
     text: $text
+    textColor: $textColor
     channelKey: $channelKey
     characterStateId: $characterStateId
     customName: $customName
@@ -4425,6 +4428,7 @@ export type WritePublicMessageMutationFn = Apollo.MutationFunction<WritePublicMe
  *   variables: {
  *      roomId: // value for 'roomId'
  *      text: // value for 'text'
+ *      textColor: // value for 'textColor'
  *      channelKey: // value for 'channelKey'
  *      characterStateId: // value for 'characterStateId'
  *      customName: // value for 'customName'
@@ -4440,11 +4444,12 @@ export type WritePublicMessageMutationHookResult = ReturnType<typeof useWritePub
 export type WritePublicMessageMutationResult = Apollo.MutationResult<WritePublicMessageMutation>;
 export type WritePublicMessageMutationOptions = Apollo.BaseMutationOptions<WritePublicMessageMutation, WritePublicMessageMutationVariables>;
 export const WritePrivateMessageDocument = gql`
-    mutation WritePrivateMessage($roomId: String!, $visibleTo: [String!]!, $text: String!, $characterStateId: String, $customName: String) {
+    mutation WritePrivateMessage($roomId: String!, $visibleTo: [String!]!, $text: String!, $textColor: String, $characterStateId: String, $customName: String) {
   result: writePrivateMessage(
     roomId: $roomId
     visibleTo: $visibleTo
     text: $text
+    textColor: $textColor
     characterStateId: $characterStateId
     customName: $customName
   ) {
@@ -4475,6 +4480,7 @@ export type WritePrivateMessageMutationFn = Apollo.MutationFunction<WritePrivate
  *      roomId: // value for 'roomId'
  *      visibleTo: // value for 'visibleTo'
  *      text: // value for 'text'
+ *      textColor: // value for 'textColor'
  *      characterStateId: // value for 'characterStateId'
  *      customName: // value for 'customName'
  *   },

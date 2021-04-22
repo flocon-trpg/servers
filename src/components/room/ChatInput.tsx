@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Col, Drawer, Input, Select, Row, Checkbox, Alert } from 'antd';
+import { Button, Col, Drawer, Input, Select, Row, Checkbox, Alert, Popover } from 'antd';
 import { isPublicChannelKey } from './RoomMessages';
 import { useListAvailableGameSystemsQuery, useWritePrivateMessageMutation, useWritePublicMessageMutation } from '../../generated/graphql';
 import { $free, $system } from '../../@shared/Constants';
@@ -18,7 +18,9 @@ import { Participant } from '../../stateManagers/states/participant';
 import { Gutter } from 'antd/lib/grid/row';
 import DrawerFooter from '../../layouts/DrawerFooter';
 import { __ } from '../../@shared/collection';
-import { PublicChannelNames } from '../../utils/types';
+import { PublicChannelNames, reset } from '../../utils/types';
+import { SketchPicker } from 'react-color';
+import classNames from 'classnames';
 
 type PrivateMessageDrawerProps = {
     visible: boolean;
@@ -250,6 +252,7 @@ export const ChatInput: React.FC<Props> = ({
                     variables: {
                         roomId,
                         text,
+                        textColor: config.selectedTextColor,
                         visibleTo: [...selectedParticipantIds],
                         characterStateId,
                         customName: customNameVariable
@@ -265,6 +268,7 @@ export const ChatInput: React.FC<Props> = ({
                     variables: {
                         roomId,
                         text,
+                        textColor: config.selectedTextColor,
                         channelKey: selectedPublicChannel,
                         characterStateId,
                         customName: customNameVariable,
@@ -280,6 +284,7 @@ export const ChatInput: React.FC<Props> = ({
                     variables: {
                         roomId,
                         text,
+                        textColor: config.selectedTextColor,
                         channelKey: $free,
                         characterStateId,
                         customName: customNameVariable,
@@ -438,6 +443,19 @@ export const ChatInput: React.FC<Props> = ({
                         })}
                     </Select>
                     <div style={{ flex: 1 }} />
+                </div>
+                <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                    <div style={titleStyle}>
+                        文字色
+                    </div>
+                    <Popover
+                        trigger='click'
+                        content={<SketchPicker className={classNames('cancel-rnd', 'colorpicker')} disableAlpha color={config.selectedTextColor == null ? '#000000' : config.selectedTextColor} onChange={e => dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { selectedTextColor: e.hex } }))} />}>
+                        <Button style={{ color: config.selectedTextColor, width: 80, margin: '4px 4px 4px 0' }} type='dashed' size='small' >{config.selectedTextColor?.toUpperCase() ?? 'デフォルト'}</Button>
+                    </Popover>
+                    <Button
+                        size='small'
+                        onClick={() => dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { selectedTextColor: { type: reset } } }))}>リセット</Button>
                 </div>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                     <Input disabled={isPosting} value={text} onChange={e => setText(e.target.value)} onPressEnter={() => onPost()} />

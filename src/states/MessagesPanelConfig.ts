@@ -217,6 +217,7 @@ export const toCompleteTabConfig = (source: PartialTabConfig): TabConfig => {
 export type MessagePanelConfig = {
     isMinimized: boolean;
     tabs: TabConfig[];
+    selectedTextColor?: string;
     selectedChannelType?: string;
     selectedPublicChannelKey?: string;
     selectedCharacterType?: string;
@@ -235,6 +236,7 @@ export const castToPartialMessagePanelConfig = (source: unknown): PartialMessage
         ...castToPartialDraggablePanelConfigBase(source),
         isMinimized: castToBoolean(source.isMinimized),
         tabs: castToArray(source.tabs, castToPartialTabConfig)?.map(toCompleteTabConfig),
+        selectedTextColor: castToString(source.selectedTextColor),
         selectedChannelType: castToString(source.selectedChannelType),
         selectedPublicChannelKey: castToString(source.selectedPublicChannelKey),
         selectedCharacterType: castToString(source.selectedCharacterType),
@@ -249,6 +251,7 @@ export const toCompleteMessagePanelConfig = (source: PartialMessagePanelConfig):
         ...toCompleteDraggablePanelConfigBase(source),
         isMinimized: source.isMinimized ?? false,
         tabs: source.tabs ?? [],
+        selectedTextColor: source.selectedTextColor,
         selectedChannelType: source.selectedChannelType,
         selectedPublicChannelKey: source.selectedPublicChannelKey,
         selectedCharacterType: source.selectedCharacterType,

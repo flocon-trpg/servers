@@ -501,8 +501,8 @@ type Props = {
 const RoomMessages: React.FC<Props> = (props: Props) => {
     const { allRoomMessagesResult, characters, participants, roomId, height, panelId, config } = props;
 
-    const contentHeight = Math.max(0, height - 250);
-    const tabsHeight = Math.max(0, height - 210);
+    const contentHeight = Math.max(0, height - 270);
+    const tabsHeight = Math.max(0, height - 230);
 
     const dispatch = useDispatch();
 

@@ -9,6 +9,7 @@ import { BoardConfig, BoardsPanelConfig, createDefaultBoardConfig } from '../sta
 import { CompositeKey, compositeKeyToString } from '../@shared/StateMap';
 import { StrIndex5 } from '../@shared/indexes';
 import { MessageFilter, MessagePanelConfig } from '../states/MessagesPanelConfig';
+import { reset, Reset } from '../utils/types';
 
 export type SetOtherValuesAction = {
     roomId: string;
@@ -96,7 +97,7 @@ export type AddMessagePanelConfigAction = {
 export type UpdateMessagePanelAction = {
     roomId: string;
     panelId: string;
-    panel: Partial<MessagePanelConfig>;
+    panel: Omit<Partial<MessagePanelConfig>, 'selectedTextColor'> & { selectedTextColor?: string | Reset };
 }
 
 export type RemoveMessagePanelAction = {
@@ -453,6 +454,12 @@ const roomConfigModule = createSlice({
             if (targetPanel == null) {
                 return;
             }
+            let selectedTextColor: string | undefined = targetPanel.selectedTextColor;
+            if (typeof action.payload.panel.selectedTextColor === 'string') {
+                selectedTextColor = action.payload.panel.selectedTextColor;
+            } else if (action.payload.panel.selectedTextColor?.type === reset) {
+                selectedTextColor = undefined;
+            }
             state.panels.messagePanels[action.payload.panelId] = {
                 ...targetPanel,
                 isMinimized: action.payload.panel.isMinimized ?? targetPanel.isMinimized,
@@ -462,6 +469,7 @@ const roomConfigModule = createSlice({
                 height: action.payload.panel.height ?? targetPanel.height,
                 zIndex: action.payload.panel.zIndex ?? targetPanel.zIndex,
                 tabs: action.payload.panel.tabs ?? targetPanel.tabs,
+                selectedTextColor,
                 selectedChannelType: action.payload.panel.selectedChannelType ?? targetPanel.selectedChannelType,
                 selectedPublicChannelKey: action.payload.panel.selectedPublicChannelKey ?? targetPanel.selectedPublicChannelKey,
                 selectedCharacterType: action.payload.panel.selectedCharacterType ?? targetPanel.selectedCharacterType,

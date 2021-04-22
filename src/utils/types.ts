@@ -27,3 +27,7 @@ export type PublicChannelNames = {
     publicChannel9Name: string;
     publicChannel10Name: string;
 }
+
+export const reset = 'reset';
+
+export type Reset = { type: typeof reset }

@@ -41,7 +41,7 @@ export namespace RoomMessage {
             return (<div style={{ ...style, opacity: 0.7 }}>(このメッセージは削除されました)</div>);
         } else {
             return (
-                <div style={{ ...style }}>
+                <div style={{ ...style, color: message.value.textColor ?? undefined }}>
                     {message.value.text ?? message.value.altTextToSecret}
                     <span> </span>
                     {message.value.commandResult != null && <span style={({ fontWeight: 'bold' })}>{`${message.value.commandResult.text}${message.value.commandResult.isSuccess === true ? ' (成功)' : ''}${message.value.commandResult.isSuccess === false ? ' (失敗)' : ''}`}</span>}
