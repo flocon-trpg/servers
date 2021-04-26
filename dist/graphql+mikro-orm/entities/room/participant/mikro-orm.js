@@ -17,6 +17,7 @@ const mikro_orm_2 = require("../mikro-orm");
 const ParticipantRoleOperation_1 = require("../../../../enums/ParticipantRoleOperation");
 const ParticipantRole_1 = require("../../../../enums/ParticipantRole");
 const mikro_orm_value_1 = require("./myValue/mikro-orm_value");
+const mikro_orm_3 = require("../../roomMessage/mikro-orm");
 class ParticiBase {
     constructor({ role, name, }) {
         this.id = uuid_1.v4();
@@ -46,6 +47,7 @@ let Partici = class Partici extends ParticiBase {
     constructor(params) {
         super(params);
         this.myValues = new core_1.Collection(this);
+        this.myValueLogs = new core_1.Collection(this);
         this.user = core_1.Reference.create(params.user);
         this.room = core_1.Reference.create(params.room);
     }
@@ -62,6 +64,10 @@ __decorate([
     core_1.OneToMany(() => mikro_orm_value_1.MyValue, x => x.partici, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], Partici.prototype, "myValues", void 0);
+__decorate([
+    core_1.OneToMany(() => mikro_orm_3.MyValueLog, x => x.createdBy, { orphanRemoval: true }),
+    __metadata("design:type", Object)
+], Partici.prototype, "myValueLogs", void 0);
 Partici = __decorate([
     core_1.Entity(),
     core_1.Unique({ properties: ['user', 'room'] }),

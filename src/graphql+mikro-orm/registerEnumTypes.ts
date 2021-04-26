@@ -22,6 +22,7 @@ import { PromoteFailureType } from '../enums/PromoteFailureType';
 import { ChangeParticipantNameFailureType } from '../enums/ChangeParticipantNameFailureType';
 import { DeleteRoomFailureType } from '../enums/DeleteRoomFailureType';
 import { PrereleaseType } from '../enums/PrereleaseType';
+import { MyValueLogType } from '../enums/MyValueLogType';
 
 let hasRegistered = false;
 const registerEnumTypes = (): void => {
@@ -70,6 +71,9 @@ const registerEnumTypes = (): void => {
     });
     registerEnumType(MakeMessageNotSecretFailureType, {
         name: 'MakeMessageNotSecretFailureType'
+    });
+    registerEnumType(MyValueLogType, {
+        name: 'MyValueLogType'
     });
     registerEnumType(OperateRoomFailureType, {
         name: 'OperateRoomFailureType'

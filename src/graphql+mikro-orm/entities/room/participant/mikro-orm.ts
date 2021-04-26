@@ -5,6 +5,7 @@ import { Room, RoomOp } from '../mikro-orm';
 import { ParticipantRoleOperation } from '../../../../enums/ParticipantRoleOperation';
 import { ParticipantRole } from '../../../../enums/ParticipantRole';
 import { AddMyValueOp, MyValue, RemovedMyValue, RemoveMyValueOp, UpdateMyValueOp } from './myValue/mikro-orm_value';
+import { MyValueLog } from '../../roomMessage/mikro-orm';
 
 type ParticiBaseParams = {
     role: ParticipantRole | undefined;
@@ -60,6 +61,9 @@ export class Partici extends ParticiBase {
 
     @OneToMany(() => MyValue, x => x.partici, { orphanRemoval: true })
     public myValues = new Collection<MyValue>(this);
+    
+    @OneToMany(() => MyValueLog, x => x.createdBy, { orphanRemoval: true })
+    public myValueLogs = new Collection<MyValueLog>(this);
 }
 
 // 削除はroleをundefinedにすることによって表現されるが、もしRemoveParticiOpが存在しないと入退室を繰り返すことで不必要なParticipantがデータベース内に大量に残ってしまうことになるため、一応削除手段を設けるという意味でRemoveParticiOpを定義している。

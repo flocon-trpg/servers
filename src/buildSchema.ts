@@ -4,7 +4,6 @@ import { GraphQLSchema } from 'graphql';
 import registerEnumTypes from './graphql+mikro-orm/registerEnumTypes';
 import { RoomResolver } from './graphql+mikro-orm/resolvers/rooms/RoomResolver';
 import { MainResolver } from './graphql+mikro-orm/resolvers/MainResolver';
-import { RoomMessageResolver } from './graphql+mikro-orm/resolvers/rooms/RoomMessageResolver';
 
 type Options = {
     emitSchemaFile: boolean;
@@ -15,7 +14,7 @@ interface EmitSchemaFileOptions extends Partial<PrintSchemaOptions> {
     path?: string;
 }
 
-const resolvers = [RoomResolver, MainResolver, RoomMessageResolver] as const;
+const resolvers = [RoomResolver, MainResolver] as const;
 const optionBase: BuildSchemaOptions = {
     resolvers,
 };

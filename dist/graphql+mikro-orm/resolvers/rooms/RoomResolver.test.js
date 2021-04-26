@@ -192,7 +192,7 @@ const operateThenGetRoomTestCore = async (strategy, orm) => {
         expect((_c = operateResult.result.operation.operatedBy) === null || _c === void 0 ? void 0 : _c.clientId).toBe(clientId());
         strategy.test.operation({
             operatedByMe: operateResult.result.operation.value,
-            operatedByAnother: operateResult.payload.generateOperation(createRoomResult.anotherUser.userUid).value,
+            operatedByAnother: operateResult.roomOperationPayload.generateOperation(createRoomResult.anotherUser.userUid).value,
         });
         const getRoomByCreator = await roomResolver.getRoomCore({
             args: {
@@ -503,7 +503,7 @@ describe('operate then getRoom', () => {
                 expect(pieceLocation1.boardId).toBe(boardStateId);
                 expect((_a = pieceLocation1.newValue) === null || _a === void 0 ? void 0 : _a.isPrivate).toBe(false);
                 expect((_b = pieceLocation1.newValue) === null || _b === void 0 ? void 0 : _b.x).toBe(11);
-                const subscription1 = operateResult1.payload.generateOperation(createRoomResult.anotherUser.userUid);
+                const subscription1 = operateResult1.roomOperationPayload.generateOperation(createRoomResult.anotherUser.userUid);
                 expect(operateResult1.result.operation.value).toEqual(subscription1.value);
                 const operateResult2 = await roomResolver.operateCore({
                     args: {
@@ -570,7 +570,7 @@ describe('operate then getRoom', () => {
                 expect(update2.operation.pieces.update.length).toBe(1);
                 const pieceLocation2 = update2.operation.pieces.update[0];
                 expect((_c = pieceLocation2.operation.x) === null || _c === void 0 ? void 0 : _c.newValue).toBe(12);
-                const subscription2 = operateResult2.payload.generateOperation(createRoomResult.anotherUser.userUid);
+                const subscription2 = operateResult2.roomOperationPayload.generateOperation(createRoomResult.anotherUser.userUid);
                 expect(operateResult2.result.operation.value).toEqual(subscription2.value);
                 const operateResult3 = await roomResolver.operateCore({
                     args: {
@@ -635,7 +635,7 @@ describe('operate then getRoom', () => {
                 expect(update3.operation.pieces.update.length).toBe(0);
                 const pieceLocation3 = update3.operation.pieces.replace[0];
                 expect(pieceLocation3.newValue).toBeUndefined();
-                const subscription3 = operateResult3.payload.generateOperation(createRoomResult.anotherUser.userUid);
+                const subscription3 = operateResult3.roomOperationPayload.generateOperation(createRoomResult.anotherUser.userUid);
                 expect(operateResult3.result.operation.value).toEqual(subscription3.value);
             }
             finally {

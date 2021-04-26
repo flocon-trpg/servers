@@ -85,6 +85,7 @@ const entities = [
     mikro_orm_4.RoomOp,
     mikro_orm_5.RoomPubMsg,
     mikro_orm_5.RoomPrvMsg,
+    mikro_orm_5.MyValueLog,
     mikro_orm_5.RoomPubCh,
     mikro_orm_5.RoomSe,
     mikro_orm_6.User,

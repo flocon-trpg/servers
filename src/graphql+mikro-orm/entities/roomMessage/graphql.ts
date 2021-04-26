@@ -9,6 +9,7 @@ import { WritePrivateRoomMessageFailureType } from '../../../enums/WritePrivateR
 import { WritePublicRoomMessageFailureType } from '../../../enums/WritePublicRoomMessageFailureType';
 import { WriteRoomSoundEffectFailureType } from '../../../enums/WriteRoomSoundEffectFailureType';
 import { FilePath } from '../filePath/graphql';
+import { MyValueLogType as MyValueLogTypeEnum } from '../../../enums/MyValueLogType';
 
 // messageIdは、Reactのkeyとして使われる
 
@@ -171,6 +172,55 @@ export class RoomPrivateMessage {
     public updatedAt?: number;
 }
 
+@ObjectType()
+export class BoardId {
+    @Field()
+    public createdBy!: string;
+
+    @Field()
+    public stateId!: string;
+}
+
+export const MyValueLogType = 'MyValueLog';
+
+@ObjectType()
+export class MyValueLog {
+    public __tstype!: typeof MyValueLogType;
+
+    @Field()
+    public messageId!: string;
+
+    @Field()
+    public stateUserUid!: string;
+
+    @Field()
+    public stateId!: string;
+
+    @Field()
+    public createdAt!: number;
+
+    @Field(() => MyValueLogTypeEnum)
+    public myValueType!: MyValueLogTypeEnum;
+
+    @Field()
+    public valueChanged!: boolean;
+
+    @Field({ nullable: true })
+    public replaceType?: boolean;
+
+    @Field(() => [BoardId])
+    public createdPieces!: BoardId[];
+
+    @Field(() => [BoardId])
+    public deletedPieces!: BoardId[];
+
+    @Field(() => [BoardId])
+    public movedPieces!: BoardId[];
+
+    @Field(() => [BoardId])
+    public resizedPieces!: BoardId[];
+}
+
 export const RoomSoundEffectType = 'RoomSoundEffect';
 
 @ObjectType()
@@ -197,13 +247,15 @@ export class RoomSoundEffect {
 
 export const RoomMessage = createUnionType({
     name: 'RoomMessage',
-    types: () => [RoomPublicMessage, RoomPrivateMessage, RoomPublicChannel, RoomSoundEffect] as const,
+    types: () => [RoomPublicMessage, RoomPrivateMessage, MyValueLog, RoomPublicChannel, RoomSoundEffect] as const,
     resolveType: value => {
         switch (value.__tstype) {
             case RoomPrivateMessageType:
                 return RoomPrivateMessage;
             case RoomPublicChannelType:
                 return RoomPublicMessage;
+            case MyValueLogType:
+                return MyValueLog;
             case RoomPublicMessageType:
                 return RoomPublicChannel;
             case RoomSoundEffectType:
@@ -224,6 +276,9 @@ export class RoomMessages {
 
     @Field(() => [RoomPrivateMessage])
     public privateMessages!: RoomPrivateMessage[];
+
+    @Field(() => [MyValueLog])
+    public myValueLogs!: MyValueLog[];
 
     @Field(() => [RoomPublicChannel])
     public publicChannels!: RoomPublicChannel[];
@@ -436,13 +491,15 @@ export class RoomPrivateMessageUpdate {
 
 export const RoomMessageEvent = createUnionType({
     name: 'RoomMessageEvent',
-    types: () => [RoomPublicMessage, RoomPrivateMessage, RoomPublicChannel, RoomSoundEffect, RoomPublicChannelUpdate, RoomPublicMessageUpdate, RoomPrivateMessageUpdate] as const,
+    types: () => [RoomPublicMessage, RoomPrivateMessage, RoomPublicChannel, MyValueLog, RoomSoundEffect, RoomPublicChannelUpdate, RoomPublicMessageUpdate, RoomPrivateMessageUpdate] as const,
     resolveType: value => {
         switch (value.__tstype) {
             case RoomPrivateMessageType:
                 return RoomPrivateMessage;
             case RoomPublicChannelType:
                 return RoomPublicChannel;
+            case MyValueLogType:
+                return MyValueLog;
             case RoomPublicMessageType:
                 return RoomPublicMessage;
             case RoomSoundEffectType:

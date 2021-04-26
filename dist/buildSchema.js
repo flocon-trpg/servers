@@ -9,8 +9,7 @@ const path_1 = __importDefault(require("path"));
 const registerEnumTypes_1 = __importDefault(require("./graphql+mikro-orm/registerEnumTypes"));
 const RoomResolver_1 = require("./graphql+mikro-orm/resolvers/rooms/RoomResolver");
 const MainResolver_1 = require("./graphql+mikro-orm/resolvers/MainResolver");
-const RoomMessageResolver_1 = require("./graphql+mikro-orm/resolvers/rooms/RoomMessageResolver");
-const resolvers = [RoomResolver_1.RoomResolver, MainResolver_1.MainResolver, RoomMessageResolver_1.RoomMessageResolver];
+const resolvers = [RoomResolver_1.RoomResolver, MainResolver_1.MainResolver];
 const optionBase = {
     resolvers,
 };

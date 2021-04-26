@@ -3,7 +3,7 @@ import { AddBoardOp, Board, BoardBase, RemoveBoardOp, UpdateBoardOp } from './gr
 import { CharaBase, Chara, AddCharaOp, RemoveCharaOp, UpdateCharaOp } from './graphql+mikro-orm/entities/room/character/mikro-orm';
 import { AddCharaPieceOp, CharaPiece, CharaPieceBase, RemovedCharaPiece, RemoveCharaPieceOp, UpdateCharaPieceOp } from './graphql+mikro-orm/entities/room/character/piece/mikro-orm';
 import { Room, RoomOp } from './graphql+mikro-orm/entities/room/mikro-orm';
-import { RoomPrvMsg, RoomPubCh, RoomPubMsg, RoomSe } from './graphql+mikro-orm/entities/roomMessage/mikro-orm';
+import { MyValueLog, RoomPrvMsg, RoomPubCh, RoomPubMsg, RoomSe } from './graphql+mikro-orm/entities/roomMessage/mikro-orm';
 import { User } from './graphql+mikro-orm/entities/user/mikro-orm';
 import { EM } from './utils/types';
 import { AddParamNameOp, ParamName, ParamNameBase, RemoveParamNameOp, UpdateParamNameOp } from './graphql+mikro-orm/entities/room/paramName/mikro-orm';
@@ -95,6 +95,7 @@ const entities = [
     RoomOp,
     RoomPubMsg,
     RoomPrvMsg,
+    MyValueLog,
     RoomPubCh,
     RoomSe,
     User,

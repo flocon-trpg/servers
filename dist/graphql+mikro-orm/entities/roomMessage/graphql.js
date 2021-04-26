@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RoomMessageEvent = exports.RoomPrivateMessageUpdate = exports.RoomPrivateMessageUpdateType = exports.RoomPublicMessageUpdate = exports.RoomPublicMessageUpdateType = exports.RoomPublicChannelUpdate = exports.RoomPublicChannelUpdateType = exports.EditMessageResult = exports.DeleteMessageResult = exports.MakeMessageNotSecretResult = exports.WriteRoomSoundEffectResult = exports.WriteRoomSoundEffectFailureResult = exports.WriteRoomSoundEffectFailureResultType = exports.WritePublicRoomMessageResult = exports.WritePublicRoomMessageFailureResult = exports.WritePublicRoomMessageFailureResultType = exports.WritePrivateRoomMessageResult = exports.WritePrivateRoomMessageFailureResult = exports.WritePrivateRoomMessageFailureResultType = exports.GetRoomLogResult = exports.GetRoomLogFailureResult = exports.GetRoomLogFailureResultType = exports.GetRoomMessagesResult = exports.GetRoomMessagesFailureResult = exports.GetRoomMessagesFailureResultType = exports.RoomMessages = exports.RoomMessagesType = exports.RoomMessage = exports.RoomSoundEffect = exports.RoomSoundEffectType = exports.RoomPrivateMessage = exports.RoomPrivateMessageType = exports.RoomPublicMessage = exports.RoomPublicMessageType = exports.CharacterValueForMessage = exports.RoomPublicChannel = exports.RoomPublicChannelType = exports.CommandResult = void 0;
+exports.RoomMessageEvent = exports.RoomPrivateMessageUpdate = exports.RoomPrivateMessageUpdateType = exports.RoomPublicMessageUpdate = exports.RoomPublicMessageUpdateType = exports.RoomPublicChannelUpdate = exports.RoomPublicChannelUpdateType = exports.EditMessageResult = exports.DeleteMessageResult = exports.MakeMessageNotSecretResult = exports.WriteRoomSoundEffectResult = exports.WriteRoomSoundEffectFailureResult = exports.WriteRoomSoundEffectFailureResultType = exports.WritePublicRoomMessageResult = exports.WritePublicRoomMessageFailureResult = exports.WritePublicRoomMessageFailureResultType = exports.WritePrivateRoomMessageResult = exports.WritePrivateRoomMessageFailureResult = exports.WritePrivateRoomMessageFailureResultType = exports.GetRoomLogResult = exports.GetRoomLogFailureResult = exports.GetRoomLogFailureResultType = exports.GetRoomMessagesResult = exports.GetRoomMessagesFailureResult = exports.GetRoomMessagesFailureResultType = exports.RoomMessages = exports.RoomMessagesType = exports.RoomMessage = exports.RoomSoundEffect = exports.RoomSoundEffectType = exports.MyValueLog = exports.MyValueLogType = exports.BoardId = exports.RoomPrivateMessage = exports.RoomPrivateMessageType = exports.RoomPublicMessage = exports.RoomPublicMessageType = exports.CharacterValueForMessage = exports.RoomPublicChannel = exports.RoomPublicChannelType = exports.CommandResult = void 0;
 const type_graphql_1 = require("type-graphql");
 const Constants_1 = require("../../../@shared/Constants");
 const DeleteMessageFailureType_1 = require("../../../enums/DeleteMessageFailureType");
@@ -21,6 +21,7 @@ const WritePrivateRoomMessageFailureType_1 = require("../../../enums/WritePrivat
 const WritePublicRoomMessageFailureType_1 = require("../../../enums/WritePublicRoomMessageFailureType");
 const WriteRoomSoundEffectFailureType_1 = require("../../../enums/WriteRoomSoundEffectFailureType");
 const graphql_1 = require("../filePath/graphql");
+const MyValueLogType_1 = require("../../../enums/MyValueLogType");
 let CommandResult = class CommandResult {
 };
 __decorate([
@@ -186,6 +187,71 @@ RoomPrivateMessage = __decorate([
     type_graphql_1.ObjectType()
 ], RoomPrivateMessage);
 exports.RoomPrivateMessage = RoomPrivateMessage;
+let BoardId = class BoardId {
+};
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
+], BoardId.prototype, "createdBy", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
+], BoardId.prototype, "stateId", void 0);
+BoardId = __decorate([
+    type_graphql_1.ObjectType()
+], BoardId);
+exports.BoardId = BoardId;
+exports.MyValueLogType = 'MyValueLog';
+let MyValueLog = class MyValueLog {
+};
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
+], MyValueLog.prototype, "messageId", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
+], MyValueLog.prototype, "stateUserUid", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
+], MyValueLog.prototype, "stateId", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", Number)
+], MyValueLog.prototype, "createdAt", void 0);
+__decorate([
+    type_graphql_1.Field(() => MyValueLogType_1.MyValueLogType),
+    __metadata("design:type", String)
+], MyValueLog.prototype, "myValueType", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", Boolean)
+], MyValueLog.prototype, "valueChanged", void 0);
+__decorate([
+    type_graphql_1.Field({ nullable: true }),
+    __metadata("design:type", Boolean)
+], MyValueLog.prototype, "replaceType", void 0);
+__decorate([
+    type_graphql_1.Field(() => [BoardId]),
+    __metadata("design:type", Array)
+], MyValueLog.prototype, "createdPieces", void 0);
+__decorate([
+    type_graphql_1.Field(() => [BoardId]),
+    __metadata("design:type", Array)
+], MyValueLog.prototype, "deletedPieces", void 0);
+__decorate([
+    type_graphql_1.Field(() => [BoardId]),
+    __metadata("design:type", Array)
+], MyValueLog.prototype, "movedPieces", void 0);
+__decorate([
+    type_graphql_1.Field(() => [BoardId]),
+    __metadata("design:type", Array)
+], MyValueLog.prototype, "resizedPieces", void 0);
+MyValueLog = __decorate([
+    type_graphql_1.ObjectType()
+], MyValueLog);
+exports.MyValueLog = MyValueLog;
 exports.RoomSoundEffectType = 'RoomSoundEffect';
 let RoomSoundEffect = class RoomSoundEffect {
 };
@@ -215,13 +281,15 @@ RoomSoundEffect = __decorate([
 exports.RoomSoundEffect = RoomSoundEffect;
 exports.RoomMessage = type_graphql_1.createUnionType({
     name: 'RoomMessage',
-    types: () => [RoomPublicMessage, RoomPrivateMessage, RoomPublicChannel, RoomSoundEffect],
+    types: () => [RoomPublicMessage, RoomPrivateMessage, MyValueLog, RoomPublicChannel, RoomSoundEffect],
     resolveType: value => {
         switch (value.__tstype) {
             case exports.RoomPrivateMessageType:
                 return RoomPrivateMessage;
             case exports.RoomPublicChannelType:
                 return RoomPublicMessage;
+            case exports.MyValueLogType:
+                return MyValueLog;
             case exports.RoomPublicMessageType:
                 return RoomPublicChannel;
             case exports.RoomSoundEffectType:
@@ -240,6 +308,10 @@ __decorate([
     type_graphql_1.Field(() => [RoomPrivateMessage]),
     __metadata("design:type", Array)
 ], RoomMessages.prototype, "privateMessages", void 0);
+__decorate([
+    type_graphql_1.Field(() => [MyValueLog]),
+    __metadata("design:type", Array)
+], RoomMessages.prototype, "myValueLogs", void 0);
 __decorate([
     type_graphql_1.Field(() => [RoomPublicChannel]),
     __metadata("design:type", Array)
@@ -476,13 +548,15 @@ RoomPrivateMessageUpdate = __decorate([
 exports.RoomPrivateMessageUpdate = RoomPrivateMessageUpdate;
 exports.RoomMessageEvent = type_graphql_1.createUnionType({
     name: 'RoomMessageEvent',
-    types: () => [RoomPublicMessage, RoomPrivateMessage, RoomPublicChannel, RoomSoundEffect, RoomPublicChannelUpdate, RoomPublicMessageUpdate, RoomPrivateMessageUpdate],
+    types: () => [RoomPublicMessage, RoomPrivateMessage, RoomPublicChannel, MyValueLog, RoomSoundEffect, RoomPublicChannelUpdate, RoomPublicMessageUpdate, RoomPrivateMessageUpdate],
     resolveType: value => {
         switch (value.__tstype) {
             case exports.RoomPrivateMessageType:
                 return RoomPrivateMessage;
             case exports.RoomPublicChannelType:
                 return RoomPublicChannel;
+            case exports.MyValueLogType:
+                return MyValueLog;
             case exports.RoomPublicMessageType:
                 return RoomPublicMessage;
             case exports.RoomSoundEffectType:

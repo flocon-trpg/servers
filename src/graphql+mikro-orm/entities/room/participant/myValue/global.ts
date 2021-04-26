@@ -1,8 +1,10 @@
-import { Collection } from '@mikro-orm/core';
+import { Collection, Reference } from '@mikro-orm/core';
 import { number } from 'yargs';
+import { __ } from '../../../../../@shared/collection';
 import { DualKey, DualKeyMap, ReadonlyDualKeyMap } from '../../../../../@shared/DualKeyMap';
 import { Result, ResultModule } from '../../../../../@shared/Result';
 import { ReadonlyStateMap } from '../../../../../@shared/StateMap';
+import { MyValueLogType } from '../../../../../enums/MyValueLogType';
 import { undefinedForAll } from '../../../../../utils/helpers';
 import { EM } from '../../../../../utils/types';
 import { ReadonlyDualKeyMapDownOperation, ReadonlyDualKeyMapTwoWayOperation, ReadonlyDualKeyMapUpOperation } from '../../../../dualKeyMapOperations';
@@ -10,6 +12,7 @@ import { createDownOperationFromMikroORM, createUpOperationFromGraphQL, Readonly
 import { ReplaceBooleanDownOperation, ReplaceBooleanDownOperationModule, ReplaceBooleanTwoWayOperation, ReplaceBooleanTwoWayOperationModule, ReplaceBooleanUpOperation, ReplaceNullableNumberDownOperation, ReplaceNullableNumberDownOperationModule, ReplaceNullableNumberTwoWayOperation, ReplaceNullableNumberTwoWayOperationModule, ReplaceNullableNumberUpOperation, ReplaceNumberDownOperation, ReplaceNumberDownOperationModule, ReplaceNumberTwoWayOperation, ReplaceNumberTwoWayOperationModule, ReplaceNumberUpOperation } from '../../../../Operations';
 import { DualKeyMapTransformer, TransformerFactory } from '../../../global';
 import { GlobalPiece } from '../../../piece/global';
+import { MyValueLog } from '../../../roomMessage/mikro-orm';
 import { Partici, UpdateParticiOp } from '../mikro-orm';
 import { MyValuePiece, RemovedMyValuePieceByMyValue } from './mikro-orm_piece';
 import { AddMyValueOp, MyValue, MyValueBase, RemovedMyValue, RemoveMyValueOp, UpdateMyValueOp } from './mikro-orm_value';
@@ -362,6 +365,85 @@ export namespace GlobalMyValue {
             }
         };
 
+        export const toLogs = ({
+            operation,
+            createdBy,
+        }: {
+            operation: ReadonlyMapTwoWayOperation<string, StateType, TwoWayOperationType>;
+            createdBy: Partici;
+        }) => {
+            const result: MyValueLog[] = [];
+            operation.forEach((value, key) => {
+                switch (value.type) {
+                    case update:
+                        result.push(new MyValueLog({
+                            stateId: key,
+                            createdBy,
+                            myValueType: MyValueLogType.Num,
+                            valueChanged: value.operation.value != null,
+                            movedPieces: __(value.operation.pieces).compact(([key, value]) => {
+                                if (value.type !== update) {
+                                    return null;
+                                }
+                                if (value.operation.cellX == null && value.operation.cellY == null && value.operation.x == null && value.operation.y == null) {
+                                    return null;
+                                }
+                                return { createdBy: key.first, stateId: key.second };
+                            }).toArray(),
+                            resizedPieces: __(value.operation.pieces).compact(([key, value]) => {
+                                if (value.type !== update) {
+                                    return null;
+                                }
+                                if (value.operation.cellH == null && value.operation.cellW == null && value.operation.h == null && value.operation.w == null) {
+                                    return null;
+                                }
+                                return { createdBy: key.first, stateId: key.second };
+                            }).toArray(),
+                            createdPieces: __(value.operation.pieces).compact(([key, value]) => {
+                                if (value.type !== replace) {
+                                    return null;
+                                }
+                                if (value.operation.newValue == null) {
+                                    return null;
+                                }
+                                return { createdBy: key.first, stateId: key.second };
+                            }).toArray(),
+                            deletedPieces: __(value.operation.pieces).compact(([key, value]) => {
+                                if (value.type !== replace) {
+                                    return null;
+                                }
+                                if (value.operation.oldValue == null) {
+                                    return null;
+                                }
+                                return { createdBy: key.first, stateId: key.second };
+                            }).toArray(),
+                        }));
+                        break;
+                    case replace:
+                        result.push(new MyValueLog({
+                            stateId: key,
+                            createdBy,
+                            myValueType: MyValueLogType.Num,
+                            valueChanged: false,
+                            replaceType: (() => {
+                                if (value.operation.oldValue == null) {
+                                    return true;
+                                }
+                                if (value.operation.newValue == null) {
+                                    return false;
+                                }
+                                return undefined; // 通常、ここには来ない
+                            })(),
+                            movedPieces: [],
+                            resizedPieces:[],
+                            createdPieces: [],
+                            deletedPieces: [],
+                        }))
+                        break;
+                }
+            });
+            return result;
+        }
     }
 
     export namespace GraphQL {

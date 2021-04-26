@@ -1,15 +1,19 @@
-import { Collection, Entity, Enum, IdentifiedReference, ManyToMany, ManyToOne, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/core';
+import { Collection, Entity, Enum, IdentifiedReference, JsonType, ManyToMany, ManyToOne, OneToMany, PrimaryKey, Property, Reference, Unique } from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { FileSourceType } from '../../../enums/FileSourceType';
-import { Chara } from '../room/character/mikro-orm';
+import { MyValueLogType } from '../../../enums/MyValueLogType';
 import { Room } from '../room/mikro-orm';
+import { Partici } from '../room/participant/mikro-orm';
 import { User } from '../user/mikro-orm';
 
-// createdByやvisibleToがParticipantではなくUserである理由:
-// - 退室してParticipantでなくなった後、再びParticipantになったときに同一人物であるとみなしたい
-// - 現在、GraphQLでブラウザに渡すのはParticipantのIdではなくUserUidなので、UserにするほうがDBへのアクセス数を少なくできる
 
 /*
+# createdByやvisibleToがParticipantではなくUserである理由:
+
+- 退室してParticipantでなくなった後、再びParticipantになったときに同一人物であるとみなしたい
+- 現在、GraphQLでブラウザに渡すのはParticipantのIdではなくUserUidなので、UserにするほうがDBへのアクセス数を少なくできる
+
+
 # text, commandResult, altTextToSecret, isSecretについて
 
 ## (text, altTextToSecret) = (nullish, nullish)
@@ -31,6 +35,11 @@ Secret設定である。
 
 ## isSecret
 Secret設定であり、本文が非公開の状態だとtrue。公開しているならばfalse。
+
+
+# システムメッセージ
+
+システムメッセージには主に二種類ある。1つはRoomPubMsgやRoomPrvMsgのcreatedByをnullishにしたものである。これは任意のチャンネルに対してメッセージを作成できるが、RoomPubMsgやRoomPrvMsgで表現不可能なメッセージは作成できない。もう1つは専用のエンティティであり、(任意のチャンネルに作成できるようにするのが面倒なので)$systemにしか作成できないが、自由度が高い。
 */
 
 // RoomPublicChannel
@@ -203,7 +212,7 @@ export class RoomPrvMsg {
     public charaName?: string;
 
     // 「書き込んだとき」のCharaのisPrivate
-    @Property({ nullable: true, default: null})
+    @Property({ nullable: true, default: null })
     public charaIsPrivate?: boolean;
 
     // 「書き込んだとき」のCharaのimagePath
@@ -236,6 +245,77 @@ export class RoomPrvMsg {
 
     @ManyToOne(() => Room, { wrappedReference: true })
     public room!: IdentifiedReference<Room>;
+}
+
+@Entity()
+export class MyValueLog {
+    public constructor({
+        createdBy,
+        stateId,
+        myValueType,
+        replaceType,
+        valueChanged,
+        createdPieces,
+        deletedPieces,
+        movedPieces,
+        resizedPieces,
+    }: {
+        createdBy: Partici;
+        stateId: string;
+        myValueType: MyValueLogType;
+        replaceType?: boolean;
+        valueChanged: boolean;
+        createdPieces: { createdBy: string; stateId: string }[];
+        deletedPieces: { createdBy: string; stateId: string }[];
+        movedPieces: { createdBy: string; stateId: string }[];
+        resizedPieces: { createdBy: string; stateId: string }[];
+    }) {
+        this.createdBy = Reference.create(createdBy);
+        this.stateId = stateId;
+        this.myValueType = myValueType;
+        this.replaceType = replaceType; 
+        this.valueChanged = valueChanged;
+        this.createdPieces = createdPieces;
+        this.deletedPieces = deletedPieces;
+        this.movedPieces = movedPieces;
+        this.resizedPieces = resizedPieces;
+    }
+
+    @PrimaryKey()
+    public id: string = v4();
+
+    @Property({ type: Date, onCreate: () => new Date() })
+    public createdAt: Date = new Date();
+
+    @Property()
+    public stateId: string;
+
+    @Enum({ items: () => MyValueLogType })
+    public myValueType: MyValueLogType;
+
+    @Property()
+    public valueChanged: boolean;
+
+    // trueならば全体のcreate、falseならば全体のdelete。trueかfalseならば、pieceCreated～pieceResizeはすべて[]。
+    @Property({ nullable: true })
+    public replaceType?: boolean;
+
+    // pieceCreated～pieceResizedのcreatedByとstateIdは、boardのものを表す
+    @Property({ type: JsonType })
+    public createdPieces: { createdBy: string; stateId: string }[];
+
+    @Property({ type: JsonType })
+    public deletedPieces: { createdBy: string; stateId: string }[];
+
+    @Property({ type: JsonType })
+    public movedPieces: { createdBy: string; stateId: string }[];
+
+    @Property({ type: JsonType })
+    public resizedPieces: { createdBy: string; stateId: string }[];
+
+    // 対象となったmyValueの所有者を表す。ログの作成者ではない。
+    @ManyToOne(() => Partici, { wrappedReference: true })
+    public createdBy: IdentifiedReference<Partici>;
 }
 
 // RoomSoundEffect

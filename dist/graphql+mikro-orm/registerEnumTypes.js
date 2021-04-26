@@ -24,6 +24,7 @@ const PromoteFailureType_1 = require("../enums/PromoteFailureType");
 const ChangeParticipantNameFailureType_1 = require("../enums/ChangeParticipantNameFailureType");
 const DeleteRoomFailureType_1 = require("../enums/DeleteRoomFailureType");
 const PrereleaseType_1 = require("../enums/PrereleaseType");
+const MyValueLogType_1 = require("../enums/MyValueLogType");
 let hasRegistered = false;
 const registerEnumTypes = () => {
     if (hasRegistered) {
@@ -71,6 +72,9 @@ const registerEnumTypes = () => {
     });
     type_graphql_1.registerEnumType(MakeMessageNotSecretFailureType_1.MakeMessageNotSecretFailureType, {
         name: 'MakeMessageNotSecretFailureType'
+    });
+    type_graphql_1.registerEnumType(MyValueLogType_1.MyValueLogType, {
+        name: 'MyValueLogType'
     });
     type_graphql_1.registerEnumType(OperateRoomFailureType_1.OperateRoomFailureType, {
         name: 'OperateRoomFailureType'

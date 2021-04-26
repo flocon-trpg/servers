@@ -9,12 +9,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RoomSe = exports.RoomPrvMsg = exports.RoomPubMsg = exports.RoomPubCh = void 0;
+exports.RoomSe = exports.MyValueLog = exports.RoomPrvMsg = exports.RoomPubMsg = exports.RoomPubCh = void 0;
 const core_1 = require("@mikro-orm/core");
 const uuid_1 = require("uuid");
 const FileSourceType_1 = require("../../../enums/FileSourceType");
+const MyValueLogType_1 = require("../../../enums/MyValueLogType");
 const mikro_orm_1 = require("../room/mikro-orm");
-const mikro_orm_2 = require("../user/mikro-orm");
+const mikro_orm_2 = require("../room/participant/mikro-orm");
+const mikro_orm_3 = require("../user/mikro-orm");
 let RoomPubCh = class RoomPubCh {
     constructor({ key }) {
         this.id = uuid_1.v4();
@@ -146,7 +148,7 @@ __decorate([
     __metadata("design:type", Object)
 ], RoomPubMsg.prototype, "roomPubCh", void 0);
 __decorate([
-    core_1.ManyToOne(() => mikro_orm_2.User, { nullable: true, wrappedReference: true }),
+    core_1.ManyToOne(() => mikro_orm_3.User, { nullable: true, wrappedReference: true }),
     __metadata("design:type", Object)
 ], RoomPubMsg.prototype, "createdBy", void 0);
 RoomPubMsg = __decorate([
@@ -239,11 +241,11 @@ __decorate([
     __metadata("design:type", String)
 ], RoomPrvMsg.prototype, "customName", void 0);
 __decorate([
-    core_1.ManyToOne(() => mikro_orm_2.User, { wrappedReference: true, nullable: true }),
+    core_1.ManyToOne(() => mikro_orm_3.User, { wrappedReference: true, nullable: true }),
     __metadata("design:type", Object)
 ], RoomPrvMsg.prototype, "createdBy", void 0);
 __decorate([
-    core_1.ManyToMany(() => mikro_orm_2.User, x => x.visibleRoomPrvMsgs),
+    core_1.ManyToMany(() => mikro_orm_3.User, x => x.visibleRoomPrvMsgs),
     __metadata("design:type", Object)
 ], RoomPrvMsg.prototype, "visibleTo", void 0);
 __decorate([
@@ -254,6 +256,70 @@ RoomPrvMsg = __decorate([
     core_1.Entity()
 ], RoomPrvMsg);
 exports.RoomPrvMsg = RoomPrvMsg;
+let MyValueLog = class MyValueLog {
+    constructor({ createdBy, stateId, myValueType, replaceType, valueChanged, createdPieces, deletedPieces, movedPieces, resizedPieces, }) {
+        this.id = uuid_1.v4();
+        this.createdAt = new Date();
+        this.createdBy = core_1.Reference.create(createdBy);
+        this.stateId = stateId;
+        this.myValueType = myValueType;
+        this.replaceType = replaceType;
+        this.valueChanged = valueChanged;
+        this.createdPieces = createdPieces;
+        this.deletedPieces = deletedPieces;
+        this.movedPieces = movedPieces;
+        this.resizedPieces = resizedPieces;
+    }
+};
+__decorate([
+    core_1.PrimaryKey(),
+    __metadata("design:type", String)
+], MyValueLog.prototype, "id", void 0);
+__decorate([
+    core_1.Property({ type: Date, onCreate: () => new Date() }),
+    __metadata("design:type", Date)
+], MyValueLog.prototype, "createdAt", void 0);
+__decorate([
+    core_1.Property(),
+    __metadata("design:type", String)
+], MyValueLog.prototype, "stateId", void 0);
+__decorate([
+    core_1.Enum({ items: () => MyValueLogType_1.MyValueLogType }),
+    __metadata("design:type", String)
+], MyValueLog.prototype, "myValueType", void 0);
+__decorate([
+    core_1.Property(),
+    __metadata("design:type", Boolean)
+], MyValueLog.prototype, "valueChanged", void 0);
+__decorate([
+    core_1.Property({ nullable: true }),
+    __metadata("design:type", Boolean)
+], MyValueLog.prototype, "replaceType", void 0);
+__decorate([
+    core_1.Property({ type: core_1.JsonType }),
+    __metadata("design:type", Array)
+], MyValueLog.prototype, "createdPieces", void 0);
+__decorate([
+    core_1.Property({ type: core_1.JsonType }),
+    __metadata("design:type", Array)
+], MyValueLog.prototype, "deletedPieces", void 0);
+__decorate([
+    core_1.Property({ type: core_1.JsonType }),
+    __metadata("design:type", Array)
+], MyValueLog.prototype, "movedPieces", void 0);
+__decorate([
+    core_1.Property({ type: core_1.JsonType }),
+    __metadata("design:type", Array)
+], MyValueLog.prototype, "resizedPieces", void 0);
+__decorate([
+    core_1.ManyToOne(() => mikro_orm_2.Partici, { wrappedReference: true }),
+    __metadata("design:type", Object)
+], MyValueLog.prototype, "createdBy", void 0);
+MyValueLog = __decorate([
+    core_1.Entity(),
+    __metadata("design:paramtypes", [Object])
+], MyValueLog);
+exports.MyValueLog = MyValueLog;
 let RoomSe = class RoomSe {
     constructor({ filePath, fileSourceType, volume }) {
         this.id = uuid_1.v4();
@@ -284,7 +350,7 @@ __decorate([
     __metadata("design:type", Number)
 ], RoomSe.prototype, "volume", void 0);
 __decorate([
-    core_1.ManyToOne(() => mikro_orm_2.User, { nullable: true, wrappedReference: true }),
+    core_1.ManyToOne(() => mikro_orm_3.User, { nullable: true, wrappedReference: true }),
     __metadata("design:type", Object)
 ], RoomSe.prototype, "createdBy", void 0);
 __decorate([

@@ -1,13 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GlobalMyValue = void 0;
+const collection_1 = require("../../../../../@shared/collection");
 const DualKeyMap_1 = require("../../../../../@shared/DualKeyMap");
 const Result_1 = require("../../../../../@shared/Result");
+const MyValueLogType_1 = require("../../../../../enums/MyValueLogType");
 const helpers_1 = require("../../../../../utils/helpers");
 const mapOperations_1 = require("../../../../mapOperations");
 const Operations_1 = require("../../../../Operations");
 const global_1 = require("../../../global");
 const global_2 = require("../../../piece/global");
+const mikro_orm_1 = require("../../../roomMessage/mikro-orm");
 const mikro_orm_piece_1 = require("./mikro-orm_piece");
 const mikro_orm_value_1 = require("./mikro-orm_value");
 const jsonType_1 = require("./number/jsonType");
@@ -239,6 +242,79 @@ var GlobalMyValue;
                     }
                 }
             }
+        };
+        Global.toLogs = ({ operation, createdBy, }) => {
+            const result = [];
+            operation.forEach((value, key) => {
+                switch (value.type) {
+                    case mapOperations_1.update:
+                        result.push(new mikro_orm_1.MyValueLog({
+                            stateId: key,
+                            createdBy,
+                            myValueType: MyValueLogType_1.MyValueLogType.Num,
+                            valueChanged: value.operation.value != null,
+                            movedPieces: collection_1.__(value.operation.pieces).compact(([key, value]) => {
+                                if (value.type !== mapOperations_1.update) {
+                                    return null;
+                                }
+                                if (value.operation.cellX == null && value.operation.cellY == null && value.operation.x == null && value.operation.y == null) {
+                                    return null;
+                                }
+                                return { createdBy: key.first, stateId: key.second };
+                            }).toArray(),
+                            resizedPieces: collection_1.__(value.operation.pieces).compact(([key, value]) => {
+                                if (value.type !== mapOperations_1.update) {
+                                    return null;
+                                }
+                                if (value.operation.cellH == null && value.operation.cellW == null && value.operation.h == null && value.operation.w == null) {
+                                    return null;
+                                }
+                                return { createdBy: key.first, stateId: key.second };
+                            }).toArray(),
+                            createdPieces: collection_1.__(value.operation.pieces).compact(([key, value]) => {
+                                if (value.type !== mapOperations_1.replace) {
+                                    return null;
+                                }
+                                if (value.operation.newValue == null) {
+                                    return null;
+                                }
+                                return { createdBy: key.first, stateId: key.second };
+                            }).toArray(),
+                            deletedPieces: collection_1.__(value.operation.pieces).compact(([key, value]) => {
+                                if (value.type !== mapOperations_1.replace) {
+                                    return null;
+                                }
+                                if (value.operation.oldValue == null) {
+                                    return null;
+                                }
+                                return { createdBy: key.first, stateId: key.second };
+                            }).toArray(),
+                        }));
+                        break;
+                    case mapOperations_1.replace:
+                        result.push(new mikro_orm_1.MyValueLog({
+                            stateId: key,
+                            createdBy,
+                            myValueType: MyValueLogType_1.MyValueLogType.Num,
+                            valueChanged: false,
+                            replaceType: (() => {
+                                if (value.operation.oldValue == null) {
+                                    return true;
+                                }
+                                if (value.operation.newValue == null) {
+                                    return false;
+                                }
+                                return undefined;
+                            })(),
+                            movedPieces: [],
+                            resizedPieces: [],
+                            createdPieces: [],
+                            deletedPieces: [],
+                        }));
+                        break;
+                }
+            });
+            return result;
         };
     })(Global = GlobalMyValue.Global || (GlobalMyValue.Global = {}));
     let GraphQL;
