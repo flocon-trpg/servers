@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tabs, Button, Menu, Dropdown, Tooltip, Popover, Drawer, Col, Row, Checkbox, Divider, Radio, Alert, Input, Modal, Result } from 'antd';
 import moment from 'moment';
-import { AllRoomMessagesSuccessResult, apolloError, failure, loading, RoomMessage, publicMessage, privateMessage, soundEffect, AllRoomMessagesResult, useFilteredAndMapRoomMessages, Message } from '../../hooks/useRoomMessages';
+import { AllRoomMessagesSuccessResult, apolloError, failure, loading, RoomMessage, publicMessage, privateMessage, soundEffect, AllRoomMessagesResult, useFilteredAndMapRoomMessages, Message, myValueLog } from '../../hooks/useRoomMessages';
 import { __ } from '../../@shared/collection';
 import { PrivateChannelSet, PrivateChannelSets } from '../../utils/PrivateChannelSet';
 import ChatInput from './ChatInput';
@@ -145,7 +145,7 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
             <Col flex='auto' />
             <Col flex={0}>特殊チャンネル</Col>
             <Col span={drawerInputSpan}>
-                <Checkbox checked={config?.showLog ?? false} onChange={e => onChange({ showLog: e.target.checked })}>
+                <Checkbox checked={config?.showNotification ?? false} onChange={e => onChange({ showNotification: e.target.checked })}>
                     <span>ログ</span>
                 </Checkbox>
                 <br />
@@ -330,7 +330,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
         createdByMe = (myAuth.uid === roomMessage.createdBy);
     }
 
-    const createdAt = message.type === privateMessage || message.type === publicMessage ? message.value.createdAt : message.createdAt as number | undefined;
+    const createdAt = message.type === privateMessage || message.type === publicMessage || message.type === myValueLog ? message.value.createdAt : message.createdAt as number | undefined;
     let datetime: string | null = null;
     if (createdAt != null) {
         datetime = moment(new Date(createdAt)).format('YYYY/MM/DD HH:mm:ss');
@@ -407,7 +407,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
                 {updatedInfo}
                 <div style={({ flex: 1 })} />
             </div>
-            {message.type === privateMessage || message.type === publicMessage ? <RoomMessageNameSpace.Content style={{ overflowWrap: 'break-word', gridRow: '2 / 3', gridColumn: '1 / 2', minHeight: contentMinHeight }} message={message} /> : <div style={{ overflowWrap: 'break-word', gridRow: '2 / 3', gridColumn: '1 / 2', minHeight: contentMinHeight }}>{message.message}</div>}
+            {message.type === privateMessage || message.type === publicMessage || message.type === myValueLog ? <RoomMessageNameSpace.Content style={{ overflowWrap: 'break-word', gridRow: '2 / 3', gridColumn: '1 / 2', minHeight: contentMinHeight }} message={message} /> : <div style={{ overflowWrap: 'break-word', gridRow: '2 / 3', gridColumn: '1 / 2', minHeight: contentMinHeight }}>{message.message}</div>}
             <div style={({ gridRow: '1 / 3', gridColumn: '2 / 3', justifySelf: 'center', alignSelf: 'center' })} >
                 {allMenuItemsAreNull ? null : <Dropdown overlay={<Menu>{menuItems}</Menu>} trigger={['click']}>
                     <Button type='text' size='small'><Icon.EllipsisOutlined /></Button>
@@ -478,7 +478,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
                     publicChannel10Name={props.publicChannel10Name}
                     key={message.type === privateMessage || message.type === publicMessage ? message.value.messageId : message.value.createdAt}
                     roomId={roomId}
-                    message={message.type === publicMessage || message.type === privateMessage ? message : message.value}
+                    message={message.type === publicMessage || message.type === privateMessage || message.type === myValueLog ? message : message.value}
                     participants={participants} />);
             });
     }, [roomId, participants, props.publicChannel1Name, props.publicChannel2Name, props.publicChannel3Name, props.publicChannel4Name, props.publicChannel5Name, props.publicChannel6Name, props.publicChannel7Name, props.publicChannel8Name, props.publicChannel9Name, props.publicChannel10Name]);

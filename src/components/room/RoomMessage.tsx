@@ -2,14 +2,15 @@ import { Tooltip } from 'antd';
 import moment from 'moment';
 import React from 'react';
 import { $free } from '../../@shared/Constants';
-import { FilePathFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment } from '../../generated/graphql';
+import { FilePathFragment, MyValueLogFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment } from '../../generated/graphql';
 import { useFirebaseStorageUrl } from '../../hooks/firebaseStorage';
-import { privateMessage, publicMessage } from '../../hooks/useRoomMessages';
+import { myValueLog, privateMessage, publicMessage } from '../../hooks/useRoomMessages';
 import { Participant } from '../../stateManagers/states/participant';
 import { PrivateChannelSet } from '../../utils/PrivateChannelSet';
 import { PublicChannelNames } from '../../utils/types';
 import * as Icon from '@ant-design/icons';
 import Jdenticon from '../../foundations/Jdenticon';
+import { compositeKeyToString } from '../../@shared/StateMap';
 
 export namespace RoomMessage {
     const Image: React.FC<{ filePath: FilePathFragment | undefined }> = ({ filePath }: { filePath: FilePathFragment | undefined }) => {
@@ -26,6 +27,9 @@ export namespace RoomMessage {
     } | {
         type: typeof publicMessage;
         value: Omit<RoomPublicMessageFragment, 'createdAt'> & { createdAt?: number };
+    } | {
+        type: typeof myValueLog;
+        value: Omit<MyValueLogFragment, 'createdAt'> & { createdAt?: number };
     }
 
     type ContentProps = {
@@ -34,6 +38,38 @@ export namespace RoomMessage {
     }
 
     export const Content: React.FC<ContentProps> = ({ style, message }: ContentProps) => {
+        if (message.type === myValueLog) {
+            const key = compositeKeyToString({ createdBy: message.value.stateUserUid, id: message.value.stateId });
+
+            if (message.value.replaceType === true) {
+                return (<div style={style}>
+                    {`数値コマ(${key})が新規作成されました`}
+                </div>);
+            }
+            if (message.value.replaceType === false) {
+                return (<div style={style}>
+                    {`数値コマ(${key})が削除されました`}
+                </div>);
+            }
+
+            // 現在、どのコマが変更されたかまでは通知していない。
+            const changed = [
+                message.value.valueChanged ? '値' : null,
+                message.value.createdPieces.length === 0 ? null : 'コマ作成',
+                message.value.deletedPieces.length === 0 ? null : 'コマ削除',
+                message.value.movedPieces.length === 0 ? null : 'コマ移動',
+                message.value.resizedPieces.length === 0?null:'コマのリサイズ',
+            ].reduce((seed, elem) => {
+                if (elem == null) {
+                    return seed;
+                }
+                return seed === '' ? elem : `${seed},${elem}`
+            },'');
+
+            return (<div style={style}>
+                {`数値コマ(${key})において次の変更がありました: ${changed}`}
+            </div>);
+        }
         if (message.value.text == null && message.value.altTextToSecret == null) {
             // 当初、削除された場合斜体にして表そうと考えたが、現状はボツにしている。
             // まず、italicなどでは対応してない日本語フォントの場合斜体にならない（対応しているフォントを選べばいいだけの話だが）。なのでtransform: skewX(-15deg)を使おうとしたが、文字列が斜めになることで横幅が少し増えるため、横のスクロールバーが出てしまう問題が出たので却下（x方向のスクロールバーを常に非表示にすれば解決しそうだが、x方向のスクロールバーを表示させたい場合は困る）。
@@ -53,7 +89,7 @@ export namespace RoomMessage {
     };
 
     export const userName = (message: MessageState, participants: ReadonlyMap<string, Participant.State>) => {
-        if (message.value.createdBy == null) {
+        if (message.type === myValueLog || message.value.createdBy == null) {
             return null;
         }
         let participantName: string | null = null;
@@ -92,7 +128,7 @@ export namespace RoomMessage {
     };
 
     export const toChannelName = (message: MessageState, publicChannelNames: PublicChannelNames, participants: ReadonlyMap<string, Participant.State>) => {
-        if (message.value.createdBy == null) {
+        if (message.type === myValueLog || message.value.createdBy == null) {
             return 'システムメッセージ';
         }
         switch (message.type) {

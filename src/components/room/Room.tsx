@@ -339,7 +339,7 @@ type RoomCoreProps = {
     logNotifications: TextNotificationsState;
 } & Props
 
-const RoomCore: React.FC<RoomCoreProps> = ({ roomState, roomId, operate, logNotifications }: RoomCoreProps) => {
+const Room: React.FC<RoomCoreProps> = ({ roomState, roomId, operate, logNotifications }: RoomCoreProps) => {
     useRoomConfig(roomId);
     const myAuth = React.useContext(MyAuthContext);
     const roomConfig = useSelector(state => state.roomConfigModule);
@@ -715,31 +715,5 @@ const RoomCore: React.FC<RoomCoreProps> = ({ roomState, roomId, operate, logNoti
             </DispatchRoomComponentsStateContext.Provider>
         </ComponentsStateContext.Provider>);
 };
-
-const Room: React.FC<Props> = (props: Props) => {
-    const [logNotification, setLogNotification] = React.useState<Notification>();
-    const [logNotifications, setLogNotifications] = React.useState<TextNotificationsState>({ values: [], newValue: null });
-    React.useEffect(() => {
-        if (logNotification == null) {
-            return;
-        }
-        const textNotification = toTextNotification(logNotification);
-        antdNotification[textNotification.type]({
-            message: textNotification.message,
-            description: textNotification.description,
-            placement: 'bottomRight',
-        });
-        setLogNotifications(oldValue => {
-            return {
-                values: [...oldValue.values, textNotification],
-                newValue: textNotification,
-            }
-        });
-    }, [logNotification]);
-
-    return <LogNotificationContext.Provider value={setLogNotification}>
-        <RoomCore {...props} logNotifications={logNotifications} />
-    </LogNotificationContext.Provider>
-}
 
 export default Room;

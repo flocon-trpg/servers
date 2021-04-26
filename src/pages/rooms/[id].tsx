@@ -8,7 +8,7 @@ import { ApolloProvider, FetchResult } from '@apollo/client';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import { deleted, getRoomFailure, joined, loading, mutationFailure, myAuthIsUnavailable, nonJoined, useRoomState } from '../../hooks/useRoomState';
 import Center from '../../foundations/Center';
-import LogNotificationContext, { TextNotification, toTextNotification, Notification } from '../../components/room/contexts/LogNotificationContext';
+import LogNotificationContext, { TextNotification, toTextNotification, Notification, TextNotificationsState } from '../../components/room/contexts/LogNotificationContext';
 import LoadingResult from '../../foundations/Result/LoadingResult';
 import NotSignInResult from '../../foundations/Result/NotSignInResult';
 
@@ -114,7 +114,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
     );
 };
 
-const RoomRouter: React.FC<{ id: string }> = ({ id }: { id: string }) => {
+const RoomRouter: React.FC<{ id: string; logNotifications: TextNotificationsState }> = ({ id, logNotifications }: { id: string; logNotifications: TextNotificationsState }) => {
     const { refetch, state } = useRoomState(id);
 
     switch (state.type) {
@@ -128,7 +128,7 @@ const RoomRouter: React.FC<{ id: string }> = ({ id }: { id: string }) => {
             }
             return (
                 <Layout requiresLogin showEntryForm={false}>
-                    <RoomComponent roomId={id} roomState={state.roomState} operate={state.operateRoom} />
+                    <RoomComponent roomId={id} roomState={state.roomState} operate={state.operateRoom} logNotifications={logNotifications} />
                 </Layout>);
         }
         case nonJoined:
@@ -183,6 +183,33 @@ const RoomRouter: React.FC<{ id: string }> = ({ id }: { id: string }) => {
     }
 };
 
+const RoomCore: React.FC<{ id: string }> = ({ id }: { id: string }) => {
+    // LogNotificationContextはuseRoomStateで使われる。そのため、useRoomStateの上位であるこのComponentで渡している。
+    const [logNotification, setLogNotification] = React.useState<Notification>();
+    const [logNotifications, setLogNotifications] = React.useState<TextNotificationsState>({ values: [], newValue: null });
+    React.useEffect(() => {
+        if (logNotification == null) {
+            return;
+        }
+        const textNotification = toTextNotification(logNotification);
+        antdNotification[textNotification.type]({
+            message: textNotification.message,
+            description: textNotification.description,
+            placement: 'bottomRight',
+        });
+        setLogNotifications(oldValue => {
+            return {
+                values: [...oldValue.values, textNotification],
+                newValue: textNotification,
+            }
+        });
+    }, [logNotification]);
+
+    return (<LogNotificationContext.Provider value={setLogNotification}>
+        <RoomRouter id={id} logNotifications={logNotifications} />
+    </LogNotificationContext.Provider>);
+}
+
 const Room: React.FC = () => {
     const router = useRouter();
     const id = router.query.id
@@ -195,7 +222,7 @@ const Room: React.FC = () => {
                     title="パラメーターが不正です。" />
             </Layout>);
     }
-    return (<RoomRouter id={id} />);
+    return (<RoomCore id={id} />);
 };
 
 export default Room;

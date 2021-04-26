@@ -3,11 +3,11 @@ import { __ } from '../@shared/collection';
 import { $free, $system } from '../@shared/Constants';
 import { MessageFilter } from '../states/MessagesPanelConfig';
 import { PrivateChannelSets } from '../utils/PrivateChannelSet';
-import { Message, notification, privateMessage, publicMessage, RoomMessage, soundEffect } from './useRoomMessages';
+import { Message, myValueLog, notification, privateMessage, publicMessage, RoomMessage, soundEffect } from './useRoomMessages';
 
-export function useMessageFilter(config: MessageFilter) {
+export function useMessageFilter(config: MessageFilter): ((message: Message) => boolean) {
     const {
-        showLog,
+        showNotification,
         showSystem,
         showFree,
         showPublic1,
@@ -25,7 +25,7 @@ export function useMessageFilter(config: MessageFilter) {
     return React.useCallback((message: Message) => {
         switch (message.type) {
             case notification:
-                return showLog;
+                return showNotification;
             case publicMessage: {
                 if (showSystem && message.value.channelKey === $system) {
                     return true;
@@ -77,6 +77,8 @@ export function useMessageFilter(config: MessageFilter) {
                     return __(set.toStringSet()).equal(new Set(message.value.visibleTo));
                 });
             }
+            case myValueLog:
+                return showSystem;
             case soundEffect:
                 return false;
         }

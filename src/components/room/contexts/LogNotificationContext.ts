@@ -53,5 +53,5 @@ export type TextNotificationsState = {
     readonly newValue: TextNotification | null;
 }
 
-const LogNotificationContext = React.createContext<(notification: Notification) => void>(() => { throw 'LogNotificationContext is empty'; });
+const LogNotificationContext = React.createContext<(notification: Notification) => void>(() => { console.warn('LogNotificationContext is empty'); });
 export default LogNotificationContext;

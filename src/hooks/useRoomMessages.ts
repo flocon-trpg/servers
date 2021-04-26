@@ -3,7 +3,7 @@ import produce from 'immer';
 import React from 'react';
 import { __ } from '../@shared/collection';
 import LogNotificationContext, { text, TextNotification, TextNotificationsState } from '../components/room/contexts/LogNotificationContext';
-import { useMessageEventSubscription, useGetMessagesQuery, RoomMessageEventFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment, RoomPublicChannelFragment, RoomSoundEffectFragment } from '../generated/graphql';
+import { useMessageEventSubscription, useGetMessagesQuery, RoomMessageEventFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment, RoomPublicChannelFragment, RoomSoundEffectFragment, MyValueLogFragment } from '../generated/graphql';
 import { appConsole } from '../utils/appConsole';
 import { PrivateChannelSet, PrivateChannelSets } from '../utils/PrivateChannelSet';
 import { usePrevious } from './usePrevious';
@@ -15,6 +15,7 @@ import { usePrevious } from './usePrevious';
 
 export const privateMessage = 'privateMessage';
 export const publicMessage = 'publicMessage';
+export const myValueLog = 'myValueLog';
 export const publicChannel = 'publicChannel';
 export const soundEffect = 'soundEffect';
 
@@ -25,11 +26,14 @@ export type RoomMessage = {
     type: typeof publicMessage;
     value: RoomPublicMessageFragment;
 } | {
+    type: typeof myValueLog;
+    value: MyValueLogFragment;
+} | {
     type: typeof soundEffect;
     value: RoomSoundEffectFragment;
 };
 
-const createRoomMessage = (source: RoomPrivateMessageFragment | RoomPublicMessageFragment | RoomSoundEffectFragment): RoomMessage | undefined => {
+const createRoomMessage = (source: RoomPrivateMessageFragment | RoomPublicMessageFragment | MyValueLogFragment | RoomSoundEffectFragment): RoomMessage | undefined => {
     switch (source.__typename) {
         case 'RoomPrivateMessage':
             return {
@@ -41,6 +45,11 @@ const createRoomMessage = (source: RoomPrivateMessageFragment | RoomPublicMessag
                 type: publicMessage,
                 value: source,
             };
+        case 'MyValueLog':
+            return {
+                type: myValueLog,
+                value: source,
+            }
         case 'RoomSoundEffect':
             return {
                 type: soundEffect,
@@ -83,6 +92,7 @@ const reduceInit = (actions: RoomMessageEventFragment[]): StateToReduce => {
                 break;
             case 'RoomPrivateMessage':
             case 'RoomPublicMessage':
+            case 'MyValueLog':
             case 'RoomSoundEffect': {
                 const newValue = createRoomMessage(action);
                 if (newValue == null) {
@@ -178,6 +188,7 @@ const reduceMessages = (state: Message[], action: RoomMessageEventFragment, filt
     switch (action.__typename) {
         case 'RoomPrivateMessage':
         case 'RoomPublicMessage':
+        case 'MyValueLog':
         case 'RoomSoundEffect': {
             const newValue = createRoomMessage(action);
             if (newValue == null) {
@@ -199,7 +210,7 @@ const reduceMessages = (state: Message[], action: RoomMessageEventFragment, filt
             }
             return produce(state, draft => {
                 const target = draft[index];
-                if (target.type === soundEffect || target.type === notification) {
+                if (target.type === myValueLog || target.type === soundEffect || target.type === notification) {
                     return;
                 }
                 target.value.altTextToSecret = action.altTextToSecret;
@@ -259,6 +270,7 @@ const reduce = (state: StateToReduce, action: RoomMessageEventFragment, filter: 
         case 'RoomPublicMessage':
         case 'RoomPrivateMessageUpdate':
         case 'RoomPublicMessageUpdate':
+        case 'MyValueLog':
         case 'RoomSoundEffect':
         case undefined: {
             return {
@@ -339,6 +351,9 @@ export const useAllRoomMessages = ({ roomId }: { roomId: string }): AllRoomMessa
                         messagesData.result.privateMessages.forEach(msg => {
                             actions.push(msg);
                         });
+                        messagesData.result.myValueLogs.forEach(msg => {
+                            actions.push(msg);
+                        })
                         messagesData.result.soundEffects.forEach(se => {
                             actions.push(se);
                         });
