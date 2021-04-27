@@ -1,4 +1,6 @@
+/** @jsxImportSource @emotion/react */
 import React from 'react';
+import { css } from '@emotion/react';
 import { Button, Col, Drawer, Input, Select, Row, Checkbox, Alert, Popover } from 'antd';
 import { isPublicChannelKey } from './RoomMessages';
 import { useListAvailableGameSystemsQuery, useWritePrivateMessageMutation, useWritePublicMessageMutation } from '../../generated/graphql';
@@ -450,7 +452,7 @@ export const ChatInput: React.FC<Props> = ({
                     </div>
                     <Popover
                         trigger='click'
-                        content={<SketchPicker className={classNames('cancel-rnd', 'colorpicker')} disableAlpha color={config.selectedTextColor == null ? '#000000' : config.selectedTextColor} onChange={e => dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { selectedTextColor: e.hex } }))} />}>
+                        content={<SketchPicker className={classNames('cancel-rnd')} css={css`color: black`} disableAlpha color={config.selectedTextColor == null ? '#000000' : config.selectedTextColor} onChange={e => dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { selectedTextColor: e.hex } }))} />}>
                         <Button style={{ color: config.selectedTextColor, width: 80, margin: '4px 4px 4px 0' }} type='dashed' size='small' >{config.selectedTextColor?.toUpperCase() ?? 'デフォルト'}</Button>
                     </Popover>
                     <Button

@@ -31,13 +31,9 @@ html {
 //     padding: $pt-navbar-height 0 0 0;
 // }
 
+// cancel-rndがclassNameに指定されている場合、react-rndが無効化されるようなコードにしている(そのため、単純にemotionなどで置き換えてはいけない)。また、ついでにcursorをautoにしている。
 .cancel-rnd {
     cursor: auto;
-}
-
-// antdをダークテーマにしている影響で、react-colorのinputの文字色が白になってしまい文字が読めなくなってしまう。それを回避するためにblackを指定している。
-.colorpicker {
-    color: black;
 }
 
 // これがあることで、antdのTabPaneの子要素のheightを100%にできる（Chrome DevToolsを用いて特定。代わりに.ant-tabs-content-topを対象にしてもよさそう）。
