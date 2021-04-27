@@ -19,7 +19,7 @@ import { Board } from '../../stateManagers/states/board';
 import { Participant } from '../../stateManagers/states/participant';
 import { useStateEditor } from '../../hooks/useStateEditor';
 import { MyNumberValue } from '../../stateManagers/states/myNumberValue';
-import { createStateMap } from '../../@shared/StateMap';
+import { compositeKeyToString, createStateMap } from '../../@shared/StateMap';
 import { __ } from '../../@shared/collection';
 import { Piece } from '../../stateManagers/states/piece';
 
@@ -105,6 +105,13 @@ const MyNumberValueDrawer: React.FC<Props> = ({ me, myUserUid }: Props) => {
                     })}
                     ok={onCreate == null ? undefined : ({ textType: 'create', onClick: onCreate })} />)}>
             <div>
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
+                    <Col flex={0}>ID</Col>
+                    <Col span={inputSpan}>
+                        {drawerType?.type === update ? compositeKeyToString({createdBy: myUserUid, id: drawerType.stateKey}) : '(なし)' }
+                    </Col>
+                </Row>
                 <Row gutter={gutter} align='middle'>
                     <Col flex='auto' />
                     <Col flex={0}>値</Col>
