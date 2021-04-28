@@ -1,4 +1,6 @@
+/** @jsxImportSource @emotion/react */
 import React from 'react';
+import { css } from '@emotion/react';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import { Table, Checkbox, Button, InputNumber, Input, Dropdown, Menu, Switch, Tooltip, Popover } from 'antd';
 import { CompositeKey, compositeKeyToString, createStateMap, StateMap } from '../../@shared/StateMap';
@@ -276,23 +278,6 @@ const CharacterList: React.FC<Props> = ({ room }: Props) => {
                             operate(setup);
                         }} />
                 </div>),
-        },
-        {
-            title: '作成者',
-            key: '作成者',
-            // eslint-disable-next-line react/display-name
-            render: (_: unknown, { character, participants: $participants }: DataSource) => {
-                const participant = $participants.get(character.stateKey.createdBy);
-                if (participant == null) {
-                    return '?';
-                }
-                return (
-                    <div style={({ whiteSpace: 'nowrap' })}>
-                        <span>{participant.name}</span>
-                        {character.createdByMe === true ? <span style={({ fontWeight: 'bold' })}> (自分)</span> : null}
-                    </div>
-                );
-            },
         },
         ...strIndex20Array.map(key => createNumParameterColumn({ key, room })),
         ...strIndex20Array.map(key => createBooleanParameterColumn({ key, room })),

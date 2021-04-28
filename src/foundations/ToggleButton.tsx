@@ -1,4 +1,6 @@
+/** @jsxImportSource @emotion/react */
 import React from 'react';
+import { css } from '@emotion/react';
 import { PropsWithChildren } from 'react';
 import { Row, Col, Button, Tooltip, Typography } from 'antd';
 import { SizeType } from 'antd/lib/config-provider/SizeContext';
@@ -26,7 +28,7 @@ const ToggleButton: React.FC<Props> = ({ checkedChildren, checkedIcon, unChecked
         return null;
     }
     if (disabled && showAsTextWhenDisabled === true) {
-        button = <span>{checked ? checkedChildren : unCheckedChildren}</span>;
+        button = <span css={css`padding: 0 5px;`}>{checked ? checkedChildren : unCheckedChildren}</span>;
     } else {
         button = (
             <Button

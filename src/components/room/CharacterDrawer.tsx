@@ -1,4 +1,4 @@
-import { Button, Checkbox, Col, Divider, Drawer, Form, Input, InputNumber, PageHeader, Row, Space, Tooltip } from 'antd';
+import { Button, Checkbox, Col, Drawer, Input, InputNumber, Row, Space, Tooltip, Typography } from 'antd';
 import React from 'react';
 import DrawerFooter from '../../layouts/DrawerFooter';
 import ComponentsStateContext from './contexts/RoomComponentsStateContext';
@@ -6,7 +6,7 @@ import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponent
 import OperateContext from './contexts/OperateContext';
 import { simpleId } from '../../utils/generators';
 import { OperationElement, replace } from '../../stateManagers/states/types';
-import { CompositeKey, createStateMap, StateMap } from '../../@shared/StateMap';
+import { createStateMap, ReadonlyStateMap } from '../../@shared/StateMap';
 import { characterDrawerType, create, update } from './RoomComponentsState';
 import { DrawerProps } from 'antd/lib/drawer';
 import InputFile from '../InputFile';
@@ -20,7 +20,7 @@ import NumberParameterInput from '../../foundations/NumberParameterInput';
 import BooleanParameterInput from '../../foundations/BooleanParameterInput';
 import StringParameterInput from '../../foundations/StringParameterInput';
 import ToggleButton from '../../foundations/ToggleButton';
-import { SettingOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import { characterIsPrivate, characterIsNotPrivate, characterIsNotPrivateAndNotCreatedByMe } from '../../resource/text/main';
 import { Room } from '../../stateManagers/states/room';
 import { Character } from '../../stateManagers/states/character';
@@ -28,6 +28,8 @@ import { Piece } from '../../stateManagers/states/piece';
 import { getUserUid } from '../../hooks/useFirebaseUser';
 import { useStateEditor } from '../../hooks/useStateEditor';
 import { BoardLocation } from '../../stateManagers/states/boardLocation';
+import { ParamName } from '../../stateManagers/states/paramName';
+import { Participant } from '../../stateManagers/states/participant';
 
 const notFound = 'notFound';
 
@@ -36,7 +38,9 @@ const drawerBaseProps: Partial<DrawerProps> = {
 };
 
 type Props = {
-    roomState: Room.State;
+    characters: ReadonlyStateMap<Character.State>;
+    paramNames: ParamName.ReadonlyStateMap<ParamName.State>;
+    participants: ReadonlyMap<string, Participant.State>;
 }
 
 const defaultCharacter: Character.State = {
@@ -66,13 +70,13 @@ const defaultPieceLocation: Piece.State = {
 const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
-const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
+const CharacterDrawer: React.FC<Props> = ({ characters, paramNames, participants }: Props) => {
     const myAuth = React.useContext(MyAuthContext);
     const componentsState = React.useContext(ComponentsStateContext);
     const drawerType = componentsState.characterDrawerType;
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
     const operate = React.useContext(OperateContext);
-    const { state: character, setState: setCharacter, stateToCreate: characterToCreate, resetStateToCreate: resetCharacterToCreate } = useStateEditor(drawerType?.type === update ? roomState.characters.get(drawerType.stateKey) : undefined, defaultCharacter, ({ prevState, nextState }) => {
+    const { state: character, setState: setCharacter, stateToCreate: characterToCreate, resetStateToCreate: resetCharacterToCreate } = useStateEditor(drawerType?.type === update ? characters.get(drawerType.stateKey) : undefined, defaultCharacter, ({ prevState, nextState }) => {
         if (drawerType?.type !== update) {
             return;
         }
@@ -376,44 +380,20 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                     }}
                 />)}>
             <div>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
-                    <Col flex={0}>全体公開</Col>
-                    <Col span={inputSpan}>
-                        <ToggleButton
-                            size='small'
-                            disabled={(createdByMe || drawerType?.type === create) ? false : characterIsNotPrivateAndNotCreatedByMe}
-                            showAsTextWhenDisabled
-                            checked={!character.isPrivate}
-                            checkedChildren={<EyeOutlined />}
-                            unCheckedChildren={<EyeInvisibleOutlined />}
-                            tooltip={character.isPrivate ? characterIsPrivate({ isCreate: drawerType?.type === create }) : characterIsNotPrivate({ isCreate: drawerType?.type === create })}
-                            onChange={newValue => updateCharacter({ isPrivate: !newValue })} />
-                    </Col>
-                </Row>
-
-                {pieceElement == null ? null : <>
-                    <Divider />
-                    <PageHeader
-                        title="コマ" />
+                {drawerType?.type === update && <>
+                    <Typography.Title level={4}>作成者</Typography.Title>
+                    <Row gutter={gutter} align='middle'>
+                        <Col flex='auto' />
+                        <Col flex={0}>作成者</Col>
+                        <Col span={inputSpan}>
+                            <span>{participants.get(drawerType.stateKey.createdBy)?.name}</span>{createdByMe && <span style={{ paddingLeft: 2, fontWeight: 'bold' }}>(自分)</span>}
+                        </Col>
+                    </Row>
                 </>}
-
-                {pieceElement}
-
-                {tachieLocationElement == null ? null : <>
-                    <Divider />
-                    <PageHeader
-                        title="立ち絵" />
-                </>}
-
-                {tachieLocationElement}
-
-                <Divider />
 
                 {characterToCreate != null ? null :
                     <>
-                        <PageHeader
-                            title="複製" />
+                        <Typography.Title level={4}>複製</Typography.Title>
 
                         <Row gutter={gutter} align='middle'>
                             <Col flex='auto' />
@@ -442,8 +422,34 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                     </>
                 }
 
-                <PageHeader
-                    title="パラメーター" />
+                {pieceElement != null && <Typography.Title level={4}>コマ</Typography.Title>}
+
+                {pieceElement}
+
+                <Typography.Title level={4}>全体公開</Typography.Title>
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
+                    <Col flex={0}>全体公開</Col>
+                    <Col span={inputSpan}>
+                        <ToggleButton
+                            size='small'
+                            disabled={(createdByMe || drawerType?.type === create) ? false : characterIsNotPrivateAndNotCreatedByMe}
+                            showAsTextWhenDisabled
+                            checked={!character.isPrivate}
+                            checkedChildren={<EyeOutlined />}
+                            unCheckedChildren={<EyeInvisibleOutlined />}
+                            tooltip={character.isPrivate ? characterIsPrivate({ isCreate: drawerType?.type === create }) : characterIsNotPrivate({ isCreate: drawerType?.type === create })}
+                            onChange={newValue => updateCharacter({ isPrivate: !newValue })} />
+                    </Col>
+                </Row>
+
+                {tachieLocationElement == null ? null : <>
+                    <Typography.Title level={4}>立ち絵</Typography.Title>
+                </>}
+
+                {tachieLocationElement}
+
+                <Typography.Title level={4}>パラメーター</Typography.Title>
 
                 <Row gutter={gutter} align='middle'>
                     <Col flex='auto' />
@@ -471,7 +477,7 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
 
                 {
                     strIndex20Array.map(key => {
-                        const paramName = roomState.paramNames.get({ type: RoomParameterNameType.Num, key });
+                        const paramName = paramNames.get({ type: RoomParameterNameType.Num, key });
                         if (paramName === undefined) {
                             return null;
                         }
@@ -500,7 +506,7 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                 }
                 {
                     strIndex20Array.map(key => {
-                        const paramName = roomState.paramNames.get({ type: RoomParameterNameType.Bool, key });
+                        const paramName = paramNames.get({ type: RoomParameterNameType.Bool, key });
                         if (paramName === undefined) {
                             return null;
                         }
@@ -527,7 +533,7 @@ const CharacterDrawer: React.FC<Props> = ({ roomState }: Props) => {
                 }
                 {
                     strIndex20Array.map(key => {
-                        const paramName = roomState.paramNames.get({ type: RoomParameterNameType.Str, key });
+                        const paramName = paramNames.get({ type: RoomParameterNameType.Str, key });
                         if (paramName === undefined) {
                             return null;
                         }

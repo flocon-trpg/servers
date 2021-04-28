@@ -705,7 +705,7 @@ const Room: React.FC<RoomCoreProps> = ({ roomState, roomId, operate, logNotifica
                                 roomCreatedByMe={myAuth?.uid === roomState.createdBy} />
 
                             <BoardDrawer roomState={roomState} />
-                            <CharacterDrawer roomState={roomState} />
+                            <CharacterDrawer characters={roomState.characters} paramNames={roomState.paramNames} participants={roomState.participants} />
                             <MyNumberValueDrawer myUserUid={myAuth.uid} me={me} />
                             <CharacterParameterNamesDrawer roomState={roomState} />
                             <EditRoomDrawer roomState={roomState} />
