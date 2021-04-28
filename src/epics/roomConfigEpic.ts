@@ -49,6 +49,9 @@ const roomConfigEpicCore = (action$: ActionsObservable<AnyAction>, state$: State
 
                     || roomConfigModule.actions.moveParticipantPanel.match(action)
                     || roomConfigModule.actions.resizeParticipantPanel.match(action)
+                    
+                    || roomConfigModule.actions.moveMyValuePanel.match(action)
+                    || roomConfigModule.actions.resizeMyValuePanel.match(action)
                 ) {
                     return action;
                 }

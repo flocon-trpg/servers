@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 //import { BoardConfig, BoardsPanelConfig } from '../states/BoardsPanelConfig';
-import { boardPanel, characterPanel, gameEffectPanel, messagePanel, PanelAction, participantPanel, RoomConfig, UpdateGameSystemAction } from '../states/RoomConfig';
+import { boardPanel, characterPanel, gameEffectPanel, messagePanel, myValuePanel, PanelAction, participantPanel, RoomConfig, UpdateGameSystemAction } from '../states/RoomConfig';
 import * as generators from '../utils/generators';
 import { ResizableDelta } from 'react-rnd';
 import { ResizeDirection } from 're-resizable';
@@ -164,6 +164,7 @@ const bringPanelToFront = (state: RoomConfig | null, action: PanelAction): void 
         const panel = state.panels.messagePanels[panelId];
         panels.push(panel);
     }
+    panels.push(state.panels.myValuePanel);
     panels.push(state.panels.participantPanel);
 
     // まずzIndexが小さい順に0,1,2,…と割り振っていく。こうすることで、例えば[-100, 5, 10000]のように飛び飛びになっている状態を修正する。zIndexが同一であるパネルが複数ある場合でも異なるzIndexになるため、場合によっては前面に来るパネルが変わる可能性もあるが、直接Configを編集したりしていない限りすべてが異なるzIndexであるはずなので無視している。
@@ -200,6 +201,10 @@ const bringPanelToFront = (state: RoomConfig | null, action: PanelAction): void 
         }
         case participantPanel: {
             state.panels.participantPanel.zIndex = panels.length;
+            return;
+        }
+        case participantPanel: {
+            state.panels.myValuePanel.zIndex = panels.length;
             return;
         }
     }
@@ -273,6 +278,10 @@ const roomConfigModule = createSlice({
                 }
                 case participantPanel: {
                     state.panels.participantPanel.isMinimized = action.payload.newValue;
+                    return;
+                }
+                case myValuePanel: {
+                    state.panels.myValuePanel.isMinimized = action.payload.newValue;
                     return;
                 }
             }
@@ -520,6 +529,27 @@ const roomConfigModule = createSlice({
                 return;
             }
             const targetPanel = state.panels.participantPanel;
+            if (targetPanel == null) {
+                return;
+            }
+            resizePanel(targetPanel, action.payload.dir, action.payload.delta);
+        },
+        
+        moveMyValuePanel: (state: RoomConfig | null, action: PayloadAction<MovePanelAction>) => {
+            if (state == null || state.roomId !== action.payload.roomId) {
+                return;
+            }
+            const targetPanel = state.panels.myValuePanel;
+            if (targetPanel == null) {
+                return;
+            }
+            movePanel(targetPanel, action.payload);
+        },
+        resizeMyValuePanel: (state: RoomConfig | null, action: PayloadAction<ResizePanelAction>) => {
+            if (state == null || state.roomId !== action.payload.roomId) {
+                return;
+            }
+            const targetPanel = state.panels.myValuePanel;
             if (targetPanel == null) {
                 return;
             }

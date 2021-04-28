@@ -44,6 +44,7 @@ export const characterPanel = 'characterPanel';
 export const gameEffectPanel = 'gameEffectPanel';
 export const messagePanel = 'messagePanel';
 export const participantPanel = 'participantPanel';
+export const myValuePanel = 'myValuePanel';
 
 export type PanelAction = {
     roomId: string;
@@ -59,7 +60,9 @@ export type PanelAction = {
         panelId: string;
     } | {
         type: typeof participantPanel;
-    };
+    } | {
+        type: typeof myValuePanel;
+    }
 }
 
 export const castToPartialRoomConfig = (source: unknown): PartialRoomConfig | undefined => {

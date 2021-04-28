@@ -17,7 +17,7 @@ import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponent
 import OperateContext from './contexts/OperateContext';
 import CharacterDrawer from './CharacterDrawer';
 import BoardDrawer from './BoardDrawer';
-import { boardPanel, characterPanel, gameEffectPanel, messagePanel, participantPanel } from '../../states/RoomConfig';
+import { boardPanel, characterPanel, gameEffectPanel, messagePanel, myValuePanel, participantPanel } from '../../states/RoomConfig';
 import * as Icon from '@ant-design/icons';
 import { DeleteRoomFailureType, ParticipantRole, PromoteFailureType, useChangeParticipantNameMutation, useDeleteRoomMutation, useGetLogLazyQuery, useLeaveRoomMutation, usePromoteToPlayerMutation, useRequiresPhraseToJoinAsPlayerLazyQuery } from '../../generated/graphql';
 import { useRouter } from 'next/router';
@@ -42,6 +42,7 @@ import { usePlayBgm } from '../../hooks/usePlayBgm';
 import { usePlaySoundEffect } from '../../hooks/usePlaySoundEffect';
 import { useMessageNotification } from '../../hooks/useMessageNotification';
 import { getUserUid } from '../../hooks/useFirebaseUser';
+import MyNumberValueList from './MyNumberValueList';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -494,16 +495,6 @@ const Room: React.FC<RoomCoreProps> = ({ roomState, roomId, operate, logNotifica
                                     })}>
                                         ログをダウンロード
                                     </Menu.Item>
-                                    <Menu.Item onClick={() => {
-                                        leaveRoomMutation().then(result => {
-                                            if (result.data == null) {
-                                                return;
-                                            }
-                                            router.push(path.rooms.index);
-                                        });
-                                    }}>
-                                        退室する
-                                    </Menu.Item>
                                 </Menu.SubMenu>
                                 <Menu.SubMenu title="ウィンドウ">
                                     <Menu.Item onClick={() => {
@@ -590,6 +581,15 @@ const Room: React.FC<RoomCoreProps> = ({ roomState, roomId, operate, logNotifica
                                         </Menu.Item>
                                     </Menu.SubMenu>
                                     <Menu.Item onClick={() => {
+                                        dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: myValuePanel }, newValue: false }));
+                                        dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: myValuePanel } }));
+                                    }}>
+                                        <div>
+                                            <span>{roomConfig.panels.myValuePanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
+                                            <span>コマ</span>
+                                        </div>
+                                    </Menu.Item>
+                                    <Menu.Item onClick={() => {
                                         dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: gameEffectPanel }, newValue: false }));
                                         dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: gameEffectPanel } }));
                                     }}>
@@ -608,6 +608,11 @@ const Room: React.FC<RoomCoreProps> = ({ roomState, roomId, operate, logNotifica
                                         </div>
                                     </Menu.Item>
                                 </Menu.SubMenu>
+                                <Menu.Item>
+                                    <Popover trigger='click' content={<VolumeBarPanel roomId={roomId} />}>
+                                        ボリューム
+                                    </Popover>
+                                </Menu.Item>
                                 {(me == null || myAuth == null) || <Menu.SubMenu
                                     title={<div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                                         <Jdenticon hashOrValue={myAuth.uid} size={20} tooltipMode={{ type: 'userUid' }} />
@@ -622,12 +627,17 @@ const Room: React.FC<RoomCoreProps> = ({ roomState, roomId, operate, logNotifica
                                         onClick={() => setIsBecomePlayerModalVisible(true)}>
                                         {me.role === ParticipantRole.Player || me.role === ParticipantRole.Master ? <Tooltip title='すでに昇格済みです。'>参加者に昇格</Tooltip> : '参加者に昇格'}
                                     </Menu.Item>
+                                    <Menu.Item onClick={() => {
+                                        leaveRoomMutation().then(result => {
+                                            if (result.data == null) {
+                                                return;
+                                            }
+                                            router.push(path.rooms.index);
+                                        });
+                                    }}>
+                                        退室する
+                                    </Menu.Item>
                                 </Menu.SubMenu>}
-                                <Menu.Item>
-                                    <Popover trigger='click' content={<VolumeBarPanel roomId={roomId} />}>
-                                        ボリューム
-                                    </Popover>
-                                </Menu.Item>
                             </Menu>
                             <div>
                                 {boardsPanels}
@@ -673,6 +683,20 @@ const Room: React.FC<RoomCoreProps> = ({ roomState, roomId, operate, logNotifica
                                     minWidth={150}
                                     zIndex={roomConfig.panels.participantPanel.zIndex}>
                                     <ParticipantList participants={roomState.participants} />
+                                </DraggableCard>}
+                                {roomConfig.panels.myValuePanel.isMinimized ? null : <DraggableCard
+                                    header="コマ"
+                                    onDragStop={e => dispatch(roomConfigModule.actions.moveMyValuePanel({ ...e, roomId }))}
+                                    onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeMyValuePanel({ roomId, dir, delta }))}
+                                    onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: myValuePanel } }))}
+                                    onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: myValuePanel }, newValue: true }))}
+                                    childrenContainerStyle={({ padding: childrenContainerPadding, overflowY: 'scroll' })}
+                                    position={roomConfig.panels.myValuePanel}
+                                    size={roomConfig.panels.myValuePanel}
+                                    minHeight={150}
+                                    minWidth={150}
+                                    zIndex={roomConfig.panels.myValuePanel.zIndex}>
+                                    <MyNumberValueList participants={roomState.participants} />
                                 </DraggableCard>}
                             </div>
 
