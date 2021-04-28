@@ -55,6 +55,7 @@ export namespace RoomMessage {
             // 現在、どのコマが変更されたかまでは通知していない。
             const changed = [
                 message.value.valueChanged ? '値' : null,
+                message.value.isValuePrivateChanged ? '公開状態' : null,
                 message.value.createdPieces.length === 0 ? null : 'コマ作成',
                 message.value.deletedPieces.length === 0 ? null : 'コマ削除',
                 message.value.movedPieces.length === 0 ? null : 'コマ移動',

@@ -699,6 +699,7 @@ export type MyValueLog = {
   createdAt: Scalars['Float'];
   createdPieces: Array<BoardId>;
   deletedPieces: Array<BoardId>;
+  isValuePrivateChanged: Scalars['Boolean'];
   messageId: Scalars['String'];
   movedPieces: Array<BoardId>;
   myValueType: MyValueLogType;
@@ -2057,7 +2058,7 @@ export type MyNumberValueStateValueFragment = (
 
 export type MyValueLogFragment = (
   { __typename?: 'MyValueLog' }
-  & Pick<MyValueLog, 'messageId' | 'stateUserUid' | 'stateId' | 'createdAt' | 'myValueType' | 'valueChanged' | 'replaceType'>
+  & Pick<MyValueLog, 'messageId' | 'stateUserUid' | 'stateId' | 'createdAt' | 'myValueType' | 'valueChanged' | 'isValuePrivateChanged' | 'replaceType'>
   & { createdPieces: Array<(
     { __typename?: 'BoardId' }
     & Pick<BoardId, 'createdBy' | 'stateId'>
@@ -3726,6 +3727,7 @@ export const MyValueLogFragmentDoc = gql`
   createdAt
   myValueType
   valueChanged
+  isValuePrivateChanged
   replaceType
   createdPieces {
     createdBy
