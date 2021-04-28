@@ -203,7 +203,7 @@ const bringPanelToFront = (state: RoomConfig | null, action: PanelAction): void 
             state.panels.participantPanel.zIndex = panels.length;
             return;
         }
-        case participantPanel: {
+        case myValuePanel: {
             state.panels.myValuePanel.zIndex = panels.length;
             return;
         }
