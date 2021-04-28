@@ -204,6 +204,9 @@ export class MyValueLog {
 
     @Field()
     public valueChanged!: boolean;
+    
+    @Field()
+    public isValuePrivateChanged!: boolean;
 
     @Field({ nullable: true })
     public replaceType?: boolean;

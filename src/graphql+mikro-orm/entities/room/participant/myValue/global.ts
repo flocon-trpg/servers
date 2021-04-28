@@ -381,6 +381,7 @@ export namespace GlobalMyValue {
                             createdBy,
                             myValueType: MyValueLogType.Num,
                             valueChanged: value.operation.value != null,
+                            isValuePrivateChanged: value.operation.isValuePrivate != null,
                             movedPieces: __(value.operation.pieces).compact(([key, value]) => {
                                 if (value.type !== update) {
                                     return null;
@@ -425,6 +426,7 @@ export namespace GlobalMyValue {
                             createdBy,
                             myValueType: MyValueLogType.Num,
                             valueChanged: false,
+                            isValuePrivateChanged: false,
                             replaceType: (() => {
                                 if (value.operation.oldValue == null) {
                                     return true;
@@ -435,7 +437,7 @@ export namespace GlobalMyValue {
                                 return undefined; // 通常、ここには来ない
                             })(),
                             movedPieces: [],
-                            resizedPieces:[],
+                            resizedPieces: [],
                             createdPieces: [],
                             deletedPieces: [],
                         }))

@@ -18,6 +18,7 @@ var MyValueLog;
                     myValueType: entity.myValueType,
                     replaceType: entity.replaceType,
                     valueChanged: entity.valueChanged,
+                    isValuePrivateChanged: entity.isValuePrivateChanged,
                     createdPieces: entity.createdPieces,
                     deletedPieces: entity.deletedPieces,
                     movedPieces: entity.movedPieces,

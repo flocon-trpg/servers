@@ -253,6 +253,7 @@ var GlobalMyValue;
                             createdBy,
                             myValueType: MyValueLogType_1.MyValueLogType.Num,
                             valueChanged: value.operation.value != null,
+                            isValuePrivateChanged: value.operation.isValuePrivate != null,
                             movedPieces: collection_1.__(value.operation.pieces).compact(([key, value]) => {
                                 if (value.type !== mapOperations_1.update) {
                                     return null;
@@ -297,6 +298,7 @@ var GlobalMyValue;
                             createdBy,
                             myValueType: MyValueLogType_1.MyValueLogType.Num,
                             valueChanged: false,
+                            isValuePrivateChanged: false,
                             replaceType: (() => {
                                 if (value.operation.oldValue == null) {
                                     return true;

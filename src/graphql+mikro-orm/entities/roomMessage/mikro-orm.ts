@@ -255,6 +255,7 @@ export class MyValueLog {
         myValueType,
         replaceType,
         valueChanged,
+        isValuePrivateChanged,
         createdPieces,
         deletedPieces,
         movedPieces,
@@ -265,6 +266,7 @@ export class MyValueLog {
         myValueType: MyValueLogType;
         replaceType?: boolean;
         valueChanged: boolean;
+        isValuePrivateChanged: boolean;
         createdPieces: { createdBy: string; stateId: string }[];
         deletedPieces: { createdBy: string; stateId: string }[];
         movedPieces: { createdBy: string; stateId: string }[];
@@ -273,8 +275,9 @@ export class MyValueLog {
         this.createdBy = Reference.create(createdBy);
         this.stateId = stateId;
         this.myValueType = myValueType;
-        this.replaceType = replaceType; 
+        this.replaceType = replaceType;
         this.valueChanged = valueChanged;
+        this.isValuePrivateChanged = isValuePrivateChanged;
         this.createdPieces = createdPieces;
         this.deletedPieces = deletedPieces;
         this.movedPieces = movedPieces;
@@ -295,6 +298,9 @@ export class MyValueLog {
 
     @Property()
     public valueChanged: boolean;
+
+    @Property({ default: false })
+    public isValuePrivateChanged: boolean
 
     // trueならば全体のcreate、falseならば全体のdelete。trueかfalseならば、pieceCreated～pieceResizeはすべて[]。
     @Property({ nullable: true })

@@ -257,7 +257,7 @@ RoomPrvMsg = __decorate([
 ], RoomPrvMsg);
 exports.RoomPrvMsg = RoomPrvMsg;
 let MyValueLog = class MyValueLog {
-    constructor({ createdBy, stateId, myValueType, replaceType, valueChanged, createdPieces, deletedPieces, movedPieces, resizedPieces, }) {
+    constructor({ createdBy, stateId, myValueType, replaceType, valueChanged, isValuePrivateChanged, createdPieces, deletedPieces, movedPieces, resizedPieces, }) {
         this.id = uuid_1.v4();
         this.createdAt = new Date();
         this.createdBy = core_1.Reference.create(createdBy);
@@ -265,6 +265,7 @@ let MyValueLog = class MyValueLog {
         this.myValueType = myValueType;
         this.replaceType = replaceType;
         this.valueChanged = valueChanged;
+        this.isValuePrivateChanged = isValuePrivateChanged;
         this.createdPieces = createdPieces;
         this.deletedPieces = deletedPieces;
         this.movedPieces = movedPieces;
@@ -291,6 +292,10 @@ __decorate([
     core_1.Property(),
     __metadata("design:type", Boolean)
 ], MyValueLog.prototype, "valueChanged", void 0);
+__decorate([
+    core_1.Property({ default: false }),
+    __metadata("design:type", Boolean)
+], MyValueLog.prototype, "isValuePrivateChanged", void 0);
 __decorate([
     core_1.Property({ nullable: true }),
     __metadata("design:type", Boolean)

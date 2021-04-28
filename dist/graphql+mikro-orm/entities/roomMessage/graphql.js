@@ -229,6 +229,10 @@ __decorate([
     __metadata("design:type", Boolean)
 ], MyValueLog.prototype, "valueChanged", void 0);
 __decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", Boolean)
+], MyValueLog.prototype, "isValuePrivateChanged", void 0);
+__decorate([
     type_graphql_1.Field({ nullable: true }),
     __metadata("design:type", Boolean)
 ], MyValueLog.prototype, "replaceType", void 0);
