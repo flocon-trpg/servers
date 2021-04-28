@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Layout as AntdLayout, notification as antdNotification, Input, Tooltip, Result, Popover } from 'antd';
+import { Menu, Layout as AntdLayout, notification as antdNotification, Input, Tooltip, Result, Popover, Modal } from 'antd';
 import DraggableCard, { horizontalPadding } from '../../foundations/DraggableCard';
 import CharacterList from './CharacterList';
 import useRoomConfig from '../../hooks/localStorage/useRoomConfig';
@@ -23,7 +23,6 @@ import { DeleteRoomFailureType, ParticipantRole, PromoteFailureType, useChangePa
 import { useRouter } from 'next/router';
 import path from '../../utils/path';
 import SoundPlayer from './SoundPlayer';
-import Modal from 'antd/lib/modal/Modal';
 import fileDownload from 'js-file-download';
 import { generateAsStaticHtml } from '../../utils/roomLogGenerator';
 import moment from 'moment';
@@ -450,7 +449,19 @@ const Room: React.FC<RoomCoreProps> = ({ roomState, roomId, operate, logNotifica
                 onDragStop={e => dispatch(roomConfigModule.actions.moveMessagePanel({ ...e, roomId, panelId: pair.key }))}
                 onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeMessagePanel({ roomId, panelId: pair.key, dir, delta }))}
                 onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: messagePanel, panelId: pair.key } }))}
-                onClose={() => dispatch(roomConfigModule.actions.removeMessagePanel({ roomId, panelId: pair.key }))}
+                onClose={() => {
+                    Modal.confirm({
+                        title: '削除の確認',
+                        content: '選択されたメッセージウィンドウを削除します。よろしいですか？',
+                        onOk: () => {
+                            dispatch(roomConfigModule.actions.removeMessagePanel({ roomId, panelId: pair.key }));
+                        },
+                        okText: '削除',
+                        cancelText: 'キャンセル',
+                        closable: true,
+                        maskClosable: true,
+                    });
+                }}
                 childrenContainerStyle={({ overflow: 'hidden' })}
                 position={pair.value}
                 size={pair.value}
