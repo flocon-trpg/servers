@@ -27,12 +27,19 @@ export type CharacterEditorDrawerType = {
 }
 
 export type MyNumberValueDrawerType = {
+    // pieceとともに作成するケース
     type: typeof create;
     boardKey: CompositeKey;
     piece: Piece.State;
 } | {
+    // pieceは作成しないケース
+    type: typeof create;
+    boardKey: null;
+    piece: null;
+} | {
     type: typeof update;
-    boardKey: CompositeKey;
+    // boardKey != nullならば、pieceが指定されたupdate。そうでないならばpieceが指定されないupdate。
+    boardKey: CompositeKey | null;
     stateKey: string;
 }
 
@@ -70,7 +77,7 @@ export type RoomComponentsAction = {
 }
 
 export const reduceComponentsState = (state: RoomComponentsState, action: RoomComponentsAction): RoomComponentsState => {
-    switch(action.type) {
+    switch (action.type) {
         case boardDrawerType:
             return {
                 ...state,

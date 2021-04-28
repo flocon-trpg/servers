@@ -74,7 +74,9 @@ const MyNumberValueDrawer: React.FC<Props> = ({ me, myUserUid }: Props) => {
             const id = simpleId();
             const operation = Room.createPostOperationSetup();
             const pieces = createStateMap<Piece.State>();
-            pieces.set(componentsState.myNumberValueDrawerType.boardKey, componentsState.myNumberValueDrawerType.piece);
+            if (componentsState.myNumberValueDrawerType.boardKey != null) {
+                pieces.set(componentsState.myNumberValueDrawerType.boardKey, componentsState.myNumberValueDrawerType.piece);
+            }
             const newValue: MyNumberValue.State = {
                 ...stateToCreate,
                 pieces,
@@ -109,7 +111,7 @@ const MyNumberValueDrawer: React.FC<Props> = ({ me, myUserUid }: Props) => {
                     <Col flex='auto' />
                     <Col flex={0}>ID</Col>
                     <Col span={inputSpan}>
-                        {drawerType?.type === update ? compositeKeyToString({createdBy: myUserUid, id: drawerType.stateKey}) : '(なし)' }
+                        {drawerType?.type === update ? compositeKeyToString({ createdBy: myUserUid, id: drawerType.stateKey }) : '(なし)'}
                     </Col>
                 </Row>
                 <Row gutter={gutter} align='middle'>

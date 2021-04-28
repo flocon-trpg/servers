@@ -5,7 +5,7 @@ import { CompositeKey, compositeKeyToString, createStateMap, StateMap } from '..
 import { secureId, simpleId } from '../../utils/generators';
 import { replace, update } from '../../stateManagers/states/types';
 import { __ } from '../../@shared/collection';
-import { characterDrawerType, characterParameterNamesDrawerVisibility, create, RoomComponentsState } from './RoomComponentsState';
+import { characterDrawerType, characterParameterNamesDrawerVisibility, create, myNumberValueDrawerType, RoomComponentsState } from './RoomComponentsState';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import OperateContext from './contexts/OperateContext';
 import { FilePathFragment, RoomParameterNameType } from '../../generated/graphql';
@@ -58,9 +58,23 @@ const MyNumberValueList: React.FC<Props> = ({ participants }: Props) => {
 
     const columns = [
         {
+            title: '',
+            key: 'menu',
+            render: (_: unknown, { stateId }: DataSource) => {
+                return <Tooltip title='編集'>
+                    <Button
+                        style={({ alignSelf: 'center' })}
+                        size='small'
+                        onClick={() => dispatchRoomComponentsState({ type: myNumberValueDrawerType, newValue: { type: update, boardKey: null, stateKey: stateId } })}>
+                        <Icon.SettingOutlined />
+                    </Button>
+                </Tooltip>
+            },
+        },
+        {
             title: 'ID',
             key: 'ID',
-            render: (_: unknown, { state, createdBy, stateId }: DataSource) => {
+            render: (_: unknown, { createdBy, stateId }: DataSource) => {
                 return <Tooltip title={compositeKeyToString({ createdBy, id: stateId })}>
                     <div style={{ width: 140, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{compositeKeyToString({ createdBy, id: stateId })}</div>
                 </Tooltip>

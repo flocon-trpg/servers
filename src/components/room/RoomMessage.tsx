@@ -58,13 +58,13 @@ export namespace RoomMessage {
                 message.value.createdPieces.length === 0 ? null : 'コマ作成',
                 message.value.deletedPieces.length === 0 ? null : 'コマ削除',
                 message.value.movedPieces.length === 0 ? null : 'コマ移動',
-                message.value.resizedPieces.length === 0?null:'コマのリサイズ',
+                message.value.resizedPieces.length === 0 ? null : 'コマのリサイズ',
             ].reduce((seed, elem) => {
                 if (elem == null) {
                     return seed;
                 }
                 return seed === '' ? elem : `${seed},${elem}`
-            },'');
+            }, '');
 
             return (<div style={style}>
                 {`数値コマ(${key})において次の変更がありました: ${changed}`}
