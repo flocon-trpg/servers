@@ -6,6 +6,7 @@ import { ParticipantsOperation, ParticipantsOperationInput, ParticipantState } f
 import { RoomBgmsOperation, RoomBgmState } from './bgm/graphql';
 import { ParamNamesOperation, ParamNameState } from './paramName/graphql';
 import { MaxLength } from 'class-validator';
+import { MyValueLog, MyValueLogType, RoomPrivateMessage, RoomPrivateMessageType, RoomPrivateMessageUpdate, RoomPrivateMessageUpdateType, RoomPublicChannel, RoomPublicChannelType, RoomPublicChannelUpdate, RoomPublicChannelUpdateType, RoomPublicMessage, RoomPublicMessageType, RoomPublicMessageUpdate, RoomPublicMessageUpdateType, RoomSoundEffect, RoomSoundEffectType } from '../roomMessage/graphql';
 
 @ObjectType()
 export class RoomGetState {
@@ -184,16 +185,3 @@ export class DeleteRoomOperation {
     @Field()
     public deletedBy!: string;
 }
-
-export const RoomOperated = createUnionType({
-    name: 'RoomOperated',
-    types: () => [RoomOperation, DeleteRoomOperation] as const,
-    resolveType: value => {
-        switch (value.__tstype) {
-            case roomOperation:
-                return RoomOperation;
-            case deleteRoomOperation:
-                return DeleteRoomOperation;
-        }
-    }
-});

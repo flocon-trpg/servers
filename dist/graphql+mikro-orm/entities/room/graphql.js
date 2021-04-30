@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RoomOperated = exports.DeleteRoomOperation = exports.deleteRoomOperation = exports.RoomOperationInput = exports.RoomOperation = exports.roomOperation = exports.OperatedBy = exports.RoomOperationValueInput = exports.RoomOperationValue = exports.RoomGetState = void 0;
+exports.DeleteRoomOperation = exports.deleteRoomOperation = exports.RoomOperationInput = exports.RoomOperation = exports.roomOperation = exports.OperatedBy = exports.RoomOperationValueInput = exports.RoomOperationValue = exports.RoomGetState = void 0;
 const type_graphql_1 = require("type-graphql");
 const Operations_1 = require("../../Operations");
 const graphql_1 = require("./board/graphql");
@@ -295,15 +295,3 @@ DeleteRoomOperation = __decorate([
     type_graphql_1.ObjectType()
 ], DeleteRoomOperation);
 exports.DeleteRoomOperation = DeleteRoomOperation;
-exports.RoomOperated = type_graphql_1.createUnionType({
-    name: 'RoomOperated',
-    types: () => [RoomOperation, DeleteRoomOperation],
-    resolveType: value => {
-        switch (value.__tstype) {
-            case exports.roomOperation:
-                return RoomOperation;
-            case exports.deleteRoomOperation:
-                return DeleteRoomOperation;
-        }
-    }
-});

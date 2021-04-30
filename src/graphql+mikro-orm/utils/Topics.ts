@@ -1,3 +1,2 @@
-export const ROOM_OPERATED = 'ROOM_OPERATED';
-export const ROOM_MESSAGE_UPDATE = 'ROOM_MESSAGE_UPDATE';
+export const ROOM_EVENT = 'ROOM_EVENT';
 export const PONG = 'PONG';

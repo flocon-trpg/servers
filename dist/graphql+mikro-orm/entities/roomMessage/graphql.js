@@ -555,14 +555,14 @@ exports.RoomMessageEvent = type_graphql_1.createUnionType({
     types: () => [RoomPublicMessage, RoomPrivateMessage, RoomPublicChannel, MyValueLog, RoomSoundEffect, RoomPublicChannelUpdate, RoomPublicMessageUpdate, RoomPrivateMessageUpdate],
     resolveType: value => {
         switch (value.__tstype) {
+            case exports.RoomPublicMessageType:
+                return RoomPublicMessage;
             case exports.RoomPrivateMessageType:
                 return RoomPrivateMessage;
             case exports.RoomPublicChannelType:
                 return RoomPublicChannel;
             case exports.MyValueLogType:
                 return MyValueLog;
-            case exports.RoomPublicMessageType:
-                return RoomPublicMessage;
             case exports.RoomSoundEffectType:
                 return RoomSoundEffect;
             case exports.RoomPublicChannelUpdateType:

@@ -204,7 +204,7 @@ export class MyValueLog {
 
     @Field()
     public valueChanged!: boolean;
-    
+
     @Field()
     public isValuePrivateChanged!: boolean;
 
@@ -497,14 +497,14 @@ export const RoomMessageEvent = createUnionType({
     types: () => [RoomPublicMessage, RoomPrivateMessage, RoomPublicChannel, MyValueLog, RoomSoundEffect, RoomPublicChannelUpdate, RoomPublicMessageUpdate, RoomPrivateMessageUpdate] as const,
     resolveType: value => {
         switch (value.__tstype) {
+            case RoomPublicMessageType:
+                return RoomPublicMessage;
             case RoomPrivateMessageType:
                 return RoomPrivateMessage;
             case RoomPublicChannelType:
                 return RoomPublicChannel;
             case MyValueLogType:
                 return MyValueLog;
-            case RoomPublicMessageType:
-                return RoomPublicMessage;
             case RoomSoundEffectType:
                 return RoomSoundEffect;
             case RoomPublicChannelUpdateType:
