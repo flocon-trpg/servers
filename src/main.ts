@@ -1,7 +1,7 @@
-import { ApolloServer } from 'apollo-server-express';
+import { ApolloServer, PubSub, PubSubEngine } from 'apollo-server-express';
 import express from 'express';
 import path from 'path';
-import admin from 'firebase-admin';
+import admin, { auth } from 'firebase-admin';
 import { ExpressContext } from 'apollo-server-express/dist/ApolloServer';
 import { authToken } from './@shared/Constants';
 import { ResolverContext } from './graphql+mikro-orm/utils/Contexts';
@@ -15,6 +15,7 @@ import ws from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import { execute, subscribe } from 'graphql';
 import { checkMigrationsBeforeStart } from './migrate';
+import { connectionManager, pubSub } from './connection/main';
 
 const main = async (params: { debug: boolean }): Promise<void> => {
     admin.initializeApp({
@@ -23,16 +24,16 @@ const main = async (params: { debug: boolean }): Promise<void> => {
 
     registerEnumTypes();
 
-    const schema = await buildSchema({ emitSchemaFile: false });
+    const schema = await buildSchema({ emitSchemaFile: false, pubSub });
     const serverConfig = loadServerConfigAsMain();
     const dbType = serverConfig.database.__type;
     const orm = await (async () => {
         try {
             switch (serverConfig.database.__type) {
                 case postgresql:
-                    return await createPostgreSQL({...serverConfig.database.postgresql, debug: params.debug });
+                    return await createPostgreSQL({ ...serverConfig.database.postgresql, debug: params.debug });
                 case sqlite:
-                    return await createSQLite({ ...serverConfig.database.sqlite, debug: params.debug } );
+                    return await createSQLite({ ...serverConfig.database.sqlite, debug: params.debug });
             }
         } catch (error) {
             console.error('Could not connect to the database!');
@@ -74,9 +75,6 @@ const main = async (params: { debug: boolean }): Promise<void> => {
     const apolloServer = new ApolloServer({
         schema,
         context,
-        subscriptions: {
-            onConnect: connectionParams => connectionParams
-        },
         debug: params.debug,
     });
 
@@ -100,22 +98,33 @@ const main = async (params: { debug: boolean }): Promise<void> => {
             schema,
             execute,
             subscribe,
-            context: async ctx => {
-                let decodedIdToken: string | undefined;
+            context: async (ctx, message) => {
+                let authTokenValue: string | undefined;
                 if (ctx.connectionParams != null) {
-                    const authTokenValue = ctx.connectionParams[authToken];
-                    if (typeof authTokenValue === 'string') {
-                        decodedIdToken = authTokenValue;
+                    const authTokenValueAsUnknown = ctx.connectionParams[authToken];
+                    if (typeof authTokenValueAsUnknown === 'string') {
+                        authTokenValue = authTokenValueAsUnknown;
                     }
                 }
+                const decodedIdToken = authTokenValue == null ? undefined : await getDecodedIdToken(authTokenValue);
+                if (decodedIdToken?.isError === false) {
+                    // Roomを開いたとき、RoomOperated, MessageEventなど複数のSubscriptionが開始されるが、代表してRoomOperatedだけを検知するようにしている。
+                    
+                    // TODO: 処理を書く
+                }
                 return {
-                    decodedIdToken: decodedIdToken == null ? undefined : await getDecodedIdToken(decodedIdToken),
+                    decodedIdToken,
                     promiseQueue,
                     createEm: () => orm.em.fork(),
                 };
             },
+            onComplete: (ctx, message) => {
+                // ブラウザが正常に終了しなくてもonCompleteは呼ばれるっぽい。
+                // connectionIdが他のと被る確率はほぼ0なので、どのsubscriptionがcompleteしたかは見ずにonLeaveRoomを呼び出している
+                connectionManager.onLeaveRoom({ connectionId: message.id });
+            },
         },
-        wsServer);
+            wsServer);
 
         console.log(`🚀 Server ready at http://localhost:${PORT}${apolloServer.graphqlPath}`);
         console.log(`🚀 Subscriptions ready at ws://localhost:${PORT}${apolloServer.subscriptionsPath}`);

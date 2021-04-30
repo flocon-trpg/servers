@@ -1,12 +1,14 @@
-import { buildSchema as buildSchemaCore, BuildSchemaOptions, buildSchemaSync as buildSchemaSyncCore, PrintSchemaOptions } from 'type-graphql';
+import { buildSchema as buildSchemaCore, BuildSchemaOptions, buildSchemaSync as buildSchemaSyncCore, PrintSchemaOptions, PubSubEngine } from 'type-graphql';
 import path from 'path';
 import { GraphQLSchema } from 'graphql';
 import registerEnumTypes from './graphql+mikro-orm/registerEnumTypes';
 import { RoomResolver } from './graphql+mikro-orm/resolvers/rooms/RoomResolver';
 import { MainResolver } from './graphql+mikro-orm/resolvers/MainResolver';
+import { PubSubOptions } from 'graphql-subscriptions';
 
 type Options = {
     emitSchemaFile: boolean;
+    pubSub?: PubSubEngine | PubSubOptions;
 }
 
 // EmitSchemaFileOptionsがtype-graphqlからexportされていないので再定義している。
@@ -33,6 +35,7 @@ export const buildSchema = async (options: Options): Promise<GraphQLSchema> => {
     return await buildSchemaCore({
         ...optionBase,
         emitSchemaFile,
+        pubSub: options.pubSub,
     });
 };
 

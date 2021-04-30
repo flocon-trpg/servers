@@ -18,13 +18,14 @@ const ws_1 = __importDefault(require("ws"));
 const ws_2 = require("graphql-ws/lib/use/ws");
 const graphql_1 = require("graphql");
 const migrate_1 = require("./migrate");
+const main_1 = require("./connection/main");
 const main = async (params) => {
     var _a;
     firebase_admin_1.default.initializeApp({
         projectId: config_1.firebaseConfig.projectId,
     });
     registerEnumTypes_1.default();
-    const schema = await buildSchema_1.buildSchema({ emitSchemaFile: false });
+    const schema = await buildSchema_1.buildSchema({ emitSchemaFile: false, pubSub: main_1.pubSub });
     const serverConfig = config_1.loadServerConfigAsMain();
     const dbType = serverConfig.database.__type;
     const orm = await (async () => {
@@ -64,9 +65,6 @@ const main = async (params) => {
     const apolloServer = new apollo_server_express_1.ApolloServer({
         schema,
         context,
-        subscriptions: {
-            onConnect: connectionParams => connectionParams
-        },
         debug: params.debug,
     });
     const app = express_1.default();
@@ -82,19 +80,25 @@ const main = async (params) => {
             schema,
             execute: graphql_1.execute,
             subscribe: graphql_1.subscribe,
-            context: async (ctx) => {
-                let decodedIdToken;
+            context: async (ctx, message) => {
+                let authTokenValue;
                 if (ctx.connectionParams != null) {
-                    const authTokenValue = ctx.connectionParams[Constants_1.authToken];
-                    if (typeof authTokenValue === 'string') {
-                        decodedIdToken = authTokenValue;
+                    const authTokenValueAsUnknown = ctx.connectionParams[Constants_1.authToken];
+                    if (typeof authTokenValueAsUnknown === 'string') {
+                        authTokenValue = authTokenValueAsUnknown;
                     }
                 }
+                const decodedIdToken = authTokenValue == null ? undefined : await getDecodedIdToken(authTokenValue);
+                if ((decodedIdToken === null || decodedIdToken === void 0 ? void 0 : decodedIdToken.isError) === false) {
+                }
                 return {
-                    decodedIdToken: decodedIdToken == null ? undefined : await getDecodedIdToken(decodedIdToken),
+                    decodedIdToken,
                     promiseQueue,
                     createEm: () => orm.em.fork(),
                 };
+            },
+            onComplete: (ctx, message) => {
+                main_1.connectionManager.onLeaveRoom({ connectionId: message.id });
             },
         }, wsServer);
         console.log(`🚀 Server ready at http://localhost:${PORT}${apolloServer.graphqlPath}`);

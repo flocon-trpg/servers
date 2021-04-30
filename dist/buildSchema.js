@@ -23,7 +23,7 @@ const buildSchema = async (options) => {
     if (options.emitSchemaFile) {
         emitSchemaFile = emitSchemaFileOptions;
     }
-    return await type_graphql_1.buildSchema(Object.assign(Object.assign({}, optionBase), { emitSchemaFile }));
+    return await type_graphql_1.buildSchema(Object.assign(Object.assign({}, optionBase), { emitSchemaFile, pubSub: options.pubSub }));
 };
 exports.buildSchema = buildSchema;
 const buildSchemaSync = (options) => {

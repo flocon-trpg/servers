@@ -2262,6 +2262,7 @@ export class RoomResolver {
         return coreResult.result;
     }
 
+    // graphql-wsでRoomOperatedのConnectionを検知しているので、もしこれがリネームもしくは削除されるときはそちらも変える。
     @Subscription(() => RoomOperated, { topics: ROOM_OPERATED, nullable: true })
     public roomOperated(@Root() payload: RoomOperatedPayload, @Arg('id') id: string, @Ctx() context: ResolverContext): typeof RoomOperated | undefined {
         // userUidが同じでも例えば異なるタブで同じRoomを開いているケースがある。そのため、Mutationを行ったuserUidにだけSubscriptionを送信しないことで通信量を節約、ということはできない。 
