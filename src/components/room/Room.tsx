@@ -19,7 +19,7 @@ import CharacterDrawer from './CharacterDrawer';
 import BoardDrawer from './BoardDrawer';
 import { boardPanel, characterPanel, gameEffectPanel, messagePanel, myValuePanel, participantPanel } from '../../states/RoomConfig';
 import * as Icon from '@ant-design/icons';
-import { DeleteRoomFailureType, ParticipantRole, PromoteFailureType, useChangeParticipantNameMutation, useDeleteRoomMutation, useGetLogLazyQuery, useLeaveRoomMutation, usePromoteToPlayerMutation, useRequiresPhraseToJoinAsPlayerLazyQuery } from '../../generated/graphql';
+import { DeleteRoomFailureType, ParticipantRole, PromoteFailureType, RoomEventSubscription, useChangeParticipantNameMutation, useDeleteRoomMutation, useGetLogLazyQuery, useLeaveRoomMutation, usePromoteToPlayerMutation, useRequiresPhraseToJoinAsPlayerLazyQuery } from '../../generated/graphql';
 import { useRouter } from 'next/router';
 import path from '../../utils/path';
 import SoundPlayer from './SoundPlayer';
@@ -333,17 +333,15 @@ type Props = {
     roomState: RoomStates.State;
     operate: ((operation: RoomStates.PostOperationSetup) => void);
     roomId: string;
+    logNotifications: TextNotificationsState;
+    roomEventSubscription: RoomEventSubscription | undefined;
 }
 
-type RoomCoreProps = {
-    logNotifications: TextNotificationsState;
-} & Props
-
-const Room: React.FC<RoomCoreProps> = ({ roomState, roomId, operate, logNotifications }: RoomCoreProps) => {
+const Room: React.FC<Props> = ({ roomState, roomId, operate, logNotifications, roomEventSubscription }: Props) => {
     useRoomConfig(roomId);
     const myAuth = React.useContext(MyAuthContext);
     const roomConfig = useSelector(state => state.roomConfigModule);
-    const allRoomMessages = useAllRoomMessages({ roomId });
+    const allRoomMessages = useAllRoomMessages({ roomId, roomEventSubscription });
     const [confirmModalState, setConfirmModalState] = React.useState<ConfirmModalState>();
     const [isBecomePlayerModalVisible, setIsBecomePlayerModalVisible] = React.useState(false);
     const [isChangeMyParticipantNameModalVisible, setIsChangeMyParticipantNameModalVisible] = React.useState(false);

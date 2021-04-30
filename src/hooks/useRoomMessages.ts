@@ -3,7 +3,7 @@ import produce from 'immer';
 import React from 'react';
 import { __ } from '../@shared/collection';
 import LogNotificationContext, { text, TextNotification, TextNotificationsState } from '../components/room/contexts/LogNotificationContext';
-import { useMessageEventSubscription, useGetMessagesQuery, RoomMessageEventFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment, RoomPublicChannelFragment, RoomSoundEffectFragment, MyValueLogFragment } from '../generated/graphql';
+import {  useGetMessagesQuery, RoomMessageEventFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment, RoomPublicChannelFragment, RoomSoundEffectFragment, MyValueLogFragment, RoomEventSubscription } from '../generated/graphql';
 import { appConsole } from '../utils/appConsole';
 import { PrivateChannelSet, PrivateChannelSets } from '../utils/PrivateChannelSet';
 import { usePrevious } from './usePrevious';
@@ -322,11 +322,9 @@ export type AllRoomMessagesResult = {
     type: typeof failure;
 } | AllRoomMessagesSuccessResult
 
-export const useAllRoomMessages = ({ roomId }: { roomId: string }): AllRoomMessagesResult => {
+export const useAllRoomMessages = ({ roomId, roomEventSubscription }: { roomId: string; roomEventSubscription: RoomEventSubscription | undefined }): AllRoomMessagesResult => {
     const [result, setResult] = React.useState<AllRoomMessagesResultCore>({ type: loading, events: [] });
-    const logNotificationContext = React.useContext(LogNotificationContext);
     const messages = useGetMessagesQuery({ variables: { roomId }, fetchPolicy: 'network-only' });
-    const messageEventSubscription = useMessageEventSubscription({ variables: { roomId } });
 
     React.useEffect(() => {
         const messagesData = messages.data;
@@ -374,7 +372,7 @@ export const useAllRoomMessages = ({ roomId }: { roomId: string }): AllRoomMessa
     }, [messages.data, messages.error]);
 
     React.useEffect(() => {
-        const messageEvent: RoomMessageEventFragment | null | undefined = messageEventSubscription.data?.messageEvent;
+        const messageEvent: RoomMessageEventFragment | null | undefined = roomEventSubscription?.roomEvent?.roomMessageEvent;
         if (messageEvent != null) {
             setResult(oldValue => {
                 switch (oldValue.type) {
@@ -395,18 +393,7 @@ export const useAllRoomMessages = ({ roomId }: { roomId: string }): AllRoomMessa
                 }
             });
         }
-    }, [messageEventSubscription.data]);
-
-    React.useEffect(() => {
-        if (messageEventSubscription.error == null) {
-            return;
-        }
-        logNotificationContext({
-            type: apolloError,
-            error: messageEventSubscription.error,
-            createdAt: new Date().getTime(),
-        });
-    }, [logNotificationContext, messageEventSubscription.error]);
+    }, [roomEventSubscription]);
 
     return result;
 };

@@ -1236,6 +1236,13 @@ export type RoomBgmsOperationInput = {
   update: Array<UpdateRoomBgmOperationInput>;
 };
 
+export type RoomEvent = {
+  __typename?: 'RoomEvent';
+  deleteRoomOperation?: Maybe<DeleteRoomOperation>;
+  roomMessageEvent?: Maybe<RoomMessageEvent>;
+  roomOperation?: Maybe<RoomOperation>;
+};
+
 export type RoomGetState = {
   __typename?: 'RoomGetState';
   bgms: Array<RoomBgmState>;
@@ -1268,8 +1275,6 @@ export type RoomMessages = {
   publicMessages: Array<RoomPublicMessage>;
   soundEffects: Array<RoomSoundEffect>;
 };
-
-export type RoomOperated = DeleteRoomOperation | RoomOperation;
 
 export type RoomOperation = {
   __typename?: 'RoomOperation';
@@ -1458,18 +1463,12 @@ export type StrParamsOperationInput = {
 
 export type Subscription = {
   __typename?: 'Subscription';
-  messageEvent?: Maybe<RoomMessageEvent>;
   pong: Pong;
-  roomOperated?: Maybe<RoomOperated>;
+  roomEvent?: Maybe<RoomEvent>;
 };
 
 
-export type SubscriptionMessageEventArgs = {
-  roomId: Scalars['String'];
-};
-
-
-export type SubscriptionRoomOperatedArgs = {
+export type SubscriptionRoomEventArgs = {
   id: Scalars['String'];
 };
 
@@ -2895,53 +2894,46 @@ export type MakeMessageNotSecretMutation = (
   ) }
 );
 
-export type RoomOperatedSubscriptionVariables = Exact<{
+export type RoomEventSubscriptionVariables = Exact<{
   id: Scalars['String'];
 }>;
 
 
-export type RoomOperatedSubscription = (
+export type RoomEventSubscription = (
   { __typename?: 'Subscription' }
-  & { roomOperated?: Maybe<(
-    { __typename?: 'DeleteRoomOperation' }
-    & Pick<DeleteRoomOperation, 'deletedBy'>
-  ) | (
-    { __typename?: 'RoomOperation' }
-    & RoomOperationFragment
-  )> }
-);
-
-export type MessageEventSubscriptionVariables = Exact<{
-  roomId: Scalars['String'];
-}>;
-
-
-export type MessageEventSubscription = (
-  { __typename?: 'Subscription' }
-  & { messageEvent?: Maybe<(
-    { __typename?: 'MyValueLog' }
-    & RoomMessageEvent_MyValueLog_Fragment
-  ) | (
-    { __typename?: 'RoomPrivateMessage' }
-    & RoomMessageEvent_RoomPrivateMessage_Fragment
-  ) | (
-    { __typename?: 'RoomPrivateMessageUpdate' }
-    & RoomMessageEvent_RoomPrivateMessageUpdate_Fragment
-  ) | (
-    { __typename?: 'RoomPublicChannel' }
-    & RoomMessageEvent_RoomPublicChannel_Fragment
-  ) | (
-    { __typename?: 'RoomPublicChannelUpdate' }
-    & RoomMessageEvent_RoomPublicChannelUpdate_Fragment
-  ) | (
-    { __typename?: 'RoomPublicMessage' }
-    & RoomMessageEvent_RoomPublicMessage_Fragment
-  ) | (
-    { __typename?: 'RoomPublicMessageUpdate' }
-    & RoomMessageEvent_RoomPublicMessageUpdate_Fragment
-  ) | (
-    { __typename?: 'RoomSoundEffect' }
-    & RoomMessageEvent_RoomSoundEffect_Fragment
+  & { roomEvent?: Maybe<(
+    { __typename?: 'RoomEvent' }
+    & { roomOperation?: Maybe<(
+      { __typename?: 'RoomOperation' }
+      & RoomOperationFragment
+    )>, deleteRoomOperation?: Maybe<(
+      { __typename?: 'DeleteRoomOperation' }
+      & Pick<DeleteRoomOperation, 'deletedBy'>
+    )>, roomMessageEvent?: Maybe<(
+      { __typename?: 'MyValueLog' }
+      & RoomMessageEvent_MyValueLog_Fragment
+    ) | (
+      { __typename?: 'RoomPrivateMessage' }
+      & RoomMessageEvent_RoomPrivateMessage_Fragment
+    ) | (
+      { __typename?: 'RoomPrivateMessageUpdate' }
+      & RoomMessageEvent_RoomPrivateMessageUpdate_Fragment
+    ) | (
+      { __typename?: 'RoomPublicChannel' }
+      & RoomMessageEvent_RoomPublicChannel_Fragment
+    ) | (
+      { __typename?: 'RoomPublicChannelUpdate' }
+      & RoomMessageEvent_RoomPublicChannelUpdate_Fragment
+    ) | (
+      { __typename?: 'RoomPublicMessage' }
+      & RoomMessageEvent_RoomPublicMessage_Fragment
+    ) | (
+      { __typename?: 'RoomPublicMessageUpdate' }
+      & RoomMessageEvent_RoomPublicMessageUpdate_Fragment
+    ) | (
+      { __typename?: 'RoomSoundEffect' }
+      & RoomMessageEvent_RoomSoundEffect_Fragment
+    )> }
   )> }
 );
 
@@ -4735,71 +4727,45 @@ export function useMakeMessageNotSecretMutation(baseOptions?: Apollo.MutationHoo
 export type MakeMessageNotSecretMutationHookResult = ReturnType<typeof useMakeMessageNotSecretMutation>;
 export type MakeMessageNotSecretMutationResult = Apollo.MutationResult<MakeMessageNotSecretMutation>;
 export type MakeMessageNotSecretMutationOptions = Apollo.BaseMutationOptions<MakeMessageNotSecretMutation, MakeMessageNotSecretMutationVariables>;
-export const RoomOperatedDocument = gql`
-    subscription RoomOperated($id: String!) {
-  roomOperated(id: $id) {
-    ... on RoomOperation {
+export const RoomEventDocument = gql`
+    subscription RoomEvent($id: String!) {
+  roomEvent(id: $id) {
+    roomOperation {
       ...RoomOperation
     }
-    ... on DeleteRoomOperation {
+    deleteRoomOperation {
       deletedBy
+    }
+    roomMessageEvent {
+      ...RoomMessageEvent
     }
   }
 }
-    ${RoomOperationFragmentDoc}`;
+    ${RoomOperationFragmentDoc}
+${RoomMessageEventFragmentDoc}`;
 
 /**
- * __useRoomOperatedSubscription__
+ * __useRoomEventSubscription__
  *
- * To run a query within a React component, call `useRoomOperatedSubscription` and pass it any options that fit your needs.
- * When your component renders, `useRoomOperatedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useRoomEventSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useRoomEventSubscription` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useRoomOperatedSubscription({
+ * const { data, loading, error } = useRoomEventSubscription({
  *   variables: {
  *      id: // value for 'id'
  *   },
  * });
  */
-export function useRoomOperatedSubscription(baseOptions: Apollo.SubscriptionHookOptions<RoomOperatedSubscription, RoomOperatedSubscriptionVariables>) {
+export function useRoomEventSubscription(baseOptions: Apollo.SubscriptionHookOptions<RoomEventSubscription, RoomEventSubscriptionVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useSubscription<RoomOperatedSubscription, RoomOperatedSubscriptionVariables>(RoomOperatedDocument, options);
+        return Apollo.useSubscription<RoomEventSubscription, RoomEventSubscriptionVariables>(RoomEventDocument, options);
       }
-export type RoomOperatedSubscriptionHookResult = ReturnType<typeof useRoomOperatedSubscription>;
-export type RoomOperatedSubscriptionResult = Apollo.SubscriptionResult<RoomOperatedSubscription>;
-export const MessageEventDocument = gql`
-    subscription MessageEvent($roomId: String!) {
-  messageEvent(roomId: $roomId) {
-    ...RoomMessageEvent
-  }
-}
-    ${RoomMessageEventFragmentDoc}`;
-
-/**
- * __useMessageEventSubscription__
- *
- * To run a query within a React component, call `useMessageEventSubscription` and pass it any options that fit your needs.
- * When your component renders, `useMessageEventSubscription` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useMessageEventSubscription({
- *   variables: {
- *      roomId: // value for 'roomId'
- *   },
- * });
- */
-export function useMessageEventSubscription(baseOptions: Apollo.SubscriptionHookOptions<MessageEventSubscription, MessageEventSubscriptionVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useSubscription<MessageEventSubscription, MessageEventSubscriptionVariables>(MessageEventDocument, options);
-      }
-export type MessageEventSubscriptionHookResult = ReturnType<typeof useMessageEventSubscription>;
-export type MessageEventSubscriptionResult = Apollo.SubscriptionResult<MessageEventSubscription>;
+export type RoomEventSubscriptionHookResult = ReturnType<typeof useRoomEventSubscription>;
+export type RoomEventSubscriptionResult = Apollo.SubscriptionResult<RoomEventSubscription>;
 export const PongDocument = gql`
     subscription Pong {
   pong {

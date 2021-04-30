@@ -1,6 +1,6 @@
 import React from 'react';
-import { Subject } from 'rxjs';
-import { GetRoomDocument, GetRoomFailureType, GetRoomQuery, GetRoomQueryVariables, OperateMutation, ParticipantsOperationFragment, RoomAsListItemFragment, RoomOperatedDocument, RoomOperatedSubscription, RoomOperatedSubscriptionVariables, RoomOperationFragment, useOperateMutation } from '../generated/graphql';
+import { Observable, Subject } from 'rxjs';
+import { GetRoomDocument, GetRoomFailureType, GetRoomQuery, GetRoomQueryVariables, OperateMutation, ParticipantsOperationFragment, RoomAsListItemFragment, RoomEventSubscription, RoomOperationFragment, useOperateMutation } from '../generated/graphql';
 import * as Rx from 'rxjs/operators';
 import { ApolloError, FetchResult, useApolloClient } from '@apollo/client';
 import { GetOnlyStateManager, StateManager } from '../stateManagers/StateManager';
@@ -53,7 +53,7 @@ type RoomStateResult = {
     state: RoomState;
 }
 
-export const useRoomState = (roomId: string): RoomStateResult => {
+export const useRoomState = (roomId: string, roomEventSubscription: Observable<RoomEventSubscription> | null): RoomStateResult => {
     const myAuth = React.useContext(MyAuthContext);
     const clientId = useClientId();
     const notificationContext = React.useContext(LogNotificationContext);
@@ -73,6 +73,9 @@ export const useRoomState = (roomId: string): RoomStateResult => {
 
         if (myAuthErrorType != null) {
             setState({ type: myAuthIsUnavailable, error: myAuthErrorType });
+            return;
+        }
+        if (roomEventSubscription == null) {
             return;
         }
         if (userUid == null) {
@@ -101,51 +104,30 @@ export const useRoomState = (roomId: string): RoomStateResult => {
 
         const postTrigger = new Subject<void>();
         const roomOperationCache = new Map<number, RoomOperationFragment>(); // キーはrevisionTo
-        // TODO: GetRoomQueryを受信中にoperationを受け取り損ねるのをなるべく防ぐためにsubscriptionを先に行っているが、必要のない場面でもsubscribeするため非効率。もしパフォーマンス上の問題があるなら、getOperationのようなqueryをサーバー側に実装してからコードを変更すべきか。
-        // そもそも、「subscribeの通信確立後にGetRoomQueryを実行」ということができればいいのだが、Apolloの仕様がまだわからないのでなんともいえない。
-        const graphQLSubscriptionSubscription = apolloClient.subscribe<RoomOperatedSubscription, RoomOperatedSubscriptionVariables>({ query: RoomOperatedDocument, variables: { id: roomId } })
+        const graphQLSubscriptionSubscription = roomEventSubscription
             .subscribe(s => {
-                if (s.data?.roomOperated == null) {
+                if (s.roomEvent?.deleteRoomOperation != null) {
+                    setState({
+                        type: deleted,
+                        deletedBy: s.roomEvent.deleteRoomOperation.deletedBy,
+                    });
                     return;
                 }
-                switch (s.data.roomOperated.__typename) {
-                    case 'DeleteRoomOperation':
-                        setState({
-                            type: deleted,
-                            deletedBy: s.data.roomOperated.deletedBy,
-                        });
-                        return;
-                    case 'RoomOperation': {
-                        if (roomStateManager == null) {
-                            roomOperationCache.set(s.data.roomOperated.revisionTo, s.data.roomOperated);
-                            return;
-                        }
-                        // Roomは、他のクライアントが行った変更はSubscriptionの結果を用い、自分のクライアントが行った変更はMutationの結果を用いている。
-                        if (s.data.roomOperated.operatedBy?.userUid !== userUid || s.data.roomOperated.operatedBy.clientId !== clientId) {
-                            const getOperation = Room.createGetOperation(s.data.roomOperated.value);
-                            roomStateManager.onOtherClientsGet(getOperation, s.data.roomOperated.revisionTo);
-                            onRoomStateManagerUpdate();
-                        }
+                if (s.roomEvent?.roomOperation != null) {
+                    if (roomStateManager == null) {
+                        roomOperationCache.set(s.roomEvent.roomOperation.revisionTo, s.roomEvent.roomOperation);
                         return;
                     }
+                    // Roomは、他のクライアントが行った変更はSubscriptionの結果を用い、自分のクライアントが行った変更はMutationの結果を用いている。
+                    if (s.roomEvent.roomOperation.operatedBy?.userUid !== userUid || s.roomEvent.roomOperation.operatedBy.clientId !== clientId) {
+                        const getOperation = Room.createGetOperation(s.roomEvent.roomOperation.value);
+                        roomStateManager.onOtherClientsGet(getOperation, s.roomEvent.roomOperation.revisionTo);
+                        onRoomStateManagerUpdate();
+                    }
+                    return;
                 }
-            }, 
-            () => notificationContext({
-                type: text,
-                notification: {
-                    type: 'error',
-                    message: 'RoomOperatedSubscriptionのsubscribeでerrorが呼ばれました。',
-                    createdAt: new Date().getTime(),
-                },
-            }),
-            () => notificationContext({
-                type: text,
-                notification: {
-                    type: 'warning',
-                    message: 'RoomOperatedSubscriptionの通信が終了しました。',
-                    createdAt: new Date().getTime(),
-                },
-            }));
+            },
+                () => { });
         const postTriggerSubscription = postTrigger.pipe(
             Rx.sampleTime(sampleTime),
             Rx.map(async () => {
@@ -316,6 +298,7 @@ export const useRoomState = (roomId: string): RoomStateResult => {
 
         return () => {
             roomStateManager = null; // 早めのメモリ解放
+
             graphQLSubscriptionSubscription.unsubscribe();
             postTriggerSubscription.unsubscribe();
         };

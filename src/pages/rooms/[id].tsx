@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import React from 'react';
 import RoomComponent from '../../components/room/Room';
-import { GetRoomFailureType, JoinRoomAsPlayerMutation, JoinRoomFailureType, ParticipantRole, RoomAsListItemFragment, RoomGetStateFragment, useJoinRoomAsPlayerMutation, useJoinRoomAsSpectatorMutation, useRoomOperatedSubscription } from '../../generated/graphql';
+import { GetRoomFailureType, JoinRoomAsPlayerMutation, JoinRoomFailureType, ParticipantRole, RoomAsListItemFragment, RoomGetStateFragment, useJoinRoomAsPlayerMutation, useJoinRoomAsSpectatorMutation, useRoomEventSubscription } from '../../generated/graphql';
 import { Alert, Button, Card, Input, Result, Spin, notification as antdNotification } from 'antd';
 import Layout from '../../layouts/Layout';
 import { ApolloProvider, FetchResult } from '@apollo/client';
@@ -11,6 +11,7 @@ import Center from '../../foundations/Center';
 import LogNotificationContext, { TextNotification, toTextNotification, Notification, TextNotificationsState } from '../../components/room/contexts/LogNotificationContext';
 import LoadingResult from '../../foundations/Result/LoadingResult';
 import NotSignInResult from '../../foundations/Result/NotSignInResult';
+import { usePublishRoomEventSubscription } from '../../hooks/usePublishRoomEventSubscription';
 
 type JoinRoomFormProps = {
     roomState: RoomAsListItemFragment;
@@ -115,7 +116,15 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
 };
 
 const RoomRouter: React.FC<{ id: string; logNotifications: TextNotificationsState }> = ({ id, logNotifications }: { id: string; logNotifications: TextNotificationsState }) => {
-    const { refetch, state } = useRoomState(id);
+    const { observable, data: roomEventSubscription, error } = usePublishRoomEventSubscription(id);
+    const { refetch, state } = useRoomState(id, observable /* Subscriptionが開始してからuseRoomState内部のQueryが呼び出されるようにしている */);
+
+    if (error != null) {
+        return (
+            <Layout requiresLogin showEntryForm={false}>
+                <Result status='error' title={`Apollo subscription エラー: ${error.message}`} subTitle='ブラウザを更新してください。' />
+            </Layout>);
+    }
 
     switch (state.type) {
         case joined: {
@@ -128,7 +137,7 @@ const RoomRouter: React.FC<{ id: string; logNotifications: TextNotificationsStat
             }
             return (
                 <Layout requiresLogin showEntryForm={false}>
-                    <RoomComponent roomId={id} roomState={state.roomState} operate={state.operateRoom} logNotifications={logNotifications} />
+                    <RoomComponent roomId={id} roomState={state.roomState} operate={state.operateRoom} logNotifications={logNotifications} roomEventSubscription={roomEventSubscription} />
                 </Layout>);
         }
         case nonJoined:
