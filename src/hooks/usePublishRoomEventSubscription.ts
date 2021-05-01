@@ -13,14 +13,18 @@ type Result = {
 // 1つのSubscriptionのみで、複数の場所でsubscribeできるようにするHook。Rxにおけるpublishのようなことをしている。ただ、現状では必要ないかもしれない。
 export function usePublishRoomEventSubscription(roomId: string): Result {
     const { data, loading, error } = useRoomEventSubscription({ variables: { id: roomId } });
-    const subjectRef = React.useRef(new Subject<RoomEventSubscription>());
+    const [subject, setSubject] = React.useState(new Subject<RoomEventSubscription>());
+    const subjectRef = React.useRef(subject);
 
     React.useEffect(() => {
-        subjectRef.current.complete();
-        subjectRef.current.unsubscribe();
-        subjectRef.current = new Subject();
+        subjectRef.current = subject;
+    }, [subject]);
+    React.useEffect(() => {
+        setSubject(subject => {
+            subject.complete();
+            return new Subject();
+        });
     }, [roomId]);
-
     React.useEffect(() => {
         if (data == null) {
             return;
@@ -36,7 +40,7 @@ export function usePublishRoomEventSubscription(roomId: string): Result {
     }, [error]);
 
     return {
-        observable: subjectRef.current,
+        observable: subject,
         data,
         loading,
         error,

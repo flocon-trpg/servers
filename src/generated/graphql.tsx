@@ -406,6 +406,26 @@ export type GetNonJoinedRoomResult = {
   roomAsListItem: RoomAsListItem;
 };
 
+export enum GetRoomConnectionFailureType {
+  NotEntry = 'NotEntry',
+  NotParticipant = 'NotParticipant',
+  NotSignIn = 'NotSignIn',
+  RoomNotFound = 'RoomNotFound'
+}
+
+export type GetRoomConnectionsFailureResult = {
+  __typename?: 'GetRoomConnectionsFailureResult';
+  failureType: GetRoomConnectionFailureType;
+};
+
+export type GetRoomConnectionsResult = GetRoomConnectionsFailureResult | GetRoomConnectionsSuccessResult;
+
+export type GetRoomConnectionsSuccessResult = {
+  __typename?: 'GetRoomConnectionsSuccessResult';
+  connectedUserUids: Array<Scalars['String']>;
+  fetchedAt: Scalars['Float'];
+};
+
 export type GetRoomFailureResult = {
   __typename?: 'GetRoomFailureResult';
   failureType: GetRoomFailureType;
@@ -983,6 +1003,7 @@ export type Query = {
   getLog: GetRoomLogResult;
   getMessages: GetRoomMessagesResult;
   getRoom: GetRoomResult;
+  getRoomConnections: GetRoomConnectionsResult;
   getRoomsList: GetRoomsListResult;
   getServerInfo: ServerInfo;
   listAvailableGameSystems: ListAvailableGameSystemsResult;
@@ -1002,6 +1023,11 @@ export type QueryGetMessagesArgs = {
 
 export type QueryGetRoomArgs = {
   id: Scalars['String'];
+};
+
+
+export type QueryGetRoomConnectionsArgs = {
+  roomId: Scalars['String'];
 };
 
 
@@ -1236,11 +1262,20 @@ export type RoomBgmsOperationInput = {
   update: Array<UpdateRoomBgmOperationInput>;
 };
 
+export type RoomConnectionEvent = {
+  __typename?: 'RoomConnectionEvent';
+  isConnected: Scalars['Boolean'];
+  updatedAt: Scalars['Float'];
+  userUid: Scalars['String'];
+};
+
 export type RoomEvent = {
   __typename?: 'RoomEvent';
   deleteRoomOperation?: Maybe<DeleteRoomOperation>;
+  roomConnectionEvent?: Maybe<RoomConnectionEvent>;
   roomMessageEvent?: Maybe<RoomMessageEvent>;
   roomOperation?: Maybe<RoomOperation>;
+  writingMessageState?: Maybe<WritingMessageState>;
 };
 
 export type RoomGetState = {
@@ -1661,6 +1696,13 @@ export enum WriteRoomSoundEffectFailureType {
 }
 
 export type WriteRoomSoundEffectResult = RoomSoundEffect | WriteRoomSoundEffectFailureResult;
+
+export type WritingMessageState = {
+  __typename?: 'WritingMessageState';
+  isWriting: Scalars['Boolean'];
+  updatedAt: Scalars['Float'];
+  userUid: Scalars['String'];
+};
 
 export type BoardStateFragment = (
   { __typename?: 'BoardState' }
@@ -2583,6 +2625,22 @@ export type GetLogQuery = (
   ) }
 );
 
+export type GetRoomConnectionsQueryVariables = Exact<{
+  roomId: Scalars['String'];
+}>;
+
+
+export type GetRoomConnectionsQuery = (
+  { __typename?: 'Query' }
+  & { result: (
+    { __typename?: 'GetRoomConnectionsFailureResult' }
+    & Pick<GetRoomConnectionsFailureResult, 'failureType'>
+  ) | (
+    { __typename?: 'GetRoomConnectionsSuccessResult' }
+    & Pick<GetRoomConnectionsSuccessResult, 'fetchedAt' | 'connectedUserUids'>
+  ) }
+);
+
 export type GetServerInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -2933,6 +2991,12 @@ export type RoomEventSubscription = (
     ) | (
       { __typename?: 'RoomSoundEffect' }
       & RoomMessageEvent_RoomSoundEffect_Fragment
+    )>, roomConnectionEvent?: Maybe<(
+      { __typename?: 'RoomConnectionEvent' }
+      & Pick<RoomConnectionEvent, 'userUid' | 'isConnected' | 'updatedAt'>
+    )>, writingMessageState?: Maybe<(
+      { __typename?: 'WritingMessageState' }
+      & Pick<WritingMessageState, 'userUid' | 'isWriting'>
     )> }
   )> }
 );
@@ -4002,6 +4066,47 @@ export function useGetLogLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Get
 export type GetLogQueryHookResult = ReturnType<typeof useGetLogQuery>;
 export type GetLogLazyQueryHookResult = ReturnType<typeof useGetLogLazyQuery>;
 export type GetLogQueryResult = Apollo.QueryResult<GetLogQuery, GetLogQueryVariables>;
+export const GetRoomConnectionsDocument = gql`
+    query GetRoomConnections($roomId: String!) {
+  result: getRoomConnections(roomId: $roomId) {
+    ... on GetRoomConnectionsSuccessResult {
+      fetchedAt
+      connectedUserUids
+    }
+    ... on GetRoomConnectionsFailureResult {
+      failureType
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetRoomConnectionsQuery__
+ *
+ * To run a query within a React component, call `useGetRoomConnectionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetRoomConnectionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetRoomConnectionsQuery({
+ *   variables: {
+ *      roomId: // value for 'roomId'
+ *   },
+ * });
+ */
+export function useGetRoomConnectionsQuery(baseOptions: Apollo.QueryHookOptions<GetRoomConnectionsQuery, GetRoomConnectionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetRoomConnectionsQuery, GetRoomConnectionsQueryVariables>(GetRoomConnectionsDocument, options);
+      }
+export function useGetRoomConnectionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetRoomConnectionsQuery, GetRoomConnectionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetRoomConnectionsQuery, GetRoomConnectionsQueryVariables>(GetRoomConnectionsDocument, options);
+        }
+export type GetRoomConnectionsQueryHookResult = ReturnType<typeof useGetRoomConnectionsQuery>;
+export type GetRoomConnectionsLazyQueryHookResult = ReturnType<typeof useGetRoomConnectionsLazyQuery>;
+export type GetRoomConnectionsQueryResult = Apollo.QueryResult<GetRoomConnectionsQuery, GetRoomConnectionsQueryVariables>;
 export const GetServerInfoDocument = gql`
     query GetServerInfo {
   result: getServerInfo {
@@ -4738,6 +4843,15 @@ export const RoomEventDocument = gql`
     }
     roomMessageEvent {
       ...RoomMessageEvent
+    }
+    roomConnectionEvent {
+      userUid
+      isConnected
+      updatedAt
+    }
+    writingMessageState {
+      userUid
+      isWriting
     }
   }
 }

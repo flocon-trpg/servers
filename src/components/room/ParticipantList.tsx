@@ -4,9 +4,11 @@ import { __ } from '../../@shared/collection';
 import { ParticipantRole } from '../../generated/graphql';
 import Jdenticon from '../../foundations/Jdenticon';
 import { Participant } from '../../stateManagers/states/participant';
+import { RoomConnectionsResult } from '../../hooks/useRoomConnections';
 
 type Props = {
     participants: ReadonlyMap<string, Participant.State>;
+    roomConnections: RoomConnectionsResult;
 }
 
 type DataSource = {
@@ -14,20 +16,23 @@ type DataSource = {
     participant: {
         userUid: string;
         state: Participant.State;
+        isConnected: string;
     };
 }
 
-const ParticipantList: React.FC<Props> = ({ participants }: Props) => {
+const ParticipantList: React.FC<Props> = ({ participants, roomConnections }: Props) => {
     const dataSource: DataSource[] =
-        [...participants].map(([key, participant]) => {
+        React.useMemo(() => [...participants].map(([key, participant]) => {
+            const connection = roomConnections[key];
             return {
                 key, // antdのtableのkeyとして必要
                 participant: {
                     userUid: key,
                     state: participant,
+                    isConnected: connection?.isConnected === true ? '接続' : '未接続',
                 },
             };
-        });
+        }), [participants, roomConnections]);
 
     const columns = __([
         {
@@ -62,6 +67,11 @@ const ParticipantList: React.FC<Props> = ({ participants }: Props) => {
                         return '退室済み';
                 }
             },
+        },
+        {
+            title: '接続状態',
+            key: '接続状態',
+            dataIndex: ['participant', 'isConnected'],
         },
     ]).compact(x => x).toArray();
 

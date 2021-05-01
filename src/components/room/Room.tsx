@@ -42,6 +42,7 @@ import { usePlaySoundEffect } from '../../hooks/usePlaySoundEffect';
 import { useMessageNotification } from '../../hooks/useMessageNotification';
 import { getUserUid } from '../../hooks/useFirebaseUser';
 import MyNumberValueList from './MyNumberValueList';
+import { useRoomConnections } from '../../hooks/useRoomConnections';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -342,6 +343,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, operate, logNotifications, r
     const myAuth = React.useContext(MyAuthContext);
     const roomConfig = useSelector(state => state.roomConfigModule);
     const allRoomMessages = useAllRoomMessages({ roomId, roomEventSubscription });
+    const roomConnections = useRoomConnections({ roomId, roomEventSubscription });
     const [confirmModalState, setConfirmModalState] = React.useState<ConfirmModalState>();
     const [isBecomePlayerModalVisible, setIsBecomePlayerModalVisible] = React.useState(false);
     const [isChangeMyParticipantNameModalVisible, setIsChangeMyParticipantNameModalVisible] = React.useState(false);
@@ -691,7 +693,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, operate, logNotifications, r
                                     minHeight={150}
                                     minWidth={150}
                                     zIndex={roomConfig.panels.participantPanel.zIndex}>
-                                    <ParticipantList participants={roomState.participants} />
+                                    <ParticipantList participants={roomState.participants} roomConnections={roomConnections} />
                                 </DraggableCard>}
                                 {roomConfig.panels.myValuePanel.isMinimized ? null : <DraggableCard
                                     header="コマ"

@@ -6,7 +6,7 @@ import { FilePath } from '../utils/types';
 import * as ReactKonva from 'react-konva';
 import { MyNumberValue } from '../stateManagers/states/myNumberValue';
 import { usePrevious } from '../hooks/usePrevious';
-import { animated, useSpring, useTransition } from 'react-spring/konva.cjs';
+import { animated, useSpring, useTransition } from '@react-spring/konva';
 import { RoomPublicMessageFragment } from '../generated/graphql';
 import produce from 'immer';
 import { __ } from '../@shared/collection';
