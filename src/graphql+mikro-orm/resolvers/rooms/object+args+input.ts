@@ -1,7 +1,9 @@
 import { MaxLength } from "class-validator";
-import { ArgsType, Field, InputType, Int } from "type-graphql";
+import { ArgsType, createUnionType, Field, InputType, Int, ObjectType } from "type-graphql";
+import { GetRoomConnectionFailureType } from "../../../enums/GetRoomConnectionFailureType";
 import { FilePath } from "../../entities/filePath/graphql";
-import { RoomOperationInput } from "../../entities/room/graphql";
+import { DeleteRoomOperation, RoomOperation, RoomOperationInput } from "../../entities/room/graphql";
+import { RoomMessageEvent } from "../../entities/roomMessage/graphql";
 
 @InputType()
 export class CreateRoomInput {
@@ -166,4 +168,84 @@ export class GetMessagesArgs {
 export class GetLogArgs {
     @Field()
     public roomId!: string;
+}
+
+export const GetRoomConnectionSuccessResultType = 'GetRoomConnectionSuccessResultType';
+
+@ObjectType()
+export class GetRoomConnectionsSuccessResult {
+    public __tstype!: typeof GetRoomConnectionSuccessResultType;
+
+    @Field()
+    public fetchedAt!: number;
+
+    @Field(() => [String])
+    public connectedUserUids!: string[];
+}
+
+export const GetRoomConnectionFailureResultType = 'GetRoomConnectionFailureResultType';
+
+@ObjectType()
+export class GetRoomConnectionsFailureResult {
+    public __tstype!: typeof GetRoomConnectionFailureResultType;
+
+    @Field(() => GetRoomConnectionFailureType)
+    public failureType!: GetRoomConnectionFailureType;
+}
+
+export const GetRoomConnectionsResult = createUnionType({
+    name: 'GetRoomConnectionsResult',
+    types: () => [GetRoomConnectionsSuccessResult, GetRoomConnectionsFailureResult] as const,
+    resolveType: value => {
+        switch (value.__tstype) {
+            case GetRoomConnectionSuccessResultType:
+                return GetRoomConnectionsSuccessResult;
+            case GetRoomConnectionFailureResultType:
+                return GetRoomConnectionsFailureResult;
+        }
+    }
+});
+
+@ObjectType()
+export class RoomConnectionEvent {
+    @Field()
+    public userUid!: string;
+
+    @Field()
+    public isConnected!: boolean;
+
+    @Field()
+    public updatedAt!: number;
+}
+
+@ObjectType()
+export class WritingMessageState {
+    @Field()
+    public userUid!: string;
+
+    @Field()
+    public isWriting!: boolean;
+
+    @Field()
+    public updatedAt!: number;
+}
+
+@ObjectType()
+export class RoomEvent {
+    // 現状は、2つ以上同時にnon-nullishになることはない。
+
+    @Field(() => RoomOperation, { nullable: true })
+    public roomOperation?: RoomOperation;
+
+    @Field(() => DeleteRoomOperation, { nullable: true })
+    public deleteRoomOperation?: DeleteRoomOperation;
+
+    @Field(() => RoomMessageEvent, { nullable: true })
+    public roomMessageEvent?: typeof RoomMessageEvent;
+
+    @Field(() => RoomConnectionEvent, { nullable: true })
+    public roomConnectionEvent?: RoomConnectionEvent;
+
+    @Field(() => WritingMessageState, { nullable: true })
+    public writingMessageState?: WritingMessageState;
 }

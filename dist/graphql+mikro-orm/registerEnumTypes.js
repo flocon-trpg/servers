@@ -25,6 +25,7 @@ const ChangeParticipantNameFailureType_1 = require("../enums/ChangeParticipantNa
 const DeleteRoomFailureType_1 = require("../enums/DeleteRoomFailureType");
 const PrereleaseType_1 = require("../enums/PrereleaseType");
 const MyValueLogType_1 = require("../enums/MyValueLogType");
+const GetRoomConnectionFailureType_1 = require("../enums/GetRoomConnectionFailureType");
 let hasRegistered = false;
 const registerEnumTypes = () => {
     if (hasRegistered) {
@@ -51,6 +52,9 @@ const registerEnumTypes = () => {
     });
     type_graphql_1.registerEnumType(FileSourceType_1.FileSourceType, {
         name: 'FileSourceType'
+    });
+    type_graphql_1.registerEnumType(GetRoomConnectionFailureType_1.GetRoomConnectionFailureType, {
+        name: 'GetRoomConnectionFailureType'
     });
     type_graphql_1.registerEnumType(GetRoomFailureType_1.GetRoomFailureType, {
         name: 'GetRoomFailureType'

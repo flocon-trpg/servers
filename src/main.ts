@@ -15,12 +15,14 @@ import ws from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import { execute, subscribe } from 'graphql';
 import { checkMigrationsBeforeStart } from './migrate';
-import { connectionManager, pubSub } from './connection/main';
+import { InMemoryConnectionManager, pubSub } from './connection/main';
 
 const main = async (params: { debug: boolean }): Promise<void> => {
     admin.initializeApp({
         projectId: firebaseConfig.projectId,
     });
+
+    const connectionManager = new InMemoryConnectionManager();
 
     registerEnumTypes();
 
@@ -66,6 +68,7 @@ const main = async (params: { debug: boolean }): Promise<void> => {
         return {
             decodedIdToken: await getDecodedIdTokenFromBearer(context.req.headers.authorization),
             promiseQueue,
+            connectionManager,
             createEm: () => orm.em.fork(),
         };
     };
@@ -107,21 +110,29 @@ const main = async (params: { debug: boolean }): Promise<void> => {
                     }
                 }
                 const decodedIdToken = authTokenValue == null ? undefined : await getDecodedIdToken(authTokenValue);
-                if (decodedIdToken?.isError === false) {
-                    // Roomを開いたとき、RoomOperated, MessageEventなど複数のSubscriptionが開始されるが、代表してRoomOperatedだけを検知するようにしている。
-                    
-                    // TODO: 処理を書く
+                if (decodedIdToken?.isError === false && message.payload.operationName?.toLowerCase() === 'roomevent') {
+                    const roomId = message.payload.variables?.id;
+                    if (typeof roomId === 'string') {
+                        connectionManager.onConnectToRoom({
+                            connectionId: message.id,
+                            userUid: decodedIdToken.value.uid,
+                            roomId,
+                        })
+                    } else {
+                        console.warn('(typeof RoomEvent.id) should be string');
+                    }
                 }
                 return {
                     decodedIdToken,
                     promiseQueue,
+                    connectionManager,
                     createEm: () => orm.em.fork(),
-                };
+                } as ResolverContext;
             },
-            onComplete: (ctx, message) => {
-                // ブラウザが正常に終了しなくてもonCompleteは呼ばれるっぽい。
-                // connectionIdが他のと被る確率はほぼ0なので、どのsubscriptionがcompleteしたかは見ずにonLeaveRoomを呼び出している
-                connectionManager.onLeaveRoom({ connectionId: message.id });
+            onDisconnect: ctx => {
+                for (const key in ctx.subscriptions) {
+                    connectionManager.onLeaveRoom({ connectionId: key });
+                }
             },
         },
             wsServer);

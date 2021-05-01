@@ -24,6 +24,7 @@ const main = async (params) => {
     firebase_admin_1.default.initializeApp({
         projectId: config_1.firebaseConfig.projectId,
     });
+    const connectionManager = new main_1.InMemoryConnectionManager();
     registerEnumTypes_1.default();
     const schema = await buildSchema_1.buildSchema({ emitSchemaFile: false, pubSub: main_1.pubSub });
     const serverConfig = config_1.loadServerConfigAsMain();
@@ -59,6 +60,7 @@ const main = async (params) => {
         return {
             decodedIdToken: await getDecodedIdTokenFromBearer(context.req.headers.authorization),
             promiseQueue,
+            connectionManager,
             createEm: () => orm.em.fork(),
         };
     };
@@ -81,6 +83,7 @@ const main = async (params) => {
             execute: graphql_1.execute,
             subscribe: graphql_1.subscribe,
             context: async (ctx, message) => {
+                var _a, _b;
                 let authTokenValue;
                 if (ctx.connectionParams != null) {
                     const authTokenValueAsUnknown = ctx.connectionParams[Constants_1.authToken];
@@ -89,16 +92,30 @@ const main = async (params) => {
                     }
                 }
                 const decodedIdToken = authTokenValue == null ? undefined : await getDecodedIdToken(authTokenValue);
-                if ((decodedIdToken === null || decodedIdToken === void 0 ? void 0 : decodedIdToken.isError) === false) {
+                if ((decodedIdToken === null || decodedIdToken === void 0 ? void 0 : decodedIdToken.isError) === false && ((_a = message.payload.operationName) === null || _a === void 0 ? void 0 : _a.toLowerCase()) === 'roomevent') {
+                    const roomId = (_b = message.payload.variables) === null || _b === void 0 ? void 0 : _b.id;
+                    if (typeof roomId === 'string') {
+                        connectionManager.onConnectToRoom({
+                            connectionId: message.id,
+                            userUid: decodedIdToken.value.uid,
+                            roomId,
+                        });
+                    }
+                    else {
+                        console.warn('(typeof RoomEvent.id) should be string');
+                    }
                 }
                 return {
                     decodedIdToken,
                     promiseQueue,
+                    connectionManager,
                     createEm: () => orm.em.fork(),
                 };
             },
-            onComplete: (ctx, message) => {
-                main_1.connectionManager.onLeaveRoom({ connectionId: message.id });
+            onDisconnect: ctx => {
+                for (const key in ctx.subscriptions) {
+                    connectionManager.onLeaveRoom({ connectionId: key });
+                }
             },
         }, wsServer);
         console.log(`🚀 Server ready at http://localhost:${PORT}${apolloServer.graphqlPath}`);

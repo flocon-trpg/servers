@@ -34,7 +34,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RoomResolver = exports.RoomEvent = void 0;
+exports.RoomResolver = void 0;
 const type_graphql_1 = require("type-graphql");
 const ParticipantRole_1 = require("../../../enums/ParticipantRole");
 const GetRoomFailureType_1 = require("../../../enums/GetRoomFailureType");
@@ -73,7 +73,7 @@ const mapOperations_1 = require("../../mapOperations");
 const global_4 = require("../../entities/room/participant/myValue/global");
 const collection_1 = require("../../../@shared/collection");
 const mikro_orm_2 = require("../../entities/roomMessage/mikro-orm");
-const args_input_1 = require("./args+input");
+const object_args_input_1 = require("./object+args+input");
 const graphql_2 = require("../../entities/roomMessage/graphql");
 const WritePublicRoomMessageFailureType_1 = require("../../../enums/WritePublicRoomMessageFailureType");
 const Constants_1 = require("../../../@shared/Constants");
@@ -93,24 +93,7 @@ const MakeMessageNotSecretFailureType_1 = require("../../../enums/MakeMessageNot
 const DeleteMessageFailureType_1 = require("../../../enums/DeleteMessageFailureType");
 const EditMessageFailureType_1 = require("../../../enums/EditMessageFailureType");
 const Topics_1 = require("../../utils/Topics");
-let RoomEvent = class RoomEvent {
-};
-__decorate([
-    type_graphql_1.Field(() => graphql_1.RoomOperation, { nullable: true }),
-    __metadata("design:type", graphql_1.RoomOperation)
-], RoomEvent.prototype, "roomOperation", void 0);
-__decorate([
-    type_graphql_1.Field(() => graphql_1.DeleteRoomOperation, { nullable: true }),
-    __metadata("design:type", graphql_1.DeleteRoomOperation)
-], RoomEvent.prototype, "deleteRoomOperation", void 0);
-__decorate([
-    type_graphql_1.Field(() => graphql_2.RoomMessageEvent, { nullable: true }),
-    __metadata("design:type", Object)
-], RoomEvent.prototype, "roomMessageEvent", void 0);
-RoomEvent = __decorate([
-    type_graphql_1.ObjectType()
-], RoomEvent);
-exports.RoomEvent = RoomEvent;
+const GetRoomConnectionFailureType_1 = require("../../../enums/GetRoomConnectionFailureType");
 const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUserUids, create, update, }) => {
     const prevRevision = room.revision;
     const roomState = await global_2.GlobalRoom.MikroORM.ToGlobal.state(room);
@@ -808,6 +791,54 @@ let RoomResolver = class RoomResolver {
             await pubSub.publish(Topics_1.ROOM_EVENT, coreResult.payload);
         }
         return coreResult.result;
+    }
+    async getRoomConnectionsCore({ roomId, context }) {
+        const decodedIdToken = helpers_1.checkSignIn(context);
+        if (decodedIdToken === helpers_1.NotSignIn) {
+            return { __tstype: object_args_input_1.GetRoomConnectionFailureResultType, failureType: GetRoomConnectionFailureType_1.GetRoomConnectionFailureType.NotSignIn };
+        }
+        const queue = async () => {
+            const em = context.createEm();
+            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+            await em.flush();
+            if (!entry) {
+                return Result_1.ResultModule.ok({
+                    __tstype: object_args_input_1.GetRoomConnectionFailureResultType,
+                    failureType: GetRoomConnectionFailureType_1.GetRoomConnectionFailureType.NotEntry,
+                });
+            }
+            const findResult = await helpers_1.findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId });
+            if (findResult == null) {
+                return Result_1.ResultModule.ok({
+                    __tstype: object_args_input_1.GetRoomConnectionFailureResultType,
+                    failureType: GetRoomConnectionFailureType_1.GetRoomConnectionFailureType.RoomNotFound,
+                });
+            }
+            const { me } = findResult;
+            if ((me === null || me === void 0 ? void 0 : me.role) === undefined) {
+                return Result_1.ResultModule.ok({
+                    __tstype: object_args_input_1.GetRoomConnectionFailureResultType,
+                    failureType: GetRoomConnectionFailureType_1.GetRoomConnectionFailureType.NotParticipant,
+                });
+            }
+            return Result_1.ResultModule.ok({
+                __tstype: object_args_input_1.GetRoomConnectionSuccessResultType,
+                connectedUserUids: [...context.connectionManager.list({ roomId })].filter(([key, value]) => value > 0).map(([key]) => key),
+                fetchedAt: new Date().getTime(),
+            });
+        };
+        const result = await context.promiseQueue.next(queue);
+        if (result.type === PromiseQueue_1.queueLimitReached) {
+            throw messages_1.serverTooBusyMessage;
+        }
+        if (result.value.isError) {
+            throw result.value.error;
+        }
+        return result.value.value;
+    }
+    async getRoomConnections(roomId, context) {
+        const coreResult = await this.getRoomConnectionsCore({ roomId, context });
+        return coreResult;
     }
     async writePublicMessageCore({ args, context, channelKey }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
@@ -2042,6 +2073,30 @@ let RoomResolver = class RoomResolver {
             return undefined;
         }
         const userUid = context.decodedIdToken.value.uid;
+        if (payload.type === 'roomConnectionUpdatePayload') {
+            if (id !== payload.roomId) {
+                return;
+            }
+            return {
+                roomConnectionEvent: {
+                    userUid: payload.userUid,
+                    isConnected: payload.isConnected,
+                    updatedAt: payload.updatedAt,
+                }
+            };
+        }
+        if (payload.type === 'writingMessageStateUpdatePayload') {
+            if (id !== payload.roomId) {
+                return;
+            }
+            return {
+                writingMessageState: {
+                    userUid: payload.userUid,
+                    isWriting: payload.isWriting,
+                    updatedAt: payload.updatedAt,
+                }
+            };
+        }
         if (payload.type === 'messageUpdatePayload') {
             if (payload.value.__tstype === graphql_2.RoomPrivateMessageType) {
                 if (payload.value.visibleTo.every(vt => vt !== userUid)) {
@@ -2116,63 +2171,70 @@ __decorate([
     type_graphql_1.Query(() => graphql_2.GetRoomMessagesResult),
     __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [args_input_1.GetMessagesArgs, Object]),
+    __metadata("design:paramtypes", [object_args_input_1.GetMessagesArgs, Object]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "getMessages", null);
 __decorate([
     type_graphql_1.Query(() => graphql_2.GetRoomLogResult),
     __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [args_input_1.GetLogArgs, Object, type_graphql_1.PubSubEngine]),
+    __metadata("design:paramtypes", [object_args_input_1.GetLogArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "getLog", null);
+__decorate([
+    type_graphql_1.Query(() => object_args_input_1.GetRoomConnectionsResult),
+    __param(0, type_graphql_1.Arg('roomId')), __param(1, type_graphql_1.Ctx()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], RoomResolver.prototype, "getRoomConnections", null);
 __decorate([
     type_graphql_1.Mutation(() => CreateRoomResult_1.CreateRoomResult),
     __param(0, type_graphql_1.Arg('input')), __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [args_input_1.CreateRoomInput, Object]),
+    __metadata("design:paramtypes", [object_args_input_1.CreateRoomInput, Object]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "createRoom", null);
 __decorate([
     type_graphql_1.Mutation(() => DeleteRoomResult_1.DeleteRoomResult),
     __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [args_input_1.DeleteRoomArgs, Object, type_graphql_1.PubSubEngine]),
+    __metadata("design:paramtypes", [object_args_input_1.DeleteRoomArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "deleteRoom", null);
 __decorate([
     type_graphql_1.Mutation(() => JoinRoomResult_1.JoinRoomResult),
     __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [args_input_1.JoinRoomArgs, Object, type_graphql_1.PubSubEngine]),
+    __metadata("design:paramtypes", [object_args_input_1.JoinRoomArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "joinRoomAsPlayer", null);
 __decorate([
     type_graphql_1.Mutation(() => JoinRoomResult_1.JoinRoomResult),
     __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [args_input_1.JoinRoomArgs, Object, type_graphql_1.PubSubEngine]),
+    __metadata("design:paramtypes", [object_args_input_1.JoinRoomArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "joinRoomAsSpectator", null);
 __decorate([
     type_graphql_1.Mutation(() => PromoteMeResult_1.PromoteResult),
     __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [args_input_1.PromoteArgs, Object, type_graphql_1.PubSubEngine]),
+    __metadata("design:paramtypes", [object_args_input_1.PromoteArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "promoteToPlayer", null);
 __decorate([
     type_graphql_1.Mutation(() => ChangeParticipantNameResult_1.ChangeParticipantNameResult),
     __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [args_input_1.ChangeParticipantNameArgs, Object, type_graphql_1.PubSubEngine]),
+    __metadata("design:paramtypes", [object_args_input_1.ChangeParticipantNameArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "changeParticipantName", null);
 __decorate([
     type_graphql_1.Query(() => GetRoomResult_1.GetRoomResult),
     __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [args_input_1.GetRoomArgs, Object]),
+    __metadata("design:paramtypes", [object_args_input_1.GetRoomArgs, Object]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "getRoom", null);
 __decorate([
@@ -2186,53 +2248,53 @@ __decorate([
     type_graphql_1.Mutation(() => OperateRoomResult_1.OperateRoomResult),
     __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [args_input_1.OperateArgs, Object, type_graphql_1.PubSubEngine]),
+    __metadata("design:paramtypes", [object_args_input_1.OperateArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "operate", null);
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.WritePublicRoomMessageResult),
     __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [args_input_1.WritePublicMessageArgs, Object, type_graphql_1.PubSubEngine]),
+    __metadata("design:paramtypes", [object_args_input_1.WritePublicMessageArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "writePublicMessage", null);
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.WritePrivateRoomMessageResult),
     __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [args_input_1.WritePrivateMessageArgs, Object, type_graphql_1.PubSubEngine]),
+    __metadata("design:paramtypes", [object_args_input_1.WritePrivateMessageArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "writePrivateMessage", null);
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.WriteRoomSoundEffectResult),
     __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [args_input_1.WriteRoomSoundEffectArgs, Object, type_graphql_1.PubSubEngine]),
+    __metadata("design:paramtypes", [object_args_input_1.WriteRoomSoundEffectArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "writeRoomSoundEffect", null);
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.MakeMessageNotSecretResult),
     __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [args_input_1.MessageIdArgs, Object, type_graphql_1.PubSubEngine]),
+    __metadata("design:paramtypes", [object_args_input_1.MessageIdArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "makeMessageNotSecret", null);
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.DeleteMessageResult),
     __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [args_input_1.MessageIdArgs, Object, type_graphql_1.PubSubEngine]),
+    __metadata("design:paramtypes", [object_args_input_1.MessageIdArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "deleteMessage", null);
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.EditMessageResult),
     __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [args_input_1.EditMessageArgs, Object, type_graphql_1.PubSubEngine]),
+    __metadata("design:paramtypes", [object_args_input_1.EditMessageArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "editMessage", null);
 __decorate([
-    type_graphql_1.Subscription(() => RoomEvent, { topics: Topics_1.ROOM_EVENT, nullable: true }),
+    type_graphql_1.Subscription(() => object_args_input_1.RoomEvent, { topics: Topics_1.ROOM_EVENT, nullable: true }),
     __param(0, type_graphql_1.Root()), __param(1, type_graphql_1.Arg('id')), __param(2, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, Object]),

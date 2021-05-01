@@ -9,11 +9,13 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetLogArgs = exports.GetMessagesArgs = exports.EditMessageArgs = exports.MessageIdArgs = exports.WriteRoomSoundEffectArgs = exports.WritePrivateMessageArgs = exports.WritePublicMessageArgs = exports.GetRoomArgs = exports.OperateArgs = exports.ChangeParticipantNameArgs = exports.PromoteArgs = exports.JoinRoomArgs = exports.DeleteRoomArgs = exports.CreateRoomInput = void 0;
+exports.RoomEvent = exports.WritingMessageState = exports.RoomConnectionEvent = exports.GetRoomConnectionsResult = exports.GetRoomConnectionsFailureResult = exports.GetRoomConnectionFailureResultType = exports.GetRoomConnectionsSuccessResult = exports.GetRoomConnectionSuccessResultType = exports.GetLogArgs = exports.GetMessagesArgs = exports.EditMessageArgs = exports.MessageIdArgs = exports.WriteRoomSoundEffectArgs = exports.WritePrivateMessageArgs = exports.WritePublicMessageArgs = exports.GetRoomArgs = exports.OperateArgs = exports.ChangeParticipantNameArgs = exports.PromoteArgs = exports.JoinRoomArgs = exports.DeleteRoomArgs = exports.CreateRoomInput = void 0;
 const class_validator_1 = require("class-validator");
 const type_graphql_1 = require("type-graphql");
+const GetRoomConnectionFailureType_1 = require("../../../enums/GetRoomConnectionFailureType");
 const graphql_1 = require("../../entities/filePath/graphql");
 const graphql_2 = require("../../entities/room/graphql");
+const graphql_3 = require("../../entities/roomMessage/graphql");
 let CreateRoomInput = class CreateRoomInput {
 };
 __decorate([
@@ -261,3 +263,103 @@ GetLogArgs = __decorate([
     type_graphql_1.ArgsType()
 ], GetLogArgs);
 exports.GetLogArgs = GetLogArgs;
+exports.GetRoomConnectionSuccessResultType = 'GetRoomConnectionSuccessResultType';
+let GetRoomConnectionsSuccessResult = class GetRoomConnectionsSuccessResult {
+};
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", Number)
+], GetRoomConnectionsSuccessResult.prototype, "fetchedAt", void 0);
+__decorate([
+    type_graphql_1.Field(() => [String]),
+    __metadata("design:type", Array)
+], GetRoomConnectionsSuccessResult.prototype, "connectedUserUids", void 0);
+GetRoomConnectionsSuccessResult = __decorate([
+    type_graphql_1.ObjectType()
+], GetRoomConnectionsSuccessResult);
+exports.GetRoomConnectionsSuccessResult = GetRoomConnectionsSuccessResult;
+exports.GetRoomConnectionFailureResultType = 'GetRoomConnectionFailureResultType';
+let GetRoomConnectionsFailureResult = class GetRoomConnectionsFailureResult {
+};
+__decorate([
+    type_graphql_1.Field(() => GetRoomConnectionFailureType_1.GetRoomConnectionFailureType),
+    __metadata("design:type", String)
+], GetRoomConnectionsFailureResult.prototype, "failureType", void 0);
+GetRoomConnectionsFailureResult = __decorate([
+    type_graphql_1.ObjectType()
+], GetRoomConnectionsFailureResult);
+exports.GetRoomConnectionsFailureResult = GetRoomConnectionsFailureResult;
+exports.GetRoomConnectionsResult = type_graphql_1.createUnionType({
+    name: 'GetRoomConnectionsResult',
+    types: () => [GetRoomConnectionsSuccessResult, GetRoomConnectionsFailureResult],
+    resolveType: value => {
+        switch (value.__tstype) {
+            case exports.GetRoomConnectionSuccessResultType:
+                return GetRoomConnectionsSuccessResult;
+            case exports.GetRoomConnectionFailureResultType:
+                return GetRoomConnectionsFailureResult;
+        }
+    }
+});
+let RoomConnectionEvent = class RoomConnectionEvent {
+};
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
+], RoomConnectionEvent.prototype, "userUid", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", Boolean)
+], RoomConnectionEvent.prototype, "isConnected", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", Number)
+], RoomConnectionEvent.prototype, "updatedAt", void 0);
+RoomConnectionEvent = __decorate([
+    type_graphql_1.ObjectType()
+], RoomConnectionEvent);
+exports.RoomConnectionEvent = RoomConnectionEvent;
+let WritingMessageState = class WritingMessageState {
+};
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
+], WritingMessageState.prototype, "userUid", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", Boolean)
+], WritingMessageState.prototype, "isWriting", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", Number)
+], WritingMessageState.prototype, "updatedAt", void 0);
+WritingMessageState = __decorate([
+    type_graphql_1.ObjectType()
+], WritingMessageState);
+exports.WritingMessageState = WritingMessageState;
+let RoomEvent = class RoomEvent {
+};
+__decorate([
+    type_graphql_1.Field(() => graphql_2.RoomOperation, { nullable: true }),
+    __metadata("design:type", graphql_2.RoomOperation)
+], RoomEvent.prototype, "roomOperation", void 0);
+__decorate([
+    type_graphql_1.Field(() => graphql_2.DeleteRoomOperation, { nullable: true }),
+    __metadata("design:type", graphql_2.DeleteRoomOperation)
+], RoomEvent.prototype, "deleteRoomOperation", void 0);
+__decorate([
+    type_graphql_1.Field(() => graphql_3.RoomMessageEvent, { nullable: true }),
+    __metadata("design:type", Object)
+], RoomEvent.prototype, "roomMessageEvent", void 0);
+__decorate([
+    type_graphql_1.Field(() => RoomConnectionEvent, { nullable: true }),
+    __metadata("design:type", RoomConnectionEvent)
+], RoomEvent.prototype, "roomConnectionEvent", void 0);
+__decorate([
+    type_graphql_1.Field(() => WritingMessageState, { nullable: true }),
+    __metadata("design:type", WritingMessageState)
+], RoomEvent.prototype, "writingMessageState", void 0);
+RoomEvent = __decorate([
+    type_graphql_1.ObjectType()
+], RoomEvent);
+exports.RoomEvent = RoomEvent;

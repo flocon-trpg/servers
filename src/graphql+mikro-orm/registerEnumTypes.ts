@@ -23,6 +23,7 @@ import { ChangeParticipantNameFailureType } from '../enums/ChangeParticipantName
 import { DeleteRoomFailureType } from '../enums/DeleteRoomFailureType';
 import { PrereleaseType } from '../enums/PrereleaseType';
 import { MyValueLogType } from '../enums/MyValueLogType';
+import { GetRoomConnectionFailureType } from '../enums/GetRoomConnectionFailureType';
 
 let hasRegistered = false;
 const registerEnumTypes = (): void => {
@@ -50,6 +51,9 @@ const registerEnumTypes = (): void => {
     });
     registerEnumType(FileSourceType, {
         name: 'FileSourceType'
+    });
+    registerEnumType(GetRoomConnectionFailureType, {
+        name: 'GetRoomConnectionFailureType'
     });
     registerEnumType(GetRoomFailureType, {
         name: 'GetRoomFailureType'

@@ -18,6 +18,7 @@ import { __ } from '../../../@shared/collection';
 import { NumMaxParam } from '../../entities/room/character/numParam/mikro-orm';
 import { Partici } from '../../entities/room/participant/mikro-orm';
 import { GlobalRoom } from '../../entities/room/global';
+import { InMemoryConnectionManager } from '../../../connection/main';
 
 const timeout = 20000;
 
@@ -74,6 +75,7 @@ const createResolverContext = (orm: ORM, uid: string): ResolverContext => ({
         },
     },
     promiseQueue: new PromiseQueue({}),
+    connectionManager: new InMemoryConnectionManager(),
     createEm: () => orm.em.fork(),
 });
 

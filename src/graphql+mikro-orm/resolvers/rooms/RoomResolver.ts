@@ -1,4 +1,4 @@
-import { Resolver, Query, Args, Mutation, Ctx, PubSub, Subscription, Root, ArgsType, Field, Arg, InputType, PubSubEngine, Int, ObjectType } from 'type-graphql';
+import { Resolver, Query, Args, Mutation, Ctx, PubSub, Subscription, Root, ArgsType, Field, Arg, InputType, PubSubEngine, Int, ObjectType, FieldResolver } from 'type-graphql';
 import { ResolverContext } from '../../utils/Contexts';
 import { ParticipantRole } from '../../../enums/ParticipantRole';
 import { GetRoomFailureType } from '../../../enums/GetRoomFailureType';
@@ -22,7 +22,7 @@ import { JoinRoomResult } from '../../results/JoinRoomResult';
 import { GetRoomsListResult } from '../../results/GetRoomsListResult';
 import { RequiresPhraseResult } from '../../results/RequiresPhraseResult';
 import { CreateRoomResult } from '../../results/CreateRoomResult';
-import { GetRoomResult } from '../../results/GetRoomResult';
+import { GetJoinedRoomResult, GetRoomResult } from '../../results/GetRoomResult';
 import { LeaveRoomResult } from '../../results/LeaveRoomResult';
 import { PromoteResult } from '../../results/PromoteMeResult';
 import { PromoteFailureType } from '../../../enums/PromoteFailureType';
@@ -39,7 +39,7 @@ import { MaxLength } from 'class-validator';
 import { GlobalMyValue } from '../../entities/room/participant/myValue/global';
 import { __ } from '../../../@shared/collection';
 import { RoomPrvMsg, RoomPubCh, RoomPubMsg, RoomSe, MyValueLog as MyValueLog$MikroORM } from '../../entities/roomMessage/mikro-orm';
-import { ChangeParticipantNameArgs, CreateRoomInput, DeleteRoomArgs, EditMessageArgs, GetLogArgs, GetMessagesArgs, GetRoomArgs, JoinRoomArgs, MessageIdArgs, OperateArgs, PromoteArgs, WritePrivateMessageArgs, WritePublicMessageArgs, WriteRoomSoundEffectArgs } from './args+input';
+import { ChangeParticipantNameArgs, CreateRoomInput, DeleteRoomArgs, EditMessageArgs, GetLogArgs, GetMessagesArgs, GetRoomArgs, GetRoomConnectionFailureResultType, GetRoomConnectionsResult, GetRoomConnectionSuccessResultType, JoinRoomArgs, MessageIdArgs, OperateArgs, PromoteArgs, RoomConnectionEvent, RoomEvent, WritePrivateMessageArgs, WritePublicMessageArgs, WriteRoomSoundEffectArgs } from './object+args+input';
 import { CharacterValueForMessage, DeleteMessageResult, EditMessageResult, GetRoomLogFailureResultType, GetRoomLogResult, GetRoomMessagesFailureResultType, GetRoomMessagesResult, MakeMessageNotSecretResult, MyValueLog as MyValueLog$GraphQL, MyValueLogType, RoomMessageEvent, RoomMessagesType, RoomPrivateMessage, RoomPrivateMessageType, RoomPrivateMessageUpdate, RoomPrivateMessageUpdateType, RoomPublicChannel, RoomPublicChannelType, RoomPublicMessage, RoomPublicMessageType, RoomPublicMessageUpdate, RoomPublicMessageUpdateType, RoomSoundEffect, RoomSoundEffectType, WritePrivateRoomMessageFailureResultType, WritePrivateRoomMessageResult, WritePublicRoomMessageFailureResultType, WritePublicRoomMessageResult, WriteRoomSoundEffectFailureResultType, WriteRoomSoundEffectResult } from '../../entities/roomMessage/graphql';
 import { WritePublicRoomMessageFailureType } from '../../../enums/WritePublicRoomMessageFailureType';
 import { $free, $system } from '../../../@shared/Constants';
@@ -61,6 +61,7 @@ import { MakeMessageNotSecretFailureType } from '../../../enums/MakeMessageNotSe
 import { DeleteMessageFailureType } from '../../../enums/DeleteMessageFailureType';
 import { EditMessageFailureType } from '../../../enums/EditMessageFailureType';
 import { ROOM_EVENT } from '../../utils/Topics';
+import { GetRoomConnectionFailureType } from '../../../enums/GetRoomConnectionFailureType';
 
 type MessageUpdatePayload = {
     type: 'messageUpdatePayload';
@@ -91,21 +92,23 @@ type DeleteRoomPayload = {
     deletedBy: string;
 }
 
-type RoomEventPayload = MessageUpdatePayload | RoomOperationPayload | DeleteRoomPayload;
-
-@ObjectType()
-export class RoomEvent {
-    // 現状は、2つ以上同時にnon-nullishになることはない。
-
-    @Field(() => RoomOperation, { nullable: true })
-    public roomOperation?: RoomOperation;
-
-    @Field(() => DeleteRoomOperation, { nullable: true })
-    public deleteRoomOperation?: DeleteRoomOperation;
-
-    @Field(() => RoomMessageEvent, { nullable: true })
-    public roomMessageEvent?: typeof RoomMessageEvent;
+export type RoomConnectionUpdatePayload = {
+    type: 'roomConnectionUpdatePayload';
+    roomId: string;
+    userUid: string;
+    isConnected: boolean;
+    updatedAt: number;
 }
+
+export type WritingMessageStateUpdatePayload = {
+    type: 'writingMessageStateUpdatePayload';
+    roomId: string;
+    userUid: string;
+    isWriting: boolean;
+    updatedAt: number;
+}
+
+export type RoomEventPayload = MessageUpdatePayload | RoomOperationPayload | DeleteRoomPayload | RoomConnectionUpdatePayload | WritingMessageStateUpdatePayload;
 
 type OperateCoreResult = {
     type: 'success';
@@ -946,6 +949,58 @@ export class RoomResolver {
         return coreResult.result;
     }
 
+    public async getRoomConnectionsCore({ roomId, context }: { roomId: string; context: ResolverContext }): Promise<typeof GetRoomConnectionsResult> {
+        const decodedIdToken = checkSignIn(context);
+        if (decodedIdToken === NotSignIn) {
+            return { __tstype: GetRoomConnectionFailureResultType, failureType: GetRoomConnectionFailureType.NotSignIn };
+        }
+        const queue = async (): Promise<Result<typeof GetRoomConnectionsResult>> => {
+            const em = context.createEm();
+            const entry = await checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+            await em.flush();
+            if (!entry) {
+                return ResultModule.ok({
+                    __tstype: GetRoomConnectionFailureResultType,
+                    failureType: GetRoomConnectionFailureType.NotEntry,
+                });
+            }
+            const findResult = await findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId });
+            if (findResult == null) {
+                return ResultModule.ok({
+                    __tstype: GetRoomConnectionFailureResultType,
+                    failureType: GetRoomConnectionFailureType.RoomNotFound,
+                });
+            }
+            const { me } = findResult;
+            if (me?.role === undefined) {
+                return ResultModule.ok({
+                    __tstype: GetRoomConnectionFailureResultType,
+                    failureType: GetRoomConnectionFailureType.NotParticipant,
+                });
+            }
+
+            return ResultModule.ok({
+                __tstype: GetRoomConnectionSuccessResultType,
+                connectedUserUids: [...context.connectionManager.list({ roomId })].filter(([key, value]) => value > 0).map(([key]) => key),
+                fetchedAt: new Date().getTime(),
+            });
+        };
+        const result = await context.promiseQueue.next(queue);
+        if (result.type === queueLimitReached) {
+            throw serverTooBusyMessage;
+        }
+        if (result.value.isError) {
+            throw result.value.error;
+        }
+        return result.value.value;
+    }
+
+    @Query(() => GetRoomConnectionsResult)
+    public async getRoomConnections(@Arg('roomId') roomId: string, @Ctx() context: ResolverContext): Promise<typeof GetRoomConnectionsResult> {
+        const coreResult = await this.getRoomConnectionsCore({ roomId, context });
+        return coreResult;
+    }
+
     public async writePublicMessageCore({ args, context, channelKey }: { args: WritePublicMessageArgs; context: ResolverContext; channelKey: string }): Promise<{ result: typeof WritePublicRoomMessageResult; payload?: MessageUpdatePayload }> {
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
@@ -1058,6 +1113,7 @@ export class RoomResolver {
         }
         return result.value.value;
     }
+
     @Mutation(() => CreateRoomResult)
     public createRoom(@Arg('input') input: CreateRoomInput, @Ctx() context: ResolverContext): Promise<typeof CreateRoomResult> {
         return this.createRoomCore({ input, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
@@ -2289,7 +2345,7 @@ export class RoomResolver {
         return coreResult.result;
     }
 
-    // graphql-wsでRoomOperatedのConnectionを検知しているので、もしこれがリネームもしくは削除されるときはそちらも変える。
+    // graphql-wsでRoomOperatedのConnectionを検知しているので、もしこれのメソッドやArgsがリネームもしくは削除されるときはそちらも変える。
     @Subscription(() => RoomEvent, { topics: ROOM_EVENT, nullable: true })
     public roomEvent(@Root() payload: RoomEventPayload | null | undefined, @Arg('id') id: string, @Ctx() context: ResolverContext): RoomEvent | undefined {
         if (payload == null) {
@@ -2302,6 +2358,32 @@ export class RoomResolver {
             return undefined;
         }
         const userUid: string = context.decodedIdToken.value.uid;
+
+        if (payload.type === 'roomConnectionUpdatePayload') {
+            if (id !== payload.roomId) {
+                return;
+            }
+            return {
+                roomConnectionEvent: {
+                    userUid: payload.userUid,
+                    isConnected: payload.isConnected,
+                    updatedAt: payload.updatedAt,
+                }
+            };
+        }
+
+        if (payload.type === 'writingMessageStateUpdatePayload') {
+            if (id !== payload.roomId) {
+                return;
+            }
+            return {
+                writingMessageState: {
+                    userUid: payload.userUid,
+                    isWriting: payload.isWriting,
+                    updatedAt: payload.updatedAt,
+                }
+            }
+        }
 
         if (payload.type === 'messageUpdatePayload') {
             if (payload.value.__tstype === RoomPrivateMessageType) {

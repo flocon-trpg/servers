@@ -31,6 +31,7 @@ const Character$MikroORM = __importStar(require("../../entities/room/character/m
 const collection_1 = require("../../../@shared/collection");
 const mikro_orm_3 = require("../../entities/room/character/numParam/mikro-orm");
 const mikro_orm_4 = require("../../entities/room/participant/mikro-orm");
+const main_1 = require("../../../connection/main");
 const timeout = 20000;
 const PostgreSQL = {
     dbName: 'test',
@@ -58,6 +59,7 @@ const createResolverContext = (orm, uid) => ({
         },
     },
     promiseQueue: new PromiseQueue_1.PromiseQueue({}),
+    connectionManager: new main_1.InMemoryConnectionManager(),
     createEm: () => orm.em.fork(),
 });
 const setupRoomAndUsersAndParticipants = ({ em, setupRoom }) => {
