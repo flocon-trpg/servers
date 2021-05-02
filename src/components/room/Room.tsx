@@ -377,6 +377,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, operate, logNotifications, r
             return;
         }
         fileDownload(generateAsStaticHtml({
+            ...roomStateRef.current,
             messages: data.result,
             participants: participantsStateRef.current,
             characters: roomStateRef.current.characters

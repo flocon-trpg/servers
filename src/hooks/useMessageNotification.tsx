@@ -77,10 +77,20 @@ export function useMessageNotification(allRoomMessagesResult: AllRoomMessagesRes
             default:
                 return;
         }
+
+        // TODO: システムメッセージは別の音にするか鳴らさないようにしたほうがいいか
+        const volume = Math.min(volumeRef.current, 1);
+        if (message.value.commandResult == null) {
+            if (message.value.createdBy !== myUserUidRef.current) {
+                new Howl({ src: '/chat.mp3', volume }).play();
+            }
+        } else {
+            new Howl({ src: '/diceroll.mp3', volume }).play();
+        }
+
         if (message.value.createdBy === myUserUidRef.current) {
             return;
         }
-        new Howl({ src: message.value.commandResult == null ? '/chat.mp3' : '/diceroll.mp3', volume: Math.min(volumeRef.current, 1) }).play();
         notification.open({
             ...argsBase,
             message: (<div style={{ display: 'flex', flexDirection: 'row' }}>

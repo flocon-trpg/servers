@@ -1,11 +1,13 @@
 import { ReadonlyStateMap } from '../@shared/StateMap';
-import { RoomMessages, RoomPrivateMessageFragment, RoomPublicChannelFragment, RoomPublicMessageFragment, RoomSoundEffectFragment } from '../generated/graphql';
+import { RoomMessages, RoomPublicChannelFragment } from '../generated/graphql';
 import { PrivateChannelSet } from './PrivateChannelSet';
 import { escape } from 'html-escaper';
 import { $free, $system } from '../@shared/Constants';
 import moment from 'moment';
 import { Participant } from '../stateManagers/states/participant';
 import { Character } from '../stateManagers/states/character';
+import { PublicChannelNames } from './types';
+import { RoomMessage } from '../components/room/RoomMessage';
 
 const privateMessage = 'privateMessage';
 const publicMessage = 'publicMessage';
@@ -21,6 +23,7 @@ type RoomMessage = {
         channelName: string;
         createdBy: CreatedBy;
         commandResult: string | null;
+        textColor: string | null;
     };
 } | {
     type: typeof privateMessage;
@@ -31,6 +34,7 @@ type RoomMessage = {
         channelName: string;
         createdBy: CreatedBy | null;
         commandResult: string | null;
+        textColor: string | null;
     };
 } | {
     type: typeof publicMessage;
@@ -41,6 +45,7 @@ type RoomMessage = {
         channelName: string;
         createdBy: CreatedBy;
         commandResult: string | null;
+        textColor: string | null;
     };
 } | {
     type: typeof publicMessage;
@@ -51,18 +56,21 @@ type RoomMessage = {
         channelName: string;
         createdBy: CreatedBy | null;
         commandResult: string | null;
+        textColor: string | null;
     };
 };
 
-const createRoomMessageArray = ({
-    messages,
-    participants,
-    characters,
-}: {
+const createRoomMessageArray = (props: {
     messages: RoomMessages;
     participants: ReadonlyMap<string, Participant.State>;
     characters: ReadonlyStateMap<Character.State>;
-}) => {
+} & PublicChannelNames) => {
+    const {
+        messages,
+        participants,
+        characters,
+    } = props;
+
     const result: RoomMessage[] = [];
     const publicChannels = new Map<string, RoomPublicChannelFragment>();
     messages.publicChannels.forEach(ch => publicChannels.set(ch.key, ch));
@@ -95,6 +103,7 @@ const createRoomMessageArray = ({
                     createdBy: createCreatedBy({ createdBy: msg.createdBy, characterStateId: msg.character?.stateId ?? undefined, customName: msg.customName ?? undefined }),
                     channelName,
                     commandResult: msg.commandResult?.text ?? null,
+                    textColor: msg.textColor ?? null,
                 }
             });
             return;
@@ -108,19 +117,13 @@ const createRoomMessageArray = ({
                 createdBy: msg.createdBy == null ? null : createCreatedBy({ createdBy: msg.createdBy, characterStateId: msg.character?.stateId ?? undefined, customName: msg.customName ?? undefined }),
                 channelName,
                 commandResult: msg.commandResult?.text ?? null,
+                textColor: msg.textColor ?? null,
             }
         });
     });
 
     messages.publicMessages.forEach(msg => {
-        let channelName: string;
-        if (msg.channelKey === $system) {
-            channelName = 'システムメッセージ'; // 現時点でこの文字は使用されていない
-        } else if (msg.channelKey === $free) {
-            channelName = 'フリー';
-        } else {
-            channelName = publicChannels.get(msg.channelKey)?.name ?? msg.channelKey;
-        }
+        const channelName = RoomMessage.toChannelName({ type: publicMessage, value: msg }, props, new Map());
 
         if (msg.text == null) {
             if (msg.createdBy == null) {
@@ -135,6 +138,7 @@ const createRoomMessageArray = ({
                     createdBy: createCreatedBy({ createdBy: msg.createdBy, characterStateId: msg.character?.stateId ?? undefined, customName: msg.customName ?? undefined }),
                     channelName,
                     commandResult: msg.commandResult?.text ?? null,
+                    textColor: msg.textColor ?? null,
                 }
             });
             return;
@@ -148,6 +152,7 @@ const createRoomMessageArray = ({
                 createdBy: msg.createdBy == null ? null : createCreatedBy({ createdBy: msg.createdBy, characterStateId: msg.character?.stateId ?? undefined, customName: msg.customName ?? undefined }),
                 channelName,
                 commandResult: msg.commandResult?.text ?? null,
+                textColor: msg.textColor ?? null,
             }
         });
     });
@@ -159,7 +164,7 @@ export const generateAsStaticHtml = (params: {
     messages: RoomMessages;
     participants: ReadonlyMap<string, Participant.State>;
     characters: ReadonlyStateMap<Character.State>;
-}) => {
+} & PublicChannelNames) => {
     const elements = createRoomMessageArray(params).sort((x, y) => x.createdAt - y.createdAt).map(msg => {
         const left = msg.value.createdBy == null ?
             '<span>システムメッセージ</span>' :
@@ -169,7 +174,7 @@ ${(msg.value.createdBy.rolePlayPart == null) ? '' : '<span> - <span>'}
 <span> (${escape(msg.value.channelName)})</span>
 <span> <span>`;
 
-        return `<div class="message">
+        return `<div class="message" style="${msg.value.textColor == null ? '' : `color: ${msg.value.textColor}`}">
 ${left}
 <span> @ ${moment(new Date(msg.createdAt)).format('MM/DD HH:mm:ss')} </span>
 ${msg.value.text == null ? '<span class="text gray">(削除済み)</span>' : `<span class="text">${escape(msg.value.text ?? '')} ${escape(msg.value.commandResult ?? '')}</span>`}
