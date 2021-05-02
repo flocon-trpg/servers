@@ -1,9 +1,11 @@
 import { notification } from 'antd';
 import { ArgsProps } from 'antd/lib/notification';
+import { Howl } from 'howler';
 import React from 'react';
 import { RoomMessage } from '../components/room/RoomMessage';
 import { Participant } from '../stateManagers/states/participant';
 import { MessageFilter } from '../states/MessagesPanelConfig';
+import { defaultMasterVolume, defaultSeVolume } from '../states/RoomConfig';
 import { useSelector } from '../store';
 import { PublicChannelNames } from '../utils/types';
 import { useMessageFilter } from './useMessageFilter';
@@ -14,6 +16,13 @@ const argsBase: Omit<ArgsProps, 'message'> = {
 };
 
 export function useMessageNotification(allRoomMessagesResult: AllRoomMessagesResult | null, myUserUid: string | null, publicChannelNames: PublicChannelNames, participants: ReadonlyMap<string, Participant.State>): void {
+    const masterVolume = useSelector(state => state.roomConfigModule?.masterVolume);
+    const seVolume = useSelector(state => state.roomConfigModule?.seVolume);
+    const volumeRef = React.useRef((masterVolume ?? defaultMasterVolume) * (seVolume ?? defaultSeVolume));
+    React.useEffect(() => {
+        volumeRef.current = (masterVolume ?? defaultMasterVolume) * (seVolume ?? defaultSeVolume);
+    }, [masterVolume, seVolume]);
+
     const messageNotificationFilter = useSelector(state => state.roomConfigModule?.messageNotificationFilter);
     const messageNotificationFilterRef = React.useRef(messageNotificationFilter ?? MessageFilter.createEmpty());
     React.useEffect(() => {
@@ -71,6 +80,7 @@ export function useMessageNotification(allRoomMessagesResult: AllRoomMessagesRes
         if (message.value.createdBy === myUserUidRef.current) {
             return;
         }
+        new Howl({ src: message.value.commandResult == null ? '/chat.mp3' : '/diceroll.mp3', volume: Math.min(volumeRef.current, 1) }).play();
         notification.open({
             ...argsBase,
             message: (<div style={{ display: 'flex', flexDirection: 'row' }}>

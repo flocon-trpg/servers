@@ -6,6 +6,7 @@ import { MessageFilter } from './MessagesPanelConfig';
 
 export const defaultMasterVolume = 0.5;
 export const defaultChannelVolume = 1;
+export const defaultSeVolume = 1;
 
 export type RoomConfig = {
     roomId: string;
@@ -62,7 +63,7 @@ export type PanelAction = {
         type: typeof participantPanel;
     } | {
         type: typeof myValuePanel;
-    }
+    };
 }
 
 export const castToPartialRoomConfig = (source: unknown): PartialRoomConfig | undefined => {
@@ -89,9 +90,9 @@ export const toCompleteRoomConfig = (source: PartialRoomConfig, roomId: string):
         version: source.version,
         panels: source.panels == null ? defaultPanelsConfig() : toCompletePanelsConfig(source.panels),
         messageNotificationFilter: source.messageNotificationFilter ?? MessageFilter.createAll(),
-        masterVolume: source.masterVolume ?? 0.5,
+        masterVolume: source.masterVolume ?? defaultMasterVolume,
         channelVolumes: source.channelVolumes ?? {},
-        seVolume: source.seVolume ?? 1,
+        seVolume: source.seVolume ?? defaultSeVolume,
     };
 };
 
@@ -101,8 +102,8 @@ export const defaultRoomConfig = (roomId: string): RoomConfig => {
         version: 1,
         panels: defaultPanelsConfig(),
         messageNotificationFilter: MessageFilter.createAll(),
-        masterVolume: 0.5,
+        masterVolume: defaultMasterVolume,
         channelVolumes: {},
-        seVolume: 1,
+        seVolume: defaultSeVolume,
     };
 };
