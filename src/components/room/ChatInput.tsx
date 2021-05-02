@@ -2,10 +2,8 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { Button, Col, Drawer, Input, Select, Row, Checkbox, Alert, Popover } from 'antd';
-import { isPublicChannelKey } from './RoomMessages';
 import { useListAvailableGameSystemsQuery, useWritePrivateMessageMutation, useWritePublicMessageMutation } from '../../generated/graphql';
-import { $free, $system } from '../../@shared/Constants';
-import { useSelector } from '../../store';
+import { $free } from '../../@shared/Constants';
 import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
 import { ReadonlyStateMap } from '../../@shared/StateMap';
@@ -23,6 +21,9 @@ import { __ } from '../../@shared/collection';
 import { PublicChannelNames, reset } from '../../utils/types';
 import { SketchPicker } from 'react-color';
 import classNames from 'classnames';
+import { PublicChannelKey } from '../../@shared/publicChannelKey';
+import { VisibleTo } from '../../utils/visibleTo';
+import { UseRoomMessageInputTextsResult } from '../../hooks/useRoomMessageInputTexts';
 
 type PrivateMessageDrawerProps = {
     visible: boolean;
@@ -119,6 +120,9 @@ type Props = {
     participants: ReadonlyMap<string, Participant.State>;
     config: MessagePanelConfig;
     panelId: string;
+
+    // メッセージ書き込み中通知機能を実現するため、*MessageTextは全てのChatInputで共通にしている。そのため、ChatInput内部でuseStateせず、外部でuseStateしたものを受け取る形にしている。
+    useRoomMessageInputTextsResult: UseRoomMessageInputTextsResult;
 } & PublicChannelNames
 
 export const ChatInput: React.FC<Props> = ({
@@ -128,6 +132,7 @@ export const ChatInput: React.FC<Props> = ({
     participants,
     config,
     panelId,
+    useRoomMessageInputTextsResult,
     publicChannel1Name,
     publicChannel2Name,
     publicChannel3Name,
@@ -158,7 +163,7 @@ export const ChatInput: React.FC<Props> = ({
     const [writePrivateMessage] = useWritePrivateMessageMutation();
     const [isPosting, setIsPosting] = React.useState(false); // 現状、チャンネルごとに並列的に投稿することはできないが、この制限はstateを増やすなどにより取り除くことができる。
     const [selectedParticipantIds, setSelectedParticipantIds] = React.useState<ReadonlySet<string>>(new Set());
-    const [text, setText] = React.useState('');
+
     const [isDrawerVisible, setIsDrawerVisible] = React.useState(false);
     const dispatch = useDispatch();
 
@@ -179,8 +184,7 @@ export const ChatInput: React.FC<Props> = ({
                 return (<div key={id} style={{ maxWidth: '60px' }}>
                     {participant.name}
                 </div>);
-            }),
-        [selectedParticipantIds, participants]);
+            }), [selectedParticipantIds, participants]);
 
     const myCharacters = React.useMemo(() => {
         if (myUserUid == null) {
@@ -231,7 +235,30 @@ export const ChatInput: React.FC<Props> = ({
             break;
     }
 
-    const onPost = () => {
+    let postTo: PublicChannelKey.Without$System.PublicChannelKey | ReadonlySet<string>;
+    switch (selectedChannelType) {
+        case freeChannelKey:
+            postTo = $free;
+            break;
+        case publicChannelKey:
+            postTo = selectedPublicChannel;
+            break;
+        case privateChannelKey:
+            postTo = selectedParticipantIds;
+            break;
+    }
+
+    const getText = (postTo: PublicChannelKey.Without$System.PublicChannelKey | ReadonlySet<string>): string => {
+        if (PublicChannelKey.Without$System.isPublicChannelKey(postTo)) {
+            return useRoomMessageInputTextsResult.publicMessageInputTexts.get(postTo) ?? '';
+        } else {
+            return useRoomMessageInputTextsResult.privateMessageInputTexts.get(VisibleTo.toString(postTo)) ?? '';
+        }
+    };
+
+    // postToは、ReadonlySet<string>のときは秘話を表す
+    const onPost = (postTo: PublicChannelKey.Without$System.PublicChannelKey | ReadonlySet<string>) => {
+        const text = getText(postTo);
         if (isPosting || text.trim() === '') {
             return;
         }
@@ -260,7 +287,7 @@ export const ChatInput: React.FC<Props> = ({
                         customName: customNameVariable
                     }
                 })
-                    .then(() => setText(''))
+                    .then(() => useRoomMessageInputTextsResult.setPrivateMessageInputText(undefined, selectedParticipantIds))
                     .finally(() => setIsPosting(false));
                 break;
             }
@@ -276,7 +303,12 @@ export const ChatInput: React.FC<Props> = ({
                         customName: customNameVariable,
                     }
                 })
-                    .then(() => setText(''))
+                    .then(() => {
+                        if (!PublicChannelKey.Without$System.isPublicChannelKey(postTo)) {
+                            return;
+                        }
+                        useRoomMessageInputTextsResult.setPublicMessageInputText(undefined, postTo);
+                    })
                     .finally(() => setIsPosting(false));
                 break;
             }
@@ -292,7 +324,12 @@ export const ChatInput: React.FC<Props> = ({
                         customName: customNameVariable,
                     },
                 })
-                    .then(() => setText(''))
+                    .then(() => {
+                        if (!PublicChannelKey.Without$System.isPublicChannelKey(postTo)) {
+                            return;
+                        }
+                        useRoomMessageInputTextsResult.setPublicMessageInputText(undefined, postTo);
+                    })
                     .finally(() => setIsPosting(false));
                 break;
             }
@@ -331,10 +368,7 @@ export const ChatInput: React.FC<Props> = ({
                         style={{ flex: 1, maxWidth: miniInputMaxWidth }}
                         value={selectedPublicChannel}
                         onSelect={(value, option) => {
-                            if (!isPublicChannelKey(option.key)) {
-                                return;
-                            }
-                            if (option.key === $free || option.key === $system) {
+                            if (!PublicChannelKey.StrIndex10.isPublicChannelKey(option.key)) {
                                 return;
                             }
                             dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { selectedPublicChannelKey: option.key } }));
@@ -460,11 +494,24 @@ export const ChatInput: React.FC<Props> = ({
                         onClick={() => dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { selectedTextColor: { type: reset } } }))}>リセット</Button>
                 </div>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                    <Input disabled={isPosting} value={text} onChange={e => setText(e.target.value)} onPressEnter={() => onPost()} />
+                    <Input
+                        disabled={isPosting}
+                        value={(PublicChannelKey.Without$System.isPublicChannelKey(postTo) ? useRoomMessageInputTextsResult.publicMessageInputTexts.get(postTo) : useRoomMessageInputTextsResult.privateMessageInputTexts.get(VisibleTo.toString(postTo))) ?? ''}
+                        onChange={e => {
+                            if (PublicChannelKey.Without$System.isPublicChannelKey(postTo)) {
+                                const $postTo = postTo;
+                                useRoomMessageInputTextsResult.setPublicMessageInputText(e.target.value, $postTo);
+                                return;
+                            }
+                            const $postTo = postTo;
+                            useRoomMessageInputTextsResult.setPrivateMessageInputText(e.target.value, $postTo);
+                            return;
+                        }}
+                        onPressEnter={() => onPost(postTo)} />
                     <Button
                         style={{ width: 80 }}
-                        disabled={isPosting || text.trim() === ''}
-                        onClick={() => onPost()}>
+                        disabled={isPosting || getText(postTo).trim() === ''}
+                        onClick={() => onPost(postTo)}>
                         {isPosting ? <Icon.LoadingOutlined /> : '投稿'}
                     </Button>
                 </div>

@@ -552,6 +552,7 @@ export type Mutation = {
   operate: OperateRoomResult;
   ping: Pong;
   promoteToPlayer: PromoteResult;
+  updateWritingMessageStatus: Scalars['Boolean'];
   writePrivateMessage: WritePrivateRoomMessageResult;
   writePublicMessage: WritePublicRoomMessageResult;
   writeRoomSoundEffect: WriteRoomSoundEffectResult;
@@ -632,6 +633,13 @@ export type MutationPingArgs = {
 
 export type MutationPromoteToPlayerArgs = {
   phrase?: Maybe<Scalars['String']>;
+  roomId: Scalars['String'];
+};
+
+
+export type MutationUpdateWritingMessageStatusArgs = {
+  newStatus: WritingMessageStatusInputType;
+  publicChannelKey: Scalars['String'];
   roomId: Scalars['String'];
 };
 
@@ -1275,7 +1283,7 @@ export type RoomEvent = {
   roomConnectionEvent?: Maybe<RoomConnectionEvent>;
   roomMessageEvent?: Maybe<RoomMessageEvent>;
   roomOperation?: Maybe<RoomOperation>;
-  writingMessageState?: Maybe<WritingMessageState>;
+  writingMessageStatus?: Maybe<WritingMessageStatus>;
 };
 
 export type RoomGetState = {
@@ -1697,12 +1705,26 @@ export enum WriteRoomSoundEffectFailureType {
 
 export type WriteRoomSoundEffectResult = RoomSoundEffect | WriteRoomSoundEffectFailureResult;
 
-export type WritingMessageState = {
-  __typename?: 'WritingMessageState';
-  isWriting: Scalars['Boolean'];
+export type WritingMessageStatus = {
+  __typename?: 'WritingMessageStatus';
+  publicChannelKey: Scalars['String'];
+  status: WritingMessageStatusType;
   updatedAt: Scalars['Float'];
   userUid: Scalars['String'];
 };
+
+export enum WritingMessageStatusInputType {
+  Cleared = 'Cleared',
+  KeepWriting = 'KeepWriting',
+  StartWriting = 'StartWriting'
+}
+
+export enum WritingMessageStatusType {
+  Cleared = 'Cleared',
+  Disconnected = 'Disconnected',
+  Submit = 'Submit',
+  Writing = 'Writing'
+}
 
 export type BoardStateFragment = (
   { __typename?: 'BoardState' }
@@ -2952,6 +2974,18 @@ export type MakeMessageNotSecretMutation = (
   ) }
 );
 
+export type UpdateWritingMessageStatusMutationVariables = Exact<{
+  roomId: Scalars['String'];
+  publicChannelKey: Scalars['String'];
+  newStatus: WritingMessageStatusInputType;
+}>;
+
+
+export type UpdateWritingMessageStatusMutation = (
+  { __typename?: 'Mutation' }
+  & { result: Mutation['updateWritingMessageStatus'] }
+);
+
 export type RoomEventSubscriptionVariables = Exact<{
   id: Scalars['String'];
 }>;
@@ -2994,9 +3028,9 @@ export type RoomEventSubscription = (
     )>, roomConnectionEvent?: Maybe<(
       { __typename?: 'RoomConnectionEvent' }
       & Pick<RoomConnectionEvent, 'userUid' | 'isConnected' | 'updatedAt'>
-    )>, writingMessageState?: Maybe<(
-      { __typename?: 'WritingMessageState' }
-      & Pick<WritingMessageState, 'userUid' | 'isWriting'>
+    )>, writingMessageStatus?: Maybe<(
+      { __typename?: 'WritingMessageStatus' }
+      & Pick<WritingMessageStatus, 'userUid' | 'status' | 'publicChannelKey'>
     )> }
   )> }
 );
@@ -4832,6 +4866,43 @@ export function useMakeMessageNotSecretMutation(baseOptions?: Apollo.MutationHoo
 export type MakeMessageNotSecretMutationHookResult = ReturnType<typeof useMakeMessageNotSecretMutation>;
 export type MakeMessageNotSecretMutationResult = Apollo.MutationResult<MakeMessageNotSecretMutation>;
 export type MakeMessageNotSecretMutationOptions = Apollo.BaseMutationOptions<MakeMessageNotSecretMutation, MakeMessageNotSecretMutationVariables>;
+export const UpdateWritingMessageStatusDocument = gql`
+    mutation UpdateWritingMessageStatus($roomId: String!, $publicChannelKey: String!, $newStatus: WritingMessageStatusInputType!) {
+  result: updateWritingMessageStatus(
+    roomId: $roomId
+    publicChannelKey: $publicChannelKey
+    newStatus: $newStatus
+  )
+}
+    `;
+export type UpdateWritingMessageStatusMutationFn = Apollo.MutationFunction<UpdateWritingMessageStatusMutation, UpdateWritingMessageStatusMutationVariables>;
+
+/**
+ * __useUpdateWritingMessageStatusMutation__
+ *
+ * To run a mutation, you first call `useUpdateWritingMessageStatusMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateWritingMessageStatusMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateWritingMessageStatusMutation, { data, loading, error }] = useUpdateWritingMessageStatusMutation({
+ *   variables: {
+ *      roomId: // value for 'roomId'
+ *      publicChannelKey: // value for 'publicChannelKey'
+ *      newStatus: // value for 'newStatus'
+ *   },
+ * });
+ */
+export function useUpdateWritingMessageStatusMutation(baseOptions?: Apollo.MutationHookOptions<UpdateWritingMessageStatusMutation, UpdateWritingMessageStatusMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateWritingMessageStatusMutation, UpdateWritingMessageStatusMutationVariables>(UpdateWritingMessageStatusDocument, options);
+      }
+export type UpdateWritingMessageStatusMutationHookResult = ReturnType<typeof useUpdateWritingMessageStatusMutation>;
+export type UpdateWritingMessageStatusMutationResult = Apollo.MutationResult<UpdateWritingMessageStatusMutation>;
+export type UpdateWritingMessageStatusMutationOptions = Apollo.BaseMutationOptions<UpdateWritingMessageStatusMutation, UpdateWritingMessageStatusMutationVariables>;
 export const RoomEventDocument = gql`
     subscription RoomEvent($id: String!) {
   roomEvent(id: $id) {
@@ -4849,9 +4920,10 @@ export const RoomEventDocument = gql`
       isConnected
       updatedAt
     }
-    writingMessageState {
+    writingMessageStatus {
       userUid
-      isWriting
+      status
+      publicChannelKey
     }
   }
 }

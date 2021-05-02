@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Layout as AntdLayout, notification as antdNotification, Input, Tooltip, Result, Popover, Modal } from 'antd';
+import { Menu, Layout as AntdLayout, Input, Tooltip, Result, Popover, Modal } from 'antd';
 import DraggableCard, { horizontalPadding } from '../../foundations/DraggableCard';
 import CharacterList from './CharacterList';
 import useRoomConfig from '../../hooks/localStorage/useRoomConfig';
@@ -30,7 +30,7 @@ import EditRoomDrawer from './EditRoomDrawer';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import Jdenticon from '../../foundations/Jdenticon';
 import ParticipantList from './ParticipantList';
-import LogNotificationContext, { graphQLErrors, Notification, text, TextNotificationsState, toTextNotification } from './contexts/LogNotificationContext';
+import LogNotificationContext, { graphQLErrors, text, TextNotificationsState } from './contexts/LogNotificationContext';
 import { Participant } from '../../stateManagers/states/participant';
 import MyNumberValueDrawer from './MyNumberValueDrawer';
 import { useAllRoomMessages } from '../../hooks/useRoomMessages';
@@ -43,6 +43,7 @@ import { useMessageNotification } from '../../hooks/useMessageNotification';
 import { getUserUid } from '../../hooks/useFirebaseUser';
 import MyNumberValueList from './MyNumberValueList';
 import { useRoomConnections } from '../../hooks/useRoomConnections';
+import { useRoomMessageInputTexts } from '../../hooks/useRoomMessageInputTexts';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -344,6 +345,7 @@ const Room: React.FC<Props> = ({ roomState, roomId, operate, logNotifications, r
     const roomConfig = useSelector(state => state.roomConfigModule);
     const allRoomMessages = useAllRoomMessages({ roomId, roomEventSubscription });
     const roomConnections = useRoomConnections({ roomId, roomEventSubscription });
+    const roomMessageInputTexts = useRoomMessageInputTexts({roomId});
     const [confirmModalState, setConfirmModalState] = React.useState<ConfirmModalState>();
     const [isBecomePlayerModalVisible, setIsBecomePlayerModalVisible] = React.useState(false);
     const [isChangeMyParticipantNameModalVisible, setIsChangeMyParticipantNameModalVisible] = React.useState(false);
@@ -351,7 +353,6 @@ const Room: React.FC<Props> = ({ roomState, roomId, operate, logNotifications, r
     const router = useRouter();
     const dispatch = useDispatch();
     const [componentsState, dispatchComponentsState] = React.useReducer(reduceComponentsState, defaultRoomComponentsState);
-
     const [getLogQuery, getLogQueryResult] = useGetLogLazyQuery({ variables: { roomId }, fetchPolicy: 'network-only' });
     const [leaveRoomMutation] = useLeaveRoomMutation({ variables: { id: roomId } });
     const roomStateRef = React.useRef(roomState);
@@ -475,7 +476,8 @@ const Room: React.FC<Props> = ({ roomState, roomId, operate, logNotifications, r
                     logNotifications={logNotifications}
                     panelId={pair.key}
                     config={pair.value}
-                    height={pair.value.height} />
+                    height={pair.value.height}
+                    useRoomMessageInputTextsResult={roomMessageInputTexts} />
             </DraggableCard>
         );
     });

@@ -1,20 +1,17 @@
 import React from 'react';
 import { Tabs, Button, Menu, Dropdown, Tooltip, Popover, Drawer, Col, Row, Checkbox, Divider, Radio, Alert, Input, Modal, Result } from 'antd';
 import moment from 'moment';
-import { AllRoomMessagesSuccessResult, apolloError, failure, loading, RoomMessage, publicMessage, privateMessage, soundEffect, AllRoomMessagesResult, useFilteredAndMapRoomMessages, Message, myValueLog } from '../../hooks/useRoomMessages';
+import { AllRoomMessagesSuccessResult, apolloError, failure, loading, publicMessage, privateMessage, soundEffect, AllRoomMessagesResult, useFilteredAndMapRoomMessages, Message, myValueLog } from '../../hooks/useRoomMessages';
 import { __ } from '../../@shared/collection';
 import { PrivateChannelSet, PrivateChannelSets } from '../../utils/PrivateChannelSet';
 import ChatInput from './ChatInput';
 import MyAuthContext from '../../contexts/MyAuthContext';
-import { $free, $system } from '../../@shared/Constants';
 import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
 import { ReadonlyStateMap } from '../../@shared/StateMap';
-import { FilePathFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment, useDeleteMessageMutation, useEditMessageMutation, useMakeMessageNotSecretMutation } from '../../generated/graphql';
+import { useDeleteMessageMutation, useEditMessageMutation, useMakeMessageNotSecretMutation } from '../../generated/graphql';
 import * as Icon from '@ant-design/icons';
-import { useFirebaseStorageUrl } from '../../hooks/firebaseStorage';
 import InputModal from '../InputModal';
-import Jdenticon from '../../foundations/Jdenticon';
 import { Character } from '../../stateManagers/states/character';
 import { Participant } from '../../stateManagers/states/participant';
 import { getUserUid } from '../../hooks/useFirebaseUser';
@@ -26,49 +23,16 @@ import DrawerFooter from '../../layouts/DrawerFooter';
 import OperateContext from './contexts/OperateContext';
 import BufferedInput from '../../foundations/BufferedInput';
 import { Room } from '../../stateManagers/states/room';
-import LoadingResult from '../../foundations/Result/LoadingResult';
 import QueryResultViewer from '../../foundations/QueryResultViewer';
 import { useMessageFilter } from '../../hooks/useMessageFilter';
 import { RoomMessage as RoomMessageNameSpace } from './RoomMessage';
 import { TextNotification, TextNotificationsState } from './contexts/LogNotificationContext';
+import { UseRoomMessageInputTextsResult } from '../../hooks/useRoomMessageInputTexts';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
 const drawerGutter: [Gutter, Gutter] = [16, 16];
 const drawerInputSpan = 18;
-
-type PublicChannelKey =
-    | typeof $free
-    | typeof $system
-    | '1'
-    | '2'
-    | '3'
-    | '4'
-    | '5'
-    | '6'
-    | '7'
-    | '8'
-    | '9'
-    | '10'
-
-const publicChannelKeys: PublicChannelKey[] = [
-    $free,
-    $system,
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '8',
-    '9',
-    '10',
-];
-
-export const isPublicChannelKey = (source: unknown): source is PublicChannelKey => {
-    return publicChannelKeys.find(key => key === source) !== undefined;
-};
 
 const none = 'none';
 const some = 'some';
@@ -496,6 +460,7 @@ type Props = {
     height: number;
     panelId: string;
     config: MessagePanelConfig;
+    useRoomMessageInputTextsResult: UseRoomMessageInputTextsResult; 
 } & PublicChannelNames
 
 const RoomMessages: React.FC<Props> = (props: Props) => {

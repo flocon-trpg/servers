@@ -126,8 +126,7 @@ export const useRoomState = (roomId: string, roomEventSubscription: Observable<R
                     }
                     return;
                 }
-            },
-                () => { });
+            }, () => undefined);
         const postTriggerSubscription = postTrigger.pipe(
             Rx.sampleTime(sampleTime),
             Rx.map(async () => {

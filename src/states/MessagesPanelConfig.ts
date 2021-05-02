@@ -272,7 +272,7 @@ export const defaultMessagePanelConfig = (): MessagePanelConfig => {
         tabs: [TabConfig.createAll({})],
         customCharacterName: '',
     };
-}
+};
 
 export const defaultMessagePanelsConfig = (): Record<string, MessagePanelConfig> => {
     const result: Record<string, MessagePanelConfig> = {};

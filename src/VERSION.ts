@@ -6,7 +6,7 @@ const VERSION = new SemVer({
     patch: 0,
     prerelease: {
         type: alpha,
-        version: 33,
+        version: 34,
     }
 });
 

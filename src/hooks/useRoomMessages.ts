@@ -49,7 +49,7 @@ const createRoomMessage = (source: RoomPrivateMessageFragment | RoomPublicMessag
             return {
                 type: myValueLog,
                 value: source,
-            }
+            };
         case 'RoomSoundEffect':
             return {
                 type: soundEffect,
@@ -351,7 +351,7 @@ export const useAllRoomMessages = ({ roomId, roomEventSubscription }: { roomId: 
                         });
                         messagesData.result.myValueLogs.forEach(msg => {
                             actions.push(msg);
-                        })
+                        });
                         messagesData.result.soundEffects.forEach(se => {
                             actions.push(se);
                         });
@@ -416,7 +416,7 @@ export const useFilteredRoomMessages = ({
 }: {
     allRoomMessagesResult: AllRoomMessagesResult;
     logNotifications?: TextNotificationsState;
-    filter?: (message: Message) => boolean
+    filter?: (message: Message) => boolean;
 }): ReadonlyArray<Message> => {
     const [result, setResult] = React.useState<Message[] | null>(null);
 
@@ -426,7 +426,7 @@ export const useFilteredRoomMessages = ({
 
     const sort = (x: Message, y: Message): number => {
         return x.value.createdAt - y.value.createdAt;
-    }
+    };
 
     React.useEffect(() => {
         const toRoomMessages = () => allRoomMessagesResult.type === loaded || allRoomMessagesResult.type === newEvent ? allRoomMessagesResult.value.messages : [];

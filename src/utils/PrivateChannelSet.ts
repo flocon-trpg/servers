@@ -1,8 +1,5 @@
 import { Participant } from '../stateManagers/states/participant';
-
-const toString = (visibleTo: ReadonlySet<string>): string => {
-    return [...visibleTo].sort().reduce((seed, elem) => seed === '' ? elem : `${seed};${elem}`, '');
-};
+import { VisibleTo } from './visibleTo';
 
 export class PrivateChannelSet {
     private readonly _source: ReadonlySet<string>
@@ -20,7 +17,7 @@ export class PrivateChannelSet {
     }
 
     public toString(): string {
-        return toString(this._source);
+        return VisibleTo.toString(this._source);
     }
 
     // participantsのkeyはUserUid
@@ -65,7 +62,7 @@ export class PrivateChannelSets {
     public add(visibleTo: string[] | PrivateChannelSet): void {
         if (Array.isArray(visibleTo)) {
             const set = new Set(visibleTo);
-            this.core.set(toString(set), new PrivateChannelSet(set));
+            this.core.set(VisibleTo.toString(set), new PrivateChannelSet(set));
             return;
         }
         this.core.set(visibleTo.toString(), visibleTo);

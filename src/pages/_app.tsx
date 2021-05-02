@@ -19,11 +19,13 @@ import firebase from 'firebase/app';
 import { useFirebaseUser } from '../hooks/useFirebaseUser';
 import useUserConfig from '../hooks/localStorage/useUserConfig';
 import { Config, getConfig } from '../config';
-import ConfigContext from '../contexts/ConfigContext';
 import { Client, ClientOptions, createClient } from 'graphql-ws';
 import { print, GraphQLError } from 'graphql';
 import { simpleId } from '../utils/generators';
 import ClientIdContext from '../contexts/ClientIdContext';
+import { enableMapSet } from 'immer';
+
+enableMapSet();
 
 const config = getConfig();
 
