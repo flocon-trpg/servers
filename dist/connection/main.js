@@ -6,6 +6,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.InMemoryConnectionManager = exports.pubSub = void 0;
 const apollo_server_express_1 = require("apollo-server-express");
 const node_cache_1 = __importDefault(require("node-cache"));
+const collection_1 = require("../@shared/collection");
+const publicChannelKey_1 = require("../@shared/publicChannelKey");
+const WritingMessageStatusType_1 = require("../enums/WritingMessageStatusType");
 const Topics_1 = require("../graphql+mikro-orm/utils/Topics");
 exports.pubSub = new apollo_server_express_1.PubSub();
 class ConnectionIdDatabase {
@@ -33,14 +36,14 @@ class ConnectionCountDatabase {
         this.database = new node_cache_1.default();
     }
     incr({ roomId, userUid }) {
-        const key = `${userUid}@${roomId}`;
+        const key = `${roomId}@${userUid}`;
         const value = this.database.get(key);
         const newValue = typeof value === 'number' ? value + 1 : 1;
         this.database.set(key, newValue);
         return newValue;
     }
     decr({ roomId, userUid }) {
-        const key = `${userUid}@${roomId}`;
+        const key = `${roomId}@${userUid}`;
         const value = this.database.get(key);
         if (typeof value !== 'number' || value <= 0) {
             this.database.del(key);
@@ -61,8 +64,8 @@ class ConnectionCountDatabase {
             if (split.length !== 2) {
                 return;
             }
-            const userUid = split[0];
-            const roomIdKey = split[1];
+            const roomIdKey = split[0];
+            const userUid = split[1];
             if (roomIdKey !== roomId) {
                 return;
             }
@@ -75,10 +78,49 @@ class ConnectionCountDatabase {
         return result;
     }
 }
+class WritingMessageStatusDatabase {
+    constructor() {
+        this.database = new node_cache_1.default({ stdTTL: 600 });
+    }
+    set({ roomId, status, publicChannelKey, userUid }) {
+        if (!publicChannelKey_1.PublicChannelKey.Without$System.isPublicChannelKey(publicChannelKey)) {
+            return null;
+        }
+        const key = `${roomId}@${userUid}@${publicChannelKey}`;
+        const oldValue = this.database.get(key);
+        if (oldValue === status) {
+            return null;
+        }
+        this.database.set(key, status);
+        return status;
+    }
+    onDisconnect({ userUid, roomId }) {
+        return collection_1.__(this.database.keys()).compact(key => {
+            const split = key.split('@');
+            if (split.length !== 3) {
+                return undefined;
+            }
+            const roomIdKey = split[0];
+            const userUidKey = split[1];
+            const publicChannelKey = split[2];
+            if (roomIdKey !== roomId) {
+                return undefined;
+            }
+            if (userUidKey !== userUid) {
+                return undefined;
+            }
+            if (!publicChannelKey_1.PublicChannelKey.Without$System.isPublicChannelKey(publicChannelKey)) {
+                return undefined;
+            }
+            return { publicChannelKey };
+        }).toArray();
+    }
+}
 class InMemoryConnectionManager {
     constructor() {
         this.connectionIdDatabase = new ConnectionIdDatabase();
         this.connectionCountDatabase = new ConnectionCountDatabase();
+        this.writingMessageStatusDatabase = new WritingMessageStatusDatabase();
     }
     onConnectToRoom({ connectionId, userUid, roomId }) {
         this.connectionIdDatabase.set({ roomId, connectionId, userUid });
@@ -104,16 +146,30 @@ class InMemoryConnectionManager {
         if (newConnectionCount !== 0) {
             return;
         }
-        const payload = {
+        const payload1 = {
             type: 'roomConnectionUpdatePayload',
             roomId: deleted.roomId,
             userUid: deleted.userUid,
             isConnected: false,
             updatedAt: new Date().getTime(),
         };
-        exports.pubSub.publish(Topics_1.ROOM_EVENT, payload);
+        exports.pubSub.publish(Topics_1.ROOM_EVENT, payload1);
+        this.writingMessageStatusDatabase.onDisconnect(deleted).forEach(({ publicChannelKey }) => {
+            const payload2 = {
+                type: 'writingMessageStatusUpdatePayload',
+                roomId: deleted.roomId,
+                userUid: deleted.userUid,
+                publicChannelKey,
+                status: WritingMessageStatusType_1.WritingMessageStatusType.Disconnected,
+                updatedAt: new Date().getTime(),
+            };
+            exports.pubSub.publish(Topics_1.ROOM_EVENT, payload2);
+        });
     }
-    list({ roomId }) {
+    onWritingMessageStatusUpdate(params) {
+        return this.writingMessageStatusDatabase.set(params);
+    }
+    listRoomConnections({ roomId }) {
         return this.connectionCountDatabase.list({ roomId });
     }
 }

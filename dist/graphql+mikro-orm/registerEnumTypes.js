@@ -26,6 +26,8 @@ const DeleteRoomFailureType_1 = require("../enums/DeleteRoomFailureType");
 const PrereleaseType_1 = require("../enums/PrereleaseType");
 const MyValueLogType_1 = require("../enums/MyValueLogType");
 const GetRoomConnectionFailureType_1 = require("../enums/GetRoomConnectionFailureType");
+const WritingMessageStatusInputType_1 = require("../enums/WritingMessageStatusInputType");
+const WritingMessageStatusType_1 = require("../enums/WritingMessageStatusType");
 let hasRegistered = false;
 const registerEnumTypes = () => {
     if (hasRegistered) {
@@ -106,6 +108,12 @@ const registerEnumTypes = () => {
     });
     type_graphql_1.registerEnumType(WriteRoomSoundEffectFailureType_1.WriteRoomSoundEffectFailureType, {
         name: 'WriteRoomSoundEffectFailureType'
+    });
+    type_graphql_1.registerEnumType(WritingMessageStatusInputType_1.WritingMessageStatusInputType, {
+        name: 'WritingMessageStatusInputType'
+    });
+    type_graphql_1.registerEnumType(WritingMessageStatusType_1.WritingMessageStatusType, {
+        name: 'WritingMessageStatusType'
     });
 };
 exports.default = registerEnumTypes;

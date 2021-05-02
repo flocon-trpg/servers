@@ -1,9 +1,11 @@
-import { MaxLength } from "class-validator";
-import { ArgsType, createUnionType, Field, InputType, Int, ObjectType } from "type-graphql";
-import { GetRoomConnectionFailureType } from "../../../enums/GetRoomConnectionFailureType";
-import { FilePath } from "../../entities/filePath/graphql";
-import { DeleteRoomOperation, RoomOperation, RoomOperationInput } from "../../entities/room/graphql";
-import { RoomMessageEvent } from "../../entities/roomMessage/graphql";
+import { MaxLength } from 'class-validator';
+import { ArgsType, createUnionType, Field, InputType, Int, ObjectType } from 'type-graphql';
+import { GetRoomConnectionFailureType } from '../../../enums/GetRoomConnectionFailureType';
+import { WritingMessageStatusInputType } from '../../../enums/WritingMessageStatusInputType';
+import { WritingMessageStatusType } from '../../../enums/WritingMessageStatusType';
+import { FilePath } from '../../entities/filePath/graphql';
+import { DeleteRoomOperation, RoomOperation, RoomOperationInput } from '../../entities/room/graphql';
+import { RoomMessageEvent } from '../../entities/roomMessage/graphql';
 
 @InputType()
 export class CreateRoomInput {
@@ -170,6 +172,18 @@ export class GetLogArgs {
     public roomId!: string;
 }
 
+@ArgsType()
+export class UpdateWritingMessageStateArgs {
+    @Field()
+    public roomId!: string;
+
+    @Field(() => WritingMessageStatusInputType)
+    public newStatus!: WritingMessageStatusInputType;
+
+    @Field()
+    public publicChannelKey!: string;
+}
+
 export const GetRoomConnectionSuccessResultType = 'GetRoomConnectionSuccessResultType';
 
 @ObjectType()
@@ -219,15 +233,18 @@ export class RoomConnectionEvent {
 }
 
 @ObjectType()
-export class WritingMessageState {
+export class WritingMessageStatus {
     @Field()
     public userUid!: string;
 
-    @Field()
-    public isWriting!: boolean;
+    @Field(() => WritingMessageStatusType)
+    public status!: WritingMessageStatusType;
 
     @Field()
     public updatedAt!: number;
+
+    @Field()
+    public publicChannelKey!: string;
 }
 
 @ObjectType()
@@ -246,6 +263,6 @@ export class RoomEvent {
     @Field(() => RoomConnectionEvent, { nullable: true })
     public roomConnectionEvent?: RoomConnectionEvent;
 
-    @Field(() => WritingMessageState, { nullable: true })
-    public writingMessageState?: WritingMessageState;
+    @Field(() => WritingMessageStatus, { nullable: true })
+    public writingMessageStatus?: WritingMessageStatus;
 }

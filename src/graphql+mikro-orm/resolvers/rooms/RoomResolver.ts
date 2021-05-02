@@ -39,7 +39,7 @@ import { MaxLength } from 'class-validator';
 import { GlobalMyValue } from '../../entities/room/participant/myValue/global';
 import { __ } from '../../../@shared/collection';
 import { RoomPrvMsg, RoomPubCh, RoomPubMsg, RoomSe, MyValueLog as MyValueLog$MikroORM } from '../../entities/roomMessage/mikro-orm';
-import { ChangeParticipantNameArgs, CreateRoomInput, DeleteRoomArgs, EditMessageArgs, GetLogArgs, GetMessagesArgs, GetRoomArgs, GetRoomConnectionFailureResultType, GetRoomConnectionsResult, GetRoomConnectionSuccessResultType, JoinRoomArgs, MessageIdArgs, OperateArgs, PromoteArgs, RoomConnectionEvent, RoomEvent, WritePrivateMessageArgs, WritePublicMessageArgs, WriteRoomSoundEffectArgs } from './object+args+input';
+import { ChangeParticipantNameArgs, CreateRoomInput, DeleteRoomArgs, EditMessageArgs, GetLogArgs, GetMessagesArgs, GetRoomArgs, GetRoomConnectionFailureResultType, GetRoomConnectionsResult, GetRoomConnectionSuccessResultType, JoinRoomArgs, MessageIdArgs, OperateArgs, PromoteArgs, RoomConnectionEvent, RoomEvent, UpdateWritingMessageStateArgs, WritePrivateMessageArgs, WritePublicMessageArgs, WriteRoomSoundEffectArgs } from './object+args+input';
 import { CharacterValueForMessage, DeleteMessageResult, EditMessageResult, GetRoomLogFailureResultType, GetRoomLogResult, GetRoomMessagesFailureResultType, GetRoomMessagesResult, MakeMessageNotSecretResult, MyValueLog as MyValueLog$GraphQL, MyValueLogType, RoomMessageEvent, RoomMessagesType, RoomPrivateMessage, RoomPrivateMessageType, RoomPrivateMessageUpdate, RoomPrivateMessageUpdateType, RoomPublicChannel, RoomPublicChannelType, RoomPublicMessage, RoomPublicMessageType, RoomPublicMessageUpdate, RoomPublicMessageUpdateType, RoomSoundEffect, RoomSoundEffectType, WritePrivateRoomMessageFailureResultType, WritePrivateRoomMessageResult, WritePublicRoomMessageFailureResultType, WritePublicRoomMessageResult, WriteRoomSoundEffectFailureResultType, WriteRoomSoundEffectResult } from '../../entities/roomMessage/graphql';
 import { WritePublicRoomMessageFailureType } from '../../../enums/WritePublicRoomMessageFailureType';
 import { $free, $system } from '../../../@shared/Constants';
@@ -62,6 +62,10 @@ import { DeleteMessageFailureType } from '../../../enums/DeleteMessageFailureTyp
 import { EditMessageFailureType } from '../../../enums/EditMessageFailureType';
 import { ROOM_EVENT } from '../../utils/Topics';
 import { GetRoomConnectionFailureType } from '../../../enums/GetRoomConnectionFailureType';
+import { WritingMessageStatusType } from '../../../enums/WritingMessageStatusType';
+import { WritingMessageStatusInputType } from '../../../enums/WritingMessageStatusInputType';
+import { PublicChannelKey } from '../../../@shared/publicChannelKey';
+import { FindValueSubscriber } from 'rxjs/internal/operators/find';
 
 type MessageUpdatePayload = {
     type: 'messageUpdatePayload';
@@ -100,15 +104,16 @@ export type RoomConnectionUpdatePayload = {
     updatedAt: number;
 }
 
-export type WritingMessageStateUpdatePayload = {
-    type: 'writingMessageStateUpdatePayload';
+export type WritingMessageStatusUpdatePayload = {
+    type: 'writingMessageStatusUpdatePayload';
     roomId: string;
     userUid: string;
-    isWriting: boolean;
+    publicChannelKey: string;
+    status: WritingMessageStatusType;
     updatedAt: number;
 }
 
-export type RoomEventPayload = MessageUpdatePayload | RoomOperationPayload | DeleteRoomPayload | RoomConnectionUpdatePayload | WritingMessageStateUpdatePayload;
+export type RoomEventPayload = MessageUpdatePayload | RoomOperationPayload | DeleteRoomPayload | RoomConnectionUpdatePayload | WritingMessageStatusUpdatePayload;
 
 type OperateCoreResult = {
     type: 'success';
@@ -554,8 +559,12 @@ const fixTextColor = (color: string) => {
     try {
         return Color(color).hex();
     } catch {
-        return undefined
+        return undefined;
     }
+};
+
+const publishRoomEvent = async (pubSub: PubSubEngine, payload: RoomEventPayload) => {
+    await pubSub.publish(ROOM_EVENT, payload);
 };
 
 @Resolver()
@@ -944,7 +953,7 @@ export class RoomResolver {
     public async getLog(@Args() args: GetLogArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<typeof GetRoomLogResult> {
         const coreResult = await this.getLogCore({ args, context });
         if (coreResult.payload != null) {
-            await pubSub.publish(ROOM_EVENT, coreResult.payload);
+            await publishRoomEvent(pubSub, coreResult.payload);
         }
         return coreResult.result;
     }
@@ -981,7 +990,7 @@ export class RoomResolver {
 
             return ResultModule.ok({
                 __tstype: GetRoomConnectionSuccessResultType,
-                connectedUserUids: [...context.connectionManager.list({ roomId })].filter(([key, value]) => value > 0).map(([key]) => key),
+                connectedUserUids: [...context.connectionManager.listRoomConnections({ roomId })].filter(([key, value]) => value > 0).map(([key]) => key),
                 fetchedAt: new Date().getTime(),
             });
         };
@@ -1178,7 +1187,7 @@ export class RoomResolver {
     public async deleteRoom(@Args() args: DeleteRoomArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<DeleteRoomResult> {
         const { result, payload } = await this.deleteRoomCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
         if (payload != null) {
-            await pubSub.publish(ROOM_EVENT, payload);
+            await publishRoomEvent(pubSub, payload);
         }
         return result;
     }
@@ -1209,7 +1218,7 @@ export class RoomResolver {
     public async joinRoomAsPlayer(@Args() args: JoinRoomArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<typeof JoinRoomResult> {
         const { result, payload } = await this.joinRoomAsPlayerCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
         if (payload != null) {
-            await pubSub.publish(ROOM_EVENT, payload);
+            await publishRoomEvent(pubSub, payload);
         }
         return result;
     }
@@ -1240,7 +1249,7 @@ export class RoomResolver {
     public async joinRoomAsSpectator(@Args() args: JoinRoomArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<typeof JoinRoomResult> {
         const { result, payload } = await this.joinRoomAsSpectatorCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
         if (payload != null) {
-            await pubSub.publish(ROOM_EVENT, payload);
+            await publishRoomEvent(pubSub, payload);
         }
         return result;
     }
@@ -1272,7 +1281,7 @@ export class RoomResolver {
     public async promoteToPlayer(@Args() args: PromoteArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<PromoteResult> {
         const { result, payload } = await this.promoteToPlayerCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
         if (payload != null) {
-            await pubSub.publish(ROOM_EVENT, payload);
+            await publishRoomEvent(pubSub, payload);
         }
         return result;
     }
@@ -1344,7 +1353,7 @@ export class RoomResolver {
     public async changeParticipantName(@Args() args: ChangeParticipantNameArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<ChangeParticipantNameResult> {
         const { result, payload } = await this.changeParticipantNameCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
         if (payload != null) {
-            await pubSub.publish(ROOM_EVENT, payload);
+            await publishRoomEvent(pubSub, payload);
         }
         return result;
     }
@@ -1456,7 +1465,7 @@ export class RoomResolver {
     public async leaveRoom(@Arg('id') id: string, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<LeaveRoomResult> {
         const { result, payload } = await this.leaveRoomCore({ id, context });
         if (payload != null) {
-            await pubSub.publish(ROOM_EVENT, payload);
+            await publishRoomEvent(pubSub, payload);
         }
         return result;
     }
@@ -1644,9 +1653,9 @@ export class RoomResolver {
     public async operate(@Args() args: OperateArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<typeof OperateRoomResult> {
         const operateResult = await this.operateCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
         if (operateResult.type === 'success') {
-            await pubSub.publish(ROOM_EVENT, operateResult.roomOperationPayload);
+            await publishRoomEvent(pubSub, operateResult.roomOperationPayload);
             for (const messageUpdate of operateResult.messageUpdatePayload) {
-                await pubSub.publish(ROOM_EVENT, messageUpdate);
+                await publishRoomEvent(pubSub, messageUpdate);
             }
         }
         return operateResult.result;
@@ -1656,7 +1665,7 @@ export class RoomResolver {
     public async writePublicMessage(@Args() args: WritePublicMessageArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<typeof WritePublicRoomMessageResult> {
         const coreResult = await this.writePublicMessageCore({ args, context, channelKey: args.channelKey });
         if (coreResult.payload != null) {
-            await pubSub.publish(ROOM_EVENT, coreResult.payload);
+            await publishRoomEvent(pubSub, coreResult.payload);
         }
         return coreResult.result;
     }
@@ -1788,7 +1797,7 @@ export class RoomResolver {
     public async writePrivateMessage(@Args() args: WritePrivateMessageArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<typeof WritePrivateRoomMessageResult> {
         const coreResult = await this.writePrivateMessageCore({ args, context });
         if (coreResult.payload != null) {
-            await pubSub.publish(ROOM_EVENT, coreResult.payload);
+            await publishRoomEvent(pubSub, coreResult.payload);
         }
         return coreResult.result;
     }
@@ -1889,7 +1898,7 @@ export class RoomResolver {
     public async writeRoomSoundEffect(@Args() args: WriteRoomSoundEffectArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<typeof WriteRoomSoundEffectResult> {
         const coreResult = await this.writeRoomSoundEffectCore({ args, context });
         if (coreResult.payload != null) {
-            await pubSub.publish(ROOM_EVENT, coreResult.payload);
+            await publishRoomEvent(pubSub, coreResult.payload);
         }
         return coreResult.result;
     }
@@ -2036,7 +2045,7 @@ export class RoomResolver {
     public async makeMessageNotSecret(@Args() args: MessageIdArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<MakeMessageNotSecretResult> {
         const coreResult = await this.makeMessageNotSecretCore({ args, context });
         if (coreResult.payload != null) {
-            await pubSub.publish(ROOM_EVENT, coreResult.payload);
+            await publishRoomEvent(pubSub, coreResult.payload);
         }
         return coreResult.result;
     }
@@ -2191,7 +2200,7 @@ export class RoomResolver {
     public async deleteMessage(@Args() args: MessageIdArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<DeleteMessageResult> {
         const coreResult = await this.deleteMessageCore({ args, context });
         if (coreResult.payload != null) {
-            await pubSub.publish(ROOM_EVENT, coreResult.payload);
+            await publishRoomEvent(pubSub, coreResult.payload);
         }
         return coreResult.result;
     }
@@ -2340,9 +2349,50 @@ export class RoomResolver {
     public async editMessage(@Args() args: EditMessageArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<EditMessageResult> {
         const coreResult = await this.editMessageCore({ args, context });
         if (coreResult.payload != null) {
-            await pubSub.publish(ROOM_EVENT, coreResult.payload);
+            await publishRoomEvent(pubSub, coreResult.payload);
         }
         return coreResult.result;
+    }
+
+    @Mutation(() => Boolean)
+    public async updateWritingMessageStatus(@Args() args: UpdateWritingMessageStateArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<boolean> {
+        if (!PublicChannelKey.Without$System.isPublicChannelKey(args.publicChannelKey)) {
+            return false;
+        }
+        const decodedIdToken = checkSignIn(context);
+        if (decodedIdToken === NotSignIn) {
+            return false;
+        }
+        let status: WritingMessageStatusType;
+        switch (args.newStatus) {
+            case WritingMessageStatusInputType.Cleared:
+                status = WritingMessageStatusType.Cleared;
+                break;
+            case WritingMessageStatusInputType.StartWriting:
+                status = WritingMessageStatusType.Writing;
+                break;
+            case WritingMessageStatusInputType.KeepWriting:
+                status = WritingMessageStatusType.Writing;
+                break;
+        }
+
+        const returns = context.connectionManager.onWritingMessageStatusUpdate({
+            roomId: args.roomId,
+            userUid: decodedIdToken.uid,
+            publicChannelKey: args.publicChannelKey,
+            status,
+        });
+        if (returns != null) {
+            await publishRoomEvent(pubSub, {
+                type: 'writingMessageStatusUpdatePayload',
+                roomId: args.roomId,
+                userUid: decodedIdToken.uid,
+                status,
+                updatedAt: new Date().getTime(),
+                publicChannelKey: args.publicChannelKey,
+            });
+        }
+        return true;
     }
 
     // graphql-wsでRoomOperatedのConnectionを検知しているので、もしこれのメソッドやArgsがリネームもしくは削除されるときはそちらも変える。
@@ -2372,17 +2422,18 @@ export class RoomResolver {
             };
         }
 
-        if (payload.type === 'writingMessageStateUpdatePayload') {
+        if (payload.type === 'writingMessageStatusUpdatePayload') {
             if (id !== payload.roomId) {
                 return;
             }
             return {
-                writingMessageState: {
+                writingMessageStatus: {
                     userUid: payload.userUid,
-                    isWriting: payload.isWriting,
+                    publicChannelKey: payload.publicChannelKey,
+                    status: payload.status,
                     updatedAt: payload.updatedAt,
                 }
-            }
+            };
         }
 
         if (payload.type === 'messageUpdatePayload') {

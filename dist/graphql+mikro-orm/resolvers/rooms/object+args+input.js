@@ -9,10 +9,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RoomEvent = exports.WritingMessageState = exports.RoomConnectionEvent = exports.GetRoomConnectionsResult = exports.GetRoomConnectionsFailureResult = exports.GetRoomConnectionFailureResultType = exports.GetRoomConnectionsSuccessResult = exports.GetRoomConnectionSuccessResultType = exports.GetLogArgs = exports.GetMessagesArgs = exports.EditMessageArgs = exports.MessageIdArgs = exports.WriteRoomSoundEffectArgs = exports.WritePrivateMessageArgs = exports.WritePublicMessageArgs = exports.GetRoomArgs = exports.OperateArgs = exports.ChangeParticipantNameArgs = exports.PromoteArgs = exports.JoinRoomArgs = exports.DeleteRoomArgs = exports.CreateRoomInput = void 0;
+exports.RoomEvent = exports.WritingMessageStatus = exports.RoomConnectionEvent = exports.GetRoomConnectionsResult = exports.GetRoomConnectionsFailureResult = exports.GetRoomConnectionFailureResultType = exports.GetRoomConnectionsSuccessResult = exports.GetRoomConnectionSuccessResultType = exports.UpdateWritingMessageStateArgs = exports.GetLogArgs = exports.GetMessagesArgs = exports.EditMessageArgs = exports.MessageIdArgs = exports.WriteRoomSoundEffectArgs = exports.WritePrivateMessageArgs = exports.WritePublicMessageArgs = exports.GetRoomArgs = exports.OperateArgs = exports.ChangeParticipantNameArgs = exports.PromoteArgs = exports.JoinRoomArgs = exports.DeleteRoomArgs = exports.CreateRoomInput = void 0;
 const class_validator_1 = require("class-validator");
 const type_graphql_1 = require("type-graphql");
 const GetRoomConnectionFailureType_1 = require("../../../enums/GetRoomConnectionFailureType");
+const WritingMessageStatusInputType_1 = require("../../../enums/WritingMessageStatusInputType");
+const WritingMessageStatusType_1 = require("../../../enums/WritingMessageStatusType");
 const graphql_1 = require("../../entities/filePath/graphql");
 const graphql_2 = require("../../entities/room/graphql");
 const graphql_3 = require("../../entities/roomMessage/graphql");
@@ -263,6 +265,24 @@ GetLogArgs = __decorate([
     type_graphql_1.ArgsType()
 ], GetLogArgs);
 exports.GetLogArgs = GetLogArgs;
+let UpdateWritingMessageStateArgs = class UpdateWritingMessageStateArgs {
+};
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
+], UpdateWritingMessageStateArgs.prototype, "roomId", void 0);
+__decorate([
+    type_graphql_1.Field(() => WritingMessageStatusInputType_1.WritingMessageStatusInputType),
+    __metadata("design:type", String)
+], UpdateWritingMessageStateArgs.prototype, "newStatus", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
+], UpdateWritingMessageStateArgs.prototype, "publicChannelKey", void 0);
+UpdateWritingMessageStateArgs = __decorate([
+    type_graphql_1.ArgsType()
+], UpdateWritingMessageStateArgs);
+exports.UpdateWritingMessageStateArgs = UpdateWritingMessageStateArgs;
 exports.GetRoomConnectionSuccessResultType = 'GetRoomConnectionSuccessResultType';
 let GetRoomConnectionsSuccessResult = class GetRoomConnectionsSuccessResult {
 };
@@ -319,24 +339,28 @@ RoomConnectionEvent = __decorate([
     type_graphql_1.ObjectType()
 ], RoomConnectionEvent);
 exports.RoomConnectionEvent = RoomConnectionEvent;
-let WritingMessageState = class WritingMessageState {
+let WritingMessageStatus = class WritingMessageStatus {
 };
 __decorate([
     type_graphql_1.Field(),
     __metadata("design:type", String)
-], WritingMessageState.prototype, "userUid", void 0);
+], WritingMessageStatus.prototype, "userUid", void 0);
 __decorate([
-    type_graphql_1.Field(),
-    __metadata("design:type", Boolean)
-], WritingMessageState.prototype, "isWriting", void 0);
+    type_graphql_1.Field(() => WritingMessageStatusType_1.WritingMessageStatusType),
+    __metadata("design:type", String)
+], WritingMessageStatus.prototype, "status", void 0);
 __decorate([
     type_graphql_1.Field(),
     __metadata("design:type", Number)
-], WritingMessageState.prototype, "updatedAt", void 0);
-WritingMessageState = __decorate([
+], WritingMessageStatus.prototype, "updatedAt", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
+], WritingMessageStatus.prototype, "publicChannelKey", void 0);
+WritingMessageStatus = __decorate([
     type_graphql_1.ObjectType()
-], WritingMessageState);
-exports.WritingMessageState = WritingMessageState;
+], WritingMessageStatus);
+exports.WritingMessageStatus = WritingMessageStatus;
 let RoomEvent = class RoomEvent {
 };
 __decorate([
@@ -356,9 +380,9 @@ __decorate([
     __metadata("design:type", RoomConnectionEvent)
 ], RoomEvent.prototype, "roomConnectionEvent", void 0);
 __decorate([
-    type_graphql_1.Field(() => WritingMessageState, { nullable: true }),
-    __metadata("design:type", WritingMessageState)
-], RoomEvent.prototype, "writingMessageState", void 0);
+    type_graphql_1.Field(() => WritingMessageStatus, { nullable: true }),
+    __metadata("design:type", WritingMessageStatus)
+], RoomEvent.prototype, "writingMessageStatus", void 0);
 RoomEvent = __decorate([
     type_graphql_1.ObjectType()
 ], RoomEvent);

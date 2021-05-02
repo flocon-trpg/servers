@@ -24,6 +24,8 @@ import { DeleteRoomFailureType } from '../enums/DeleteRoomFailureType';
 import { PrereleaseType } from '../enums/PrereleaseType';
 import { MyValueLogType } from '../enums/MyValueLogType';
 import { GetRoomConnectionFailureType } from '../enums/GetRoomConnectionFailureType';
+import { WritingMessageStatusInputType } from '../enums/WritingMessageStatusInputType';
+import { WritingMessageStatusType } from '../enums/WritingMessageStatusType';
 
 let hasRegistered = false;
 const registerEnumTypes = (): void => {
@@ -105,6 +107,12 @@ const registerEnumTypes = (): void => {
     });
     registerEnumType(WriteRoomSoundEffectFailureType, {
         name: 'WriteRoomSoundEffectFailureType'
+    });
+    registerEnumType(WritingMessageStatusInputType, {
+        name: 'WritingMessageStatusInputType'
+    });
+    registerEnumType(WritingMessageStatusType, {
+        name: 'WritingMessageStatusType'
     });
 };
 
