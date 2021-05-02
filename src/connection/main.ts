@@ -80,7 +80,7 @@ class ConnectionCountDatabase {
 
 // 値が前と同じ時はSubscriptionで送信するのをある程度防ぐためのクラス
 class WritingMessageStatusDatabase {
-    private database = new NodeCache({ stdTTL: 600 });
+    private database = new NodeCache({ stdTTL: 600, maxKeys: 10000, checkperiod: 299 });
 
     // 戻り値がnullの場合、subscriptionで送信する必要はない 
     public set({ roomId, status, publicChannelKey, userUid }: { roomId: string; userUid: string; publicChannelKey: string; status: WritingMessageStatusType }): WritingMessageStatusType | null {
@@ -89,7 +89,7 @@ class WritingMessageStatusDatabase {
         }
         const key = `${roomId}@${userUid}@${publicChannelKey}`;
         const oldValue = this.database.get(key);
-        if (oldValue === status) {
+        if (oldValue === status && status !== WritingMessageStatusType.Writing) {
             return null;
         }
         this.database.set(key, status);
@@ -114,6 +114,7 @@ class WritingMessageStatusDatabase {
             if (!PublicChannelKey.Without$System.isPublicChannelKey(publicChannelKey)) {
                 return undefined;
             }
+            this.database.del(key);
             return { publicChannelKey };
         }).toArray();
     }

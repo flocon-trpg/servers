@@ -80,7 +80,7 @@ class ConnectionCountDatabase {
 }
 class WritingMessageStatusDatabase {
     constructor() {
-        this.database = new node_cache_1.default({ stdTTL: 600 });
+        this.database = new node_cache_1.default({ stdTTL: 600, maxKeys: 10000, checkperiod: 299 });
     }
     set({ roomId, status, publicChannelKey, userUid }) {
         if (!publicChannelKey_1.PublicChannelKey.Without$System.isPublicChannelKey(publicChannelKey)) {
@@ -88,7 +88,7 @@ class WritingMessageStatusDatabase {
         }
         const key = `${roomId}@${userUid}@${publicChannelKey}`;
         const oldValue = this.database.get(key);
-        if (oldValue === status) {
+        if (oldValue === status && status !== WritingMessageStatusType_1.WritingMessageStatusType.Writing) {
             return null;
         }
         this.database.set(key, status);
@@ -112,6 +112,7 @@ class WritingMessageStatusDatabase {
             if (!publicChannelKey_1.PublicChannelKey.Without$System.isPublicChannelKey(publicChannelKey)) {
                 return undefined;
             }
+            this.database.del(key);
             return { publicChannelKey };
         }).toArray();
     }

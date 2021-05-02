@@ -117,7 +117,7 @@ const main = async (params: { debug: boolean }): Promise<void> => {
                             connectionId: message.id,
                             userUid: decodedIdToken.value.uid,
                             roomId,
-                        })
+                        });
                     } else {
                         console.warn('(typeof RoomEvent.id) should be string');
                     }
@@ -134,8 +134,7 @@ const main = async (params: { debug: boolean }): Promise<void> => {
                     connectionManager.onLeaveRoom({ connectionId: key });
                 }
             },
-        },
-            wsServer);
+        }, wsServer);
 
         console.log(`🚀 Server ready at http://localhost:${PORT}${apolloServer.graphqlPath}`);
         console.log(`🚀 Subscriptions ready at ws://localhost:${PORT}${apolloServer.subscriptionsPath}`);

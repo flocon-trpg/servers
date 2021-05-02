@@ -145,6 +145,10 @@ class $Iterator<T> {
         return [...this.iterate()];
     }
 
+    public toSet(): Set<T> {
+        return new Set(this.iterate());
+    }
+
     public toMap<TKey, TValue>(mapping: (source: T) => { key: TKey; value: TValue }): Map<TKey, TValue> {
         const result = new Map<TKey, TValue>();
         for (const elem of this.iterate()) {

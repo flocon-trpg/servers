@@ -151,6 +151,9 @@ class $Iterator {
     toArray() {
         return [...this.iterate()];
     }
+    toSet() {
+        return new Set(this.iterate());
+    }
     toMap(mapping) {
         const result = new Map();
         for (const elem of this.iterate()) {

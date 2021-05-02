@@ -2099,7 +2099,7 @@ let RoomResolver = class RoomResolver {
                 type: 'writingMessageStatusUpdatePayload',
                 roomId: args.roomId,
                 userUid: decodedIdToken.uid,
-                status,
+                status: returns,
                 updatedAt: new Date().getTime(),
                 publicChannelKey: args.publicChannelKey,
             });
@@ -2118,9 +2118,6 @@ let RoomResolver = class RoomResolver {
         }
         const userUid = context.decodedIdToken.value.uid;
         if (payload.type === 'roomConnectionUpdatePayload') {
-            if (id !== payload.roomId) {
-                return;
-            }
             return {
                 roomConnectionEvent: {
                     userUid: payload.userUid,
@@ -2130,9 +2127,6 @@ let RoomResolver = class RoomResolver {
             };
         }
         if (payload.type === 'writingMessageStatusUpdatePayload') {
-            if (id !== payload.roomId) {
-                return;
-            }
             return {
                 writingMessageStatus: {
                     userUid: payload.userUid,
