@@ -19,9 +19,6 @@ function useSkipAndTake<T>(array: ReadonlyArray<T>, skipCount: number, thenTakeC
 const heightMultiplier = 3;
 
 function PagenationScroll({ source, height, elementMinHeight }: Props): JSX.Element | null {
-    if (height <= 0) {
-        throw 'height <= 0';
-    }
     if (elementMinHeight <= 0) {
         throw 'elementMinHeight <= 0';
     }
@@ -31,7 +28,11 @@ function PagenationScroll({ source, height, elementMinHeight }: Props): JSX.Elem
     const countPerPage = Math.ceil(height / elementMinHeight);
     const [skipCount, setSkipCount] = React.useState(0);
 
-    const { result, hasMore } = useSkipAndTake(source, skipCount, countPerPage * heightMultiplier);
+    const { result, hasMore } = useSkipAndTake(source, skipCount, Math.max(countPerPage * heightMultiplier, 0));
+
+    if (height <= 0) {
+        return null;
+    }
 
     return (<div style={{ display: 'flex', flexDirection: 'column', height, overflowX: 'hidden', overflowY: 'scroll', overscrollBehavior: 'contain' }} onScroll={e => {
         const target = e.target as HTMLTextAreaElement;

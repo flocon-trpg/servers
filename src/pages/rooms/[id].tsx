@@ -210,18 +210,18 @@ const RoomCore: React.FC<{ id: string }> = ({ id }: { id: string }) => {
             return {
                 values: [...oldValue.values, textNotification],
                 newValue: textNotification,
-            }
+            };
         });
     }, [logNotification]);
 
     return (<LogNotificationContext.Provider value={setLogNotification}>
         <RoomRouter id={id} logNotifications={logNotifications} />
     </LogNotificationContext.Provider>);
-}
+};
 
 const Room: React.FC = () => {
     const router = useRouter();
-    const id = router.query.id
+    const id = router.query.id;
 
     if (Array.isArray(id) || id == null) {
         return (

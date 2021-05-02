@@ -64,7 +64,7 @@ export namespace RoomMessage {
                 if (elem == null) {
                     return seed;
                 }
-                return seed === '' ? elem : `${seed},${elem}`
+                return seed === '' ? elem : `${seed},${elem}`;
             }, '');
 
             return (<div style={style}>

@@ -1,4 +1,6 @@
+/** @jsxImportSource @emotion/react */
 import React from 'react';
+import { css } from '@emotion/react';
 import { Tabs, Button, Menu, Dropdown, Tooltip, Popover, Drawer, Col, Row, Checkbox, Divider, Radio, Alert, Input, Modal, Result } from 'antd';
 import moment from 'moment';
 import { AllRoomMessagesSuccessResult, apolloError, failure, loading, publicMessage, privateMessage, soundEffect, AllRoomMessagesResult, useFilteredAndMapRoomMessages, Message, myValueLog } from '../../hooks/useRoomMessages';
@@ -9,7 +11,7 @@ import MyAuthContext from '../../contexts/MyAuthContext';
 import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
 import { ReadonlyStateMap } from '../../@shared/StateMap';
-import { useDeleteMessageMutation, useEditMessageMutation, useMakeMessageNotSecretMutation } from '../../generated/graphql';
+import { useDeleteMessageMutation, useEditMessageMutation, useMakeMessageNotSecretMutation, WritingMessageStatusType } from '../../generated/graphql';
 import * as Icon from '@ant-design/icons';
 import InputModal from '../InputModal';
 import { Character } from '../../stateManagers/states/character';
@@ -28,6 +30,9 @@ import { useMessageFilter } from '../../hooks/useMessageFilter';
 import { RoomMessage as RoomMessageNameSpace } from './RoomMessage';
 import { TextNotification, TextNotificationsState } from './contexts/LogNotificationContext';
 import { UseRoomMessageInputTextsResult } from '../../hooks/useRoomMessageInputTexts';
+import { WritingMessageStatusResult } from '../../hooks/useWritingMessageStatus';
+import { PublicChannelKey } from '../../@shared/publicChannelKey';
+import { $free } from '../../@shared/Constants';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -407,6 +412,7 @@ type MessageTabPaneProps = {
     roomId: string;
     contentHeight: number;
     config: MessageFilter;
+    writingMessageStatusResult: WritingMessageStatusResult;
 } & PublicChannelNames
 
 const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProps) => {
@@ -417,7 +423,12 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
         roomId,
         contentHeight,
         config,
+        writingMessageStatusResult,
     } = props;
+
+    const writingStatusHeight = 16;
+
+    const myAuth = React.useContext(MyAuthContext);
 
     const filter = useMessageFilter(config);
 
@@ -447,8 +458,31 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
             });
     }, [roomId, participants, props.publicChannel1Name, props.publicChannel2Name, props.publicChannel3Name, props.publicChannel4Name, props.publicChannel5Name, props.publicChannel6Name, props.publicChannel7Name, props.publicChannel8Name, props.publicChannel9Name, props.publicChannel10Name]);
 
+    const writingUserUids = __(PublicChannelKey.Without$System.publicChannelKeys).flatMap(key => {
+        const map = writingMessageStatusResult.get(key);
+        if (map == null) {
+            return [];
+        }
+        return [...map].filter(([key, value]) => key !== getUserUid(myAuth) && value.current === WritingMessageStatusType.Writing).map(([key]) => key);
+    }).toSet();
+    const writingUsers = __(writingUserUids).compact(userUid => participants.get(userUid)?.name).toArray().sort();
+    let writingStatus: JSX.Element | null = null;
+    // TODO: background-colorが適当
+    const writingStatusCss = css`
+        flex-basis: ${writingStatusHeight}px;
+        background-color: #10101090;
+    `;
+    if (writingUsers.length >= 3) {
+        writingStatus = <div css={writingStatusCss}>複数人が書き込み中…</div>;
+    } else if (writingUsers.length !== 0) {
+        writingStatus = <div css={writingStatusCss}>{writingUsers.reduce((seed, elem, i) => i === 0 ? elem : `${seed}, ${elem}`, '') + ' が書き込み中…'}</div>;
+    }
+
     const messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, logNotifications, filter, thenMap });
-    return <PagenationScroll source={messages} elementMinHeight={headerHeight + contentMinHeight} height={contentHeight} />;
+    return <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <PagenationScroll source={messages} elementMinHeight={headerHeight + contentMinHeight} height={writingStatus == null ? contentHeight : (contentHeight - writingStatusHeight)} />
+        {writingStatus}
+    </div>;
 };
 
 type Props = {
@@ -460,7 +494,8 @@ type Props = {
     height: number;
     panelId: string;
     config: MessagePanelConfig;
-    useRoomMessageInputTextsResult: UseRoomMessageInputTextsResult; 
+    useRoomMessageInputTextsResult: UseRoomMessageInputTextsResult;
+    writingMessageStatusResult: WritingMessageStatusResult;
 } & PublicChannelNames
 
 const RoomMessages: React.FC<Props> = (props: Props) => {

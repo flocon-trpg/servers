@@ -7,7 +7,6 @@ import { $free } from '../@shared/Constants';
 import { PublicChannelKey } from '../@shared/publicChannelKey';
 import { useUpdateWritingMessageStatusMutation, WritingMessageStatusInputType } from '../generated/graphql';
 import { VisibleTo } from '../utils/visibleTo';
-import { useMap } from './useMap';
 
 type MessagePair = {
     prevMessage: string | undefined;
