@@ -60,6 +60,7 @@ const MyNumberValueList: React.FC<Props> = ({ participants }: Props) => {
         {
             title: '',
             key: 'menu',
+            // eslint-disable-next-line react/display-name
             render: (_: unknown, { stateId }: DataSource) => {
                 return <Tooltip title='編集'>
                     <Button
@@ -68,16 +69,17 @@ const MyNumberValueList: React.FC<Props> = ({ participants }: Props) => {
                         onClick={() => dispatchRoomComponentsState({ type: myNumberValueDrawerType, newValue: { type: update, boardKey: null, stateKey: stateId } })}>
                         <Icon.SettingOutlined />
                     </Button>
-                </Tooltip>
+                </Tooltip>;
             },
         },
         {
             title: 'ID',
             key: 'ID',
+            // eslint-disable-next-line react/display-name
             render: (_: unknown, { createdBy, stateId }: DataSource) => {
                 return <Tooltip title={compositeKeyToString({ createdBy, id: stateId })}>
                     <div style={{ width: 140, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{compositeKeyToString({ createdBy, id: stateId })}</div>
-                </Tooltip>
+                </Tooltip>;
             },
         },
         {
@@ -122,23 +124,24 @@ const MyNumberValueList: React.FC<Props> = ({ participants }: Props) => {
                         checkedChildren={<Icon.EyeInvisibleOutlined />}
                         unCheckedChildren={<Icon.EyeOutlined />}
                         checked={state.isValuePrivate}
-                        onChange={() => { }} />;
+                        onChange={() => undefined} />;
                 }
-                return <span>{input}{toggleButton}</span>
+                return <span>{input}{toggleButton}</span>;
             },
         },
         {
             key: '作成者',
             title: '作成者',
+            // eslint-disable-next-line react/display-name
             render: (_: unknown, { state, createdBy, stateId }: DataSource) => {
-                return <span>{participants.get(createdBy)?.name}{createdBy === getUserUid(myAuth) && <span style={{ fontWeight: 'bold', paddingLeft: 2 }}>(自分)</span>}</span>
+                return <span>{participants.get(createdBy)?.name}{createdBy === getUserUid(myAuth) && <span style={{ fontWeight: 'bold', paddingLeft: 2 }}>(自分)</span>}</span>;
             },
         }
     ];
 
     return (
         <div>
-            <Table columns={columns} dataSource={charactersDataSource} size='small' />
+            <Table columns={columns} dataSource={charactersDataSource} size='small' pagination={false} />
         </div>);
 };
 
