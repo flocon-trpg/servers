@@ -1,10 +1,13 @@
 import { DynamicLoader } from 'bcdice';
-import Result from 'bcdice/ts/result';
+import BcdiceResult from 'bcdice/ts/result';
 import { __ } from '../@shared/collection';
-import { analyze as analyzeCore, executeCompareOperator, maybeDice, MaybeDice, Parameter, prettifyOperator } from '../@shared/expression';
+import { analyze as analyzeToExpression, plain } from '../@shared/expression';
+import { Result, ResultModule } from '../@shared/Result';
 import { RoomParameterNameType } from '../enums/RoomParameterNameType';
+import { BoolParam } from '../graphql+mikro-orm/entities/room/character/boolParam/mikro-orm';
 import { Chara } from '../graphql+mikro-orm/entities/room/character/mikro-orm';
 import { NumParam } from '../graphql+mikro-orm/entities/room/character/numParam/mikro-orm';
+import { StrParam } from '../graphql+mikro-orm/entities/room/character/strParam/mikro-orm';
 import { Room } from '../graphql+mikro-orm/entities/room/mikro-orm';
 import { ParamName } from '../graphql+mikro-orm/entities/room/paramName/mikro-orm';
 import { EM } from '../utils/types';
@@ -15,7 +18,7 @@ export const listAvailableGameSystems = () => {
     return loader.listAvailableGameSystems();
 };
 
-const roll = async (text: string, gameType: string): Promise<Result | null> => {
+const roll = async (text: string, gameType: string): Promise<BcdiceResult | null> => {
     const gameSystemInfo = listAvailableGameSystems().find(info => info.id === gameType);
     if (gameSystemInfo == null) {
         return null;
@@ -24,143 +27,106 @@ const roll = async (text: string, gameType: string): Promise<Result | null> => {
     return gameSystem.eval(text);
 };
 
-export const plain = 'plain';
-export const command = 'command';
+export const chara = 'chara';
 
-// 戻り値は、number==nullのときはtextにエラーメッセージが入る。number!=nullのときはパラメーター名と結果のセットを表す文字列が入る。
-const getParameter = async ({ em, parameter, chara, room }: { em: EM; parameter: Parameter; chara: Chara | null; room: Room }): Promise<{ text: string; number: number | null }> => {
-    if (chara == null) {
-        return {
-            text: 'キャラクターが指定されていないため、数値パラメーターを取得できませんでした',
-            number: null,
-        };
-    }
-    const paramNames = await em.find(ParamName, { room: room.id, name: parameter.parameter, type: RoomParameterNameType.Num }, { limit: 2 });
-    if (paramNames.length === 0) {
-        return {
-            text: `"${parameter.parameter}"という名前の数値パラメーターが見つかりませんでした`,
-            number: null,
-        };
-    }
-    if (paramNames.length !== 1) {
-        return {
-            text: `"${parameter.parameter}"という名前の数値パラメーターが複数存在します。パラメーターの名前を変えることを検討してください`,
-            number: null,
-        };
-    }
-    const numParam = await em.findOne(NumParam, { chara: chara.id, key: paramNames[0].key });
-    return {
-        text: `{${parameter.parameter}} → ${numParam?.value ?? 0}`,
-        number: numParam?.value ?? 0,
-    };
-};
+export type Context = {
+    type: typeof chara;
+    value: Chara;
+}
 
-const sum = (dice: Result): number => {
-    let sum = 0;
-    dice.rands.forEach(rnd => {
-        const result = rnd[0];
-        // result == nullになるケースは確認していないが、念の為。
-        if (result == null) {
-            return;
+// 全てにおいて何も見つからなかった場合、nullが返される。
+const getParameter = async ({ em, parameter, context, room }: { em: EM; parameter: string; context: Context | null; room: Room }): Promise<Result<{ value: string | boolean | number | undefined; stringValue: string }> | null> => {
+    const paramNameValue = await (async () => {
+        if (context?.type === chara) {
+            const paramNames = await em.find(ParamName, { room: room.id, name: parameter }, { limit: 2 });
+            if (paramNames.length === 0) {
+                return null;
+            }
+            if (paramNames.length !== 1) {
+                return ResultModule.error(`"${parameter}"という名前のパラメーターが複数存在します。パラメーターの名前を変えることを検討してください`);
+            }
+            const paramName = paramNames[0];
+            let paramValue;
+            switch (paramName.type) {
+                case RoomParameterNameType.Str:
+                    paramValue = (await em.findOne(StrParam, { chara: context.value.id, key: paramNames[0].key }))?.value;
+                    break;
+                case RoomParameterNameType.Num:
+                    paramValue = (await em.findOne(NumParam, { chara: context.value.id, key: paramNames[0].key }))?.value;
+                    break;
+                case RoomParameterNameType.Bool:
+                    paramValue = (await em.findOne(BoolParam, { chara: context.value.id, key: paramNames[0].key }))?.value;
+                    break;
+            }
+            return ResultModule.ok({
+                stringValue: paramValue?.toString() ?? '',
+                value: paramValue,
+            });
         }
-        sum += result;
-    });
-    return sum;
-};
-
-// https://www.yoheim.net/blog.php?q=20191101
-const toHanAscii = (source: string): string => {
-    return source.replace(/[Ａ-Ｚａ-ｚ０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
-};
-
-// {text: '1d100'} -> bcdiceのtextを返す
-// {text: '5'} -> 5
-const getDiceOrNumber = async ({ text, gameType }: { text: string; gameType: string }): Promise<{ text: string; number: number; bcdice: Result | null } | null> => {
-    const hankakuText = toHanAscii(text);
-    const result = await roll(hankakuText, gameType);
-    if (result != null) {
-        return { text: result.text, number: sum(result), bcdice: result };
+    })();
+    if (paramNameValue != null) {
+        return paramNameValue;
     }
-    const number = Number(hankakuText);
-    if (isNaN(number) || !isFinite(number)) {
-        return null;
-    }
-    return { text: number.toString(), number, bcdice: null };
-};
-
-const getParameterOrDiceOrNumber = async (params: {
-    em: EM;
-    value: MaybeDice | Parameter;
-    chara: Chara | null;
-    gameType: string;
-    room: Room;
-}): Promise<{ text: string; number: number | null; bcdice: Result | null } | null> => {
-    if (params.value.type === maybeDice) {
-        return getDiceOrNumber({ text: params.value.command, gameType: params.gameType });
-    }
-    const result = await getParameter({ ...params, parameter: params.value });
-    return { ...result, bcdice: null };
+    return null;
 };
 
 type AnalyzeResult = {
-    type: typeof plain;
-} | {
-    type: typeof command;
-    result: string;
-    isSecret: boolean;
-    // nullの場合は、成功判定のないコマンドを表す
-    isSuccess: boolean | null;
+    message: string;
+    expressionResult: string | null;
+    diceResult: {
+        result: string;
+        isSecret: boolean;
+        // nullの場合は、成功判定のないコマンドを表す
+        isSuccess: boolean | null;
+    } | null;
 }
-
-const isSuccess = ({ success, failure }: { success: boolean; failure: boolean }) => {
-    if (success === failure) {
-        return null;
-    }
-    return success;
-};
 
 export const analyze = async (params: {
     em: EM;
     text: string;
-    chara: Chara | null;
     gameType: string;
+    context: Context | null;
     room: Room;
-}): Promise<AnalyzeResult> => {
-    const exp = analyzeCore(params.text);
-    if (exp?.isCompare === true) {
-        const left = await getParameterOrDiceOrNumber({ ...params, value: exp.left });
-        const right = await getParameterOrDiceOrNumber({ ...params, value: exp.right });
-        if (left != null && right != null) {
-            if (left.number != null && right.number != null) {
-                return {
-                    type: command,
-                    result: `${left.text} ${prettifyOperator(exp.compareOperator)} ${right.text}`,
-                    isSuccess: executeCompareOperator(left.number, right.number, exp.compareOperator),
-                    isSecret: (left.bcdice?.secret ?? false) || (right.bcdice?.secret ?? false),
-                };
-            }
-            // BCDiceは例えば '1d100 < {NON_EXIST_PARAM}' のような文字列も1d100と判定されるため、ここで弾いている。ただし、'1d100 {SAN}'のような文字列も1d100と判定されるが、これは防いでいない。
-            // まず最初に {SAN} のような文字列を置き換えてしまってから判定し始めたほうがいいか。
-            return {
-                type: command,
-                result: `${left.text}; ${right.text}`,
-                isSuccess: null,
-                isSecret: (left.bcdice?.secret ?? false) || (right.bcdice?.secret ?? false),
-            };
+}): Promise<Result<AnalyzeResult>> => {
+    const expressions = analyzeToExpression(params.text);
+    if (expressions.isError) {
+        return expressions;
+    }
+    let message = '';
+    const expressionResultArray: { expression: string; result: string | number | boolean | undefined }[] = [];
+    for (const expr of expressions.value) {
+        if (expr.type === plain) {
+            message += expr.text;
+            continue;
         }
+        const parameterValue = await getParameter({ ...params, parameter: expr.variable });
+        if (parameterValue == null) {
+            expressionResultArray.push({ expression: expr.variable, result: undefined });
+            continue;
+        }
+        if (parameterValue.isError) {
+            return parameterValue;
+        }
+        message += parameterValue.value.stringValue;
+        expressionResultArray.push({ expression: expr.variable, result: parameterValue.value.value });
     }
 
-    const analyzed = await getDiceOrNumber(params);
-    if (analyzed == null) {
-        return {
-            type: plain,
-        };
-    }
+    const expressionResult = expressionResultArray.reduce((seed, elem) => {
+        const text = `${elem.expression}=>${elem.result === undefined ? 'undefined' : elem.result}`;
+        if (seed === '') {
+            return text;
+        }
+        return `${seed}, ${text}`;
+    }, '');
 
-    return {
-        type: command,
-        result: analyzed.text,
-        isSuccess: analyzed.bcdice == null ? null : isSuccess(analyzed.bcdice),
-        isSecret: analyzed.bcdice?.secret ?? false,
-    };
+    const rolled = await roll(message, params.gameType);
+    return ResultModule.ok({
+        message,
+        expressionResult,
+        diceResult: rolled == null ? null : {
+            result: rolled.text,
+            isSecret: rolled.secret,
+            isSuccess: (rolled.success === rolled.failure) ? null : rolled.success,
+        },
+    });
 };

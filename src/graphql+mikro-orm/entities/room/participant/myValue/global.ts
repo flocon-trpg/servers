@@ -440,12 +440,12 @@ export namespace GlobalMyValue {
                             resizedPieces: [],
                             createdPieces: [],
                             deletedPieces: [],
-                        }))
+                        }));
                         break;
                 }
             });
             return result;
-        }
+        };
     }
 
     export namespace GraphQL {

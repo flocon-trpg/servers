@@ -60,11 +60,13 @@ RoomPubCh = __decorate([
 ], RoomPubCh);
 exports.RoomPubCh = RoomPubCh;
 let RoomPubMsg = class RoomPubMsg {
-    constructor() {
+    constructor({ text, textSource }) {
         this.id = uuid_1.v4();
         this.version = 1;
         this.createdAt = new Date();
         this.isSecret = false;
+        this.text = text;
+        this.textSource = textSource;
     }
 };
 __decorate([
@@ -84,9 +86,17 @@ __decorate([
     __metadata("design:type", Date)
 ], RoomPubMsg.prototype, "updatedAt", void 0);
 __decorate([
-    core_1.Property({ nullable: true, length: 65535 }),
+    core_1.Property({ nullable: true, length: 65535, default: '' }),
+    __metadata("design:type", String)
+], RoomPubMsg.prototype, "textSource", void 0);
+__decorate([
+    core_1.Property({ length: 65535, default: '' }),
     __metadata("design:type", String)
 ], RoomPubMsg.prototype, "text", void 0);
+__decorate([
+    core_1.Property({ nullable: true, length: 65535 }),
+    __metadata("design:type", String)
+], RoomPubMsg.prototype, "updatedText", void 0);
 __decorate([
     core_1.Property({ nullable: true, default: null }),
     __metadata("design:type", Number)
@@ -152,16 +162,19 @@ __decorate([
     __metadata("design:type", Object)
 ], RoomPubMsg.prototype, "createdBy", void 0);
 RoomPubMsg = __decorate([
-    core_1.Entity()
+    core_1.Entity(),
+    __metadata("design:paramtypes", [Object])
 ], RoomPubMsg);
 exports.RoomPubMsg = RoomPubMsg;
 let RoomPrvMsg = class RoomPrvMsg {
-    constructor() {
+    constructor({ text, textSource }) {
         this.id = uuid_1.v4();
         this.version = 1;
         this.createdAt = new Date();
         this.isSecret = false;
         this.visibleTo = new core_1.Collection(this);
+        this.text = text;
+        this.textSource = textSource;
     }
 };
 __decorate([
@@ -181,9 +194,17 @@ __decorate([
     __metadata("design:type", Date)
 ], RoomPrvMsg.prototype, "updatedAt", void 0);
 __decorate([
-    core_1.Property({ nullable: true, length: 65535 }),
+    core_1.Property({ nullable: true, length: 65535, default: '' }),
+    __metadata("design:type", String)
+], RoomPrvMsg.prototype, "textSource", void 0);
+__decorate([
+    core_1.Property({ length: 65535, default: '' }),
     __metadata("design:type", String)
 ], RoomPrvMsg.prototype, "text", void 0);
+__decorate([
+    core_1.Property({ nullable: true, length: 65535 }),
+    __metadata("design:type", String)
+], RoomPrvMsg.prototype, "updatedText", void 0);
 __decorate([
     core_1.Property({ nullable: true, default: null }),
     __metadata("design:type", Number)
@@ -253,7 +274,8 @@ __decorate([
     __metadata("design:type", Object)
 ], RoomPrvMsg.prototype, "room", void 0);
 RoomPrvMsg = __decorate([
-    core_1.Entity()
+    core_1.Entity(),
+    __metadata("design:paramtypes", [Object])
 ], RoomPrvMsg);
 exports.RoomPrvMsg = RoomPrvMsg;
 let MyValueLog = class MyValueLog {

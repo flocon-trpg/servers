@@ -6,35 +6,37 @@ import { Room } from '../room/mikro-orm';
 import { Partici } from '../room/participant/mikro-orm';
 import { User } from '../user/mikro-orm';
 
-
 /*
-# createdByやvisibleToがParticipantではなくUserである理由:
+# 変数展開（仮称）の仕様
 
-- 退室してParticipantでなくなった後、再びParticipantになったときに同一人物であるとみなしたい
-- 現在、GraphQLでブラウザに渡すのはParticipantのIdではなくUserUidなので、UserにするほうがDBへのアクセス数を少なくできる
+「今のHPは{HP}です」というメッセージで、{HP}のように{}でくくることでHPという変数を自動的に探して取得し、その文字に置き換えられる。例えばHPが10ならば「今のHPは10です」というメッセージになる。変数の型は、string, number, booleanのいずれでもOKである。
+このように、変数を自動的に代入する仕組みを変数展開（仮称）という。
+変数が見つからなかったときの処理の定義は曖昧。今の所「undefined」を代入して正常に処理されるようにしている。
+
+変数展開が行われてから、bcdiceの処理が行われる。そのため、例えば「1d{HP}<{MP}」や「{memo}1d100」（memoに"s"という文字列が入っているときは、s1d100になる）のようなこともできる。
+
+## textSourceについて
+
+変数展開が行われ、bcdiceの処理が行われる前の文字列はDBのtextに入る。変数展開が行われる前の文字列はDBのtextSourceに入る（text === textSourceになるときは、容量節約のためにtextSourceにはnullishが代入されることもありうる）。
 
 
-# text, commandResult, altTextToSecret, isSecretについて
+# text, textSource, updatedText, textUpdatedAt, commandResult, altTextToSecret, isSecretについて
 
-## (text, altTextToSecret) = (nullish, nullish)
-そのメッセージは削除されたことを表す。このときはcommandResultもnullish。
+textとtextSourceは、投稿時のメッセージ。編集や削除されても残る。本来ならばinitTextやinitTextSourceという名前にしたほうが良さそうだが、マイグレーションでデータが損失するのを防ぐために今の名前になっている。
+TODO: ↑正式リリースまでにinitTextなどに変えたほうがいいか
 
-## (text, altTextToSecret) = (non-nullish, nullish)
-常に公開されるメッセージを表す。
-
-## (text, altTextToSecret) = (nullish, non-nullish)
-未定義。この状態になることはない。
-
-## (text, altTextToSecret) = (non-nullish, non-nullish)
-Secret設定である。
+各プロパティの詳細な関係は、./state-table.mdを参照。
 
 ## commandResult
 コマンドの実行結果を表す文字列。textのほうは実行結果に関わらず投稿された文字列がそのまま入る。
 コマンドでないとみなされていた場合はnullish。
 公開条件はtextと同様。altCommandResultToSecretは、今のところ使える場面が思いつかないので定義していない。
 
-## isSecret
-Secret設定であり、本文が非公開の状態だとtrue。公開しているならばfalse。
+
+# createdByやvisibleToがParticipantではなくUserである理由
+
+- 退室してParticipantでなくなった後、再びParticipantになったときに同一人物であるとみなしたい
+- 現在、GraphQLでブラウザに渡すのはParticipantのIdではなくUserUidなので、UserにするほうがDBへのアクセス数を少なくできる
 
 
 # システムメッセージ
@@ -76,6 +78,11 @@ export class RoomPubCh {
 // RoomPublicMessage
 @Entity()
 export class RoomPubMsg {
+    public constructor({ text, textSource }: { text: string; textSource: string | undefined }) {
+        this.text = text;
+        this.textSource = textSource;
+    }
+
     @PrimaryKey()
     public id: string = v4();
 
@@ -90,8 +97,16 @@ export class RoomPubMsg {
     public updatedAt?: Date;
 
     // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
+    @Property({ nullable: true, length: 65535, default: '' })
+    public textSource?: string;
+
+    // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
+    @Property({ length: 65535, default: '' })
+    public text!: string;
+
+    // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
     @Property({ nullable: true, length: 65535 })
-    public text?: string;
+    public updatedText?: string;
 
     @Property({ nullable: true, default: null })
     public textUpdatedAt?: number;
@@ -161,6 +176,11 @@ export class RoomPubMsg {
 // RoomPrivateMessage
 @Entity()
 export class RoomPrvMsg {
+    public constructor({ text, textSource }: { text: string; textSource: string | undefined }) {
+        this.text = text;
+        this.textSource = textSource;
+    }
+
     @PrimaryKey()
     public id: string = v4();
 
@@ -175,8 +195,16 @@ export class RoomPrvMsg {
     public updatedAt?: Date;
 
     // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
+    @Property({ nullable: true, length: 65535, default: '' })
+    public textSource?: string;
+
+    // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
+    @Property({ length: 65535, default: '' })
+    public text!: string;
+
+    // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
     @Property({ nullable: true, length: 65535 })
-    public text?: string;
+    public updatedText?: string;
 
     @Property({ nullable: true, default: null })
     public textUpdatedAt?: number;

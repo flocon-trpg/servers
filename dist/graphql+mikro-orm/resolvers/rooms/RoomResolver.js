@@ -350,25 +350,25 @@ const checkChannelKey = (channelKey, isSpectator) => {
 const analyzeTextAndSetToEntity = async (params) => {
     var _a, _b, _c;
     const defaultGameType = 'DiceBot';
-    const gameType = (_a = params.gameType) !== null && _a !== void 0 ? _a : defaultGameType;
-    const rolled = await main_1.analyze(Object.assign(Object.assign({}, params), { gameType }));
-    if (rolled.type === main_1.plain) {
-        params.targetEntity.text = params.text;
+    const analyzed = await main_1.analyze(Object.assign(Object.assign({}, params), { gameType: (_a = params.gameType) !== null && _a !== void 0 ? _a : defaultGameType, text: params.textSource }));
+    if (analyzed.isError) {
+        return analyzed;
     }
-    else {
-        if (rolled.isSecret) {
-            params.targetEntity.isSecret = true;
-            params.targetEntity.text = params.text;
-            params.targetEntity.altTextToSecret = 'シークレットダイス';
-            params.targetEntity.commandResult = rolled.result;
-            params.targetEntity.commandIsSuccess = (_b = rolled.isSuccess) !== null && _b !== void 0 ? _b : undefined;
+    const targetEntity = params.type === 'RoomPubMsg' ? new mikro_orm_2.RoomPubMsg({ textSource: params.textSource, text: analyzed.value.message }) : new mikro_orm_2.RoomPrvMsg({ textSource: params.textSource, text: analyzed.value.message });
+    targetEntity.createdBy = core_1.Reference.create(params.createdBy);
+    if (analyzed.value.diceResult != null) {
+        if (analyzed.value.diceResult.isSecret) {
+            targetEntity.isSecret = true;
+            targetEntity.altTextToSecret = 'シークレットダイス';
+            targetEntity.commandResult = analyzed.value.diceResult.result;
+            targetEntity.commandIsSuccess = (_b = analyzed.value.diceResult.isSuccess) !== null && _b !== void 0 ? _b : undefined;
         }
         else {
-            params.targetEntity.text = params.text;
-            params.targetEntity.commandResult = rolled.result;
-            params.targetEntity.commandIsSuccess = (_c = rolled.isSuccess) !== null && _c !== void 0 ? _c : undefined;
+            targetEntity.commandResult = analyzed.value.diceResult.result;
+            targetEntity.commandIsSuccess = (_c = analyzed.value.diceResult.isSuccess) !== null && _c !== void 0 ? _c : undefined;
         }
     }
+    return Result_1.ResultModule.ok(targetEntity);
 };
 const toCharacterValueForMessage = (message) => {
     if (message.charaStateId == null || message.charaName == null || message.charaIsPrivate == null) {
@@ -388,13 +388,27 @@ const toCharacterValueForMessage = (message) => {
         },
     };
 };
+const createUpdatedText = (entity) => {
+    if (entity.textUpdatedAt == null) {
+        return undefined;
+    }
+    return { currentText: entity.updatedText, updatedAt: entity.textUpdatedAt };
+};
+const isDeleted = (entity) => {
+    if (entity.textUpdatedAt == null) {
+        return false;
+    }
+    return entity.updatedText == null;
+};
 const createRoomPublicMessage = ({ msg, channelKey, }) => {
     var _a, _b, _c, _d;
     return {
         __tstype: graphql_2.RoomPublicMessageType,
         channelKey,
         messageId: msg.id,
-        text: (_a = msg.text) !== null && _a !== void 0 ? _a : undefined,
+        initText: msg.text,
+        initTextSource: (_a = msg.textSource) !== null && _a !== void 0 ? _a : msg.text,
+        updatedText: createUpdatedText(msg),
         textColor: (_b = msg.textColor) !== null && _b !== void 0 ? _b : undefined,
         commandResult: msg.commandResult == null ? undefined : {
             text: msg.commandResult,
@@ -410,7 +424,7 @@ const createRoomPublicMessage = ({ msg, channelKey, }) => {
     };
 };
 const createRoomPrivateMessage = async ({ msg, myUserUid, visibleTo: visibleToCore, visibleToMe: visibleToMeCore, }) => {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e;
     const visibleTo = visibleToCore !== null && visibleToCore !== void 0 ? visibleToCore : (await msg.visibleTo.loadItems()).map(user => user.userUid);
     const visibleToMe = visibleToMeCore !== null && visibleToMeCore !== void 0 ? visibleToMeCore : visibleTo.find(userUid => userUid === myUserUid);
     if (!visibleToMe) {
@@ -425,13 +439,15 @@ const createRoomPrivateMessage = async ({ msg, myUserUid, visibleTo: visibleToCo
         customName: msg.customName,
         createdAt: msg.createdAt.getTime(),
         updatedAt: msg.textUpdatedAt,
-        text: (_b = msg.text) !== null && _b !== void 0 ? _b : undefined,
-        textColor: (_c = msg.textColor) !== null && _c !== void 0 ? _c : undefined,
+        initText: (_b = msg.text) !== null && _b !== void 0 ? _b : undefined,
+        initTextSource: (_c = msg.textSource) !== null && _c !== void 0 ? _c : msg.text,
+        updatedText: createUpdatedText(msg),
+        textColor: (_d = msg.textColor) !== null && _d !== void 0 ? _d : undefined,
         commandResult: msg.commandResult == null ? undefined : {
             text: msg.commandResult,
             isSuccess: msg.commandIsSuccess,
         },
-        altTextToSecret: (_d = msg.altTextToSecret) !== null && _d !== void 0 ? _d : undefined,
+        altTextToSecret: (_e = msg.altTextToSecret) !== null && _e !== void 0 ? _e : undefined,
         isSecret: msg.isSecret,
     };
 };
@@ -896,10 +912,24 @@ let RoomResolver = class RoomResolver {
                 });
             }
             const meAsUser = await me.user.load();
-            const entity = new mikro_orm_2.RoomPubMsg();
-            entity.text = args.text;
+            let chara = null;
+            if (args.characterStateId != null) {
+                chara = await em.findOne(mikro_orm_3.Chara, { createdBy: decodedIdToken.uid, stateId: args.characterStateId });
+            }
+            const entityResult = await analyzeTextAndSetToEntity({
+                type: 'RoomPubMsg',
+                em,
+                textSource: args.text,
+                context: chara == null ? null : { type: 'chara', value: chara },
+                createdBy: meAsUser,
+                room,
+                gameType: args.gameType,
+            });
+            if (entityResult.isError) {
+                return entityResult;
+            }
+            const entity = entityResult.value;
             entity.textColor = args.textColor == null ? undefined : fixTextColor(args.textColor);
-            entity.createdBy = core_1.Reference.create(meAsUser);
             let ch = await em.findOne(mikro_orm_2.RoomPubCh, { key: channelKey, room: room.id });
             if (ch == null) {
                 ch = new mikro_orm_2.RoomPubCh({ key: channelKey });
@@ -907,10 +937,6 @@ let RoomResolver = class RoomResolver {
                 em.persist(ch);
             }
             entity.customName = args.customName;
-            let chara = null;
-            if (args.characterStateId != null) {
-                chara = await em.findOne(mikro_orm_3.Chara, { createdBy: decodedIdToken.uid, stateId: args.characterStateId });
-            }
             if (chara != null) {
                 entity.charaStateId = chara.stateId;
                 entity.charaName = chara.name;
@@ -920,14 +946,6 @@ let RoomResolver = class RoomResolver {
                 entity.charaTachieImagePath = chara.tachieImagePath;
                 entity.charaTachieImageSourceType = chara.tachieImageSourceType;
             }
-            await analyzeTextAndSetToEntity({
-                targetEntity: entity,
-                em,
-                text: args.text,
-                chara,
-                room,
-                gameType: args.gameType,
-            });
             entity.roomPubCh = core_1.Reference.create(ch);
             await em.persistAndFlush(entity);
             const result = createRoomPublicMessage({ msg: entity, channelKey });
@@ -1492,10 +1510,24 @@ let RoomResolver = class RoomResolver {
                 });
             }
             await meAsUser.visibleRoomPrvMsgs.init({ where: { room: { id: room.id } } });
-            const entity = new mikro_orm_2.RoomPrvMsg();
-            entity.text = args.text;
+            let chara = null;
+            if (args.characterStateId != null) {
+                chara = await em.findOne(mikro_orm_3.Chara, { createdBy: decodedIdToken.uid, stateId: args.characterStateId });
+            }
+            const entityResult = await analyzeTextAndSetToEntity({
+                type: 'RoomPrvMsg',
+                em,
+                textSource: args.text,
+                context: chara == null ? null : { type: 'chara', value: chara },
+                createdBy: meAsUser,
+                room,
+                gameType: args.gameType,
+            });
+            if (entityResult.isError) {
+                return entityResult;
+            }
+            const entity = entityResult.value;
             args.textColor == null ? undefined : fixTextColor(args.textColor);
-            entity.createdBy = core_1.Reference.create(meAsUser);
             for (const participantUserRef of participantUsers) {
                 const participantUser = await participantUserRef.load();
                 if (visibleTo.has(participantUser.userUid)) {
@@ -1504,10 +1536,6 @@ let RoomResolver = class RoomResolver {
                 }
             }
             entity.customName = args.customName;
-            let chara = null;
-            if (args.characterStateId != null) {
-                chara = await em.findOne(mikro_orm_3.Chara, { createdBy: decodedIdToken.uid, stateId: args.characterStateId });
-            }
             if (chara != null) {
                 entity.charaStateId = chara.stateId;
                 entity.charaName = chara.name;
@@ -1694,7 +1722,7 @@ let RoomResolver = class RoomResolver {
                     __tstype: graphql_2.RoomPublicMessageUpdateType,
                     messageId: publicMsg.id,
                     isSecret: publicMsg.isSecret,
-                    text: publicMsg.text,
+                    updatedText: createUpdatedText(publicMsg),
                     commandResult: publicMsg.commandResult == null ? undefined : {
                         text: publicMsg.commandResult,
                         isSuccess: publicMsg.commandIsSuccess,
@@ -1735,7 +1763,7 @@ let RoomResolver = class RoomResolver {
                     __tstype: graphql_2.RoomPrivateMessageUpdateType,
                     messageId: privateMsg.id,
                     isSecret: privateMsg.isSecret,
-                    text: privateMsg.text,
+                    updatedText: createUpdatedText(privateMsg),
                     commandResult: privateMsg.commandResult == null ? undefined : {
                         text: privateMsg.commandResult,
                         isSuccess: privateMsg.commandIsSuccess,
@@ -1829,17 +1857,14 @@ let RoomResolver = class RoomResolver {
                         }
                     });
                 }
-                publicMsg.text = undefined;
-                publicMsg.altTextToSecret = undefined;
-                publicMsg.commandResult = undefined;
-                publicMsg.isSecret = false;
+                publicMsg.updatedText = undefined;
                 publicMsg.textUpdatedAt = new Date().getTime();
                 await em.flush();
                 const payloadValue = {
                     __tstype: graphql_2.RoomPublicMessageUpdateType,
                     messageId: publicMsg.id,
                     isSecret: publicMsg.isSecret,
-                    text: publicMsg.text,
+                    updatedText: createUpdatedText(publicMsg),
                     commandResult: publicMsg.commandResult == null ? undefined : {
                         text: publicMsg.commandResult,
                         isSuccess: publicMsg.commandIsSuccess,
@@ -1874,22 +1899,14 @@ let RoomResolver = class RoomResolver {
                         }
                     });
                 }
-                privateMsg.text = undefined;
-                privateMsg.altTextToSecret = undefined;
-                privateMsg.commandResult = undefined;
-                privateMsg.isSecret = false;
+                privateMsg.updatedText = undefined;
                 privateMsg.textUpdatedAt = new Date().getTime();
                 await em.flush();
                 const payloadValue = {
                     __tstype: graphql_2.RoomPrivateMessageUpdateType,
+                    updatedText: privateMsg.updatedText,
                     messageId: privateMsg.id,
                     isSecret: privateMsg.isSecret,
-                    text: privateMsg.text,
-                    commandResult: privateMsg.commandResult == null ? undefined : {
-                        text: privateMsg.commandResult,
-                        isSuccess: privateMsg.commandIsSuccess,
-                    },
-                    altTextToSecret: privateMsg.altTextToSecret,
                     updatedAt: privateMsg.textUpdatedAt,
                 };
                 return Result_1.ResultModule.ok({
@@ -1971,7 +1988,7 @@ let RoomResolver = class RoomResolver {
                         }
                     });
                 }
-                if (publicMsg.text == null) {
+                if (isDeleted(publicMsg)) {
                     return Result_1.ResultModule.ok({
                         result: {
                             failureType: EditMessageFailureType_1.EditMessageFailureType.MessageDeleted,
@@ -1985,7 +2002,7 @@ let RoomResolver = class RoomResolver {
                     __tstype: graphql_2.RoomPublicMessageUpdateType,
                     messageId: publicMsg.id,
                     isSecret: publicMsg.isSecret,
-                    text: publicMsg.text,
+                    updatedText: createUpdatedText(publicMsg),
                     commandResult: publicMsg.commandResult == null ? undefined : {
                         text: publicMsg.commandResult,
                         isSuccess: publicMsg.commandIsSuccess,
@@ -2027,7 +2044,7 @@ let RoomResolver = class RoomResolver {
                     __tstype: graphql_2.RoomPrivateMessageUpdateType,
                     messageId: privateMsg.id,
                     isSecret: privateMsg.isSecret,
-                    text: privateMsg.text,
+                    updatedText: createUpdatedText(privateMsg),
                     commandResult: privateMsg.commandResult == null ? undefined : {
                         text: privateMsg.commandResult,
                         isSuccess: privateMsg.commandIsSuccess,
@@ -2155,7 +2172,7 @@ let RoomResolver = class RoomResolver {
                 case graphql_2.RoomPublicMessageType: {
                     if (payload.value.isSecret && (payload.value.createdBy !== userUid)) {
                         return {
-                            roomMessageEvent: Object.assign(Object.assign({}, payload.value), { text: undefined, commandResult: undefined })
+                            roomMessageEvent: Object.assign(Object.assign({}, payload.value), { initText: undefined, initTextSource: undefined, commandResult: undefined })
                         };
                     }
                     break;
@@ -2164,7 +2181,7 @@ let RoomResolver = class RoomResolver {
                 case graphql_2.RoomPublicMessageUpdateType:
                     if (payload.value.isSecret && (payload.createdBy !== userUid)) {
                         return {
-                            roomMessageEvent: Object.assign(Object.assign({}, payload.value), { text: undefined, commandResult: undefined })
+                            roomMessageEvent: Object.assign(Object.assign({}, payload.value), { initText: undefined, initTextSource: undefined, commandResult: undefined })
                         };
                     }
                     break;

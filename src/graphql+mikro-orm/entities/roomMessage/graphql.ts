@@ -10,25 +10,29 @@ import { WritePublicRoomMessageFailureType } from '../../../enums/WritePublicRoo
 import { WriteRoomSoundEffectFailureType } from '../../../enums/WriteRoomSoundEffectFailureType';
 import { FilePath } from '../filePath/graphql';
 import { MyValueLogType as MyValueLogTypeEnum } from '../../../enums/MyValueLogType';
+import { ReplaceNullableStringUpOperation } from '../../Operations';
 
 // messageIdは、Reactのkeyとして使われる
 
 /*
-# text, commandResult, altTextToSecret, isSecretについて
+# initText, updatedText, commandResult, altTextToSecret, isSecretについて
 
-## (text, altTextToSecret) = (nullish, nullish)
-そのメッセージは削除されたことを表す。このときはcommandResultもnullish。
+## (initText, altTextToSecret) = (nullish, nullish)
+この状態になることはない。
 
-## (text, altTextToSecret) = (non-nullish, nullish)
+## (initText, altTextToSecret) = (non-nullish, nullish)
 常に公開されるメッセージを表す。
 
-## (text, altTextToSecret) = (nullish, non-nullish)
+## (initText, altTextToSecret) = (nullish, non-nullish)
 Secret設定であり、本文が非公開になっていて閲覧できない状態。自分が投稿したメッセージであればこの状態になることはない。
 
-## (text, altTextToSecret) = (non-nullish, non-nullish)
+## (initText, altTextToSecret) = (non-nullish, non-nullish)
 下のいずれか
 - Secret設定であり、メッセージの投稿者が公開した
 - Secret設定であり、自分が投稿した
+
+## updatedText
+initTextがnullishならば、updatedTextもnullish。逆や裏は必ずしも成り立たない。
 
 ## commandResult
 コマンドの実行結果を表す文字列。textのほうは実行結果に関わらず投稿された文字列がそのまま入る。
@@ -81,6 +85,16 @@ export class CharacterValueForMessage {
     public tachieImage?: FilePath;
 }
 
+@ObjectType()
+export class UpdatedText {
+    @Field({ nullable: true })
+    public currentText?: string;
+
+    @Field()
+    public updatedAt!: number;
+}
+
+
 export const RoomPublicMessageType = 'RoomPublicMessage';
 
 @ObjectType()
@@ -96,7 +110,13 @@ export class RoomPublicMessage {
     public channelKey!: string;
 
     @Field({ nullable: true })
-    public text?: string;
+    public initText?: string;
+    
+    @Field({ nullable: true })
+    public initTextSource?: string
+
+    @Field({ nullable: true })
+    public updatedText?: UpdatedText;
 
     @Field({ nullable: true })
     public textColor?: string;
@@ -142,7 +162,13 @@ export class RoomPrivateMessage {
 
 
     @Field({ nullable: true })
-    public text?: string;
+    public initText?: string
+
+    @Field({ nullable: true })
+    public initTextSource?: string
+
+    @Field({ nullable: true })
+    public updatedText?: UpdatedText;
 
     @Field({ nullable: true })
     public textColor?: string;
@@ -448,9 +474,14 @@ export class RoomPublicMessageUpdate {
     @Field()
     public messageId!: string;
 
+    @Field({ nullable: true })
+    public initText?: string;
 
     @Field({ nullable: true })
-    public text?: string;
+    public initTextSource?: string
+
+    @Field({ nullable: true })
+    public updatedText?: UpdatedText;
 
     @Field({ nullable: true })
     public commandResult?: CommandResult;
@@ -458,6 +489,8 @@ export class RoomPublicMessageUpdate {
     @Field({ nullable: true })
     public altTextToSecret?: string;
 
+    // isSecret===falseだったものが途中からtrueに切り替わることもある。そのとき、メッセージが削除されていない限りupdatedTextがnullishになったりすることはない。
+    // もしこれをnullableにすると、unionにする際に「BooleanとBoolean!が混在してしまう」というエラーが出るので注意。
     @Field()
     public isSecret!: boolean;
 
@@ -477,7 +510,13 @@ export class RoomPrivateMessageUpdate {
 
 
     @Field({ nullable: true })
-    public text?: string;
+    public initText?: string;
+
+    @Field({ nullable: true })
+    public initTextSource?: string
+
+    @Field({ nullable: true })
+    public updatedText?: UpdatedText;
 
     @Field({ nullable: true })
     public commandResult?: CommandResult;
@@ -485,6 +524,7 @@ export class RoomPrivateMessageUpdate {
     @Field({ nullable: true })
     public altTextToSecret?: string;
 
+    // RoomPublicMessageUpdateを参照
     @Field()
     public isSecret!: boolean;
 

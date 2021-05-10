@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RoomMessageEvent = exports.RoomPrivateMessageUpdate = exports.RoomPrivateMessageUpdateType = exports.RoomPublicMessageUpdate = exports.RoomPublicMessageUpdateType = exports.RoomPublicChannelUpdate = exports.RoomPublicChannelUpdateType = exports.EditMessageResult = exports.DeleteMessageResult = exports.MakeMessageNotSecretResult = exports.WriteRoomSoundEffectResult = exports.WriteRoomSoundEffectFailureResult = exports.WriteRoomSoundEffectFailureResultType = exports.WritePublicRoomMessageResult = exports.WritePublicRoomMessageFailureResult = exports.WritePublicRoomMessageFailureResultType = exports.WritePrivateRoomMessageResult = exports.WritePrivateRoomMessageFailureResult = exports.WritePrivateRoomMessageFailureResultType = exports.GetRoomLogResult = exports.GetRoomLogFailureResult = exports.GetRoomLogFailureResultType = exports.GetRoomMessagesResult = exports.GetRoomMessagesFailureResult = exports.GetRoomMessagesFailureResultType = exports.RoomMessages = exports.RoomMessagesType = exports.RoomMessage = exports.RoomSoundEffect = exports.RoomSoundEffectType = exports.MyValueLog = exports.MyValueLogType = exports.BoardId = exports.RoomPrivateMessage = exports.RoomPrivateMessageType = exports.RoomPublicMessage = exports.RoomPublicMessageType = exports.CharacterValueForMessage = exports.RoomPublicChannel = exports.RoomPublicChannelType = exports.CommandResult = void 0;
+exports.RoomMessageEvent = exports.RoomPrivateMessageUpdate = exports.RoomPrivateMessageUpdateType = exports.RoomPublicMessageUpdate = exports.RoomPublicMessageUpdateType = exports.RoomPublicChannelUpdate = exports.RoomPublicChannelUpdateType = exports.EditMessageResult = exports.DeleteMessageResult = exports.MakeMessageNotSecretResult = exports.WriteRoomSoundEffectResult = exports.WriteRoomSoundEffectFailureResult = exports.WriteRoomSoundEffectFailureResultType = exports.WritePublicRoomMessageResult = exports.WritePublicRoomMessageFailureResult = exports.WritePublicRoomMessageFailureResultType = exports.WritePrivateRoomMessageResult = exports.WritePrivateRoomMessageFailureResult = exports.WritePrivateRoomMessageFailureResultType = exports.GetRoomLogResult = exports.GetRoomLogFailureResult = exports.GetRoomLogFailureResultType = exports.GetRoomMessagesResult = exports.GetRoomMessagesFailureResult = exports.GetRoomMessagesFailureResultType = exports.RoomMessages = exports.RoomMessagesType = exports.RoomMessage = exports.RoomSoundEffect = exports.RoomSoundEffectType = exports.MyValueLog = exports.MyValueLogType = exports.BoardId = exports.RoomPrivateMessage = exports.RoomPrivateMessageType = exports.RoomPublicMessage = exports.RoomPublicMessageType = exports.UpdatedText = exports.CharacterValueForMessage = exports.RoomPublicChannel = exports.RoomPublicChannelType = exports.CommandResult = void 0;
 const type_graphql_1 = require("type-graphql");
 const Constants_1 = require("../../../@shared/Constants");
 const DeleteMessageFailureType_1 = require("../../../enums/DeleteMessageFailureType");
@@ -77,6 +77,20 @@ CharacterValueForMessage = __decorate([
     type_graphql_1.ObjectType()
 ], CharacterValueForMessage);
 exports.CharacterValueForMessage = CharacterValueForMessage;
+let UpdatedText = class UpdatedText {
+};
+__decorate([
+    type_graphql_1.Field({ nullable: true }),
+    __metadata("design:type", String)
+], UpdatedText.prototype, "currentText", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", Number)
+], UpdatedText.prototype, "updatedAt", void 0);
+UpdatedText = __decorate([
+    type_graphql_1.ObjectType()
+], UpdatedText);
+exports.UpdatedText = UpdatedText;
 exports.RoomPublicMessageType = 'RoomPublicMessage';
 let RoomPublicMessage = class RoomPublicMessage {
 };
@@ -91,7 +105,15 @@ __decorate([
 __decorate([
     type_graphql_1.Field({ nullable: true }),
     __metadata("design:type", String)
-], RoomPublicMessage.prototype, "text", void 0);
+], RoomPublicMessage.prototype, "initText", void 0);
+__decorate([
+    type_graphql_1.Field({ nullable: true }),
+    __metadata("design:type", String)
+], RoomPublicMessage.prototype, "initTextSource", void 0);
+__decorate([
+    type_graphql_1.Field({ nullable: true }),
+    __metadata("design:type", UpdatedText)
+], RoomPublicMessage.prototype, "updatedText", void 0);
 __decorate([
     type_graphql_1.Field({ nullable: true }),
     __metadata("design:type", String)
@@ -146,7 +168,15 @@ __decorate([
 __decorate([
     type_graphql_1.Field({ nullable: true }),
     __metadata("design:type", String)
-], RoomPrivateMessage.prototype, "text", void 0);
+], RoomPrivateMessage.prototype, "initText", void 0);
+__decorate([
+    type_graphql_1.Field({ nullable: true }),
+    __metadata("design:type", String)
+], RoomPrivateMessage.prototype, "initTextSource", void 0);
+__decorate([
+    type_graphql_1.Field({ nullable: true }),
+    __metadata("design:type", UpdatedText)
+], RoomPrivateMessage.prototype, "updatedText", void 0);
 __decorate([
     type_graphql_1.Field({ nullable: true }),
     __metadata("design:type", String)
@@ -498,7 +528,15 @@ __decorate([
 __decorate([
     type_graphql_1.Field({ nullable: true }),
     __metadata("design:type", String)
-], RoomPublicMessageUpdate.prototype, "text", void 0);
+], RoomPublicMessageUpdate.prototype, "initText", void 0);
+__decorate([
+    type_graphql_1.Field({ nullable: true }),
+    __metadata("design:type", String)
+], RoomPublicMessageUpdate.prototype, "initTextSource", void 0);
+__decorate([
+    type_graphql_1.Field({ nullable: true }),
+    __metadata("design:type", UpdatedText)
+], RoomPublicMessageUpdate.prototype, "updatedText", void 0);
 __decorate([
     type_graphql_1.Field({ nullable: true }),
     __metadata("design:type", CommandResult)
@@ -529,7 +567,15 @@ __decorate([
 __decorate([
     type_graphql_1.Field({ nullable: true }),
     __metadata("design:type", String)
-], RoomPrivateMessageUpdate.prototype, "text", void 0);
+], RoomPrivateMessageUpdate.prototype, "initText", void 0);
+__decorate([
+    type_graphql_1.Field({ nullable: true }),
+    __metadata("design:type", String)
+], RoomPrivateMessageUpdate.prototype, "initTextSource", void 0);
+__decorate([
+    type_graphql_1.Field({ nullable: true }),
+    __metadata("design:type", UpdatedText)
+], RoomPrivateMessageUpdate.prototype, "updatedText", void 0);
 __decorate([
     type_graphql_1.Field({ nullable: true }),
     __metadata("design:type", CommandResult)

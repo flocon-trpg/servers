@@ -191,6 +191,10 @@ __decorate([
     type_graphql_1.Field({ nullable: true }),
     __metadata("design:type", String)
 ], WritePrivateMessageArgs.prototype, "customName", void 0);
+__decorate([
+    type_graphql_1.Field({ nullable: true, description: 'BCDiceのgameType。' }),
+    __metadata("design:type", String)
+], WritePrivateMessageArgs.prototype, "gameType", void 0);
 WritePrivateMessageArgs = __decorate([
     type_graphql_1.ArgsType()
 ], WritePrivateMessageArgs);

@@ -115,6 +115,27 @@ class $Iterator {
     mapAsync(mapping) {
         return this.toAsync(this.iterate).mapAsync(mapping);
     }
+    pairwise() {
+        const baseIterate = this.iterate;
+        function* iterate() {
+            let current = undefined;
+            let prev = undefined;
+            for (const next of baseIterate()) {
+                if (current === undefined) {
+                    prev = current;
+                    current = next;
+                    continue;
+                }
+                yield { prev, current, next };
+                prev = current;
+                current = next;
+            }
+            if (current !== undefined) {
+                yield { prev, current, next: undefined };
+            }
+        }
+        return new $Iterator(iterate);
+    }
     reduce(mapping, seed) {
         let result = seed;
         let index = 0;

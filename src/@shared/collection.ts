@@ -103,6 +103,28 @@ class $Iterator<T> {
         return this.toAsync(this.iterate).mapAsync(mapping);
     }
 
+    public pairwise(): $Iterator<{ prev: T | undefined; current: T; next: T | undefined }> {
+        const baseIterate = this.iterate;
+        function* iterate() {
+            let current: T | undefined = undefined;
+            let prev: T | undefined = undefined;
+            for (const next of baseIterate()) {
+                if (current === undefined) {
+                    prev = current;
+                    current = next;
+                    continue;
+                }
+                yield { prev, current, next };
+                prev = current;
+                current = next;
+            }
+            if (current !== undefined) {
+                yield { prev, current, next: undefined };
+            }
+        }
+        return new $Iterator(iterate);
+    }
+
     public reduce<TResult>(mapping: (seed: TResult, element: T, index: number) => TResult, seed: TResult): TResult {
         let result = seed;
         let index = 0;

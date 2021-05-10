@@ -125,6 +125,9 @@ export class WritePrivateMessageArgs {
 
     @Field({ nullable: true })
     public customName?: string;
+    
+    @Field({ nullable: true, description: 'BCDiceのgameType。' })
+    public gameType?: string
 }
 
 @ArgsType()

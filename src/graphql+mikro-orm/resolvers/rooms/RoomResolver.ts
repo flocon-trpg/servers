@@ -1,4 +1,4 @@
-import { Resolver, Query, Args, Mutation, Ctx, PubSub, Subscription, Root, ArgsType, Field, Arg, InputType, PubSubEngine, Int, ObjectType, FieldResolver } from 'type-graphql';
+import { Resolver, Query, Args, Mutation, Ctx, PubSub, Subscription, Root, Arg, PubSubEngine } from 'type-graphql';
 import { ResolverContext } from '../../utils/Contexts';
 import { ParticipantRole } from '../../../enums/ParticipantRole';
 import { GetRoomFailureType } from '../../../enums/GetRoomFailureType';
@@ -10,7 +10,7 @@ import * as Room$MikroORM from '../../entities/room/mikro-orm';
 import { stateToGraphQL as stateToGraphql$RoomAsListItem } from '../../entities/roomAsListItem/global';
 import { queueLimitReached } from '../../../utils/PromiseQueue';
 import { serverTooBusyMessage } from '../utils/messages';
-import { RoomOperation, RoomOperationInput, deleteRoomOperation, DeleteRoomOperation } from '../../entities/room/graphql';
+import { RoomOperation, deleteRoomOperation } from '../../entities/room/graphql';
 import { OperateRoomFailureType } from '../../../enums/OperateRoomFailureType';
 import { Result, ResultModule } from '../../../@shared/Result';
 import { LeaveRoomFailureType } from '../../../enums/LeaveRoomFailureType';
@@ -22,7 +22,7 @@ import { JoinRoomResult } from '../../results/JoinRoomResult';
 import { GetRoomsListResult } from '../../results/GetRoomsListResult';
 import { RequiresPhraseResult } from '../../results/RequiresPhraseResult';
 import { CreateRoomResult } from '../../results/CreateRoomResult';
-import { GetJoinedRoomResult, GetRoomResult } from '../../results/GetRoomResult';
+import { GetRoomResult } from '../../results/GetRoomResult';
 import { LeaveRoomResult } from '../../results/LeaveRoomResult';
 import { PromoteResult } from '../../results/PromoteMeResult';
 import { PromoteFailureType } from '../../../enums/PromoteFailureType';
@@ -31,21 +31,20 @@ import { ChangeParticipantNameFailureType } from '../../../enums/ChangeParticipa
 import { DeleteRoomResult } from '../../results/DeleteRoomResult';
 import { DeleteRoomFailureType } from '../../../enums/DeleteRoomFailureType';
 import { GlobalRoom } from '../../entities/room/global';
-import { client, RequestedBy, server } from '../../Types';
+import { client, server } from '../../Types';
 import { GlobalParticipant } from '../../entities/room/participant/global';
 import { MapTwoWayOperationElementUnion, replace, update } from '../../mapOperations';
 import { EM } from '../../../utils/types';
-import { MaxLength } from 'class-validator';
 import { GlobalMyValue } from '../../entities/room/participant/myValue/global';
 import { __ } from '../../../@shared/collection';
 import { RoomPrvMsg, RoomPubCh, RoomPubMsg, RoomSe, MyValueLog as MyValueLog$MikroORM } from '../../entities/roomMessage/mikro-orm';
-import { ChangeParticipantNameArgs, CreateRoomInput, DeleteRoomArgs, EditMessageArgs, GetLogArgs, GetMessagesArgs, GetRoomArgs, GetRoomConnectionFailureResultType, GetRoomConnectionsResult, GetRoomConnectionSuccessResultType, JoinRoomArgs, MessageIdArgs, OperateArgs, PromoteArgs, RoomConnectionEvent, RoomEvent, UpdateWritingMessageStateArgs, WritePrivateMessageArgs, WritePublicMessageArgs, WriteRoomSoundEffectArgs } from './object+args+input';
-import { CharacterValueForMessage, DeleteMessageResult, EditMessageResult, GetRoomLogFailureResultType, GetRoomLogResult, GetRoomMessagesFailureResultType, GetRoomMessagesResult, MakeMessageNotSecretResult, MyValueLog as MyValueLog$GraphQL, MyValueLogType, RoomMessageEvent, RoomMessagesType, RoomPrivateMessage, RoomPrivateMessageType, RoomPrivateMessageUpdate, RoomPrivateMessageUpdateType, RoomPublicChannel, RoomPublicChannelType, RoomPublicMessage, RoomPublicMessageType, RoomPublicMessageUpdate, RoomPublicMessageUpdateType, RoomSoundEffect, RoomSoundEffectType, WritePrivateRoomMessageFailureResultType, WritePrivateRoomMessageResult, WritePublicRoomMessageFailureResultType, WritePublicRoomMessageResult, WriteRoomSoundEffectFailureResultType, WriteRoomSoundEffectResult } from '../../entities/roomMessage/graphql';
+import { ChangeParticipantNameArgs, CreateRoomInput, DeleteRoomArgs, EditMessageArgs, GetLogArgs, GetMessagesArgs, GetRoomArgs, GetRoomConnectionFailureResultType, GetRoomConnectionsResult, GetRoomConnectionSuccessResultType, JoinRoomArgs, MessageIdArgs, OperateArgs, PromoteArgs, RoomEvent, UpdateWritingMessageStateArgs, WritePrivateMessageArgs, WritePublicMessageArgs, WriteRoomSoundEffectArgs } from './object+args+input';
+import { CharacterValueForMessage, DeleteMessageResult, EditMessageResult, GetRoomLogFailureResultType, GetRoomLogResult, GetRoomMessagesFailureResultType, GetRoomMessagesResult, MakeMessageNotSecretResult, MyValueLog as MyValueLog$GraphQL, RoomMessageEvent, RoomMessagesType, RoomPrivateMessage, RoomPrivateMessageType, RoomPrivateMessageUpdate, RoomPrivateMessageUpdateType, RoomPublicChannel, RoomPublicChannelType, RoomPublicMessage, RoomPublicMessageType, RoomPublicMessageUpdate, RoomPublicMessageUpdateType, RoomSoundEffect, RoomSoundEffectType, UpdatedText, WritePrivateRoomMessageFailureResultType, WritePrivateRoomMessageResult, WritePublicRoomMessageFailureResultType, WritePublicRoomMessageResult, WriteRoomSoundEffectFailureResultType, WriteRoomSoundEffectResult } from '../../entities/roomMessage/graphql';
 import { WritePublicRoomMessageFailureType } from '../../../enums/WritePublicRoomMessageFailureType';
 import { $free, $system } from '../../../@shared/Constants';
 import { Chara } from '../../entities/room/character/mikro-orm';
 import { GameType } from '../../../@shared/bcdice';
-import { analyze, plain } from '../../../messageAnalyzer/main';
+import { analyze, Context } from '../../../messageAnalyzer/main';
 import Color from 'color';
 import { GetRoomMessagesFailureType } from '../../../enums/GetRoomMessagesFailureType';
 import { MyValueLog as MyValueLogNameSpace } from '../../entities/roomMessage/global';
@@ -65,7 +64,6 @@ import { GetRoomConnectionFailureType } from '../../../enums/GetRoomConnectionFa
 import { WritingMessageStatusType } from '../../../enums/WritingMessageStatusType';
 import { WritingMessageStatusInputType } from '../../../enums/WritingMessageStatusInputType';
 import { PublicChannelKey } from '../../../@shared/publicChannelKey';
-import { FindValueSubscriber } from 'rxjs/internal/operators/find';
 
 type MessageUpdatePayload = {
     type: 'messageUpdatePayload';
@@ -446,31 +444,33 @@ const checkChannelKey = (channelKey: string, isSpectator: boolean) => {
 };
 
 const analyzeTextAndSetToEntity = async (params: {
-    targetEntity: RoomPubMsg | RoomPrvMsg;
+    type: 'RoomPubMsg' | 'RoomPrvMsg';
     em: EM;
-    text: string;
-    chara: Chara | null;
+    textSource: string;
+    context: Context | null;
     gameType: string | undefined;
+    createdBy: User;
     room: Room$MikroORM.Room;
 }) => {
     const defaultGameType: GameType = 'DiceBot';
-    const gameType = params.gameType ?? defaultGameType;
-    const rolled = await analyze({ ...params, gameType });
-    if (rolled.type === plain) {
-        params.targetEntity.text = params.text;
-    } else {
-        if (rolled.isSecret) {
-            params.targetEntity.isSecret = true;
-            params.targetEntity.text = params.text;
-            params.targetEntity.altTextToSecret = 'シークレットダイス';
-            params.targetEntity.commandResult = rolled.result;
-            params.targetEntity.commandIsSuccess = rolled.isSuccess ?? undefined;
+    const analyzed = await analyze({ ...params, gameType: params.gameType ?? defaultGameType, text: params.textSource });
+    if (analyzed.isError) {
+        return analyzed;
+    }
+    const targetEntity = params.type === 'RoomPubMsg' ? new RoomPubMsg({ textSource: params.textSource, text: analyzed.value.message }) : new RoomPrvMsg({ textSource: params.textSource, text: analyzed.value.message });
+    targetEntity.createdBy = Reference.create<User, 'userUid'>(params.createdBy);
+    if (analyzed.value.diceResult != null) {
+        if (analyzed.value.diceResult.isSecret) {
+            targetEntity.isSecret = true;
+            targetEntity.altTextToSecret = 'シークレットダイス';
+            targetEntity.commandResult = analyzed.value.diceResult.result;
+            targetEntity.commandIsSuccess = analyzed.value.diceResult.isSuccess ?? undefined;
         } else {
-            params.targetEntity.text = params.text;
-            params.targetEntity.commandResult = rolled.result;
-            params.targetEntity.commandIsSuccess = rolled.isSuccess ?? undefined;
+            targetEntity.commandResult = analyzed.value.diceResult.result;
+            targetEntity.commandIsSuccess = analyzed.value.diceResult.isSuccess ?? undefined;
         }
     }
+    return ResultModule.ok(targetEntity);
 };
 
 const toCharacterValueForMessage = (message: RoomPubMsg | RoomPrvMsg): CharacterValueForMessage | undefined => {
@@ -492,6 +492,20 @@ const toCharacterValueForMessage = (message: RoomPubMsg | RoomPrvMsg): Character
     };
 };
 
+const createUpdatedText = (entity: RoomPubMsg | RoomPrvMsg): UpdatedText | undefined => {
+    if (entity.textUpdatedAt == null) {
+        return undefined;
+    }
+    return { currentText: entity.updatedText, updatedAt: entity.textUpdatedAt };
+};
+
+const isDeleted = (entity: RoomPubMsg | RoomPrvMsg): boolean => {
+    if (entity.textUpdatedAt == null) {
+        return false;
+    }
+    return entity.updatedText == null;
+};
+
 const createRoomPublicMessage = ({
     msg,
     channelKey,
@@ -503,7 +517,9 @@ const createRoomPublicMessage = ({
         __tstype: RoomPublicMessageType,
         channelKey,
         messageId: msg.id,
-        text: msg.text ?? undefined,
+        initText: msg.text,
+        initTextSource: msg.textSource ?? msg.text,
+        updatedText: createUpdatedText(msg),
         textColor: msg.textColor ?? undefined,
         commandResult: msg.commandResult == null ? undefined : {
             text: msg.commandResult,
@@ -544,7 +560,9 @@ const createRoomPrivateMessage = async ({
         customName: msg.customName,
         createdAt: msg.createdAt.getTime(),
         updatedAt: msg.textUpdatedAt,
-        text: msg.text ?? undefined,
+        initText: msg.text ?? undefined,
+        initTextSource: msg.textSource ?? msg.text,
+        updatedText: createUpdatedText(msg),
         textColor: msg.textColor ?? undefined,
         commandResult: msg.commandResult == null ? undefined : {
             text: msg.commandResult,
@@ -1063,10 +1081,24 @@ export class RoomResolver {
 
             const meAsUser = await me.user.load();
 
-            const entity = new RoomPubMsg();
-            entity.text = args.text;
+            let chara: Chara | null = null;
+            if (args.characterStateId != null) {
+                chara = await em.findOne(Chara, { createdBy: decodedIdToken.uid, stateId: args.characterStateId });
+            }
+            const entityResult = await analyzeTextAndSetToEntity({
+                type: 'RoomPubMsg',
+                em,
+                textSource: args.text,
+                context: chara == null ? null : { type: 'chara', value: chara },
+                createdBy: meAsUser,
+                room,
+                gameType: args.gameType,
+            });
+            if (entityResult.isError) {
+                return entityResult;
+            }
+            const entity = entityResult.value as RoomPubMsg;
             entity.textColor = args.textColor == null ? undefined : fixTextColor(args.textColor);
-            entity.createdBy = Reference.create<User, 'userUid'>(meAsUser);
             let ch = await em.findOne(RoomPubCh, { key: channelKey, room: room.id });
             if (ch == null) {
                 ch = new RoomPubCh({ key: channelKey });
@@ -1075,10 +1107,6 @@ export class RoomResolver {
             }
             entity.customName = args.customName;
 
-            let chara: Chara | null = null;
-            if (args.characterStateId != null) {
-                chara = await em.findOne(Chara, { createdBy: decodedIdToken.uid, stateId: args.characterStateId });
-            }
             if (chara != null) {
                 entity.charaStateId = chara.stateId;
                 entity.charaName = chara.name;
@@ -1088,15 +1116,6 @@ export class RoomResolver {
                 entity.charaTachieImagePath = chara.tachieImagePath;
                 entity.charaTachieImageSourceType = chara.tachieImageSourceType;
             }
-
-            await analyzeTextAndSetToEntity({
-                targetEntity: entity,
-                em,
-                text: args.text,
-                chara,
-                room,
-                gameType: args.gameType,
-            });
 
             entity.roomPubCh = Reference.create(ch);
             await em.persistAndFlush(entity);
@@ -1737,10 +1756,24 @@ export class RoomResolver {
 
             await meAsUser.visibleRoomPrvMsgs.init({ where: { room: { id: room.id } } });
 
-            const entity = new RoomPrvMsg();
-            entity.text = args.text;
+            let chara: Chara | null = null;
+            if (args.characterStateId != null) {
+                chara = await em.findOne(Chara, { createdBy: decodedIdToken.uid, stateId: args.characterStateId });
+            }
+            const entityResult = await analyzeTextAndSetToEntity({
+                type: 'RoomPrvMsg',
+                em,
+                textSource: args.text,
+                context: chara == null ? null : { type: 'chara', value: chara },
+                createdBy: meAsUser,
+                room,
+                gameType: args.gameType,
+            });
+            if (entityResult.isError) {
+                return entityResult;
+            }
+            const entity = entityResult.value as RoomPrvMsg;
             args.textColor == null ? undefined : fixTextColor(args.textColor);
-            entity.createdBy = Reference.create<User, 'userUid'>(meAsUser);
             for (const participantUserRef of participantUsers) {
                 const participantUser = await participantUserRef.load();
                 if (visibleTo.has(participantUser.userUid)) {
@@ -1750,10 +1783,6 @@ export class RoomResolver {
             }
             entity.customName = args.customName;
 
-            let chara: Chara | null = null;
-            if (args.characterStateId != null) {
-                chara = await em.findOne(Chara, { createdBy: decodedIdToken.uid, stateId: args.characterStateId });
-            }
             if (chara != null) {
                 entity.charaStateId = chara.stateId;
                 entity.charaName = chara.name;
@@ -1963,7 +1992,7 @@ export class RoomResolver {
                     __tstype: RoomPublicMessageUpdateType,
                     messageId: publicMsg.id,
                     isSecret: publicMsg.isSecret,
-                    text: publicMsg.text,
+                    updatedText: createUpdatedText(publicMsg),
                     commandResult: publicMsg.commandResult == null ? undefined : {
                         text: publicMsg.commandResult,
                         isSuccess: publicMsg.commandIsSuccess,
@@ -2005,7 +2034,7 @@ export class RoomResolver {
                     __tstype: RoomPrivateMessageUpdateType,
                     messageId: privateMsg.id,
                     isSecret: privateMsg.isSecret,
-                    text: privateMsg.text,
+                    updatedText: createUpdatedText(privateMsg),
                     commandResult: privateMsg.commandResult == null ? undefined : {
                         text: privateMsg.commandResult,
                         isSuccess: privateMsg.commandIsSuccess,
@@ -2103,10 +2132,7 @@ export class RoomResolver {
                         }
                     });
                 }
-                publicMsg.text = undefined;
-                publicMsg.altTextToSecret = undefined;
-                publicMsg.commandResult = undefined;
-                publicMsg.isSecret = false;
+                publicMsg.updatedText = undefined;
                 publicMsg.textUpdatedAt = new Date().getTime();
                 await em.flush();
 
@@ -2114,7 +2140,7 @@ export class RoomResolver {
                     __tstype: RoomPublicMessageUpdateType,
                     messageId: publicMsg.id,
                     isSecret: publicMsg.isSecret,
-                    text: publicMsg.text,
+                    updatedText: createUpdatedText(publicMsg),
                     commandResult: publicMsg.commandResult == null ? undefined : {
                         text: publicMsg.commandResult,
                         isSuccess: publicMsg.commandIsSuccess,
@@ -2149,23 +2175,15 @@ export class RoomResolver {
                         }
                     });
                 }
-                privateMsg.text = undefined;
-                privateMsg.altTextToSecret = undefined;
-                privateMsg.commandResult = undefined;
-                privateMsg.isSecret = false;
+                privateMsg.updatedText = undefined;
                 privateMsg.textUpdatedAt = new Date().getTime();
                 await em.flush();
 
                 const payloadValue: RoomPrivateMessageUpdate = {
                     __tstype: RoomPrivateMessageUpdateType,
+                    updatedText: privateMsg.updatedText,
                     messageId: privateMsg.id,
                     isSecret: privateMsg.isSecret,
-                    text: privateMsg.text,
-                    commandResult: privateMsg.commandResult == null ? undefined : {
-                        text: privateMsg.commandResult,
-                        isSuccess: privateMsg.commandIsSuccess,
-                    },
-                    altTextToSecret: privateMsg.altTextToSecret,
                     updatedAt: privateMsg.textUpdatedAt,
                 };
                 return ResultModule.ok({
@@ -2251,7 +2269,7 @@ export class RoomResolver {
                         }
                     });
                 }
-                if (publicMsg.text == null) {
+                if (isDeleted(publicMsg)) {
                     return ResultModule.ok({
                         result: {
                             failureType: EditMessageFailureType.MessageDeleted,
@@ -2266,7 +2284,7 @@ export class RoomResolver {
                     __tstype: RoomPublicMessageUpdateType,
                     messageId: publicMsg.id,
                     isSecret: publicMsg.isSecret,
-                    text: publicMsg.text,
+                    updatedText: createUpdatedText(publicMsg),
                     commandResult: publicMsg.commandResult == null ? undefined : {
                         text: publicMsg.commandResult,
                         isSuccess: publicMsg.commandIsSuccess,
@@ -2309,7 +2327,7 @@ export class RoomResolver {
                     __tstype: RoomPrivateMessageUpdateType,
                     messageId: privateMsg.id,
                     isSecret: privateMsg.isSecret,
-                    text: privateMsg.text,
+                    updatedText: createUpdatedText(privateMsg),
                     commandResult: privateMsg.commandResult == null ? undefined : {
                         text: privateMsg.commandResult,
                         isSuccess: privateMsg.commandIsSuccess,
@@ -2452,8 +2470,9 @@ export class RoomResolver {
                         return {
                             roomMessageEvent: {
                                 ...payload.value,
-                                text: undefined,
-                                commandResult: undefined,
+                                initText: undefined,
+                                initTextSource: undefined,
+                                commandResult: undefined
                             }
                         };
                     }
@@ -2465,7 +2484,8 @@ export class RoomResolver {
                         return {
                             roomMessageEvent: {
                                 ...payload.value,
-                                text: undefined,
+                                initText: undefined,
+                                initTextSource: undefined,
                                 commandResult: undefined,
                             }
                         };

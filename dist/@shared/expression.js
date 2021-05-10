@@ -1,115 +1,143 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.analyze = exports.prettifyOperator = exports.executeCompareOperator = exports.parameter = exports.maybeDice = void 0;
-exports.maybeDice = 'maybeDice';
-exports.parameter = 'parameter';
-const compareOperatorRegex = /(≦|<=|≧|>=|＜|<|＞|>|≠|!=|＝|=)/u;
-const isCompareOperator = (str) => {
-    switch (str) {
-        case '≦':
-        case '<=':
-        case '≧':
-        case '>=':
-        case '＜':
-        case '<':
-        case '＞':
-        case '>':
-        case '≠':
-        case '!=':
-        case '＝':
-        case '=':
-            return true;
-        default:
-            return false;
-    }
-};
-const executeCompareOperator = (left, right, operator) => {
-    switch (operator) {
-        case '≦':
-        case '<=':
-            return left <= right;
-        case '≧':
-        case '>=':
-            return left >= right;
-        case '＜':
-        case '<':
-            return left < right;
-        case '＞':
-        case '>':
-            return left > right;
-        case '≠':
-        case '!=':
-            return left != right;
-        case '＝':
-        case '=':
-            return left == right;
-    }
-};
-exports.executeCompareOperator = executeCompareOperator;
-const prettifyOperator = (operator) => {
-    switch (operator) {
-        case '≦':
-        case '<=':
-            return '≦';
-        case '≧':
-        case '>=':
-            return '≧';
-        case '＜':
-        case '<':
-            return '＜';
-        case '＞':
-        case '>':
-            return '＞';
-        case '≠':
-        case '!=':
-            return '≠';
-        case '＝':
-        case '=':
-            return '＝';
-    }
-};
-exports.prettifyOperator = prettifyOperator;
-const toMaybeDiceOrParameter = (token) => {
-    const parameterMatch = token.trim().match(/^[{｛](?<value>.*)[}｝]$/u);
-    const parameterGroups = parameterMatch === null || parameterMatch === void 0 ? void 0 : parameterMatch.groups;
-    if (parameterGroups != null) {
-        const value = parameterGroups['value'];
-        if (value == null) {
-            throw 'This should not happen. value == null';
+exports.analyze = exports.expr1 = exports.plain = void 0;
+const Result_1 = require("./Result");
+exports.plain = 'plain';
+exports.expr1 = 'expr1';
+const expr2 = 'expr2';
+const toExpressionCore = (text) => {
+    const head = [];
+    let tail = null;
+    const append = (source, text) => {
+        switch (source === null || source === void 0 ? void 0 : source.type) {
+            case undefined:
+                return { type: exports.plain, text };
+            case exports.plain:
+            case exports.expr1:
+            case expr2:
+                return Object.assign(Object.assign({}, source), { text: source.text + text });
         }
-        return {
-            type: exports.parameter,
-            parameter: value,
-        };
-    }
-    return {
-        type: exports.maybeDice,
-        command: token.trim(),
     };
+    const charArray = text.split('');
+    let cursor = 0;
+    let isInExpr = false;
+    let braCountInExpr = 0;
+    for (; cursor < charArray.length; cursor++) {
+        const char = charArray[cursor];
+        if (char === undefined) {
+            throw 'this should not happen. charArray out of range.';
+        }
+        switch (char) {
+            case '\\': {
+                const nextChar = charArray[cursor + 1];
+                switch (nextChar) {
+                    case '{':
+                    case '}':
+                        cursor++;
+                        tail = append(tail, nextChar);
+                        continue;
+                    default:
+                        if (isInExpr) {
+                            cursor++;
+                            tail = append(tail, nextChar);
+                            continue;
+                        }
+                        break;
+                }
+                tail = append(tail, nextChar);
+                continue;
+            }
+            case '{': {
+                if (isInExpr) {
+                    braCountInExpr++;
+                    tail = append(tail, '{');
+                    continue;
+                }
+                const nextChar = charArray[cursor + 1];
+                if (nextChar === '{') {
+                    cursor++;
+                    isInExpr = true;
+                    if (tail != null) {
+                        head.push(tail);
+                    }
+                    tail = { type: expr2, text: '' };
+                    continue;
+                }
+                isInExpr = true;
+                if (tail != null) {
+                    head.push(tail);
+                }
+                tail = { type: exports.expr1, text: '' };
+                continue;
+            }
+            case '}': {
+                if (braCountInExpr >= 1) {
+                    braCountInExpr--;
+                    tail = append(tail, '}');
+                    continue;
+                }
+                const nextChar = charArray[cursor + 1];
+                if (nextChar === '}') {
+                    switch (tail === null || tail === void 0 ? void 0 : tail.type) {
+                        case undefined:
+                        case exports.plain:
+                            return Result_1.ResultModule.error({ index: cursor + 1, message: '}}に対応する{{がありません。' });
+                        case exports.expr1:
+                            return Result_1.ResultModule.error({ index: cursor + 1, message: '{を}}で閉じることはできません。' });
+                    }
+                    cursor++;
+                    isInExpr = false;
+                    if (tail != null) {
+                        head.push(tail);
+                    }
+                    tail = null;
+                    continue;
+                }
+                switch (tail === null || tail === void 0 ? void 0 : tail.type) {
+                    case undefined:
+                    case exports.plain:
+                        return Result_1.ResultModule.error({ index: cursor + 1, message: '}に対応する{がありません。' });
+                    case expr2:
+                        return Result_1.ResultModule.error({ index: cursor + 1, message: '{{を}で閉じることはできません。' });
+                }
+                if (tail != null) {
+                    head.push(tail);
+                }
+                tail = null;
+                continue;
+            }
+            default:
+                tail = append(tail, char);
+                continue;
+        }
+    }
+    switch (tail === null || tail === void 0 ? void 0 : tail.type) {
+        case undefined:
+            return Result_1.ResultModule.ok(head);
+        case exports.plain:
+            return Result_1.ResultModule.ok([...head, tail]);
+        case exports.expr1:
+            return Result_1.ResultModule.error({ index: cursor + 1, message: '}に対応する{がありません。' });
+        case expr2:
+            return Result_1.ResultModule.error({ index: cursor + 1, message: '}}に対応する{{がありません。' });
+    }
 };
 const analyze = (text) => {
-    const tokens = text.split(compareOperatorRegex);
-    if (tokens.length !== 3) {
-        return {
-            isCompare: false,
-            text: toMaybeDiceOrParameter(text)
-        };
+    const expressions = toExpressionCore(text);
+    if (expressions.isError) {
+        return Result_1.ResultModule.error(`${expressions.error.index}: ${expressions.error.message}`);
     }
-    const [rawLeft, rawOperator, rawRight] = tokens;
-    const operator = isCompareOperator(rawOperator) ? rawOperator : null;
-    if (operator == null) {
-        return null;
+    const result = [];
+    for (const expr of expressions.value) {
+        if (expr.type === expr2) {
+            return Result_1.ResultModule.error('{{と}}で囲む構文は将来のために予約されているため、現在は使用することはできません。');
+        }
+        if (expr.type === exports.expr1) {
+            result.push({ type: exports.expr1, variable: expr.text });
+            continue;
+        }
+        result.push(expr);
     }
-    const left = toMaybeDiceOrParameter(rawLeft);
-    const right = toMaybeDiceOrParameter(rawRight);
-    if (left == null || right == null) {
-        return null;
-    }
-    return {
-        isCompare: true,
-        left,
-        compareOperator: operator,
-        right,
-    };
+    return Result_1.ResultModule.ok(result);
 };
 exports.analyze = analyze;

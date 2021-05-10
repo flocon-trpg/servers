@@ -5,7 +5,7 @@ const core_1 = require("@mikro-orm/core");
 const Constants_1 = require("../../../@shared/Constants");
 const mikro_orm_1 = require("../../entities/roomMessage/mikro-orm");
 const writeSystemMessage = async ({ em, text, room }) => {
-    const entity = new mikro_orm_1.RoomPubMsg();
+    const entity = new mikro_orm_1.RoomPubMsg({ text, textSource: undefined });
     entity.text = text;
     let ch = await em.findOne(mikro_orm_1.RoomPubCh, { key: Constants_1.$system, room: room.id });
     if (ch == null) {

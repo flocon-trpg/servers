@@ -19,8 +19,8 @@ export namespace MyValueLog {
                     deletedPieces: entity.deletedPieces,
                     movedPieces: entity.movedPieces,
                     resizedPieces: entity.resizedPieces,
-                }
-            }
+                };
+            };
         }
     }
 }
