@@ -11,6 +11,7 @@ import { RoomPublicMessageFragment } from '../generated/graphql';
 import produce from 'immer';
 import { __ } from '../@shared/collection';
 import { interval } from 'rxjs';
+import { isDeleted, toText as toTextCore } from '../utils/message';
 
 export namespace MyKonva {
     export type Vector2 = {
@@ -184,14 +185,18 @@ export namespace MyKonva {
         }, [timeWindow]);
 
         const texts = [...recentMessages]
-            .filter(msg => msg.text != null)
+            .filter(msg => !isDeleted(msg))
             .sort((x, y) => y.createdAt - x.createdAt);
             
         const toText = (message: RoomPublicMessageFragment | null | undefined): string | undefined => {
-            if (message?.text == null) {
+            if (message == null) {
                 return undefined;
             }
-            return `${message.text} ${message.commandResult?.text ?? ''}`;
+            const text = toTextCore(message);
+            if (text == null) {
+                return undefined;
+            }
+            return `${text} ${message.commandResult?.text ?? ''}`;
         };
 
         const [text0, text1, text2, text3, text4] = [

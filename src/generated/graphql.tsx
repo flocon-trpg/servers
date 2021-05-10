@@ -647,6 +647,7 @@ export type MutationUpdateWritingMessageStatusArgs = {
 export type MutationWritePrivateMessageArgs = {
   characterStateId?: Maybe<Scalars['String']>;
   customName?: Maybe<Scalars['String']>;
+  gameType?: Maybe<Scalars['String']>;
   roomId: Scalars['String'];
   text: Scalars['String'];
   textColor?: Maybe<Scalars['String']>;
@@ -1384,11 +1385,13 @@ export type RoomPrivateMessage = {
   createdAt: Scalars['Float'];
   createdBy?: Maybe<Scalars['String']>;
   customName?: Maybe<Scalars['String']>;
+  initText?: Maybe<Scalars['String']>;
+  initTextSource?: Maybe<Scalars['String']>;
   isSecret: Scalars['Boolean'];
   messageId: Scalars['String'];
-  text?: Maybe<Scalars['String']>;
   textColor?: Maybe<Scalars['String']>;
   updatedAt?: Maybe<Scalars['Float']>;
+  updatedText?: Maybe<UpdatedText>;
   visibleTo: Array<Scalars['String']>;
 };
 
@@ -1396,10 +1399,12 @@ export type RoomPrivateMessageUpdate = {
   __typename?: 'RoomPrivateMessageUpdate';
   altTextToSecret?: Maybe<Scalars['String']>;
   commandResult?: Maybe<CommandResult>;
+  initText?: Maybe<Scalars['String']>;
+  initTextSource?: Maybe<Scalars['String']>;
   isSecret: Scalars['Boolean'];
   messageId: Scalars['String'];
-  text?: Maybe<Scalars['String']>;
   updatedAt?: Maybe<Scalars['Float']>;
+  updatedText?: Maybe<UpdatedText>;
 };
 
 export type RoomPublicChannel = {
@@ -1423,21 +1428,25 @@ export type RoomPublicMessage = {
   createdAt: Scalars['Float'];
   createdBy?: Maybe<Scalars['String']>;
   customName?: Maybe<Scalars['String']>;
+  initText?: Maybe<Scalars['String']>;
+  initTextSource?: Maybe<Scalars['String']>;
   isSecret: Scalars['Boolean'];
   messageId: Scalars['String'];
-  text?: Maybe<Scalars['String']>;
   textColor?: Maybe<Scalars['String']>;
   updatedAt?: Maybe<Scalars['Float']>;
+  updatedText?: Maybe<UpdatedText>;
 };
 
 export type RoomPublicMessageUpdate = {
   __typename?: 'RoomPublicMessageUpdate';
   altTextToSecret?: Maybe<Scalars['String']>;
   commandResult?: Maybe<CommandResult>;
+  initText?: Maybe<Scalars['String']>;
+  initTextSource?: Maybe<Scalars['String']>;
   isSecret: Scalars['Boolean'];
   messageId: Scalars['String'];
-  text?: Maybe<Scalars['String']>;
   updatedAt?: Maybe<Scalars['Float']>;
+  updatedText?: Maybe<UpdatedText>;
 };
 
 export type RoomSoundEffect = {
@@ -1657,6 +1666,12 @@ export type UpdateStrParamOperation = {
 export type UpdateStrParamOperationInput = {
   key: Scalars['String'];
   operation: StrParamOperationInput;
+};
+
+export type UpdatedText = {
+  __typename?: 'UpdatedText';
+  currentText?: Maybe<Scalars['String']>;
+  updatedAt: Scalars['Float'];
 };
 
 export type WritePrivateRoomMessageFailureResult = {
@@ -2450,8 +2465,11 @@ export type RoomPublicChannelFragment = (
 
 export type RoomPublicMessageFragment = (
   { __typename?: 'RoomPublicMessage' }
-  & Pick<RoomPublicMessage, 'messageId' | 'channelKey' | 'text' | 'textColor' | 'altTextToSecret' | 'isSecret' | 'createdBy' | 'customName' | 'createdAt' | 'updatedAt'>
-  & { commandResult?: Maybe<(
+  & Pick<RoomPublicMessage, 'messageId' | 'channelKey' | 'initText' | 'initTextSource' | 'textColor' | 'altTextToSecret' | 'isSecret' | 'createdBy' | 'customName' | 'createdAt' | 'updatedAt'>
+  & { updatedText?: Maybe<(
+    { __typename?: 'UpdatedText' }
+    & Pick<UpdatedText, 'currentText' | 'updatedAt'>
+  )>, commandResult?: Maybe<(
     { __typename?: 'CommandResult' }
     & Pick<CommandResult, 'text' | 'isSuccess'>
   )>, character?: Maybe<(
@@ -2462,8 +2480,11 @@ export type RoomPublicMessageFragment = (
 
 export type RoomPrivateMessageFragment = (
   { __typename?: 'RoomPrivateMessage' }
-  & Pick<RoomPrivateMessage, 'messageId' | 'visibleTo' | 'text' | 'textColor' | 'altTextToSecret' | 'isSecret' | 'createdBy' | 'customName' | 'createdAt' | 'updatedAt'>
-  & { commandResult?: Maybe<(
+  & Pick<RoomPrivateMessage, 'messageId' | 'visibleTo' | 'initText' | 'initTextSource' | 'textColor' | 'altTextToSecret' | 'isSecret' | 'createdBy' | 'customName' | 'createdAt' | 'updatedAt'>
+  & { updatedText?: Maybe<(
+    { __typename?: 'UpdatedText' }
+    & Pick<UpdatedText, 'currentText' | 'updatedAt'>
+  )>, commandResult?: Maybe<(
     { __typename?: 'CommandResult' }
     & Pick<CommandResult, 'text' | 'isSuccess'>
   )>, character?: Maybe<(
@@ -2493,8 +2514,11 @@ type RoomMessageEvent_RoomPrivateMessage_Fragment = (
 
 type RoomMessageEvent_RoomPrivateMessageUpdate_Fragment = (
   { __typename?: 'RoomPrivateMessageUpdate' }
-  & Pick<RoomPrivateMessageUpdate, 'messageId' | 'text' | 'altTextToSecret' | 'isSecret' | 'updatedAt'>
-  & { commandResult?: Maybe<(
+  & Pick<RoomPrivateMessageUpdate, 'messageId' | 'initText' | 'initTextSource' | 'altTextToSecret' | 'isSecret' | 'updatedAt'>
+  & { updatedText?: Maybe<(
+    { __typename?: 'UpdatedText' }
+    & Pick<UpdatedText, 'currentText' | 'updatedAt'>
+  )>, commandResult?: Maybe<(
     { __typename?: 'CommandResult' }
     & Pick<CommandResult, 'text' | 'isSuccess'>
   )> }
@@ -2517,8 +2541,11 @@ type RoomMessageEvent_RoomPublicMessage_Fragment = (
 
 type RoomMessageEvent_RoomPublicMessageUpdate_Fragment = (
   { __typename?: 'RoomPublicMessageUpdate' }
-  & Pick<RoomPublicMessageUpdate, 'messageId' | 'text' | 'altTextToSecret' | 'isSecret' | 'updatedAt'>
-  & { commandResult?: Maybe<(
+  & Pick<RoomPublicMessageUpdate, 'messageId' | 'initText' | 'initTextSource' | 'altTextToSecret' | 'isSecret' | 'updatedAt'>
+  & { updatedText?: Maybe<(
+    { __typename?: 'UpdatedText' }
+    & Pick<UpdatedText, 'currentText' | 'updatedAt'>
+  )>, commandResult?: Maybe<(
     { __typename?: 'CommandResult' }
     & Pick<CommandResult, 'text' | 'isSuccess'>
   )> }
@@ -3765,7 +3792,12 @@ export const RoomPublicMessageFragmentDoc = gql`
     fragment RoomPublicMessage on RoomPublicMessage {
   messageId
   channelKey
-  text
+  initText
+  initTextSource
+  updatedText {
+    currentText
+    updatedAt
+  }
   textColor
   commandResult {
     text
@@ -3792,7 +3824,12 @@ export const RoomPrivateMessageFragmentDoc = gql`
     fragment RoomPrivateMessage on RoomPrivateMessage {
   messageId
   visibleTo
-  text
+  initText
+  initTextSource
+  updatedText {
+    currentText
+    updatedAt
+  }
   textColor
   commandResult {
     text
@@ -3860,7 +3897,12 @@ export const RoomMessageEventFragmentDoc = gql`
   }
   ... on RoomPublicMessageUpdate {
     messageId
-    text
+    initText
+    initTextSource
+    updatedText {
+      currentText
+      updatedAt
+    }
     commandResult {
       text
       isSuccess
@@ -3871,7 +3913,12 @@ export const RoomMessageEventFragmentDoc = gql`
   }
   ... on RoomPrivateMessageUpdate {
     messageId
-    text
+    initText
+    initTextSource
+    updatedText {
+      currentText
+      updatedAt
+    }
     commandResult {
       text
       isSuccess

@@ -1,4 +1,4 @@
-import { Tooltip } from 'antd';
+import { Popover, Tooltip } from 'antd';
 import moment from 'moment';
 import React from 'react';
 import { $free } from '../../@shared/Constants';
@@ -11,6 +11,7 @@ import { PublicChannelNames } from '../../utils/types';
 import * as Icon from '@ant-design/icons';
 import Jdenticon from '../../foundations/Jdenticon';
 import { compositeKeyToString } from '../../@shared/StateMap';
+import { isDeleted, toText } from '../../utils/message';
 
 export namespace RoomMessage {
     const Image: React.FC<{ filePath: FilePathFragment | undefined }> = ({ filePath }: { filePath: FilePathFragment | undefined }) => {
@@ -71,7 +72,7 @@ export namespace RoomMessage {
                 {`数値コマ(${key})において次の変更がありました: ${changed}`}
             </div>);
         }
-        if (message.value.text == null && message.value.altTextToSecret == null) {
+        if (isDeleted(message.value)) {
             // 当初、削除された場合斜体にして表そうと考えたが、現状はボツにしている。
             // まず、italicなどでは対応してない日本語フォントの場合斜体にならない（対応しているフォントを選べばいいだけの話だが）。なのでtransform: skewX(-15deg)を使おうとしたが、文字列が斜めになることで横幅が少し増えるため、横のスクロールバーが出てしまう問題が出たので却下（x方向のスクロールバーを常に非表示にすれば解決しそうだが、x方向のスクロールバーを表示させたい場合は困る）。
             // ただ、解決策はありそうなのでのちのち斜体にするかもしれない。
@@ -79,12 +80,14 @@ export namespace RoomMessage {
         } else {
             return (
                 <div style={{ ...style, color: message.value.textColor ?? undefined }}>
-                    {message.value.text ?? message.value.altTextToSecret}
+                    <Popover content={message.value.initTextSource}>
+                        {toText(message.value) ?? message.value.altTextToSecret}</Popover>
                     <span> </span>
                     {message.value.commandResult != null && <span style={({ fontWeight: 'bold' })}>{`${message.value.commandResult.text}${message.value.commandResult.isSuccess === true ? ' (成功)' : ''}${message.value.commandResult.isSuccess === false ? ' (失敗)' : ''}`}</span>}
                     <span> </span>
                     <span style={({ fontWeight: 'bold' })}>{message.value.isSecret ? 'Secret' : ''}</span>
-                </div>);
+                </div>
+            );
         }
 
     };

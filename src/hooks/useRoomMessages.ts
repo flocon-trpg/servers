@@ -124,9 +124,11 @@ const reduceInit = (actions: RoomMessageEventFragment[]): StateToReduce => {
                 const newValue = produce(found, found => {
                     found.value.altTextToSecret = action.altTextToSecret;
                     found.value.commandResult = action.commandResult;
+                    found.value.initText = action.initText;
+                    found.value.initTextSource = action.initTextSource;
                     found.value.isSecret = action.isSecret;
-                    found.value.text = action.text;
                     found.value.updatedAt = action.updatedAt;
+                    found.value.updatedText = action.updatedText;
                 });
                 messages.set(action.messageId, newValue);
                 break;
@@ -143,9 +145,11 @@ const reduceInit = (actions: RoomMessageEventFragment[]): StateToReduce => {
                 const newValue = produce(found, found => {
                     found.value.altTextToSecret = action.altTextToSecret;
                     found.value.commandResult = action.commandResult;
+                    found.value.initText = action.initText;
+                    found.value.initTextSource = action.initTextSource;
                     found.value.isSecret = action.isSecret;
-                    found.value.text = action.text;
                     found.value.updatedAt = action.updatedAt;
+                    found.value.updatedText = action.updatedText;
                 });
                 messages.set(action.messageId, newValue);
                 break;
@@ -216,7 +220,8 @@ const reduceMessages = (state: Message[], action: RoomMessageEventFragment, filt
                 target.value.altTextToSecret = action.altTextToSecret;
                 target.value.commandResult = action.commandResult;
                 target.value.isSecret = action.isSecret;
-                target.value.text = action.text;
+                target.value.initText = action.initText;
+                target.value.initTextSource = action.initTextSource;
                 target.value.updatedAt = action.updatedAt;
             });
         }

@@ -1,5 +1,5 @@
 import { ReadonlyStateMap } from '../@shared/StateMap';
-import { RoomMessages, RoomPublicChannelFragment } from '../generated/graphql';
+import { RoomMessages, RoomPrivateMessage, RoomPublicChannelFragment, RoomPublicMessage } from '../generated/graphql';
 import { PrivateChannelSet } from './PrivateChannelSet';
 import { escape } from 'html-escaper';
 import { $free, $system } from '../@shared/Constants';
@@ -8,6 +8,7 @@ import { Participant } from '../stateManagers/states/participant';
 import { Character } from '../stateManagers/states/character';
 import { PublicChannelNames } from './types';
 import { RoomMessage } from '../components/room/RoomMessage';
+import { isDeleted, toText } from './message';
 
 const privateMessage = 'privateMessage';
 const publicMessage = 'publicMessage';
@@ -90,7 +91,7 @@ const createRoomMessageArray = (props: {
     messages.privateMessages.forEach(msg => {
         const privateChannelSet = new PrivateChannelSet(new Set(msg.visibleTo));
         const channelName = privateChannelSet.toChannelNameBase(participants).reduce((seed, elem, i) => i === 0 ? elem : `${seed}, ${elem}`, '');
-        if (msg.text == null) {
+        if (isDeleted(msg)) {
             if (msg.createdBy == null) {
                 return;
             }
@@ -113,7 +114,7 @@ const createRoomMessageArray = (props: {
             deleted: false,
             createdAt: msg.createdAt,
             value: {
-                text: msg.text,
+                text: toText(msg) ?? '',
                 createdBy: msg.createdBy == null ? null : createCreatedBy({ createdBy: msg.createdBy, characterStateId: msg.character?.stateId ?? undefined, customName: msg.customName ?? undefined }),
                 channelName,
                 commandResult: msg.commandResult?.text ?? null,
@@ -125,7 +126,7 @@ const createRoomMessageArray = (props: {
     messages.publicMessages.forEach(msg => {
         const channelName = RoomMessage.toChannelName({ type: publicMessage, value: msg }, props, new Map());
 
-        if (msg.text == null) {
+        if (isDeleted(msg)) {
             if (msg.createdBy == null) {
                 return;
             }
@@ -148,7 +149,7 @@ const createRoomMessageArray = (props: {
             deleted: false,
             createdAt: msg.createdAt,
             value: {
-                text: msg.text,
+                text: toText(msg) ?? '',
                 createdBy: msg.createdBy == null ? null : createCreatedBy({ createdBy: msg.createdBy, characterStateId: msg.character?.stateId ?? undefined, customName: msg.customName ?? undefined }),
                 channelName,
                 commandResult: msg.commandResult?.text ?? null,

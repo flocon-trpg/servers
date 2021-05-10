@@ -33,6 +33,7 @@ import { UseRoomMessageInputTextsResult } from '../../hooks/useRoomMessageInputT
 import { WritingMessageStatusResult } from '../../hooks/useWritingMessageStatus';
 import { PublicChannelKey } from '../../@shared/publicChannelKey';
 import { $free } from '../../@shared/Constants';
+import { isDeleted, toText } from '../../utils/message';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -307,7 +308,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
 
     let updatedInfo: JSX.Element | null = null;
     if (roomMessage?.updatedAt != null) {
-        if (roomMessage.text == null) {
+        if (isDeleted(roomMessage) == null) {
             updatedInfo = (
                 <Tooltip title={`${moment(new Date(roomMessage.updatedAt)).format('YYYY/MM/DD HH:mm:ss')}に削除されました`}>
                     <span style={({ color: 'gray' })}>(削除済み)</span>
@@ -399,7 +400,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
                     setValue('');
                 }}
                 onOpen={setValue => {
-                    setValue(roomMessage?.text ?? '');
+                    setValue(roomMessage == null ? '' : toText(roomMessage) ?? '');
                 }} />
         </div>
     );
