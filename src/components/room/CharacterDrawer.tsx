@@ -558,6 +558,20 @@ const CharacterDrawer: React.FC<Props> = ({ characters, paramNames, participants
                         );
                     })
                 }
+
+                {createdByMe &&
+                    <>
+                        <Typography.Title level={4}>変数</Typography.Title>
+
+                        <Row gutter={gutter} align='middle'>
+                            <Col flex='auto' />
+                            <Col flex={0}></Col>
+                            <Col span={inputSpan}>
+                                <Input.TextArea size='small' value={character.privateVarToml ?? ''} rows={8} onChange={e => updateCharacter({ privateVarToml: e.currentTarget.value })} />
+                            </Col>
+                        </Row>
+                    </>
+                }
             </div>
             <FilesManagerDrawer drawerType={filesManagerDrawerType} onClose={() => setFilesManagerDrawerType(null)} />
         </Drawer>

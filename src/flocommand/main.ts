@@ -1,11 +1,10 @@
 import Ajv from 'ajv';
-import { CharacterAction, characterActionSchema } from '../@shared/flocommand';
+import { CharacterAction, TOML } from '../@shared/flocommand';
 import { Result, ResultModule } from '../@shared/Result';
 import { CompositeKey, createStateMap } from '../@shared/StateMap';
 import { Character } from '../stateManagers/states/character';
 import { Room } from '../stateManagers/states/room';
 import { update } from '../stateManagers/states/types';
-
 
 const addActionToCharacter = ({ key, postOperationSetup, action }: { key: CompositeKey; postOperationSetup: Room.PostOperationSetup; action: CharacterAction }): void => {
     const operation: Character.PostOperation = {
@@ -22,13 +21,12 @@ const addActionToCharacter = ({ key, postOperationSetup, action }: { key: Compos
     postOperationSetup.characters.set(key, { type: update, operation });
 };
 
-export const flocommand = (json: string) => (characterKey: CompositeKey, myUserUid: string): Result<Room.PostOperation> => {
-    const compiler = new Ajv().compile(characterActionSchema);
-    const object = JSON.parse(json);
-    if (!compiler(object)) {
-        return ResultModule.error((compiler.errors ?? [])[0]?.message ?? '不明なエラーが発生しました。');
+export const flocommand = (toml: string) => (characterKey: CompositeKey, myUserUid: string): Result<Room.PostOperation> => {
+    const compiled = TOML.characterAction(toml);
+    if (compiled.isError) {
+        return compiled;
     }
     const operationSetup = Room.createPostOperationSetup();
-    addActionToCharacter({ key: characterKey, postOperationSetup: operationSetup, action: object });
+    addActionToCharacter({ key: characterKey, postOperationSetup: operationSetup, action: compiled.value });
     return ResultModule.ok(Room.setupPostOperation(operationSetup, myUserUid));
 };

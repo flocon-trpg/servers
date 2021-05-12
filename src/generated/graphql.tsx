@@ -216,6 +216,7 @@ export type CharacterOperation = {
   numMaxParams: NumParamsOperation;
   numParams: NumParamsOperation;
   pieces: PiecesOperation;
+  privateVarToml?: Maybe<ReplaceStringUpOperation>;
   strParams: StrParamsOperation;
   tachieImage?: Maybe<ReplaceNullableFilePathUpOperation>;
   tachieLocations: BoardLocationsOperation;
@@ -229,6 +230,7 @@ export type CharacterOperationInput = {
   numMaxParams: NumParamsOperationInput;
   numParams: NumParamsOperationInput;
   pieces: PiecesOperationInput;
+  privateVarToml?: Maybe<ReplaceStringUpOperationInput>;
   strParams: StrParamsOperationInput;
   tachieImage?: Maybe<ReplaceNullableFilePathUpOperationInput>;
   tachieLocations: BoardLocationsOperationInput;
@@ -259,6 +261,7 @@ export type CharacterValueState = {
   numMaxParams: Array<NumParamState>;
   numParams: Array<NumParamState>;
   pieces: Array<PieceState>;
+  privateVarToml?: Maybe<Scalars['String']>;
   strParams: Array<StrParamState>;
   tachieImage?: Maybe<FilePath>;
   tachieLocations: Array<BoardLocationState>;
@@ -272,6 +275,7 @@ export type CharacterValueStateInput = {
   numMaxParams: Array<NumParamStateInput>;
   numParams: Array<NumParamStateInput>;
   pieces: Array<PieceStateInput>;
+  privateVarToml?: Maybe<Scalars['String']>;
   strParams: Array<StrParamStateInput>;
   tachieImage?: Maybe<FilePathInput>;
   tachieLocations: Array<BoardLocationStateInput>;
@@ -1877,7 +1881,7 @@ export type CharacterStateFragment = (
 
 export type CharacterValueStateFragment = (
   { __typename?: 'CharacterValueState' }
-  & Pick<CharacterValueState, 'isPrivate' | 'name'>
+  & Pick<CharacterValueState, 'isPrivate' | 'name' | 'privateVarToml'>
   & { image?: Maybe<(
     { __typename?: 'FilePath' }
     & FilePathFragment
@@ -1958,6 +1962,9 @@ export type CharacterOperationFragment = (
     { __typename?: 'ReplaceBooleanUpOperation' }
     & Pick<ReplaceBooleanUpOperation, 'newValue'>
   )>, name?: Maybe<(
+    { __typename?: 'ReplaceStringUpOperation' }
+    & Pick<ReplaceStringUpOperation, 'newValue'>
+  )>, privateVarToml?: Maybe<(
     { __typename?: 'ReplaceStringUpOperation' }
     & Pick<ReplaceStringUpOperation, 'newValue'>
   )>, boolParams: (
@@ -3148,6 +3155,7 @@ export const CharacterValueStateFragmentDoc = gql`
     fragment CharacterValueState on CharacterValueState {
   isPrivate
   name
+  privateVarToml
   image {
     ...FilePath
   }
@@ -3476,6 +3484,9 @@ export const CharacterOperationFragmentDoc = gql`
     newValue
   }
   name {
+    newValue
+  }
+  privateVarToml {
     newValue
   }
   boolParams {

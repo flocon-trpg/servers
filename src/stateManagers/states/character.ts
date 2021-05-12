@@ -316,6 +316,9 @@ export namespace Character {
             if (operation.name != null) {
                 state.name = operation.name.newValue;
             }
+            if (operation.privateVarToml != null) {
+                state.privateVarToml = operation.privateVarToml.newValue;
+            }
         });
     };
 
@@ -380,6 +383,7 @@ export namespace Character {
         result.tachieImage = ReplaceNullableValueOperationModule.compose(first.tachieImage, second.tachieImage);
         result.isPrivate = ReplaceValueOperationModule.compose(first.isPrivate, second.isPrivate);
         result.name = ReplaceValueOperationModule.compose(first.name, second.name);
+        result.privateVarToml = ReplaceValueOperationModule.compose(first.privateVarToml, second.privateVarToml);
 
         return result;
     };
@@ -425,6 +429,9 @@ export namespace Character {
 
         firstPrime.name = transformReplace({ first: first.name, second: second.name }).firstPrime;
         secondPrime.name = transformReplace({ first: first.name, second: second.name }).secondPrime;
+
+        firstPrime.privateVarToml = transformReplace({ first: first.privateVarToml, second: second.privateVarToml }).firstPrime;
+        secondPrime.privateVarToml = transformReplace({ first: first.privateVarToml, second: second.privateVarToml }).secondPrime;
 
         return { firstPrime, secondPrime };
     };
@@ -513,6 +520,9 @@ export namespace Character {
         }
         if (prev.name != next.name) {
             result.name = { newValue: next.name };
+        }
+        if (prev.privateVarToml != next.privateVarToml) {
+            result.privateVarToml = { newValue: next.privateVarToml ?? '' };
         }
 
         return result;
