@@ -61,9 +61,11 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
     }, [volumeConfig]);
 }
 
-export function usePlaySoundEffect(allRoomMesssagesResult: AllRoomMessagesResult): void {
+export function usePlaySoundEffect(): void {
+    const allRoomMesssagesResult = useSelector(state => state.roomModule.allRoomMessagesResult);
+
     let soundEffect: SoundEffect | undefined = undefined;
-    if (allRoomMesssagesResult.type === newEvent) {
+    if (allRoomMesssagesResult?.type === newEvent) {
         if (allRoomMesssagesResult.event.__typename === 'RoomSoundEffect') {
             soundEffect = {
                 filePath: allRoomMesssagesResult.event.file,

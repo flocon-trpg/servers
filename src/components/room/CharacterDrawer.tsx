@@ -3,7 +3,6 @@ import React from 'react';
 import DrawerFooter from '../../layouts/DrawerFooter';
 import ComponentsStateContext from './contexts/RoomComponentsStateContext';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
-import OperateContext from './contexts/OperateContext';
 import { simpleId } from '../../utils/generators';
 import { OperationElement, replace } from '../../stateManagers/states/types';
 import { createStateMap, ReadonlyStateMap } from '../../@shared/StateMap';
@@ -28,20 +27,14 @@ import { Piece } from '../../stateManagers/states/piece';
 import { getUserUid } from '../../hooks/useFirebaseUser';
 import { useStateEditor } from '../../hooks/useStateEditor';
 import { BoardLocation } from '../../stateManagers/states/boardLocation';
-import { ParamName } from '../../stateManagers/states/paramName';
-import { Participant } from '../../stateManagers/states/participant';
+import { useOperate } from '../../hooks/useOperate';
+import { useSelector } from '../../store';
 
 const notFound = 'notFound';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
 };
-
-type Props = {
-    characters: ReadonlyStateMap<Character.State>;
-    paramNames: ParamName.ReadonlyStateMap<ParamName.State>;
-    participants: ReadonlyMap<string, Participant.State>;
-}
 
 const defaultCharacter: Character.State = {
     name: '',
@@ -70,13 +63,16 @@ const defaultPieceLocation: Piece.State = {
 const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
-const CharacterDrawer: React.FC<Props> = ({ characters, paramNames, participants }: Props) => {
+const CharacterDrawer: React.FC = () => {
     const myAuth = React.useContext(MyAuthContext);
     const componentsState = React.useContext(ComponentsStateContext);
     const drawerType = componentsState.characterDrawerType;
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
-    const operate = React.useContext(OperateContext);
-    const { state: character, setState: setCharacter, stateToCreate: characterToCreate, resetStateToCreate: resetCharacterToCreate } = useStateEditor(drawerType?.type === update ? characters.get(drawerType.stateKey) : undefined, defaultCharacter, ({ prevState, nextState }) => {
+    const operate = useOperate();
+    const characters = useSelector(state => state.roomModule.roomState?.state?.characters);
+    const paramNames = useSelector(state => state.roomModule.roomState?.state?.paramNames);
+    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
+    const { state: character, setState: setCharacter, stateToCreate: characterToCreate, resetStateToCreate: resetCharacterToCreate } = useStateEditor(drawerType?.type === update ? characters?.get(drawerType.stateKey) : undefined, defaultCharacter, ({ prevState, nextState }) => {
         if (drawerType?.type !== update) {
             return;
         }
@@ -86,6 +82,10 @@ const CharacterDrawer: React.FC<Props> = ({ characters, paramNames, participants
         operate(operation);
     });
     const [filesManagerDrawerType, setFilesManagerDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
+
+    if (paramNames == null || participants == null) {
+        return null;
+    }
 
     const createdByMe = (() => {
         if (drawerType?.type !== update) {

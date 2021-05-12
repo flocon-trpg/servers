@@ -13,7 +13,6 @@ import Konva from 'konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import { FilePath } from '../../utils/types';
 import { __ } from '../../@shared/collection';
-import OperateContext from './contexts/OperateContext';
 import { OperationElement, replace, update } from '../../stateManagers/states/types';
 import * as Icon from '@ant-design/icons';
 import { Character } from '../../stateManagers/states/character';
@@ -26,6 +25,9 @@ import { MyKonva } from '../../foundations/MyKonva';
 import { BoardLocation } from '../../stateManagers/states/boardLocation';
 import { AllRoomMessagesResult, Message, publicMessage, RoomMessage, useFilteredRoomMessages } from '../../hooks/useRoomMessages';
 import { $free } from '../../@shared/Constants';
+import { useSelector } from '../../store';
+import { useOperate } from '../../hooks/useOperate';
+import { useMe } from '../../hooks/useMe';
 
 namespace Resource {
     export const cellSizeIsTooSmall = 'セルが小さすぎるため、無効化されています';
@@ -111,15 +113,10 @@ const publicMessageFilter = (message: Message): boolean => {
 };
 
 type BoardProps = {
-    roomId: string;
-    myUserUid: string;
     boardKey: CompositeKey;
     boardsPanelConfigId: string;
     board: StatesBoard.State;
     boardsPanelConfig: BoardsPanelConfig;
-    characters: ReadonlyStateMap<Character.State>;
-    participants: ReadonlyMap<string, Participant.State>;
-    allRoomMessages: AllRoomMessagesResult;
     onClick?: (e: KonvaEventObject<MouseEvent>) => void;
     onContextMenu?: (e: KonvaEventObject<PointerEvent>, stateOffset: MyKonva.Vector2) => void; // stateOffsetは、configなどのxy座標を基準にした位置。
     canvasWidth: number;
@@ -127,26 +124,30 @@ type BoardProps = {
 }
 
 const Board: React.FC<BoardProps> = ({
-    roomId,
-    myUserUid,
     board,
     boardKey,
     boardsPanelConfigId,
     boardsPanelConfig,
-    characters,
-    participants,
-    allRoomMessages,
     onClick,
     onContextMenu,
     canvasWidth,
     canvasHeight
 }: BoardProps) => {
+    const roomId = useSelector(state => state.roomModule.roomId);
+    const characters = useSelector(state => state.roomModule.roomState?.state?.characters);
+    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
+
     const [selectedPieceKey, setSelectedPieceKey] = React.useState<SelectedPieceKey>();
     const [isBackgroundDragging, setIsBackgroundDragging] = React.useState(false); // これがないと、pieceをドラッグでリサイズする際に背景が少し動いてしまう。
     const backgroundImage = useImageFromGraphQL(board.backgroundImage);
     const dispatch = useDispatch();
-    const operate = React.useContext(OperateContext);
-    const publicMessages = useFilteredRoomMessages({ allRoomMessagesResult: allRoomMessages, filter: publicMessageFilter });
+    const operate = useOperate();
+    const publicMessages = useFilteredRoomMessages({ filter: publicMessageFilter });
+    const { userUid: myUserUid } = useMe();
+
+    if (myUserUid == null || roomId == null || characters == null || participants == null) {
+        return null;
+    }
 
     const boardConfig = boardsPanelConfig.boards[compositeKeyToString(boardKey)] ?? createDefaultBoardConfig();
 
@@ -428,17 +429,10 @@ namespace ContextMenuState {
 }
 
 type Props = {
-    boards: ReadonlyStateMap<StatesBoard.State>;
     boardsPanelConfig: BoardsPanelConfig;
     boardsPanelConfigId: string;
-    characters: ReadonlyStateMap<Character.State>;
-    participants: ReadonlyMap<string, Participant.State>;
-    roomId: string;
     canvasWidth: number;
     canvasHeight: number;
-    me: Participant.State;
-    myUserUid: string;
-    allRoomMessages: AllRoomMessagesResult;
 }
 
 const boardsDropDownStyle: React.CSSProperties = {
@@ -454,22 +448,23 @@ const zoomButtonStyle: React.CSSProperties = {
 };
 
 const Boards: React.FC<Props> = ({
-    boards,
     boardsPanelConfig,
     boardsPanelConfigId,
-    characters,
-    participants,
-    roomId,
     canvasWidth,
     canvasHeight,
-    me,
-    myUserUid,
-    allRoomMessages,
 }: Props) => {
     const dispatchRoomComponentsState = React.useContext(DispatchRoomComponentsStateContext);
     const dispatch = useDispatch();
     const [contextMenuState, setContextMenuState] = React.useState<ContextMenuState | null>(null);
-    const operate = React.useContext(OperateContext);
+    const operate = useOperate();
+    const roomId = useSelector(state => state.roomModule.roomId);
+    const boards = useSelector(state => state.roomModule.roomState?.state?.boards);
+    const characters = useSelector(state => state.roomModule.roomState?.state?.characters);
+    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
+    const { participant: me, userUid: myUserUid } = useMe();
+    if (me == null || myUserUid == null || roomId == null || boards == null || characters == null) {
+        return null;
+    }
 
     const activeBoardKey = (() => {
         if (boardsPanelConfig.activeBoardKey == null) {
@@ -497,14 +492,9 @@ const Boards: React.FC<Props> = ({
             canvasWidth={canvasWidth}
             canvasHeight={canvasHeight}
             board={board}
-            roomId={roomId}
-            myUserUid={myUserUid}
             boardKey={activeBoardKey}
             boardsPanelConfig={boardsPanelConfig}
             boardsPanelConfigId={boardsPanelConfigId}
-            characters={characters}
-            participants={participants}
-            allRoomMessages={allRoomMessages}
             onClick={() => setContextMenuState(null)}
             onContextMenu={(e, stateOffset) => {
                 e.evt.preventDefault();
@@ -541,7 +531,7 @@ const Boards: React.FC<Props> = ({
                             return { characterKey, character, tachieLocation: found[1] };
                         })
                         .toArray(),
-                    myNumberValuesOnCursor: __([...participants])
+                    myNumberValuesOnCursor: __([...(participants ?? [])])
                         .flatMap(([userUid, participant]) => [...participant.myNumberValues].map(x => [userUid, ...x] as const))
                         .compact(([userUid, myNumberValueKey, myNumberValue]) => {
                             const found = myNumberValue.pieces.toArray()
@@ -565,7 +555,7 @@ const Boards: React.FC<Props> = ({
             key={toJSONString(key)}
             onClick={() => dispatch(roomConfigModule.actions.updateBoardPanel({
                 panelId: boardsPanelConfigId,
-                roomId: roomId,
+                roomId,
                 panel: {
                     activeBoardKey: compositeKeyToString(key),
                 }

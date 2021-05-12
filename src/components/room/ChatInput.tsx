@@ -8,7 +8,6 @@ import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
 import { ReadonlyStateMap } from '../../@shared/StateMap';
 import MyAuthContext from '../../contexts/MyAuthContext';
-import LogNotificationContext from './contexts/LogNotificationContext';
 import { apolloError } from '../../hooks/useRoomMessages';
 import { Character } from '../../stateManagers/states/character';
 import { getUserUid } from '../../hooks/useFirebaseUser';
@@ -24,10 +23,12 @@ import classNames from 'classnames';
 import { PublicChannelKey } from '../../@shared/publicChannelKey';
 import { VisibleTo } from '../../utils/visibleTo';
 import { UseRoomMessageInputTextsResult } from '../../hooks/useRoomMessageInputTexts';
+import roomModule from '../../modules/roomModule';
+import { useSelector } from '../../store';
+import { usePublicChannelNames } from '../../hooks/usePublicChannelNames';
 
 type PrivateMessageDrawerProps = {
     visible: boolean;
-    participants: ReadonlyMap<string, Participant.State>;
     selectedParticipants: ReadonlySet<string>;
     onChange: (selectedParticipants: ReadonlySet<string>) => void;
     onClose: () => void;
@@ -37,11 +38,12 @@ const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 18;
 
 // TODO: playerの場合、characterの情報も一緒に載せたほうがわかりやすい
-const PrivateMessageDrawer: React.FC<PrivateMessageDrawerProps> = ({ visible, participants, selectedParticipants, onChange, onClose }: PrivateMessageDrawerProps) => {
+const PrivateMessageDrawer: React.FC<PrivateMessageDrawerProps> = ({ visible, selectedParticipants, onChange, onClose }: PrivateMessageDrawerProps) => {
     const myAuth = React.useContext(MyAuthContext);
+    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
 
     const myUserUid = getUserUid(myAuth);
-    if (myUserUid == null) {
+    if (myUserUid == null || participants == null) {
         return null;
     }
 
@@ -116,48 +118,37 @@ const custom = 'custom';
 type Props = {
     roomId: string;
     style?: Omit<React.CSSProperties, 'alignItems' | 'display' | 'flexDirection'>;
-    characters: ReadonlyStateMap<Character.State>;
-    participants: ReadonlyMap<string, Participant.State>;
     config: MessagePanelConfig;
     panelId: string;
 
     // メッセージ書き込み中通知機能を実現するため、*MessageTextは全てのChatInputで共通にしている。そのため、ChatInput内部でuseStateせず、外部でuseStateしたものを受け取る形にしている。
     useRoomMessageInputTextsResult: UseRoomMessageInputTextsResult;
-} & PublicChannelNames
+}
 
 export const ChatInput: React.FC<Props> = ({
     roomId,
     style,
-    characters,
-    participants,
     config,
     panelId,
     useRoomMessageInputTextsResult,
-    publicChannel1Name,
-    publicChannel2Name,
-    publicChannel3Name,
-    publicChannel4Name,
-    publicChannel5Name,
-    publicChannel6Name,
-    publicChannel7Name,
-    publicChannel8Name,
-    publicChannel9Name,
-    publicChannel10Name,
 }: Props) => {
     const miniInputMaxWidth = 200;
 
-    const notificationContext = React.useContext(LogNotificationContext);
+    const dispatch = useDispatch();
+    const characters = useSelector(state => state.roomModule.roomState?.state?.characters);
+    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
+    const publicChannelNames = usePublicChannelNames();
     const availableGameSystems = useListAvailableGameSystemsQuery();
     React.useEffect(() => {
         if (availableGameSystems.error == null) {
             return;
         }
-        notificationContext({
+        dispatch(roomModule.actions.addNotification({
             type: apolloError,
             error: availableGameSystems.error,
             createdAt: new Date().getTime(),
-        });
-    }, [availableGameSystems.error, notificationContext]);
+        }));
+    }, [availableGameSystems.error, dispatch]);
     const myAuth = React.useContext(MyAuthContext);
     const [writePublicMessage] = useWritePublicMessageMutation();
     const [writePrivateMessage] = useWritePrivateMessageMutation();
@@ -165,14 +156,13 @@ export const ChatInput: React.FC<Props> = ({
     const [selectedParticipantIds, setSelectedParticipantIds] = React.useState<ReadonlySet<string>>(new Set());
 
     const [isDrawerVisible, setIsDrawerVisible] = React.useState(false);
-    const dispatch = useDispatch();
 
     const myUserUid = getUserUid(myAuth);
 
     const selectedParticipants = React.useMemo(() =>
         __(selectedParticipantIds)
             .compact(id => {
-                const found = participants.get(id);
+                const found = participants?.get(id);
                 if (found == null) {
                     return null;
                 }
@@ -187,7 +177,7 @@ export const ChatInput: React.FC<Props> = ({
             }), [selectedParticipantIds, participants]);
 
     const myCharacters = React.useMemo(() => {
-        if (myUserUid == null) {
+        if (myUserUid == null || characters == null) {
             return [];
         }
         return characters.toArray().sort(([, x], [, y]) => x.name.localeCompare(y.name)).map(([key, character]) => {
@@ -339,7 +329,6 @@ export const ChatInput: React.FC<Props> = ({
     return (
         <>
             <PrivateMessageDrawer
-                participants={participants}
                 visible={isDrawerVisible}
                 onClose={() => setIsDrawerVisible(false)}
                 selectedParticipants={selectedParticipantIds}
@@ -374,34 +363,34 @@ export const ChatInput: React.FC<Props> = ({
                             dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { selectedPublicChannelKey: option.key } }));
                         }}>
                         <Select.Option key='1' value='1'>
-                            {publicChannel1Name}
+                            {publicChannelNames?.publicChannel1Name}
                         </Select.Option>
                         <Select.Option key='2' value='2'>
-                            {publicChannel2Name}
+                            {publicChannelNames?.publicChannel2Name}
                         </Select.Option>
                         <Select.Option key='3' value='3'>
-                            {publicChannel3Name}
+                            {publicChannelNames?.publicChannel3Name}
                         </Select.Option>
                         <Select.Option key='4' value='4'>
-                            {publicChannel4Name}
+                            {publicChannelNames?.publicChannel4Name}
                         </Select.Option>
                         <Select.Option key='5' value='5'>
-                            {publicChannel5Name}
+                            {publicChannelNames?.publicChannel5Name}
                         </Select.Option>
                         <Select.Option key='6' value='6'>
-                            {publicChannel6Name}
+                            {publicChannelNames?.publicChannel6Name}
                         </Select.Option>
                         <Select.Option key='7' value='7'>
-                            {publicChannel7Name}
+                            {publicChannelNames?.publicChannel7Name}
                         </Select.Option>
                         <Select.Option key='8' value='8'>
-                            {publicChannel8Name}
+                            {publicChannelNames?.publicChannel8Name}
                         </Select.Option>
                         <Select.Option key='9' value='9'>
-                            {publicChannel9Name}
+                            {publicChannelNames?.publicChannel9Name}
                         </Select.Option>
                         <Select.Option key='10' value='10'>
-                            {publicChannel10Name}
+                            {publicChannelNames?.publicChannel10Name}
                         </Select.Option>
                     </Select>}
                     {selectedChannelType === privateChannelKey && <>

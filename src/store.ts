@@ -1,16 +1,18 @@
 import { combineReducers, AnyAction } from 'redux';
-import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
+import { configureStore, getDefaultMiddleware, PayloadAction } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook } from 'react-redux';
 import { useSelector as useReduxSelector } from 'react-redux';
 import { createEpicMiddleware } from 'redux-observable';
 import roomConfigModule from './modules/roomConfigModule';
 import { rootEpic } from './epics/rootEpic';
 import userConfigModule from './modules/userConfigModule';
+import roomModule from './modules/roomModule';
 
 // rootReducer の準備
 const rootReducer = combineReducers({
     roomConfigModule: roomConfigModule.reducer,
     userConfigModule: userConfigModule.reducer,
+    roomModule: roomModule.reducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

@@ -9,7 +9,6 @@ import { replace, update } from '../../stateManagers/states/types';
 import { __ } from '../../@shared/collection';
 import { characterDrawerType, characterParameterNamesDrawerVisibility, create, RoomComponentsState } from './RoomComponentsState';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
-import OperateContext from './contexts/OperateContext';
 import { FilePathFragment, RoomParameterNameType } from '../../generated/graphql';
 import { TextTwoWayOperation } from '../../@shared/textOperation';
 import { StrIndex20, strIndex20Array } from '../../@shared/indexes';
@@ -25,6 +24,9 @@ import { Character } from '../../stateManagers/states/character';
 import { Room } from '../../stateManagers/states/room';
 import { Participant } from '../../stateManagers/states/participant';
 import { getUserUid } from '../../hooks/useFirebaseUser';
+import { useSelector } from '../../store';
+import { ParamName } from '../../stateManagers/states/paramName';
+import { useOperate } from '../../hooks/useOperate';
 
 const characterOperationBase: Character.PostOperation = {
     boolParams: new Map(),
@@ -34,10 +36,6 @@ const characterOperationBase: Character.PostOperation = {
     pieces: createStateMap(),
     tachieLocations: createStateMap(),
 };
-
-type Props = {
-    room: Room.State;
-}
 
 type DataSource = {
     key: string;
@@ -55,13 +53,13 @@ const maxNumParameter = 1000000;
 
 const createBooleanParameterColumn = ({
     key,
-    room,
+    paramNames,
 }: {
     key: StrIndex20;
-    room: Room.State;
+    paramNames: ParamName.ReadonlyStateMap<ParamName.State>;
 }) => {
     const reactKey = `boolParameter${key}`;
-    const name = room.paramNames.get({ key: key, type: RoomParameterNameType.Bool });
+    const name = paramNames.get({ key: key, type: RoomParameterNameType.Bool });
     if (name == null) {
         return null;
     }
@@ -94,13 +92,13 @@ const createBooleanParameterColumn = ({
 
 const createNumParameterColumn = ({
     key,
-    room,
+    paramNames,
 }: {
     key: StrIndex20;
-    room: Room.State;
+    paramNames: ParamName.ReadonlyStateMap<ParamName.State>;
 }) => {
     const reactKey = `numParameter${key}`;
-    const name = room.paramNames.get({ key: key, type: RoomParameterNameType.Num });
+    const name = paramNames.get({ key: key, type: RoomParameterNameType.Num });
     if (name == null) {
         return null;
     }
@@ -134,13 +132,13 @@ const createNumParameterColumn = ({
 
 const createStringParameterColumn = ({
     key,
-    room,
+    paramNames,
 }: {
     key: StrIndex20;
-    room: Room.State;
+    paramNames: ParamName.ReadonlyStateMap<ParamName.State>;
 }) => {
     const reactKey = `strmParameter${key}`;
-    const name = room.paramNames.get({ key: key, type: RoomParameterNameType.Str });
+    const name = paramNames.get({ key: key, type: RoomParameterNameType.Str });
     if (name == null) {
         return null;
     }
@@ -179,14 +177,22 @@ const Image: React.FC<{ filePath?: FilePathFragment; iconSize: boolean }> = ({ f
     return (<img src={src} width={iconSize ? 20 : 150} height={iconSize ? 20 : 150} />);
 };
 
-const CharacterList: React.FC<Props> = ({ room }: Props) => {
+const CharacterList: React.FC = () => {
     const myAuth = React.useContext(MyAuthContext);
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
     const dispatchRoomComponentsState = React.useContext(DispatchRoomComponentsStateContext);
-    const operate = React.useContext(OperateContext);
+    const operate = useOperate(); 
+
+    const characters = useSelector(state => state.roomModule.roomState?.state?.characters);
+    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
+    const paramNames = useSelector(state => state.roomModule.roomState?.state?.paramNames);
+
+    if (characters == null || participants == null || paramNames == null) {
+        return null;
+    }
 
     const charactersDataSource: DataSource[] =
-        room.characters.toArray().map(([key, character]) => {
+        characters.toArray().map(([key, character]) => {
             const createdByMe = getUserUid(myAuth) === key.createdBy;
             return {
                 key: compositeKeyToString(key), // antdのtableのkeyとして必要
@@ -195,7 +201,7 @@ const CharacterList: React.FC<Props> = ({ room }: Props) => {
                     state: character,
                     createdByMe,
                 },
-                participants: room.participants,
+                participants,
                 operate,
             };
         });
@@ -259,9 +265,9 @@ const CharacterList: React.FC<Props> = ({ room }: Props) => {
                             </div>
                         </Popover>}
                     <div style={({ width: 4 })} />
-                    <Input 
+                    <Input
                         style={({ minWidth: 100 })}
-                        value={character.state.name} 
+                        value={character.state.name}
                         size='small'
                         onChange={newValue => {
                             const setup = Room.createPostOperationSetup();
@@ -279,9 +285,9 @@ const CharacterList: React.FC<Props> = ({ room }: Props) => {
                         }} />
                 </div>),
         },
-        ...strIndex20Array.map(key => createNumParameterColumn({ key, room })),
-        ...strIndex20Array.map(key => createBooleanParameterColumn({ key, room })),
-        ...strIndex20Array.map(key => createStringParameterColumn({ key, room })),
+        ...strIndex20Array.map(key => createNumParameterColumn({ key, paramNames })),
+        ...strIndex20Array.map(key => createBooleanParameterColumn({ key, paramNames })),
+        ...strIndex20Array.map(key => createStringParameterColumn({ key, paramNames })),
     ]).compact(x => x).toArray();
 
     return (

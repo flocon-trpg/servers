@@ -4,12 +4,8 @@ import { __ } from '../../@shared/collection';
 import { ParticipantRole } from '../../generated/graphql';
 import Jdenticon from '../../foundations/Jdenticon';
 import { Participant } from '../../stateManagers/states/participant';
-import { RoomConnectionsResult } from '../../hooks/useRoomConnections';
-
-type Props = {
-    participants: ReadonlyMap<string, Participant.State>;
-    roomConnections: RoomConnectionsResult;
-}
+import { RoomConnectionsResult, useRoomConnections } from '../../hooks/useRoomConnections';
+import { useSelector } from '../../store';
 
 type DataSource = {
     key: string;
@@ -20,9 +16,12 @@ type DataSource = {
     };
 }
 
-const ParticipantList: React.FC<Props> = ({ participants, roomConnections }: Props) => {
+const ParticipantList: React.FC = () => {
+    const roomConnections = useRoomConnections();
+    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
+
     const dataSource: DataSource[] =
-        React.useMemo(() => [...participants].map(([key, participant]) => {
+        React.useMemo(() => [...(participants ?? [])].map(([key, participant]) => {
             const connection = roomConnections[key];
             return {
                 key, // antdのtableのkeyとして必要

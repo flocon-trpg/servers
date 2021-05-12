@@ -28,6 +28,19 @@ export type PublicChannelNames = {
     publicChannel10Name: string;
 }
 
+export const emptyPublicChannelNames: PublicChannelNames = {
+    publicChannel1Name: '',
+    publicChannel2Name: '',
+    publicChannel3Name: '',
+    publicChannel4Name: '',
+    publicChannel5Name: '',
+    publicChannel6Name: '',
+    publicChannel7Name: '',
+    publicChannel8Name: '',
+    publicChannel9Name: '',
+    publicChannel10Name: '',
+};
+
 export const reset = 'reset';
 
 export type Reset = { type: typeof reset }

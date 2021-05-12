@@ -58,13 +58,14 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmBehaviorCoreProps): void {
     }, [volume]);
 }
 
-export function usePlayBgm(bgms: ReadonlyMap<StrIndex5, RoomBgm.State>): void {
+export function usePlayBgm(): void {
+    const bgms = useSelector(state => state.roomModule.roomState?.state?.bgms);
     const masterVolume = useSelector(state => state.roomConfigModule?.masterVolume) ?? defaultMasterVolume;
     const channelVolumes = useSelector(state => state.roomConfigModule?.channelVolumes) ?? {};
 
-    usePlayBgmCore({ bgm: bgms.get('1') ?? null, volumeConfig: masterVolume * (channelVolumes['1'] ?? defaultChannelVolume) });
-    usePlayBgmCore({ bgm: bgms.get('2') ?? null, volumeConfig: masterVolume * (channelVolumes['2'] ?? defaultChannelVolume) });
-    usePlayBgmCore({ bgm: bgms.get('3') ?? null, volumeConfig: masterVolume * (channelVolumes['3'] ?? defaultChannelVolume) });
-    usePlayBgmCore({ bgm: bgms.get('4') ?? null, volumeConfig: masterVolume * (channelVolumes['4'] ?? defaultChannelVolume) });
-    usePlayBgmCore({ bgm: bgms.get('5') ?? null, volumeConfig: masterVolume * (channelVolumes['5'] ?? defaultChannelVolume) });
+    usePlayBgmCore({ bgm: bgms?.get('1') ?? null, volumeConfig: masterVolume * (channelVolumes['1'] ?? defaultChannelVolume) });
+    usePlayBgmCore({ bgm: bgms?.get('2') ?? null, volumeConfig: masterVolume * (channelVolumes['2'] ?? defaultChannelVolume) });
+    usePlayBgmCore({ bgm: bgms?.get('3') ?? null, volumeConfig: masterVolume * (channelVolumes['3'] ?? defaultChannelVolume) });
+    usePlayBgmCore({ bgm: bgms?.get('4') ?? null, volumeConfig: masterVolume * (channelVolumes['4'] ?? defaultChannelVolume) });
+    usePlayBgmCore({ bgm: bgms?.get('5') ?? null, volumeConfig: masterVolume * (channelVolumes['5'] ?? defaultChannelVolume) });
 }

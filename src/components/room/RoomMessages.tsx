@@ -22,18 +22,20 @@ import { MessagePanelConfig, MessageFilter, TabConfig } from '../../states/Messa
 import { Gutter } from 'antd/lib/grid/row';
 import { PublicChannelNames } from '../../utils/types';
 import DrawerFooter from '../../layouts/DrawerFooter';
-import OperateContext from './contexts/OperateContext';
 import BufferedInput from '../../foundations/BufferedInput';
 import { Room } from '../../stateManagers/states/room';
 import QueryResultViewer from '../../foundations/QueryResultViewer';
 import { useMessageFilter } from '../../hooks/useMessageFilter';
 import { RoomMessage as RoomMessageNameSpace } from './RoomMessage';
-import { TextNotification, TextNotificationsState } from './contexts/LogNotificationContext';
 import { UseRoomMessageInputTextsResult } from '../../hooks/useRoomMessageInputTexts';
-import { WritingMessageStatusResult } from '../../hooks/useWritingMessageStatus';
+import { useWritingMessageStatus, WritingMessageStatusResult } from '../../hooks/useWritingMessageStatus';
 import { PublicChannelKey } from '../../@shared/publicChannelKey';
 import { $free } from '../../@shared/Constants';
 import { isDeleted, toText } from '../../utils/message';
+import { Notification } from '../../modules/roomModule';
+import { useSelector } from '../../store';
+import { usePublicChannelNames } from '../../hooks/usePublicChannelNames';
+import { useOperate } from '../../hooks/useOperate';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -51,13 +53,15 @@ type TabEditorDrawerProps = {
 
     onChange: (newValue: TabConfig) => void;
     onClose: () => void;
-    participants: ReadonlyMap<string, Participant.State>;
-} & PublicChannelNames
+}
 
 const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerProps) => {
-    const { config, onChange: onChangeCore, participants, onClose } = props;
+    const { config, onChange: onChangeCore, onClose } = props;
 
     const myAuth = React.useContext(MyAuthContext);
+    const publicChannelNames = usePublicChannelNames();
+    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
+
     const hiwaSelectValue: HiwaSelectValueType = (() => {
         // config == null のケースは本来考慮する必要はないが、とりあえずnoneにしている。
         if (config == null || config.privateChannels === false) {
@@ -85,6 +89,10 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
         }
         onChangeCore({ ...config, ...newValue });
     };
+
+    if (participants == null) {
+        return null;
+    }
 
     return (<Drawer
         className='cancel-rnd'
@@ -134,43 +142,43 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
             <Col flex={0}>一般チャンネル</Col>
             <Col span={drawerInputSpan}>
                 <Checkbox checked={config?.showPublic1 ?? false} onChange={e => onChange({ showPublic1: e.target.checked })}>
-                    <span>{props.publicChannel1Name}</span>
+                    <span>{publicChannelNames?.publicChannel1Name}</span>
                 </Checkbox>
                 <br />
                 <Checkbox checked={config?.showPublic2 ?? false} onChange={e => onChange({ showPublic2: e.target.checked })}>
-                    <span>{props.publicChannel2Name}</span>
+                    <span>{publicChannelNames?.publicChannel2Name}</span>
                 </Checkbox>
                 <br />
                 <Checkbox checked={config?.showPublic3 ?? false} onChange={e => onChange({ showPublic3: e.target.checked })}>
-                    <span>{props.publicChannel3Name}</span>
+                    <span>{publicChannelNames?.publicChannel3Name}</span>
                 </Checkbox>
                 <br />
                 <Checkbox checked={config?.showPublic4 ?? false} onChange={e => onChange({ showPublic4: e.target.checked })}>
-                    <span>{props.publicChannel4Name}</span>
+                    <span>{publicChannelNames?.publicChannel4Name}</span>
                 </Checkbox>
                 <br />
                 <Checkbox checked={config?.showPublic5 ?? false} onChange={e => onChange({ showPublic5: e.target.checked })}>
-                    <span>{props.publicChannel5Name}</span>
+                    <span>{publicChannelNames?.publicChannel5Name}</span>
                 </Checkbox>
                 <br />
                 <Checkbox checked={config?.showPublic6 ?? false} onChange={e => onChange({ showPublic6: e.target.checked })}>
-                    <span>{props.publicChannel6Name}</span>
+                    <span>{publicChannelNames?.publicChannel6Name}</span>
                 </Checkbox>
                 <br />
                 <Checkbox checked={config?.showPublic7 ?? false} onChange={e => onChange({ showPublic7: e.target.checked })}>
-                    <span>{props.publicChannel7Name}</span>
+                    <span>{publicChannelNames?.publicChannel7Name}</span>
                 </Checkbox>
                 <br />
                 <Checkbox checked={config?.showPublic8 ?? false} onChange={e => onChange({ showPublic8: e.target.checked })}>
-                    <span>{props.publicChannel8Name}</span>
+                    <span>{publicChannelNames?.publicChannel8Name}</span>
                 </Checkbox>
                 <br />
                 <Checkbox checked={config?.showPublic9 ?? false} onChange={e => onChange({ showPublic9: e.target.checked })}>
-                    <span>{props.publicChannel9Name}</span>
+                    <span>{publicChannelNames?.publicChannel9Name}</span>
                 </Checkbox>
                 <br />
                 <Checkbox checked={config?.showPublic10 ?? false} onChange={e => onChange({ showPublic10: e.target.checked })}>
-                    <span>{props.publicChannel10Name}</span>
+                    <span>{publicChannelNames?.publicChannel10Name}</span>
                 </Checkbox>
             </Col>
         </Row>
@@ -235,12 +243,12 @@ type ChannelNameEditorDrawerProps = {
     visible: boolean;
 
     onClose: () => void;
-} & PublicChannelNames
+}
 
 const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (props: ChannelNameEditorDrawerProps) => {
     const { visible, onClose } = props;
-
-    const operate = React.useContext(OperateContext);
+    const publicChannelNames = usePublicChannelNames();
+    const operate = useOperate();
 
     return (<Drawer
         className='cancel-rnd'
@@ -261,7 +269,7 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (props: Chann
                 <Col flex='auto' />
                 <Col flex={0}>チャンネル{i}</Col>
                 <Col span={drawerInputSpan}>
-                    <BufferedInput bufferDuration='default' value={props[key]} onChange={e => {
+                    <BufferedInput bufferDuration='default' value={publicChannelNames == null ? '' : publicChannelNames[key]} onChange={e => {
                         if (e.previousValue === e.currentValue) {
                             return;
                         }
@@ -276,20 +284,26 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (props: Chann
 };
 
 type RoomMessageComponentProps = {
-    roomId: string;
-    message: RoomMessageNameSpace.MessageState | TextNotification;
-    participants: ReadonlyMap<string, Participant.State> | undefined;
+    message: RoomMessageNameSpace.MessageState | Notification.StateElement;
     showPrivateMessageMembers?: boolean;
-} & PublicChannelNames
+}
 
 const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMessageComponentProps) => {
-    const { roomId, message, participants, showPrivateMessageMembers } = props;
+    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
+
+    const { message, showPrivateMessageMembers } = props;
 
     const myAuth = React.useContext(MyAuthContext);
     const [editMessageMutation] = useEditMessageMutation();
     const [deleteMessageMutation] = useDeleteMessageMutation();
     const [makeMessageNotSecret] = useMakeMessageNotSecretMutation();
     const [isEditModalVisible, setIsEditModalVisible] = React.useState(false);
+    const roomId = useSelector(state => state.roomModule.roomId);
+    const publicChannelNames = usePublicChannelNames();
+
+    if (roomId == null || publicChannelNames == null) {
+        return null;
+    }
 
     const roomMessage = message.type === privateMessage || message.type === publicMessage ? message.value : null;
 
@@ -369,7 +383,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
                 <div style={({ flex: '0 0 auto' })}>
                     {message.type === privateMessage || message.type === publicMessage && RoomMessageNameSpace.userName(message, participants ?? new Map())}
                 </div>
-                <div style={({ flex: '0 0 auto', color: 'gray', marginLeft: 6 })}>{message.type !== privateMessage && message.type !== publicMessage ? '(ログ)' : RoomMessageNameSpace.toChannelName(message, props, participants ?? new Map())}</div>
+                <div style={({ flex: '0 0 auto', color: 'gray', marginLeft: 6 })}>{message.type !== privateMessage && message.type !== publicMessage ? '(ログ)' : RoomMessageNameSpace.toChannelName(message, publicChannelNames, participants ?? new Map())}</div>
                 <div style={({ flex: '0 0 auto', color: 'gray', marginLeft: 6 })}>{datetime}</div>
                 {privateMessageMembersInfo != null && <div style={{ flex: '0 0 auto', width: 6 }} />}
                 {privateMessageMembersInfo}
@@ -407,29 +421,21 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
 };
 
 type MessageTabPaneProps = {
-    allRoomMessagesResult: AllRoomMessagesSuccessResult;
-    logNotifications: TextNotificationsState;
-    participants: ReadonlyMap<string, Participant.State>;
-    roomId: string;
     contentHeight: number;
     config: MessageFilter;
-    writingMessageStatusResult: WritingMessageStatusResult;
-} & PublicChannelNames
+}
 
 const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProps) => {
     const {
-        allRoomMessagesResult,
-        logNotifications,
-        participants,
-        roomId,
         contentHeight,
         config,
-        writingMessageStatusResult,
     } = props;
 
     const writingStatusHeight = 16;
 
     const myAuth = React.useContext(MyAuthContext);
+    const writingMessageStatusResult = useWritingMessageStatus();
+    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
 
     const filter = useMessageFilter(config);
 
@@ -442,22 +448,10 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
                     throw 'soundEffect is not supported';
                 }
                 return (<RoomMessageComponent
-                    publicChannel1Name={props.publicChannel1Name}
-                    publicChannel2Name={props.publicChannel2Name}
-                    publicChannel3Name={props.publicChannel3Name}
-                    publicChannel4Name={props.publicChannel4Name}
-                    publicChannel5Name={props.publicChannel5Name}
-                    publicChannel6Name={props.publicChannel6Name}
-                    publicChannel7Name={props.publicChannel7Name}
-                    publicChannel8Name={props.publicChannel8Name}
-                    publicChannel9Name={props.publicChannel9Name}
-                    publicChannel10Name={props.publicChannel10Name}
                     key={message.type === privateMessage || message.type === publicMessage ? message.value.messageId : message.value.createdAt}
-                    roomId={roomId}
-                    message={message.type === publicMessage || message.type === privateMessage || message.type === myValueLog ? message : message.value}
-                    participants={participants} />);
+                    message={message.type === publicMessage || message.type === privateMessage || message.type === myValueLog ? message : message.value} />);
             });
-    }, [roomId, participants, props.publicChannel1Name, props.publicChannel2Name, props.publicChannel3Name, props.publicChannel4Name, props.publicChannel5Name, props.publicChannel6Name, props.publicChannel7Name, props.publicChannel8Name, props.publicChannel9Name, props.publicChannel10Name]);
+    }, []);
 
     const writingUserUids = __(PublicChannelKey.Without$System.publicChannelKeys).flatMap(key => {
         const map = writingMessageStatusResult.get(key);
@@ -466,7 +460,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
         }
         return [...map].filter(([key, value]) => key !== getUserUid(myAuth) && value.current === WritingMessageStatusType.Writing).map(([key]) => key);
     }).toSet();
-    const writingUsers = __(writingUserUids).compact(userUid => participants.get(userUid)?.name).toArray().sort();
+    const writingUsers = __(writingUserUids).compact(userUid => participants?.get(userUid)?.name).toArray().sort();
     let writingStatus: JSX.Element | null = null;
     // TODO: background-colorが適当
     const writingStatusCss = css`
@@ -479,7 +473,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
         writingStatus = <div css={writingStatusCss}>{writingUsers.reduce((seed, elem, i) => i === 0 ? elem : `${seed}, ${elem}`, '') + ' が書き込み中…'}</div>;
     }
 
-    const messages = useFilteredAndMapRoomMessages({ allRoomMessagesResult, logNotifications, filter, thenMap });
+    const messages = useFilteredAndMapRoomMessages({ filter, thenMap });
     return <div style={{ display: 'flex', flexDirection: 'column' }}>
         <PagenationScroll source={messages} elementMinHeight={headerHeight + contentMinHeight} height={writingStatus == null ? contentHeight : (contentHeight - writingStatusHeight)} />
         {writingStatus}
@@ -487,20 +481,14 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
 };
 
 type Props = {
-    allRoomMessagesResult: AllRoomMessagesResult;
-    logNotifications: TextNotificationsState;
-    characters: ReadonlyStateMap<Character.State>;
-    participants: ReadonlyMap<string, Participant.State>;
-    roomId: string;
     height: number;
     panelId: string;
     config: MessagePanelConfig;
     useRoomMessageInputTextsResult: UseRoomMessageInputTextsResult;
-    writingMessageStatusResult: WritingMessageStatusResult;
-} & PublicChannelNames
+}
 
 const RoomMessages: React.FC<Props> = (props: Props) => {
-    const { allRoomMessagesResult, characters, participants, roomId, height, panelId, config } = props;
+    const { height, panelId, config } = props;
 
     const contentHeight = Math.max(0, height - 270);
     const tabsHeight = Math.max(0, height - 230);
@@ -514,13 +502,20 @@ const RoomMessages: React.FC<Props> = (props: Props) => {
 
     const [isChannelNamesEditorVisible, setIsChannelNamesEditorVisible] = React.useState(false);
 
+    const roomId = useSelector(state => state.roomModule.roomId);
+    const allRoomMessagesResult = useSelector(state => state.roomModule.allRoomMessagesResult);
+
+    if (roomId == null || allRoomMessagesResult == null) {
+        return null;
+    }
+
     switch (allRoomMessagesResult.type) {
         case loading:
             return <QueryResultViewer loading compact={false} />;
         case apolloError:
             return <QueryResultViewer loading={false} error={allRoomMessagesResult.error} compact={false} />;
         case failure:
-            return <Result status='error' title='エラー' />;
+            return <Result status='error' title='エラー' subTitle={allRoomMessagesResult.failureType} />;
         default:
             break;
     }
@@ -561,9 +556,6 @@ const RoomMessages: React.FC<Props> = (props: Props) => {
             </div>}>
             <MessageTabPane
                 {...props}
-                allRoomMessagesResult={allRoomMessagesResult}
-                participants={participants}
-                roomId={roomId}
                 config={tab}
                 contentHeight={contentHeight} />
         </Tabs.TabPane>;
@@ -584,8 +576,7 @@ const RoomMessages: React.FC<Props> = (props: Props) => {
                         tabs: config.tabs.map(oldValue => oldValue.key === newValue.key && oldValue.createdAt === newValue.createdAt ? newValue : oldValue)
                     }
                 }));
-            }}
-            participants={participants} />
+            }} />
         <ChannelNamesEditor {...props} visible={isChannelNamesEditorVisible} onClose={() => setIsChannelNamesEditorVisible(false)} />
         <Button style={{ margin: `4px ${marginX}px 4px ${marginX}px`, width: 170 }} size='small' onClick={() => setIsChannelNamesEditorVisible(true)}>チャンネルの名前を編集</Button>
         <Tabs
@@ -616,7 +607,7 @@ const RoomMessages: React.FC<Props> = (props: Props) => {
             {tabPanels}
         </Tabs>
         <div style={{ flex: 1 }} />
-        <ChatInput {...props} style={{ flex: 'auto', margin: '0 4px' }} roomId={roomId} characters={characters} participants={participants} config={config} />
+        <ChatInput {...props} style={{ flex: 'auto', margin: '0 4px' }} roomId={roomId} config={config} />
     </div>);
 };
 

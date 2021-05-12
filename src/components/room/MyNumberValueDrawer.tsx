@@ -4,7 +4,6 @@ import DrawerFooter from '../../layouts/DrawerFooter';
 import * as Character from '../../stateManagers/states/character';
 import ComponentsStateContext from './contexts/RoomComponentsStateContext';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
-import OperateContext from './contexts/OperateContext';
 import { simpleId } from '../../utils/generators';
 import { OperationElement, replace } from '../../stateManagers/states/types';
 import InputFile from '../InputFile';
@@ -22,15 +21,12 @@ import { MyNumberValue } from '../../stateManagers/states/myNumberValue';
 import { compositeKeyToString, createStateMap } from '../../@shared/StateMap';
 import { __ } from '../../@shared/collection';
 import { Piece } from '../../stateManagers/states/piece';
+import { useOperate } from '../../hooks/useOperate';
+import { useMe } from '../../hooks/useMe';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
 };
-
-type Props = {
-    me: Participant.State;
-    myUserUid: string;
-}
 
 const defaultMyNumberValue: MyNumberValue.State = {
     value: 0,
@@ -41,15 +37,16 @@ const defaultMyNumberValue: MyNumberValue.State = {
 const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
-const MyNumberValueDrawer: React.FC<Props> = ({ me, myUserUid }: Props) => {
+const MyNumberValueDrawer: React.FC = () => {
     const componentsState = React.useContext(ComponentsStateContext);
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
-    const operate = React.useContext(OperateContext);
+    const operate = useOperate();
+    const { participant: me, userUid: myUserUid } = useMe();
 
     const drawerType = componentsState.myNumberValueDrawerType;
 
-    const { state, setState, stateToCreate } = useStateEditor(drawerType?.type === update ? me.myNumberValues.get(drawerType.stateKey) : null, defaultMyNumberValue, ({ prevState, nextState }) => {
-        if (drawerType?.type !== update) {
+    const { state, setState, stateToCreate } = useStateEditor(drawerType?.type === update ? me?.myNumberValues.get(drawerType.stateKey) : null, defaultMyNumberValue, ({ prevState, nextState }) => {
+        if (myUserUid == null || drawerType?.type !== update) {
             return;
         }
         const diff = MyNumberValue.diff({ prev: prevState, next: nextState });
@@ -62,6 +59,10 @@ const MyNumberValueDrawer: React.FC<Props> = ({ me, myUserUid }: Props) => {
         operation.participants.set(myUserUid, participantsOperation);
         operate(operation);
     });
+
+    if (myUserUid == null) {
+        return null;
+    }
 
     let onCreate: (() => void) | undefined = undefined;
     // drawerType != nullを付けていることで、updateから閉じる際に一瞬onCreateボタンが出るのを防いでいる。ただし、これで適切なのかどうかは吟味していない

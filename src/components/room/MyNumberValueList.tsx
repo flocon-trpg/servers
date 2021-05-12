@@ -1,51 +1,41 @@
 import React from 'react';
 import MyAuthContext from '../../contexts/MyAuthContext';
-import { Table, Checkbox, Button, InputNumber, Input, Dropdown, Menu, Switch, Tooltip, Popover } from 'antd';
-import { CompositeKey, compositeKeyToString, createStateMap, StateMap } from '../../@shared/StateMap';
-import { secureId, simpleId } from '../../utils/generators';
-import { replace, update } from '../../stateManagers/states/types';
+import { Table, Button, InputNumber, Tooltip } from 'antd';
+import { compositeKeyToString, createStateMap } from '../../@shared/StateMap';
+import { update } from '../../stateManagers/states/types';
 import { __ } from '../../@shared/collection';
-import { characterDrawerType, characterParameterNamesDrawerVisibility, create, myNumberValueDrawerType, RoomComponentsState } from './RoomComponentsState';
+import { myNumberValueDrawerType } from './RoomComponentsState';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
-import OperateContext from './contexts/OperateContext';
-import { FilePathFragment, RoomParameterNameType } from '../../generated/graphql';
-import { TextTwoWayOperation } from '../../@shared/textOperation';
-import { StrIndex20, strIndex20Array } from '../../@shared/indexes';
-import produce from 'immer';
-import NumberParameterInput from '../../foundations/NumberParameterInput';
-import BooleanParameterInput from '../../foundations/BooleanParameterInput';
-import StringParameterInput from '../../foundations/StringParameterInput';
-import { useFirebaseStorageUrl } from '../../hooks/firebaseStorage';
 import * as Icon from '@ant-design/icons';
 import ToggleButton from '../../foundations/ToggleButton';
-import { Character } from '../../stateManagers/states/character';
 import { Room } from '../../stateManagers/states/room';
 import { Participant } from '../../stateManagers/states/participant';
 import { MyNumberValue } from '../../stateManagers/states/myNumberValue';
 import { getUserUid } from '../../hooks/useFirebaseUser';
+import { useOperate } from '../../hooks/useOperate';
+import { useSelector } from '../../store';
 
 const characterOperationBase: Participant.PostOperation = {
     myNumberValues: new Map(),
 };
-
-type Props = {
-    participants: ReadonlyMap<string, Participant.State>;
-
-}
 
 type DataSource = {
     key: string;
     createdBy: string;
     stateId: string;
     state: MyNumberValue.State;
-    operate: (operation: Room.PostOperationSetup) => void;
 }
 
-const MyNumberValueList: React.FC<Props> = ({ participants }: Props) => {
+const MyNumberValueList: React.FC = () => {
     const myAuth = React.useContext(MyAuthContext);
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
     const dispatchRoomComponentsState = React.useContext(DispatchRoomComponentsStateContext);
-    const operate = React.useContext(OperateContext);
+    const operate = useOperate();
+    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
+
+    if (participants == null) {
+        return null;
+    }
 
     const charactersDataSource: DataSource[] =
         __(participants).flatMap(([userUid, participant]) => [...participant.myNumberValues].map(([stateId, myNumberValue]) => ({

@@ -2,12 +2,16 @@ import produce from 'immer';
 import React from 'react';
 import { interval } from 'rxjs';
 import { PublicChannelKey } from '../@shared/publicChannelKey';
-import { RoomEventSubscription, WritingMessageStatusType } from '../generated/graphql';
+import { WritingMessageStatusType } from '../generated/graphql';
+import { useSelector } from '../store';
 
 export type WritingMessageStatusResult = ReadonlyMap<PublicChannelKey.Without$System.PublicChannelKey, ReadonlyMap<string, { prev?: WritingMessageStatusType; current: WritingMessageStatusType; __elapsed: number }>>
 
-export function useWritingMessageStatus({ roomId, roomEventSubscription }: { roomId: string; roomEventSubscription: RoomEventSubscription | undefined }) {
+export function useWritingMessageStatus() {
     const [result, setResult] = React.useState<WritingMessageStatusResult>(new Map());
+
+    const roomId = useSelector(state => state.roomModule.roomId);
+    const roomEventSubscription = useSelector(state => state.roomModule.roomEventSubscription);
 
     React.useEffect(() => {
         setResult(new Map());

@@ -2629,7 +2629,10 @@ export type GetMessagesQueryVariables = Exact<{
 
 export type GetMessagesQuery = (
   { __typename?: 'Query' }
-  & { result: { __typename?: 'GetRoomMessagesFailureResult' } | (
+  & { result: (
+    { __typename?: 'GetRoomMessagesFailureResult' }
+    & Pick<GetRoomMessagesFailureResult, 'failureType'>
+  ) | (
     { __typename?: 'RoomMessages' }
     & { publicMessages: Array<(
       { __typename?: 'RoomPublicMessage' }
@@ -4064,6 +4067,9 @@ export const GetMessagesDocument = gql`
       soundEffects {
         ...RoomSoundEffect
       }
+    }
+    ... on GetRoomMessagesFailureResult {
+      failureType
     }
   }
 }

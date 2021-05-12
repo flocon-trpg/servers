@@ -1,5 +1,4 @@
 import { Popover, Tooltip } from 'antd';
-import moment from 'moment';
 import React from 'react';
 import { $free } from '../../@shared/Constants';
 import { FilePathFragment, MyValueLogFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment } from '../../generated/graphql';

@@ -2,7 +2,6 @@ import React from 'react';
 import { Button, Divider, Drawer, Tag, Tooltip, Typography } from 'antd';
 import { FilePathInput, FileSourceType, useWriteRoomSoundEffectMutation } from '../../generated/graphql';
 import * as Icon from '@ant-design/icons';
-import OperateContext from './contexts/OperateContext';
 import FilesManagerDrawer from '../FilesManagerDrawer';
 import { FilesManagerDrawerType, some } from '../../utils/types';
 import { replace, update } from '../../stateManagers/states/types';
@@ -14,6 +13,8 @@ import VolumeBar from '../../foundations/VolumeBar';
 import DrawerFooter from '../../layouts/DrawerFooter';
 import { MyStyle } from '../../utils/myStyle';
 import { __ } from '../../@shared/collection';
+import { useSelector } from '../../store';
+import { useOperate } from '../../hooks/useOperate';
 
 const defaultVolume = 0.5;
 
@@ -71,9 +72,10 @@ type BgmPlayerDrawerProps = {
 }
 
 const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({ channelKey, bgmState, visible, onClose }: BgmPlayerDrawerProps) => {
+    const operate = useOperate();
+
     const [filesManagerDrawerType, setFilesManagerDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
 
-    const operate = React.useContext(OperateContext);
     const [filesInput, setFilesInput] = React.useState<FilePathInput[]>([]);
     const [volumeInput, setVolumeInput] = React.useState<number>(defaultVolume);
 
@@ -154,12 +156,12 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({ channelKey, bgmState,
 };
 
 type SePlayerDrawerProps = {
-    roomId: string;
     visible: boolean;
     onClose: () => void;
 }
 
-const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({ roomId, visible, onClose }: SePlayerDrawerProps) => {
+const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({ visible, onClose }: SePlayerDrawerProps) => {
+    const roomId = useSelector(state => state.roomModule.roomId);
     const [filesManagerDrawerType, setFilesManagerDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
 
     const [writeRoomSoundEffect] = useWriteRoomSoundEffectMutation();
@@ -170,6 +172,10 @@ const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({ roomId, visible, onClos
         setFileInput(undefined);
         setVolumeInput(defaultVolume);
     }, [visible]);
+
+    if (roomId == null) {
+        return null;
+    }
 
     return (<Drawer
         className='cancel-rnd'
@@ -224,7 +230,7 @@ type BgmPlayerProps = {
 const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayerProps) => {
     const defaultVolume = 0.5;
 
-    const operate = React.useContext(OperateContext);
+    const operate = useOperate();
     const [isDrawerVisible, setIsDrawerVisible] = React.useState(false);
     const [volumeInput, setVolumeInput] = React.useState<number>();
 
@@ -301,18 +307,14 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
     </div>;
 };
 
-type Props = {
-    roomId: string;
-    bgmsState: ReadonlyMap<StrIndex5, RoomBgm.State>;
-}
-
-const SoundPlayer: React.FC<Props> = ({ roomId, bgmsState }: Props) => {
+const SoundPlayer: React.FC = () => {
+    const bgmsState = useSelector(state => state.roomModule.roomState?.state?.bgms);
     const [isSeDrawerVisible, setIsSeDrawerVisible] = React.useState(false);
 
     const padding = 16;
 
     return <div>
-        <SePlayerDrawer roomId={roomId} visible={isSeDrawerVisible} onClose={() => setIsSeDrawerVisible(false)} />
+        <SePlayerDrawer visible={isSeDrawerVisible} onClose={() => setIsSeDrawerVisible(false)} />
 
         <div style={MyStyle.Text.larger}>SE</div>
         <Button
@@ -322,15 +324,15 @@ const SoundPlayer: React.FC<Props> = ({ roomId, bgmsState }: Props) => {
                 setIsSeDrawerVisible(true);
             }}>流す</Button>
         <div style={{ height: padding }} />
-        <BgmPlayer bgmState={bgmsState.get('1')} channelKey='1' />
+        <BgmPlayer bgmState={bgmsState?.get('1')} channelKey='1' />
         <div style={{ height: padding }} />
-        <BgmPlayer bgmState={bgmsState.get('2')} channelKey='2' />
+        <BgmPlayer bgmState={bgmsState?.get('2')} channelKey='2' />
         <div style={{ height: padding }} />
-        <BgmPlayer bgmState={bgmsState.get('3')} channelKey='3' />
+        <BgmPlayer bgmState={bgmsState?.get('3')} channelKey='3' />
         <div style={{ height: padding }} />
-        <BgmPlayer bgmState={bgmsState.get('4')} channelKey='4' />
+        <BgmPlayer bgmState={bgmsState?.get('4')} channelKey='4' />
         <div style={{ height: padding }} />
-        <BgmPlayer bgmState={bgmsState.get('5')} channelKey='5' />
+        <BgmPlayer bgmState={bgmsState?.get('5')} channelKey='5' />
     </div>;
 };
 

@@ -6,14 +6,16 @@ import { ApolloError, FetchResult, useApolloClient } from '@apollo/client';
 import { GetOnlyStateManager, StateManager } from '../stateManagers/StateManager';
 import { create as createStateManager } from '../stateManagers/main';
 import MyAuthContext from '../contexts/MyAuthContext';
-import LogNotificationContext, { apolloError, text } from '../components/room/contexts/LogNotificationContext';
 import { Room } from '../stateManagers/states/room';
 import { Participant } from '../stateManagers/states/participant';
 import { authNotFound, FirebaseUserState, notSignIn } from './useFirebaseUser';
 import { useClientId } from './useClientId';
+import { useDispatch } from 'react-redux';
+import roomModule, { Notification } from '../modules/roomModule';
 
 const sampleTime = 3000;
 
+export const stopped = 'stopped';
 export const loading = 'loading';
 export const joined = 'joined';
 export const requiresReload = 'requiresReload';
@@ -23,28 +25,40 @@ export const getRoomFailure = 'getRoomFailure';
 export const mutationFailure = 'mutationFailure';
 export const deleted = 'deleted';
 
-type RoomState = {
+export type RoomState = {
     type: typeof loading;
+    state?: undefined;
+    operate?: undefined;
 } | {
     type: typeof joined;
-    roomState: Room.State;
+    state: Room.State;
     // undefinedならばrefetchが必要。
-    operateRoom: ((operation: Room.PostOperationSetup) => void) | undefined;
+    operate: ((operation: Room.PostOperationSetup) => void) | undefined;
     // participantの更新は、mutationを直接呼び出すことで行う。
 } | {
     type: typeof myAuthIsUnavailable;
+    state?: undefined;
+    operate?: undefined;
     error: typeof loading | typeof notSignIn | typeof authNotFound;
 } | {
     type: typeof nonJoined;
+    state?: undefined;
+    operate?: undefined;
     nonJoinedRoom: RoomAsListItemFragment;
 } | {
     type: typeof getRoomFailure;
+    state?: undefined;
+    operate?: undefined;
     getRoomFailureType: GetRoomFailureType;
 } | {
     // TODO: エラーの内容を返したり、unionを細分化する。
     type: typeof mutationFailure;
+    state?: undefined;
+    operate?: undefined;
 } | {
     type: typeof deleted;
+    state?: undefined;
+    operate?: undefined;
     deletedBy: string;
 }
 
@@ -56,7 +70,6 @@ type RoomStateResult = {
 export const useRoomState = (roomId: string, roomEventSubscription: Observable<RoomEventSubscription> | null): RoomStateResult => {
     const myAuth = React.useContext(MyAuthContext);
     const clientId = useClientId();
-    const notificationContext = React.useContext(LogNotificationContext);
     const apolloClient = useApolloClient();
     const [operateMutation] = useOperateMutation();
     const [state, setState] = React.useState<RoomState>({ type: loading });
@@ -64,6 +77,7 @@ export const useRoomState = (roomId: string, roomEventSubscription: Observable<R
     const [refetchKey, setRefetchKey] = React.useState(0);
     // refetchとして単に () => setRefetchKey(refetchKey + 1) をそのまま返す（この値をfとする）と、レンダーのたびにfは変わるため、fをdepsに使用されたときに問題が起こる可能性が高いので、useMemoで軽減。
     const refetch = React.useMemo(() => () => setRefetchKey(refetchKey + 1), [refetchKey]);
+    const dispatch = useDispatch();
 
     const userUid = typeof myAuth === 'string' ? null : myAuth.uid;
     const myAuthErrorType = typeof myAuth === 'string' ? myAuth : null;
@@ -96,8 +110,8 @@ export const useRoomState = (roomId: string, roomEventSubscription: Observable<R
                 const newState = $stateManager.uiState;
                 return {
                     ...oldValue,
-                    roomState: newState,
-                    operateRoom: $stateManager.requiresReload ? undefined : oldValue.operateRoom,
+                    state: newState,
+                    operate: $stateManager.requiresReload ? undefined : oldValue.operate,
                 };
             });
         };
@@ -155,20 +169,20 @@ export const useRoomState = (roomId: string, roomEventSubscription: Observable<R
                     });
                 } catch (e) {
                     if (e instanceof ApolloError) {
-                        notificationContext({
-                            type: apolloError,
+                        dispatch(roomModule.actions.addNotification({
+                            type: Notification.apolloError,
                             error: e,
                             createdAt: new Date().getTime(),
-                        });
+                        }));
                     } else {
-                        notificationContext({
-                            type: text,
+                        dispatch(roomModule.actions.addNotification({
+                            type: Notification.text,
                             notification: {
                                 type: 'error',
                                 message: 'Unknown error at operateMutation, useRoomState',
                                 createdAt: new Date().getTime(),
                             }
-                        });
+                        }));
                     }
                     toPost.onPosted({ isSuccess: null });
                     return;
@@ -198,29 +212,29 @@ export const useRoomState = (roomId: string, roomEventSubscription: Observable<R
                         onRoomStateManagerUpdate();
                         break;
                     case 'OperateRoomNonJoinedResult':
-                        notificationContext({
-                            type: text,
+                        dispatch(roomModule.actions.addNotification({
+                            type: Notification.text,
                             notification: {
                                 type: 'error',
                                 message: '部屋に入室していないため、operateできませんでした。',
                                 createdAt: new Date().getTime(),
                             }
-                        });
+                        }));
                         // TODO: 状況によって自動リトライを可能にする。
                         setState({
                             type: mutationFailure,
                         });
                         break;
                     case 'OperateRoomFailureResult':
-                        notificationContext({
-                            type: text,
+                        dispatch(roomModule.actions.addNotification({
+                            type: Notification.text,
                             notification: {
                                 type: 'error',
                                 message: 'operateで問題が発生しました。',
                                 description: result.data.result.failureType,
                                 createdAt: new Date().getTime(),
                             }
-                        });
+                        }));
                         // TODO: 状況によって自動リトライを可能にする。
                         setState({
                             type: mutationFailure,
@@ -258,7 +272,7 @@ export const useRoomState = (roomId: string, roomEventSubscription: Observable<R
                                 }
                                 return {
                                     ...oldValue,
-                                    operateRoom: undefined,
+                                    operate: undefined,
                                 };
                             });
                             return;
@@ -270,8 +284,8 @@ export const useRoomState = (roomId: string, roomEventSubscription: Observable<R
 
                     setState({
                         type: joined,
-                        roomState: newRoomStateManager.uiState,
-                        operateRoom: newRoomStateManager.requiresReload ? undefined : operate,
+                        state: newRoomStateManager.uiState,
+                        operate: newRoomStateManager.requiresReload ? undefined : operate,
                     });
 
                     break;
@@ -301,7 +315,7 @@ export const useRoomState = (roomId: string, roomEventSubscription: Observable<R
             graphQLSubscriptionSubscription.unsubscribe();
             postTriggerSubscription.unsubscribe();
         };
-    }, [refetchKey, apolloClient, roomId, userUid, myAuthErrorType, operateMutation, notificationContext]);
+    }, [refetchKey, apolloClient, roomId, userUid, myAuthErrorType, operateMutation, dispatch, clientId, roomEventSubscription]);
 
     return { refetch, state };
 };

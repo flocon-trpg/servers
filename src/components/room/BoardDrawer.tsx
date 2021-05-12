@@ -1,14 +1,11 @@
-import { Checkbox, Col, Drawer, Form, Input, InputNumber, Row, Space } from 'antd';
+import { Col, Drawer, Input, InputNumber, Row } from 'antd';
 import React from 'react';
 import DrawerFooter from '../../layouts/DrawerFooter';
-import * as Character from '../../stateManagers/states/character';
 import ComponentsStateContext from './contexts/RoomComponentsStateContext';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
-import OperateContext from './contexts/OperateContext';
 import { simpleId } from '../../utils/generators';
 import { replace } from '../../stateManagers/states/types';
 import InputFile from '../InputFile';
-import { FilePath } from '../../generated/graphql';
 import { DrawerProps } from 'antd/lib/drawer';
 import { boardDrawerType, create, update } from './RoomComponentsState';
 import FilesManagerDrawer from '../FilesManagerDrawer';
@@ -17,16 +14,14 @@ import { Gutter } from 'antd/lib/grid/row';
 import { Room } from '../../stateManagers/states/room';
 import { Board } from '../../stateManagers/states/board';
 import { useStateEditor } from '../../hooks/useStateEditor';
+import { useOperate } from '../../hooks/useOperate';
+import { useSelector } from '../../store';
 
 const notFound = 'notFound';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
 };
-
-type Props = {
-    roomState: Room.State;
-}
 
 const defaultBoard: Board.State = {
     name: '',
@@ -42,12 +37,13 @@ const defaultBoard: Board.State = {
 const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
-const BoardDrawer: React.FC<Props> = ({ roomState }: Props) => {
+const BoardDrawer: React.FC = () => {
     const componentsState = React.useContext(ComponentsStateContext);
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
-    const operate = React.useContext(OperateContext);
+    const operate = useOperate();
     const drawerType = componentsState.boardDrawerType;
-    const { state: board, setState: setBoard, stateToCreate: boardToCreate, resetStateToCreate: resetBoardToCreate } = useStateEditor(drawerType?.type === update ? roomState.boards.get(drawerType.stateKey) : undefined, defaultBoard, ({ prevState, nextState }) => {
+    const boards = useSelector(state => state.roomModule.roomState?.state?.boards);
+    const { state: board, setState: setBoard, stateToCreate: boardToCreate, resetStateToCreate: resetBoardToCreate } = useStateEditor(drawerType?.type === update ? boards?.get(drawerType.stateKey) : undefined, defaultBoard, ({ prevState, nextState }) => {
         if (drawerType?.type !== update) {
             return;
         }
@@ -62,7 +58,7 @@ const BoardDrawer: React.FC<Props> = ({ roomState }: Props) => {
     const boardForUseEffect = (() => {
         switch (drawerType?.type) {
             case update:
-                return roomState.boards.get(drawerType.stateKey) ?? notFound;
+                return boards?.get(drawerType.stateKey) ?? notFound;
             case create:
                 return 'create';
             default:

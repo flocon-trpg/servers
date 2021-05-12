@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { PropsWithChildren, ReactNode } from 'react';
 import RoomComponent from '../../components/room/Room';
 import { GetRoomFailureType, JoinRoomAsPlayerMutation, JoinRoomFailureType, ParticipantRole, RoomAsListItemFragment, RoomGetStateFragment, useJoinRoomAsPlayerMutation, useJoinRoomAsSpectatorMutation, useRoomEventSubscription } from '../../generated/graphql';
 import { Alert, Button, Card, Input, Result, Spin, notification as antdNotification } from 'antd';
@@ -8,10 +8,14 @@ import { ApolloProvider, FetchResult } from '@apollo/client';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import { deleted, getRoomFailure, joined, loading, mutationFailure, myAuthIsUnavailable, nonJoined, useRoomState } from '../../hooks/useRoomState';
 import Center from '../../foundations/Center';
-import LogNotificationContext, { TextNotification, toTextNotification, Notification, TextNotificationsState } from '../../components/room/contexts/LogNotificationContext';
 import LoadingResult from '../../foundations/Result/LoadingResult';
 import NotSignInResult from '../../foundations/Result/NotSignInResult';
 import { usePublishRoomEventSubscription } from '../../hooks/usePublishRoomEventSubscription';
+import { useDispatch } from 'react-redux';
+import roomModule, { Notification } from '../../modules/roomModule';
+import { useAllRoomMessages } from '../../hooks/useRoomMessages';
+import { useSelector } from '../../store';
+import useRoomConfig from '../../hooks/localStorage/useRoomConfig';
 
 type JoinRoomFormProps = {
     roomState: RoomAsListItemFragment;
@@ -115,9 +119,40 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
     );
 };
 
-const RoomRouter: React.FC<{ id: string; logNotifications: TextNotificationsState }> = ({ id, logNotifications }: { id: string; logNotifications: TextNotificationsState }) => {
-    const { observable, data: roomEventSubscription, error } = usePublishRoomEventSubscription(id);
-    const { refetch, state } = useRoomState(id, observable /* Subscriptionが開始してからuseRoomState内部のQueryが呼び出されるようにしている */);
+const RoomBehavior: React.FC<PropsWithChildren<{ roomId: string }>> = ({ roomId, children }: PropsWithChildren<{ roomId: string }>) => {
+    useRoomConfig(roomId);
+
+    const dispatch = useDispatch();
+    const { observable, data: roomEventSubscription, error } = usePublishRoomEventSubscription(roomId);
+    const { state: roomState, refetch: refetchRoomState } = useRoomState(roomId, observable);
+    const allRoomMessages = useAllRoomMessages({ roomId, roomEventSubscription });
+
+    React.useEffect(() => {
+        dispatch(roomModule.actions.reset());
+        dispatch(roomModule.actions.setRoom({ roomId }));
+    }, [dispatch, roomId]);
+    React.useEffect(() => {
+        dispatch(roomModule.actions.setRoom({ roomState }));
+    }, [dispatch, roomState]);
+    React.useEffect(() => {
+        dispatch(roomModule.actions.setRoom({ roomEventSubscription }));
+    }, [dispatch, roomEventSubscription]);
+    React.useEffect(() => {
+        dispatch(roomModule.actions.setRoom({ allRoomMessagesResult: allRoomMessages }));
+    }, [dispatch, allRoomMessages]);
+
+    const newNotification = useSelector(state => state.roomModule.notifications.newValue);
+
+    React.useEffect(() => {
+        if (newNotification == null) {
+            return;
+        }
+        antdNotification[newNotification.type]({
+            message: newNotification.message,
+            description: newNotification.description,
+            placement: 'bottomRight',
+        });
+    }, [newNotification]);
 
     if (error != null) {
         return (
@@ -126,9 +161,9 @@ const RoomRouter: React.FC<{ id: string; logNotifications: TextNotificationsStat
             </Layout>);
     }
 
-    switch (state.type) {
+    switch (roomState.type) {
         case joined: {
-            if (state.operateRoom == null) {
+            if (roomState.operate == null) {
                 // TODO: Buttonなどを用いたreloadに対応させる。
                 return (
                     <Layout requiresLogin showEntryForm={false}>
@@ -137,23 +172,22 @@ const RoomRouter: React.FC<{ id: string; logNotifications: TextNotificationsStat
             }
             return (
                 <Layout requiresLogin showEntryForm={false}>
-                    <RoomComponent roomId={id} roomState={state.roomState} operate={state.operateRoom} logNotifications={logNotifications} roomEventSubscription={roomEventSubscription} />
+                    {children}
                 </Layout>);
         }
         case nonJoined:
             return (<Layout requiresLogin showEntryForm={false}>
                 <Center>
                     <Card title="入室" >
-                        <JoinRoomForm roomState={state.nonJoinedRoom} onJoin={() => refetch()} />
+                        <JoinRoomForm roomState={roomState.nonJoinedRoom} onJoin={() => refetchRoomState()} />
                     </Card>
                 </Center>
             </Layout >);
         case getRoomFailure: {
-            switch (state.getRoomFailureType) {
+            switch (roomState.getRoomFailureType) {
                 case GetRoomFailureType.NotEntry:
                     return (
-                        <Layout requiresLogin showEntryForm={true} onEntry={() => refetch()}>
-                        </Layout>);
+                        <Layout requiresLogin showEntryForm={true} onEntry={() => refetchRoomState()} />);
                 case GetRoomFailureType.NotFound:
                     return (
                         <Layout requiresLogin showEntryForm={false}>
@@ -192,34 +226,7 @@ const RoomRouter: React.FC<{ id: string; logNotifications: TextNotificationsStat
     }
 };
 
-const RoomCore: React.FC<{ id: string }> = ({ id }: { id: string }) => {
-    // LogNotificationContextはuseRoomStateで使われる。そのため、useRoomStateの上位であるこのComponentで渡している。
-    const [logNotification, setLogNotification] = React.useState<Notification>();
-    const [logNotifications, setLogNotifications] = React.useState<TextNotificationsState>({ values: [], newValue: null });
-    React.useEffect(() => {
-        if (logNotification == null) {
-            return;
-        }
-        const textNotification = toTextNotification(logNotification);
-        antdNotification[textNotification.type]({
-            message: textNotification.message,
-            description: textNotification.description,
-            placement: 'bottomRight',
-        });
-        setLogNotifications(oldValue => {
-            return {
-                values: [...oldValue.values, textNotification],
-                newValue: textNotification,
-            };
-        });
-    }, [logNotification]);
-
-    return (<LogNotificationContext.Provider value={setLogNotification}>
-        <RoomRouter id={id} logNotifications={logNotifications} />
-    </LogNotificationContext.Provider>);
-};
-
-const Room: React.FC = () => {
+const RoomCore: React.FC<{ children?: ReactNode }> = ({ children }: { children?: ReactNode }) => {
     const router = useRouter();
     const id = router.query.id;
 
@@ -231,7 +238,14 @@ const Room: React.FC = () => {
                     title="パラメーターが不正です。" />
             </Layout>);
     }
-    return (<RoomCore id={id} />);
+
+    return <RoomBehavior roomId={id}>{children}</RoomBehavior>;
+};
+
+const Room: React.FC = () => {
+    return (<RoomCore>
+        <RoomComponent />
+    </RoomCore>);
 };
 
 export default Room;

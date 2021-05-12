@@ -1,36 +1,37 @@
-import { Button, Col, Collapse, Drawer, Form, Input, Row, Select, Space } from 'antd';
+import { Button, Collapse, Drawer, Form, Input, Select, Space } from 'antd';
 import React from 'react';
 import DrawerFooter from '../../layouts/DrawerFooter';
 import ComponentsStateContext from './contexts/RoomComponentsStateContext';
-import OperateContext from './contexts/OperateContext';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import InputModal from '../InputModal';
 import { characterParameterNamesDrawerVisibility } from './RoomComponentsState';
-import produce from 'immer';
-import { isStrIndex20, StrIndex100, strIndex100Array, StrIndex20, strIndex20Array } from '../../@shared/indexes';
+import { StrIndex100, StrIndex20, strIndex20Array } from '../../@shared/indexes';
 import { RoomParameterNameType } from '../../generated/graphql';
 import { replace, update } from '../../stateManagers/states/types';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import BufferedInput from '../../foundations/BufferedInput';
 import { Room } from '../../stateManagers/states/room';
-
-type Props = {
-    roomState: Room.State;
-}
+import { useSelector } from '../../store';
+import { useOperate } from '../../hooks/useOperate';
 
 type VisibleParameterForm = {
     type: RoomParameterNameType;
     key: StrIndex100;
 }
 
-const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) => {
-    const operate = React.useContext(OperateContext);
+const CharacterParameterNamesDrawer: React.FC = () => {
     const componentsState = React.useContext(ComponentsStateContext);
+    const operate = useOperate();
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
     const [visibleParameterForm, setVisibleParameterForm] = React.useState<VisibleParameterForm>();
     const [addNumParamSelector, setAddNumParamSelector] = React.useState<StrIndex20>();
     const [addBoolParamSelector, setAddBoolParamSelector] = React.useState<StrIndex20>();
     const [addStrParamSelector, setAddStrParamSelector] = React.useState<StrIndex20>();
+    const paramNames = useSelector(state => state.roomModule.roomState?.state?.paramNames);
+
+    if (paramNames == null) {
+        return null;
+    }
 
     const modalTitle = (() => {
         if (visibleParameterForm == null) {
@@ -54,7 +55,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
     const formItemStyle: React.CSSProperties = { margin: 0 }; // margin-bottomのデフォルト値(24px)を上書きさせている
 
     const createNumParamName = (key: StrIndex20) => {
-        const state = roomState.paramNames.get({ key, type: RoomParameterNameType.Num });
+        const state = paramNames.get({ key, type: RoomParameterNameType.Num });
         if (state == null) {
             return null;
         }
@@ -88,7 +89,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
     };
 
     const createBoolParamName = (key: StrIndex20) => {
-        const state = roomState.paramNames.get({ key, type: RoomParameterNameType.Bool });
+        const state = paramNames.get({ key, type: RoomParameterNameType.Bool });
         if (state == null) {
             return null;
         }
@@ -122,7 +123,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
     };
 
     const createStrParamName = (key: StrIndex20) => {
-        const state = roomState.paramNames.get({ key, type: RoomParameterNameType.Str });
+        const state = paramNames.get({ key, type: RoomParameterNameType.Str });
         if (state == null) {
             return null;
         }
@@ -179,7 +180,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                             strIndex20Array.map(createNumParamName)
                         }
                         {
-                            strIndex20Array.filter(key => roomState.paramNames.has({ key, type: RoomParameterNameType.Num })).length === 0 ? null : <div style={({ padding: 6 })} />
+                            strIndex20Array.filter(key => paramNames.has({ key, type: RoomParameterNameType.Num })).length === 0 ? null : <div style={({ padding: 6 })} />
                         }
                         <div style={({ display: 'flex', flexDirection: 'row' })}>
                             <Select
@@ -193,7 +194,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                                     setAddNumParamSelector(undefined);
                                 }}>
                                 {strIndex20Array.map(key => {
-                                    const hasKey = roomState.paramNames.has({ key, type: RoomParameterNameType.Num });
+                                    const hasKey = paramNames.has({ key, type: RoomParameterNameType.Num });
                                     if (hasKey) {
                                         return null;
                                     }
@@ -208,7 +209,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                                     if (addNumParamSelector == null) {
                                         return;
                                     }
-                                    const hasKey = roomState.paramNames.has({ key: addNumParamSelector, type: RoomParameterNameType.Num });
+                                    const hasKey = paramNames.has({ key: addNumParamSelector, type: RoomParameterNameType.Num });
                                     if (hasKey) {
                                         return null;
                                     }
@@ -226,7 +227,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                             strIndex20Array.map(createBoolParamName)
                         }
                         {
-                            strIndex20Array.filter(key => roomState.paramNames.has({ key, type: RoomParameterNameType.Bool })).length === 0 ? null : <div style={({ padding: 6 })} />
+                            strIndex20Array.filter(key => paramNames.has({ key, type: RoomParameterNameType.Bool })).length === 0 ? null : <div style={({ padding: 6 })} />
                         }
                         <div style={({ display: 'flex', flexDirection: 'row' })}>
                             <Select
@@ -240,7 +241,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                                     setAddBoolParamSelector(undefined);
                                 }}>
                                 {strIndex20Array.map(key => {
-                                    const hasKey = roomState.paramNames.has({ key, type: RoomParameterNameType.Bool });
+                                    const hasKey = paramNames.has({ key, type: RoomParameterNameType.Bool });
                                     if (hasKey) {
                                         return null;
                                     }
@@ -255,7 +256,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                                     if (addBoolParamSelector == null) {
                                         return;
                                     }
-                                    const hasKey = roomState.paramNames.has({ key: addBoolParamSelector, type: RoomParameterNameType.Bool });
+                                    const hasKey = paramNames.has({ key: addBoolParamSelector, type: RoomParameterNameType.Bool });
                                     if (hasKey) {
                                         return null;
                                     }
@@ -273,7 +274,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                             strIndex20Array.map(createStrParamName)
                         }
                         {
-                            strIndex20Array.filter(key => roomState.paramNames.has({ key, type: RoomParameterNameType.Str })).length === 0 ? null : <div style={({ padding: 6 })} />
+                            strIndex20Array.filter(key => paramNames.has({ key, type: RoomParameterNameType.Str })).length === 0 ? null : <div style={({ padding: 6 })} />
                         }
                         <div style={({ display: 'flex', flexDirection: 'row' })}>
                             <Select
@@ -287,7 +288,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                                     setAddStrParamSelector(undefined);
                                 }}>
                                 {strIndex20Array.map(key => {
-                                    const hasKey = roomState.paramNames.has({ key, type: RoomParameterNameType.Str });
+                                    const hasKey = paramNames.has({ key, type: RoomParameterNameType.Str });
                                     if (hasKey) {
                                         return null;
                                     }
@@ -302,7 +303,7 @@ const CharacterParameterNamesDrawer: React.FC<Props> = ({ roomState }: Props) =>
                                     if (addStrParamSelector == null) {
                                         return;
                                     }
-                                    const hasKey = roomState.paramNames.has({ key: addStrParamSelector, type: RoomParameterNameType.Str });
+                                    const hasKey = paramNames.has({ key: addStrParamSelector, type: RoomParameterNameType.Str });
                                     if (hasKey) {
                                         return null;
                                     }

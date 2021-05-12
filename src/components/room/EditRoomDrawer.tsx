@@ -3,27 +3,25 @@ import React from 'react';
 import DrawerFooter from '../../layouts/DrawerFooter';
 import ComponentsStateContext from './contexts/RoomComponentsStateContext';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
-import OperateContext from './contexts/OperateContext';
 import { DrawerProps } from 'antd/lib/drawer';
 import { editRoomDrawerVisibility } from './RoomComponentsState';
 import { Gutter } from 'antd/lib/grid/row';
 import { Room } from '../../stateManagers/states/room';
+import { useOperate } from '../../hooks/useOperate';
+import { useSelector } from '../../store';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
 };
 
-type Props = {
-    roomState: Room.State;
-}
-
 const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
-const EditRoomDrawer: React.FC<Props> = ({ roomState }: Props) => {
+const EditRoomDrawer: React.FC = () => {
     const componentsState = React.useContext(ComponentsStateContext);
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
-    const operate = React.useContext(OperateContext);
+    const operate = useOperate();
+    const name = useSelector(state => state.roomModule.roomState?.state?.name);
 
     return (
         <Drawer
@@ -44,7 +42,7 @@ const EditRoomDrawer: React.FC<Props> = ({ roomState }: Props) => {
                     <Col flex={0}>名前</Col>
                     <Col span={inputSpan}>
                         <Input size='small'
-                            value={roomState.name}
+                            value={name}
                             onChange={e => {
                                 const operation = Room.createPostOperationSetup();
                                 operation.name = { newValue: e.target.value };

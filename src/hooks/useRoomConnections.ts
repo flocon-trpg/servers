@@ -1,18 +1,24 @@
 import produce from 'immer';
 import React from 'react';
-import { RoomEventSubscription, useGetRoomConnectionsQuery } from '../generated/graphql';
+import { useGetRoomConnectionsLazyQuery, useGetRoomConnectionsQuery } from '../generated/graphql';
+import { useSelector } from '../store';
 
 export type RoomConnectionsResult = {
     readonly [userUid: string]: { readonly isConnected: boolean; readonly fetchedAt: number };
 }
 
-export function useRoomConnections({ roomId, roomEventSubscription }: { roomId: string; roomEventSubscription: RoomEventSubscription | undefined }) {
+export function useRoomConnections() {
+    const roomId = useSelector(state => state.roomModule.roomId);
+    const roomConnectionEvent = useSelector(state => state.roomModule.roomEventSubscription?.roomEvent?.roomConnectionEvent);
     const [result, setResult] = React.useState<RoomConnectionsResult>({});
-    const roomConnections = useGetRoomConnectionsQuery({ variables: { roomId }, fetchPolicy: 'network-only' });
+    const [getRoomConnections, roomConnections] = useGetRoomConnectionsLazyQuery({ fetchPolicy: 'network-only' });
 
     React.useEffect(() => {
         setResult({});
-    }, [roomId]);
+        if (roomId != null) {
+            getRoomConnections({ variables: { roomId } });
+        }
+    }, [roomId, getRoomConnections]);
     React.useEffect(() => {
         if (roomConnections.data?.result.__typename !== 'GetRoomConnectionsSuccessResult') {
             return;
@@ -25,7 +31,6 @@ export function useRoomConnections({ roomId, roomEventSubscription }: { roomId: 
         }));
     }, [roomConnections.data]);
     React.useEffect(() => {
-        const roomConnectionEvent = roomEventSubscription?.roomEvent?.roomConnectionEvent;
         if (roomConnectionEvent == null) {
             return;
         }
@@ -40,7 +45,7 @@ export function useRoomConnections({ roomId, roomEventSubscription }: { roomId: 
             }
             draft[roomConnectionEvent.userUid] = { isConnected: roomConnectionEvent.isConnected, fetchedAt: roomConnectionEvent.updatedAt };
         }));
-    }, [roomEventSubscription?.roomEvent?.roomConnectionEvent]);
+    }, [roomConnectionEvent]);
 
     return result;
 }

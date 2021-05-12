@@ -2,11 +2,13 @@ import { ApolloError } from '@apollo/client';
 import produce from 'immer';
 import React from 'react';
 import { __ } from '../@shared/collection';
-import LogNotificationContext, { text, TextNotification, TextNotificationsState } from '../components/room/contexts/LogNotificationContext';
-import {  useGetMessagesQuery, RoomMessageEventFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment, RoomPublicChannelFragment, RoomSoundEffectFragment, MyValueLogFragment, RoomEventSubscription } from '../generated/graphql';
+import { useGetMessagesQuery, RoomMessageEventFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment, RoomPublicChannelFragment, RoomSoundEffectFragment, MyValueLogFragment, RoomEventSubscription, GetRoomMessagesFailureType, useGetMessagesLazyQuery } from '../generated/graphql';
 import { appConsole } from '../utils/appConsole';
 import { PrivateChannelSet, PrivateChannelSets } from '../utils/PrivateChannelSet';
 import { usePrevious } from './usePrevious';
+import { Notification } from '../modules/roomModule';
+import { useSelector } from '../store';
+import { useMe } from './useMe';
 
 // 使い方:
 // 1. どこかでuseAllRoomMessagesを呼ぶ。冗長な通信を避けるため、useAllRoomMessagesを呼ぶ箇所はなるべく少なくする。
@@ -300,6 +302,7 @@ type AllRoomMessagesResultCore = {
     error: ApolloError;
 } | {
     type: typeof failure;
+    failureType: GetRoomMessagesFailureType;
 } | {
     type: typeof loaded;
     value: StateToReduce;
@@ -325,11 +328,20 @@ export type AllRoomMessagesResult = {
     error: ApolloError;
 } | {
     type: typeof failure;
+    failureType: GetRoomMessagesFailureType;
 } | AllRoomMessagesSuccessResult
 
 export const useAllRoomMessages = ({ roomId, roomEventSubscription }: { roomId: string; roomEventSubscription: RoomEventSubscription | undefined }): AllRoomMessagesResult => {
+    const { userUid: myUserUid } = useMe();
     const [result, setResult] = React.useState<AllRoomMessagesResultCore>({ type: loading, events: [] });
-    const messages = useGetMessagesQuery({ variables: { roomId }, fetchPolicy: 'network-only' });
+    const [getMessages, messages] = useGetMessagesLazyQuery({ fetchPolicy: 'network-only' });
+
+    React.useEffect(() => {
+        if (myUserUid == null) {
+            return;
+        }
+        getMessages({ variables: { roomId } });
+    }, [roomId, myUserUid, getMessages]);
 
     React.useEffect(() => {
         const messagesData = messages.data;
@@ -341,7 +353,8 @@ export const useAllRoomMessages = ({ roomId, roomEventSubscription }: { roomId: 
                 switch (messagesData.result.__typename) {
                     case 'GetRoomMessagesFailureResult':
                         return {
-                            type: 'failure',
+                            type: failure,
+                            failureType: messagesData.result.failureType,
                         };
                     case 'RoomMessages': {
                         const actions: RoomMessageEventFragment[] = [...oldValue.events];
@@ -407,7 +420,7 @@ export const notification = 'notification';
 
 export type Message = {
     type: typeof notification;
-    value: TextNotification;
+    value: Notification.StateElement;
 } | RoomMessage
 
 const emptyArray: Message[] = [];
@@ -415,14 +428,13 @@ const emptyArray: Message[] = [];
 // filterは、常に同じ参照にするかuseCallbackなどを使うのを忘れずに。
 // 仕様として、Roomが変わるなどでallRoomMessagesResult.valueの中身が大きく変わった場合でもそれは正常に反映されない。そのため、常に同じRoomに対するallRoomMessageResultを渡さなければならない。logNotificationsも同様。
 export const useFilteredRoomMessages = ({
-    allRoomMessagesResult,
-    logNotifications,
     filter,
 }: {
-    allRoomMessagesResult: AllRoomMessagesResult;
-    logNotifications?: TextNotificationsState;
     filter?: (message: Message) => boolean;
 }): ReadonlyArray<Message> => {
+    const logNotifications = useSelector(state => state.roomModule.notifications);
+    const allRoomMessagesResult = useSelector(state => state.roomModule.allRoomMessagesResult);
+
     const [result, setResult] = React.useState<Message[] | null>(null);
 
     const prevAllRoomMessagesResult = usePrevious(allRoomMessagesResult);
@@ -434,7 +446,7 @@ export const useFilteredRoomMessages = ({
     };
 
     React.useEffect(() => {
-        const toRoomMessages = () => allRoomMessagesResult.type === loaded || allRoomMessagesResult.type === newEvent ? allRoomMessagesResult.value.messages : [];
+        const toRoomMessages = () => allRoomMessagesResult?.type === loaded || allRoomMessagesResult?.type === newEvent ? allRoomMessagesResult.value.messages : [];
         const toNotificationMessages = () => {
             if (logNotifications == null) {
                 return [];
@@ -451,7 +463,7 @@ export const useFilteredRoomMessages = ({
 
             let result = oldValue;
             if (allRoomMessagesResult !== prevAllRoomMessagesResult) {
-                switch (allRoomMessagesResult.type) {
+                switch (allRoomMessagesResult?.type) {
                     case newEvent:
                         result = reduceMessages(result, allRoomMessagesResult.event, filter ?? (() => true));
                         break;
@@ -477,17 +489,13 @@ export const useFilteredRoomMessages = ({
 
 // filterとthenMapは、常に同じ参照にするかuseCallbackなどを使うのを忘れずに。
 export const useFilteredAndMapRoomMessages = <TResult>({
-    allRoomMessagesResult,
-    logNotifications,
     filter,
     thenMap,
 }: {
-    allRoomMessagesResult: AllRoomMessagesResult;
-    logNotifications: TextNotificationsState;
     filter?: (message: Message) => boolean;
     thenMap: (message: ReadonlyArray<Message>) => ReadonlyArray<TResult>;
 }): ReadonlyArray<TResult> => {
-    const nonMappedResult = useFilteredRoomMessages({ allRoomMessagesResult, logNotifications, filter });
+    const nonMappedResult = useFilteredRoomMessages({ filter });
     const [result, setResult] = React.useState<ReadonlyArray<TResult>>([]);
     React.useEffect(() => {
         setResult(thenMap(nonMappedResult));
