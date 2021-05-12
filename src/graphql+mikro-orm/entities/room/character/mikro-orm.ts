@@ -29,6 +29,7 @@ export abstract class CharaBase {
         this.stateId = stateId;
         this.isPrivate = isPrivate;
         this.name = name;
+        this.privateVarToml = '';
     }
 
     @PrimaryKey()
@@ -49,6 +50,11 @@ export abstract class CharaBase {
 
     @Property()
     public name: string;
+
+    // のちのち必要になったらpublicVarTomlも追加するかもしれない
+    // CONSIDER: デフォルトではPostgreSQLの場合varchar(255)になるため、lengthを設定している。値は適当（MySQLの最大値）。
+    @Property({ nullable: true, default: '', length: 65536 })
+    public privateVarToml!: string;
 
     // CONSIDER: デフォルトではPostgreSQLの場合varchar(255)になるため、lengthを設定している。値は適当（MySQLの最大値）。
     @Property({ nullable: true, length: 65535 })
@@ -199,6 +205,9 @@ export class UpdateCharaOp {
 
     @Property({ nullable: true })
     public name?: string;
+
+    @Property({ nullable: true })
+    public privateVarToml?: string;
 
     @Property({ type: JsonType, nullable: true })
     public image?: ReplaceNullableFilePathDownOperation;

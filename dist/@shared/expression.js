@@ -6,120 +6,219 @@ exports.plain = 'plain';
 exports.expr1 = 'expr1';
 const expr2 = 'expr2';
 const toExpressionCore = (text) => {
+    const bareKey = /[a-zA-Z0-9_-]/;
     const head = [];
-    let tail = null;
-    const append = (source, text) => {
-        switch (source === null || source === void 0 ? void 0 : source.type) {
-            case undefined:
-                return { type: exports.plain, text };
-            case exports.plain:
-            case exports.expr1:
-            case expr2:
-                return Object.assign(Object.assign({}, source), { text: source.text + text });
-        }
+    let tail = {
+        type: exports.plain,
+        text: '',
     };
     const charArray = text.split('');
     let cursor = 0;
-    let isInExpr = false;
-    let braCountInExpr = 0;
     for (; cursor < charArray.length; cursor++) {
         const char = charArray[cursor];
         if (char === undefined) {
             throw 'this should not happen. charArray out of range.';
         }
-        switch (char) {
-            case '\\': {
-                const nextChar = charArray[cursor + 1];
-                switch (nextChar) {
-                    case '{':
-                    case '}':
+        switch (tail.type) {
+            case exports.plain:
+                switch (char) {
+                    case '\\': {
+                        const nextChar = charArray[cursor + 1];
+                        if (nextChar == null) {
+                            return Result_1.ResultModule.error({ message: '末尾を \\ にすることはできません。', index: cursor });
+                        }
                         cursor++;
-                        tail = append(tail, nextChar);
+                        tail = Object.assign(Object.assign({}, tail), { text: tail.text + nextChar });
                         continue;
-                    default:
-                        if (isInExpr) {
+                    }
+                    case '{': {
+                        const nextChar = charArray[cursor + 1];
+                        if (tail != null) {
+                            head.push(tail);
+                        }
+                        if (nextChar === '{') {
                             cursor++;
-                            tail = append(tail, nextChar);
+                            tail = {
+                                type: expr2,
+                                path: [],
+                                reading: {
+                                    type: 'Begin',
+                                }
+                            };
                             continue;
                         }
-                        break;
-                }
-                tail = append(tail, nextChar);
-                continue;
-            }
-            case '{': {
-                if (isInExpr) {
-                    braCountInExpr++;
-                    tail = append(tail, '{');
-                    continue;
-                }
-                const nextChar = charArray[cursor + 1];
-                if (nextChar === '{') {
-                    cursor++;
-                    isInExpr = true;
-                    if (tail != null) {
-                        head.push(tail);
+                        tail = {
+                            type: exports.expr1,
+                            path: [],
+                            reading: {
+                                type: 'Begin',
+                            }
+                        };
+                        continue;
                     }
-                    tail = { type: expr2, text: '' };
-                    continue;
-                }
-                isInExpr = true;
-                if (tail != null) {
-                    head.push(tail);
-                }
-                tail = { type: exports.expr1, text: '' };
-                continue;
-            }
-            case '}': {
-                if (braCountInExpr >= 1) {
-                    braCountInExpr--;
-                    tail = append(tail, '}');
-                    continue;
-                }
-                const nextChar = charArray[cursor + 1];
-                if (nextChar === '}') {
-                    switch (tail === null || tail === void 0 ? void 0 : tail.type) {
-                        case undefined:
-                        case exports.plain:
-                            return Result_1.ResultModule.error({ index: cursor + 1, message: '}}に対応する{{がありません。' });
-                        case exports.expr1:
-                            return Result_1.ResultModule.error({ index: cursor + 1, message: '{を}}で閉じることはできません。' });
+                    case '}': {
+                        return Result_1.ResultModule.error({ message: '} に対応する { が見つかりません。', index: cursor });
                     }
-                    cursor++;
-                    isInExpr = false;
-                    if (tail != null) {
-                        head.push(tail);
+                    default: {
+                        tail = Object.assign(Object.assign({}, tail), { text: tail.text + char });
+                        continue;
                     }
-                    tail = null;
-                    continue;
                 }
-                switch (tail === null || tail === void 0 ? void 0 : tail.type) {
-                    case undefined:
-                    case exports.plain:
-                        return Result_1.ResultModule.error({ index: cursor + 1, message: '}に対応する{がありません。' });
-                    case expr2:
-                        return Result_1.ResultModule.error({ index: cursor + 1, message: '{{を}で閉じることはできません。' });
+            case exports.expr1:
+            case expr2: {
+                if (char === '}') {
+                    switch (tail.reading.type) {
+                        case 'Begin':
+                            return Result_1.ResultModule.error({ message: 'プロパティを空にすることはできません。', index: cursor });
+                        case 'Bare':
+                        case 'EndOfProp': {
+                            if (tail.type === exports.expr1) {
+                                head.push({
+                                    type: exports.expr1,
+                                    path: tail.reading.type === 'Bare' ? [...tail.path, tail.reading.text] : tail.path,
+                                });
+                                tail = { type: exports.plain, text: '' };
+                                continue;
+                            }
+                            const nextChar = charArray[cursor + 1];
+                            if (nextChar !== '}') {
+                                return Result_1.ResultModule.error({ message: '{{ を } で閉じることはできません。', index: cursor });
+                            }
+                            continue;
+                        }
+                        default:
+                            break;
+                    }
                 }
-                if (tail != null) {
-                    head.push(tail);
+                switch (tail.reading.type) {
+                    case 'Begin': {
+                        switch (char) {
+                            case ' ':
+                                continue;
+                            case '\'': {
+                                tail = Object.assign(Object.assign({}, tail), { reading: { type: 'InSingleQuote', text: '' } });
+                                continue;
+                            }
+                            case '"': {
+                                tail = Object.assign(Object.assign({}, tail), { reading: { type: 'InDoubleQuote', text: '' } });
+                                continue;
+                            }
+                            default: {
+                                if (!bareKey.test(char)) {
+                                    return Result_1.ResultModule.error({ message: `${char} はこの場所で使うことはできません。`, index: cursor });
+                                }
+                                tail = Object.assign(Object.assign({}, tail), { reading: {
+                                        type: 'Bare',
+                                        text: char,
+                                    } });
+                                continue;
+                            }
+                        }
+                    }
+                    case 'EndOfProp': {
+                        switch (char) {
+                            case ' ':
+                                continue;
+                            case '.': {
+                                tail = Object.assign(Object.assign({}, tail), { reading: { type: 'Begin' } });
+                                continue;
+                            }
+                            default: {
+                                return Result_1.ResultModule.error({ message: `${char} はこの場所で使うことはできません。`, index: cursor });
+                            }
+                        }
+                    }
+                    case 'Bare': {
+                        switch (char) {
+                            case ' ': {
+                                tail = Object.assign(Object.assign({}, tail), { path: [...tail.path, tail.reading.text], reading: { type: 'EndOfProp' } });
+                                continue;
+                            }
+                            case '.':
+                                tail = {
+                                    type: tail.type,
+                                    path: [...tail.path, tail.reading.text],
+                                    reading: {
+                                        type: 'Begin',
+                                    }
+                                };
+                                continue;
+                            default: {
+                                if (!bareKey.test(char)) {
+                                    return Result_1.ResultModule.error({ message: `${char} は ' か " で囲む必要があります。`, index: cursor });
+                                }
+                                tail = Object.assign(Object.assign({}, tail), { reading: {
+                                        type: 'Bare',
+                                        text: tail.reading.text + char,
+                                    } });
+                                continue;
+                            }
+                        }
+                    }
+                    case 'InDoubleQuote': {
+                        switch (char) {
+                            case '"': {
+                                tail = Object.assign(Object.assign({}, tail), { path: [...tail.path, tail.reading.text], reading: {
+                                        type: 'EndOfProp',
+                                    } });
+                                continue;
+                            }
+                            case '\\': {
+                                const nextChar = charArray[cursor + 1];
+                                switch (nextChar) {
+                                    case '"':
+                                        tail = Object.assign(Object.assign({}, tail), { reading: {
+                                                type: tail.reading.type,
+                                                text: tail.reading.text + '"'
+                                            } });
+                                        cursor++;
+                                        continue;
+                                    case '\\': {
+                                        tail = Object.assign(Object.assign({}, tail), { reading: {
+                                                type: tail.reading.type,
+                                                text: tail.reading.text + '\\'
+                                            } });
+                                        cursor++;
+                                        continue;
+                                    }
+                                    case undefined:
+                                        return Result_1.ResultModule.error({ message: 'エスケープ文字の次に文字がありません。', index: cursor });
+                                    default:
+                                        return Result_1.ResultModule.error({ message: `\\${nextChar} は無効なエスケープシーケンスです。`, index: cursor });
+                                }
+                            }
+                            default:
+                                tail = Object.assign(Object.assign({}, tail), { reading: {
+                                        type: tail.reading.type,
+                                        text: tail.reading.text + char,
+                                    } });
+                                continue;
+                        }
+                    }
+                    case 'InSingleQuote': {
+                        switch (char) {
+                            case '\'':
+                                tail = Object.assign(Object.assign({}, tail), { path: [...tail.path, tail.reading.text], reading: { type: 'EndOfProp' } });
+                                continue;
+                            default:
+                                tail = Object.assign(Object.assign({}, tail), { reading: {
+                                        type: tail.reading.type,
+                                        text: tail.reading.text + char,
+                                    } });
+                                continue;
+                        }
+                    }
                 }
-                tail = null;
-                continue;
             }
-            default:
-                tail = append(tail, char);
-                continue;
         }
     }
-    switch (tail === null || tail === void 0 ? void 0 : tail.type) {
-        case undefined:
-            return Result_1.ResultModule.ok(head);
+    switch (tail.type) {
         case exports.plain:
             return Result_1.ResultModule.ok([...head, tail]);
         case exports.expr1:
-            return Result_1.ResultModule.error({ index: cursor + 1, message: '}に対応する{がありません。' });
+            return Result_1.ResultModule.error({ index: cursor + 1, message: '} に対応する { がありません。' });
         case expr2:
-            return Result_1.ResultModule.error({ index: cursor + 1, message: '}}に対応する{{がありません。' });
+            return Result_1.ResultModule.error({ index: cursor + 1, message: '}} に対応する {{ がありません。' });
     }
 };
 const analyze = (text) => {
@@ -129,14 +228,18 @@ const analyze = (text) => {
     }
     const result = [];
     for (const expr of expressions.value) {
-        if (expr.type === expr2) {
-            return Result_1.ResultModule.error('{{と}}で囲む構文は将来のために予約されているため、現在は使用することはできません。');
+        switch (expr.type) {
+            case expr2:
+                return Result_1.ResultModule.error('{{と}}で囲む構文は将来のために予約されているため、現在は使用することはできません。');
+            case exports.expr1:
+                result.push({ type: exports.expr1, path: expr.path });
+                continue;
+            default:
+                if (expr.text !== '') {
+                    result.push({ type: exports.plain, text: expr.text });
+                }
+                continue;
         }
-        if (expr.type === exports.expr1) {
-            result.push({ type: exports.expr1, variable: expr.text });
-            continue;
-        }
-        result.push(expr);
     }
     return Result_1.ResultModule.ok(result);
 };

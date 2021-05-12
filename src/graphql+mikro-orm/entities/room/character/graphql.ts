@@ -16,6 +16,9 @@ export class CharacterValueState {
     @Field()
     public name!: string;
 
+    @Field({ nullable: true, description: '自分のCharacter ⇔ non-nullish' })
+    public privateVarToml?: string;
+
     @Field(() => FilePath, { nullable: true })
     public image?: FilePath;
 
@@ -64,6 +67,9 @@ export class CharacterOperation {
     public name?: ReplaceStringUpOperation;
 
     @Field({ nullable: true })
+    public privateVarToml?: ReplaceStringUpOperation;
+
+    @Field({ nullable: true })
     public image?: ReplaceNullableFilePathUpOperation;
 
     @Field({ nullable: true })
@@ -71,7 +77,7 @@ export class CharacterOperation {
 
     @Field()
     public boolParams!: BoolParamsOperation;
-    
+
     @Field()
     public numParams!: NumParamsOperation;
 

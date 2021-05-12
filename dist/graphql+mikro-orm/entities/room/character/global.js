@@ -127,6 +127,7 @@ var GlobalCharacter;
                             tachieLocations: tachieLocations.value,
                             isPrivate: entity.isPrivate == null ? undefined : { oldValue: entity.isPrivate },
                             name: entity.name == null ? undefined : { oldValue: entity.name },
+                            privateVarToml: entity.privateVarToml == null ? undefined : { oldValue: entity.privateVarToml },
                             image: entity.image,
                             tachieImage: entity.tachieImage
                         });
@@ -143,7 +144,7 @@ var GlobalCharacter;
                 if (!createdByMe && source.isPrivate) {
                     return undefined;
                 }
-                return Object.assign(Object.assign({}, source), { boolParams: global_3.GlobalBoolParam.Global.ToGraphQL.stateMany({ source: source.boolParams, createdByMe }), numParams: global_4.GlobalNumParam.Global.ToGraphQL.stateMany({ source: source.numParams, createdByMe }), numMaxParams: global_4.GlobalNumParam.Global.ToGraphQL.stateMany({ source: source.numMaxParams, createdByMe }), strParams: global_5.GlobalStrParam.Global.ToGraphQL.stateMany({ source: source.strParams, createdByMe }), pieces: global_2.GlobalPiece.Global.ToGraphQL.stateMany({ source: source.pieces, createdByMe }), tachieLocations: global_6.GlobalBoardLocation.Global.ToGraphQL.stateMany({ source: source.tachieLocations, createdByMe }) });
+                return Object.assign(Object.assign({}, source), { privateVarToml: createdByMe ? source.privateVarToml : undefined, boolParams: global_3.GlobalBoolParam.Global.ToGraphQL.stateMany({ source: source.boolParams, createdByMe }), numParams: global_4.GlobalNumParam.Global.ToGraphQL.stateMany({ source: source.numParams, createdByMe }), numMaxParams: global_4.GlobalNumParam.Global.ToGraphQL.stateMany({ source: source.numMaxParams, createdByMe }), strParams: global_5.GlobalStrParam.Global.ToGraphQL.stateMany({ source: source.strParams, createdByMe }), pieces: global_2.GlobalPiece.Global.ToGraphQL.stateMany({ source: source.pieces, createdByMe }), tachieLocations: global_6.GlobalBoardLocation.Global.ToGraphQL.stateMany({ source: source.tachieLocations, createdByMe }) });
             };
             ToGraphQL.stateMany = ({ source, requestedBy }) => {
                 const result = [];
@@ -217,7 +218,7 @@ var GlobalCharacter;
                         return {
                             createdBy: key.first,
                             id: key.second,
-                            operation: Object.assign(Object.assign({}, operation), { boolParams,
+                            operation: Object.assign(Object.assign({}, operation), { privateVarToml: Types_1.RequestedBy.createdByMe({ requestedBy, userUid: key.first }) ? operation.privateVarToml : undefined, boolParams,
                                 numParams,
                                 numMaxParams,
                                 strParams,
@@ -284,6 +285,10 @@ var GlobalCharacter;
                         if (value.operation.name != null) {
                             target.name = value.operation.name.newValue;
                             op.name = value.operation.name.oldValue;
+                        }
+                        if (value.operation.privateVarToml != null) {
+                            target.privateVarToml = value.operation.privateVarToml.newValue;
+                            op.privateVarToml = value.operation.privateVarToml.oldValue;
                         }
                         em.persist(op);
                         continue;
@@ -412,6 +417,7 @@ var GlobalCharacter;
             const valueProps = {
                 isPrivate: Operations_1.ReplaceBooleanDownOperationModule.compose(first.isPrivate, second.isPrivate),
                 name: Operations_1.ReplaceStringDownOperationModule.compose(first.name, second.name),
+                privateVarToml: Operations_1.ReplaceStringDownOperationModule.compose(first.privateVarToml, second.privateVarToml),
                 image: Operations_1.ReplaceNullableFilePathDownOperationModule.compose(first.image, second.image),
                 tachieImage: Operations_1.ReplaceNullableFilePathDownOperationModule.compose(first.tachieImage, second.tachieImage),
                 boolParams: (_a = boolParams.value) !== null && _a !== void 0 ? _a : new Map(),
@@ -424,7 +430,7 @@ var GlobalCharacter;
             return Result_1.ResultModule.ok(valueProps);
         },
         restore: ({ key, nextState, downOperation }) => {
-            var _a, _b, _c, _d;
+            var _a, _b, _c, _d, _e;
             if (downOperation === undefined) {
                 return Result_1.ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
             }
@@ -500,10 +506,14 @@ var GlobalCharacter;
                 prevState.name = downOperation.name.oldValue;
                 twoWayOperation.name = Object.assign(Object.assign({}, downOperation.name), { newValue: nextState.name });
             }
+            if (downOperation.privateVarToml !== undefined) {
+                prevState.privateVarToml = downOperation.privateVarToml.oldValue;
+                twoWayOperation.privateVarToml = Object.assign(Object.assign({}, downOperation.privateVarToml), { newValue: (_e = nextState.privateVarToml) !== null && _e !== void 0 ? _e : '' });
+            }
             return Result_1.ResultModule.ok({ prevState, twoWayOperation });
         },
         transform: ({ key, prevState, currentState, clientOperation, serverOperation }) => {
-            var _a, _b, _c, _d, _e, _f;
+            var _a, _b, _c, _d, _e, _f, _g;
             if (!Types_1.RequestedBy.createdByMe({ requestedBy: operatedBy, userUid: key.first }) && currentState.isPrivate) {
                 return Result_1.ResultModule.ok(undefined);
             }
@@ -587,12 +597,20 @@ var GlobalCharacter;
                 second: clientOperation.name,
                 prevState: prevState.name,
             });
+            if (Types_1.RequestedBy.createdByMe({ requestedBy: operatedBy, userUid: key.first })) {
+                twoWayOperation.privateVarToml = Operations_1.ReplaceStringTwoWayOperationModule.transform({
+                    first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.privateVarToml,
+                    second: clientOperation.privateVarToml,
+                    prevState: (_g = prevState.privateVarToml) !== null && _g !== void 0 ? _g : '',
+                });
+            }
             if (helpers_1.undefinedForAll(twoWayOperation) && boolParams.value.size === 0 && numParams.value.size === 0 && numMaxParams.value.size === 0 && strParams.value.size === 0 && pieces.value.isEmpty && tachieLocations.value.isEmpty) {
                 return Result_1.ResultModule.ok(undefined);
             }
             return Result_1.ResultModule.ok(Object.assign(Object.assign({}, twoWayOperation), { boolParams: boolParams.value, numParams: numParams.value, numMaxParams: numMaxParams.value, strParams: strParams.value, pieces: pieces.value, tachieLocations: tachieLocations.value }));
         },
         diff: ({ key, prevState, nextState }) => {
+            var _a, _b;
             const boolParamsTransformer = createBoolParamsTransformer(Types_1.RequestedBy.createdByMe({ requestedBy: operatedBy, userUid: key.first }));
             const boolParams = boolParamsTransformer.diff({
                 prevState: prevState.boolParams,
@@ -634,6 +652,9 @@ var GlobalCharacter;
             }
             if (prevState.name !== nextState.name) {
                 resultType.name = { oldValue: prevState.name, newValue: nextState.name };
+            }
+            if (prevState.privateVarToml !== nextState.privateVarToml) {
+                resultType.privateVarToml = { oldValue: (_a = prevState.privateVarToml) !== null && _a !== void 0 ? _a : '', newValue: (_b = nextState.privateVarToml) !== null && _b !== void 0 ? _b : '' };
             }
             if (helpers_1.undefinedForAll(resultType) && boolParams.size === 0 && numParams.size === 0 && numMaxParams.size === 0 && strParams.size === 0 && pieces.isEmpty && tachieLocations.isEmpty) {
                 return undefined;
@@ -701,6 +722,9 @@ var GlobalCharacter;
             }
             if (downOperation.name !== undefined) {
                 result.name = downOperation.name.oldValue;
+            }
+            if (downOperation.privateVarToml !== undefined) {
+                result.privateVarToml = downOperation.privateVarToml.oldValue;
             }
             return Result_1.ResultModule.ok(result);
         },

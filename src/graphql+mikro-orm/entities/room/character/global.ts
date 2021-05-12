@@ -5,26 +5,24 @@ import { Result, ResultModule } from '../../../../@shared/Result';
 import { undefinedForAll } from '../../../../utils/helpers';
 import { EM } from '../../../../utils/types';
 import { createDownOperationFromMikroORM, createUpOperationFromGraphQL, ReadonlyDualKeyMapDownOperation, ReadonlyDualKeyMapTwoWayOperation, ReadonlyDualKeyMapUpOperation, replace, toGraphQLWithState, update } from '../../../dualKeyMapOperations';
-import { ReadonlyMapDownOperation, ReadonlyMapTwoWayOperation, ReadonlyMapUpOperation } from '../../../mapOperations';
 import { ReplaceBooleanDownOperation, ReplaceBooleanDownOperationModule, ReplaceBooleanTwoWayOperation, ReplaceBooleanTwoWayOperationModule, ReplaceBooleanUpOperation, ReplaceNullableFilePathDownOperation, ReplaceNullableFilePathDownOperationModule, ReplaceNullableFilePathTwoWayOperation, ReplaceNullableFilePathTwoWayOperationModule, ReplaceNullableFilePathUpOperation, ReplaceStringDownOperation, ReplaceStringDownOperationModule, ReplaceStringTwoWayOperation, ReplaceStringTwoWayOperationModule, ReplaceStringUpOperation } from '../../../Operations';
-import { toGraphQL } from '../../../paramMapOperations';
 import { FilePath } from '../../filePath/global';
-import { DualKeyMapTransformer, MapTransformer, ParamMapTransformer, TransformerFactory } from '../../global';
+import { DualKeyMapTransformer, ParamMapTransformer, TransformerFactory } from '../../global';
 import { GlobalPiece } from '../../piece/global';
 import { Room, RoomOp } from '../mikro-orm';
-import { stateToGraphQL } from '../../roomAsListItem/global';
 import { GlobalBoolParam } from './boolParam/global';
 import { CharactersOperation, CharacterState, CharacterValueState } from './graphql';
-import { AddCharaOp, Chara, CharaBase, RemoveCharaOp, UpdateCharaOp } from './mikro-orm';
+import { AddCharaOp, Chara, RemoveCharaOp, UpdateCharaOp } from './mikro-orm';
 import { GlobalNumParam } from './numParam/global';
 import { GlobalStrParam } from './strParam/global';
-import { RequestedBy, server } from '../../../Types';
+import { RequestedBy } from '../../../Types';
 import { GlobalBoardLocation } from '../../boardLocation/global';
 
 export namespace GlobalCharacter {
     type StateTypeValue = {
         isPrivate: boolean;
         name: string;
+        privateVarToml?: string;
         image?: FilePath;
         tachieImage?: FilePath;
     }
@@ -41,6 +39,7 @@ export namespace GlobalCharacter {
     type DownOperationTypeValue = {
         isPrivate?: ReplaceBooleanDownOperation;
         name?: ReplaceStringDownOperation;
+        privateVarToml?: ReplaceStringDownOperation;
         image?: ReplaceNullableFilePathDownOperation;
         tachieImage?: ReplaceNullableFilePathDownOperation;
     }
@@ -57,6 +56,7 @@ export namespace GlobalCharacter {
     type UpOperationTypeValue = {
         isPrivate?: ReplaceBooleanUpOperation;
         name?: ReplaceStringUpOperation;
+        privateVarToml?: ReplaceStringUpOperation;
         image?: ReplaceNullableFilePathUpOperation;
         tachieImage?: ReplaceNullableFilePathUpOperation;
     }
@@ -73,6 +73,7 @@ export namespace GlobalCharacter {
     type TwoWayOperationTypeValue = {
         isPrivate?: ReplaceBooleanTwoWayOperation;
         name?: ReplaceStringTwoWayOperation;
+        privateVarToml?: ReplaceStringTwoWayOperation;
         image?: ReplaceNullableFilePathTwoWayOperation;
         tachieImage?: ReplaceNullableFilePathTwoWayOperation;
     }
@@ -220,6 +221,7 @@ export namespace GlobalCharacter {
                             tachieLocations: tachieLocations.value,
                             isPrivate: entity.isPrivate == null ? undefined : { oldValue: entity.isPrivate },
                             name: entity.name == null ? undefined : { oldValue: entity.name },
+                            privateVarToml: entity.privateVarToml == null ? undefined : { oldValue: entity.privateVarToml },
                             image: entity.image,
                             tachieImage: entity.tachieImage
                         });
@@ -237,6 +239,7 @@ export namespace GlobalCharacter {
                 }
                 return {
                     ...source,
+                    privateVarToml: createdByMe ? source.privateVarToml : undefined,
                     boolParams: GlobalBoolParam.Global.ToGraphQL.stateMany({ source: source.boolParams, createdByMe }),
                     numParams: GlobalNumParam.Global.ToGraphQL.stateMany({ source: source.numParams, createdByMe }),
                     numMaxParams: GlobalNumParam.Global.ToGraphQL.stateMany({ source: source.numMaxParams, createdByMe }),
@@ -331,6 +334,7 @@ export namespace GlobalCharacter {
                             id: key.second,
                             operation: {
                                 ...operation,
+                                privateVarToml: RequestedBy.createdByMe({ requestedBy, userUid: key.first }) ? operation.privateVarToml : undefined,
                                 boolParams,
                                 numParams,
                                 numMaxParams,
@@ -424,6 +428,10 @@ export namespace GlobalCharacter {
                         if (value.operation.name != null) {
                             target.name = value.operation.name.newValue;
                             op.name = value.operation.name.oldValue;
+                        }
+                        if (value.operation.privateVarToml != null) {
+                            target.privateVarToml= value.operation.privateVarToml.newValue;
+                            op.privateVarToml = value.operation.privateVarToml.oldValue;
                         }
 
                         em.persist(op);
@@ -573,6 +581,7 @@ export namespace GlobalCharacter {
             const valueProps: DownOperationType = {
                 isPrivate: ReplaceBooleanDownOperationModule.compose(first.isPrivate, second.isPrivate),
                 name: ReplaceStringDownOperationModule.compose(first.name, second.name),
+                privateVarToml: ReplaceStringDownOperationModule.compose(first.privateVarToml, second.privateVarToml),
                 image: ReplaceNullableFilePathDownOperationModule.compose(first.image, second.image),
                 tachieImage: ReplaceNullableFilePathDownOperationModule.compose(first.tachieImage, second.tachieImage),
                 boolParams: boolParams.value ?? new Map(),
@@ -676,6 +685,10 @@ export namespace GlobalCharacter {
                 prevState.name = downOperation.name.oldValue;
                 twoWayOperation.name = { ...downOperation.name, newValue: nextState.name };
             }
+            if (downOperation.privateVarToml !== undefined) {
+                prevState.privateVarToml = downOperation.privateVarToml.oldValue;
+                twoWayOperation.privateVarToml = { ...downOperation.privateVarToml, newValue: nextState.privateVarToml ?? '' };
+            }
 
             return ResultModule.ok({ prevState, twoWayOperation });
         },
@@ -771,6 +784,13 @@ export namespace GlobalCharacter {
                 second: clientOperation.name,
                 prevState: prevState.name,
             });
+            if (RequestedBy.createdByMe({ requestedBy: operatedBy, userUid: key.first })) {
+                twoWayOperation.privateVarToml = ReplaceStringTwoWayOperationModule.transform({
+                    first: serverOperation?.privateVarToml,
+                    second: clientOperation.privateVarToml,
+                    prevState: prevState.privateVarToml ?? '',
+                });
+            }
 
             if (undefinedForAll(twoWayOperation) && boolParams.value.size === 0 && numParams.value.size === 0 && numMaxParams.value.size === 0 && strParams.value.size === 0 && pieces.value.isEmpty && tachieLocations.value.isEmpty) {
                 return ResultModule.ok(undefined);
@@ -828,6 +848,9 @@ export namespace GlobalCharacter {
             }
             if (prevState.name !== nextState.name) {
                 resultType.name = { oldValue: prevState.name, newValue: nextState.name };
+            }
+            if (prevState.privateVarToml !== nextState.privateVarToml) {
+                resultType.privateVarToml = { oldValue: prevState.privateVarToml ?? '', newValue: nextState.privateVarToml ?? '' };
             }
             if (undefinedForAll(resultType) && boolParams.size === 0 && numParams.size === 0 && numMaxParams.size === 0 && strParams.size === 0 && pieces.isEmpty && tachieLocations.isEmpty) {
                 return undefined;
@@ -909,6 +932,9 @@ export namespace GlobalCharacter {
             }
             if (downOperation.name !== undefined) {
                 result.name = downOperation.name.oldValue;
+            }
+            if (downOperation.privateVarToml !== undefined) {
+                result.privateVarToml = downOperation.privateVarToml.oldValue;
             }
 
             return ResultModule.ok(result);

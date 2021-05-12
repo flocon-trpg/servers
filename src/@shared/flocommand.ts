@@ -1,175 +1,137 @@
 /* eslint-disable @typescript-eslint/no-namespace */
-import { JSONSchemaType } from 'ajv';
+import * as t from 'io-ts';
+import JTOML from '@ltd/j-toml';
+import { Result, ResultModule } from './Result';
 
 namespace Util {
-    export type WhereNum = {
-        is?: number;
-        isNot?: number;
-    } | number;
-
-    export const whereNumSchema: JSONSchemaType<WhereNum> = {
-        oneOf: [
-            {
-                type: 'object',
-                properties: { is: { type: 'number', nullable: true }, isNot: { type: 'number', nullable: true } },
-                additionalProperties: false,
-            }, {
-                type: ['number'],
-            }
-        ]
-    };
-
-    export type WhereStr = {
-        is?: string;
-        isNot?: string;
-    } | string;
-
-    export const whereStrSchema: JSONSchemaType<WhereStr> = {
-        oneOf: [
-            {
-                type: 'object',
-                properties: { is: { type: 'string', nullable: true }, isNot: { type: 'string', nullable: true } },
-                additionalProperties: false,
-            }, {
-                type: ['string'],
-            }
-        ],
-    };
-
-    export type WhereId = {
-        userId: WhereStr;
-        mainId: WhereStr;
-    } | WhereStr;
-
-    export const whereIdSchema: JSONSchemaType<WhereId> = {
-        oneOf: [
-            ...whereStrSchema.oneOf,
-            {
-                type: 'object',
-                properties: { userId: whereStrSchema, mainId: whereStrSchema },
-                additionalProperties: false,
-                required: ['userId', 'mainId'],
-            }
-        ]
-    };
-
-    export type SetImage = {
-        src: string;
-        type: string;
-    } | string;
-
-    export const setImageSchema: JSONSchemaType<SetImage> = {
-        oneOf: [{
-            type: 'object',
-            properties: {
-                src: { type: 'string' },
-                type: { type: 'string' },
-            },
-            required: ['src', 'type'],
-        }, {
-            type: ['string']
-        }]
-    };
+    const setImageObject = t.type({
+        src: t.string,
+        type: t.string,
+    });
+    export const setImage = t.union([setImageObject, t.string]);
+    export type SetImage = t.TypeOf<typeof setImage>;
 }
 
 namespace Character {
-    type CharacterWhere = {
-        id?: Util.WhereId;
-        name?: Util.WhereStr;
-    }
+    const setCharacter = t.partial({
+        name: t.string,
+        image: Util.setImage,
+    });
 
-    const requiredCharacterWhereSchema: JSONSchemaType<Required<CharacterWhere>> = {
-        type: 'object',
-        properties: {
-            id: Util.whereIdSchema,
-            name: Util.whereStrSchema,
-        },
-        additionalProperties: false,
-        required: ['id', 'name']
-    };
+    export const action = t.partial({
+        set: setCharacter,
+    });
 
-    // propertyがoneOfかつnullableの場合は型チェックがうまくいかないっぽいので、まず型サポートを最大限受けられるschemaをまず書いて、それを少し調整してからasでキャストしている。
-    const characterWhereSchema = {
-        ...requiredCharacterWhereSchema,
-        required: undefined,
-    } as JSONSchemaType<CharacterWhere>;
-
-
-    type Set = {
-        image?: string;
-        name?: string;
-    }
-
-    const setSchema: JSONSchemaType<Set> = {
-        type: 'object',
-        properties: {
-            image: {
-                type: 'string',
-                nullable: true,
-            },
-            name: {
-                type: 'string',
-                nullable: true,
-            }
-        },
-        additionalProperties: false,
-    };
-
-    export type Action = {
-        set?: Set;
-    }
-
-    export const actionSchema: JSONSchemaType<Action> = {
-        type: 'object',
-        properties: {
-            set: { ...setSchema, nullable: true },
-        },
-        additionalProperties: false,
-    };
+    export type Action = t.TypeOf<typeof action>;
 }
 
 namespace Message {
-    type Write = {
-        text: string;
-        // TODO: チャンネルも設ける
-    }
+    const write = t.type({
+        text: t.string,
+    });
 
-    const writeSchema: JSONSchemaType<Write> = {
-        type: 'object',
-        properties: {
-            text: { type: 'string' }
-        },
-        required: ['text'],
-        additionalProperties: false,
-    };
+    export const action = t.partial({
+        write,
+    });
 
-    export type Action = {
-        write?: Write;
-    }
-
-    export const actionSchema: JSONSchemaType<Action> = {
-        type: 'object',
-        properties: {
-            write: { ...writeSchema, nullable: true },
-        },
-        additionalProperties: false,
-    };
+    export type Action = t.TypeOf<typeof action>;
 }
 
-export type CharacterAction = {
-    title?: string;
-    character?: Character.Action;
-    // CompositeActionみたいなものを定義してそれらをグループ化するというのも考えられる。そうすることで、characterのoperateは成功したけどmessageの投稿だけ失敗したので、messageだけ再度コマンドを実行したい、ということが可能になる。
-    // CharacterAction.messageは廃止して別の場所でActionを定義してそれをグループ化する、というのも考えられるが、message内でCharacterをContextとして利用できなくなるのでもしかしたら不便な場面ができてしまうかも？
-    message?: Message.Action;
-}
-
-export const characterActionSchema: JSONSchemaType<CharacterAction> = {
-    type: 'object',
-    properties: {
-        title: { type: 'string', nullable: true },
-        character: { ...Character.actionSchema, nullable: true },
-        message: { ...Message.actionSchema, nullable: true },
+type TomlDateTime = JTOML.LocalDate | JTOML.LocalDateTime | JTOML.LocalTime | JTOML.OffsetDateTime;
+const dateTime = new t.Type<TomlDateTime>(
+    'DateTime',
+    (obj): obj is TomlDateTime => true,
+    (input: any, context) => {
+        if (input == null) {
+            return t.failure(input, context);
+        }
+        if (typeof input.toJSON !== 'function') {
+            return t.failure(input, context);
+        }
+        return t.success(input);
     },
-    additionalProperties: false,
+    t.identity);
+
+const $characterAction = t.partial({
+    title: t.string,
+    character: Character.action,
+    message: Message.action,
+});
+
+export type CharacterAction = t.TypeOf<typeof $characterAction>;
+
+const errorToMessage = (source: t.Errors): string => {
+    return source[0]?.message ?? '不明なエラーが発生しました';
 };
+
+export namespace TOML {
+    const parse = (toml: string) => {
+        let object;
+        try {
+            object = JTOML.parse(toml, 1.0, '\r\n', false);
+        }
+        catch (error) {
+            if (typeof error === 'string') {
+                return ResultModule.error(error);
+            }
+            if (error instanceof Error) {
+                return ResultModule.error(error.message);
+            }
+            throw error;
+        }
+        return ResultModule.ok(object);
+    };
+
+    export const isValidVarToml = (toml: string): Result<undefined> => {
+        const parsed = parse(toml);
+        if (parsed.isError) {
+            return parsed;
+        }
+        return ResultModule.ok(undefined);
+    };
+
+    export const variable = (toml: string, path: ReadonlyArray<string>) => {
+        const tomlResult = parse(toml);
+        if (tomlResult.isError) {
+            return tomlResult;
+        }
+        let current: any = tomlResult.value;
+        for (const key of path) {
+            if (typeof current !== 'object') {
+                return ResultModule.ok(undefined);
+            }
+            const next = current[key];
+            const dateTimeValue = dateTime.decode(next);
+            if (dateTimeValue._tag === 'Right') {
+                return ResultModule.ok(dateTimeValue.right);
+            }
+            current = current[key];
+        }
+        const dateTimeValue = dateTime.decode(current);
+        if (dateTimeValue._tag === 'Right') {
+            return ResultModule.ok(dateTimeValue.right);
+        }
+        switch (typeof current) {
+            case 'boolean':
+            case 'number':
+            case 'string':
+            case 'undefined':
+                return ResultModule.ok(current);
+            default:
+                return ResultModule.ok(undefined);
+        }
+    };
+
+    export const characterAction = (toml: string): Result<CharacterAction> => {
+        // CONSIDER: TOMLのDateTimeに未対応
+        const object = parse(toml);
+        if (object.isError) {
+            return object;
+        }
+        const decoded = $characterAction.decode(object.value);
+        if (decoded._tag === 'Left') {
+            return ResultModule.error(errorToMessage(decoded.left));
+        }
+        return ResultModule.ok(decoded.right);
+    };
+}

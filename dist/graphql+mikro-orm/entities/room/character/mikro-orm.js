@@ -26,6 +26,7 @@ class CharaBase {
         this.stateId = stateId;
         this.isPrivate = isPrivate;
         this.name = name;
+        this.privateVarToml = '';
     }
 }
 __decorate([
@@ -50,6 +51,10 @@ __decorate([
     core_1.Property(),
     __metadata("design:type", String)
 ], CharaBase.prototype, "name", void 0);
+__decorate([
+    core_1.Property({ nullable: true, default: '', length: 65536 }),
+    __metadata("design:type", String)
+], CharaBase.prototype, "privateVarToml", void 0);
 __decorate([
     core_1.Property({ nullable: true, length: 65535 }),
     __metadata("design:type", String)
@@ -236,6 +241,10 @@ __decorate([
     core_1.Property({ nullable: true }),
     __metadata("design:type", String)
 ], UpdateCharaOp.prototype, "name", void 0);
+__decorate([
+    core_1.Property({ nullable: true }),
+    __metadata("design:type", String)
+], UpdateCharaOp.prototype, "privateVarToml", void 0);
 __decorate([
     core_1.Property({ type: core_1.JsonType, nullable: true }),
     __metadata("design:type", Object)

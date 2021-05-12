@@ -29,6 +29,10 @@ __decorate([
     __metadata("design:type", String)
 ], CharacterValueState.prototype, "name", void 0);
 __decorate([
+    type_graphql_1.Field({ nullable: true, description: '自分のCharacter ⇔ non-nullish' }),
+    __metadata("design:type", String)
+], CharacterValueState.prototype, "privateVarToml", void 0);
+__decorate([
     type_graphql_1.Field(() => graphql_2.FilePath, { nullable: true }),
     __metadata("design:type", graphql_2.FilePath)
 ], CharacterValueState.prototype, "image", void 0);
@@ -93,6 +97,10 @@ __decorate([
     type_graphql_1.Field({ nullable: true }),
     __metadata("design:type", Operations_1.ReplaceStringUpOperation)
 ], CharacterOperation.prototype, "name", void 0);
+__decorate([
+    type_graphql_1.Field({ nullable: true }),
+    __metadata("design:type", Operations_1.ReplaceStringUpOperation)
+], CharacterOperation.prototype, "privateVarToml", void 0);
 __decorate([
     type_graphql_1.Field({ nullable: true }),
     __metadata("design:type", Operations_1.ReplaceNullableFilePathUpOperation)
