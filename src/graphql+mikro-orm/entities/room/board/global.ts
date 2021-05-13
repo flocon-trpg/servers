@@ -1,7 +1,7 @@
 import { Collection } from '@mikro-orm/core';
 import { DualKey, DualKeyMap, ReadonlyDualKeyMap } from '../../../../@shared/DualKeyMap';
 import { Result, ResultModule } from '../../../../@shared/Result';
-import { undefinedForAll } from '../../../../utils/helpers';
+import { undefinedForAll } from '../../../../@shared/utils';
 import { EM } from '../../../../utils/types';
 import { createDownOperationFromMikroORM, createUpOperationFromGraphQL, ReadonlyDualKeyMapDownOperation, ReadonlyDualKeyMapTwoWayOperation, ReadonlyDualKeyMapUpOperation, replace, update } from '../../../dualKeyMapOperations';
 import { ReplaceNullableFilePathDownOperation, ReplaceNullableFilePathDownOperationModule, ReplaceNullableFilePathTwoWayOperation, ReplaceNullableFilePathTwoWayOperationModule, ReplaceNullableFilePathUpOperation, ReplaceNumberDownOperation, ReplaceNumberDownOperationModule, ReplaceNumberTwoWayOperation, ReplaceNumberTwoWayOperationModule, ReplaceNumberUpOperation, ReplaceStringDownOperation, ReplaceStringDownOperationModule, ReplaceStringTwoWayOperation, ReplaceStringTwoWayOperationModule, ReplaceStringUpOperation } from '../../../Operations';

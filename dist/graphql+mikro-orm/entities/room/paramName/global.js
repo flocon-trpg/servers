@@ -4,7 +4,7 @@ exports.GlobalParamName = void 0;
 const DualKeyMap_1 = require("../../../../@shared/DualKeyMap");
 const indexes_1 = require("../../../../@shared/indexes");
 const Result_1 = require("../../../../@shared/Result");
-const helpers_1 = require("../../../../utils/helpers");
+const utils_1 = require("../../../../@shared/utils");
 const dualKeyMapOperations_1 = require("../../../dualKeyMapOperations");
 const Operations_1 = require("../../../Operations");
 const mikro_orm_1 = require("./mikro-orm");
@@ -186,7 +186,7 @@ var GlobalParamName;
                 second: clientOperation.name,
                 prevState: prevState.name,
             });
-            if (helpers_1.undefinedForAll(twoWayOperation)) {
+            if (utils_1.undefinedForAll(twoWayOperation)) {
                 return Result_1.ResultModule.ok(undefined);
             }
             return Result_1.ResultModule.ok(Object.assign({}, twoWayOperation));
@@ -196,7 +196,7 @@ var GlobalParamName;
             if (prevState.name !== nextState.name) {
                 resultType.name = { oldValue: prevState.name, newValue: nextState.name };
             }
-            if (helpers_1.undefinedForAll(resultType)) {
+            if (utils_1.undefinedForAll(resultType)) {
                 return undefined;
             }
             return Object.assign({}, resultType);

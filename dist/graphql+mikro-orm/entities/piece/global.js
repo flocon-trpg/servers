@@ -3,11 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GlobalPiece = void 0;
 const DualKeyMap_1 = require("../../../@shared/DualKeyMap");
 const Result_1 = require("../../../@shared/Result");
-const helpers_1 = require("../../../utils/helpers");
 const dualKeyMapOperations_1 = require("../../dualKeyMapOperations");
 const Operations_1 = require("../../Operations");
 const mikro_orm_1 = require("../room/character/piece/mikro-orm");
 const mikro_orm_piece_1 = require("../room/participant/myValue/mikro-orm_piece");
+const utils_1 = require("../../../@shared/utils");
 var GlobalPiece;
 (function (GlobalPiece) {
     let MikroORM;
@@ -353,7 +353,7 @@ var GlobalPiece;
                 second: clientOperation.y,
                 prevState: prevState.y,
             });
-            if (helpers_1.undefinedForAll(twoWayOperation)) {
+            if (utils_1.undefinedForAll(twoWayOperation)) {
                 return Result_1.ResultModule.ok(undefined);
             }
             return Result_1.ResultModule.ok(twoWayOperation);
@@ -390,7 +390,7 @@ var GlobalPiece;
             if (prevState.y !== nextState.y) {
                 resultType.y = { oldValue: prevState.y, newValue: nextState.y };
             }
-            if (helpers_1.undefinedForAll(resultType)) {
+            if (utils_1.undefinedForAll(resultType)) {
                 return undefined;
             }
             return resultType;

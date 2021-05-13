@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GlobalBoard = void 0;
 const DualKeyMap_1 = require("../../../../@shared/DualKeyMap");
 const Result_1 = require("../../../../@shared/Result");
-const helpers_1 = require("../../../../utils/helpers");
+const utils_1 = require("../../../../@shared/utils");
 const dualKeyMapOperations_1 = require("../../../dualKeyMapOperations");
 const Operations_1 = require("../../../Operations");
 const mikro_orm_1 = require("./mikro-orm");
@@ -316,7 +316,7 @@ var GlobalBoard;
                 second: clientOperation.name,
                 prevState: prevState.name,
             });
-            if (helpers_1.undefinedForAll(twoWayOperation)) {
+            if (utils_1.undefinedForAll(twoWayOperation)) {
                 return Result_1.ResultModule.ok(undefined);
             }
             return Result_1.ResultModule.ok(twoWayOperation);
@@ -350,7 +350,7 @@ var GlobalBoard;
             if (prevState.name !== nextState.name) {
                 resultType.name = { oldValue: prevState.name, newValue: nextState.name };
             }
-            if (helpers_1.undefinedForAll(resultType)) {
+            if (utils_1.undefinedForAll(resultType)) {
                 return undefined;
             }
             return resultType;

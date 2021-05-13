@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GlobalStrParam = void 0;
 const indexes_1 = require("../../../../../@shared/indexes");
 const Result_1 = require("../../../../../@shared/Result");
-const helpers_1 = require("../../../../../utils/helpers");
+const utils_1 = require("../../../../../@shared/utils");
 const Operations_1 = require("../../../../Operations");
 const paramMapOperations_1 = require("../../../../paramMapOperations");
 const mikro_orm_1 = require("./mikro-orm");
@@ -200,7 +200,7 @@ var GlobalStrParam;
                 }
                 twoWayOperation.value = value.value.secondPrime;
             }
-            if (helpers_1.undefinedForAll(twoWayOperation)) {
+            if (utils_1.undefinedForAll(twoWayOperation)) {
                 return Result_1.ResultModule.ok(undefined);
             }
             return Result_1.ResultModule.ok(Object.assign({}, twoWayOperation));
@@ -214,7 +214,7 @@ var GlobalStrParam;
             if (prevState.value !== nextState.value) {
                 resultType.value = Operations_1.TextTwoWayOperationModule.diff((_a = prevState.value) !== null && _a !== void 0 ? _a : '', (_b = nextState.value) !== null && _b !== void 0 ? _b : '');
             }
-            if (helpers_1.undefinedForAll(resultType)) {
+            if (utils_1.undefinedForAll(resultType)) {
                 return undefined;
             }
             return Object.assign({}, resultType);

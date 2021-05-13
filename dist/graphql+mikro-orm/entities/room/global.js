@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GlobalRoom = void 0;
 const DualKeyMap_1 = require("../../../@shared/DualKeyMap");
 const Result_1 = require("../../../@shared/Result");
-const helpers_1 = require("../../../utils/helpers");
 const Operations_1 = require("../../Operations");
 const global_1 = require("./board/global");
 const global_2 = require("./character/global");
@@ -14,6 +13,7 @@ const mikro_orm_1 = require("./mikro-orm");
 const global_6 = require("./paramName/global");
 const Types_1 = require("../../Types");
 const core_1 = require("@mikro-orm/core");
+const utils_1 = require("../../../@shared/utils");
 const isSequential = (array, getIndex) => {
     const sorted = array.map(value => ({ index: getIndex(value), value })).sort((x, y) => x.index - y.index);
     if (sorted.length === 0) {
@@ -498,7 +498,7 @@ var GlobalRoom;
                     prevState: prevState[key],
                 });
             });
-            if (helpers_1.undefinedForAll(twoWayOperation) && bgms.value.size === 0 && boards.value.size === 0 && characters.value.size === 0 && paramNames.value.size === 0 && participants.value.size === 0) {
+            if (utils_1.undefinedForAll(twoWayOperation) && bgms.value.size === 0 && boards.value.size === 0 && characters.value.size === 0 && paramNames.value.size === 0 && participants.value.size === 0) {
                 return Result_1.ResultModule.ok(undefined);
             }
             return Result_1.ResultModule.ok(Object.assign(Object.assign({}, twoWayOperation), { bgms: bgms.value, boards: boards.value, characters: characters.value, paramNames: paramNames.value, participants: participants.value }));
@@ -534,7 +534,7 @@ var GlobalRoom;
                     resultType[key] = { oldValue: prevState[key], newValue: nextState[key] };
                 }
             });
-            if (helpers_1.undefinedForAll(resultType) && bgms.size === 0 && boards.size === 0 && characters.size === 0 && paramNames.size === 0 && participants.size === 0) {
+            if (utils_1.undefinedForAll(resultType) && bgms.size === 0 && boards.size === 0 && characters.size === 0 && paramNames.size === 0 && participants.size === 0) {
                 return undefined;
             }
             return Object.assign(Object.assign({}, resultType), { bgms, boards, characters, paramNames, participants });

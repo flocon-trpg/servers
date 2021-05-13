@@ -2,7 +2,7 @@ import { Collection } from '@mikro-orm/core';
 import { __ } from '../../../../@shared/collection';
 import { isStrIndex5, StrIndex5 } from '../../../../@shared/indexes';
 import { Result, ResultModule } from '../../../../@shared/Result';
-import { undefinedForAll } from '../../../../utils/helpers';
+import { undefinedForAll } from '../../../../@shared/utils';
 import { EM } from '../../../../utils/types';
 import { createDownOperationFromMikroORM, createUpOperationFromGraphQL, ReadonlyMapDownOperation, ReadonlyMapTwoWayOperation, ReadonlyMapUpOperation, replace, update } from '../../../mapOperations';
 import { ReplaceFilePathArrayDownOperation, ReplaceFilePathArrayDownOperationModule, ReplaceFilePathArrayTwoWayOperation, ReplaceFilePathArrayTwoWayOperationModule, ReplaceFilePathArrayUpOperation, ReplaceNumberDownOperation, ReplaceNumberDownOperationModule, ReplaceNumberTwoWayOperation, ReplaceNumberTwoWayOperationModule, ReplaceNumberUpOperation } from '../../../Operations';

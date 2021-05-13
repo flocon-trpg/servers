@@ -3,7 +3,6 @@ import { DualKey } from '../../../../@shared/DualKeyMap';
 import { Result, ResultModule } from '../../../../@shared/Result';
 import { ParticipantRole } from '../../../../enums/ParticipantRole';
 import { ParticipantRoleOperation } from '../../../../enums/ParticipantRoleOperation';
-import { undefinedForAll } from '../../../../utils/helpers';
 import { EM } from '../../../../utils/types';
 import { createDownOperationFromMikroORM, createUpOperationFromGraphQL, ReadonlyMapDownOperation, ReadonlyMapTwoWayOperation, ReadonlyMapUpOperation, replace, toGraphQLWithState, update } from '../../../mapOperations';
 import { ReplaceNullableParticipantRoleDownOperation, ReplaceNullableParticipantRoleDownOperationModule, ReplaceNullableParticipantRoleTwoWayOperationModule, ReplaceNullableParticipantRoleUpOperation, ReplaceStringDownOperation, ReplaceStringDownOperationModule, ReplaceStringTwoWayOperation, ReplaceStringTwoWayOperationModule, ReplaceStringUpOperation } from '../../../Operations';
@@ -15,6 +14,7 @@ import { ParticipantsOperation, ParticipantsOperationInput, ParticipantState, Pa
 import { AddParticiOp, Partici, ParticiBase, RemoveParticiOp, UpdateParticiOp } from './mikro-orm';
 import { GlobalMyValue } from './myValue/global';
 import { RequestedBy, server } from '../../../Types';
+import { undefinedForAll } from '../../../../@shared/utils';
 
 export namespace GlobalParticipant {
     type StateTypeValue = {

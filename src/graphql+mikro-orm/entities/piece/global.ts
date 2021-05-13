@@ -1,7 +1,6 @@
 import { Collection } from '@mikro-orm/core';
 import { DualKey, DualKeyMap, ReadonlyDualKeyMap } from '../../../@shared/DualKeyMap';
 import { Result, ResultModule } from '../../../@shared/Result';
-import { undefinedForAll } from '../../../utils/helpers';
 import { EM } from '../../../utils/types';
 import { createDownOperationFromMikroORM, createUpOperationFromGraphQL, ReadonlyDualKeyMapDownOperation, ReadonlyDualKeyMapTwoWayOperation, ReadonlyDualKeyMapUpOperation, replace, toGraphQLWithState, update } from '../../dualKeyMapOperations';
 import { ReplaceBooleanDownOperation, ReplaceBooleanDownOperationModule, ReplaceBooleanTwoWayOperation, ReplaceBooleanTwoWayOperationModule, ReplaceBooleanUpOperation, ReplaceNumberDownOperation, ReplaceNumberDownOperationModule, ReplaceNumberTwoWayOperation, ReplaceNumberTwoWayOperationModule, ReplaceNumberUpOperation } from '../../Operations';
@@ -10,8 +9,8 @@ import { AddCharaPieceOp, CharaPiece, RemoveCharaPieceOp, UpdateCharaPieceOp } f
 import { TransformerFactory } from '../global';
 import { AddMyValuePieceOp, MyValuePiece, RemoveMyValuePieceOp, UpdateMyValuePieceOp } from '../room/participant/myValue/mikro-orm_piece';
 import { MyValue, UpdateMyValueOp } from '../room/participant/myValue/mikro-orm_value';
-import { RoomOp } from '../room/mikro-orm';
 import { PiecesOperation, PieceState, PieceValueState } from './graphql';
+import { undefinedForAll } from '../../../@shared/utils';
 
 export namespace GlobalPiece {
     export type StateType = {

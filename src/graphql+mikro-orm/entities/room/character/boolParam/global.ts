@@ -1,7 +1,7 @@
 import { Collection } from '@mikro-orm/core';
 import { isStrIndex100, StrIndex100 } from '../../../../../@shared/indexes';
 import { Result, ResultModule } from '../../../../../@shared/Result';
-import { undefinedForAll } from '../../../../../utils/helpers';
+import { undefinedForAll } from '../../../../../@shared/utils';
 import { EM } from '../../../../../utils/types';
 import { ReplaceBooleanDownOperation, ReplaceBooleanDownOperationModule, ReplaceBooleanTwoWayOperation, ReplaceBooleanTwoWayOperationModule, ReplaceBooleanUpOperation, ReplaceNullableBooleanDownOperation, ReplaceNullableBooleanDownOperationModule, ReplaceNullableBooleanTwoWayOperation, ReplaceNullableBooleanTwoWayOperationModule, ReplaceNullableBooleanUpOperation } from '../../../../Operations';
 import { createDownOperationFromMikroORM, createUpOperationFromGraphQL } from '../../../../paramMapOperations';

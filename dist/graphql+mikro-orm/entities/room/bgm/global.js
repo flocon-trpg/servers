@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GlobalBgm = void 0;
 const indexes_1 = require("../../../../@shared/indexes");
 const Result_1 = require("../../../../@shared/Result");
-const helpers_1 = require("../../../../utils/helpers");
+const utils_1 = require("../../../../@shared/utils");
 const mapOperations_1 = require("../../../mapOperations");
 const Operations_1 = require("../../../Operations");
 const mikro_orm_1 = require("./mikro-orm");
@@ -192,7 +192,7 @@ var GlobalBgm;
                 second: clientOperation.volume,
                 prevState: prevState.volume,
             });
-            if (helpers_1.undefinedForAll(twoWayOperation)) {
+            if (utils_1.undefinedForAll(twoWayOperation)) {
                 return Result_1.ResultModule.ok(undefined);
             }
             return Result_1.ResultModule.ok(Object.assign({}, twoWayOperation));
@@ -205,7 +205,7 @@ var GlobalBgm;
             if (prevState.volume !== nextState.volume) {
                 resultType.volume = { oldValue: prevState.volume, newValue: nextState.volume };
             }
-            if (helpers_1.undefinedForAll(resultType)) {
+            if (utils_1.undefinedForAll(resultType)) {
                 return undefined;
             }
             return Object.assign({}, resultType);

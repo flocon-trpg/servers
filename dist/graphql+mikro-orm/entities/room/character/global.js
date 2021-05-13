@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GlobalCharacter = void 0;
 const DualKeyMap_1 = require("../../../../@shared/DualKeyMap");
 const Result_1 = require("../../../../@shared/Result");
-const helpers_1 = require("../../../../utils/helpers");
 const dualKeyMapOperations_1 = require("../../../dualKeyMapOperations");
 const Operations_1 = require("../../../Operations");
 const global_1 = require("../../global");
@@ -14,6 +13,7 @@ const global_4 = require("./numParam/global");
 const global_5 = require("./strParam/global");
 const Types_1 = require("../../../Types");
 const global_6 = require("../../boardLocation/global");
+const utils_1 = require("../../../../@shared/utils");
 var GlobalCharacter;
 (function (GlobalCharacter) {
     let MikroORM;
@@ -604,7 +604,7 @@ var GlobalCharacter;
                     prevState: (_g = prevState.privateVarToml) !== null && _g !== void 0 ? _g : '',
                 });
             }
-            if (helpers_1.undefinedForAll(twoWayOperation) && boolParams.value.size === 0 && numParams.value.size === 0 && numMaxParams.value.size === 0 && strParams.value.size === 0 && pieces.value.isEmpty && tachieLocations.value.isEmpty) {
+            if (utils_1.undefinedForAll(twoWayOperation) && boolParams.value.size === 0 && numParams.value.size === 0 && numMaxParams.value.size === 0 && strParams.value.size === 0 && pieces.value.isEmpty && tachieLocations.value.isEmpty) {
                 return Result_1.ResultModule.ok(undefined);
             }
             return Result_1.ResultModule.ok(Object.assign(Object.assign({}, twoWayOperation), { boolParams: boolParams.value, numParams: numParams.value, numMaxParams: numMaxParams.value, strParams: strParams.value, pieces: pieces.value, tachieLocations: tachieLocations.value }));
@@ -656,7 +656,7 @@ var GlobalCharacter;
             if (prevState.privateVarToml !== nextState.privateVarToml) {
                 resultType.privateVarToml = { oldValue: (_a = prevState.privateVarToml) !== null && _a !== void 0 ? _a : '', newValue: (_b = nextState.privateVarToml) !== null && _b !== void 0 ? _b : '' };
             }
-            if (helpers_1.undefinedForAll(resultType) && boolParams.size === 0 && numParams.size === 0 && numMaxParams.size === 0 && strParams.size === 0 && pieces.isEmpty && tachieLocations.isEmpty) {
+            if (utils_1.undefinedForAll(resultType) && boolParams.size === 0 && numParams.size === 0 && numMaxParams.size === 0 && strParams.size === 0 && pieces.isEmpty && tachieLocations.isEmpty) {
                 return undefined;
             }
             return Object.assign(Object.assign({}, resultType), { boolParams, numParams, numMaxParams, strParams, pieces, tachieLocations });

@@ -2,7 +2,6 @@ import { DualKeyMap, ReadonlyDualKeyMap } from '../../../@shared/DualKeyMap';
 import { StrIndex100, StrIndex5 } from '../../../@shared/indexes';
 import { Result, ResultModule } from '../../../@shared/Result';
 import { RoomParameterNameType } from '../../../enums/RoomParameterNameType';
-import { undefinedForAll } from '../../../utils/helpers';
 import { ReadonlyDualKeyMapDownOperation, ReadonlyDualKeyMapTwoWayOperation, ReadonlyDualKeyMapUpOperation } from '../../dualKeyMapOperations';
 import { ReadonlyMapDownOperation, ReadonlyMapTwoWayOperation, ReadonlyMapUpOperation } from '../../mapOperations';
 import { ReplaceStringDownOperation, ReplaceStringDownOperationModule, ReplaceStringTwoWayOperation, ReplaceStringTwoWayOperationModule, ReplaceStringUpOperation } from '../../Operations';
@@ -17,6 +16,7 @@ import { GlobalParamName } from './paramName/global';
 import { RequestedBy, server } from '../../Types';
 import { EM } from '../../../utils/types';
 import { Reference } from '@mikro-orm/core';
+import { undefinedForAll } from '../../../@shared/utils';
 
 type IsSequentialResult<T> = {
     type: 'DuplicateElement';

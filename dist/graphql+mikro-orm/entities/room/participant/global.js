@@ -4,7 +4,6 @@ exports.GlobalParticipant = void 0;
 const Result_1 = require("../../../../@shared/Result");
 const ParticipantRole_1 = require("../../../../enums/ParticipantRole");
 const ParticipantRoleOperation_1 = require("../../../../enums/ParticipantRoleOperation");
-const helpers_1 = require("../../../../utils/helpers");
 const mapOperations_1 = require("../../../mapOperations");
 const Operations_1 = require("../../../Operations");
 const global_1 = require("../../global");
@@ -12,6 +11,7 @@ const mikro_orm_1 = require("../../user/mikro-orm");
 const mikro_orm_2 = require("./mikro-orm");
 const global_2 = require("./myValue/global");
 const Types_1 = require("../../../Types");
+const utils_1 = require("../../../../@shared/utils");
 var GlobalParticipant;
 (function (GlobalParticipant) {
     let MikroORM;
@@ -331,7 +331,7 @@ var GlobalParticipant;
                 second: (_e = clientOperation.role) !== null && _e !== void 0 ? _e : undefined,
                 prevState: prevState.role,
             });
-            if (helpers_1.undefinedForAll(twoWayOperation) && myNumberValues.value.size === 0) {
+            if (utils_1.undefinedForAll(twoWayOperation) && myNumberValues.value.size === 0) {
                 return Result_1.ResultModule.ok(undefined);
             }
             return Result_1.ResultModule.ok(Object.assign(Object.assign({}, twoWayOperation), { myNumberValues: myNumberValues.value }));
@@ -349,7 +349,7 @@ var GlobalParticipant;
             if (prevState.role != nextState.role) {
                 resultType.role = { oldValue: prevState.role, newValue: nextState.role };
             }
-            if (helpers_1.undefinedForAll(resultType) && myNumberValues.size === 0) {
+            if (utils_1.undefinedForAll(resultType) && myNumberValues.size === 0) {
                 return undefined;
             }
             return Object.assign(Object.assign({}, resultType), { myNumberValues });

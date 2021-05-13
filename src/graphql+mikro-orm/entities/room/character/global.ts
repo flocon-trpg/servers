@@ -2,7 +2,6 @@ import { Collection } from '@mikro-orm/core';
 import { DualKey, DualKeyMap, ReadonlyDualKeyMap } from '../../../../@shared/DualKeyMap';
 import { StrIndex100 } from '../../../../@shared/indexes';
 import { Result, ResultModule } from '../../../../@shared/Result';
-import { undefinedForAll } from '../../../../utils/helpers';
 import { EM } from '../../../../utils/types';
 import { createDownOperationFromMikroORM, createUpOperationFromGraphQL, ReadonlyDualKeyMapDownOperation, ReadonlyDualKeyMapTwoWayOperation, ReadonlyDualKeyMapUpOperation, replace, toGraphQLWithState, update } from '../../../dualKeyMapOperations';
 import { ReplaceBooleanDownOperation, ReplaceBooleanDownOperationModule, ReplaceBooleanTwoWayOperation, ReplaceBooleanTwoWayOperationModule, ReplaceBooleanUpOperation, ReplaceNullableFilePathDownOperation, ReplaceNullableFilePathDownOperationModule, ReplaceNullableFilePathTwoWayOperation, ReplaceNullableFilePathTwoWayOperationModule, ReplaceNullableFilePathUpOperation, ReplaceStringDownOperation, ReplaceStringDownOperationModule, ReplaceStringTwoWayOperation, ReplaceStringTwoWayOperationModule, ReplaceStringUpOperation } from '../../../Operations';
@@ -17,6 +16,7 @@ import { GlobalNumParam } from './numParam/global';
 import { GlobalStrParam } from './strParam/global';
 import { RequestedBy } from '../../../Types';
 import { GlobalBoardLocation } from '../../boardLocation/global';
+import { undefinedForAll } from '../../../../@shared/utils';
 
 export namespace GlobalCharacter {
     type StateTypeValue = {

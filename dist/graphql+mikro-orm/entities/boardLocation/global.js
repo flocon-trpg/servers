@@ -3,10 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GlobalBoardLocation = void 0;
 const DualKeyMap_1 = require("../../../@shared/DualKeyMap");
 const Result_1 = require("../../../@shared/Result");
-const helpers_1 = require("../../../utils/helpers");
 const dualKeyMapOperations_1 = require("../../dualKeyMapOperations");
 const Operations_1 = require("../../Operations");
 const mikro_orm_1 = require("../room/character/tachie/mikro-orm");
+const utils_1 = require("../../../@shared/utils");
 var GlobalBoardLocation;
 (function (GlobalBoardLocation) {
     let MikroORM;
@@ -241,7 +241,7 @@ var GlobalBoardLocation;
                 second: clientOperation.y,
                 prevState: prevState.y,
             });
-            if (helpers_1.undefinedForAll(twoWayOperation)) {
+            if (utils_1.undefinedForAll(twoWayOperation)) {
                 return Result_1.ResultModule.ok(undefined);
             }
             return Result_1.ResultModule.ok(twoWayOperation);
@@ -263,7 +263,7 @@ var GlobalBoardLocation;
             if (prevState.y !== nextState.y) {
                 resultType.y = { oldValue: prevState.y, newValue: nextState.y };
             }
-            if (helpers_1.undefinedForAll(resultType)) {
+            if (utils_1.undefinedForAll(resultType)) {
                 return undefined;
             }
             return resultType;

@@ -4,8 +4,8 @@ exports.GlobalMyValue = void 0;
 const collection_1 = require("../../../../../@shared/collection");
 const DualKeyMap_1 = require("../../../../../@shared/DualKeyMap");
 const Result_1 = require("../../../../../@shared/Result");
+const utils_1 = require("../../../../../@shared/utils");
 const MyValueLogType_1 = require("../../../../../enums/MyValueLogType");
-const helpers_1 = require("../../../../../utils/helpers");
 const mapOperations_1 = require("../../../../mapOperations");
 const Operations_1 = require("../../../../Operations");
 const global_1 = require("../../../global");
@@ -445,7 +445,7 @@ var GlobalMyValue;
                 second: (_k = clientOperation.valueRangeMin) !== null && _k !== void 0 ? _k : undefined,
                 prevState: (_l = prevState.valueRangeMin) !== null && _l !== void 0 ? _l : undefined,
             });
-            if (helpers_1.undefinedForAll(twoWayOperation)) {
+            if (utils_1.undefinedForAll(twoWayOperation)) {
                 return Result_1.ResultModule.ok(undefined);
             }
             return Result_1.ResultModule.ok(Object.assign({}, twoWayOperation));
@@ -471,7 +471,7 @@ var GlobalMyValue;
             if (prevState.valueRangeMin != nextState.valueRangeMin) {
                 resultType.valueRangeMin = { oldValue: prevState.valueRangeMin, newValue: nextState.valueRangeMin };
             }
-            if (helpers_1.undefinedForAll(resultType)) {
+            if (utils_1.undefinedForAll(resultType)) {
                 return undefined;
             }
             return Object.assign({}, resultType);
