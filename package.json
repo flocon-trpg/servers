@@ -16,6 +16,7 @@
         "diff-match-patch": "^1.0.5",
         "firebase": "^8.4.1",
         "firebaseui": "^4.8.0",
+        "fp-ts": "^2.10.5",
         "graphql": "^15.5.0",
         "graphql-ws": "^4.4.1",
         "howler": "^2.2.1",
