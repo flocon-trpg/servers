@@ -1,5 +1,6 @@
 import produce from 'immer';
 import { ReadonlyStateMap } from '../../@shared/StateMap';
+import { undefinedForAll } from '../../@shared/utils';
 import { PieceOperationInput, PiecesOperationInput, PieceValueState, ReplacePieceOperationInput, UpdatePieceOperationInput } from '../../generated/graphql';
 import { Board } from './board';
 import { transform as transformReplace, transformNullable as transformNullableReplace } from './replaceValue';
@@ -131,7 +132,7 @@ export namespace Piece {
     }: {
         prev: State;
         next: State;
-    }): GetOperation => {
+    }): GetOperation | undefined => {
         const result: GetOperation = {};
 
         if (prev.isPrivate != next.isPrivate) {
@@ -163,6 +164,10 @@ export namespace Piece {
         }
         if (prev.cellH != next.cellH) {
             result.cellH = { newValue: next.cellH };
+        }
+
+        if (undefinedForAll(result)) {
+            return undefined;
         }
 
         return result;

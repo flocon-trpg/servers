@@ -29,6 +29,9 @@ import { useStateEditor } from '../../hooks/useStateEditor';
 import { BoardLocation } from '../../stateManagers/states/boardLocation';
 import { useOperate } from '../../hooks/useOperate';
 import { useSelector } from '../../store';
+import BufferedInput from '../../foundations/BufferedInput';
+import BufferedTextArea from '../../foundations/BufferedTextArea';
+import { TOMLInput } from '../../foundations/TOMLInput';
 
 const notFound = 'notFound';
 
@@ -115,6 +118,7 @@ const CharacterDrawer: React.FC = () => {
                 return;
             case update: {
                 const diffOperation = Character.diff({ prev: character, next: { ...character, ...partialState } });
+                console.info('diff', diffOperation);
                 const operation = Room.createPostOperationSetup();
                 operation.characters.set(drawerType.stateKey, { type: update, operation: diffOperation });
                 operate(operation);
@@ -144,10 +148,12 @@ const CharacterDrawer: React.FC = () => {
         }
         const diffOperation = Piece.diff({ prev: piece, next: { ...piece, ...partialState } });
         const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
-        pieces.set(drawerType.boardKey, {
-            type: update,
-            operation: diffOperation,
-        });
+        if (diffOperation != null) {
+            pieces.set(drawerType.boardKey, {
+                type: update,
+                operation: diffOperation,
+            });
+        }
         const operation = Room.createPostOperationSetup();
         operation.characters.set(drawerType.stateKey, {
             type: update,
@@ -169,10 +175,12 @@ const CharacterDrawer: React.FC = () => {
         }
         const diffOperation = BoardLocation.diff({ prev: tachieLocation, next: { ...tachieLocation, ...partialState } });
         const tachieLocations = createStateMap<OperationElement<BoardLocation.State, BoardLocation.PostOperation>>();
-        tachieLocations.set(drawerType.boardKey, {
-            type: update,
-            operation: diffOperation,
-        });
+        if (diffOperation != null) {
+            tachieLocations.set(drawerType.boardKey, {
+                type: update,
+                operation: diffOperation,
+            });
+        }
         const operation = Room.createPostOperationSetup();
         operation.characters.set(drawerType.stateKey, {
             type: update,
@@ -455,7 +463,16 @@ const CharacterDrawer: React.FC = () => {
                     <Col flex='auto' />
                     <Col flex={0}>名前</Col>
                     <Col span={inputSpan}>
-                        <Input size='small' value={character.name} onChange={e => updateCharacter({ name: e.target.value })} />
+                        <BufferedInput
+                            bufferDuration='default'
+                            size='small'
+                            value={character.name}
+                            onChange={e => {
+                                if (e.previousValue === e.currentValue) {
+                                    return;
+                                }
+                                updateCharacter({ name: e.currentValue });
+                            }} />
                     </Col>
                 </Row>
 
@@ -567,7 +584,7 @@ const CharacterDrawer: React.FC = () => {
                             <Col flex='auto' />
                             <Col flex={0}></Col>
                             <Col span={inputSpan}>
-                                <Input.TextArea size='small' value={character.privateVarToml ?? ''} rows={8} onChange={e => updateCharacter({ privateVarToml: e.currentTarget.value })} />
+                                <TOMLInput size='small' bufferDuration='default' value={character.privateVarToml ?? ''} rows={8} onChange={e => updateCharacter({ privateVarToml: e.currentValue })} />
                             </Col>
                         </Row>
                     </>

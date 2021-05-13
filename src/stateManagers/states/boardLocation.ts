@@ -1,5 +1,6 @@
 import produce from 'immer';
 import { ReadonlyStateMap } from '../../@shared/StateMap';
+import { undefinedForAll } from '../../@shared/utils';
 import { BoardLocationOperationInput, BoardLocationsOperationInput, BoardLocationValueState, PieceOperationInput, PiecesOperationInput, PieceValueState, ReplaceBoardLocationOperationInput, ReplacePieceOperationInput, UpdateBoardLocationOperationInput, UpdatePieceOperationInput } from '../../generated/graphql';
 import { transform as transformReplace, transformNullable as transformNullableReplace } from './replaceValue';
 import { OperationElement, replace } from './types';
@@ -95,7 +96,7 @@ export namespace BoardLocation {
     }: {
         prev: State;
         next: State;
-    }): GetOperation => {
+    }): GetOperation | undefined => {
         const result: GetOperation = {};
 
         if (prev.isPrivate != next.isPrivate) {
@@ -112,6 +113,10 @@ export namespace BoardLocation {
         }
         if (prev.h != next.h) {
             result.h = { newValue: next.h };
+        }
+
+        if (undefinedForAll(result)) {
+            return undefined;
         }
 
         return result;

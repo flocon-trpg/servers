@@ -1,5 +1,6 @@
 import produce from 'immer';
 import { StrIndex100 } from '../../@shared/indexes';
+import { undefinedForAll } from '../../@shared/utils';
 import { NumParamOperationInput, NumParamsOperationInput, NumParamValueState, UpdateNumParamOperationInput } from '../../generated/graphql';
 import { transform as transformReplace, transformNullable as transformNullableReplace } from './replaceValue';
 import { ReplaceNullableValueOperationModule, ReplaceValueOperationModule } from './utils/replaceValueOperation';
@@ -69,7 +70,7 @@ export namespace NumParam {
     }: {
         prev: State;
         next: State;
-    }): GetOperation => {
+    }): GetOperation | undefined => {
         const result: GetOperation = {};
 
         if (prev.isValuePrivate != next.isValuePrivate) {
@@ -77,6 +78,10 @@ export namespace NumParam {
         }
         if (prev.value != next.value) {
             result.value = { newValue: next.value };
+        }
+
+        if (undefinedForAll(result)) {
+            return undefined;
         }
 
         return result;

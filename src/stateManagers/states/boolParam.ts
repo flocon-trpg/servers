@@ -1,5 +1,6 @@
 import produce from 'immer';
 import { StrIndex100 } from '../../@shared/indexes';
+import { undefinedForAll } from '../../@shared/utils';
 import { BoolParamOperationInput, BoolParamsOperationInput, BoolParamValueState, UpdateBoolParamOperationInput } from '../../generated/graphql';
 import { transform as transformReplace, transformNullable as transformNullableReplace } from './replaceValue';
 import { ReplaceNullableValueOperationModule, ReplaceValueOperationModule } from './utils/replaceValueOperation';
@@ -66,7 +67,7 @@ export namespace BoolParam {
     }: {
         prev: State;
         next: State;
-    }): GetOperation => {
+    }): GetOperation | undefined => {
         const result: GetOperation = {};
 
         if (prev.isValuePrivate != next.isValuePrivate) {
@@ -74,6 +75,10 @@ export namespace BoolParam {
         }
         if (prev.value != next.value) {
             result.value = { newValue: next.value };
+        }
+
+        if (undefinedForAll(result)) {
+            return undefined;
         }
 
         return result;

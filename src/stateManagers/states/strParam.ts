@@ -1,6 +1,7 @@
 import produce from 'immer';
 import { StrIndex100 } from '../../@shared/indexes';
 import { TextTwoWayOperation, TextUpOperation } from '../../@shared/textOperation';
+import { undefinedForAll } from '../../@shared/utils';
 import { StrParamOperation, StrParamOperationInput, StrParamsOperationInput, StrParamValueState, UpdateStrParamOperationInput } from '../../generated/graphql';
 import { TextUpOperationModule } from '../../utils/operations';
 import { transform as transformReplace } from './replaceValue';
@@ -93,7 +94,7 @@ export namespace StrParam {
     }: {
         prev: State;
         next: State;
-    }): GetOperation => {
+    }): GetOperation | undefined => {
         const result: GetOperation = {};
 
         if (prev.isValuePrivate != next.isValuePrivate) {
@@ -101,6 +102,10 @@ export namespace StrParam {
         }
         if (prev.value != next.value) {
             result.value = TextUpOperationModule.diff({ first: prev.value, second: next.value });
+        }
+
+        if (undefinedForAll(result)) {
+            return undefined;
         }
 
         return result;

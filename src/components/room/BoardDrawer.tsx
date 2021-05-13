@@ -16,6 +16,7 @@ import { Board } from '../../stateManagers/states/board';
 import { useStateEditor } from '../../hooks/useStateEditor';
 import { useOperate } from '../../hooks/useOperate';
 import { useSelector } from '../../store';
+import BufferedInput from '../../foundations/BufferedInput';
 
 const notFound = 'notFound';
 
@@ -131,7 +132,16 @@ const BoardDrawer: React.FC = () => {
                     <Col flex='auto' />
                     <Col flex={0}>名前</Col>
                     <Col span={inputSpan}>
-                        <Input size='small' value={board.name} onChange={e => updateBoard({ name: e.target.value })} />
+                        <BufferedInput
+                            bufferDuration='default'
+                            size='small'
+                            value={board.name}
+                            onChange={e => {
+                                if (e.previousValue === e.currentValue) {
+                                    return;
+                                }
+                                updateBoard({ name: e.currentValue });
+                            }} />
                     </Col>
                 </Row>
                 <Row gutter={gutter} align='middle'>
