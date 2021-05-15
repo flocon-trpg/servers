@@ -4,7 +4,6 @@ import React from 'react';
 import { success, useImageFromGraphQL } from '../hooks/image';
 import { FilePath } from '../utils/types';
 import * as ReactKonva from 'react-konva';
-import { MyNumberValue } from '../stateManagers/states/myNumberValue';
 import { usePrevious } from '../hooks/usePrevious';
 import { animated, useSpring, useTransition } from '@react-spring/konva';
 import { RoomPublicMessageFragment } from '../generated/graphql';
@@ -12,6 +11,8 @@ import produce from 'immer';
 import { __ } from '../@shared/collection';
 import { interval } from 'rxjs';
 import { isDeleted, toText as toTextCore } from '../utils/message';
+import * as MyNumberValue from '../@shared/ot/room/participant/myNumberValue/v1';
+import * as FilePathModule from '../@shared/ot/filePath/v1';
 
 export namespace MyKonva {
     export type Vector2 = {
@@ -229,7 +230,7 @@ export namespace MyKonva {
     const imageMinimalSize = 10;
 
     type ImageProps = {
-        filePath: FilePath;
+        filePath: FilePath | FilePathModule.FilePath;
         isSelected: boolean;
         draggable: boolean;
         listening: boolean;

@@ -1,41 +1,31 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
-import { css } from '@emotion/react';
 import MyAuthContext from '../../contexts/MyAuthContext';
-import { Table, Checkbox, Button, InputNumber, Input, Dropdown, Menu, Switch, Tooltip, Popover } from 'antd';
-import { CompositeKey, compositeKeyToString, createStateMap, StateMap } from '../../@shared/StateMap';
-import { secureId, simpleId } from '../../utils/generators';
-import { replace, update } from '../../stateManagers/states/types';
+import { Table, Button, Input, Tooltip, Popover } from 'antd';
+import { CompositeKey, compositeKeyToString } from '../../@shared/StateMap';
+import { update } from '../../stateManagers/states/types';
 import { __ } from '../../@shared/collection';
-import { characterDrawerType, characterParameterNamesDrawerVisibility, create, RoomComponentsState } from './RoomComponentsState';
+import { characterDrawerType, characterParameterNamesDrawerVisibility, create } from './RoomComponentsState';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
-import { FilePathFragment, RoomParameterNameType } from '../../generated/graphql';
-import { TextTwoWayOperation } from '../../@shared/textOperation';
+import { FilePathFragment } from '../../generated/graphql';
 import { StrIndex20, strIndex20Array } from '../../@shared/indexes';
-import produce from 'immer';
 import NumberParameterInput from '../../foundations/NumberParameterInput';
 import BooleanParameterInput from '../../foundations/BooleanParameterInput';
 import StringParameterInput from '../../foundations/StringParameterInput';
 import { useFirebaseStorageUrl } from '../../hooks/firebaseStorage';
 import * as Icon from '@ant-design/icons';
 import ToggleButton from '../../foundations/ToggleButton';
-import { characterIsPrivate, characterIsNotPrivate, parameterIsPrivateAndNotCreatedByMe, characterIsNotPrivateAndNotCreatedByMe } from '../../resource/text/main';
-import { Character } from '../../stateManagers/states/character';
-import { Room } from '../../stateManagers/states/room';
-import { Participant } from '../../stateManagers/states/participant';
+import { characterIsPrivate, characterIsNotPrivate, characterIsNotPrivateAndNotCreatedByMe } from '../../resource/text/main';
 import { getUserUid } from '../../hooks/useFirebaseUser';
-import { useSelector } from '../../store';
-import { ParamName } from '../../stateManagers/states/paramName';
 import { useOperate } from '../../hooks/useOperate';
-
-const characterOperationBase: Character.PostOperation = {
-    boolParams: new Map(),
-    numParams: new Map(),
-    numMaxParams: new Map(),
-    strParams: new Map(),
-    pieces: createStateMap(),
-    tachieLocations: createStateMap(),
-};
+import * as Room from '../../@shared/ot/room/v1';
+import * as Character from '../../@shared/ot/room/participant/character/v1';
+import * as Participant from '../../@shared/ot/room/participant/v1';
+import * as ParamName from '../../@shared/ot/room/paramName/v1';
+import * as FilePathModule from '../../@shared/ot/filePath/v1';
+import { useCharacters } from '../../hooks/state/useCharacters';
+import { useParticipants } from '../../hooks/state/useParticipants';
+import { useBoolParamNames, useNumParamNames, useStrParamNames } from '../../hooks/state/useParamNames';
 
 type DataSource = {
     key: string;
@@ -45,7 +35,7 @@ type DataSource = {
         createdByMe: boolean | null;
     };
     participants: ReadonlyMap<string, Participant.State>;
-    operate: (operation: Room.PostOperationSetup) => void;
+    operate: (operation: Room.UpOperation) => void;
 }
 
 const minNumParameter = -1000000;
@@ -53,13 +43,13 @@ const maxNumParameter = 1000000;
 
 const createBooleanParameterColumn = ({
     key,
-    paramNames,
+    boolParamNames,
 }: {
     key: StrIndex20;
-    paramNames: ParamName.ReadonlyStateMap<ParamName.State>;
+    boolParamNames: ReadonlyMap<string, ParamName.State>;
 }) => {
     const reactKey = `boolParameter${key}`;
-    const name = paramNames.get({ key: key, type: RoomParameterNameType.Bool });
+    const name = boolParamNames.get(key);
     if (name == null) {
         return null;
     }
@@ -75,14 +65,26 @@ const createBooleanParameterColumn = ({
                         isCreate={false}
                         compact
                         parameterKey={key}
-                        parameter={character.state.boolParams.get(key)}
+                        parameter={character.state.boolParams[key]}
                         createdByMe={character.createdByMe ?? false}
                         onOperate={characterOperation => {
-                            const operation = Room.createPostOperationSetup();
-                            operation.characters.set(character.stateKey, {
-                                type: update,
-                                operation: characterOperation,
-                            });
+                            const operation: Room.UpOperation = {
+                                $version: 1,
+                                participants: {
+                                    [character.stateKey.createdBy]: {
+                                        type: update,
+                                        update: {
+                                            $version: 1,
+                                            characters: {
+                                                [character.stateKey.createdBy]: {
+                                                    type: update,
+                                                    update: characterOperation,
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            };
                             operate(operation);
                         }} />
                 </>);
@@ -92,13 +94,13 @@ const createBooleanParameterColumn = ({
 
 const createNumParameterColumn = ({
     key,
-    paramNames,
+    numParamNames,
 }: {
     key: StrIndex20;
-    paramNames: ParamName.ReadonlyStateMap<ParamName.State>;
+    numParamNames: ReadonlyMap<string, ParamName.State>;
 }) => {
     const reactKey = `numParameter${key}`;
-    const name = paramNames.get({ key: key, type: RoomParameterNameType.Num });
+    const name = numParamNames.get(key);
     if (name == null) {
         return null;
     }
@@ -114,15 +116,27 @@ const createNumParameterColumn = ({
                         isCreate={false}
                         compact
                         parameterKey={key}
-                        numberParameter={character.state.numParams.get(key)}
-                        numberMaxParameter={character.state.numMaxParams.get(key)}
+                        numberParameter={character.state.numParams[key]}
+                        numberMaxParameter={character.state.numMaxParams[key]}
                         createdByMe={character.createdByMe ?? false}
                         onOperate={characterOperation => {
-                            const operation = Room.createPostOperationSetup();
-                            operation.characters.set(character.stateKey, {
-                                type: update,
-                                operation: characterOperation,
-                            });
+                            const operation: Room.UpOperation = {
+                                $version: 1,
+                                participants: {
+                                    [character.stateKey.createdBy]: {
+                                        type: update,
+                                        update: {
+                                            $version: 1,
+                                            characters: {
+                                                [character.stateKey.createdBy]: {
+                                                    type: update,
+                                                    update: characterOperation,
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            };
                             operate(operation);
                         }} />
                 </>);
@@ -132,13 +146,13 @@ const createNumParameterColumn = ({
 
 const createStringParameterColumn = ({
     key,
-    paramNames,
+    strParamNames,
 }: {
     key: StrIndex20;
-    paramNames: ParamName.ReadonlyStateMap<ParamName.State>;
+    strParamNames: ReadonlyMap<string, ParamName.State>;
 }) => {
     const reactKey = `strmParameter${key}`;
-    const name = paramNames.get({ key: key, type: RoomParameterNameType.Str });
+    const name = strParamNames.get(key);
     if (name == null) {
         return null;
     }
@@ -154,14 +168,26 @@ const createStringParameterColumn = ({
                         isCharacterPrivate={character.state.isPrivate}
                         isCreate={false}
                         parameterKey={key}
-                        parameter={character.state.strParams.get(key)}
+                        parameter={character.state.strParams[key]}
                         createdByMe={character.createdByMe ?? false}
                         onOperate={characterOperation => {
-                            const operation = Room.createPostOperationSetup();
-                            operation.characters.set(character.stateKey, {
-                                type: update,
-                                operation: characterOperation,
-                            });
+                            const operation: Room.UpOperation = {
+                                $version: 1,
+                                participants: {
+                                    [character.stateKey.createdBy]: {
+                                        type: update,
+                                        update: {
+                                            $version: 1,
+                                            characters: {
+                                                [character.stateKey.createdBy]: {
+                                                    type: update,
+                                                    update: characterOperation,
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            };
                             operate(operation);
                         }} />
                 </>);
@@ -169,7 +195,7 @@ const createStringParameterColumn = ({
     };
 };
 
-const Image: React.FC<{ filePath?: FilePathFragment; iconSize: boolean }> = ({ filePath, iconSize }: { filePath?: FilePathFragment; iconSize: boolean }) => {
+const Image: React.FC<{ filePath?: FilePathFragment | FilePathModule.FilePath; iconSize: boolean }> = ({ filePath, iconSize }: { filePath?: FilePathFragment | FilePathModule.FilePath; iconSize: boolean }) => {
     const src = useFirebaseStorageUrl(filePath);
     if (src == null) {
         return null;
@@ -181,13 +207,15 @@ const CharacterList: React.FC = () => {
     const myAuth = React.useContext(MyAuthContext);
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
     const dispatchRoomComponentsState = React.useContext(DispatchRoomComponentsStateContext);
-    const operate = useOperate(); 
+    const operate = useOperate();
 
-    const characters = useSelector(state => state.roomModule.roomState?.state?.characters);
-    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
-    const paramNames = useSelector(state => state.roomModule.roomState?.state?.paramNames);
+    const characters = useCharacters();
+    const participants = useParticipants();
+    const boolParamNames = useBoolParamNames();
+    const numParamNames = useNumParamNames();
+    const strParamNames = useStrParamNames();
 
-    if (characters == null || participants == null || paramNames == null) {
+    if (characters == null || participants == null || boolParamNames == null || numParamNames == null || strParamNames == null) {
         return null;
     }
 
@@ -237,18 +265,27 @@ const CharacterList: React.FC = () => {
                     unCheckedChildren={<Icon.EyeInvisibleOutlined />}
                     tooltip={character.state.isPrivate ? characterIsPrivate({ isCreate: false }) : characterIsNotPrivate({ isCreate: false })}
                     onChange={newValue => {
-                        const setup = Room.createPostOperationSetup();
-                        const characterOperation: Character.PostOperation = {
-                            ...characterOperationBase,
-                            isPrivate: {
-                                newValue: !newValue,
-                            },
+                        const operation: Room.UpOperation = {
+                            $version: 1,
+                            participants: {
+                                [character.stateKey.createdBy]: {
+                                    type: update,
+                                    update: {
+                                        $version: 1,
+                                        characters: {
+                                            [character.stateKey.createdBy]: {
+                                                type: update,
+                                                update: {
+                                                    $version: 1,
+                                                    isPrivate: { newValue: !newValue },
+                                                },
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         };
-                        setup.characters.set(character.stateKey, {
-                            type: update,
-                            operation: characterOperation,
-                        });
-                        operate(setup);
+                        operate(operation);
                     }} />)
         },
         {
@@ -270,24 +307,33 @@ const CharacterList: React.FC = () => {
                         value={character.state.name}
                         size='small'
                         onChange={newValue => {
-                            const setup = Room.createPostOperationSetup();
-                            const characterOperation: Character.PostOperation = {
-                                ...characterOperationBase,
-                                name: {
-                                    newValue: newValue.target.value,
-                                },
+                            const operation: Room.UpOperation = {
+                                $version: 1,
+                                participants: {
+                                    [character.stateKey.createdBy]: {
+                                        type: update,
+                                        update: {
+                                            $version: 1,
+                                            characters: {
+                                                [character.stateKey.createdBy]: {
+                                                    type: update,
+                                                    update: {
+                                                        $version: 1,
+                                                        name: { newValue: newValue.target.value },
+                                                    },
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             };
-                            setup.characters.set(character.stateKey, {
-                                type: update,
-                                operation: characterOperation,
-                            });
-                            operate(setup);
+                            operate(operation);
                         }} />
                 </div>),
         },
-        ...strIndex20Array.map(key => createNumParameterColumn({ key, paramNames })),
-        ...strIndex20Array.map(key => createBooleanParameterColumn({ key, paramNames })),
-        ...strIndex20Array.map(key => createStringParameterColumn({ key, paramNames })),
+        ...strIndex20Array.map(key => createNumParameterColumn({ key, numParamNames })),
+        ...strIndex20Array.map(key => createBooleanParameterColumn({ key, boolParamNames })),
+        ...strIndex20Array.map(key => createStringParameterColumn({ key, strParamNames })),
     ]).compact(x => x).toArray();
 
     return (

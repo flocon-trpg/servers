@@ -15,32 +15,30 @@ import { FilePath } from '../../utils/types';
 import { __ } from '../../@shared/collection';
 import { OperationElement, replace, update } from '../../stateManagers/states/types';
 import * as Icon from '@ant-design/icons';
-import { Character } from '../../stateManagers/states/character';
-import { Piece } from '../../stateManagers/states/piece';
-import { Room } from '../../stateManagers/states/room';
-import { Board as StatesBoard } from '../../stateManagers/states/board';
-import { MyNumberValue } from '../../stateManagers/states/myNumberValue';
-import { Participant } from '../../stateManagers/states/participant';
 import { MyKonva } from '../../foundations/MyKonva';
-import { BoardLocation } from '../../stateManagers/states/boardLocation';
 import { AllRoomMessagesResult, Message, publicMessage, RoomMessage, useFilteredRoomMessages } from '../../hooks/useRoomMessages';
 import { $free } from '../../@shared/Constants';
 import { useSelector } from '../../store';
 import { useOperate } from '../../hooks/useOperate';
 import { useMe } from '../../hooks/useMe';
+import * as RoomModule from '../../@shared/ot/room/v1';
+import * as StatesBoard from '../../@shared/ot/room/participant/board/v1';
+import * as Character from '../../@shared/ot/room/participant/character/v1';
+import * as MyNumberValueModule from '../../@shared/ot/room/participant/myNumberValue/v1';
+import * as PieceModule from '../../@shared/ot/piece/v1';
+import * as BoardLocationModule from '../../@shared/ot/boardLocation/v1';
+import { useCharacters } from '../../hooks/state/useCharacters';
+import { useParticipants } from '../../hooks/state/useParticipants';
+import { Piece } from '../../utils/piece';
+import { useBoards } from '../../hooks/state/useBoards';
+import { recordToArray, recordToDualKeyMap, recordToMap } from '../../@shared/utils';
+import { RecordUpOperationElement } from '../../@shared/ot/room/util/recordOperationElement';
+import { MyNumberValue } from '../../utils/myNumberValue';
+import { BoardLocation } from '../../utils/boardLocation';
 
 namespace Resource {
     export const cellSizeIsTooSmall = 'セルが小さすぎるため、無効化されています';
 }
-
-const emptyCharacterOperation = (): Character.PostOperation => ({
-    boolParams: new Map(),
-    numParams: new Map(),
-    numMaxParams: new Map(),
-    strParams: new Map(),
-    pieces: createStateMap(),
-    tachieLocations: createStateMap(),
-});
 
 const createPiecePostOperation = ({
     e,
@@ -48,10 +46,10 @@ const createPiecePostOperation = ({
     board,
 }: {
     e: MyKonva.DragEndResult;
-    piece: Piece.State;
+    piece: PieceModule.State;
     board: StatesBoard.State;
-}): Piece.PostOperation => {
-    const pieceOperation: Piece.PostOperation = {};
+}): PieceModule.UpOperation => {
+    const pieceOperation: PieceModule.UpOperation = { $version: 1 };
     if (piece.isCellMode) {
         if (e.newLocation != null) {
             const position = Piece.getCellPosition({ ...e.newLocation, board });
@@ -80,8 +78,8 @@ const createTachieLocationPostOperation = ({
     e,
 }: {
     e: MyKonva.DragEndResult;
-}): Piece.PostOperation => {
-    const pieceOperation: BoardLocation.PostOperation = {};
+}): PieceModule.UpOperation => {
+    const pieceOperation: BoardLocationModule.UpOperation = { $version: 1 };
     if (e.newLocation != null) {
         pieceOperation.x = { newValue: e.newLocation.x };
         pieceOperation.y = { newValue: e.newLocation.y };
@@ -134,8 +132,8 @@ const Board: React.FC<BoardProps> = ({
     canvasHeight
 }: BoardProps) => {
     const roomId = useSelector(state => state.roomModule.roomId);
-    const characters = useSelector(state => state.roomModule.roomState?.state?.characters);
-    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
+    const characters = useCharacters();
+    const participants = useParticipants();
 
     const [selectedPieceKey, setSelectedPieceKey] = React.useState<SelectedPieceKey>();
     const [isBackgroundDragging, setIsBackgroundDragging] = React.useState(false); // これがないと、pieceをドラッグでリサイズする際に背景が少し動いてしまう。
@@ -189,8 +187,8 @@ const Board: React.FC<BoardProps> = ({
 
     const pieces = (() => {
         const characterPieces = __(characters).compact(([characterKey, character]) => {
-            const piece = __(character.pieces).find(([boardKey$]) => {
-                return boardKey.createdBy === boardKey$.createdBy && boardKey.id === boardKey$.id;
+            const piece = __(recordToDualKeyMap<PieceModule.State>(character.pieces)).find(([boardKey$]) => {
+                return boardKey.createdBy === boardKey$.first && boardKey.id === boardKey$.second;
             });
             if (piece == null) {
                 return null;
@@ -210,23 +208,40 @@ const Board: React.FC<BoardProps> = ({
                 onClick={() => setSelectedPieceKey({ type: 'character', characterKey })}
                 onDragEnd={e => {
                     const pieceOperation = createPiecePostOperation({ e, piece: pieceValue, board });
-                    const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
-                    pieces.set(boardKey, { type: update, operation: pieceOperation });
-                    const operation = Room.createPostOperationSetup();
-                    operation.characters.set(characterKey, {
-                        type: update,
-                        operation: {
-                            ...emptyCharacterOperation(),
-                            pieces,
+                    const operation: RoomModule.UpOperation = {
+                        $version: 1,
+                        participants: {
+                            [characterKey.createdBy]: {
+                                type: update,
+                                update: {
+                                    $version: 1,
+                                    characters: {
+                                        [characterKey.id]: {
+                                            type: update,
+                                            update: {
+                                                $version: 1,
+                                                pieces: {
+                                                    [boardKey.createdBy]: {
+                                                        [boardKey.id]: {
+                                                            type: update,
+                                                            update: pieceOperation,
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
-                    });
+                    };
                     operate(operation);
                 }} />;
         }).toArray();
 
         const tachieLocations = __(characters).compact(([characterKey, character]) => {
-            const tachieLocation = __(character.tachieLocations).find(([boardKey$]) => {
-                return boardKey.createdBy === boardKey$.createdBy && boardKey.id === boardKey$.id;
+            const tachieLocation = __(recordToDualKeyMap<BoardLocationModule.State>(character.tachieLocations)).find(([boardKey$]) => {
+                return boardKey.createdBy === boardKey$.first && boardKey.id === boardKey$.second;
             });
             if (tachieLocation == null) {
                 return null;
@@ -254,25 +269,42 @@ const Board: React.FC<BoardProps> = ({
                 onClick={() => setSelectedPieceKey({ type: 'tachie', characterKey })}
                 onDragEnd={e => {
                     const tachieLocationOperation = createTachieLocationPostOperation({ e });
-                    const tachieLocations = createStateMap<OperationElement<BoardLocation.State, BoardLocation.PostOperation>>();
-                    tachieLocations.set(boardKey, { type: update, operation: tachieLocationOperation });
-                    const operation = Room.createPostOperationSetup();
-                    operation.characters.set(characterKey, {
-                        type: update,
-                        operation: {
-                            ...emptyCharacterOperation(),
-                            tachieLocations,
+                    const operation: RoomModule.UpOperation = {
+                        $version: 1,
+                        participants: {
+                            [characterKey.createdBy]: {
+                                type: update,
+                                update: {
+                                    $version: 1,
+                                    characters: {
+                                        [characterKey.id]: {
+                                            type: update,
+                                            update: {
+                                                $version: 1,
+                                                tachieLocations: {
+                                                    [boardKey.createdBy]: {
+                                                        [boardKey.id]: {
+                                                            type: update,
+                                                            update: tachieLocationOperation,
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
-                    });
+                    };
                     operate(operation);
                 }} />;
         }).toArray();
 
         const myNumberValuePieces = __([...participants])
-            .flatMap(([userUid, participant]) => [...participant.myNumberValues].map(x => [userUid, ...x] as const))
+            .flatMap(([userUid, participant]) => recordToArray(participant.myNumberValues).map(pair => [userUid, pair.key, pair.value] as const))
             .compact(([userUid, stateId, myNumberValue]) => {
-                const piece = __(myNumberValue.pieces).find(([boardKey$, piece]) => {
-                    return boardKey.createdBy === boardKey$.createdBy && boardKey.id === boardKey$.id;
+                const piece = __(recordToDualKeyMap<PieceModule.State>(myNumberValue.pieces)).find(([boardKey$, piece]) => {
+                    return boardKey.createdBy === boardKey$.first && boardKey.id === boardKey$.second;
                 });
                 if (piece == null) {
                     return null;
@@ -289,20 +321,33 @@ const Board: React.FC<BoardProps> = ({
                     onClick={() => setSelectedPieceKey({ type: 'myNumberValue', stateId })}
                     onDragEnd={e => {
                         const pieceOperation = createPiecePostOperation({ e, piece: pieceValue, board });
-                        const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
-                        pieces.set(boardKey, { type: update, operation: pieceOperation });
-
-                        const myNumberValuesOperation = new Map<string, OperationElement<MyNumberValue.State, MyNumberValue.PostOperation>>();
-                        myNumberValuesOperation.set(stateId, {
-                            type: update,
-                            operation: {
-                                pieces,
-                            },
-                        });
-                        const operation = Room.createPostOperationSetup();
-                        operation.participants.set(userUid, {
-                            myNumberValues: myNumberValuesOperation,
-                        });
+                        const operation: RoomModule.UpOperation = {
+                            $version: 1,
+                            participants: {
+                                [userUid]: {
+                                    type: update,
+                                    update: {
+                                        $version: 1,
+                                        myNumberValues: {
+                                            [stateId]: {
+                                                type: update,
+                                                update: {
+                                                    $version: 1,
+                                                    pieces: {
+                                                        [boardKey.createdBy]: {
+                                                            [boardKey.id]: {
+                                                                type: update,
+                                                                update: pieceOperation,
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        };
                         operate(operation);
                     }} />;
             }).toArray();
@@ -407,9 +452,9 @@ const Board: React.FC<BoardProps> = ({
 type ContextMenuState = {
     x: number;
     y: number;
-    characterPiecesOnCursor: ReadonlyArray<{ characterKey: CompositeKey; character: Character.State; piece: Piece.State }>;
-    tachiesOnCursor: ReadonlyArray<{ characterKey: CompositeKey; character: Character.State; tachieLocation: BoardLocation.State }>;
-    myNumberValuesOnCursor: ReadonlyArray<{ myNumberValueKey: string; myNumberValue: MyNumberValue.State; piece: Piece.State; userUid: string }>;
+    characterPiecesOnCursor: ReadonlyArray<{ characterKey: CompositeKey; character: Character.State; piece: PieceModule.State }>;
+    tachiesOnCursor: ReadonlyArray<{ characterKey: CompositeKey; character: Character.State; tachieLocation: BoardLocationModule.State }>;
+    myNumberValuesOnCursor: ReadonlyArray<{ myNumberValueKey: string; myNumberValue: MyNumberValueModule.State; piece: PieceModule.State; userUid: string }>;
 }
 
 namespace ContextMenuState {
@@ -458,9 +503,9 @@ const Boards: React.FC<Props> = ({
     const [contextMenuState, setContextMenuState] = React.useState<ContextMenuState | null>(null);
     const operate = useOperate();
     const roomId = useSelector(state => state.roomModule.roomId);
-    const boards = useSelector(state => state.roomModule.roomState?.state?.boards);
-    const characters = useSelector(state => state.roomModule.roomState?.state?.characters);
-    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
+    const boards = useBoards();
+    const characters = useCharacters();
+    const participants = useParticipants();
     const { participant: me, userUid: myUserUid } = useMe();
     if (me == null || myUserUid == null || roomId == null || boards == null || characters == null) {
         return null;
@@ -503,9 +548,9 @@ const Boards: React.FC<Props> = ({
                     y: e.evt.offsetY,
                     characterPiecesOnCursor: __(characters.toArray())
                         .compact(([characterKey, character]) => {
-                            const found = character.pieces.toArray()
+                            const found = recordToDualKeyMap<PieceModule.State>(character.pieces).toArray()
                                 .find(([boardKey, piece]) => {
-                                    if (boardKey.createdBy !== activeBoardKey.createdBy || boardKey.id !== activeBoardKey.id) {
+                                    if (boardKey.first !== activeBoardKey.createdBy || boardKey.second !== activeBoardKey.id) {
                                         return false;
                                     }
                                     return Piece.isCursorOnIcon({ ...board, state: piece, cursorPosition: stateOffset });
@@ -518,9 +563,9 @@ const Boards: React.FC<Props> = ({
                         .toArray(),
                     tachiesOnCursor: __(characters.toArray())
                         .compact(([characterKey, character]) => {
-                            const found = character.tachieLocations.toArray()
+                            const found = recordToDualKeyMap<BoardLocationModule.State>(character.tachieLocations).toArray()
                                 .find(([boardKey, tachie]) => {
-                                    if (boardKey.createdBy !== activeBoardKey.createdBy || boardKey.id !== activeBoardKey.id) {
+                                    if (boardKey.first !== activeBoardKey.createdBy || boardKey.second !== activeBoardKey.id) {
                                         return false;
                                     }
                                     return BoardLocation.isCursorOnIcon({ state: tachie, cursorPosition: stateOffset });
@@ -532,11 +577,11 @@ const Boards: React.FC<Props> = ({
                         })
                         .toArray(),
                     myNumberValuesOnCursor: __([...(participants ?? [])])
-                        .flatMap(([userUid, participant]) => [...participant.myNumberValues].map(x => [userUid, ...x] as const))
+                        .flatMap(([userUid, participant]) => [...recordToMap(participant.myNumberValues)].map(([key, value]) => [userUid, key, value] as const))
                         .compact(([userUid, myNumberValueKey, myNumberValue]) => {
-                            const found = myNumberValue.pieces.toArray()
+                            const found = recordToDualKeyMap<PieceModule.State>(myNumberValue.pieces).toArray()
                                 .find(([boardKey, piece]) => {
-                                    if (boardKey.createdBy !== activeBoardKey.createdBy || boardKey.id !== activeBoardKey.id) {
+                                    if (boardKey.first !== activeBoardKey.createdBy || boardKey.second !== activeBoardKey.id) {
                                         return false;
                                     }
                                     return Piece.isCursorOnIcon({ ...board, state: piece, cursorPosition: stateOffset });
@@ -607,19 +652,33 @@ const Boards: React.FC<Props> = ({
                                 </Menu.Item>
                                 <Menu.Item
                                     onClick={() => {
-                                        const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
-                                        pieces.set(activeBoardKey, {
-                                            type: replace,
-                                            newValue: undefined,
-                                        });
-                                        const operation = Room.createPostOperationSetup();
-                                        operation.characters.set(characterKey, {
-                                            type: update,
-                                            operation: {
-                                                ...emptyCharacterOperation(),
-                                                pieces,
+                                        const operation: RoomModule.UpOperation = {
+                                            $version: 1,
+                                            participants: {
+                                                [characterKey.createdBy]: {
+                                                    type: update,
+                                                    update: {
+                                                        $version: 1,
+                                                        characters: {
+                                                            [characterKey.id]: {
+                                                                type: update,
+                                                                update: {
+                                                                    $version: 1,
+                                                                    pieces: {
+                                                                        [activeBoardKey.createdBy]: {
+                                                                            [activeBoardKey.id]: {
+                                                                                type: replace,
+                                                                                replace: { newValue: undefined },
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
                                             }
-                                        });
+                                        };
                                         operate(operation);
                                         setContextMenuState(null);
                                     }}>
@@ -658,19 +717,33 @@ const Boards: React.FC<Props> = ({
                                 </Menu.Item>
                                 <Menu.Item
                                     onClick={() => {
-                                        const tachieLocations = createStateMap<OperationElement<BoardLocation.State, BoardLocation.PostOperation>>();
-                                        tachieLocations.set(activeBoardKey, {
-                                            type: replace,
-                                            newValue: undefined,
-                                        });
-                                        const operation = Room.createPostOperationSetup();
-                                        operation.characters.set(characterKey, {
-                                            type: update,
-                                            operation: {
-                                                ...emptyCharacterOperation(),
-                                                tachieLocations,
+                                        const operation: RoomModule.UpOperation = {
+                                            $version: 1,
+                                            participants: {
+                                                [characterKey.createdBy]: {
+                                                    type: update,
+                                                    update: {
+                                                        $version: 1,
+                                                        characters: {
+                                                            [characterKey.id]: {
+                                                                type: update,
+                                                                update: {
+                                                                    $version: 1,
+                                                                    tachieLocations: {
+                                                                        [activeBoardKey.createdBy]: {
+                                                                            [activeBoardKey.id]: {
+                                                                                type: replace,
+                                                                                replace: { newValue: undefined },
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
                                             }
-                                        });
+                                        };
                                         operate(operation);
                                         setContextMenuState(null);
                                     }}>
@@ -691,13 +764,14 @@ const Boards: React.FC<Props> = ({
             return (
                 <Menu.SubMenu title={title}>
                     {__(characters.toArray()).compact(([key, value]) => {
-                        const pieceExists = __(value.pieces).some(([boardKey]) => activeBoardKey.id === boardKey.id && activeBoardKey.createdBy === boardKey.createdBy);
-                        const tachieExists = __(value.tachieLocations).some(([boardKey]) => activeBoardKey.id === boardKey.id && activeBoardKey.createdBy === boardKey.createdBy);
+                        const pieceExists = recordToDualKeyMap(value.pieces).toArray().some(([boardKey]) => activeBoardKey.id === boardKey.second && activeBoardKey.createdBy === boardKey.first);
+                        const tachieExists = recordToDualKeyMap(value.tachieLocations).toArray().some(([boardKey]) => activeBoardKey.id === boardKey.second && activeBoardKey.createdBy === boardKey.first);
 
                         const { x, y } = ContextMenuState.toKonvaPosition({ contextMenuState, boardConfig });
                         const cellPosition = Piece.getCellPosition({ x, y, board });
                         // TODO: x,y,w,h の値が適当
-                        const pieceLocationWhichIsCellMode = {
+                        const pieceLocationWhichIsCellMode: PieceModule.State = {
+                            $version: 1,
                             x: 0,
                             y: 0,
                             w: 50,
@@ -710,20 +784,22 @@ const Boards: React.FC<Props> = ({
                             isPrivate: false,
                         };
 
-                        const pieceLocationWhichIsNotCellMode = {
+                        const pieceLocationWhichIsNotCellMode: PieceModule.State = {
+                            $version: 1,
                             x,
                             y,
                             w: 50,
                             h: 50,
-                            isPrivate: false,
                             isCellMode: false,
+                            isPrivate: false,
                             cellX: 0,
                             cellY: 0,
                             cellW: 1,
                             cellH: 1,
                         };
 
-                        const tachieLocationWhichIsNotCellMode = {
+                        const tachieLocationWhichIsNotCellMode: BoardLocationModule.State = {
+                            $version: 1,
                             x,
                             y,
                             w: 100,
@@ -753,20 +829,33 @@ const Boards: React.FC<Props> = ({
                                         <Menu.Item
                                             disabled={Math.min(board.cellHeight, board.cellWidth) <= 0}
                                             onClick={() => {
-                                                const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
-
-                                                pieces.set(activeBoardKey, {
-                                                    type: replace,
-                                                    newValue: pieceLocationWhichIsCellMode
-                                                });
-                                                const operation = Room.createPostOperationSetup();
-                                                operation.characters.set(key, {
-                                                    type: update,
-                                                    operation: {
-                                                        ...emptyCharacterOperation(),
-                                                        pieces,
+                                                const operation: RoomModule.UpOperation = {
+                                                    $version: 1,
+                                                    participants: {
+                                                        [key.createdBy]: {
+                                                            type: update,
+                                                            update: {
+                                                                $version: 1,
+                                                                characters: {
+                                                                    [key.id]: {
+                                                                        type: update,
+                                                                        update: {
+                                                                            $version: 1,
+                                                                            tachieLocations: {
+                                                                                [activeBoardKey.createdBy]: {
+                                                                                    [activeBoardKey.id]: {
+                                                                                        type: replace,
+                                                                                        replace: { newValue: undefined },
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
                                                     }
-                                                });
+                                                };
                                                 operate(operation);
                                                 setContextMenuState(null);
                                             }}>
@@ -775,19 +864,33 @@ const Boards: React.FC<Props> = ({
                                             </Tooltip>
                                         </Menu.Item>
                                         <Menu.Item onClick={() => {
-                                            const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
-                                            pieces.set(activeBoardKey, {
-                                                type: replace,
-                                                newValue: pieceLocationWhichIsNotCellMode
-                                            });
-                                            const operation = Room.createPostOperationSetup();
-                                            operation.characters.set(key, {
-                                                type: update,
-                                                operation: {
-                                                    ...emptyCharacterOperation(),
-                                                    pieces,
+                                            const operation: RoomModule.UpOperation = {
+                                                $version: 1,
+                                                participants: {
+                                                    [key.createdBy]: {
+                                                        type: update,
+                                                        update: {
+                                                            $version: 1,
+                                                            characters: {
+                                                                [key.id]: {
+                                                                    type: update,
+                                                                    update: {
+                                                                        $version: 1,
+                                                                        pieces: {
+                                                                            [activeBoardKey.createdBy]: {
+                                                                                [activeBoardKey.id]: {
+                                                                                    type: replace,
+                                                                                    replace: { newValue: pieceLocationWhichIsNotCellMode },
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
                                                 }
-                                            });
+                                            };
                                             operate(operation);
                                             setContextMenuState(null);
                                         }}>
@@ -797,19 +900,33 @@ const Boards: React.FC<Props> = ({
                                     <Menu.Item
                                         disabled={!pieceExists}
                                         onClick={() => {
-                                            const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
-                                            pieces.set(activeBoardKey, {
-                                                type: replace,
-                                                newValue: undefined,
-                                            });
-                                            const operation = Room.createPostOperationSetup();
-                                            operation.characters.set(key, {
-                                                type: update,
-                                                operation: {
-                                                    ...emptyCharacterOperation(),
-                                                    pieces,
+                                            const operation: RoomModule.UpOperation = {
+                                                $version: 1,
+                                                participants: {
+                                                    [key.createdBy]: {
+                                                        type: update,
+                                                        update: {
+                                                            $version: 1,
+                                                            characters: {
+                                                                [key.id]: {
+                                                                    type: update,
+                                                                    update: {
+                                                                        $version: 1,
+                                                                        pieces: {
+                                                                            [activeBoardKey.createdBy]: {
+                                                                                [activeBoardKey.id]: {
+                                                                                    type: replace,
+                                                                                    replace: { newValue: undefined },
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
                                                 }
-                                            });
+                                            };
                                             operate(operation);
                                             setContextMenuState(null);
                                         }}>
@@ -835,19 +952,33 @@ const Boards: React.FC<Props> = ({
                                     <Menu.Item
                                         disabled={tachieExists}
                                         onClick={() => {
-                                            const tachieLocations = createStateMap<OperationElement<BoardLocation.State, BoardLocation.PostOperation>>();
-                                            tachieLocations.set(activeBoardKey, {
-                                                type: replace,
-                                                newValue: tachieLocationWhichIsNotCellMode
-                                            });
-                                            const operation = Room.createPostOperationSetup();
-                                            operation.characters.set(key, {
-                                                type: update,
-                                                operation: {
-                                                    ...emptyCharacterOperation(),
-                                                    tachieLocations,
+                                            const operation: RoomModule.UpOperation = {
+                                                $version: 1,
+                                                participants: {
+                                                    [key.createdBy]: {
+                                                        type: update,
+                                                        update: {
+                                                            $version: 1,
+                                                            characters: {
+                                                                [key.id]: {
+                                                                    type: update,
+                                                                    update: {
+                                                                        $version: 1,
+                                                                        tachieLocations: {
+                                                                            [activeBoardKey.createdBy]: {
+                                                                                [activeBoardKey.id]: {
+                                                                                    type: replace,
+                                                                                    replace: { newValue: tachieLocationWhichIsNotCellMode },
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
                                                 }
-                                            });
+                                            };
                                             operate(operation);
                                             setContextMenuState(null);
                                         }}>
@@ -856,19 +987,33 @@ const Boards: React.FC<Props> = ({
                                     <Menu.Item
                                         disabled={!tachieExists}
                                         onClick={() => {
-                                            const tachieLocations = createStateMap<OperationElement<BoardLocation.State, BoardLocation.PostOperation>>();
-                                            tachieLocations.set(activeBoardKey, {
-                                                type: replace,
-                                                newValue: undefined,
-                                            });
-                                            const operation = Room.createPostOperationSetup();
-                                            operation.characters.set(key, {
-                                                type: update,
-                                                operation: {
-                                                    ...emptyCharacterOperation(),
-                                                    tachieLocations,
+                                            const operation: RoomModule.UpOperation = {
+                                                $version: 1,
+                                                participants: {
+                                                    [key.createdBy]: {
+                                                        type: update,
+                                                        update: {
+                                                            $version: 1,
+                                                            characters: {
+                                                                [key.id]: {
+                                                                    type: update,
+                                                                    update: {
+                                                                        $version: 1,
+                                                                        tachieLocations: {
+                                                                            [activeBoardKey.createdBy]: {
+                                                                                [activeBoardKey.id]: {
+                                                                                    type: replace,
+                                                                                    replace: { newValue: undefined },
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
                                                 }
-                                            });
+                                            };
                                             operate(operation);
                                             setContextMenuState(null);
                                         }}>
@@ -913,15 +1058,23 @@ const Boards: React.FC<Props> = ({
                                     </Menu.Item>}
                                 <Menu.Item
                                     onClick={() => {
-                                        const myNumberValues = new Map<string, OperationElement<MyNumberValue.State, MyNumberValue.PostOperation>>();
-                                        myNumberValues.set(myNumberValueKey, {
-                                            type: replace,
-                                            newValue: undefined,
-                                        });
-                                        const operation = Room.createPostOperationSetup();
-                                        operation.participants.set(myUserUid, {
-                                            myNumberValues,
-                                        });
+                                        const operation: RoomModule.UpOperation = {
+                                            $version: 1,
+                                            participants: {
+                                                [myUserUid]: {
+                                                    type: update,
+                                                    update: {
+                                                        $version: 1,
+                                                        myNumberValues: {
+                                                            [myNumberValueKey]: {
+                                                                type: replace,
+                                                                replace: { newValue: undefined }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        };
                                         operate(operation);
                                         setContextMenuState(null);
                                     }}>
@@ -945,7 +1098,8 @@ const Boards: React.FC<Props> = ({
 
 
             // TODO: x,y,w,h の値が適当
-            const pieceLocationWhichIsCellMode = {
+            const pieceLocationWhichIsCellMode: PieceModule.State = {
+                $version: 1,
                 x: 0,
                 y: 0,
                 w: 50,
@@ -958,7 +1112,8 @@ const Boards: React.FC<Props> = ({
                 isPrivate: false,
             };
 
-            const pieceLocationWhichIsNotCellMode = {
+            const pieceLocationWhichIsNotCellMode: PieceModule.State = {
+                $version: 1,
                 x: nonCellPosition.x,
                 y: nonCellPosition.y,
                 w: 50,
@@ -974,8 +1129,8 @@ const Boards: React.FC<Props> = ({
             return (
                 <Menu.SubMenu title={title}>
                     <Menu.SubMenu title='数値'>
-                        {__(me.myNumberValues).compact(([key, value]) => {
-                            const pieceExists = __(value.pieces).some(([boardKey]) => activeBoardKey.id === boardKey.id && activeBoardKey.createdBy === boardKey.createdBy);
+                        {__(recordToArray(me.myNumberValues)).compact(({ key, value }) => {
+                            const pieceExists = recordToDualKeyMap(value.pieces).toArray().some(([boardKey]) => activeBoardKey.id === boardKey.second && activeBoardKey.createdBy === boardKey.first);
                             return (
                                 <Menu.SubMenu key={key} title={<span>{pieceExists ? <Icon.CheckOutlined /> : null} {MyNumberValue.stringify(value)}</span>}>
                                     <Menu.Item
@@ -994,15 +1149,23 @@ const Boards: React.FC<Props> = ({
                                     </Menu.Item>
                                     <Menu.Item
                                         onClick={() => {
-                                            const myNumberValues = new Map<string, OperationElement<MyNumberValue.State, MyNumberValue.PostOperation>>();
-                                            myNumberValues.set(key, {
-                                                type: replace,
-                                                newValue: undefined,
-                                            });
-                                            const operation = Room.createPostOperationSetup();
-                                            operation.participants.set(myUserUid, {
-                                                myNumberValues,
-                                            });
+                                            const operation: RoomModule.UpOperation = {
+                                                $version: 1,
+                                                participants: {
+                                                    [myUserUid]: {
+                                                        type: update,
+                                                        update: {
+                                                            $version: 1,
+                                                            myNumberValues: {
+                                                                [key]: {
+                                                                    type: replace,
+                                                                    replace: { newValue: undefined }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            };
                                             operate(operation);
                                             setContextMenuState(null);
                                         }}>

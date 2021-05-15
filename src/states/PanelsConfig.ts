@@ -1,14 +1,12 @@
 import { castToRecord } from '../utils/cast';
 import isObject from '../utils/isObject';
-import { chooseRecord } from '../utils/record';
 import { castToPartialCharactersPanelConfig, CharactersPanelConfig as CharacterPanelConfig, defaultCharactersPanelConfig as defaultCharacterPanelConfig, PartialCharactersPanelConfig as PartialCharacterPanelConfig, toCompleteCharactersPanelConfig } from './CharactersPanelConfig';
-import * as Room from '../stateManagers/states/room';
 import { BoardsPanelConfig as BoardPanelConfig, castToPartialBoardPanelConfig, defaultBoardPanelsConfig as defaultBoardPanelsConfig, PartialBoardPanelConfig, toCompleteBoardPanelConfig } from './BoardsPanelConfig';
 import { castToPartialMessagePanelConfig, defaultMessagePanelsConfig, MessagePanelConfig, PartialMessagePanelConfig, toCompleteMessagePanelConfig } from './MessagesPanelConfig';
-import { ReadonlyStateToReduce } from '../hooks/useRoomMessages';
 import { castToPartialGameEffectPanelConfig, defaultGameEffectPanelConfig, GameEffectPanelConfig, PartialGameEffectPanelConfig, toCompleteGameEffectPanelConfig } from './GameEffectPanelConfig';
 import { castToPartialParticipantPanelConfig, defaultParticipantPanelConfig, PartialParticipantPanelConfig, ParticipantPanelConfig, toCompleteParticipantsPanelConfig } from './ParticipantsPanelConfig';
 import { castToPartialMyValuePanelConfig, defaultMyValuePanelConfig, MyValuePanelConfig, PartialMyValuePanelConfig, toCompleteMyValuePanelConfig } from './MyValuePanelConfig';
+import { chooseRecord } from '../@shared/utils';
 
 export type PanelsConfig = {
     boardPanels: Record<string, BoardPanelConfig>;

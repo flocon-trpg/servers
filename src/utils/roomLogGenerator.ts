@@ -1,14 +1,16 @@
-import { ReadonlyStateMap } from '../@shared/StateMap';
+import { createStateMap, ReadonlyStateMap } from '../@shared/StateMap';
 import { RoomMessages, RoomPrivateMessage, RoomPublicChannelFragment, RoomPublicMessage } from '../generated/graphql';
 import { PrivateChannelSet } from './PrivateChannelSet';
 import { escape } from 'html-escaper';
 import { $free, $system } from '../@shared/Constants';
 import moment from 'moment';
-import { Participant } from '../stateManagers/states/participant';
-import { Character } from '../stateManagers/states/character';
 import { PublicChannelNames } from './types';
 import { RoomMessage } from '../components/room/RoomMessage';
 import { isDeleted, toText } from './message';
+import * as CharacterModule from '../@shared/ot/room/participant/character/v1';
+import * as ParticipantModule from '../@shared/ot/room/participant/v1';
+import { __ } from '../@shared/collection';
+import { recordToMap } from '../@shared/utils';
 
 const privateMessage = 'privateMessage';
 const publicMessage = 'publicMessage';
@@ -63,18 +65,21 @@ type RoomMessage = {
 
 const createRoomMessageArray = (props: {
     messages: RoomMessages;
-    participants: ReadonlyMap<string, Participant.State>;
-    characters: ReadonlyStateMap<Character.State>;
+    participants: ReadonlyMap<string, ParticipantModule.State>;
 } & PublicChannelNames) => {
     const {
         messages,
         participants,
-        characters,
     } = props;
 
     const result: RoomMessage[] = [];
     const publicChannels = new Map<string, RoomPublicChannelFragment>();
     messages.publicChannels.forEach(ch => publicChannels.set(ch.key, ch));
+
+    const charactersSource = __(participants).map(([key, value]) => {
+        return { key, value: recordToMap(value.characters) };
+    }).toMap(x => x);
+    const characters = createStateMap(charactersSource);
 
     const createCreatedBy = ({ createdBy, characterStateId, customName }: { createdBy: string; characterStateId?: string; customName?: string }): { rolePlayPart?: string; participantNamePart: string } => {
         const participantNamePart = participants.get(createdBy)?.name ?? createdBy;
@@ -163,8 +168,7 @@ const createRoomMessageArray = (props: {
 
 export const generateAsStaticHtml = (params: {
     messages: RoomMessages;
-    participants: ReadonlyMap<string, Participant.State>;
-    characters: ReadonlyStateMap<Character.State>;
+    participants: ReadonlyMap<string, ParticipantModule.State>;
 } & PublicChannelNames) => {
     const elements = createRoomMessageArray(params).sort((x, y) => x.createdAt - y.createdAt).map(msg => {
         const left = msg.value.createdBy == null ?

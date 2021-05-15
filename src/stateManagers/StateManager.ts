@@ -18,8 +18,8 @@ export type Transform<TFirstOperation, TSecondOperation> = (params: {
 }) => { firstPrime: TFirstOperation; secondPrime: TSecondOperation };
 
 export type Diff<TState, TOperation> = (params: {
-    prev: TState;
-    next: TState;
+    prevState: TState;
+    nextState: TState;
 }) => TOperation | undefined;
 
 export type StateManagerParameters<TState, TGetOperation, TPostOperation> = {
@@ -131,7 +131,7 @@ class StateManagerCore<TState, TGetOperation, TPostOperation> {
                 this._actualState :
                 this.params.applyPostOperation({ state: this._actualState, operation: this._postingOperation.operation });
             this._actualState = this.params.applyGetOperation({ state: this._actualState, operation: toApply.operation });
-            const diff = this.params.diff({ prev: expectedState, next: this._actualState });
+            const diff = this.params.diff({ prevState: expectedState, nextState: this._actualState });
             this._localOperation = (() => {
                 if (this._localOperation === undefined) {
                     return undefined;
@@ -231,7 +231,7 @@ class StateManagerCore<TState, TGetOperation, TPostOperation> {
             return true;
         }
         const nextState = this.params.applyPostOperation({ state: this.actualState, operation: this._postingOperation.operation });
-        const diffBack = this.params.diff({ prev: nextState, next: this.actualState });
+        const diffBack = this.params.diff({ prevState: nextState, nextState: this.actualState });
         if (diffBack === undefined) {
             this._postingOperation = undefined;
             this._uiStateCache = undefined;

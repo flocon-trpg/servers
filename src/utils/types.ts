@@ -1,8 +1,50 @@
 import { FileSourceType } from '../generated/graphql';
+import * as FilePathModule from '../@shared/ot/filePath/v1';
 
 export type FilePath = {
     path: string;
     sourceType: FileSourceType;
+}
+
+export namespace FilePath {
+    export const toGraphQL = (source: FilePath | FilePathModule.FilePath): FilePath => {
+        let sourceType: FileSourceType;
+        switch (source.sourceType) {
+            case FilePathModule.Default:
+                sourceType = FileSourceType.Default;
+                break;
+            case FilePathModule.FirebaseStorage:
+                sourceType = FileSourceType.FirebaseStorage;
+                break;
+            default:
+                sourceType = source.sourceType;
+                break;
+        }
+        return {
+            path: source.path,
+            sourceType,
+        };
+    };
+
+    export const toOt = (source: FilePath | FilePathModule.FilePath): FilePathModule.FilePath => {
+        let sourceType: typeof FilePathModule.Default | typeof FilePathModule.FirebaseStorage;
+        switch (source.sourceType) {
+            case FileSourceType.Default:
+                sourceType = FilePathModule.Default;
+                break;
+            case FileSourceType.FirebaseStorage:
+                sourceType = FilePathModule.FirebaseStorage;
+                break;
+            default:
+                sourceType = source.sourceType;
+                break;
+        }
+        return {
+            $version: 1,
+            path: source.path,
+            sourceType,
+        };
+    };
 }
 
 export const none = 'none';

@@ -4,13 +4,18 @@ import { $free } from '../../@shared/Constants';
 import { FilePathFragment, MyValueLogFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment } from '../../generated/graphql';
 import { useFirebaseStorageUrl } from '../../hooks/firebaseStorage';
 import { myValueLog, privateMessage, publicMessage } from '../../hooks/useRoomMessages';
-import { Participant } from '../../stateManagers/states/participant';
 import { PrivateChannelSet } from '../../utils/PrivateChannelSet';
 import { PublicChannelNames } from '../../utils/types';
 import * as Icon from '@ant-design/icons';
 import Jdenticon from '../../foundations/Jdenticon';
 import { compositeKeyToString } from '../../@shared/StateMap';
 import { isDeleted, toText } from '../../utils/message';
+import * as ParticipantModule from '../../@shared/ot/room/participant/v1';
+import * as Converter from '../../@shared/ot/room/participant/myNumberValue/converter';
+import { recordToDualKeyMap } from '../../@shared/utils';
+import * as PieceModule from '../../@shared/ot/piece/v1';
+import { RecordUpOperationElement, replace, update } from '../../@shared/ot/room/util/recordOperationElement';
+import { isIdRecord } from '../../@shared/ot/room/util/record';
 
 export namespace RoomMessage {
     const Image: React.FC<{ filePath: FilePathFragment | undefined }> = ({ filePath }: { filePath: FilePathFragment | undefined }) => {
@@ -40,26 +45,27 @@ export namespace RoomMessage {
     export const Content: React.FC<ContentProps> = ({ style, message }: ContentProps) => {
         if (message.type === myValueLog) {
             const key = compositeKeyToString({ createdBy: message.value.stateUserUid, id: message.value.stateId });
+            const value = Converter.parse(message.value.valueJson);
 
-            if (message.value.replaceType === true) {
+            if (value.type === 'create') {
                 return (<div style={style}>
                     {`数値コマ(${key})が新規作成されました`}
                 </div>);
             }
-            if (message.value.replaceType === false) {
+            if (value.type === 'delete') {
                 return (<div style={style}>
                     {`数値コマ(${key})が削除されました`}
                 </div>);
             }
 
-            // 現在、どのコマが変更されたかまでは通知していない。
+            const pieces = recordToDualKeyMap<RecordUpOperationElement<PieceModule.State, PieceModule.UpOperation>>(value.pieces ?? {});
+
             const changed = [
-                message.value.valueChanged ? '値' : null,
-                message.value.isValuePrivateChanged ? '公開状態' : null,
-                message.value.createdPieces.length === 0 ? null : 'コマ作成',
-                message.value.deletedPieces.length === 0 ? null : 'コマ削除',
-                message.value.movedPieces.length === 0 ? null : 'コマ移動',
-                message.value.resizedPieces.length === 0 ? null : 'コマのリサイズ',
+                value.value ? '値' : null,
+                value.isValuePrivate ? '公開状態' : null,
+                pieces.toArray().some(([,piece]) => piece.type === replace && piece.replace.newValue != null) ? null : 'コマ作成',
+                pieces.toArray().some(([,piece]) => piece.type === replace && piece.replace.newValue == null) ? null : 'コマ削除',
+                pieces.toArray().some(([,piece]) => piece.type === update && !isIdRecord(piece.update)) ? null : 'コマ編集',
             ].reduce((seed, elem) => {
                 if (elem == null) {
                     return seed;
@@ -91,7 +97,7 @@ export namespace RoomMessage {
 
     };
 
-    export const userName = (message: MessageState, participants: ReadonlyMap<string, Participant.State>) => {
+    export const userName = (message: MessageState, participants: ReadonlyMap<string, ParticipantModule.State>) => {
         if (message.type === myValueLog || message.value.createdBy == null) {
             return null;
         }
@@ -130,7 +136,7 @@ export namespace RoomMessage {
             </div>);
     };
 
-    export const toChannelName = (message: MessageState, publicChannelNames: PublicChannelNames, participants: ReadonlyMap<string, Participant.State>) => {
+    export const toChannelName = (message: MessageState, publicChannelNames: PublicChannelNames, participants: ReadonlyMap<string, ParticipantModule.State>) => {
         if (message.type === myValueLog || message.value.createdBy == null) {
             return 'システムメッセージ';
         }

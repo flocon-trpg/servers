@@ -1,6 +1,6 @@
 import React from 'react';
-import { useSelector } from '../store';
-import { PublicChannelNames } from '../utils/types';
+import { useSelector } from '../../store';
+import { PublicChannelNames } from '../../utils/types';
 
 export function usePublicChannelNames(): PublicChannelNames | null {
     const publicChannel1Name = useSelector(state => state.roomModule?.roomState?.state?.publicChannel1Name);

@@ -3,9 +3,9 @@ import { Table } from 'antd';
 import { __ } from '../../@shared/collection';
 import { ParticipantRole } from '../../generated/graphql';
 import Jdenticon from '../../foundations/Jdenticon';
-import { Participant } from '../../stateManagers/states/participant';
-import { RoomConnectionsResult, useRoomConnections } from '../../hooks/useRoomConnections';
-import { useSelector } from '../../store';
+import { useRoomConnections } from '../../hooks/useRoomConnections';
+import * as Participant from '../../@shared/ot/room/participant/v1';
+import { useParticipants } from '../../hooks/state/useParticipants';
 
 type DataSource = {
     key: string;
@@ -18,7 +18,7 @@ type DataSource = {
 
 const ParticipantList: React.FC = () => {
     const roomConnections = useRoomConnections();
-    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
+    const participants = useParticipants();
 
     const dataSource: DataSource[] =
         React.useMemo(() => [...(participants ?? [])].map(([key, participant]) => {

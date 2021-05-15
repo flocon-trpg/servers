@@ -1,5 +1,5 @@
 import { CompositeKey } from '../../@shared/StateMap';
-import { Piece } from '../../stateManagers/states/piece';
+import * as Piece from '../../@shared/ot/piece/v1';
 
 export const create = 'create';
 export const update = 'update';

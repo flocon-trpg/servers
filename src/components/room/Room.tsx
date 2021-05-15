@@ -6,7 +6,6 @@ import { useSelector } from '../../store';
 import roomConfigModule from '../../modules/roomConfigModule';
 import { useDispatch } from 'react-redux';
 import Boards from './Boards';
-import { recordToArray } from '../../utils/record';
 import RoomMessages from './RoomMessages';
 import CharacterParameterNamesDrawer from './CharacterParameterNamesDrawer';
 import { defaultRoomComponentsState, reduceComponentsState } from './RoomComponentsState';
@@ -14,7 +13,7 @@ import ComponentsStateContext from './contexts/RoomComponentsStateContext';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import CharacterDrawer from './CharacterDrawer';
 import BoardDrawer from './BoardDrawer';
-import { boardPanel, characterPanel, gameEffectPanel, messagePanel, myValuePanel, participantPanel } from '../../states/RoomConfig';
+import { boardPanel, messagePanel } from '../../states/RoomConfig';
 import SoundPlayer from './SoundPlayer';
 import EditRoomDrawer from './EditRoomDrawer';
 import ParticipantList from './ParticipantList';
@@ -27,6 +26,7 @@ import MyNumberValueList from './MyNumberValueList';
 import { useRoomMessageInputTexts } from '../../hooks/useRoomMessageInputTexts';
 import { useMe } from '../../hooks/useMe';
 import { RoomMenu } from './RoomMenu';
+import { recordToArray } from '../../@shared/utils';
 
 const RoomMessagePanels: React.FC<{ roomId: string }> = ({ roomId }: { roomId: string }) => {
     const dispatch = useDispatch();

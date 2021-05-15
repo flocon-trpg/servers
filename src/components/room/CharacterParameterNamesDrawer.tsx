@@ -6,17 +6,18 @@ import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponent
 import InputModal from '../InputModal';
 import { characterParameterNamesDrawerVisibility } from './RoomComponentsState';
 import { StrIndex100, StrIndex20, strIndex20Array } from '../../@shared/indexes';
-import { RoomParameterNameType } from '../../generated/graphql';
 import { replace, update } from '../../stateManagers/states/types';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import BufferedInput from '../../foundations/BufferedInput';
 import { Room } from '../../stateManagers/states/room';
 import { useSelector } from '../../store';
 import { useOperate } from '../../hooks/useOperate';
+import * as RoomModule from '../../@shared/ot/room/v1';
+import { isRecordEmpty, recordToMap } from '../../@shared/utils';
 
 type VisibleParameterForm = {
-    type: RoomParameterNameType;
-    key: StrIndex100;
+    type: 'Bool' | 'Str' | 'Num';
+    key: StrIndex20;
 }
 
 const CharacterParameterNamesDrawer: React.FC = () => {
@@ -27,9 +28,15 @@ const CharacterParameterNamesDrawer: React.FC = () => {
     const [addNumParamSelector, setAddNumParamSelector] = React.useState<StrIndex20>();
     const [addBoolParamSelector, setAddBoolParamSelector] = React.useState<StrIndex20>();
     const [addStrParamSelector, setAddStrParamSelector] = React.useState<StrIndex20>();
-    const paramNames = useSelector(state => state.roomModule.roomState?.state?.paramNames);
+    const boolParamNames = useSelector(state => state.roomModule.roomState?.state?.boolParamNames);
+    const numParamNames = useSelector(state => state.roomModule.roomState?.state?.numParamNames);
+    const strParamNames = useSelector(state => state.roomModule.roomState?.state?.strParamNames);
 
-    if (paramNames == null) {
+    const boolParamNamesMap = React.useMemo(() => boolParamNames == null ? undefined : recordToMap(boolParamNames), [boolParamNames]);
+    const numParamNamesMap = React.useMemo(() => numParamNames == null ? undefined : recordToMap(numParamNames), [numParamNames]);
+    const strParamNamesMap = React.useMemo(() => strParamNames == null ? undefined : recordToMap(strParamNames), [strParamNames]);
+
+    if (boolParamNamesMap == null || numParamNamesMap == null || strParamNamesMap == null) {
         return null;
     }
 
@@ -39,13 +46,13 @@ const CharacterParameterNamesDrawer: React.FC = () => {
         }
         let type = '';
         switch (visibleParameterForm.type) {
-            case RoomParameterNameType.Num:
+            case 'Num':
                 type = '数値';
                 break;
-            case RoomParameterNameType.Bool:
+            case 'Bool':
                 type = 'チェックマーク';
                 break;
-            case RoomParameterNameType.Str:
+            case 'Str':
                 type = '文字列';
                 break;
         }
@@ -55,7 +62,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
     const formItemStyle: React.CSSProperties = { margin: 0 }; // margin-bottomのデフォルト値(24px)を上書きさせている
 
     const createNumParamName = (key: StrIndex20) => {
-        const state = paramNames.get({ key, type: RoomParameterNameType.Num });
+        const state = numParamNamesMap.get(key);
         if (state == null) {
             return null;
         }
@@ -66,19 +73,42 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                 label={`数値パラメーター${key}`}
                 name={`numParameter${key}`}>
                 <Space>
-                    <Input
+                    <BufferedInput
                         size='small'
                         value={state.name}
+                        bufferDuration={200}
                         onChange={e => {
-                            const operation = Room.createPostOperationSetup();
-                            operation.paramNames.set({ key, type: RoomParameterNameType.Num }, { type: update, operation: { name: { newValue: e.target.value } } });
+                            if (e.previousValue === e.currentValue) {
+                                return;
+                            }
+                            const operation: RoomModule.UpOperation = {
+                                $version: 1,
+                                numParamNames: {
+                                    [key]: {
+                                        type: update,
+                                        update: {
+                                            $version: 1,
+                                            name: { newValue: e.currentValue }
+                                        }
+                                    }
+                                }
+                            };
                             operate(operation);
                         }} />
                     <Button
                         size='small'
                         onClick={() => {
-                            const operation = Room.createPostOperationSetup();
-                            operation.paramNames.set({ key, type: RoomParameterNameType.Num }, { type: replace, newValue: undefined });
+                            const operation: RoomModule.UpOperation = {
+                                $version: 1,
+                                numParamNames: {
+                                    [key]: {
+                                        type: replace,
+                                        replace: {
+                                            newValue: undefined,
+                                        }
+                                    }
+                                }
+                            };
                             operate(operation);
                         }} >
                         <DeleteOutlined />
@@ -89,7 +119,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
     };
 
     const createBoolParamName = (key: StrIndex20) => {
-        const state = paramNames.get({ key, type: RoomParameterNameType.Bool });
+        const state = boolParamNamesMap.get(key);
         if (state == null) {
             return null;
         }
@@ -100,19 +130,42 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                 label={`チェックマークパラメーター${key}`}
                 name={`boolParameter${key}`}>
                 <Space>
-                    <Input
+                    <BufferedInput
                         size='small'
                         value={state.name}
+                        bufferDuration={200}
                         onChange={e => {
-                            const operation = Room.createPostOperationSetup();
-                            operation.paramNames.set({ key, type: RoomParameterNameType.Bool }, { type: update, operation: { name: { newValue: e.target.value } } });
+                            if (e.previousValue === e.currentValue) {
+                                return;
+                            }
+                            const operation: RoomModule.UpOperation = {
+                                $version: 1,
+                                boolParamNames: {
+                                    [key]: {
+                                        type: update,
+                                        update: {
+                                            $version: 1,
+                                            name: { newValue: e.currentValue }
+                                        }
+                                    }
+                                }
+                            };
                             operate(operation);
                         }} />
                     <Button
                         size='small'
                         onClick={() => {
-                            const operation = Room.createPostOperationSetup();
-                            operation.paramNames.set({ key, type: RoomParameterNameType.Bool }, { type: replace, newValue: undefined });
+                            const operation: RoomModule.UpOperation = {
+                                $version: 1,
+                                boolParamNames: {
+                                    [key]: {
+                                        type: replace,
+                                        replace: {
+                                            newValue: undefined,
+                                        }
+                                    }
+                                }
+                            };
                             operate(operation);
                         }} >
                         <DeleteOutlined />
@@ -123,7 +176,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
     };
 
     const createStrParamName = (key: StrIndex20) => {
-        const state = paramNames.get({ key, type: RoomParameterNameType.Str });
+        const state = strParamNamesMap.get(key);
         if (state == null) {
             return null;
         }
@@ -142,15 +195,34 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                             if (e.previousValue === e.currentValue) {
                                 return;
                             }
-                            const operation = Room.createPostOperationSetup();
-                            operation.paramNames.set({ key, type: RoomParameterNameType.Str }, { type: update, operation: { name: { newValue: e.currentValue } } });
+                            const operation: RoomModule.UpOperation = {
+                                $version: 1,
+                                strParamNames: {
+                                    [key]: {
+                                        type: update,
+                                        update: {
+                                            $version: 1,
+                                            name: { newValue: e.currentValue }
+                                        }
+                                    }
+                                }
+                            };
                             operate(operation);
                         }} />
                     <Button
                         size='small'
                         onClick={() => {
-                            const operation = Room.createPostOperationSetup();
-                            operation.paramNames.set({ key, type: RoomParameterNameType.Str }, { type: replace, newValue: undefined });
+                            const operation: RoomModule.UpOperation = {
+                                $version: 1,
+                                strParamNames: {
+                                    [key]: {
+                                        type: replace,
+                                        replace: {
+                                            newValue: undefined,
+                                        }
+                                    }
+                                }
+                            };
                             operate(operation);
                         }} >
                         <DeleteOutlined />
@@ -180,7 +252,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                             strIndex20Array.map(createNumParamName)
                         }
                         {
-                            strIndex20Array.filter(key => paramNames.has({ key, type: RoomParameterNameType.Num })).length === 0 ? null : <div style={({ padding: 6 })} />
+                            strIndex20Array.filter(key => numParamNamesMap.has(key) ? <div style={({ padding: 6 })} /> : null)
                         }
                         <div style={({ display: 'flex', flexDirection: 'row' })}>
                             <Select
@@ -194,7 +266,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                     setAddNumParamSelector(undefined);
                                 }}>
                                 {strIndex20Array.map(key => {
-                                    const hasKey = paramNames.has({ key, type: RoomParameterNameType.Num });
+                                    const hasKey = numParamNamesMap.has(key);
                                     if (hasKey) {
                                         return null;
                                     }
@@ -209,12 +281,12 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                     if (addNumParamSelector == null) {
                                         return;
                                     }
-                                    const hasKey = paramNames.has({ key: addNumParamSelector, type: RoomParameterNameType.Num });
+                                    const hasKey = numParamNamesMap.has(addNumParamSelector);
                                     if (hasKey) {
                                         return null;
                                     }
                                     setVisibleParameterForm({
-                                        type: RoomParameterNameType.Num,
+                                        type: 'Num',
                                         key: addNumParamSelector,
                                     });
                                 }}>
@@ -227,7 +299,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                             strIndex20Array.map(createBoolParamName)
                         }
                         {
-                            strIndex20Array.filter(key => paramNames.has({ key, type: RoomParameterNameType.Bool })).length === 0 ? null : <div style={({ padding: 6 })} />
+                            strIndex20Array.filter(key => boolParamNamesMap.has(key) ? <div style={({ padding: 6 })} /> : null)
                         }
                         <div style={({ display: 'flex', flexDirection: 'row' })}>
                             <Select
@@ -241,7 +313,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                     setAddBoolParamSelector(undefined);
                                 }}>
                                 {strIndex20Array.map(key => {
-                                    const hasKey = paramNames.has({ key, type: RoomParameterNameType.Bool });
+                                    const hasKey = boolParamNamesMap.has(key);
                                     if (hasKey) {
                                         return null;
                                     }
@@ -256,12 +328,12 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                     if (addBoolParamSelector == null) {
                                         return;
                                     }
-                                    const hasKey = paramNames.has({ key: addBoolParamSelector, type: RoomParameterNameType.Bool });
+                                    const hasKey = boolParamNamesMap.has(addBoolParamSelector);
                                     if (hasKey) {
                                         return null;
                                     }
                                     setVisibleParameterForm({
-                                        type: RoomParameterNameType.Bool,
+                                        type: 'Bool',
                                         key: addBoolParamSelector,
                                     });
                                 }}>
@@ -274,7 +346,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                             strIndex20Array.map(createStrParamName)
                         }
                         {
-                            strIndex20Array.filter(key => paramNames.has({ key, type: RoomParameterNameType.Str })).length === 0 ? null : <div style={({ padding: 6 })} />
+                            strIndex20Array.filter(key => strParamNamesMap.has(key) ? <div style={({ padding: 6 })} /> : null)
                         }
                         <div style={({ display: 'flex', flexDirection: 'row' })}>
                             <Select
@@ -288,7 +360,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                     setAddStrParamSelector(undefined);
                                 }}>
                                 {strIndex20Array.map(key => {
-                                    const hasKey = paramNames.has({ key, type: RoomParameterNameType.Str });
+                                    const hasKey = strParamNamesMap.has(key);
                                     if (hasKey) {
                                         return null;
                                     }
@@ -303,12 +375,12 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                     if (addStrParamSelector == null) {
                                         return;
                                     }
-                                    const hasKey = paramNames.has({ key: addStrParamSelector, type: RoomParameterNameType.Str });
+                                    const hasKey = strParamNamesMap.has(addStrParamSelector);
                                     if (hasKey) {
                                         return null;
                                     }
                                     setVisibleParameterForm({
-                                        type: RoomParameterNameType.Str,
+                                        type: 'Str',
                                         key: addStrParamSelector,
                                     });
                                 }}>
@@ -325,12 +397,67 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                     if (visibleParameterForm == null) {
                         return;
                     }
-                    const operation = Room.createPostOperationSetup();
-                    operation.paramNames.set({ key: visibleParameterForm.key, type: visibleParameterForm.type }, { type: replace, newValue: { name: value } });
+                    let operation: RoomModule.UpOperation;
+                    switch (visibleParameterForm.type) {
+                        case 'Bool':
+                            operation = {
+                                $version: 1,
+                                boolParamNames: {
+                                    [visibleParameterForm.key]: {
+                                        type: replace,
+                                        replace: {
+                                            newValue: {
+                                                $version: 1,
+                                                name: value
+                                            }
+                                        }
+                                    }
+                                }
+                            };
+                            break;
+                        case 'Num':
+                            operation = {
+                                $version: 1,
+                                numParamNames: {
+                                    [visibleParameterForm.key]: {
+                                        type: replace,
+                                        replace: {
+                                            newValue: {
+                                                $version: 1,
+                                                name: value
+                                            }
+                                        }
+                                    }
+                                }
+                            };
+                            break;
+                        case 'Str':
+                            operation = {
+                                $version: 1,
+                                strParamNames: {
+                                    [visibleParameterForm.key]: {
+                                        type: replace,
+                                        replace: {
+                                            newValue: {
+                                                $version: 1,
+                                                name: value
+                                            }
+                                        }
+                                    }
+                                }
+                            };
+                            break;
+                    }
                     operate(operation);
                     switch (visibleParameterForm.type) {
-                        case RoomParameterNameType.Num:
+                        case 'Bool':
+                            setAddBoolParamSelector(undefined);
+                            break;
+                        case 'Num':
                             setAddNumParamSelector(undefined);
+                            break;
+                        case 'Str':
+                            setAddStrParamSelector(undefined);
                             break;
                     }
                     setVisibleParameterForm(undefined);

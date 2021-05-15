@@ -6,8 +6,6 @@ import FilesManagerDrawer from '../FilesManagerDrawer';
 import { FilesManagerDrawerType, some } from '../../utils/types';
 import { replace, update } from '../../stateManagers/states/types';
 import { StrIndex5 } from '../../@shared/indexes';
-import { Room } from '../../stateManagers/states/room';
-import { RoomBgm } from '../../stateManagers/states/roomBgm';
 import { filePathEquals } from '../../stateManagers/states/comparer';
 import VolumeBar from '../../foundations/VolumeBar';
 import DrawerFooter from '../../layouts/DrawerFooter';
@@ -15,10 +13,13 @@ import { MyStyle } from '../../utils/myStyle';
 import { __ } from '../../@shared/collection';
 import { useSelector } from '../../store';
 import { useOperate } from '../../hooks/useOperate';
+import * as BgmModule from '../../@shared/ot/room/bgm/v1';
+import * as FilePathModule from '../../@shared/ot/filePath/v1';
+import * as RoomModule from '../../@shared/ot/room/v1';
 
 const defaultVolume = 0.5;
 
-const toKey = (source: FilePathInput): string => {
+const toKey = (source: FilePathInput | FilePathModule.FilePath): string => {
     return `${source.sourceType}:${source.path}`;
 };
 
@@ -45,7 +46,7 @@ const VolumeBarForSoundPlayer: React.FC<VolumeBarForSoundPlayerProps> = ({ volum
 };
 
 type FilePathViewProps = {
-    filePath: FilePathInput;
+    filePath: FilePathInput | FilePathModule.FilePath;
     closable?: boolean;
     onClose?: () => void;
 }
@@ -66,7 +67,7 @@ const FilePathView: React.FC<FilePathViewProps> = ({ filePath, closable, onClose
 
 type BgmPlayerDrawerProps = {
     channelKey: StrIndex5;
-    bgmState: RoomBgm.State | undefined;
+    bgmState: BgmModule.State | undefined;
     visible: boolean;
     onClose: () => void;
 }
@@ -108,30 +109,43 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({ channelKey, bgmState,
             ok={{
                 textType: 'ok',
                 onClick: () => {
-                    const operation = Room.createPostOperationSetup();
                     if (bgmState == null) {
-                        operation.bgms.set(channelKey, {
-                            type: replace,
-                            newValue: {
-                                files: filesInput,
-                                volume: volumeInput,
+                        const operation: RoomModule.UpOperation = {
+                            $version: 1,
+                            bgms: {
+                                [channelKey]: {
+                                    type: replace,
+                                    replace: {
+                                        newValue: {
+                                            $version: 1,
+                                            files: filesInput.map(x => ({ ...x, $version: 1 })),
+                                            volume: volumeInput,
+                                        }
+                                    },
+                                }
                             }
-                        });
+                        };
                         operate(operation);
                         onClose();
                         return;
                     }
-                    operation.bgms.set(channelKey, {
-                        type: update,
-                        operation: {
-                            files: {
-                                newValue: filesInput,
-                            },
-                            volume: {
-                                newValue: volumeInput,
+                    const operation: RoomModule.UpOperation = {
+                        $version: 1,
+                        bgms: {
+                            [channelKey]: {
+                                type: update,
+                                update: {
+                                    $version: 1,
+                                    files: {
+                                        newValue: filesInput.map(x => ({ ...x, $version: 1 })),
+                                    },
+                                    volume: {
+                                        newValue: volumeInput,
+                                    }
+                                },
                             }
-                        },
-                    });
+                        }
+                    };
                     operate(operation);
                     onClose();
                 }
@@ -224,7 +238,7 @@ const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({ visible, onClose }: SeP
 
 type BgmPlayerProps = {
     channelKey: StrIndex5;
-    bgmState: RoomBgm.State | undefined;
+    bgmState: BgmModule.State | undefined;
 }
 
 const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayerProps) => {
@@ -261,13 +275,16 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                             if (volumeInput == null || bgmState == null) {
                                 return;
                             }
-                            const operation = Room.createPostOperationSetup();
-                            operation.bgms.set(channelKey, {
-                                type: update,
-                                operation: {
-                                    volume: { newValue: volumeInput },
+                            const operation: RoomModule.UpOperation = {
+                                $version: 1,
+                                [channelKey]: {
+                                    type: update,
+                                    update: {
+                                        $version: 1,
+                                        volume: { newValue: volumeInput },
+                                    }
                                 }
-                            });
+                            };
                             operate(operation);
                         }}>
                         適用
@@ -294,11 +311,13 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                 size='small'
                 disabled={(bgmState?.files ?? []).length === 0}
                 onClick={() => {
-                    const operation = Room.createPostOperationSetup();
-                    operation.bgms.set(channelKey, {
-                        type: replace,
-                        newValue: undefined,
-                    });
+                    const operation: RoomModule.UpOperation = {
+                        $version: 1,
+                        [channelKey]: {
+                            type: replace,
+                            replace: { newValue: undefined },
+                        }
+                    };
                     operate(operation);
                 }}>
                 停止
@@ -324,15 +343,15 @@ const SoundPlayer: React.FC = () => {
                 setIsSeDrawerVisible(true);
             }}>流す</Button>
         <div style={{ height: padding }} />
-        <BgmPlayer bgmState={bgmsState?.get('1')} channelKey='1' />
+        <BgmPlayer bgmState={(bgmsState ?? {})['1']} channelKey='1' />
         <div style={{ height: padding }} />
-        <BgmPlayer bgmState={bgmsState?.get('2')} channelKey='2' />
+        <BgmPlayer bgmState={(bgmsState ?? {})['2']} channelKey='2' />
         <div style={{ height: padding }} />
-        <BgmPlayer bgmState={bgmsState?.get('3')} channelKey='3' />
+        <BgmPlayer bgmState={(bgmsState ?? {})['3']} channelKey='3' />
         <div style={{ height: padding }} />
-        <BgmPlayer bgmState={bgmsState?.get('4')} channelKey='4' />
+        <BgmPlayer bgmState={(bgmsState ?? {})['4']} channelKey='4' />
         <div style={{ height: padding }} />
-        <BgmPlayer bgmState={bgmsState?.get('5')} channelKey='5' />
+        <BgmPlayer bgmState={(bgmsState ?? {})['5']} channelKey='5' />
     </div>;
 };
 

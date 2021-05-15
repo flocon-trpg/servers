@@ -1,35 +1,24 @@
 import React from 'react';
-import { Button, Checkbox, Input, InputNumber, Space, Switch, Tag, Tooltip } from 'antd';
-import { update } from '../stateManagers/states/types';
-import { createStateMap } from '../@shared/StateMap';
-import { StrIndex100 } from '../@shared/indexes';
+import { Button, Input, InputNumber, Tooltip } from 'antd';
+import { StrIndex20 } from '../@shared/indexes';
 import { EyeInvisibleOutlined, EyeOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import ToggleButton from './ToggleButton';
 import { addParameter, deleteParameter, parameterIsPrivate, parameterIsNotPrivate, parameterIsPrivateAndNotCreatedByMe, parameterIsNotPrivateAndNotCreatedByMe } from '../resource/text/main';
-import { Character } from '../stateManagers/states/character';
-import { NumParam } from '../stateManagers/states/numParam';
+import * as Character from '../@shared/ot/room/participant/character/v1';
+import * as NumParam from '../@shared/ot/room/participant/character/numParam/v1';
 
 const inputWidth = 50;
 
 type Props = {
     isCharacterPrivate: boolean;
     isCreate: boolean;
-    parameterKey: StrIndex100;
+    parameterKey: StrIndex20;
     numberParameter: NumParam.State | undefined;
     numberMaxParameter: NumParam.State | undefined;
     createdByMe: boolean;
-    onOperate: (operation: Character.PostOperation) => void;
+    onOperate: (operation: Character.UpOperation) => void;
     compact: boolean;
 }
-
-const createCharacterOperationBase = (): Character.WritablePostOperation => ({
-    pieces: createStateMap(),
-    tachieLocations: createStateMap(),
-    boolParams: new Map(),
-    numParams: new Map(),
-    numMaxParams: new Map(),
-    strParams: new Map(),
-});
 
 const disabledInput = (<Input style={({ width: inputWidth })} disabled value='?' size='small' />);
 
@@ -54,10 +43,15 @@ const NumberParameterInput: React.FC<Props> = ({
                         size='small'
                         disabled={disabled}
                         onClick={() => {
-                            const operation = createCharacterOperationBase();
-                            operation.numParams.set(parameterKey, {
-                                value: { newValue: 0 },
-                            });
+                            const operation: Character.UpOperation = {
+                                $version: 1,
+                                numParams: {
+                                    [parameterKey]: {
+                                        $version: 1,
+                                        value: { newValue: 0 },
+                                    }
+                                }
+                            };
                             onOperate(operation);
                         }}>
                         <PlusOutlined />
@@ -70,10 +64,15 @@ const NumberParameterInput: React.FC<Props> = ({
                     size='small'
                     disabled={disabled}
                     onClick={() => {
-                        const operation = createCharacterOperationBase();
-                        operation.numParams.set(parameterKey, {
-                            value: { newValue: undefined },
-                        });
+                        const operation: Character.UpOperation = {
+                            $version: 1,
+                            numParams: {
+                                [parameterKey]: {
+                                    $version: 1,
+                                    value: { newValue: undefined },
+                                }
+                            }
+                        };
                         onOperate(operation);
                     }}>
                     <DeleteOutlined />
@@ -92,10 +91,15 @@ const NumberParameterInput: React.FC<Props> = ({
                         size='small'
                         disabled={disabled}
                         onClick={() => {
-                            const operation = createCharacterOperationBase();
-                            operation.numMaxParams.set(parameterKey, {
-                                value: { newValue: 0 },
-                            });
+                            const operation: Character.UpOperation = {
+                                $version: 1,
+                                numMaxParams: {
+                                    [parameterKey]: {
+                                        $version: 1,
+                                        value: { newValue: 0 },
+                                    }
+                                }
+                            };
                             onOperate(operation);
                         }}>
                         <PlusOutlined />
@@ -108,10 +112,15 @@ const NumberParameterInput: React.FC<Props> = ({
                     size='small'
                     disabled={disabled}
                     onClick={() => {
-                        const operation = createCharacterOperationBase();
-                        operation.numMaxParams.set(parameterKey, {
-                            value: { newValue: undefined },
-                        });
+                        const operation: Character.UpOperation = {
+                            $version: 1,
+                            numMaxParams: {
+                                [parameterKey]: {
+                                    $version: 1,
+                                    value: { newValue: undefined },
+                                }
+                            }
+                        };
                         onOperate(operation);
                     }}>
                     <DeleteOutlined />
@@ -143,10 +152,15 @@ const NumberParameterInput: React.FC<Props> = ({
                 unCheckedChildren={<EyeInvisibleOutlined />}
                 size='small'
                 onChange={e => {
-                    const operation = createCharacterOperationBase();
-                    operation.numParams.set(parameterKey, {
-                        isValuePrivate: { newValue: !e },
-                    });
+                    const operation: Character.UpOperation = {
+                        $version: 1,
+                        numParams: {
+                            [parameterKey]: {
+                                $version: 1,
+                                isValuePrivate: { newValue: !e },
+                            }
+                        }
+                    };
                     onOperate(operation);
                 }} />
         );
@@ -171,10 +185,15 @@ const NumberParameterInput: React.FC<Props> = ({
                         if (typeof newValue !== 'number') {
                             return;
                         }
-                        const operation = createCharacterOperationBase();
-                        operation.numParams.set(parameterKey, {
-                            value: { newValue: newValue },
-                        });
+                        const operation: Character.UpOperation = {
+                            $version: 1,
+                            numParams: {
+                                [parameterKey]: {
+                                    $version: 1,
+                                    value: { newValue },
+                                }
+                            }
+                        };
                         onOperate(operation);
                     }} />
                 {addOrDeleteNumberParameterButton({ disabled: false })}
@@ -205,10 +224,15 @@ const NumberParameterInput: React.FC<Props> = ({
                 unCheckedChildren={<EyeInvisibleOutlined />}
                 size='small'
                 onChange={e => {
-                    const operation = createCharacterOperationBase();
-                    operation.numMaxParams.set(parameterKey, {
-                        isValuePrivate: { newValue: !e },
-                    });
+                    const operation: Character.UpOperation = {
+                        $version: 1,
+                        numMaxParams: {
+                            [parameterKey]: {
+                                $version: 1,
+                                isValuePrivate: { newValue: !e },
+                            }
+                        }
+                    };
                     onOperate(operation);
                 }} />
         );
@@ -233,10 +257,15 @@ const NumberParameterInput: React.FC<Props> = ({
                         if (typeof newValue !== 'number') {
                             return;
                         }
-                        const operation = createCharacterOperationBase();
-                        operation.numMaxParams.set(parameterKey, {
-                            value: { newValue: newValue },
-                        });
+                        const operation: Character.UpOperation = {
+                            $version: 1,
+                            numMaxParams: {
+                                [parameterKey]: {
+                                    $version: 1,
+                                    value: { newValue },
+                                }
+                            }
+                        };
                         onOperate(operation);
                     }} />
                 {addOrDeleteNumberMaxParameterButton({ disabled: false })}

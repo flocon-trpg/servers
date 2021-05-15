@@ -2,16 +2,17 @@ import { notification } from 'antd';
 import { ArgsProps } from 'antd/lib/notification';
 import { Howl } from 'howler';
 import React from 'react';
+import { recordToMap } from '../@shared/utils';
 import { RoomMessage } from '../components/room/RoomMessage';
-import { Participant } from '../stateManagers/states/participant';
 import { MessageFilter } from '../states/MessagesPanelConfig';
 import { defaultMasterVolume, defaultSeVolume } from '../states/RoomConfig';
 import { useSelector } from '../store';
 import { emptyPublicChannelNames, PublicChannelNames } from '../utils/types';
 import { useMe } from './useMe';
 import { useMessageFilter } from './useMessageFilter';
-import { usePublicChannelNames } from './usePublicChannelNames';
+import { usePublicChannelNames } from './state/usePublicChannelNames';
 import { AllRoomMessagesResult, newEvent, privateMessage, publicMessage } from './useRoomMessages';
+import { useParticipants } from './state/useParticipants';
 
 const argsBase: Omit<ArgsProps, 'message'> = {
     placement: 'bottomRight',
@@ -20,7 +21,7 @@ const argsBase: Omit<ArgsProps, 'message'> = {
 export function useMessageNotification(): void {
     const publicChannelNames = usePublicChannelNames();
     const allRoomMessagesResult = useSelector(state => state.roomModule.allRoomMessagesResult);
-    const participants = useSelector(state => state.roomModule?.roomState?.state?.participants);
+    const participantsMap = useParticipants(); 
     const masterVolume = useSelector(state => state.roomConfigModule?.masterVolume);
     const seVolume = useSelector(state => state.roomConfigModule?.seVolume);
     const volumeRef = React.useRef((masterVolume ?? defaultMasterVolume) * (seVolume ?? defaultSeVolume));
@@ -51,10 +52,10 @@ export function useMessageNotification(): void {
         publicChannelNameRef.current = publicChannelNames;
     }, [publicChannelNames]);
 
-    const participantsRef = React.useRef(participants);
+    const participantsMapRef = React.useRef(participantsMap);
     React.useEffect(() => {
-        participantsRef.current = participants;
-    }, [participants]);
+        participantsMapRef.current = participantsMap;
+    }, [participantsMap]);
 
     React.useEffect(() => {
         if (myUserUidRef.current == null || allRoomMessagesResult?.type !== newEvent) {
@@ -100,9 +101,9 @@ export function useMessageNotification(): void {
         notification.open({
             ...argsBase,
             message: (<div style={{ display: 'flex', flexDirection: 'row' }}>
-                {RoomMessage.userName(message, participantsRef.current ?? new Map())}
+                {RoomMessage.userName(message, participantsMapRef.current ?? new Map())}
                 <div style={{ margin: '0 4px' }}>-</div>
-                {RoomMessage.toChannelName(message, publicChannelNameRef.current ?? emptyPublicChannelNames, participantsRef.current ?? new Map())}</div>),
+                {RoomMessage.toChannelName(message, publicChannelNameRef.current ?? emptyPublicChannelNames, participantsMapRef.current ?? new Map())}</div>),
             description: <RoomMessage.Content style={{}} message={message} />
         });
     }, [allRoomMessagesResult]);
