@@ -2276,7 +2276,7 @@ export class RoomResolver {
                         }
                     });
                 }
-                publicMsg.text = args.text;
+                publicMsg.updatedText = args.text;
                 publicMsg.textUpdatedAt = new Date().getTime();
                 await em.flush();
 
@@ -2319,7 +2319,7 @@ export class RoomResolver {
                         }
                     });
                 }
-                privateMsg.text = args.text;
+                privateMsg.updatedText = args.text;
                 privateMsg.textUpdatedAt = new Date().getTime();
                 await em.flush();
 
