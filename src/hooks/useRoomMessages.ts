@@ -224,6 +224,7 @@ const reduceMessages = (state: Message[], action: RoomMessageEventFragment, filt
                 target.value.isSecret = action.isSecret;
                 target.value.initText = action.initText;
                 target.value.initTextSource = action.initTextSource;
+                target.value.updatedText = action.updatedText;
                 target.value.updatedAt = action.updatedAt;
             });
         }

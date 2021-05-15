@@ -375,7 +375,10 @@ export const RoomMenu: React.FC = () => {
                     <p>ログをダウンロードしますか？</p>
                 </span>),
                 onOk: () => {
-                    getLogQuery();
+                    if (roomId == null) {
+                        return;
+                    }
+                    getLogQuery({ variables: { roomId } });
                 }
             })}>
                 ログをダウンロード
