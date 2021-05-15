@@ -30,18 +30,18 @@ const getParameter = async ({ em, parameterPath, context, room }) => {
     }
     const parameter = parameterPath[0];
     const privateVarValue = await (async () => {
-        var _a;
+        var _a, _b, _c;
         if ((context === null || context === void 0 ? void 0 : context.type) !== exports.chara) {
             return null;
         }
-        if (context.value.privateVarToml.trim() === '') {
+        if (((_a = context.value.privateVarToml) !== null && _a !== void 0 ? _a : '').trim() === '') {
             return null;
         }
-        const result = flocommand_1.TOML.variable(context.value.privateVarToml, parameterPath);
+        const result = flocommand_1.TOML.variable((_b = context.value.privateVarToml) !== null && _b !== void 0 ? _b : '', parameterPath);
         if (result.isError) {
             return null;
         }
-        return (_a = result.value) !== null && _a !== void 0 ? _a : null;
+        return (_c = result.value) !== null && _c !== void 0 ? _c : null;
     })();
     if (privateVarValue != null && typeof privateVarValue !== 'object') {
         return Result_1.ResultModule.ok({ value: privateVarValue, stringValue: privateVarValue.toString() });

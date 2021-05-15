@@ -54,7 +54,7 @@ export abstract class CharaBase {
     // のちのち必要になったらpublicVarTomlも追加するかもしれない
     // CONSIDER: デフォルトではPostgreSQLの場合varchar(255)になるため、lengthを設定している。値は適当（MySQLの最大値）。
     @Property({ nullable: true, default: '', length: 65536 })
-    public privateVarToml!: string;
+    public privateVarToml?: string;
 
     // CONSIDER: デフォルトではPostgreSQLの場合varchar(255)になるため、lengthを設定している。値は適当（MySQLの最大値）。
     @Property({ nullable: true, length: 65535 })

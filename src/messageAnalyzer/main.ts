@@ -47,10 +47,10 @@ const getParameter = async ({ em, parameterPath, context, room }: { em: EM; para
         if (context?.type !== chara) {
             return null;
         }
-        if (context.value.privateVarToml.trim() === '') {
+        if ((context.value.privateVarToml ?? '').trim() === '') {
             return null;
         }
-        const result = TOML.variable(context.value.privateVarToml, parameterPath);
+        const result = TOML.variable(context.value.privateVarToml ?? '', parameterPath);
         if (result.isError) {
             return null;
         }
