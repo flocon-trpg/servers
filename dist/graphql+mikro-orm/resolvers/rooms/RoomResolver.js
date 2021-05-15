@@ -36,7 +36,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RoomResolver = void 0;
 const type_graphql_1 = require("type-graphql");
-const ParticipantRole_1 = require("../../../enums/ParticipantRole");
 const GetRoomFailureType_1 = require("../../../enums/GetRoomFailureType");
 const GetRoomsListFailureType_1 = require("../../../enums/GetRoomsListFailureType");
 const CreateRoomFailureType_1 = require("../../../enums/CreateRoomFailureType");
@@ -51,7 +50,6 @@ const OperateRoomFailureType_1 = require("../../../enums/OperateRoomFailureType"
 const Result_1 = require("../../../@shared/Result");
 const LeaveRoomFailureType_1 = require("../../../enums/LeaveRoomFailureType");
 const config_1 = require("../../../config");
-const mikro_orm_1 = require("../../entities/room/participant/mikro-orm");
 const RequiresPhraseFailureType_1 = require("../../../enums/RequiresPhraseFailureType");
 const OperateRoomResult_1 = require("../../results/OperateRoomResult");
 const JoinRoomResult_1 = require("../../results/JoinRoomResult");
@@ -68,26 +66,21 @@ const DeleteRoomResult_1 = require("../../results/DeleteRoomResult");
 const DeleteRoomFailureType_1 = require("../../../enums/DeleteRoomFailureType");
 const global_2 = require("../../entities/room/global");
 const Types_1 = require("../../Types");
-const global_3 = require("../../entities/room/participant/global");
 const mapOperations_1 = require("../../mapOperations");
-const global_4 = require("../../entities/room/participant/myValue/global");
-const collection_1 = require("../../../@shared/collection");
-const mikro_orm_2 = require("../../entities/roomMessage/mikro-orm");
+const mikro_orm_1 = require("../../entities/roomMessage/mikro-orm");
 const object_args_input_1 = require("./object+args+input");
 const graphql_2 = require("../../entities/roomMessage/graphql");
 const WritePublicRoomMessageFailureType_1 = require("../../../enums/WritePublicRoomMessageFailureType");
 const Constants_1 = require("../../../@shared/Constants");
-const mikro_orm_3 = require("../../entities/room/character/mikro-orm");
 const main_1 = require("../../../messageAnalyzer/main");
 const color_1 = __importDefault(require("color"));
 const GetRoomMessagesFailureType_1 = require("../../../enums/GetRoomMessagesFailureType");
-const global_5 = require("../../entities/roomMessage/global");
+const global_3 = require("../../entities/roomMessage/global");
 const GetRoomLogFailureType_1 = require("../../../enums/GetRoomLogFailureType");
 const roomMessage_1 = require("../utils/roomMessage");
 const core_1 = require("@mikro-orm/core");
+const mikro_orm_2 = require("../../entities/user/mikro-orm");
 const WritePrivateRoomMessageFailureType_1 = require("../../../enums/WritePrivateRoomMessageFailureType");
-const Set_1 = require("../../../@shared/Set");
-const Types_2 = require("../../../@shared/Types");
 const WriteRoomSoundEffectFailureType_1 = require("../../../enums/WriteRoomSoundEffectFailureType");
 const MakeMessageNotSecretFailureType_1 = require("../../../enums/MakeMessageNotSecretFailureType");
 const DeleteMessageFailureType_1 = require("../../../enums/DeleteMessageFailureType");
@@ -97,57 +90,83 @@ const GetRoomConnectionFailureType_1 = require("../../../enums/GetRoomConnection
 const WritingMessageStatusType_1 = require("../../../enums/WritingMessageStatusType");
 const WritingMessageStatusInputType_1 = require("../../../enums/WritingMessageStatusInputType");
 const publicChannelKey_1 = require("../../../@shared/publicChannelKey");
+const RoomModule = __importStar(require("../../../@shared/ot/room/v1"));
+const ParticipantModule = __importStar(require("../../../@shared/ot/room/participant/v1"));
+const utils_1 = require("../../../@shared/utils");
+const FileSourceType_1 = require("../../../enums/FileSourceType");
+const MyNumberValueModule = __importStar(require("../../../@shared/ot/room/participant/myNumberValue/log-v1"));
+const ParticipantRole_1 = require("../../../enums/ParticipantRole");
+const find = (source, key) => source[key];
 const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUserUids, create, update, }) => {
     const prevRevision = room.revision;
-    const roomState = await global_2.GlobalRoom.MikroORM.ToGlobal.state(room);
-    const me = roomState.participants.get(myUserUid);
-    const participantsOperation = new Map();
+    const roomState = global_2.GlobalRoom.MikroORM.ToGlobal.state(room);
+    const me = find(roomState.participants, myUserUid);
+    let participantOperation = undefined;
     if (me == null) {
         if (create != null) {
-            participantsOperation.set(myUserUid, {
+            participantOperation = {
                 type: mapOperations_1.replace,
-                operation: {
-                    oldValue: undefined,
+                replace: {
                     newValue: {
                         name: create.name,
                         role: create.role,
-                        myNumberValues: new Map(),
+                        boards: {},
+                        characters: {},
+                        myNumberValues: {},
                     }
                 },
-            });
+            };
         }
     }
     else {
         if (update != null) {
-            const operation = global_3.GlobalParticipant.transformerFactory({ type: Types_1.server }).diff({
-                key: myUserUid,
-                prevState: me,
-                nextState: Object.assign(Object.assign({}, me), { role: update.role === undefined ? me.role : update.role.newValue, name: update.name === undefined ? me.name : update.name.newValue }),
-            });
-            if (operation !== undefined) {
-                participantsOperation.set(myUserUid, {
-                    type: 'update',
-                    operation,
-                });
-            }
+            participantOperation = {
+                type: 'update',
+                update: {
+                    role: update.role,
+                    name: update.name,
+                }
+            };
         }
     }
-    const roomOperation = Object.assign(Object.assign({}, global_2.GlobalRoom.Global.emptyTwoWayOperation()), { participants: participantsOperation });
-    await global_2.GlobalRoom.Global.applyToEntity({ em, target: room, operation: roomOperation });
+    if (participantOperation == null) {
+        return {
+            result: {},
+            payload: undefined,
+        };
+    }
+    const roomUpOperation = {
+        participants: {
+            [myUserUid]: participantOperation,
+        }
+    };
+    const transformed = RoomModule.transformerFactory({ type: Types_1.server }).transform({ key: null, prevState: roomState, currentState: roomState, clientOperation: roomUpOperation, serverOperation: undefined });
+    if (transformed.isError) {
+        return {
+            result: { failureType: JoinRoomFailureType_1.JoinRoomFailureType.TransformError },
+            payload: undefined,
+        };
+    }
+    const transformedValue = transformed.value;
+    if (transformedValue == null) {
+        return {
+            result: {},
+            payload: undefined,
+        };
+    }
+    const nextRoomState = global_2.GlobalRoom.Global.applyToEntity({ em, target: room, prevState: roomState, operation: transformedValue });
     await em.flush();
-    const nextRoomState = await global_2.GlobalRoom.MikroORM.ToGlobal.state(room);
     const generateOperation = (deliverTo) => {
-        const value = global_2.GlobalRoom.Global.ToGraphQL.operation({
-            operation: roomOperation,
-            prevState: roomState,
-            nextState: nextRoomState,
-            requestedBy: { type: Types_1.client, userUid: deliverTo },
-        });
         return {
             __tstype: 'RoomOperation',
             revisionTo: prevRevision + 1,
             operatedBy: undefined,
-            value,
+            valueJson: global_2.GlobalRoom.Global.ToGraphQL.operation({
+                operation: transformedValue,
+                prevState: roomState,
+                nextState: nextRoomState,
+                requestedBy: { type: Types_1.client, userUid: deliverTo },
+            }),
         };
     };
     return {
@@ -179,7 +198,7 @@ const joinRoomCore = async ({ args, context, globalEntryPhrase, strategy, }) => 
                 payload: undefined,
             };
         }
-        const findResult = await helpers_1.findRoomAndMyParticipantAndParitipantUserUids({ em, userUid: decodedIdToken.uid, roomId: args.id });
+        const findResult = await helpers_1.findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId: args.id });
         if (findResult == null) {
             return {
                 result: {
@@ -188,7 +207,8 @@ const joinRoomCore = async ({ args, context, globalEntryPhrase, strategy, }) => 
                 payload: undefined,
             };
         }
-        const { room, me, participantUserUids } = findResult;
+        const { room, me } = findResult;
+        const participantUserUids = findResult.participantIds();
         const strategyResult = strategy({ me, room, args });
         switch (strategyResult) {
             case 'id': {
@@ -244,6 +264,7 @@ const promoteMeCore = async ({ roomId, context, globalEntryPhrase, strategy, }) 
         return { result: { failureType: PromoteFailureType_1.PromoteFailureType.NotSignIn }, payload: undefined };
     }
     const queue = async () => {
+        var _a;
         const em = context.createEm();
         const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase, });
         await em.flush();
@@ -255,7 +276,7 @@ const promoteMeCore = async ({ roomId, context, globalEntryPhrase, strategy, }) 
                 payload: undefined,
             };
         }
-        const findResult = await helpers_1.findRoomAndMyParticipantAndParitipantUserUids({ em, userUid: decodedIdToken.uid, roomId });
+        const findResult = await helpers_1.findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId });
         if (findResult == null) {
             return {
                 result: {
@@ -264,7 +285,8 @@ const promoteMeCore = async ({ roomId, context, globalEntryPhrase, strategy, }) 
                 payload: undefined,
             };
         }
-        const { room, me, participantUserUids } = findResult;
+        const { room, me } = findResult;
+        const participantUserUids = findResult.participantIds();
         if (me == null) {
             return {
                 result: {
@@ -304,7 +326,7 @@ const promoteMeCore = async ({ roomId, context, globalEntryPhrase, strategy, }) 
                     result: {
                         failureType: undefined,
                     },
-                    payload: (await operateParticipantAndFlush({
+                    payload: (_a = (await operateParticipantAndFlush({
                         em,
                         room,
                         participantUserUids,
@@ -312,7 +334,7 @@ const promoteMeCore = async ({ roomId, context, globalEntryPhrase, strategy, }) 
                         update: {
                             role: { newValue: strategyResult },
                         }
-                    })).payload,
+                    }))) === null || _a === void 0 ? void 0 : _a.payload,
                 };
             }
         }
@@ -354,7 +376,7 @@ const analyzeTextAndSetToEntity = async (params) => {
     if (analyzed.isError) {
         return analyzed;
     }
-    const targetEntity = params.type === 'RoomPubMsg' ? new mikro_orm_2.RoomPubMsg({ textSource: params.textSource, text: analyzed.value.message }) : new mikro_orm_2.RoomPrvMsg({ textSource: params.textSource, text: analyzed.value.message });
+    const targetEntity = params.type === 'RoomPubMsg' ? new mikro_orm_1.RoomPubMsg({ textSource: params.textSource, text: analyzed.value.message }) : new mikro_orm_1.RoomPrvMsg({ textSource: params.textSource, text: analyzed.value.message });
     targetEntity.createdBy = core_1.Reference.create(params.createdBy);
     if (analyzed.value.diceResult != null) {
         if (analyzed.value.diceResult.isSecret) {
@@ -542,24 +564,37 @@ let RoomResolver = class RoomResolver {
             const newRoom = new Room$MikroORM.Room({
                 name: input.roomName,
                 createdBy: decodedIdToken.uid,
-                publicChannel1Name: 'メイン',
-                publicChannel2Name: 'メイン2',
-                publicChannel3Name: 'メイン3',
-                publicChannel4Name: 'メイン4',
-                publicChannel5Name: 'メイン5',
-                publicChannel6Name: 'メイン6',
-                publicChannel7Name: 'メイン7',
-                publicChannel8Name: 'メイン8',
-                publicChannel9Name: 'メイン9',
-                publicChannel10Name: 'メイン10',
+                value: {
+                    participants: {
+                        [entryUser.userUid]: {
+                            role: ParticipantModule.Master,
+                            name: input.participantName,
+                            boards: {},
+                            characters: {},
+                            myNumberValues: {},
+                        }
+                    },
+                    publicChannel1Name: 'メイン',
+                    publicChannel2Name: 'メイン2',
+                    publicChannel3Name: 'メイン3',
+                    publicChannel4Name: 'メイン4',
+                    publicChannel5Name: 'メイン5',
+                    publicChannel6Name: 'メイン6',
+                    publicChannel7Name: 'メイン7',
+                    publicChannel8Name: 'メイン8',
+                    publicChannel9Name: 'メイン9',
+                    publicChannel10Name: 'メイン10',
+                    bgms: {},
+                    boolParamNames: {},
+                    numParamNames: {},
+                    strParamNames: {},
+                }
             });
-            const newParticipant = new mikro_orm_1.Partici({ role: ParticipantRole_1.ParticipantRole.Master, name: input.participantName, user: entryUser, room: newRoom });
             newRoom.joinAsPlayerPhrase = input.joinAsPlayerPhrase;
             newRoom.joinAsSpectatorPhrase = input.joinAsSpectatorPhrase;
             const revision = newRoom.revision;
-            em.persist(newParticipant);
             em.persist(newRoom);
-            const roomState = await global_2.GlobalRoom.MikroORM.ToGlobal.state(newRoom);
+            const roomState = global_2.GlobalRoom.MikroORM.ToGlobal.state(newRoom);
             const graphqlState = global_2.GlobalRoom.Global.ToGraphQL.state({
                 source: roomState,
                 requestedBy: { type: Types_1.client, userUid: decodedIdToken.uid },
@@ -638,10 +673,8 @@ let RoomResolver = class RoomResolver {
                 privateMessages.push(graphQLValue);
             }
             const myValueLogs = [];
-            for (const partici of await room.particis.loadItems()) {
-                for (const msg of await partici.myValueLogs.loadItems()) {
-                    myValueLogs.push(global_5.MyValueLog.MikroORM.ToGraphQL.state({ entity: msg, stateUserUid: partici.user.userUid }));
-                }
+            for (const msg of await room.myValueLogs.loadItems()) {
+                myValueLogs.push(global_3.MyValueLog.MikroORM.ToGraphQL.state(msg));
             }
             const soundEffects = [];
             for (const se of await room.roomSes.loadItems()) {
@@ -721,7 +754,7 @@ let RoomResolver = class RoomResolver {
                     }
                 });
             }
-            if (me.role === ParticipantRole_1.ParticipantRole.Spectator) {
+            if (me.role === ParticipantModule.Spectator) {
                 return Result_1.ResultModule.ok({
                     result: {
                         __tstype: graphql_2.GetRoomLogFailureResultType,
@@ -757,10 +790,8 @@ let RoomResolver = class RoomResolver {
                 privateMessages.push(graphQLValue);
             }
             const myValueLogs = [];
-            for (const partici of await room.particis.loadItems()) {
-                for (const msg of await partici.myValueLogs.loadItems()) {
-                    myValueLogs.push(global_5.MyValueLog.MikroORM.ToGraphQL.state({ entity: msg, stateUserUid: partici.user.userUid }));
-                }
+            for (const msg of await room.myValueLogs.loadItems()) {
+                myValueLogs.push(global_3.MyValueLog.MikroORM.ToGraphQL.state(msg));
             }
             const soundEffects = [];
             for (const se of await room.roomSes.loadItems()) {
@@ -873,10 +904,11 @@ let RoomResolver = class RoomResolver {
             };
         }
         const queue = async () => {
+            var _a, _b, _c, _d, _e, _f;
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
             await em.flush();
-            if (!entry) {
+            if (entryUser == null) {
                 return Result_1.ResultModule.ok({
                     result: {
                         __tstype: graphql_2.WritePublicRoomMessageFailureResultType,
@@ -893,7 +925,7 @@ let RoomResolver = class RoomResolver {
                     }
                 });
             }
-            const { room, me } = findResult;
+            const { room, me, roomState } = findResult;
             if (me === undefined) {
                 return Result_1.ResultModule.ok({
                     result: {
@@ -902,7 +934,7 @@ let RoomResolver = class RoomResolver {
                     }
                 });
             }
-            const channelKeyFailureType = checkChannelKey(channelKey, me.role === ParticipantRole_1.ParticipantRole.Spectator);
+            const channelKeyFailureType = checkChannelKey(channelKey, me.role === ParticipantModule.Spectator);
             if (channelKeyFailureType != null) {
                 return Result_1.ResultModule.ok({
                     result: {
@@ -911,18 +943,17 @@ let RoomResolver = class RoomResolver {
                     }
                 });
             }
-            const meAsUser = await me.user.load();
-            let chara = null;
+            let chara = undefined;
             if (args.characterStateId != null) {
-                chara = await em.findOne(mikro_orm_3.Chara, { createdBy: decodedIdToken.uid, stateId: args.characterStateId });
+                const characters = (_b = (_a = find(roomState.participants, decodedIdToken.uid)) === null || _a === void 0 ? void 0 : _a.characters) !== null && _b !== void 0 ? _b : {};
+                chara = find(characters, args.characterStateId);
             }
             const entityResult = await analyzeTextAndSetToEntity({
                 type: 'RoomPubMsg',
-                em,
                 textSource: args.text,
                 context: chara == null ? null : { type: 'chara', value: chara },
-                createdBy: meAsUser,
-                room,
+                createdBy: entryUser,
+                room: roomState,
                 gameType: args.gameType,
             });
             if (entityResult.isError) {
@@ -930,21 +961,21 @@ let RoomResolver = class RoomResolver {
             }
             const entity = entityResult.value;
             entity.textColor = args.textColor == null ? undefined : fixTextColor(args.textColor);
-            let ch = await em.findOne(mikro_orm_2.RoomPubCh, { key: channelKey, room: room.id });
+            let ch = await em.findOne(mikro_orm_1.RoomPubCh, { key: channelKey, room: room.id });
             if (ch == null) {
-                ch = new mikro_orm_2.RoomPubCh({ key: channelKey });
+                ch = new mikro_orm_1.RoomPubCh({ key: channelKey });
                 ch.room = core_1.Reference.create(room);
                 em.persist(ch);
             }
             entity.customName = args.customName;
             if (chara != null) {
-                entity.charaStateId = chara.stateId;
+                entity.charaStateId = args.characterStateId;
                 entity.charaName = chara.name;
                 entity.charaIsPrivate = chara.isPrivate;
-                entity.charaImagePath = chara.imagePath;
-                entity.charaImageSourceType = chara.imageSourceType;
-                entity.charaTachieImagePath = chara.tachieImagePath;
-                entity.charaTachieImageSourceType = chara.tachieImageSourceType;
+                entity.charaImagePath = (_c = chara.image) === null || _c === void 0 ? void 0 : _c.path;
+                entity.charaImageSourceType = FileSourceType_1.FileSourceType.ofNullishString((_d = chara.image) === null || _d === void 0 ? void 0 : _d.sourceType);
+                entity.charaTachieImagePath = (_e = chara.tachieImage) === null || _e === void 0 ? void 0 : _e.path;
+                entity.charaTachieImageSourceType = FileSourceType_1.FileSourceType.ofNullishString((_f = chara.tachieImage) === null || _f === void 0 ? void 0 : _f.sourceType);
             }
             entity.roomPubCh = core_1.Reference.create(ch);
             await em.persistAndFlush(entity);
@@ -952,7 +983,7 @@ let RoomResolver = class RoomResolver {
             const payload = {
                 type: 'messageUpdatePayload',
                 roomId: args.roomId,
-                createdBy: meAsUser.userUid,
+                createdBy: decodedIdToken.uid,
                 visibleTo: undefined,
                 value: result,
             };
@@ -1043,7 +1074,7 @@ let RoomResolver = class RoomResolver {
                 if (room.joinAsPlayerPhrase != null && room.joinAsPlayerPhrase !== args.phrase) {
                     return JoinRoomFailureType_1.JoinRoomFailureType.WrongPhrase;
                 }
-                return ParticipantRole_1.ParticipantRole.Player;
+                return ParticipantModule.Player;
             }
         });
     }
@@ -1071,7 +1102,7 @@ let RoomResolver = class RoomResolver {
                 if (room.joinAsSpectatorPhrase != null && room.joinAsSpectatorPhrase !== args.phrase) {
                     return JoinRoomFailureType_1.JoinRoomFailureType.WrongPhrase;
                 }
-                return ParticipantRole_1.ParticipantRole.Spectator;
+                return ParticipantModule.Spectator;
             }
         });
     }
@@ -1086,15 +1117,16 @@ let RoomResolver = class RoomResolver {
         return promoteMeCore(Object.assign(Object.assign({}, args), { context,
             globalEntryPhrase, strategy: ({ me, room }) => {
                 switch (me.role) {
-                    case ParticipantRole_1.ParticipantRole.Master:
-                    case ParticipantRole_1.ParticipantRole.Player:
+                    case ParticipantModule.Master:
+                    case ParticipantModule.Player:
                         return PromoteFailureType_1.PromoteFailureType.NoNeedToPromote;
-                    case ParticipantRole_1.ParticipantRole.Spectator: {
+                    case ParticipantModule.Spectator: {
                         if (room.joinAsPlayerPhrase != null && room.joinAsPlayerPhrase !== args.phrase) {
                             return PromoteFailureType_1.PromoteFailureType.WrongPhrase;
                         }
-                        return ParticipantRole_1.ParticipantRole.Player;
+                        return ParticipantModule.Player;
                     }
+                    case null:
                     case undefined:
                         return PromoteFailureType_1.PromoteFailureType.NotParticipant;
                 }
@@ -1124,7 +1156,7 @@ let RoomResolver = class RoomResolver {
                     payload: undefined,
                 };
             }
-            const findResult = await helpers_1.findRoomAndMyParticipantAndParitipantUserUids({ em, userUid: decodedIdToken.uid, roomId: args.roomId });
+            const findResult = await helpers_1.findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId: args.roomId });
             if (findResult == null) {
                 return {
                     result: {
@@ -1133,7 +1165,8 @@ let RoomResolver = class RoomResolver {
                     payload: undefined,
                 };
             }
-            const { room, me, participantUserUids } = findResult;
+            const { room, me, roomState } = findResult;
+            const participantUserUids = findResult.participantIds();
             if (me == null || me.role == null) {
                 return {
                     result: {
@@ -1155,7 +1188,7 @@ let RoomResolver = class RoomResolver {
                 result: {
                     failureType: undefined,
                 },
-                payload,
+                payload: payload,
             };
         };
         const result = await context.promiseQueue.next(queue);
@@ -1197,9 +1230,9 @@ let RoomResolver = class RoomResolver {
                     roomAsListItem: global_1.stateToGraphQL({ roomEntity: room }),
                 });
             }
-            const roomState = await global_2.GlobalRoom.MikroORM.ToGlobal.state(room);
+            const roomState = global_2.GlobalRoom.MikroORM.ToGlobal.state(room);
             return Result_1.ResultModule.ok({
-                role: me.role,
+                role: ParticipantRole_1.ParticipantRole.ofString(me.role),
                 room: Object.assign(Object.assign({}, global_2.GlobalRoom.Global.ToGraphQL.state({ source: roomState, requestedBy: { type: Types_1.client, userUid: decodedIdToken.uid } })), { revision: room.revision, createdBy: room.createdBy }),
             });
         };
@@ -1225,14 +1258,15 @@ let RoomResolver = class RoomResolver {
         }
         const queue = async () => {
             const em = context.createEm();
-            const findResult = await helpers_1.findRoomAndMyParticipantAndParitipantUserUids({ em, userUid: decodedIdToken.uid, roomId: id });
+            const findResult = await helpers_1.findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId: id });
             if (findResult == null) {
                 return Result_1.ResultModule.ok({
                     result: { failureType: LeaveRoomFailureType_1.LeaveRoomFailureType.NotFound },
                     payload: undefined,
                 });
             }
-            const { me, room, participantUserUids } = findResult;
+            const { me, room } = findResult;
+            const participantUserUids = findResult.participantIds();
             if (me === undefined || me.role == null) {
                 return Result_1.ResultModule.ok({
                     result: { failureType: LeaveRoomFailureType_1.LeaveRoomFailureType.NotEntry },
@@ -1250,7 +1284,7 @@ let RoomResolver = class RoomResolver {
             });
             return Result_1.ResultModule.ok({
                 result: {},
-                payload,
+                payload: payload,
             });
         };
         const result = await context.promiseQueue.next(queue);
@@ -1278,6 +1312,7 @@ let RoomResolver = class RoomResolver {
             };
         }
         const queue = async () => {
+            var _a, _b;
             const em = context.createEm();
             const entry = await helpers_1.checkEntry({
                 userUid: decodedIdToken.uid,
@@ -1291,14 +1326,15 @@ let RoomResolver = class RoomResolver {
                     result: { failureType: OperateRoomFailureType_1.OperateRoomFailureType.NotEntry }
                 });
             }
-            const findResult = await helpers_1.findRoomAndMyParticipantAndParitipantUserUids({ em, userUid: decodedIdToken.uid, roomId: args.id });
+            const findResult = await helpers_1.findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId: args.id });
             if (findResult == null) {
                 return Result_1.ResultModule.ok({
                     type: 'failure',
                     result: { failureType: OperateRoomFailureType_1.OperateRoomFailureType.NotFound }
                 });
             }
-            const { room, me, participantUserUids } = findResult;
+            const { room, me, roomState } = findResult;
+            const participantUserUids = findResult.participantIds();
             if (me === undefined) {
                 return Result_1.ResultModule.ok({
                     type: 'nonJoined',
@@ -1306,10 +1342,6 @@ let RoomResolver = class RoomResolver {
                 });
             }
             const clientOperation = global_2.GlobalRoom.GraphQL.ToGlobal.upOperation(args.operation);
-            if (clientOperation.isError) {
-                return clientOperation;
-            }
-            const roomState = await global_2.GlobalRoom.MikroORM.ToGlobal.state(room);
             const downOperation = await global_2.GlobalRoom.MikroORM.ToGlobal.downOperationMany({
                 em,
                 roomId: room.id,
@@ -1318,7 +1350,7 @@ let RoomResolver = class RoomResolver {
             if (downOperation.isError) {
                 return downOperation;
             }
-            const transformerFactory = global_2.GlobalRoom.transformerFactory({ type: Types_1.client, userUid: decodedIdToken.uid });
+            const transformerFactory = RoomModule.transformerFactory({ type: Types_1.client, userUid: decodedIdToken.uid });
             let prevState = roomState;
             let twoWayOperation = undefined;
             if (downOperation.value !== undefined) {
@@ -1337,7 +1369,7 @@ let RoomResolver = class RoomResolver {
                 key: null,
                 prevState,
                 currentState: roomState,
-                clientOperation: clientOperation.value,
+                clientOperation: clientOperation,
                 serverOperation: twoWayOperation,
             });
             if (transformed.isError) {
@@ -1349,53 +1381,54 @@ let RoomResolver = class RoomResolver {
             const operation = transformed.value;
             const prevRevision = room.revision;
             const myValueLogs = [];
-            for (const [userUid, participant] of operation.participants) {
+            for (const pair of utils_1.recordToArray((_a = operation.participants) !== null && _a !== void 0 ? _a : {})) {
+                const userUid = pair.key;
+                const participant = pair.value;
                 if (participant.type === mapOperations_1.replace) {
-                    if (participant.operation.oldValue != null) {
-                        const operation = collection_1.__(participant.operation.oldValue.myNumberValues).toMap(([key, value]) => {
-                            return { key, value: { type: mapOperations_1.replace, operation: { oldValue: value, newValue: undefined } } };
-                        });
-                        const partici = await em.findOne(mikro_orm_1.Partici, { user: { userUid } });
-                        if (partici == null) {
-                            console.warn('Partici not found');
-                            continue;
-                        }
-                        myValueLogs.push(...global_4.GlobalMyValue.Global.toLogs({ operation, createdBy: partici }).map(log => ({ log, stateUserUid: partici.user.userUid })));
+                    if (participant.replace.oldValue != null) {
+                        utils_1.recordForEach(participant.replace.oldValue.myNumberValues, async (value, key) => myValueLogs.push(new mikro_orm_1.MyValueLog({
+                            createdBy: userUid,
+                            room,
+                            stateId: key,
+                            value: { type: MyNumberValueModule.deleteType },
+                        })));
                     }
-                    if (participant.operation.newValue != null) {
-                        const operation = collection_1.__(participant.operation.newValue.myNumberValues).toMap(([key, value]) => {
-                            return { key, value: { type: mapOperations_1.replace, operation: { oldValue: undefined, newValue: value } } };
-                        });
-                        const partici = await em.findOne(mikro_orm_1.Partici, { user: { userUid } });
-                        if (partici == null) {
-                            console.warn('Partici not found');
-                            continue;
-                        }
-                        myValueLogs.push(...global_4.GlobalMyValue.Global.toLogs({ operation, createdBy: partici }).map(log => ({ log, stateUserUid: partici.user.userUid })));
+                    if (participant.replace.newValue != null) {
+                        utils_1.recordForEach(participant.replace.newValue.myNumberValues, async (value, key) => myValueLogs.push(new mikro_orm_1.MyValueLog({
+                            createdBy: userUid,
+                            room,
+                            stateId: key,
+                            value: { type: MyNumberValueModule.createType },
+                        })));
                     }
                 }
                 if (participant.type === mapOperations_1.update) {
-                    const partici = await em.findOne(mikro_orm_1.Partici, { user: { userUid } });
-                    if (partici == null) {
-                        console.warn('Partici not found');
-                        continue;
-                    }
-                    myValueLogs.push(...global_4.GlobalMyValue.Global.toLogs({ operation: participant.operation.myNumberValues, createdBy: partici }).map(log => ({ log, stateUserUid: partici.user.userUid })));
+                    utils_1.recordForEach((_b = participant.update.myNumberValues) !== null && _b !== void 0 ? _b : {}, (value, key) => {
+                        if (value.type === mapOperations_1.replace) {
+                            myValueLogs.push(new mikro_orm_1.MyValueLog({
+                                createdBy: userUid,
+                                room,
+                                stateId: key,
+                                value: value.replace.newValue == null ? { type: MyNumberValueModule.deleteType } : { type: MyNumberValueModule.createType },
+                            }));
+                        }
+                        else {
+                            myValueLogs.push(new mikro_orm_1.MyValueLog({
+                                createdBy: userUid,
+                                room,
+                                stateId: key,
+                                value: MyNumberValueModule.ofOperation(value.update),
+                            }));
+                        }
+                    });
                 }
             }
-            for (const { log } of myValueLogs) {
+            for (const log of myValueLogs) {
                 em.persist(log);
             }
-            await global_2.GlobalRoom.Global.applyToEntity({ em, target: room, operation });
+            const nextRoomState = await global_2.GlobalRoom.Global.applyToEntity({ em, target: room, prevState: roomState, operation });
             await em.flush();
-            const nextRoomState = await global_2.GlobalRoom.MikroORM.ToGlobal.state(room);
             const generateOperation = (deliverTo) => {
-                const value = global_2.GlobalRoom.Global.ToGraphQL.operation({
-                    operation,
-                    prevState: roomState,
-                    nextState: nextRoomState,
-                    requestedBy: { type: Types_1.client, userUid: deliverTo },
-                });
                 return {
                     __tstype: 'RoomOperation',
                     revisionTo: prevRevision + 1,
@@ -1403,7 +1436,12 @@ let RoomResolver = class RoomResolver {
                         userUid: decodedIdToken.uid,
                         clientId: args.operation.clientId,
                     },
-                    value,
+                    valueJson: global_2.GlobalRoom.Global.ToGraphQL.operation({
+                        operation,
+                        prevState: roomState,
+                        nextState: nextRoomState,
+                        requestedBy: { type: Types_1.client, userUid: deliverTo },
+                    }),
                 };
             };
             const roomOperationPayload = {
@@ -1415,12 +1453,12 @@ let RoomResolver = class RoomResolver {
             const result = {
                 type: 'success',
                 roomOperationPayload,
-                messageUpdatePayload: myValueLogs.map(({ log, stateUserUid }) => ({
+                messageUpdatePayload: myValueLogs.map(log => ({
                     type: 'messageUpdatePayload',
                     roomId: room.id,
                     createdBy: undefined,
                     visibleTo: undefined,
-                    value: global_5.MyValueLog.MikroORM.ToGraphQL.state({ entity: log, stateUserUid }),
+                    value: global_3.MyValueLog.MikroORM.ToGraphQL.state(log),
                 })),
                 result: {
                     operation: generateOperation(decodedIdToken.uid)
@@ -1468,10 +1506,11 @@ let RoomResolver = class RoomResolver {
             };
         }
         const queue = async () => {
+            var _a, _b, _c, _d, _e, _f;
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
             await em.flush();
-            if (!entry) {
+            if (entryUser == null) {
                 return Result_1.ResultModule.ok({
                     result: {
                         __tstype: graphql_2.WritePrivateRoomMessageFailureResultType,
@@ -1479,7 +1518,7 @@ let RoomResolver = class RoomResolver {
                     }
                 });
             }
-            const findResult = await helpers_1.findRoomAndMyParticipantAndParitipantUserUids({ em, userUid: decodedIdToken.uid, roomId: args.roomId });
+            const findResult = await helpers_1.findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId: args.roomId });
             if (findResult == null) {
                 return Result_1.ResultModule.ok({
                     result: {
@@ -1488,7 +1527,7 @@ let RoomResolver = class RoomResolver {
                     }
                 });
             }
-            const { room, me, participantUserUids, participantUsers } = findResult;
+            const { room, me, roomState } = findResult;
             if (me === undefined) {
                 return Result_1.ResultModule.ok({
                     result: {
@@ -1497,30 +1536,20 @@ let RoomResolver = class RoomResolver {
                     }
                 });
             }
-            const meAsUser = await me.user.load();
             const visibleTo = new Set(args.visibleTo);
             visibleTo.add(decodedIdToken.uid);
-            const visibleToIsOk = collection_1.__(Set_1.groupJoin(visibleTo, new Set(participantUserUids))).forAll(({ value }) => value !== Types_2.left);
-            if (!visibleToIsOk) {
-                return Result_1.ResultModule.ok({
-                    result: {
-                        __tstype: graphql_2.WritePrivateRoomMessageFailureResultType,
-                        failureType: WritePrivateRoomMessageFailureType_1.WritePrivateRoomMessageFailureType.VisibleToIsInvalid,
-                    }
-                });
-            }
-            await meAsUser.visibleRoomPrvMsgs.init({ where: { room: { id: room.id } } });
-            let chara = null;
+            await entryUser.visibleRoomPrvMsgs.init({ where: { room: { id: room.id } } });
+            let chara = undefined;
             if (args.characterStateId != null) {
-                chara = await em.findOne(mikro_orm_3.Chara, { createdBy: decodedIdToken.uid, stateId: args.characterStateId });
+                const characters = (_b = (_a = find(roomState.participants, decodedIdToken.uid)) === null || _a === void 0 ? void 0 : _a.characters) !== null && _b !== void 0 ? _b : {};
+                chara = find(characters, args.characterStateId);
             }
             const entityResult = await analyzeTextAndSetToEntity({
                 type: 'RoomPrvMsg',
-                em,
                 textSource: args.text,
                 context: chara == null ? null : { type: 'chara', value: chara },
-                createdBy: meAsUser,
-                room,
+                createdBy: entryUser,
+                room: roomState,
                 gameType: args.gameType,
             });
             if (entityResult.isError) {
@@ -1528,34 +1557,40 @@ let RoomResolver = class RoomResolver {
             }
             const entity = entityResult.value;
             args.textColor == null ? undefined : fixTextColor(args.textColor);
-            for (const participantUserRef of participantUsers) {
-                const participantUser = await participantUserRef.load();
-                if (visibleTo.has(participantUser.userUid)) {
-                    participantUser.visibleRoomPrvMsgs.add(entity);
-                    entity.visibleTo.add(participantUser);
+            for (const visibleToElement of visibleTo) {
+                const user = await em.findOne(mikro_orm_2.User, { userUid: visibleToElement });
+                if (user == null) {
+                    return Result_1.ResultModule.ok({
+                        result: {
+                            __tstype: graphql_2.WritePrivateRoomMessageFailureResultType,
+                            failureType: WritePrivateRoomMessageFailureType_1.WritePrivateRoomMessageFailureType.VisibleToIsInvalid,
+                        }
+                    });
                 }
+                ;
+                entity.visibleTo.add(user);
             }
             entity.customName = args.customName;
             if (chara != null) {
-                entity.charaStateId = chara.stateId;
+                entity.charaStateId = args.characterStateId;
                 entity.charaName = chara.name;
                 entity.charaIsPrivate = chara.isPrivate;
-                entity.charaImagePath = chara.imagePath;
-                entity.charaImageSourceType = chara.imageSourceType;
-                entity.charaTachieImagePath = chara.tachieImagePath;
-                entity.charaTachieImageSourceType = chara.tachieImageSourceType;
+                entity.charaImagePath = (_c = chara.image) === null || _c === void 0 ? void 0 : _c.path;
+                entity.charaImageSourceType = FileSourceType_1.FileSourceType.ofNullishString((_d = chara.tachieImage) === null || _d === void 0 ? void 0 : _d.sourceType);
+                entity.charaTachieImagePath = (_e = chara.tachieImage) === null || _e === void 0 ? void 0 : _e.path;
+                entity.charaTachieImageSourceType = FileSourceType_1.FileSourceType.ofNullishString((_f = chara.tachieImage) === null || _f === void 0 ? void 0 : _f.sourceType);
             }
             entity.room = core_1.Reference.create(room);
             await em.persistAndFlush(entity);
             const visibleToArray = [...visibleTo].sort();
-            const result = await createRoomPrivateMessage({ msg: entity, myUserUid: meAsUser.userUid, visibleTo: visibleToArray, visibleToMe: true });
+            const result = await createRoomPrivateMessage({ msg: entity, myUserUid: entryUser.userUid, visibleTo: visibleToArray, visibleToMe: true });
             if (result == null) {
                 throw 'This should not happen';
             }
             const payload = {
                 type: 'messageUpdatePayload',
                 roomId: args.roomId,
-                createdBy: meAsUser.userUid,
+                createdBy: entryUser.userUid,
                 visibleTo: visibleToArray,
                 value: result,
             };
@@ -1589,9 +1624,9 @@ let RoomResolver = class RoomResolver {
         }
         const queue = async () => {
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
             await em.flush();
-            if (!entry) {
+            if (entryUser == null) {
                 return Result_1.ResultModule.ok({
                     result: {
                         __tstype: graphql_2.WriteRoomSoundEffectFailureResultType,
@@ -1617,7 +1652,7 @@ let RoomResolver = class RoomResolver {
                     }
                 });
             }
-            if (me.role === ParticipantRole_1.ParticipantRole.Spectator) {
+            if (me.role === ParticipantModule.Spectator) {
                 return Result_1.ResultModule.ok({
                     result: {
                         __tstype: graphql_2.WriteRoomSoundEffectFailureResultType,
@@ -1625,23 +1660,22 @@ let RoomResolver = class RoomResolver {
                     }
                 });
             }
-            const meAsUser = await me.user.load();
-            const entity = new mikro_orm_2.RoomSe({
+            const entity = new mikro_orm_1.RoomSe({
                 filePath: args.file.path,
                 fileSourceType: args.file.sourceType,
                 volume: args.volume,
             });
-            entity.createdBy = core_1.Reference.create(meAsUser);
+            entity.createdBy = core_1.Reference.create(entryUser);
             entity.room = core_1.Reference.create(room);
             await em.persistAndFlush(entity);
-            const result = Object.assign(Object.assign({}, entity), { __tstype: graphql_2.RoomSoundEffectType, messageId: entity.id, createdBy: meAsUser.userUid, createdAt: entity.createdAt.getTime(), file: {
+            const result = Object.assign(Object.assign({}, entity), { __tstype: graphql_2.RoomSoundEffectType, messageId: entity.id, createdBy: decodedIdToken.uid, createdAt: entity.createdAt.getTime(), file: {
                     path: entity.filePath,
                     sourceType: entity.fileSourceType,
                 } });
             const payload = {
                 type: 'messageUpdatePayload',
                 roomId: args.roomId,
-                createdBy: meAsUser.userUid,
+                createdBy: decodedIdToken.uid,
                 visibleTo: undefined,
                 value: result,
             };
@@ -1700,7 +1734,7 @@ let RoomResolver = class RoomResolver {
                     }
                 });
             }
-            const publicMsg = await em.findOne(mikro_orm_2.RoomPubMsg, { id: args.messageId });
+            const publicMsg = await em.findOne(mikro_orm_1.RoomPubMsg, { id: args.messageId });
             if (publicMsg != null) {
                 if (((_a = publicMsg.createdBy) === null || _a === void 0 ? void 0 : _a.userUid) !== decodedIdToken.uid) {
                     return Result_1.ResultModule.ok({
@@ -1741,7 +1775,7 @@ let RoomResolver = class RoomResolver {
                     },
                 });
             }
-            const privateMsg = await em.findOne(mikro_orm_2.RoomPrvMsg, { id: args.messageId });
+            const privateMsg = await em.findOne(mikro_orm_1.RoomPrvMsg, { id: args.messageId });
             if (privateMsg != null) {
                 if (((_c = privateMsg.createdBy) === null || _c === void 0 ? void 0 : _c.userUid) !== decodedIdToken.uid) {
                     return Result_1.ResultModule.ok({
@@ -1841,7 +1875,7 @@ let RoomResolver = class RoomResolver {
                     }
                 });
             }
-            const publicMsg = await em.findOne(mikro_orm_2.RoomPubMsg, { id: args.messageId });
+            const publicMsg = await em.findOne(mikro_orm_1.RoomPubMsg, { id: args.messageId });
             if (publicMsg != null) {
                 if (((_a = publicMsg.createdBy) === null || _a === void 0 ? void 0 : _a.userUid) !== decodedIdToken.uid) {
                     return Result_1.ResultModule.ok({
@@ -1883,7 +1917,7 @@ let RoomResolver = class RoomResolver {
                     }
                 });
             }
-            const privateMsg = await em.findOne(mikro_orm_2.RoomPrvMsg, { id: args.messageId });
+            const privateMsg = await em.findOne(mikro_orm_1.RoomPrvMsg, { id: args.messageId });
             if (privateMsg != null) {
                 if (((_c = privateMsg.createdBy) === null || _c === void 0 ? void 0 : _c.userUid) !== decodedIdToken.uid) {
                     return Result_1.ResultModule.ok({
@@ -1979,7 +2013,7 @@ let RoomResolver = class RoomResolver {
                     }
                 });
             }
-            const publicMsg = await em.findOne(mikro_orm_2.RoomPubMsg, { id: args.messageId });
+            const publicMsg = await em.findOne(mikro_orm_1.RoomPubMsg, { id: args.messageId });
             if (publicMsg != null) {
                 if (((_a = publicMsg.createdBy) === null || _a === void 0 ? void 0 : _a.userUid) !== decodedIdToken.uid) {
                     return Result_1.ResultModule.ok({
@@ -2021,7 +2055,7 @@ let RoomResolver = class RoomResolver {
                     }
                 });
             }
-            const privateMsg = await em.findOne(mikro_orm_2.RoomPrvMsg, { id: args.messageId });
+            const privateMsg = await em.findOne(mikro_orm_1.RoomPrvMsg, { id: args.messageId });
             if (privateMsg != null) {
                 if (((_c = privateMsg.createdBy) === null || _c === void 0 ? void 0 : _c.userUid) !== decodedIdToken.uid) {
                     return Result_1.ResultModule.ok({

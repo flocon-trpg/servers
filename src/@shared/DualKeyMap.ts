@@ -15,6 +15,8 @@ export const toJSONString = <T1, T2>(source: DualKey<T1, T2>): string => {
 
 export type DualKeyMapSource<TKey1, TKey2, TValue> = Map<TKey1, Map<TKey2, TValue>> | Map<TKey1, ReadonlyMap<TKey2, TValue>> | ReadonlyMap<TKey1, Map<TKey2, TValue>> | ReadonlyMap<TKey1, ReadonlyMap<TKey2, TValue>>;
 
+type RecordKey = string | number | symbol;
+
 export class DualKeyMap<TKey1, TKey2, TValue> {
     private _core: Map<TKey1, Map<TKey2, TValue>>;
 
@@ -44,6 +46,23 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
     private static create<TKey1, TKey2, TValue1, TValue2>(source: DualKeyMapSource<TKey1, TKey2, TValue1> | DualKeyMap<TKey1, TKey2, TValue1>, mapping: (source: TValue1, key: DualKey<TKey1, TKey2>) => TValue2): DualKeyMap<TKey1, TKey2, TValue2> {
         const result = new DualKeyMap<TKey1, TKey2, TValue2>();
         result._core = DualKeyMap.mapMap(source instanceof DualKeyMap ? source._core : source, mapping);
+        return result;
+    }
+
+    public static ofRecord<TKey1 extends RecordKey, TKey2 extends RecordKey, TValue>(source: Record<TKey1, Record<TKey2, TValue | undefined> | undefined>): DualKeyMap<TKey1, TKey2, TValue> {
+        const result = new DualKeyMap<TKey1, TKey2, TValue>();
+        for (const key1 in source) {
+            const inner: Record<TKey2, TValue | undefined> | undefined = source[key1];
+            if (inner === undefined) {
+                continue;
+            }
+            for (const key2 in inner) {
+                const value: TValue | undefined = inner[key2];
+                if (value !== undefined) {
+                    result.set({ first: key1, second: key2 }, value);
+                }
+            }
+        }
         return result;
     }
 
@@ -107,6 +126,18 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
 
     public toMap() {
         return DualKeyMap.mapMap(this._core, x => x);
+    }
+
+    public toStringRecord(createStringKey1: (first: TKey1) => string, createStringKey2: (second: TKey2) => string) {
+        const result: Record<string, Record<string, TValue>> = {};
+        this._core.forEach((inner, first) => {
+            const innerRecord: Record<string, TValue> = {};
+            inner.forEach((value, second) => {
+                innerRecord[createStringKey2(second)] = value;
+            });
+            result[createStringKey1(first)] = innerRecord;
+        });
+        return result;
     }
 
     public get size(): number {

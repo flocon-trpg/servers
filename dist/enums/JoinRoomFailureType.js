@@ -8,4 +8,5 @@ var JoinRoomFailureType;
     JoinRoomFailureType["NotSignIn"] = "NotSignIn";
     JoinRoomFailureType["WrongPhrase"] = "WrongPhrase";
     JoinRoomFailureType["AlreadyParticipant"] = "AlreadyParticipant";
+    JoinRoomFailureType["TransformError"] = "TransformError";
 })(JoinRoomFailureType = exports.JoinRoomFailureType || (exports.JoinRoomFailureType = {}));

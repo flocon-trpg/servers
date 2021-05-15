@@ -3,8 +3,8 @@ import { v4 } from 'uuid';
 import { FileSourceType } from '../../../enums/FileSourceType';
 import { MyValueLogType } from '../../../enums/MyValueLogType';
 import { Room } from '../room/mikro-orm';
-import { Partici } from '../room/participant/mikro-orm';
 import { User } from '../user/mikro-orm';
+import * as MyNumberValueLogModule from '../../../@shared/ot/room/participant/myNumberValue/log-v1';
 
 /*
 # 変数展開（仮称）の仕様
@@ -279,41 +279,28 @@ export class RoomPrvMsg {
 export class MyValueLog {
     public constructor({
         createdBy,
+        room,
         stateId,
-        myValueType,
-        replaceType,
-        valueChanged,
-        isValuePrivateChanged,
-        createdPieces,
-        deletedPieces,
-        movedPieces,
-        resizedPieces,
+        value,
     }: {
-        createdBy: Partici;
+
+        createdBy: string;
+        room: Room;
         stateId: string;
-        myValueType: MyValueLogType;
-        replaceType?: boolean;
-        valueChanged: boolean;
-        isValuePrivateChanged: boolean;
-        createdPieces: { createdBy: string; stateId: string }[];
-        deletedPieces: { createdBy: string; stateId: string }[];
-        movedPieces: { createdBy: string; stateId: string }[];
-        resizedPieces: { createdBy: string; stateId: string }[];
+        value: MyNumberValueLogModule.Main;
     }) {
-        this.createdBy = Reference.create(createdBy);
+        this.createdBy = createdBy;
+        this.room = Reference.create(room);
         this.stateId = stateId;
-        this.myValueType = myValueType;
-        this.replaceType = replaceType;
-        this.valueChanged = valueChanged;
-        this.isValuePrivateChanged = isValuePrivateChanged;
-        this.createdPieces = createdPieces;
-        this.deletedPieces = deletedPieces;
-        this.movedPieces = movedPieces;
-        this.resizedPieces = resizedPieces;
+        this.value = value;
     }
 
     @PrimaryKey()
     public id: string = v4();
+
+    // 対象となったmyValueの所有者を表す。ログの作成者ではない。
+    @Property()
+    public createdBy: string;
 
     @Property({ type: Date, onCreate: () => new Date() })
     public createdAt: Date = new Date();
@@ -321,35 +308,11 @@ export class MyValueLog {
     @Property()
     public stateId: string;
 
-    @Enum({ items: () => MyValueLogType })
-    public myValueType: MyValueLogType;
+    @Property({ type: JsonType, nullable: true })
+    public value?: MyNumberValueLogModule.Main;
 
-    @Property()
-    public valueChanged: boolean;
-
-    @Property({ default: false })
-    public isValuePrivateChanged: boolean
-
-    // trueならば全体のcreate、falseならば全体のdelete。trueかfalseならば、pieceCreated～pieceResizeはすべて[]。
-    @Property({ nullable: true })
-    public replaceType?: boolean;
-
-    // pieceCreated～pieceResizedのcreatedByとstateIdは、boardのものを表す
-    @Property({ type: JsonType })
-    public createdPieces: { createdBy: string; stateId: string }[];
-
-    @Property({ type: JsonType })
-    public deletedPieces: { createdBy: string; stateId: string }[];
-
-    @Property({ type: JsonType })
-    public movedPieces: { createdBy: string; stateId: string }[];
-
-    @Property({ type: JsonType })
-    public resizedPieces: { createdBy: string; stateId: string }[];
-
-    // 対象となったmyValueの所有者を表す。ログの作成者ではない。
-    @ManyToOne(() => Partici, { wrappedReference: true })
-    public createdBy: IdentifiedReference<Partici>;
+    @ManyToOne(() => Room, { wrappedReference: true })
+    public room: IdentifiedReference<Room>;
 }
 
 // RoomSoundEffect

@@ -3,7 +3,7 @@ import * as DualKeyMapOperations from './dualKeyMapOperations';
 import { Collection } from '@mikro-orm/core';
 import { groupJoin } from '../@shared/Map';
 import { both, left, right } from '../@shared/Types';
-import { Result, ResultModule } from '../@shared/Result';
+import { CustomResult, Result, ResultModule } from '../@shared/Result';
 import { DualKeyMap } from '../@shared/DualKeyMap';
 
 // ほぼstateMapOperations.tsのラッパー。一部はコピペして調整。
@@ -59,17 +59,17 @@ export type MapTwoWayOperation<TKey, TState, TTwoWayOperation> = Map<TKey, MapTw
 
 export type ReadonlyMapTwoWayOperation<TKey, TState, TTwoWayOperation> = ReadonlyMap<TKey, MapTwoWayOperationElementUnion<TState, TTwoWayOperation>>;
 
-type RestoreParameters<TKey, TState, TDownOperation, TTwoWayOperation> = {
+type RestoreParameters<TKey, TState, TDownOperation, TTwoWayOperation, TCustomError = string> = {
     nextState: ReadonlyMap<TKey, TState>;
     downOperation: ReadonlyMapDownOperation<TKey, TState, TDownOperation>;
-    innerRestore: (params: { downOperation: TDownOperation; nextState: TState }) => Result<RestoreResult<TState, TTwoWayOperation | undefined>>;
+    innerRestore: (params: { downOperation: TDownOperation; nextState: TState }) => CustomResult<RestoreResult<TState, TTwoWayOperation | undefined>, TCustomError>;
     innerDiff: (params: { prevState: TState; nextState: TState }) => TTwoWayOperation | undefined;
 }
 
-type ApplyBackParameters<TKey, TState, TDownOperation> = {
+type ApplyBackParameters<TKey, TState, TDownOperation, TCustomError = string> = {
     nextState: ReadonlyMap<TKey, TState>;
     downOperation: ReadonlyMapDownOperation<TKey, TState, TDownOperation>;
-    innerApplyBack: (params: { downOperation: TDownOperation; nextState: TState }) => Result<TState>;
+    innerApplyBack: (params: { downOperation: TDownOperation; nextState: TState }) => CustomResult<TState, string | TCustomError>;
 }
 
 type ComposeParameters<TKey, TState, TDownOperation> = {
@@ -262,7 +262,7 @@ export const toGraphQLWithState = <TKey, TSourceState, TReplaceOperation, TSourc
     });
 };
 
-export const restore = <TKey, TState, TDownOperation, TTwoWayOperation>({ nextState, downOperation, innerRestore, innerDiff }: RestoreParameters<TKey, TState, TDownOperation, TTwoWayOperation>): Result<RestoreResult<Map<TKey, TState>, MapTwoWayOperation<TKey, TState, TTwoWayOperation>>> => {
+export const restore = <TKey, TState, TDownOperation, TTwoWayOperation, TCustomError = string>({ nextState, downOperation, innerRestore, innerDiff }: RestoreParameters<TKey, TState, TDownOperation, TTwoWayOperation, TCustomError>): CustomResult<RestoreResult<Map<TKey, TState>, MapTwoWayOperation<TKey, TState, TTwoWayOperation>>, string | TCustomError> => {
     const stateMapResult = DualKeyMapOperations.restore({ nextState: toDualKeyMap(nextState), downOperation: toDualKeyMap(downOperation), innerRestore, innerDiff });
     if (stateMapResult.isError) {
         return stateMapResult;
@@ -273,7 +273,7 @@ export const restore = <TKey, TState, TDownOperation, TTwoWayOperation>({ nextSt
     });
 };
 
-export const applyBack = <TKey, TState, TDownOperation>({ nextState, downOperation, innerApplyBack }: ApplyBackParameters<TKey, TState, TDownOperation>): Result<Map<TKey, TState>> => {
+export const applyBack = <TKey, TState, TDownOperation, TCustomError = string>({ nextState, downOperation, innerApplyBack }: ApplyBackParameters<TKey, TState, TDownOperation, TCustomError>): CustomResult<Map<TKey, TState>, string | TCustomError> => {
     const stateMapResult = DualKeyMapOperations.applyBack({ nextState: toDualKeyMap(nextState), downOperation: toDualKeyMap(downOperation), innerApplyBack });
     if (stateMapResult.isError) {
         return stateMapResult;

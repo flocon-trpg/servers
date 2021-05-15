@@ -198,15 +198,6 @@ export class RoomPrivateMessage {
     public updatedAt?: number;
 }
 
-@ObjectType()
-export class BoardId {
-    @Field()
-    public createdBy!: string;
-
-    @Field()
-    public stateId!: string;
-}
-
 export const MyValueLogType = 'MyValueLog';
 
 @ObjectType()
@@ -225,29 +216,8 @@ export class MyValueLog {
     @Field()
     public createdAt!: number;
 
-    @Field(() => MyValueLogTypeEnum)
-    public myValueType!: MyValueLogTypeEnum;
-
     @Field()
-    public valueChanged!: boolean;
-
-    @Field()
-    public isValuePrivateChanged!: boolean;
-
-    @Field({ nullable: true })
-    public replaceType?: boolean;
-
-    @Field(() => [BoardId])
-    public createdPieces!: BoardId[];
-
-    @Field(() => [BoardId])
-    public deletedPieces!: BoardId[];
-
-    @Field(() => [BoardId])
-    public movedPieces!: BoardId[];
-
-    @Field(() => [BoardId])
-    public resizedPieces!: BoardId[];
+    public valueJson!: string;
 }
 
 export const RoomSoundEffectType = 'RoomSoundEffect';

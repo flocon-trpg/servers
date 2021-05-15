@@ -3,9 +3,10 @@ import { FileSourceType } from '../enums/FileSourceType';
 import { FilePath as GraphQLFilePath } from './entities/filePath/graphql';
 import { FilePath as GlobalFilePath } from './entities/filePath/global';
 import { TextDownOperation as TextDownOperationCore, TextUpOperation as TextUpOperationCore, TextTwoWayOperation as TextTwoWayOperationCore, ApplyError, PositiveInt, ComposeAndTransformError, retain, insert$, delete$, NonEmptyString, TextUpOperation } from '../@shared/textOperation';
-import { CustomResult, ResultModule } from '../@shared/Result';
+import { CustomResult, Result, ResultModule } from '../@shared/Result';
 import { __ } from '../@shared/collection';
 import { ParticipantRole } from '../enums/ParticipantRole';
+import { applyBack, MapDownOperationElementUnion, replace, restore, update } from './mapOperations';
 
 /* validateメソッドは、mikro-ormでJSONとして保存された値をチェックするために使われる。
  * 通常は型は常に正しいが、Entityのコードに変更があったり（おそらくマイグレーションも不可）、管理者がDBを直接いじったりしたときに型が異なるおそれがある。それに備えた対策。
@@ -641,11 +642,54 @@ export const TextDownOperationModule = {
 
         return TextDownOperationCore.ofUnit(unit);
     },
+    ofUnitAndValidateMany: ({ updates, removes }: { updates: ReadonlyMap<string, ReadonlyArray<TextDownOperationUnit> | null | undefined>; removes: ReadonlyMap<string, string | null | undefined> }) => {
+        const result = new Map<string, MapDownOperationElementUnion<string, TextDownOperation>>();
+        updates.forEach((value, key) => {
+            if (value == null) {
+                return;
+            }
+            const newValue = TextDownOperationModule.ofUnitAndValidate(value);
+            if (newValue == null) {
+                return;
+            }
+            result.set(key, { type: update, operation: newValue });
+        });
+        removes.forEach((value, key) => {
+            if (value == null) {
+                return;
+            }
+            result.set(key, { type: replace, operation: { oldValue: value } });
+        });
+        return result;
+    },
     applyBack: (nextState: string, action: TextDownOperation) => {
         return TextDownOperationCore.applyBack({ nextState, action });
     },
+    applyBackMany: (nextState: ReadonlyMap<string, string>, action: ReadonlyMap<string, MapDownOperationElementUnion<string, TextDownOperation>>) => {
+        return applyBack({
+            nextState, downOperation: action, innerApplyBack: ({ nextState, downOperation }) => {
+                return TextDownOperationModule.applyBack(nextState, downOperation);
+            }
+        });
+    },
     applyBackAndRestore: (nextState: string, action: TextDownOperation) => {
         return TextDownOperationCore.applyBackAndRestore({ nextState, action });
+    },
+    applyBackAndRestoreMany: (nextState: ReadonlyMap<string, string>, action: ReadonlyMap<string, MapDownOperationElementUnion<string, TextDownOperation>>) => {
+        return restore({
+            nextState,
+            downOperation: action,
+            innerRestore: ({ nextState, downOperation }) => {
+                const result = TextDownOperationModule.applyBackAndRestore(nextState, downOperation);
+                if (result.isError) {
+                    return result;
+                }
+                return ResultModule.ok({ prevState: result.value.prevState, twoWayOperation: result.value.restored });
+            },
+            innerDiff: ({ prevState, nextState }) => {
+                return TextTwoWayOperationModule.diff(prevState, nextState);
+            },
+        });
     },
     compose: (first: TextDownOperation | undefined, second: TextDownOperation | undefined): TextDownOperation | undefined => {
         if (first === undefined) {
@@ -661,7 +705,7 @@ export const TextDownOperationModule = {
         return result.value;
     },
     diff: (prev: string, next: string) => {
-        return TextDownOperationCore.diff({first: prev, second: next});
+        return TextDownOperationCore.diff({ first: prev, second: next });
     }
 };
 

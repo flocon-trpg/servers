@@ -4,4 +4,5 @@ export enum JoinRoomFailureType {
     NotSignIn = 'NotSignIn',
     WrongPhrase = 'WrongPhrase',
     AlreadyParticipant = 'AlreadyParticipant',
+    TransformError = 'TransformError',
 }

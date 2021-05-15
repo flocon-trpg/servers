@@ -5,11 +5,7 @@ const bcdice_1 = require("bcdice");
 const expression_1 = require("../@shared/expression");
 const flocommand_1 = require("../@shared/flocommand");
 const Result_1 = require("../@shared/Result");
-const RoomParameterNameType_1 = require("../enums/RoomParameterNameType");
-const mikro_orm_1 = require("../graphql+mikro-orm/entities/room/character/boolParam/mikro-orm");
-const mikro_orm_2 = require("../graphql+mikro-orm/entities/room/character/numParam/mikro-orm");
-const mikro_orm_3 = require("../graphql+mikro-orm/entities/room/character/strParam/mikro-orm");
-const mikro_orm_4 = require("../graphql+mikro-orm/entities/room/paramName/mikro-orm");
+const utils_1 = require("../@shared/utils");
 const loader = new bcdice_1.DynamicLoader();
 const listAvailableGameSystems = () => {
     return loader.listAvailableGameSystems();
@@ -24,7 +20,8 @@ const roll = async (text, gameType) => {
     return gameSystem.eval(text);
 };
 exports.chara = 'chara';
-const getParameter = async ({ em, parameterPath, context, room }) => {
+const getParameter = async ({ parameterPath, context, room }) => {
+    var _a;
     if (parameterPath.length === 0) {
         throw new Error('parameterPath.length === 0');
     }
@@ -47,42 +44,44 @@ const getParameter = async ({ em, parameterPath, context, room }) => {
         return Result_1.ResultModule.ok({ value: privateVarValue, stringValue: privateVarValue.toString() });
     }
     const paramNameValue = await (async () => {
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e, _f;
         if (parameterPath.length >= 2) {
-            return null;
+            return Result_1.ResultModule.ok(undefined);
         }
         if ((context === null || context === void 0 ? void 0 : context.type) !== exports.chara) {
-            return null;
+            return Result_1.ResultModule.ok(undefined);
         }
-        const paramNames = await em.find(mikro_orm_4.ParamName, { room: room.id, name: parameter }, { limit: 2 });
-        if (paramNames.length === 0) {
-            return null;
-        }
-        if (paramNames.length !== 1) {
+        const matchedBoolParams = utils_1.recordToArray(room.boolParamNames).filter(({ value }) => value.name === parameter);
+        const matchedNumParams = utils_1.recordToArray(room.numParamNames).filter(({ value }) => value.name === parameter);
+        const matchedStrParams = utils_1.recordToArray(room.strParamNames).filter(({ value }) => value.name === parameter);
+        const totalLength = matchedBoolParams.length + matchedNumParams.length + matchedStrParams.length;
+        if (totalLength >= 2) {
             return Result_1.ResultModule.error(`"${parameter}"という名前のパラメーターが複数存在します。パラメーターの名前を変えることを検討してください`);
         }
-        const paramName = paramNames[0];
-        let paramValue;
-        switch (paramName.type) {
-            case RoomParameterNameType_1.RoomParameterNameType.Str:
-                paramValue = (_a = (await em.findOne(mikro_orm_3.StrParam, { chara: context.value.id, key: paramNames[0].key }))) === null || _a === void 0 ? void 0 : _a.value;
-                break;
-            case RoomParameterNameType_1.RoomParameterNameType.Num:
-                paramValue = (_b = (await em.findOne(mikro_orm_2.NumParam, { chara: context.value.id, key: paramNames[0].key }))) === null || _b === void 0 ? void 0 : _b.value;
-                break;
-            case RoomParameterNameType_1.RoomParameterNameType.Bool:
-                paramValue = (_c = (await em.findOne(mikro_orm_1.BoolParam, { chara: context.value.id, key: paramNames[0].key }))) === null || _c === void 0 ? void 0 : _c.value;
-                break;
+        if (matchedBoolParams.length !== 0) {
+            const matched = matchedBoolParams[0];
+            return Result_1.ResultModule.ok((_b = (_a = context.value.boolParams[matched.key]) === null || _a === void 0 ? void 0 : _a.value) !== null && _b !== void 0 ? _b : undefined);
         }
-        return Result_1.ResultModule.ok({
-            stringValue: (_d = paramValue === null || paramValue === void 0 ? void 0 : paramValue.toString()) !== null && _d !== void 0 ? _d : '',
-            value: paramValue,
-        });
+        if (matchedNumParams.length !== 0) {
+            const matched = matchedNumParams[0];
+            return Result_1.ResultModule.ok((_d = (_c = context.value.numParams[matched.key]) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : undefined);
+        }
+        if (matchedStrParams.length !== 0) {
+            const matched = matchedStrParams[0];
+            return Result_1.ResultModule.ok((_f = (_e = context.value.strParams[matched.key]) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : undefined);
+        }
+        return Result_1.ResultModule.ok(undefined);
     })();
-    if (paramNameValue != null) {
+    if (paramNameValue.isError) {
         return paramNameValue;
     }
-    return null;
+    if (paramNameValue.value !== undefined) {
+        return Result_1.ResultModule.ok({
+            stringValue: (_a = paramNameValue.value) === null || _a === void 0 ? void 0 : _a.toString(),
+            value: paramNameValue.value,
+        });
+    }
+    return undefined;
 };
 const analyze = async (params) => {
     const expressions = expression_1.analyze(params.text);

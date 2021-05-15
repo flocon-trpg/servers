@@ -5,13 +5,11 @@ import { analyze as analyzeToExpression, plain } from '../@shared/expression';
 import { TOML } from '../@shared/flocommand';
 import { Result, ResultModule } from '../@shared/Result';
 import { RoomParameterNameType } from '../enums/RoomParameterNameType';
-import { BoolParam } from '../graphql+mikro-orm/entities/room/character/boolParam/mikro-orm';
-import { Chara } from '../graphql+mikro-orm/entities/room/character/mikro-orm';
-import { NumParam } from '../graphql+mikro-orm/entities/room/character/numParam/mikro-orm';
-import { StrParam } from '../graphql+mikro-orm/entities/room/character/strParam/mikro-orm';
 import { Room } from '../graphql+mikro-orm/entities/room/mikro-orm';
-import { ParamName } from '../graphql+mikro-orm/entities/room/paramName/mikro-orm';
 import { EM } from '../utils/types';
+import * as CharacterModule from '../@shared/ot/room/participant/character/v1';
+import * as RoomModule from '../@shared/ot/room/v1';
+import { recordToArray } from '../@shared/utils';
 
 const loader = new DynamicLoader();
 
@@ -32,11 +30,11 @@ export const chara = 'chara';
 
 export type Context = {
     type: typeof chara;
-    value: Chara;
+    value: CharacterModule.State;
 }
 
-// 全てにおいて何も見つからなかった場合、nullが返される。
-const getParameter = async ({ em, parameterPath, context, room }: { em: EM; parameterPath: string[]; context: Context | null; room: Room }): Promise<Result<{ value: string | boolean | number | undefined; stringValue: string }> | null> => {
+// 全てにおいて何も見つからなかった場合、undefinedが返される。
+const getParameter = async ({ parameterPath, context, room }: { parameterPath: string[]; context: Context | null; room: RoomModule.State }): Promise<Result<{ value: string | boolean | number | undefined; stringValue: string }> | undefined> => {
     if (parameterPath.length === 0) {
         throw new Error('parameterPath.length === 0');
     }
@@ -62,42 +60,46 @@ const getParameter = async ({ em, parameterPath, context, room }: { em: EM; para
 
     const paramNameValue = await (async () => {
         if (parameterPath.length >= 2) {
-            return null;
+            return ResultModule.ok(undefined);
         }
 
         if (context?.type !== chara) {
-            return null;
+            return ResultModule.ok(undefined);
         }
 
-        const paramNames = await em.find(ParamName, { room: room.id, name: parameter }, { limit: 2 });
-        if (paramNames.length === 0) {
-            return null;
-        }
-        if (paramNames.length !== 1) {
+        const matchedBoolParams = recordToArray(room.boolParamNames).filter(({ value }) => value.name === parameter);
+        const matchedNumParams = recordToArray(room.numParamNames).filter(({ value }) => value.name === parameter);
+        const matchedStrParams = recordToArray(room.strParamNames).filter(({ value }) => value.name === parameter);
+        const totalLength = matchedBoolParams.length + matchedNumParams.length + matchedStrParams.length;
+        if (totalLength >= 2) {
             return ResultModule.error(`"${parameter}"という名前のパラメーターが複数存在します。パラメーターの名前を変えることを検討してください`);
         }
-        const paramName = paramNames[0];
-        let paramValue;
-        switch (paramName.type) {
-            case RoomParameterNameType.Str:
-                paramValue = (await em.findOne(StrParam, { chara: context.value.id, key: paramNames[0].key }))?.value;
-                break;
-            case RoomParameterNameType.Num:
-                paramValue = (await em.findOne(NumParam, { chara: context.value.id, key: paramNames[0].key }))?.value;
-                break;
-            case RoomParameterNameType.Bool:
-                paramValue = (await em.findOne(BoolParam, { chara: context.value.id, key: paramNames[0].key }))?.value;
-                break;
+
+        if (matchedBoolParams.length !== 0) {
+            const matched = matchedBoolParams[0];
+            return ResultModule.ok(context.value.boolParams[matched.key]?.value ?? undefined);
         }
-        return ResultModule.ok({
-            stringValue: paramValue?.toString() ?? '',
-            value: paramValue,
-        });
+        if (matchedNumParams.length !== 0) {
+            const matched = matchedNumParams[0];
+            return ResultModule.ok(context.value.numParams[matched.key]?.value ?? undefined);
+        }
+        if (matchedStrParams.length !== 0) {
+            const matched = matchedStrParams[0];
+            return ResultModule.ok(context.value.strParams[matched.key]?.value ?? undefined);
+        }
+
+        return ResultModule.ok(undefined);
     })();
-    if (paramNameValue != null) {
+    if (paramNameValue.isError) {
         return paramNameValue;
     }
-    return null;
+    if (paramNameValue.value !== undefined) {
+        return ResultModule.ok({
+            stringValue: paramNameValue.value?.toString(),
+            value: paramNameValue.value,
+        });
+    }
+    return undefined;
 };
 
 type AnalyzeResult = {
@@ -111,11 +113,10 @@ type AnalyzeResult = {
 }
 
 export const analyze = async (params: {
-    em: EM;
     text: string;
     gameType: string;
     context: Context | null;
-    room: Room;
+    room: RoomModule.State;
 }): Promise<Result<AnalyzeResult>> => {
     const expressions = analyzeToExpression(params.text);
     if (expressions.isError) {

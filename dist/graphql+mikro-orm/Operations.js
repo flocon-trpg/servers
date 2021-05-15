@@ -17,6 +17,7 @@ const textOperation_1 = require("../@shared/textOperation");
 const Result_1 = require("../@shared/Result");
 const collection_1 = require("../@shared/collection");
 const ParticipantRole_1 = require("../enums/ParticipantRole");
+const mapOperations_1 = require("./mapOperations");
 const validateFilePath = (source) => {
     if (typeof source.path !== 'string') {
         throw 'FilePath.path is not string.';
@@ -484,11 +485,54 @@ exports.TextDownOperationModule = {
         }).toArray();
         return textOperation_1.TextDownOperation.ofUnit(unit);
     },
+    ofUnitAndValidateMany: ({ updates, removes }) => {
+        const result = new Map();
+        updates.forEach((value, key) => {
+            if (value == null) {
+                return;
+            }
+            const newValue = exports.TextDownOperationModule.ofUnitAndValidate(value);
+            if (newValue == null) {
+                return;
+            }
+            result.set(key, { type: mapOperations_1.update, operation: newValue });
+        });
+        removes.forEach((value, key) => {
+            if (value == null) {
+                return;
+            }
+            result.set(key, { type: mapOperations_1.replace, operation: { oldValue: value } });
+        });
+        return result;
+    },
     applyBack: (nextState, action) => {
         return textOperation_1.TextDownOperation.applyBack({ nextState, action });
     },
+    applyBackMany: (nextState, action) => {
+        return mapOperations_1.applyBack({
+            nextState, downOperation: action, innerApplyBack: ({ nextState, downOperation }) => {
+                return exports.TextDownOperationModule.applyBack(nextState, downOperation);
+            }
+        });
+    },
     applyBackAndRestore: (nextState, action) => {
         return textOperation_1.TextDownOperation.applyBackAndRestore({ nextState, action });
+    },
+    applyBackAndRestoreMany: (nextState, action) => {
+        return mapOperations_1.restore({
+            nextState,
+            downOperation: action,
+            innerRestore: ({ nextState, downOperation }) => {
+                const result = exports.TextDownOperationModule.applyBackAndRestore(nextState, downOperation);
+                if (result.isError) {
+                    return result;
+                }
+                return Result_1.ResultModule.ok({ prevState: result.value.prevState, twoWayOperation: result.value.restored });
+            },
+            innerDiff: ({ prevState, nextState }) => {
+                return exports.TextTwoWayOperationModule.diff(prevState, nextState);
+            },
+        });
     },
     compose: (first, second) => {
         if (first === undefined) {
