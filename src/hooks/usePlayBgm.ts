@@ -15,8 +15,13 @@ type PlayBgmBehaviorCoreProps = {
 }
 
 function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmBehaviorCoreProps): void {
+    // bgm == null ⇔ volume == null
+    // bgm == null のときはvolumeを求めようがない
     const getVolume = () => {
-        return (bgm?.volume ?? 1) * volumeConfig;
+        if (bgm == null) {
+            return null;
+        }
+        return bgm.volume * volumeConfig;
     };
     const volume = getVolume();
     const volumeRef = React.useRef(volume);
@@ -28,7 +33,7 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmBehaviorCoreProps): void {
     const howlRef = React.useRef<Howl>();
 
     useDeepCompareEffectNoCheck(() => {
-        if (urlArray == null || volumeRef == null) {
+        if (urlArray == null || volumeRef.current == null) {
             return;
         }
 
@@ -50,6 +55,9 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmBehaviorCoreProps): void {
     }, [urlArray]);
 
     React.useEffect(() => {
+        if (volume == null) {
+            return;
+        }
         const howl = howlRef.current;
         if (howl == null) {
             return;
