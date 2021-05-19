@@ -9,8 +9,6 @@ import { WritePrivateRoomMessageFailureType } from '../../../enums/WritePrivateR
 import { WritePublicRoomMessageFailureType } from '../../../enums/WritePublicRoomMessageFailureType';
 import { WriteRoomSoundEffectFailureType } from '../../../enums/WriteRoomSoundEffectFailureType';
 import { FilePath } from '../filePath/graphql';
-import { MyValueLogType as MyValueLogTypeEnum } from '../../../enums/MyValueLogType';
-import { ReplaceNullableStringUpOperation } from '../../Operations';
 
 // messageIdは、Reactのkeyとして使われる
 

@@ -66,7 +66,6 @@ const DeleteRoomResult_1 = require("../../results/DeleteRoomResult");
 const DeleteRoomFailureType_1 = require("../../../enums/DeleteRoomFailureType");
 const global_2 = require("../../entities/room/global");
 const Types_1 = require("../../Types");
-const mapOperations_1 = require("../../mapOperations");
 const mikro_orm_1 = require("../../entities/roomMessage/mikro-orm");
 const object_args_input_1 = require("./object+args+input");
 const graphql_2 = require("../../entities/roomMessage/graphql");
@@ -92,6 +91,7 @@ const WritingMessageStatusInputType_1 = require("../../../enums/WritingMessageSt
 const publicChannelKey_1 = require("../../../@shared/publicChannelKey");
 const RoomModule = __importStar(require("../../../@shared/ot/room/v1"));
 const ParticipantModule = __importStar(require("../../../@shared/ot/room/participant/v1"));
+const recordOperationElement_1 = require("../../../@shared/ot/room/util/recordOperationElement");
 const utils_1 = require("../../../@shared/utils");
 const FileSourceType_1 = require("../../../enums/FileSourceType");
 const MyNumberValueModule = __importStar(require("../../../@shared/ot/room/participant/myNumberValue/log-v1"));
@@ -105,7 +105,7 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
     if (me == null) {
         if (create != null) {
             participantOperation = {
-                type: mapOperations_1.replace,
+                type: recordOperationElement_1.replace,
                 replace: {
                     newValue: {
                         name: create.name,
@@ -1384,7 +1384,7 @@ let RoomResolver = class RoomResolver {
             for (const pair of utils_1.recordToArray((_a = operation.participants) !== null && _a !== void 0 ? _a : {})) {
                 const userUid = pair.key;
                 const participant = pair.value;
-                if (participant.type === mapOperations_1.replace) {
+                if (participant.type === recordOperationElement_1.replace) {
                     if (participant.replace.oldValue != null) {
                         utils_1.recordForEach(participant.replace.oldValue.myNumberValues, async (value, key) => myValueLogs.push(new mikro_orm_1.MyValueLog({
                             createdBy: userUid,
@@ -1402,9 +1402,9 @@ let RoomResolver = class RoomResolver {
                         })));
                     }
                 }
-                if (participant.type === mapOperations_1.update) {
+                if (participant.type === recordOperationElement_1.update) {
                     utils_1.recordForEach((_b = participant.update.myNumberValues) !== null && _b !== void 0 ? _b : {}, (value, key) => {
-                        if (value.type === mapOperations_1.replace) {
+                        if (value.type === recordOperationElement_1.replace) {
                             myValueLogs.push(new mikro_orm_1.MyValueLog({
                                 createdBy: userUid,
                                 room,
