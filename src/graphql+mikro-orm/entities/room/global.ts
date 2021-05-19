@@ -130,7 +130,7 @@ export namespace GlobalRoom {
         export namespace ToGraphQL {
             export const state = ({ source, requestedBy }: { source: RoomModule.State; requestedBy: RequestedBy }): Omit<RoomGetState, 'revision' | 'createdBy'> => {
                 return {
-                    stateJSON: RoomConverterModule.stringifyState(RoomModule.toClientState(requestedBy)(source)),
+                    stateJson: RoomConverterModule.stringifyState(RoomModule.toClientState(requestedBy)(source)),
                 };
             };
 

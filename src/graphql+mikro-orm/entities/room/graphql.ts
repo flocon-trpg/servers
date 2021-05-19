@@ -11,7 +11,7 @@ export class RoomGetState {
     public createdBy!: string;
 
     @Field({ description: 'room.state をJSON化したもの' })
-    public stateJSON!: string;
+    public stateJson!: string;
 }
 
 @ObjectType()

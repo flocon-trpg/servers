@@ -123,7 +123,7 @@ var GlobalRoom;
         (function (ToGraphQL) {
             ToGraphQL.state = ({ source, requestedBy }) => {
                 return {
-                    stateJSON: RoomConverterModule.stringifyState(RoomModule.toClientState(requestedBy)(source)),
+                    stateJson: RoomConverterModule.stringifyState(RoomModule.toClientState(requestedBy)(source)),
                 };
             };
             ToGraphQL.operation = ({ operation, prevState, nextState, requestedBy, }) => {

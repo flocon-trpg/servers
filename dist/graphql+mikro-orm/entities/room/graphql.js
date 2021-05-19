@@ -25,7 +25,7 @@ __decorate([
 __decorate([
     type_graphql_1.Field({ description: 'room.state をJSON化したもの' }),
     __metadata("design:type", String)
-], RoomGetState.prototype, "stateJSON", void 0);
+], RoomGetState.prototype, "stateJson", void 0);
 RoomGetState = __decorate([
     type_graphql_1.ObjectType()
 ], RoomGetState);
