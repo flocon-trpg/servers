@@ -1,29 +1,34 @@
 import * as t from 'io-ts';
 import { ResultModule } from '../../../Result';
 import { undefinedForAll } from '../../../utils';
+import { operation } from '../util/operation';
 import * as ReplaceValueOperation from '../util/replaceOperation';
 import { TransformerFactory } from '../util/transformerFactory';
 import { Apply, ToClientOperationParams, } from '../util/type';
 
 export const state = t.type({
+    version: t.literal(1),
+
     name: t.string,
 });
 
 export type State = t.TypeOf<typeof state>;
 
-export const downOperation = t.partial({
+export const downOperation = operation(1, {
     name: t.type({ oldValue: t.string }),
 });
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
-export const upOperation = t.partial({
+export const upOperation = operation(1, {
     name: t.type({ newValue: t.string }),
 });
 
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
+    version: 1;
+
     name?: ReplaceValueOperation.ReplaceValueTwoWayOperation<string>;
 }
 
@@ -48,6 +53,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
 export const transformerFactory: TransformerFactory<string, State, State, DownOperation, UpOperation, TwoWayOperation> = ({
     composeLoose: ({ first, second }) => {
         const valueProps: DownOperation = {
+            version: 1,
             name: ReplaceValueOperation.composeDownOperation(first.name, second.name),
         };
         return ResultModule.ok(valueProps);
@@ -58,7 +64,7 @@ export const transformerFactory: TransformerFactory<string, State, State, DownOp
         }
 
         const prevState: State = { ...nextState };
-        const twoWayOperation: TwoWayOperation = {};
+        const twoWayOperation: TwoWayOperation = { version: 1 };
 
         if (downOperation.name !== undefined) {
             prevState.name = downOperation.name.oldValue;
@@ -68,7 +74,7 @@ export const transformerFactory: TransformerFactory<string, State, State, DownOp
         return ResultModule.ok({ prevState, twoWayOperation });
     },
     transform: ({ prevState, clientOperation, serverOperation }) => {
-        const twoWayOperation: TwoWayOperation = {};
+        const twoWayOperation: TwoWayOperation = { version: 1 };
 
         twoWayOperation.name = ReplaceValueOperation.transform({
             first: serverOperation?.name,
@@ -83,7 +89,7 @@ export const transformerFactory: TransformerFactory<string, State, State, DownOp
         return ResultModule.ok({ ...twoWayOperation });
     },
     diff: ({ prevState, nextState }) => {
-        const resultType: TwoWayOperation = {};
+        const resultType: TwoWayOperation = { version: 1 };
         if (prevState.name !== nextState.name) {
             resultType.name = { oldValue: prevState.name, newValue: nextState.name };
         }

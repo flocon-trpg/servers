@@ -21,6 +21,8 @@ const participantRole = t.union([t.literal(Player), t.literal(Spectator), t.lite
 export type ParticipantRole = t.TypeOf<typeof participantRole>;
 
 export const state = t.type({
+    version: t.literal(1),
+
     name: t.string,
     role: maybe(participantRole),
     boards: t.record(t.string, Board.state),

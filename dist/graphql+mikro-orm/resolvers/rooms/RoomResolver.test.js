@@ -66,12 +66,14 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }) => {
         name: roomName,
         createdBy: creatorUserUid,
         value: {
+            version: 1,
             boolParamNames: {},
             numParamNames: {},
             strParamNames: {},
             bgms: {},
             participants: {
                 [creatorUserUid]: {
+                    version: 1,
                     role: 'Master',
                     name: creatorName,
                     boards: {},

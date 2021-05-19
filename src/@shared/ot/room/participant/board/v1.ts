@@ -6,6 +6,7 @@ import * as ReplaceValueOperation from '../../util/replaceOperation';
 import { filePath } from '../../../filePath/v1';
 import { TransformerFactory } from '../../util/transformerFactory';
 import { Apply, ToClientOperationParams } from '../../util/type';
+import { operation } from '../../util/operation';
 
 const stringDownOperation = t.type({ oldValue: t.string });
 const stringUpOperation = t.type({ newValue: t.string });
@@ -13,6 +14,8 @@ const numberDownOperation = t.type({ oldValue: t.number });
 const numberUpOperation = t.type({ newValue: t.number });
 
 export const state = t.type({
+    version: t.literal(1),
+
     backgroundImage: maybe(filePath),
     backgroundImageZoom: t.number,
     cellColumnCount: t.number,
@@ -26,7 +29,7 @@ export const state = t.type({
 
 export type State = t.TypeOf<typeof state>;
 
-export const downOperation = t.partial({
+export const downOperation = operation(1, {
     backgroundImage: t.type({ oldValue: maybe(filePath) }),
     backgroundImageZoom: numberDownOperation,
     cellColumnCount: numberDownOperation,
@@ -40,7 +43,7 @@ export const downOperation = t.partial({
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
-export const upOperation = t.partial({
+export const upOperation = operation(1, {
     backgroundImage: t.type({ newValue: maybe(filePath) }),
     backgroundImageZoom: numberUpOperation,
     cellColumnCount: numberUpOperation,
@@ -55,6 +58,8 @@ export const upOperation = t.partial({
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
+    version: 1;
+
     backgroundImage?: ReplaceValueOperation.ReplaceValueTwoWayOperation<t.TypeOf<typeof filePath> | null | undefined>;
     backgroundImageZoom?: ReplaceValueOperation.ReplaceValueTwoWayOperation<number>;
     cellColumnCount?: ReplaceValueOperation.ReplaceValueTwoWayOperation<number>;
@@ -111,6 +116,8 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
 export const transformerFactory: TransformerFactory<string, State, State, DownOperation, UpOperation, TwoWayOperation> = ({
     composeLoose: ({ first, second }) => {
         const valueProps: DownOperation = {
+            version: 1,
+
             backgroundImage: ReplaceValueOperation.composeDownOperation(first.backgroundImage, second.backgroundImage),
             backgroundImageZoom: ReplaceValueOperation.composeDownOperation(first.backgroundImageZoom, second.backgroundImageZoom),
             cellColumnCount: ReplaceValueOperation.composeDownOperation(first.cellColumnCount, second.cellColumnCount),
@@ -131,7 +138,7 @@ export const transformerFactory: TransformerFactory<string, State, State, DownOp
         const prevState: State = {
             ...nextState,
         };
-        const twoWayOperation: TwoWayOperation = {};
+        const twoWayOperation: TwoWayOperation = { version: 1 };
 
         if (downOperation.backgroundImage !== undefined) {
             prevState.backgroundImage = downOperation.backgroundImage.oldValue ?? undefined;
@@ -173,7 +180,7 @@ export const transformerFactory: TransformerFactory<string, State, State, DownOp
         return ResultModule.ok({ prevState, twoWayOperation });
     },
     transform: ({ prevState, clientOperation, serverOperation }) => {
-        const twoWayOperation: TwoWayOperation = {};
+        const twoWayOperation: TwoWayOperation = { version: 1 };
 
         twoWayOperation.backgroundImage = ReplaceValueOperation.transform({
             first: serverOperation?.backgroundImage,
@@ -229,7 +236,7 @@ export const transformerFactory: TransformerFactory<string, State, State, DownOp
         return ResultModule.ok(twoWayOperation);
     },
     diff: ({ prevState, nextState }) => {
-        const resultType: TwoWayOperation = {};
+        const resultType: TwoWayOperation = { version: 1 };
         if (prevState.backgroundImage !== nextState.backgroundImage) {
             resultType.backgroundImage = { oldValue: prevState.backgroundImage, newValue: nextState.backgroundImage };
         }

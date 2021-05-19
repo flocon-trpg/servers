@@ -26,11 +26,13 @@ const utils_1 = require("../../../../utils");
 const io_ts_1 = require("../../../../io-ts");
 const ReplaceValueOperation = __importStar(require("../../util/replaceOperation"));
 const v1_1 = require("../../../filePath/v1");
+const operation_1 = require("../../util/operation");
 const stringDownOperation = t.type({ oldValue: t.string });
 const stringUpOperation = t.type({ newValue: t.string });
 const numberDownOperation = t.type({ oldValue: t.number });
 const numberUpOperation = t.type({ newValue: t.number });
 exports.state = t.type({
+    version: t.literal(1),
     backgroundImage: io_ts_1.maybe(v1_1.filePath),
     backgroundImageZoom: t.number,
     cellColumnCount: t.number,
@@ -41,7 +43,7 @@ exports.state = t.type({
     cellWidth: t.number,
     name: t.string,
 });
-exports.downOperation = t.partial({
+exports.downOperation = operation_1.operation(1, {
     backgroundImage: t.type({ oldValue: io_ts_1.maybe(v1_1.filePath) }),
     backgroundImageZoom: numberDownOperation,
     cellColumnCount: numberDownOperation,
@@ -52,7 +54,7 @@ exports.downOperation = t.partial({
     cellWidth: numberDownOperation,
     name: stringDownOperation,
 });
-exports.upOperation = t.partial({
+exports.upOperation = operation_1.operation(1, {
     backgroundImage: t.type({ newValue: io_ts_1.maybe(v1_1.filePath) }),
     backgroundImageZoom: numberUpOperation,
     cellColumnCount: numberUpOperation,
@@ -108,6 +110,7 @@ exports.apply = apply;
 exports.transformerFactory = ({
     composeLoose: ({ first, second }) => {
         const valueProps = {
+            version: 1,
             backgroundImage: ReplaceValueOperation.composeDownOperation(first.backgroundImage, second.backgroundImage),
             backgroundImageZoom: ReplaceValueOperation.composeDownOperation(first.backgroundImageZoom, second.backgroundImageZoom),
             cellColumnCount: ReplaceValueOperation.composeDownOperation(first.cellColumnCount, second.cellColumnCount),
@@ -126,7 +129,7 @@ exports.transformerFactory = ({
             return Result_1.ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
         }
         const prevState = Object.assign({}, nextState);
-        const twoWayOperation = {};
+        const twoWayOperation = { version: 1 };
         if (downOperation.backgroundImage !== undefined) {
             prevState.backgroundImage = (_a = downOperation.backgroundImage.oldValue) !== null && _a !== void 0 ? _a : undefined;
             twoWayOperation.backgroundImage = { oldValue: (_b = downOperation.backgroundImage.oldValue) !== null && _b !== void 0 ? _b : undefined, newValue: (_c = nextState.backgroundImage) !== null && _c !== void 0 ? _c : undefined };
@@ -166,7 +169,7 @@ exports.transformerFactory = ({
         return Result_1.ResultModule.ok({ prevState, twoWayOperation });
     },
     transform: ({ prevState, clientOperation, serverOperation }) => {
-        const twoWayOperation = {};
+        const twoWayOperation = { version: 1 };
         twoWayOperation.backgroundImage = ReplaceValueOperation.transform({
             first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.backgroundImage,
             second: clientOperation.backgroundImage,
@@ -218,7 +221,7 @@ exports.transformerFactory = ({
         return Result_1.ResultModule.ok(twoWayOperation);
     },
     diff: ({ prevState, nextState }) => {
-        const resultType = {};
+        const resultType = { version: 1 };
         if (prevState.backgroundImage !== nextState.backgroundImage) {
             resultType.backgroundImage = { oldValue: prevState.backgroundImage, newValue: nextState.backgroundImage };
         }

@@ -25,15 +25,17 @@ const Result_1 = require("../../../Result");
 const utils_1 = require("../../../utils");
 const ReplaceValueOperation = __importStar(require("../util/replaceOperation"));
 const v1_1 = require("../../filePath/v1");
+const operation_1 = require("../util/operation");
 exports.state = t.type({
+    version: t.literal(1),
     files: t.array(v1_1.filePath),
     volume: t.number,
 });
-exports.downOperation = t.partial({
+exports.downOperation = operation_1.operation(1, {
     files: t.type({ oldValue: t.array(v1_1.filePath) }),
     volume: t.type({ oldValue: t.number }),
 });
-exports.upOperation = t.partial({
+exports.upOperation = operation_1.operation(1, {
     files: t.type({ newValue: t.array(v1_1.filePath) }),
     volume: t.type({ newValue: t.number }),
 });
@@ -61,6 +63,7 @@ exports.apply = apply;
 exports.transformerFactory = ({
     composeLoose: ({ first, second }) => {
         const valueProps = {
+            version: 1,
             files: ReplaceValueOperation.composeDownOperation(first.files, second.files),
             volume: ReplaceValueOperation.composeDownOperation(first.volume, second.volume),
         };
@@ -71,7 +74,7 @@ exports.transformerFactory = ({
             return Result_1.ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
         }
         const prevState = Object.assign({}, nextState);
-        const twoWayOperation = {};
+        const twoWayOperation = { version: 1 };
         if (downOperation.files !== undefined) {
             prevState.files = downOperation.files.oldValue;
             twoWayOperation.files = Object.assign(Object.assign({}, downOperation.files), { newValue: nextState.files });
@@ -83,7 +86,7 @@ exports.transformerFactory = ({
         return Result_1.ResultModule.ok({ prevState, twoWayOperation: utils_1.undefinedForAll(twoWayOperation) ? undefined : twoWayOperation });
     },
     transform: ({ prevState, clientOperation, serverOperation }) => {
-        const twoWayOperation = {};
+        const twoWayOperation = { version: 1 };
         twoWayOperation.files = ReplaceValueOperation.transform({
             first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.files,
             second: clientOperation.files,
@@ -100,7 +103,7 @@ exports.transformerFactory = ({
         return Result_1.ResultModule.ok(Object.assign({}, twoWayOperation));
     },
     diff: ({ prevState, nextState }) => {
-        const resultType = {};
+        const resultType = { version: 1 };
         if (prevState.files !== nextState.files) {
             resultType.files = { oldValue: prevState.files, newValue: nextState.files };
         }

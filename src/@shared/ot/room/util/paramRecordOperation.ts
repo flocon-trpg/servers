@@ -1,15 +1,11 @@
 
-import * as t from 'io-ts';
 import { groupJoin } from '../../../Map';
 import { CustomResult, ResultModule } from '../../../Result';
 import { both, left, right } from '../../../Types';
 import { recordCompact, recordForEach, recordToMap, undefinedForAll } from '../../../utils';
 import * as DualKeyRecordOperation from './dualKeyRecordOperation';
 import { ParamRecordTransformerFactory } from './transformerFactory';
-import * as TextOperation from './textOperation';
 import * as ReplaceValueOperation from './replaceOperation';
-import { ApplyError, ComposeAndTransformError, PositiveInt } from '../../../textOperation';
-import { Maybe, maybe } from '../../../io-ts';
 
 type RestoreResult<TState, TTwoWayOperation> = { prevState: TState; twoWayOperation: TTwoWayOperation | undefined }
 export type ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> = DualKeyRecordOperation.ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation>
@@ -265,21 +261,29 @@ export const diff = <TState, TOperation>({
 };
 
 type ParamState<T> = {
+    version: 1;
+
     isValuePrivate: boolean;
     value: T;
 }
 
 type ParamDownOperation<T> = {
+    version: 1;
+
     isValuePrivate?: { oldValue: boolean };
     value?: { oldValue: T };
 }
 
 type ParamUpOperation<T> = {
+    version: 1;
+
     isValuePrivate?: { newValue: boolean };
     value?: { newValue: T };
 }
 
 type ParamTwoWayOperation<T> = {
+    version: 1;
+
     isValuePrivate?: { oldValue: boolean; newValue: boolean };
     value?: { oldValue: T; newValue: T };
 }
@@ -287,6 +291,7 @@ type ParamTwoWayOperation<T> = {
 export const createParamTransformerFactory = <T>(createdByMe: boolean): ParamRecordTransformerFactory<string, ParamState<T | undefined>, ParamState<T | undefined>, ParamDownOperation<T | undefined>, ParamUpOperation<T | undefined>, ParamTwoWayOperation<T | undefined>> => ({
     composeLoose: ({ first, second }) => {
         const valueProps: ParamDownOperation<T | undefined> = {
+            version: 1,
             isValuePrivate: ReplaceValueOperation.composeDownOperation(first.isValuePrivate, second.isValuePrivate),
             value: ReplaceValueOperation.composeDownOperation(first.value, second.value),
         };
@@ -298,7 +303,7 @@ export const createParamTransformerFactory = <T>(createdByMe: boolean): ParamRec
         }
 
         const prevState: ParamState<T | undefined> = { ...nextState };
-        const twoWayOperation: ParamTwoWayOperation<T | undefined> = {};
+        const twoWayOperation: ParamTwoWayOperation<T | undefined> = { version: 1 };
 
         if (downOperation.isValuePrivate !== undefined) {
             prevState.isValuePrivate = downOperation.isValuePrivate.oldValue;
@@ -312,7 +317,7 @@ export const createParamTransformerFactory = <T>(createdByMe: boolean): ParamRec
         return ResultModule.ok({ prevState, nextState, twoWayOperation });
     },
     transform: ({ prevState, currentState, clientOperation, serverOperation }) => {
-        const twoWayOperation: ParamTwoWayOperation<T | undefined> = {};
+        const twoWayOperation: ParamTwoWayOperation<T | undefined> = { version: 1 };
 
         if (createdByMe) {
             twoWayOperation.isValuePrivate = ReplaceValueOperation.transform({
@@ -336,7 +341,7 @@ export const createParamTransformerFactory = <T>(createdByMe: boolean): ParamRec
         return ResultModule.ok({ ...twoWayOperation });
     },
     diff: ({ prevState, nextState }) => {
-        const resultType: ParamTwoWayOperation<T | undefined> = {};
+        const resultType: ParamTwoWayOperation<T | undefined> = { version: 1 };
         if (prevState.isValuePrivate !== nextState.isValuePrivate) {
             resultType.isValuePrivate = { oldValue: prevState.isValuePrivate, newValue: nextState.isValuePrivate };
         }
@@ -361,7 +366,7 @@ export const createParamTransformerFactory = <T>(createdByMe: boolean): ParamRec
         return ResultModule.ok(result);
     },
     toServerState: ({ clientState }) => clientState,
-    createDefaultState: () => ({ isValuePrivate: false, value: undefined }),
+    createDefaultState: () => ({ version: 1, isValuePrivate: false, value: undefined }),
 });
 
 export class ParamRecordTransformer<TServerState, TClientState, TDownOperation, TUpOperation, TTwoWayOperation, TCustomError = string> {

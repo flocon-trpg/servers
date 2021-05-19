@@ -25,12 +25,17 @@ const io_ts_1 = require("../../../../../io-ts");
 const paramRecordOperation_1 = require("../../../util/paramRecordOperation");
 const ReplaceOperation = __importStar(require("../../../util/replaceOperation"));
 const Result_1 = require("../../../../../Result");
-exports.state = t.type({ isValuePrivate: t.boolean, value: io_ts_1.maybe(t.boolean) });
-exports.downOperation = t.partial({
+const operation_1 = require("../../../util/operation");
+exports.state = t.type({
+    version: t.literal(1),
+    isValuePrivate: t.boolean,
+    value: io_ts_1.maybe(t.boolean),
+});
+exports.downOperation = operation_1.operation(1, {
     isValuePrivate: t.type({ oldValue: t.boolean }),
     value: t.type({ oldValue: io_ts_1.maybe(t.boolean) }),
 });
-exports.upOperation = t.partial({
+exports.upOperation = operation_1.operation(1, {
     isValuePrivate: t.type({ newValue: t.boolean }),
     value: t.type({ newValue: io_ts_1.maybe(t.boolean) }),
 });

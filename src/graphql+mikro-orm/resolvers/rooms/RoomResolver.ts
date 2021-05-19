@@ -167,6 +167,7 @@ const operateParticipantAndFlush = async ({
                 type: replace,
                 replace: {
                     newValue: {
+                        version: 1,
                         name: create.name,
                         role: create.role,
                         boards: {},
@@ -196,6 +197,7 @@ const operateParticipantAndFlush = async ({
     }
 
     const roomUpOperation: RoomModule.UpOperation = {
+        version: 1,
         participants: {
             [myUserUid]: participantOperation,
         }
@@ -704,8 +706,10 @@ export class RoomResolver {
                 name: input.roomName,
                 createdBy: decodedIdToken.uid,
                 value: {
+                    version: 1,
                     participants: {
                         [entryUser.userUid]: {
+                            version: 1,
                             role: ParticipantModule.Master,
                             name: input.participantName,
                             boards: {},

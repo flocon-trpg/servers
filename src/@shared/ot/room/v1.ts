@@ -7,14 +7,17 @@ import * as RecordOperation from './util/recordOperation';
 import { mapRecordOperationElement, recordDownOperationElementFactory, recordUpOperationElementFactory } from './util/recordOperationElement';
 import * as ReplaceValueOperation from './util/replaceOperation';
 import { TransformerFactory } from './util/transformerFactory';
-import { Apply, RequestedBy, server, ToClientOperationParams } from './util/type';
+import { Apply, RequestedBy, ToClientOperationParams } from './util/type';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '../../textOperation';
 import { chooseRecord, undefinedForAll } from '../../utils';
+import { operation } from './util/operation';
 
 const replaceStringDownOperation = t.type({ oldValue: t.string });
 const replaceStringUpOperation = t.type({ newValue: t.string });
 
 export const dbState = t.type({
+    version: t.literal(1),
+
     bgms: t.record(t.string, Bgm.state),
     boolParamNames: t.record(t.string, ParamNames.state),
     numParamNames: t.record(t.string, ParamNames.state),
@@ -41,7 +44,7 @@ export const state = t.intersection([dbState, t.type({
 // nameはDBから頻繁に取得されると思われる値なので独立させている。
 export type State = t.TypeOf<typeof state>;
 
-export const downOperation = t.partial({
+export const downOperation = operation(1, {
     bgms: t.record(t.string, recordDownOperationElementFactory(Bgm.state, Bgm.downOperation)),
     boolParamNames: t.record(t.string, recordDownOperationElementFactory(ParamNames.state, ParamNames.downOperation)),
     name: replaceStringDownOperation,
@@ -62,7 +65,7 @@ export const downOperation = t.partial({
 
 export type DownOperation = t.TypeOf<typeof downOperation>
 
-export const upOperation = t.partial({
+export const upOperation = operation(1, {
     bgms: t.record(t.string, recordUpOperationElementFactory(Bgm.state, Bgm.upOperation)),
     boolParamNames: t.record(t.string, recordUpOperationElementFactory(ParamNames.state, ParamNames.upOperation)),
     name: replaceStringUpOperation,
@@ -84,6 +87,8 @@ export const upOperation = t.partial({
 export type UpOperation = t.TypeOf<typeof upOperation>
 
 export type TwoWayOperation = {
+    version: 1;
+
     bgms?: RecordOperation.RecordTwoWayOperation<Bgm.State, Bgm.TwoWayOperation>;
     boolParamNames?: RecordOperation.RecordTwoWayOperation<ParamNames.State, ParamNames.TwoWayOperation>;
     name?: ReplaceValueOperation.ReplaceValueTwoWayOperation<string>;
@@ -327,6 +332,7 @@ export const transformerFactory = (operatedBy: RequestedBy): TransformerFactory<
         }
 
         const valueProps: DownOperation = {
+            version: 1,
             name: ReplaceValueOperation.composeDownOperation(first.name, second.name),
             publicChannel1Name: ReplaceValueOperation.composeDownOperation(first.publicChannel1Name, second.publicChannel1Name),
             publicChannel2Name: ReplaceValueOperation.composeDownOperation(first.publicChannel2Name, second.publicChannel2Name),
@@ -398,6 +404,7 @@ export const transformerFactory = (operatedBy: RequestedBy): TransformerFactory<
             participants: participants.value.prevState,
         };
         const twoWayOperation: TwoWayOperation = {
+            version: 1,
             bgms: bgms.value.twoWayOperation,
             boolParamNames: boolParamNames.value.twoWayOperation,
             numParamNames: numParamNames.value.twoWayOperation,
@@ -473,6 +480,7 @@ export const transformerFactory = (operatedBy: RequestedBy): TransformerFactory<
         }
 
         const twoWayOperation: TwoWayOperation = {
+            version: 1,
             bgms: bgms.value,
             boolParamNames: boolParamNames.value,
             numParamNames: numParamNames.value,
@@ -523,6 +531,7 @@ export const transformerFactory = (operatedBy: RequestedBy): TransformerFactory<
             nextState: nextState.participants,
         });
         const result: TwoWayOperation = {
+            version: 1,
             bgms,
             boolParamNames,
             numParamNames,

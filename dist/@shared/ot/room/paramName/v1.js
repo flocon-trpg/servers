@@ -23,14 +23,16 @@ exports.transformerFactory = exports.apply = exports.toClientOperation = exports
 const t = __importStar(require("io-ts"));
 const Result_1 = require("../../../Result");
 const utils_1 = require("../../../utils");
+const operation_1 = require("../util/operation");
 const ReplaceValueOperation = __importStar(require("../util/replaceOperation"));
 exports.state = t.type({
+    version: t.literal(1),
     name: t.string,
 });
-exports.downOperation = t.partial({
+exports.downOperation = operation_1.operation(1, {
     name: t.type({ oldValue: t.string }),
 });
-exports.upOperation = t.partial({
+exports.upOperation = operation_1.operation(1, {
     name: t.type({ newValue: t.string }),
 });
 const toClientState = (source) => source;
@@ -54,6 +56,7 @@ exports.apply = apply;
 exports.transformerFactory = ({
     composeLoose: ({ first, second }) => {
         const valueProps = {
+            version: 1,
             name: ReplaceValueOperation.composeDownOperation(first.name, second.name),
         };
         return Result_1.ResultModule.ok(valueProps);
@@ -63,7 +66,7 @@ exports.transformerFactory = ({
             return Result_1.ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
         }
         const prevState = Object.assign({}, nextState);
-        const twoWayOperation = {};
+        const twoWayOperation = { version: 1 };
         if (downOperation.name !== undefined) {
             prevState.name = downOperation.name.oldValue;
             twoWayOperation.name = Object.assign(Object.assign({}, downOperation.name), { newValue: nextState.name });
@@ -71,7 +74,7 @@ exports.transformerFactory = ({
         return Result_1.ResultModule.ok({ prevState, twoWayOperation });
     },
     transform: ({ prevState, clientOperation, serverOperation }) => {
-        const twoWayOperation = {};
+        const twoWayOperation = { version: 1 };
         twoWayOperation.name = ReplaceValueOperation.transform({
             first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.name,
             second: clientOperation.name,
@@ -83,7 +86,7 @@ exports.transformerFactory = ({
         return Result_1.ResultModule.ok(Object.assign({}, twoWayOperation));
     },
     diff: ({ prevState, nextState }) => {
-        const resultType = {};
+        const resultType = { version: 1 };
         if (prevState.name !== nextState.name) {
             resultType.name = { oldValue: prevState.name, newValue: nextState.name };
         }

@@ -19,12 +19,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.filePath = exports.FirebaseStorage = exports.Default = void 0;
+exports.operation = void 0;
 const t = __importStar(require("io-ts"));
-exports.Default = 'Default';
-exports.FirebaseStorage = 'FirebaseStorage';
-exports.filePath = t.type({
-    version: t.literal(1),
-    path: t.string,
-    sourceType: t.union([t.literal(exports.Default), t.literal(exports.FirebaseStorage)]),
-});
+const operation = (source, props) => t.intersection([
+    t.type({
+        version: t.literal(source)
+    }),
+    t.partial(props)
+]);
+exports.operation = operation;

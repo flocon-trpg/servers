@@ -37,6 +37,7 @@ exports.Spectator = 'Spectator';
 exports.Master = 'Master';
 const participantRole = t.union([t.literal(exports.Player), t.literal(exports.Spectator), t.literal(exports.Master)]);
 exports.state = t.type({
+    version: t.literal(1),
     name: t.string,
     role: io_ts_1.maybe(participantRole),
     boards: t.record(t.string, Board.state),

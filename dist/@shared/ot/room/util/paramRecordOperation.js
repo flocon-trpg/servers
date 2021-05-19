@@ -206,6 +206,7 @@ exports.diff = diff;
 const createParamTransformerFactory = (createdByMe) => ({
     composeLoose: ({ first, second }) => {
         const valueProps = {
+            version: 1,
             isValuePrivate: ReplaceValueOperation.composeDownOperation(first.isValuePrivate, second.isValuePrivate),
             value: ReplaceValueOperation.composeDownOperation(first.value, second.value),
         };
@@ -217,7 +218,7 @@ const createParamTransformerFactory = (createdByMe) => ({
             return Result_1.ResultModule.ok({ prevState: nextState, nextState, twoWayOperation: undefined });
         }
         const prevState = Object.assign({}, nextState);
-        const twoWayOperation = {};
+        const twoWayOperation = { version: 1 };
         if (downOperation.isValuePrivate !== undefined) {
             prevState.isValuePrivate = downOperation.isValuePrivate.oldValue;
             twoWayOperation.isValuePrivate = Object.assign(Object.assign({}, downOperation.isValuePrivate), { newValue: nextState.isValuePrivate });
@@ -229,7 +230,7 @@ const createParamTransformerFactory = (createdByMe) => ({
         return Result_1.ResultModule.ok({ prevState, nextState, twoWayOperation });
     },
     transform: ({ prevState, currentState, clientOperation, serverOperation }) => {
-        const twoWayOperation = {};
+        const twoWayOperation = { version: 1 };
         if (createdByMe) {
             twoWayOperation.isValuePrivate = ReplaceValueOperation.transform({
                 first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.isValuePrivate,
@@ -250,7 +251,7 @@ const createParamTransformerFactory = (createdByMe) => ({
         return Result_1.ResultModule.ok(Object.assign({}, twoWayOperation));
     },
     diff: ({ prevState, nextState }) => {
-        const resultType = {};
+        const resultType = { version: 1 };
         if (prevState.isValuePrivate !== nextState.isValuePrivate) {
             resultType.isValuePrivate = { oldValue: prevState.isValuePrivate, newValue: nextState.isValuePrivate };
         }
@@ -274,7 +275,7 @@ const createParamTransformerFactory = (createdByMe) => ({
         return Result_1.ResultModule.ok(result);
     },
     toServerState: ({ clientState }) => clientState,
-    createDefaultState: () => ({ isValuePrivate: false, value: undefined }),
+    createDefaultState: () => ({ version: 1, isValuePrivate: false, value: undefined }),
 });
 exports.createParamTransformerFactory = createParamTransformerFactory;
 class ParamRecordTransformer {

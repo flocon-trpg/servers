@@ -5,22 +5,25 @@ import * as ReplaceValueOperation from '../util/replaceOperation';
 import { filePath } from '../../filePath/v1';
 import { TransformerFactory } from '../util/transformerFactory';
 import { Apply, ToClientOperationParams } from '../util/type';
+import { operation } from '../util/operation';
 
 export const state = t.type({
+    version: t.literal(1),
+
     files: t.array(filePath),
     volume: t.number,
 });
 
 export type State = t.TypeOf<typeof state>;
 
-export const downOperation = t.partial({
+export const downOperation = operation(1, {
     files: t.type({ oldValue: t.array(filePath) }),
     volume: t.type({ oldValue: t.number }),
 });
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
-export const upOperation = t.partial({
+export const upOperation = operation(1, {
     files: t.type({ newValue: t.array(filePath) }),
     volume: t.type({ newValue: t.number }),
 });
@@ -28,6 +31,8 @@ export const upOperation = t.partial({
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
+    version: 1;
+
     files?: ReplaceValueOperation.ReplaceValueTwoWayOperation<t.TypeOf<typeof filePath>[]>;
     volume?: ReplaceValueOperation.ReplaceValueTwoWayOperation<number>;
 }
@@ -56,6 +61,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
 export const transformerFactory: TransformerFactory<string, State, State, DownOperation, UpOperation, TwoWayOperation> = ({
     composeLoose: ({ first, second }) => {
         const valueProps: DownOperation = {
+            version: 1,
             files: ReplaceValueOperation.composeDownOperation(first.files, second.files),
             volume: ReplaceValueOperation.composeDownOperation(first.volume, second.volume),
         };
@@ -67,7 +73,7 @@ export const transformerFactory: TransformerFactory<string, State, State, DownOp
         }
 
         const prevState: State = { ...nextState };
-        const twoWayOperation: TwoWayOperation = {};
+        const twoWayOperation: TwoWayOperation = { version: 1 };
 
         if (downOperation.files !== undefined) {
             prevState.files = downOperation.files.oldValue;
@@ -81,7 +87,7 @@ export const transformerFactory: TransformerFactory<string, State, State, DownOp
         return ResultModule.ok({ prevState, twoWayOperation: undefinedForAll(twoWayOperation) ? undefined : twoWayOperation });
     },
     transform: ({ prevState, clientOperation, serverOperation }) => {
-        const twoWayOperation: TwoWayOperation = {};
+        const twoWayOperation: TwoWayOperation = { version: 1 };
 
         twoWayOperation.files = ReplaceValueOperation.transform({
             first: serverOperation?.files,
@@ -101,7 +107,7 @@ export const transformerFactory: TransformerFactory<string, State, State, DownOp
         return ResultModule.ok({ ...twoWayOperation });
     },
     diff: ({ prevState, nextState }) => {
-        const resultType: TwoWayOperation = {};
+        const resultType: TwoWayOperation = { version: 1 };
         if (prevState.files !== nextState.files) {
             resultType.files = { oldValue: prevState.files, newValue: nextState.files };
         }

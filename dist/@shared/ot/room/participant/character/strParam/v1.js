@@ -25,12 +25,17 @@ const TextOperation = __importStar(require("../../../util/textOperation"));
 const ReplaceOperation = __importStar(require("../../../util/replaceOperation"));
 const Result_1 = require("../../../../../Result");
 const utils_1 = require("../../../../../utils");
-exports.state = t.type({ isValuePrivate: t.boolean, value: t.string });
-exports.downOperation = t.partial({
+const operation_1 = require("../../../util/operation");
+exports.state = t.type({
+    version: t.literal(1),
+    isValuePrivate: t.boolean,
+    value: t.string
+});
+exports.downOperation = operation_1.operation(1, {
     isValuePrivate: t.type({ oldValue: t.boolean }),
     value: TextOperation.downOperation,
 });
-exports.upOperation = t.partial({
+exports.upOperation = operation_1.operation(1, {
     isValuePrivate: t.type({ newValue: t.boolean }),
     value: TextOperation.upOperation,
 });
@@ -79,6 +84,7 @@ const createTransformerFactory = (createdByMe) => ({
             return value;
         }
         const valueProps = {
+            version: 1,
             isValuePrivate: ReplaceOperation.composeDownOperation(first.isValuePrivate, second.isValuePrivate),
             value: value.value,
         };
@@ -89,7 +95,7 @@ const createTransformerFactory = (createdByMe) => ({
             return Result_1.ResultModule.ok({ prevState: nextState, nextState, twoWayOperation: undefined });
         }
         const prevState = Object.assign({}, nextState);
-        const twoWayOperation = {};
+        const twoWayOperation = { version: 1 };
         if (downOperation.isValuePrivate !== undefined) {
             prevState.isValuePrivate = downOperation.isValuePrivate.oldValue;
             twoWayOperation.isValuePrivate = Object.assign(Object.assign({}, downOperation.isValuePrivate), { newValue: nextState.isValuePrivate });
@@ -105,7 +111,7 @@ const createTransformerFactory = (createdByMe) => ({
         return Result_1.ResultModule.ok({ prevState, nextState, twoWayOperation });
     },
     transform: ({ prevState, currentState, clientOperation, serverOperation }) => {
-        const twoWayOperation = {};
+        const twoWayOperation = { version: 1 };
         if (createdByMe) {
             twoWayOperation.isValuePrivate = ReplaceOperation.transform({
                 first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.isValuePrivate,
@@ -126,7 +132,7 @@ const createTransformerFactory = (createdByMe) => ({
         return Result_1.ResultModule.ok(twoWayOperation);
     },
     diff: ({ prevState, nextState }) => {
-        const resultType = {};
+        const resultType = { version: 1 };
         if (prevState.isValuePrivate !== nextState.isValuePrivate) {
             resultType.isValuePrivate = { oldValue: prevState.isValuePrivate, newValue: nextState.isValuePrivate };
         }
@@ -153,6 +159,6 @@ const createTransformerFactory = (createdByMe) => ({
         return Result_1.ResultModule.ok(result);
     },
     toServerState: ({ clientState }) => clientState,
-    createDefaultState: () => ({ isValuePrivate: false, value: '' }),
+    createDefaultState: () => ({ version: 1, isValuePrivate: false, value: '' }),
 });
 exports.createTransformerFactory = createTransformerFactory;

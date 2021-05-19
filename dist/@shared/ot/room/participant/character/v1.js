@@ -38,7 +38,9 @@ const BoolParam = __importStar(require("./boolParam/v1"));
 const NumParam = __importStar(require("./numParam/v1"));
 const StrParam = __importStar(require("./strParam/v1"));
 const paramRecordOperation_1 = require("../../util/paramRecordOperation");
+const operation_1 = require("../../util/operation");
 exports.state = t.type({
+    version: t.literal(1),
     image: io_ts_1.maybe(v1_1.filePath),
     isPrivate: t.boolean,
     name: t.string,
@@ -52,7 +54,7 @@ exports.state = t.type({
     pieces: t.record(t.string, t.record(t.string, Piece.state)),
     tachieLocations: t.record(t.string, t.record(t.string, BoardLocation.state)),
 });
-exports.downOperation = t.partial({
+exports.downOperation = operation_1.operation(1, {
     image: t.type({ oldValue: io_ts_1.maybe(v1_1.filePath) }),
     isPrivate: t.type({ oldValue: t.boolean }),
     name: t.type({ oldValue: t.string }),
@@ -66,7 +68,7 @@ exports.downOperation = t.partial({
     pieces: t.record(t.string, t.record(t.string, recordOperationElement_1.recordDownOperationElementFactory(Piece.state, Piece.downOperation))),
     tachieLocations: t.record(t.string, t.record(t.string, recordOperationElement_1.recordDownOperationElementFactory(BoardLocation.state, BoardLocation.downOperation))),
 });
-exports.upOperation = t.partial({
+exports.upOperation = operation_1.operation(1, {
     image: t.type({ newValue: io_ts_1.maybe(v1_1.filePath) }),
     isPrivate: t.type({ newValue: t.boolean }),
     name: t.type({ newValue: t.string }),
@@ -304,6 +306,7 @@ const transformerFactory = (createdByMe) => ({
             return privateVarToml;
         }
         const valueProps = {
+            version: 1,
             isPrivate: ReplaceValueOperation.composeDownOperation(first.isPrivate, second.isPrivate),
             name: ReplaceValueOperation.composeDownOperation(first.name, second.name),
             privateVarToml: privateVarToml.value,
@@ -377,6 +380,7 @@ const transformerFactory = (createdByMe) => ({
         }
         const prevState = Object.assign(Object.assign({}, nextState), { boolParams: boolParams.value.prevState, numParams: numParams.value.prevState, numMaxParams: numMaxParams.value.prevState, strParams: strParams.value.prevState, pieces: pieces.value.prevState, tachieLocations: tachieLocations.value.prevState });
         const twoWayOperation = {
+            version: 1,
             boolParams: boolParams.value.twoWayOperation,
             numParams: numParams.value.twoWayOperation,
             numMaxParams: numMaxParams.value.twoWayOperation,
@@ -479,6 +483,7 @@ const transformerFactory = (createdByMe) => ({
             return tachieLocations;
         }
         const twoWayOperation = {
+            version: 1,
             boolParams: boolParams.value,
             numParams: numParams.value,
             numMaxParams: numMaxParams.value,
@@ -553,7 +558,7 @@ const transformerFactory = (createdByMe) => ({
             prevState: prevState.tachieLocations,
             nextState: nextState.tachieLocations,
         });
-        const resultType = {};
+        const resultType = { version: 1 };
         if (prevState.image !== nextState.image) {
             resultType.image = { oldValue: prevState.image, newValue: nextState.image };
         }
@@ -569,7 +574,7 @@ const transformerFactory = (createdByMe) => ({
         if (prevState.privateVarToml !== nextState.privateVarToml) {
             resultType.privateVarToml = TextOperation.diff({ prev: prevState.privateVarToml, next: nextState.privateVarToml });
         }
-        if (utils_1.undefinedForAll(resultType) && boolParams.size === 0 && numParams.size === 0 && numMaxParams.size === 0 && strParams.size === 0 && pieces.isEmpty && tachieLocations.isEmpty) {
+        if (utils_1.undefinedForAll(resultType)) {
             return undefined;
         }
         return Object.assign(Object.assign({}, resultType), { boolParams, numParams, numMaxParams, strParams, pieces, tachieLocations });

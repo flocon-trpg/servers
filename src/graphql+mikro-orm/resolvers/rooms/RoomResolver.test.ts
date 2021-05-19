@@ -68,12 +68,16 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }: { em: EM; setupRoom
         name: roomName,
         createdBy: creatorUserUid,
         value: {
+            version: 1,
+
             boolParamNames: {},
             numParamNames: {},
             strParamNames: {},
             bgms: {},
             participants: {
                 [creatorUserUid]: {
+                    version: 1,
+
                     // 現状はとりあえず全員がMasterのケースのみを考えている。
                     role: 'Master',
                     name: creatorName,

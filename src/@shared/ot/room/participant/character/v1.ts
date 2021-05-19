@@ -20,8 +20,11 @@ import * as BoolParam from './boolParam/v1';
 import * as NumParam from './numParam/v1';
 import * as StrParam from './strParam/v1';
 import { createParamTransformerFactory, ParamRecordTransformer } from '../../util/paramRecordOperation';
+import { operation } from '../../util/operation';
 
 export const state = t.type({
+    version: t.literal(1),
+
     image: maybe(filePath),
     isPrivate: t.boolean,
     name: t.string,
@@ -39,7 +42,7 @@ export const state = t.type({
 
 export type State = t.TypeOf<typeof state>;
 
-export const downOperation = t.partial({
+export const downOperation = operation(1, {
     image: t.type({ oldValue: maybe(filePath) }),
     isPrivate: t.type({ oldValue: t.boolean }),
     name: t.type({ oldValue: t.string }),
@@ -57,7 +60,7 @@ export const downOperation = t.partial({
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
-export const upOperation = t.partial({
+export const upOperation = operation(1,{
     image: t.type({ newValue: maybe(filePath) }),
     isPrivate: t.type({ newValue: t.boolean }),
     name: t.type({ newValue: t.string }),
@@ -76,6 +79,8 @@ export const upOperation = t.partial({
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
+    version: 1;
+
     image?: ReplaceValueOperation.ReplaceValueTwoWayOperation<Maybe<FilePath>>;
     isPrivate?: ReplaceValueOperation.ReplaceValueTwoWayOperation<boolean>;
     name?: ReplaceValueOperation.ReplaceValueTwoWayOperation<string>;
@@ -361,6 +366,8 @@ export const transformerFactory = (createdByMe: boolean): TransformerFactory<str
         }
 
         const valueProps: DownOperation = {
+            version: 1,
+
             isPrivate: ReplaceValueOperation.composeDownOperation(first.isPrivate, second.isPrivate),
             name: ReplaceValueOperation.composeDownOperation(first.name, second.name),
             privateVarToml: privateVarToml.value,
@@ -448,6 +455,7 @@ export const transformerFactory = (createdByMe: boolean): TransformerFactory<str
             tachieLocations: tachieLocations.value.prevState,
         };
         const twoWayOperation: TwoWayOperation = {
+            version: 1,
             boolParams: boolParams.value.twoWayOperation,
             numParams: numParams.value.twoWayOperation,
             numMaxParams: numMaxParams.value.twoWayOperation,
@@ -559,6 +567,7 @@ export const transformerFactory = (createdByMe: boolean): TransformerFactory<str
         }
 
         const twoWayOperation: TwoWayOperation = {
+            version: 1,
             boolParams: boolParams.value,
             numParams: numParams.value,
             numMaxParams: numMaxParams.value,
@@ -644,7 +653,7 @@ export const transformerFactory = (createdByMe: boolean): TransformerFactory<str
             prevState: prevState.tachieLocations,
             nextState: nextState.tachieLocations,
         });
-        const resultType: TwoWayOperation = {};
+        const resultType: TwoWayOperation = {version:1};
         if (prevState.image !== nextState.image) {
             resultType.image = { oldValue: prevState.image, newValue: nextState.image };
         }
@@ -660,7 +669,7 @@ export const transformerFactory = (createdByMe: boolean): TransformerFactory<str
         if (prevState.privateVarToml !== nextState.privateVarToml) {
             resultType.privateVarToml = TextOperation.diff({ prev: prevState.privateVarToml, next: nextState.privateVarToml });
         }
-        if (undefinedForAll(resultType) && boolParams.size === 0 && numParams.size === 0 && numMaxParams.size === 0 && strParams.size === 0 && pieces.isEmpty && tachieLocations.isEmpty) {
+        if (undefinedForAll(resultType)) {
             return undefined;
         }
         return { ...resultType, boolParams, numParams, numMaxParams, strParams, pieces, tachieLocations };

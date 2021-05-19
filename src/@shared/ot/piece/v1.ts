@@ -2,6 +2,7 @@ import * as t from 'io-ts';
 import { DualKey } from '../../DualKeyMap';
 import { ResultModule } from '../../Result';
 import { undefinedForAll } from '../../utils';
+import { operation } from '../room/util/operation';
 import * as ReplaceValueOperation from '../room/util/replaceOperation';
 import { TransformerFactory } from '../room/util/transformerFactory';
 import { Apply, ToClientOperationParams } from '../room/util/type';
@@ -12,6 +13,7 @@ const numberUpOperation = t.type({ newValue: t.number });
 const booleanUpOperation = t.type({ newValue: t.boolean });
 
 export const state = t.type({
+    version: t.literal(1),
     cellH: t.number,
     cellW: t.number,
     cellX: t.number,
@@ -25,7 +27,7 @@ export const state = t.type({
 
 export type State = t.TypeOf<typeof state>;
 
-export const downOperation = t.partial({
+export const downOperation = operation(1, {
     cellH: numberDownOperation,
     cellW: numberDownOperation,
     cellX: numberDownOperation,
@@ -39,7 +41,7 @@ export const downOperation = t.partial({
 
 type DownOperation = t.TypeOf<typeof downOperation>;
 
-export const upOperation = t.partial({
+export const upOperation = operation(1, {
     cellH: numberUpOperation,
     cellW: numberUpOperation,
     cellX: numberUpOperation,
@@ -54,6 +56,8 @@ export const upOperation = t.partial({
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
+    version: 1;
+
     cellH?: ReplaceValueOperation.ReplaceValueTwoWayOperation<number>;
     cellW?: ReplaceValueOperation.ReplaceValueTwoWayOperation<number>;
     cellX?: ReplaceValueOperation.ReplaceValueTwoWayOperation<number>;
@@ -112,6 +116,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
 export const transformerFactory = (createdByMe: boolean): TransformerFactory<DualKey<string, string>, State, State, DownOperation, UpOperation, TwoWayOperation> => ({
     composeLoose: ({ first, second }) => {
         const valueProps: DownOperation = {
+            version: 1,
             cellH: ReplaceValueOperation.composeDownOperation(first.cellH, second.cellH),
             cellW: ReplaceValueOperation.composeDownOperation(first.cellW, second.cellW),
             cellX: ReplaceValueOperation.composeDownOperation(first.cellX, second.cellX),
@@ -132,7 +137,7 @@ export const transformerFactory = (createdByMe: boolean): TransformerFactory<Dua
         const prevState: State = {
             ...nextState,
         };
-        const twoWayOperation: TwoWayOperation = {};
+        const twoWayOperation: TwoWayOperation = { version: 1 };
 
         if (downOperation.cellH !== undefined) {
             prevState.cellH = downOperation.cellH.oldValue;
@@ -174,7 +179,7 @@ export const transformerFactory = (createdByMe: boolean): TransformerFactory<Dua
         return ResultModule.ok({ prevState, twoWayOperation });
     },
     transform: ({ prevState, clientOperation, serverOperation }) => {
-        const twoWayOperation: TwoWayOperation = {};
+        const twoWayOperation: TwoWayOperation = { version: 1 };
 
         twoWayOperation.cellH = ReplaceValueOperation.transform({
             first: serverOperation?.cellH,
@@ -229,7 +234,7 @@ export const transformerFactory = (createdByMe: boolean): TransformerFactory<Dua
         return ResultModule.ok(twoWayOperation);
     },
     diff: ({ prevState, nextState }) => {
-        const resultType: TwoWayOperation = {};
+        const resultType: TwoWayOperation = { version: 1 };
         if (prevState.cellH !== nextState.cellH) {
             resultType.cellH = { oldValue: prevState.cellH, newValue: nextState.cellH };
         }

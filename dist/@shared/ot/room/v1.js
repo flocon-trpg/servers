@@ -30,9 +30,11 @@ const recordOperationElement_1 = require("./util/recordOperationElement");
 const ReplaceValueOperation = __importStar(require("./util/replaceOperation"));
 const type_1 = require("./util/type");
 const utils_1 = require("../../utils");
+const operation_1 = require("./util/operation");
 const replaceStringDownOperation = t.type({ oldValue: t.string });
 const replaceStringUpOperation = t.type({ newValue: t.string });
 exports.dbState = t.type({
+    version: t.literal(1),
     bgms: t.record(t.string, Bgm.state),
     boolParamNames: t.record(t.string, ParamNames.state),
     numParamNames: t.record(t.string, ParamNames.state),
@@ -52,7 +54,7 @@ exports.dbState = t.type({
 exports.state = t.intersection([exports.dbState, t.type({
         name: t.string,
     })]);
-exports.downOperation = t.partial({
+exports.downOperation = operation_1.operation(1, {
     bgms: t.record(t.string, recordOperationElement_1.recordDownOperationElementFactory(Bgm.state, Bgm.downOperation)),
     boolParamNames: t.record(t.string, recordOperationElement_1.recordDownOperationElementFactory(ParamNames.state, ParamNames.downOperation)),
     name: replaceStringDownOperation,
@@ -70,7 +72,7 @@ exports.downOperation = t.partial({
     publicChannel10Name: replaceStringDownOperation,
     strParamNames: t.record(t.string, recordOperationElement_1.recordDownOperationElementFactory(ParamNames.state, ParamNames.downOperation)),
 });
-exports.upOperation = t.partial({
+exports.upOperation = operation_1.operation(1, {
     bgms: t.record(t.string, recordOperationElement_1.recordUpOperationElementFactory(Bgm.state, Bgm.upOperation)),
     boolParamNames: t.record(t.string, recordOperationElement_1.recordUpOperationElementFactory(ParamNames.state, ParamNames.upOperation)),
     name: replaceStringUpOperation,
@@ -278,6 +280,7 @@ const transformerFactory = (operatedBy) => ({
             return participants;
         }
         const valueProps = {
+            version: 1,
             name: ReplaceValueOperation.composeDownOperation(first.name, second.name),
             publicChannel1Name: ReplaceValueOperation.composeDownOperation(first.publicChannel1Name, second.publicChannel1Name),
             publicChannel2Name: ReplaceValueOperation.composeDownOperation(first.publicChannel2Name, second.publicChannel2Name),
@@ -336,6 +339,7 @@ const transformerFactory = (operatedBy) => ({
         }
         const prevState = Object.assign(Object.assign({}, nextState), { bgms: bgms.value.prevState, boolParamNames: boolParamNames.value.prevState, numParamNames: numParamNames.value.prevState, strParamNames: strParamNames.value.prevState, participants: participants.value.prevState });
         const twoWayOperation = {
+            version: 1,
             bgms: bgms.value.twoWayOperation,
             boolParamNames: boolParamNames.value.twoWayOperation,
             numParamNames: numParamNames.value.twoWayOperation,
@@ -403,6 +407,7 @@ const transformerFactory = (operatedBy) => ({
             return participants;
         }
         const twoWayOperation = {
+            version: 1,
             bgms: bgms.value,
             boolParamNames: boolParamNames.value,
             numParamNames: numParamNames.value,
@@ -449,6 +454,7 @@ const transformerFactory = (operatedBy) => ({
             nextState: nextState.participants,
         });
         const result = {
+            version: 1,
             bgms,
             boolParamNames,
             numParamNames,

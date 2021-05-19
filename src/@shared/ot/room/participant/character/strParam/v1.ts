@@ -6,19 +6,25 @@ import { ApplyError, ComposeAndTransformError, PositiveInt } from '../../../../.
 import { ResultModule } from '../../../../../Result';
 import { undefinedForAll } from '../../../../../utils';
 import { Apply, ToClientOperationParams } from '../../../util/type';
+import { operation } from '../../../util/operation';
 
-export const state = t.type({ isValuePrivate: t.boolean, value: t.string });
+export const state = t.type({
+    version: t.literal(1),
+
+    isValuePrivate: t.boolean,
+    value: t.string
+});
 
 export type State = t.TypeOf<typeof state>;
 
-export const downOperation = t.partial({
+export const downOperation = operation(1, {
     isValuePrivate: t.type({ oldValue: t.boolean }),
     value: TextOperation.downOperation,
 });
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
-export const upOperation = t.partial({
+export const upOperation = operation(1, {
     isValuePrivate: t.type({ newValue: t.boolean }),
     value: TextOperation.upOperation,
 });
@@ -26,6 +32,8 @@ export const upOperation = t.partial({
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
+    version: 1;
+
     isValuePrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     value?: TextOperation.TwoWayOperation;
 }
@@ -84,6 +92,7 @@ export const createTransformerFactory = (createdByMe: boolean): ParamRecordTrans
             return value;
         }
         const valueProps: DownOperation = {
+            version: 1,
             isValuePrivate: ReplaceOperation.composeDownOperation(first.isValuePrivate, second.isValuePrivate),
             value: value.value,
         };
@@ -95,7 +104,7 @@ export const createTransformerFactory = (createdByMe: boolean): ParamRecordTrans
         }
 
         const prevState: State = { ...nextState };
-        const twoWayOperation: TwoWayOperation = {};
+        const twoWayOperation: TwoWayOperation = { version: 1 };
 
         if (downOperation.isValuePrivate !== undefined) {
             prevState.isValuePrivate = downOperation.isValuePrivate.oldValue;
@@ -113,7 +122,7 @@ export const createTransformerFactory = (createdByMe: boolean): ParamRecordTrans
         return ResultModule.ok({ prevState, nextState, twoWayOperation });
     },
     transform: ({ prevState, currentState, clientOperation, serverOperation }) => {
-        const twoWayOperation: TwoWayOperation = {};
+        const twoWayOperation: TwoWayOperation = { version: 1 };
 
         if (createdByMe) {
             twoWayOperation.isValuePrivate = ReplaceOperation.transform({
@@ -137,7 +146,7 @@ export const createTransformerFactory = (createdByMe: boolean): ParamRecordTrans
         return ResultModule.ok(twoWayOperation);
     },
     diff: ({ prevState, nextState }) => {
-        const resultType: TwoWayOperation = {};
+        const resultType: TwoWayOperation = { version: 1 };
         if (prevState.isValuePrivate !== nextState.isValuePrivate) {
             resultType.isValuePrivate = { oldValue: prevState.isValuePrivate, newValue: nextState.isValuePrivate };
         }
@@ -166,5 +175,5 @@ export const createTransformerFactory = (createdByMe: boolean): ParamRecordTrans
         return ResultModule.ok(result);
     },
     toServerState: ({ clientState }) => clientState,
-    createDefaultState: () => ({ isValuePrivate: false, value: '' }),
+    createDefaultState: () => ({ version: 1, isValuePrivate: false, value: '' }),
 });
