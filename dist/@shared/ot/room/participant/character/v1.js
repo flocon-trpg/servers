@@ -26,7 +26,7 @@ const recordOperationElement_1 = require("../../util/recordOperationElement");
 const v1_1 = require("../../../filePath/v1");
 const TextOperation = __importStar(require("../../util/textOperation"));
 const Piece = __importStar(require("../../../piece/v1"));
-const BoardLocation = __importStar(require("../../util/boardLocation"));
+const BoardLocation = __importStar(require("../../../boardLocation/v1"));
 const ReplaceValueOperation = __importStar(require("../../util/replaceOperation"));
 const DualKeyRecordOperation = __importStar(require("../../util/dualKeyRecordOperation"));
 const RecordOperation = __importStar(require("../../util/recordOperation"));
@@ -39,8 +39,9 @@ const NumParam = __importStar(require("./numParam/v1"));
 const StrParam = __importStar(require("./strParam/v1"));
 const paramRecordOperation_1 = require("../../util/paramRecordOperation");
 const operation_1 = require("../../util/operation");
+const record_1 = require("../../util/record");
 exports.state = t.type({
-    version: t.literal(1),
+    $version: t.literal(1),
     image: io_ts_1.maybe(v1_1.filePath),
     isPrivate: t.boolean,
     name: t.string,
@@ -306,7 +307,7 @@ const transformerFactory = (createdByMe) => ({
             return privateVarToml;
         }
         const valueProps = {
-            version: 1,
+            $version: 1,
             isPrivate: ReplaceValueOperation.composeDownOperation(first.isPrivate, second.isPrivate),
             name: ReplaceValueOperation.composeDownOperation(first.name, second.name),
             privateVarToml: privateVarToml.value,
@@ -380,7 +381,7 @@ const transformerFactory = (createdByMe) => ({
         }
         const prevState = Object.assign(Object.assign({}, nextState), { boolParams: boolParams.value.prevState, numParams: numParams.value.prevState, numMaxParams: numMaxParams.value.prevState, strParams: strParams.value.prevState, pieces: pieces.value.prevState, tachieLocations: tachieLocations.value.prevState });
         const twoWayOperation = {
-            version: 1,
+            $version: 1,
             boolParams: boolParams.value.twoWayOperation,
             numParams: numParams.value.twoWayOperation,
             numMaxParams: numMaxParams.value.twoWayOperation,
@@ -483,7 +484,7 @@ const transformerFactory = (createdByMe) => ({
             return tachieLocations;
         }
         const twoWayOperation = {
-            version: 1,
+            $version: 1,
             boolParams: boolParams.value,
             numParams: numParams.value,
             numMaxParams: numMaxParams.value,
@@ -518,7 +519,7 @@ const transformerFactory = (createdByMe) => ({
             }
             twoWayOperation.privateVarToml = transformed.value.secondPrime;
         }
-        if (utils_1.undefinedForAll(twoWayOperation)) {
+        if (record_1.isIdRecord(twoWayOperation)) {
             return Result_1.ResultModule.ok(undefined);
         }
         return Result_1.ResultModule.ok(Object.assign(Object.assign({}, twoWayOperation), { boolParams: boolParams.value, numParams: numParams.value, numMaxParams: numMaxParams.value, strParams: strParams.value, pieces: pieces.value, tachieLocations: tachieLocations.value }));
@@ -558,7 +559,7 @@ const transformerFactory = (createdByMe) => ({
             prevState: prevState.tachieLocations,
             nextState: nextState.tachieLocations,
         });
-        const resultType = { version: 1 };
+        const resultType = { $version: 1 };
         if (prevState.image !== nextState.image) {
             resultType.image = { oldValue: prevState.image, newValue: nextState.image };
         }
@@ -574,7 +575,7 @@ const transformerFactory = (createdByMe) => ({
         if (prevState.privateVarToml !== nextState.privateVarToml) {
             resultType.privateVarToml = TextOperation.diff({ prev: prevState.privateVarToml, next: nextState.privateVarToml });
         }
-        if (utils_1.undefinedForAll(resultType)) {
+        if (record_1.isIdRecord(resultType)) {
             return undefined;
         }
         return Object.assign(Object.assign({}, resultType), { boolParams, numParams, numMaxParams, strParams, pieces, tachieLocations });

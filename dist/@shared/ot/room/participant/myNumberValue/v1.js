@@ -28,17 +28,20 @@ const DualKeyRecordOperation = __importStar(require("../../util/dualKeyRecordOpe
 const Piece = __importStar(require("../../../piece/v1"));
 const recordOperationElement_1 = require("../../util/recordOperationElement");
 const ReplaceOperation = __importStar(require("../../util/replaceOperation"));
+const operation_1 = require("../../util/operation");
+const record_1 = require("../../util/record");
 exports.state = t.type({
+    $version: t.literal(1),
     isValuePrivate: t.boolean,
     value: t.number,
     pieces: t.record(t.string, t.record(t.string, Piece.state)),
 });
-exports.downOperation = t.partial({
+exports.downOperation = operation_1.operation(1, {
     isValuePrivate: t.type({ oldValue: t.boolean }),
     value: t.type({ oldValue: t.number }),
     pieces: t.record(t.string, t.record(t.string, recordOperationElement_1.recordDownOperationElementFactory(Piece.state, Piece.downOperation))),
 });
-exports.upOperation = t.partial({
+exports.upOperation = operation_1.operation(1, {
     isValuePrivate: t.type({ newValue: t.boolean }),
     value: t.type({ newValue: t.number }),
     pieces: t.record(t.string, t.record(t.string, recordOperationElement_1.recordUpOperationElementFactory(Piece.state, Piece.upOperation))),
@@ -107,6 +110,7 @@ const transformerFactory = (createdByMe) => ({
             return pieces;
         }
         const valueProps = {
+            $version: 1,
             isValuePrivate: ReplaceOperation.composeDownOperation((_a = first.isValuePrivate) !== null && _a !== void 0 ? _a : undefined, (_b = second.isValuePrivate) !== null && _b !== void 0 ? _b : undefined),
             value: ReplaceOperation.composeDownOperation((_c = first.value) !== null && _c !== void 0 ? _c : undefined, (_d = second.value) !== null && _d !== void 0 ? _d : undefined),
             pieces: pieces.value,
@@ -126,7 +130,7 @@ const transformerFactory = (createdByMe) => ({
             return pieces;
         }
         const prevState = Object.assign(Object.assign({}, nextState), { pieces: pieces.value.prevState });
-        const twoWayOperation = { pieces: pieces.value.twoWayOperation };
+        const twoWayOperation = { $version: 1, pieces: pieces.value.twoWayOperation };
         if (downOperation.isValuePrivate != null) {
             prevState.isValuePrivate = downOperation.isValuePrivate.oldValue;
             twoWayOperation.isValuePrivate = Object.assign(Object.assign({}, downOperation.isValuePrivate), { newValue: nextState.isValuePrivate });
@@ -152,7 +156,7 @@ const transformerFactory = (createdByMe) => ({
         if (pieces.isError) {
             return pieces;
         }
-        const twoWayOperation = { pieces: pieces.value };
+        const twoWayOperation = { $version: 1, pieces: pieces.value };
         twoWayOperation.isValuePrivate = ReplaceOperation.transform({
             first: (_a = serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.isValuePrivate) !== null && _a !== void 0 ? _a : undefined,
             second: (_b = clientOperation.isValuePrivate) !== null && _b !== void 0 ? _b : undefined,
@@ -163,7 +167,7 @@ const transformerFactory = (createdByMe) => ({
             second: (_d = clientOperation.value) !== null && _d !== void 0 ? _d : undefined,
             prevState: prevState.value,
         });
-        if (utils_1.undefinedForAll(twoWayOperation)) {
+        if (record_1.isIdRecord(twoWayOperation)) {
             return Result_1.ResultModule.ok(undefined);
         }
         return Result_1.ResultModule.ok(Object.assign({}, twoWayOperation));
@@ -175,6 +179,7 @@ const transformerFactory = (createdByMe) => ({
             nextState: nextState.pieces,
         });
         const resultType = {
+            $version: 1,
             pieces,
         };
         if (prevState.isValuePrivate !== nextState.isValuePrivate) {
@@ -183,7 +188,7 @@ const transformerFactory = (createdByMe) => ({
         if (prevState.value !== nextState.value) {
             resultType.value = { oldValue: prevState.value, newValue: nextState.value };
         }
-        if (utils_1.undefinedForAll(resultType)) {
+        if (record_1.isIdRecord(resultType)) {
             return undefined;
         }
         return Object.assign({}, resultType);

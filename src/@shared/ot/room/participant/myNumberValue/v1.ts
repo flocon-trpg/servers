@@ -1,6 +1,6 @@
 import * as t from 'io-ts';
 import { ResultModule } from '../../../../Result';
-import { chooseDualKeyRecord, undefinedForAll } from '../../../../utils';
+import { chooseDualKeyRecord } from '../../../../utils';
 import { DualKeyRecordTransformer, DualKeyRecordTwoWayOperation } from '../../util/dualKeyRecordOperation';
 import * as DualKeyRecordOperation from '../../util/dualKeyRecordOperation';
 import * as Piece from '../../../piece/v1';
@@ -9,8 +9,11 @@ import * as ReplaceOperation from '../../util/replaceOperation';
 import { TransformerFactory } from '../../util/transformerFactory';
 import { Apply, ToClientOperationParams } from '../../util/type';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '../../../../textOperation';
+import { operation } from '../../util/operation';
+import { isIdRecord } from '../../util/record';
 
 export const state = t.type({
+    $version: t.literal(1),
     isValuePrivate: t.boolean,
     value: t.number,
     pieces: t.record(t.string, t.record(t.string, Piece.state)),
@@ -18,7 +21,7 @@ export const state = t.type({
 
 export type State = t.TypeOf<typeof state>;
 
-export const downOperation = t.partial({
+export const downOperation = operation(1, {
     isValuePrivate: t.type({ oldValue: t.boolean }),
     value: t.type({ oldValue: t.number }),
     pieces: t.record(t.string, t.record(t.string, recordDownOperationElementFactory(Piece.state, Piece.downOperation))),
@@ -26,7 +29,7 @@ export const downOperation = t.partial({
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
-export const upOperation = t.partial({
+export const upOperation = operation(1, {
     isValuePrivate: t.type({ newValue: t.boolean }),
     value: t.type({ newValue: t.number }),
     pieces: t.record(t.string, t.record(t.string, recordUpOperationElementFactory(Piece.state, Piece.upOperation))),
@@ -35,6 +38,7 @@ export const upOperation = t.partial({
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
+    $version: 1;
     isValuePrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     value?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     pieces?: DualKeyRecordTwoWayOperation<Piece.State, Piece.TwoWayOperation>;
@@ -115,6 +119,7 @@ export const transformerFactory = (createdByMe: boolean): TransformerFactory<str
         }
 
         const valueProps: DownOperation = {
+            $version: 1,
             isValuePrivate: ReplaceOperation.composeDownOperation(first.isValuePrivate ?? undefined, second.isValuePrivate ?? undefined),
             value: ReplaceOperation.composeDownOperation(first.value ?? undefined, second.value ?? undefined),
             pieces: pieces.value,
@@ -136,7 +141,7 @@ export const transformerFactory = (createdByMe: boolean): TransformerFactory<str
         }
 
         const prevState: State = { ...nextState, pieces: pieces.value.prevState, };
-        const twoWayOperation: TwoWayOperation = { pieces: pieces.value.twoWayOperation };
+        const twoWayOperation: TwoWayOperation = { $version: 1, pieces: pieces.value.twoWayOperation };
 
         if (downOperation.isValuePrivate != null) {
             prevState.isValuePrivate = downOperation.isValuePrivate.oldValue;
@@ -166,7 +171,7 @@ export const transformerFactory = (createdByMe: boolean): TransformerFactory<str
             return pieces;
         }
 
-        const twoWayOperation: TwoWayOperation = { pieces: pieces.value };
+        const twoWayOperation: TwoWayOperation = { $version: 1, pieces: pieces.value };
 
         twoWayOperation.isValuePrivate = ReplaceOperation.transform({
             first: serverOperation?.isValuePrivate ?? undefined,
@@ -180,7 +185,7 @@ export const transformerFactory = (createdByMe: boolean): TransformerFactory<str
             prevState: prevState.value,
         });
 
-        if (undefinedForAll(twoWayOperation)) {
+        if (isIdRecord(twoWayOperation)) {
             return ResultModule.ok(undefined);
         }
 
@@ -193,6 +198,7 @@ export const transformerFactory = (createdByMe: boolean): TransformerFactory<str
             nextState: nextState.pieces,
         });
         const resultType: TwoWayOperation = {
+            $version: 1,
             pieces,
         };
         if (prevState.isValuePrivate !== nextState.isValuePrivate) {
@@ -201,7 +207,7 @@ export const transformerFactory = (createdByMe: boolean): TransformerFactory<str
         if (prevState.value !== nextState.value) {
             resultType.value = { oldValue: prevState.value, newValue: nextState.value };
         }
-        if (undefinedForAll(resultType)) {
+        if (isIdRecord(resultType)) {
             return undefined;
         }
         return { ...resultType };

@@ -78,13 +78,13 @@ RoomPubCh = __decorate([
 ], RoomPubCh);
 exports.RoomPubCh = RoomPubCh;
 let RoomPubMsg = class RoomPubMsg {
-    constructor({ text, textSource }) {
+    constructor({ initText, initTextSource }) {
         this.id = uuid_1.v4();
         this.version = 1;
         this.createdAt = new Date();
         this.isSecret = false;
-        this.text = text;
-        this.textSource = textSource;
+        this.initText = initText;
+        this.initTextSource = initTextSource;
     }
 };
 __decorate([
@@ -106,11 +106,11 @@ __decorate([
 __decorate([
     core_1.Property({ nullable: true, length: 65535, default: '' }),
     __metadata("design:type", String)
-], RoomPubMsg.prototype, "textSource", void 0);
+], RoomPubMsg.prototype, "initTextSource", void 0);
 __decorate([
     core_1.Property({ length: 65535, default: '' }),
     __metadata("design:type", String)
-], RoomPubMsg.prototype, "text", void 0);
+], RoomPubMsg.prototype, "initText", void 0);
 __decorate([
     core_1.Property({ nullable: true, length: 65535 }),
     __metadata("design:type", String)
@@ -185,14 +185,14 @@ RoomPubMsg = __decorate([
 ], RoomPubMsg);
 exports.RoomPubMsg = RoomPubMsg;
 let RoomPrvMsg = class RoomPrvMsg {
-    constructor({ text, textSource }) {
+    constructor({ initText, initTextSource }) {
         this.id = uuid_1.v4();
         this.version = 1;
         this.createdAt = new Date();
         this.isSecret = false;
         this.visibleTo = new core_1.Collection(this);
-        this.text = text;
-        this.textSource = textSource;
+        this.initText = initText;
+        this.initTextSource = initTextSource;
     }
 };
 __decorate([
@@ -214,11 +214,11 @@ __decorate([
 __decorate([
     core_1.Property({ nullable: true, length: 65535, default: '' }),
     __metadata("design:type", String)
-], RoomPrvMsg.prototype, "textSource", void 0);
+], RoomPrvMsg.prototype, "initTextSource", void 0);
 __decorate([
     core_1.Property({ length: 65535, default: '' }),
     __metadata("design:type", String)
-], RoomPrvMsg.prototype, "text", void 0);
+], RoomPrvMsg.prototype, "initText", void 0);
 __decorate([
     core_1.Property({ nullable: true, length: 65535 }),
     __metadata("design:type", String)

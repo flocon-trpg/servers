@@ -27,7 +27,7 @@ const ReplaceOperation = __importStar(require("../../../util/replaceOperation"))
 const Result_1 = require("../../../../../Result");
 const operation_1 = require("../../../util/operation");
 exports.state = t.type({
-    version: t.literal(1),
+    $version: t.literal(1),
     isValuePrivate: t.boolean,
     value: io_ts_1.maybe(t.boolean),
 });

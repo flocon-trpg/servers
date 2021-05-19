@@ -22,17 +22,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.transformerFactory = exports.apply = exports.toClientOperation = exports.toServerOperation = exports.toClientState = exports.upOperation = exports.downOperation = exports.state = void 0;
 const t = __importStar(require("io-ts"));
 const Result_1 = require("../../../../Result");
-const utils_1 = require("../../../../utils");
 const io_ts_1 = require("../../../../io-ts");
 const ReplaceValueOperation = __importStar(require("../../util/replaceOperation"));
 const v1_1 = require("../../../filePath/v1");
 const operation_1 = require("../../util/operation");
+const record_1 = require("../../util/record");
 const stringDownOperation = t.type({ oldValue: t.string });
 const stringUpOperation = t.type({ newValue: t.string });
 const numberDownOperation = t.type({ oldValue: t.number });
 const numberUpOperation = t.type({ newValue: t.number });
 exports.state = t.type({
-    version: t.literal(1),
+    $version: t.literal(1),
     backgroundImage: io_ts_1.maybe(v1_1.filePath),
     backgroundImageZoom: t.number,
     cellColumnCount: t.number,
@@ -110,7 +110,7 @@ exports.apply = apply;
 exports.transformerFactory = ({
     composeLoose: ({ first, second }) => {
         const valueProps = {
-            version: 1,
+            $version: 1,
             backgroundImage: ReplaceValueOperation.composeDownOperation(first.backgroundImage, second.backgroundImage),
             backgroundImageZoom: ReplaceValueOperation.composeDownOperation(first.backgroundImageZoom, second.backgroundImageZoom),
             cellColumnCount: ReplaceValueOperation.composeDownOperation(first.cellColumnCount, second.cellColumnCount),
@@ -129,7 +129,7 @@ exports.transformerFactory = ({
             return Result_1.ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
         }
         const prevState = Object.assign({}, nextState);
-        const twoWayOperation = { version: 1 };
+        const twoWayOperation = { $version: 1 };
         if (downOperation.backgroundImage !== undefined) {
             prevState.backgroundImage = (_a = downOperation.backgroundImage.oldValue) !== null && _a !== void 0 ? _a : undefined;
             twoWayOperation.backgroundImage = { oldValue: (_b = downOperation.backgroundImage.oldValue) !== null && _b !== void 0 ? _b : undefined, newValue: (_c = nextState.backgroundImage) !== null && _c !== void 0 ? _c : undefined };
@@ -169,7 +169,7 @@ exports.transformerFactory = ({
         return Result_1.ResultModule.ok({ prevState, twoWayOperation });
     },
     transform: ({ prevState, clientOperation, serverOperation }) => {
-        const twoWayOperation = { version: 1 };
+        const twoWayOperation = { $version: 1 };
         twoWayOperation.backgroundImage = ReplaceValueOperation.transform({
             first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.backgroundImage,
             second: clientOperation.backgroundImage,
@@ -215,13 +215,13 @@ exports.transformerFactory = ({
             second: clientOperation.name,
             prevState: prevState.name,
         });
-        if (utils_1.undefinedForAll(twoWayOperation)) {
+        if (record_1.isIdRecord(twoWayOperation)) {
             return Result_1.ResultModule.ok(undefined);
         }
         return Result_1.ResultModule.ok(twoWayOperation);
     },
     diff: ({ prevState, nextState }) => {
-        const resultType = { version: 1 };
+        const resultType = { $version: 1 };
         if (prevState.backgroundImage !== nextState.backgroundImage) {
             resultType.backgroundImage = { oldValue: prevState.backgroundImage, newValue: nextState.backgroundImage };
         }
@@ -249,7 +249,7 @@ exports.transformerFactory = ({
         if (prevState.name !== nextState.name) {
             resultType.name = { oldValue: prevState.name, newValue: nextState.name };
         }
-        if (utils_1.undefinedForAll(resultType)) {
+        if (record_1.isIdRecord(resultType)) {
             return undefined;
         }
         return resultType;

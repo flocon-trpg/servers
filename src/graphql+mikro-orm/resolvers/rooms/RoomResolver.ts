@@ -167,7 +167,7 @@ const operateParticipantAndFlush = async ({
                 type: replace,
                 replace: {
                     newValue: {
-                        version: 1,
+                        $version: 1,
                         name: create.name,
                         role: create.role,
                         boards: {},
@@ -182,6 +182,7 @@ const operateParticipantAndFlush = async ({
             participantOperation = {
                 type: 'update',
                 update: {
+                    $version: 1,
                     role: update.role,
                     name: update.name,
                 }
@@ -197,7 +198,7 @@ const operateParticipantAndFlush = async ({
     }
 
     const roomUpOperation: RoomModule.UpOperation = {
-        version: 1,
+        $version: 1,
         participants: {
             [myUserUid]: participantOperation,
         }
@@ -482,7 +483,7 @@ const analyzeTextAndSetToEntity = async (params: {
     if (analyzed.isError) {
         return analyzed;
     }
-    const targetEntity = params.type === 'RoomPubMsg' ? new RoomPubMsg({ textSource: params.textSource, text: analyzed.value.message }) : new RoomPrvMsg({ textSource: params.textSource, text: analyzed.value.message });
+    const targetEntity = params.type === 'RoomPubMsg' ? new RoomPubMsg({ initTextSource: params.textSource, initText: analyzed.value.message }) : new RoomPrvMsg({ initTextSource: params.textSource, initText: analyzed.value.message });
     targetEntity.createdBy = Reference.create<User, 'userUid'>(params.createdBy);
     if (analyzed.value.diceResult != null) {
         if (analyzed.value.diceResult.isSecret) {
@@ -542,8 +543,8 @@ const createRoomPublicMessage = ({
         __tstype: RoomPublicMessageType,
         channelKey,
         messageId: msg.id,
-        initText: msg.text,
-        initTextSource: msg.textSource ?? msg.text,
+        initText: msg.initText,
+        initTextSource: msg.initTextSource ?? msg.initText,
         updatedText: createUpdatedText(msg),
         textColor: msg.textColor ?? undefined,
         commandResult: msg.commandResult == null ? undefined : {
@@ -585,8 +586,8 @@ const createRoomPrivateMessage = async ({
         customName: msg.customName,
         createdAt: msg.createdAt.getTime(),
         updatedAt: msg.textUpdatedAt,
-        initText: msg.text ?? undefined,
-        initTextSource: msg.textSource ?? msg.text,
+        initText: msg.initText ?? undefined,
+        initTextSource: msg.initTextSource ?? msg.initText,
         updatedText: createUpdatedText(msg),
         textColor: msg.textColor ?? undefined,
         commandResult: msg.commandResult == null ? undefined : {
@@ -706,10 +707,10 @@ export class RoomResolver {
                 name: input.roomName,
                 createdBy: decodedIdToken.uid,
                 value: {
-                    version: 1,
+                    $version: 1,
                     participants: {
                         [entryUser.userUid]: {
-                            version: 1,
+                            $version: 1,
                             role: ParticipantModule.Master,
                             name: input.participantName,
                             boards: {},
@@ -1619,7 +1620,10 @@ export class RoomResolver {
                                 createdBy: userUid,
                                 room,
                                 stateId: key,
-                                value: { type: MyNumberValueModule.deleteType },
+                                value: {
+                                    $version: 1,
+                                    type: MyNumberValueModule.deleteType
+                                },
                             }))
                         );
                     }
@@ -1629,7 +1633,10 @@ export class RoomResolver {
                                 createdBy: userUid,
                                 room,
                                 stateId: key,
-                                value: { type: MyNumberValueModule.createType },
+                                value: {
+                                    $version: 1,
+                                    type: MyNumberValueModule.createType
+                                },
                             }))
                         );
                     }
@@ -1641,7 +1648,14 @@ export class RoomResolver {
                                 createdBy: userUid,
                                 room,
                                 stateId: key,
-                                value: value.replace.newValue == null ? { type: MyNumberValueModule.deleteType } : { type: MyNumberValueModule.createType },
+                                value:
+                                    value.replace.newValue == null ? {
+                                        $version: 1,
+                                        type: MyNumberValueModule.deleteType
+                                    } : {
+                                        $version: 1,
+                                        type: MyNumberValueModule.createType
+                                    },
                             }));
                         } else {
                             myValueLogs.push(new MyValueLog$MikroORM({
@@ -1658,7 +1672,7 @@ export class RoomResolver {
                 em.persist(log);
             }
 
-            const nextRoomState = await GlobalRoom.Global.applyToEntity({ em, target: room, prevState: roomState, operation });
+            const nextRoomState = GlobalRoom.Global.applyToEntity({ em, target: room, prevState: roomState, operation });
             await em.flush();
 
             const generateOperation = (deliverTo: string): RoomOperation => {
@@ -2161,7 +2175,7 @@ export class RoomResolver {
                         }
                     });
                 }
-                if (publicMsg.text == null && publicMsg.altTextToSecret == null && publicMsg.commandResult == null) {
+                if (publicMsg.initText == null && publicMsg.altTextToSecret == null && publicMsg.commandResult == null) {
                     return ResultModule.ok({
                         result: {
                             failureType: DeleteMessageFailureType.MessageDeleted,
@@ -2204,7 +2218,7 @@ export class RoomResolver {
                         }
                     });
                 }
-                if (privateMsg.text == null && privateMsg.altTextToSecret == null && privateMsg.commandResult == null) {
+                if (privateMsg.initText == null && privateMsg.altTextToSecret == null && privateMsg.commandResult == null) {
                     return ResultModule.ok({
                         result: {
                             failureType: DeleteMessageFailureType.MessageDeleted,
@@ -2312,7 +2326,7 @@ export class RoomResolver {
                         }
                     });
                 }
-                publicMsg.text = args.text;
+                publicMsg.initText = args.text;
                 publicMsg.textUpdatedAt = new Date().getTime();
                 await em.flush();
 
@@ -2348,14 +2362,14 @@ export class RoomResolver {
                         }
                     });
                 }
-                if (privateMsg.text == null) {
+                if (privateMsg.initText == null) {
                     return ResultModule.ok({
                         result: {
                             failureType: EditMessageFailureType.MessageDeleted,
                         }
                     });
                 }
-                privateMsg.text = args.text;
+                privateMsg.initText = args.text;
                 privateMsg.textUpdatedAt = new Date().getTime();
                 await em.flush();
 

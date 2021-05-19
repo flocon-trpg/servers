@@ -68,7 +68,7 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }: { em: EM; setupRoom
         name: roomName,
         createdBy: creatorUserUid,
         value: {
-            version: 1,
+            $version: 1,
 
             boolParamNames: {},
             numParamNames: {},
@@ -76,7 +76,7 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }: { em: EM; setupRoom
             bgms: {},
             participants: {
                 [creatorUserUid]: {
-                    version: 1,
+                    $version: 1,
 
                     // 現状はとりあえず全員がMasterのケースのみを考えている。
                     role: 'Master',

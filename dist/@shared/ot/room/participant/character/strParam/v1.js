@@ -24,10 +24,10 @@ const t = __importStar(require("io-ts"));
 const TextOperation = __importStar(require("../../../util/textOperation"));
 const ReplaceOperation = __importStar(require("../../../util/replaceOperation"));
 const Result_1 = require("../../../../../Result");
-const utils_1 = require("../../../../../utils");
 const operation_1 = require("../../../util/operation");
+const record_1 = require("../../../util/record");
 exports.state = t.type({
-    version: t.literal(1),
+    $version: t.literal(1),
     isValuePrivate: t.boolean,
     value: t.string
 });
@@ -84,7 +84,7 @@ const createTransformerFactory = (createdByMe) => ({
             return value;
         }
         const valueProps = {
-            version: 1,
+            $version: 1,
             isValuePrivate: ReplaceOperation.composeDownOperation(first.isValuePrivate, second.isValuePrivate),
             value: value.value,
         };
@@ -95,7 +95,7 @@ const createTransformerFactory = (createdByMe) => ({
             return Result_1.ResultModule.ok({ prevState: nextState, nextState, twoWayOperation: undefined });
         }
         const prevState = Object.assign({}, nextState);
-        const twoWayOperation = { version: 1 };
+        const twoWayOperation = { $version: 1 };
         if (downOperation.isValuePrivate !== undefined) {
             prevState.isValuePrivate = downOperation.isValuePrivate.oldValue;
             twoWayOperation.isValuePrivate = Object.assign(Object.assign({}, downOperation.isValuePrivate), { newValue: nextState.isValuePrivate });
@@ -111,7 +111,7 @@ const createTransformerFactory = (createdByMe) => ({
         return Result_1.ResultModule.ok({ prevState, nextState, twoWayOperation });
     },
     transform: ({ prevState, currentState, clientOperation, serverOperation }) => {
-        const twoWayOperation = { version: 1 };
+        const twoWayOperation = { $version: 1 };
         if (createdByMe) {
             twoWayOperation.isValuePrivate = ReplaceOperation.transform({
                 first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.isValuePrivate,
@@ -126,20 +126,20 @@ const createTransformerFactory = (createdByMe) => ({
             }
             twoWayOperation.value = transformed.value.secondPrime;
         }
-        if (utils_1.undefinedForAll(twoWayOperation)) {
+        if (record_1.isIdRecord(twoWayOperation)) {
             return Result_1.ResultModule.ok(undefined);
         }
         return Result_1.ResultModule.ok(twoWayOperation);
     },
     diff: ({ prevState, nextState }) => {
-        const resultType = { version: 1 };
+        const resultType = { $version: 1 };
         if (prevState.isValuePrivate !== nextState.isValuePrivate) {
             resultType.isValuePrivate = { oldValue: prevState.isValuePrivate, newValue: nextState.isValuePrivate };
         }
         if (prevState.value !== nextState.value) {
             resultType.value = TextOperation.diff({ prev: prevState.value, next: nextState.value });
         }
-        if (utils_1.undefinedForAll(resultType)) {
+        if (record_1.isIdRecord(resultType)) {
             return undefined;
         }
         return Object.assign({}, resultType);
@@ -159,6 +159,6 @@ const createTransformerFactory = (createdByMe) => ({
         return Result_1.ResultModule.ok(result);
     },
     toServerState: ({ clientState }) => clientState,
-    createDefaultState: () => ({ version: 1, isValuePrivate: false, value: '' }),
+    createDefaultState: () => ({ $version: 1, isValuePrivate: false, value: '' }),
 });
 exports.createTransformerFactory = createTransformerFactory;

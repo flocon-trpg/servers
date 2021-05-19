@@ -10,8 +10,10 @@ import * as RecordOperation from '../util/recordOperation';
 import { Apply, RequestedBy, server, ToClientOperationParams } from '../util/type';
 import * as ReplaceValueOperation from '../util/replaceOperation';
 import { ResultModule } from '../../../Result';
-import { chooseRecord, undefinedForAll } from '../../../utils';
+import { chooseRecord } from '../../../utils';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '../../../textOperation';
+import { operation } from '../util/operation';
+import { isIdRecord } from '../util/record';
 
 export const Player = 'Player';
 export const Spectator = 'Spectator';
@@ -21,7 +23,7 @@ const participantRole = t.union([t.literal(Player), t.literal(Spectator), t.lite
 export type ParticipantRole = t.TypeOf<typeof participantRole>;
 
 export const state = t.type({
-    version: t.literal(1),
+    $version: t.literal(1),
 
     name: t.string,
     role: maybe(participantRole),
@@ -32,7 +34,7 @@ export const state = t.type({
 
 export type State = t.TypeOf<typeof state>
 
-export const downOperation = t.partial({
+export const downOperation = operation(1, {
     name: t.type({ oldValue: t.string }),
     role: t.type({ oldValue: maybe(participantRole) }),
     boards: t.record(t.string, recordDownOperationElementFactory(Board.state, Board.downOperation)),
@@ -42,7 +44,7 @@ export const downOperation = t.partial({
 
 export type DownOperation = t.TypeOf<typeof downOperation>
 
-export const upOperation = t.partial({
+export const upOperation = operation(1, {
     name: t.type({ newValue: t.string }),
     role: t.type({ newValue: maybe(participantRole) }),
     boards: t.record(t.string, recordUpOperationElementFactory(Board.state, Board.upOperation)),
@@ -53,6 +55,8 @@ export const upOperation = t.partial({
 export type UpOperation = t.TypeOf<typeof upOperation>
 
 export type TwoWayOperation = {
+    $version: 1;
+
     name?: ReplaceValueOperation.ReplaceValueTwoWayOperation<string>;
     role?: ReplaceValueOperation.ReplaceValueTwoWayOperation<Maybe<ParticipantRole>>;
     boards?: Record<string, RecordTwoWayOperationElement<Board.State, Board.TwoWayOperation>>;
@@ -210,6 +214,7 @@ export const transformerFactory = (requestedBy: RequestedBy): TransformerFactory
         }
 
         const valueProps: DownOperation = {
+            $version: 1,
             name: ReplaceValueOperation.composeDownOperation(first.name ?? undefined, second.name ?? undefined),
             role: ReplaceValueOperation.composeDownOperation(first.role ?? undefined, second.role ?? undefined),
             boards: boards.value,
@@ -256,6 +261,7 @@ export const transformerFactory = (requestedBy: RequestedBy): TransformerFactory
             myNumberValues: myNumberValues.value.prevState,
         };
         const twoWayOperation: TwoWayOperation = {
+            $version: 1,
             boards: boards.value.twoWayOperation,
             characters: characters.value.twoWayOperation,
             myNumberValues: myNumberValues.value.twoWayOperation,
@@ -306,6 +312,7 @@ export const transformerFactory = (requestedBy: RequestedBy): TransformerFactory
         }
 
         const twoWayOperation: TwoWayOperation = {
+            $version: 1,
             boards: boards.value,
             characters: characters.value,
             myNumberValues: myNumberValues.value,
@@ -325,7 +332,7 @@ export const transformerFactory = (requestedBy: RequestedBy): TransformerFactory
             });
         }
 
-        if (undefinedForAll(twoWayOperation)) {
+        if (isIdRecord(twoWayOperation)) {
             return ResultModule.ok(undefined);
         }
 
@@ -347,6 +354,7 @@ export const transformerFactory = (requestedBy: RequestedBy): TransformerFactory
             nextState: nextState.myNumberValues,
         });
         const result: TwoWayOperation = {
+            $version: 1,
             boards,
             characters,
             myNumberValues,
@@ -357,7 +365,7 @@ export const transformerFactory = (requestedBy: RequestedBy): TransformerFactory
         if (prevState.role != nextState.role) {
             result.role = { oldValue: prevState.role, newValue: nextState.role };
         }
-        if (undefinedForAll(result)) {
+        if (isIdRecord(result)) {
             return undefined;
         }
         return result;

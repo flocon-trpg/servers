@@ -25,6 +25,7 @@ const Result_1 = require("../../../Result");
 const Types_1 = require("../../../Types");
 const utils_1 = require("../../../utils");
 const ReplaceValueOperation = __importStar(require("./replaceOperation"));
+const record_1 = require("./record");
 const toClientOperation = ({ diff, prevState, nextState, toClientOperation, }) => {
     const result = {};
     utils_1.recordForEach(diff, (value, key) => {
@@ -206,7 +207,7 @@ exports.diff = diff;
 const createParamTransformerFactory = (createdByMe) => ({
     composeLoose: ({ first, second }) => {
         const valueProps = {
-            version: 1,
+            $version: 1,
             isValuePrivate: ReplaceValueOperation.composeDownOperation(first.isValuePrivate, second.isValuePrivate),
             value: ReplaceValueOperation.composeDownOperation(first.value, second.value),
         };
@@ -218,7 +219,7 @@ const createParamTransformerFactory = (createdByMe) => ({
             return Result_1.ResultModule.ok({ prevState: nextState, nextState, twoWayOperation: undefined });
         }
         const prevState = Object.assign({}, nextState);
-        const twoWayOperation = { version: 1 };
+        const twoWayOperation = { $version: 1 };
         if (downOperation.isValuePrivate !== undefined) {
             prevState.isValuePrivate = downOperation.isValuePrivate.oldValue;
             twoWayOperation.isValuePrivate = Object.assign(Object.assign({}, downOperation.isValuePrivate), { newValue: nextState.isValuePrivate });
@@ -230,7 +231,7 @@ const createParamTransformerFactory = (createdByMe) => ({
         return Result_1.ResultModule.ok({ prevState, nextState, twoWayOperation });
     },
     transform: ({ prevState, currentState, clientOperation, serverOperation }) => {
-        const twoWayOperation = { version: 1 };
+        const twoWayOperation = { $version: 1 };
         if (createdByMe) {
             twoWayOperation.isValuePrivate = ReplaceValueOperation.transform({
                 first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.isValuePrivate,
@@ -245,20 +246,20 @@ const createParamTransformerFactory = (createdByMe) => ({
                 prevState: prevState.value,
             });
         }
-        if (utils_1.undefinedForAll(twoWayOperation)) {
+        if (record_1.isIdRecord(twoWayOperation)) {
             return Result_1.ResultModule.ok(undefined);
         }
         return Result_1.ResultModule.ok(Object.assign({}, twoWayOperation));
     },
     diff: ({ prevState, nextState }) => {
-        const resultType = { version: 1 };
+        const resultType = { $version: 1 };
         if (prevState.isValuePrivate !== nextState.isValuePrivate) {
             resultType.isValuePrivate = { oldValue: prevState.isValuePrivate, newValue: nextState.isValuePrivate };
         }
         if (prevState.value !== nextState.value) {
             resultType.value = { oldValue: prevState.value, newValue: nextState.value };
         }
-        if (utils_1.undefinedForAll(resultType)) {
+        if (record_1.isIdRecord(resultType)) {
             return undefined;
         }
         return Object.assign({}, resultType);
@@ -275,7 +276,7 @@ const createParamTransformerFactory = (createdByMe) => ({
         return Result_1.ResultModule.ok(result);
     },
     toServerState: ({ clientState }) => clientState,
-    createDefaultState: () => ({ version: 1, isValuePrivate: false, value: undefined }),
+    createDefaultState: () => ({ $version: 1, isValuePrivate: false, value: undefined }),
 });
 exports.createParamTransformerFactory = createParamTransformerFactory;
 class ParamRecordTransformer {

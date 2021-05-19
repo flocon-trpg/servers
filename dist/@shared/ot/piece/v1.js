@@ -22,15 +22,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.transformerFactory = exports.apply = exports.toClientOperation = exports.toServerOperation = exports.toClientState = exports.upOperation = exports.downOperation = exports.state = void 0;
 const t = __importStar(require("io-ts"));
 const Result_1 = require("../../Result");
-const utils_1 = require("../../utils");
 const operation_1 = require("../room/util/operation");
+const record_1 = require("../room/util/record");
 const ReplaceValueOperation = __importStar(require("../room/util/replaceOperation"));
 const numberDownOperation = t.type({ oldValue: t.number });
 const booleanDownOperation = t.type({ oldValue: t.boolean });
 const numberUpOperation = t.type({ newValue: t.number });
 const booleanUpOperation = t.type({ newValue: t.boolean });
 exports.state = t.type({
-    version: t.literal(1),
+    $version: t.literal(1),
     cellH: t.number,
     cellW: t.number,
     cellX: t.number,
@@ -110,7 +110,7 @@ exports.apply = apply;
 const transformerFactory = (createdByMe) => ({
     composeLoose: ({ first, second }) => {
         const valueProps = {
-            version: 1,
+            $version: 1,
             cellH: ReplaceValueOperation.composeDownOperation(first.cellH, second.cellH),
             cellW: ReplaceValueOperation.composeDownOperation(first.cellW, second.cellW),
             cellX: ReplaceValueOperation.composeDownOperation(first.cellX, second.cellX),
@@ -128,7 +128,7 @@ const transformerFactory = (createdByMe) => ({
             return Result_1.ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
         }
         const prevState = Object.assign({}, nextState);
-        const twoWayOperation = { version: 1 };
+        const twoWayOperation = { $version: 1 };
         if (downOperation.cellH !== undefined) {
             prevState.cellH = downOperation.cellH.oldValue;
             twoWayOperation.cellH = Object.assign(Object.assign({}, downOperation.cellH), { newValue: nextState.cellH });
@@ -168,7 +168,7 @@ const transformerFactory = (createdByMe) => ({
         return Result_1.ResultModule.ok({ prevState, twoWayOperation });
     },
     transform: ({ prevState, clientOperation, serverOperation }) => {
-        const twoWayOperation = { version: 1 };
+        const twoWayOperation = { $version: 1 };
         twoWayOperation.cellH = ReplaceValueOperation.transform({
             first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.cellH,
             second: clientOperation.cellH,
@@ -214,13 +214,13 @@ const transformerFactory = (createdByMe) => ({
             second: clientOperation.y,
             prevState: prevState.y,
         });
-        if (utils_1.undefinedForAll(twoWayOperation)) {
+        if (record_1.isIdRecord(twoWayOperation)) {
             return Result_1.ResultModule.ok(undefined);
         }
         return Result_1.ResultModule.ok(twoWayOperation);
     },
     diff: ({ prevState, nextState }) => {
-        const resultType = { version: 1 };
+        const resultType = { $version: 1 };
         if (prevState.cellH !== nextState.cellH) {
             resultType.cellH = { oldValue: prevState.cellH, newValue: nextState.cellH };
         }
@@ -248,7 +248,7 @@ const transformerFactory = (createdByMe) => ({
         if (prevState.y !== nextState.y) {
             resultType.y = { oldValue: prevState.y, newValue: nextState.y };
         }
-        if (utils_1.undefinedForAll(resultType)) {
+        if (record_1.isIdRecord(resultType)) {
             return undefined;
         }
         return resultType;

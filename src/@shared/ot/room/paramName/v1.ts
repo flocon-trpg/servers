@@ -1,13 +1,13 @@
 import * as t from 'io-ts';
 import { ResultModule } from '../../../Result';
-import { undefinedForAll } from '../../../utils';
 import { operation } from '../util/operation';
+import { isIdRecord } from '../util/record';
 import * as ReplaceValueOperation from '../util/replaceOperation';
 import { TransformerFactory } from '../util/transformerFactory';
 import { Apply, ToClientOperationParams, } from '../util/type';
 
 export const state = t.type({
-    version: t.literal(1),
+    $version: t.literal(1),
 
     name: t.string,
 });
@@ -27,7 +27,7 @@ export const upOperation = operation(1, {
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
-    version: 1;
+    $version: 1;
 
     name?: ReplaceValueOperation.ReplaceValueTwoWayOperation<string>;
 }
@@ -53,7 +53,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
 export const transformerFactory: TransformerFactory<string, State, State, DownOperation, UpOperation, TwoWayOperation> = ({
     composeLoose: ({ first, second }) => {
         const valueProps: DownOperation = {
-            version: 1,
+            $version: 1,
             name: ReplaceValueOperation.composeDownOperation(first.name, second.name),
         };
         return ResultModule.ok(valueProps);
@@ -64,7 +64,7 @@ export const transformerFactory: TransformerFactory<string, State, State, DownOp
         }
 
         const prevState: State = { ...nextState };
-        const twoWayOperation: TwoWayOperation = { version: 1 };
+        const twoWayOperation: TwoWayOperation = { $version: 1 };
 
         if (downOperation.name !== undefined) {
             prevState.name = downOperation.name.oldValue;
@@ -74,7 +74,7 @@ export const transformerFactory: TransformerFactory<string, State, State, DownOp
         return ResultModule.ok({ prevState, twoWayOperation });
     },
     transform: ({ prevState, clientOperation, serverOperation }) => {
-        const twoWayOperation: TwoWayOperation = { version: 1 };
+        const twoWayOperation: TwoWayOperation = { $version: 1 };
 
         twoWayOperation.name = ReplaceValueOperation.transform({
             first: serverOperation?.name,
@@ -82,18 +82,18 @@ export const transformerFactory: TransformerFactory<string, State, State, DownOp
             prevState: prevState.name,
         });
 
-        if (undefinedForAll(twoWayOperation)) {
+        if (isIdRecord(twoWayOperation)) {
             return ResultModule.ok(undefined);
         }
 
         return ResultModule.ok({ ...twoWayOperation });
     },
     diff: ({ prevState, nextState }) => {
-        const resultType: TwoWayOperation = { version: 1 };
+        const resultType: TwoWayOperation = { $version: 1 };
         if (prevState.name !== nextState.name) {
             resultType.name = { oldValue: prevState.name, newValue: nextState.name };
         }
-        if (undefinedForAll(resultType)) {
+        if (isIdRecord(resultType)) {
             return undefined;
         }
         return { ...resultType };

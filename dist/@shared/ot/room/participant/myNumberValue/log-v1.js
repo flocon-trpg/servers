@@ -27,6 +27,7 @@ exports.updateType = 'update';
 exports.createType = 'create';
 exports.deleteType = 'delete';
 const update = t.intersection([t.type({
+        $version: t.literal(1),
         type: t.literal(exports.updateType),
         value: t.boolean,
         isValuePrivate: t.boolean,
@@ -34,17 +35,30 @@ const update = t.intersection([t.type({
         pieces: t.record(t.string, t.record(t.string, recordOperationElement_1.recordUpOperationElementFactory(Piece.state, Piece.upOperation))),
     })]);
 exports.main = t.union([
-    t.type({ type: t.literal(exports.createType) }),
-    t.type({ type: t.literal(exports.deleteType) }),
+    t.type({
+        $version: t.literal(1),
+        type: t.literal(exports.createType)
+    }),
+    t.type({
+        $version: t.literal(1),
+        type: t.literal(exports.deleteType)
+    }),
     update,
 ]);
 exports.exactMain = t.union([
-    t.strict({ type: t.literal(exports.createType) }),
-    t.strict({ type: t.literal(exports.deleteType) }),
+    t.strict({
+        $version: t.literal(1),
+        type: t.literal(exports.createType)
+    }),
+    t.strict({
+        $version: t.literal(1),
+        type: t.literal(exports.deleteType)
+    }),
     t.exact(update),
 ]);
 const ofOperation = (source) => {
     return {
+        $version: 1,
         type: exports.updateType,
         value: source.value != null && source.value.oldValue !== source.value.newValue,
         isValuePrivate: source.isValuePrivate != null && source.isValuePrivate.oldValue !== source.isValuePrivate.newValue,

@@ -1,12 +1,12 @@
 import * as t from 'io-ts';
 import { ResultModule } from '../../../../Result';
-import { undefinedForAll } from '../../../../utils';
 import { maybe } from '../../../../io-ts';
 import * as ReplaceValueOperation from '../../util/replaceOperation';
 import { filePath } from '../../../filePath/v1';
 import { TransformerFactory } from '../../util/transformerFactory';
 import { Apply, ToClientOperationParams } from '../../util/type';
 import { operation } from '../../util/operation';
+import { isIdRecord } from '../../util/record';
 
 const stringDownOperation = t.type({ oldValue: t.string });
 const stringUpOperation = t.type({ newValue: t.string });
@@ -14,7 +14,7 @@ const numberDownOperation = t.type({ oldValue: t.number });
 const numberUpOperation = t.type({ newValue: t.number });
 
 export const state = t.type({
-    version: t.literal(1),
+    $version: t.literal(1),
 
     backgroundImage: maybe(filePath),
     backgroundImageZoom: t.number,
@@ -58,7 +58,7 @@ export const upOperation = operation(1, {
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
-    version: 1;
+    $version: 1;
 
     backgroundImage?: ReplaceValueOperation.ReplaceValueTwoWayOperation<t.TypeOf<typeof filePath> | null | undefined>;
     backgroundImageZoom?: ReplaceValueOperation.ReplaceValueTwoWayOperation<number>;
@@ -116,7 +116,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
 export const transformerFactory: TransformerFactory<string, State, State, DownOperation, UpOperation, TwoWayOperation> = ({
     composeLoose: ({ first, second }) => {
         const valueProps: DownOperation = {
-            version: 1,
+            $version: 1,
 
             backgroundImage: ReplaceValueOperation.composeDownOperation(first.backgroundImage, second.backgroundImage),
             backgroundImageZoom: ReplaceValueOperation.composeDownOperation(first.backgroundImageZoom, second.backgroundImageZoom),
@@ -138,7 +138,7 @@ export const transformerFactory: TransformerFactory<string, State, State, DownOp
         const prevState: State = {
             ...nextState,
         };
-        const twoWayOperation: TwoWayOperation = { version: 1 };
+        const twoWayOperation: TwoWayOperation = { $version: 1 };
 
         if (downOperation.backgroundImage !== undefined) {
             prevState.backgroundImage = downOperation.backgroundImage.oldValue ?? undefined;
@@ -180,7 +180,7 @@ export const transformerFactory: TransformerFactory<string, State, State, DownOp
         return ResultModule.ok({ prevState, twoWayOperation });
     },
     transform: ({ prevState, clientOperation, serverOperation }) => {
-        const twoWayOperation: TwoWayOperation = { version: 1 };
+        const twoWayOperation: TwoWayOperation = { $version: 1 };
 
         twoWayOperation.backgroundImage = ReplaceValueOperation.transform({
             first: serverOperation?.backgroundImage,
@@ -229,14 +229,14 @@ export const transformerFactory: TransformerFactory<string, State, State, DownOp
             prevState: prevState.name,
         });
 
-        if (undefinedForAll(twoWayOperation)) {
+        if (isIdRecord(twoWayOperation)) {
             return ResultModule.ok(undefined);
         }
 
         return ResultModule.ok(twoWayOperation);
     },
     diff: ({ prevState, nextState }) => {
-        const resultType: TwoWayOperation = { version: 1 };
+        const resultType: TwoWayOperation = { $version: 1 };
         if (prevState.backgroundImage !== nextState.backgroundImage) {
             resultType.backgroundImage = { oldValue: prevState.backgroundImage, newValue: nextState.backgroundImage };
         }
@@ -264,7 +264,7 @@ export const transformerFactory: TransformerFactory<string, State, State, DownOp
         if (prevState.name !== nextState.name) {
             resultType.name = { oldValue: prevState.name, newValue: nextState.name };
         }
-        if (undefinedForAll(resultType)) {
+        if (isIdRecord(resultType)) {
             return undefined;
         }
         return resultType;

@@ -31,10 +31,11 @@ const ReplaceValueOperation = __importStar(require("./util/replaceOperation"));
 const type_1 = require("./util/type");
 const utils_1 = require("../../utils");
 const operation_1 = require("./util/operation");
+const record_1 = require("./util/record");
 const replaceStringDownOperation = t.type({ oldValue: t.string });
 const replaceStringUpOperation = t.type({ newValue: t.string });
 exports.dbState = t.type({
-    version: t.literal(1),
+    $version: t.literal(1),
     bgms: t.record(t.string, Bgm.state),
     boolParamNames: t.record(t.string, ParamNames.state),
     numParamNames: t.record(t.string, ParamNames.state),
@@ -280,7 +281,7 @@ const transformerFactory = (operatedBy) => ({
             return participants;
         }
         const valueProps = {
-            version: 1,
+            $version: 1,
             name: ReplaceValueOperation.composeDownOperation(first.name, second.name),
             publicChannel1Name: ReplaceValueOperation.composeDownOperation(first.publicChannel1Name, second.publicChannel1Name),
             publicChannel2Name: ReplaceValueOperation.composeDownOperation(first.publicChannel2Name, second.publicChannel2Name),
@@ -339,7 +340,7 @@ const transformerFactory = (operatedBy) => ({
         }
         const prevState = Object.assign(Object.assign({}, nextState), { bgms: bgms.value.prevState, boolParamNames: boolParamNames.value.prevState, numParamNames: numParamNames.value.prevState, strParamNames: strParamNames.value.prevState, participants: participants.value.prevState });
         const twoWayOperation = {
-            version: 1,
+            $version: 1,
             bgms: bgms.value.twoWayOperation,
             boolParamNames: boolParamNames.value.twoWayOperation,
             numParamNames: numParamNames.value.twoWayOperation,
@@ -407,7 +408,7 @@ const transformerFactory = (operatedBy) => ({
             return participants;
         }
         const twoWayOperation = {
-            version: 1,
+            $version: 1,
             bgms: bgms.value,
             boolParamNames: boolParamNames.value,
             numParamNames: numParamNames.value,
@@ -427,7 +428,7 @@ const transformerFactory = (operatedBy) => ({
                 prevState: prevState[key],
             });
         });
-        if (utils_1.undefinedForAll(twoWayOperation)) {
+        if (record_1.isIdRecord(twoWayOperation)) {
             return Result_1.ResultModule.ok(undefined);
         }
         return Result_1.ResultModule.ok(twoWayOperation);
@@ -454,7 +455,7 @@ const transformerFactory = (operatedBy) => ({
             nextState: nextState.participants,
         });
         const result = {
-            version: 1,
+            $version: 1,
             bgms,
             boolParamNames,
             numParamNames,
@@ -470,7 +471,7 @@ const transformerFactory = (operatedBy) => ({
                 result[key] = { oldValue: prevState[key], newValue: nextState[key] };
             }
         });
-        if (utils_1.undefinedForAll(result)) {
+        if (record_1.isIdRecord(result)) {
             return undefined;
         }
         return result;

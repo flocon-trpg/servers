@@ -1,16 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.dualKeyRecordFind = exports.recordCompact = exports.dualKeyRecordForEach = exports.recordForEachAsync = exports.recordForEach = exports.mapToRecord = exports.recordToMap = exports.recordToArray = exports.chooseDualKeyRecord = exports.chooseRecord = exports.undefinedForAll = void 0;
-const undefinedForAll = (source) => {
-    for (const key in source) {
-        const value = source[key];
-        if (value !== undefined) {
-            return false;
-        }
-    }
-    return true;
-};
-exports.undefinedForAll = undefinedForAll;
+exports.dualKeyRecordFind = exports.recordCompact = exports.dualKeyRecordForEach = exports.recordForEachAsync = exports.recordForEach = exports.mapToRecord = exports.recordToMap = exports.recordToArray = exports.chooseDualKeyRecord = exports.chooseRecord = void 0;
 const chooseRecord = (source, chooser) => {
     const result = {};
     for (const key in source) {

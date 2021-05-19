@@ -24,7 +24,7 @@ const t = __importStar(require("io-ts"));
 exports.Default = 'Default';
 exports.FirebaseStorage = 'FirebaseStorage';
 exports.filePath = t.type({
-    version: t.literal(1),
+    $version: t.literal(1),
     path: t.string,
     sourceType: t.union([t.literal(exports.Default), t.literal(exports.FirebaseStorage)]),
 });

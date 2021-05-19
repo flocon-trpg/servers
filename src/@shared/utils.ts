@@ -1,15 +1,4 @@
-import { string } from 'io-ts';
 import { DualKey } from './DualKeyMap';
-
-export const undefinedForAll = (source: Record<string, unknown>): boolean => {
-    for (const key in source) {
-        const value = source[key];
-        if (value !== undefined) {
-            return false;
-        }
-    }
-    return true;
-};
 
 export const chooseRecord = <TSource, TResult>(source: Record<string, TSource>, chooser: (element: TSource) => TResult | undefined): Record<string, TResult> => {
     const result: Record<string, TResult> = {};

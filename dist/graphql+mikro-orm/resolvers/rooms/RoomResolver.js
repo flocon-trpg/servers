@@ -108,7 +108,7 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
                 type: recordOperationElement_1.replace,
                 replace: {
                     newValue: {
-                        version: 1,
+                        $version: 1,
                         name: create.name,
                         role: create.role,
                         boards: {},
@@ -124,6 +124,7 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
             participantOperation = {
                 type: 'update',
                 update: {
+                    $version: 1,
                     role: update.role,
                     name: update.name,
                 }
@@ -137,7 +138,7 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
         };
     }
     const roomUpOperation = {
-        version: 1,
+        $version: 1,
         participants: {
             [myUserUid]: participantOperation,
         }
@@ -378,7 +379,7 @@ const analyzeTextAndSetToEntity = async (params) => {
     if (analyzed.isError) {
         return analyzed;
     }
-    const targetEntity = params.type === 'RoomPubMsg' ? new mikro_orm_1.RoomPubMsg({ textSource: params.textSource, text: analyzed.value.message }) : new mikro_orm_1.RoomPrvMsg({ textSource: params.textSource, text: analyzed.value.message });
+    const targetEntity = params.type === 'RoomPubMsg' ? new mikro_orm_1.RoomPubMsg({ initTextSource: params.textSource, initText: analyzed.value.message }) : new mikro_orm_1.RoomPrvMsg({ initTextSource: params.textSource, initText: analyzed.value.message });
     targetEntity.createdBy = core_1.Reference.create(params.createdBy);
     if (analyzed.value.diceResult != null) {
         if (analyzed.value.diceResult.isSecret) {
@@ -430,8 +431,8 @@ const createRoomPublicMessage = ({ msg, channelKey, }) => {
         __tstype: graphql_2.RoomPublicMessageType,
         channelKey,
         messageId: msg.id,
-        initText: msg.text,
-        initTextSource: (_a = msg.textSource) !== null && _a !== void 0 ? _a : msg.text,
+        initText: msg.initText,
+        initTextSource: (_a = msg.initTextSource) !== null && _a !== void 0 ? _a : msg.initText,
         updatedText: createUpdatedText(msg),
         textColor: (_b = msg.textColor) !== null && _b !== void 0 ? _b : undefined,
         commandResult: msg.commandResult == null ? undefined : {
@@ -463,8 +464,8 @@ const createRoomPrivateMessage = async ({ msg, myUserUid, visibleTo: visibleToCo
         customName: msg.customName,
         createdAt: msg.createdAt.getTime(),
         updatedAt: msg.textUpdatedAt,
-        initText: (_b = msg.text) !== null && _b !== void 0 ? _b : undefined,
-        initTextSource: (_c = msg.textSource) !== null && _c !== void 0 ? _c : msg.text,
+        initText: (_b = msg.initText) !== null && _b !== void 0 ? _b : undefined,
+        initTextSource: (_c = msg.initTextSource) !== null && _c !== void 0 ? _c : msg.initText,
         updatedText: createUpdatedText(msg),
         textColor: (_d = msg.textColor) !== null && _d !== void 0 ? _d : undefined,
         commandResult: msg.commandResult == null ? undefined : {
@@ -567,10 +568,10 @@ let RoomResolver = class RoomResolver {
                 name: input.roomName,
                 createdBy: decodedIdToken.uid,
                 value: {
-                    version: 1,
+                    $version: 1,
                     participants: {
                         [entryUser.userUid]: {
-                            version: 1,
+                            $version: 1,
                             role: ParticipantModule.Master,
                             name: input.participantName,
                             boards: {},
@@ -1394,7 +1395,10 @@ let RoomResolver = class RoomResolver {
                             createdBy: userUid,
                             room,
                             stateId: key,
-                            value: { type: MyNumberValueModule.deleteType },
+                            value: {
+                                $version: 1,
+                                type: MyNumberValueModule.deleteType
+                            },
                         })));
                     }
                     if (participant.replace.newValue != null) {
@@ -1402,7 +1406,10 @@ let RoomResolver = class RoomResolver {
                             createdBy: userUid,
                             room,
                             stateId: key,
-                            value: { type: MyNumberValueModule.createType },
+                            value: {
+                                $version: 1,
+                                type: MyNumberValueModule.createType
+                            },
                         })));
                     }
                 }
@@ -1413,7 +1420,13 @@ let RoomResolver = class RoomResolver {
                                 createdBy: userUid,
                                 room,
                                 stateId: key,
-                                value: value.replace.newValue == null ? { type: MyNumberValueModule.deleteType } : { type: MyNumberValueModule.createType },
+                                value: value.replace.newValue == null ? {
+                                    $version: 1,
+                                    type: MyNumberValueModule.deleteType
+                                } : {
+                                    $version: 1,
+                                    type: MyNumberValueModule.createType
+                                },
                             }));
                         }
                         else {
@@ -1430,7 +1443,7 @@ let RoomResolver = class RoomResolver {
             for (const log of myValueLogs) {
                 em.persist(log);
             }
-            const nextRoomState = await global_2.GlobalRoom.Global.applyToEntity({ em, target: room, prevState: roomState, operation });
+            const nextRoomState = global_2.GlobalRoom.Global.applyToEntity({ em, target: room, prevState: roomState, operation });
             await em.flush();
             const generateOperation = (deliverTo) => {
                 return {
@@ -1888,7 +1901,7 @@ let RoomResolver = class RoomResolver {
                         }
                     });
                 }
-                if (publicMsg.text == null && publicMsg.altTextToSecret == null && publicMsg.commandResult == null) {
+                if (publicMsg.initText == null && publicMsg.altTextToSecret == null && publicMsg.commandResult == null) {
                     return Result_1.ResultModule.ok({
                         result: {
                             failureType: DeleteMessageFailureType_1.DeleteMessageFailureType.MessageDeleted,
@@ -1930,7 +1943,7 @@ let RoomResolver = class RoomResolver {
                         }
                     });
                 }
-                if (privateMsg.text == null && privateMsg.altTextToSecret == null && privateMsg.commandResult == null) {
+                if (privateMsg.initText == null && privateMsg.altTextToSecret == null && privateMsg.commandResult == null) {
                     return Result_1.ResultModule.ok({
                         result: {
                             failureType: DeleteMessageFailureType_1.DeleteMessageFailureType.MessageDeleted,
@@ -2033,7 +2046,7 @@ let RoomResolver = class RoomResolver {
                         }
                     });
                 }
-                publicMsg.text = args.text;
+                publicMsg.initText = args.text;
                 publicMsg.textUpdatedAt = new Date().getTime();
                 await em.flush();
                 const payloadValue = {
@@ -2068,14 +2081,14 @@ let RoomResolver = class RoomResolver {
                         }
                     });
                 }
-                if (privateMsg.text == null) {
+                if (privateMsg.initText == null) {
                     return Result_1.ResultModule.ok({
                         result: {
                             failureType: EditMessageFailureType_1.EditMessageFailureType.MessageDeleted,
                         }
                     });
                 }
-                privateMsg.text = args.text;
+                privateMsg.initText = args.text;
                 privateMsg.textUpdatedAt = new Date().getTime();
                 await em.flush();
                 const payloadValue = {

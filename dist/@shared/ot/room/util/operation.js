@@ -23,7 +23,7 @@ exports.operation = void 0;
 const t = __importStar(require("io-ts"));
 const operation = (source, props) => t.intersection([
     t.type({
-        version: t.literal(source)
+        $version: t.literal(source)
     }),
     t.partial(props)
 ]);

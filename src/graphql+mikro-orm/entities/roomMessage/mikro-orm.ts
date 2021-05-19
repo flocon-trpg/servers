@@ -22,8 +22,7 @@ import * as MyNumberValueLogModule from '../../../@shared/ot/room/participant/my
 
 # text, textSource, updatedText, textUpdatedAt, commandResult, altTextToSecret, isSecretについて
 
-textとtextSourceは、投稿時のメッセージ。編集や削除されても残る。本来ならばinitTextやinitTextSourceという名前にしたほうが良さそうだが、マイグレーションでデータが損失するのを防ぐために今の名前になっている。
-TODO: ↑正式リリースまでにinitTextなどに変えたほうがいいか
+initTextとinitTextSourceは、投稿時のメッセージ。編集や削除されても残る。本来ならばinitTextやinitTextSourceという名前にしたほうが良さそうだが、マイグレーションでデータが損失するのを防ぐために今の名前になっている。
 
 各プロパティの詳細な関係は、./state-table.mdを参照。
 
@@ -78,9 +77,9 @@ export class RoomPubCh {
 // RoomPublicMessage
 @Entity()
 export class RoomPubMsg {
-    public constructor({ text, textSource }: { text: string; textSource: string | undefined }) {
-        this.text = text;
-        this.textSource = textSource;
+    public constructor({ initText, initTextSource }: { initText: string; initTextSource: string | undefined }) {
+        this.initText = initText;
+        this.initTextSource = initTextSource;
     }
 
     @PrimaryKey()
@@ -98,11 +97,11 @@ export class RoomPubMsg {
 
     // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
     @Property({ nullable: true, length: 65535, default: '' })
-    public textSource?: string;
+    public initTextSource?: string;
 
     // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
     @Property({ length: 65535, default: '' })
-    public text!: string;
+    public initText!: string;
 
     // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
     @Property({ nullable: true, length: 65535 })
@@ -176,9 +175,9 @@ export class RoomPubMsg {
 // RoomPrivateMessage
 @Entity()
 export class RoomPrvMsg {
-    public constructor({ text, textSource }: { text: string; textSource: string | undefined }) {
-        this.text = text;
-        this.textSource = textSource;
+    public constructor({ initText, initTextSource }: { initText: string; initTextSource: string | undefined }) {
+        this.initText = initText;
+        this.initTextSource = initTextSource;
     }
 
     @PrimaryKey()
@@ -196,11 +195,11 @@ export class RoomPrvMsg {
 
     // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
     @Property({ nullable: true, length: 65535, default: '' })
-    public textSource?: string;
+    public initTextSource?: string;
 
     // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
     @Property({ length: 65535, default: '' })
-    public text!: string;
+    public initText!: string;
 
     // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
     @Property({ nullable: true, length: 65535 })

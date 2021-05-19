@@ -22,12 +22,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.transformerFactory = exports.apply = exports.toClientOperation = exports.toServerOperation = exports.toClientState = exports.upOperation = exports.downOperation = exports.state = void 0;
 const t = __importStar(require("io-ts"));
 const Result_1 = require("../../../Result");
-const utils_1 = require("../../../utils");
 const ReplaceValueOperation = __importStar(require("../util/replaceOperation"));
 const v1_1 = require("../../filePath/v1");
 const operation_1 = require("../util/operation");
+const record_1 = require("../util/record");
 exports.state = t.type({
-    version: t.literal(1),
+    $version: t.literal(1),
     files: t.array(v1_1.filePath),
     volume: t.number,
 });
@@ -63,7 +63,7 @@ exports.apply = apply;
 exports.transformerFactory = ({
     composeLoose: ({ first, second }) => {
         const valueProps = {
-            version: 1,
+            $version: 1,
             files: ReplaceValueOperation.composeDownOperation(first.files, second.files),
             volume: ReplaceValueOperation.composeDownOperation(first.volume, second.volume),
         };
@@ -74,7 +74,7 @@ exports.transformerFactory = ({
             return Result_1.ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
         }
         const prevState = Object.assign({}, nextState);
-        const twoWayOperation = { version: 1 };
+        const twoWayOperation = { $version: 1 };
         if (downOperation.files !== undefined) {
             prevState.files = downOperation.files.oldValue;
             twoWayOperation.files = Object.assign(Object.assign({}, downOperation.files), { newValue: nextState.files });
@@ -83,10 +83,10 @@ exports.transformerFactory = ({
             prevState.volume = downOperation.volume.oldValue;
             twoWayOperation.volume = Object.assign(Object.assign({}, downOperation.volume), { newValue: nextState.volume });
         }
-        return Result_1.ResultModule.ok({ prevState, twoWayOperation: utils_1.undefinedForAll(twoWayOperation) ? undefined : twoWayOperation });
+        return Result_1.ResultModule.ok({ prevState, twoWayOperation: record_1.isIdRecord(twoWayOperation) ? undefined : twoWayOperation });
     },
     transform: ({ prevState, clientOperation, serverOperation }) => {
-        const twoWayOperation = { version: 1 };
+        const twoWayOperation = { $version: 1 };
         twoWayOperation.files = ReplaceValueOperation.transform({
             first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.files,
             second: clientOperation.files,
@@ -97,20 +97,20 @@ exports.transformerFactory = ({
             second: clientOperation.volume,
             prevState: prevState.volume,
         });
-        if (utils_1.undefinedForAll(twoWayOperation)) {
+        if (record_1.isIdRecord(twoWayOperation)) {
             return Result_1.ResultModule.ok(undefined);
         }
         return Result_1.ResultModule.ok(Object.assign({}, twoWayOperation));
     },
     diff: ({ prevState, nextState }) => {
-        const resultType = { version: 1 };
+        const resultType = { $version: 1 };
         if (prevState.files !== nextState.files) {
             resultType.files = { oldValue: prevState.files, newValue: nextState.files };
         }
         if (prevState.volume !== nextState.volume) {
             resultType.volume = { oldValue: prevState.volume, newValue: nextState.volume };
         }
-        if (utils_1.undefinedForAll(resultType)) {
+        if (record_1.isIdRecord(resultType)) {
             return undefined;
         }
         return Object.assign({}, resultType);

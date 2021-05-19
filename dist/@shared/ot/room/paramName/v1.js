@@ -22,11 +22,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.transformerFactory = exports.apply = exports.toClientOperation = exports.toServerOperation = exports.toClientState = exports.upOperation = exports.downOperation = exports.state = void 0;
 const t = __importStar(require("io-ts"));
 const Result_1 = require("../../../Result");
-const utils_1 = require("../../../utils");
 const operation_1 = require("../util/operation");
+const record_1 = require("../util/record");
 const ReplaceValueOperation = __importStar(require("../util/replaceOperation"));
 exports.state = t.type({
-    version: t.literal(1),
+    $version: t.literal(1),
     name: t.string,
 });
 exports.downOperation = operation_1.operation(1, {
@@ -56,7 +56,7 @@ exports.apply = apply;
 exports.transformerFactory = ({
     composeLoose: ({ first, second }) => {
         const valueProps = {
-            version: 1,
+            $version: 1,
             name: ReplaceValueOperation.composeDownOperation(first.name, second.name),
         };
         return Result_1.ResultModule.ok(valueProps);
@@ -66,7 +66,7 @@ exports.transformerFactory = ({
             return Result_1.ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
         }
         const prevState = Object.assign({}, nextState);
-        const twoWayOperation = { version: 1 };
+        const twoWayOperation = { $version: 1 };
         if (downOperation.name !== undefined) {
             prevState.name = downOperation.name.oldValue;
             twoWayOperation.name = Object.assign(Object.assign({}, downOperation.name), { newValue: nextState.name });
@@ -74,23 +74,23 @@ exports.transformerFactory = ({
         return Result_1.ResultModule.ok({ prevState, twoWayOperation });
     },
     transform: ({ prevState, clientOperation, serverOperation }) => {
-        const twoWayOperation = { version: 1 };
+        const twoWayOperation = { $version: 1 };
         twoWayOperation.name = ReplaceValueOperation.transform({
             first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.name,
             second: clientOperation.name,
             prevState: prevState.name,
         });
-        if (utils_1.undefinedForAll(twoWayOperation)) {
+        if (record_1.isIdRecord(twoWayOperation)) {
             return Result_1.ResultModule.ok(undefined);
         }
         return Result_1.ResultModule.ok(Object.assign({}, twoWayOperation));
     },
     diff: ({ prevState, nextState }) => {
-        const resultType = { version: 1 };
+        const resultType = { $version: 1 };
         if (prevState.name !== nextState.name) {
             resultType.name = { oldValue: prevState.name, newValue: nextState.name };
         }
-        if (utils_1.undefinedForAll(resultType)) {
+        if (record_1.isIdRecord(resultType)) {
             return undefined;
         }
         return Object.assign({}, resultType);

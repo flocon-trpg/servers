@@ -4,14 +4,14 @@ import { mapRecordOperationElement, recordDownOperationElementFactory, RecordTwo
 import { FilePath, filePath } from '../../../filePath/v1';
 import * as TextOperation from '../../util/textOperation';
 import * as Piece from '../../../piece/v1';
-import * as BoardLocation from '../../util/boardLocation';
+import * as BoardLocation from '../../../boardLocation/v1';
 import { TransformerFactory } from '../../util/transformerFactory';
 import * as ReplaceValueOperation from '../../util/replaceOperation';
 import * as DualKeyRecordOperation from '../../util/dualKeyRecordOperation';
 import * as RecordOperation from '../../util/recordOperation';
 import * as ParamRecordOperation from '../../util/paramRecordOperation';
 import { ResultModule } from '../../../../Result';
-import { chooseDualKeyRecord, chooseRecord, undefinedForAll } from '../../../../utils';
+import { chooseDualKeyRecord, chooseRecord } from '../../../../utils';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '../../../../textOperation';
 import { RecordTwoWayOperation } from '../../util/recordOperation';
 import { DualKeyRecordTransformer, DualKeyRecordTwoWayOperation } from '../../util/dualKeyRecordOperation';
@@ -21,9 +21,10 @@ import * as NumParam from './numParam/v1';
 import * as StrParam from './strParam/v1';
 import { createParamTransformerFactory, ParamRecordTransformer } from '../../util/paramRecordOperation';
 import { operation } from '../../util/operation';
+import { isIdRecord } from '../../util/record';
 
 export const state = t.type({
-    version: t.literal(1),
+    $version: t.literal(1),
 
     image: maybe(filePath),
     isPrivate: t.boolean,
@@ -60,7 +61,7 @@ export const downOperation = operation(1, {
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
-export const upOperation = operation(1,{
+export const upOperation = operation(1, {
     image: t.type({ newValue: maybe(filePath) }),
     isPrivate: t.type({ newValue: t.boolean }),
     name: t.type({ newValue: t.string }),
@@ -79,7 +80,7 @@ export const upOperation = operation(1,{
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
-    version: 1;
+    $version: 1;
 
     image?: ReplaceValueOperation.ReplaceValueTwoWayOperation<Maybe<FilePath>>;
     isPrivate?: ReplaceValueOperation.ReplaceValueTwoWayOperation<boolean>;
@@ -277,7 +278,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     }
     result.strParams = strParams.value;
 
-    const pieces = DualKeyRecordOperation.apply<Piece.State,Piece.UpOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
+    const pieces = DualKeyRecordOperation.apply<Piece.State, Piece.UpOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
         prevState: state.pieces, operation: operation.pieces, innerApply: ({ prevState, operation: upOperation }) => {
             return Piece.apply({ state: prevState, operation: upOperation });
         }
@@ -286,8 +287,8 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
         return pieces;
     }
     result.pieces = pieces.value;
-    
-    const tachieLocations = DualKeyRecordOperation.apply<BoardLocation.State,BoardLocation.UpOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
+
+    const tachieLocations = DualKeyRecordOperation.apply<BoardLocation.State, BoardLocation.UpOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
         prevState: state.tachieLocations, operation: operation.tachieLocations, innerApply: ({ prevState, operation: upOperation }) => {
             return BoardLocation.apply({ state: prevState, operation: upOperation });
         }
@@ -366,7 +367,7 @@ export const transformerFactory = (createdByMe: boolean): TransformerFactory<str
         }
 
         const valueProps: DownOperation = {
-            version: 1,
+            $version: 1,
 
             isPrivate: ReplaceValueOperation.composeDownOperation(first.isPrivate, second.isPrivate),
             name: ReplaceValueOperation.composeDownOperation(first.name, second.name),
@@ -455,7 +456,7 @@ export const transformerFactory = (createdByMe: boolean): TransformerFactory<str
             tachieLocations: tachieLocations.value.prevState,
         };
         const twoWayOperation: TwoWayOperation = {
-            version: 1,
+            $version: 1,
             boolParams: boolParams.value.twoWayOperation,
             numParams: numParams.value.twoWayOperation,
             numMaxParams: numMaxParams.value.twoWayOperation,
@@ -567,7 +568,7 @@ export const transformerFactory = (createdByMe: boolean): TransformerFactory<str
         }
 
         const twoWayOperation: TwoWayOperation = {
-            version: 1,
+            $version: 1,
             boolParams: boolParams.value,
             numParams: numParams.value,
             numMaxParams: numMaxParams.value,
@@ -604,7 +605,7 @@ export const transformerFactory = (createdByMe: boolean): TransformerFactory<str
             twoWayOperation.privateVarToml = transformed.value.secondPrime;
         }
 
-        if (undefinedForAll(twoWayOperation)) {
+        if (isIdRecord(twoWayOperation)) {
             return ResultModule.ok(undefined);
         }
 
@@ -653,7 +654,7 @@ export const transformerFactory = (createdByMe: boolean): TransformerFactory<str
             prevState: prevState.tachieLocations,
             nextState: nextState.tachieLocations,
         });
-        const resultType: TwoWayOperation = {version:1};
+        const resultType: TwoWayOperation = { $version: 1 };
         if (prevState.image !== nextState.image) {
             resultType.image = { oldValue: prevState.image, newValue: nextState.image };
         }
@@ -669,7 +670,7 @@ export const transformerFactory = (createdByMe: boolean): TransformerFactory<str
         if (prevState.privateVarToml !== nextState.privateVarToml) {
             resultType.privateVarToml = TextOperation.diff({ prev: prevState.privateVarToml, next: nextState.privateVarToml });
         }
-        if (undefinedForAll(resultType)) {
+        if (isIdRecord(resultType)) {
             return undefined;
         }
         return { ...resultType, boolParams, numParams, numMaxParams, strParams, pieces, tachieLocations };

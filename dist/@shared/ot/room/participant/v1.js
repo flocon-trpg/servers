@@ -32,26 +32,28 @@ const type_1 = require("../util/type");
 const ReplaceValueOperation = __importStar(require("../util/replaceOperation"));
 const Result_1 = require("../../../Result");
 const utils_1 = require("../../../utils");
+const operation_1 = require("../util/operation");
+const record_1 = require("../util/record");
 exports.Player = 'Player';
 exports.Spectator = 'Spectator';
 exports.Master = 'Master';
 const participantRole = t.union([t.literal(exports.Player), t.literal(exports.Spectator), t.literal(exports.Master)]);
 exports.state = t.type({
-    version: t.literal(1),
+    $version: t.literal(1),
     name: t.string,
     role: io_ts_1.maybe(participantRole),
     boards: t.record(t.string, Board.state),
     characters: t.record(t.string, Character.state),
     myNumberValues: t.record(t.string, MyNumberValue.state),
 });
-exports.downOperation = t.partial({
+exports.downOperation = operation_1.operation(1, {
     name: t.type({ oldValue: t.string }),
     role: t.type({ oldValue: io_ts_1.maybe(participantRole) }),
     boards: t.record(t.string, recordOperationElement_1.recordDownOperationElementFactory(Board.state, Board.downOperation)),
     characters: t.record(t.string, recordOperationElement_1.recordDownOperationElementFactory(Character.state, Character.downOperation)),
     myNumberValues: t.record(t.string, recordOperationElement_1.recordDownOperationElementFactory(MyNumberValue.state, MyNumberValue.downOperation)),
 });
-exports.upOperation = t.partial({
+exports.upOperation = operation_1.operation(1, {
     name: t.type({ newValue: t.string }),
     role: t.type({ newValue: io_ts_1.maybe(participantRole) }),
     boards: t.record(t.string, recordOperationElement_1.recordUpOperationElementFactory(Board.state, Board.upOperation)),
@@ -186,6 +188,7 @@ const transformerFactory = (requestedBy) => ({
             return myNumberValues;
         }
         const valueProps = {
+            $version: 1,
             name: ReplaceValueOperation.composeDownOperation((_a = first.name) !== null && _a !== void 0 ? _a : undefined, (_b = second.name) !== null && _b !== void 0 ? _b : undefined),
             role: ReplaceValueOperation.composeDownOperation((_c = first.role) !== null && _c !== void 0 ? _c : undefined, (_d = second.role) !== null && _d !== void 0 ? _d : undefined),
             boards: boards.value,
@@ -224,6 +227,7 @@ const transformerFactory = (requestedBy) => ({
         }
         const prevState = Object.assign(Object.assign({}, nextState), { boards: boards.value.prevState, characters: characters.value.prevState, myNumberValues: myNumberValues.value.prevState });
         const twoWayOperation = {
+            $version: 1,
             boards: boards.value.twoWayOperation,
             characters: characters.value.twoWayOperation,
             myNumberValues: myNumberValues.value.twoWayOperation,
@@ -270,6 +274,7 @@ const transformerFactory = (requestedBy) => ({
             return myNumberValues;
         }
         const twoWayOperation = {
+            $version: 1,
             boards: boards.value,
             characters: characters.value,
             myNumberValues: myNumberValues.value,
@@ -286,7 +291,7 @@ const transformerFactory = (requestedBy) => ({
                 prevState: prevState.role,
             });
         }
-        if (utils_1.undefinedForAll(twoWayOperation)) {
+        if (record_1.isIdRecord(twoWayOperation)) {
             return Result_1.ResultModule.ok(undefined);
         }
         return Result_1.ResultModule.ok(twoWayOperation);
@@ -307,6 +312,7 @@ const transformerFactory = (requestedBy) => ({
             nextState: nextState.myNumberValues,
         });
         const result = {
+            $version: 1,
             boards,
             characters,
             myNumberValues,
@@ -317,7 +323,7 @@ const transformerFactory = (requestedBy) => ({
         if (prevState.role != nextState.role) {
             result.role = { oldValue: prevState.role, newValue: nextState.role };
         }
-        if (utils_1.undefinedForAll(result)) {
+        if (record_1.isIdRecord(result)) {
             return undefined;
         }
         return result;

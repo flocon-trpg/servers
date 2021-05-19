@@ -1,68 +1,72 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.transformerFactory = exports.apply = exports.toClientOperation = exports.toServerOperation = exports.toClientState = exports.upOperation = exports.downOperation = exports.state = void 0;
-const t = __importStar(require("io-ts"));
-const Result_1 = require("../../../Result");
-const utils_1 = require("../../../utils");
-const ReplaceOperation = __importStar(require("./replaceOperation"));
+import * as t from 'io-ts';
+import { DualKey } from '../../DualKeyMap';
+import { ResultModule } from '../../Result';
+import { operation } from '../room/util/operation';
+import { isIdRecord } from '../room/util/record';
+import * as ReplaceOperation from '../room/util/replaceOperation';
+import { TransformerFactory } from '../room/util/transformerFactory';
+import { Apply, ToClientOperationParams } from '../room/util/type';
+
 const numberDownOperation = t.type({ oldValue: t.number });
 const booleanDownOperation = t.type({ oldValue: t.boolean });
 const numberUpOperation = t.type({ newValue: t.number });
 const booleanUpOperation = t.type({ newValue: t.boolean });
-exports.state = t.type({
+
+export const state = t.type({
+    $version: t.literal(1),
     h: t.number,
     isPrivate: t.boolean,
     w: t.number,
     x: t.number,
     y: t.number,
 });
-exports.downOperation = t.partial({
+
+export type State = t.TypeOf<typeof state>;
+
+export const downOperation = operation(1, {
     h: numberDownOperation,
     isPrivate: booleanDownOperation,
     w: numberDownOperation,
     x: numberDownOperation,
     y: numberDownOperation,
 });
-exports.upOperation = t.partial({
+
+export type DownOperation = t.TypeOf<typeof downOperation>;
+
+export const upOperation = operation(1, {
     h: numberUpOperation,
     isPrivate: booleanUpOperation,
     w: numberUpOperation,
     x: numberUpOperation,
     y: numberUpOperation,
 });
-const toClientState = (source) => {
+
+export type UpOperation = t.TypeOf<typeof upOperation>;
+
+export type TwoWayOperation = {
+    $version: 1;
+
+    h?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
+    isPrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
+    w?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
+    x?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
+    y?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
+}
+
+export const toClientState = (source: State): State => {
     return source;
 };
-exports.toClientState = toClientState;
-const toServerOperation = (source) => {
+
+export const toServerOperation = (source: TwoWayOperation): DownOperation => {
     return source;
 };
-exports.toServerOperation = toServerOperation;
-const toClientOperation = ({ diff }) => {
+
+export const toClientOperation = ({ diff }: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
     return diff;
 };
-exports.toClientOperation = toClientOperation;
-const apply = ({ state, operation }) => {
-    const result = Object.assign({}, state);
+
+export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
+    const result: State = { ...state };
     if (operation.h != null) {
         result.h = operation.h.newValue;
     }
@@ -78,85 +82,92 @@ const apply = ({ state, operation }) => {
     if (operation.y != null) {
         result.y = operation.y.newValue;
     }
-    return Result_1.ResultModule.ok(result);
+    return ResultModule.ok(result);
 };
-exports.apply = apply;
-const transformerFactory = (createdByMe) => ({
+
+export const transformerFactory = (createdByMe: boolean): TransformerFactory<DualKey<string, string>, State, State, DownOperation, UpOperation, TwoWayOperation> => ({
     composeLoose: ({ first, second }) => {
-        const valueProps = {
+        const valueProps: DownOperation = {
+            $version: 1,
             h: ReplaceOperation.composeDownOperation(first.h, second.h),
             isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
             w: ReplaceOperation.composeDownOperation(first.w, second.w),
             x: ReplaceOperation.composeDownOperation(first.x, second.x),
             y: ReplaceOperation.composeDownOperation(first.y, second.y),
         };
-        return Result_1.ResultModule.ok(valueProps);
+        return ResultModule.ok(valueProps);
     },
     restore: ({ nextState, downOperation }) => {
         if (downOperation === undefined) {
-            return Result_1.ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
+            return ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
         }
-        const prevState = Object.assign({}, nextState);
-        const twoWayOperation = {};
+        const prevState = { ...nextState };
+        const twoWayOperation: TwoWayOperation = { $version: 1 };
+
         if (downOperation.h !== undefined) {
             prevState.h = downOperation.h.oldValue;
-            twoWayOperation.h = Object.assign(Object.assign({}, downOperation.h), { newValue: nextState.h });
+            twoWayOperation.h = { ...downOperation.h, newValue: nextState.h };
         }
         if (downOperation.isPrivate !== undefined) {
             prevState.isPrivate = downOperation.isPrivate.oldValue;
-            twoWayOperation.isPrivate = Object.assign(Object.assign({}, downOperation.isPrivate), { newValue: nextState.isPrivate });
+            twoWayOperation.isPrivate = { ...downOperation.isPrivate, newValue: nextState.isPrivate };
         }
         if (downOperation.w !== undefined) {
             prevState.w = downOperation.w.oldValue;
-            twoWayOperation.w = Object.assign(Object.assign({}, downOperation.w), { newValue: nextState.w });
+            twoWayOperation.w = { ...downOperation.w, newValue: nextState.w };
         }
         if (downOperation.x !== undefined) {
             prevState.x = downOperation.x.oldValue;
-            twoWayOperation.x = Object.assign(Object.assign({}, downOperation.x), { newValue: nextState.x });
+            twoWayOperation.x = { ...downOperation.x, newValue: nextState.x };
         }
         if (downOperation.y !== undefined) {
             prevState.y = downOperation.y.oldValue;
-            twoWayOperation.y = Object.assign(Object.assign({}, downOperation.y), { newValue: nextState.y });
+            twoWayOperation.y = { ...downOperation.y, newValue: nextState.y };
         }
-        return Result_1.ResultModule.ok({ prevState, twoWayOperation });
+
+        return ResultModule.ok({ prevState, twoWayOperation });
     },
     transform: ({ prevState, clientOperation, serverOperation, currentState }) => {
         if (!createdByMe && currentState.isPrivate) {
-            return Result_1.ResultModule.ok(undefined);
+            return ResultModule.ok(undefined);
         }
-        const twoWayOperation = {};
+
+        const twoWayOperation: TwoWayOperation = { $version: 1 };
+
         twoWayOperation.h = ReplaceOperation.transform({
-            first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.h,
+            first: serverOperation?.h,
             second: clientOperation.h,
             prevState: prevState.h,
         });
         twoWayOperation.isPrivate = ReplaceOperation.transform({
-            first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.isPrivate,
+            first: serverOperation?.isPrivate,
             second: clientOperation.isPrivate,
             prevState: prevState.isPrivate,
         });
         twoWayOperation.w = ReplaceOperation.transform({
-            first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.w,
+            first: serverOperation?.w,
             second: clientOperation.w,
             prevState: prevState.w,
         });
         twoWayOperation.x = ReplaceOperation.transform({
-            first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.x,
+            first: serverOperation?.x,
             second: clientOperation.x,
             prevState: prevState.x,
         });
         twoWayOperation.y = ReplaceOperation.transform({
-            first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.y,
+            first: serverOperation?.y,
             second: clientOperation.y,
             prevState: prevState.y,
         });
-        if (utils_1.undefinedForAll(twoWayOperation)) {
-            return Result_1.ResultModule.ok(undefined);
+
+        if (isIdRecord(twoWayOperation)) {
+            return ResultModule.ok(undefined);
         }
-        return Result_1.ResultModule.ok(twoWayOperation);
+
+        return ResultModule.ok(twoWayOperation);
     },
     diff: ({ prevState, nextState }) => {
-        const resultType = {};
+        const resultType: TwoWayOperation = { $version: 1 };
         if (prevState.h !== nextState.h) {
             resultType.h = { oldValue: prevState.h, newValue: nextState.h };
         }
@@ -172,13 +183,14 @@ const transformerFactory = (createdByMe) => ({
         if (prevState.y !== nextState.y) {
             resultType.y = { oldValue: prevState.y, newValue: nextState.y };
         }
-        if (utils_1.undefinedForAll(resultType)) {
+        if (isIdRecord(resultType)) {
             return undefined;
         }
         return resultType;
     },
     applyBack: ({ downOperation, nextState }) => {
-        const result = Object.assign({}, nextState);
+        const result = { ...nextState };
+
         if (downOperation.h !== undefined) {
             result.h = downOperation.h.oldValue;
         }
@@ -194,11 +206,11 @@ const transformerFactory = (createdByMe) => ({
         if (downOperation.y !== undefined) {
             result.y = downOperation.y.oldValue;
         }
-        return Result_1.ResultModule.ok(result);
+
+        return ResultModule.ok(result);
     },
     toServerState: ({ clientState }) => clientState,
     protectedValuePolicy: {
         cancelRemove: ({ nextState }) => !createdByMe && nextState.isPrivate,
     }
 });
-exports.transformerFactory = transformerFactory;

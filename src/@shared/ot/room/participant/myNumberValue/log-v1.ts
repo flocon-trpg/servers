@@ -8,6 +8,8 @@ export const createType = 'create';
 export const deleteType = 'delete';
 
 const update = t.intersection([t.type({
+    $version: t.literal(1),
+
     type: t.literal(updateType),
     value: t.boolean,
     isValuePrivate: t.boolean,
@@ -16,14 +18,26 @@ const update = t.intersection([t.type({
 })]);
 
 export const main = t.union([
-    t.type({ type: t.literal(createType) }),
-    t.type({ type: t.literal(deleteType) }),
+    t.type({
+        $version: t.literal(1),
+        type: t.literal(createType)
+    }),
+    t.type({
+        $version: t.literal(1),
+        type: t.literal(deleteType)
+    }),
     update,
 ]);
 
 export const exactMain = t.union([
-    t.strict({ type: t.literal(createType) }),
-    t.strict({ type: t.literal(deleteType) }),
+    t.strict({
+        $version: t.literal(1),
+        type: t.literal(createType)
+    }),
+    t.strict({
+        $version: t.literal(1),
+        type: t.literal(deleteType)
+    }),
     t.exact(update),
 ]);
 
@@ -31,6 +45,7 @@ export type Main = t.TypeOf<typeof main>;
 
 export const ofOperation = (source: MyNumberValue.TwoWayOperation): Main => {
     return {
+        $version: 1,
         type: updateType,
         value: source.value != null && source.value.oldValue !== source.value.newValue,
         isValuePrivate: source.isValuePrivate != null && source.isValuePrivate.oldValue !== source.isValuePrivate.newValue,

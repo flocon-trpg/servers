@@ -7,7 +7,7 @@ import { ResultModule } from '../../../../../Result';
 import { operation } from '../../../util/operation';
 
 export const state = t.type({
-    version: t.literal(1),
+    $version: t.literal(1),
 
     isValuePrivate: t.boolean,
     value: maybe(t.boolean),
@@ -30,7 +30,7 @@ export const upOperation = operation(1, {
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
-    version: 1;
+    $version: 1;
 
     isValuePrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     value?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<boolean>>;
