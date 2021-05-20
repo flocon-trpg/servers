@@ -1010,7 +1010,7 @@ export namespace TextTwoWayOperation {
         return builder.build();
     };
 
-    export const transform = ({ first, second }: { first: Operation; second: Operation }): CustomResult<{ firstPrime: Operation; secondPrime: Operation }, ComposeAndTransformError> => {
+    export const serverTransform = ({ first, second }: { first: Operation; second: Operation }): CustomResult<{ firstPrime: Operation; secondPrime: Operation }, ComposeAndTransformError> => {
         return transformCore({
             first: [...new TextOperationBuilder(twoWayFactory, first).toUnits()],
             second: [...new TextOperationBuilder(twoWayFactory, second).toUnits()],

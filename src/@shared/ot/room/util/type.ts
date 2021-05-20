@@ -1,18 +1,22 @@
 import { CustomResult, Result } from '../../../Result';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '../../../textOperation';
 
-export type Apply<TState, TOperation> = (params: { state: TState; operation: TOperation }) => CustomResult<TState, string | ApplyError<PositiveInt> | ComposeAndTransformError>;
+type Error = string | ApplyError<PositiveInt> | ComposeAndTransformError;
 
-export type Compose<TOperation> = (params: { prev: TOperation; next: TOperation }) => Result<TOperation | undefined>;
+export type Apply<TState, TOperation> = (params: { state: TState; operation: TOperation }) => CustomResult<TState, Error>;
+
+export type Compose<TOperation> = (params: { first: TOperation; second: TOperation }) => CustomResult<TOperation | undefined, Error>;
 
 export type Diff<TState, TOperation> = (params: { prevState: TState; nextState: TState }) => TOperation | undefined;
 
-export type Restore<TState, TDownOperation, TTwoWayOperation> = (params: { nextState: TState; downOperation: TDownOperation }) => Result<{
+export type Restore<TState, TDownOperation, TTwoWayOperation> = (params: { nextState: TState; downOperation: TDownOperation }) => CustomResult<{
     prevState: TState;
-    twoWayOperation: TTwoWayOperation;
-}>
+    twoWayOperation: TTwoWayOperation | undefined;
+}, Error>
 
-export type Transform<TServerState, TTwoWayOperation, TUpOperation> = (params: { prevState: TServerState; currentState: TServerState; serverOperation: TTwoWayOperation | undefined; clientOperation: TUpOperation }) => Result<TTwoWayOperation | undefined>;
+export type ServerTransform<TServerState, TTwoWayOperation, TUpOperation> = (params: { prevState: TServerState; currentState: TServerState; serverOperation: TTwoWayOperation | undefined; clientOperation: TUpOperation }) => CustomResult<TTwoWayOperation | undefined, Error>;
+
+export type ClientTransform<TOperation> = (params: { first: TOperation; second: TOperation }) => CustomResult<{ firstPrime: TOperation | undefined; secondPrime: TOperation | undefined }, Error>
 
 // Ensure this:
 // - diff(prevState) = nextState

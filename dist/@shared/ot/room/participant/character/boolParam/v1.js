@@ -19,12 +19,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createTransformerFactory = exports.apply = exports.toClientOperation = exports.toServerOperation = exports.toClientState = exports.upOperation = exports.downOperation = exports.state = void 0;
+exports.upOperation = exports.downOperation = exports.state = void 0;
 const t = __importStar(require("io-ts"));
 const io_ts_1 = require("../../../../../io-ts");
-const paramRecordOperation_1 = require("../../../util/paramRecordOperation");
-const ReplaceOperation = __importStar(require("../../../util/replaceOperation"));
-const Result_1 = require("../../../../../Result");
 const operation_1 = require("../../../util/operation");
 exports.state = t.type({
     $version: t.literal(1),
@@ -39,39 +36,3 @@ exports.upOperation = operation_1.operation(1, {
     isValuePrivate: t.type({ newValue: t.boolean }),
     value: t.type({ newValue: io_ts_1.maybe(t.boolean) }),
 });
-const toClientState = (createdByMe) => (source) => {
-    return Object.assign(Object.assign({}, source), { value: source.isValuePrivate && !createdByMe ? undefined : source.value });
-};
-exports.toClientState = toClientState;
-const toServerOperation = (source) => {
-    return source;
-};
-exports.toServerOperation = toServerOperation;
-const toClientOperation = (createdByMe) => ({ prevState, nextState, diff }) => {
-    return Object.assign(Object.assign({}, diff), { value: ReplaceOperation.toPrivateClientOperation({
-            oldValue: {
-                value: prevState.value,
-                isValuePrivate: prevState.isValuePrivate,
-            },
-            newValue: {
-                value: nextState.value,
-                isValuePrivate: nextState.isValuePrivate,
-            },
-            defaultState: undefined,
-            createdByMe,
-        }) });
-};
-exports.toClientOperation = toClientOperation;
-const apply = ({ state, operation }) => {
-    const result = Object.assign({}, state);
-    if (operation.isValuePrivate != null) {
-        result.isValuePrivate = operation.isValuePrivate.newValue;
-    }
-    if (operation.value != null) {
-        result.value = operation.value.newValue;
-    }
-    return Result_1.ResultModule.ok(result);
-};
-exports.apply = apply;
-const createTransformerFactory = (createdByMe) => paramRecordOperation_1.createParamTransformerFactory(createdByMe);
-exports.createTransformerFactory = createTransformerFactory;

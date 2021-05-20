@@ -2,9 +2,8 @@ import * as t from 'io-ts';
 import { ResultModule } from '../../../Result';
 import { operation } from '../util/operation';
 import { isIdRecord } from '../util/record';
-import * as ReplaceValueOperation from '../util/replaceOperation';
-import { TransformerFactory } from '../util/transformerFactory';
-import { Apply, ToClientOperationParams, } from '../util/type';
+import * as ReplaceOperation from '../util/replaceOperation';
+import { Apply, ClientTransform, Compose, Diff, Restore, ServerTransform, ToClientOperationParams, } from '../util/type';
 
 export const state = t.type({
     $version: t.literal(1),
@@ -29,17 +28,21 @@ export type UpOperation = t.TypeOf<typeof upOperation>;
 export type TwoWayOperation = {
     $version: 1;
 
-    name?: ReplaceValueOperation.ReplaceValueTwoWayOperation<string>;
+    name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
 }
 
 export const toClientState = (source: State): State => source;
 
-export const toServerOperation = (source: TwoWayOperation): DownOperation => {
+export const toClientOperation = ({ diff }: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
+    return diff;
+};
+
+export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return source;
 };
 
-export const toClientOperation = ({ diff }: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
-    return diff;
+export const toUpOperation = (source: TwoWayOperation): UpOperation => {
+    return source;
 };
 
 export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
@@ -50,64 +53,93 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     return ResultModule.ok(result);
 };
 
-export const transformerFactory: TransformerFactory<string, State, State, DownOperation, UpOperation, TwoWayOperation> = ({
-    composeLoose: ({ first, second }) => {
-        const valueProps: DownOperation = {
-            $version: 1,
-            name: ReplaceValueOperation.composeDownOperation(first.name, second.name),
-        };
-        return ResultModule.ok(valueProps);
-    },
-    restore: ({ nextState, downOperation }) => {
-        if (downOperation === undefined) {
-            return ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
-        }
+export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
+    const result = { ...state };
 
-        const prevState: State = { ...nextState };
-        const twoWayOperation: TwoWayOperation = { $version: 1 };
-
-        if (downOperation.name !== undefined) {
-            prevState.name = downOperation.name.oldValue;
-            twoWayOperation.name = { ...downOperation.name, newValue: nextState.name };
-        }
-
-        return ResultModule.ok({ prevState, twoWayOperation });
-    },
-    transform: ({ prevState, clientOperation, serverOperation }) => {
-        const twoWayOperation: TwoWayOperation = { $version: 1 };
-
-        twoWayOperation.name = ReplaceValueOperation.transform({
-            first: serverOperation?.name,
-            second: clientOperation.name,
-            prevState: prevState.name,
-        });
-
-        if (isIdRecord(twoWayOperation)) {
-            return ResultModule.ok(undefined);
-        }
-
-        return ResultModule.ok({ ...twoWayOperation });
-    },
-    diff: ({ prevState, nextState }) => {
-        const resultType: TwoWayOperation = { $version: 1 };
-        if (prevState.name !== nextState.name) {
-            resultType.name = { oldValue: prevState.name, newValue: nextState.name };
-        }
-        if (isIdRecord(resultType)) {
-            return undefined;
-        }
-        return { ...resultType };
-    },
-    applyBack: ({ downOperation, nextState }) => {
-        const result = { ...nextState };
-
-        if (downOperation.name !== undefined) {
-            result.name = downOperation.name.oldValue;
-        }
-
-        return ResultModule.ok(result);
-    },
-    toServerState: ({ clientState }) => clientState,
-    protectedValuePolicy: {
+    if (operation.name !== undefined) {
+        result.name = operation.name.oldValue;
     }
-});
+
+    return ResultModule.ok(result);
+};
+
+export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
+    const valueProps: UpOperation = {
+        $version: 1,
+        name: ReplaceOperation.composeUpOperation(first.name, second.name),
+    };
+    return ResultModule.ok(valueProps);
+};
+
+export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
+    const valueProps: DownOperation = {
+        $version: 1,
+        name: ReplaceOperation.composeDownOperation(first.name, second.name),
+    };
+    return ResultModule.ok(valueProps);
+};
+
+export const restore: Restore<State, DownOperation, TwoWayOperation> = ({ nextState, downOperation }) => {
+    if (downOperation === undefined) {
+        return ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
+    }
+
+    const prevState: State = { ...nextState };
+    const twoWayOperation: TwoWayOperation = { $version: 1 };
+
+    if (downOperation.name !== undefined) {
+        prevState.name = downOperation.name.oldValue;
+        twoWayOperation.name = { ...downOperation.name, newValue: nextState.name };
+    }
+
+    return ResultModule.ok({ prevState, twoWayOperation });
+};
+
+export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
+    const resultType: TwoWayOperation = { $version: 1 };
+    if (prevState.name !== nextState.name) {
+        resultType.name = { oldValue: prevState.name, newValue: nextState.name };
+    }
+    if (isIdRecord(resultType)) {
+        return undefined;
+    }
+    return resultType;
+};
+
+export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperation> = ({ prevState, clientOperation, serverOperation }) => {
+    const twoWayOperation: TwoWayOperation = { $version: 1 };
+
+    twoWayOperation.name = ReplaceOperation.serverTransform({
+        first: serverOperation?.name,
+        second: clientOperation.name,
+        prevState: prevState.name,
+    });
+
+    if (isIdRecord(twoWayOperation)) {
+        return ResultModule.ok(undefined);
+    }
+
+    return ResultModule.ok({ ...twoWayOperation });
+};
+
+export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
+    const name = ReplaceOperation.clientTransform({
+        first: first.name,
+        second: second.name,
+    });
+
+    const firstPrime: UpOperation = {
+        $version: 1,
+        name: name.firstPrime,
+    };
+
+    const secondPrime: UpOperation = {
+        $version: 1,
+        name: name.secondPrime,
+    };
+
+    return ResultModule.ok({
+        firstPrime: isIdRecord(firstPrime) ? undefined : firstPrime,
+        secondPrime: isIdRecord(secondPrime) ? undefined : secondPrime,
+    });
+};

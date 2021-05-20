@@ -19,11 +19,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.transformerFactory = exports.apply = exports.toClientOperation = exports.toServerOperation = exports.toClientState = exports.upOperation = exports.downOperation = exports.state = void 0;
+exports.clientTransform = exports.serverTransform = exports.diff = exports.restore = exports.composeDownOperation = exports.composeUpOperation = exports.applyBack = exports.apply = exports.toUpOperation = exports.toDownOperation = exports.toClientOperation = exports.toClientState = exports.upOperation = exports.downOperation = exports.state = void 0;
 const t = __importStar(require("io-ts"));
 const Result_1 = require("../../../../Result");
 const io_ts_1 = require("../../../../io-ts");
-const ReplaceValueOperation = __importStar(require("../../util/replaceOperation"));
+const ReplaceOperation = __importStar(require("../../util/replaceOperation"));
 const v1_1 = require("../../../filePath/v1");
 const operation_1 = require("../../util/operation");
 const record_1 = require("../../util/record");
@@ -67,14 +67,18 @@ exports.upOperation = operation_1.operation(1, {
 });
 const toClientState = (source) => source;
 exports.toClientState = toClientState;
-const toServerOperation = (source) => {
-    return source;
-};
-exports.toServerOperation = toServerOperation;
 const toClientOperation = ({ diff }) => {
     return diff;
 };
 exports.toClientOperation = toClientOperation;
+const toDownOperation = (source) => {
+    return source;
+};
+exports.toDownOperation = toDownOperation;
+const toUpOperation = (source) => {
+    return source;
+};
+exports.toUpOperation = toUpOperation;
 const apply = ({ state, operation }) => {
     const result = Object.assign({}, state);
     if (operation.backgroundImage != null) {
@@ -107,185 +111,269 @@ const apply = ({ state, operation }) => {
     return Result_1.ResultModule.ok(result);
 };
 exports.apply = apply;
-exports.transformerFactory = ({
-    composeLoose: ({ first, second }) => {
-        const valueProps = {
-            $version: 1,
-            backgroundImage: ReplaceValueOperation.composeDownOperation(first.backgroundImage, second.backgroundImage),
-            backgroundImageZoom: ReplaceValueOperation.composeDownOperation(first.backgroundImageZoom, second.backgroundImageZoom),
-            cellColumnCount: ReplaceValueOperation.composeDownOperation(first.cellColumnCount, second.cellColumnCount),
-            cellHeight: ReplaceValueOperation.composeDownOperation(first.cellHeight, second.cellHeight),
-            cellOffsetX: ReplaceValueOperation.composeDownOperation(first.cellOffsetX, second.cellOffsetX),
-            cellOffsetY: ReplaceValueOperation.composeDownOperation(first.cellOffsetY, second.cellOffsetY),
-            cellRowCount: ReplaceValueOperation.composeDownOperation(first.cellRowCount, second.cellRowCount),
-            cellWidth: ReplaceValueOperation.composeDownOperation(first.cellWidth, second.cellWidth),
-            name: ReplaceValueOperation.composeDownOperation(first.name, second.name),
-        };
-        return Result_1.ResultModule.ok(valueProps);
-    },
-    restore: ({ nextState, downOperation }) => {
-        var _a, _b, _c;
-        if (downOperation === undefined) {
-            return Result_1.ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
-        }
-        const prevState = Object.assign({}, nextState);
-        const twoWayOperation = { $version: 1 };
-        if (downOperation.backgroundImage !== undefined) {
-            prevState.backgroundImage = (_a = downOperation.backgroundImage.oldValue) !== null && _a !== void 0 ? _a : undefined;
-            twoWayOperation.backgroundImage = { oldValue: (_b = downOperation.backgroundImage.oldValue) !== null && _b !== void 0 ? _b : undefined, newValue: (_c = nextState.backgroundImage) !== null && _c !== void 0 ? _c : undefined };
-        }
-        if (downOperation.backgroundImageZoom !== undefined) {
-            prevState.backgroundImageZoom = downOperation.backgroundImageZoom.oldValue;
-            twoWayOperation.backgroundImageZoom = Object.assign(Object.assign({}, downOperation.backgroundImageZoom), { newValue: nextState.backgroundImageZoom });
-        }
-        if (downOperation.cellColumnCount !== undefined) {
-            prevState.cellColumnCount = downOperation.cellColumnCount.oldValue;
-            twoWayOperation.cellColumnCount = Object.assign(Object.assign({}, downOperation.cellColumnCount), { newValue: nextState.cellColumnCount });
-        }
-        if (downOperation.cellHeight !== undefined) {
-            prevState.cellHeight = downOperation.cellHeight.oldValue;
-            twoWayOperation.cellHeight = Object.assign(Object.assign({}, downOperation.cellHeight), { newValue: nextState.cellHeight });
-        }
-        if (downOperation.cellOffsetX !== undefined) {
-            prevState.cellOffsetX = downOperation.cellOffsetX.oldValue;
-            twoWayOperation.cellOffsetX = Object.assign(Object.assign({}, downOperation.cellOffsetX), { newValue: nextState.cellOffsetX });
-        }
-        if (downOperation.cellOffsetY !== undefined) {
-            prevState.cellOffsetY = downOperation.cellOffsetY.oldValue;
-            twoWayOperation.cellOffsetY = Object.assign(Object.assign({}, downOperation.cellOffsetY), { newValue: nextState.cellOffsetY });
-        }
-        if (downOperation.cellRowCount !== undefined) {
-            prevState.cellRowCount = downOperation.cellRowCount.oldValue;
-            twoWayOperation.cellRowCount = Object.assign(Object.assign({}, downOperation.cellRowCount), { newValue: nextState.cellRowCount });
-        }
-        if (downOperation.cellWidth !== undefined) {
-            prevState.cellWidth = downOperation.cellWidth.oldValue;
-            twoWayOperation.cellWidth = Object.assign(Object.assign({}, downOperation.cellWidth), { newValue: nextState.cellWidth });
-        }
-        if (downOperation.name !== undefined) {
-            prevState.name = downOperation.name.oldValue;
-            twoWayOperation.name = Object.assign(Object.assign({}, downOperation.name), { newValue: nextState.name });
-        }
-        return Result_1.ResultModule.ok({ prevState, twoWayOperation });
-    },
-    transform: ({ prevState, clientOperation, serverOperation }) => {
-        const twoWayOperation = { $version: 1 };
-        twoWayOperation.backgroundImage = ReplaceValueOperation.transform({
-            first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.backgroundImage,
-            second: clientOperation.backgroundImage,
-            prevState: prevState.backgroundImage,
-        });
-        twoWayOperation.backgroundImageZoom = ReplaceValueOperation.transform({
-            first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.backgroundImageZoom,
-            second: clientOperation.backgroundImageZoom,
-            prevState: prevState.backgroundImageZoom,
-        });
-        twoWayOperation.cellColumnCount = ReplaceValueOperation.transform({
-            first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.cellColumnCount,
-            second: clientOperation.cellColumnCount,
-            prevState: prevState.cellColumnCount,
-        });
-        twoWayOperation.cellHeight = ReplaceValueOperation.transform({
-            first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.cellHeight,
-            second: clientOperation.cellHeight,
-            prevState: prevState.cellHeight,
-        });
-        twoWayOperation.cellOffsetX = ReplaceValueOperation.transform({
-            first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.cellOffsetX,
-            second: clientOperation.cellOffsetX,
-            prevState: prevState.cellOffsetX,
-        });
-        twoWayOperation.cellOffsetY = ReplaceValueOperation.transform({
-            first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.cellOffsetY,
-            second: clientOperation.cellOffsetY,
-            prevState: prevState.cellOffsetY,
-        });
-        twoWayOperation.cellRowCount = ReplaceValueOperation.transform({
-            first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.cellRowCount,
-            second: clientOperation.cellRowCount,
-            prevState: prevState.cellRowCount,
-        });
-        twoWayOperation.cellWidth = ReplaceValueOperation.transform({
-            first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.cellWidth,
-            second: clientOperation.cellWidth,
-            prevState: prevState.cellWidth,
-        });
-        twoWayOperation.name = ReplaceValueOperation.transform({
-            first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.name,
-            second: clientOperation.name,
-            prevState: prevState.name,
-        });
-        if (record_1.isIdRecord(twoWayOperation)) {
-            return Result_1.ResultModule.ok(undefined);
-        }
-        return Result_1.ResultModule.ok(twoWayOperation);
-    },
-    diff: ({ prevState, nextState }) => {
-        const resultType = { $version: 1 };
-        if (prevState.backgroundImage !== nextState.backgroundImage) {
-            resultType.backgroundImage = { oldValue: prevState.backgroundImage, newValue: nextState.backgroundImage };
-        }
-        if (prevState.backgroundImageZoom !== nextState.backgroundImageZoom) {
-            resultType.backgroundImageZoom = { oldValue: prevState.backgroundImageZoom, newValue: nextState.backgroundImageZoom };
-        }
-        if (prevState.cellColumnCount !== nextState.cellColumnCount) {
-            resultType.cellColumnCount = { oldValue: prevState.cellColumnCount, newValue: nextState.cellColumnCount };
-        }
-        if (prevState.cellHeight !== nextState.cellHeight) {
-            resultType.cellHeight = { oldValue: prevState.cellHeight, newValue: nextState.cellHeight };
-        }
-        if (prevState.cellOffsetX !== nextState.cellOffsetX) {
-            resultType.cellOffsetX = { oldValue: prevState.cellOffsetX, newValue: nextState.cellOffsetX };
-        }
-        if (prevState.cellOffsetY !== nextState.cellOffsetY) {
-            resultType.cellOffsetY = { oldValue: prevState.cellOffsetY, newValue: nextState.cellOffsetY };
-        }
-        if (prevState.cellRowCount !== nextState.cellRowCount) {
-            resultType.cellRowCount = { oldValue: prevState.cellRowCount, newValue: nextState.cellRowCount };
-        }
-        if (prevState.cellWidth !== nextState.cellWidth) {
-            resultType.cellWidth = { oldValue: prevState.cellWidth, newValue: nextState.cellWidth };
-        }
-        if (prevState.name !== nextState.name) {
-            resultType.name = { oldValue: prevState.name, newValue: nextState.name };
-        }
-        if (record_1.isIdRecord(resultType)) {
-            return undefined;
-        }
-        return resultType;
-    },
-    applyBack: ({ downOperation, nextState }) => {
-        var _a, _b, _c, _d, _e, _f, _g, _h;
-        const result = Object.assign({}, nextState);
-        if (downOperation.backgroundImage !== undefined) {
-            result.backgroundImage = (_a = downOperation.backgroundImage.oldValue) !== null && _a !== void 0 ? _a : undefined;
-        }
-        if (downOperation.backgroundImageZoom !== undefined) {
-            result.backgroundImageZoom = (_b = downOperation.backgroundImageZoom.oldValue) !== null && _b !== void 0 ? _b : undefined;
-        }
-        if (downOperation.cellColumnCount !== undefined) {
-            result.cellColumnCount = (_c = downOperation.cellColumnCount.oldValue) !== null && _c !== void 0 ? _c : undefined;
-        }
-        if (downOperation.cellHeight !== undefined) {
-            result.cellHeight = (_d = downOperation.cellHeight.oldValue) !== null && _d !== void 0 ? _d : undefined;
-        }
-        if (downOperation.cellOffsetX !== undefined) {
-            result.cellOffsetX = (_e = downOperation.cellOffsetX.oldValue) !== null && _e !== void 0 ? _e : undefined;
-        }
-        if (downOperation.cellOffsetY !== undefined) {
-            result.cellOffsetY = (_f = downOperation.cellOffsetY.oldValue) !== null && _f !== void 0 ? _f : undefined;
-        }
-        if (downOperation.cellRowCount !== undefined) {
-            result.cellRowCount = (_g = downOperation.cellRowCount.oldValue) !== null && _g !== void 0 ? _g : undefined;
-        }
-        if (downOperation.cellWidth !== undefined) {
-            result.cellWidth = (_h = downOperation.cellWidth.oldValue) !== null && _h !== void 0 ? _h : undefined;
-        }
-        if (downOperation.name !== undefined) {
-            result.name = downOperation.name.oldValue;
-        }
-        return Result_1.ResultModule.ok(result);
-    },
-    toServerState: ({ clientState }) => clientState,
-    protectedValuePolicy: {}
-});
+const applyBack = ({ state, operation }) => {
+    var _a, _b, _c, _d, _e, _f, _g, _h;
+    const result = Object.assign({}, state);
+    if (operation.backgroundImage !== undefined) {
+        result.backgroundImage = (_a = operation.backgroundImage.oldValue) !== null && _a !== void 0 ? _a : undefined;
+    }
+    if (operation.backgroundImageZoom !== undefined) {
+        result.backgroundImageZoom = (_b = operation.backgroundImageZoom.oldValue) !== null && _b !== void 0 ? _b : undefined;
+    }
+    if (operation.cellColumnCount !== undefined) {
+        result.cellColumnCount = (_c = operation.cellColumnCount.oldValue) !== null && _c !== void 0 ? _c : undefined;
+    }
+    if (operation.cellHeight !== undefined) {
+        result.cellHeight = (_d = operation.cellHeight.oldValue) !== null && _d !== void 0 ? _d : undefined;
+    }
+    if (operation.cellOffsetX !== undefined) {
+        result.cellOffsetX = (_e = operation.cellOffsetX.oldValue) !== null && _e !== void 0 ? _e : undefined;
+    }
+    if (operation.cellOffsetY !== undefined) {
+        result.cellOffsetY = (_f = operation.cellOffsetY.oldValue) !== null && _f !== void 0 ? _f : undefined;
+    }
+    if (operation.cellRowCount !== undefined) {
+        result.cellRowCount = (_g = operation.cellRowCount.oldValue) !== null && _g !== void 0 ? _g : undefined;
+    }
+    if (operation.cellWidth !== undefined) {
+        result.cellWidth = (_h = operation.cellWidth.oldValue) !== null && _h !== void 0 ? _h : undefined;
+    }
+    if (operation.name !== undefined) {
+        result.name = operation.name.oldValue;
+    }
+    return Result_1.ResultModule.ok(result);
+};
+exports.applyBack = applyBack;
+const composeUpOperation = ({ first, second }) => {
+    const valueProps = {
+        $version: 1,
+        backgroundImage: ReplaceOperation.composeUpOperation(first.backgroundImage, second.backgroundImage),
+        backgroundImageZoom: ReplaceOperation.composeUpOperation(first.backgroundImageZoom, second.backgroundImageZoom),
+        cellColumnCount: ReplaceOperation.composeUpOperation(first.cellColumnCount, second.cellColumnCount),
+        cellHeight: ReplaceOperation.composeUpOperation(first.cellHeight, second.cellHeight),
+        cellOffsetX: ReplaceOperation.composeUpOperation(first.cellOffsetX, second.cellOffsetX),
+        cellOffsetY: ReplaceOperation.composeUpOperation(first.cellOffsetY, second.cellOffsetY),
+        cellRowCount: ReplaceOperation.composeUpOperation(first.cellRowCount, second.cellRowCount),
+        cellWidth: ReplaceOperation.composeUpOperation(first.cellWidth, second.cellWidth),
+        name: ReplaceOperation.composeUpOperation(first.name, second.name),
+    };
+    return Result_1.ResultModule.ok(valueProps);
+};
+exports.composeUpOperation = composeUpOperation;
+const composeDownOperation = ({ first, second }) => {
+    const valueProps = {
+        $version: 1,
+        backgroundImage: ReplaceOperation.composeDownOperation(first.backgroundImage, second.backgroundImage),
+        backgroundImageZoom: ReplaceOperation.composeDownOperation(first.backgroundImageZoom, second.backgroundImageZoom),
+        cellColumnCount: ReplaceOperation.composeDownOperation(first.cellColumnCount, second.cellColumnCount),
+        cellHeight: ReplaceOperation.composeDownOperation(first.cellHeight, second.cellHeight),
+        cellOffsetX: ReplaceOperation.composeDownOperation(first.cellOffsetX, second.cellOffsetX),
+        cellOffsetY: ReplaceOperation.composeDownOperation(first.cellOffsetY, second.cellOffsetY),
+        cellRowCount: ReplaceOperation.composeDownOperation(first.cellRowCount, second.cellRowCount),
+        cellWidth: ReplaceOperation.composeDownOperation(first.cellWidth, second.cellWidth),
+        name: ReplaceOperation.composeDownOperation(first.name, second.name),
+    };
+    return Result_1.ResultModule.ok(valueProps);
+};
+exports.composeDownOperation = composeDownOperation;
+const restore = ({ nextState, downOperation }) => {
+    var _a, _b, _c;
+    if (downOperation === undefined) {
+        return Result_1.ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
+    }
+    const prevState = Object.assign({}, nextState);
+    const twoWayOperation = { $version: 1 };
+    if (downOperation.backgroundImage !== undefined) {
+        prevState.backgroundImage = (_a = downOperation.backgroundImage.oldValue) !== null && _a !== void 0 ? _a : undefined;
+        twoWayOperation.backgroundImage = { oldValue: (_b = downOperation.backgroundImage.oldValue) !== null && _b !== void 0 ? _b : undefined, newValue: (_c = nextState.backgroundImage) !== null && _c !== void 0 ? _c : undefined };
+    }
+    if (downOperation.backgroundImageZoom !== undefined) {
+        prevState.backgroundImageZoom = downOperation.backgroundImageZoom.oldValue;
+        twoWayOperation.backgroundImageZoom = Object.assign(Object.assign({}, downOperation.backgroundImageZoom), { newValue: nextState.backgroundImageZoom });
+    }
+    if (downOperation.cellColumnCount !== undefined) {
+        prevState.cellColumnCount = downOperation.cellColumnCount.oldValue;
+        twoWayOperation.cellColumnCount = Object.assign(Object.assign({}, downOperation.cellColumnCount), { newValue: nextState.cellColumnCount });
+    }
+    if (downOperation.cellHeight !== undefined) {
+        prevState.cellHeight = downOperation.cellHeight.oldValue;
+        twoWayOperation.cellHeight = Object.assign(Object.assign({}, downOperation.cellHeight), { newValue: nextState.cellHeight });
+    }
+    if (downOperation.cellOffsetX !== undefined) {
+        prevState.cellOffsetX = downOperation.cellOffsetX.oldValue;
+        twoWayOperation.cellOffsetX = Object.assign(Object.assign({}, downOperation.cellOffsetX), { newValue: nextState.cellOffsetX });
+    }
+    if (downOperation.cellOffsetY !== undefined) {
+        prevState.cellOffsetY = downOperation.cellOffsetY.oldValue;
+        twoWayOperation.cellOffsetY = Object.assign(Object.assign({}, downOperation.cellOffsetY), { newValue: nextState.cellOffsetY });
+    }
+    if (downOperation.cellRowCount !== undefined) {
+        prevState.cellRowCount = downOperation.cellRowCount.oldValue;
+        twoWayOperation.cellRowCount = Object.assign(Object.assign({}, downOperation.cellRowCount), { newValue: nextState.cellRowCount });
+    }
+    if (downOperation.cellWidth !== undefined) {
+        prevState.cellWidth = downOperation.cellWidth.oldValue;
+        twoWayOperation.cellWidth = Object.assign(Object.assign({}, downOperation.cellWidth), { newValue: nextState.cellWidth });
+    }
+    if (downOperation.name !== undefined) {
+        prevState.name = downOperation.name.oldValue;
+        twoWayOperation.name = Object.assign(Object.assign({}, downOperation.name), { newValue: nextState.name });
+    }
+    return Result_1.ResultModule.ok({ prevState, twoWayOperation });
+};
+exports.restore = restore;
+const diff = ({ prevState, nextState }) => {
+    const resultType = { $version: 1 };
+    if (prevState.backgroundImage !== nextState.backgroundImage) {
+        resultType.backgroundImage = { oldValue: prevState.backgroundImage, newValue: nextState.backgroundImage };
+    }
+    if (prevState.backgroundImageZoom !== nextState.backgroundImageZoom) {
+        resultType.backgroundImageZoom = { oldValue: prevState.backgroundImageZoom, newValue: nextState.backgroundImageZoom };
+    }
+    if (prevState.cellColumnCount !== nextState.cellColumnCount) {
+        resultType.cellColumnCount = { oldValue: prevState.cellColumnCount, newValue: nextState.cellColumnCount };
+    }
+    if (prevState.cellHeight !== nextState.cellHeight) {
+        resultType.cellHeight = { oldValue: prevState.cellHeight, newValue: nextState.cellHeight };
+    }
+    if (prevState.cellOffsetX !== nextState.cellOffsetX) {
+        resultType.cellOffsetX = { oldValue: prevState.cellOffsetX, newValue: nextState.cellOffsetX };
+    }
+    if (prevState.cellOffsetY !== nextState.cellOffsetY) {
+        resultType.cellOffsetY = { oldValue: prevState.cellOffsetY, newValue: nextState.cellOffsetY };
+    }
+    if (prevState.cellRowCount !== nextState.cellRowCount) {
+        resultType.cellRowCount = { oldValue: prevState.cellRowCount, newValue: nextState.cellRowCount };
+    }
+    if (prevState.cellWidth !== nextState.cellWidth) {
+        resultType.cellWidth = { oldValue: prevState.cellWidth, newValue: nextState.cellWidth };
+    }
+    if (prevState.name !== nextState.name) {
+        resultType.name = { oldValue: prevState.name, newValue: nextState.name };
+    }
+    if (record_1.isIdRecord(resultType)) {
+        return undefined;
+    }
+    return resultType;
+};
+exports.diff = diff;
+const serverTransform = ({ prevState, clientOperation, serverOperation }) => {
+    const twoWayOperation = { $version: 1 };
+    twoWayOperation.backgroundImage = ReplaceOperation.serverTransform({
+        first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.backgroundImage,
+        second: clientOperation.backgroundImage,
+        prevState: prevState.backgroundImage,
+    });
+    twoWayOperation.backgroundImageZoom = ReplaceOperation.serverTransform({
+        first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.backgroundImageZoom,
+        second: clientOperation.backgroundImageZoom,
+        prevState: prevState.backgroundImageZoom,
+    });
+    twoWayOperation.cellColumnCount = ReplaceOperation.serverTransform({
+        first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.cellColumnCount,
+        second: clientOperation.cellColumnCount,
+        prevState: prevState.cellColumnCount,
+    });
+    twoWayOperation.cellHeight = ReplaceOperation.serverTransform({
+        first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.cellHeight,
+        second: clientOperation.cellHeight,
+        prevState: prevState.cellHeight,
+    });
+    twoWayOperation.cellOffsetX = ReplaceOperation.serverTransform({
+        first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.cellOffsetX,
+        second: clientOperation.cellOffsetX,
+        prevState: prevState.cellOffsetX,
+    });
+    twoWayOperation.cellOffsetY = ReplaceOperation.serverTransform({
+        first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.cellOffsetY,
+        second: clientOperation.cellOffsetY,
+        prevState: prevState.cellOffsetY,
+    });
+    twoWayOperation.cellRowCount = ReplaceOperation.serverTransform({
+        first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.cellRowCount,
+        second: clientOperation.cellRowCount,
+        prevState: prevState.cellRowCount,
+    });
+    twoWayOperation.cellWidth = ReplaceOperation.serverTransform({
+        first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.cellWidth,
+        second: clientOperation.cellWidth,
+        prevState: prevState.cellWidth,
+    });
+    twoWayOperation.name = ReplaceOperation.serverTransform({
+        first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.name,
+        second: clientOperation.name,
+        prevState: prevState.name,
+    });
+    if (record_1.isIdRecord(twoWayOperation)) {
+        return Result_1.ResultModule.ok(undefined);
+    }
+    return Result_1.ResultModule.ok(twoWayOperation);
+};
+exports.serverTransform = serverTransform;
+const clientTransform = ({ first, second }) => {
+    const backgroundImage = ReplaceOperation.clientTransform({
+        first: first.backgroundImage,
+        second: second.backgroundImage,
+    });
+    const backgroundImageZoom = ReplaceOperation.clientTransform({
+        first: first.backgroundImageZoom,
+        second: second.backgroundImageZoom,
+    });
+    const cellColumnCount = ReplaceOperation.clientTransform({
+        first: first.cellColumnCount,
+        second: second.cellColumnCount,
+    });
+    const cellHeight = ReplaceOperation.clientTransform({
+        first: first.cellHeight,
+        second: second.cellHeight,
+    });
+    const cellOffsetX = ReplaceOperation.clientTransform({
+        first: first.cellOffsetX,
+        second: second.cellOffsetX,
+    });
+    const cellOffsetY = ReplaceOperation.clientTransform({
+        first: first.cellOffsetY,
+        second: second.cellOffsetY,
+    });
+    const cellRowCount = ReplaceOperation.clientTransform({
+        first: first.cellRowCount,
+        second: second.cellRowCount,
+    });
+    const cellWidth = ReplaceOperation.clientTransform({
+        first: first.cellWidth,
+        second: second.cellWidth,
+    });
+    const name = ReplaceOperation.clientTransform({
+        first: first.name,
+        second: second.name,
+    });
+    const firstPrime = {
+        $version: 1,
+        backgroundImage: backgroundImage.firstPrime,
+        backgroundImageZoom: backgroundImageZoom.firstPrime,
+        cellColumnCount: cellColumnCount.firstPrime,
+        cellHeight: cellHeight.firstPrime,
+        cellOffsetX: cellOffsetX.firstPrime,
+        cellOffsetY: cellOffsetY.firstPrime,
+        cellRowCount: cellRowCount.firstPrime,
+        cellWidth: cellWidth.firstPrime,
+        name: name.firstPrime,
+    };
+    const secondPrime = {
+        $version: 1,
+        backgroundImage: backgroundImage.secondPrime,
+        backgroundImageZoom: backgroundImageZoom.secondPrime,
+        cellColumnCount: cellColumnCount.secondPrime,
+        cellHeight: cellHeight.secondPrime,
+        cellOffsetX: cellOffsetX.secondPrime,
+        cellOffsetY: cellOffsetY.secondPrime,
+        cellRowCount: cellRowCount.secondPrime,
+        cellWidth: cellWidth.secondPrime,
+        name: name.secondPrime,
+    };
+    return Result_1.ResultModule.ok({
+        firstPrime: record_1.isIdRecord(firstPrime) ? undefined : firstPrime,
+        secondPrime: record_1.isIdRecord(secondPrime) ? undefined : secondPrime,
+    });
+};
+exports.clientTransform = clientTransform;

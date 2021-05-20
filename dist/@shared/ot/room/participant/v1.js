@@ -19,17 +19,16 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.transformerFactory = exports.apply = exports.toClientOperation = exports.toServerOperation = exports.toClientState = exports.upOperation = exports.downOperation = exports.state = exports.Master = exports.Spectator = exports.Player = void 0;
+exports.clientTransform = exports.serverTransform = exports.diff = exports.restore = exports.composeDownOperation = exports.composeUpOperation = exports.applyBack = exports.apply = exports.toClientOperation = exports.toUpOperation = exports.toDownOperation = exports.toClientState = exports.upOperation = exports.downOperation = exports.state = exports.Master = exports.Spectator = exports.Player = void 0;
 const t = __importStar(require("io-ts"));
 const io_ts_1 = require("../../../io-ts");
 const Board = __importStar(require("./board/v1"));
 const Character = __importStar(require("./character/v1"));
 const MyNumberValue = __importStar(require("./myNumberValue/v1"));
 const recordOperationElement_1 = require("../util/recordOperationElement");
-const recordOperation_1 = require("../util/recordOperation");
 const RecordOperation = __importStar(require("../util/recordOperation"));
 const type_1 = require("../util/type");
-const ReplaceValueOperation = __importStar(require("../util/replaceOperation"));
+const ReplaceOperation = __importStar(require("../util/replaceOperation"));
 const Result_1 = require("../../../Result");
 const utils_1 = require("../../../utils");
 const operation_1 = require("../util/operation");
@@ -76,22 +75,38 @@ const toClientState = (createdByMe) => (source) => {
         }) });
 };
 exports.toClientState = toClientState;
-const toServerOperation = (source) => {
+const toDownOperation = (source) => {
     return Object.assign(Object.assign({}, source), { boards: source.boards == null ? undefined : utils_1.chooseRecord(source.boards, operation => recordOperationElement_1.mapRecordOperationElement({
             source: operation,
             mapReplace: x => x,
-            mapOperation: Board.toServerOperation,
+            mapOperation: Board.toDownOperation,
         })), characters: source.characters == null ? undefined : utils_1.chooseRecord(source.characters, operation => recordOperationElement_1.mapRecordOperationElement({
             source: operation,
             mapReplace: x => x,
-            mapOperation: Character.toServerOperation,
+            mapOperation: Character.toDownOperation,
         })), myNumberValues: source.myNumberValues == null ? undefined : utils_1.chooseRecord(source.myNumberValues, operation => recordOperationElement_1.mapRecordOperationElement({
             source: operation,
             mapReplace: x => x,
-            mapOperation: MyNumberValue.toServerOperation,
+            mapOperation: MyNumberValue.toDownOperation,
         })) });
 };
-exports.toServerOperation = toServerOperation;
+exports.toDownOperation = toDownOperation;
+const toUpOperation = (source) => {
+    return Object.assign(Object.assign({}, source), { boards: source.boards == null ? undefined : utils_1.chooseRecord(source.boards, operation => recordOperationElement_1.mapRecordOperationElement({
+            source: operation,
+            mapReplace: x => x,
+            mapOperation: Board.toUpOperation,
+        })), characters: source.characters == null ? undefined : utils_1.chooseRecord(source.characters, operation => recordOperationElement_1.mapRecordOperationElement({
+            source: operation,
+            mapReplace: x => x,
+            mapOperation: Character.toUpOperation,
+        })), myNumberValues: source.myNumberValues == null ? undefined : utils_1.chooseRecord(source.myNumberValues, operation => recordOperationElement_1.mapRecordOperationElement({
+            source: operation,
+            mapReplace: x => x,
+            mapOperation: MyNumberValue.toUpOperation,
+        })) });
+};
+exports.toUpOperation = toUpOperation;
 const toClientOperation = (createdByMe) => ({ prevState, nextState, diff }) => {
     return Object.assign(Object.assign({}, diff), { boards: diff.boards == null ? undefined : RecordOperation.toClientOperation({
             diff: diff.boards,
@@ -155,214 +170,358 @@ const apply = ({ state, operation }) => {
     return Result_1.ResultModule.ok(result);
 };
 exports.apply = apply;
-const boardTransformer = Board.transformerFactory;
-const boardsTransformer = new recordOperation_1.RecordTransformer(boardTransformer);
-const createCharacterTransformer = (createdByMe) => Character.transformerFactory(createdByMe);
-const createCharactersTransformer = (createdByMe) => new recordOperation_1.RecordTransformer(createCharacterTransformer(createdByMe));
-const createMyNumberValueTransformer = (createdByMe) => MyNumberValue.transformerFactory(createdByMe);
-const createMyNumberValuesTransformer = (createdByMe) => new recordOperation_1.RecordTransformer(createMyNumberValueTransformer(createdByMe));
-const transformerFactory = (requestedBy) => ({
-    composeLoose: ({ key, first, second }) => {
-        var _a, _b, _c, _d;
-        const boards = boardsTransformer.composeLoose({
-            first: first.boards,
-            second: second.boards,
+const applyBack = ({ state, operation }) => {
+    const result = Object.assign({}, state);
+    if (operation.name != null) {
+        result.name = operation.name.oldValue;
+    }
+    if (operation.role != null) {
+        result.role = operation.role.oldValue;
+    }
+    const boards = RecordOperation.applyBack({
+        nextState: state.boards, operation: operation.boards, innerApplyBack: ({ state, operation }) => {
+            return Board.applyBack({ state, operation });
+        }
+    });
+    if (boards.isError) {
+        return boards;
+    }
+    result.boards = boards.value;
+    const characters = RecordOperation.applyBack({
+        nextState: state.characters, operation: operation.characters, innerApplyBack: ({ state, operation }) => {
+            return Character.applyBack({ state, operation });
+        }
+    });
+    if (characters.isError) {
+        return characters;
+    }
+    result.characters = characters.value;
+    const myNumberValues = RecordOperation.applyBack({
+        nextState: state.myNumberValues, operation: operation.myNumberValues, innerApplyBack: ({ state, operation }) => {
+            return MyNumberValue.applyBack({ state, operation });
+        }
+    });
+    if (myNumberValues.isError) {
+        return myNumberValues;
+    }
+    result.myNumberValues = myNumberValues.value;
+    return Result_1.ResultModule.ok(result);
+};
+exports.applyBack = applyBack;
+const composeUpOperation = ({ first, second }) => {
+    var _a, _b, _c, _d;
+    const boards = RecordOperation.composeUpOperation({
+        first: first.boards,
+        second: second.boards,
+        innerApply: params => Board.apply(params),
+        innerCompose: params => Board.composeUpOperation(params),
+    });
+    if (boards.isError) {
+        return boards;
+    }
+    const characters = RecordOperation.composeUpOperation({
+        first: first.characters,
+        second: second.characters,
+        innerApply: params => Character.apply(params),
+        innerCompose: params => Character.composeUpOperation(params),
+    });
+    if (characters.isError) {
+        return characters;
+    }
+    const myNumberValues = RecordOperation.composeUpOperation({
+        first: first.myNumberValues,
+        second: second.myNumberValues,
+        innerApply: params => MyNumberValue.apply(params),
+        innerCompose: params => MyNumberValue.composeUpOperation(params),
+    });
+    if (myNumberValues.isError) {
+        return myNumberValues;
+    }
+    const valueProps = {
+        $version: 1,
+        name: ReplaceOperation.composeUpOperation((_a = first.name) !== null && _a !== void 0 ? _a : undefined, (_b = second.name) !== null && _b !== void 0 ? _b : undefined),
+        role: ReplaceOperation.composeUpOperation((_c = first.role) !== null && _c !== void 0 ? _c : undefined, (_d = second.role) !== null && _d !== void 0 ? _d : undefined),
+        boards: boards.value,
+        characters: characters.value,
+        myNumberValues: myNumberValues.value,
+    };
+    return Result_1.ResultModule.ok(valueProps);
+};
+exports.composeUpOperation = composeUpOperation;
+const composeDownOperation = ({ first, second }) => {
+    var _a, _b, _c, _d;
+    const boards = RecordOperation.composeDownOperation({
+        first: first.boards,
+        second: second.boards,
+        innerApplyBack: params => Board.applyBack(params),
+        innerCompose: params => Board.composeDownOperation(params),
+    });
+    if (boards.isError) {
+        return boards;
+    }
+    const characters = RecordOperation.composeDownOperation({
+        first: first.characters,
+        second: second.characters,
+        innerApplyBack: params => Character.applyBack(params),
+        innerCompose: params => Character.composeDownOperation(params),
+    });
+    if (characters.isError) {
+        return characters;
+    }
+    const myNumberValues = RecordOperation.composeDownOperation({
+        first: first.myNumberValues,
+        second: second.myNumberValues,
+        innerApplyBack: params => MyNumberValue.applyBack(params),
+        innerCompose: params => MyNumberValue.composeDownOperation(params),
+    });
+    if (myNumberValues.isError) {
+        return myNumberValues;
+    }
+    const valueProps = {
+        $version: 1,
+        name: ReplaceOperation.composeDownOperation((_a = first.name) !== null && _a !== void 0 ? _a : undefined, (_b = second.name) !== null && _b !== void 0 ? _b : undefined),
+        role: ReplaceOperation.composeDownOperation((_c = first.role) !== null && _c !== void 0 ? _c : undefined, (_d = second.role) !== null && _d !== void 0 ? _d : undefined),
+        boards: boards.value,
+        characters: characters.value,
+        myNumberValues: myNumberValues.value,
+    };
+    return Result_1.ResultModule.ok(valueProps);
+};
+exports.composeDownOperation = composeDownOperation;
+const restore = ({ nextState, downOperation }) => {
+    var _a, _b;
+    if (downOperation === undefined) {
+        return Result_1.ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
+    }
+    const boards = RecordOperation.restore({
+        nextState: nextState.boards,
+        downOperation: downOperation.boards,
+        innerDiff: params => Board.diff(params),
+        innerRestore: params => Board.restore(params),
+    });
+    if (boards.isError) {
+        return boards;
+    }
+    const characters = RecordOperation.restore({
+        nextState: nextState.characters,
+        downOperation: downOperation.characters,
+        innerDiff: params => Character.diff(params),
+        innerRestore: params => Character.restore(params),
+    });
+    if (characters.isError) {
+        return characters;
+    }
+    const myNumberValues = RecordOperation.restore({
+        nextState: nextState.myNumberValues,
+        downOperation: downOperation.myNumberValues,
+        innerDiff: params => MyNumberValue.diff(params),
+        innerRestore: params => MyNumberValue.restore(params),
+    });
+    if (myNumberValues.isError) {
+        return myNumberValues;
+    }
+    const prevState = Object.assign(Object.assign({}, nextState), { boards: boards.value.prevState, characters: characters.value.prevState, myNumberValues: myNumberValues.value.prevState });
+    const twoWayOperation = {
+        $version: 1,
+        boards: boards.value.twoWayOperation,
+        characters: characters.value.twoWayOperation,
+        myNumberValues: myNumberValues.value.twoWayOperation,
+    };
+    if (downOperation.name != null) {
+        prevState.name = downOperation.name.oldValue;
+        twoWayOperation.name = Object.assign(Object.assign({}, downOperation.name), { newValue: nextState.name });
+    }
+    if (downOperation.role != null) {
+        prevState.role = (_a = downOperation.role.oldValue) !== null && _a !== void 0 ? _a : undefined;
+        twoWayOperation.role = { oldValue: (_b = downOperation.role.oldValue) !== null && _b !== void 0 ? _b : undefined, newValue: nextState.role };
+    }
+    return Result_1.ResultModule.ok({ prevState, twoWayOperation });
+};
+exports.restore = restore;
+const diff = ({ prevState, nextState }) => {
+    const boards = RecordOperation.diff({
+        prevState: prevState.boards,
+        nextState: nextState.boards,
+        innerDiff: params => Board.diff(params),
+    });
+    const characters = RecordOperation.diff({
+        prevState: prevState.characters,
+        nextState: nextState.characters,
+        innerDiff: params => Character.diff(params),
+    });
+    const myNumberValues = RecordOperation.diff({
+        prevState: prevState.myNumberValues,
+        nextState: nextState.myNumberValues,
+        innerDiff: params => MyNumberValue.diff(params),
+    });
+    const result = {
+        $version: 1,
+        boards,
+        characters,
+        myNumberValues,
+    };
+    if (prevState.name != nextState.name) {
+        result.name = { oldValue: prevState.name, newValue: nextState.name };
+    }
+    if (prevState.role != nextState.role) {
+        result.role = { oldValue: prevState.role, newValue: nextState.role };
+    }
+    if (record_1.isIdRecord(result)) {
+        return undefined;
+    }
+    return result;
+};
+exports.diff = diff;
+const serverTransform = (requestedBy) => ({ prevState, currentState, clientOperation, serverOperation }) => {
+    var _a, _b, _c, _d;
+    const boards = RecordOperation.serverTransform({
+        first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.boards,
+        second: clientOperation.boards,
+        prevState: prevState.boards,
+        nextState: currentState.boards,
+        innerTransform: ({ first, second, prevState, nextState }) => Board.serverTransform({
+            prevState,
+            currentState: nextState,
+            serverOperation: first,
+            clientOperation: second,
+        }),
+        toServerState: state => state,
+        protectedValuePolicy: {}
+    });
+    if (boards.isError) {
+        return boards;
+    }
+    const characters = RecordOperation.serverTransform({
+        first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.characters,
+        second: clientOperation.characters,
+        prevState: prevState.characters,
+        nextState: currentState.characters,
+        innerTransform: ({ first, second, prevState, nextState, key }) => Character.serverTransform(type_1.RequestedBy.createdByMe({ requestedBy, userUid: key }))({
+            prevState,
+            currentState: nextState,
+            serverOperation: first,
+            clientOperation: second,
+        }),
+        toServerState: state => state,
+        protectedValuePolicy: {}
+    });
+    if (characters.isError) {
+        return characters;
+    }
+    const myNumberValues = RecordOperation.serverTransform({
+        first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.myNumberValues,
+        second: clientOperation.myNumberValues,
+        prevState: prevState.myNumberValues,
+        nextState: currentState.myNumberValues,
+        innerTransform: ({ first, second, prevState, nextState, key }) => MyNumberValue.serverTransform(type_1.RequestedBy.createdByMe({ requestedBy, userUid: key }))({
+            prevState,
+            currentState: nextState,
+            serverOperation: first,
+            clientOperation: second,
+        }),
+        toServerState: state => state,
+        protectedValuePolicy: {}
+    });
+    if (myNumberValues.isError) {
+        return myNumberValues;
+    }
+    const twoWayOperation = {
+        $version: 1,
+        boards: boards.value,
+        characters: characters.value,
+        myNumberValues: myNumberValues.value,
+    };
+    twoWayOperation.name = ReplaceOperation.serverTransform({
+        first: (_a = serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.name) !== null && _a !== void 0 ? _a : undefined,
+        second: (_b = clientOperation.name) !== null && _b !== void 0 ? _b : undefined,
+        prevState: prevState.name,
+    });
+    if (requestedBy.type === type_1.server) {
+        twoWayOperation.role = ReplaceOperation.serverTransform({
+            first: (_c = serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.role) !== null && _c !== void 0 ? _c : undefined,
+            second: (_d = clientOperation.role) !== null && _d !== void 0 ? _d : undefined,
+            prevState: prevState.role,
         });
-        if (boards.isError) {
-            return boards;
-        }
-        const charactersTransformer = createCharactersTransformer(type_1.RequestedBy.createdByMe({ requestedBy, userUid: key }));
-        const characters = charactersTransformer.composeLoose({
-            first: first.characters,
-            second: second.characters,
-        });
-        if (characters.isError) {
-            return characters;
-        }
-        const myNumberValuesTransformer = createMyNumberValuesTransformer(type_1.RequestedBy.createdByMe({ requestedBy, userUid: key }));
-        const myNumberValues = myNumberValuesTransformer.composeLoose({
-            first: first.myNumberValues,
-            second: second.myNumberValues,
-        });
-        if (myNumberValues.isError) {
-            return myNumberValues;
-        }
-        const valueProps = {
-            $version: 1,
-            name: ReplaceValueOperation.composeDownOperation((_a = first.name) !== null && _a !== void 0 ? _a : undefined, (_b = second.name) !== null && _b !== void 0 ? _b : undefined),
-            role: ReplaceValueOperation.composeDownOperation((_c = first.role) !== null && _c !== void 0 ? _c : undefined, (_d = second.role) !== null && _d !== void 0 ? _d : undefined),
-            boards: boards.value,
-            characters: characters.value,
-            myNumberValues: myNumberValues.value,
-        };
-        return Result_1.ResultModule.ok(valueProps);
-    },
-    restore: ({ key, nextState, downOperation }) => {
-        var _a, _b;
-        if (downOperation === undefined) {
-            return Result_1.ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
-        }
-        const boards = boardsTransformer.restore({
-            nextState: nextState.boards,
-            downOperation: downOperation.boards,
-        });
-        if (boards.isError) {
-            return boards;
-        }
-        const charactersTransformer = createCharactersTransformer(type_1.RequestedBy.createdByMe({ requestedBy, userUid: key }));
-        const characters = charactersTransformer.restore({
-            nextState: nextState.characters,
-            downOperation: downOperation.characters,
-        });
-        if (characters.isError) {
-            return characters;
-        }
-        const myNumberValuesTransformer = createMyNumberValuesTransformer(type_1.RequestedBy.createdByMe({ requestedBy, userUid: key }));
-        const myNumberValues = myNumberValuesTransformer.restore({
-            nextState: nextState.myNumberValues,
-            downOperation: downOperation.myNumberValues,
-        });
-        if (myNumberValues.isError) {
-            return myNumberValues;
-        }
-        const prevState = Object.assign(Object.assign({}, nextState), { boards: boards.value.prevState, characters: characters.value.prevState, myNumberValues: myNumberValues.value.prevState });
-        const twoWayOperation = {
-            $version: 1,
-            boards: boards.value.twoWayOperation,
-            characters: characters.value.twoWayOperation,
-            myNumberValues: myNumberValues.value.twoWayOperation,
-        };
-        if (downOperation.name != null) {
-            prevState.name = downOperation.name.oldValue;
-            twoWayOperation.name = Object.assign(Object.assign({}, downOperation.name), { newValue: nextState.name });
-        }
-        if (downOperation.role != null) {
-            prevState.role = (_a = downOperation.role.oldValue) !== null && _a !== void 0 ? _a : undefined;
-            twoWayOperation.role = { oldValue: (_b = downOperation.role.oldValue) !== null && _b !== void 0 ? _b : undefined, newValue: nextState.role };
-        }
-        return Result_1.ResultModule.ok({ prevState, twoWayOperation });
-    },
-    transform: ({ key, prevState, currentState, clientOperation, serverOperation }) => {
-        var _a, _b, _c, _d;
-        const boards = boardsTransformer.transform({
-            prevState: prevState.boards,
-            currentState: currentState.boards,
-            clientOperation: clientOperation.boards,
-            serverOperation: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.boards,
-        });
-        if (boards.isError) {
-            return boards;
-        }
-        const charactersTransformer = createCharactersTransformer(type_1.RequestedBy.createdByMe({ requestedBy, userUid: key }));
-        const characters = charactersTransformer.transform({
-            prevState: prevState.characters,
-            currentState: currentState.characters,
-            clientOperation: clientOperation.characters,
-            serverOperation: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.characters,
-        });
-        if (characters.isError) {
-            return characters;
-        }
-        const myNumberValuesTransformer = createMyNumberValuesTransformer(type_1.RequestedBy.createdByMe({ requestedBy, userUid: key }));
-        const myNumberValues = myNumberValuesTransformer.transform({
-            prevState: prevState.myNumberValues,
-            currentState: currentState.myNumberValues,
-            clientOperation: clientOperation.myNumberValues,
-            serverOperation: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.myNumberValues,
-        });
-        if (myNumberValues.isError) {
-            return myNumberValues;
-        }
-        const twoWayOperation = {
-            $version: 1,
-            boards: boards.value,
-            characters: characters.value,
-            myNumberValues: myNumberValues.value,
-        };
-        twoWayOperation.name = ReplaceValueOperation.transform({
-            first: (_a = serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.name) !== null && _a !== void 0 ? _a : undefined,
-            second: (_b = clientOperation.name) !== null && _b !== void 0 ? _b : undefined,
-            prevState: prevState.name,
-        });
-        if (requestedBy.type === type_1.server) {
-            twoWayOperation.role = ReplaceValueOperation.transform({
-                first: (_c = serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.role) !== null && _c !== void 0 ? _c : undefined,
-                second: (_d = clientOperation.role) !== null && _d !== void 0 ? _d : undefined,
-                prevState: prevState.role,
-            });
-        }
-        if (record_1.isIdRecord(twoWayOperation)) {
-            return Result_1.ResultModule.ok(undefined);
-        }
-        return Result_1.ResultModule.ok(twoWayOperation);
-    },
-    diff: ({ key, prevState, nextState }) => {
-        const boards = boardsTransformer.diff({
-            prevState: prevState.boards,
-            nextState: nextState.boards,
-        });
-        const charactersTransformer = createCharactersTransformer(type_1.RequestedBy.createdByMe({ requestedBy, userUid: key }));
-        const characters = charactersTransformer.diff({
-            prevState: prevState.characters,
-            nextState: nextState.characters,
-        });
-        const myNumberValuesTransformer = createMyNumberValuesTransformer(type_1.RequestedBy.createdByMe({ requestedBy, userUid: key }));
-        const myNumberValues = myNumberValuesTransformer.diff({
-            prevState: prevState.myNumberValues,
-            nextState: nextState.myNumberValues,
-        });
-        const result = {
-            $version: 1,
-            boards,
-            characters,
-            myNumberValues,
-        };
-        if (prevState.name != nextState.name) {
-            result.name = { oldValue: prevState.name, newValue: nextState.name };
-        }
-        if (prevState.role != nextState.role) {
-            result.role = { oldValue: prevState.role, newValue: nextState.role };
-        }
-        if (record_1.isIdRecord(result)) {
-            return undefined;
-        }
-        return result;
-    },
-    applyBack: ({ key, downOperation, nextState }) => {
-        var _a, _b;
-        const boards = boardsTransformer.applyBack({
-            downOperation: downOperation.boards,
-            nextState: nextState.boards,
-        });
-        if (boards.isError) {
-            return boards;
-        }
-        const charactersTransformer = createCharactersTransformer(type_1.RequestedBy.createdByMe({ requestedBy, userUid: key }));
-        const characters = charactersTransformer.applyBack({
-            downOperation: downOperation.characters,
-            nextState: nextState.characters,
-        });
-        if (characters.isError) {
-            return characters;
-        }
-        const myNumberValuesTransformer = createMyNumberValuesTransformer(type_1.RequestedBy.createdByMe({ requestedBy, userUid: key }));
-        const myNumberValues = myNumberValuesTransformer.applyBack({
-            downOperation: downOperation.myNumberValues,
-            nextState: nextState.myNumberValues,
-        });
-        if (myNumberValues.isError) {
-            return myNumberValues;
-        }
-        const result = Object.assign(Object.assign({}, nextState), { boards: boards.value, characters: characters.value, myNumberValues: myNumberValues.value });
-        if (downOperation.name !== undefined) {
-            result.name = (_a = downOperation.name.oldValue) !== null && _a !== void 0 ? _a : undefined;
-        }
-        if (downOperation.role !== undefined) {
-            result.role = (_b = downOperation.role.oldValue) !== null && _b !== void 0 ? _b : undefined;
-        }
-        return Result_1.ResultModule.ok(result);
-    },
-    toServerState: ({ clientState }) => clientState,
-    protectedValuePolicy: {}
-});
-exports.transformerFactory = transformerFactory;
+    }
+    if (record_1.isIdRecord(twoWayOperation)) {
+        return Result_1.ResultModule.ok(undefined);
+    }
+    return Result_1.ResultModule.ok(twoWayOperation);
+};
+exports.serverTransform = serverTransform;
+const clientTransform = ({ first, second }) => {
+    const boards = RecordOperation.clientTransform({
+        first: first.boards,
+        second: second.boards,
+        innerTransform: params => Board.clientTransform(params),
+        innerDiff: params => {
+            const diff = Board.diff(params);
+            if (diff == null) {
+                return diff;
+            }
+            return Board.toUpOperation(diff);
+        },
+    });
+    if (boards.isError) {
+        return boards;
+    }
+    const characters = RecordOperation.clientTransform({
+        first: first.characters,
+        second: second.characters,
+        innerTransform: params => Character.clientTransform(params),
+        innerDiff: params => {
+            const diff = Character.diff(params);
+            if (diff == null) {
+                return diff;
+            }
+            return Character.toUpOperation(diff);
+        },
+    });
+    if (characters.isError) {
+        return characters;
+    }
+    const myNumberValues = RecordOperation.clientTransform({
+        first: first.myNumberValues,
+        second: second.myNumberValues,
+        innerTransform: params => MyNumberValue.clientTransform(params),
+        innerDiff: params => {
+            const diff = MyNumberValue.diff(params);
+            if (diff == null) {
+                return diff;
+            }
+            return MyNumberValue.toUpOperation(diff);
+        },
+    });
+    if (myNumberValues.isError) {
+        return myNumberValues;
+    }
+    const name = ReplaceOperation.clientTransform({
+        first: first.name,
+        second: second.name,
+    });
+    const role = ReplaceOperation.clientTransform({
+        first: first.role,
+        second: second.role,
+    });
+    const firstPrime = {
+        $version: 1,
+        boards: boards.value.firstPrime,
+        characters: characters.value.firstPrime,
+        myNumberValues: myNumberValues.value.firstPrime,
+        name: name.firstPrime,
+        role: role.firstPrime,
+    };
+    const secondPrime = {
+        $version: 1,
+        boards: boards.value.secondPrime,
+        characters: characters.value.secondPrime,
+        myNumberValues: myNumberValues.value.secondPrime,
+        name: name.secondPrime,
+        role: role.secondPrime,
+    };
+    return Result_1.ResultModule.ok({
+        firstPrime: record_1.isIdRecord(firstPrime) ? undefined : firstPrime,
+        secondPrime: record_1.isIdRecord(secondPrime) ? undefined : secondPrime,
+    });
+};
+exports.clientTransform = clientTransform;

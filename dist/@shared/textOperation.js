@@ -735,7 +735,7 @@ var TextTwoWayOperation;
         });
         return builder.build();
     };
-    TextTwoWayOperation.transform = ({ first, second }) => {
+    TextTwoWayOperation.serverTransform = ({ first, second }) => {
         return transformCore({
             first: [...new TextOperationBuilder(twoWayFactory, first).toUnits()],
             second: [...new TextOperationBuilder(twoWayFactory, second).toUnits()],

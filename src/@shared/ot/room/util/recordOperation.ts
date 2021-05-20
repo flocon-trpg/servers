@@ -2,7 +2,6 @@ import * as t from 'io-ts';
 import * as DualKeyRecordOperation from './dualKeyRecordOperation';
 import { CustomResult, ResultModule } from '../../../Result';
 import { DualKeyRecord, recordDownOperationElementFactory, RecordDownOperationElement, RecordTwoWayOperationElement, recordUpOperationElementFactory, RecordUpOperationElement } from './recordOperationElement';
-import { TransformerFactory } from './transformerFactory';
 
 export type RecordDownOperation<TState, TOperation> = Record<string, RecordDownOperationElement<TState, TOperation>>;
 export type RecordUpOperation<TState, TOperation> = Record<string, RecordUpOperationElement<TState, TOperation>>;
@@ -84,10 +83,17 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
     innerDiff
 }: {
     nextState: Record<string, TState>;
-    downOperation: RecordDownOperation<TState, TDownOperation>;
+    downOperation?: RecordDownOperation<TState, TDownOperation>;
     innerRestore: (params: { key: string; downOperation: TDownOperation; nextState: TState }) => CustomResult<RestoreResult<TState, TTwoWayOperation | undefined>, string | TCustomError>;
     innerDiff: (params: { key: string; prevState: TState; nextState: TState }) => TTwoWayOperation | undefined;
 }): CustomResult<RestoreResult<Record<string, TState>, RecordTwoWayOperation<TState, TTwoWayOperation>>, string | TCustomError> => {
+    if (downOperation == null) {
+        return ResultModule.ok({
+            prevState: nextState,
+            twoWayOperation: undefined
+        });
+    }
+
     const result = DualKeyRecordOperation.restore({
         nextState: { [dummyKey]: nextState },
         downOperation: { [dummyKey]: downOperation },
@@ -129,20 +135,20 @@ export const apply = <TState, TOperation, TCustomError = string>({
 
 export const applyBack = <TState, TDownOperation, TCustomError = string>({
     nextState,
-    downOperation,
+    operation,
     innerApplyBack
 }: {
     nextState: Record<string, TState>;
-    downOperation?: Record<string, RecordDownOperationElement<TState, TDownOperation>>;
-    innerApplyBack: (params: { key: string; downOperation: TDownOperation; nextState: TState }) => CustomResult<TState, string | TCustomError>;
+    operation?: Record<string, RecordDownOperationElement<TState, TDownOperation>>;
+    innerApplyBack: (params: { key: string; operation: TDownOperation; state: TState }) => CustomResult<TState, string | TCustomError>;
 }): CustomResult<Record<string, TState>, string | TCustomError> => {
-    if (downOperation == null) {
+    if (operation == null) {
         return ResultModule.ok(nextState);
     }
 
     const result = DualKeyRecordOperation.applyBack({
         nextState: { [dummyKey]: nextState },
-        downOperation: { [dummyKey]: downOperation },
+        operation: { [dummyKey]: operation },
         innerApplyBack: ({ key, ...params }) => innerApplyBack({ ...params, key: key.second }),
     });
     if (result.isError) {
@@ -151,19 +157,56 @@ export const applyBack = <TState, TDownOperation, TCustomError = string>({
     return ResultModule.ok(result.value[dummyKey] ?? {});
 };
 
+export const composeUpOperation = <TState, TUpOperation, TCustomError = string>({
+    first,
+    second,
+    innerApply,
+    innerCompose
+}: {
+    first?: RecordUpOperation<TState, TUpOperation>;
+    second?: RecordUpOperation<TState, TUpOperation>;
+    innerApply: (params: { key: string; operation: TUpOperation; state: TState }) => CustomResult<TState, string | TCustomError>;
+    innerCompose: (params: { key: string; first: TUpOperation; second: TUpOperation }) => CustomResult<TUpOperation | undefined, string | TCustomError>;
+}): CustomResult<RecordUpOperation<TState, TUpOperation> | undefined, string | TCustomError> => {
+    if (first == null) {
+        return ResultModule.ok(second);
+    }
+    if (second == null) {
+        return ResultModule.ok(first);
+    }
+
+    const result = DualKeyRecordOperation.composeUpOperation({
+        first: { [dummyKey]: first },
+        second: { [dummyKey]: second },
+        innerApply: ({ key, ...params }) => innerApply({ ...params, key: key.second }),
+        innerCompose: ({ key, ...params }) => innerCompose({ ...params, key: key.second }),
+    });
+    if (result.isError) {
+        return result;
+    }
+    return ResultModule.ok(result.value === undefined ? undefined : result.value[dummyKey]);
+};
+
 // stateが必要ないため処理を高速化&簡略化できるが、その代わり戻り値のreplaceにおいて oldValue === undefined && newValue === undefined もしくは oldValue !== undefined && newValue !== undefinedになるケースがある。
-export const composeDownOperationLoose = <TState, TDownOperation, TCustomError = string>({
+export const composeDownOperation = <TState, TDownOperation, TCustomError = string>({
     first,
     second,
     innerApplyBack,
     innerCompose
 }: {
-    first: RecordDownOperation<TState, TDownOperation>;
-    second: RecordDownOperation<TState, TDownOperation>;
-    innerApplyBack: (params: { key: string; downOperation: TDownOperation; nextState: TState }) => CustomResult<TState, string | TCustomError>;
+    first?: RecordDownOperation<TState, TDownOperation>;
+    second?: RecordDownOperation<TState, TDownOperation>;
+    innerApplyBack: (params: { key: string; operation: TDownOperation; state: TState }) => CustomResult<TState, string | TCustomError>;
     innerCompose: (params: { key: string; first: TDownOperation; second: TDownOperation }) => CustomResult<TDownOperation | undefined, string | TCustomError>;
 }): CustomResult<RecordDownOperation<TState, TDownOperation> | undefined, string | TCustomError> => {
-    const result = DualKeyRecordOperation.composeDownOperationLoose({
+    if (first == null) {
+        return ResultModule.ok(second);
+    }
+    if (second == null) {
+        return ResultModule.ok(first);
+    }
+
+    const result = DualKeyRecordOperation.composeDownOperation({
         first: { [dummyKey]: first },
         second: { [dummyKey]: second },
         innerApplyBack: ({ key, ...params }) => innerApplyBack({ ...params, key: key.second }),
@@ -177,7 +220,7 @@ export const composeDownOperationLoose = <TState, TDownOperation, TCustomError =
 
 // Make sure these:
 // - apply(prevState, first) = nextState
-export const transform = <TServerState, TClientState, TFirstOperation, TSecondOperation, TCustomError = string>({
+export const serverTransform = <TServerState, TClientState, TFirstOperation, TSecondOperation, TCustomError = string>({
     first,
     second,
     prevState,
@@ -194,17 +237,13 @@ export const transform = <TServerState, TClientState, TFirstOperation, TSecondOp
     innerTransform: (params: ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> & { key: string }) => CustomResult<TFirstOperation | undefined, string | TCustomError>;
     protectedValuePolicy: ProtectedValuePolicy<string, TServerState>;
 }): CustomResult<RecordTwoWayOperation<TServerState, TFirstOperation> | undefined, string | TCustomError> => {
-    if (second === undefined) {
-        return ResultModule.ok(undefined);
-    }
-
     const cancelCreate = protectedValuePolicy.cancelCreate;
     const cancelUpdate = protectedValuePolicy.cancelUpdate;
     const cancelRemove = protectedValuePolicy.cancelRemove;
 
-    const result = DualKeyRecordOperation.transform({
+    const result = DualKeyRecordOperation.serverTransform({
         first: first === undefined ? undefined : { [dummyKey]: first },
-        second: { [dummyKey]: second },
+        second: second === undefined ? undefined : { [dummyKey]: second },
         prevState: { [dummyKey]: prevState },
         nextState: { [dummyKey]: nextState },
         innerTransform: ({ key, ...params }) => innerTransform({ ...params, key: key.second }),
@@ -223,197 +262,49 @@ export const transform = <TServerState, TClientState, TFirstOperation, TSecondOp
     return ResultModule.ok((result.value === undefined ? undefined : result.value[dummyKey]) ?? {});
 };
 
-export const diff = <TState, TOperation>({
-    prev,
-    next,
+type InnerClientTransform<TFirstOperation, TSecondOperation, TError = string> = (params: {
+    first: TFirstOperation;
+    second: TSecondOperation;
+}) => CustomResult<{ firstPrime: TFirstOperation | undefined; secondPrime: TSecondOperation | undefined }, TError>;
+
+export const clientTransform = <TState, TOperation, TError = string>({
+    first,
+    second,
+    innerTransform,
     innerDiff,
 }: {
-    prev: Record<string, TState>;
-    next: Record<string, TState>;
-    innerDiff: (params: { key: string; prev: TState; next: TState }) => TOperation | undefined;
-}) => {
-    return DualKeyRecordOperation.diff({
-        prev: { [dummyKey]: prev },
-        next: { [dummyKey]: next },
-        innerDiff: ({ key, ...params }) => innerDiff({ ...params, key: key.second }),
+    first?: RecordUpOperation<TState, TOperation>;
+    second?: RecordUpOperation<TState, TOperation>;
+    innerTransform: InnerClientTransform<TOperation, TOperation, TError>;
+    innerDiff: (params: { prevState: TState; nextState: TState }) => TOperation | undefined;
+}): CustomResult<{ firstPrime: RecordUpOperation<TState, TOperation> | undefined; secondPrime: RecordUpOperation<TState, TOperation> | undefined }, TError> => {
+    const result = DualKeyRecordOperation.clientTransform({
+        first: first == null ? undefined : { [dummyKey]: first },
+        second: second == null ? undefined : { [dummyKey]: second },
+        innerTransform: params => innerTransform(params),
+        innerDiff: params => innerDiff(params),
+    });
+    if (result.isError) {
+        return result;
+    }
+    return ResultModule.ok({
+        firstPrime: result.value.firstPrime == null ? undefined : result.value.firstPrime[dummyKey],
+        secondPrime: result.value.secondPrime == null ? undefined : result.value.secondPrime[dummyKey],
     });
 };
 
-const dummyFirstKey = '';
-
-const toDualKeyRecord = <T>(source: Record<string, T>): DualKeyRecord<T> => {
-    return { [dummyFirstKey]: source };
+export const diff = <TState, TOperation>({
+    prevState,
+    nextState,
+    innerDiff,
+}: {
+    prevState: Record<string, TState>;
+    nextState: Record<string, TState>;
+    innerDiff: (params: { key: string; prevState: TState; nextState: TState }) => TOperation | undefined;
+}) => {
+    return DualKeyRecordOperation.diff({
+        prevState: { [dummyKey]: prevState },
+        nextState: { [dummyKey]: nextState },
+        innerDiff: ({ key, ...params }) => innerDiff({ ...params, key: key.second }),
+    })[dummyKey];
 };
-
-const toRecord = <T>(source: DualKeyRecord<T>): Record<string, T> => {
-    return source[dummyFirstKey] ?? {};
-};
-
-export class RecordTransformer<TServerState, TClientState, TDownOperation, TUpOperation, TTwoWayOperation, TCustomError = string> {
-    private readonly core: DualKeyRecordOperation.DualKeyRecordTransformer<TServerState, TClientState, TDownOperation, TUpOperation, TTwoWayOperation, TCustomError>;
-
-    public constructor(factory: TransformerFactory<string, TServerState, TClientState, TDownOperation, TUpOperation, TTwoWayOperation, TCustomError>) {
-        const cancelRemove = factory.protectedValuePolicy.cancelRemove;
-        this.core = new DualKeyRecordOperation.DualKeyRecordTransformer({
-            composeLoose: params => factory.composeLoose({
-                key: params.key.second,
-                first: params.first,
-                second: params.second,
-            }),
-            restore: params => factory.restore({
-                key: params.key.second,
-                nextState: params.nextState,
-                downOperation: params.downOperation,
-            }),
-            transform: params => factory.transform({
-                key: params.key.second,
-                prevState: params.prevState,
-                currentState: params.currentState,
-                serverOperation: params.serverOperation,
-                clientOperation: params.clientOperation,
-            }),
-            diff: params => factory.diff({
-                key: params.key.second,
-                prevState: params.prevState,
-                nextState: params.nextState,
-            }),
-            applyBack: params => factory.applyBack({
-                key: params.key.second,
-                downOperation: params.downOperation,
-                nextState: params.nextState,
-            }),
-            toServerState: params => factory.toServerState({
-                key: params.key.second,
-                clientState: params.clientState,
-            }),
-            protectedValuePolicy: cancelRemove === undefined ? {} : {
-                cancelRemove: params => cancelRemove({ key: params.key.second, nextState: params.nextState })
-            },
-        });
-    }
-
-    public composeLoose({
-        first,
-        second,
-    }: {
-        first?: RecordDownOperation<TServerState, TDownOperation>;
-        second?: RecordDownOperation<TServerState, TDownOperation>;
-    }): CustomResult<RecordDownOperation<TServerState, TDownOperation> | undefined, string | TCustomError> {
-        const dualKeyMap = this.core.composeLoose({
-            first: first == null ? undefined : toDualKeyRecord(first),
-            second: second == null ? undefined : toDualKeyRecord(second),
-        });
-        if (dualKeyMap.isError) {
-            return dualKeyMap;
-        }
-        return ResultModule.ok(dualKeyMap.value === undefined ? undefined : toRecord(dualKeyMap.value));
-    }
-
-    public restore({
-        downOperation,
-        nextState,
-    }: {
-        downOperation?: RecordDownOperation<TServerState, TDownOperation>;
-        nextState: Record<string, TServerState>;
-    }) {
-        const dualKeyMap = this.core.restore({
-            downOperation: downOperation == null ? undefined : toDualKeyRecord(downOperation),
-            nextState: toDualKeyRecord(nextState),
-        });
-        if (dualKeyMap.isError) {
-            return dualKeyMap;
-        }
-        return ResultModule.ok({
-            prevState: toRecord(dualKeyMap.value.prevState),
-            twoWayOperation: dualKeyMap.value.twoWayOperation === undefined ? undefined : toRecord(dualKeyMap.value.twoWayOperation),
-        });
-    }
-
-    public transform({
-        prevState,
-        currentState,
-        serverOperation,
-        clientOperation,
-    }: {
-        prevState: Record<string, TServerState>;
-        currentState: Record<string, TServerState>;
-        serverOperation?: RecordTwoWayOperation<TServerState, TTwoWayOperation>;
-        clientOperation?: RecordUpOperation<TClientState, TUpOperation>;
-    }): CustomResult<RecordTwoWayOperation<TServerState, TTwoWayOperation> | undefined, string | TCustomError> {
-        const dualKeyMap = this.core.transform({
-            prevState: toDualKeyRecord(prevState),
-            currentState: toDualKeyRecord(currentState),
-            serverOperation: serverOperation == null ? undefined : toDualKeyRecord(serverOperation),
-            clientOperation: clientOperation == null ? undefined : toDualKeyRecord(clientOperation),
-        });
-        if (dualKeyMap.isError) {
-            return dualKeyMap;
-        }
-        return ResultModule.ok(dualKeyMap.value === undefined ? undefined : toRecord(dualKeyMap.value));
-    }
-
-    public restoreAndTransform({
-        currentState,
-        serverOperation,
-        clientOperation,
-    }: {
-        currentState: Record<string, TServerState>;
-        serverOperation: RecordDownOperation<TServerState, TDownOperation>;
-        clientOperation: RecordUpOperation<TClientState, TUpOperation>;
-    }): CustomResult<RecordTwoWayOperation<TServerState, TTwoWayOperation> | undefined, string | TCustomError> {
-        const dualKeyMap = this.core.restoreAndTransform({
-            currentState: toDualKeyRecord(currentState),
-            serverOperation: toDualKeyRecord(serverOperation),
-            clientOperation: toDualKeyRecord(clientOperation),
-        });
-        if (dualKeyMap.isError) {
-            return dualKeyMap;
-        }
-        return ResultModule.ok(dualKeyMap.value === undefined ? undefined : toRecord(dualKeyMap.value));
-    }
-
-    public diff({
-        prevState,
-        nextState,
-    }: {
-        prevState: Record<string, TServerState>;
-        nextState: Record<string, TServerState>;
-    }) {
-        const dualKeyMap = this.core.diff({
-            prevState: toDualKeyRecord(prevState),
-            nextState: toDualKeyRecord(nextState),
-        });
-        return toRecord(dualKeyMap);
-    }
-
-    public applyBack({
-        downOperation,
-        nextState,
-    }: {
-        downOperation?: RecordDownOperation<TServerState, TDownOperation>;
-        nextState: Record<string, TServerState>;
-    }) {
-        if (downOperation == null) {
-            return ResultModule.ok(nextState);
-        }
-        const dualKeyMap = this.core.applyBack({
-            downOperation: toDualKeyRecord(downOperation),
-            nextState: toDualKeyRecord(nextState),
-        });
-        if (dualKeyMap.isError) {
-            return dualKeyMap;
-        }
-        return ResultModule.ok(toRecord(dualKeyMap.value));
-    }
-
-    public toServerState({
-        clientState,
-    }: {
-        clientState: Record<string, TClientState>;
-    }): Record<string, TServerState> {
-        const dualKeyMap = this.core.toServerState({
-            clientState: toDualKeyRecord(clientState),
-        });
-        return toRecord(dualKeyMap);
-    }
-}

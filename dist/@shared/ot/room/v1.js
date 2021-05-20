@@ -19,7 +19,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.transformerFactory = exports.apply = exports.toClientOperation = exports.toServerOperation = exports.toClientState = exports.upOperation = exports.downOperation = exports.state = exports.dbState = void 0;
+exports.clientTransform = exports.serverTransform = exports.diff = exports.restore = exports.composeDownOperation = exports.composeUpOperation = exports.applyBack = exports.apply = exports.toUpOperation = exports.toDownOperation = exports.toClientOperation = exports.toClientState = exports.upOperation = exports.downOperation = exports.state = exports.dbState = void 0;
 const t = __importStar(require("io-ts"));
 const Result_1 = require("../../Result");
 const Bgm = __importStar(require("./bgm/v1"));
@@ -27,7 +27,7 @@ const ParamNames = __importStar(require("./paramName/v1"));
 const Participant = __importStar(require("./participant/v1"));
 const RecordOperation = __importStar(require("./util/recordOperation"));
 const recordOperationElement_1 = require("./util/recordOperationElement");
-const ReplaceValueOperation = __importStar(require("./util/replaceOperation"));
+const ReplaceOperation = __importStar(require("./util/replaceOperation"));
 const type_1 = require("./util/type");
 const utils_1 = require("../../utils");
 const operation_1 = require("./util/operation");
@@ -115,30 +115,6 @@ const toClientState = (requestedBy) => (source) => {
         }) });
 };
 exports.toClientState = toClientState;
-const toServerOperation = (source) => {
-    return Object.assign(Object.assign({}, source), { bgms: source.bgms == null ? undefined : utils_1.chooseRecord(source.bgms, operation => recordOperationElement_1.mapRecordOperationElement({
-            source: operation,
-            mapReplace: x => x,
-            mapOperation: Bgm.toServerOperation,
-        })), boolParamNames: source.boolParamNames == null ? undefined : utils_1.chooseRecord(source.boolParamNames, operation => recordOperationElement_1.mapRecordOperationElement({
-            source: operation,
-            mapReplace: x => x,
-            mapOperation: ParamNames.toServerOperation,
-        })), numParamNames: source.numParamNames == null ? undefined : utils_1.chooseRecord(source.numParamNames, operation => recordOperationElement_1.mapRecordOperationElement({
-            source: operation,
-            mapReplace: x => x,
-            mapOperation: ParamNames.toServerOperation,
-        })), participants: source.participants == null ? undefined : utils_1.chooseRecord(source.participants, operation => recordOperationElement_1.mapRecordOperationElement({
-            source: operation,
-            mapReplace: x => x,
-            mapOperation: Participant.toServerOperation,
-        })), strParamNames: source.strParamNames == null ? undefined : utils_1.chooseRecord(source.strParamNames, operation => recordOperationElement_1.mapRecordOperationElement({
-            source: operation,
-            mapReplace: x => x,
-            mapOperation: ParamNames.toServerOperation,
-        })) });
-};
-exports.toServerOperation = toServerOperation;
 const toClientOperation = (requestedBy) => ({ prevState, nextState, diff }) => {
     return Object.assign(Object.assign({}, diff), { bgms: diff.bgms == null ? undefined : RecordOperation.toClientOperation({
             diff: diff.bgms,
@@ -178,11 +154,59 @@ const toClientOperation = (requestedBy) => ({ prevState, nextState, diff }) => {
         }) });
 };
 exports.toClientOperation = toClientOperation;
+const toDownOperation = (source) => {
+    return Object.assign(Object.assign({}, source), { bgms: source.bgms == null ? undefined : utils_1.chooseRecord(source.bgms, operation => recordOperationElement_1.mapRecordOperationElement({
+            source: operation,
+            mapReplace: x => x,
+            mapOperation: Bgm.toDownOperation,
+        })), boolParamNames: source.boolParamNames == null ? undefined : utils_1.chooseRecord(source.boolParamNames, operation => recordOperationElement_1.mapRecordOperationElement({
+            source: operation,
+            mapReplace: x => x,
+            mapOperation: ParamNames.toDownOperation,
+        })), numParamNames: source.numParamNames == null ? undefined : utils_1.chooseRecord(source.numParamNames, operation => recordOperationElement_1.mapRecordOperationElement({
+            source: operation,
+            mapReplace: x => x,
+            mapOperation: ParamNames.toDownOperation,
+        })), participants: source.participants == null ? undefined : utils_1.chooseRecord(source.participants, operation => recordOperationElement_1.mapRecordOperationElement({
+            source: operation,
+            mapReplace: x => x,
+            mapOperation: Participant.toDownOperation,
+        })), strParamNames: source.strParamNames == null ? undefined : utils_1.chooseRecord(source.strParamNames, operation => recordOperationElement_1.mapRecordOperationElement({
+            source: operation,
+            mapReplace: x => x,
+            mapOperation: ParamNames.toDownOperation,
+        })) });
+};
+exports.toDownOperation = toDownOperation;
+const toUpOperation = (source) => {
+    return Object.assign(Object.assign({}, source), { bgms: source.bgms == null ? undefined : utils_1.chooseRecord(source.bgms, operation => recordOperationElement_1.mapRecordOperationElement({
+            source: operation,
+            mapReplace: x => x,
+            mapOperation: Bgm.toUpOperation,
+        })), boolParamNames: source.boolParamNames == null ? undefined : utils_1.chooseRecord(source.boolParamNames, operation => recordOperationElement_1.mapRecordOperationElement({
+            source: operation,
+            mapReplace: x => x,
+            mapOperation: ParamNames.toUpOperation,
+        })), numParamNames: source.numParamNames == null ? undefined : utils_1.chooseRecord(source.numParamNames, operation => recordOperationElement_1.mapRecordOperationElement({
+            source: operation,
+            mapReplace: x => x,
+            mapOperation: ParamNames.toUpOperation,
+        })), participants: source.participants == null ? undefined : utils_1.chooseRecord(source.participants, operation => recordOperationElement_1.mapRecordOperationElement({
+            source: operation,
+            mapReplace: x => x,
+            mapOperation: Participant.toUpOperation,
+        })), strParamNames: source.strParamNames == null ? undefined : utils_1.chooseRecord(source.strParamNames, operation => recordOperationElement_1.mapRecordOperationElement({
+            source: operation,
+            mapReplace: x => x,
+            mapOperation: ParamNames.toUpOperation,
+        })) });
+};
+exports.toUpOperation = toUpOperation;
 const apply = ({ state, operation }) => {
     const result = Object.assign({}, state);
     const bgms = RecordOperation.apply({
-        prevState: state.bgms, operation: operation.bgms, innerApply: ({ prevState, operation: upOperation }) => {
-            return Bgm.apply({ state: prevState, operation: upOperation });
+        prevState: state.bgms, operation: operation.bgms, innerApply: ({ prevState, operation }) => {
+            return Bgm.apply({ state: prevState, operation });
         }
     });
     if (bgms.isError) {
@@ -190,8 +214,8 @@ const apply = ({ state, operation }) => {
     }
     result.bgms = bgms.value;
     const boolParamNames = RecordOperation.apply({
-        prevState: state.boolParamNames, operation: operation.boolParamNames, innerApply: ({ prevState, operation: upOperation }) => {
-            return ParamNames.apply({ state: prevState, operation: upOperation });
+        prevState: state.boolParamNames, operation: operation.boolParamNames, innerApply: ({ prevState, operation }) => {
+            return ParamNames.apply({ state: prevState, operation });
         }
     });
     if (boolParamNames.isError) {
@@ -202,8 +226,8 @@ const apply = ({ state, operation }) => {
         result.name = operation.name.newValue;
     }
     const numParamNames = RecordOperation.apply({
-        prevState: state.numParamNames, operation: operation.numParamNames, innerApply: ({ prevState, operation: upOperation }) => {
-            return ParamNames.apply({ state: prevState, operation: upOperation });
+        prevState: state.numParamNames, operation: operation.numParamNames, innerApply: ({ prevState, operation }) => {
+            return ParamNames.apply({ state: prevState, operation });
         }
     });
     if (numParamNames.isError) {
@@ -211,8 +235,8 @@ const apply = ({ state, operation }) => {
     }
     result.numParamNames = numParamNames.value;
     const participants = RecordOperation.apply({
-        prevState: state.participants, operation: operation.participants, innerApply: ({ prevState, operation: upOperation }) => {
-            return Participant.apply({ state: prevState, operation: upOperation });
+        prevState: state.participants, operation: operation.participants, innerApply: ({ prevState, operation }) => {
+            return Participant.apply({ state: prevState, operation });
         }
     });
     if (participants.isError) {
@@ -226,8 +250,8 @@ const apply = ({ state, operation }) => {
         }
     });
     const strParamNames = RecordOperation.apply({
-        prevState: state.strParamNames, operation: operation.strParamNames, innerApply: ({ prevState, operation: upOperation }) => {
-            return ParamNames.apply({ state: prevState, operation: upOperation });
+        prevState: state.strParamNames, operation: operation.strParamNames, innerApply: ({ prevState, operation }) => {
+            return ParamNames.apply({ state: prevState, operation });
         }
     });
     if (strParamNames.isError) {
@@ -237,295 +261,542 @@ const apply = ({ state, operation }) => {
     return Result_1.ResultModule.ok(result);
 };
 exports.apply = apply;
-const bgmTransformer = Bgm.transformerFactory;
-const bgmsTransformer = new RecordOperation.RecordTransformer(bgmTransformer);
-const paramNameTransformer = ParamNames.transformerFactory;
-const paramNamesTransformer = new RecordOperation.RecordTransformer(paramNameTransformer);
-const createParticipantTransformer = (operatedBy) => Participant.transformerFactory(operatedBy);
-const createParticipantsTransformer = (operatedBy) => new RecordOperation.RecordTransformer(createParticipantTransformer(operatedBy));
-const transformerFactory = (operatedBy) => ({
-    composeLoose: ({ first, second }) => {
-        const bgms = bgmsTransformer.composeLoose({
-            first: first.bgms,
-            second: second.bgms,
+const applyBack = ({ state, operation }) => {
+    const result = Object.assign({}, state);
+    const bgms = RecordOperation.applyBack({
+        nextState: state.bgms, operation: operation.bgms, innerApplyBack: ({ state, operation }) => {
+            return Bgm.applyBack({ state, operation });
+        }
+    });
+    if (bgms.isError) {
+        return bgms;
+    }
+    result.bgms = bgms.value;
+    const boolParamNames = RecordOperation.applyBack({
+        nextState: state.boolParamNames, operation: operation.boolParamNames, innerApplyBack: ({ state, operation }) => {
+            return ParamNames.applyBack({ state, operation });
+        }
+    });
+    if (boolParamNames.isError) {
+        return boolParamNames;
+    }
+    result.boolParamNames = boolParamNames.value;
+    if (operation.name != null) {
+        result.name = operation.name.oldValue;
+    }
+    const numParamNames = RecordOperation.applyBack({
+        nextState: state.numParamNames, operation: operation.numParamNames, innerApplyBack: ({ state, operation }) => {
+            return ParamNames.applyBack({ state, operation });
+        }
+    });
+    if (numParamNames.isError) {
+        return numParamNames;
+    }
+    result.numParamNames = numParamNames.value;
+    const participants = RecordOperation.applyBack({
+        nextState: state.participants, operation: operation.participants, innerApplyBack: ({ state, operation }) => {
+            return Participant.applyBack({ state, operation });
+        }
+    });
+    if (participants.isError) {
+        return participants;
+    }
+    result.participants = participants.value;
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach(i => {
+        const operationElement = operation[`publicChannel${i}Name`];
+        if (operationElement != null) {
+            result[`publicChannel${i}Name`] = operationElement.oldValue;
+        }
+    });
+    const strParamNames = RecordOperation.applyBack({
+        nextState: state.strParamNames, operation: operation.strParamNames, innerApplyBack: ({ state, operation }) => {
+            return ParamNames.applyBack({ state, operation });
+        }
+    });
+    if (strParamNames.isError) {
+        return strParamNames;
+    }
+    result.strParamNames = strParamNames.value;
+    return Result_1.ResultModule.ok(result);
+};
+exports.applyBack = applyBack;
+const composeUpOperation = ({ first, second }) => {
+    const bgms = RecordOperation.composeUpOperation({
+        first: first.bgms,
+        second: second.bgms,
+        innerApply: params => Bgm.apply(params),
+        innerCompose: params => Bgm.composeUpOperation(params),
+    });
+    if (bgms.isError) {
+        return bgms;
+    }
+    const boolParamNames = RecordOperation.composeUpOperation({
+        first: first.boolParamNames,
+        second: second.boolParamNames,
+        innerApply: params => ParamNames.apply(params),
+        innerCompose: params => ParamNames.composeUpOperation(params),
+    });
+    if (boolParamNames.isError) {
+        return boolParamNames;
+    }
+    const numParamNames = RecordOperation.composeUpOperation({
+        first: first.numParamNames,
+        second: second.numParamNames,
+        innerApply: params => ParamNames.apply(params),
+        innerCompose: params => ParamNames.composeUpOperation(params),
+    });
+    if (numParamNames.isError) {
+        return numParamNames;
+    }
+    const strParamNames = RecordOperation.composeUpOperation({
+        first: first.strParamNames,
+        second: second.strParamNames,
+        innerApply: params => ParamNames.apply(params),
+        innerCompose: params => ParamNames.composeUpOperation(params),
+    });
+    if (strParamNames.isError) {
+        return strParamNames;
+    }
+    const participants = RecordOperation.composeUpOperation({
+        first: first.participants,
+        second: second.participants,
+        innerApply: params => Participant.apply(params),
+        innerCompose: params => Participant.composeUpOperation(params),
+    });
+    if (participants.isError) {
+        return participants;
+    }
+    const valueProps = {
+        $version: 1,
+        name: ReplaceOperation.composeUpOperation(first.name, second.name),
+        publicChannel1Name: ReplaceOperation.composeUpOperation(first.publicChannel1Name, second.publicChannel1Name),
+        publicChannel2Name: ReplaceOperation.composeUpOperation(first.publicChannel2Name, second.publicChannel2Name),
+        publicChannel3Name: ReplaceOperation.composeUpOperation(first.publicChannel3Name, second.publicChannel3Name),
+        publicChannel4Name: ReplaceOperation.composeUpOperation(first.publicChannel4Name, second.publicChannel4Name),
+        publicChannel5Name: ReplaceOperation.composeUpOperation(first.publicChannel5Name, second.publicChannel5Name),
+        publicChannel6Name: ReplaceOperation.composeUpOperation(first.publicChannel6Name, second.publicChannel6Name),
+        publicChannel7Name: ReplaceOperation.composeUpOperation(first.publicChannel7Name, second.publicChannel7Name),
+        publicChannel8Name: ReplaceOperation.composeUpOperation(first.publicChannel8Name, second.publicChannel8Name),
+        publicChannel9Name: ReplaceOperation.composeUpOperation(first.publicChannel9Name, second.publicChannel9Name),
+        publicChannel10Name: ReplaceOperation.composeUpOperation(first.publicChannel10Name, second.publicChannel10Name),
+        bgms: bgms.value,
+        numParamNames: numParamNames.value,
+        participants: participants.value,
+    };
+    return Result_1.ResultModule.ok(valueProps);
+};
+exports.composeUpOperation = composeUpOperation;
+const composeDownOperation = ({ first, second }) => {
+    const bgms = RecordOperation.composeDownOperation({
+        first: first.bgms,
+        second: second.bgms,
+        innerApplyBack: params => Bgm.applyBack(params),
+        innerCompose: params => Bgm.composeDownOperation(params),
+    });
+    if (bgms.isError) {
+        return bgms;
+    }
+    const boolParamNames = RecordOperation.composeDownOperation({
+        first: first.boolParamNames,
+        second: second.boolParamNames,
+        innerApplyBack: params => ParamNames.applyBack(params),
+        innerCompose: params => ParamNames.composeDownOperation(params),
+    });
+    if (boolParamNames.isError) {
+        return boolParamNames;
+    }
+    const numParamNames = RecordOperation.composeDownOperation({
+        first: first.numParamNames,
+        second: second.numParamNames,
+        innerApplyBack: params => ParamNames.applyBack(params),
+        innerCompose: params => ParamNames.composeDownOperation(params),
+    });
+    if (numParamNames.isError) {
+        return numParamNames;
+    }
+    const strParamNames = RecordOperation.composeDownOperation({
+        first: first.strParamNames,
+        second: second.strParamNames,
+        innerApplyBack: params => ParamNames.applyBack(params),
+        innerCompose: params => ParamNames.composeDownOperation(params),
+    });
+    if (strParamNames.isError) {
+        return strParamNames;
+    }
+    const participants = RecordOperation.composeDownOperation({
+        first: first.participants,
+        second: second.participants,
+        innerApplyBack: params => Participant.applyBack(params),
+        innerCompose: params => Participant.composeDownOperation(params),
+    });
+    if (participants.isError) {
+        return participants;
+    }
+    const valueProps = {
+        $version: 1,
+        name: ReplaceOperation.composeDownOperation(first.name, second.name),
+        publicChannel1Name: ReplaceOperation.composeDownOperation(first.publicChannel1Name, second.publicChannel1Name),
+        publicChannel2Name: ReplaceOperation.composeDownOperation(first.publicChannel2Name, second.publicChannel2Name),
+        publicChannel3Name: ReplaceOperation.composeDownOperation(first.publicChannel3Name, second.publicChannel3Name),
+        publicChannel4Name: ReplaceOperation.composeDownOperation(first.publicChannel4Name, second.publicChannel4Name),
+        publicChannel5Name: ReplaceOperation.composeDownOperation(first.publicChannel5Name, second.publicChannel5Name),
+        publicChannel6Name: ReplaceOperation.composeDownOperation(first.publicChannel6Name, second.publicChannel6Name),
+        publicChannel7Name: ReplaceOperation.composeDownOperation(first.publicChannel7Name, second.publicChannel7Name),
+        publicChannel8Name: ReplaceOperation.composeDownOperation(first.publicChannel8Name, second.publicChannel8Name),
+        publicChannel9Name: ReplaceOperation.composeDownOperation(first.publicChannel9Name, second.publicChannel9Name),
+        publicChannel10Name: ReplaceOperation.composeDownOperation(first.publicChannel10Name, second.publicChannel10Name),
+        bgms: bgms.value,
+        numParamNames: numParamNames.value,
+        participants: participants.value,
+    };
+    return Result_1.ResultModule.ok(valueProps);
+};
+exports.composeDownOperation = composeDownOperation;
+const restore = ({ nextState, downOperation }) => {
+    if (downOperation === undefined) {
+        return Result_1.ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
+    }
+    const bgms = RecordOperation.restore({
+        nextState: nextState.bgms,
+        downOperation: downOperation.bgms,
+        innerDiff: params => Bgm.diff(params),
+        innerRestore: params => Bgm.restore(params),
+    });
+    if (bgms.isError) {
+        return bgms;
+    }
+    const boolParamNames = RecordOperation.restore({
+        nextState: nextState.boolParamNames,
+        downOperation: downOperation.boolParamNames,
+        innerDiff: params => ParamNames.diff(params),
+        innerRestore: params => ParamNames.restore(params),
+    });
+    if (boolParamNames.isError) {
+        return boolParamNames;
+    }
+    const numParamNames = RecordOperation.restore({
+        nextState: nextState.numParamNames,
+        downOperation: downOperation.numParamNames,
+        innerDiff: params => ParamNames.diff(params),
+        innerRestore: params => ParamNames.restore(params),
+    });
+    if (numParamNames.isError) {
+        return numParamNames;
+    }
+    const strParamNames = RecordOperation.restore({
+        nextState: nextState.strParamNames,
+        downOperation: downOperation.strParamNames,
+        innerDiff: params => ParamNames.diff(params),
+        innerRestore: params => ParamNames.restore(params),
+    });
+    if (strParamNames.isError) {
+        return strParamNames;
+    }
+    const participants = RecordOperation.restore({
+        nextState: nextState.participants,
+        downOperation: downOperation.participants,
+        innerDiff: params => Participant.diff(params),
+        innerRestore: params => Participant.restore(params),
+    });
+    if (participants.isError) {
+        return participants;
+    }
+    const prevState = Object.assign(Object.assign({}, nextState), { bgms: bgms.value.prevState, boolParamNames: boolParamNames.value.prevState, numParamNames: numParamNames.value.prevState, strParamNames: strParamNames.value.prevState, participants: participants.value.prevState });
+    const twoWayOperation = {
+        $version: 1,
+        bgms: bgms.value.twoWayOperation,
+        boolParamNames: boolParamNames.value.twoWayOperation,
+        numParamNames: numParamNames.value.twoWayOperation,
+        strParamNames: strParamNames.value.twoWayOperation,
+        participants: participants.value.twoWayOperation,
+    };
+    if (downOperation.name !== undefined) {
+        prevState.name = downOperation.name.oldValue;
+        twoWayOperation.name = Object.assign(Object.assign({}, downOperation.name), { newValue: nextState.name });
+    }
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach(i => {
+        const key = `publicChannel${i}Name`;
+        const downOperationValue = downOperation[key];
+        if (downOperationValue !== undefined) {
+            prevState[key] = downOperationValue.oldValue;
+            twoWayOperation[key] = Object.assign(Object.assign({}, downOperationValue), { newValue: nextState[key] });
+        }
+    });
+    return Result_1.ResultModule.ok({ prevState, twoWayOperation });
+};
+exports.restore = restore;
+const diff = ({ prevState, nextState }) => {
+    const bgms = RecordOperation.diff({
+        prevState: prevState.bgms,
+        nextState: nextState.bgms,
+        innerDiff: params => Bgm.diff(params),
+    });
+    const boolParamNames = RecordOperation.diff({
+        prevState: prevState.boolParamNames,
+        nextState: nextState.boolParamNames,
+        innerDiff: params => ParamNames.diff(params),
+    });
+    const numParamNames = RecordOperation.diff({
+        prevState: prevState.numParamNames,
+        nextState: nextState.numParamNames,
+        innerDiff: params => ParamNames.diff(params),
+    });
+    const strParamNames = RecordOperation.diff({
+        prevState: prevState.strParamNames,
+        nextState: nextState.strParamNames,
+        innerDiff: params => ParamNames.diff(params),
+    });
+    const participants = RecordOperation.diff({
+        prevState: prevState.participants,
+        nextState: nextState.participants,
+        innerDiff: params => Participant.diff(params),
+    });
+    const result = {
+        $version: 1,
+        bgms,
+        boolParamNames,
+        numParamNames,
+        strParamNames,
+        participants,
+    };
+    if (prevState.name !== nextState.name) {
+        result.name = { oldValue: prevState.name, newValue: nextState.name };
+    }
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach(i => {
+        const key = `publicChannel${i}Name`;
+        if (prevState[key] !== nextState[key]) {
+            result[key] = { oldValue: prevState[key], newValue: nextState[key] };
+        }
+    });
+    if (record_1.isIdRecord(result)) {
+        return undefined;
+    }
+    return result;
+};
+exports.diff = diff;
+const serverTransform = (requestedBy) => ({ prevState, currentState, clientOperation, serverOperation }) => {
+    const bgms = RecordOperation.serverTransform({
+        prevState: prevState.bgms,
+        nextState: currentState.bgms,
+        first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.bgms,
+        second: clientOperation.bgms,
+        innerTransform: ({ prevState, nextState, first, second }) => Bgm.serverTransform({
+            prevState,
+            currentState: nextState,
+            serverOperation: first,
+            clientOperation: second,
+        }),
+        toServerState: state => state,
+        protectedValuePolicy: {},
+    });
+    if (bgms.isError) {
+        return bgms;
+    }
+    const boolParamNames = RecordOperation.serverTransform({
+        prevState: prevState.boolParamNames,
+        nextState: currentState.boolParamNames,
+        first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.boolParamNames,
+        second: clientOperation.boolParamNames,
+        innerTransform: ({ prevState, nextState, first, second }) => ParamNames.serverTransform({
+            prevState,
+            currentState: nextState,
+            serverOperation: first,
+            clientOperation: second,
+        }),
+        toServerState: state => state,
+        protectedValuePolicy: {},
+    });
+    if (boolParamNames.isError) {
+        return boolParamNames;
+    }
+    const numParamNames = RecordOperation.serverTransform({
+        prevState: prevState.numParamNames,
+        nextState: currentState.numParamNames,
+        first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.numParamNames,
+        second: clientOperation.numParamNames,
+        innerTransform: ({ prevState, nextState, first, second }) => ParamNames.serverTransform({
+            prevState,
+            currentState: nextState,
+            serverOperation: first,
+            clientOperation: second,
+        }),
+        toServerState: state => state,
+        protectedValuePolicy: {},
+    });
+    if (numParamNames.isError) {
+        return numParamNames;
+    }
+    const strParamNames = RecordOperation.serverTransform({
+        prevState: prevState.strParamNames,
+        nextState: currentState.strParamNames,
+        first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.strParamNames,
+        second: clientOperation.strParamNames,
+        innerTransform: ({ prevState, nextState, first, second }) => ParamNames.serverTransform({
+            prevState,
+            currentState: nextState,
+            serverOperation: first,
+            clientOperation: second,
+        }),
+        toServerState: state => state,
+        protectedValuePolicy: {},
+    });
+    if (strParamNames.isError) {
+        return strParamNames;
+    }
+    const participants = RecordOperation.serverTransform({
+        prevState: prevState.participants,
+        nextState: currentState.participants,
+        first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.participants,
+        second: clientOperation.participants,
+        innerTransform: ({ prevState, nextState, first, second }) => Participant.serverTransform(requestedBy)({
+            prevState,
+            currentState: nextState,
+            serverOperation: first,
+            clientOperation: second,
+        }),
+        toServerState: state => state,
+        protectedValuePolicy: {},
+    });
+    if (participants.isError) {
+        return participants;
+    }
+    const twoWayOperation = {
+        $version: 1,
+        bgms: bgms.value,
+        boolParamNames: boolParamNames.value,
+        numParamNames: numParamNames.value,
+        strParamNames: strParamNames.value,
+        participants: participants.value,
+    };
+    twoWayOperation.name = ReplaceOperation.serverTransform({
+        first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.name,
+        second: clientOperation.name,
+        prevState: prevState.name,
+    });
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach(i => {
+        const key = `publicChannel${i}Name`;
+        twoWayOperation[key] = ReplaceOperation.serverTransform({
+            first: serverOperation == null ? undefined : serverOperation[key],
+            second: clientOperation[key],
+            prevState: prevState[key],
         });
-        if (bgms.isError) {
-            return bgms;
-        }
-        const boolParamNames = paramNamesTransformer.composeLoose({
-            first: first.boolParamNames,
-            second: second.boolParamNames,
-        });
-        if (boolParamNames.isError) {
-            return boolParamNames;
-        }
-        const numParamNames = paramNamesTransformer.composeLoose({
-            first: first.numParamNames,
-            second: second.numParamNames,
-        });
-        if (numParamNames.isError) {
-            return numParamNames;
-        }
-        const strParamNames = paramNamesTransformer.composeLoose({
-            first: first.strParamNames,
-            second: second.strParamNames,
-        });
-        if (strParamNames.isError) {
-            return strParamNames;
-        }
-        const participants = createParticipantsTransformer(operatedBy).composeLoose({
-            first: first.participants,
-            second: second.participants,
-        });
-        if (participants.isError) {
-            return participants;
-        }
-        const valueProps = {
-            $version: 1,
-            name: ReplaceValueOperation.composeDownOperation(first.name, second.name),
-            publicChannel1Name: ReplaceValueOperation.composeDownOperation(first.publicChannel1Name, second.publicChannel1Name),
-            publicChannel2Name: ReplaceValueOperation.composeDownOperation(first.publicChannel2Name, second.publicChannel2Name),
-            publicChannel3Name: ReplaceValueOperation.composeDownOperation(first.publicChannel3Name, second.publicChannel3Name),
-            publicChannel4Name: ReplaceValueOperation.composeDownOperation(first.publicChannel4Name, second.publicChannel4Name),
-            publicChannel5Name: ReplaceValueOperation.composeDownOperation(first.publicChannel5Name, second.publicChannel5Name),
-            publicChannel6Name: ReplaceValueOperation.composeDownOperation(first.publicChannel6Name, second.publicChannel6Name),
-            publicChannel7Name: ReplaceValueOperation.composeDownOperation(first.publicChannel7Name, second.publicChannel7Name),
-            publicChannel8Name: ReplaceValueOperation.composeDownOperation(first.publicChannel8Name, second.publicChannel8Name),
-            publicChannel9Name: ReplaceValueOperation.composeDownOperation(first.publicChannel9Name, second.publicChannel9Name),
-            publicChannel10Name: ReplaceValueOperation.composeDownOperation(first.publicChannel10Name, second.publicChannel10Name),
-            bgms: bgms.value,
-            numParamNames: numParamNames.value,
-            participants: participants.value,
-        };
-        return Result_1.ResultModule.ok(valueProps);
-    },
-    restore: ({ nextState, downOperation }) => {
-        if (downOperation === undefined) {
-            return Result_1.ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
-        }
-        const bgms = bgmsTransformer.restore({
-            nextState: nextState.bgms,
-            downOperation: downOperation.bgms,
-        });
-        if (bgms.isError) {
-            return bgms;
-        }
-        const boolParamNames = paramNamesTransformer.restore({
-            nextState: nextState.boolParamNames,
-            downOperation: downOperation.boolParamNames,
-        });
-        if (boolParamNames.isError) {
-            return boolParamNames;
-        }
-        const numParamNames = paramNamesTransformer.restore({
-            nextState: nextState.numParamNames,
-            downOperation: downOperation.numParamNames,
-        });
-        if (numParamNames.isError) {
-            return numParamNames;
-        }
-        const strParamNames = paramNamesTransformer.restore({
-            nextState: nextState.strParamNames,
-            downOperation: downOperation.strParamNames,
-        });
-        if (strParamNames.isError) {
-            return strParamNames;
-        }
-        const participants = createParticipantsTransformer(operatedBy).restore({
-            nextState: nextState.participants,
-            downOperation: downOperation.participants,
-        });
-        if (participants.isError) {
-            return participants;
-        }
-        const prevState = Object.assign(Object.assign({}, nextState), { bgms: bgms.value.prevState, boolParamNames: boolParamNames.value.prevState, numParamNames: numParamNames.value.prevState, strParamNames: strParamNames.value.prevState, participants: participants.value.prevState });
-        const twoWayOperation = {
-            $version: 1,
-            bgms: bgms.value.twoWayOperation,
-            boolParamNames: boolParamNames.value.twoWayOperation,
-            numParamNames: numParamNames.value.twoWayOperation,
-            strParamNames: strParamNames.value.twoWayOperation,
-            participants: participants.value.twoWayOperation,
-        };
-        if (downOperation.name !== undefined) {
-            prevState.name = downOperation.name.oldValue;
-            twoWayOperation.name = Object.assign(Object.assign({}, downOperation.name), { newValue: nextState.name });
-        }
-        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach(i => {
-            const key = `publicChannel${i}Name`;
-            const downOperationValue = downOperation[key];
-            if (downOperationValue !== undefined) {
-                prevState[key] = downOperationValue.oldValue;
-                twoWayOperation[key] = Object.assign(Object.assign({}, downOperationValue), { newValue: nextState[key] });
+    });
+    if (record_1.isIdRecord(twoWayOperation)) {
+        return Result_1.ResultModule.ok(undefined);
+    }
+    return Result_1.ResultModule.ok(twoWayOperation);
+};
+exports.serverTransform = serverTransform;
+const clientTransform = ({ first, second }) => {
+    const bgms = RecordOperation.clientTransform({
+        first: first.bgms,
+        second: second.bgms,
+        innerTransform: params => Bgm.clientTransform(params),
+        innerDiff: params => {
+            const diff = Bgm.diff(params);
+            if (diff == null) {
+                return diff;
             }
-        });
-        return Result_1.ResultModule.ok({ prevState, twoWayOperation });
-    },
-    transform: ({ prevState, currentState, clientOperation, serverOperation }) => {
-        const bgms = bgmsTransformer.transform({
-            prevState: prevState.bgms,
-            currentState: currentState.bgms,
-            clientOperation: clientOperation.bgms,
-            serverOperation: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.bgms,
-        });
-        if (bgms.isError) {
-            return bgms;
-        }
-        const boolParamNames = paramNamesTransformer.transform({
-            prevState: prevState.boolParamNames,
-            currentState: currentState.boolParamNames,
-            clientOperation: clientOperation.boolParamNames,
-            serverOperation: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.boolParamNames,
-        });
-        if (boolParamNames.isError) {
-            return boolParamNames;
-        }
-        const numParamNames = paramNamesTransformer.transform({
-            prevState: prevState.numParamNames,
-            currentState: currentState.numParamNames,
-            clientOperation: clientOperation.numParamNames,
-            serverOperation: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.numParamNames,
-        });
-        if (numParamNames.isError) {
-            return numParamNames;
-        }
-        const strParamNames = paramNamesTransformer.transform({
-            prevState: prevState.strParamNames,
-            currentState: currentState.strParamNames,
-            clientOperation: clientOperation.strParamNames,
-            serverOperation: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.strParamNames,
-        });
-        if (strParamNames.isError) {
-            return strParamNames;
-        }
-        const participants = createParticipantsTransformer(operatedBy).transform({
-            prevState: prevState.participants,
-            currentState: currentState.participants,
-            clientOperation: clientOperation.participants,
-            serverOperation: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.participants,
-        });
-        if (participants.isError) {
-            return participants;
-        }
-        const twoWayOperation = {
-            $version: 1,
-            bgms: bgms.value,
-            boolParamNames: boolParamNames.value,
-            numParamNames: numParamNames.value,
-            strParamNames: strParamNames.value,
-            participants: participants.value,
-        };
-        twoWayOperation.name = ReplaceValueOperation.transform({
-            first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.name,
-            second: clientOperation.name,
-            prevState: prevState.name,
-        });
-        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach(i => {
-            const key = `publicChannel${i}Name`;
-            twoWayOperation[key] = ReplaceValueOperation.transform({
-                first: serverOperation == null ? undefined : serverOperation[key],
-                second: clientOperation[key],
-                prevState: prevState[key],
-            });
-        });
-        if (record_1.isIdRecord(twoWayOperation)) {
-            return Result_1.ResultModule.ok(undefined);
-        }
-        return Result_1.ResultModule.ok(twoWayOperation);
-    },
-    diff: ({ prevState, nextState }) => {
-        const bgms = bgmsTransformer.diff({
-            prevState: prevState.bgms,
-            nextState: nextState.bgms,
-        });
-        const boolParamNames = paramNamesTransformer.diff({
-            prevState: prevState.boolParamNames,
-            nextState: nextState.boolParamNames,
-        });
-        const numParamNames = paramNamesTransformer.diff({
-            prevState: prevState.numParamNames,
-            nextState: nextState.numParamNames,
-        });
-        const strParamNames = paramNamesTransformer.diff({
-            prevState: prevState.strParamNames,
-            nextState: nextState.strParamNames,
-        });
-        const participants = createParticipantsTransformer(operatedBy).diff({
-            prevState: prevState.participants,
-            nextState: nextState.participants,
-        });
-        const result = {
-            $version: 1,
-            bgms,
-            boolParamNames,
-            numParamNames,
-            strParamNames,
-            participants,
-        };
-        if (prevState.name !== nextState.name) {
-            result.name = { oldValue: prevState.name, newValue: nextState.name };
-        }
-        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach(i => {
-            const key = `publicChannel${i}Name`;
-            if (prevState[key] !== nextState[key]) {
-                result[key] = { oldValue: prevState[key], newValue: nextState[key] };
+            return Bgm.toUpOperation(diff);
+        },
+    });
+    if (bgms.isError) {
+        return bgms;
+    }
+    const boolParamNames = RecordOperation.clientTransform({
+        first: first.boolParamNames,
+        second: second.boolParamNames,
+        innerTransform: params => ParamNames.clientTransform(params),
+        innerDiff: params => {
+            const diff = ParamNames.diff(params);
+            if (diff == null) {
+                return diff;
             }
-        });
-        if (record_1.isIdRecord(result)) {
-            return undefined;
-        }
-        return result;
-    },
-    applyBack: ({ downOperation, nextState }) => {
-        const bgms = bgmsTransformer.applyBack({
-            downOperation: downOperation.bgms,
-            nextState: nextState.bgms,
-        });
-        if (bgms.isError) {
-            return bgms;
-        }
-        const boolParamNames = paramNamesTransformer.applyBack({
-            downOperation: downOperation.boolParamNames,
-            nextState: nextState.boolParamNames,
-        });
-        if (boolParamNames.isError) {
-            return boolParamNames;
-        }
-        const numParamNames = paramNamesTransformer.applyBack({
-            downOperation: downOperation.numParamNames,
-            nextState: nextState.numParamNames,
-        });
-        if (numParamNames.isError) {
-            return numParamNames;
-        }
-        const strParamNames = paramNamesTransformer.applyBack({
-            downOperation: downOperation.strParamNames,
-            nextState: nextState.strParamNames,
-        });
-        if (strParamNames.isError) {
-            return strParamNames;
-        }
-        const participants = createParticipantsTransformer(operatedBy).applyBack({
-            downOperation: downOperation.participants,
-            nextState: nextState.participants,
-        });
-        if (participants.isError) {
-            return participants;
-        }
-        const result = Object.assign(Object.assign({}, nextState), { bgms: bgms.value, boolParamNames: boolParamNames.value, numParamNames: numParamNames.value, strParamNames: strParamNames.value, participants: participants.value });
-        if (downOperation.name !== undefined) {
-            result.name = downOperation.name.oldValue;
-        }
-        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach(i => {
-            const key = `publicChannel${i}Name`;
-            const downOperationValue = downOperation[key];
-            if (downOperationValue !== undefined) {
-                result[key] = downOperationValue.oldValue;
+            return ParamNames.toUpOperation(diff);
+        },
+    });
+    if (boolParamNames.isError) {
+        return boolParamNames;
+    }
+    const numParamNames = RecordOperation.clientTransform({
+        first: first.numParamNames,
+        second: second.numParamNames,
+        innerTransform: params => ParamNames.clientTransform(params),
+        innerDiff: params => {
+            const diff = ParamNames.diff(params);
+            if (diff == null) {
+                return diff;
             }
+            return ParamNames.toUpOperation(diff);
+        },
+    });
+    if (numParamNames.isError) {
+        return numParamNames;
+    }
+    const strParamNames = RecordOperation.clientTransform({
+        first: first.strParamNames,
+        second: second.strParamNames,
+        innerTransform: params => ParamNames.clientTransform(params),
+        innerDiff: params => {
+            const diff = ParamNames.diff(params);
+            if (diff == null) {
+                return diff;
+            }
+            return ParamNames.toUpOperation(diff);
+        },
+    });
+    if (strParamNames.isError) {
+        return strParamNames;
+    }
+    const participants = RecordOperation.clientTransform({
+        first: first.participants,
+        second: second.participants,
+        innerTransform: params => Participant.clientTransform(params),
+        innerDiff: params => {
+            const diff = Participant.diff(params);
+            if (diff == null) {
+                return diff;
+            }
+            return Participant.toUpOperation(diff);
+        },
+    });
+    if (participants.isError) {
+        return participants;
+    }
+    const name = ReplaceOperation.clientTransform({
+        first: first.name,
+        second: second.name,
+    });
+    const firstPrime = {
+        $version: 1,
+        bgms: bgms.value.firstPrime,
+        boolParamNames: boolParamNames.value.firstPrime,
+        numParamNames: numParamNames.value.firstPrime,
+        strParamNames: strParamNames.value.firstPrime,
+        participants: participants.value.firstPrime,
+        name: name.firstPrime,
+    };
+    const secondPrime = {
+        $version: 1,
+        bgms: bgms.value.secondPrime,
+        boolParamNames: boolParamNames.value.secondPrime,
+        numParamNames: numParamNames.value.secondPrime,
+        strParamNames: strParamNames.value.secondPrime,
+        participants: participants.value.secondPrime,
+        name: name.secondPrime,
+    };
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach(i => {
+        const key = `publicChannel${i}Name`;
+        const operation = ReplaceOperation.clientTransform({
+            first: first[key],
+            second: second[key],
         });
-        return Result_1.ResultModule.ok(result);
-    },
-    toServerState: ({ clientState }) => clientState,
-    protectedValuePolicy: {}
-});
-exports.transformerFactory = transformerFactory;
+        firstPrime[key] = operation.firstPrime;
+        secondPrime[key] = operation.secondPrime;
+    });
+    return Result_1.ResultModule.ok({
+        firstPrime: record_1.isIdRecord(firstPrime) ? undefined : firstPrime,
+        secondPrime: record_1.isIdRecord(secondPrime) ? undefined : secondPrime,
+    });
+};
+exports.clientTransform = clientTransform;

@@ -204,7 +204,7 @@ const operateParticipantAndFlush = async ({
         }
     };
 
-    const transformed = RoomModule.transformerFactory({ type: server }).transform({ key: null, prevState: roomState, currentState: roomState, clientOperation: roomUpOperation, serverOperation: undefined });
+    const transformed = RoomModule.serverTransform({ type: server })({ prevState: roomState, currentState: roomState, clientOperation: roomUpOperation, serverOperation: undefined });
     if (transformed.isError) {
         return {
             result: { failureType: JoinRoomFailureType.TransformError },
@@ -1576,12 +1576,10 @@ export class RoomResolver {
                 return downOperation;
             }
 
-            const transformerFactory = RoomModule.transformerFactory({ type: client, userUid: decodedIdToken.uid });
             let prevState: RoomModule.State = roomState;
             let twoWayOperation: RoomModule.TwoWayOperation | undefined = undefined;
             if (downOperation.value !== undefined) {
-                const restoredRoom = transformerFactory.restore({
-                    key: null,
+                const restoredRoom = RoomModule.restore({
                     nextState: roomState,
                     downOperation: downOperation.value
                 });
@@ -1592,8 +1590,7 @@ export class RoomResolver {
                 twoWayOperation = restoredRoom.value.twoWayOperation;
             }
 
-            const transformed = transformerFactory.transform({
-                key: null,
+            const transformed = RoomModule.serverTransform({ type: client, userUid: decodedIdToken.uid })({
                 prevState,
                 currentState: roomState,
                 clientOperation: clientOperation,

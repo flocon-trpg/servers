@@ -21,7 +21,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GlobalRoom = void 0;
 const mikro_orm_1 = require("./mikro-orm");
-const Types_1 = require("../../Types");
 const core_1 = require("@mikro-orm/core");
 const RoomConverterModule = __importStar(require("../../../@shared/ot/room/converter"));
 const RoomModule = __importStar(require("../../../@shared/ot/room/v1"));
@@ -107,7 +106,7 @@ var GlobalRoom;
                         operation = second;
                         continue;
                     }
-                    const composed = RoomModule.transformerFactory({ type: Types_1.server }).composeLoose({ key: null, first: operation, second });
+                    const composed = RoomModule.composeDownOperation({ first: operation, second });
                     if (composed.isError) {
                         return composed;
                     }
@@ -149,7 +148,7 @@ var GlobalRoom;
             target.revision += 1;
             const op = new mikro_orm_1.RoomOp({
                 prevRevision,
-                value: RoomModule.toServerOperation(operation),
+                value: RoomModule.toDownOperation(operation),
             });
             op.room = core_1.Reference.create(target);
             em.persist(op);

@@ -114,8 +114,7 @@ export namespace GlobalRoom {
                         operation = second;
                         continue;
                     }
-                    // composeLooseではoperatedByは使われていないはずなので、適当な値を渡している。
-                    const composed = RoomModule.transformerFactory({ type: server }).composeLoose({ key: null, first: operation, second });
+                    const composed = RoomModule.composeDownOperation({ first: operation, second });
                     if (composed.isError) {
                         return composed;
                     }
@@ -179,7 +178,7 @@ export namespace GlobalRoom {
             target.revision += 1;
             const op = new RoomOp({
                 prevRevision,
-                value: RoomModule.toServerOperation(operation),
+                value: RoomModule.toDownOperation(operation),
             });
             op.room = Reference.create<Room>(target);
 

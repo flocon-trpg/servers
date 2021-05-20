@@ -1,4 +1,4 @@
-import { DualKey } from './DualKeyMap';
+import { DualKey, DualKeyMap } from './DualKeyMap';
 
 export const chooseRecord = <TSource, TResult>(source: Record<string, TSource>, chooser: (element: TSource) => TResult | undefined): Record<string, TResult> => {
     const result: Record<string, TResult> = {};
@@ -42,6 +42,22 @@ export const recordToMap = <T>(source: Record<string, T>): Map<string, T> => {
         const value = source[key];
         if (value !== undefined) {
             result.set(key, value);
+        }
+    }
+    return result;
+};
+
+export const recordToDualKeyMap = <T>(source: Record<string, Record<string, T>>): DualKeyMap<string, string, T> => {
+    const result = new DualKeyMap<string, string, T>();
+    for (const first in source) {
+        const innerRecord = source[first];
+        if (innerRecord !== undefined) {
+            for (const second in innerRecord) {
+                const value = innerRecord[second];
+                if (value !== undefined) {
+                    result.set({ first, second }, value);
+                }
+            }
         }
     }
     return result;

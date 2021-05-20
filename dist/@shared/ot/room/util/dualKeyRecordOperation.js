@@ -19,7 +19,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DualKeyRecordTransformer = exports.diff = exports.transform = exports.composeDownOperationLoose = exports.applyBack = exports.apply = exports.restore = exports.toClientOperation = exports.toClientState = exports.dualKeyMapUpOperationFactory = exports.dualKeyMapDownOperationFactory = exports.dualKeyMapStateFactory = void 0;
+exports.diff = exports.clientTransform = exports.serverTransform = exports.composeDownOperation = exports.composeUpOperation = exports.applyBack = exports.apply = exports.restore = exports.toClientOperation = exports.toClientState = exports.dualKeyMapUpOperationFactory = exports.dualKeyMapDownOperationFactory = exports.dualKeyMapStateFactory = void 0;
 const t = __importStar(require("io-ts"));
 const DualKeyMap_1 = require("../../../DualKeyMap");
 const Result_1 = require("../../../Result");
@@ -200,12 +200,12 @@ const apply = ({ prevState, operation, innerApply }) => {
     return Result_1.ResultModule.ok(nextState.toStringRecord(x => x, x => x));
 };
 exports.apply = apply;
-const applyBack = ({ nextState, downOperation, innerApplyBack }) => {
-    if (downOperation == null) {
+const applyBack = ({ nextState, operation: operation, innerApplyBack }) => {
+    if (operation == null) {
         return Result_1.ResultModule.ok(nextState);
     }
     const prevState = DualKeyMap_1.DualKeyMap.ofRecord(nextState);
-    for (const [key, value] of DualKeyMap_1.DualKeyMap.ofRecord(downOperation)) {
+    for (const [key, value] of DualKeyMap_1.DualKeyMap.ofRecord(operation)) {
         switch (value.type) {
             case 'replace': {
                 if (value.replace.oldValue === undefined) {
@@ -221,7 +221,7 @@ const applyBack = ({ nextState, downOperation, innerApplyBack }) => {
                 if (nextStateElement === undefined) {
                     return Result_1.ResultModule.error(`tried to update "${DualKeyMap_1.toJSONString(key)}", but nextState does not have such a key`);
                 }
-                const oldValue = innerApplyBack({ key, downOperation: value.update, nextState: nextStateElement });
+                const oldValue = innerApplyBack({ key, operation: value.update, state: nextStateElement });
                 if (oldValue.isError) {
                     return oldValue;
                 }
@@ -233,7 +233,81 @@ const applyBack = ({ nextState, downOperation, innerApplyBack }) => {
     return Result_1.ResultModule.ok(prevState.toStringRecord(x => x, x => x));
 };
 exports.applyBack = applyBack;
-const composeDownOperationLoose = ({ first, second, innerApplyBack, innerCompose }) => {
+const composeUpOperation = ({ first, second, innerApply, innerCompose }) => {
+    if (first == null) {
+        return Result_1.ResultModule.ok(second);
+    }
+    if (second == null) {
+        return Result_1.ResultModule.ok(first);
+    }
+    const result = new DualKeyMap_1.DualKeyMap();
+    for (const [key, groupJoined] of DualKeyMap_1.groupJoin(DualKeyMap_1.DualKeyMap.ofRecord(first), DualKeyMap_1.DualKeyMap.ofRecord(second))) {
+        switch (groupJoined.type) {
+            case Types_1.left:
+                switch (groupJoined.left.type) {
+                    case 'replace':
+                        result.set(key, { type: 'replace', replace: groupJoined.left.replace });
+                        continue;
+                    case 'update':
+                        result.set(key, { type: 'update', update: groupJoined.left.update });
+                        continue;
+                }
+                break;
+            case Types_1.right:
+                switch (groupJoined.right.type) {
+                    case 'replace':
+                        result.set(key, { type: 'replace', replace: groupJoined.right.replace });
+                        continue;
+                    case 'update':
+                        result.set(key, { type: 'update', update: groupJoined.right.update });
+                        continue;
+                }
+                break;
+            case Types_1.both:
+                switch (groupJoined.right.type) {
+                    case 'replace':
+                        switch (groupJoined.left.type) {
+                            case 'replace': {
+                                const right = groupJoined.right.replace.newValue;
+                                result.set(key, { type: 'replace', replace: { newValue: right } });
+                                continue;
+                            }
+                        }
+                        result.set(key, { type: 'replace', replace: groupJoined.right.replace });
+                        continue;
+                    case 'update':
+                        switch (groupJoined.left.type) {
+                            case 'replace': {
+                                if (groupJoined.left.replace.newValue === undefined) {
+                                    return Result_1.ResultModule.error(`second is update, but first.newValue is null. the key is "${key}".`);
+                                }
+                                const secondNewValue = innerApply({ key, operation: groupJoined.right.update, state: groupJoined.left.replace.newValue });
+                                if (secondNewValue.isError) {
+                                    return secondNewValue;
+                                }
+                                result.set(key, { type: 'replace', replace: { newValue: secondNewValue.value } });
+                                continue;
+                            }
+                            case 'update': {
+                                const update = innerCompose({ key, first: groupJoined.left.update, second: groupJoined.right.update });
+                                if (update.isError) {
+                                    return update;
+                                }
+                                if (update.value === undefined) {
+                                    continue;
+                                }
+                                result.set(key, { type: 'update', update: update.value });
+                                continue;
+                            }
+                        }
+                }
+                break;
+        }
+    }
+    return Result_1.ResultModule.ok(result.toStringRecord(x => x, x => x));
+};
+exports.composeUpOperation = composeUpOperation;
+const composeDownOperation = ({ first, second, innerApplyBack, innerCompose }) => {
     if (first == null) {
         return Result_1.ResultModule.ok(second);
     }
@@ -281,7 +355,7 @@ const composeDownOperationLoose = ({ first, second, innerApplyBack, innerCompose
                                 if (groupJoined.right.replace.oldValue === undefined) {
                                     return Result_1.ResultModule.error(`first is update, but second.oldValue is null. the key is "${key}".`);
                                 }
-                                const firstOldValue = innerApplyBack({ key, downOperation: groupJoined.left.update, nextState: groupJoined.right.replace.oldValue });
+                                const firstOldValue = innerApplyBack({ key, operation: groupJoined.left.update, state: groupJoined.right.replace.oldValue });
                                 if (firstOldValue.isError) {
                                     return firstOldValue;
                                 }
@@ -306,8 +380,8 @@ const composeDownOperationLoose = ({ first, second, innerApplyBack, innerCompose
     }
     return Result_1.ResultModule.ok(result.toStringRecord(x => x, x => x));
 };
-exports.composeDownOperationLoose = composeDownOperationLoose;
-const transform = ({ first, second, prevState, nextState, innerTransform, toServerState, protectedValuePolicy }) => {
+exports.composeDownOperation = composeDownOperation;
+const serverTransform = ({ first, second, prevState, nextState, innerTransform, toServerState, protectedValuePolicy }) => {
     if (second === undefined) {
         return Result_1.ResultModule.ok(undefined);
     }
@@ -383,10 +457,123 @@ const transform = ({ first, second, prevState, nextState, innerTransform, toServ
     }
     return Result_1.ResultModule.ok(result.toStringRecord(x => x, x => x));
 };
-exports.transform = transform;
-const diff = ({ prev, next, innerDiff, }) => {
+exports.serverTransform = serverTransform;
+const transformElement = ({ first, second, innerTransform, innerDiff }) => {
+    switch (first.type) {
+        case recordOperationElement_1.replace:
+            switch (second.type) {
+                case recordOperationElement_1.replace:
+                    if (first.replace.newValue !== undefined && second.replace.newValue !== undefined) {
+                        const diffResult = innerDiff({ nextState: first.replace.newValue, prevState: second.replace.newValue });
+                        if (diffResult === undefined) {
+                            return Result_1.ResultModule.ok({
+                                firstPrime: undefined,
+                                secondPrime: undefined
+                            });
+                        }
+                        return Result_1.ResultModule.ok({
+                            firstPrime: { type: recordOperationElement_1.update, update: diffResult },
+                            secondPrime: undefined
+                        });
+                    }
+                    return Result_1.ResultModule.ok({
+                        firstPrime: undefined,
+                        secondPrime: undefined
+                    });
+                case recordOperationElement_1.update:
+                    return Result_1.ResultModule.ok({
+                        firstPrime: first,
+                        secondPrime: undefined,
+                    });
+            }
+            break;
+        case recordOperationElement_1.update:
+            switch (second.type) {
+                case recordOperationElement_1.replace: {
+                    if (second.replace.newValue !== undefined) {
+                        throw 'Tried to add an element, but already exists another value.';
+                    }
+                    return Result_1.ResultModule.ok({
+                        firstPrime: undefined,
+                        secondPrime: {
+                            type: recordOperationElement_1.replace,
+                            replace: {
+                                newValue: undefined,
+                            },
+                        },
+                    });
+                }
+                case recordOperationElement_1.update: {
+                    const xform = innerTransform({ first: first.update, second: second.update });
+                    if (xform.isError) {
+                        return xform;
+                    }
+                    return Result_1.ResultModule.ok({
+                        firstPrime: xform.value.firstPrime == null ? undefined : {
+                            type: recordOperationElement_1.update,
+                            update: xform.value.firstPrime,
+                        },
+                        secondPrime: xform.value.secondPrime == null ? undefined : {
+                            type: recordOperationElement_1.update,
+                            update: xform.value.secondPrime,
+                        },
+                    });
+                }
+            }
+            break;
+    }
+};
+const clientTransform = ({ first, second, innerTransform, innerDiff, }) => {
+    if (first == null || second == null) {
+        return Result_1.ResultModule.ok({
+            firstPrime: first,
+            secondPrime: second,
+        });
+    }
+    const firstPrime = new DualKeyMap_1.DualKeyMap();
+    const secondPrime = new DualKeyMap_1.DualKeyMap();
+    let error = undefined;
+    DualKeyMap_1.groupJoin(utils_1.recordToDualKeyMap(first), utils_1.recordToDualKeyMap(second)).forEach((group, key) => {
+        if (error != null) {
+            return;
+        }
+        switch (group.type) {
+            case Types_1.left: {
+                firstPrime.set(key, group.left);
+                return;
+            }
+            case Types_1.right: {
+                secondPrime.set(key, group.right);
+                return;
+            }
+            case Types_1.both: {
+                const xform = transformElement({ first: group.left, second: group.right, innerTransform, innerDiff });
+                if (xform.isError) {
+                    error = { error: xform.error };
+                    return;
+                }
+                if (xform.value.firstPrime !== undefined) {
+                    firstPrime.set(key, xform.value.firstPrime);
+                }
+                if (xform.value.secondPrime !== undefined) {
+                    secondPrime.set(key, xform.value.secondPrime);
+                }
+                return;
+            }
+        }
+    });
+    if (error != null) {
+        return Result_1.ResultModule.error(error.error);
+    }
+    return Result_1.ResultModule.ok({
+        firstPrime: firstPrime.isEmpty ? undefined : firstPrime.toStringRecord(x => x, x => x),
+        secondPrime: secondPrime.isEmpty ? undefined : secondPrime.toStringRecord(x => x, x => x),
+    });
+};
+exports.clientTransform = clientTransform;
+const diff = ({ prevState, nextState, innerDiff, }) => {
     const result = new DualKeyMap_1.DualKeyMap();
-    for (const [key, value] of DualKeyMap_1.groupJoin(DualKeyMap_1.DualKeyMap.ofRecord(prev), DualKeyMap_1.DualKeyMap.ofRecord(next))) {
+    for (const [key, value] of DualKeyMap_1.groupJoin(DualKeyMap_1.DualKeyMap.ofRecord(prevState), DualKeyMap_1.DualKeyMap.ofRecord(nextState))) {
         switch (value.type) {
             case Types_1.left:
                 result.set(key, { type: recordOperationElement_1.replace, replace: { oldValue: value.left, newValue: undefined } });
@@ -396,7 +583,7 @@ const diff = ({ prev, next, innerDiff, }) => {
                 continue;
             }
             case Types_1.both: {
-                const diffResult = innerDiff({ key, prev: value.left, next: value.right });
+                const diffResult = innerDiff({ key, prevState: value.left, nextState: value.right });
                 if (diffResult === undefined) {
                     continue;
                 }
@@ -408,76 +595,3 @@ const diff = ({ prev, next, innerDiff, }) => {
     return result.toStringRecord(x => x, x => x);
 };
 exports.diff = diff;
-class DualKeyRecordTransformer {
-    constructor(factory) {
-        this.factory = factory;
-    }
-    composeLoose(params) {
-        return exports.composeDownOperationLoose(Object.assign(Object.assign({}, params), { innerApplyBack: params => this.factory.applyBack(params), innerCompose: params => this.factory.composeLoose(params) }));
-    }
-    restore({ downOperation, nextState, }) {
-        return exports.restore({
-            nextState,
-            downOperation,
-            innerRestore: params => this.factory.restore(params),
-            innerDiff: params => this.factory.diff(params),
-        });
-    }
-    transform({ prevState, currentState, serverOperation, clientOperation, }) {
-        return exports.transform({
-            first: serverOperation,
-            second: clientOperation,
-            prevState: prevState,
-            nextState: currentState,
-            innerTransform: params => this.factory.transform({
-                key: params.key,
-                prevState: params.prevState,
-                currentState: params.nextState,
-                serverOperation: params.first,
-                clientOperation: params.second,
-            }),
-            toServerState: (state, key) => this.factory.toServerState({
-                key,
-                clientState: state,
-            }),
-            protectedValuePolicy: this.factory.protectedValuePolicy,
-        });
-    }
-    restoreAndTransform({ currentState, serverOperation, clientOperation, }) {
-        const restoreResult = this.restore({
-            nextState: currentState,
-            downOperation: serverOperation,
-        });
-        if (restoreResult.isError) {
-            return restoreResult;
-        }
-        return this.transform({
-            serverOperation: restoreResult.value.twoWayOperation,
-            clientOperation,
-            prevState: restoreResult.value.prevState,
-            currentState,
-        });
-    }
-    diff({ prevState, nextState, }) {
-        return exports.diff({
-            prev: prevState,
-            next: nextState,
-            innerDiff: ({ prev, next, key }) => this.factory.diff({
-                prevState: prev,
-                nextState: next,
-                key,
-            }),
-        });
-    }
-    applyBack({ downOperation, nextState, }) {
-        return exports.applyBack({
-            nextState,
-            downOperation,
-            innerApplyBack: params => this.factory.applyBack(params),
-        });
-    }
-    toServerState({ clientState, }) {
-        return DualKeyMap_1.DualKeyMap.ofRecord(clientState).map((value, key) => this.factory.toServerState({ key, clientState: value })).toStringRecord(x => x, x => x);
-    }
-}
-exports.DualKeyRecordTransformer = DualKeyRecordTransformer;

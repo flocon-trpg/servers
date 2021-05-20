@@ -19,10 +19,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.transformerFactory = exports.apply = exports.toClientOperation = exports.toServerOperation = exports.toClientState = exports.upOperation = exports.downOperation = exports.state = void 0;
+exports.clientTransform = exports.serverTransform = exports.diff = exports.restore = exports.composeDownOperation = exports.composeUpOperation = exports.applyBack = exports.apply = exports.toUpOperation = exports.toDownOperation = exports.toClientOperation = exports.toClientState = exports.upOperation = exports.downOperation = exports.state = void 0;
 const t = __importStar(require("io-ts"));
 const Result_1 = require("../../../Result");
-const ReplaceValueOperation = __importStar(require("../util/replaceOperation"));
+const ReplaceOperation = __importStar(require("../util/replaceOperation"));
 const v1_1 = require("../../filePath/v1");
 const operation_1 = require("../util/operation");
 const record_1 = require("../util/record");
@@ -41,14 +41,18 @@ exports.upOperation = operation_1.operation(1, {
 });
 const toClientState = (source) => source;
 exports.toClientState = toClientState;
-const toServerOperation = (source) => {
-    return source;
-};
-exports.toServerOperation = toServerOperation;
 const toClientOperation = ({ diff }) => {
     return diff;
 };
 exports.toClientOperation = toClientOperation;
+const toDownOperation = (source) => {
+    return source;
+};
+exports.toDownOperation = toDownOperation;
+const toUpOperation = (source) => {
+    return source;
+};
+exports.toUpOperation = toUpOperation;
 const apply = ({ state, operation }) => {
     const result = Object.assign({}, state);
     if (operation.files != null) {
@@ -60,71 +64,106 @@ const apply = ({ state, operation }) => {
     return Result_1.ResultModule.ok(result);
 };
 exports.apply = apply;
-exports.transformerFactory = ({
-    composeLoose: ({ first, second }) => {
-        const valueProps = {
-            $version: 1,
-            files: ReplaceValueOperation.composeDownOperation(first.files, second.files),
-            volume: ReplaceValueOperation.composeDownOperation(first.volume, second.volume),
-        };
-        return Result_1.ResultModule.ok(valueProps);
-    },
-    restore: ({ nextState, downOperation }) => {
-        if (downOperation === undefined) {
-            return Result_1.ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
-        }
-        const prevState = Object.assign({}, nextState);
-        const twoWayOperation = { $version: 1 };
-        if (downOperation.files !== undefined) {
-            prevState.files = downOperation.files.oldValue;
-            twoWayOperation.files = Object.assign(Object.assign({}, downOperation.files), { newValue: nextState.files });
-        }
-        if (downOperation.volume !== undefined) {
-            prevState.volume = downOperation.volume.oldValue;
-            twoWayOperation.volume = Object.assign(Object.assign({}, downOperation.volume), { newValue: nextState.volume });
-        }
-        return Result_1.ResultModule.ok({ prevState, twoWayOperation: record_1.isIdRecord(twoWayOperation) ? undefined : twoWayOperation });
-    },
-    transform: ({ prevState, clientOperation, serverOperation }) => {
-        const twoWayOperation = { $version: 1 };
-        twoWayOperation.files = ReplaceValueOperation.transform({
-            first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.files,
-            second: clientOperation.files,
-            prevState: prevState.files,
-        });
-        twoWayOperation.volume = ReplaceValueOperation.transform({
-            first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.volume,
-            second: clientOperation.volume,
-            prevState: prevState.volume,
-        });
-        if (record_1.isIdRecord(twoWayOperation)) {
-            return Result_1.ResultModule.ok(undefined);
-        }
-        return Result_1.ResultModule.ok(Object.assign({}, twoWayOperation));
-    },
-    diff: ({ prevState, nextState }) => {
-        const resultType = { $version: 1 };
-        if (prevState.files !== nextState.files) {
-            resultType.files = { oldValue: prevState.files, newValue: nextState.files };
-        }
-        if (prevState.volume !== nextState.volume) {
-            resultType.volume = { oldValue: prevState.volume, newValue: nextState.volume };
-        }
-        if (record_1.isIdRecord(resultType)) {
-            return undefined;
-        }
-        return Object.assign({}, resultType);
-    },
-    applyBack: ({ downOperation, nextState }) => {
-        const result = Object.assign({}, nextState);
-        if (downOperation.files !== undefined) {
-            result.files = downOperation.files.oldValue;
-        }
-        if (downOperation.volume !== undefined) {
-            result.volume = downOperation.volume.oldValue;
-        }
-        return Result_1.ResultModule.ok(result);
-    },
-    toServerState: ({ clientState }) => clientState,
-    protectedValuePolicy: {}
-});
+const applyBack = ({ state, operation }) => {
+    const result = Object.assign({}, state);
+    if (operation.files != null) {
+        result.files = operation.files.oldValue;
+    }
+    if (operation.volume != null) {
+        result.volume = operation.volume.oldValue;
+    }
+    return Result_1.ResultModule.ok(result);
+};
+exports.applyBack = applyBack;
+const composeUpOperation = ({ first, second }) => {
+    const valueProps = {
+        $version: 1,
+        files: ReplaceOperation.composeUpOperation(first.files, second.files),
+        volume: ReplaceOperation.composeUpOperation(first.volume, second.volume),
+    };
+    return Result_1.ResultModule.ok(valueProps);
+};
+exports.composeUpOperation = composeUpOperation;
+const composeDownOperation = ({ first, second }) => {
+    const valueProps = {
+        $version: 1,
+        files: ReplaceOperation.composeDownOperation(first.files, second.files),
+        volume: ReplaceOperation.composeDownOperation(first.volume, second.volume),
+    };
+    return Result_1.ResultModule.ok(valueProps);
+};
+exports.composeDownOperation = composeDownOperation;
+const restore = ({ nextState, downOperation }) => {
+    if (downOperation === undefined) {
+        return Result_1.ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
+    }
+    const prevState = Object.assign({}, nextState);
+    const twoWayOperation = { $version: 1 };
+    if (downOperation.files !== undefined) {
+        prevState.files = downOperation.files.oldValue;
+        twoWayOperation.files = Object.assign(Object.assign({}, downOperation.files), { newValue: nextState.files });
+    }
+    if (downOperation.volume !== undefined) {
+        prevState.volume = downOperation.volume.oldValue;
+        twoWayOperation.volume = Object.assign(Object.assign({}, downOperation.volume), { newValue: nextState.volume });
+    }
+    return Result_1.ResultModule.ok({ prevState, twoWayOperation: record_1.isIdRecord(twoWayOperation) ? undefined : twoWayOperation });
+};
+exports.restore = restore;
+const diff = ({ prevState, nextState }) => {
+    const resultType = { $version: 1 };
+    if (prevState.files !== nextState.files) {
+        resultType.files = { oldValue: prevState.files, newValue: nextState.files };
+    }
+    if (prevState.volume !== nextState.volume) {
+        resultType.volume = { oldValue: prevState.volume, newValue: nextState.volume };
+    }
+    if (record_1.isIdRecord(resultType)) {
+        return undefined;
+    }
+    return resultType;
+};
+exports.diff = diff;
+const serverTransform = ({ prevState, clientOperation, serverOperation }) => {
+    const twoWayOperation = { $version: 1 };
+    twoWayOperation.files = ReplaceOperation.serverTransform({
+        first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.files,
+        second: clientOperation.files,
+        prevState: prevState.files,
+    });
+    twoWayOperation.volume = ReplaceOperation.serverTransform({
+        first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.volume,
+        second: clientOperation.volume,
+        prevState: prevState.volume,
+    });
+    if (record_1.isIdRecord(twoWayOperation)) {
+        return Result_1.ResultModule.ok(undefined);
+    }
+    return Result_1.ResultModule.ok(Object.assign({}, twoWayOperation));
+};
+exports.serverTransform = serverTransform;
+const clientTransform = ({ first, second }) => {
+    const files = ReplaceOperation.clientTransform({
+        first: first.files,
+        second: second.files,
+    });
+    const volume = ReplaceOperation.clientTransform({
+        first: first.volume,
+        second: second.volume,
+    });
+    const firstPrime = {
+        $version: 1,
+        files: files.firstPrime,
+        volume: volume.firstPrime,
+    };
+    const secondPrime = {
+        $version: 1,
+        files: files.secondPrime,
+        volume: volume.secondPrime,
+    };
+    return Result_1.ResultModule.ok({
+        firstPrime: record_1.isIdRecord(firstPrime) ? undefined : firstPrime,
+        secondPrime: record_1.isIdRecord(secondPrime) ? undefined : secondPrime,
+    });
+};
+exports.clientTransform = clientTransform;

@@ -1,10 +1,19 @@
 /* eslint-disable @typescript-eslint/no-namespace */
-type TransformParameters<T> = {
+type ServerTransformParameters<T> = {
     first: { oldValue: T; newValue: T } | undefined;
     second: { newValue: T } | undefined;
     prevState: T;
 }
-type TransformResult<T> = { oldValue: T; newValue: T } | undefined;
+type ServerTransformResult<T> = { oldValue: T; newValue: T } | undefined;
+
+type ClientTransformParameters<T> = {
+    first: { newValue: T } | undefined;
+    second: { newValue: T } | undefined;
+}
+type ClientTransformResult<T> = {
+    firstPrime: { newValue: T } | undefined;
+    secondPrime: { newValue: T } | undefined;
+};
 
 export type ReplaceValueTwoWayOperation<T> = {
     oldValue: T;
@@ -21,7 +30,17 @@ export const composeDownOperation = <T>(first: { oldValue: T } | undefined, seco
     return { oldValue: first.oldValue };
 };
 
-export const transform = <T>({ first, second, prevState }: TransformParameters<T>): TransformResult<T> => {
+export const composeUpOperation = <T>(first: { newValue: T } | undefined, second: { newValue: T } | undefined): { newValue: T } | undefined => {
+    if (first === undefined) {
+        return second;
+    }
+    if (second === undefined) {
+        return first;
+    }
+    return { newValue: first.newValue };
+};
+
+export const serverTransform = <T>({ first, second, prevState }: ServerTransformParameters<T>): ServerTransformResult<T> => {
     if (first === undefined && second !== undefined) {
         const newOperation = { oldValue: prevState, newValue: second.newValue };
         if (newOperation.oldValue !== newOperation.newValue) {
@@ -29,6 +48,13 @@ export const transform = <T>({ first, second, prevState }: TransformParameters<T
         }
     }
     return undefined;
+};
+
+export const clientTransform = <T>({ first, second }: ClientTransformParameters<T>): ClientTransformResult<T> => {
+    return {
+        firstPrime: first,
+        secondPrime: second,
+    };
 };
 
 export const toPrivateClientOperation = <T>({

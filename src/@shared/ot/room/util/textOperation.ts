@@ -69,6 +69,22 @@ export const applyBack = (state: string, action: DownOperation) => {
     return TextOperationCore.TextDownOperation.applyBack({ nextState: state, action: action$ });
 };
 
+export const composeUpOperation = (first: UpOperation | undefined, second: UpOperation | undefined): CustomResult<UpOperation | undefined, TextOperationCore.ComposeAndTransformError> => {
+    const first$ = first == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(first);
+    const second$ = second == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(second);
+    if (first$ == null) {
+        return ResultModule.ok(second);
+    }
+    if (second$ == null) {
+        return ResultModule.ok(first);
+    }
+    const result = TextOperationCore.TextUpOperation.compose({ first: first$, second: second$ });
+    if (result.isError) {
+        return result;
+    }
+    return ResultModule.ok(TextOperationCore.TextUpOperation.toUnit(result.value));
+};
+
 export const composeDownOperation = (first: DownOperation | undefined, second: DownOperation | undefined): CustomResult<DownOperation | undefined, TextOperationCore.ComposeAndTransformError> => {
     const first$ = first == null ? undefined : TextOperationCore.TextDownOperation.ofUnit(first);
     const second$ = second == null ? undefined : TextOperationCore.TextDownOperation.ofUnit(second);
@@ -103,7 +119,7 @@ export const restore = ({ nextState, downOperation }: { nextState: string; downO
     });
 };
 
-export const transform = ({
+export const serverTransform = ({
     first,
     second,
     prevState,
@@ -141,13 +157,51 @@ export const transform = ({
     if (secondResult.isError) {
         return secondResult;
     }
-    const result = TextOperationCore.TextTwoWayOperation.transform({ first: first$, second: secondResult.value.restored });
+    const result = TextOperationCore.TextTwoWayOperation.serverTransform({ first: first$, second: secondResult.value.restored });
     if (result.isError) {
         return result;
     }
     return ResultModule.ok({
         firstPrime: TextOperationCore.TextTwoWayOperation.toUnit(result.value.firstPrime),
         secondPrime: TextOperationCore.TextTwoWayOperation.toUnit(result.value.secondPrime),
+    });
+};
+
+export const clientTransform = ({
+    first,
+    second,
+}: {
+    first?: UpOperation;
+    second?: UpOperation;
+}) => {
+    const first$ = first == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(first);
+    if (first$ === undefined) {
+        const second$ = second == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(second);
+        if (second$ === undefined) {
+            return ResultModule.ok({
+                firstPrime: undefined,
+                secondPrime: undefined,
+            });
+        }
+        return ResultModule.ok({
+            firstPrime: undefined,
+            secondPrime: TextOperationCore.TextUpOperation.toUnit(second$),
+        });
+    }
+    const second$ = second == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(second);
+    if (second$ === undefined) {
+        return ResultModule.ok({
+            firstPrime: TextOperationCore.TextUpOperation.toUnit(first$),
+            secondPrime: undefined
+        });
+    }
+    const result = TextOperationCore.TextUpOperation.transform({ first: first$, second: second$ });
+    if (result.isError) {
+        return result;
+    }
+    return ResultModule.ok({
+        firstPrime: TextOperationCore.TextUpOperation.toUnit(result.value.firstPrime),
+        secondPrime: TextOperationCore.TextUpOperation.toUnit(result.value.secondPrime),
     });
 };
 

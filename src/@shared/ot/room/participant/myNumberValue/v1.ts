@@ -1,13 +1,12 @@
 import * as t from 'io-ts';
 import { ResultModule } from '../../../../Result';
 import { chooseDualKeyRecord } from '../../../../utils';
-import { DualKeyRecordTransformer, DualKeyRecordTwoWayOperation } from '../../util/dualKeyRecordOperation';
+import { DualKeyRecordTwoWayOperation } from '../../util/dualKeyRecordOperation';
 import * as DualKeyRecordOperation from '../../util/dualKeyRecordOperation';
 import * as Piece from '../../../piece/v1';
 import { recordDownOperationElementFactory, recordUpOperationElementFactory } from '../../util/recordOperationElement';
 import * as ReplaceOperation from '../../util/replaceOperation';
-import { TransformerFactory } from '../../util/transformerFactory';
-import { Apply, ToClientOperationParams } from '../../util/type';
+import { Apply, ClientTransform, Compose, Diff, Restore, ServerTransform, ToClientOperationParams } from '../../util/type';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '../../../../textOperation';
 import { operation } from '../../util/operation';
 import { isIdRecord } from '../../util/record';
@@ -52,10 +51,6 @@ export const toClientState = (createdByMe: boolean) => (source: State): State =>
     };
 };
 
-export const toServerOperation = (source: TwoWayOperation): DownOperation => {
-    return source;
-};
-
 export const toClientOperation = (createdByMe: boolean) => ({ prevState, nextState, diff }: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
     return {
         ...diff,
@@ -82,6 +77,14 @@ export const toClientOperation = (createdByMe: boolean) => ({ prevState, nextSta
     };
 };
 
+export const toDownOperation = (source: TwoWayOperation): DownOperation => {
+    return source;
+};
+
+export const toUpOperation = (source: TwoWayOperation): UpOperation => {
+    return source;
+};
+
 export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
     const result: State = { ...state };
     if (operation.isValuePrivate != null) {
@@ -104,138 +107,208 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     return ResultModule.ok(result);
 };
 
-const createPieceTransformer = (createdByMe: boolean) => Piece.transformerFactory(createdByMe);
-const createPiecesTransformer = (createdByMe: boolean) => new DualKeyRecordTransformer(createPieceTransformer(createdByMe));
+export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
+    const result: State = { ...state };
+    if (operation.isValuePrivate != null) {
+        result.isValuePrivate = operation.isValuePrivate.oldValue;
+    }
+    if (operation.value != null) {
+        result.value = operation.value.oldValue;
+    }
 
-export const transformerFactory = (createdByMe: boolean): TransformerFactory<string, State, State, DownOperation, UpOperation, TwoWayOperation> => ({
-    composeLoose: ({ first, second }) => {
-        const piecesTransformer = createPiecesTransformer(createdByMe);
-        const pieces = piecesTransformer.composeLoose({
-            first: first.pieces,
-            second: second.pieces,
-        });
-        if (pieces.isError) {
-            return pieces;
+    const pieces = DualKeyRecordOperation.applyBack<Piece.State, Piece.DownOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
+        nextState: state.pieces, operation: operation.pieces, innerApplyBack: ({ state: nextState, operation }) => {
+            return Piece.applyBack({ state: nextState, operation });
         }
+    });
+    if (pieces.isError) {
+        return pieces;
+    }
+    result.pieces = pieces.value;
 
-        const valueProps: DownOperation = {
-            $version: 1,
-            isValuePrivate: ReplaceOperation.composeDownOperation(first.isValuePrivate ?? undefined, second.isValuePrivate ?? undefined),
-            value: ReplaceOperation.composeDownOperation(first.value ?? undefined, second.value ?? undefined),
-            pieces: pieces.value,
-        };
-        return ResultModule.ok(valueProps);
-    },
-    restore: ({ nextState, downOperation }) => {
-        if (downOperation === undefined) {
-            return ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
-        }
+    return ResultModule.ok(result);
+};
 
-        const piecesTransformer = createPiecesTransformer(createdByMe);
-        const pieces = piecesTransformer.restore({
-            nextState: nextState.pieces,
-            downOperation: downOperation.pieces,
-        });
-        if (pieces.isError) {
-            return pieces;
-        }
+export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
+    const pieces = DualKeyRecordOperation.composeUpOperation<Piece.State, Piece.UpOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
+        first: first.pieces,
+        second: second.pieces,
+        innerApply: ({ state, operation }) => {
+            return Piece.apply({ state, operation });
+        },
+        innerCompose: params => Piece.composeUpOperation(params),
+    });
+    if (pieces.isError) {
+        return pieces;
+    }
 
-        const prevState: State = { ...nextState, pieces: pieces.value.prevState, };
-        const twoWayOperation: TwoWayOperation = { $version: 1, pieces: pieces.value.twoWayOperation };
+    const valueProps: UpOperation = {
+        $version: 1,
+        isValuePrivate: ReplaceOperation.composeUpOperation(first.isValuePrivate ?? undefined, second.isValuePrivate ?? undefined),
+        value: ReplaceOperation.composeUpOperation(first.value ?? undefined, second.value ?? undefined),
+        pieces: pieces.value,
+    };
+    return ResultModule.ok(valueProps);
+};
 
-        if (downOperation.isValuePrivate != null) {
-            prevState.isValuePrivate = downOperation.isValuePrivate.oldValue;
-            twoWayOperation.isValuePrivate = { ...downOperation.isValuePrivate, newValue: nextState.isValuePrivate };
-        }
-        if (downOperation.value != null) {
-            prevState.value = downOperation.value.oldValue;
-            twoWayOperation.value = { ...downOperation.value, newValue: nextState.value };
-        }
+export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
+    const pieces = DualKeyRecordOperation.composeDownOperation<Piece.State, Piece.DownOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
+        first: first.pieces,
+        second: second.pieces,
+        innerApplyBack: ({ state, operation }) => {
+            return Piece.applyBack({ state, operation });
+        },
+        innerCompose: params => Piece.composeDownOperation(params),
+    });
+    if (pieces.isError) {
+        return pieces;
+    }
 
-        return ResultModule.ok({ prevState, nextState, twoWayOperation });
-    },
-    transform: ({ prevState, clientOperation, serverOperation, currentState }) => {
-        if (!createdByMe) {
-            // 自分以外はどのプロパティも編集できない。
-            return ResultModule.ok(undefined);
-        }
+    const valueProps: DownOperation = {
+        $version: 1,
+        isValuePrivate: ReplaceOperation.composeDownOperation(first.isValuePrivate ?? undefined, second.isValuePrivate ?? undefined),
+        value: ReplaceOperation.composeDownOperation(first.value ?? undefined, second.value ?? undefined),
+        pieces: pieces.value,
+    };
+    return ResultModule.ok(valueProps);
+};
 
-        const piecesTransformer = createPiecesTransformer(createdByMe);
-        const pieces = piecesTransformer.transform({
-            prevState: prevState.pieces,
-            currentState: currentState.pieces,
-            clientOperation: clientOperation.pieces,
-            serverOperation: serverOperation?.pieces,
-        });
-        if (pieces.isError) {
-            return pieces;
-        }
+export const restore: Restore<State, DownOperation, TwoWayOperation> = ({ nextState, downOperation }) => {
+    if (downOperation === undefined) {
+        return ResultModule.ok({ prevState: nextState, twoWayOperation: undefined });
+    }
 
-        const twoWayOperation: TwoWayOperation = { $version: 1, pieces: pieces.value };
+    const pieces = DualKeyRecordOperation.restore<Piece.State, Piece.DownOperation, Piece.TwoWayOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
+        nextState: nextState.pieces,
+        downOperation: downOperation.pieces,
+        innerDiff: params => Piece.diff(params),
+        innerRestore: params => Piece.restore(params),
+    });
+    if (pieces.isError) {
+        return pieces;
+    }
 
-        twoWayOperation.isValuePrivate = ReplaceOperation.transform({
-            first: serverOperation?.isValuePrivate ?? undefined,
-            second: clientOperation.isValuePrivate ?? undefined,
-            prevState: prevState.isValuePrivate,
-        });
-        // !createdByMe の場合は最初の方ですべて弾いているため、isValuePrivateのチェックをする必要はない。
-        twoWayOperation.value = ReplaceOperation.transform({
-            first: serverOperation?.value ?? undefined,
-            second: clientOperation.value ?? undefined,
-            prevState: prevState.value,
-        });
+    const prevState: State = { ...nextState, pieces: pieces.value.prevState, };
+    const twoWayOperation: TwoWayOperation = { $version: 1, pieces: pieces.value.twoWayOperation };
 
-        if (isIdRecord(twoWayOperation)) {
-            return ResultModule.ok(undefined);
-        }
+    if (downOperation.isValuePrivate != null) {
+        prevState.isValuePrivate = downOperation.isValuePrivate.oldValue;
+        twoWayOperation.isValuePrivate = { ...downOperation.isValuePrivate, newValue: nextState.isValuePrivate };
+    }
+    if (downOperation.value != null) {
+        prevState.value = downOperation.value.oldValue;
+        twoWayOperation.value = { ...downOperation.value, newValue: nextState.value };
+    }
 
-        return ResultModule.ok({ ...twoWayOperation });
-    },
-    diff: ({ prevState, nextState }) => {
-        const piecesTransformer = createPiecesTransformer(createdByMe);
-        const pieces = piecesTransformer.diff({
-            prevState: prevState.pieces,
-            nextState: nextState.pieces,
-        });
-        const resultType: TwoWayOperation = {
-            $version: 1,
-            pieces,
-        };
-        if (prevState.isValuePrivate !== nextState.isValuePrivate) {
-            resultType.isValuePrivate = { oldValue: prevState.isValuePrivate, newValue: nextState.isValuePrivate };
-        }
-        if (prevState.value !== nextState.value) {
-            resultType.value = { oldValue: prevState.value, newValue: nextState.value };
-        }
-        if (isIdRecord(resultType)) {
-            return undefined;
-        }
-        return { ...resultType };
-    },
-    applyBack: ({ downOperation, nextState }) => {
-        const piecesTransformer = createPiecesTransformer(createdByMe);
-        const pieces = piecesTransformer.applyBack({
-            downOperation: downOperation.pieces,
-            nextState: nextState.pieces,
-        });
-        if (pieces.isError) {
-            return pieces;
-        }
+    return ResultModule.ok({ prevState, nextState, twoWayOperation });
+};
 
-        const result: State = { ...nextState, pieces: pieces.value };
+export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
+    const pieces = DualKeyRecordOperation.diff<Piece.State, Piece.TwoWayOperation>({
+        prevState: prevState.pieces,
+        nextState: nextState.pieces,
+        innerDiff: params => Piece.diff(params),
+    });
+    const resultType: TwoWayOperation = {
+        $version: 1,
+        pieces,
+    };
+    if (prevState.isValuePrivate !== nextState.isValuePrivate) {
+        resultType.isValuePrivate = { oldValue: prevState.isValuePrivate, newValue: nextState.isValuePrivate };
+    }
+    if (prevState.value !== nextState.value) {
+        resultType.value = { oldValue: prevState.value, newValue: nextState.value };
+    }
+    if (isIdRecord(resultType)) {
+        return undefined;
+    }
+    return { ...resultType };
+};
 
-        if (downOperation.isValuePrivate != null) {
-            result.isValuePrivate = downOperation.isValuePrivate.oldValue;
-        }
-        if (downOperation.value != null) {
-            result.value = downOperation.value.oldValue;
-        }
+export const serverTransform = (createdByMe: boolean): ServerTransform<State, TwoWayOperation, UpOperation> => ({ prevState, currentState, clientOperation, serverOperation }) => {
+    if (!createdByMe) {
+        // 自分以外はどのプロパティも編集できない。
+        return ResultModule.ok(undefined);
+    }
 
-        return ResultModule.ok(result);
-    },
-    toServerState: ({ clientState }) => clientState,
-    protectedValuePolicy: {
-        cancelRemove: () => !createdByMe,
-        cancelCreate: () => !createdByMe,
-    },
-});
+    const pieces = DualKeyRecordOperation.serverTransform<Piece.State, Piece.State, Piece.TwoWayOperation, Piece.UpOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
+        prevState: prevState.pieces,
+        nextState: currentState.pieces,
+        first: serverOperation?.pieces,
+        second: clientOperation.pieces,
+        innerTransform: ({ prevState, nextState, first, second }) => Piece.serverTransform({
+            prevState,
+            currentState: nextState,
+            serverOperation: first,
+            clientOperation: second,
+        }),
+        toServerState: state => state,
+        protectedValuePolicy: {
+
+        },
+    });
+    if (pieces.isError) {
+        return pieces;
+    }
+
+    const twoWayOperation: TwoWayOperation = { $version: 1, pieces: pieces.value };
+
+    twoWayOperation.isValuePrivate = ReplaceOperation.serverTransform({
+        first: serverOperation?.isValuePrivate ?? undefined,
+        second: clientOperation.isValuePrivate ?? undefined,
+        prevState: prevState.isValuePrivate,
+    });
+    // !createdByMe の場合は最初の方ですべて弾いているため、isValuePrivateのチェックをする必要はない。
+    twoWayOperation.value = ReplaceOperation.serverTransform({
+        first: serverOperation?.value ?? undefined,
+        second: clientOperation.value ?? undefined,
+        prevState: prevState.value,
+    });
+
+    if (isIdRecord(twoWayOperation)) {
+        return ResultModule.ok(undefined);
+    }
+
+    return ResultModule.ok({ ...twoWayOperation });
+};
+
+export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
+    const pieces = DualKeyRecordOperation.clientTransform<Piece.State, Piece.UpOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
+        first: first.pieces,
+        second: second.pieces,
+        innerTransform: params => Piece.clientTransform(params),
+        innerDiff: params => Piece.diff(params),
+    });
+    if (pieces.isError) {
+        return pieces;
+    }
+
+    const isValuePrivate = ReplaceOperation.clientTransform({
+        first: first.isValuePrivate,
+        second: second.isValuePrivate,
+    });
+
+    const value = ReplaceOperation.clientTransform({
+        first: first.value,
+        second: second.value,
+    });
+
+    const firstPrime: UpOperation = {
+        $version: 1,
+        pieces: pieces.value.firstPrime,
+        isValuePrivate: isValuePrivate.firstPrime,
+        value: value.firstPrime,
+    };
+
+    const secondPrime: UpOperation = {
+        $version: 1,
+        pieces: pieces.value.secondPrime,
+        isValuePrivate: isValuePrivate.secondPrime,
+        value: value.secondPrime,
+    };
+
+    return ResultModule.ok({
+        firstPrime: isIdRecord(firstPrime) ? undefined : firstPrime,
+        secondPrime: isIdRecord(secondPrime) ? undefined : secondPrime,
+    });
+};
