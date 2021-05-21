@@ -67,7 +67,7 @@ var GlobalRoom;
         (function (ToGlobal) {
             ToGlobal.state = (entity) => {
                 const result = RoomConverterModule.decodeDbState(entity.value);
-                return Object.assign(Object.assign({}, result), { name: entity.name });
+                return Object.assign(Object.assign({}, result), { createdBy: entity.createdBy, name: entity.name });
             };
             const downOperation = (entity) => {
                 const result = RoomConverterModule.decodeDownOperation(entity.value);

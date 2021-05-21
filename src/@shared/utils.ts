@@ -91,6 +91,16 @@ export const recordForEachAsync = async <T>(source: Record<string, T | undefined
     }
 };
 
+export const isRecordEmpty = <T>(source: Record<string, T>) => {
+    for (const key in source) {
+        const value = source[key];
+        if (value !== undefined) {
+            return false;
+        }
+    }
+    return true;
+};
+
 export const dualKeyRecordForEach = <T>(source: Record<string, Record<string, T | undefined> | undefined>, action: (value: T, key: DualKey<string, string>) => void): void => {
     for (const first in source) {
         const inner = source[first];

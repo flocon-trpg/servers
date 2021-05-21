@@ -53,6 +53,7 @@ exports.dbState = t.type({
     strParamNames: t.record(t.string, ParamNames.state),
 });
 exports.state = t.intersection([exports.dbState, t.type({
+        createdBy: t.string,
         name: t.string,
     })]);
 exports.downOperation = operation_1.operation(1, {

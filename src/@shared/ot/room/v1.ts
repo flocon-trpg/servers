@@ -38,6 +38,7 @@ export const dbState = t.type({
 export type DbState = t.TypeOf<typeof dbState>;
 
 export const state = t.intersection([dbState, t.type({
+    createdBy: t.string,
     name: t.string,
 })]);
 
@@ -896,7 +897,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).forEach(i => {
         const key = `publicChannel${i}Name` as const;
         const operation = ReplaceOperation.clientTransform({
-            first: first[key], 
+            first: first[key],
             second: second[key],
         });
         firstPrime[key] = operation.firstPrime;

@@ -61,9 +61,9 @@ const isSequential = <T>(array: T[], getIndex: (elem: T) => number): IsSequentia
 export namespace GlobalRoom {
     export namespace MikroORM {
         export namespace ToGlobal {
-            export const state = (entity: Room) => {
+            export const state = (entity: Room): RoomModule.State => {
                 const result = RoomConverterModule.decodeDbState(entity.value);
-                return { ...result, name: entity.name };
+                return { ...result, createdBy: entity.createdBy, name: entity.name };
             };
 
             const downOperation = (entity: RoomOp) => {
@@ -190,7 +190,7 @@ export namespace GlobalRoom {
     export namespace GraphQL {
         export namespace ToGlobal {
             export const upOperation = (source: RoomOperationInput): RoomModule.UpOperation => {
-                return Converter.parseUpOperation(source.valueJson); 
+                return Converter.parseUpOperation(source.valueJson);
             };
         }
     }

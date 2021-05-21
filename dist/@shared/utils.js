@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.dualKeyRecordFind = exports.recordCompact = exports.dualKeyRecordForEach = exports.recordForEachAsync = exports.recordForEach = exports.mapToRecord = exports.recordToDualKeyMap = exports.recordToMap = exports.recordToArray = exports.chooseDualKeyRecord = exports.chooseRecord = void 0;
+exports.dualKeyRecordFind = exports.recordCompact = exports.dualKeyRecordForEach = exports.isRecordEmpty = exports.recordForEachAsync = exports.recordForEach = exports.mapToRecord = exports.recordToDualKeyMap = exports.recordToMap = exports.recordToArray = exports.chooseDualKeyRecord = exports.chooseRecord = void 0;
 const DualKeyMap_1 = require("./DualKeyMap");
 const chooseRecord = (source, chooser) => {
     const result = {};
@@ -93,6 +93,16 @@ const recordForEachAsync = async (source, action) => {
     }
 };
 exports.recordForEachAsync = recordForEachAsync;
+const isRecordEmpty = (source) => {
+    for (const key in source) {
+        const value = source[key];
+        if (value !== undefined) {
+            return false;
+        }
+    }
+    return true;
+};
+exports.isRecordEmpty = isRecordEmpty;
 const dualKeyRecordForEach = (source, action) => {
     for (const first in source) {
         const inner = source[first];
