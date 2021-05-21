@@ -1,14 +1,13 @@
 import { Button } from 'antd';
 import * as React from 'react';
-import { useDispatch } from 'react-redux';
 import { FileSourceType } from '../generated/graphql';
 import { useFirebaseStorageUrl } from '../hooks/firebaseStorage';
-import { useSelector } from '../store';
 import { FilePath, some } from '../utils/types';
 import FirebaseStorageLink from './FirebaseStorageLink';
+import * as FilePathModule from '../@shared/ot/filePath/v1';
 
 type ImageProps = {
-    filePath?: FilePath;
+    filePath?: FilePath | FilePathModule.FilePath;
 }
 
 const Image: React.FC<ImageProps> = ({ filePath }: ImageProps) => {
@@ -23,14 +22,14 @@ const Image: React.FC<ImageProps> = ({ filePath }: ImageProps) => {
 };
 
 type Props = {
-    filePath?: FilePath;
-    onPathChange?: (path: FilePath | null) => void;
-    openFilesManager: (drawerType: { openFileType: typeof some; onOpen: (path: FilePath) => void }) => void;
+    filePath?: FilePath | FilePathModule.FilePath;
+    onPathChange?: (path: FilePath | FilePathModule.FilePath | null) => void;
+    openFilesManager: (drawerType: { openFileType: typeof some; onOpen: (path: FilePath | FilePathModule.FilePath) => void }) => void;
     showImage?: boolean;
 }
 
 const InputFile: React.FC<Props> = ({ filePath, onPathChange, openFilesManager, showImage }: Props) => {
-    const onOpen = (path: FilePath) => {
+    const onOpen = (path: FilePath | FilePathModule.FilePath) => {
         if (onPathChange != null) {
             onPathChange(path);
         }
@@ -40,7 +39,7 @@ const InputFile: React.FC<Props> = ({ filePath, onPathChange, openFilesManager, 
         if (filePath == null || showImage !== true) {
             return null;
         }
-        return (<Image filePath={filePath}/>);
+        return (<Image filePath={filePath} />);
     })();
     const fileNameElement = (() => {
         if (filePath == null) {

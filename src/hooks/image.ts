@@ -6,11 +6,9 @@
 // 普通に<img/>から表示するぶんには問題ないが、useImageの関数内のような呼び方だと表示されない。
 
 import React from 'react';
-import { FilePathFragment, FileSourceType } from '../generated/graphql';
-import firebase from 'firebase/app';
-import { getStorage, getStorageForce } from '../utils/firebaseHelpers';
-import ConfigContext from '../contexts/ConfigContext';
+import { FilePathFragment } from '../generated/graphql';
 import { useFirebaseStorageUrl } from './firebaseStorage';
+import * as FilePathModule from '../@shared/ot/filePath/v1';
 
 type Size = {
     w: number;
@@ -85,7 +83,7 @@ export function useImage(src: string | null, size?: Size, crossOrigin?: string):
     return state ?? { type: loading };
 }
 
-export function useImageFromGraphQL(filePath: FilePathFragment | null | undefined, crossOrigin?: string): State {
+export function useImageFromGraphQL(filePath: FilePathFragment | FilePathModule.FilePath | null | undefined, crossOrigin?: string): State {
     const src = useFirebaseStorageUrl(filePath);
 
     return useImage(src, undefined, crossOrigin);

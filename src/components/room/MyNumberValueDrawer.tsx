@@ -1,37 +1,30 @@
-import { Checkbox, Col, Drawer, Form, Input, InputNumber, Row, Space } from 'antd';
+import { Checkbox, Col, Drawer, InputNumber, Row } from 'antd';
 import React from 'react';
 import DrawerFooter from '../../layouts/DrawerFooter';
-import * as Character from '../../stateManagers/states/character';
 import ComponentsStateContext from './contexts/RoomComponentsStateContext';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import { simpleId } from '../../utils/generators';
-import { OperationElement, replace } from '../../stateManagers/states/types';
-import InputFile from '../InputFile';
-import { FilePath } from '../../generated/graphql';
+import { replace } from '../../stateManagers/states/types';
 import { DrawerProps } from 'antd/lib/drawer';
-import { boardDrawerType, create, myNumberValueDrawerType, update } from './RoomComponentsState';
-import FilesManagerDrawer from '../FilesManagerDrawer';
-import { FilesManagerDrawerType } from '../../utils/types';
+import { create, myNumberValueDrawerType, update } from './RoomComponentsState';
 import { Gutter } from 'antd/lib/grid/row';
-import { Room } from '../../stateManagers/states/room';
-import { Board } from '../../stateManagers/states/board';
-import { Participant } from '../../stateManagers/states/participant';
 import { useStateEditor } from '../../hooks/useStateEditor';
-import { MyNumberValue } from '../../stateManagers/states/myNumberValue';
-import { compositeKeyToString, createStateMap } from '../../@shared/StateMap';
+import { compositeKeyToString } from '../../@shared/StateMap';
 import { __ } from '../../@shared/collection';
-import { Piece } from '../../stateManagers/states/piece';
 import { useOperate } from '../../hooks/useOperate';
 import { useMe } from '../../hooks/useMe';
+import * as Room from '../../@shared/ot/room/v1';
+import * as MyNumberValue from '../../@shared/ot/room/participant/myNumberValue/v1';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
 };
 
 const defaultMyNumberValue: MyNumberValue.State = {
+    $version: 1,
     value: 0,
     isValuePrivate: false,
-    pieces: createStateMap(),
+    pieces: {},
 };
 
 const gutter: [Gutter, Gutter] = [16, 16];
@@ -45,18 +38,31 @@ const MyNumberValueDrawer: React.FC = () => {
 
     const drawerType = componentsState.myNumberValueDrawerType;
 
-    const { state, setState, stateToCreate } = useStateEditor(drawerType?.type === update ? me?.myNumberValues.get(drawerType.stateKey) : null, defaultMyNumberValue, ({ prevState, nextState }) => {
+    const { state, setState, stateToCreate } = useStateEditor(drawerType?.type === update ? (me?.myNumberValues ?? {})[drawerType.stateKey] : null, defaultMyNumberValue, ({ prevState, nextState }) => {
         if (myUserUid == null || drawerType?.type !== update) {
             return;
         }
-        const diff = MyNumberValue.diff({ prev: prevState, next: nextState });
-        const operation = Room.createPostOperationSetup();
-        const myNumberValues = new Map<string, OperationElement<MyNumberValue.State, MyNumberValue.PostOperation>>();
-        myNumberValues.set(drawerType.stateKey, { type: update, operation: diff });
-        const participantsOperation: Participant.PostOperation = {
-            myNumberValues,
+        const diff = MyNumberValue.diff({ prevState, nextState });
+        if (diff == null) {
+            return;
+        }
+        const operation: Room.UpOperation = {
+            $version: 1,
+            participants: {
+                [myUserUid]: {
+                    type: update,
+                    update: {
+                        $version: 1,
+                        myNumberValues: {
+                            [drawerType.stateKey]: {
+                                type: update,
+                                update: MyNumberValue.toUpOperation(diff),
+                            }
+                        }
+                    }
+                }
+            }
         };
-        operation.participants.set(myUserUid, participantsOperation);
         operate(operation);
     });
 
@@ -73,21 +79,32 @@ const MyNumberValueDrawer: React.FC = () => {
             }
 
             const id = simpleId();
-            const operation = Room.createPostOperationSetup();
-            const pieces = createStateMap<Piece.State>();
-            if (componentsState.myNumberValueDrawerType.boardKey != null) {
-                pieces.set(componentsState.myNumberValueDrawerType.boardKey, componentsState.myNumberValueDrawerType.piece);
-            }
-            const newValue: MyNumberValue.State = {
-                ...stateToCreate,
-                pieces,
+            const operation: Room.UpOperation = {
+                $version: 1,
+                participants: {
+                    [myUserUid]: {
+                        type: update,
+                        update: {
+                            $version: 1,
+                            myNumberValues: {
+                                [id]: {
+                                    type: replace,
+                                    replace: {
+                                        newValue: {
+                                            ...stateToCreate,
+                                            pieces: componentsState.myNumberValueDrawerType.boardKey == null ? {} : {
+                                                [componentsState.myNumberValueDrawerType.boardKey.createdBy]: {
+                                                    [componentsState.myNumberValueDrawerType.boardKey.id]: componentsState.myNumberValueDrawerType.piece,
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             };
-            const myNumberValues = new Map<string, OperationElement<MyNumberValue.State, MyNumberValue.PostOperation>>();
-            myNumberValues.set(id, { type: replace, newValue });
-            const participantsOperation: Participant.PostOperation = {
-                myNumberValues,
-            };
-            operation.participants.set(myUserUid, participantsOperation);
             operate(operation);
             dispatch({ type: myNumberValueDrawerType, newValue: null });
         };

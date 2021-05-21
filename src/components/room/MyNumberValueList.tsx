@@ -1,23 +1,20 @@
 import React from 'react';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import { Table, Button, InputNumber, Tooltip } from 'antd';
-import { compositeKeyToString, createStateMap } from '../../@shared/StateMap';
+import { compositeKeyToString } from '../../@shared/StateMap';
 import { update } from '../../stateManagers/states/types';
 import { __ } from '../../@shared/collection';
 import { myNumberValueDrawerType } from './RoomComponentsState';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import * as Icon from '@ant-design/icons';
 import ToggleButton from '../../foundations/ToggleButton';
-import { Room } from '../../stateManagers/states/room';
-import { Participant } from '../../stateManagers/states/participant';
-import { MyNumberValue } from '../../stateManagers/states/myNumberValue';
 import { getUserUid } from '../../hooks/useFirebaseUser';
 import { useOperate } from '../../hooks/useOperate';
 import { useSelector } from '../../store';
-
-const characterOperationBase: Participant.PostOperation = {
-    myNumberValues: new Map(),
-};
+import { recordToArray, recordToMap } from '../../@shared/utils';
+import * as MyNumberValue from '../../@shared/ot/room/participant/myNumberValue/v1';
+import * as Room from '../../@shared/ot/room/v1';
+import { useParticipants } from '../../hooks/state/useParticipants';
 
 type DataSource = {
     key: string;
@@ -31,14 +28,14 @@ const MyNumberValueList: React.FC = () => {
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
     const dispatchRoomComponentsState = React.useContext(DispatchRoomComponentsStateContext);
     const operate = useOperate();
-    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
+    const participantsMap = useParticipants(); 
 
-    if (participants == null) {
+    if (participantsMap == null) {
         return null;
     }
 
     const charactersDataSource: DataSource[] =
-        __(participants).flatMap(([userUid, participant]) => [...participant.myNumberValues].map(([stateId, myNumberValue]) => ({
+        __(participantsMap).flatMap(([userUid, participant]) => recordToArray(participant.myNumberValues).map(({ key: stateId, value: myNumberValue }) => ({
             key: compositeKeyToString({ createdBy: userUid, id: stateId }),
             createdBy: userUid,
             stateId,
@@ -85,12 +82,27 @@ const MyNumberValueList: React.FC = () => {
                         size='small'
                         value={state.value}
                         onChange={newValue => {
-                            const postOperationSetup = Room.createPostOperationSetup();
-                            const participantOperation: Participant.PostOperation = {
-                                myNumberValues: new Map([[stateId, { type: update, operation: { value: { newValue }, pieces: createStateMap() } }]]),
+                            const operation: Room.UpOperation = {
+                                $version: 1,
+                                participants: {
+                                    [createdBy]: {
+                                        type: update,
+                                        update: {
+                                            $version: 1,
+                                            myNumberValues: {
+                                                [stateId]: {
+                                                    type: update,
+                                                    update: {
+                                                        $version: 1,
+                                                        value: { newValue }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             };
-                            postOperationSetup.participants.set(createdBy, participantOperation);
-                            operate(postOperationSetup);
+                            operate(operation);
                         }} />;
                     toggleButton = <ToggleButton
                         size='small'
@@ -99,12 +111,27 @@ const MyNumberValueList: React.FC = () => {
                         unCheckedChildren={<Icon.EyeOutlined />}
                         checked={state.isValuePrivate}
                         onChange={newValue => {
-                            const postOperationSetup = Room.createPostOperationSetup();
-                            const participantOperation: Participant.PostOperation = {
-                                myNumberValues: new Map([[stateId, { type: update, operation: { isValuePrivate: { newValue }, pieces: createStateMap() } }]]),
+                            const operation: Room.UpOperation = {
+                                $version: 1,
+                                participants: {
+                                    [createdBy]: {
+                                        type: update,
+                                        update: {
+                                            $version: 1,
+                                            myNumberValues: {
+                                                [stateId]: {
+                                                    type: update,
+                                                    update: {
+                                                        $version: 1,
+                                                        isValuePrivate: { newValue }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             };
-                            postOperationSetup.participants.set(createdBy, participantOperation);
-                            operate(postOperationSetup);
+                            operate(operation);
                         }} />;
                 } else {
                     input = <span>{state.value}</span>;
@@ -124,7 +151,7 @@ const MyNumberValueList: React.FC = () => {
             title: '作成者',
             // eslint-disable-next-line react/display-name
             render: (_: unknown, { state, createdBy, stateId }: DataSource) => {
-                return <span>{participants.get(createdBy)?.name}{createdBy === getUserUid(myAuth) && <span style={{ fontWeight: 'bold', paddingLeft: 2 }}>(自分)</span>}</span>;
+                return <span>{participantsMap.get(createdBy)?.name}{createdBy === getUserUid(myAuth) && <span style={{ fontWeight: 'bold', paddingLeft: 2 }}>(自分)</span>}</span>;
             },
         }
     ];

@@ -1010,7 +1010,7 @@ export namespace TextTwoWayOperation {
         return builder.build();
     };
 
-    export const transform = ({ first, second }: { first: Operation; second: Operation }): CustomResult<{ firstPrime: Operation; secondPrime: Operation }, ComposeAndTransformError> => {
+    export const serverTransform = ({ first, second }: { first: Operation; second: Operation }): CustomResult<{ firstPrime: Operation; secondPrime: Operation }, ComposeAndTransformError> => {
         return transformCore({
             first: [...new TextOperationBuilder(twoWayFactory, first).toUnits()],
             second: [...new TextOperationBuilder(twoWayFactory, second).toUnits()],
@@ -1042,6 +1042,45 @@ export namespace TextTwoWayOperation {
                     } as const;
             }
         }).toArray();
+    };
+
+    export const ofUnit = (source: ReadonlyArray<OperationUnit>): Operation => {
+        const builder = new TextOperationBuilder<NonEmptyString, NonEmptyString>(twoWayFactory);
+        for (const unit of source) {
+            if (unit == null) {
+                continue;
+            }
+            switch (unit.type) {
+                case retain: {
+                    const retain = unit.retain;
+                    const retainAsPositiveInt = PositiveInt.tryCreate(retain);
+                    if (retainAsPositiveInt == null) {
+                        continue;
+                    }
+                    builder.retain(retainAsPositiveInt);
+                    break;
+                }
+                case insert$: {
+                    const insert = unit.insert;
+                    const insertAsNonEpmtyString = NonEmptyString.tryCreate(insert);
+                    if (insertAsNonEpmtyString == null) {
+                        continue;
+                    }
+                    builder.insert(insertAsNonEpmtyString);
+                    break;
+                }
+                case delete$: {
+                    const del = unit.delete;
+                    const delAsNonEmptyString = NonEmptyString.tryCreate(del);
+                    if (delAsNonEmptyString == null) {
+                        continue;
+                    }
+                    builder.delete(delAsNonEmptyString);
+                    break;
+                }
+            }
+        }
+        return builder.build();
     };
 
     export const toUpOperation = (source: Operation): TextOperation<NonEmptyString, PositiveInt> => {
@@ -1174,64 +1213,39 @@ export namespace TextUpOperation {
         }).toArray();
     };
 
-    // もしsourceの型が ReadonlyArray<OperationUnit> | null | undefined ではない場合でも正常に処理され、undefinedが返される。
-    export const ofUnit = (source: ReadonlyArray<OperationUnit> | null | undefined): Operation | undefined => {
-        if (source == null) {
-            return undefined;
-        }
-        if (!Array.isArray(source)) {
-            return undefined;
-        }
+    export const ofUnit = (source: ReadonlyArray<OperationUnit | TextTwoWayOperation.OperationUnit>): Operation => {
         const builder = new TextOperationBuilder<NonEmptyString, PositiveInt>(upFactory);
         for (const unit of source) {
             if (unit == null) {
                 continue;
             }
-            if (typeof unit !== 'object') {
-                return undefined;
-            }
-            if (typeof unit.type !== 'string') {
-                return undefined;
-            }
             switch (unit.type) {
                 case retain: {
                     const retain = unit.retain;
-                    if (typeof retain !== 'number') {
-                        return undefined;
-                    }
                     const retainAsPositiveInt = PositiveInt.tryCreate(retain);
                     if (retainAsPositiveInt == null) {
-                        return undefined;
+                        continue;
                     }
                     builder.retain(retainAsPositiveInt);
                     break;
                 }
                 case insert$: {
                     const insert = unit.insert;
-                    if (typeof insert !== 'string') {
-                        return undefined;
+                    const insertAsNonEmptyString = NonEmptyString.tryCreate(insert);
+                    if (insertAsNonEmptyString == null) {
+                        continue;
                     }
-                    const insertAsPositiveInt = NonEmptyString.tryCreate(insert);
-                    if (insertAsPositiveInt == null) {
-                        return undefined;
-                    }
-                    builder.insert(insertAsPositiveInt);
+                    builder.insert(insertAsNonEmptyString);
                     break;
                 }
                 case delete$: {
-                    const del = unit.delete;
-                    if (typeof del !== 'number') {
-                        return undefined;
-                    }
+                    const del = typeof unit.delete === 'string' ? unit.delete.length : unit.delete;
                     const delAsPositiveInt = PositiveInt.tryCreate(del);
                     if (delAsPositiveInt == null) {
-                        return undefined;
+                        continue;
                     }
                     builder.delete(delAsPositiveInt);
                     break;
-                }
-                default: {
-                    return undefined;
                 }
             }
         }
@@ -1320,64 +1334,39 @@ export namespace TextDownOperation {
         }).toArray();
     };
 
-    // もしsourceの型が ReadonlyArray<OperationUnit> | null | undefined ではない場合でも正常に処理され、undefinedが返される。
-    export const ofUnit = (source: ReadonlyArray<OperationUnit> | null | undefined): Operation | undefined => {
-        if (source == null) {
-            return undefined;
-        }
-        if (!Array.isArray(source)) {
-            return undefined;
-        }
+    export const ofUnit = (source: ReadonlyArray<OperationUnit | TextTwoWayOperation.OperationUnit>): Operation => {
         const builder = new TextOperationBuilder<PositiveInt, NonEmptyString>(downFactory);
         for (const unit of source) {
             if (unit == null) {
                 continue;
             }
-            if (typeof unit !== 'object') {
-                return undefined;
-            }
-            if (typeof unit.type !== 'string') {
-                return undefined;
-            }
             switch (unit.type) {
                 case retain: {
                     const retain = unit.retain;
-                    if (typeof retain !== 'number') {
-                        return undefined;
-                    }
                     const retainAsPositiveInt = PositiveInt.tryCreate(retain);
                     if (retainAsPositiveInt == null) {
-                        return undefined;
+                        continue;
                     }
                     builder.retain(retainAsPositiveInt);
                     break;
                 }
                 case insert$: {
-                    const insert = unit.insert;
-                    if (typeof insert !== 'number') {
-                        return undefined;
-                    }
+                    const insert = typeof unit.insert === 'string' ? unit.insert.length : unit.insert;
                     const insertAsPositiveInt = PositiveInt.tryCreate(insert);
                     if (insertAsPositiveInt == null) {
-                        return undefined;
+                        continue;
                     }
                     builder.insert(insertAsPositiveInt);
                     break;
                 }
                 case delete$: {
                     const del = unit.delete;
-                    if (typeof del !== 'string') {
-                        return undefined;
-                    }
                     const delAsPositiveInt = NonEmptyString.tryCreate(del);
                     if (delAsPositiveInt == null) {
-                        return undefined;
+                        continue;
                     }
                     builder.delete(delAsPositiveInt);
                     break;
-                }
-                default: {
-                    return undefined;
                 }
             }
         }

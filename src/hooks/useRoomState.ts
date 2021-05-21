@@ -1,17 +1,17 @@
 import React from 'react';
 import { Observable, Subject } from 'rxjs';
-import { GetRoomDocument, GetRoomFailureType, GetRoomQuery, GetRoomQueryVariables, OperateMutation, ParticipantsOperationFragment, RoomAsListItemFragment, RoomEventSubscription, RoomOperationFragment, useOperateMutation } from '../generated/graphql';
+import { GetRoomDocument, GetRoomFailureType, GetRoomQuery, GetRoomQueryVariables, OperateMutation, RoomAsListItemFragment, RoomEventSubscription, RoomOperationFragment, useOperateMutation } from '../generated/graphql';
 import * as Rx from 'rxjs/operators';
 import { ApolloError, FetchResult, useApolloClient } from '@apollo/client';
 import { GetOnlyStateManager, StateManager } from '../stateManagers/StateManager';
 import { create as createStateManager } from '../stateManagers/main';
 import MyAuthContext from '../contexts/MyAuthContext';
 import { Room } from '../stateManagers/states/room';
-import { Participant } from '../stateManagers/states/participant';
 import { authNotFound, FirebaseUserState, notSignIn } from './useFirebaseUser';
 import { useClientId } from './useClientId';
 import { useDispatch } from 'react-redux';
 import roomModule, { Notification } from '../modules/roomModule';
+import * as RoomModule from '../@shared/ot/room/v1';
 
 const sampleTime = 3000;
 
@@ -31,9 +31,9 @@ export type RoomState = {
     operate?: undefined;
 } | {
     type: typeof joined;
-    state: Room.State;
+    state: RoomModule.State;
     // undefinedならばrefetchが必要。
-    operate: ((operation: Room.PostOperationSetup) => void) | undefined;
+    operate: ((operation: RoomModule.UpOperation) => void) | undefined;
     // participantの更新は、mutationを直接呼び出すことで行う。
 } | {
     type: typeof myAuthIsUnavailable;
@@ -96,7 +96,7 @@ export const useRoomState = (roomId: string, roomEventSubscription: Observable<R
             return; // This should not happen
         }
 
-        let roomStateManager: StateManager<Room.State, Room.GetOperation, Room.PostOperation> | null = null;
+        let roomStateManager: StateManager<RoomModule.State, RoomModule.UpOperation, RoomModule.UpOperation> | null = null;
 
         const onRoomStateManagerUpdate = () => {
             const $stateManager = roomStateManager;
@@ -134,7 +134,7 @@ export const useRoomState = (roomId: string, roomEventSubscription: Observable<R
                     }
                     // Roomは、他のクライアントが行った変更はSubscriptionの結果を用い、自分のクライアントが行った変更はMutationの結果を用いている。
                     if (s.roomEvent.roomOperation.operatedBy?.userUid !== userUid || s.roomEvent.roomOperation.operatedBy.clientId !== clientId) {
-                        const getOperation = Room.createGetOperation(s.roomEvent.roomOperation.value);
+                        const getOperation = Room.createGetOperation(s.roomEvent.roomOperation);
                         roomStateManager.onOtherClientsGet(getOperation, s.roomEvent.roomOperation.revisionTo);
                         onRoomStateManagerUpdate();
                     }
@@ -154,15 +154,15 @@ export const useRoomState = (roomId: string, roomEventSubscription: Observable<R
                 if (toPost == null) {
                     return;
                 }
-                const valueInput = Room.toGraphQLInput(toPost.operationToPost);
-                console.info({ valueInput });
+                const valueInput = Room.toGraphQLInput(toPost.operationToPost, clientId);
+                console.info({ valueInput, operationToPost: toPost.operationToPost });
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 let result: FetchResult<OperateMutation, Record<string, any>, Record<string, any>>;
                 try {
                     result = await operateMutation({
                         variables: {
                             id: roomId,
-                            operation: { value: valueInput, clientId },
+                            operation: valueInput,
                             revisionFrom: toPost.revision,
                             requestId: toPost.requestId,
                         }
@@ -199,7 +199,7 @@ export const useRoomState = (roomId: string, roomEventSubscription: Observable<R
                             isSuccess: true,
                             isId: false,
                             revisionTo: result.data.result.operation.revisionTo,
-                            result: Room.createGetOperation(result.data.result.operation.value)
+                            result: Room.createGetOperation(result.data.result.operation)
                         });
                         onRoomStateManagerUpdate();
                         break;
@@ -254,13 +254,13 @@ export const useRoomState = (roomId: string, roomEventSubscription: Observable<R
                     const newRoomStateManager = createStateManager(Room.createState(q.data.result.room), q.data.result.room.revision);
                     roomOperationCache.forEach((operation, revisionTo) => {
                         if (operation.operatedBy?.userUid !== userUid || operation.operatedBy.clientId !== clientId) {
-                            newRoomStateManager.onOtherClientsGet(Room.createGetOperation(operation.value), revisionTo);
+                            newRoomStateManager.onOtherClientsGet(Room.createGetOperation(operation), revisionTo);
                         }
                     });
 
                     roomOperationCache.clear(); // 早めのメモリ解放
                     roomStateManager = newRoomStateManager;
-                    const operate = (operation: Room.PostOperationSetup) => {
+                    const operate = (operation: RoomModule.UpOperation) => {
                         const $stateManager = roomStateManager;
                         if ($stateManager == null) {
                             return;
@@ -277,7 +277,7 @@ export const useRoomState = (roomId: string, roomEventSubscription: Observable<R
                             });
                             return;
                         }
-                        $stateManager.operate(Room.setupPostOperation(operation, userUid));
+                        $stateManager.operate(operation);
                         onRoomStateManagerUpdate();
                         postTrigger.next();
                     };

@@ -1,15 +1,15 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 //import { BoardConfig, BoardsPanelConfig } from '../states/BoardsPanelConfig';
-import { boardPanel, characterPanel, gameEffectPanel, messagePanel, myValuePanel, PanelAction, participantPanel, RoomConfig, UpdateGameSystemAction } from '../states/RoomConfig';
+import { boardPanel, characterPanel, gameEffectPanel, messagePanel, myValuePanel, PanelAction, participantPanel, RoomConfig } from '../states/RoomConfig';
 import * as generators from '../utils/generators';
 import { ResizableDelta } from 'react-rnd';
 import { ResizeDirection } from 're-resizable';
-import { recordToArray } from '../utils/record';
-import { BoardConfig, BoardsPanelConfig, createDefaultBoardConfig } from '../states/BoardsPanelConfig';
+import { BoardsPanelConfig, createDefaultBoardConfig } from '../states/BoardsPanelConfig';
 import { CompositeKey, compositeKeyToString } from '../@shared/StateMap';
 import { StrIndex5 } from '../@shared/indexes';
 import { MessageFilter, MessagePanelConfig } from '../states/MessagesPanelConfig';
 import { reset, Reset } from '../utils/types';
+import { recordToArray } from '../@shared/utils';
 
 export type SetOtherValuesAction = {
     roomId: string;

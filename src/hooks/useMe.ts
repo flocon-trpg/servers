@@ -1,13 +1,13 @@
 
 import React from 'react';
 import MyAuthContext from '../contexts/MyAuthContext';
-import { useSelector } from '../store';
+import { useParticipants } from './state/useParticipants';
 
 export const useMe = () => {
     const myAuth = React.useContext(MyAuthContext);
-    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
+    const participantsMap = useParticipants(); 
     if (typeof myAuth === 'string') {
         return { participant: undefined, userUid: undefined };
     }
-    return { participant: participants?.get(myAuth.uid), userUid: myAuth.uid };
+    return { participant: participantsMap?.get(myAuth.uid), userUid: myAuth.uid };
 };

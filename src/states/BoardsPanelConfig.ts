@@ -1,8 +1,8 @@
-import { castToBoolean, castToNullableString, castToNumber, castToRecord, castToString } from '../utils/cast';
+import { castToBoolean, castToNullableString, castToNumber, castToRecord } from '../utils/cast';
 import isObject from '../utils/isObject';
-import { chooseRecord } from '../utils/record';
 import { castToPartialDraggablePanelConfigBase, DraggablePanelConfigBase, toCompleteDraggablePanelConfigBase } from './DraggablePanelConfigBase';
 import * as generators from '../utils/generators';
+import { chooseRecord } from '../@shared/utils';
 
 export type BoardConfig = {
     offsetX: number;

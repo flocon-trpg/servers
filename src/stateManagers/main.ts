@@ -1,21 +1,60 @@
 import { StateManager, StateManagerParameters } from './StateManager';
-import { Room } from './states/room';
+import * as RoomModule from '../@shared/ot/room/v1';
 
-type Parameters = StateManagerParameters<Room.State, Room.GetOperation, Room.PostOperation>;
+type Parameters = StateManagerParameters<RoomModule.State, RoomModule.UpOperation, RoomModule.UpOperation>;
 
-const createParameters = (state: Room.State, revision: number): Parameters => {
+const createParameters = (state: RoomModule.State, revision: number): Parameters => {
     return {
         state,
         revision,
-        applyGetOperation: Room.applyGetOperation,
-        applyPostOperation: Room.applyPostOperation,
-        composePostOperation: Room.compose,
-        getFirstTransform: Room.getFirstTransform,
-        postFirstTransform: Room.postFirstTransform,
-        diff: Room.diff,
+        applyGetOperation: params => {
+            const result = RoomModule.apply(params);
+            if (result.isError) {
+                throw result.error;
+            }
+            return result.value;
+        },
+        applyPostOperation: params => {
+            const result = RoomModule.apply(params);
+            if (result.isError) {
+                throw result.error;
+            }
+            return result.value;
+        },
+        composePostOperation: params => {
+            const result = RoomModule.composeUpOperation(params);
+            if (result.isError) {
+                throw result.error;
+            }
+            return result.value ?? { $version: 1 };
+        },
+        getFirstTransform: params => {
+            const result = RoomModule.clientTransform(params);
+            if (result.isError) {
+                throw result.error;
+            }
+            return {
+                firstPrime: result.value.firstPrime ?? { $version: 1 },
+                secondPrime: result.value.secondPrime ?? { $version: 1 },
+            };
+        },
+        postFirstTransform: params => {
+            const result = RoomModule.clientTransform(params);
+            if (result.isError) {
+                throw result.error;
+            }
+            return {
+                firstPrime: result.value.firstPrime ?? { $version: 1 },
+                secondPrime: result.value.secondPrime ?? { $version: 1 },
+            };
+        },
+        diff: params => {
+            const result = RoomModule.diff(params);
+            return RoomModule.toUpOperation(result ?? { $version: 1 });
+        },
     };
 };
 
-export const create = (state: Room.State, revision: number): StateManager<Room.State, Room.GetOperation, Room.PostOperation> => {
+export const create = (state: RoomModule.State, revision: number): StateManager<RoomModule.State, RoomModule.UpOperation, RoomModule.UpOperation> => {
     return new StateManager(createParameters(state, revision));
 };

@@ -3,10 +3,11 @@ import { useDeepCompareEffectNoCheck } from 'use-deep-compare-effect';
 import ConfigContext from '../contexts/ConfigContext';
 import { FilePathFragment, FileSourceType } from '../generated/graphql';
 import { getStorageForce } from '../utils/firebaseHelpers';
+import * as FilePathModule from '../@shared/ot/filePath/v1';
 
 // PathArrayがnullish ⇔ 戻り値がnull
 // pathArray.length = 戻り値.length
-export function useFirebaseStorageUrlArray(pathArray: ReadonlyArray<FilePathFragment> | null | undefined): (string | null)[] | null {
+export function useFirebaseStorageUrlArray(pathArray: ReadonlyArray<FilePathFragment | FilePathModule.FilePath> | null | undefined): (string | null)[] | null {
     const config = React.useContext(ConfigContext);
     const [result, setResult] = React.useState<(string | null)[] | null>(null);
 
@@ -42,7 +43,7 @@ export function useFirebaseStorageUrlArray(pathArray: ReadonlyArray<FilePathFrag
     return result;
 }
 
-export function useFirebaseStorageUrl(path: FilePathFragment | null | undefined): string | null {
+export function useFirebaseStorageUrl(path: FilePathFragment | FilePathModule.FilePath | null | undefined): string | null {
     const pathArray = React.useMemo(() => path == null ? null : [path], [path]);
     const resultArray = useFirebaseStorageUrlArray(pathArray);
     if (resultArray == null) {

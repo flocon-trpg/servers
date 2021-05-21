@@ -6,18 +6,15 @@ import { useListAvailableGameSystemsQuery, useWritePrivateMessageMutation, useWr
 import { $free } from '../../@shared/Constants';
 import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
-import { ReadonlyStateMap } from '../../@shared/StateMap';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import { apolloError } from '../../hooks/useRoomMessages';
-import { Character } from '../../stateManagers/states/character';
 import { getUserUid } from '../../hooks/useFirebaseUser';
 import { MessagePanelConfig } from '../../states/MessagesPanelConfig';
 import * as Icon from '@ant-design/icons';
-import { Participant } from '../../stateManagers/states/participant';
 import { Gutter } from 'antd/lib/grid/row';
 import DrawerFooter from '../../layouts/DrawerFooter';
 import { __ } from '../../@shared/collection';
-import { PublicChannelNames, reset } from '../../utils/types';
+import { reset } from '../../utils/types';
 import { SketchPicker } from 'react-color';
 import classNames from 'classnames';
 import { PublicChannelKey } from '../../@shared/publicChannelKey';
@@ -25,7 +22,8 @@ import { VisibleTo } from '../../utils/visibleTo';
 import { UseRoomMessageInputTextsResult } from '../../hooks/useRoomMessageInputTexts';
 import roomModule from '../../modules/roomModule';
 import { useSelector } from '../../store';
-import { usePublicChannelNames } from '../../hooks/usePublicChannelNames';
+import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
+import { isRecordEmpty, recordToArray } from '../../@shared/utils';
 
 type PrivateMessageDrawerProps = {
     visible: boolean;
@@ -67,24 +65,24 @@ const PrivateMessageDrawer: React.FC<PrivateMessageDrawerProps> = ({ visible, se
                     <Col flex={0}>送信先</Col>
                     <Col span={inputSpan}>
                         <div>
-                            {participants.size <= 1 ? '(自分以外の入室者がいません)' : [...participants]
-                                .filter(([userUid]) => getUserUid(myAuth) !== userUid)
-                                .sort(([, x], [, y]) => x.name.localeCompare(y.name))
-                                .map(([userUid, participant]) => {
+                            {recordToArray(participants.size).length <= 1 ? '(自分以外の入室者がいません)' : recordToArray(participants)
+                                .filter(pair => getUserUid(myAuth) !== pair.key)
+                                .sort((x, y) => x.value.name.localeCompare(y.value.name))
+                                .map(pair => {
                                     return (
-                                        <React.Fragment key={userUid}>
+                                        <React.Fragment key={pair.key}>
                                             <Checkbox
-                                                checked={selectedParticipants.has(userUid)}
+                                                checked={selectedParticipants.has(pair.key)}
                                                 onChange={newValue => {
                                                     const newSelectedParticipants = new Set(selectedParticipants);
                                                     if (newValue.target.checked) {
-                                                        newSelectedParticipants.add(userUid);
+                                                        newSelectedParticipants.add(pair.key);
                                                     } else {
-                                                        newSelectedParticipants.delete(userUid);
+                                                        newSelectedParticipants.delete(pair.key);
                                                     }
                                                     onChange(newSelectedParticipants);
                                                 }}>
-                                                {participant.name}
+                                                {pair.value.name}
                                             </Checkbox>
                                             <br />
                                         </React.Fragment>);
@@ -135,7 +133,6 @@ export const ChatInput: React.FC<Props> = ({
     const miniInputMaxWidth = 200;
 
     const dispatch = useDispatch();
-    const characters = useSelector(state => state.roomModule.roomState?.state?.characters);
     const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
     const publicChannelNames = usePublicChannelNames();
     const availableGameSystems = useListAvailableGameSystemsQuery();
@@ -162,7 +159,7 @@ export const ChatInput: React.FC<Props> = ({
     const selectedParticipants = React.useMemo(() =>
         __(selectedParticipantIds)
             .compact(id => {
-                const found = participants?.get(id);
+                const found = (participants ?? {})[id];
                 if (found == null) {
                     return null;
                 }
@@ -176,15 +173,23 @@ export const ChatInput: React.FC<Props> = ({
                 </div>);
             }), [selectedParticipantIds, participants]);
 
+    const characters = React.useMemo(() => {
+        return __(recordToArray(participants ?? {}))
+            .flatMap(participantPair =>
+                recordToArray(participantPair.value.characters)
+                    .map(characterPair => ({ key: { createdBy: participantPair.key, id: characterPair.key }, value: characterPair.value })))
+            .toArray();
+    }, [participants]);
+
     const myCharacters = React.useMemo(() => {
         if (myUserUid == null || characters == null) {
             return [];
         }
-        return characters.toArray().sort(([, x], [, y]) => x.name.localeCompare(y.name)).map(([key, character]) => {
-            if (key.createdBy === myUserUid) {
+        return characters.sort((x, y) => x.value.name.localeCompare(y.value.name)).map(pair => {
+            if (pair.key.createdBy === myUserUid) {
                 return (
-                    <Select.Option key={key.id} value={key.id}>
-                        {character.name}
+                    <Select.Option key={pair.key.id} value={pair.key.id}>
+                        {pair.value.name}
                     </Select.Option>
                 );
             }

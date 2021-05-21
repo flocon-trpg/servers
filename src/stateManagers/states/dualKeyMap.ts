@@ -76,7 +76,7 @@ const composeElement = <TState, TOperation>({
                         if (state === undefined) {
                             throw 'state is undefined, but first is remove';
                         }
-                        const diffResult = innerDiff({ prev: state, next: second.newValue });
+                        const diffResult = innerDiff({ prevState: state, nextState: second.newValue });
                         if (diffResult === undefined) {
                             return undefined;
                         }
@@ -167,7 +167,7 @@ const transformElement = <TState, TFirstOperation, TSecondOperation>({
                 case replace:
                     // 通常、片方がnon-undefinedならばもう片方もnon-undefined。
                     if (first.newValue !== undefined && second.newValue !== undefined) {
-                        const diffResult = diff({ next: first.newValue, prev: second.newValue });
+                        const diffResult = diff({ nextState: first.newValue, prevState: second.newValue });
                         if (diffResult === undefined) {
                             return {
                                 firstPrime: undefined,
@@ -285,7 +285,7 @@ export const diff = <TKey1, TKey2, TState, TOperation>({
                 return;
             }
             case both: {
-                const diff = inner({ prev: group.left, next: group.right });
+                const diff = inner({ prevState: group.left, nextState: group.right });
                 if (diff === undefined) {
                     return;
                 }

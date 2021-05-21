@@ -14,8 +14,6 @@ import { ReadonlyStateMap } from '../../@shared/StateMap';
 import { useDeleteMessageMutation, useEditMessageMutation, useMakeMessageNotSecretMutation, WritingMessageStatusType } from '../../generated/graphql';
 import * as Icon from '@ant-design/icons';
 import InputModal from '../InputModal';
-import { Character } from '../../stateManagers/states/character';
-import { Participant } from '../../stateManagers/states/participant';
 import { getUserUid } from '../../hooks/useFirebaseUser';
 import PagenationScroll from '../PagenationScroll';
 import { MessagePanelConfig, MessageFilter, TabConfig } from '../../states/MessagesPanelConfig';
@@ -34,8 +32,11 @@ import { $free } from '../../@shared/Constants';
 import { isDeleted, toText } from '../../utils/message';
 import { Notification } from '../../modules/roomModule';
 import { useSelector } from '../../store';
-import { usePublicChannelNames } from '../../hooks/usePublicChannelNames';
+import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import { useOperate } from '../../hooks/useOperate';
+import { recordToMap } from '../../@shared/utils';
+import * as RoomModule from '../../@shared/ot/room/v1';
+import { useParticipants } from '../../hooks/state/useParticipants';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -60,7 +61,7 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
 
     const myAuth = React.useContext(MyAuthContext);
     const publicChannelNames = usePublicChannelNames();
-    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
+    const participantsMap = useParticipants(); 
 
     const hiwaSelectValue: HiwaSelectValueType = (() => {
         // config == null のケースは本来考慮する必要はないが、とりあえずnoneにしている。
@@ -90,7 +91,7 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
         onChangeCore({ ...config, ...newValue });
     };
 
-    if (participants == null) {
+    if (participantsMap == null) {
         return null;
     }
 
@@ -210,7 +211,7 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
                     <Radio value={custom}>カスタム(完全一致)</Radio>
                 </Radio.Group>
                 <br />
-                {(hiwaSelectValue === custom && participants.size <= 1) && [...participants]
+                {(hiwaSelectValue === custom && participantsMap.size <= 1) && [...participantsMap]
                     .filter(([userUid]) => getUserUid(myAuth) !== userUid)
                     .sort(([, x], [, y]) => x.name.localeCompare(y.name))
                     .map(([userUid, participant]) => {
@@ -233,7 +234,7 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
                                 <br key={userUid + '<br>'} />
                             </>);
                     })}
-                {(hiwaSelectValue === custom && participants.size <= 1) && <Alert type='info' showIcon message='自分以外の入室者がいません。' />}
+                {(hiwaSelectValue === custom && participantsMap.size <= 1) && <Alert type='info' showIcon message='自分以外の入室者がいません。' />}
             </Col>
         </Row>
     </Drawer >);
@@ -273,9 +274,11 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (props: Chann
                         if (e.previousValue === e.currentValue) {
                             return;
                         }
-                        const setup = Room.createPostOperationSetup();
-                        setup[key] = { newValue: e.currentValue };
-                        operate(setup);
+                        const operation: RoomModule.UpOperation = {
+                            $version: 1,
+                        };
+                        operation[key] = { newValue: e.currentValue };
+                        operate(operation);
                     }} />
                 </Col>
             </Row>;
@@ -300,6 +303,8 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
     const [isEditModalVisible, setIsEditModalVisible] = React.useState(false);
     const roomId = useSelector(state => state.roomModule.roomId);
     const publicChannelNames = usePublicChannelNames();
+
+    const participantsMap = React.useMemo(() => participants == null ? null : recordToMap(participants), [participants]);
 
     if (roomId == null || publicChannelNames == null) {
         return null;
@@ -342,7 +347,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
         if (message.value.visibleTo.length === 0) {
             privateMessageMembersInfo = <div>(独り言)</div>;
         } else {
-            const visibleTo = message.value.visibleTo.map(v => participants?.get(v)?.name ?? v).sort((x, y) => x.localeCompare(y));
+            const visibleTo = message.value.visibleTo.map(v => participantsMap?.get(v)?.name ?? v).sort((x, y) => x.localeCompare(y));
             privateMessageMembersInfo = <Popover content={<ul>{visibleTo.map((str, i) => <li key={i}>{str}</li>)}</ul>}>
                 <div style={{ maxWidth: 100, textOverflow: 'ellipsis' }}>{visibleTo.reduce((seed, elem, i) => i === 0 ? elem : `${seed}, ${elem}`, '')}</div>
             </Popover>;
@@ -381,9 +386,9 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
         <div style={({ display: 'grid', gridTemplateRows: `${headerHeight}px 1fr`, gridTemplateColumns: '1fr 40px', marginBottom: 4, marginTop: 4 })}>
             <div style={({ gridRow: '1 / 2', gridColumn: '1 / 2', display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
                 <div style={({ flex: '0 0 auto' })}>
-                    {message.type === privateMessage || message.type === publicMessage && RoomMessageNameSpace.userName(message, participants ?? new Map())}
+                    {message.type === privateMessage || message.type === publicMessage && RoomMessageNameSpace.userName(message, participantsMap ?? new Map())}
                 </div>
-                <div style={({ flex: '0 0 auto', color: 'gray', marginLeft: 6 })}>{message.type !== privateMessage && message.type !== publicMessage ? '(ログ)' : RoomMessageNameSpace.toChannelName(message, publicChannelNames, participants ?? new Map())}</div>
+                <div style={({ flex: '0 0 auto', color: 'gray', marginLeft: 6 })}>{message.type !== privateMessage && message.type !== publicMessage ? '(ログ)' : RoomMessageNameSpace.toChannelName(message, publicChannelNames, participantsMap ?? new Map())}</div>
                 <div style={({ flex: '0 0 auto', color: 'gray', marginLeft: 6 })}>{datetime}</div>
                 {privateMessageMembersInfo != null && <div style={{ flex: '0 0 auto', width: 6 }} />}
                 {privateMessageMembersInfo}
@@ -436,6 +441,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
     const myAuth = React.useContext(MyAuthContext);
     const writingMessageStatusResult = useWritingMessageStatus();
     const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
+    const participantsMap = React.useMemo(() => participants == null ? null : recordToMap(participants), [participants]);
 
     const filter = useMessageFilter(config);
 
@@ -460,7 +466,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
         }
         return [...map].filter(([key, value]) => key !== getUserUid(myAuth) && value.current === WritingMessageStatusType.Writing).map(([key]) => key);
     }).toSet();
-    const writingUsers = __(writingUserUids).compact(userUid => participants?.get(userUid)?.name).toArray().sort();
+    const writingUsers = __(writingUserUids).compact(userUid => participantsMap?.get(userUid)?.name).toArray().sort();
     let writingStatus: JSX.Element | null = null;
     // TODO: background-colorが適当
     const writingStatusCss = css`

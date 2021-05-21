@@ -4,23 +4,24 @@ import { useDispatch } from 'react-redux';
 import { DeleteRoomFailureType, ParticipantRole, PromoteFailureType, useChangeParticipantNameMutation, useDeleteRoomMutation, useGetLogLazyQuery, useLeaveRoomMutation, usePromoteToPlayerMutation, useRequiresPhraseToJoinAsPlayerLazyQuery } from '../../generated/graphql';
 import roomConfigModule from '../../modules/roomConfigModule';
 import { useSelector } from '../../store';
-import { recordToArray } from '../../utils/record';
-import { editRoomDrawerVisibility, RoomComponentsAction } from './RoomComponentsState';
+import { editRoomDrawerVisibility } from './RoomComponentsState';
 import * as Icon from '@ant-design/icons';
-import { boardPanel, characterPanel, gameEffectPanel, messagePanel, myValuePanel, participantPanel } from '../../states/RoomConfig';
+import { boardPanel } from '../../states/RoomConfig';
 import VolumeBarPanel from './VolumeBarPanel';
 import Jdenticon from '../../foundations/Jdenticon';
 import roomModule, { Notification } from '../../modules/roomModule';
 import MyAuthContext from '../../contexts/MyAuthContext';
-import { getUserUid } from '../../hooks/useFirebaseUser';
 import path from '../../utils/path';
 import { useRouter } from 'next/router';
 import { defaultMessagePanelConfig } from '../../states/MessagesPanelConfig';
 import fileDownload from 'js-file-download';
 import { generateAsStaticHtml } from '../../utils/roomLogGenerator';
 import moment from 'moment';
-import { usePublicChannelNames } from '../../hooks/usePublicChannelNames';
+import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
+import { recordToArray, recordToMap } from '../../@shared/utils';
+import { __ } from '../../@shared/collection';
+import { useParticipants } from '../../hooks/state/useParticipants';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -307,8 +308,7 @@ export const RoomMenu: React.FC = () => {
     const roomId = useSelector(state => state.roomModule.roomId);
     const createdBy = useSelector(state => state.roomModule.roomState?.state?.createdBy);
     const publicChannelNames = usePublicChannelNames();
-    const characters = useSelector(state => state.roomModule.roomState?.state?.characters);
-    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
+    const participantsMap = useParticipants(); 
     const boardPanels = useSelector(state => state.roomConfigModule?.panels.boardPanels);
     const characterPanel = useSelector(state => state.roomConfigModule?.panels.characterPanel);
     const gameEffectPanel = useSelector(state => state.roomConfigModule?.panels.gameEffectPanel);
@@ -321,14 +321,10 @@ export const RoomMenu: React.FC = () => {
     const [isChangeMyParticipantNameModalVisible, setIsChangeMyParticipantNameModalVisible] = React.useState(false);
     const [isDeleteRoomModalVisible, setIsDeleteRoomModalVisible] = React.useState(false);
 
-    const charactersRef = React.useRef(characters);
+    const participantsMapRef = React.useRef(participantsMap);
     React.useEffect(() => {
-        charactersRef.current = characters;
-    }, [characters]);
-    const participantsRef = React.useRef(participants);
-    React.useEffect(() => {
-        participantsRef.current = participants;
-    }, [participants]);
+        participantsMapRef.current = participantsMap;
+    }, [participantsMap]);
     const publicChannelNamesRef = React.useRef(publicChannelNames);
     React.useEffect(() => {
         publicChannelNamesRef.current = publicChannelNames;
@@ -343,14 +339,13 @@ export const RoomMenu: React.FC = () => {
             // TODO: エラーメッセージを出す
             return;
         }
-        if (publicChannelNamesRef.current == null || participantsRef.current == null || charactersRef.current == null) {
+        if (publicChannelNamesRef.current == null || participantsMapRef.current == null) {
             return;
         }
         fileDownload(generateAsStaticHtml({
             ...publicChannelNamesRef.current,
             messages: data.result,
-            participants: participantsRef.current,
-            characters: charactersRef.current,
+            participants: participantsMapRef.current,
         }), `log_${moment(new Date()).format('YYYYMMDDHHmmss')}.html`);
     }, [getLogQueryResult.data]);
 
@@ -358,7 +353,7 @@ export const RoomMenu: React.FC = () => {
         return null;
     }
 
-    const me = participants?.get(myAuth.uid);
+    const me = participantsMap?.get(myAuth.uid);
 
     return <><Menu triggerSubMenuAction='click' selectable={false} mode="horizontal">
         <Menu.SubMenu title="部屋">

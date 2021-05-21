@@ -1,32 +1,21 @@
 import React from 'react';
-import { Button, Checkbox, InputNumber, Space, Switch, Tooltip } from 'antd';
-import { update } from '../stateManagers/states/types';
-import { createStateMap } from '../@shared/StateMap';
-import { StrIndex100 } from '../@shared/indexes';
+import { Button, Checkbox, Tooltip } from 'antd';
+import { StrIndex20 } from '../@shared/indexes';
 import { EyeInvisibleOutlined, EyeOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import ToggleButton from './ToggleButton';
 import { addParameter, deleteParameter, parameterIsNotPrivate, parameterIsNotPrivateAndNotCreatedByMe, parameterIsPrivate, parameterIsPrivateAndNotCreatedByMe } from '../resource/text/main';
-import { Character } from '../stateManagers/states/character';
-import { BoolParam } from '../stateManagers/states/boolParam';
+import * as Character from '../@shared/ot/room/participant/character/v1';
+import * as BoolParam from '../@shared/ot/room/participant/character/boolParam/v1';
 
 type Props = {
     isCharacterPrivate: boolean;
     isCreate: boolean;
-    parameterKey: StrIndex100;
+    parameterKey: StrIndex20;
     parameter: BoolParam.State | undefined;
     createdByMe: boolean;
-    onOperate: (operation: Character.PostOperation) => void;
+    onOperate: (operation: Character.UpOperation) => void;
     compact: boolean;
 }
-
-const createCharacterOperationBase = (): Character.WritablePostOperation => ({
-    pieces: createStateMap(),
-    tachieLocations: createStateMap(),
-    boolParams: new Map(),
-    numParams: new Map(),
-    numMaxParams: new Map(),
-    strParams: new Map(),
-});
 
 const BooleanParameterInput: React.FC<Props> = ({
     isCharacterPrivate,
@@ -42,10 +31,15 @@ const BooleanParameterInput: React.FC<Props> = ({
             disabled={disabled}
             checked={parameter?.value ?? false}
             onChange={e => {
-                const operation = createCharacterOperationBase();
-                operation.boolParams.set(parameterKey, {
-                    value: { newValue: e.target.checked },
-                });
+                const operation: Character.UpOperation = {
+                    $version: 1,
+                    boolParams: {
+                        [parameterKey]: {
+                            $version: 1,
+                            value: { newValue: e.target.checked },
+                        }
+                    }
+                };
                 onOperate(operation);
             }} />
     );
@@ -61,10 +55,15 @@ const BooleanParameterInput: React.FC<Props> = ({
                         size='small'
                         disabled={disabled}
                         onClick={() => {
-                            const operation = createCharacterOperationBase();
-                            operation.boolParams.set(parameterKey, {
-                                value: { newValue: false },
-                            });
+                            const operation: Character.UpOperation = {
+                                $version: 1,
+                                boolParams: {
+                                    [parameterKey]: {
+                                        $version: 1,
+                                        value: { newValue: false },
+                                    }
+                                }
+                            };
                             onOperate(operation);
                         }}>
                         <PlusOutlined />
@@ -77,10 +76,15 @@ const BooleanParameterInput: React.FC<Props> = ({
                     size='small'
                     disabled={disabled}
                     onClick={() => {
-                        const operation = createCharacterOperationBase();
-                        operation.boolParams.set(parameterKey, {
-                            value: { newValue: undefined },
-                        });
+                        const operation: Character.UpOperation = {
+                            $version: 1,
+                            boolParams: {
+                                [parameterKey]: {
+                                    $version: 1,
+                                    value: { newValue: undefined },
+                                }
+                            }
+                        };
                         onOperate(operation);
                     }}>
                     <DeleteOutlined />
@@ -111,10 +115,15 @@ const BooleanParameterInput: React.FC<Props> = ({
             unCheckedChildren={<EyeInvisibleOutlined />}
             size='small'
             onChange={e => {
-                const operation = createCharacterOperationBase();
-                operation.boolParams.set(parameterKey, {
-                    isValuePrivate: { newValue: !e },
-                });
+                const operation: Character.UpOperation = {
+                    $version: 1,
+                    boolParams: {
+                        [parameterKey]: {
+                            $version: 1,
+                            isValuePrivate: { newValue: !e },
+                        }
+                    }
+                };
                 onOperate(operation);
             }} />
     );

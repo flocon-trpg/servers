@@ -9,11 +9,10 @@ import { createStateMap, ReadonlyStateMap } from '../../@shared/StateMap';
 import { characterDrawerType, create, update } from './RoomComponentsState';
 import { DrawerProps } from 'antd/lib/drawer';
 import InputFile from '../InputFile';
-import { FilesManagerDrawerType } from '../../utils/types';
+import { FilePath, FilesManagerDrawerType } from '../../utils/types';
 import FilesManagerDrawer from '../FilesManagerDrawer';
 import { Gutter } from 'antd/lib/grid/row';
 import { strIndex20Array } from '../../@shared/indexes';
-import { RoomParameterNameType } from '../../generated/graphql';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import NumberParameterInput from '../../foundations/NumberParameterInput';
 import BooleanParameterInput from '../../foundations/BooleanParameterInput';
@@ -21,17 +20,22 @@ import StringParameterInput from '../../foundations/StringParameterInput';
 import ToggleButton from '../../foundations/ToggleButton';
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import { characterIsPrivate, characterIsNotPrivate, characterIsNotPrivateAndNotCreatedByMe } from '../../resource/text/main';
-import { Room } from '../../stateManagers/states/room';
-import { Character } from '../../stateManagers/states/character';
-import { Piece } from '../../stateManagers/states/piece';
+import * as Room from '../../@shared/ot/room/v1';
+import * as Character from '../../@shared/ot/room/participant/character/v1';
+import * as BoardLocation from '../../@shared/ot/boardLocation/v1';
+import * as Piece from '../../@shared/ot/piece/v1';
 import { getUserUid } from '../../hooks/useFirebaseUser';
 import { useStateEditor } from '../../hooks/useStateEditor';
-import { BoardLocation } from '../../stateManagers/states/boardLocation';
 import { useOperate } from '../../hooks/useOperate';
 import { useSelector } from '../../store';
 import BufferedInput from '../../foundations/BufferedInput';
 import BufferedTextArea from '../../foundations/BufferedTextArea';
 import { TOMLInput } from '../../foundations/TOMLInput';
+import { useCharacters } from '../../hooks/state/useCharacters';
+import { useParticipants } from '../../hooks/state/useParticipants';
+import { useBoolParamNames, useNumParamNames, useStrParamNames } from '../../hooks/state/useParamNames';
+import { useMe } from '../../hooks/useMe';
+import { dualKeyRecordFind, recordToDualKeyMap } from '../../@shared/utils';
 
 const notFound = 'notFound';
 
@@ -40,17 +44,23 @@ const drawerBaseProps: Partial<DrawerProps> = {
 };
 
 const defaultCharacter: Character.State = {
+    $version: 1,
     name: '',
     isPrivate: false,
-    pieces: createStateMap(),
-    tachieLocations: createStateMap(),
-    boolParams: new Map(),
-    numParams: new Map(),
-    numMaxParams: new Map(),
-    strParams: new Map(),
+    image: null,
+    privateCommands: {},
+    privateVarToml: '',
+    tachieImage: null,
+    tachieLocations: {},
+    boolParams: {},
+    numParams: {},
+    numMaxParams: {},
+    strParams: {},
+    pieces: {},
 };
 
 const defaultPieceLocation: Piece.State = {
+    $version: 1,
     x: 0,
     y: 0,
     w: 50,
@@ -59,34 +69,54 @@ const defaultPieceLocation: Piece.State = {
     cellY: 0,
     cellW: 1,
     cellH: 1,
-    isPrivate: false,
     isCellMode: true,
+    isPrivate: true,
 };
 
 const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
 const CharacterDrawer: React.FC = () => {
-    const myAuth = React.useContext(MyAuthContext);
+    const me = useMe();
     const componentsState = React.useContext(ComponentsStateContext);
     const drawerType = componentsState.characterDrawerType;
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
     const operate = useOperate();
-    const characters = useSelector(state => state.roomModule.roomState?.state?.characters);
-    const paramNames = useSelector(state => state.roomModule.roomState?.state?.paramNames);
-    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
+    const characters = useCharacters();
+    const boolParamNames = useBoolParamNames();
+    const numParamNames = useNumParamNames();
+    const strParamNames = useStrParamNames();
+    const participants = useParticipants();
     const { state: character, setState: setCharacter, stateToCreate: characterToCreate, resetStateToCreate: resetCharacterToCreate } = useStateEditor(drawerType?.type === update ? characters?.get(drawerType.stateKey) : undefined, defaultCharacter, ({ prevState, nextState }) => {
         if (drawerType?.type !== update) {
             return;
         }
-        const diffOperation = Character.diff({ prev: prevState, next: nextState });
-        const operation = Room.createPostOperationSetup();
-        operation.characters.set(drawerType.stateKey, { type: update, operation: diffOperation });
+        const diffOperation = Character.diff({ prevState, nextState });
+        if (diffOperation == null) {
+            return;
+        }
+        const operation: Room.UpOperation = {
+            $version: 1,
+            participants: {
+                [drawerType.stateKey.createdBy]: {
+                    type: update,
+                    update: {
+                        $version: 1,
+                        characters: {
+                            [drawerType.stateKey.id]: {
+                                type: update,
+                                update: Character.toUpOperation(diffOperation),
+                            }
+                        }
+                    }
+                }
+            }
+        };
         operate(operation);
     });
     const [filesManagerDrawerType, setFilesManagerDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
 
-    if (paramNames == null || participants == null) {
+    if (boolParamNames == null || numParamNames == null || strParamNames == null || participants == null || me.userUid == null) {
         return null;
     }
 
@@ -94,21 +124,21 @@ const CharacterDrawer: React.FC = () => {
         if (drawerType?.type !== update) {
             return true;
         }
-        return drawerType.stateKey.createdBy === getUserUid(myAuth);
+        return drawerType.stateKey.createdBy === me.userUid;
     })();
 
     const piece = (() => {
         if (drawerType?.type !== update || drawerType.boardKey == null) {
             return null;
         }
-        return character.pieces.get(drawerType.boardKey) ?? null;
+        return dualKeyRecordFind<Piece.State>(character.pieces, { first: drawerType.boardKey.createdBy, second: drawerType.boardKey.id }) ?? null;
     })();
 
     const tachieLocation = (() => {
         if (drawerType?.type !== update || drawerType.boardKey == null) {
             return null;
         }
-        return character.tachieLocations.get(drawerType.boardKey) ?? null;
+        return dualKeyRecordFind<BoardLocation.State>(character.tachieLocations, { first: drawerType.boardKey.createdBy, second: drawerType.boardKey.id }) ?? null;
     })();
 
     const updateCharacter = (partialState: Partial<Character.State>) => {
@@ -117,25 +147,60 @@ const CharacterDrawer: React.FC = () => {
                 setCharacter({ ...character, ...partialState });
                 return;
             case update: {
-                const diffOperation = Character.diff({ prev: character, next: { ...character, ...partialState } });
-                console.info('diff', diffOperation);
-                const operation = Room.createPostOperationSetup();
-                operation.characters.set(drawerType.stateKey, { type: update, operation: diffOperation });
+                const diffOperation = Character.diff({ prevState: character, nextState: { ...character, ...partialState } });
+                if (diffOperation == null) {
+                    return;
+                }
+                const operation: Room.UpOperation = {
+                    $version: 1,
+                    participants: {
+                        [drawerType.stateKey.createdBy]: {
+                            type: update,
+                            update: {
+                                $version: 1,
+                                characters: {
+                                    [drawerType.stateKey.id]: {
+                                        type: update,
+                                        update: Character.toUpOperation(diffOperation),
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
                 operate(operation);
                 return;
             }
         }
     };
-    const updateCharacterByOperation = (operation: Character.PostOperation) => {
+    const updateCharacterByOperation = (operation: Character.UpOperation) => {
         switch (drawerType?.type) {
             case create: {
-                const newCharacter = Character.applyOperation({ state: character, operation });
-                setCharacter(newCharacter);
+                const newCharacter = Character.apply({ state: character, operation });
+                if (newCharacter.isError) {
+                    throw newCharacter.error;
+                }
+                setCharacter(newCharacter.value);
                 return;
             }
             case update: {
-                const roomOperation = Room.createPostOperationSetup();
-                roomOperation.characters.set(drawerType.stateKey, { type: update, operation });
+                const roomOperation: Room.UpOperation = {
+                    $version: 1,
+                    participants: {
+                        [drawerType.stateKey.createdBy]: {
+                            type: update,
+                            update: {
+                                $version: 1,
+                                characters: {
+                                    [drawerType.stateKey.id]: {
+                                        type: update,
+                                        update: operation,
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
                 operate(roomOperation);
                 return;
             }
@@ -146,26 +211,37 @@ const CharacterDrawer: React.FC = () => {
         if (piece == null || drawerType?.type !== update || drawerType.boardKey == null) {
             return;
         }
-        const diffOperation = Piece.diff({ prev: piece, next: { ...piece, ...partialState } });
-        const pieces = createStateMap<OperationElement<Piece.State, Piece.PostOperation>>();
-        if (diffOperation != null) {
-            pieces.set(drawerType.boardKey, {
-                type: update,
-                operation: diffOperation,
-            });
+        const diffOperation = Piece.diff({ prevState: piece, nextState: { ...piece, ...partialState } });
+        if (diffOperation == null) {
+            return;
         }
-        const operation = Room.createPostOperationSetup();
-        operation.characters.set(drawerType.stateKey, {
-            type: update,
-            operation: {
-                pieces,
-                tachieLocations: createStateMap(),
-                boolParams: new Map(),
-                numParams: new Map(),
-                numMaxParams: new Map(),
-                strParams: new Map(),
+        const operation: Room.UpOperation = {
+            $version: 1,
+            participants: {
+                [drawerType.stateKey.createdBy]: {
+                    type: update,
+                    update: {
+                        $version: 1,
+                        characters: {
+                            [drawerType.stateKey.id]: {
+                                type: update,
+                                update: {
+                                    $version: 1,
+                                    pieces: {
+                                        [drawerType.boardKey.createdBy]: {
+                                            [drawerType.boardKey.id]: {
+                                                type: update,
+                                                update: diffOperation,
+                                            }
+                                        }
+                                    }
+                                },
+                            }
+                        }
+                    }
+                }
             }
-        });
+        };
         operate(operation);
     };
 
@@ -173,26 +249,37 @@ const CharacterDrawer: React.FC = () => {
         if (tachieLocation == null || drawerType?.type !== update || drawerType.boardKey == null) {
             return;
         }
-        const diffOperation = BoardLocation.diff({ prev: tachieLocation, next: { ...tachieLocation, ...partialState } });
-        const tachieLocations = createStateMap<OperationElement<BoardLocation.State, BoardLocation.PostOperation>>();
-        if (diffOperation != null) {
-            tachieLocations.set(drawerType.boardKey, {
-                type: update,
-                operation: diffOperation,
-            });
+        const diffOperation = BoardLocation.diff({ prevState: tachieLocation, nextState: { ...tachieLocation, ...partialState } });
+        if (diffOperation == null) {
+            return;
         }
-        const operation = Room.createPostOperationSetup();
-        operation.characters.set(drawerType.stateKey, {
-            type: update,
-            operation: {
-                tachieLocations,
-                pieces: createStateMap(),
-                boolParams: new Map(),
-                numParams: new Map(),
-                numMaxParams: new Map(),
-                strParams: new Map(),
+        const operation: Room.UpOperation = {
+            $version: 1,
+            participants: {
+                [drawerType.stateKey.createdBy]: {
+                    type: update,
+                    update: {
+                        $version: 1,
+                        characters: {
+                            [drawerType.stateKey.id]: {
+                                type: update,
+                                update: {
+                                    $version: 1,
+                                    tachieLocations: {
+                                        [drawerType.boardKey.createdBy]: {
+                                            [drawerType.boardKey.id]: {
+                                                type: update,
+                                                update: diffOperation,
+                                            }
+                                        }
+                                    }
+                                },
+                            }
+                        }
+                    }
+                }
             }
-        });
+        };
         operate(operation);
     };
 
@@ -203,8 +290,25 @@ const CharacterDrawer: React.FC = () => {
                 return;
             }
             const id = simpleId();
-            const operation = Room.createPostOperationSetup();
-            operation.addCharacters.set(id, characterToCreate);
+            const operation: Room.UpOperation = {
+                $version: 1,
+                participants: {
+                    [me.userUid]: {
+                        type: update,
+                        update: {
+                            $version: 1,
+                            characters: {
+                                [id]: {
+                                    type: replace,
+                                    replace: {
+                                        newValue: characterToCreate,
+                                    },
+                                }
+                            }
+                        }
+                    }
+                }
+            };
             operate(operation);
             resetCharacterToCreate();
             dispatch({ type: characterDrawerType, newValue: null });
@@ -214,8 +318,25 @@ const CharacterDrawer: React.FC = () => {
     let onDestroy: (() => void) | undefined = undefined;
     if (drawerType?.type === update) {
         onDestroy = () => {
-            const operation = Room.createPostOperationSetup();
-            operation.characters.set(drawerType.stateKey, { type: replace, newValue: undefined });
+            const operation: Room.UpOperation = {
+                $version: 1,
+                participants: {
+                    [drawerType.stateKey.createdBy]: {
+                        type: update,
+                        update: {
+                            $version: 1,
+                            characters: {
+                                [drawerType.stateKey.id]: {
+                                    type: replace,
+                                    replace: {
+                                        newValue: undefined,
+                                    },
+                                }
+                            }
+                        }
+                    }
+                }
+            };
             operate(operation);
             dispatch({ type: characterDrawerType, newValue: null });
         };
@@ -414,12 +535,28 @@ const CharacterDrawer: React.FC = () => {
                                             return;
                                         }
                                         const id = simpleId();
-                                        const operation = Room.createPostOperationSetup();
-                                        operation.addCharacters.set(id, {
-                                            ...character,
-                                            name: `${character.name} (複製)`,
-                                            pieces: createStateMap(),
-                                        });
+                                        const operation: Room.UpOperation = {
+                                            $version: 1,
+                                            participants: {
+                                                [me.userUid]: {
+                                                    type: update,
+                                                    update: {
+                                                        $version: 1,
+                                                        characters: {
+                                                            [id]: {
+                                                                type: replace,
+                                                                replace: {
+                                                                    newValue: {
+                                                                        ...character,
+                                                                        name: `${character.name} (複製)`,
+                                                                    },
+                                                                },
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        };
                                         operate(operation);
                                     }} >
                                         このキャラクターを複製
@@ -480,7 +617,7 @@ const CharacterDrawer: React.FC = () => {
                     <Col flex='auto' />
                     <Col flex={0}>アイコン画像</Col>
                     <Col span={inputSpan}>
-                        <InputFile filePath={character.image ?? undefined} onPathChange={path => updateCharacter({ image: path ?? undefined })} openFilesManager={setFilesManagerDrawerType} showImage />
+                        <InputFile filePath={character.image ?? undefined} onPathChange={path => updateCharacter({ image: path == null ? undefined : FilePath.toOt(path) })} openFilesManager={setFilesManagerDrawerType} showImage />
                     </Col>
                 </Row>
 
@@ -488,18 +625,18 @@ const CharacterDrawer: React.FC = () => {
                     <Col flex='auto' />
                     <Col flex={0}>立ち絵画像</Col>
                     <Col span={inputSpan}>
-                        <InputFile filePath={character.tachieImage ?? undefined} onPathChange={path => updateCharacter({ tachieImage: path ?? undefined })} openFilesManager={setFilesManagerDrawerType} showImage />
+                        <InputFile filePath={character.tachieImage ?? undefined} onPathChange={path => updateCharacter({ tachieImage: path == null ? undefined : FilePath.toOt(path) })} openFilesManager={setFilesManagerDrawerType} showImage />
                     </Col>
                 </Row>
 
                 {
                     strIndex20Array.map(key => {
-                        const paramName = paramNames.get({ type: RoomParameterNameType.Num, key });
+                        const paramName = numParamNames.get(key);
                         if (paramName === undefined) {
                             return null;
                         }
-                        const value = character.numParams.get(key);
-                        const maxValue = character.numMaxParams.get(key);
+                        const value = character.numParams[key];
+                        const maxValue = character.numMaxParams[key];
                         return (
                             <Row key={`numParam${key}Row`} gutter={gutter} align='middle'>
                                 <Col flex='auto' />
@@ -523,11 +660,11 @@ const CharacterDrawer: React.FC = () => {
                 }
                 {
                     strIndex20Array.map(key => {
-                        const paramName = paramNames.get({ type: RoomParameterNameType.Bool, key });
+                        const paramName = boolParamNames.get(key);
                         if (paramName === undefined) {
                             return null;
                         }
-                        const value = character.boolParams.get(key);
+                        const value = character.boolParams[key];
                         return (
                             <Row key={`boolParam${key}Row`} gutter={gutter} align='middle'>
                                 <Col flex='auto' />
@@ -550,11 +687,11 @@ const CharacterDrawer: React.FC = () => {
                 }
                 {
                     strIndex20Array.map(key => {
-                        const paramName = paramNames.get({ type: RoomParameterNameType.Str, key });
+                        const paramName = strParamNames.get(key);
                         if (paramName === undefined) {
                             return null;
                         }
-                        const value = character.strParams.get(key);
+                        const value = character.strParams[key];
                         return (
                             <Row key={`strParam${key}Row`} gutter={gutter} align='middle'>
                                 <Col flex='auto' />

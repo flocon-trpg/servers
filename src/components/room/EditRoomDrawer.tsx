@@ -6,9 +6,9 @@ import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponent
 import { DrawerProps } from 'antd/lib/drawer';
 import { editRoomDrawerVisibility } from './RoomComponentsState';
 import { Gutter } from 'antd/lib/grid/row';
-import { Room } from '../../stateManagers/states/room';
 import { useOperate } from '../../hooks/useOperate';
 import { useSelector } from '../../store';
+import * as Room from '../../@shared/ot/room/v1';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -44,8 +44,10 @@ const EditRoomDrawer: React.FC = () => {
                         <Input size='small'
                             value={name}
                             onChange={e => {
-                                const operation = Room.createPostOperationSetup();
-                                operation.name = { newValue: e.target.value };
+                                const operation: Room.UpOperation = {
+                                    $version: 1,
+                                    name: { newValue: e.target.value },
+                                };
                                 operate(operation);
                             }} />
                     </Col>

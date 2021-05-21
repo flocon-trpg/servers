@@ -1,36 +1,25 @@
 import React from 'react';
 import { Tooltip } from 'antd';
-import { update } from '../stateManagers/states/types';
-import { createStateMap } from '../@shared/StateMap';
-import { StrIndex100 } from '../@shared/indexes';
-import { EyeInvisibleOutlined, EyeOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { StrIndex20 } from '../@shared/indexes';
+import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 import ToggleButton from './ToggleButton';
-import { addParameter, deleteParameter, parameterIsPrivate, parameterIsNotPrivate, parameterIsPrivateAndNotCreatedByMe, parameterIsNotPrivateAndNotCreatedByMe } from '../resource/text/main';
-import { TextUpOperationModule } from '../utils/operations';
+import { parameterIsPrivate, parameterIsNotPrivate, parameterIsPrivateAndNotCreatedByMe, parameterIsNotPrivateAndNotCreatedByMe } from '../resource/text/main';
 import BufferedInput from './BufferedInput';
-import { StrParam } from '../stateManagers/states/strParam';
-import { Character } from '../stateManagers/states/character';
+import * as TextOperation from '../@shared/ot/room/util/textOperation';
+import * as Character from '../@shared/ot/room/participant/character/v1';
+import * as StrParam from '../@shared/ot/room/participant/character/strParam/v1';
 
 const inputWidth = 150;
 
 type Props = {
     isCharacterPrivate: boolean;
     isCreate: boolean;
-    parameterKey: StrIndex100;
+    parameterKey: StrIndex20;
     parameter: StrParam.State | undefined;
     createdByMe: boolean;
-    onOperate: (operation: Character.PostOperation) => void;
+    onOperate: (operation: Character.UpOperation) => void;
     compact: boolean;
 }
-
-const createCharacterOperationBase = (): Character.WritablePostOperation => ({
-    pieces: createStateMap(),
-    tachieLocations: createStateMap(),
-    boolParams: new Map(),
-    numParams: new Map(),
-    numMaxParams: new Map(),
-    strParams: new Map(),
-});
 
 const StringParameterInput: React.FC<Props> = ({
     isCharacterPrivate,
@@ -52,10 +41,15 @@ const StringParameterInput: React.FC<Props> = ({
                 if (e.previousValue === e.currentValue) {
                     return;
                 }
-                const operation = createCharacterOperationBase();
-                operation.strParams.set(parameterKey, {
-                    value: TextUpOperationModule.diff({ first: e.previousValue, second: e.currentValue }),
-                });
+                const operation: Character.UpOperation = {
+                    $version: 1,
+                    strParams: {
+                        [parameterKey]: {
+                            $version: 1,
+                            value: TextOperation.toUpOperation(TextOperation.diff({ prev: e.previousValue, next: e.currentValue })),
+                        }
+                    }
+                };
                 onOperate(operation);
             }} />
     );
@@ -82,10 +76,15 @@ const StringParameterInput: React.FC<Props> = ({
             unCheckedChildren={<EyeInvisibleOutlined />}
             size='small'
             onChange={e => {
-                const operation = createCharacterOperationBase();
-                operation.strParams.set(parameterKey, {
-                    isValuePrivate: { newValue: !e },
-                });
+                const operation: Character.UpOperation = {
+                    $version: 1,
+                    strParams: {
+                        [parameterKey]: {
+                            $version: 1,
+                            isValuePrivate: { newValue: !e },
+                        }
+                    }
+                };
                 onOperate(operation);
             }} />
     );
