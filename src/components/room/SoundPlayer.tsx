@@ -277,11 +277,13 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                             }
                             const operation: RoomModule.UpOperation = {
                                 $version: 1,
-                                [channelKey]: {
-                                    type: update,
-                                    update: {
-                                        $version: 1,
-                                        volume: { newValue: volumeInput },
+                                bgms: {
+                                    [channelKey]: {
+                                        type: update,
+                                        update: {
+                                            $version: 1,
+                                            volume: { newValue: volumeInput },
+                                        }
                                     }
                                 }
                             };
@@ -313,9 +315,11 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                 onClick={() => {
                     const operation: RoomModule.UpOperation = {
                         $version: 1,
-                        [channelKey]: {
-                            type: replace,
-                            replace: { newValue: undefined },
+                        bgms: {
+                            [channelKey]: {
+                                type: replace,
+                                replace: { newValue: undefined },
+                            }
                         }
                     };
                     operate(operation);
@@ -323,7 +327,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                 停止
             </Button>
         </div>
-    </div>;
+    </div >;
 };
 
 const SoundPlayer: React.FC = () => {

@@ -155,7 +155,7 @@ export const useRoomState = (roomId: string, roomEventSubscription: Observable<R
                     return;
                 }
                 const valueInput = Room.toGraphQLInput(toPost.operationToPost, clientId);
-                console.info({ valueInput });
+                console.info({ valueInput, operationToPost: toPost.operationToPost });
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 let result: FetchResult<OperateMutation, Record<string, any>, Record<string, any>>;
                 try {
