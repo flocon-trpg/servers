@@ -873,6 +873,8 @@ export const serverTransform = (createdByMe: boolean): ServerTransform<State, Tw
         }),
         toServerState: state => state,
         protectedValuePolicy: {
+            cancelRemove: params => !createdByMe && params.nextState.isPrivate,
+            cancelUpdate: params => !createdByMe && params.nextState.isPrivate,
         },
     });
     if (pieces.isError) {
@@ -1007,7 +1009,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     if (tachieLocations.isError) {
         return tachieLocations;
     }
-    
+
     const image = ReplaceOperation.clientTransform({
         first: first.image,
         second: second.image,
@@ -1036,7 +1038,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         return privateVarToml;
     }
 
-    const firstPrime: UpOperation= {
+    const firstPrime: UpOperation = {
         $version: 1,
         boolParams: boolParams.value.firstPrime,
         numParams: numParams.value.firstPrime,
@@ -1050,7 +1052,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         name: name.firstPrime,
         privateVarToml: privateVarToml.value.firstPrime,
     };
-    const secondPrime: UpOperation= {
+    const secondPrime: UpOperation = {
         $version: 1,
         boolParams: boolParams.value.secondPrime,
         numParams: numParams.value.secondPrime,

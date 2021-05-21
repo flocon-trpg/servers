@@ -64,7 +64,7 @@ import * as CharacterModule from '../../../@shared/ot/room/participant/character
 import { RecordUpOperationElement, replace, update } from '../../../@shared/ot/room/util/recordOperationElement';
 import { recordForEach, recordForEachAsync, recordToArray, recordToMap } from '../../../@shared/utils';
 import { MyValueLogType as MyValueLogTypeEnum } from '../../../enums/MyValueLogType';
-import { FileSourceType } from '../../../enums/FileSourceType';
+import { FileSourceType, FileSourceTypeModule } from '../../../enums/FileSourceType';
 import * as MyNumberValueConverter from '../../../@shared/ot/room/participant/myNumberValue/converter';
 import * as MyNumberValueModule from '../../../@shared/ot/room/participant/myNumberValue/log-v1';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '../../../@shared/textOperation';
@@ -1147,9 +1147,9 @@ export class RoomResolver {
                 entity.charaName = chara.name;
                 entity.charaIsPrivate = chara.isPrivate;
                 entity.charaImagePath = chara.image?.path;
-                entity.charaImageSourceType = FileSourceType.ofNullishString(chara.image?.sourceType);
+                entity.charaImageSourceType = FileSourceTypeModule.ofNullishString(chara.image?.sourceType);
                 entity.charaTachieImagePath = chara.tachieImage?.path;
-                entity.charaTachieImageSourceType = FileSourceType.ofNullishString(chara.tachieImage?.sourceType);
+                entity.charaTachieImageSourceType = FileSourceTypeModule.ofNullishString(chara.tachieImage?.sourceType);
             }
 
             entity.roomPubCh = Reference.create(ch);
@@ -1836,9 +1836,9 @@ export class RoomResolver {
                 entity.charaName = chara.name;
                 entity.charaIsPrivate = chara.isPrivate;
                 entity.charaImagePath = chara.image?.path;
-                entity.charaImageSourceType = FileSourceType.ofNullishString(chara.tachieImage?.sourceType);
+                entity.charaImageSourceType = FileSourceTypeModule.ofNullishString(chara.tachieImage?.sourceType);
                 entity.charaTachieImagePath = chara.tachieImage?.path;
-                entity.charaTachieImageSourceType = FileSourceType.ofNullishString(chara.tachieImage?.sourceType);
+                entity.charaTachieImageSourceType = FileSourceTypeModule.ofNullishString(chara.tachieImage?.sourceType);
             }
 
             entity.room = Reference.create(room);

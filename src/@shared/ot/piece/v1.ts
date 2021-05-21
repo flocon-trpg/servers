@@ -19,6 +19,7 @@ export const state = t.type({
     cellY: t.number,
     h: t.number,
     isCellMode: t.boolean,
+    isPrivate: t.boolean,
     w: t.number,
     x: t.number,
     y: t.number,
@@ -33,6 +34,7 @@ export const downOperation = operation(1, {
     cellY: numberDownOperation,
     h: numberDownOperation,
     isCellMode: booleanDownOperation,
+    isPrivate: booleanDownOperation,
     w: numberDownOperation,
     x: numberDownOperation,
     y: numberDownOperation,
@@ -47,6 +49,7 @@ export const upOperation = operation(1, {
     cellY: numberUpOperation,
     h: numberUpOperation,
     isCellMode: booleanUpOperation,
+    isPrivate: booleanUpOperation,
     w: numberUpOperation,
     x: numberUpOperation,
     y: numberUpOperation,
@@ -63,6 +66,7 @@ export type TwoWayOperation = {
     cellY?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     h?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     isCellMode?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
+    isPrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     w?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     x?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     y?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
@@ -104,6 +108,9 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     if (operation.isCellMode != null) {
         result.isCellMode = operation.isCellMode.newValue;
     }
+    if (operation.isPrivate != null) {
+        result.isPrivate = operation.isPrivate.newValue;
+    }
     if (operation.w != null) {
         result.w = operation.w.newValue;
     }
@@ -137,6 +144,9 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     if (operation.isCellMode !== undefined) {
         result.isCellMode = operation.isCellMode.oldValue;
     }
+    if (operation.isPrivate !== undefined) {
+        result.isPrivate = operation.isPrivate.oldValue;
+    }
     if (operation.w !== undefined) {
         result.w = operation.w.oldValue;
     }
@@ -159,6 +169,7 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
         cellY: ReplaceOperation.composeUpOperation(first.cellY, second.cellY),
         h: ReplaceOperation.composeUpOperation(first.h, second.h),
         isCellMode: ReplaceOperation.composeUpOperation(first.isCellMode, second.isCellMode),
+        isPrivate: ReplaceOperation.composeUpOperation(first.isPrivate, second.isPrivate),
         w: ReplaceOperation.composeUpOperation(first.w, second.w),
         x: ReplaceOperation.composeUpOperation(first.x, second.x),
         y: ReplaceOperation.composeUpOperation(first.y, second.y),
@@ -175,6 +186,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
         cellY: ReplaceOperation.composeDownOperation(first.cellY, second.cellY),
         h: ReplaceOperation.composeDownOperation(first.h, second.h),
         isCellMode: ReplaceOperation.composeDownOperation(first.isCellMode, second.isCellMode),
+        isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
         w: ReplaceOperation.composeDownOperation(first.w, second.w),
         x: ReplaceOperation.composeDownOperation(first.x, second.x),
         y: ReplaceOperation.composeDownOperation(first.y, second.y),
@@ -216,6 +228,10 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({ nextSt
         prevState.isCellMode = downOperation.isCellMode.oldValue;
         twoWayOperation.isCellMode = { ...downOperation.isCellMode, newValue: nextState.isCellMode };
     }
+    if (downOperation.isPrivate !== undefined) {
+        prevState.isPrivate = downOperation.isPrivate.oldValue;
+        twoWayOperation.isPrivate = { ...downOperation.isPrivate, newValue: nextState.isPrivate };
+    }
     if (downOperation.w !== undefined) {
         prevState.w = downOperation.w.oldValue;
         twoWayOperation.w = { ...downOperation.w, newValue: nextState.w };
@@ -251,6 +267,9 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     }
     if (prevState.isCellMode !== nextState.isCellMode) {
         resultType.isCellMode = { oldValue: prevState.isCellMode, newValue: nextState.isCellMode };
+    }
+    if (prevState.isPrivate !== nextState.isPrivate) {
+        resultType.isPrivate = { oldValue: prevState.isPrivate, newValue: nextState.isPrivate };
     }
     if (prevState.w !== nextState.w) {
         resultType.w = { oldValue: prevState.w, newValue: nextState.w };
@@ -294,6 +313,11 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
         first: serverOperation?.isCellMode,
         second: clientOperation.isCellMode,
         prevState: prevState.isCellMode,
+    });
+    twoWayOperation.isPrivate = ReplaceOperation.serverTransform({
+        first: serverOperation?.isPrivate,
+        second: clientOperation.isPrivate,
+        prevState: prevState.isPrivate,
     });
     twoWayOperation.h = ReplaceOperation.serverTransform({
         first: serverOperation?.h,
@@ -344,6 +368,10 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         first: first.isCellMode,
         second: second.isCellMode,
     });
+    const isPrivate = ReplaceOperation.clientTransform({
+        first: first.isPrivate,
+        second: second.isPrivate,
+    });
     const h = ReplaceOperation.clientTransform({
         first: first.h,
         second: second.h,
@@ -369,6 +397,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         cellY: cellY.firstPrime,
         h: h.firstPrime,
         isCellMode: isCellMode.firstPrime,
+        isPrivate: isPrivate.firstPrime,
         w: w.firstPrime,
         x: x.firstPrime,
         y: y.firstPrime,
@@ -382,6 +411,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         cellY: cellY.secondPrime,
         h: h.secondPrime,
         isCellMode: isCellMode.secondPrime,
+        isPrivate: isPrivate.secondPrime,
         w: w.secondPrime,
         x: x.secondPrime,
         y: y.secondPrime,

@@ -19,15 +19,16 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.FileSourceType = void 0;
+exports.FileSourceTypeModule = exports.FileSourceType = void 0;
 const FilePathModule = __importStar(require("../@shared/ot/filePath/v1"));
 var FileSourceType;
 (function (FileSourceType) {
     FileSourceType["Default"] = "Default";
     FileSourceType["FirebaseStorage"] = "FirebaseStorage";
 })(FileSourceType = exports.FileSourceType || (exports.FileSourceType = {}));
-(function (FileSourceType) {
-    FileSourceType.ofString = (source) => {
+var FileSourceTypeModule;
+(function (FileSourceTypeModule) {
+    FileSourceTypeModule.ofString = (source) => {
         switch (source) {
             case FilePathModule.Default:
                 return FileSourceType.Default;
@@ -35,13 +36,13 @@ var FileSourceType;
                 return FileSourceType.FirebaseStorage;
         }
     };
-    FileSourceType.ofNullishString = (source) => {
+    FileSourceTypeModule.ofNullishString = (source) => {
         switch (source) {
             case null:
             case undefined:
                 return undefined;
             default:
-                return FileSourceType.ofString(source);
+                return FileSourceTypeModule.ofString(source);
         }
     };
-})(FileSourceType = exports.FileSourceType || (exports.FileSourceType = {}));
+})(FileSourceTypeModule = exports.FileSourceTypeModule || (exports.FileSourceTypeModule = {}));

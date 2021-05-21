@@ -978,9 +978,9 @@ let RoomResolver = class RoomResolver {
                 entity.charaName = chara.name;
                 entity.charaIsPrivate = chara.isPrivate;
                 entity.charaImagePath = (_c = chara.image) === null || _c === void 0 ? void 0 : _c.path;
-                entity.charaImageSourceType = FileSourceType_1.FileSourceType.ofNullishString((_d = chara.image) === null || _d === void 0 ? void 0 : _d.sourceType);
+                entity.charaImageSourceType = FileSourceType_1.FileSourceTypeModule.ofNullishString((_d = chara.image) === null || _d === void 0 ? void 0 : _d.sourceType);
                 entity.charaTachieImagePath = (_e = chara.tachieImage) === null || _e === void 0 ? void 0 : _e.path;
-                entity.charaTachieImageSourceType = FileSourceType_1.FileSourceType.ofNullishString((_f = chara.tachieImage) === null || _f === void 0 ? void 0 : _f.sourceType);
+                entity.charaTachieImageSourceType = FileSourceType_1.FileSourceTypeModule.ofNullishString((_f = chara.tachieImage) === null || _f === void 0 ? void 0 : _f.sourceType);
             }
             entity.roomPubCh = core_1.Reference.create(ch);
             await em.persistAndFlush(entity);
@@ -1590,9 +1590,9 @@ let RoomResolver = class RoomResolver {
                 entity.charaName = chara.name;
                 entity.charaIsPrivate = chara.isPrivate;
                 entity.charaImagePath = (_c = chara.image) === null || _c === void 0 ? void 0 : _c.path;
-                entity.charaImageSourceType = FileSourceType_1.FileSourceType.ofNullishString((_d = chara.tachieImage) === null || _d === void 0 ? void 0 : _d.sourceType);
+                entity.charaImageSourceType = FileSourceType_1.FileSourceTypeModule.ofNullishString((_d = chara.tachieImage) === null || _d === void 0 ? void 0 : _d.sourceType);
                 entity.charaTachieImagePath = (_e = chara.tachieImage) === null || _e === void 0 ? void 0 : _e.path;
-                entity.charaTachieImageSourceType = FileSourceType_1.FileSourceType.ofNullishString((_f = chara.tachieImage) === null || _f === void 0 ? void 0 : _f.sourceType);
+                entity.charaTachieImageSourceType = FileSourceType_1.FileSourceTypeModule.ofNullishString((_f = chara.tachieImage) === null || _f === void 0 ? void 0 : _f.sourceType);
             }
             entity.room = core_1.Reference.create(room);
             await em.persistAndFlush(entity);

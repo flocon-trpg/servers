@@ -37,6 +37,7 @@ exports.state = t.type({
     cellY: t.number,
     h: t.number,
     isCellMode: t.boolean,
+    isPrivate: t.boolean,
     w: t.number,
     x: t.number,
     y: t.number,
@@ -48,6 +49,7 @@ exports.downOperation = operation_1.operation(1, {
     cellY: numberDownOperation,
     h: numberDownOperation,
     isCellMode: booleanDownOperation,
+    isPrivate: booleanDownOperation,
     w: numberDownOperation,
     x: numberDownOperation,
     y: numberDownOperation,
@@ -59,6 +61,7 @@ exports.upOperation = operation_1.operation(1, {
     cellY: numberUpOperation,
     h: numberUpOperation,
     isCellMode: booleanUpOperation,
+    isPrivate: booleanUpOperation,
     w: numberUpOperation,
     x: numberUpOperation,
     y: numberUpOperation,
@@ -99,6 +102,9 @@ const apply = ({ state, operation }) => {
     if (operation.isCellMode != null) {
         result.isCellMode = operation.isCellMode.newValue;
     }
+    if (operation.isPrivate != null) {
+        result.isPrivate = operation.isPrivate.newValue;
+    }
     if (operation.w != null) {
         result.w = operation.w.newValue;
     }
@@ -131,6 +137,9 @@ const applyBack = ({ state, operation }) => {
     if (operation.isCellMode !== undefined) {
         result.isCellMode = operation.isCellMode.oldValue;
     }
+    if (operation.isPrivate !== undefined) {
+        result.isPrivate = operation.isPrivate.oldValue;
+    }
     if (operation.w !== undefined) {
         result.w = operation.w.oldValue;
     }
@@ -152,6 +161,7 @@ const composeUpOperation = ({ first, second }) => {
         cellY: ReplaceOperation.composeUpOperation(first.cellY, second.cellY),
         h: ReplaceOperation.composeUpOperation(first.h, second.h),
         isCellMode: ReplaceOperation.composeUpOperation(first.isCellMode, second.isCellMode),
+        isPrivate: ReplaceOperation.composeUpOperation(first.isPrivate, second.isPrivate),
         w: ReplaceOperation.composeUpOperation(first.w, second.w),
         x: ReplaceOperation.composeUpOperation(first.x, second.x),
         y: ReplaceOperation.composeUpOperation(first.y, second.y),
@@ -168,6 +178,7 @@ const composeDownOperation = ({ first, second }) => {
         cellY: ReplaceOperation.composeDownOperation(first.cellY, second.cellY),
         h: ReplaceOperation.composeDownOperation(first.h, second.h),
         isCellMode: ReplaceOperation.composeDownOperation(first.isCellMode, second.isCellMode),
+        isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
         w: ReplaceOperation.composeDownOperation(first.w, second.w),
         x: ReplaceOperation.composeDownOperation(first.x, second.x),
         y: ReplaceOperation.composeDownOperation(first.y, second.y),
@@ -205,6 +216,10 @@ const restore = ({ nextState, downOperation }) => {
         prevState.isCellMode = downOperation.isCellMode.oldValue;
         twoWayOperation.isCellMode = Object.assign(Object.assign({}, downOperation.isCellMode), { newValue: nextState.isCellMode });
     }
+    if (downOperation.isPrivate !== undefined) {
+        prevState.isPrivate = downOperation.isPrivate.oldValue;
+        twoWayOperation.isPrivate = Object.assign(Object.assign({}, downOperation.isPrivate), { newValue: nextState.isPrivate });
+    }
     if (downOperation.w !== undefined) {
         prevState.w = downOperation.w.oldValue;
         twoWayOperation.w = Object.assign(Object.assign({}, downOperation.w), { newValue: nextState.w });
@@ -239,6 +254,9 @@ const diff = ({ prevState, nextState }) => {
     }
     if (prevState.isCellMode !== nextState.isCellMode) {
         resultType.isCellMode = { oldValue: prevState.isCellMode, newValue: nextState.isCellMode };
+    }
+    if (prevState.isPrivate !== nextState.isPrivate) {
+        resultType.isPrivate = { oldValue: prevState.isPrivate, newValue: nextState.isPrivate };
     }
     if (prevState.w !== nextState.w) {
         resultType.w = { oldValue: prevState.w, newValue: nextState.w };
@@ -281,6 +299,11 @@ const serverTransform = ({ prevState, clientOperation, serverOperation }) => {
         first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.isCellMode,
         second: clientOperation.isCellMode,
         prevState: prevState.isCellMode,
+    });
+    twoWayOperation.isPrivate = ReplaceOperation.serverTransform({
+        first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.isPrivate,
+        second: clientOperation.isPrivate,
+        prevState: prevState.isPrivate,
     });
     twoWayOperation.h = ReplaceOperation.serverTransform({
         first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.h,
@@ -329,6 +352,10 @@ const clientTransform = ({ first, second }) => {
         first: first.isCellMode,
         second: second.isCellMode,
     });
+    const isPrivate = ReplaceOperation.clientTransform({
+        first: first.isPrivate,
+        second: second.isPrivate,
+    });
     const h = ReplaceOperation.clientTransform({
         first: first.h,
         second: second.h,
@@ -353,6 +380,7 @@ const clientTransform = ({ first, second }) => {
         cellY: cellY.firstPrime,
         h: h.firstPrime,
         isCellMode: isCellMode.firstPrime,
+        isPrivate: isPrivate.firstPrime,
         w: w.firstPrime,
         x: x.firstPrime,
         y: y.firstPrime,
@@ -365,6 +393,7 @@ const clientTransform = ({ first, second }) => {
         cellY: cellY.secondPrime,
         h: h.secondPrime,
         isCellMode: isCellMode.secondPrime,
+        isPrivate: isPrivate.secondPrime,
         w: w.secondPrime,
         x: x.secondPrime,
         y: y.secondPrime,

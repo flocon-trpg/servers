@@ -5,7 +5,8 @@ export enum FileSourceType {
     FirebaseStorage = 'FirebaseStorage'
 }
 
-export namespace FileSourceType {
+// FileSourceTypeと同じ名前をつけると、npm run genしたときにenumにこれらの関数名も混じってしまうので別の名前を付けている。
+export namespace FileSourceTypeModule {
     export const ofString = (source: typeof FilePathModule.Default | typeof FilePathModule.FirebaseStorage) => {
         switch (source) {
             case FilePathModule.Default:

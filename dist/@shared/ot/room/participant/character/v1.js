@@ -769,7 +769,10 @@ const serverTransform = (createdByMe) => ({ prevState, currentState, clientOpera
             clientOperation: second,
         }),
         toServerState: state => state,
-        protectedValuePolicy: {},
+        protectedValuePolicy: {
+            cancelRemove: params => !createdByMe && params.nextState.isPrivate,
+            cancelUpdate: params => !createdByMe && params.nextState.isPrivate,
+        },
     });
     if (pieces.isError) {
         return pieces;
