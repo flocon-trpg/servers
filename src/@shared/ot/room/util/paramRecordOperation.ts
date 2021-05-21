@@ -2,7 +2,7 @@
 import { groupJoin } from '../../../Map';
 import { CustomResult, ResultModule } from '../../../Result';
 import { both, left, right } from '../../../Types';
-import { mapToRecord, recordCompact, recordForEach, recordToMap } from '../../../utils';
+import { mapToRecord, recordForEach, recordToMap } from '../../../utils';
 import * as DualKeyRecordOperation from './dualKeyRecordOperation';
 
 type RestoreResult<TState, TTwoWayOperation> = { prevState: TState; twoWayOperation: TTwoWayOperation | undefined }
@@ -14,22 +14,18 @@ export const toClientOperation = <TSourceState, TSourceOperation, TClientOperati
     prevState,
     nextState,
     toClientOperation,
+    defaultState,
 }: {
     diff: Record<string, TSourceOperation>;
     prevState: Record<string, TSourceState>;
     nextState: Record<string, TSourceState>;
     toClientOperation: (params: { diff: TSourceOperation; key: string; prevState: TSourceState; nextState: TSourceState }) => TClientOperation | null | undefined;
+    defaultState: TSourceState;
 }) => {
     const result: Record<string, TClientOperation> = {};
     recordForEach(diff, (value, key) => {
-        const prevStateElement = prevState[key];
-        if (prevStateElement === undefined) {
-            throw `tried to operate "${key}", but not found in prevState.`;
-        }
-        const nextStateElement = nextState[key];
-        if (nextStateElement === undefined) {
-            throw `tried to operate "${key}", but not found in nextState.`;
-        }
+        const prevStateElement = prevState[key] ?? defaultState;
+        const nextStateElement = nextState[key] ?? defaultState;
 
         const operation = toClientOperation({ diff: value, key, prevState: prevStateElement, nextState: nextStateElement });
         if (operation != null) {
@@ -180,12 +176,14 @@ export const serverTransform = <TServerState, TFirstOperation, TSecondOperation,
     prevState,
     nextState,
     innerTransform,
+    defaultState,
 }: {
     prevState: Record<string, TServerState>;
     nextState: Record<string, TServerState>;
     first?: Record<string, TFirstOperation>;
     second?: Record<string, TSecondOperation>;
     innerTransform: (params: ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> & { key: string }) => CustomResult<TFirstOperation | undefined, string | TCustomError>;
+    defaultState: TServerState;
 }): CustomResult<Record<string, TFirstOperation> | undefined, string | TCustomError> => {
     if (second === undefined) {
         return ResultModule.ok(undefined);
@@ -194,8 +192,8 @@ export const serverTransform = <TServerState, TFirstOperation, TSecondOperation,
     const result: Record<string, TFirstOperation> = {};
 
     for (const [key, operation] of recordToMap(second)) {
-        const innerPrevState = prevState[key];
-        const innerNextState = nextState[key];
+        const innerPrevState = prevState[key] ?? defaultState;
+        const innerNextState = nextState[key] ?? defaultState;
         const innerFirst = first == null ? undefined : first[key];
 
         const transformed = innerTransform({

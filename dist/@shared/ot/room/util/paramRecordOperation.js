@@ -5,17 +5,12 @@ const Map_1 = require("../../../Map");
 const Result_1 = require("../../../Result");
 const Types_1 = require("../../../Types");
 const utils_1 = require("../../../utils");
-const toClientOperation = ({ diff, prevState, nextState, toClientOperation, }) => {
+const toClientOperation = ({ diff, prevState, nextState, toClientOperation, defaultState, }) => {
     const result = {};
     utils_1.recordForEach(diff, (value, key) => {
-        const prevStateElement = prevState[key];
-        if (prevStateElement === undefined) {
-            throw `tried to operate "${key}", but not found in prevState.`;
-        }
-        const nextStateElement = nextState[key];
-        if (nextStateElement === undefined) {
-            throw `tried to operate "${key}", but not found in nextState.`;
-        }
+        var _a, _b;
+        const prevStateElement = (_a = prevState[key]) !== null && _a !== void 0 ? _a : defaultState;
+        const nextStateElement = (_b = nextState[key]) !== null && _b !== void 0 ? _b : defaultState;
         const operation = toClientOperation({ diff: value, key, prevState: prevStateElement, nextState: nextStateElement });
         if (operation != null) {
             result[key] = operation;
@@ -123,14 +118,15 @@ const compose = ({ first, second, innerCompose }) => {
     return Result_1.ResultModule.ok(result);
 };
 exports.compose = compose;
-const serverTransform = ({ first, second, prevState, nextState, innerTransform, }) => {
+const serverTransform = ({ first, second, prevState, nextState, innerTransform, defaultState, }) => {
+    var _a, _b;
     if (second === undefined) {
         return Result_1.ResultModule.ok(undefined);
     }
     const result = {};
     for (const [key, operation] of utils_1.recordToMap(second)) {
-        const innerPrevState = prevState[key];
-        const innerNextState = nextState[key];
+        const innerPrevState = (_a = prevState[key]) !== null && _a !== void 0 ? _a : defaultState;
+        const innerNextState = (_b = nextState[key]) !== null && _b !== void 0 ? _b : defaultState;
         const innerFirst = first == null ? undefined : first[key];
         const transformed = innerTransform({
             first: innerFirst,
