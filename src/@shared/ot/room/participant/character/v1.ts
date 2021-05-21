@@ -96,6 +96,24 @@ export type TwoWayOperation = {
     tachieLocations?: DualKeyRecordTwoWayOperation<BoardLocation.State, BoardLocation.TwoWayOperation>;
 }
 
+const defaultBoolParamState: BoolParam.State = {
+    $version: 1,
+    isValuePrivate: false,
+    value: null,
+};
+
+const defaultNumParamState: NumParam.State = {
+    $version: 1,
+    isValuePrivate: false,
+    value: null,
+};
+
+const defaultStrParamState: StrParam.State = {
+    $version: 1,
+    isValuePrivate: false,
+    value: '',
+};
+
 export const toClientState = (createdByMe: boolean) => (source: State): State => {
     return {
         ...source,
@@ -144,24 +162,29 @@ export const toClientOperation = (createdByMe: boolean) => ({ prevState, nextSta
             prevState: prevState.boolParams,
             nextState: nextState.boolParams,
             toClientOperation: (params) => SimpleValueParam.toClientOperation<Maybe<boolean>>(createdByMe, null)(params),
+            defaultState: defaultBoolParamState,
         }),
         numParams: diff.numParams == null ? undefined : ParamRecordOperation.toClientOperation({
             diff: diff.numParams,
             prevState: prevState.numParams,
             nextState: nextState.numParams,
             toClientOperation: (params) => SimpleValueParam.toClientOperation<Maybe<number>>(createdByMe, null)(params),
+            defaultState: defaultNumParamState,
         }),
         numMaxParams: diff.numMaxParams == null ? undefined : ParamRecordOperation.toClientOperation({
             diff: diff.numMaxParams,
             prevState: prevState.numMaxParams,
             nextState: nextState.numMaxParams,
             toClientOperation: (params) => SimpleValueParam.toClientOperation<Maybe<number>>(createdByMe, null)(params),
+            defaultState: defaultNumParamState,
         }),
         strParams: diff.strParams == null ? undefined : ParamRecordOperation.toClientOperation({
             diff: diff.strParams,
             prevState: prevState.strParams,
             nextState: nextState.strParams,
             toClientOperation: (params) => StrParam.toClientOperation(createdByMe)(params),
+            defaultState: defaultStrParamState,
+
         }),
         pieces: diff.pieces == null ? undefined : DualKeyRecordOperation.toClientOperation({
             diff: diff.pieces,
@@ -260,9 +283,12 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     }
 
     const boolParams = ParamRecordOperation.apply<BoolParam.State, BoolParam.UpOperation | BoolParam.TwoWayOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
-        prevState: state.boolParams, operation: operation.boolParams, innerApply: ({ prevState, operation: upOperation }) => {
-            return SimpleValueParam.apply<Maybe<boolean>>()({ state: prevState, operation: upOperation });
-        }
+        prevState: state.boolParams,
+        operation: operation.boolParams,
+        innerApply: ({ prevState, operation }) => {
+            return SimpleValueParam.apply<Maybe<boolean>>()({ state: prevState, operation });
+        },
+        defaultState: defaultBoolParamState,
     });
     if (boolParams.isError) {
         return boolParams;
@@ -270,9 +296,12 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     result.boolParams = boolParams.value;
 
     const numParams = ParamRecordOperation.apply<NumParam.State, NumParam.UpOperation | NumParam.TwoWayOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
-        prevState: state.numParams, operation: operation.numParams, innerApply: ({ prevState, operation: upOperation }) => {
-            return SimpleValueParam.apply<Maybe<number>>()({ state: prevState, operation: upOperation });
-        }
+        prevState: state.numParams,
+        operation: operation.numParams,
+        innerApply: ({ prevState, operation }) => {
+            return SimpleValueParam.apply<Maybe<number>>()({ state: prevState, operation });
+        },
+        defaultState: defaultNumParamState,
     });
     if (numParams.isError) {
         return numParams;
@@ -280,9 +309,12 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     result.numParams = numParams.value;
 
     const numMaxParams = ParamRecordOperation.apply<NumParam.State, NumParam.UpOperation | NumParam.TwoWayOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
-        prevState: state.numMaxParams, operation: operation.numMaxParams, innerApply: ({ prevState, operation: upOperation }) => {
-            return SimpleValueParam.apply<Maybe<number>>()({ state: prevState, operation: upOperation });
-        }
+        prevState: state.numMaxParams,
+        operation: operation.numMaxParams,
+        innerApply: ({ prevState, operation }) => {
+            return SimpleValueParam.apply<Maybe<number>>()({ state: prevState, operation });
+        },
+        defaultState: defaultNumParamState,
     });
     if (numMaxParams.isError) {
         return numMaxParams;
@@ -290,9 +322,12 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     result.numMaxParams = numMaxParams.value;
 
     const strParams = ParamRecordOperation.apply<StrParam.State, StrParam.UpOperation | StrParam.TwoWayOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
-        prevState: state.strParams, operation: operation.strParams, innerApply: ({ prevState, operation: upOperation }) => {
-            return StrParam.apply({ state: prevState, operation: upOperation });
-        }
+        prevState: state.strParams,
+        operation: operation.strParams,
+        innerApply: ({ prevState, operation }) => {
+            return StrParam.apply({ state: prevState, operation });
+        },
+        defaultState: defaultStrParamState,
     });
     if (strParams.isError) {
         return strParams;
@@ -300,8 +335,8 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     result.strParams = strParams.value;
 
     const pieces = DualKeyRecordOperation.apply<Piece.State, Piece.UpOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
-        prevState: state.pieces, operation: operation.pieces, innerApply: ({ prevState, operation: upOperation }) => {
-            return Piece.apply({ state: prevState, operation: upOperation });
+        prevState: state.pieces, operation: operation.pieces, innerApply: ({ prevState, operation }) => {
+            return Piece.apply({ state: prevState, operation });
         }
     });
     if (pieces.isError) {
@@ -310,8 +345,8 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     result.pieces = pieces.value;
 
     const tachieLocations = DualKeyRecordOperation.apply<BoardLocation.State, BoardLocation.UpOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
-        prevState: state.tachieLocations, operation: operation.tachieLocations, innerApply: ({ prevState, operation: upOperation }) => {
-            return BoardLocation.apply({ state: prevState, operation: upOperation });
+        prevState: state.tachieLocations, operation: operation.tachieLocations, innerApply: ({ prevState, operation }) => {
+            return BoardLocation.apply({ state: prevState, operation });
         }
     });
     if (tachieLocations.isError) {
@@ -356,9 +391,12 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     }
 
     const boolParams = ParamRecordOperation.applyBack<BoolParam.State, BoolParam.DownOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
-        nextState: state.boolParams, operation: operation.boolParams, innerApplyBack: ({ nextState, operation }) => {
+        nextState: state.boolParams,
+        operation: operation.boolParams,
+        innerApplyBack: ({ nextState, operation }) => {
             return SimpleValueParam.applyBack<Maybe<boolean>>()({ state: nextState, operation });
-        }
+        },
+        defaultState: defaultBoolParamState,
     });
     if (boolParams.isError) {
         return boolParams;
@@ -366,9 +404,12 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     result.boolParams = boolParams.value;
 
     const numParams = ParamRecordOperation.applyBack<NumParam.State, NumParam.DownOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
-        nextState: state.numParams, operation: operation.numParams, innerApplyBack: ({ nextState, operation }) => {
+        nextState: state.numParams,
+        operation: operation.numParams,
+        innerApplyBack: ({ nextState, operation }) => {
             return SimpleValueParam.applyBack<Maybe<number>>()({ state: nextState, operation });
-        }
+        },
+        defaultState: defaultNumParamState,
     });
     if (numParams.isError) {
         return numParams;
@@ -376,9 +417,12 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     result.numParams = numParams.value;
 
     const numMaxParams = ParamRecordOperation.applyBack<NumParam.State, NumParam.DownOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
-        nextState: state.numMaxParams, operation: operation.numMaxParams, innerApplyBack: ({ nextState, operation }) => {
+        nextState: state.numMaxParams,
+        operation: operation.numMaxParams,
+        innerApplyBack: ({ nextState, operation }) => {
             return SimpleValueParam.applyBack<Maybe<number>>()({ state: nextState, operation });
-        }
+        },
+        defaultState: defaultNumParamState,
     });
     if (numMaxParams.isError) {
         return numMaxParams;
@@ -386,9 +430,12 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     result.numMaxParams = numMaxParams.value;
 
     const strParams = ParamRecordOperation.applyBack<StrParam.State, StrParam.DownOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
-        nextState: state.strParams, operation: operation.strParams, innerApplyBack: ({ nextState, operation }) => {
+        nextState: state.strParams,
+        operation: operation.strParams,
+        innerApplyBack: ({ nextState, operation }) => {
             return StrParam.applyBack({ state: nextState, operation });
-        }
+        },
+        defaultState: defaultStrParamState,
     });
     if (strParams.isError) {
         return strParams;
@@ -807,6 +854,7 @@ export const serverTransform = (createdByMe: boolean): ServerTransform<State, Tw
             serverOperation: first,
             clientOperation: second,
         }),
+        defaultState: defaultBoolParamState,
     });
     if (boolParams.isError) {
         return boolParams;
@@ -823,6 +871,7 @@ export const serverTransform = (createdByMe: boolean): ServerTransform<State, Tw
             serverOperation: first,
             clientOperation: second,
         }),
+        defaultState: defaultNumParamState,
     });
     if (numParams.isError) {
         return numParams;
@@ -839,6 +888,7 @@ export const serverTransform = (createdByMe: boolean): ServerTransform<State, Tw
             serverOperation: first,
             clientOperation: second,
         }),
+        defaultState: defaultNumParamState,
     });
     if (numMaxParams.isError) {
         return numMaxParams;
@@ -855,6 +905,7 @@ export const serverTransform = (createdByMe: boolean): ServerTransform<State, Tw
             serverOperation: first,
             clientOperation: second,
         }),
+        defaultState: defaultStrParamState,
     });
     if (strParams.isError) {
         return strParams;

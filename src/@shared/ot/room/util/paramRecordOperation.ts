@@ -2,7 +2,7 @@
 import { groupJoin } from '../../../Map';
 import { CustomResult, ResultModule } from '../../../Result';
 import { both, left, right } from '../../../Types';
-import { mapToRecord, recordCompact, recordForEach, recordToMap } from '../../../utils';
+import { mapToRecord, recordForEach, recordToMap } from '../../../utils';
 import * as DualKeyRecordOperation from './dualKeyRecordOperation';
 
 type RestoreResult<TState, TTwoWayOperation> = { prevState: TState; twoWayOperation: TTwoWayOperation | undefined }
@@ -14,22 +14,18 @@ export const toClientOperation = <TSourceState, TSourceOperation, TClientOperati
     prevState,
     nextState,
     toClientOperation,
+    defaultState,
 }: {
     diff: Record<string, TSourceOperation>;
     prevState: Record<string, TSourceState>;
     nextState: Record<string, TSourceState>;
     toClientOperation: (params: { diff: TSourceOperation; key: string; prevState: TSourceState; nextState: TSourceState }) => TClientOperation | null | undefined;
+    defaultState: TSourceState;
 }) => {
     const result: Record<string, TClientOperation> = {};
     recordForEach(diff, (value, key) => {
-        const prevStateElement = prevState[key];
-        if (prevStateElement === undefined) {
-            throw `tried to operate "${key}", but not found in prevState.`;
-        }
-        const nextStateElement = nextState[key];
-        if (nextStateElement === undefined) {
-            throw `tried to operate "${key}", but not found in nextState.`;
-        }
+        const prevStateElement = prevState[key] ?? defaultState;
+        const nextStateElement = nextState[key] ?? defaultState;
 
         const operation = toClientOperation({ diff: value, key, prevState: prevStateElement, nextState: nextStateElement });
         if (operation != null) {
@@ -80,10 +76,11 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
     return ResultModule.ok({ prevState, twoWayOperation });
 };
 
-export const apply = <TState, TUpOperation, TCustomError = string>({ prevState, operation, innerApply }: {
+export const apply = <TState, TUpOperation, TCustomError = string>({ prevState, operation, innerApply, defaultState }: {
     prevState: Record<string, TState>;
     operation?: Record<string, TUpOperation>;
     innerApply: (params: { operation: TUpOperation; prevState: TState; key: string }) => CustomResult<TState, string | TCustomError>;
+    defaultState: TState;
 }): CustomResult<Record<string, TState>, string | TCustomError> => {
     if (operation == null) {
         return ResultModule.ok(prevState);
@@ -92,10 +89,7 @@ export const apply = <TState, TUpOperation, TCustomError = string>({ prevState, 
     const nextState = { ...prevState };
 
     for (const [key, value] of recordToMap(operation)) {
-        const prevStateElement = prevState[key];
-        if (prevStateElement === undefined) {
-            return ResultModule.error(`tried to update "${key}", but prevState does not have such a key`);
-        }
+        const prevStateElement = prevState[key] ?? defaultState;
         const newValue = innerApply({ operation: value, prevState: prevStateElement, key });
         if (newValue.isError) {
             return newValue;
@@ -107,10 +101,11 @@ export const apply = <TState, TUpOperation, TCustomError = string>({ prevState, 
     return ResultModule.ok(nextState);
 };
 
-export const applyBack = <TState, TDownOperation, TCustomError = string>({ nextState, operation, innerApplyBack }: {
+export const applyBack = <TState, TDownOperation, TCustomError = string>({ nextState, operation, innerApplyBack, defaultState }: {
     nextState: Record<string, TState>;
     operation?: Record<string, TDownOperation>;
     innerApplyBack: (params: { operation: TDownOperation; nextState: TState; key: string }) => CustomResult<TState, string | TCustomError>;
+    defaultState: TState;
 }): CustomResult<Record<string, TState>, string | TCustomError> => {
     if (operation == null) {
         return ResultModule.ok(nextState);
@@ -119,10 +114,7 @@ export const applyBack = <TState, TDownOperation, TCustomError = string>({ nextS
     const prevState = { ...nextState };
 
     for (const [key, value] of recordToMap(operation)) {
-        const nextStateElement = nextState[key];
-        if (nextStateElement === undefined) {
-            return ResultModule.error(`tried to update "${key}", but nextState does not have such a key`);
-        }
+        const nextStateElement = nextState[key] ?? defaultState;
         const oldValue = innerApplyBack({ operation: value, nextState: nextStateElement, key });
         if (oldValue.isError) {
             return oldValue;
@@ -184,12 +176,14 @@ export const serverTransform = <TServerState, TFirstOperation, TSecondOperation,
     prevState,
     nextState,
     innerTransform,
+    defaultState,
 }: {
     prevState: Record<string, TServerState>;
     nextState: Record<string, TServerState>;
     first?: Record<string, TFirstOperation>;
     second?: Record<string, TSecondOperation>;
     innerTransform: (params: ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> & { key: string }) => CustomResult<TFirstOperation | undefined, string | TCustomError>;
+    defaultState: TServerState;
 }): CustomResult<Record<string, TFirstOperation> | undefined, string | TCustomError> => {
     if (second === undefined) {
         return ResultModule.ok(undefined);
@@ -198,8 +192,8 @@ export const serverTransform = <TServerState, TFirstOperation, TSecondOperation,
     const result: Record<string, TFirstOperation> = {};
 
     for (const [key, operation] of recordToMap(second)) {
-        const innerPrevState = prevState[key];
-        const innerNextState = nextState[key];
+        const innerPrevState = prevState[key] ?? defaultState;
+        const innerNextState = nextState[key] ?? defaultState;
         const innerFirst = first == null ? undefined : first[key];
 
         const transformed = innerTransform({
