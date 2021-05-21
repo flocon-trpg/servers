@@ -735,7 +735,7 @@ var TextTwoWayOperation;
         });
         return builder.build();
     };
-    TextTwoWayOperation.transform = ({ first, second }) => {
+    TextTwoWayOperation.serverTransform = ({ first, second }) => {
         return transformCore({
             first: [...new TextOperationBuilder(twoWayFactory, first).toUnits()],
             second: [...new TextOperationBuilder(twoWayFactory, second).toUnits()],
@@ -766,6 +766,44 @@ var TextTwoWayOperation;
                     };
             }
         }).toArray();
+    };
+    TextTwoWayOperation.ofUnit = (source) => {
+        const builder = new TextOperationBuilder(twoWayFactory);
+        for (const unit of source) {
+            if (unit == null) {
+                continue;
+            }
+            switch (unit.type) {
+                case exports.retain: {
+                    const retain = unit.retain;
+                    const retainAsPositiveInt = PositiveInt.tryCreate(retain);
+                    if (retainAsPositiveInt == null) {
+                        continue;
+                    }
+                    builder.retain(retainAsPositiveInt);
+                    break;
+                }
+                case exports.insert$: {
+                    const insert = unit.insert;
+                    const insertAsNonEpmtyString = NonEmptyString.tryCreate(insert);
+                    if (insertAsNonEpmtyString == null) {
+                        continue;
+                    }
+                    builder.insert(insertAsNonEpmtyString);
+                    break;
+                }
+                case exports.delete$: {
+                    const del = unit.delete;
+                    const delAsNonEmptyString = NonEmptyString.tryCreate(del);
+                    if (delAsNonEmptyString == null) {
+                        continue;
+                    }
+                    builder.delete(delAsNonEmptyString);
+                    break;
+                }
+            }
+        }
+        return builder.build();
     };
     TextTwoWayOperation.toUpOperation = (source) => {
         return mapTextOperation({
@@ -866,62 +904,38 @@ var TextUpOperation;
         }).toArray();
     };
     TextUpOperation.ofUnit = (source) => {
-        if (source == null) {
-            return undefined;
-        }
-        if (!Array.isArray(source)) {
-            return undefined;
-        }
         const builder = new TextOperationBuilder(upFactory);
         for (const unit of source) {
             if (unit == null) {
                 continue;
             }
-            if (typeof unit !== 'object') {
-                return undefined;
-            }
-            if (typeof unit.type !== 'string') {
-                return undefined;
-            }
             switch (unit.type) {
                 case exports.retain: {
                     const retain = unit.retain;
-                    if (typeof retain !== 'number') {
-                        return undefined;
-                    }
                     const retainAsPositiveInt = PositiveInt.tryCreate(retain);
                     if (retainAsPositiveInt == null) {
-                        return undefined;
+                        continue;
                     }
                     builder.retain(retainAsPositiveInt);
                     break;
                 }
                 case exports.insert$: {
                     const insert = unit.insert;
-                    if (typeof insert !== 'string') {
-                        return undefined;
+                    const insertAsNonEmptyString = NonEmptyString.tryCreate(insert);
+                    if (insertAsNonEmptyString == null) {
+                        continue;
                     }
-                    const insertAsPositiveInt = NonEmptyString.tryCreate(insert);
-                    if (insertAsPositiveInt == null) {
-                        return undefined;
-                    }
-                    builder.insert(insertAsPositiveInt);
+                    builder.insert(insertAsNonEmptyString);
                     break;
                 }
                 case exports.delete$: {
-                    const del = unit.delete;
-                    if (typeof del !== 'number') {
-                        return undefined;
-                    }
+                    const del = typeof unit.delete === 'string' ? unit.delete.length : unit.delete;
                     const delAsPositiveInt = PositiveInt.tryCreate(del);
                     if (delAsPositiveInt == null) {
-                        return undefined;
+                        continue;
                     }
                     builder.delete(delAsPositiveInt);
                     break;
-                }
-                default: {
-                    return undefined;
                 }
             }
         }
@@ -981,62 +995,38 @@ var TextDownOperation;
         }).toArray();
     };
     TextDownOperation.ofUnit = (source) => {
-        if (source == null) {
-            return undefined;
-        }
-        if (!Array.isArray(source)) {
-            return undefined;
-        }
         const builder = new TextOperationBuilder(downFactory);
         for (const unit of source) {
             if (unit == null) {
                 continue;
             }
-            if (typeof unit !== 'object') {
-                return undefined;
-            }
-            if (typeof unit.type !== 'string') {
-                return undefined;
-            }
             switch (unit.type) {
                 case exports.retain: {
                     const retain = unit.retain;
-                    if (typeof retain !== 'number') {
-                        return undefined;
-                    }
                     const retainAsPositiveInt = PositiveInt.tryCreate(retain);
                     if (retainAsPositiveInt == null) {
-                        return undefined;
+                        continue;
                     }
                     builder.retain(retainAsPositiveInt);
                     break;
                 }
                 case exports.insert$: {
-                    const insert = unit.insert;
-                    if (typeof insert !== 'number') {
-                        return undefined;
-                    }
+                    const insert = typeof unit.insert === 'string' ? unit.insert.length : unit.insert;
                     const insertAsPositiveInt = PositiveInt.tryCreate(insert);
                     if (insertAsPositiveInt == null) {
-                        return undefined;
+                        continue;
                     }
                     builder.insert(insertAsPositiveInt);
                     break;
                 }
                 case exports.delete$: {
                     const del = unit.delete;
-                    if (typeof del !== 'string') {
-                        return undefined;
-                    }
                     const delAsPositiveInt = NonEmptyString.tryCreate(del);
                     if (delAsPositiveInt == null) {
-                        return undefined;
+                        continue;
                     }
                     builder.delete(delAsPositiveInt);
                     break;
-                }
-                default: {
-                    return undefined;
                 }
             }
         }

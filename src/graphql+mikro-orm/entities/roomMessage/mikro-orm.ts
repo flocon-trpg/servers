@@ -3,8 +3,8 @@ import { v4 } from 'uuid';
 import { FileSourceType } from '../../../enums/FileSourceType';
 import { MyValueLogType } from '../../../enums/MyValueLogType';
 import { Room } from '../room/mikro-orm';
-import { Partici } from '../room/participant/mikro-orm';
 import { User } from '../user/mikro-orm';
+import * as MyNumberValueLogModule from '../../../@shared/ot/room/participant/myNumberValue/log-v1';
 
 /*
 # 変数展開（仮称）の仕様
@@ -22,8 +22,7 @@ import { User } from '../user/mikro-orm';
 
 # text, textSource, updatedText, textUpdatedAt, commandResult, altTextToSecret, isSecretについて
 
-textとtextSourceは、投稿時のメッセージ。編集や削除されても残る。本来ならばinitTextやinitTextSourceという名前にしたほうが良さそうだが、マイグレーションでデータが損失するのを防ぐために今の名前になっている。
-TODO: ↑正式リリースまでにinitTextなどに変えたほうがいいか
+initTextとinitTextSourceは、投稿時のメッセージ。編集や削除されても残る。本来ならばinitTextやinitTextSourceという名前にしたほうが良さそうだが、マイグレーションでデータが損失するのを防ぐために今の名前になっている。
 
 各プロパティの詳細な関係は、./state-table.mdを参照。
 
@@ -78,9 +77,9 @@ export class RoomPubCh {
 // RoomPublicMessage
 @Entity()
 export class RoomPubMsg {
-    public constructor({ text, textSource }: { text: string; textSource: string | undefined }) {
-        this.text = text;
-        this.textSource = textSource;
+    public constructor({ initText, initTextSource }: { initText: string; initTextSource: string | undefined }) {
+        this.initText = initText;
+        this.initTextSource = initTextSource;
     }
 
     @PrimaryKey()
@@ -98,11 +97,11 @@ export class RoomPubMsg {
 
     // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
     @Property({ nullable: true, length: 65535, default: '' })
-    public textSource?: string;
+    public initTextSource?: string;
 
     // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
     @Property({ length: 65535, default: '' })
-    public text!: string;
+    public initText!: string;
 
     // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
     @Property({ nullable: true, length: 65535 })
@@ -176,9 +175,9 @@ export class RoomPubMsg {
 // RoomPrivateMessage
 @Entity()
 export class RoomPrvMsg {
-    public constructor({ text, textSource }: { text: string; textSource: string | undefined }) {
-        this.text = text;
-        this.textSource = textSource;
+    public constructor({ initText, initTextSource }: { initText: string; initTextSource: string | undefined }) {
+        this.initText = initText;
+        this.initTextSource = initTextSource;
     }
 
     @PrimaryKey()
@@ -196,11 +195,11 @@ export class RoomPrvMsg {
 
     // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
     @Property({ nullable: true, length: 65535, default: '' })
-    public textSource?: string;
+    public initTextSource?: string;
 
     // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
     @Property({ length: 65535, default: '' })
-    public text!: string;
+    public initText!: string;
 
     // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
     @Property({ nullable: true, length: 65535 })
@@ -279,41 +278,28 @@ export class RoomPrvMsg {
 export class MyValueLog {
     public constructor({
         createdBy,
+        room,
         stateId,
-        myValueType,
-        replaceType,
-        valueChanged,
-        isValuePrivateChanged,
-        createdPieces,
-        deletedPieces,
-        movedPieces,
-        resizedPieces,
+        value,
     }: {
-        createdBy: Partici;
+
+        createdBy: string;
+        room: Room;
         stateId: string;
-        myValueType: MyValueLogType;
-        replaceType?: boolean;
-        valueChanged: boolean;
-        isValuePrivateChanged: boolean;
-        createdPieces: { createdBy: string; stateId: string }[];
-        deletedPieces: { createdBy: string; stateId: string }[];
-        movedPieces: { createdBy: string; stateId: string }[];
-        resizedPieces: { createdBy: string; stateId: string }[];
+        value: MyNumberValueLogModule.Main;
     }) {
-        this.createdBy = Reference.create(createdBy);
+        this.createdBy = createdBy;
+        this.room = Reference.create(room);
         this.stateId = stateId;
-        this.myValueType = myValueType;
-        this.replaceType = replaceType;
-        this.valueChanged = valueChanged;
-        this.isValuePrivateChanged = isValuePrivateChanged;
-        this.createdPieces = createdPieces;
-        this.deletedPieces = deletedPieces;
-        this.movedPieces = movedPieces;
-        this.resizedPieces = resizedPieces;
+        this.value = value;
     }
 
     @PrimaryKey()
     public id: string = v4();
+
+    // 対象となったmyValueの所有者を表す。ログの作成者ではない。
+    @Property()
+    public createdBy: string;
 
     @Property({ type: Date, onCreate: () => new Date() })
     public createdAt: Date = new Date();
@@ -321,35 +307,11 @@ export class MyValueLog {
     @Property()
     public stateId: string;
 
-    @Enum({ items: () => MyValueLogType })
-    public myValueType: MyValueLogType;
+    @Property({ type: JsonType, nullable: true })
+    public value?: MyNumberValueLogModule.Main;
 
-    @Property()
-    public valueChanged: boolean;
-
-    @Property({ default: false })
-    public isValuePrivateChanged: boolean
-
-    // trueならば全体のcreate、falseならば全体のdelete。trueかfalseならば、pieceCreated～pieceResizeはすべて[]。
-    @Property({ nullable: true })
-    public replaceType?: boolean;
-
-    // pieceCreated～pieceResizedのcreatedByとstateIdは、boardのものを表す
-    @Property({ type: JsonType })
-    public createdPieces: { createdBy: string; stateId: string }[];
-
-    @Property({ type: JsonType })
-    public deletedPieces: { createdBy: string; stateId: string }[];
-
-    @Property({ type: JsonType })
-    public movedPieces: { createdBy: string; stateId: string }[];
-
-    @Property({ type: JsonType })
-    public resizedPieces: { createdBy: string; stateId: string }[];
-
-    // 対象となったmyValueの所有者を表す。ログの作成者ではない。
-    @ManyToOne(() => Partici, { wrappedReference: true })
-    public createdBy: IdentifiedReference<Partici>;
+    @ManyToOne(() => Room, { wrappedReference: true })
+    public room: IdentifiedReference<Room>;
 }
 
 // RoomSoundEffect

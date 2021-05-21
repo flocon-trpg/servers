@@ -1,3 +1,4 @@
+import * as t from 'io-ts';
 import { anonymous } from '../../../@shared/Constants';
 import { DecodedIdToken, ResolverContext } from '../../utils/Contexts';
 import admin from 'firebase-admin';
@@ -7,7 +8,12 @@ import { Room } from '../../entities/room/mikro-orm';
 import { __ } from '../../../@shared/collection';
 import { Reference } from '@mikro-orm/core';
 import { loadServerConfigAsMain } from '../../../config';
-import { Partici } from '../../entities/room/participant/mikro-orm';
+import * as ParticipantModule from '../../../@shared/ot/room/participant/v1';
+import * as RoomModule from '../../../@shared/ot/room/v1';
+import { recordToArray, recordToMap } from '../../../@shared/utils';
+import { GlobalRoom } from '../../entities/room/global';
+
+const find = <T>(source: Record<string, T | undefined>, key: string): T | undefined => source[key];
 
 export const NotSignIn = 'NotSignIn';
 export const AnonymousAccount = 'AnonymousAccount';
@@ -60,6 +66,16 @@ export const checkEntry = async ({ em, userUid, globalEntryPhrase }: { em: EM; u
     return (await getUserIfEntry({ em, userUid, globalEntryPhrase })) != null;
 };
 
+class FindRoomAndMyParticipantResult {
+    public constructor(public readonly room: Room, public readonly roomState: RoomModule.State, public readonly me?: ParticipantModule.State) {
+
+    }
+
+    public participantIds(): Set<string> {
+        return new Set(recordToArray(this.roomState).map(({ key }) => key));
+    }
+}
+
 export const findRoomAndMyParticipant = async ({
     em,
     userUid,
@@ -68,73 +84,12 @@ export const findRoomAndMyParticipant = async ({
     em: EM;
     userUid: string;
     roomId: string;
-}): Promise<{ room: Room; me?: Partici } | null> => {
+}): Promise<FindRoomAndMyParticipantResult | null> => {
     const room = await em.findOne(Room, { id: roomId });
     if (room == null) {
         return null;
     }
-    const participants = await room.particis.loadItems();
-    const me = await __(participants).findOrUndefinedAsync(async p => {
-        const loadedUserUid = await p.user.load('userUid');
-        return loadedUserUid === userUid;
-    });
-    return { room, me };
-};
-
-export const findRoomAndMyParticipantAndParitipantUserUids = async ({
-    em,
-    userUid,
-    roomId
-}: {
-    em: EM;
-    userUid: string;
-    roomId: string;
-}): Promise<{ room: Room; me?: Partici; participantUsers: Reference<User>[]; participantUserUids: ReadonlySet<string> } | null> => {
-    const room = await em.findOne(Room, { id: roomId });
-    if (room == null) {
-        return null;
-    }
-    const participants = await room.particis.loadItems();
-    const participantUserUids: { participant: Partici; userUid: string }[] = [];
-    const participantUsers: Reference<User>[] = [];
-    for (const participant of participants) {
-        participantUsers.push(participant.user);
-        const loadedUserUid = await participant.user.load('userUid');
-        participantUserUids.push({ participant, userUid: loadedUserUid });
-    }
-    const me = participantUserUids.find(({ userUid: loadedUserUid }) => loadedUserUid === userUid);
-    return {
-        room,
-        me: me?.participant,
-        participantUsers: participantUsers,
-        participantUserUids: new Set(participantUserUids.map(({ userUid }) => userUid))
-    };
-};
-
-export const maskValue = <T>({
-    createdByMe,
-    isPrevValuePrivate,
-    nextValue,
-    isNextValuePrivate,
-    valueWhenHidden,
-}: {
-    createdByMe: boolean;
-    isPrevValuePrivate: boolean;
-    nextValue: T;
-    isNextValuePrivate: boolean;
-    valueWhenHidden: T;
-}): T | undefined => {
-    if (createdByMe) {
-        return nextValue;
-    }
-    if (isPrevValuePrivate && isNextValuePrivate) {
-        return undefined;
-    }
-    if (isPrevValuePrivate && !isNextValuePrivate) {
-        return nextValue;
-    }
-    if (!isPrevValuePrivate && isNextValuePrivate) {
-        return valueWhenHidden;
-    }
-    return nextValue;
+    const jsonState = GlobalRoom.MikroORM.ToGlobal.state(room);
+    const me = find(jsonState.participants, userUid);
+    return new FindRoomAndMyParticipantResult(room, { ...jsonState, name: room.name }, me);
 };

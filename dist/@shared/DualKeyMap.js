@@ -37,6 +37,22 @@ class DualKeyMap {
         result._core = DualKeyMap.mapMap(source instanceof DualKeyMap ? source._core : source, mapping);
         return result;
     }
+    static ofRecord(source) {
+        const result = new DualKeyMap();
+        for (const key1 in source) {
+            const inner = source[key1];
+            if (inner === undefined) {
+                continue;
+            }
+            for (const key2 in inner) {
+                const value = inner[key2];
+                if (value !== undefined) {
+                    result.set({ first: key1, second: key2 }, value);
+                }
+            }
+        }
+        return result;
+    }
     map(mapping) {
         return DualKeyMap.create(this, mapping);
     }
@@ -88,6 +104,17 @@ class DualKeyMap {
     }
     toMap() {
         return DualKeyMap.mapMap(this._core, x => x);
+    }
+    toStringRecord(createStringKey1, createStringKey2) {
+        const result = {};
+        this._core.forEach((inner, first) => {
+            const innerRecord = {};
+            inner.forEach((value, second) => {
+                innerRecord[createStringKey2(second)] = value;
+            });
+            result[createStringKey1(first)] = innerRecord;
+        });
+        return result;
     }
     get size() {
         return this.toArray().length;
