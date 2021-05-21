@@ -54,16 +54,14 @@ const restore = ({ nextState, downOperation, innerRestore, }) => {
     return Result_1.ResultModule.ok({ prevState, twoWayOperation });
 };
 exports.restore = restore;
-const apply = ({ prevState, operation, innerApply }) => {
+const apply = ({ prevState, operation, innerApply, defaultState }) => {
+    var _a;
     if (operation == null) {
         return Result_1.ResultModule.ok(prevState);
     }
     const nextState = Object.assign({}, prevState);
     for (const [key, value] of utils_1.recordToMap(operation)) {
-        const prevStateElement = prevState[key];
-        if (prevStateElement === undefined) {
-            return Result_1.ResultModule.error(`tried to update "${key}", but prevState does not have such a key`);
-        }
+        const prevStateElement = (_a = prevState[key]) !== null && _a !== void 0 ? _a : defaultState;
         const newValue = innerApply({ operation: value, prevState: prevStateElement, key });
         if (newValue.isError) {
             return newValue;
@@ -74,16 +72,14 @@ const apply = ({ prevState, operation, innerApply }) => {
     return Result_1.ResultModule.ok(nextState);
 };
 exports.apply = apply;
-const applyBack = ({ nextState, operation, innerApplyBack }) => {
+const applyBack = ({ nextState, operation, innerApplyBack, defaultState }) => {
+    var _a;
     if (operation == null) {
         return Result_1.ResultModule.ok(nextState);
     }
     const prevState = Object.assign({}, nextState);
     for (const [key, value] of utils_1.recordToMap(operation)) {
-        const nextStateElement = nextState[key];
-        if (nextStateElement === undefined) {
-            return Result_1.ResultModule.error(`tried to update "${key}", but nextState does not have such a key`);
-        }
+        const nextStateElement = (_a = nextState[key]) !== null && _a !== void 0 ? _a : defaultState;
         const oldValue = innerApplyBack({ operation: value, nextState: nextStateElement, key });
         if (oldValue.isError) {
             return oldValue;

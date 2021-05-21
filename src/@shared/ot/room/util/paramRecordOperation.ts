@@ -80,10 +80,11 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
     return ResultModule.ok({ prevState, twoWayOperation });
 };
 
-export const apply = <TState, TUpOperation, TCustomError = string>({ prevState, operation, innerApply }: {
+export const apply = <TState, TUpOperation, TCustomError = string>({ prevState, operation, innerApply, defaultState }: {
     prevState: Record<string, TState>;
     operation?: Record<string, TUpOperation>;
     innerApply: (params: { operation: TUpOperation; prevState: TState; key: string }) => CustomResult<TState, string | TCustomError>;
+    defaultState: TState;
 }): CustomResult<Record<string, TState>, string | TCustomError> => {
     if (operation == null) {
         return ResultModule.ok(prevState);
@@ -92,10 +93,7 @@ export const apply = <TState, TUpOperation, TCustomError = string>({ prevState, 
     const nextState = { ...prevState };
 
     for (const [key, value] of recordToMap(operation)) {
-        const prevStateElement = prevState[key];
-        if (prevStateElement === undefined) {
-            return ResultModule.error(`tried to update "${key}", but prevState does not have such a key`);
-        }
+        const prevStateElement = prevState[key] ?? defaultState;
         const newValue = innerApply({ operation: value, prevState: prevStateElement, key });
         if (newValue.isError) {
             return newValue;
@@ -107,10 +105,11 @@ export const apply = <TState, TUpOperation, TCustomError = string>({ prevState, 
     return ResultModule.ok(nextState);
 };
 
-export const applyBack = <TState, TDownOperation, TCustomError = string>({ nextState, operation, innerApplyBack }: {
+export const applyBack = <TState, TDownOperation, TCustomError = string>({ nextState, operation, innerApplyBack, defaultState }: {
     nextState: Record<string, TState>;
     operation?: Record<string, TDownOperation>;
     innerApplyBack: (params: { operation: TDownOperation; nextState: TState; key: string }) => CustomResult<TState, string | TCustomError>;
+    defaultState: TState;
 }): CustomResult<Record<string, TState>, string | TCustomError> => {
     if (operation == null) {
         return ResultModule.ok(nextState);
@@ -119,10 +118,7 @@ export const applyBack = <TState, TDownOperation, TCustomError = string>({ nextS
     const prevState = { ...nextState };
 
     for (const [key, value] of recordToMap(operation)) {
-        const nextStateElement = nextState[key];
-        if (nextStateElement === undefined) {
-            return ResultModule.error(`tried to update "${key}", but nextState does not have such a key`);
-        }
+        const nextStateElement = nextState[key] ?? defaultState;
         const oldValue = innerApplyBack({ operation: value, nextState: nextStateElement, key });
         if (oldValue.isError) {
             return oldValue;

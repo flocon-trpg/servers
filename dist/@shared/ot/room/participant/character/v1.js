@@ -203,9 +203,15 @@ const apply = ({ state, operation }) => {
         result.tachieImage = operation.tachieImage.newValue;
     }
     const boolParams = ParamRecordOperation.apply({
-        prevState: state.boolParams, operation: operation.boolParams,
-        innerApply: ({ prevState, operation: upOperation }) => {
-            return SimpleValueParam.apply()({ state: prevState, operation: upOperation });
+        prevState: state.boolParams,
+        operation: operation.boolParams,
+        innerApply: ({ prevState, operation }) => {
+            return SimpleValueParam.apply()({ state: prevState, operation });
+        },
+        defaultState: {
+            $version: 1,
+            isValuePrivate: false,
+            value: undefined,
         }
     });
     if (boolParams.isError) {
@@ -213,9 +219,15 @@ const apply = ({ state, operation }) => {
     }
     result.boolParams = boolParams.value;
     const numParams = ParamRecordOperation.apply({
-        prevState: state.numParams, operation: operation.numParams,
-        innerApply: ({ prevState, operation: upOperation }) => {
-            return SimpleValueParam.apply()({ state: prevState, operation: upOperation });
+        prevState: state.numParams,
+        operation: operation.numParams,
+        innerApply: ({ prevState, operation }) => {
+            return SimpleValueParam.apply()({ state: prevState, operation });
+        },
+        defaultState: {
+            $version: 1,
+            isValuePrivate: false,
+            value: undefined,
         }
     });
     if (numParams.isError) {
@@ -223,9 +235,15 @@ const apply = ({ state, operation }) => {
     }
     result.numParams = numParams.value;
     const numMaxParams = ParamRecordOperation.apply({
-        prevState: state.numMaxParams, operation: operation.numMaxParams,
-        innerApply: ({ prevState, operation: upOperation }) => {
-            return SimpleValueParam.apply()({ state: prevState, operation: upOperation });
+        prevState: state.numMaxParams,
+        operation: operation.numMaxParams,
+        innerApply: ({ prevState, operation }) => {
+            return SimpleValueParam.apply()({ state: prevState, operation });
+        },
+        defaultState: {
+            $version: 1,
+            isValuePrivate: false,
+            value: undefined,
         }
     });
     if (numMaxParams.isError) {
@@ -233,8 +251,15 @@ const apply = ({ state, operation }) => {
     }
     result.numMaxParams = numMaxParams.value;
     const strParams = ParamRecordOperation.apply({
-        prevState: state.strParams, operation: operation.strParams, innerApply: ({ prevState, operation: upOperation }) => {
-            return StrParam.apply({ state: prevState, operation: upOperation });
+        prevState: state.strParams,
+        operation: operation.strParams,
+        innerApply: ({ prevState, operation }) => {
+            return StrParam.apply({ state: prevState, operation });
+        },
+        defaultState: {
+            $version: 1,
+            isValuePrivate: false,
+            value: '',
         }
     });
     if (strParams.isError) {
@@ -242,8 +267,8 @@ const apply = ({ state, operation }) => {
     }
     result.strParams = strParams.value;
     const pieces = DualKeyRecordOperation.apply({
-        prevState: state.pieces, operation: operation.pieces, innerApply: ({ prevState, operation: upOperation }) => {
-            return Piece.apply({ state: prevState, operation: upOperation });
+        prevState: state.pieces, operation: operation.pieces, innerApply: ({ prevState, operation }) => {
+            return Piece.apply({ state: prevState, operation });
         }
     });
     if (pieces.isError) {
@@ -251,8 +276,8 @@ const apply = ({ state, operation }) => {
     }
     result.pieces = pieces.value;
     const tachieLocations = DualKeyRecordOperation.apply({
-        prevState: state.tachieLocations, operation: operation.tachieLocations, innerApply: ({ prevState, operation: upOperation }) => {
-            return BoardLocation.apply({ state: prevState, operation: upOperation });
+        prevState: state.tachieLocations, operation: operation.tachieLocations, innerApply: ({ prevState, operation }) => {
+            return BoardLocation.apply({ state: prevState, operation });
         }
     });
     if (tachieLocations.isError) {
@@ -293,9 +318,15 @@ const applyBack = ({ state, operation }) => {
         result.tachieImage = operation.tachieImage.oldValue;
     }
     const boolParams = ParamRecordOperation.applyBack({
-        nextState: state.boolParams, operation: operation.boolParams,
+        nextState: state.boolParams,
+        operation: operation.boolParams,
         innerApplyBack: ({ nextState, operation }) => {
             return SimpleValueParam.applyBack()({ state: nextState, operation });
+        },
+        defaultState: {
+            $version: 1,
+            isValuePrivate: false,
+            value: undefined,
         }
     });
     if (boolParams.isError) {
@@ -303,9 +334,15 @@ const applyBack = ({ state, operation }) => {
     }
     result.boolParams = boolParams.value;
     const numParams = ParamRecordOperation.applyBack({
-        nextState: state.numParams, operation: operation.numParams,
+        nextState: state.numParams,
+        operation: operation.numParams,
         innerApplyBack: ({ nextState, operation }) => {
             return SimpleValueParam.applyBack()({ state: nextState, operation });
+        },
+        defaultState: {
+            $version: 1,
+            isValuePrivate: false,
+            value: undefined,
         }
     });
     if (numParams.isError) {
@@ -313,9 +350,15 @@ const applyBack = ({ state, operation }) => {
     }
     result.numParams = numParams.value;
     const numMaxParams = ParamRecordOperation.applyBack({
-        nextState: state.numMaxParams, operation: operation.numMaxParams,
+        nextState: state.numMaxParams,
+        operation: operation.numMaxParams,
         innerApplyBack: ({ nextState, operation }) => {
             return SimpleValueParam.applyBack()({ state: nextState, operation });
+        },
+        defaultState: {
+            $version: 1,
+            isValuePrivate: false,
+            value: undefined,
         }
     });
     if (numMaxParams.isError) {
@@ -323,8 +366,15 @@ const applyBack = ({ state, operation }) => {
     }
     result.numMaxParams = numMaxParams.value;
     const strParams = ParamRecordOperation.applyBack({
-        nextState: state.strParams, operation: operation.strParams, innerApplyBack: ({ nextState, operation }) => {
+        nextState: state.strParams,
+        operation: operation.strParams,
+        innerApplyBack: ({ nextState, operation }) => {
             return StrParam.applyBack({ state: nextState, operation });
+        },
+        defaultState: {
+            $version: 1,
+            isValuePrivate: false,
+            value: '',
         }
     });
     if (strParams.isError) {

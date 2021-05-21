@@ -260,8 +260,15 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     }
 
     const boolParams = ParamRecordOperation.apply<BoolParam.State, BoolParam.UpOperation | BoolParam.TwoWayOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
-        prevState: state.boolParams, operation: operation.boolParams, innerApply: ({ prevState, operation: upOperation }) => {
-            return SimpleValueParam.apply<Maybe<boolean>>()({ state: prevState, operation: upOperation });
+        prevState: state.boolParams,
+        operation: operation.boolParams,
+        innerApply: ({ prevState, operation }) => {
+            return SimpleValueParam.apply<Maybe<boolean>>()({ state: prevState, operation });
+        },
+        defaultState: {
+            $version: 1,
+            isValuePrivate: false,
+            value: undefined,
         }
     });
     if (boolParams.isError) {
@@ -270,8 +277,15 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     result.boolParams = boolParams.value;
 
     const numParams = ParamRecordOperation.apply<NumParam.State, NumParam.UpOperation | NumParam.TwoWayOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
-        prevState: state.numParams, operation: operation.numParams, innerApply: ({ prevState, operation: upOperation }) => {
-            return SimpleValueParam.apply<Maybe<number>>()({ state: prevState, operation: upOperation });
+        prevState: state.numParams,
+        operation: operation.numParams,
+        innerApply: ({ prevState, operation }) => {
+            return SimpleValueParam.apply<Maybe<number>>()({ state: prevState, operation });
+        },
+        defaultState: {
+            $version: 1,
+            isValuePrivate: false,
+            value: undefined,
         }
     });
     if (numParams.isError) {
@@ -280,8 +294,15 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     result.numParams = numParams.value;
 
     const numMaxParams = ParamRecordOperation.apply<NumParam.State, NumParam.UpOperation | NumParam.TwoWayOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
-        prevState: state.numMaxParams, operation: operation.numMaxParams, innerApply: ({ prevState, operation: upOperation }) => {
-            return SimpleValueParam.apply<Maybe<number>>()({ state: prevState, operation: upOperation });
+        prevState: state.numMaxParams,
+        operation: operation.numMaxParams,
+        innerApply: ({ prevState, operation }) => {
+            return SimpleValueParam.apply<Maybe<number>>()({ state: prevState, operation });
+        },
+        defaultState: {
+            $version: 1,
+            isValuePrivate: false,
+            value: undefined,
         }
     });
     if (numMaxParams.isError) {
@@ -290,8 +311,15 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     result.numMaxParams = numMaxParams.value;
 
     const strParams = ParamRecordOperation.apply<StrParam.State, StrParam.UpOperation | StrParam.TwoWayOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
-        prevState: state.strParams, operation: operation.strParams, innerApply: ({ prevState, operation: upOperation }) => {
-            return StrParam.apply({ state: prevState, operation: upOperation });
+        prevState: state.strParams,
+        operation: operation.strParams,
+        innerApply: ({ prevState, operation }) => {
+            return StrParam.apply({ state: prevState, operation });
+        },
+        defaultState: {
+            $version: 1,
+            isValuePrivate: false,
+            value: '',
         }
     });
     if (strParams.isError) {
@@ -300,8 +328,8 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     result.strParams = strParams.value;
 
     const pieces = DualKeyRecordOperation.apply<Piece.State, Piece.UpOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
-        prevState: state.pieces, operation: operation.pieces, innerApply: ({ prevState, operation: upOperation }) => {
-            return Piece.apply({ state: prevState, operation: upOperation });
+        prevState: state.pieces, operation: operation.pieces, innerApply: ({ prevState, operation }) => {
+            return Piece.apply({ state: prevState, operation });
         }
     });
     if (pieces.isError) {
@@ -310,8 +338,8 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     result.pieces = pieces.value;
 
     const tachieLocations = DualKeyRecordOperation.apply<BoardLocation.State, BoardLocation.UpOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
-        prevState: state.tachieLocations, operation: operation.tachieLocations, innerApply: ({ prevState, operation: upOperation }) => {
-            return BoardLocation.apply({ state: prevState, operation: upOperation });
+        prevState: state.tachieLocations, operation: operation.tachieLocations, innerApply: ({ prevState, operation }) => {
+            return BoardLocation.apply({ state: prevState, operation });
         }
     });
     if (tachieLocations.isError) {
@@ -356,8 +384,15 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     }
 
     const boolParams = ParamRecordOperation.applyBack<BoolParam.State, BoolParam.DownOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
-        nextState: state.boolParams, operation: operation.boolParams, innerApplyBack: ({ nextState, operation }) => {
+        nextState: state.boolParams,
+        operation: operation.boolParams,
+        innerApplyBack: ({ nextState, operation }) => {
             return SimpleValueParam.applyBack<Maybe<boolean>>()({ state: nextState, operation });
+        },
+        defaultState: {
+            $version: 1,
+            isValuePrivate: false,
+            value: undefined,
         }
     });
     if (boolParams.isError) {
@@ -366,8 +401,15 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     result.boolParams = boolParams.value;
 
     const numParams = ParamRecordOperation.applyBack<NumParam.State, NumParam.DownOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
-        nextState: state.numParams, operation: operation.numParams, innerApplyBack: ({ nextState, operation }) => {
+        nextState: state.numParams,
+        operation: operation.numParams,
+        innerApplyBack: ({ nextState, operation }) => {
             return SimpleValueParam.applyBack<Maybe<number>>()({ state: nextState, operation });
+        },
+        defaultState: {
+            $version: 1,
+            isValuePrivate: false,
+            value: undefined,
         }
     });
     if (numParams.isError) {
@@ -376,8 +418,15 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     result.numParams = numParams.value;
 
     const numMaxParams = ParamRecordOperation.applyBack<NumParam.State, NumParam.DownOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
-        nextState: state.numMaxParams, operation: operation.numMaxParams, innerApplyBack: ({ nextState, operation }) => {
+        nextState: state.numMaxParams,
+        operation: operation.numMaxParams,
+        innerApplyBack: ({ nextState, operation }) => {
             return SimpleValueParam.applyBack<Maybe<number>>()({ state: nextState, operation });
+        },
+        defaultState: {
+            $version: 1,
+            isValuePrivate: false,
+            value: undefined,
         }
     });
     if (numMaxParams.isError) {
@@ -386,8 +435,15 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     result.numMaxParams = numMaxParams.value;
 
     const strParams = ParamRecordOperation.applyBack<StrParam.State, StrParam.DownOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
-        nextState: state.strParams, operation: operation.strParams, innerApplyBack: ({ nextState, operation }) => {
+        nextState: state.strParams,
+        operation: operation.strParams,
+        innerApplyBack: ({ nextState, operation }) => {
             return StrParam.applyBack({ state: nextState, operation });
+        },
+        defaultState: {
+            $version: 1,
+            isValuePrivate: false,
+            value: '',
         }
     });
     if (strParams.isError) {
