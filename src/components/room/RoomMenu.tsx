@@ -6,7 +6,7 @@ import roomConfigModule from '../../modules/roomConfigModule';
 import { useSelector } from '../../store';
 import { editRoomDrawerVisibility } from './RoomComponentsState';
 import * as Icon from '@ant-design/icons';
-import { boardPanel } from '../../states/RoomConfig';
+import { boardEditorPanel } from '../../states/RoomConfig';
 import VolumeBarPanel from './VolumeBarPanel';
 import Jdenticon from '../../foundations/Jdenticon';
 import roomModule, { Notification } from '../../modules/roomModule';
@@ -308,8 +308,9 @@ export const RoomMenu: React.FC = () => {
     const roomId = useSelector(state => state.roomModule.roomId);
     const createdBy = useSelector(state => state.roomModule.roomState?.state?.createdBy);
     const publicChannelNames = usePublicChannelNames();
-    const participantsMap = useParticipants(); 
-    const boardPanels = useSelector(state => state.roomConfigModule?.panels.boardPanels);
+    const participantsMap = useParticipants();
+    const activeBoardPanel = useSelector(state => state.roomConfigModule?.panels.activeBoardPanel);
+    const boardPanels = useSelector(state => state.roomConfigModule?.panels.boardEditorPanels);
     const characterPanel = useSelector(state => state.roomConfigModule?.panels.characterPanel);
     const gameEffectPanel = useSelector(state => state.roomConfigModule?.panels.gameEffectPanel);
     const participantPanel = useSelector(state => state.roomConfigModule?.panels.participantPanel);
@@ -349,7 +350,7 @@ export const RoomMenu: React.FC = () => {
         }), `log_${moment(new Date()).format('YYYYMMDDHHmmss')}.html`);
     }, [getLogQueryResult.data]);
 
-    if (typeof myAuth === 'string' || roomId == null || boardPanels == null || characterPanel == null || gameEffectPanel == null || participantPanel == null || messagePanel == null || myValuePanel == null) {
+    if (typeof myAuth === 'string' || roomId == null || activeBoardPanel == null || boardPanels == null || characterPanel == null || gameEffectPanel == null || participantPanel == null || messagePanel == null || myValuePanel == null) {
         return null;
     }
 
@@ -389,7 +390,16 @@ export const RoomMenu: React.FC = () => {
                     <span>キャラクター一覧</span>
                 </div>
             </Menu.Item>
-            <Menu.SubMenu title="ボード">
+            <Menu.Item onClick={() => {
+                dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: 'activeBoardPanel' }, newValue: false }));
+                dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: 'activeBoardPanel' } }));
+            }}>
+                <div>
+                    <span>{activeBoardPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
+                    <span>ボードビューア</span>
+                </div>
+            </Menu.Item>
+            <Menu.SubMenu title="ボードエディター">
                 {
                     recordToArray(boardPanels).map((pair, i) => {
                         return (
@@ -397,9 +407,9 @@ export const RoomMenu: React.FC = () => {
                                 key={pair.key}
                                 onClick={() => {
                                     // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
-                                    dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: boardPanel, panelId: pair.key }, newValue: false }));
+                                    dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: boardEditorPanel, panelId: pair.key }, newValue: false }));
 
-                                    dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: boardPanel, panelId: pair.key } }));
+                                    dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: boardEditorPanel, panelId: pair.key } }));
                                 }}>
                                 <div>
                                     <span>{pair.value.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
@@ -410,7 +420,7 @@ export const RoomMenu: React.FC = () => {
                 }
                 <Menu.Divider />
                 <Menu.Item onClick={() => {
-                    dispatch(roomConfigModule.actions.addBoardPanelConfig({
+                    dispatch(roomConfigModule.actions.addBoardEditorPanelConfig({
                         roomId,
                         panel: {
                             activeBoardKey: null,

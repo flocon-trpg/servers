@@ -25,15 +25,14 @@ const roomConfigEpicCore = (action$: ActionsObservable<AnyAction>, state$: State
                     || roomConfigModule.actions.bringPanelToFront.match(action)
                     || roomConfigModule.actions.setIsMinimized.match(action)
 
-                    || roomConfigModule.actions.addBoardPanelConfig.match(action)
+                    || roomConfigModule.actions.addBoardEditorPanelConfig.match(action)
                     || roomConfigModule.actions.moveBoardPanel.match(action)
                     || roomConfigModule.actions.resizeBoardPanel.match(action)
                     || roomConfigModule.actions.removeBoardPanel.match(action)
                     || roomConfigModule.actions.updateBoard.match(action)
                     || roomConfigModule.actions.zoomBoard.match(action)
                     || roomConfigModule.actions.resetBoard.match(action)
-                    || roomConfigModule.actions.removeBoard.match(action)
-                    || roomConfigModule.actions.updateBoardPanel.match(action)
+                    || roomConfigModule.actions.updateBoardEditorPanel.match(action)
 
                     || roomConfigModule.actions.addMessagePanelConfig.match(action)
                     || roomConfigModule.actions.moveMessagePanel.match(action)

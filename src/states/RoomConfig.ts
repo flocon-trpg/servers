@@ -40,7 +40,8 @@ export type UpdateGameSystemAction = {
     } | undefined;
 }
 
-export const boardPanel = 'boardPanel';
+export const activeBoardPanel = 'activeBoardPanel';
+export const boardEditorPanel = 'boardEditorPanel';
 export const characterPanel = 'characterPanel';
 export const gameEffectPanel = 'gameEffectPanel';
 export const messagePanel = 'messagePanel';
@@ -50,7 +51,9 @@ export const myValuePanel = 'myValuePanel';
 export type PanelAction = {
     roomId: string;
     target: {
-        type: typeof boardPanel;
+        type: typeof activeBoardPanel;
+    } | {
+        type: typeof boardEditorPanel;
         panelId: string;
     } | {
         type: typeof characterPanel;

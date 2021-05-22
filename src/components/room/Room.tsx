@@ -5,7 +5,7 @@ import CharacterList from './CharacterList';
 import { useSelector } from '../../store';
 import roomConfigModule from '../../modules/roomConfigModule';
 import { useDispatch } from 'react-redux';
-import Boards from './Boards';
+import Board from './Board';
 import RoomMessages from './RoomMessages';
 import CharacterParameterNamesDrawer from './CharacterParameterNamesDrawer';
 import { defaultRoomComponentsState, reduceComponentsState } from './RoomComponentsState';
@@ -13,7 +13,7 @@ import ComponentsStateContext from './contexts/RoomComponentsStateContext';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import CharacterDrawer from './CharacterDrawer';
 import BoardDrawer from './BoardDrawer';
-import { boardPanel, messagePanel } from '../../states/RoomConfig';
+import { activeBoardPanel, boardEditorPanel, messagePanel } from '../../states/RoomConfig';
 import SoundPlayer from './SoundPlayer';
 import EditRoomDrawer from './EditRoomDrawer';
 import ParticipantList from './ParticipantList';
@@ -83,7 +83,8 @@ const bottomContainerPadding = `0px ${horizontalPadding}px`;
 const Room: React.FC = () => {
     const { userUid: myUserUid } = useMe();
     const roomIdOfRoomConfig = useSelector(state => state.roomConfigModule?.roomId);
-    const boardPanels = useSelector(state => state.roomConfigModule?.panels.boardPanels);
+    const activeBoardPanelConfig = useSelector(state => state.roomConfigModule?.panels.activeBoardPanel);
+    const boardEditorPanelsConfig = useSelector(state => state.roomConfigModule?.panels.boardEditorPanels);
     const characterPanel = useSelector(state => state.roomConfigModule?.panels.characterPanel);
     const gameEffectPanel = useSelector(state => state.roomConfigModule?.panels.gameEffectPanel);
     const myValuePanel = useSelector(state => state.roomConfigModule?.panels.myValuePanel);
@@ -98,7 +99,7 @@ const Room: React.FC = () => {
 
     const roomId = useSelector(state => state.roomModule.roomId);
 
-    if (roomIdOfRoomConfig == null || roomIdOfRoomConfig !== roomId || boardPanels == null || characterPanel == null || gameEffectPanel == null || myValuePanel == null || participantPanel == null) {
+    if (roomIdOfRoomConfig == null || roomIdOfRoomConfig !== roomId || activeBoardPanelConfig == null || boardEditorPanelsConfig == null || characterPanel == null || gameEffectPanel == null || myValuePanel == null || participantPanel == null) {
         return (<LoadingResult title='個人設定のデータをブラウザから読み込んでいます…' />);
     }
 
@@ -112,7 +113,7 @@ const Room: React.FC = () => {
         </AntdLayout>;
     }
 
-    const boardsPanels = recordToArray(boardPanels).map(pair => {
+    const boardEditorPanels = recordToArray(boardEditorPanelsConfig).map(pair => {
         if (pair.value.isMinimized) {
             return null;
         }
@@ -121,22 +122,23 @@ const Room: React.FC = () => {
         return (
             <DraggableCard
                 key={pair.key}
-                header="Board"
-                onDragStop={e => dispatch(roomConfigModule.actions.moveBoardPanel({ ...e, roomId, panelId: pair.key }))}
-                onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeBoardPanel({ roomId, panelId: pair.key, dir, delta }))}
-                onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: boardPanel, panelId: pair.key } }))}
-                onClose={() => dispatch(roomConfigModule.actions.removeBoardPanel({ roomId, panelId: pair.key }))}
+                header="ボードエディター"
+                onDragStop={e => dispatch(roomConfigModule.actions.moveBoardPanel({ ...e, roomId, boardEditorPanelId: pair.key }))}
+                onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeBoardPanel({ roomId, boardEditorPanelId: pair.key, dir, delta }))}
+                onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: boardEditorPanel, panelId: pair.key } }))}
+                onClose={() => dispatch(roomConfigModule.actions.removeBoardPanel({ roomId, boardEditorPanelId: pair.key }))}
                 childrenContainerStyle={({ overflow: 'hidden' })}
                 position={pair.value}
                 size={pair.value}
                 minHeight={150}
                 minWidth={150}
                 zIndex={pair.value.zIndex}>
-                <Boards
+                <Board
                     canvasWidth={pair.value.width}
                     canvasHeight={pair.value.height}
-                    boardsPanelConfigId={pair.key}
-                    boardsPanelConfig={pair.value} />
+                    type='boardEditor'
+                    boardEditorPanelId={pair.key}
+                    boardEditorPanel={pair.value} />
             </DraggableCard>
         );
     });
@@ -148,7 +150,25 @@ const Room: React.FC = () => {
                     <AntdLayout.Content>
                         <RoomMenu />
                         <div>
-                            {boardsPanels}
+                            {activeBoardPanelConfig.isMinimized ? null : <DraggableCard
+                                header="ボードビューア"
+                                onDragStop={e => dispatch(roomConfigModule.actions.moveBoardPanel({ ...e, roomId, boardEditorPanelId: null }))}
+                                onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeBoardPanel({ roomId, boardEditorPanelId: null, dir, delta }))}
+                                onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: activeBoardPanel } }))}
+                                onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: activeBoardPanel }, newValue: true }))}
+                                childrenContainerStyle={({ overflow: 'hidden' })}
+                                position={activeBoardPanelConfig}
+                                size={activeBoardPanelConfig}
+                                minHeight={150}
+                                minWidth={150}
+                                zIndex={activeBoardPanelConfig.zIndex}>
+                                <Board
+                                    canvasWidth={activeBoardPanelConfig.width}
+                                    canvasHeight={activeBoardPanelConfig.height}
+                                    type='activeBoard'
+                                    activeBoardPanel={activeBoardPanelConfig} />
+                            </DraggableCard>}
+                            {boardEditorPanels}
                             <RoomMessagePanels roomId={roomId} />
                             {characterPanel.isMinimized ? null : <DraggableCard
                                 header="Characters"
