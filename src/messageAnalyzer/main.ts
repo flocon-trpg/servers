@@ -4,9 +4,6 @@ import { __ } from '../@shared/collection';
 import { analyze as analyzeToExpression, plain } from '../@shared/expression';
 import { TOML } from '../@shared/flocommand';
 import { Result, ResultModule } from '../@shared/Result';
-import { RoomParameterNameType } from '../enums/RoomParameterNameType';
-import { Room } from '../graphql+mikro-orm/entities/room/mikro-orm';
-import { EM } from '../utils/types';
 import * as CharacterModule from '../@shared/ot/room/participant/character/v1';
 import * as RoomModule from '../@shared/ot/room/v1';
 import { recordToArray } from '../@shared/utils';
@@ -18,6 +15,11 @@ export const listAvailableGameSystems = () => {
 };
 
 const roll = async (text: string, gameType: string): Promise<BcdiceResult | null> => {
+    if (text.trim() === '') {
+        // 空のメッセージを渡すとbcdiceでエラーが出るようなので弾いている
+        return null;
+    }
+
     const gameSystemInfo = listAvailableGameSystems().find(info => info.id === gameType);
     if (gameSystemInfo == null) {
         return null;
@@ -95,7 +97,7 @@ const getParameter = async ({ parameterPath, context, room }: { parameterPath: s
     }
     if (paramNameValue.value !== undefined) {
         return ResultModule.ok({
-            stringValue: paramNameValue.value?.toString(),
+            stringValue: paramNameValue.value.toString(),
             value: paramNameValue.value,
         });
     }

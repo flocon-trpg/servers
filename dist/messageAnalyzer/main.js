@@ -12,6 +12,9 @@ const listAvailableGameSystems = () => {
 };
 exports.listAvailableGameSystems = listAvailableGameSystems;
 const roll = async (text, gameType) => {
+    if (text.trim() === '') {
+        return null;
+    }
     const gameSystemInfo = exports.listAvailableGameSystems().find(info => info.id === gameType);
     if (gameSystemInfo == null) {
         return null;
@@ -21,7 +24,6 @@ const roll = async (text, gameType) => {
 };
 exports.chara = 'chara';
 const getParameter = async ({ parameterPath, context, room }) => {
-    var _a;
     if (parameterPath.length === 0) {
         throw new Error('parameterPath.length === 0');
     }
@@ -77,7 +79,7 @@ const getParameter = async ({ parameterPath, context, room }) => {
     }
     if (paramNameValue.value !== undefined) {
         return Result_1.ResultModule.ok({
-            stringValue: (_a = paramNameValue.value) === null || _a === void 0 ? void 0 : _a.toString(),
+            stringValue: paramNameValue.value.toString(),
             value: paramNameValue.value,
         });
     }
