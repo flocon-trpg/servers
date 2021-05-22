@@ -1,22 +1,20 @@
 import React from 'react';
-import { success, useImageFromGraphQL } from '../../hooks/image';
+import { useImageFromGraphQL } from '../../hooks/image';
 import * as ReactKonva from 'react-konva';
-import { CompositeKey, compositeKeyToString, createStateMap, equals, ReadonlyStateMap, stringToCompositeKey, toJSONString } from '../../@shared/StateMap';
-import { Button, Dropdown, Menu, Tooltip } from 'antd';
-import { DownOutlined, PlusOutlined } from '@ant-design/icons';
+import { CompositeKey, compositeKeyToString, equals, stringToCompositeKey, toJSONString } from '../../@shared/StateMap';
+import { Button, Dropdown, Menu, Modal, Tooltip } from 'antd';
+import * as Icons from '@ant-design/icons';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import { boardDrawerType, characterDrawerType, create, myNumberValueDrawerType } from './RoomComponentsState';
 import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
-import { BoardConfig, BoardsPanelConfig, createDefaultBoardConfig } from '../../states/BoardsPanelConfig';
-import Konva from 'konva';
+import { BoardEditorPanelConfig } from '../../states/BoardEditorPanelConfig';
 import { KonvaEventObject } from 'konva/types/Node';
-import { FilePath } from '../../utils/types';
 import { __ } from '../../@shared/collection';
-import { OperationElement, replace, update } from '../../stateManagers/states/types';
+import { replace, update } from '../../stateManagers/states/types';
 import * as Icon from '@ant-design/icons';
 import { MyKonva } from '../../foundations/MyKonva';
-import { AllRoomMessagesResult, Message, publicMessage, RoomMessage, useFilteredRoomMessages } from '../../hooks/useRoomMessages';
+import { Message, publicMessage, useFilteredRoomMessages } from '../../hooks/useRoomMessages';
 import { $free } from '../../@shared/Constants';
 import { useSelector } from '../../store';
 import { useOperate } from '../../hooks/useOperate';
@@ -32,9 +30,11 @@ import { useParticipants } from '../../hooks/state/useParticipants';
 import { Piece } from '../../utils/piece';
 import { useBoards } from '../../hooks/state/useBoards';
 import { recordToArray, recordToDualKeyMap, recordToMap } from '../../@shared/utils';
-import { RecordUpOperationElement } from '../../@shared/ot/room/util/recordOperationElement';
 import { MyNumberValue } from '../../utils/myNumberValue';
 import { BoardLocation } from '../../utils/boardLocation';
+import { BoardConfig, defaultBoardConfig } from '../../states/BoardConfig';
+import { ActiveBoardPanelConfig } from '../../states/ActiveBoardPanelConfig';
+import { ActiveBoardSelectorModal } from './ActiveBoardSelecterModal';
 
 namespace Resource {
     export const cellSizeIsTooSmall = 'セルが小さすぎるため、無効化されています';
@@ -110,27 +110,27 @@ const publicMessageFilter = (message: Message): boolean => {
     return message.type === publicMessage;
 };
 
-type BoardProps = {
-    boardKey: CompositeKey;
-    boardsPanelConfigId: string;
+type BoardCoreProps = {
     board: StatesBoard.State;
-    boardsPanelConfig: BoardsPanelConfig;
+    boardConfig: BoardConfig;
+    boardKey: CompositeKey;
+    boardEditorPanelId: string | null; // nullならばactiveBoardPanelとして扱われる
     onClick?: (e: KonvaEventObject<MouseEvent>) => void;
     onContextMenu?: (e: KonvaEventObject<PointerEvent>, stateOffset: MyKonva.Vector2) => void; // stateOffsetは、configなどのxy座標を基準にした位置。
     canvasWidth: number;
     canvasHeight: number;
 }
 
-const Board: React.FC<BoardProps> = ({
+const BoardCore: React.FC<BoardCoreProps> = ({
     board,
+    boardConfig,
     boardKey,
-    boardsPanelConfigId,
-    boardsPanelConfig,
+    boardEditorPanelId,
     onClick,
     onContextMenu,
     canvasWidth,
     canvasHeight
-}: BoardProps) => {
+}: BoardCoreProps) => {
     const roomId = useSelector(state => state.roomModule.roomId);
     const characters = useCharacters();
     const participants = useParticipants();
@@ -146,8 +146,6 @@ const Board: React.FC<BoardProps> = ({
     if (myUserUid == null || roomId == null || characters == null || participants == null) {
         return null;
     }
-
-    const boardConfig = boardsPanelConfig.boards[compositeKeyToString(boardKey)] ?? createDefaultBoardConfig();
 
     const lastPublicMessage = (() => {
         if (publicMessages.length === 0) {
@@ -397,7 +395,7 @@ const Board: React.FC<BoardProps> = ({
                 dispatch(roomConfigModule.actions.zoomBoard({
                     roomId,
                     boardKey,
-                    panelId: boardsPanelConfigId,
+                    boardEditorPanelId: boardEditorPanelId,
                     zoomDelta: e.evt.deltaY > 0 ? -0.25 : 0.25,
                     prevCanvasWidth: canvasWidth,
                     prevCanvasHeight: canvasHeight,
@@ -430,7 +428,7 @@ const Board: React.FC<BoardProps> = ({
                     dispatch(roomConfigModule.actions.updateBoard({
                         roomId,
                         boardKey,
-                        panelId: boardsPanelConfigId,
+                        boardEditorPanelId: boardEditorPanelId,
                         offsetXDelta: -e.evt.movementX / nonZeroScale,
                         offsetYDelta: -e.evt.movementY / nonZeroScale,
                     }));
@@ -474,11 +472,16 @@ namespace ContextMenuState {
 }
 
 type Props = {
-    boardsPanelConfig: BoardsPanelConfig;
-    boardsPanelConfigId: string;
     canvasWidth: number;
     canvasHeight: number;
-}
+} & ({
+    type: 'activeBoard';
+    activeBoardPanel: ActiveBoardPanelConfig;
+} | {
+    type: 'boardEditor';
+    boardEditorPanel: BoardEditorPanelConfig;
+    boardEditorPanelId: string;
+})
 
 const boardsDropDownStyle: React.CSSProperties = {
     position: 'absolute',
@@ -492,11 +495,10 @@ const zoomButtonStyle: React.CSSProperties = {
     right: 20,
 };
 
-const Boards: React.FC<Props> = ({
-    boardsPanelConfig,
-    boardsPanelConfigId,
+const Board: React.FC<Props> = ({
     canvasWidth,
     canvasHeight,
+    ...panel
 }: Props) => {
     const dispatchRoomComponentsState = React.useContext(DispatchRoomComponentsStateContext);
     const dispatch = useDispatch();
@@ -507,39 +509,51 @@ const Boards: React.FC<Props> = ({
     const characters = useCharacters();
     const participants = useParticipants();
     const { participant: me, userUid: myUserUid } = useMe();
+    const activeBoardKey = useSelector(state => state.roomModule.roomState?.state?.activeBoardKey);
+    const activeBoardPanelConfig = useSelector(state => state.roomConfigModule?.panels.activeBoardPanel);
+    const [activeBoardSelectorModalVisibility, setActiveBoardSelectorModalVisibility] = React.useState(false);
+
     if (me == null || myUserUid == null || roomId == null || boards == null || characters == null) {
         return null;
     }
 
-    const activeBoardKey = (() => {
-        if (boardsPanelConfig.activeBoardKey == null) {
+    const boardKeyToShow = (() => {
+        if (panel.type === 'activeBoard') {
+            return activeBoardKey;
+        }
+        if (panel.boardEditorPanel.activeBoardKey == null) {
             return null;
         }
-        return stringToCompositeKey(boardsPanelConfig.activeBoardKey);
+        return stringToCompositeKey(panel.boardEditorPanel.activeBoardKey);
     })();
-    const boardConfig = (activeBoardKey == null ? null : boardsPanelConfig.boards[compositeKeyToString(activeBoardKey)]) ?? createDefaultBoardConfig();
+    const boardConfig = (() => {
+        if (boardKeyToShow == null) {
+            return null;
+        }
+        if (panel.type === 'activeBoard') {
+            if (activeBoardPanelConfig == null) {
+                return null;
+            }
+            return activeBoardPanelConfig.boards[compositeKeyToString(boardKeyToShow)];
+        }
+        return panel.boardEditorPanel.boards[compositeKeyToString(boardKeyToShow)];
+    })() ?? defaultBoardConfig();
+    const boardEditorPanelId = panel.type === 'boardEditor' ? panel.boardEditorPanelId : null;
+    const board = boardKeyToShow == null ? null : boards.get(boardKeyToShow);
     const boardComponent = (() => {
-        if (boards.size === 0) {
-            return (
-                <div>
-                    Boardが1つも存在しません。
-                </div>
-            );
+        if (boardKeyToShow == null) {
+            return (<div>ボードビュアーに表示するボードが指定されていません。</div>);
         }
-        if (activeBoardKey == null) {
-            return (<div>Boardが選択されていません。</div>);
-        }
-        const board = boards.get(activeBoardKey);
         if (board == null) {
-            return (<div>{`キーが ${toJSONString(activeBoardKey)} であるBoardが見つかりません。他のBoardを選択してください。`}</div>);
+            return (<div>{`キーが ${toJSONString(boardKeyToShow)} であるボードが見つかりませんでした。`}</div>);
         }
-        return (<Board
+        return (<BoardCore
             canvasWidth={canvasWidth}
             canvasHeight={canvasHeight}
             board={board}
-            boardKey={activeBoardKey}
-            boardsPanelConfig={boardsPanelConfig}
-            boardsPanelConfigId={boardsPanelConfigId}
+            boardKey={boardKeyToShow}
+            boardConfig={boardConfig}
+            boardEditorPanelId={boardEditorPanelId}
             onClick={() => setContextMenuState(null)}
             onContextMenu={(e, stateOffset) => {
                 e.evt.preventDefault();
@@ -550,7 +564,7 @@ const Boards: React.FC<Props> = ({
                         .compact(([characterKey, character]) => {
                             const found = recordToDualKeyMap<PieceModule.State>(character.pieces).toArray()
                                 .find(([boardKey, piece]) => {
-                                    if (boardKey.first !== activeBoardKey.createdBy || boardKey.second !== activeBoardKey.id) {
+                                    if (boardKey.first !== boardKeyToShow.createdBy || boardKey.second !== boardKeyToShow.id) {
                                         return false;
                                     }
                                     return Piece.isCursorOnIcon({ ...board, state: piece, cursorPosition: stateOffset });
@@ -565,7 +579,7 @@ const Boards: React.FC<Props> = ({
                         .compact(([characterKey, character]) => {
                             const found = recordToDualKeyMap<BoardLocationModule.State>(character.tachieLocations).toArray()
                                 .find(([boardKey, tachie]) => {
-                                    if (boardKey.first !== activeBoardKey.createdBy || boardKey.second !== activeBoardKey.id) {
+                                    if (boardKey.first !== boardKeyToShow.createdBy || boardKey.second !== boardKeyToShow.id) {
                                         return false;
                                     }
                                     return BoardLocation.isCursorOnIcon({ state: tachie, cursorPosition: stateOffset });
@@ -581,7 +595,7 @@ const Boards: React.FC<Props> = ({
                         .compact(([userUid, myNumberValueKey, myNumberValue]) => {
                             const found = recordToDualKeyMap<PieceModule.State>(myNumberValue.pieces).toArray()
                                 .find(([boardKey, piece]) => {
-                                    if (boardKey.first !== activeBoardKey.createdBy || boardKey.second !== activeBoardKey.id) {
+                                    if (boardKey.first !== boardKeyToShow.createdBy || boardKey.second !== boardKeyToShow.id) {
                                         return false;
                                     }
                                     return Piece.isCursorOnIcon({ ...board, state: piece, cursorPosition: stateOffset });
@@ -595,11 +609,11 @@ const Boards: React.FC<Props> = ({
                 });
             }} />);
     })();
-    const dropDownItems = boards.toArray().map(([key, board]) => (
+    const dropDownItems = boardEditorPanelId == null ? null : boards.toArray().map(([key, board]) => (
         <Menu.Item
             key={toJSONString(key)}
-            onClick={() => dispatch(roomConfigModule.actions.updateBoardPanel({
-                panelId: boardsPanelConfigId,
+            onClick={() => dispatch(roomConfigModule.actions.updateBoardEditorPanel({
+                boardEditorPanelId,
                 roomId,
                 panel: {
                     activeBoardKey: compositeKeyToString(key),
@@ -607,14 +621,15 @@ const Boards: React.FC<Props> = ({
             }))}>
             {board.name === '' ? '(名前なし)' : board.name}
         </Menu.Item>));
-    const boardsMenu = (
+    // activeBoardPanelモードのときは boardsMenu==null
+    const boardsMenu = dropDownItems == null ? null : (
         <Menu>
             <Menu.ItemGroup title="ボード一覧">
                 {dropDownItems}
             </Menu.ItemGroup>
             <Menu.Divider />
             <Menu.Item
-                icon={<PlusOutlined />}
+                icon={<Icons.PlusOutlined />}
                 onClick={() => dispatchRoomComponentsState({ type: boardDrawerType, newValue: { type: create } })}>
                 新規作成
             </Menu.Item>
@@ -624,10 +639,10 @@ const Boards: React.FC<Props> = ({
         if (contextMenuState == null) {
             return null;
         }
-        const board = activeBoardKey == null ? undefined : boards.get(activeBoardKey);
+        const board = boardKeyToShow == null ? undefined : boards.get(boardKeyToShow);
 
         const selectedCharacterPiecesMenu = (() => {
-            if (activeBoardKey == null || contextMenuState.characterPiecesOnCursor.length === 0) {
+            if (boardKeyToShow == null || contextMenuState.characterPiecesOnCursor.length === 0) {
                 return null;
             }
             return (
@@ -642,7 +657,7 @@ const Boards: React.FC<Props> = ({
                                             type: characterDrawerType,
                                             newValue: {
                                                 type: update,
-                                                boardKey: activeBoardKey,
+                                                boardKey: boardKeyToShow,
                                                 stateKey: characterKey,
                                             }
                                         });
@@ -665,8 +680,8 @@ const Boards: React.FC<Props> = ({
                                                                 update: {
                                                                     $version: 1,
                                                                     pieces: {
-                                                                        [activeBoardKey.createdBy]: {
-                                                                            [activeBoardKey.id]: {
+                                                                        [boardKeyToShow.createdBy]: {
+                                                                            [boardKeyToShow.id]: {
                                                                                 type: replace,
                                                                                 replace: { newValue: undefined },
                                                                             }
@@ -692,7 +707,7 @@ const Boards: React.FC<Props> = ({
         })();
 
         const selectedTachiesMenu = (() => {
-            if (activeBoardKey == null || contextMenuState.tachiesOnCursor.length === 0) {
+            if (boardKeyToShow == null || contextMenuState.tachiesOnCursor.length === 0) {
                 return null;
             }
             return (
@@ -707,7 +722,7 @@ const Boards: React.FC<Props> = ({
                                             type: characterDrawerType,
                                             newValue: {
                                                 type: update,
-                                                boardKey: activeBoardKey,
+                                                boardKey: boardKeyToShow,
                                                 stateKey: characterKey,
                                             }
                                         });
@@ -730,8 +745,8 @@ const Boards: React.FC<Props> = ({
                                                                 update: {
                                                                     $version: 1,
                                                                     tachieLocations: {
-                                                                        [activeBoardKey.createdBy]: {
-                                                                            [activeBoardKey.id]: {
+                                                                        [boardKeyToShow.createdBy]: {
+                                                                            [boardKeyToShow.id]: {
                                                                                 type: replace,
                                                                                 replace: { newValue: undefined },
                                                                             }
@@ -758,14 +773,14 @@ const Boards: React.FC<Props> = ({
 
         const allCharactersListMenu = (() => {
             const title = 'キャラクター一覧';
-            if (board == null || activeBoardKey == null) {
+            if (board == null || boardKeyToShow == null) {
                 return <Menu.SubMenu title={title} disabled />;
             }
             return (
                 <Menu.SubMenu title={title}>
                     {__(characters.toArray()).compact(([key, value]) => {
-                        const pieceExists = recordToDualKeyMap(value.pieces).toArray().some(([boardKey]) => activeBoardKey.id === boardKey.second && activeBoardKey.createdBy === boardKey.first);
-                        const tachieExists = recordToDualKeyMap(value.tachieLocations).toArray().some(([boardKey]) => activeBoardKey.id === boardKey.second && activeBoardKey.createdBy === boardKey.first);
+                        const pieceExists = recordToDualKeyMap(value.pieces).toArray().some(([boardKey]) => boardKeyToShow.id === boardKey.second && boardKeyToShow.createdBy === boardKey.first);
+                        const tachieExists = recordToDualKeyMap(value.tachieLocations).toArray().some(([boardKey]) => boardKeyToShow.id === boardKey.second && boardKeyToShow.createdBy === boardKey.first);
 
                         const { x, y } = ContextMenuState.toKonvaPosition({ contextMenuState, boardConfig });
                         const cellPosition = Piece.getCellPosition({ x, y, board });
@@ -817,7 +832,7 @@ const Boards: React.FC<Props> = ({
                                                 type: characterDrawerType,
                                                 newValue: {
                                                     type: update,
-                                                    boardKey: activeBoardKey,
+                                                    boardKey: boardKeyToShow,
                                                     stateKey: key,
                                                 }
                                             });
@@ -842,8 +857,8 @@ const Boards: React.FC<Props> = ({
                                                                         update: {
                                                                             $version: 1,
                                                                             tachieLocations: {
-                                                                                [activeBoardKey.createdBy]: {
-                                                                                    [activeBoardKey.id]: {
+                                                                                [boardKeyToShow.createdBy]: {
+                                                                                    [boardKeyToShow.id]: {
                                                                                         type: replace,
                                                                                         replace: { newValue: pieceLocationWhichIsCellMode },
                                                                                     }
@@ -877,8 +892,8 @@ const Boards: React.FC<Props> = ({
                                                                     update: {
                                                                         $version: 1,
                                                                         pieces: {
-                                                                            [activeBoardKey.createdBy]: {
-                                                                                [activeBoardKey.id]: {
+                                                                            [boardKeyToShow.createdBy]: {
+                                                                                [boardKeyToShow.id]: {
                                                                                     type: replace,
                                                                                     replace: { newValue: pieceLocationWhichIsNotCellMode },
                                                                                 }
@@ -913,8 +928,8 @@ const Boards: React.FC<Props> = ({
                                                                     update: {
                                                                         $version: 1,
                                                                         pieces: {
-                                                                            [activeBoardKey.createdBy]: {
-                                                                                [activeBoardKey.id]: {
+                                                                            [boardKeyToShow.createdBy]: {
+                                                                                [boardKeyToShow.id]: {
                                                                                     type: replace,
                                                                                     replace: { newValue: undefined },
                                                                                 }
@@ -941,7 +956,7 @@ const Boards: React.FC<Props> = ({
                                                 type: characterDrawerType,
                                                 newValue: {
                                                     type: update,
-                                                    boardKey: activeBoardKey,
+                                                    boardKey: boardKeyToShow,
                                                     stateKey: key,
                                                 }
                                             });
@@ -965,8 +980,8 @@ const Boards: React.FC<Props> = ({
                                                                     update: {
                                                                         $version: 1,
                                                                         tachieLocations: {
-                                                                            [activeBoardKey.createdBy]: {
-                                                                                [activeBoardKey.id]: {
+                                                                            [boardKeyToShow.createdBy]: {
+                                                                                [boardKeyToShow.id]: {
                                                                                     type: replace,
                                                                                     replace: { newValue: tachieLocationWhichIsNotCellMode },
                                                                                 }
@@ -1000,8 +1015,8 @@ const Boards: React.FC<Props> = ({
                                                                     update: {
                                                                         $version: 1,
                                                                         tachieLocations: {
-                                                                            [activeBoardKey.createdBy]: {
-                                                                                [activeBoardKey.id]: {
+                                                                            [boardKeyToShow.createdBy]: {
+                                                                                [boardKeyToShow.id]: {
                                                                                     type: replace,
                                                                                     replace: { newValue: undefined },
                                                                                 }
@@ -1028,7 +1043,7 @@ const Boards: React.FC<Props> = ({
         })();
 
         const selectedMyNumbersMenu = (() => {
-            if (activeBoardKey == null || contextMenuState.myNumberValuesOnCursor.length === 0) {
+            if (boardKeyToShow == null || contextMenuState.myNumberValuesOnCursor.length === 0) {
                 return null;
             }
             return (
@@ -1043,7 +1058,7 @@ const Boards: React.FC<Props> = ({
                                             type: myNumberValueDrawerType,
                                             newValue: {
                                                 type: update,
-                                                boardKey: activeBoardKey,
+                                                boardKey: boardKeyToShow,
                                                 stateKey: myNumberValueKey,
                                             }
                                         });
@@ -1089,7 +1104,7 @@ const Boards: React.FC<Props> = ({
 
         const allMyNumbersMenu = (() => {
             const title = '一時コマ（仮称）一覧';
-            if (board == null || activeBoardKey == null) {
+            if (board == null || boardKeyToShow == null) {
                 return <Menu.SubMenu title={title} disabled />;
             }
 
@@ -1130,7 +1145,7 @@ const Boards: React.FC<Props> = ({
                 <Menu.SubMenu title={title}>
                     <Menu.SubMenu title='数値'>
                         {__(recordToArray(me.myNumberValues)).compact(({ key, value }) => {
-                            const pieceExists = recordToDualKeyMap(value.pieces).toArray().some(([boardKey]) => activeBoardKey.id === boardKey.second && activeBoardKey.createdBy === boardKey.first);
+                            const pieceExists = recordToDualKeyMap(value.pieces).toArray().some(([boardKey]) => boardKeyToShow.id === boardKey.second && boardKeyToShow.createdBy === boardKey.first);
                             return (
                                 <Menu.SubMenu key={key} title={<span>{pieceExists ? <Icon.CheckOutlined /> : null} {MyNumberValue.stringify(value)}</span>}>
                                     <Menu.Item
@@ -1139,7 +1154,7 @@ const Boards: React.FC<Props> = ({
                                                 type: myNumberValueDrawerType,
                                                 newValue: {
                                                     type: update,
-                                                    boardKey: activeBoardKey,
+                                                    boardKey: boardKeyToShow,
                                                     stateKey: key,
                                                 }
                                             });
@@ -1183,7 +1198,7 @@ const Boards: React.FC<Props> = ({
                                         type: myNumberValueDrawerType,
                                         newValue: {
                                             type: create,
-                                            boardKey: activeBoardKey,
+                                            boardKey: boardKeyToShow,
                                             piece: pieceLocationWhichIsCellMode,
                                         }
                                     });
@@ -1199,7 +1214,7 @@ const Boards: React.FC<Props> = ({
                                         type: myNumberValueDrawerType,
                                         newValue: {
                                             type: create,
-                                            boardKey: activeBoardKey,
+                                            boardKey: boardKeyToShow,
                                             piece: pieceLocationWhichIsNotCellMode,
                                         }
                                     });
@@ -1232,18 +1247,31 @@ const Boards: React.FC<Props> = ({
         <div style={({ position: 'relative' })}>
             {boardComponent}
             <span style={boardsDropDownStyle}>
-                <Dropdown overlay={boardsMenu} trigger={['click']}>
-                    <Button>
-                        {activeBoardKey == null ? noActiveBoardText : (boards.get(activeBoardKey)?.name ?? noActiveBoardText)} <DownOutlined />
-                    </Button>
-                </Dropdown>
+                {boardsMenu != null
+                    ? <Dropdown overlay={boardsMenu} trigger={['click']}>
+                        <Button>
+                            {boardKeyToShow == null ? noActiveBoardText : (boards.get(boardKeyToShow)?.name ?? noActiveBoardText)} <Icons.DownOutlined />
+                        </Button>
+                    </Dropdown>
+                    : <Dropdown
+                        trigger={['click']}
+                        overlay={<Menu>
+                            <Menu.Item
+                                onClick={() => {
+                                    setActiveBoardSelectorModalVisibility(true);
+                                }}>
+                                表示ボードの変更
+                            </Menu.Item>
+                        </Menu>}>
+                        <Button>{board?.name}<Icons.DownOutlined /></Button>
+                    </Dropdown>}
                 <Button
-                    disabled={activeBoardKey == null}
+                    disabled={boardKeyToShow == null}
                     onClick={() => {
-                        if (activeBoardKey == null) {
+                        if (boardKeyToShow == null) {
                             return;
                         }
-                        dispatchRoomComponentsState({ type: boardDrawerType, newValue: { type: update, stateKey: activeBoardKey } });
+                        dispatchRoomComponentsState({ type: boardDrawerType, newValue: { type: update, stateKey: boardKeyToShow } });
                     }}>
                     編集
                 </Button>
@@ -1251,13 +1279,13 @@ const Boards: React.FC<Props> = ({
             <div style={zoomButtonStyle}>
                 <div style={({ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' })}>
                     <Button onClick={() => {
-                        if (activeBoardKey == null) {
+                        if (boardKeyToShow == null) {
                             return;
                         }
                         dispatch(roomConfigModule.actions.zoomBoard({
                             roomId,
-                            boardKey: activeBoardKey,
-                            panelId: boardsPanelConfigId,
+                            boardKey: boardKeyToShow,
+                            boardEditorPanelId,
                             zoomDelta: 0.25,
                             prevCanvasWidth: canvasWidth,
                             prevCanvasHeight: canvasHeight,
@@ -1266,13 +1294,13 @@ const Boards: React.FC<Props> = ({
                         <Icon.ZoomInOutlined />
                     </Button>
                     <Button onClick={() => {
-                        if (activeBoardKey == null) {
+                        if (boardKeyToShow == null) {
                             return;
                         }
                         dispatch(roomConfigModule.actions.zoomBoard({
                             roomId,
-                            boardKey: activeBoardKey,
-                            panelId: boardsPanelConfigId,
+                            boardKey: boardKeyToShow,
+                            boardEditorPanelId,
                             zoomDelta: -0.25,
                             prevCanvasWidth: canvasWidth,
                             prevCanvasHeight: canvasHeight,
@@ -1282,13 +1310,13 @@ const Boards: React.FC<Props> = ({
                     </Button>
                     <div style={({ height: 6 })} />
                     <Button onClick={() => {
-                        if (activeBoardKey == null) {
+                        if (boardKeyToShow == null) {
                             return;
                         }
                         dispatch(roomConfigModule.actions.resetBoard({
                             roomId,
-                            boardKey: activeBoardKey,
-                            panelId: boardsPanelConfigId,
+                            boardKey: boardKeyToShow,
+                            boardEditorPanelId,
                         }));
                     }}>
                         Boardの位置とズームをリセット
@@ -1296,8 +1324,11 @@ const Boards: React.FC<Props> = ({
                 </div>
             </div>
             {contextMenu}
+            <ActiveBoardSelectorModal
+                visible={activeBoardSelectorModalVisibility}
+                onComplete={() => setActiveBoardSelectorModalVisibility(false)} />
         </div >
     );
 };
 
-export default Boards;
+export default Board;

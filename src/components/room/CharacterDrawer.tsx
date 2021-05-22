@@ -45,6 +45,7 @@ const drawerBaseProps: Partial<DrawerProps> = {
 
 const defaultCharacter: Character.State = {
     $version: 1,
+    memo: '',
     name: '',
     isPrivate: false,
     image: null,
@@ -713,6 +714,16 @@ const CharacterDrawer: React.FC = () => {
                     })
                 }
 
+                <Typography.Title level={4}>メモ</Typography.Title>
+
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
+                    <Col flex={0}></Col>
+                    <Col span={inputSpan}>
+                        <BufferedTextArea size='small' bufferDuration='default' value={character.memo} rows={8} onChange={e => updateCharacter({ memo: e.currentValue })} />
+                    </Col>
+                </Row>
+
                 {createdByMe &&
                     <>
                         <Typography.Title level={4}>変数</Typography.Title>
@@ -721,7 +732,7 @@ const CharacterDrawer: React.FC = () => {
                             <Col flex='auto' />
                             <Col flex={0}></Col>
                             <Col span={inputSpan}>
-                                <TOMLInput size='small' bufferDuration='default' value={character.privateVarToml ?? ''} rows={8} onChange={e => updateCharacter({ privateVarToml: e.currentValue })} />
+                                <TOMLInput size='small' bufferDuration='default' value={character.privateVarToml} rows={8} onChange={e => updateCharacter({ privateVarToml: e.currentValue })} />
                             </Col>
                         </Row>
                     </>

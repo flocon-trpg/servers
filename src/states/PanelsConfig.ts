@@ -1,15 +1,17 @@
 import { castToRecord } from '../utils/cast';
 import isObject from '../utils/isObject';
 import { castToPartialCharactersPanelConfig, CharactersPanelConfig as CharacterPanelConfig, defaultCharactersPanelConfig as defaultCharacterPanelConfig, PartialCharactersPanelConfig as PartialCharacterPanelConfig, toCompleteCharactersPanelConfig } from './CharactersPanelConfig';
-import { BoardsPanelConfig as BoardPanelConfig, castToPartialBoardPanelConfig, defaultBoardPanelsConfig as defaultBoardPanelsConfig, PartialBoardPanelConfig, toCompleteBoardPanelConfig } from './BoardsPanelConfig';
+import { BoardEditorPanelConfig, castToPartialBoardEditorPanelConfig, defaultBoardEditorPanelsConfig as defaultBoardEditorPanelsConfig, PartialBoardEditorPanelConfig, toCompleteBoardEditorPanelConfig } from './BoardEditorPanelConfig';
 import { castToPartialMessagePanelConfig, defaultMessagePanelsConfig, MessagePanelConfig, PartialMessagePanelConfig, toCompleteMessagePanelConfig } from './MessagesPanelConfig';
 import { castToPartialGameEffectPanelConfig, defaultGameEffectPanelConfig, GameEffectPanelConfig, PartialGameEffectPanelConfig, toCompleteGameEffectPanelConfig } from './GameEffectPanelConfig';
 import { castToPartialParticipantPanelConfig, defaultParticipantPanelConfig, PartialParticipantPanelConfig, ParticipantPanelConfig, toCompleteParticipantsPanelConfig } from './ParticipantsPanelConfig';
 import { castToPartialMyValuePanelConfig, defaultMyValuePanelConfig, MyValuePanelConfig, PartialMyValuePanelConfig, toCompleteMyValuePanelConfig } from './MyValuePanelConfig';
 import { chooseRecord } from '../@shared/utils';
+import { ActiveBoardPanelConfig, castToPartialActiveBoardPanelConfig, defaultActiveBoardPanelsConfig, PartialActiveBoardPanelConfig, toCompleteActiveBoardPanelConfig } from './ActiveBoardPanelConfig';
 
 export type PanelsConfig = {
-    boardPanels: Record<string, BoardPanelConfig>;
+    activeBoardPanel: ActiveBoardPanelConfig;
+    boardEditorPanels: Record<string, BoardEditorPanelConfig>;
     characterPanel: CharacterPanelConfig;
     gameEffectPanel: GameEffectPanelConfig;
     messagePanels: Record<string, MessagePanelConfig>;
@@ -18,7 +20,8 @@ export type PanelsConfig = {
 }
 
 export type PartialPanelsConfig = {
-    boardPanels?: Record<string, PartialBoardPanelConfig>;
+    activeBoardPanel?: PartialActiveBoardPanelConfig;
+    boardEditorPanels?: Record<string, PartialBoardEditorPanelConfig>;
     characterPanel?: PartialCharacterPanelConfig;
     gameEffectPanel?: PartialGameEffectPanelConfig;
     messagePanels?: Record<string, PartialMessagePanelConfig>;
@@ -31,7 +34,8 @@ export const castToPartialPanelsConfig = (source: unknown): PartialPanelsConfig 
         return;
     }
     return {
-        boardPanels: castToRecord(source.boardPanels, castToPartialBoardPanelConfig),
+        activeBoardPanel: castToPartialActiveBoardPanelConfig(source.activeBoardPanel),
+        boardEditorPanels: castToRecord(source.boardEditorPanels, castToPartialBoardEditorPanelConfig),
         characterPanel: castToPartialCharactersPanelConfig(source.characterPanel),
         gameEffectPanel: castToPartialGameEffectPanelConfig(source.gameEffectPanel),
         messagePanels: castToRecord(source.messagePanels, castToPartialMessagePanelConfig),
@@ -42,7 +46,8 @@ export const castToPartialPanelsConfig = (source: unknown): PartialPanelsConfig 
 
 export const toCompletePanelsConfig = (source: PartialPanelsConfig): PanelsConfig => {
     return {
-        boardPanels: chooseRecord(source.boardPanels ?? {}, toCompleteBoardPanelConfig),
+        activeBoardPanel: toCompleteActiveBoardPanelConfig(source.activeBoardPanel ?? {}),
+        boardEditorPanels: chooseRecord(source.boardEditorPanels ?? {}, toCompleteBoardEditorPanelConfig),
         characterPanel: toCompleteCharactersPanelConfig(source.characterPanel ?? {}),
         gameEffectPanel: toCompleteGameEffectPanelConfig(source.gameEffectPanel ?? {}),
         messagePanels: chooseRecord(source.messagePanels ?? {}, toCompleteMessagePanelConfig),
@@ -53,7 +58,8 @@ export const toCompletePanelsConfig = (source: PartialPanelsConfig): PanelsConfi
 
 export const defaultPanelsConfig = (): PanelsConfig => {
     return {
-        boardPanels: defaultBoardPanelsConfig(),
+        activeBoardPanel: defaultActiveBoardPanelsConfig(),
+        boardEditorPanels: defaultBoardEditorPanelsConfig(),
         characterPanel: defaultCharacterPanelConfig(),
         gameEffectPanel: defaultGameEffectPanelConfig(),
         messagePanels: defaultMessagePanelsConfig(),
