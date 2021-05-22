@@ -417,7 +417,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     return result;
 };
 
-export const serverTransform = (requestedBy: RequestedBy): ServerTransform<State, TwoWayOperation, UpOperation> => ({ prevState, currentState, clientOperation, serverOperation }) => {
+export const serverTransform = (requestedBy: RequestedBy, participantKey: string): ServerTransform<State, TwoWayOperation, UpOperation> => ({ prevState, currentState, clientOperation, serverOperation }) => {
     const boards = RecordOperation.serverTransform({
         first: serverOperation?.boards,
         second: clientOperation.boards,
@@ -442,7 +442,7 @@ export const serverTransform = (requestedBy: RequestedBy): ServerTransform<State
         second: clientOperation.characters,
         prevState: prevState.characters,
         nextState: currentState.characters,
-        innerTransform: ({ first, second, prevState, nextState, key }) => Character.serverTransform(RequestedBy.createdByMe({ requestedBy, userUid: key }))({
+        innerTransform: ({ first, second, prevState, nextState }) => Character.serverTransform(RequestedBy.createdByMe({ requestedBy, userUid: participantKey }))({
             prevState,
             currentState: nextState,
             serverOperation: first,
@@ -461,7 +461,7 @@ export const serverTransform = (requestedBy: RequestedBy): ServerTransform<State
         second: clientOperation.myNumberValues,
         prevState: prevState.myNumberValues,
         nextState: currentState.myNumberValues,
-        innerTransform: ({ first, second, prevState, nextState, key }) => MyNumberValue.serverTransform(RequestedBy.createdByMe({ requestedBy, userUid: key }))({
+        innerTransform: ({ first, second, prevState, nextState }) => MyNumberValue.serverTransform(RequestedBy.createdByMe({ requestedBy, userUid: participantKey }))({
             prevState,
             currentState: nextState,
             serverOperation: first,

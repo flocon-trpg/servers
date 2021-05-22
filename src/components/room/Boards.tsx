@@ -845,7 +845,7 @@ const Boards: React.FC<Props> = ({
                                                                                 [activeBoardKey.createdBy]: {
                                                                                     [activeBoardKey.id]: {
                                                                                         type: replace,
-                                                                                        replace: { newValue: undefined },
+                                                                                        replace: { newValue: pieceLocationWhichIsCellMode },
                                                                                     }
                                                                                 }
                                                                             }

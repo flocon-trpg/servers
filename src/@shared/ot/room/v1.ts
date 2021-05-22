@@ -743,7 +743,7 @@ export const serverTransform = (requestedBy: RequestedBy): ServerTransform<State
         nextState: currentState.participants,
         first: serverOperation?.participants,
         second: clientOperation.participants,
-        innerTransform: ({ prevState, nextState, first, second }) => Participant.serverTransform(requestedBy)({
+        innerTransform: ({ prevState, nextState, first, second, key }) => Participant.serverTransform(requestedBy, key)({
             prevState,
             currentState: nextState,
             serverOperation: first,

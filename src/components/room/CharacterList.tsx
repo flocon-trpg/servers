@@ -76,7 +76,7 @@ const createBooleanParameterColumn = ({
                                         update: {
                                             $version: 1,
                                             characters: {
-                                                [character.stateKey.createdBy]: {
+                                                [character.stateKey.id]: {
                                                     type: update,
                                                     update: characterOperation,
                                                 }
@@ -128,7 +128,7 @@ const createNumParameterColumn = ({
                                         update: {
                                             $version: 1,
                                             characters: {
-                                                [character.stateKey.createdBy]: {
+                                                [character.stateKey.id]: {
                                                     type: update,
                                                     update: characterOperation,
                                                 }
@@ -179,7 +179,7 @@ const createStringParameterColumn = ({
                                         update: {
                                             $version: 1,
                                             characters: {
-                                                [character.stateKey.createdBy]: {
+                                                [character.stateKey.id]: {
                                                     type: update,
                                                     update: characterOperation,
                                                 }
@@ -273,7 +273,7 @@ const CharacterList: React.FC = () => {
                                     update: {
                                         $version: 1,
                                         characters: {
-                                            [character.stateKey.createdBy]: {
+                                            [character.stateKey.id]: {
                                                 type: update,
                                                 update: {
                                                     $version: 1,
@@ -315,7 +315,7 @@ const CharacterList: React.FC = () => {
                                         update: {
                                             $version: 1,
                                             characters: {
-                                                [character.stateKey.createdBy]: {
+                                                [character.stateKey.id]: {
                                                     type: update,
                                                     update: {
                                                         $version: 1,
