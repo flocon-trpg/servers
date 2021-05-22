@@ -62,12 +62,20 @@ export type TwoWayOperation = {
     myNumberValues?: Record<string, RecordTwoWayOperationElement<MyNumberValue.State, MyNumberValue.TwoWayOperation>>;
 }
 
-export const toClientState = (createdByMe: boolean) => (source: State): State => {
+export const toClientState = (createdByMe: boolean, activeBoardSecondKey: string | null | undefined) => (source: State): State => {
     return {
         ...source,
         boards: RecordOperation.toClientState({
             serverState: source.boards,
-            isPrivate: () => false,
+            isPrivate: (state, key) => {
+                if (createdByMe) {
+                    return false;
+                }
+                if (key === activeBoardSecondKey) {
+                    return false;
+                }
+                return true;
+            },
             toClientState: ({ state }) => Board.toClientState(state),
         }),
         characters: RecordOperation.toClientState({
@@ -125,7 +133,7 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
     };
 };
 
-export const toClientOperation = (createdByMe: boolean) => ({ prevState, nextState, diff }: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
+export const toClientOperation = (createdByMe: boolean, activeBoardSecondKey: string | null | undefined) => ({ prevState, nextState, diff }: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
     return {
         ...diff,
         boards: diff.boards == null ? undefined : RecordOperation.toClientOperation({
@@ -134,7 +142,15 @@ export const toClientOperation = (createdByMe: boolean) => ({ prevState, nextSta
             nextState: nextState.boards,
             toClientState: ({ nextState }) => Board.toClientState(nextState),
             toClientOperation: (params) => Board.toClientOperation(params),
-            isPrivate: () => false,
+            isPrivate: (state, key) => {
+                if (createdByMe) {
+                    return false;
+                }
+                if (key === activeBoardSecondKey) {
+                    return false;
+                }
+                return true;
+            },
         }),
         characters: diff.characters == null ? undefined : RecordOperation.toClientOperation({
             diff: diff.characters,
@@ -417,7 +433,15 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     return result;
 };
 
-export const serverTransform = (requestedBy: RequestedBy): ServerTransform<State, TwoWayOperation, UpOperation> => ({ prevState, currentState, clientOperation, serverOperation }) => {
+export const serverTransform = ({
+    requestedBy,
+    participantKey,
+    activeBoardSecondKey,
+}: {
+    requestedBy: RequestedBy;
+    participantKey: string;
+    activeBoardSecondKey: string | null | undefined;
+}): ServerTransform<State, TwoWayOperation, UpOperation> => ({ prevState, currentState, clientOperation, serverOperation }) => {
     const boards = RecordOperation.serverTransform({
         first: serverOperation?.boards,
         second: clientOperation.boards,
@@ -431,6 +455,9 @@ export const serverTransform = (requestedBy: RequestedBy): ServerTransform<State
         }),
         toServerState: state => state,
         protectedValuePolicy: {
+            cancelCreate: () => !RequestedBy.createdByMe({ requestedBy, userUid: participantKey }),
+            cancelUpdate: ({ key }) => !RequestedBy.createdByMe({ requestedBy, userUid: participantKey }) && key !== activeBoardSecondKey,
+            cancelRemove: () => !RequestedBy.createdByMe({ requestedBy, userUid: participantKey }),
         }
     });
     if (boards.isError) {
@@ -442,7 +469,7 @@ export const serverTransform = (requestedBy: RequestedBy): ServerTransform<State
         second: clientOperation.characters,
         prevState: prevState.characters,
         nextState: currentState.characters,
-        innerTransform: ({ first, second, prevState, nextState, key }) => Character.serverTransform(RequestedBy.createdByMe({ requestedBy, userUid: key }))({
+        innerTransform: ({ first, second, prevState, nextState }) => Character.serverTransform(RequestedBy.createdByMe({ requestedBy, userUid: participantKey }))({
             prevState,
             currentState: nextState,
             serverOperation: first,
@@ -461,7 +488,7 @@ export const serverTransform = (requestedBy: RequestedBy): ServerTransform<State
         second: clientOperation.myNumberValues,
         prevState: prevState.myNumberValues,
         nextState: currentState.myNumberValues,
-        innerTransform: ({ first, second, prevState, nextState, key }) => MyNumberValue.serverTransform(RequestedBy.createdByMe({ requestedBy, userUid: key }))({
+        innerTransform: ({ first, second, prevState, nextState }) => MyNumberValue.serverTransform(RequestedBy.createdByMe({ requestedBy, userUid: participantKey }))({
             prevState,
             currentState: nextState,
             serverOperation: first,

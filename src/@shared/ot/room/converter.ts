@@ -42,7 +42,7 @@ export const stringifyUpOperation = (source: Room.UpOperation): string => {
 export const decodeDownOperation = (source: unknown): Room.DownOperation => {
     const result = t.exact(Room.downOperation).decode(source);
     if (result._tag === 'Left') {
-        throw 'decodeRoomDownOperation failure';
+        throw 'decodeDownOperation failure';
     }
     return result.right;
 };

@@ -18,7 +18,7 @@ const composeUpOperation = (first, second) => {
     if (second === undefined) {
         return first;
     }
-    return { newValue: first.newValue };
+    return { newValue: second.newValue };
 };
 exports.composeUpOperation = composeUpOperation;
 const serverTransform = ({ first, second, prevState }) => {
@@ -34,7 +34,7 @@ exports.serverTransform = serverTransform;
 const clientTransform = ({ first, second }) => {
     return {
         firstPrime: first,
-        secondPrime: second,
+        secondPrime: undefined,
     };
 };
 exports.clientTransform = clientTransform;

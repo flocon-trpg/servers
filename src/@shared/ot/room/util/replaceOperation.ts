@@ -37,7 +37,7 @@ export const composeUpOperation = <T>(first: { newValue: T } | undefined, second
     if (second === undefined) {
         return first;
     }
-    return { newValue: first.newValue };
+    return { newValue: second.newValue };
 };
 
 export const serverTransform = <T>({ first, second, prevState }: ServerTransformParameters<T>): ServerTransformResult<T> => {
@@ -53,7 +53,7 @@ export const serverTransform = <T>({ first, second, prevState }: ServerTransform
 export const clientTransform = <T>({ first, second }: ClientTransformParameters<T>): ClientTransformResult<T> => {
     return {
         firstPrime: first,
-        secondPrime: second,
+        secondPrime: undefined,
     };
 };
 

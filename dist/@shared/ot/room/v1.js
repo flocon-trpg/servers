@@ -32,10 +32,13 @@ const type_1 = require("./util/type");
 const utils_1 = require("../../utils");
 const operation_1 = require("./util/operation");
 const record_1 = require("./util/record");
+const io_ts_1 = require("../../io-ts");
+const v1_1 = require("../compositeKey/v1");
 const replaceStringDownOperation = t.type({ oldValue: t.string });
 const replaceStringUpOperation = t.type({ newValue: t.string });
 exports.dbState = t.type({
     $version: t.literal(1),
+    activeBoardKey: io_ts_1.maybe(v1_1.compositeKey),
     bgms: t.record(t.string, Bgm.state),
     boolParamNames: t.record(t.string, ParamNames.state),
     numParamNames: t.record(t.string, ParamNames.state),
@@ -57,6 +60,7 @@ exports.state = t.intersection([exports.dbState, t.type({
         name: t.string,
     })]);
 exports.downOperation = operation_1.operation(1, {
+    activeBoardKey: t.type({ oldValue: io_ts_1.maybe(v1_1.compositeKey) }),
     bgms: t.record(t.string, recordOperationElement_1.recordDownOperationElementFactory(Bgm.state, Bgm.downOperation)),
     boolParamNames: t.record(t.string, recordOperationElement_1.recordDownOperationElementFactory(ParamNames.state, ParamNames.downOperation)),
     name: replaceStringDownOperation,
@@ -75,6 +79,7 @@ exports.downOperation = operation_1.operation(1, {
     strParamNames: t.record(t.string, recordOperationElement_1.recordDownOperationElementFactory(ParamNames.state, ParamNames.downOperation)),
 });
 exports.upOperation = operation_1.operation(1, {
+    activeBoardKey: t.type({ newValue: io_ts_1.maybe(v1_1.compositeKey) }),
     bgms: t.record(t.string, recordOperationElement_1.recordUpOperationElementFactory(Bgm.state, Bgm.upOperation)),
     boolParamNames: t.record(t.string, recordOperationElement_1.recordUpOperationElementFactory(ParamNames.state, ParamNames.upOperation)),
     name: replaceStringUpOperation,
@@ -108,7 +113,7 @@ const toClientState = (requestedBy) => (source) => {
         }), participants: RecordOperation.toClientState({
             serverState: source.participants,
             isPrivate: () => false,
-            toClientState: ({ state, key }) => Participant.toClientState(type_1.RequestedBy.createdByMe({ requestedBy, userUid: key }))(state),
+            toClientState: ({ state, key }) => { var _a; return Participant.toClientState(type_1.RequestedBy.createdByMe({ requestedBy, userUid: key }), (_a = source.activeBoardKey) === null || _a === void 0 ? void 0 : _a.id)(state); },
         }), strParamNames: RecordOperation.toClientState({
             serverState: source.strParamNames,
             isPrivate: () => false,
@@ -117,6 +122,7 @@ const toClientState = (requestedBy) => (source) => {
 };
 exports.toClientState = toClientState;
 const toClientOperation = (requestedBy) => ({ prevState, nextState, diff }) => {
+    const nextActiveBoardKey = nextState.activeBoardKey;
     return Object.assign(Object.assign({}, diff), { bgms: diff.bgms == null ? undefined : RecordOperation.toClientOperation({
             diff: diff.bgms,
             prevState: prevState.bgms,
@@ -142,8 +148,8 @@ const toClientOperation = (requestedBy) => ({ prevState, nextState, diff }) => {
             diff: diff.participants,
             prevState: prevState.participants,
             nextState: nextState.participants,
-            toClientState: ({ nextState, key }) => Participant.toClientState(type_1.RequestedBy.createdByMe({ requestedBy, userUid: key }))(nextState),
-            toClientOperation: (params) => Participant.toClientOperation(type_1.RequestedBy.createdByMe({ requestedBy, userUid: params.key }))(params),
+            toClientState: ({ nextState, key }) => Participant.toClientState(type_1.RequestedBy.createdByMe({ requestedBy, userUid: key }), nextActiveBoardKey === null || nextActiveBoardKey === void 0 ? void 0 : nextActiveBoardKey.id)(nextState),
+            toClientOperation: (params) => Participant.toClientOperation(type_1.RequestedBy.createdByMe({ requestedBy, userUid: params.key }), nextActiveBoardKey === null || nextActiveBoardKey === void 0 ? void 0 : nextActiveBoardKey.id)(params),
             isPrivate: () => false,
         }), strParamNames: diff.strParamNames == null ? undefined : RecordOperation.toClientOperation({
             diff: diff.strParamNames,
@@ -205,6 +211,9 @@ const toUpOperation = (source) => {
 exports.toUpOperation = toUpOperation;
 const apply = ({ state, operation }) => {
     const result = Object.assign({}, state);
+    if (operation.activeBoardKey != null) {
+        result.activeBoardKey = operation.activeBoardKey.newValue;
+    }
     const bgms = RecordOperation.apply({
         prevState: state.bgms, operation: operation.bgms, innerApply: ({ prevState, operation }) => {
             return Bgm.apply({ state: prevState, operation });
@@ -264,6 +273,9 @@ const apply = ({ state, operation }) => {
 exports.apply = apply;
 const applyBack = ({ state, operation }) => {
     const result = Object.assign({}, state);
+    if (operation.activeBoardKey != null) {
+        result.activeBoardKey = operation.activeBoardKey.oldValue;
+    }
     const bgms = RecordOperation.applyBack({
         nextState: state.bgms, operation: operation.bgms, innerApplyBack: ({ state, operation }) => {
             return Bgm.applyBack({ state, operation });
@@ -369,6 +381,7 @@ const composeUpOperation = ({ first, second }) => {
     }
     const valueProps = {
         $version: 1,
+        activeBoardKey: ReplaceOperation.composeUpOperation(first.activeBoardKey, second.activeBoardKey),
         name: ReplaceOperation.composeUpOperation(first.name, second.name),
         publicChannel1Name: ReplaceOperation.composeUpOperation(first.publicChannel1Name, second.publicChannel1Name),
         publicChannel2Name: ReplaceOperation.composeUpOperation(first.publicChannel2Name, second.publicChannel2Name),
@@ -435,6 +448,7 @@ const composeDownOperation = ({ first, second }) => {
     }
     const valueProps = {
         $version: 1,
+        activeBoardKey: ReplaceOperation.composeDownOperation(first.activeBoardKey, second.activeBoardKey),
         name: ReplaceOperation.composeDownOperation(first.name, second.name),
         publicChannel1Name: ReplaceOperation.composeDownOperation(first.publicChannel1Name, second.publicChannel1Name),
         publicChannel2Name: ReplaceOperation.composeDownOperation(first.publicChannel2Name, second.publicChannel2Name),
@@ -511,6 +525,10 @@ const restore = ({ nextState, downOperation }) => {
         strParamNames: strParamNames.value.twoWayOperation,
         participants: participants.value.twoWayOperation,
     };
+    if (downOperation.activeBoardKey !== undefined) {
+        prevState.activeBoardKey = downOperation.activeBoardKey.oldValue;
+        twoWayOperation.activeBoardKey = Object.assign(Object.assign({}, downOperation.activeBoardKey), { newValue: nextState.activeBoardKey });
+    }
     if (downOperation.name !== undefined) {
         prevState.name = downOperation.name.oldValue;
         twoWayOperation.name = Object.assign(Object.assign({}, downOperation.name), { newValue: nextState.name });
@@ -527,6 +545,7 @@ const restore = ({ nextState, downOperation }) => {
 };
 exports.restore = restore;
 const diff = ({ prevState, nextState }) => {
+    var _a, _b, _c, _d;
     const bgms = RecordOperation.diff({
         prevState: prevState.bgms,
         nextState: nextState.bgms,
@@ -560,6 +579,9 @@ const diff = ({ prevState, nextState }) => {
         strParamNames,
         participants,
     };
+    if (((_a = prevState.activeBoardKey) === null || _a === void 0 ? void 0 : _a.createdBy) !== ((_b = nextState.activeBoardKey) === null || _b === void 0 ? void 0 : _b.createdBy) || ((_c = prevState.activeBoardKey) === null || _c === void 0 ? void 0 : _c.id) !== ((_d = nextState.activeBoardKey) === null || _d === void 0 ? void 0 : _d.id)) {
+        result.activeBoardKey = { oldValue: prevState.activeBoardKey, newValue: nextState.activeBoardKey };
+    }
     if (prevState.name !== nextState.name) {
         result.name = { oldValue: prevState.name, newValue: nextState.name };
     }
@@ -576,6 +598,7 @@ const diff = ({ prevState, nextState }) => {
 };
 exports.diff = diff;
 const serverTransform = (requestedBy) => ({ prevState, currentState, clientOperation, serverOperation }) => {
+    const currentActiveBoardKey = currentState.activeBoardKey;
     const bgms = RecordOperation.serverTransform({
         prevState: prevState.bgms,
         nextState: currentState.bgms,
@@ -649,7 +672,7 @@ const serverTransform = (requestedBy) => ({ prevState, currentState, clientOpera
         nextState: currentState.participants,
         first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.participants,
         second: clientOperation.participants,
-        innerTransform: ({ prevState, nextState, first, second }) => Participant.serverTransform(requestedBy)({
+        innerTransform: ({ prevState, nextState, first, second, key }) => Participant.serverTransform({ requestedBy, participantKey: key, activeBoardSecondKey: currentActiveBoardKey === null || currentActiveBoardKey === void 0 ? void 0 : currentActiveBoardKey.id })({
             prevState,
             currentState: nextState,
             serverOperation: first,
@@ -669,6 +692,15 @@ const serverTransform = (requestedBy) => ({ prevState, currentState, clientOpera
         strParamNames: strParamNames.value,
         participants: participants.value,
     };
+    if (clientOperation.activeBoardKey != null) {
+        if (clientOperation.activeBoardKey.newValue == null || type_1.RequestedBy.createdByMe({ requestedBy, userUid: clientOperation.activeBoardKey.newValue.createdBy })) {
+            twoWayOperation.name = ReplaceOperation.serverTransform({
+                first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.name,
+                second: clientOperation.name,
+                prevState: prevState.name,
+            });
+        }
+    }
     twoWayOperation.name = ReplaceOperation.serverTransform({
         first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.name,
         second: clientOperation.name,
@@ -689,6 +721,10 @@ const serverTransform = (requestedBy) => ({ prevState, currentState, clientOpera
 };
 exports.serverTransform = serverTransform;
 const clientTransform = ({ first, second }) => {
+    const activeBoardKey = ReplaceOperation.clientTransform({
+        first: first.activeBoardKey,
+        second: second.activeBoardKey,
+    });
     const bgms = RecordOperation.clientTransform({
         first: first.bgms,
         second: second.bgms,
@@ -770,6 +806,7 @@ const clientTransform = ({ first, second }) => {
     });
     const firstPrime = {
         $version: 1,
+        activeBoardKey: activeBoardKey.firstPrime,
         bgms: bgms.value.firstPrime,
         boolParamNames: boolParamNames.value.firstPrime,
         numParamNames: numParamNames.value.firstPrime,
@@ -779,7 +816,7 @@ const clientTransform = ({ first, second }) => {
     };
     const secondPrime = {
         $version: 1,
-        bgms: bgms.value.secondPrime,
+        activeBoardKey: activeBoardKey.secondPrime,
         boolParamNames: boolParamNames.value.secondPrime,
         numParamNames: numParamNames.value.secondPrime,
         strParamNames: strParamNames.value.secondPrime,

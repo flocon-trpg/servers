@@ -81,6 +81,7 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }) => {
                     myNumberValues: {},
                 }
             },
+            activeBoardKey: null,
             publicChannel1Name: 'メイン',
             publicChannel2Name: 'メイン2',
             publicChannel3Name: 'メイン3',

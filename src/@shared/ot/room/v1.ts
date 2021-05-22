@@ -11,6 +11,8 @@ import { ApplyError, ComposeAndTransformError, PositiveInt } from '../../textOpe
 import { chooseRecord } from '../../utils';
 import { operation } from './util/operation';
 import { isIdRecord } from './util/record';
+import { Maybe, maybe } from '../../io-ts';
+import { CompositeKey, compositeKey } from '../compositeKey/v1';
 
 const replaceStringDownOperation = t.type({ oldValue: t.string });
 const replaceStringUpOperation = t.type({ newValue: t.string });
@@ -18,6 +20,7 @@ const replaceStringUpOperation = t.type({ newValue: t.string });
 export const dbState = t.type({
     $version: t.literal(1),
 
+    activeBoardKey: maybe(compositeKey),
     bgms: t.record(t.string, Bgm.state),
     boolParamNames: t.record(t.string, ParamNames.state),
     numParamNames: t.record(t.string, ParamNames.state),
@@ -46,6 +49,7 @@ export const state = t.intersection([dbState, t.type({
 export type State = t.TypeOf<typeof state>;
 
 export const downOperation = operation(1, {
+    activeBoardKey: t.type({ oldValue: maybe(compositeKey) }),
     bgms: t.record(t.string, recordDownOperationElementFactory(Bgm.state, Bgm.downOperation)),
     boolParamNames: t.record(t.string, recordDownOperationElementFactory(ParamNames.state, ParamNames.downOperation)),
     name: replaceStringDownOperation,
@@ -67,6 +71,7 @@ export const downOperation = operation(1, {
 export type DownOperation = t.TypeOf<typeof downOperation>
 
 export const upOperation = operation(1, {
+    activeBoardKey: t.type({ newValue: maybe(compositeKey) }),
     bgms: t.record(t.string, recordUpOperationElementFactory(Bgm.state, Bgm.upOperation)),
     boolParamNames: t.record(t.string, recordUpOperationElementFactory(ParamNames.state, ParamNames.upOperation)),
     name: replaceStringUpOperation,
@@ -90,6 +95,7 @@ export type UpOperation = t.TypeOf<typeof upOperation>
 export type TwoWayOperation = {
     $version: 1;
 
+    activeBoardKey?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<CompositeKey>>;
     bgms?: RecordOperation.RecordTwoWayOperation<Bgm.State, Bgm.TwoWayOperation>;
     boolParamNames?: RecordOperation.RecordTwoWayOperation<ParamNames.State, ParamNames.TwoWayOperation>;
     name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
@@ -129,7 +135,7 @@ export const toClientState = (requestedBy: RequestedBy) => (source: State): Stat
         participants: RecordOperation.toClientState({
             serverState: source.participants,
             isPrivate: () => false,
-            toClientState: ({ state, key }) => Participant.toClientState(RequestedBy.createdByMe({ requestedBy, userUid: key }))(state),
+            toClientState: ({ state, key }) => Participant.toClientState(RequestedBy.createdByMe({ requestedBy, userUid: key }), source.activeBoardKey?.id)(state),
         }),
         strParamNames: RecordOperation.toClientState({
             serverState: source.strParamNames,
@@ -140,6 +146,7 @@ export const toClientState = (requestedBy: RequestedBy) => (source: State): Stat
 };
 
 export const toClientOperation = (requestedBy: RequestedBy) => ({ prevState, nextState, diff }: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
+    const nextActiveBoardKey = nextState.activeBoardKey;
     return {
         ...diff,
         bgms: diff.bgms == null ? undefined : RecordOperation.toClientOperation({
@@ -170,8 +177,8 @@ export const toClientOperation = (requestedBy: RequestedBy) => ({ prevState, nex
             diff: diff.participants,
             prevState: prevState.participants,
             nextState: nextState.participants,
-            toClientState: ({ nextState, key }) => Participant.toClientState(RequestedBy.createdByMe({ requestedBy, userUid: key }))(nextState),
-            toClientOperation: (params) => Participant.toClientOperation(RequestedBy.createdByMe({ requestedBy, userUid: params.key }))(params),
+            toClientState: ({ nextState, key }) => Participant.toClientState(RequestedBy.createdByMe({ requestedBy, userUid: key }), nextActiveBoardKey?.id)(nextState),
+            toClientOperation: (params) => Participant.toClientOperation(RequestedBy.createdByMe({ requestedBy, userUid: params.key }), nextActiveBoardKey?.id)(params),
             isPrivate: () => false,
         }),
         strParamNames: diff.strParamNames == null ? undefined : RecordOperation.toClientOperation({
@@ -250,6 +257,10 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
 export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
     const result: State = { ...state };
 
+    if (operation.activeBoardKey != null) {
+        result.activeBoardKey = operation.activeBoardKey.newValue;
+    }
+
     const bgms = RecordOperation.apply<Bgm.State, Bgm.UpOperation | Bgm.TwoWayOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
         prevState: state.bgms, operation: operation.bgms, innerApply: ({ prevState, operation }) => {
             return Bgm.apply({ state: prevState, operation });
@@ -316,6 +327,10 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
 
 export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
     const result: State = { ...state };
+
+    if (operation.activeBoardKey != null) {
+        result.activeBoardKey = operation.activeBoardKey.oldValue;
+    }
 
     const bgms = RecordOperation.applyBack<Bgm.State, Bgm.DownOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
         nextState: state.bgms, operation: operation.bgms, innerApplyBack: ({ state, operation }) => {
@@ -434,6 +449,7 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
 
     const valueProps: UpOperation = {
         $version: 1,
+        activeBoardKey: ReplaceOperation.composeUpOperation(first.activeBoardKey, second.activeBoardKey),
         name: ReplaceOperation.composeUpOperation(first.name, second.name),
         publicChannel1Name: ReplaceOperation.composeUpOperation(first.publicChannel1Name, second.publicChannel1Name),
         publicChannel2Name: ReplaceOperation.composeUpOperation(first.publicChannel2Name, second.publicChannel2Name),
@@ -505,6 +521,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
 
     const valueProps: DownOperation = {
         $version: 1,
+        activeBoardKey: ReplaceOperation.composeDownOperation(first.activeBoardKey, second.activeBoardKey),
         name: ReplaceOperation.composeDownOperation(first.name, second.name),
         publicChannel1Name: ReplaceOperation.composeDownOperation(first.publicChannel1Name, second.publicChannel1Name),
         publicChannel2Name: ReplaceOperation.composeDownOperation(first.publicChannel2Name, second.publicChannel2Name),
@@ -595,6 +612,11 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({ nextSt
         participants: participants.value.twoWayOperation,
     };
 
+    if (downOperation.activeBoardKey !== undefined) {
+        prevState.activeBoardKey = downOperation.activeBoardKey.oldValue;
+        twoWayOperation.activeBoardKey = { ...downOperation.activeBoardKey, newValue: nextState.activeBoardKey };
+    }
+
     if (downOperation.name !== undefined) {
         prevState.name = downOperation.name.oldValue;
         twoWayOperation.name = { ...downOperation.name, newValue: nextState.name };
@@ -646,6 +668,9 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         strParamNames,
         participants,
     };
+    if (prevState.activeBoardKey?.createdBy !== nextState.activeBoardKey?.createdBy || prevState.activeBoardKey?.id !== nextState.activeBoardKey?.id) {
+        result.activeBoardKey = { oldValue: prevState.activeBoardKey, newValue: nextState.activeBoardKey };
+    }
     if (prevState.name !== nextState.name) {
         result.name = { oldValue: prevState.name, newValue: nextState.name };
     }
@@ -662,6 +687,8 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
 };
 
 export const serverTransform = (requestedBy: RequestedBy): ServerTransform<State, TwoWayOperation, UpOperation> => ({ prevState, currentState, clientOperation, serverOperation }) => {
+    const currentActiveBoardKey = currentState.activeBoardKey;
+
     const bgms = RecordOperation.serverTransform<Bgm.State, Bgm.State, Bgm.TwoWayOperation, Bgm.UpOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
         prevState: prevState.bgms,
         nextState: currentState.bgms,
@@ -743,7 +770,7 @@ export const serverTransform = (requestedBy: RequestedBy): ServerTransform<State
         nextState: currentState.participants,
         first: serverOperation?.participants,
         second: clientOperation.participants,
-        innerTransform: ({ prevState, nextState, first, second }) => Participant.serverTransform(requestedBy)({
+        innerTransform: ({ prevState, nextState, first, second, key }) => Participant.serverTransform({ requestedBy, participantKey: key, activeBoardSecondKey: currentActiveBoardKey?.id })({
             prevState,
             currentState: nextState,
             serverOperation: first,
@@ -765,6 +792,17 @@ export const serverTransform = (requestedBy: RequestedBy): ServerTransform<State
         strParamNames: strParamNames.value,
         participants: participants.value,
     };
+
+    // activeBoardKeyには、自分が作成したBoardしか設定できない。ただし、nullishにするのは誰でもできる。
+    if (clientOperation.activeBoardKey != null) {
+        if (clientOperation.activeBoardKey.newValue == null || RequestedBy.createdByMe({ requestedBy, userUid: clientOperation.activeBoardKey.newValue.createdBy })) {
+            twoWayOperation.name = ReplaceOperation.serverTransform({
+                first: serverOperation?.name,
+                second: clientOperation.name,
+                prevState: prevState.name,
+            });
+        }
+    }
 
     twoWayOperation.name = ReplaceOperation.serverTransform({
         first: serverOperation?.name,
@@ -789,6 +827,11 @@ export const serverTransform = (requestedBy: RequestedBy): ServerTransform<State
 };
 
 export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
+    const activeBoardKey = ReplaceOperation.clientTransform({
+        first: first.activeBoardKey,
+        second: second.activeBoardKey,
+    });
+
     const bgms = RecordOperation.clientTransform<Bgm.State, Bgm.UpOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
         first: first.bgms,
         second: second.bgms,
@@ -876,6 +919,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const firstPrime: UpOperation = {
         $version: 1,
+        activeBoardKey: activeBoardKey.firstPrime,
         bgms: bgms.value.firstPrime,
         boolParamNames: boolParamNames.value.firstPrime,
         numParamNames: numParamNames.value.firstPrime,
@@ -886,7 +930,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const secondPrime: UpOperation = {
         $version: 1,
-        bgms: bgms.value.secondPrime,
+        activeBoardKey: activeBoardKey.secondPrime,
         boolParamNames: boolParamNames.value.secondPrime,
         numParamNames: numParamNames.value.secondPrime,
         strParamNames: strParamNames.value.secondPrime,

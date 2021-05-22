@@ -27,6 +27,7 @@ export const state = t.type({
 
     image: maybe(filePath),
     isPrivate: t.boolean,
+    memo: t.string,
     name: t.string,
     privateCommands: t.record(t.string, t.string),
     privateVarToml: t.string,
@@ -45,6 +46,7 @@ export type State = t.TypeOf<typeof state>;
 export const downOperation = operation(1, {
     image: t.type({ oldValue: maybe(filePath) }),
     isPrivate: t.type({ oldValue: t.boolean }),
+    memo: TextOperation.downOperation,
     name: t.type({ oldValue: t.string }),
     privateCommands: t.record(t.string, recordDownOperationElementFactory(t.string, TextOperation.downOperation)),
     privateVarToml: TextOperation.downOperation,
@@ -63,6 +65,7 @@ export type DownOperation = t.TypeOf<typeof downOperation>;
 export const upOperation = operation(1, {
     image: t.type({ newValue: maybe(filePath) }),
     isPrivate: t.type({ newValue: t.boolean }),
+    memo: TextOperation.upOperation,
     name: t.type({ newValue: t.string }),
     privateCommands: t.record(t.string, recordUpOperationElementFactory(t.string, TextOperation.upOperation)),
     privateVarToml: TextOperation.upOperation,
@@ -83,6 +86,7 @@ export type TwoWayOperation = {
 
     image?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<FilePath>>;
     isPrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
+    memo?: TextOperation.TwoWayOperation;
     name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
     privateCommands?: RecordTwoWayOperation<string, TextOperation.TwoWayOperation>;
     privateVarToml?: TextOperation.TwoWayOperation;
@@ -155,6 +159,7 @@ export const toClientState = (createdByMe: boolean) => (source: State): State =>
 export const toClientOperation = (createdByMe: boolean) => ({ prevState, nextState, diff }: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
     return {
         ...diff,
+        memo: diff.memo == null ? undefined : TextOperation.toUpOperation(diff.memo),
         privateCommands: diff.privateCommands == null ? undefined : chooseRecord(diff.privateCommands, operation => mapRecordOperationElement({ source: operation, mapReplace: x => x, mapOperation: x => TextOperation.toUpOperation(x) })),
         privateVarToml: diff.privateVarToml == null ? undefined : TextOperation.toUpOperation(diff.privateVarToml),
         boolParams: diff.boolParams == null ? undefined : ParamRecordOperation.toClientOperation({
@@ -208,6 +213,7 @@ export const toClientOperation = (createdByMe: boolean) => ({ prevState, nextSta
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return {
         ...source,
+        memo: source.memo == null ? undefined : TextOperation.toDownOperation(source.memo),
         privateCommands: source.privateCommands == null ? undefined : chooseRecord(source.privateCommands, operation => mapRecordOperationElement({ source: operation, mapReplace: x => x, mapOperation: x => TextOperation.toDownOperation(x) })),
         privateVarToml: source.privateVarToml == null ? undefined : TextOperation.toDownOperation(source.privateVarToml),
         boolParams: source.boolParams == null ? undefined : chooseRecord(source.boolParams, SimpleValueParam.toDownOperation),
@@ -230,6 +236,7 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
 export const toUpOperation = (source: TwoWayOperation): UpOperation => {
     return {
         ...source,
+        memo: source.memo == null ? undefined : TextOperation.toUpOperation(source.memo),
         privateCommands: source.privateCommands == null ? undefined : chooseRecord(source.privateCommands, operation => mapRecordOperationElement({ source: operation, mapReplace: x => x, mapOperation: x => TextOperation.toUpOperation(x) })),
         privateVarToml: source.privateVarToml == null ? undefined : TextOperation.toUpOperation(source.privateVarToml),
         boolParams: source.boolParams == null ? undefined : chooseRecord(source.boolParams, SimpleValueParam.toUpOperation),
@@ -256,6 +263,13 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     }
     if (operation.isPrivate != null) {
         result.isPrivate = operation.isPrivate.newValue;
+    }
+    if (operation.memo != null) {
+        const valueResult = TextOperation.apply(state.memo, operation.memo);
+        if (valueResult.isError) {
+            return valueResult;
+        }
+        result.memo = valueResult.value;
     }
     if (operation.name != null) {
         result.name = operation.name.newValue;
@@ -364,6 +378,13 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     }
     if (operation.isPrivate != null) {
         result.isPrivate = operation.isPrivate.oldValue;
+    }
+    if (operation.memo != null) {
+        const valueResult = TextOperation.applyBack(state.memo, operation.memo);
+        if (valueResult.isError) {
+            return valueResult;
+        }
+        result.memo = valueResult.value;
     }
     if (operation.name != null) {
         result.name = operation.name.oldValue;
@@ -522,6 +543,11 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
         return tachieLocations;
     }
 
+    const memo = TextOperation.composeUpOperation(first.memo, second.memo);
+    if (memo.isError) {
+        return memo;
+    }
+
     const privateVarToml = TextOperation.composeUpOperation(first.privateVarToml, second.privateVarToml);
     if (privateVarToml.isError) {
         return privateVarToml;
@@ -531,6 +557,7 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
         $version: 1,
 
         isPrivate: ReplaceOperation.composeUpOperation(first.isPrivate, second.isPrivate),
+        memo: memo.value,
         name: ReplaceOperation.composeUpOperation(first.name, second.name),
         privateVarToml: privateVarToml.value,
         image: ReplaceOperation.composeUpOperation(first.image, second.image),
@@ -602,6 +629,10 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
         return tachieLocations;
     }
 
+    const memo = TextOperation.composeDownOperation(first.memo, second.memo);
+    if (memo.isError) {
+        return memo;
+    }
     const privateVarToml = TextOperation.composeDownOperation(first.privateVarToml, second.privateVarToml);
     if (privateVarToml.isError) {
         return privateVarToml;
@@ -611,6 +642,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
         $version: 1,
 
         isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
+        memo: memo.value,
         name: ReplaceOperation.composeDownOperation(first.name, second.name),
         privateVarToml: privateVarToml.value,
         image: ReplaceOperation.composeDownOperation(first.image, second.image),
@@ -716,6 +748,14 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({ nextSt
     if (downOperation.isPrivate !== undefined) {
         prevState.isPrivate = downOperation.isPrivate.oldValue;
         twoWayOperation.isPrivate = { ...downOperation.isPrivate, newValue: nextState.isPrivate };
+    }
+    if (downOperation.memo !== undefined) {
+        const restored = TextOperation.restore({ nextState: nextState.memo, downOperation: downOperation.memo });
+        if (restored.isError) {
+            return restored;
+        }
+        prevState.memo = restored.value.prevState;
+        twoWayOperation.memo = restored.value.twoWayOperation;
     }
     if (downOperation.name !== undefined) {
         prevState.name = downOperation.name.oldValue;
@@ -825,6 +865,9 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     }
     if (prevState.isPrivate !== nextState.isPrivate) {
         result.isPrivate = { oldValue: prevState.isPrivate, newValue: nextState.isPrivate };
+    }
+    if (prevState.memo !== nextState.memo) {
+        result.memo = TextOperation.diff({ prev: prevState.memo, next: nextState.memo });
     }
     if (prevState.name !== nextState.name) {
         result.name = { oldValue: prevState.name, newValue: nextState.name };
@@ -976,6 +1019,11 @@ export const serverTransform = (createdByMe: boolean): ServerTransform<State, Tw
         second: clientOperation.isPrivate,
         prevState: prevState.isPrivate,
     });
+    const transformedMemo = TextOperation.serverTransform({ first: serverOperation?.memo, second: clientOperation.memo, prevState: prevState.memo });
+    if (transformedMemo.isError) {
+        return transformedMemo;
+    }
+    twoWayOperation.memo = transformedMemo.value.secondPrime;
     twoWayOperation.name = ReplaceOperation.serverTransform({
         first: serverOperation?.name,
         second: clientOperation.name,
@@ -1075,6 +1123,14 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         first: first.isPrivate,
         second: second.isPrivate,
     });
+
+    const memo = TextOperation.clientTransform({
+        first: first.memo,
+        second: second.memo,
+    });
+    if (memo.isError) {
+        return memo;
+    }
 
     const name = ReplaceOperation.clientTransform({
         first: first.name,

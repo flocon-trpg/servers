@@ -63,7 +63,7 @@ exports.stringifyUpOperation = stringifyUpOperation;
 const decodeDownOperation = (source) => {
     const result = t.exact(Room.downOperation).decode(source);
     if (result._tag === 'Left') {
-        throw 'decodeRoomDownOperation failure';
+        throw 'decodeDownOperation failure';
     }
     return result.right;
 };
