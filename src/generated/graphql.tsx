@@ -1382,6 +1382,7 @@ export type WritePrivateMessageMutationVariables = Exact<{
   textColor?: Maybe<Scalars['String']>;
   characterStateId?: Maybe<Scalars['String']>;
   customName?: Maybe<Scalars['String']>;
+  gameType?: Maybe<Scalars['String']>;
 }>;
 
 
@@ -2563,7 +2564,7 @@ export type WritePublicMessageMutationHookResult = ReturnType<typeof useWritePub
 export type WritePublicMessageMutationResult = Apollo.MutationResult<WritePublicMessageMutation>;
 export type WritePublicMessageMutationOptions = Apollo.BaseMutationOptions<WritePublicMessageMutation, WritePublicMessageMutationVariables>;
 export const WritePrivateMessageDocument = gql`
-    mutation WritePrivateMessage($roomId: String!, $visibleTo: [String!]!, $text: String!, $textColor: String, $characterStateId: String, $customName: String) {
+    mutation WritePrivateMessage($roomId: String!, $visibleTo: [String!]!, $text: String!, $textColor: String, $characterStateId: String, $customName: String, $gameType: String) {
   result: writePrivateMessage(
     roomId: $roomId
     visibleTo: $visibleTo
@@ -2571,6 +2572,7 @@ export const WritePrivateMessageDocument = gql`
     textColor: $textColor
     characterStateId: $characterStateId
     customName: $customName
+    gameType: $gameType
   ) {
     ... on RoomPrivateMessage {
       ...RoomPrivateMessage
@@ -2602,6 +2604,7 @@ export type WritePrivateMessageMutationFn = Apollo.MutationFunction<WritePrivate
  *      textColor: // value for 'textColor'
  *      characterStateId: // value for 'characterStateId'
  *      customName: // value for 'customName'
+ *      gameType: // value for 'gameType'
  *   },
  * });
  */

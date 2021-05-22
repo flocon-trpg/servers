@@ -279,7 +279,8 @@ export const ChatInput: React.FC<Props> = ({
                         textColor: config.selectedTextColor,
                         visibleTo: [...selectedParticipantIds],
                         characterStateId,
-                        customName: customNameVariable
+                        customName: customNameVariable,
+                        gameType: config.selectedGameSystem,
                     }
                 })
                     .then(() => useRoomMessageInputTextsResult.setPrivateMessageInputText(undefined, selectedParticipantIds))
@@ -296,6 +297,7 @@ export const ChatInput: React.FC<Props> = ({
                         channelKey: selectedPublicChannel,
                         characterStateId,
                         customName: customNameVariable,
+                        gameType: config.selectedGameSystem,
                     }
                 })
                     .then(() => {
@@ -317,6 +319,7 @@ export const ChatInput: React.FC<Props> = ({
                         channelKey: $free,
                         characterStateId,
                         customName: customNameVariable,
+                        gameType: config.selectedGameSystem,
                     },
                 })
                     .then(() => {
