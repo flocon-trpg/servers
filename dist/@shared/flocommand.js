@@ -62,11 +62,12 @@ const dateTime = new t.Type('DateTime', (obj) => true, (input, context) => {
     }
     return t.success(input);
 }, t.identity);
-const $characterAction = t.partial({
-    title: t.string,
+const characterActionElement = t.partial({
     character: Character.action,
     message: Message.action,
 });
+const $characterAction = t.record(t.string, characterActionElement);
+const exactCharacterAction = t.record(t.string, t.exact(characterActionElement));
 const errorToMessage = (source) => {
     var _a, _b;
     return (_b = (_a = source[0]) === null || _a === void 0 ? void 0 : _a.message) !== null && _b !== void 0 ? _b : '不明なエラーが発生しました';
@@ -132,7 +133,7 @@ var TOML;
         if (object.isError) {
             return object;
         }
-        const decoded = $characterAction.decode(object.value);
+        const decoded = exactCharacterAction.decode(object.value);
         if (decoded._tag === 'Left') {
             return Result_1.ResultModule.error(errorToMessage(decoded.left));
         }

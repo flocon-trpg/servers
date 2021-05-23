@@ -34,6 +34,7 @@ const ParamRecordOperation = __importStar(require("../../util/paramRecordOperati
 const Result_1 = require("../../../../Result");
 const utils_1 = require("../../../../utils");
 const BoolParam = __importStar(require("./boolParam/v1"));
+const Command = __importStar(require("./command/v1"));
 const NumParam = __importStar(require("./numParam/v1"));
 const StrParam = __importStar(require("./strParam/v1"));
 const SimpleValueParam = __importStar(require("./simpleValueParam/v1"));
@@ -45,7 +46,7 @@ exports.state = t.type({
     isPrivate: t.boolean,
     memo: t.string,
     name: t.string,
-    privateCommands: t.record(t.string, t.string),
+    privateCommand: t.string,
     privateVarToml: t.string,
     tachieImage: io_ts_1.maybe(v1_1.filePath),
     boolParams: t.record(t.string, BoolParam.state),
@@ -53,6 +54,7 @@ exports.state = t.type({
     numMaxParams: t.record(t.string, NumParam.state),
     strParams: t.record(t.string, StrParam.state),
     pieces: t.record(t.string, t.record(t.string, Piece.state)),
+    privateCommands: t.record(t.string, Command.state),
     tachieLocations: t.record(t.string, t.record(t.string, BoardLocation.state)),
 });
 exports.downOperation = operation_1.operation(1, {
@@ -60,7 +62,7 @@ exports.downOperation = operation_1.operation(1, {
     isPrivate: t.type({ oldValue: t.boolean }),
     memo: TextOperation.downOperation,
     name: t.type({ oldValue: t.string }),
-    privateCommands: t.record(t.string, recordOperationElement_1.recordDownOperationElementFactory(t.string, TextOperation.downOperation)),
+    privateCommand: TextOperation.downOperation,
     privateVarToml: TextOperation.downOperation,
     tachieImage: t.type({ oldValue: io_ts_1.maybe(v1_1.filePath) }),
     boolParams: t.record(t.string, BoolParam.downOperation),
@@ -68,6 +70,7 @@ exports.downOperation = operation_1.operation(1, {
     numMaxParams: t.record(t.string, NumParam.downOperation),
     strParams: t.record(t.string, StrParam.downOperation),
     pieces: t.record(t.string, t.record(t.string, recordOperationElement_1.recordDownOperationElementFactory(Piece.state, Piece.downOperation))),
+    privateCommands: t.record(t.string, recordOperationElement_1.recordDownOperationElementFactory(Command.state, Command.downOperation)),
     tachieLocations: t.record(t.string, t.record(t.string, recordOperationElement_1.recordDownOperationElementFactory(BoardLocation.state, BoardLocation.downOperation))),
 });
 exports.upOperation = operation_1.operation(1, {
@@ -75,7 +78,7 @@ exports.upOperation = operation_1.operation(1, {
     isPrivate: t.type({ newValue: t.boolean }),
     memo: TextOperation.upOperation,
     name: t.type({ newValue: t.string }),
-    privateCommands: t.record(t.string, recordOperationElement_1.recordUpOperationElementFactory(t.string, TextOperation.upOperation)),
+    privateCommand: TextOperation.upOperation,
     privateVarToml: TextOperation.upOperation,
     tachieImage: t.type({ newValue: io_ts_1.maybe(v1_1.filePath) }),
     boolParams: t.record(t.string, BoolParam.upOperation),
@@ -83,6 +86,7 @@ exports.upOperation = operation_1.operation(1, {
     numMaxParams: t.record(t.string, NumParam.upOperation),
     strParams: t.record(t.string, StrParam.upOperation),
     pieces: t.record(t.string, t.record(t.string, recordOperationElement_1.recordUpOperationElementFactory(Piece.state, Piece.upOperation))),
+    privateCommands: t.record(t.string, recordOperationElement_1.recordUpOperationElementFactory(Command.state, Command.upOperation)),
     tachieLocations: t.record(t.string, t.record(t.string, recordOperationElement_1.recordUpOperationElementFactory(BoardLocation.state, BoardLocation.upOperation))),
 });
 const defaultBoolParamState = {
@@ -101,7 +105,7 @@ const defaultStrParamState = {
     value: '',
 };
 const toClientState = (createdByMe) => (source) => {
-    return Object.assign(Object.assign({}, source), { privateCommands: createdByMe ? source.privateCommands : {}, privateVarToml: createdByMe ? source.privateVarToml : '', boolParams: RecordOperation.toClientState({
+    return Object.assign(Object.assign({}, source), { privateCommand: createdByMe ? source.privateCommand : '', privateVarToml: createdByMe ? source.privateVarToml : '', boolParams: RecordOperation.toClientState({
             serverState: source.boolParams,
             isPrivate: () => false,
             toClientState: ({ state }) => SimpleValueParam.toClientState(createdByMe, null)(state),
@@ -121,6 +125,10 @@ const toClientState = (createdByMe) => (source) => {
             serverState: source.pieces,
             isPrivate: () => false,
             toClientState: ({ state }) => Piece.toClientState(state),
+        }), privateCommands: RecordOperation.toClientState({
+            serverState: source.privateCommands,
+            isPrivate: () => !createdByMe,
+            toClientState: ({ state }) => Command.toClientState(state),
         }), tachieLocations: DualKeyRecordOperation.toClientState({
             serverState: source.tachieLocations,
             isPrivate: () => false,
@@ -129,7 +137,7 @@ const toClientState = (createdByMe) => (source) => {
 };
 exports.toClientState = toClientState;
 const toClientOperation = (createdByMe) => ({ prevState, nextState, diff }) => {
-    return Object.assign(Object.assign({}, diff), { memo: diff.memo == null ? undefined : TextOperation.toUpOperation(diff.memo), privateCommands: diff.privateCommands == null ? undefined : utils_1.chooseRecord(diff.privateCommands, operation => recordOperationElement_1.mapRecordOperationElement({ source: operation, mapReplace: x => x, mapOperation: x => TextOperation.toUpOperation(x) })), privateVarToml: diff.privateVarToml == null ? undefined : TextOperation.toUpOperation(diff.privateVarToml), boolParams: diff.boolParams == null ? undefined : ParamRecordOperation.toClientOperation({
+    return Object.assign(Object.assign({}, diff), { memo: diff.memo == null ? undefined : TextOperation.toUpOperation(diff.memo), privateCommand: diff.privateCommand == null ? undefined : TextOperation.toUpOperation(diff.privateCommand), privateVarToml: diff.privateVarToml == null ? undefined : TextOperation.toUpOperation(diff.privateVarToml), boolParams: diff.boolParams == null ? undefined : ParamRecordOperation.toClientOperation({
             diff: diff.boolParams,
             prevState: prevState.boolParams,
             nextState: nextState.boolParams,
@@ -160,6 +168,13 @@ const toClientOperation = (createdByMe) => ({ prevState, nextState, diff }) => {
             toClientState: ({ nextState }) => Piece.toClientState(nextState),
             toClientOperation: (params) => Piece.toClientOperation(params),
             isPrivate: () => false,
+        }), privateCommands: diff.privateCommands == null ? undefined : RecordOperation.toClientOperation({
+            diff: diff.privateCommands,
+            prevState: prevState.privateCommands,
+            nextState: nextState.privateCommands,
+            toClientState: ({ nextState }) => Command.toClientState(nextState),
+            toClientOperation: (params) => Command.toClientOperation(params),
+            isPrivate: () => !createdByMe,
         }), tachieLocations: diff.tachieLocations == null ? undefined : DualKeyRecordOperation.toClientOperation({
             diff: diff.tachieLocations,
             prevState: prevState.tachieLocations,
@@ -171,10 +186,14 @@ const toClientOperation = (createdByMe) => ({ prevState, nextState, diff }) => {
 };
 exports.toClientOperation = toClientOperation;
 const toDownOperation = (source) => {
-    return Object.assign(Object.assign({}, source), { memo: source.memo == null ? undefined : TextOperation.toDownOperation(source.memo), privateCommands: source.privateCommands == null ? undefined : utils_1.chooseRecord(source.privateCommands, operation => recordOperationElement_1.mapRecordOperationElement({ source: operation, mapReplace: x => x, mapOperation: x => TextOperation.toDownOperation(x) })), privateVarToml: source.privateVarToml == null ? undefined : TextOperation.toDownOperation(source.privateVarToml), boolParams: source.boolParams == null ? undefined : utils_1.chooseRecord(source.boolParams, SimpleValueParam.toDownOperation), numParams: source.numParams == null ? undefined : utils_1.chooseRecord(source.numParams, SimpleValueParam.toDownOperation), numMaxParams: source.numMaxParams == null ? undefined : utils_1.chooseRecord(source.numMaxParams, SimpleValueParam.toDownOperation), strParams: source.strParams == null ? undefined : utils_1.chooseRecord(source.strParams, StrParam.toDownOperation), pieces: source.pieces == null ? undefined : utils_1.chooseDualKeyRecord(source.pieces, operation => recordOperationElement_1.mapRecordOperationElement({
+    return Object.assign(Object.assign({}, source), { memo: source.memo == null ? undefined : TextOperation.toDownOperation(source.memo), privateCommand: source.privateCommand == null ? undefined : TextOperation.toDownOperation(source.privateCommand), privateVarToml: source.privateVarToml == null ? undefined : TextOperation.toDownOperation(source.privateVarToml), boolParams: source.boolParams == null ? undefined : utils_1.chooseRecord(source.boolParams, SimpleValueParam.toDownOperation), numParams: source.numParams == null ? undefined : utils_1.chooseRecord(source.numParams, SimpleValueParam.toDownOperation), numMaxParams: source.numMaxParams == null ? undefined : utils_1.chooseRecord(source.numMaxParams, SimpleValueParam.toDownOperation), strParams: source.strParams == null ? undefined : utils_1.chooseRecord(source.strParams, StrParam.toDownOperation), pieces: source.pieces == null ? undefined : utils_1.chooseDualKeyRecord(source.pieces, operation => recordOperationElement_1.mapRecordOperationElement({
             source: operation,
             mapReplace: x => x,
             mapOperation: Piece.toDownOperation,
+        })), privateCommands: source.privateCommands == null ? undefined : utils_1.chooseRecord(source.privateCommands, operation => recordOperationElement_1.mapRecordOperationElement({
+            source: operation,
+            mapReplace: x => x,
+            mapOperation: Command.toDownOperation,
         })), tachieLocations: source.tachieLocations == null ? undefined : utils_1.chooseDualKeyRecord(source.tachieLocations, operation => recordOperationElement_1.mapRecordOperationElement({
             source: operation,
             mapReplace: x => x,
@@ -183,10 +202,14 @@ const toDownOperation = (source) => {
 };
 exports.toDownOperation = toDownOperation;
 const toUpOperation = (source) => {
-    return Object.assign(Object.assign({}, source), { memo: source.memo == null ? undefined : TextOperation.toUpOperation(source.memo), privateCommands: source.privateCommands == null ? undefined : utils_1.chooseRecord(source.privateCommands, operation => recordOperationElement_1.mapRecordOperationElement({ source: operation, mapReplace: x => x, mapOperation: x => TextOperation.toUpOperation(x) })), privateVarToml: source.privateVarToml == null ? undefined : TextOperation.toUpOperation(source.privateVarToml), boolParams: source.boolParams == null ? undefined : utils_1.chooseRecord(source.boolParams, SimpleValueParam.toUpOperation), numParams: source.numParams == null ? undefined : utils_1.chooseRecord(source.numParams, SimpleValueParam.toUpOperation), numMaxParams: source.numMaxParams == null ? undefined : utils_1.chooseRecord(source.numMaxParams, SimpleValueParam.toUpOperation), strParams: source.strParams == null ? undefined : utils_1.chooseRecord(source.strParams, StrParam.toUpOperation), pieces: source.pieces == null ? undefined : utils_1.chooseDualKeyRecord(source.pieces, operation => recordOperationElement_1.mapRecordOperationElement({
+    return Object.assign(Object.assign({}, source), { memo: source.memo == null ? undefined : TextOperation.toUpOperation(source.memo), privateCommand: source.privateCommand == null ? undefined : TextOperation.toUpOperation(source.privateCommand), privateVarToml: source.privateVarToml == null ? undefined : TextOperation.toUpOperation(source.privateVarToml), boolParams: source.boolParams == null ? undefined : utils_1.chooseRecord(source.boolParams, SimpleValueParam.toUpOperation), numParams: source.numParams == null ? undefined : utils_1.chooseRecord(source.numParams, SimpleValueParam.toUpOperation), numMaxParams: source.numMaxParams == null ? undefined : utils_1.chooseRecord(source.numMaxParams, SimpleValueParam.toUpOperation), strParams: source.strParams == null ? undefined : utils_1.chooseRecord(source.strParams, StrParam.toUpOperation), pieces: source.pieces == null ? undefined : utils_1.chooseDualKeyRecord(source.pieces, operation => recordOperationElement_1.mapRecordOperationElement({
             source: operation,
             mapReplace: x => x,
             mapOperation: Piece.toUpOperation,
+        })), privateCommands: source.privateCommands == null ? undefined : utils_1.chooseRecord(source.privateCommands, operation => recordOperationElement_1.mapRecordOperationElement({
+            source: operation,
+            mapReplace: x => x,
+            mapOperation: Command.toUpOperation,
         })), tachieLocations: source.tachieLocations == null ? undefined : utils_1.chooseDualKeyRecord(source.tachieLocations, operation => recordOperationElement_1.mapRecordOperationElement({
             source: operation,
             mapReplace: x => x,
@@ -212,15 +235,13 @@ const apply = ({ state, operation }) => {
     if (operation.name != null) {
         result.name = operation.name.newValue;
     }
-    const privateCommandsResult = RecordOperation.apply({
-        prevState: state.privateCommands, operation: operation.privateCommands, innerApply: ({ prevState, operation }) => {
-            return TextOperation.apply(prevState, operation);
+    if (operation.privateCommand != null) {
+        const valueResult = TextOperation.apply(state.privateCommand, operation.privateCommand);
+        if (valueResult.isError) {
+            return valueResult;
         }
-    });
-    if (privateCommandsResult.isError) {
-        return privateCommandsResult;
+        result.privateCommand = valueResult.value;
     }
-    result.privateCommands = privateCommandsResult.value;
     if (operation.privateVarToml != null) {
         const valueResult = TextOperation.apply(state.privateVarToml, operation.privateVarToml);
         if (valueResult.isError) {
@@ -288,6 +309,15 @@ const apply = ({ state, operation }) => {
         return pieces;
     }
     result.pieces = pieces.value;
+    const privateCommandsResult = RecordOperation.apply({
+        prevState: state.privateCommands, operation: operation.privateCommands, innerApply: ({ prevState, operation }) => {
+            return Command.apply({ state: prevState, operation });
+        }
+    });
+    if (privateCommandsResult.isError) {
+        return privateCommandsResult;
+    }
+    result.privateCommands = privateCommandsResult.value;
     const tachieLocations = DualKeyRecordOperation.apply({
         prevState: state.tachieLocations, operation: operation.tachieLocations, innerApply: ({ prevState, operation }) => {
             return BoardLocation.apply({ state: prevState, operation });
@@ -318,15 +348,13 @@ const applyBack = ({ state, operation }) => {
     if (operation.name != null) {
         result.name = operation.name.oldValue;
     }
-    const privateCommandsResult = RecordOperation.applyBack({
-        nextState: state.privateCommands, operation: operation.privateCommands, innerApplyBack: ({ state: nextState, operation }) => {
-            return TextOperation.applyBack(nextState, operation);
+    if (operation.privateCommand != null) {
+        const valueResult = TextOperation.applyBack(state.privateCommand, operation.privateCommand);
+        if (valueResult.isError) {
+            return valueResult;
         }
-    });
-    if (privateCommandsResult.isError) {
-        return privateCommandsResult;
+        result.privateCommand = valueResult.value;
     }
-    result.privateCommands = privateCommandsResult.value;
     if (operation.privateVarToml != null) {
         const valueResult = TextOperation.applyBack(state.privateVarToml, operation.privateVarToml);
         if (valueResult.isError) {
@@ -394,6 +422,15 @@ const applyBack = ({ state, operation }) => {
         return pieces;
     }
     result.pieces = pieces.value;
+    const privateCommandsResult = RecordOperation.applyBack({
+        nextState: state.privateCommands, operation: operation.privateCommands, innerApplyBack: params => {
+            return Command.applyBack(params);
+        }
+    });
+    if (privateCommandsResult.isError) {
+        return privateCommandsResult;
+    }
+    result.privateCommands = privateCommandsResult.value;
     const tachieLocations = DualKeyRecordOperation.applyBack({
         nextState: state.tachieLocations, operation: operation.tachieLocations, innerApplyBack: ({ state: nextState, operation }) => {
             return BoardLocation.applyBack({ state: nextState, operation });
@@ -448,6 +485,15 @@ const composeUpOperation = ({ first, second }) => {
     if (pieces.isError) {
         return pieces;
     }
+    const privateCommands = RecordOperation.composeUpOperation({
+        first: first.privateCommands,
+        second: second.privateCommands,
+        innerApply: ({ state, operation }) => Command.apply({ state, operation }),
+        innerCompose: params => Command.composeUpOperation(params)
+    });
+    if (privateCommands.isError) {
+        return privateCommands;
+    }
     const tachieLocations = DualKeyRecordOperation.composeUpOperation({
         first: first.tachieLocations,
         second: second.tachieLocations,
@@ -461,6 +507,10 @@ const composeUpOperation = ({ first, second }) => {
     if (memo.isError) {
         return memo;
     }
+    const privateCommand = TextOperation.composeUpOperation(first.privateCommand, second.privateCommand);
+    if (privateCommand.isError) {
+        return privateCommand;
+    }
     const privateVarToml = TextOperation.composeUpOperation(first.privateVarToml, second.privateVarToml);
     if (privateVarToml.isError) {
         return privateVarToml;
@@ -470,6 +520,7 @@ const composeUpOperation = ({ first, second }) => {
         isPrivate: ReplaceOperation.composeUpOperation(first.isPrivate, second.isPrivate),
         memo: memo.value,
         name: ReplaceOperation.composeUpOperation(first.name, second.name),
+        privateCommand: privateCommand.value,
         privateVarToml: privateVarToml.value,
         image: ReplaceOperation.composeUpOperation(first.image, second.image),
         tachieImage: ReplaceOperation.composeUpOperation(first.tachieImage, second.tachieImage),
@@ -478,6 +529,7 @@ const composeUpOperation = ({ first, second }) => {
         numMaxParams: numMaxParams.value,
         strParams: strParams.value,
         pieces: pieces.value,
+        privateCommands: privateCommands.value,
         tachieLocations: tachieLocations.value,
     };
     return Result_1.ResultModule.ok(valueProps);
@@ -487,7 +539,7 @@ const composeDownOperation = ({ first, second }) => {
     const boolParams = ParamRecordOperation.compose({
         first: first.boolParams,
         second: second.boolParams,
-        innerCompose: params => SimpleValueParam.composeDownOperationLoose()(params)
+        innerCompose: params => SimpleValueParam.composeDownOperation()(params)
     });
     if (boolParams.isError) {
         return boolParams;
@@ -495,7 +547,7 @@ const composeDownOperation = ({ first, second }) => {
     const numParams = ParamRecordOperation.compose({
         first: first.numParams,
         second: second.numParams,
-        innerCompose: params => SimpleValueParam.composeDownOperationLoose()(params)
+        innerCompose: params => SimpleValueParam.composeDownOperation()(params)
     });
     if (numParams.isError) {
         return numParams;
@@ -503,7 +555,7 @@ const composeDownOperation = ({ first, second }) => {
     const numMaxParams = ParamRecordOperation.compose({
         first: first.numMaxParams,
         second: second.numMaxParams,
-        innerCompose: params => SimpleValueParam.composeDownOperationLoose()(params)
+        innerCompose: params => SimpleValueParam.composeDownOperation()(params)
     });
     if (numMaxParams.isError) {
         return numMaxParams;
@@ -511,7 +563,7 @@ const composeDownOperation = ({ first, second }) => {
     const strParams = ParamRecordOperation.compose({
         first: first.strParams,
         second: second.strParams,
-        innerCompose: params => StrParam.composeDownOperationLoose(params)
+        innerCompose: params => StrParam.composeDownOperation(params)
     });
     if (strParams.isError) {
         return strParams;
@@ -524,6 +576,15 @@ const composeDownOperation = ({ first, second }) => {
     });
     if (pieces.isError) {
         return pieces;
+    }
+    const privateCommands = RecordOperation.composeDownOperation({
+        first: first.privateCommands,
+        second: second.privateCommands,
+        innerApplyBack: ({ state, operation }) => Command.applyBack({ state, operation }),
+        innerCompose: params => Command.composeDownOperation(params)
+    });
+    if (privateCommands.isError) {
+        return privateCommands;
     }
     const tachieLocations = DualKeyRecordOperation.composeDownOperation({
         first: first.tachieLocations,
@@ -538,6 +599,10 @@ const composeDownOperation = ({ first, second }) => {
     if (memo.isError) {
         return memo;
     }
+    const privateCommand = TextOperation.composeDownOperation(first.privateCommand, second.privateCommand);
+    if (privateCommand.isError) {
+        return privateCommand;
+    }
     const privateVarToml = TextOperation.composeDownOperation(first.privateVarToml, second.privateVarToml);
     if (privateVarToml.isError) {
         return privateVarToml;
@@ -547,6 +612,7 @@ const composeDownOperation = ({ first, second }) => {
         isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
         memo: memo.value,
         name: ReplaceOperation.composeDownOperation(first.name, second.name),
+        privateCommand: privateCommand.value,
         privateVarToml: privateVarToml.value,
         image: ReplaceOperation.composeDownOperation(first.image, second.image),
         tachieImage: ReplaceOperation.composeDownOperation(first.tachieImage, second.tachieImage),
@@ -555,6 +621,7 @@ const composeDownOperation = ({ first, second }) => {
         numMaxParams: numMaxParams.value,
         strParams: strParams.value,
         pieces: pieces.value,
+        privateCommands: privateCommands.value,
         tachieLocations: tachieLocations.value,
     };
     return Result_1.ResultModule.ok(valueProps);
@@ -606,6 +673,15 @@ const restore = ({ nextState, downOperation }) => {
     if (pieces.isError) {
         return pieces;
     }
+    const privateCommands = RecordOperation.restore({
+        nextState: nextState.privateCommands,
+        downOperation: downOperation.privateCommands,
+        innerDiff: params => Command.diff(params),
+        innerRestore: params => Command.restore(params),
+    });
+    if (privateCommands.isError) {
+        return privateCommands;
+    }
     const tachieLocations = DualKeyRecordOperation.restore({
         nextState: nextState.tachieLocations,
         downOperation: downOperation.tachieLocations,
@@ -615,7 +691,7 @@ const restore = ({ nextState, downOperation }) => {
     if (tachieLocations.isError) {
         return tachieLocations;
     }
-    const prevState = Object.assign(Object.assign({}, nextState), { boolParams: boolParams.value.prevState, numParams: numParams.value.prevState, numMaxParams: numMaxParams.value.prevState, strParams: strParams.value.prevState, pieces: pieces.value.prevState, tachieLocations: tachieLocations.value.prevState });
+    const prevState = Object.assign(Object.assign({}, nextState), { boolParams: boolParams.value.prevState, numParams: numParams.value.prevState, numMaxParams: numMaxParams.value.prevState, strParams: strParams.value.prevState, pieces: pieces.value.prevState, privateCommands: privateCommands.value.prevState, tachieLocations: tachieLocations.value.prevState });
     const twoWayOperation = {
         $version: 1,
         boolParams: boolParams.value.twoWayOperation,
@@ -623,6 +699,7 @@ const restore = ({ nextState, downOperation }) => {
         numMaxParams: numMaxParams.value.twoWayOperation,
         strParams: strParams.value.twoWayOperation,
         pieces: pieces.value.twoWayOperation,
+        privateCommands: privateCommands.value.twoWayOperation,
         tachieLocations: tachieLocations.value.twoWayOperation,
     };
     if (downOperation.image !== undefined) {
@@ -648,6 +725,14 @@ const restore = ({ nextState, downOperation }) => {
     if (downOperation.name !== undefined) {
         prevState.name = downOperation.name.oldValue;
         twoWayOperation.name = Object.assign(Object.assign({}, downOperation.name), { newValue: nextState.name });
+    }
+    if (downOperation.privateCommand !== undefined) {
+        const restored = TextOperation.restore({ nextState: nextState.privateCommand, downOperation: downOperation.privateCommand });
+        if (restored.isError) {
+            return restored;
+        }
+        prevState.privateCommand = restored.value.prevState;
+        twoWayOperation.privateCommand = restored.value.twoWayOperation;
     }
     if (downOperation.privateVarToml !== undefined) {
         const restored = TextOperation.restore({ nextState: nextState.privateVarToml, downOperation: downOperation.privateVarToml });
@@ -730,6 +815,11 @@ const diff = ({ prevState, nextState }) => {
         nextState: nextState.pieces,
         innerDiff: params => Piece.diff(params),
     });
+    const privateCommands = RecordOperation.diff({
+        prevState: prevState.privateCommands,
+        nextState: nextState.privateCommands,
+        innerDiff: params => Command.diff(params),
+    });
     const tachieLocations = DualKeyRecordOperation.diff({
         prevState: prevState.tachieLocations,
         nextState: nextState.tachieLocations,
@@ -742,6 +832,7 @@ const diff = ({ prevState, nextState }) => {
         numMaxParams,
         strParams,
         pieces,
+        privateCommands,
         tachieLocations,
     };
     if (prevState.image !== nextState.image) {
@@ -758,6 +849,9 @@ const diff = ({ prevState, nextState }) => {
     }
     if (prevState.name !== nextState.name) {
         result.name = { oldValue: prevState.name, newValue: nextState.name };
+    }
+    if (prevState.privateCommand !== nextState.privateCommand) {
+        result.privateCommand = TextOperation.diff({ prev: prevState.privateCommand, next: nextState.privateCommand });
     }
     if (prevState.privateVarToml !== nextState.privateVarToml) {
         result.privateVarToml = TextOperation.diff({ prev: prevState.privateVarToml, next: nextState.privateVarToml });
@@ -908,6 +1002,13 @@ const serverTransform = (createdByMe) => ({ prevState, currentState, clientOpera
         prevState: prevState.name,
     });
     if (createdByMe) {
+        const transformed = TextOperation.serverTransform({ first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.privateCommand, second: clientOperation.privateCommand, prevState: prevState.privateCommand });
+        if (transformed.isError) {
+            return transformed;
+        }
+        twoWayOperation.privateCommand = transformed.value.secondPrime;
+    }
+    if (createdByMe) {
         const transformed = TextOperation.serverTransform({ first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.privateVarToml, second: clientOperation.privateVarToml, prevState: prevState.privateVarToml });
         if (transformed.isError) {
             return transformed;
@@ -962,6 +1063,21 @@ const clientTransform = ({ first, second }) => {
     if (pieces.isError) {
         return pieces;
     }
+    const privateCommands = RecordOperation.clientTransform({
+        first: first.privateCommands,
+        second: second.privateCommands,
+        innerTransform: params => Command.clientTransform(params),
+        innerDiff: params => {
+            const diff = Command.diff(params);
+            if (diff == null) {
+                return diff;
+            }
+            return Command.toUpOperation(diff);
+        },
+    });
+    if (privateCommands.isError) {
+        return privateCommands;
+    }
     const tachieLocations = DualKeyRecordOperation.clientTransform({
         first: first.tachieLocations,
         second: second.tachieLocations,
@@ -994,6 +1110,13 @@ const clientTransform = ({ first, second }) => {
         first: first.name,
         second: second.name,
     });
+    const privateCommand = TextOperation.clientTransform({
+        first: first.privateCommand,
+        second: second.privateCommand,
+    });
+    if (privateCommand.isError) {
+        return privateCommand;
+    }
     const privateVarToml = TextOperation.clientTransform({
         first: first.privateVarToml,
         second: second.privateVarToml,
@@ -1008,11 +1131,13 @@ const clientTransform = ({ first, second }) => {
         numMaxParams: numMaxParams.value.firstPrime,
         strParams: strParams.value.firstPrime,
         pieces: pieces.value.firstPrime,
+        privateCommands: privateCommands.value.firstPrime,
         tachieLocations: tachieLocations.value.firstPrime,
         image: image.firstPrime,
         tachieImage: tachieImage.firstPrime,
         isPrivate: isPrivate.firstPrime,
         name: name.firstPrime,
+        privateCommand: privateCommand.value.firstPrime,
         privateVarToml: privateVarToml.value.firstPrime,
     };
     const secondPrime = {
@@ -1022,11 +1147,13 @@ const clientTransform = ({ first, second }) => {
         numMaxParams: numMaxParams.value.secondPrime,
         strParams: strParams.value.secondPrime,
         pieces: pieces.value.secondPrime,
+        privateCommands: privateCommands.value.secondPrime,
         tachieLocations: tachieLocations.value.secondPrime,
         image: image.secondPrime,
         tachieImage: tachieImage.secondPrime,
         isPrivate: isPrivate.secondPrime,
         name: name.secondPrime,
+        privateCommand: privateCommand.value.secondPrime,
         privateVarToml: privateVarToml.value.secondPrime,
     };
     return Result_1.ResultModule.ok({

@@ -19,7 +19,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.clientTransform = exports.serverTransform = exports.diff = exports.restore = exports.composeDownOperationLoose = exports.composeUpOperation = exports.applyBack = exports.apply = exports.toUpOperation = exports.toDownOperation = exports.toClientOperation = exports.toClientState = void 0;
+exports.clientTransform = exports.serverTransform = exports.diff = exports.restore = exports.composeDownOperation = exports.composeUpOperation = exports.applyBack = exports.apply = exports.toUpOperation = exports.toDownOperation = exports.toClientOperation = exports.toClientState = void 0;
 const Result_1 = require("../../../../../Result");
 const ReplaceValueOperation = __importStar(require("../../../util/replaceOperation"));
 const record_1 = require("../../../util/record");
@@ -82,7 +82,7 @@ const composeUpOperation = () => ({ first, second }) => {
     return Result_1.ResultModule.ok(valueProps);
 };
 exports.composeUpOperation = composeUpOperation;
-const composeDownOperationLoose = () => ({ first, second }) => {
+const composeDownOperation = () => ({ first, second }) => {
     const valueProps = {
         $version: 1,
         isValuePrivate: ReplaceValueOperation.composeDownOperation(first.isValuePrivate, second.isValuePrivate),
@@ -90,7 +90,7 @@ const composeDownOperationLoose = () => ({ first, second }) => {
     };
     return Result_1.ResultModule.ok(valueProps);
 };
-exports.composeDownOperationLoose = composeDownOperationLoose;
+exports.composeDownOperation = composeDownOperation;
 const restore = () => ({ nextState, downOperation }) => {
     if (downOperation === undefined) {
         return Result_1.ResultModule.ok({ prevState: nextState, nextState, twoWayOperation: undefined });
