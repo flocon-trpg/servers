@@ -2,7 +2,7 @@ import React from 'react';
 import { useImageFromGraphQL } from '../../hooks/image';
 import * as ReactKonva from 'react-konva';
 import { CompositeKey, compositeKeyToString, equals, stringToCompositeKey, toJSONString } from '../../@shared/StateMap';
-import { Button, Dropdown, Menu, Modal, Tooltip } from 'antd';
+import { Button, Dropdown, Menu, Modal, Popover, Tooltip } from 'antd';
 import * as Icons from '@ant-design/icons';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import { boardDrawerType, characterDrawerType, create, myNumberValueDrawerType } from './RoomComponentsState';
@@ -35,6 +35,7 @@ import { BoardLocation } from '../../utils/boardLocation';
 import { BoardConfig, defaultBoardConfig } from '../../states/BoardConfig';
 import { ActiveBoardPanelConfig } from '../../states/ActiveBoardPanelConfig';
 import { ActiveBoardSelectorModal } from './ActiveBoardSelecterModal';
+import { executeCharacterFlocommand, listCharacterFlocommand } from '../../flocommand/main';
 
 namespace Resource {
     export const cellSizeIsTooSmall = 'セルが小さすぎるため、無効化されています';
@@ -639,10 +640,13 @@ const Board: React.FC<Props> = ({
         if (contextMenuState == null) {
             return null;
         }
-        const board = boardKeyToShow == null ? undefined : boards.get(boardKeyToShow);
+        if (boardKeyToShow == null) {
+            return null;
+        }
+        const board = boards.get(boardKeyToShow);
 
         const selectedCharacterPiecesMenu = (() => {
-            if (boardKeyToShow == null || contextMenuState.characterPiecesOnCursor.length === 0) {
+            if (contextMenuState.characterPiecesOnCursor.length === 0) {
                 return null;
             }
             return (
@@ -707,7 +711,7 @@ const Board: React.FC<Props> = ({
         })();
 
         const selectedTachiesMenu = (() => {
-            if (boardKeyToShow == null || contextMenuState.tachiesOnCursor.length === 0) {
+            if (contextMenuState.tachiesOnCursor.length === 0) {
                 return null;
             }
             return (
@@ -771,9 +775,60 @@ const Board: React.FC<Props> = ({
                 </>);
         })();
 
+        const selectedCharacterCommandsMenu = (() => {
+            if (board == null || contextMenuState.characterPiecesOnCursor.length + contextMenuState.tachiesOnCursor.length === 0) {
+                return null;
+            }
+
+            const characters: { key: CompositeKey; value: Character.State }[] = [];
+            [...contextMenuState.characterPiecesOnCursor, ...contextMenuState.tachiesOnCursor].forEach(elem => {
+                if (characters.some(exists => exists.key.createdBy === elem.characterKey.createdBy && exists.key.id === elem.characterKey.id)) {
+                    return;
+                }
+                characters.push({ key: elem.characterKey, value: elem.character });
+            });
+            const itemGroups = __(characters).compact(pair => {
+                if (pair.value.privateCommand.trim() === '') {
+                    return null;
+                }
+                const key = compositeKeyToString(pair.key);
+                const commands = listCharacterFlocommand(pair.value.privateCommand);
+                if (commands.isError) {
+                    return (<Menu.ItemGroup key={key}>
+                        <Menu.Item disabled><Tooltip title={commands.error}>(コマンド文法エラー)</Tooltip></Menu.Item>
+                    </Menu.ItemGroup>);
+                }
+                const menuItems = [...commands.value].map(([commandKey,]) => {
+                    return (<Menu.Item
+                        key={commandKey}
+                        onClick={() => {
+                            const operation = executeCharacterFlocommand({ action: commands.value, characterKey: pair.key, character: pair.value, commandKey });
+                            if (operation == null) {
+                                return;
+                            }
+                            operate(operation);
+                        }}>
+                        {commandKey}
+                    </Menu.Item>);
+                });
+                return (<Menu.ItemGroup key={key} title={pair.value.name}>
+                    {menuItems}
+                </Menu.ItemGroup>);
+            }).toArray();
+            if (itemGroups.length === 0) {
+                return null;
+            }
+            return (<>
+                <Menu.SubMenu title='キャラクターコマンド'>
+                    {itemGroups}
+                </Menu.SubMenu>
+                <Menu.Divider />
+            </>);
+        })();
+
         const allCharactersListMenu = (() => {
             const title = 'キャラクター一覧';
-            if (board == null || boardKeyToShow == null) {
+            if (board == null) {
                 return <Menu.SubMenu title={title} disabled />;
             }
             return (
@@ -856,7 +911,7 @@ const Board: React.FC<Props> = ({
                                                                         type: update,
                                                                         update: {
                                                                             $version: 1,
-                                                                            tachieLocations: {
+                                                                            pieces: {
                                                                                 [boardKeyToShow.createdBy]: {
                                                                                     [boardKeyToShow.id]: {
                                                                                         type: replace,
@@ -1043,7 +1098,7 @@ const Board: React.FC<Props> = ({
         })();
 
         const selectedMyNumbersMenu = (() => {
-            if (boardKeyToShow == null || contextMenuState.myNumberValuesOnCursor.length === 0) {
+            if (contextMenuState.myNumberValuesOnCursor.length === 0) {
                 return null;
             }
             return (
@@ -1104,7 +1159,7 @@ const Board: React.FC<Props> = ({
 
         const allMyNumbersMenu = (() => {
             const title = '一時コマ（仮称）一覧';
-            if (board == null || boardKeyToShow == null) {
+            if (board == null) {
                 return <Menu.SubMenu title={title} disabled />;
             }
 
@@ -1234,6 +1289,7 @@ const Board: React.FC<Props> = ({
                     {selectedCharacterPiecesMenu}
                     {selectedTachiesMenu}
                     {selectedMyNumbersMenu}
+                    {selectedCharacterCommandsMenu}
                     {allCharactersListMenu}
                     {allMyNumbersMenu}
                 </Menu>

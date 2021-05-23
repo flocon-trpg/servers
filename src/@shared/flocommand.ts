@@ -52,11 +52,15 @@ const dateTime = new t.Type<TomlDateTime>(
     },
     t.identity);
 
-const $characterAction = t.partial({
-    title: t.string,
+const characterActionElement = t.partial({
     character: Character.action,
     message: Message.action,
 });
+
+export type CharacterActionElement = t.TypeOf<typeof characterActionElement>;
+
+const $characterAction = t.record(t.string, characterActionElement);
+const exactCharacterAction = t.record(t.string, t.exact(characterActionElement));
 
 export type CharacterAction = t.TypeOf<typeof $characterAction>;
 
@@ -128,7 +132,7 @@ export namespace TOML {
         if (object.isError) {
             return object;
         }
-        const decoded = $characterAction.decode(object.value);
+        const decoded = exactCharacterAction.decode(object.value);
         if (decoded._tag === 'Left') {
             return ResultModule.error(errorToMessage(decoded.left));
         }

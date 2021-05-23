@@ -9,21 +9,18 @@ import { isIdRecord } from '../../../util/record';
 export const state = t.type({
     $version: t.literal(1),
 
-    isValuePrivate: t.boolean,
     value: t.string
 });
 
 export type State = t.TypeOf<typeof state>;
 
 export const downOperation = operation(1, {
-    isValuePrivate: t.type({ oldValue: t.boolean }),
     value: TextOperation.downOperation,
 });
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
 export const upOperation = operation(1, {
-    isValuePrivate: t.type({ newValue: t.boolean }),
     value: TextOperation.upOperation,
 });
 
@@ -32,32 +29,17 @@ export type UpOperation = t.TypeOf<typeof upOperation>;
 export type TwoWayOperation = {
     $version: 1;
 
-    isValuePrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     value?: TextOperation.TwoWayOperation;
 }
 
-export const toClientState = (createdByMe: boolean) => (source: State): State => {
-    return {
-        ...source,
-        value: source.isValuePrivate && !createdByMe ? '' : source.value,
-    };
+export const toClientState = (source: State): State => {
+    return source;
 };
 
-export const toClientOperation = (createdByMe: boolean) => ({ prevState, nextState, diff }: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
+export const toClientOperation = ({ diff }: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
     return {
         ...diff,
-        value: TextOperation.toPrivateClientOperation({
-            oldValue: {
-                value: prevState.value,
-                isValuePrivate: prevState.isValuePrivate,
-            },
-            newValue: {
-                value: nextState.value,
-                isValuePrivate: nextState.isValuePrivate,
-            },
-            diff: diff.value,
-            createdByMe,
-        })
+        value: diff.value == null ? undefined : TextOperation.toUpOperation(diff.value)
     };
 };
 
@@ -77,9 +59,6 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
 
 export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
     const result: State = { ...state };
-    if (operation.isValuePrivate != null) {
-        result.isValuePrivate = operation.isValuePrivate.newValue;
-    }
     if (operation.value != null) {
         const valueResult = TextOperation.apply(state.value, operation.value);
         if (valueResult.isError) {
@@ -93,9 +72,6 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
 export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
     const result = { ...state };
 
-    if (operation.isValuePrivate !== undefined) {
-        result.isValuePrivate = operation.isValuePrivate.oldValue;
-    }
     if (operation.value !== undefined) {
         const prevValue = TextOperation.applyBack(state.value, operation.value);
         if (prevValue.isError) {
@@ -114,7 +90,6 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
     }
     const valueProps: UpOperation = {
         $version: 1,
-        isValuePrivate: ReplaceOperation.composeUpOperation(first.isValuePrivate, second.isValuePrivate),
         value: value.value,
     };
     return ResultModule.ok(valueProps);
@@ -127,7 +102,6 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     }
     const valueProps: DownOperation = {
         $version: 1,
-        isValuePrivate: ReplaceOperation.composeDownOperation(first.isValuePrivate, second.isValuePrivate),
         value: value.value,
     };
     return ResultModule.ok(valueProps);
@@ -142,10 +116,6 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({ nextSt
     const prevState: State = { ...nextState };
     const twoWayOperation: TwoWayOperation = { $version: 1 };
 
-    if (downOperation.isValuePrivate !== undefined) {
-        prevState.isValuePrivate = downOperation.isValuePrivate.oldValue;
-        twoWayOperation.isValuePrivate = { ...downOperation.isValuePrivate, newValue: nextState.isValuePrivate };
-    }
     if (downOperation.value !== undefined) {
         const restored = TextOperation.restore({ nextState: nextState.value, downOperation: downOperation.value });
         if (restored.isError) {
@@ -160,35 +130,23 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({ nextSt
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
     const resultType: TwoWayOperation = { $version: 1 };
-    if (prevState.isValuePrivate !== nextState.isValuePrivate) {
-        resultType.isValuePrivate = { oldValue: prevState.isValuePrivate, newValue: nextState.isValuePrivate };
-    }
     if (prevState.value !== nextState.value) {
         resultType.value = TextOperation.diff({ prev: prevState.value, next: nextState.value });
     }
     if (isIdRecord(resultType)) {
         return undefined;
     }
-    return { ...resultType };
+    return resultType;
 };
 
-export const serverTransform = (createdByMe: boolean): ServerTransform<State, TwoWayOperation, UpOperation> => ({ prevState, currentState, clientOperation, serverOperation }) => {
+export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperation> = ({ prevState, currentState, clientOperation, serverOperation }) => {
     const twoWayOperation: TwoWayOperation = { $version: 1 };
 
-    if (createdByMe) {
-        twoWayOperation.isValuePrivate = ReplaceOperation.serverTransform({
-            first: serverOperation?.isValuePrivate,
-            second: clientOperation.isValuePrivate,
-            prevState: prevState.isValuePrivate,
-        });
+    const transformed = TextOperation.serverTransform({ first: serverOperation?.value, second: clientOperation.value, prevState: prevState.value });
+    if (transformed.isError) {
+        return transformed;
     }
-    if (createdByMe || !currentState.isValuePrivate) {
-        const transformed = TextOperation.serverTransform({ first: serverOperation?.value, second: clientOperation.value, prevState: prevState.value });
-        if (transformed.isError) {
-            return transformed;
-        }
-        twoWayOperation.value = transformed.value.secondPrime;
-    }
+    twoWayOperation.value = transformed.value.secondPrime;
 
     if (isIdRecord(twoWayOperation)) {
         return ResultModule.ok(undefined);
@@ -198,11 +156,6 @@ export const serverTransform = (createdByMe: boolean): ServerTransform<State, Tw
 };
 
 export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
-    const isValuePrivate = ReplaceOperation.clientTransform({
-        first: first.isValuePrivate,
-        second: second.isValuePrivate,
-    });
-
     const value = TextOperation.clientTransform({
         first: first.value,
         second: second.value,
@@ -214,13 +167,11 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const firstPrime: UpOperation = {
         $version: 1,
-        isValuePrivate: isValuePrivate.firstPrime,
         value: value.value.firstPrime,
     };
 
     const secondPrime: UpOperation = {
         $version: 1,
-        isValuePrivate: isValuePrivate.secondPrime,
         value: value.value.secondPrime,
     };
 
@@ -229,3 +180,4 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         secondPrime: isIdRecord(secondPrime) ? undefined : secondPrime,
     });
 };
+

@@ -96,7 +96,7 @@ export const composeUpOperation = <T>(): Compose<UpOperation<T>> => ({ first, se
     return ResultModule.ok(valueProps);
 };
 
-export const composeDownOperationLoose = <T>(): Compose<DownOperation<T>> => ({ first, second }) => {
+export const composeDownOperation = <T>(): Compose<DownOperation<T>> => ({ first, second }) => {
     const valueProps: DownOperation<T> = {
         $version: 1,
         isValuePrivate: ReplaceValueOperation.composeDownOperation(first.isValuePrivate, second.isValuePrivate),

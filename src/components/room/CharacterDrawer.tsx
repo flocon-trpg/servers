@@ -49,6 +49,7 @@ const defaultCharacter: Character.State = {
     name: '',
     isPrivate: false,
     image: null,
+    privateCommand: '',
     privateCommands: {},
     privateVarToml: '',
     tachieImage: null,
@@ -116,6 +117,7 @@ const CharacterDrawer: React.FC = () => {
         operate(operation);
     });
     const [filesManagerDrawerType, setFilesManagerDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
+
 
     if (boolParamNames == null || numParamNames == null || strParamNames == null || participants == null || me.userUid == null) {
         return null;
@@ -733,6 +735,20 @@ const CharacterDrawer: React.FC = () => {
                             <Col flex={0}></Col>
                             <Col span={inputSpan}>
                                 <TOMLInput size='small' bufferDuration='default' value={character.privateVarToml} rows={8} onChange={e => updateCharacter({ privateVarToml: e.currentValue })} />
+                            </Col>
+                        </Row>
+                    </>
+                }
+
+                {createdByMe &&
+                    <>
+                        <Typography.Title level={4}>コマンド</Typography.Title>
+
+                        <Row gutter={gutter} align='middle'>
+                            <Col flex='auto' />
+                            <Col flex={0}></Col>
+                            <Col span={inputSpan}>
+                                <TOMLInput size='small' bufferDuration='default' value={character.privateCommand} rows={8} onChange={e => updateCharacter({ privateCommand: e.currentValue })} />
                             </Col>
                         </Row>
                     </>
