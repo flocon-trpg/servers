@@ -796,10 +796,10 @@ export const serverTransform = (requestedBy: RequestedBy): ServerTransform<State
     // activeBoardKeyには、自分が作成したBoardしか設定できない。ただし、nullishにするのは誰でもできる。
     if (clientOperation.activeBoardKey != null) {
         if (clientOperation.activeBoardKey.newValue == null || RequestedBy.createdByMe({ requestedBy, userUid: clientOperation.activeBoardKey.newValue.createdBy })) {
-            twoWayOperation.name = ReplaceOperation.serverTransform({
-                first: serverOperation?.name,
-                second: clientOperation.name,
-                prevState: prevState.name,
+            twoWayOperation.activeBoardKey = ReplaceOperation.serverTransform({
+                first: serverOperation?.activeBoardKey,
+                second: clientOperation.activeBoardKey,
+                prevState: prevState.activeBoardKey,
             });
         }
     }

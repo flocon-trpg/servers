@@ -244,6 +244,7 @@ export const serverTransform = (createdByMe: boolean): ServerTransform<State, Tw
         }),
         toServerState: state => state,
         protectedValuePolicy: {
+            cancelCreate: () => !createdByMe,
             cancelRemove: params => !createdByMe && params.nextState.isPrivate,
             cancelUpdate: params => !createdByMe && params.nextState.isPrivate,
         },

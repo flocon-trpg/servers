@@ -229,6 +229,7 @@ const serverTransform = (createdByMe) => ({ prevState, currentState, clientOpera
         }),
         toServerState: state => state,
         protectedValuePolicy: {
+            cancelCreate: () => !createdByMe,
             cancelRemove: params => !createdByMe && params.nextState.isPrivate,
             cancelUpdate: params => !createdByMe && params.nextState.isPrivate,
         },

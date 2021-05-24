@@ -694,10 +694,10 @@ const serverTransform = (requestedBy) => ({ prevState, currentState, clientOpera
     };
     if (clientOperation.activeBoardKey != null) {
         if (clientOperation.activeBoardKey.newValue == null || type_1.RequestedBy.createdByMe({ requestedBy, userUid: clientOperation.activeBoardKey.newValue.createdBy })) {
-            twoWayOperation.name = ReplaceOperation.serverTransform({
-                first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.name,
-                second: clientOperation.name,
-                prevState: prevState.name,
+            twoWayOperation.activeBoardKey = ReplaceOperation.serverTransform({
+                first: serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.activeBoardKey,
+                second: clientOperation.activeBoardKey,
+                prevState: prevState.activeBoardKey,
             });
         }
     }
