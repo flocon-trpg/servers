@@ -58,12 +58,12 @@ export namespace MyKonva {
 
         const transitions0 = useTransition(text0, {
             from: { opacity: 0 },
-            enter: { opacity: labelOpacity},
+            enter: { opacity: labelOpacity },
             leave: { opacity: 0 },
         });
         const transitions1 = useTransition(text1, {
             from: { opacity: 0 },
-            enter: { opacity: labelOpacity},
+            enter: { opacity: labelOpacity },
             leave: { opacity: 0 },
         });
         const transitions2 = useTransition(text2, {
@@ -103,7 +103,7 @@ export namespace MyKonva {
                             pointerWidth={6}
                             pointerHeight={6}
                             pointerDirection='down'
-                            lineJoin='round'/>
+                            lineJoin='round' />
                         <ReactKonva.Text
                             text={item}
                             fontFamily='Noto Sans JP Regular'
@@ -188,7 +188,7 @@ export namespace MyKonva {
         const texts = [...recentMessages]
             .filter(msg => !isDeleted(msg))
             .sort((x, y) => y.createdAt - x.createdAt);
-            
+
         const toText = (message: RoomPublicMessageFragment | null | undefined): string | undefined => {
             if (message == null) {
                 return undefined;
@@ -247,6 +247,8 @@ export namespace MyKonva {
 
         onDragEnd?: (resize: DragEndResult) => void;
         onClick?: () => void;
+        onMouseEnter?: () => void;
+        onMouseLeave?: () => void;
     } & Vector2 & Size
 
     export const Image: React.FC<ImageProps> = (props: ImageProps) => {
@@ -328,6 +330,18 @@ export namespace MyKonva {
                     }}
                     onDragEnd={e => onDragEnd(e)}
                     onTouchEnd={e => onDragEnd(e)}
+                    onMouseEnter={() => {
+                        if (props.onMouseEnter == null) {
+                            return;
+                        }
+                        props.onMouseEnter();
+                    }}
+                    onMouseLeave={() => {
+                        if (props.onMouseLeave == null) {
+                            return;
+                        }
+                        props.onMouseLeave();
+                    }}
                     onTransformEnd={() => {
                         // transformer is changing scale of the node
                         // and NOT its width or height
@@ -402,7 +416,8 @@ export namespace MyKonva {
 
         onDragEnd?: (resize: DragEndResult) => void;
         onClick?: () => void;
-
+        onMouseEnter?: () => void;
+        onMouseLeave?: () => void;
     } & Vector2 & Size
 
     export const MyNumberValue: React.FC<MyNumberValueProps> = (props: MyNumberValueProps) => {
@@ -537,6 +552,18 @@ export namespace MyKonva {
                     }}
                     onDragEnd={e => onDragEnd(e)}
                     onTouchEnd={e => onDragEnd(e)}
+                    onMouseEnter={() => {
+                        if (props.onMouseEnter == null) {
+                            return;
+                        }
+                        props.onMouseEnter();
+                    }}
+                    onMouseLeave={() => {
+                        if (props.onMouseLeave == null) {
+                            return;
+                        }
+                        props.onMouseLeave();
+                    }}
                     onTransformEnd={() => {
                         // transformer is changing scale of the node
                         // and NOT its width or height

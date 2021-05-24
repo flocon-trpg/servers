@@ -1,8 +1,6 @@
-import { Drawer } from 'antd';
 import React from 'react';
 import { interval } from 'rxjs';
-import useConstant from 'use-constant';
-import BufferedInput, { OnChangeParams } from '../../foundations/BufferedInput';
+import { OnChangeParams } from '../../foundations/BufferedInput';
 import BufferedTextArea from '../../foundations/BufferedTextArea';
 
 const Main: React.FC = () => {

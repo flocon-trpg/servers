@@ -16,6 +16,7 @@ import { recordToDualKeyMap } from '../../@shared/utils';
 import * as PieceModule from '../../@shared/ot/piece/v1';
 import { RecordUpOperationElement, replace, update } from '../../@shared/ot/room/util/recordOperationElement';
 import { isIdRecord } from '../../@shared/ot/room/util/record';
+import { NewTabLinkify } from '../../foundations/NewTabLinkify';
 
 export namespace RoomMessage {
     const Image: React.FC<{ filePath: FilePathFragment | undefined }> = ({ filePath }: { filePath: FilePathFragment | undefined }) => {
@@ -63,9 +64,9 @@ export namespace RoomMessage {
             const changed = [
                 value.value ? '値' : null,
                 value.isValuePrivate ? '公開状態' : null,
-                pieces.toArray().some(([,piece]) => piece.type === replace && piece.replace.newValue != null) ? null : 'コマ作成',
-                pieces.toArray().some(([,piece]) => piece.type === replace && piece.replace.newValue == null) ? null : 'コマ削除',
-                pieces.toArray().some(([,piece]) => piece.type === update && !isIdRecord(piece.update)) ? null : 'コマ編集',
+                pieces.toArray().some(([, piece]) => piece.type === replace && piece.replace.newValue != null) ? null : 'コマ作成',
+                pieces.toArray().some(([, piece]) => piece.type === replace && piece.replace.newValue == null) ? null : 'コマ削除',
+                pieces.toArray().some(([, piece]) => piece.type === update && !isIdRecord(piece.update)) ? null : 'コマ編集',
             ].reduce((seed, elem) => {
                 if (elem == null) {
                     return seed;
@@ -86,7 +87,8 @@ export namespace RoomMessage {
             return (
                 <div style={{ ...style, color: message.value.textColor ?? undefined }}>
                     <Popover content={message.value.initTextSource}>
-                        {toText(message.value) ?? message.value.altTextToSecret}</Popover>
+                        <NewTabLinkify>{toText(message.value) ?? message.value.altTextToSecret}</NewTabLinkify>
+                    </Popover>
                     <span> </span>
                     {message.value.commandResult != null && <span style={({ fontWeight: 'bold' })}>{`${message.value.commandResult.text}${message.value.commandResult.isSuccess === true ? ' (成功)' : ''}${message.value.commandResult.isSuccess === false ? ' (失敗)' : ''}`}</span>}
                     <span> </span>

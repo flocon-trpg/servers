@@ -1,4 +1,3 @@
-
 import React from 'react';
 import MyAuthContext from '../contexts/MyAuthContext';
 import { useParticipants } from './state/useParticipants';

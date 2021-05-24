@@ -36,6 +36,12 @@ import { BoardConfig, defaultBoardConfig } from '../../states/BoardConfig';
 import { ActiveBoardPanelConfig } from '../../states/ActiveBoardPanelConfig';
 import { ActiveBoardSelectorModal } from './ActiveBoardSelecterModal';
 import { executeCharacterFlocommand, listCharacterFlocommand } from '../../flocommand/main';
+import useConstant from 'use-constant';
+import { debounceTime } from 'rxjs/operators';
+import { Vector2d } from 'konva/types/types';
+import { Subject } from 'rxjs';
+import { useReadonlyRef } from '../../hooks/useReadonlyRef';
+import { NewTabLinkify } from '../../foundations/NewTabLinkify';
 
 namespace Resource {
     export const cellSizeIsTooSmall = 'セルが小さすぎるため、無効化されています';
@@ -92,6 +98,7 @@ const createTachieLocationPostOperation = ({
     return pieceOperation;
 };
 
+const background = 'background';
 const character = 'character';
 const tachie = 'tachie';
 const myNumberValue = 'myNumberValue';
@@ -107,9 +114,35 @@ type SelectedPieceKey = {
     stateId: string;
 }
 
+type MouseOverOn = {
+    type: typeof background;
+} | {
+    type: typeof character | typeof tachie;
+    character: Character.State;
+} | {
+    type: typeof myNumberValue;
+}
+
 const publicMessageFilter = (message: Message): boolean => {
     return message.type === publicMessage;
 };
+
+const useGetStoppedCursor = () => {
+    const [stoppedCursor, setStoppedCursor] = React.useState<Vector2d | null>(null);
+    const subject = useConstant(() => new Subject<Vector2d>());
+    const onMove = React.useCallback((newCursor: Vector2d) => {
+        setStoppedCursor(null);
+        subject.next(newCursor);
+    }, [subject]);
+    React.useEffect(() => {
+        subject.pipe(debounceTime(500)).subscribe(cursor => {
+            setStoppedCursor(cursor);
+        });
+    }, [subject]);
+    return { stoppedCursor, onMove };
+};
+
+type OnTooltipParams = { offset: MyKonva.Vector2; mouseOverOn: MouseOverOn };
 
 type BoardCoreProps = {
     board: StatesBoard.State;
@@ -118,6 +151,7 @@ type BoardCoreProps = {
     boardEditorPanelId: string | null; // nullならばactiveBoardPanelとして扱われる
     onClick?: (e: KonvaEventObject<MouseEvent>) => void;
     onContextMenu?: (e: KonvaEventObject<PointerEvent>, stateOffset: MyKonva.Vector2) => void; // stateOffsetは、configなどのxy座標を基準にした位置。
+    onTooltip?: (params: OnTooltipParams | null) => void;
     canvasWidth: number;
     canvasHeight: number;
 }
@@ -129,6 +163,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     boardEditorPanelId,
     onClick,
     onContextMenu,
+    onTooltip,
     canvasWidth,
     canvasHeight
 }: BoardCoreProps) => {
@@ -136,6 +171,20 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const characters = useCharacters();
     const participants = useParticipants();
 
+    const onTooltipRef = useReadonlyRef(onTooltip);
+
+    const mouseOverOnRef = React.useRef<MouseOverOn>({ type: background });
+    const { stoppedCursor, onMove } = useGetStoppedCursor();
+    React.useEffect(() => {
+        if (onTooltipRef.current == null) {
+            return;
+        }
+        if (stoppedCursor == null) {
+            onTooltipRef.current(null);
+            return;
+        }
+        onTooltipRef.current({ offset: stoppedCursor, mouseOverOn: mouseOverOnRef.current });
+    }, [stoppedCursor, onTooltipRef]);
     const [selectedPieceKey, setSelectedPieceKey] = React.useState<SelectedPieceKey>();
     const [isBackgroundDragging, setIsBackgroundDragging] = React.useState(false); // これがないと、pieceをドラッグでリサイズする際に背景が少し動いてしまう。
     const backgroundImage = useImageFromGraphQL(board.backgroundImage);
@@ -205,6 +254,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 listening
                 isSelected={selectedPieceKey?.type === 'character' && equals(selectedPieceKey.characterKey, characterKey)}
                 onClick={() => setSelectedPieceKey({ type: 'character', characterKey })}
+                onMouseEnter={() => mouseOverOnRef.current = { type: 'character', character }}
+                onMouseLeave={() => mouseOverOnRef.current = { type: 'background' }}
                 onDragEnd={e => {
                     const pieceOperation = createPiecePostOperation({ e, piece: pieceValue, board });
                     const operation: RoomModule.UpOperation = {
@@ -266,6 +317,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 listening
                 isSelected={selectedPieceKey?.type === 'tachie' && equals(selectedPieceKey.characterKey, characterKey)}
                 onClick={() => setSelectedPieceKey({ type: 'tachie', characterKey })}
+                onMouseEnter={() => mouseOverOnRef.current = { type: 'tachie', character }}
+                onMouseLeave={() => mouseOverOnRef.current = { type: 'background' }}
                 onDragEnd={e => {
                     const tachieLocationOperation = createTachieLocationPostOperation({ e });
                     const operation: RoomModule.UpOperation = {
@@ -318,6 +371,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     listening
                     isSelected={selectedPieceKey?.type === 'myNumberValue' && (selectedPieceKey.stateId === stateId)}
                     onClick={() => setSelectedPieceKey({ type: 'myNumberValue', stateId })}
+                    onMouseEnter={() => mouseOverOnRef.current = { type: 'myNumberValue' }}
+                    onMouseLeave={() => mouseOverOnRef.current = { type: 'background' }}
                     onDragEnd={e => {
                         const pieceOperation = createPiecePostOperation({ e, piece: pieceValue, board });
                         const operation: RoomModule.UpOperation = {
@@ -385,6 +440,13 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 onContextMenu(e, {
                     x: (e.evt.offsetX / scale) + boardConfig.offsetX,
                     y: (e.evt.offsetY / scale) + boardConfig.offsetY,
+                });
+            }}
+            onMouseMove={e => {
+                // CONSIDER: scale === 0 のケースに対応していない。configのほうで boardConfig.zoom === -Inf にならないようにするほうが自然か。
+                onMove({
+                    x: e.evt.offsetX,
+                    y: e.evt.offsetY,
                 });
             }}
             offsetX={boardConfig.offsetX}
@@ -504,6 +566,7 @@ const Board: React.FC<Props> = ({
     const dispatchRoomComponentsState = React.useContext(DispatchRoomComponentsStateContext);
     const dispatch = useDispatch();
     const [contextMenuState, setContextMenuState] = React.useState<ContextMenuState | null>(null);
+    const [tooltipState, setTooltipState] = React.useState<OnTooltipParams | null>(null);
     const operate = useOperate();
     const roomId = useSelector(state => state.roomModule.roomId);
     const boards = useBoards();
@@ -527,6 +590,7 @@ const Board: React.FC<Props> = ({
         }
         return stringToCompositeKey(panel.boardEditorPanel.activeBoardKey);
     })();
+
     const boardConfig = (() => {
         if (boardKeyToShow == null) {
             return null;
@@ -539,8 +603,11 @@ const Board: React.FC<Props> = ({
         }
         return panel.boardEditorPanel.boards[compositeKeyToString(boardKeyToShow)];
     })() ?? defaultBoardConfig();
+
     const boardEditorPanelId = panel.type === 'boardEditor' ? panel.boardEditorPanelId : null;
+
     const board = boardKeyToShow == null ? null : boards.get(boardKeyToShow);
+
     const boardComponent = (() => {
         if (boardKeyToShow == null) {
             return (<div>ボードビュアーに表示するボードが指定されていません。</div>);
@@ -548,6 +615,7 @@ const Board: React.FC<Props> = ({
         if (board == null) {
             return (<div>{`キーが ${toJSONString(boardKeyToShow)} であるボードが見つかりませんでした。`}</div>);
         }
+
         return (<BoardCore
             canvasWidth={canvasWidth}
             canvasHeight={canvasHeight}
@@ -556,6 +624,7 @@ const Board: React.FC<Props> = ({
             boardConfig={boardConfig}
             boardEditorPanelId={boardEditorPanelId}
             onClick={() => setContextMenuState(null)}
+            onTooltip={newValue => setTooltipState(newValue)}
             onContextMenu={(e, stateOffset) => {
                 e.evt.preventDefault();
                 setContextMenuState({
@@ -610,6 +679,7 @@ const Board: React.FC<Props> = ({
                 });
             }} />);
     })();
+
     const dropDownItems = boardEditorPanelId == null ? null : boards.toArray().map(([key, board]) => (
         <Menu.Item
             key={toJSONString(key)}
@@ -622,6 +692,7 @@ const Board: React.FC<Props> = ({
             }))}>
             {board.name === '' ? '(名前なし)' : board.name}
         </Menu.Item>));
+
     // activeBoardPanelモードのときは boardsMenu==null
     const boardsMenu = dropDownItems == null ? null : (
         <Menu>
@@ -636,6 +707,7 @@ const Board: React.FC<Props> = ({
             </Menu.Item>
         </Menu>
     );
+
     const contextMenu = (() => {
         if (contextMenuState == null) {
             return null;
@@ -807,6 +879,7 @@ const Board: React.FC<Props> = ({
                                 return;
                             }
                             operate(operation);
+                            setContextMenuState(null);
                         }}>
                         {commandKey}
                     </Menu.Item>);
@@ -1297,6 +1370,29 @@ const Board: React.FC<Props> = ({
     }
     )();
 
+    const tooltip = (() => {
+        if (tooltipState == null) {
+            return null;
+        }
+
+        switch (tooltipState.mouseOverOn.type) {
+            case 'character':
+            case 'tachie':
+                return (
+                    <div style={({ position: 'absolute', left: tooltipState.offset.x - 30, top: tooltipState.offset.y + 1, padding: 8, backgroundColor: '#202020E8', maxWidth: 200 })}>
+                        <div>{tooltipState.mouseOverOn.character.name}</div>
+                        {tooltipState.mouseOverOn.character.memo.trim() !== '' && <hr style={{ transform: 'scaleY(0.5)', borderWidth: '1px 0 0 0', borderStyle: 'solid', borderColor: '#FFFFFFD0' }} />}
+                        <NewTabLinkify>
+                            <span style={{ whiteSpace: 'pre-wrap' /* これがないと、stringに存在する改行が無視されてしまう */ }}>
+                                {tooltipState.mouseOverOn.character.memo}
+                            </span>
+                        </NewTabLinkify>
+                    </div>);
+            default:
+                return null;
+        }
+    })();
+
     const noActiveBoardText = '';
 
     return (
@@ -1379,6 +1475,7 @@ const Board: React.FC<Props> = ({
                     </Button>
                 </div>
             </div>
+            {tooltip}
             {contextMenu}
             <ActiveBoardSelectorModal
                 visible={activeBoardSelectorModalVisibility}
