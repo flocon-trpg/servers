@@ -70,16 +70,15 @@ export const ActiveBoardSelectorModal: React.FC<Props> = ({ visible, onComplete 
         <Modal
             className='cancel-rnd'
             visible={visible}
-            title='ボードビューアに表示させるボードの変更'
+            title='ボードビュアーに表示させるボードの変更'
             onOk={onOk}
             okButtonProps={(hasSelectedBoardKey || selectedBoardKey?.delete === true ? undefined : { disabled: true })}
             onCancel={() => {
                 onComplete();
-                setSelectedBoardKey(undefined);
             }}>
             <div>
                 <div>
-                    {'ボードビューアに表示させるボードを変更もしくはクリアできます。他の参加者が作成したボードを選択することはできません。ボードビューアに表示されているボードは全参加者が閲覧、編集できます。'}
+                    {'ボードビュアーに表示させるボードを変更もしくはクリアできます。他の参加者が作成したボードを選択することはできません。ボードビューアに表示されているボードは全参加者が閲覧、編集できます。'}
                 </div>
                 <Select
                     style={{ minWidth: 150 }}

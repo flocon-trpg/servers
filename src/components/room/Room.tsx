@@ -151,7 +151,7 @@ const Room: React.FC = () => {
                         <RoomMenu />
                         <div>
                             {activeBoardPanelConfig.isMinimized ? null : <DraggableCard
-                                header="ボードビューア"
+                                header="ボードビュアー"
                                 onDragStop={e => dispatch(roomConfigModule.actions.moveBoardPanel({ ...e, roomId, boardEditorPanelId: null }))}
                                 onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeBoardPanel({ roomId, boardEditorPanelId: null, dir, delta }))}
                                 onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: activeBoardPanel } }))}

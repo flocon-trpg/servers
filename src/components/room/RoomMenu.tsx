@@ -396,7 +396,7 @@ export const RoomMenu: React.FC = () => {
             }}>
                 <div>
                     <span>{activeBoardPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
-                    <span>ボードビューア</span>
+                    <span>ボードビュアー</span>
                 </div>
             </Menu.Item>
             <Menu.SubMenu title="ボードエディター">
