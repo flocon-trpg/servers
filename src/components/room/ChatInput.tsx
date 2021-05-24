@@ -495,7 +495,13 @@ export const ChatInput: React.FC<Props> = ({
                     </div>
                     <Popover
                         trigger='click'
-                        content={<SketchPicker className={classNames('cancel-rnd')} css={css`color: black`} disableAlpha color={config.selectedTextColor == null ? '#000000' : config.selectedTextColor} onChange={e => dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { selectedTextColor: e.hex } }))} />}>
+                        content={<SketchPicker
+                            className={classNames('cancel-rnd')}
+                            css={css`color: black`}
+                            disableAlpha
+                            color={config.selectedTextColor == null ? '#000000' : config.selectedTextColor}
+                            onChange={e => dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { selectedTextColor: e.hex } }))}
+                            presetColors={['#F26262', '#F2A962', '#F1F262', '#AAF262', '#63F262', '#62F2AB', '#62F2F2', '#62ABF2', '#6362F2', '#AA62F2', '#F162F2', '#F262A9', '#9D9D9D']} />}>
                         <Button style={{ color: config.selectedTextColor, width: 80, margin: '4px 4px 4px 0' }} type='dashed' size='small' >{config.selectedTextColor?.toUpperCase() ?? 'デフォルト'}</Button>
                     </Popover>
                     <Button

@@ -61,7 +61,7 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
 
     const myAuth = React.useContext(MyAuthContext);
     const publicChannelNames = usePublicChannelNames();
-    const participantsMap = useParticipants(); 
+    const participantsMap = useParticipants();
 
     const hiwaSelectValue: HiwaSelectValueType = (() => {
         // config == null のケースは本来考慮する必要はないが、とりあえずnoneにしている。
