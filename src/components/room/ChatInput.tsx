@@ -155,8 +155,7 @@ export const ChatInput: React.FC<Props> = ({
     const [isDrawerVisible, setIsDrawerVisible] = React.useState(false);
 
     const myUserUid = getUserUid(myAuth);
-
-    const selectedParticipants = React.useMemo(() =>
+    const selectedParticipantsBase = React.useMemo(() =>
         __(selectedParticipantIds)
             .compact(id => {
                 const found = (participants ?? {})[id];
@@ -166,12 +165,16 @@ export const ChatInput: React.FC<Props> = ({
                 return [id, found] as const;
             })
             .toArray()
-            .sort(([, x], [, y]) => x.name.localeCompare(y.name))
+            .sort(([, x], [, y]) => x.name.localeCompare(y.name)), [selectedParticipantIds, participants]);
+    const selectedParticipants = React.useMemo(() =>
+        selectedParticipantsBase.map(([, participant]) => participant.name), [selectedParticipantsBase]);
+    const selectedParticipantElements = React.useMemo(() =>
+        selectedParticipantsBase
             .map(([id, participant]) => {
                 return (<div key={id} style={{ maxWidth: '60px' }}>
                     {participant.name}
                 </div>);
-            }), [selectedParticipantIds, participants]);
+            }), [selectedParticipantsBase]);
 
     const characters = React.useMemo(() => {
         return __(recordToArray(participants ?? {}))
@@ -243,7 +246,12 @@ export const ChatInput: React.FC<Props> = ({
             break;
         case privateChannelKey:
             postTo = selectedParticipantIds;
-            placeholder = '秘話へ投稿';
+            placeholder = `秘話 (${selectedParticipants.length === 0 ? '自分のみ' : selectedParticipants.reduce((seed, elem, i) => {
+                if (i === 0) {
+                    return elem;
+                }
+                return `${seed}, ${elem}`;
+            }, '')}) へ投稿`;
             break;
     }
 
@@ -407,7 +415,7 @@ export const ChatInput: React.FC<Props> = ({
                     </Select>}
                     {selectedChannelType === privateChannelKey && <>
                         <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'row' }}>
-                            {selectedParticipants.length === 0 ? '(自分のみ)' : selectedParticipants}
+                            {selectedParticipantElements.length === 0 ? '(自分のみ)' : selectedParticipantElements}
                         </div>
                         <Button style={{ flex: '0 0 auto' }} onClick={() => setIsDrawerVisible(true)}>編集</Button>
                     </>}
