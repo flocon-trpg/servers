@@ -231,15 +231,19 @@ export const ChatInput: React.FC<Props> = ({
     }
 
     let postTo: PublicChannelKey.Without$System.PublicChannelKey | ReadonlySet<string>;
+    let placeholder: string;
     switch (selectedChannelType) {
         case freeChannelKey:
             postTo = $free;
+            placeholder = '雑談へ投稿';
             break;
         case publicChannelKey:
             postTo = selectedPublicChannel;
+            placeholder = `${publicChannelNames == null ? '?' : publicChannelNames[`publicChannel${selectedPublicChannel}Name` as const]}へ投稿`;
             break;
         case privateChannelKey:
             postTo = selectedParticipantIds;
+            placeholder = '秘話へ投稿';
             break;
     }
 
@@ -494,6 +498,7 @@ export const ChatInput: React.FC<Props> = ({
                     <Input
                         disabled={isPosting}
                         value={(PublicChannelKey.Without$System.isPublicChannelKey(postTo) ? useRoomMessageInputTextsResult.publicMessageInputTexts.get(postTo) : useRoomMessageInputTextsResult.privateMessageInputTexts.get(VisibleTo.toString(postTo))) ?? ''}
+                        placeholder={placeholder}
                         onChange={e => {
                             if (PublicChannelKey.Without$System.isPublicChannelKey(postTo)) {
                                 const $postTo = postTo;
