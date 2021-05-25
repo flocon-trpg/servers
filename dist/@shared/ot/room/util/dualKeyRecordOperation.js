@@ -381,7 +381,7 @@ const composeDownOperation = ({ first, second, innerApplyBack, innerCompose }) =
     return Result_1.ResultModule.ok(result.toStringRecord(x => x, x => x));
 };
 exports.composeDownOperation = composeDownOperation;
-const serverTransform = ({ first, second, prevState, nextState, innerTransform, toServerState, protectedValuePolicy }) => {
+const serverTransform = ({ first, second, prevState, nextState, innerTransform, toServerState, cancellationPolicy, }) => {
     if (second === undefined) {
         return Result_1.ResultModule.ok(undefined);
     }
@@ -398,8 +398,8 @@ const serverTransform = ({ first, second, prevState, nextState, innerTransform, 
                     if (innerNextState === undefined) {
                         break;
                     }
-                    if (protectedValuePolicy.cancelRemove) {
-                        if (protectedValuePolicy.cancelRemove({ key, nextState: innerNextState })) {
+                    if (cancellationPolicy.cancelRemove) {
+                        if (cancellationPolicy.cancelRemove({ key, nextState: innerNextState })) {
                             break;
                         }
                     }
@@ -412,8 +412,8 @@ const serverTransform = ({ first, second, prevState, nextState, innerTransform, 
                 if (innerNextState !== undefined) {
                     break;
                 }
-                if (protectedValuePolicy.cancelCreate) {
-                    if (protectedValuePolicy.cancelCreate({ key })) {
+                if (cancellationPolicy.cancelCreate) {
+                    if (cancellationPolicy.cancelCreate({ key })) {
                         break;
                     }
                 }
@@ -433,8 +433,8 @@ const serverTransform = ({ first, second, prevState, nextState, innerTransform, 
                 if (innerFirst !== undefined && innerFirst.type === recordOperationElement_1.replace) {
                     break;
                 }
-                if (protectedValuePolicy.cancelUpdate) {
-                    if (protectedValuePolicy.cancelUpdate({ key, prevState: innerPrevState, nextState: innerNextState })) {
+                if (cancellationPolicy.cancelUpdate) {
+                    if (cancellationPolicy.cancelUpdate({ key, prevState: innerPrevState, nextState: innerNextState })) {
                         break;
                     }
                 }

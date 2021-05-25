@@ -19,12 +19,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.filePath = exports.FirebaseStorage = exports.Default = void 0;
+exports.filePath = exports.sourceType = exports.FirebaseStorage = exports.Default = void 0;
 const t = __importStar(require("io-ts"));
 exports.Default = 'Default';
 exports.FirebaseStorage = 'FirebaseStorage';
+exports.sourceType = t.union([t.literal(exports.Default), t.literal(exports.FirebaseStorage)]);
 exports.filePath = t.type({
     $version: t.literal(1),
     path: t.string,
-    sourceType: t.union([t.literal(exports.Default), t.literal(exports.FirebaseStorage)]),
+    sourceType: exports.sourceType,
 });

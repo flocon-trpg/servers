@@ -180,11 +180,11 @@ const composeDownOperation = ({ first, second, innerApplyBack, innerCompose }) =
     return Result_1.ResultModule.ok(result.value === undefined ? undefined : result.value[dummyKey]);
 };
 exports.composeDownOperation = composeDownOperation;
-const serverTransform = ({ first, second, prevState, nextState, innerTransform, toServerState, protectedValuePolicy }) => {
+const serverTransform = ({ first, second, prevState, nextState, innerTransform, toServerState, cancellationPolicy }) => {
     var _a;
-    const cancelCreate = protectedValuePolicy.cancelCreate;
-    const cancelUpdate = protectedValuePolicy.cancelUpdate;
-    const cancelRemove = protectedValuePolicy.cancelRemove;
+    const cancelCreate = cancellationPolicy.cancelCreate;
+    const cancelUpdate = cancellationPolicy.cancelUpdate;
+    const cancelRemove = cancellationPolicy.cancelRemove;
     const result = DualKeyRecordOperation.serverTransform({
         first: first === undefined ? undefined : { [dummyKey]: first },
         second: second === undefined ? undefined : { [dummyKey]: second },
@@ -195,7 +195,7 @@ const serverTransform = ({ first, second, prevState, nextState, innerTransform, 
             return innerTransform(Object.assign(Object.assign({}, params), { key: key.second }));
         },
         toServerState: (state, key) => toServerState(state, key.second),
-        protectedValuePolicy: {
+        cancellationPolicy: {
             cancelCreate: cancelCreate === undefined ? undefined : ((_a) => {
                 var { key } = _a, params = __rest(_a, ["key"]);
                 return cancelCreate(Object.assign(Object.assign({}, params), { key: key.second }));

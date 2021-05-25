@@ -402,7 +402,7 @@ const serverTransform = ({ requestedBy, participantKey, activeBoardSecondKey, })
             clientOperation: second,
         }),
         toServerState: state => state,
-        protectedValuePolicy: {
+        cancellationPolicy: {
             cancelCreate: () => !type_1.RequestedBy.createdByMe({ requestedBy, userUid: participantKey }),
             cancelUpdate: ({ key }) => !type_1.RequestedBy.createdByMe({ requestedBy, userUid: participantKey }) && key !== activeBoardSecondKey,
             cancelRemove: () => !type_1.RequestedBy.createdByMe({ requestedBy, userUid: participantKey }),
@@ -423,7 +423,7 @@ const serverTransform = ({ requestedBy, participantKey, activeBoardSecondKey, })
             clientOperation: second,
         }),
         toServerState: state => state,
-        protectedValuePolicy: {}
+        cancellationPolicy: {}
     });
     if (characters.isError) {
         return characters;
@@ -440,7 +440,7 @@ const serverTransform = ({ requestedBy, participantKey, activeBoardSecondKey, })
             clientOperation: second,
         }),
         toServerState: state => state,
-        protectedValuePolicy: {}
+        cancellationPolicy: {}
     });
     if (myNumberValues.isError) {
         return myNumberValues;
@@ -451,11 +451,13 @@ const serverTransform = ({ requestedBy, participantKey, activeBoardSecondKey, })
         characters: characters.value,
         myNumberValues: myNumberValues.value,
     };
-    twoWayOperation.name = ReplaceOperation.serverTransform({
-        first: (_a = serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.name) !== null && _a !== void 0 ? _a : undefined,
-        second: (_b = clientOperation.name) !== null && _b !== void 0 ? _b : undefined,
-        prevState: prevState.name,
-    });
+    if (type_1.RequestedBy.createdByMe({ requestedBy, userUid: participantKey })) {
+        twoWayOperation.name = ReplaceOperation.serverTransform({
+            first: (_a = serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.name) !== null && _a !== void 0 ? _a : undefined,
+            second: (_b = clientOperation.name) !== null && _b !== void 0 ? _b : undefined,
+            prevState: prevState.name,
+        });
+    }
     if (requestedBy.type === type_1.server) {
         twoWayOperation.role = ReplaceOperation.serverTransform({
             first: (_c = serverOperation === null || serverOperation === void 0 ? void 0 : serverOperation.role) !== null && _c !== void 0 ? _c : undefined,

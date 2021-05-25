@@ -2,7 +2,7 @@ import { DynamicLoader } from 'bcdice';
 import BcdiceResult from 'bcdice/ts/result';
 import { __ } from '../@shared/collection';
 import { analyze as analyzeToExpression, plain } from '../@shared/expression';
-import { TOML } from '../@shared/flocommand';
+import * as Flocommand from '../@shared/flocommand';
 import { Result, ResultModule } from '../@shared/Result';
 import * as CharacterModule from '../@shared/ot/room/participant/character/v1';
 import * as RoomModule from '../@shared/ot/room/v1';
@@ -50,7 +50,7 @@ const getParameter = async ({ parameterPath, context, room }: { parameterPath: s
         if ((context.value.privateVarToml ?? '').trim() === '') {
             return null;
         }
-        const result = TOML.variable(context.value.privateVarToml ?? '', parameterPath);
+        const result = Flocommand.variable(context.value.privateVarToml ?? '', parameterPath);
         if (result.isError) {
             return null;
         }

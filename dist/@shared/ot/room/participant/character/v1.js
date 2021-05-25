@@ -942,7 +942,7 @@ const serverTransform = (createdByMe) => ({ prevState, currentState, clientOpera
             clientOperation: second,
         }),
         toServerState: state => state,
-        protectedValuePolicy: {
+        cancellationPolicy: {
             cancelRemove: params => !createdByMe && params.nextState.isPrivate,
             cancelUpdate: params => !createdByMe && params.nextState.isPrivate,
         },
@@ -962,7 +962,7 @@ const serverTransform = (createdByMe) => ({ prevState, currentState, clientOpera
             clientOperation: second,
         }),
         toServerState: state => state,
-        protectedValuePolicy: {},
+        cancellationPolicy: {},
     });
     if (tachieLocations.isError) {
         return tachieLocations;

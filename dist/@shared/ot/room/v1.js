@@ -34,6 +34,7 @@ const operation_1 = require("./util/operation");
 const record_1 = require("./util/record");
 const io_ts_1 = require("../../io-ts");
 const v1_1 = require("../compositeKey/v1");
+const indexes_1 = require("../../indexes");
 const replaceStringDownOperation = t.type({ oldValue: t.string });
 const replaceStringUpOperation = t.type({ newValue: t.string });
 exports.dbState = t.type({
@@ -611,7 +612,9 @@ const serverTransform = (requestedBy) => ({ prevState, currentState, clientOpera
             clientOperation: second,
         }),
         toServerState: state => state,
-        protectedValuePolicy: {},
+        cancellationPolicy: {
+            cancelCreate: ({ key }) => !indexes_1.isStrIndex5(key),
+        },
     });
     if (bgms.isError) {
         return bgms;
@@ -628,7 +631,9 @@ const serverTransform = (requestedBy) => ({ prevState, currentState, clientOpera
             clientOperation: second,
         }),
         toServerState: state => state,
-        protectedValuePolicy: {},
+        cancellationPolicy: {
+            cancelCreate: ({ key }) => !indexes_1.isStrIndex20(key),
+        },
     });
     if (boolParamNames.isError) {
         return boolParamNames;
@@ -645,7 +650,9 @@ const serverTransform = (requestedBy) => ({ prevState, currentState, clientOpera
             clientOperation: second,
         }),
         toServerState: state => state,
-        protectedValuePolicy: {},
+        cancellationPolicy: {
+            cancelCreate: ({ key }) => !indexes_1.isStrIndex20(key),
+        },
     });
     if (numParamNames.isError) {
         return numParamNames;
@@ -662,7 +669,9 @@ const serverTransform = (requestedBy) => ({ prevState, currentState, clientOpera
             clientOperation: second,
         }),
         toServerState: state => state,
-        protectedValuePolicy: {},
+        cancellationPolicy: {
+            cancelCreate: ({ key }) => !indexes_1.isStrIndex20(key),
+        },
     });
     if (strParamNames.isError) {
         return strParamNames;
@@ -679,7 +688,7 @@ const serverTransform = (requestedBy) => ({ prevState, currentState, clientOpera
             clientOperation: second,
         }),
         toServerState: state => state,
-        protectedValuePolicy: {},
+        cancellationPolicy: {},
     });
     if (participants.isError) {
         return participants;

@@ -15,7 +15,7 @@ export const upOperationFactory = <TKey extends t.Mixed, TState extends t.Mixed,
 
 export type ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> = DualKeyRecordOperation.ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation>;
 
-export type ProtectedValuePolicy<TKey, TServerState> = DualKeyRecordOperation.ProtectedValuePolicy<TKey, TServerState>;
+export type CancellationPolicy<TKey, TServerState> = DualKeyRecordOperation.CancellationPolicy<TKey, TServerState>;
 
 type RestoreResult<TState, TTwoWayOperation> = { prevState: TState; twoWayOperation: TTwoWayOperation | undefined }
 
@@ -227,7 +227,7 @@ export const serverTransform = <TServerState, TClientState, TFirstOperation, TSe
     nextState,
     innerTransform,
     toServerState,
-    protectedValuePolicy
+    cancellationPolicy
 }: {
     prevState: Record<string, TServerState>;
     nextState: Record<string, TServerState>;
@@ -235,11 +235,11 @@ export const serverTransform = <TServerState, TClientState, TFirstOperation, TSe
     second?: RecordUpOperation<TClientState, TSecondOperation>;
     toServerState: (state: TClientState, key: string) => TServerState;
     innerTransform: (params: ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> & { key: string }) => CustomResult<TFirstOperation | undefined, string | TCustomError>;
-    protectedValuePolicy: ProtectedValuePolicy<string, TServerState>;
+    cancellationPolicy: CancellationPolicy<string, TServerState>;
 }): CustomResult<RecordTwoWayOperation<TServerState, TFirstOperation> | undefined, string | TCustomError> => {
-    const cancelCreate = protectedValuePolicy.cancelCreate;
-    const cancelUpdate = protectedValuePolicy.cancelUpdate;
-    const cancelRemove = protectedValuePolicy.cancelRemove;
+    const cancelCreate = cancellationPolicy.cancelCreate;
+    const cancelUpdate = cancellationPolicy.cancelUpdate;
+    const cancelRemove = cancellationPolicy.cancelRemove;
 
     const result = DualKeyRecordOperation.serverTransform({
         first: first === undefined ? undefined : { [dummyKey]: first },
@@ -248,7 +248,7 @@ export const serverTransform = <TServerState, TClientState, TFirstOperation, TSe
         nextState: { [dummyKey]: nextState },
         innerTransform: ({ key, ...params }) => innerTransform({ ...params, key: key.second }),
         toServerState: (state, key) => toServerState(state, key.second),
-        protectedValuePolicy: {
+        cancellationPolicy: {
             cancelCreate: cancelCreate === undefined ? undefined : (({ key, ...params }) => cancelCreate({ ...params, key: key.second })),
             cancelUpdate: cancelUpdate === undefined ? undefined : (({ key, ...params }) => cancelUpdate({ ...params, key: key.second })),
             cancelRemove: cancelRemove === undefined ? undefined : (({ key, ...params }) => cancelRemove({ ...params, key: key.second })),
