@@ -1,23 +1,16 @@
 import * as React from 'react';
-import { Button, Drawer, Dropdown, Input, Menu, Modal, Radio, Result, Table, Tabs, Tooltip, Upload } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
-import { ShowUploadListInterface } from 'antd/lib/upload/interface';
-import Link from 'next/link';
+import { Button, Drawer, Dropdown, Input, Menu, Modal, Result, Table, Tabs, Upload, notification } from 'antd';
 import { FilePathFragment, FileSourceType } from '../generated/graphql';
 import { ColumnGroupType, ColumnType } from 'antd/lib/table';
 import { getStorageForce } from '../utils/firebaseHelpers';
 import MyAuthContext from '../contexts/MyAuthContext';
-import ComponentsStateContext from './room/contexts/RoomComponentsStateContext';
-import DispatchRoomComponentsStateContext from './room/contexts/DispatchRoomComponentsStateContext';
 import DrawerFooter from '../layouts/DrawerFooter';
 import FirebaseApp from 'firebase/app';
-import { useSelector } from '../store';
-import { useDispatch } from 'react-redux';
-import { EllipsisOutlined, DeleteOutlined, MoreOutlined } from '@ant-design/icons';
+import * as Icons from '@ant-design/icons';
 import FirebaseStorageLink from './FirebaseStorageLink';
 import { FilesManagerDrawerType, some } from '../utils/types';
 import ConfigContext from '../contexts/ConfigContext';
-import { __ } from '../@shared/collection';
+import copy from 'clipboard-copy';
 
 type Reference = firebase.default.storage.Reference;
 
@@ -113,7 +106,7 @@ const openButtonColumn = (onClick: (ref: Reference) => void): Column => ({
     key: 'Open',
     // eslint-disable-next-line react/display-name
     render: (_, record: Reference) => {
-        return (<Button key={record.fullPath} onClick={() => onClick(record)}>Open</Button>);
+        return (<Button key={record.fullPath} onClick={() => onClick(record)}>選択</Button>);
     },
 });
 
@@ -130,7 +123,18 @@ const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({ reference, storageTyp
     return (
         <div>
             <Menu>
-                <Menu.Item icon={<DeleteOutlined />} onClick={() => {
+                <Menu.Item icon={<Icons.CopyOutlined />} onClick={() => {
+                    copy(`firebase:${reference.fullPath}`)
+                        .then(() => {
+                            notification.success({
+                                message: 'クリップボードにコピーしました。',
+                                placement: 'bottomRight'
+                            });
+                        });
+                }}>
+                    コマンドに使用するリンクとしてクリップボードにコピー
+                </Menu.Item>
+                <Menu.Item icon={<Icons.DeleteOutlined />} onClick={() => {
                     Modal.warn({
                         title: `${storageType} の ${reference.name} を削除します。よろしいですか？`,
                         onOk() {
@@ -167,7 +171,7 @@ const fileOptionsColumn = (storageType: StorageType): Column => ({
     render: (_, record: Reference) => {
         return (
             <Dropdown.Button
-                icon={<MoreOutlined />}
+                icon={<Icons.MoreOutlined />}
                 overlay={<FileOptionsMenu reference={record} storageType={storageType} />}
                 type={'text' as any}
                 trigger={['click']} />

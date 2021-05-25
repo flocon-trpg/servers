@@ -13,6 +13,7 @@ import { operation } from './util/operation';
 import { isIdRecord } from './util/record';
 import { Maybe, maybe } from '../../io-ts';
 import { CompositeKey, compositeKey } from '../compositeKey/v1';
+import { isStrIndex20, isStrIndex5 } from '../../indexes';
 
 const replaceStringDownOperation = t.type({ oldValue: t.string });
 const replaceStringUpOperation = t.type({ newValue: t.string });
@@ -701,7 +702,8 @@ export const serverTransform = (requestedBy: RequestedBy): ServerTransform<State
             clientOperation: second,
         }),
         toServerState: state => state,
-        protectedValuePolicy: {
+        cancellationPolicy: {
+            cancelCreate: ({ key }) => !isStrIndex5(key),
         },
     });
     if (bgms.isError) {
@@ -720,7 +722,8 @@ export const serverTransform = (requestedBy: RequestedBy): ServerTransform<State
             clientOperation: second,
         }),
         toServerState: state => state,
-        protectedValuePolicy: {
+        cancellationPolicy: {
+            cancelCreate: ({ key }) => !isStrIndex20(key),
         },
     });
     if (boolParamNames.isError) {
@@ -739,7 +742,8 @@ export const serverTransform = (requestedBy: RequestedBy): ServerTransform<State
             clientOperation: second,
         }),
         toServerState: state => state,
-        protectedValuePolicy: {
+        cancellationPolicy: {
+            cancelCreate: ({ key }) => !isStrIndex20(key),
         },
     });
     if (numParamNames.isError) {
@@ -758,7 +762,8 @@ export const serverTransform = (requestedBy: RequestedBy): ServerTransform<State
             clientOperation: second,
         }),
         toServerState: state => state,
-        protectedValuePolicy: {
+        cancellationPolicy: {
+            cancelCreate: ({ key }) => !isStrIndex20(key),
         },
     });
     if (strParamNames.isError) {
@@ -777,7 +782,7 @@ export const serverTransform = (requestedBy: RequestedBy): ServerTransform<State
             clientOperation: second,
         }),
         toServerState: state => state,
-        protectedValuePolicy: {
+        cancellationPolicy: {
         },
     });
     if (participants.isError) {

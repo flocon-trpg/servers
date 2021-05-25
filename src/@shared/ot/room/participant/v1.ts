@@ -454,7 +454,7 @@ export const serverTransform = ({
             clientOperation: second,
         }),
         toServerState: state => state,
-        protectedValuePolicy: {
+        cancellationPolicy: {
             cancelCreate: () => !RequestedBy.createdByMe({ requestedBy, userUid: participantKey }),
             cancelUpdate: ({ key }) => !RequestedBy.createdByMe({ requestedBy, userUid: participantKey }) && key !== activeBoardSecondKey,
             cancelRemove: () => !RequestedBy.createdByMe({ requestedBy, userUid: participantKey }),
@@ -476,7 +476,7 @@ export const serverTransform = ({
             clientOperation: second,
         }),
         toServerState: state => state,
-        protectedValuePolicy: {
+        cancellationPolicy: {
         }
     });
     if (characters.isError) {
@@ -495,7 +495,7 @@ export const serverTransform = ({
             clientOperation: second,
         }),
         toServerState: state => state,
-        protectedValuePolicy: {
+        cancellationPolicy: {
         }
     });
     if (myNumberValues.isError) {
@@ -509,11 +509,13 @@ export const serverTransform = ({
         myNumberValues: myNumberValues.value,
     };
 
-    twoWayOperation.name = ReplaceOperation.serverTransform({
-        first: serverOperation?.name ?? undefined,
-        second: clientOperation.name ?? undefined,
-        prevState: prevState.name,
-    });
+    if (RequestedBy.createdByMe({ requestedBy, userUid: participantKey })) {
+        twoWayOperation.name = ReplaceOperation.serverTransform({
+            first: serverOperation?.name ?? undefined,
+            second: clientOperation.name ?? undefined,
+            prevState: prevState.name,
+        });
+    }
 
     if (requestedBy.type === server) {
         twoWayOperation.role = ReplaceOperation.serverTransform({

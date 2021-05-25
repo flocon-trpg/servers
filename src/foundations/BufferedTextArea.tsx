@@ -19,6 +19,7 @@ export type Props = {
     rows?: number;
     cols?: number;
     size?: 'small' | 'middle';
+    spellCheck?: boolean;
     bufferDuration: number | 'default' | 'short';
     onChange: (params: OnChangeParams) => void;
     

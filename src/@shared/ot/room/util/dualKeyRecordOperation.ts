@@ -24,7 +24,7 @@ export type ProtectedTransformParameters<TServerState, TFirstOperation, TSecondO
     nextState: TServerState;
 }
 
-export type ProtectedValuePolicy<TKey, TServerState> = {
+export type CancellationPolicy<TKey, TServerState> = {
     // trueを返すと、「TServerState全体がprivateであり編集不可能」とみなしてスキップする。ただし制限されるのはtransformのみであるため、読み取りなどは制限されない。
     // 「ユーザーがprivateだと思っていたらその後すぐ変更があってprivateになった」というケースがあるので、trueでもエラーは返さず処理が続行される。
     // 関数ではなくundefinedを渡した場合、常にfalseを返す関数が渡されたときと同等の処理が行われる。
@@ -492,7 +492,7 @@ export const serverTransform = <TServerState, TClientState, TFirstOperation, TSe
     nextState,
     innerTransform,
     toServerState,
-    protectedValuePolicy
+    cancellationPolicy,
 }: {
     prevState: DualKeyRecord<TServerState>;
     nextState: DualKeyRecord<TServerState>;
@@ -500,7 +500,7 @@ export const serverTransform = <TServerState, TClientState, TFirstOperation, TSe
     second?: DualKeyRecordUpOperation<TClientState, TSecondOperation>;
     toServerState: (state: TClientState, key: DualKey<string, string>) => TServerState;
     innerTransform: (params: ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> & { key: DualKey<string, string> }) => CustomResult<TFirstOperation | undefined, string | TCustomError>;
-    protectedValuePolicy: ProtectedValuePolicy<DualKey<string, string>, TServerState>;
+    cancellationPolicy: CancellationPolicy<DualKey<string, string>, TServerState>;
 }): CustomResult<DualKeyRecordTwoWayOperation<TServerState, TFirstOperation> | undefined, string | TCustomError> => {
     // 現在のCharacterの全体Privateの仕組みだと、PrivateになっているCharacterをupdateもしくはremoveしようとしてもエラーは出ない（最新の状態でPrivateになっているかどうかはクライアント側はわからないので、代わりにエラーを返すのは問題がある）。だが、現在のこのtransformのコードだと、存在しないCharacterをupdateもしくはremoveしようとするとエラーを返す。このため、keyを Brute-force attackすることで、PrivateになっているCharacterが存在することを理論上は判別できてしまう。だが、中の値は見ることができないので、現状のままでも問題ないと考えている。
 
@@ -527,8 +527,8 @@ export const serverTransform = <TServerState, TClientState, TFirstOperation, TSe
                         break;
                     }
 
-                    if (protectedValuePolicy.cancelRemove) {
-                        if (protectedValuePolicy.cancelRemove({ key, nextState: innerNextState })) {
+                    if (cancellationPolicy.cancelRemove) {
+                        if (cancellationPolicy.cancelRemove({ key, nextState: innerNextState })) {
                             break;
                         }
                     }
@@ -548,8 +548,8 @@ export const serverTransform = <TServerState, TClientState, TFirstOperation, TSe
                     break;
                 }
 
-                if (protectedValuePolicy.cancelCreate) {
-                    if (protectedValuePolicy.cancelCreate({ key })) {
+                if (cancellationPolicy.cancelCreate) {
+                    if (cancellationPolicy.cancelCreate({ key })) {
                         break;
                     }
                 }
@@ -572,8 +572,8 @@ export const serverTransform = <TServerState, TClientState, TFirstOperation, TSe
                 if (innerFirst !== undefined && innerFirst.type === replace) {
                     break;
                 }
-                if (protectedValuePolicy.cancelUpdate) {
-                    if (protectedValuePolicy.cancelUpdate({ key, prevState: innerPrevState, nextState: innerNextState })) {
+                if (cancellationPolicy.cancelUpdate) {
+                    if (cancellationPolicy.cancelUpdate({ key, prevState: innerPrevState, nextState: innerNextState })) {
                         break;
                     }
                 }
@@ -703,7 +703,7 @@ export const clientTransform = <TState, TOperation, TError = string>({
             secondPrime: second,
         });
     }
-    
+
     const firstPrime = new DualKeyMap<string, string, RecordUpOperationElement<TState, TOperation>>();
     const secondPrime = new DualKeyMap<string, string, RecordUpOperationElement<TState, TOperation>>();
     let error = undefined as { error: TError } | undefined;

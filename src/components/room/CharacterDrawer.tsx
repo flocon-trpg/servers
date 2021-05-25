@@ -30,7 +30,7 @@ import { useOperate } from '../../hooks/useOperate';
 import { useSelector } from '../../store';
 import BufferedInput from '../../foundations/BufferedInput';
 import BufferedTextArea from '../../foundations/BufferedTextArea';
-import { TOMLInput } from '../../foundations/TOMLInput';
+import { characterCommand, characterVariable, TomlInput } from '../../foundations/Tomllnput';
 import { useCharacters } from '../../hooks/state/useCharacters';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { useBoolParamNames, useNumParamNames, useStrParamNames } from '../../hooks/state/useParamNames';
@@ -734,7 +734,7 @@ const CharacterDrawer: React.FC = () => {
                             <Col flex='auto' />
                             <Col flex={0}></Col>
                             <Col span={inputSpan}>
-                                <TOMLInput size='small' bufferDuration='default' value={character.privateVarToml} rows={8} onChange={e => updateCharacter({ privateVarToml: e.currentValue })} />
+                                <TomlInput tomlType={characterVariable} size='small' bufferDuration='default' value={character.privateVarToml} rows={8} onChange={e => updateCharacter({ privateVarToml: e.currentValue })} />
                             </Col>
                         </Row>
                     </>
@@ -748,7 +748,7 @@ const CharacterDrawer: React.FC = () => {
                             <Col flex='auto' />
                             <Col flex={0}></Col>
                             <Col span={inputSpan}>
-                                <TOMLInput size='small' bufferDuration='default' value={character.privateCommand} rows={8} onChange={e => updateCharacter({ privateCommand: e.currentValue })} />
+                                <TomlInput tomlType={characterCommand} size='small' bufferDuration='default' value={character.privateCommand} rows={8} onChange={e => updateCharacter({ privateCommand: e.currentValue })} />
                             </Col>
                         </Row>
                     </>

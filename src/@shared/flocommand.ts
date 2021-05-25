@@ -2,36 +2,44 @@
 import * as t from 'io-ts';
 import JTOML from '@ltd/j-toml';
 import { Result, ResultModule } from './Result';
+import { Default, FilePath, FirebaseStorage, sourceType } from './ot/filePath/v1';
+import * as Character from './ot/room/participant/character/v1';
 
 namespace Util {
-    const setImageObject = t.type({
+    const imageObject = t.type({
         src: t.string,
-        type: t.string,
+        type: sourceType,
     });
-    export const setImage = t.union([setImageObject, t.string]);
-    export type SetImage = t.TypeOf<typeof setImage>;
-}
+    export const image = t.union([imageObject, t.string]);
+    export type Image = t.TypeOf<typeof image>;
 
-namespace Character {
-    const setCharacter = t.partial({
-        name: t.string,
-        image: Util.setImage,
-    });
-
-    export const action = t.partial({
-        set: setCharacter,
-    });
-
-    export type Action = t.TypeOf<typeof action>;
+    export const toFilePath = (source: Image): FilePath => {
+        if (typeof source === 'string') {
+            const replaced = source.replace(/^firebase:/, '');
+            if (source === replaced) {
+                return {
+                    $version: 1,
+                    sourceType: Default,
+                    path: replaced,
+                };
+            }
+            return {
+                $version: 1,
+                sourceType: FirebaseStorage,
+                path: replaced,
+            };
+        }
+        return {
+            $version: 1,
+            sourceType: source.type,
+            path: source.src,
+        };
+    };
 }
 
 namespace Message {
-    const write = t.type({
-        text: t.string,
-    });
-
     export const action = t.partial({
-        write,
+        text: t.string,
     });
 
     export type Action = t.TypeOf<typeof action>;
@@ -52,9 +60,15 @@ const dateTime = new t.Type<TomlDateTime>(
     },
     t.identity);
 
-const characterActionElement = t.partial({
-    character: Character.action,
+const chara = t.partial({
+    name: t.string,
+    icon: Util.image,
+    tachie: Util.image,
     message: Message.action,
+});
+
+const characterActionElement = t.partial({
+    chara,
 });
 
 export type CharacterActionElement = t.TypeOf<typeof characterActionElement>;
@@ -68,74 +82,91 @@ const errorToMessage = (source: t.Errors): string => {
     return source[0]?.message ?? '不明なエラーが発生しました';
 };
 
-export namespace TOML {
-    const parse = (toml: string) => {
-        let object;
-        try {
-            object = JTOML.parse(toml, 1.0, '\r\n', false);
+const parse = (toml: string) => {
+    let object;
+    try {
+        object = JTOML.parse(toml, 1.0, '\r\n', false);
+    }
+    catch (error) {
+        if (typeof error === 'string') {
+            return ResultModule.error(error);
         }
-        catch (error) {
-            if (typeof error === 'string') {
-                return ResultModule.error(error);
-            }
-            if (error instanceof Error) {
-                return ResultModule.error(error.message);
-            }
-            throw error;
+        if (error instanceof Error) {
+            return ResultModule.error(error.message);
         }
-        return ResultModule.ok(object);
-    };
+        throw error;
+    }
+    return ResultModule.ok(object);
+};
 
-    export const isValidVarToml = (toml: string): Result<undefined> => {
-        const parsed = parse(toml);
-        if (parsed.isError) {
-            return parsed;
-        }
-        return ResultModule.ok(undefined);
-    };
+export const isValidVarToml = (toml: string): Result<undefined> => {
+    const parsed = parse(toml);
+    if (parsed.isError) {
+        return parsed;
+    }
+    return ResultModule.ok(undefined);
+};
 
-    export const variable = (toml: string, path: ReadonlyArray<string>) => {
-        const tomlResult = parse(toml);
-        if (tomlResult.isError) {
-            return tomlResult;
+export const variable = (toml: string, path: ReadonlyArray<string>) => {
+    const tomlResult = parse(toml);
+    if (tomlResult.isError) {
+        return tomlResult;
+    }
+    let current: any = tomlResult.value;
+    for (const key of path) {
+        if (typeof current !== 'object') {
+            return ResultModule.ok(undefined);
         }
-        let current: any = tomlResult.value;
-        for (const key of path) {
-            if (typeof current !== 'object') {
-                return ResultModule.ok(undefined);
-            }
-            const next = current[key];
-            const dateTimeValue = dateTime.decode(next);
-            if (dateTimeValue._tag === 'Right') {
-                return ResultModule.ok(dateTimeValue.right);
-            }
-            current = current[key];
-        }
-        const dateTimeValue = dateTime.decode(current);
+        const next = current[key];
+        const dateTimeValue = dateTime.decode(next);
         if (dateTimeValue._tag === 'Right') {
             return ResultModule.ok(dateTimeValue.right);
         }
-        switch (typeof current) {
-            case 'boolean':
-            case 'number':
-            case 'string':
-            case 'undefined':
-                return ResultModule.ok(current);
-            default:
-                return ResultModule.ok(undefined);
-        }
-    };
+        current = current[key];
+    }
+    const dateTimeValue = dateTime.decode(current);
+    if (dateTimeValue._tag === 'Right') {
+        return ResultModule.ok(dateTimeValue.right);
+    }
+    switch (typeof current) {
+        case 'boolean':
+        case 'number':
+        case 'string':
+        case 'undefined':
+            return ResultModule.ok(current);
+        default:
+            return ResultModule.ok(undefined);
+    }
+};
 
-    export const characterAction = (toml: string): Result<CharacterAction> => {
-        // CONSIDER: TOMLのDateTimeに未対応
-        const object = parse(toml);
-        if (object.isError) {
-            return object;
-        }
-        const decoded = exactCharacterAction.decode(object.value);
-        if (decoded._tag === 'Left') {
-            return ResultModule.error(errorToMessage(decoded.left));
-        }
-        return ResultModule.ok(decoded.right);
-    };
-}
+export const characterAction = (toml: string): Result<CharacterAction> => {
+    // CONSIDER: TOMLのDateTimeに未対応
+    const object = parse(toml);
+    if (object.isError) {
+        return object;
+    }
+    const decoded = exactCharacterAction.decode(object.value);
+    if (decoded._tag === 'Left') {
+        return ResultModule.error(errorToMessage(decoded.left));
+    }
+    return ResultModule.ok(decoded.right);
+};
+
+export const toCharacterOperation = ({ action, currentState, commandKey }: { action: ReadonlyMap<string, CharacterActionElement>; currentState: Character.State; commandKey: string }) => {
+    const command = action.get(commandKey);
+    if (command?.chara == null) {
+        return undefined;
+    }
+
+    const result: Character.UpOperation = { $version: 1 };
+    if (command.chara.name != null) {
+        result.name = { newValue: command.chara.name };
+    }
+    if (command.chara.icon != null) {
+        result.image = { newValue: Util.toFilePath(command.chara.icon) };
+    }
+    if (command.chara.tachie != null) {
+        result.tachieImage = { newValue: Util.toFilePath(command.chara.tachie) };
+    }
+    return result;
+};
