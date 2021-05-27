@@ -13,7 +13,7 @@ export {
     ReadonlyDualKeyMap,
     DualKeyMapSource,
     dualKeyToString,
-    toJsonString as dualKeyMapToJsonString,
+    toJsonString as dualKeyToJsonString,
     groupJoin as groupJoinDualKeyMap,
     groupJoin3 as groupJoin3DualKeyMap,
     groupJoin4 as groupJoin4DualKeyMap,
@@ -59,6 +59,7 @@ export {
     ReadonlyStateMap,
     createStateMap,
 } from './internal/stateMap';
+export { left, right, both } from './internal/types';
 export {
     chooseDualKeyRecord,
     chooseRecord,
