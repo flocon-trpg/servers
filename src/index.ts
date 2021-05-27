@@ -52,7 +52,7 @@ export {
 } from './internal/ot/room/converter';
 export {
     State as BoardLocationState,
-    UpOperation as BoardLocationPieceUpOperation,
+    UpOperation as BoardLocationUpOperation,
     DownOperation as BoardLocationDownOperation,
     apply as applyBoardLocation,
     diff as boardLocationDiff,
@@ -72,6 +72,14 @@ export {
     UpOperation as PieceUpOperation,
     DownOperation as PieceDownOperation,
 } from './internal/ot/piece/v1';
+export {
+    State as BoardState,
+    UpOperation as BoardUpOperation,
+    DownOperation as BoardDownOperation,
+    apply as applyBoard,
+    diff as boardDiff,
+    toUpOperation as toBoardUpOperation,
+} from './internal/ot/room/participant/board/v1';
 export {
     State as CharacterState,
     UpOperation as CharacterUpOperation,
