@@ -1148,14 +1148,15 @@
   resolved "https://registry.yarnpkg.com/@kizahasi/result/-/result-0.2.0.tgz#a38c8c6c109124ec7350c796d36cf55fa826f6d9"
   integrity sha512-4IkSRH36XepOM4+eWNqnOfCrjHtOe10aYWWANot5cUbRPrghGbBdyNyONr2bCma6FnnrtnGqj8e2lX5hDKjwLQ==
 
-"@kizahasi/util@0.1.0-alpha.2":
-  version "0.1.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/@kizahasi/util/-/util-0.1.0-alpha.2.tgz#01e64c8713e297fb60101d413c0aff367e145871"
-  integrity sha512-DpJYalF7pmLREUKZV/4QHAnPZtcIIdqkhXuZGQoEIEM2U60HtjbFJOj0Pgs2Y57GPT9mB2oDKFeYfehEEroNcg==
+"@kizahasi/util@0.1.0-alpha.3":
+  version "0.1.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/@kizahasi/util/-/util-0.1.0-alpha.3.tgz#af75a1814d119c7922ed97ebf63d7c62fe802823"
+  integrity sha512-mdxsi95l+qUC2WFRB0yA2gqK6VoEQkmyRNdSrgWCQ+szOJENDVfgHho+ZViuWTOB8i0EspqS4nkY6gME+/Vcag==
   dependencies:
     "@kizahasi/result" "^0.2.0"
     fp-ts "^2.10.5"
     io-ts "^2.2.16"
+    lodash "^4.17.21"
 
 "@ltd/j-toml@^1.12.2":
   version "1.12.2"
@@ -5383,7 +5384,7 @@ lodash.uniq@^4.5.0:
   resolved "https://registry.yarnpkg.com/lodash.uniq/-/lodash.uniq-4.5.0.tgz#d0225373aeb652adc1bc82e4945339a842754773"
   integrity sha1-0CJTc662Uq3BvILklFM5qEJ1R3M=
 
-lodash@4.x, lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.20, lodash@^4.17.5, lodash@^4.7.0:
+lodash@4.x, lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.20, lodash@^4.17.21, lodash@^4.17.5, lodash@^4.7.0:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==

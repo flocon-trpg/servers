@@ -67,7 +67,7 @@
     },
     "dependencies": {
         "@kizahasi/ot-string": "0.2.0",
-        "@kizahasi/util": "0.1.0-alpha.2",
+        "@kizahasi/util": "0.1.0-alpha.3",
         "@ltd/j-toml": "^1.12.2",
         "fp-ts": "^2.10.5",
         "io-ts": "^2.2.16"
