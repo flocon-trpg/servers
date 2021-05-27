@@ -20,7 +20,6 @@ import {
     Compose,
     Diff,
     Restore,
-    server,
     ServerTransform,
     ToClientOperationParams,
 } from '../../util/type';

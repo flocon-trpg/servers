@@ -1,11 +1,12 @@
 export {
     CharacterAction,
     CharacterActionElement,
-    characterAction,
+    characterAction as tomlToCharacterAction,
     isValidVarToml,
-    toCharacterOperation,
-    variable,
+    toCharacterOperation as characterActionToOperation,
+    variable as tomlVariable,
 } from './internal/flocommand';
+export { Default, FirebaseStorage } from './internal/ot/filePath/v1';
 export {
     dbState,
     DbState,
@@ -39,7 +40,16 @@ export {
     decodeDownOperation,
     exactDownOperation,
 } from './internal/ot/room/converter';
-export { UpOperation as CharacterUpOperation } from './internal/ot/room/participant/character/v1';
+export {
+    Master,
+    Player,
+    Spectator,
+    ParticipantRole,
+} from './internal/ot/room/participant/v1';
+export {
+    State as CharacterState,
+    UpOperation as CharacterUpOperation,
+} from './internal/ot/room/participant/character/v1';
 export {
     decode as decodeMyNumberValue,
     parse as parseMyNumberValue,
