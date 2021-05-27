@@ -1,33 +1,24 @@
-import { Button, Checkbox, Col, Drawer, Input, InputNumber, Row, Space, Tooltip, Typography } from 'antd';
+import { Button, Checkbox, Col, Drawer, InputNumber, Row, Space, Tooltip, Typography } from 'antd';
 import React from 'react';
 import DrawerFooter from '../../layouts/DrawerFooter';
 import ComponentsStateContext from './contexts/RoomComponentsStateContext';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import { simpleId } from '../../utils/generators';
-import { OperationElement, replace } from '../../stateManagers/states/types';
-import { createStateMap, ReadonlyStateMap } from '../../@shared/StateMap';
+import { replace } from '../../stateManagers/states/types';
 import { characterDrawerType, create, update } from './RoomComponentsState';
 import { DrawerProps } from 'antd/lib/drawer';
 import InputFile from '../InputFile';
 import { FilePath, FilesManagerDrawerType } from '../../utils/types';
 import FilesManagerDrawer from '../FilesManagerDrawer';
 import { Gutter } from 'antd/lib/grid/row';
-import { strIndex20Array } from '../../@shared/indexes';
-import MyAuthContext from '../../contexts/MyAuthContext';
 import NumberParameterInput from '../../foundations/NumberParameterInput';
 import BooleanParameterInput from '../../foundations/BooleanParameterInput';
 import StringParameterInput from '../../foundations/StringParameterInput';
 import ToggleButton from '../../foundations/ToggleButton';
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import { characterIsPrivate, characterIsNotPrivate, characterIsNotPrivateAndNotCreatedByMe } from '../../resource/text/main';
-import * as Room from '../../@shared/ot/room/v1';
-import * as Character from '../../@shared/ot/room/participant/character/v1';
-import * as BoardLocation from '../../@shared/ot/boardLocation/v1';
-import * as Piece from '../../@shared/ot/piece/v1';
-import { getUserUid } from '../../hooks/useFirebaseUser';
 import { useStateEditor } from '../../hooks/useStateEditor';
 import { useOperate } from '../../hooks/useOperate';
-import { useSelector } from '../../store';
 import BufferedInput from '../../foundations/BufferedInput';
 import BufferedTextArea from '../../foundations/BufferedTextArea';
 import { characterCommand, characterVariable, TomlInput } from '../../foundations/Tomllnput';
@@ -35,7 +26,8 @@ import { useCharacters } from '../../hooks/state/useCharacters';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { useBoolParamNames, useNumParamNames, useStrParamNames } from '../../hooks/state/useParamNames';
 import { useMe } from '../../hooks/useMe';
-import { dualKeyRecordFind, recordToDualKeyMap } from '../../@shared/utils';
+import { applyCharacter, boardLocationDiff, BoardLocationState, characterDiff, CharacterState, CharacterUpOperation, PieceState, toCharacterUpOperation, UpOperation, pieceDiff } from '@kizahasi/flocon-core';
+import { dualKeyRecordFind, strIndex20Array } from '@kizahasi/util';
 
 const notFound = 'notFound';
 
@@ -43,7 +35,7 @@ const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
 };
 
-const defaultCharacter: Character.State = {
+const defaultCharacter: CharacterState = {
     $version: 1,
     memo: '',
     name: '',
@@ -61,7 +53,7 @@ const defaultCharacter: Character.State = {
     pieces: {},
 };
 
-const defaultPieceLocation: Piece.State = {
+const defaultPieceLocation: PieceState = {
     $version: 1,
     x: 0,
     y: 0,
@@ -93,11 +85,11 @@ const CharacterDrawer: React.FC = () => {
         if (drawerType?.type !== update) {
             return;
         }
-        const diffOperation = Character.diff({ prevState, nextState });
+        const diffOperation = characterDiff({ prevState, nextState });
         if (diffOperation == null) {
             return;
         }
-        const operation: Room.UpOperation = {
+        const operation: UpOperation = {
             $version: 1,
             participants: {
                 [drawerType.stateKey.createdBy]: {
@@ -107,7 +99,7 @@ const CharacterDrawer: React.FC = () => {
                         characters: {
                             [drawerType.stateKey.id]: {
                                 type: update,
-                                update: Character.toUpOperation(diffOperation),
+                                update: toCharacterUpOperation(diffOperation),
                             }
                         }
                     }
@@ -134,27 +126,27 @@ const CharacterDrawer: React.FC = () => {
         if (drawerType?.type !== update || drawerType.boardKey == null) {
             return null;
         }
-        return dualKeyRecordFind<Piece.State>(character.pieces, { first: drawerType.boardKey.createdBy, second: drawerType.boardKey.id }) ?? null;
+        return dualKeyRecordFind<PieceState>(character.pieces, { first: drawerType.boardKey.createdBy, second: drawerType.boardKey.id }) ?? null;
     })();
 
     const tachieLocation = (() => {
         if (drawerType?.type !== update || drawerType.boardKey == null) {
             return null;
         }
-        return dualKeyRecordFind<BoardLocation.State>(character.tachieLocations, { first: drawerType.boardKey.createdBy, second: drawerType.boardKey.id }) ?? null;
+        return dualKeyRecordFind<BoardLocationState>(character.tachieLocations, { first: drawerType.boardKey.createdBy, second: drawerType.boardKey.id }) ?? null;
     })();
 
-    const updateCharacter = (partialState: Partial<Character.State>) => {
+    const updateCharacter = (partialState: Partial<CharacterState>) => {
         switch (drawerType?.type) {
             case create:
                 setCharacter({ ...character, ...partialState });
                 return;
             case update: {
-                const diffOperation = Character.diff({ prevState: character, nextState: { ...character, ...partialState } });
+                const diffOperation = characterDiff({ prevState: character, nextState: { ...character, ...partialState } });
                 if (diffOperation == null) {
                     return;
                 }
-                const operation: Room.UpOperation = {
+                const operation: UpOperation = {
                     $version: 1,
                     participants: {
                         [drawerType.stateKey.createdBy]: {
@@ -164,7 +156,7 @@ const CharacterDrawer: React.FC = () => {
                                 characters: {
                                     [drawerType.stateKey.id]: {
                                         type: update,
-                                        update: Character.toUpOperation(diffOperation),
+                                        update: toCharacterUpOperation(diffOperation),
                                     }
                                 }
                             }
@@ -176,10 +168,10 @@ const CharacterDrawer: React.FC = () => {
             }
         }
     };
-    const updateCharacterByOperation = (operation: Character.UpOperation) => {
+    const updateCharacterByOperation = (operation: CharacterUpOperation) => {
         switch (drawerType?.type) {
             case create: {
-                const newCharacter = Character.apply({ state: character, operation });
+                const newCharacter = applyCharacter({ state: character, operation });
                 if (newCharacter.isError) {
                     throw newCharacter.error;
                 }
@@ -187,7 +179,7 @@ const CharacterDrawer: React.FC = () => {
                 return;
             }
             case update: {
-                const roomOperation: Room.UpOperation = {
+                const roomOperation: UpOperation = {
                     $version: 1,
                     participants: {
                         [drawerType.stateKey.createdBy]: {
@@ -210,15 +202,15 @@ const CharacterDrawer: React.FC = () => {
         }
     };
 
-    const updatePiece = (partialState: Partial<Piece.State>) => {
+    const updatePiece = (partialState: Partial<PieceState>) => {
         if (piece == null || drawerType?.type !== update || drawerType.boardKey == null) {
             return;
         }
-        const diffOperation = Piece.diff({ prevState: piece, nextState: { ...piece, ...partialState } });
+        const diffOperation = pieceDiff({ prevState: piece, nextState: { ...piece, ...partialState } });
         if (diffOperation == null) {
             return;
         }
-        const operation: Room.UpOperation = {
+        const operation: UpOperation = {
             $version: 1,
             participants: {
                 [drawerType.stateKey.createdBy]: {
@@ -248,15 +240,15 @@ const CharacterDrawer: React.FC = () => {
         operate(operation);
     };
 
-    const updateTachieLocation = (partialState: Partial<BoardLocation.State>) => {
+    const updateTachieLocation = (partialState: Partial<BoardLocationState>) => {
         if (tachieLocation == null || drawerType?.type !== update || drawerType.boardKey == null) {
             return;
         }
-        const diffOperation = BoardLocation.diff({ prevState: tachieLocation, nextState: { ...tachieLocation, ...partialState } });
+        const diffOperation = boardLocationDiff({ prevState: tachieLocation, nextState: { ...tachieLocation, ...partialState } });
         if (diffOperation == null) {
             return;
         }
-        const operation: Room.UpOperation = {
+        const operation: UpOperation = {
             $version: 1,
             participants: {
                 [drawerType.stateKey.createdBy]: {
@@ -293,7 +285,7 @@ const CharacterDrawer: React.FC = () => {
                 return;
             }
             const id = simpleId();
-            const operation: Room.UpOperation = {
+            const operation: UpOperation = {
                 $version: 1,
                 participants: {
                     [me.userUid]: {
@@ -321,7 +313,7 @@ const CharacterDrawer: React.FC = () => {
     let onDestroy: (() => void) | undefined = undefined;
     if (drawerType?.type === update) {
         onDestroy = () => {
-            const operation: Room.UpOperation = {
+            const operation: UpOperation = {
                 $version: 1,
                 participants: {
                     [drawerType.stateKey.createdBy]: {
@@ -538,7 +530,7 @@ const CharacterDrawer: React.FC = () => {
                                             return;
                                         }
                                         const id = simpleId();
-                                        const operation: Room.UpOperation = {
+                                        const operation: UpOperation = {
                                             $version: 1,
                                             participants: {
                                                 [me.userUid]: {

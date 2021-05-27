@@ -3,13 +3,13 @@ import { Howl } from 'howler';
 import { useDeepCompareEffectNoCheck } from 'use-deep-compare-effect';
 import { useFirebaseStorageUrlArray } from './firebaseStorage';
 import { volumeCap } from '../utils/variables';
-import { __ } from '../@shared/collection';
 import { useSelector } from '../store';
 import { defaultChannelVolume, defaultMasterVolume } from '../states/RoomConfig';
-import * as BgmModule from '../@shared/ot/room/bgm/v1';
+import { __ } from '@kizahasi/util';
+import { BgmState } from '@kizahasi/flocon-core';
 
 type PlayBgmBehaviorCoreProps = {
-    bgm: BgmModule.State | null;
+    bgm: BgmState | null;
     volumeConfig: number;
 }
 

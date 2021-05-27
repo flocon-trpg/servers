@@ -1,16 +1,12 @@
-import { createStateMap, ReadonlyStateMap } from '../@shared/StateMap';
 import { RoomMessages, RoomPrivateMessage, RoomPublicChannelFragment, RoomPublicMessage } from '../generated/graphql';
 import { PrivateChannelSet } from './PrivateChannelSet';
 import { escape } from 'html-escaper';
-import { $free, $system } from '../@shared/Constants';
 import moment from 'moment';
 import { PublicChannelNames } from './types';
 import { RoomMessage } from '../components/room/RoomMessage';
 import { isDeleted, toText } from './message';
-import * as CharacterModule from '../@shared/ot/room/participant/character/v1';
-import * as ParticipantModule from '../@shared/ot/room/participant/v1';
-import { __ } from '../@shared/collection';
-import { recordToMap } from '../@shared/utils';
+import { recordToMap, __, createStateMap } from '@kizahasi/util';
+import { ParticipantState } from '@kizahasi/flocon-core';
 
 const privateMessage = 'privateMessage';
 const publicMessage = 'publicMessage';
@@ -65,7 +61,7 @@ type RoomMessage = {
 
 const createRoomMessageArray = (props: {
     messages: RoomMessages;
-    participants: ReadonlyMap<string, ParticipantModule.State>;
+    participants: ReadonlyMap<string, ParticipantState>;
 } & PublicChannelNames) => {
     const {
         messages,
@@ -168,7 +164,7 @@ const createRoomMessageArray = (props: {
 
 export const generateAsStaticHtml = (params: {
     messages: RoomMessages;
-    participants: ReadonlyMap<string, ParticipantModule.State>;
+    participants: ReadonlyMap<string, ParticipantState>;
 } & PublicChannelNames) => {
     const elements = createRoomMessageArray(params).sort((x, y) => x.createdAt - y.createdAt).map(msg => {
         const left = msg.value.createdBy == null ?

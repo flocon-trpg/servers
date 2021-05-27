@@ -2,13 +2,10 @@
 import React from 'react';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import { Table, Button, Input, Tooltip, Popover } from 'antd';
-import { CompositeKey, compositeKeyToString } from '../../@shared/StateMap';
 import { update } from '../../stateManagers/states/types';
-import { __ } from '../../@shared/collection';
 import { characterDrawerType, characterParameterNamesDrawerVisibility, create } from './RoomComponentsState';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import { FilePathFragment } from '../../generated/graphql';
-import { StrIndex20, strIndex20Array } from '../../@shared/indexes';
 import NumberParameterInput from '../../foundations/NumberParameterInput';
 import BooleanParameterInput from '../../foundations/BooleanParameterInput';
 import StringParameterInput from '../../foundations/StringParameterInput';
@@ -18,24 +15,21 @@ import ToggleButton from '../../foundations/ToggleButton';
 import { characterIsPrivate, characterIsNotPrivate, characterIsNotPrivateAndNotCreatedByMe } from '../../resource/text/main';
 import { getUserUid } from '../../hooks/useFirebaseUser';
 import { useOperate } from '../../hooks/useOperate';
-import * as Room from '../../@shared/ot/room/v1';
-import * as Character from '../../@shared/ot/room/participant/character/v1';
-import * as Participant from '../../@shared/ot/room/participant/v1';
-import * as ParamName from '../../@shared/ot/room/paramName/v1';
-import * as FilePathModule from '../../@shared/ot/filePath/v1';
 import { useCharacters } from '../../hooks/state/useCharacters';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { useBoolParamNames, useNumParamNames, useStrParamNames } from '../../hooks/state/useParamNames';
+import { CharacterState, FilePath, ParamNameState, ParticipantState, UpOperation } from '@kizahasi/flocon-core';
+import { CompositeKey, compositeKeyToString, StrIndex20, strIndex20Array, __ } from '@kizahasi/util';
 
 type DataSource = {
     key: string;
     character: {
         stateKey: CompositeKey;
-        state: Character.State;
+        state: CharacterState;
         createdByMe: boolean | null;
     };
-    participants: ReadonlyMap<string, Participant.State>;
-    operate: (operation: Room.UpOperation) => void;
+    participants: ReadonlyMap<string, ParticipantState>;
+    operate: (operation: UpOperation) => void;
 }
 
 const minNumParameter = -1000000;
@@ -46,7 +40,7 @@ const createBooleanParameterColumn = ({
     boolParamNames,
 }: {
     key: StrIndex20;
-    boolParamNames: ReadonlyMap<string, ParamName.State>;
+    boolParamNames: ReadonlyMap<string, ParamNameState>;
 }) => {
     const reactKey = `boolParameter${key}`;
     const name = boolParamNames.get(key);
@@ -68,7 +62,7 @@ const createBooleanParameterColumn = ({
                         parameter={character.state.boolParams[key]}
                         createdByMe={character.createdByMe ?? false}
                         onOperate={characterOperation => {
-                            const operation: Room.UpOperation = {
+                            const operation: UpOperation = {
                                 $version: 1,
                                 participants: {
                                     [character.stateKey.createdBy]: {
@@ -97,7 +91,7 @@ const createNumParameterColumn = ({
     numParamNames,
 }: {
     key: StrIndex20;
-    numParamNames: ReadonlyMap<string, ParamName.State>;
+    numParamNames: ReadonlyMap<string, ParamNameState>;
 }) => {
     const reactKey = `numParameter${key}`;
     const name = numParamNames.get(key);
@@ -120,7 +114,7 @@ const createNumParameterColumn = ({
                         numberMaxParameter={character.state.numMaxParams[key]}
                         createdByMe={character.createdByMe ?? false}
                         onOperate={characterOperation => {
-                            const operation: Room.UpOperation = {
+                            const operation: UpOperation = {
                                 $version: 1,
                                 participants: {
                                     [character.stateKey.createdBy]: {
@@ -149,7 +143,7 @@ const createStringParameterColumn = ({
     strParamNames,
 }: {
     key: StrIndex20;
-    strParamNames: ReadonlyMap<string, ParamName.State>;
+    strParamNames: ReadonlyMap<string, ParamNameState>;
 }) => {
     const reactKey = `strmParameter${key}`;
     const name = strParamNames.get(key);
@@ -171,7 +165,7 @@ const createStringParameterColumn = ({
                         parameter={character.state.strParams[key]}
                         createdByMe={character.createdByMe ?? false}
                         onOperate={characterOperation => {
-                            const operation: Room.UpOperation = {
+                            const operation: UpOperation = {
                                 $version: 1,
                                 participants: {
                                     [character.stateKey.createdBy]: {
@@ -195,7 +189,7 @@ const createStringParameterColumn = ({
     };
 };
 
-const Image: React.FC<{ filePath?: FilePathFragment | FilePathModule.FilePath; iconSize: boolean }> = ({ filePath, iconSize }: { filePath?: FilePathFragment | FilePathModule.FilePath; iconSize: boolean }) => {
+const Image: React.FC<{ filePath?: FilePathFragment | FilePath; iconSize: boolean }> = ({ filePath, iconSize }: { filePath?: FilePathFragment | FilePath; iconSize: boolean }) => {
     const src = useFirebaseStorageUrl(filePath);
     if (src == null) {
         return null;
@@ -265,7 +259,7 @@ const CharacterList: React.FC = () => {
                     unCheckedChildren={<Icon.EyeInvisibleOutlined />}
                     tooltip={character.state.isPrivate ? characterIsPrivate({ isCreate: false }) : characterIsNotPrivate({ isCreate: false })}
                     onChange={newValue => {
-                        const operation: Room.UpOperation = {
+                        const operation: UpOperation = {
                             $version: 1,
                             participants: {
                                 [character.stateKey.createdBy]: {
@@ -307,7 +301,7 @@ const CharacterList: React.FC = () => {
                         value={character.state.name}
                         size='small'
                         onChange={newValue => {
-                            const operation: Room.UpOperation = {
+                            const operation: UpOperation = {
                                 $version: 1,
                                 participants: {
                                     [character.stateKey.createdBy]: {

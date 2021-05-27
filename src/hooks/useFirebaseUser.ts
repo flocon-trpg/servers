@@ -1,6 +1,5 @@
 import React from 'react';
 import firebase from 'firebase/app';
-import useConstant from 'use-constant';
 import { getAuth } from '../utils/firebaseHelpers';
 import ConfigContext from '../contexts/ConfigContext';
 

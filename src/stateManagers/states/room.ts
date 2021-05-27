@@ -1,25 +1,19 @@
 import { replace } from './types';
-import * as RoomConverter from '../../@shared/ot/room/converter';
-import * as RoomModule from '../../@shared/ot/room/v1';
 import { RoomGetStateFragment, RoomOperationFragment, RoomOperationInput } from '../../generated/graphql';
-import * as ParticipantModule from '../../@shared/ot/room/participant/v1';
-import * as BoardModule from '../../@shared/ot/room/participant/board/v1';
-import * as CharacterModule from '../../@shared/ot/room/participant/character/v1';
-import { RecordUpOperation } from '../../@shared/ot/room/util/recordOperation';
-import { updateType } from '../../@shared/ot/room/participant/myNumberValue/log-v1';
-import { recordForEach } from '../../@shared/utils';
+import { BoardState, BoardUpOperation, CharacterState, CharacterUpOperation, parseState, parseUpOperation, ParticipantState, ParticipantUpOperation, RecordUpOperation, State, stringifyUpOperation, updateType, UpOperation } from '@kizahasi/flocon-core';
+import { recordForEach } from '@kizahasi/util';
 
 export namespace Room {
-    export const createState = (source: RoomGetStateFragment): RoomModule.State => {
-        return RoomConverter.parseState(source.stateJson);
+    export const createState = (source: RoomGetStateFragment): State => {
+        return parseState(source.stateJson);
     };
 
-    export const createGetOperation = (source: RoomOperationFragment): RoomModule.UpOperation => {
-        return RoomConverter.parseUpOperation(source.valueJson);
+    export const createGetOperation = (source: RoomOperationFragment): UpOperation => {
+        return parseUpOperation(source.valueJson);
     };
 
-    export const createAddBoardsOperation = (source: Record<string, BoardModule.State>, userUid: string): RoomModule.UpOperation => {
-        const boards: RecordUpOperation<BoardModule.State, BoardModule.UpOperation> = {};
+    export const createAddBoardsOperation = (source: Record<string, BoardState>, userUid: string): UpOperation => {
+        const boards: RecordUpOperation<BoardState, BoardUpOperation> = {};
         recordForEach(source, (value, key) => {
             if (value == null) {
                 return;
@@ -32,7 +26,7 @@ export namespace Room {
             };
         });
 
-        const participants: RecordUpOperation<ParticipantModule.State, ParticipantModule.UpOperation> = {
+        const participants: RecordUpOperation<ParticipantState, ParticipantUpOperation> = {
             [userUid]: {
                 type: updateType,
                 update: {
@@ -48,8 +42,8 @@ export namespace Room {
         };
     };
 
-    export const createAddCharactersOperation = (source: Record<string, CharacterModule.State>, userUid: string): RoomModule.UpOperation => {
-        const characters: RecordUpOperation<CharacterModule.State, CharacterModule.UpOperation> = {};
+    export const createAddCharactersOperation = (source: Record<string, CharacterState>, userUid: string): UpOperation => {
+        const characters: RecordUpOperation<CharacterState, CharacterUpOperation> = {};
         recordForEach(source, (value, key) => {
             if (value == null) {
                 return;
@@ -62,7 +56,7 @@ export namespace Room {
             };
         });
 
-        const participants: RecordUpOperation<ParticipantModule.State, ParticipantModule.UpOperation> = {
+        const participants: RecordUpOperation<ParticipantState, ParticipantUpOperation> = {
             [userUid]: {
                 type: updateType,
                 update: {
@@ -78,10 +72,10 @@ export namespace Room {
         };
     };
 
-    export const toGraphQLInput = (source: RoomModule.UpOperation, clientId: string): RoomOperationInput => {
+    export const toGraphQLInput = (source: UpOperation, clientId: string): RoomOperationInput => {
         return {
             clientId,
-            valueJson: RoomConverter.stringifyUpOperation(source),
+            valueJson: stringifyUpOperation(source),
         };
     };
 }

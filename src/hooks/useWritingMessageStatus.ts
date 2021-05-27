@@ -1,7 +1,7 @@
+import { PublicChannelKey } from '@kizahasi/util';
 import produce from 'immer';
 import React from 'react';
 import { interval } from 'rxjs';
-import { PublicChannelKey } from '../@shared/publicChannelKey';
 import { WritingMessageStatusType } from '../generated/graphql';
 import { useSelector } from '../store';
 
@@ -23,7 +23,6 @@ export function useWritingMessageStatus() {
             return;
         }
         setResult(oldValue => produce(oldValue, draft => {
-            console.info('publicChannelKey', writingMessageStatus.publicChannelKey);
             if (!PublicChannelKey.Without$System.isPublicChannelKey(writingMessageStatus.publicChannelKey)) {
                 return;
             }

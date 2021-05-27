@@ -19,9 +19,8 @@ import { generateAsStaticHtml } from '../../utils/roomLogGenerator';
 import moment from 'moment';
 import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
-import { recordToArray, recordToMap } from '../../@shared/utils';
-import { __ } from '../../@shared/collection';
 import { useParticipants } from '../../hooks/state/useParticipants';
+import { recordToArray } from '@kizahasi/util';
 
 type BecomePlayerModalProps = {
     roomId: string;

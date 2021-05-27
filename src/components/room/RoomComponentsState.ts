@@ -1,5 +1,5 @@
-import { CompositeKey } from '../../@shared/StateMap';
-import * as Piece from '../../@shared/ot/piece/v1';
+import { PieceState } from '@kizahasi/flocon-core';
+import { CompositeKey } from '@kizahasi/util';
 
 export const create = 'create';
 export const update = 'update';
@@ -30,7 +30,7 @@ export type MyNumberValueDrawerType = {
     // pieceとともに作成するケース
     type: typeof create;
     boardKey: CompositeKey;
-    piece: Piece.State;
+    piece: PieceState;
 } | {
     // pieceは作成しないケース
     type: typeof create;

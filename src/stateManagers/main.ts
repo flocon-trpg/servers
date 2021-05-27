@@ -1,35 +1,35 @@
+import { State, UpOperation, apply, composeUpOperation, clientTransform, diff, toUpOperation } from '@kizahasi/flocon-core';
 import { StateManager, StateManagerParameters } from './StateManager';
-import * as RoomModule from '../@shared/ot/room/v1';
 
-type Parameters = StateManagerParameters<RoomModule.State, RoomModule.UpOperation, RoomModule.UpOperation>;
+type Parameters = StateManagerParameters<State, UpOperation, UpOperation>;
 
-const createParameters = (state: RoomModule.State, revision: number): Parameters => {
+const createParameters = (state: State, revision: number): Parameters => {
     return {
         state,
         revision,
         applyGetOperation: params => {
-            const result = RoomModule.apply(params);
+            const result = apply(params);
             if (result.isError) {
                 throw result.error;
             }
             return result.value;
         },
         applyPostOperation: params => {
-            const result = RoomModule.apply(params);
+            const result = apply(params);
             if (result.isError) {
                 throw result.error;
             }
             return result.value;
         },
         composePostOperation: params => {
-            const result = RoomModule.composeUpOperation(params);
+            const result = composeUpOperation(params);
             if (result.isError) {
                 throw result.error;
             }
             return result.value ?? { $version: 1 };
         },
         getFirstTransform: params => {
-            const result = RoomModule.clientTransform(params);
+            const result = clientTransform(params);
             if (result.isError) {
                 throw result.error;
             }
@@ -39,7 +39,7 @@ const createParameters = (state: RoomModule.State, revision: number): Parameters
             };
         },
         postFirstTransform: params => {
-            const result = RoomModule.clientTransform(params);
+            const result = clientTransform(params);
             if (result.isError) {
                 throw result.error;
             }
@@ -49,12 +49,12 @@ const createParameters = (state: RoomModule.State, revision: number): Parameters
             };
         },
         diff: params => {
-            const result = RoomModule.diff(params);
-            return RoomModule.toUpOperation(result ?? { $version: 1 });
+            const result = diff(params);
+            return toUpOperation(result ?? { $version: 1 });
         },
     };
 };
 
-export const create = (state: RoomModule.State, revision: number): StateManager<RoomModule.State, RoomModule.UpOperation, RoomModule.UpOperation> => {
+export const create = (state: State, revision: number): StateManager<State, UpOperation, UpOperation> => {
     return new StateManager(createParameters(state, revision));
 };

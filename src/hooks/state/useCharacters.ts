@@ -1,11 +1,9 @@
 import React from 'react';
-import { recordToMap } from '../../@shared/utils';
-import * as Character from '../../@shared/ot/room/participant/character/v1';
-import { createStateMap, ReadonlyStateMap } from '../../@shared/StateMap';
 import { useParticipants } from './useParticipants';
-import { __ } from '../../@shared/collection';
+import { createStateMap, ReadonlyStateMap, recordToMap, __ } from '@kizahasi/util';
+import { CharacterState } from '@kizahasi/flocon-core';
 
-export const useCharacters = (): ReadonlyStateMap<Character.State> | undefined => {
+export const useCharacters = (): ReadonlyStateMap<CharacterState> | undefined => {
     const participants = useParticipants();
     return React.useMemo(() => {
         if (participants == null) {

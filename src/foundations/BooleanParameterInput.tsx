@@ -1,19 +1,18 @@
 import React from 'react';
 import { Button, Checkbox, Tooltip } from 'antd';
-import { StrIndex20 } from '../@shared/indexes';
 import { EyeInvisibleOutlined, EyeOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import ToggleButton from './ToggleButton';
 import { addParameter, deleteParameter, parameterIsNotPrivate, parameterIsNotPrivateAndNotCreatedByMe, parameterIsPrivate, parameterIsPrivateAndNotCreatedByMe } from '../resource/text/main';
-import * as Character from '../@shared/ot/room/participant/character/v1';
-import * as BoolParam from '../@shared/ot/room/participant/character/boolParam/v1';
+import { StrIndex20 } from '@kizahasi/util';
+import { BoolParamState, CharacterUpOperation } from '@kizahasi/flocon-core';
 
 type Props = {
     isCharacterPrivate: boolean;
     isCreate: boolean;
     parameterKey: StrIndex20;
-    parameter: BoolParam.State | undefined;
+    parameter: BoolParamState | undefined;
     createdByMe: boolean;
-    onOperate: (operation: Character.UpOperation) => void;
+    onOperate: (operation: CharacterUpOperation) => void;
     compact: boolean;
 }
 
@@ -31,7 +30,7 @@ const BooleanParameterInput: React.FC<Props> = ({
             disabled={disabled}
             checked={parameter?.value ?? false}
             onChange={e => {
-                const operation: Character.UpOperation = {
+                const operation: CharacterUpOperation = {
                     $version: 1,
                     boolParams: {
                         [parameterKey]: {
@@ -55,7 +54,7 @@ const BooleanParameterInput: React.FC<Props> = ({
                         size='small'
                         disabled={disabled}
                         onClick={() => {
-                            const operation: Character.UpOperation = {
+                            const operation: CharacterUpOperation = {
                                 $version: 1,
                                 boolParams: {
                                     [parameterKey]: {
@@ -76,7 +75,7 @@ const BooleanParameterInput: React.FC<Props> = ({
                     size='small'
                     disabled={disabled}
                     onClick={() => {
-                        const operation: Character.UpOperation = {
+                        const operation: CharacterUpOperation = {
                             $version: 1,
                             boolParams: {
                                 [parameterKey]: {
@@ -115,7 +114,7 @@ const BooleanParameterInput: React.FC<Props> = ({
             unCheckedChildren={<EyeInvisibleOutlined />}
             size='small'
             onChange={e => {
-                const operation: Character.UpOperation = {
+                const operation: CharacterUpOperation = {
                     $version: 1,
                     boolParams: {
                         [parameterKey]: {

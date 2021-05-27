@@ -1,13 +1,11 @@
 import React from 'react';
 import { Tooltip } from 'antd';
-import { StrIndex20 } from '../@shared/indexes';
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 import ToggleButton from './ToggleButton';
 import { parameterIsPrivate, parameterIsNotPrivate, parameterIsPrivateAndNotCreatedByMe, parameterIsNotPrivateAndNotCreatedByMe } from '../resource/text/main';
 import BufferedInput from './BufferedInput';
-import * as TextOperation from '../@shared/ot/room/util/textOperation';
-import * as Character from '../@shared/ot/room/participant/character/v1';
-import * as StrParam from '../@shared/ot/room/participant/character/strParam/v1';
+import { StrIndex20 } from '@kizahasi/util';
+import { CharacterUpOperation, StrParamState, textDiff, toTextUpOperation } from '@kizahasi/flocon-core';
 
 const inputWidth = 150;
 
@@ -15,9 +13,9 @@ type Props = {
     isCharacterPrivate: boolean;
     isCreate: boolean;
     parameterKey: StrIndex20;
-    parameter: StrParam.State | undefined;
+    parameter: StrParamState | undefined;
     createdByMe: boolean;
-    onOperate: (operation: Character.UpOperation) => void;
+    onOperate: (operation: CharacterUpOperation) => void;
     compact: boolean;
 }
 
@@ -41,12 +39,12 @@ const StringParameterInput: React.FC<Props> = ({
                 if (e.previousValue === e.currentValue) {
                     return;
                 }
-                const operation: Character.UpOperation = {
+                const operation: CharacterUpOperation = {
                     $version: 1,
                     strParams: {
                         [parameterKey]: {
                             $version: 1,
-                            value: TextOperation.toUpOperation(TextOperation.diff({ prev: e.previousValue, next: e.currentValue })),
+                            value: toTextUpOperation(textDiff({ prev: e.previousValue, next: e.currentValue })),
                         }
                     }
                 };
@@ -76,7 +74,7 @@ const StringParameterInput: React.FC<Props> = ({
             unCheckedChildren={<EyeInvisibleOutlined />}
             size='small'
             onChange={e => {
-                const operation: Character.UpOperation = {
+                const operation: CharacterUpOperation = {
                     $version: 1,
                     strParams: {
                         [parameterKey]: {

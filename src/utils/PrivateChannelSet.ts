@@ -1,5 +1,5 @@
+import { ParticipantState } from '@kizahasi/flocon-core';
 import { VisibleTo } from './visibleTo';
-import * as ParticipantModule from '../@shared/ot/room/participant/v1';
 
 export class PrivateChannelSet {
     private readonly _source: ReadonlySet<string>
@@ -21,7 +21,7 @@ export class PrivateChannelSet {
     }
 
     // participantsのkeyはUserUid
-    public toChannelNameBase(participants: ReadonlyMap<string, ParticipantModule.State>, skipMe?: { userUid: string }): string[] {
+    public toChannelNameBase(participants: ReadonlyMap<string, ParticipantState>, skipMe?: { userUid: string }): string[] {
         const result: string[] = [];
         this._source.forEach(userUid => {
             if (userUid === skipMe?.userUid) {

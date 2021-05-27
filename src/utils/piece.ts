@@ -1,5 +1,4 @@
-import * as PieceModule from '../@shared/ot/piece/v1';
-import * as BoardModule from '../@shared/ot/room/participant/board/v1';
+import { BoardState, PieceState } from '@kizahasi/flocon-core';
 
 export namespace Piece {
     export const getPosition = ({
@@ -9,7 +8,7 @@ export namespace Piece {
         cellOffsetX,
         cellOffsetY,
     }: {
-        state: PieceModule.State;
+        state: PieceState;
         cellWidth: number;
         cellHeight: number;
         cellOffsetX: number;
@@ -31,7 +30,7 @@ export namespace Piece {
         cellOffsetX,
         cellOffsetY,
     }: {
-        state: PieceModule.State;
+        state: PieceState;
         cellWidth: number;
         cellHeight: number;
         cursorPosition: { x: number; y: number };
@@ -48,7 +47,7 @@ export namespace Piece {
         x,
         y,
     }: {
-        board: BoardModule.State;
+        board: BoardState;
         x: number;
         y: number;
     }): { cellX: number; cellY: number } => {
@@ -70,7 +69,7 @@ export namespace Piece {
         w,
         h,
     }: {
-        board: BoardModule.State;
+        board: BoardState;
         w: number;
         h: number;
     }): { cellW: number; cellH: number } => {

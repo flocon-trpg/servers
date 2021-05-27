@@ -3,15 +3,15 @@ import { Observable, Subject } from 'rxjs';
 import { GetRoomDocument, GetRoomFailureType, GetRoomQuery, GetRoomQueryVariables, OperateMutation, RoomAsListItemFragment, RoomEventSubscription, RoomOperationFragment, useOperateMutation } from '../generated/graphql';
 import * as Rx from 'rxjs/operators';
 import { ApolloError, FetchResult, useApolloClient } from '@apollo/client';
-import { GetOnlyStateManager, StateManager } from '../stateManagers/StateManager';
+import { StateManager } from '../stateManagers/StateManager';
 import { create as createStateManager } from '../stateManagers/main';
 import MyAuthContext from '../contexts/MyAuthContext';
 import { Room } from '../stateManagers/states/room';
-import { authNotFound, FirebaseUserState, notSignIn } from './useFirebaseUser';
+import { authNotFound, notSignIn } from './useFirebaseUser';
 import { useClientId } from './useClientId';
 import { useDispatch } from 'react-redux';
 import roomModule, { Notification } from '../modules/roomModule';
-import * as RoomModule from '../@shared/ot/room/v1';
+import { State, UpOperation } from '@kizahasi/flocon-core';
 
 const sampleTime = 3000;
 
@@ -31,9 +31,9 @@ export type RoomState = {
     operate?: undefined;
 } | {
     type: typeof joined;
-    state: RoomModule.State;
+    state: State;
     // undefinedならばrefetchが必要。
-    operate: ((operation: RoomModule.UpOperation) => void) | undefined;
+    operate: ((operation: UpOperation) => void) | undefined;
     // participantの更新は、mutationを直接呼び出すことで行う。
 } | {
     type: typeof myAuthIsUnavailable;
@@ -96,7 +96,7 @@ export const useRoomState = (roomId: string, roomEventSubscription: Observable<R
             return; // This should not happen
         }
 
-        let roomStateManager: StateManager<RoomModule.State, RoomModule.UpOperation, RoomModule.UpOperation> | null = null;
+        let roomStateManager: StateManager<State, UpOperation, UpOperation> | null = null;
 
         const onRoomStateManagerUpdate = () => {
             const $stateManager = roomStateManager;
@@ -260,7 +260,7 @@ export const useRoomState = (roomId: string, roomEventSubscription: Observable<R
 
                     roomOperationCache.clear(); // 早めのメモリ解放
                     roomStateManager = newRoomStateManager;
-                    const operate = (operation: RoomModule.UpOperation) => {
+                    const operate = (operation: UpOperation) => {
                         const $stateManager = roomStateManager;
                         if ($stateManager == null) {
                             return;

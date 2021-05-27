@@ -1,6 +1,5 @@
 import { Popover, Tooltip } from 'antd';
 import React from 'react';
-import { $free } from '../../@shared/Constants';
 import { FilePathFragment, MyValueLogFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment } from '../../generated/graphql';
 import { useFirebaseStorageUrl } from '../../hooks/firebaseStorage';
 import { myValueLog, privateMessage, publicMessage } from '../../hooks/useRoomMessages';
@@ -8,15 +7,10 @@ import { PrivateChannelSet } from '../../utils/PrivateChannelSet';
 import { PublicChannelNames } from '../../utils/types';
 import * as Icon from '@ant-design/icons';
 import Jdenticon from '../../foundations/Jdenticon';
-import { compositeKeyToString } from '../../@shared/StateMap';
 import { isDeleted, toText } from '../../utils/message';
-import * as ParticipantModule from '../../@shared/ot/room/participant/v1';
-import * as Converter from '../../@shared/ot/room/participant/myNumberValue/converter';
-import { recordToDualKeyMap } from '../../@shared/utils';
-import * as PieceModule from '../../@shared/ot/piece/v1';
-import { RecordUpOperationElement, replace, update } from '../../@shared/ot/room/util/recordOperationElement';
-import { isIdRecord } from '../../@shared/ot/room/util/record';
 import { NewTabLinkify } from '../../foundations/NewTabLinkify';
+import { isIdRecord, ParticipantState, PieceState, PieceUpOperation, RecordUpOperationElement, replace, update, parseMyNumberValue } from '@kizahasi/flocon-core';
+import { $free, compositeKeyToString, recordToDualKeyMap } from '@kizahasi/util';
 
 export namespace RoomMessage {
     const Image: React.FC<{ filePath: FilePathFragment | undefined }> = ({ filePath }: { filePath: FilePathFragment | undefined }) => {
@@ -46,7 +40,7 @@ export namespace RoomMessage {
     export const Content: React.FC<ContentProps> = ({ style, message }: ContentProps) => {
         if (message.type === myValueLog) {
             const key = compositeKeyToString({ createdBy: message.value.stateUserUid, id: message.value.stateId });
-            const value = Converter.parse(message.value.valueJson);
+            const value = parseMyNumberValue(message.value.valueJson);
 
             if (value.type === 'create') {
                 return (<div style={style}>
@@ -59,7 +53,7 @@ export namespace RoomMessage {
                 </div>);
             }
 
-            const pieces = recordToDualKeyMap<RecordUpOperationElement<PieceModule.State, PieceModule.UpOperation>>(value.pieces ?? {});
+            const pieces = recordToDualKeyMap<RecordUpOperationElement<PieceState, PieceUpOperation>>(value.pieces ?? {});
 
             const changed = [
                 value.value ? '値' : null,
@@ -99,7 +93,7 @@ export namespace RoomMessage {
 
     };
 
-    export const userName = (message: MessageState, participants: ReadonlyMap<string, ParticipantModule.State>) => {
+    export const userName = (message: MessageState, participants: ReadonlyMap<string, ParticipantState>) => {
         if (message.type === myValueLog || message.value.createdBy == null) {
             return null;
         }
@@ -138,7 +132,7 @@ export namespace RoomMessage {
             </div>);
     };
 
-    export const toChannelName = (message: MessageState, publicChannelNames: PublicChannelNames, participants: ReadonlyMap<string, ParticipantModule.State>) => {
+    export const toChannelName = (message: MessageState, publicChannelNames: PublicChannelNames, participants: ReadonlyMap<string, ParticipantState>) => {
         if (message.type === myValueLog || message.value.createdBy == null) {
             return 'システムメッセージ';
         }

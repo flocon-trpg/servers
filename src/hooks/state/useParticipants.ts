@@ -1,9 +1,9 @@
 import React from 'react';
-import { recordToMap } from '../../@shared/utils';
 import { useSelector } from '../../store';
-import * as Participant from '../../@shared/ot/room/participant/v1';
+import { recordToMap } from '@kizahasi/util';
+import { ParticipantState } from '@kizahasi/flocon-core';
 
-export const useParticipants = (): ReadonlyMap<string, Participant.State> | undefined => {
+export const useParticipants = (): ReadonlyMap<string, ParticipantState> | undefined => {
     const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
     return React.useMemo(() => participants == null ? undefined : recordToMap(participants), [participants]);
 };

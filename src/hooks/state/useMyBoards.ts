@@ -1,9 +1,9 @@
+import { BoardState } from '@kizahasi/flocon-core';
+import { recordToMap } from '@kizahasi/util';
 import React from 'react';
-import { recordToMap } from '../../@shared/utils';
-import * as Board from '../../@shared/ot/room/participant/board/v1';
 import { useMe } from '../useMe';
 
-export const useMyBoards = (): ReadonlyMap<string, Board.State> | undefined => {
+export const useMyBoards = (): ReadonlyMap<string, BoardState> | undefined => {
     const { participant } = useMe();
     return React.useMemo(() => {
         if (participant == null) {

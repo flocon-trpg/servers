@@ -4,13 +4,11 @@ import { css } from '@emotion/react';
 import { Tabs, Button, Menu, Dropdown, Tooltip, Popover, Drawer, Col, Row, Checkbox, Divider, Radio, Alert, Input, Modal, Result } from 'antd';
 import moment from 'moment';
 import { AllRoomMessagesSuccessResult, apolloError, failure, loading, publicMessage, privateMessage, soundEffect, AllRoomMessagesResult, useFilteredAndMapRoomMessages, Message, myValueLog } from '../../hooks/useRoomMessages';
-import { __ } from '../../@shared/collection';
 import { PrivateChannelSet, PrivateChannelSets } from '../../utils/PrivateChannelSet';
 import ChatInput from './ChatInput';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
-import { ReadonlyStateMap } from '../../@shared/StateMap';
 import { useDeleteMessageMutation, useEditMessageMutation, useMakeMessageNotSecretMutation, WritingMessageStatusType } from '../../generated/graphql';
 import * as Icon from '@ant-design/icons';
 import InputModal from '../InputModal';
@@ -27,16 +25,14 @@ import { useMessageFilter } from '../../hooks/useMessageFilter';
 import { RoomMessage as RoomMessageNameSpace } from './RoomMessage';
 import { UseRoomMessageInputTextsResult } from '../../hooks/useRoomMessageInputTexts';
 import { useWritingMessageStatus, WritingMessageStatusResult } from '../../hooks/useWritingMessageStatus';
-import { PublicChannelKey } from '../../@shared/publicChannelKey';
-import { $free } from '../../@shared/Constants';
 import { isDeleted, toText } from '../../utils/message';
 import { Notification } from '../../modules/roomModule';
 import { useSelector } from '../../store';
 import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import { useOperate } from '../../hooks/useOperate';
-import { recordToMap } from '../../@shared/utils';
-import * as RoomModule from '../../@shared/ot/room/v1';
 import { useParticipants } from '../../hooks/state/useParticipants';
+import { UpOperation } from '@kizahasi/flocon-core';
+import { PublicChannelKey, recordToMap, __ } from '@kizahasi/util';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -274,7 +270,7 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (props: Chann
                         if (e.previousValue === e.currentValue) {
                             return;
                         }
-                        const operation: RoomModule.UpOperation = {
+                        const operation: UpOperation = {
                             $version: 1,
                         };
                         operation[key] = { newValue: e.currentValue };

@@ -1,11 +1,11 @@
-import * as BoardLocationModule from '../@shared/ot/boardLocation/v1';
+import { BoardLocationState } from '@kizahasi/flocon-core';
 
 export namespace BoardLocation {
     export const isCursorOnIcon = ({
         state,
         cursorPosition,
     }: {
-        state: BoardLocationModule.State;
+        state: BoardLocationState;
         cursorPosition: { x: number; y: number };
     }): boolean => {
         const { x, y, w, h } = state;

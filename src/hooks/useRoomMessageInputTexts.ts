@@ -1,10 +1,9 @@
+import { $free, PublicChannelKey } from '@kizahasi/util';
 import produce from 'immer';
 import React from 'react';
 import { Subject } from 'rxjs';
 import { bufferTime } from 'rxjs/operators';
 import useConstant from 'use-constant';
-import { $free } from '../@shared/Constants';
-import { PublicChannelKey } from '../@shared/publicChannelKey';
 import { useUpdateWritingMessageStatusMutation, WritingMessageStatusInputType } from '../generated/graphql';
 import { VisibleTo } from '../utils/visibleTo';
 

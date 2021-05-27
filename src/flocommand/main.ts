@@ -1,17 +1,14 @@
-import { characterAction, CharacterActionElement, toCharacterOperation } from '../@shared/flocommand';
-import { ResultModule } from '../@shared/Result';
-import { CompositeKey } from '../@shared/StateMap';
 import { update } from '../stateManagers/states/types';
-import * as Room from '../@shared/ot/room/v1';
-import * as Character from '../@shared/ot/room/participant/character/v1';
-import { recordToMap } from '../@shared/utils';
+import { Result } from '@kizahasi/result';
+import { CompositeKey, recordToMap } from '@kizahasi/util';
+import { CharacterActionElement, characterActionToOperation, CharacterState, tomlToCharacterAction, UpOperation } from '@kizahasi/flocon-core';
 
 export const listCharacterFlocommand = (toml: string) => {
-    const compiled = characterAction(toml);
+    const compiled = tomlToCharacterAction(toml);
     if (compiled.isError) {
         return compiled;
     }
-    return ResultModule.ok(recordToMap(compiled.value));
+    return Result.ok(recordToMap(compiled.value));
 };
 
 export const executeCharacterFlocommand = ({
@@ -22,14 +19,14 @@ export const executeCharacterFlocommand = ({
 }: {
     action: ReadonlyMap<string, CharacterActionElement>;
     characterKey: CompositeKey;
-    character: Character.State;
+    character: CharacterState;
     commandKey: string;
-}): Room.UpOperation | undefined => {
-    const operation = toCharacterOperation({ action, currentState: character, commandKey });
+}): UpOperation | undefined => {
+    const operation = characterActionToOperation({ action, currentState: character, commandKey });
     if (operation == null) {
         return undefined;
     }
-    const result: Room.UpOperation = {
+    const result: UpOperation = {
         $version: 1,
         participants: {
             [characterKey.createdBy]: {

@@ -6,8 +6,8 @@ import { castToPartialMessagePanelConfig, defaultMessagePanelsConfig, MessagePan
 import { castToPartialGameEffectPanelConfig, defaultGameEffectPanelConfig, GameEffectPanelConfig, PartialGameEffectPanelConfig, toCompleteGameEffectPanelConfig } from './GameEffectPanelConfig';
 import { castToPartialParticipantPanelConfig, defaultParticipantPanelConfig, PartialParticipantPanelConfig, ParticipantPanelConfig, toCompleteParticipantsPanelConfig } from './ParticipantsPanelConfig';
 import { castToPartialMyValuePanelConfig, defaultMyValuePanelConfig, MyValuePanelConfig, PartialMyValuePanelConfig, toCompleteMyValuePanelConfig } from './MyValuePanelConfig';
-import { chooseRecord } from '../@shared/utils';
 import { ActiveBoardPanelConfig, castToPartialActiveBoardPanelConfig, defaultActiveBoardPanelsConfig, PartialActiveBoardPanelConfig, toCompleteActiveBoardPanelConfig } from './ActiveBoardPanelConfig';
+import { chooseRecord } from '@kizahasi/util';
 
 export type PanelsConfig = {
     activeBoardPanel: ActiveBoardPanelConfig;

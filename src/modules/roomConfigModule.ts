@@ -5,12 +5,10 @@ import * as generators from '../utils/generators';
 import { ResizableDelta } from 'react-rnd';
 import { ResizeDirection } from 're-resizable';
 import { BoardEditorPanelConfig } from '../states/BoardEditorPanelConfig';
-import { CompositeKey, compositeKeyToString } from '../@shared/StateMap';
-import { StrIndex5 } from '../@shared/indexes';
 import { MessageFilter, MessagePanelConfig } from '../states/MessagesPanelConfig';
 import { reset, Reset } from '../utils/types';
-import { recordToArray } from '../@shared/utils';
 import { BoardConfig, defaultBoardConfig } from '../states/BoardConfig';
+import { StrIndex5, CompositeKey, recordToArray, compositeKeyToString } from '@kizahasi/util';
 
 export type SetOtherValuesAction = {
     roomId: string;

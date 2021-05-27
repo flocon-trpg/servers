@@ -5,15 +5,13 @@ import ComponentsStateContext from './contexts/RoomComponentsStateContext';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import InputModal from '../InputModal';
 import { characterParameterNamesDrawerVisibility } from './RoomComponentsState';
-import { StrIndex100, StrIndex20, strIndex20Array } from '../../@shared/indexes';
 import { replace, update } from '../../stateManagers/states/types';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import BufferedInput from '../../foundations/BufferedInput';
-import { Room } from '../../stateManagers/states/room';
 import { useSelector } from '../../store';
 import { useOperate } from '../../hooks/useOperate';
-import * as RoomModule from '../../@shared/ot/room/v1';
-import { isRecordEmpty, recordToMap } from '../../@shared/utils';
+import { recordToMap, StrIndex20, strIndex20Array } from '@kizahasi/util';
+import { UpOperation } from '@kizahasi/flocon-core';
 
 type VisibleParameterForm = {
     type: 'Bool' | 'Str' | 'Num';
@@ -81,7 +79,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                             if (e.previousValue === e.currentValue) {
                                 return;
                             }
-                            const operation: RoomModule.UpOperation = {
+                            const operation: UpOperation = {
                                 $version: 1,
                                 numParamNames: {
                                     [key]: {
@@ -98,7 +96,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                     <Button
                         size='small'
                         onClick={() => {
-                            const operation: RoomModule.UpOperation = {
+                            const operation: UpOperation = {
                                 $version: 1,
                                 numParamNames: {
                                     [key]: {
@@ -138,7 +136,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                             if (e.previousValue === e.currentValue) {
                                 return;
                             }
-                            const operation: RoomModule.UpOperation = {
+                            const operation: UpOperation = {
                                 $version: 1,
                                 boolParamNames: {
                                     [key]: {
@@ -155,7 +153,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                     <Button
                         size='small'
                         onClick={() => {
-                            const operation: RoomModule.UpOperation = {
+                            const operation: UpOperation = {
                                 $version: 1,
                                 boolParamNames: {
                                     [key]: {
@@ -195,7 +193,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                             if (e.previousValue === e.currentValue) {
                                 return;
                             }
-                            const operation: RoomModule.UpOperation = {
+                            const operation: UpOperation = {
                                 $version: 1,
                                 strParamNames: {
                                     [key]: {
@@ -212,7 +210,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                     <Button
                         size='small'
                         onClick={() => {
-                            const operation: RoomModule.UpOperation = {
+                            const operation: UpOperation = {
                                 $version: 1,
                                 strParamNames: {
                                     [key]: {
@@ -397,7 +395,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                     if (visibleParameterForm == null) {
                         return;
                     }
-                    let operation: RoomModule.UpOperation;
+                    let operation: UpOperation;
                     switch (visibleParameterForm.type) {
                         case 'Bool':
                             operation = {

@@ -1,5 +1,5 @@
-import React, { PropsWithChildren } from 'react';
-import { __ } from '../@shared/collection';
+import { __ } from '@kizahasi/util';
+import React from 'react';
 
 type Props = {
     // 戻り値にはkeyを付けなければならない。また、minHeightをprops.minHeight以上の値にしなければならない。

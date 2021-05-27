@@ -1,6 +1,5 @@
+import { createFirebaseConfig, JsonObject } from '@kizahasi/util';
 import fs from 'fs';
-import { createFirebaseConfig } from './@shared/config';
-import { JSONObject } from './@shared/JSONObject';
 
 // 本来はjsonファイルを直接importすれば動くが、jsonファイルにミスがあるときに出るエラーメッセージをわかりやすくするため、jsonファイルをtsファイルに変換してそれをimportさせている。
 // jsonファイルを見てチェックするだけでは漏れが生じる可能性があるので、tsファイルに変換することでそれを排除している。
@@ -21,7 +20,7 @@ const loadConfig = () => {
     }
 
     const webConfigJson = JSON.parse(webConfigFile.toString());
-    const webJSONObject = JSONObject.init(webConfigJson);
+    const webJSONObject = JsonObject.init(webConfigJson);
     const url = webJSONObject.tryGet('api')?.tryGet('url');
     const storage = webJSONObject.get('firebase').get('storage');
 

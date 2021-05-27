@@ -1,17 +1,17 @@
 import React from 'react';
 import { Table } from 'antd';
-import { __ } from '../../@shared/collection';
 import { ParticipantRole } from '../../generated/graphql';
 import Jdenticon from '../../foundations/Jdenticon';
 import { useRoomConnections } from '../../hooks/useRoomConnections';
-import * as Participant from '../../@shared/ot/room/participant/v1';
 import { useParticipants } from '../../hooks/state/useParticipants';
+import { __ } from '@kizahasi/util';
+import { ParticipantState } from '@kizahasi/flocon-core';
 
 type DataSource = {
     key: string;
     participant: {
         userUid: string;
-        state: Participant.State;
+        state: ParticipantState;
         isConnected: string;
     };
 }

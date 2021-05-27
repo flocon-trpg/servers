@@ -1,7 +1,6 @@
 import { ApolloError } from '@apollo/client';
 import produce from 'immer';
 import React from 'react';
-import { __ } from '../@shared/collection';
 import { useGetMessagesQuery, RoomMessageEventFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment, RoomPublicChannelFragment, RoomSoundEffectFragment, MyValueLogFragment, RoomEventSubscription, GetRoomMessagesFailureType, useGetMessagesLazyQuery } from '../generated/graphql';
 import { appConsole } from '../utils/appConsole';
 import { PrivateChannelSet, PrivateChannelSets } from '../utils/PrivateChannelSet';

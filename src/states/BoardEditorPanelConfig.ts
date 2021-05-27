@@ -2,8 +2,8 @@ import { castToBoolean, castToNullableString, castToNumber, castToRecord } from 
 import isObject from '../utils/isObject';
 import { castToPartialDraggablePanelConfigBase, DraggablePanelConfigBase, toCompleteDraggablePanelConfigBase } from './DraggablePanelConfigBase';
 import * as generators from '../utils/generators';
-import { chooseRecord } from '../@shared/utils';
 import { BoardConfig, castToPartialBoardConfig, PartialBoardConfig, toCompleteBoardConfig } from './BoardConfig';
+import { chooseRecord } from '@kizahasi/util';
 
 export type BoardEditorPanelConfig = {
     activeBoardKey: string | null;

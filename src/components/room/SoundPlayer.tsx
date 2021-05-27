@@ -5,21 +5,18 @@ import * as Icon from '@ant-design/icons';
 import FilesManagerDrawer from '../FilesManagerDrawer';
 import { FilesManagerDrawerType, some } from '../../utils/types';
 import { replace, update } from '../../stateManagers/states/types';
-import { StrIndex5 } from '../../@shared/indexes';
 import { filePathEquals } from '../../stateManagers/states/comparer';
 import VolumeBar from '../../foundations/VolumeBar';
 import DrawerFooter from '../../layouts/DrawerFooter';
 import { MyStyle } from '../../utils/myStyle';
-import { __ } from '../../@shared/collection';
 import { useSelector } from '../../store';
 import { useOperate } from '../../hooks/useOperate';
-import * as BgmModule from '../../@shared/ot/room/bgm/v1';
-import * as FilePathModule from '../../@shared/ot/filePath/v1';
-import * as RoomModule from '../../@shared/ot/room/v1';
+import { StrIndex5, __ } from '@kizahasi/util';
+import { BgmState, FilePath, UpOperation } from '@kizahasi/flocon-core';
 
 const defaultVolume = 0.5;
 
-const toKey = (source: FilePathInput | FilePathModule.FilePath): string => {
+const toKey = (source: FilePathInput | FilePath): string => {
     return `${source.sourceType}:${source.path}`;
 };
 
@@ -46,7 +43,7 @@ const VolumeBarForSoundPlayer: React.FC<VolumeBarForSoundPlayerProps> = ({ volum
 };
 
 type FilePathViewProps = {
-    filePath: FilePathInput | FilePathModule.FilePath;
+    filePath: FilePathInput | FilePath;
     closable?: boolean;
     onClose?: () => void;
 }
@@ -67,7 +64,7 @@ const FilePathView: React.FC<FilePathViewProps> = ({ filePath, closable, onClose
 
 type BgmPlayerDrawerProps = {
     channelKey: StrIndex5;
-    bgmState: BgmModule.State | undefined;
+    bgmState: BgmState | undefined;
     visible: boolean;
     onClose: () => void;
 }
@@ -110,7 +107,7 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({ channelKey, bgmState,
                 textType: 'ok',
                 onClick: () => {
                     if (bgmState == null) {
-                        const operation: RoomModule.UpOperation = {
+                        const operation: UpOperation = {
                             $version: 1,
                             bgms: {
                                 [channelKey]: {
@@ -129,7 +126,7 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({ channelKey, bgmState,
                         onClose();
                         return;
                     }
-                    const operation: RoomModule.UpOperation = {
+                    const operation: UpOperation = {
                         $version: 1,
                         bgms: {
                             [channelKey]: {
@@ -238,7 +235,7 @@ const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({ visible, onClose }: SeP
 
 type BgmPlayerProps = {
     channelKey: StrIndex5;
-    bgmState: BgmModule.State | undefined;
+    bgmState: BgmState | undefined;
 }
 
 const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayerProps) => {
@@ -275,7 +272,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                             if (volumeInput == null || bgmState == null) {
                                 return;
                             }
-                            const operation: RoomModule.UpOperation = {
+                            const operation: UpOperation = {
                                 $version: 1,
                                 bgms: {
                                     [channelKey]: {
@@ -313,7 +310,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                 size='small'
                 disabled={(bgmState?.files ?? []).length === 0}
                 onClick={() => {
-                    const operation: RoomModule.UpOperation = {
+                    const operation: UpOperation = {
                         $version: 1,
                         bgms: {
                             [channelKey]: {

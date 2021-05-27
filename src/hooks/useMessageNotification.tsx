@@ -2,16 +2,15 @@ import { notification } from 'antd';
 import { ArgsProps } from 'antd/lib/notification';
 import { Howl } from 'howler';
 import React from 'react';
-import { recordToMap } from '../@shared/utils';
 import { RoomMessage } from '../components/room/RoomMessage';
 import { MessageFilter } from '../states/MessagesPanelConfig';
 import { defaultMasterVolume, defaultSeVolume } from '../states/RoomConfig';
 import { useSelector } from '../store';
-import { emptyPublicChannelNames, PublicChannelNames } from '../utils/types';
+import { emptyPublicChannelNames } from '../utils/types';
 import { useMe } from './useMe';
 import { useMessageFilter } from './useMessageFilter';
 import { usePublicChannelNames } from './state/usePublicChannelNames';
-import { AllRoomMessagesResult, newEvent, privateMessage, publicMessage } from './useRoomMessages';
+import { newEvent, privateMessage, publicMessage } from './useRoomMessages';
 import { useParticipants } from './state/useParticipants';
 
 const argsBase: Omit<ArgsProps, 'message'> = {

@@ -4,10 +4,10 @@ import { FileSourceType } from '../generated/graphql';
 import { useFirebaseStorageUrl } from '../hooks/firebaseStorage';
 import { FilePath, some } from '../utils/types';
 import FirebaseStorageLink from './FirebaseStorageLink';
-import * as FilePathModule from '../@shared/ot/filePath/v1';
+import * as Core from '@kizahasi/flocon-core';
 
 type ImageProps = {
-    filePath?: FilePath | FilePathModule.FilePath;
+    filePath?: FilePath | Core.FilePath;
 }
 
 const Image: React.FC<ImageProps> = ({ filePath }: ImageProps) => {
@@ -22,14 +22,14 @@ const Image: React.FC<ImageProps> = ({ filePath }: ImageProps) => {
 };
 
 type Props = {
-    filePath?: FilePath | FilePathModule.FilePath;
-    onPathChange?: (path: FilePath | FilePathModule.FilePath | null) => void;
-    openFilesManager: (drawerType: { openFileType: typeof some; onOpen: (path: FilePath | FilePathModule.FilePath) => void }) => void;
+    filePath?: FilePath | Core.FilePath;
+    onPathChange?: (path: FilePath | Core.FilePath | null) => void;
+    openFilesManager: (drawerType: { openFileType: typeof some; onOpen: (path: FilePath | Core.FilePath) => void }) => void;
     showImage?: boolean;
 }
 
 const InputFile: React.FC<Props> = ({ filePath, onPathChange, openFilesManager, showImage }: Props) => {
-    const onOpen = (path: FilePath | FilePathModule.FilePath) => {
+    const onOpen = (path: FilePath | Core.FilePath) => {
         if (onPathChange != null) {
             onPathChange(path);
         }

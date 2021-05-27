@@ -3,7 +3,6 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { Button, Col, Drawer, Input, Select, Row, Checkbox, Alert, Popover } from 'antd';
 import { useListAvailableGameSystemsQuery, useWritePrivateMessageMutation, useWritePublicMessageMutation } from '../../generated/graphql';
-import { $free } from '../../@shared/Constants';
 import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
 import MyAuthContext from '../../contexts/MyAuthContext';
@@ -13,17 +12,15 @@ import { MessagePanelConfig } from '../../states/MessagesPanelConfig';
 import * as Icon from '@ant-design/icons';
 import { Gutter } from 'antd/lib/grid/row';
 import DrawerFooter from '../../layouts/DrawerFooter';
-import { __ } from '../../@shared/collection';
 import { reset } from '../../utils/types';
 import { SketchPicker } from 'react-color';
 import classNames from 'classnames';
-import { PublicChannelKey } from '../../@shared/publicChannelKey';
 import { VisibleTo } from '../../utils/visibleTo';
 import { UseRoomMessageInputTextsResult } from '../../hooks/useRoomMessageInputTexts';
 import roomModule from '../../modules/roomModule';
 import { useSelector } from '../../store';
 import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
-import { isRecordEmpty, recordToArray } from '../../@shared/utils';
+import { $free, isStrIndex10, PublicChannelKey, recordToArray, __ } from '@kizahasi/util';
 
 type PrivateMessageDrawerProps = {
     visible: boolean;
@@ -377,7 +374,7 @@ export const ChatInput: React.FC<Props> = ({
                         style={{ flex: 1, maxWidth: miniInputMaxWidth }}
                         value={selectedPublicChannel}
                         onSelect={(value, option) => {
-                            if (!PublicChannelKey.StrIndex10.isPublicChannelKey(option.key)) {
+                            if (typeof option.key !== 'string' || !isStrIndex10(option.key)) {
                                 return;
                             }
                             dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { selectedPublicChannelKey: option.key } }));

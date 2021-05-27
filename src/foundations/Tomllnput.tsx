@@ -1,5 +1,5 @@
+import { isValidVarToml, tomlToCharacterAction } from '@kizahasi/flocon-core';
 import React from 'react';
-import { characterAction, isValidVarToml } from '../@shared/flocommand';
 import { useBufferValue } from '../hooks/useBufferValue';
 import BufferedTextArea, { Props as BufferedTextAreaProps } from './BufferedTextArea';
 
@@ -35,7 +35,7 @@ export const TomlInput: React.FC<Props> = (props: Props) => {
                 return { type: 'ok' };
             }
             case characterCommand: {
-                const result = characterAction(toml);
+                const result = tomlToCharacterAction(toml);
                 if (result.isError) {
                     return { type: 'error', message: result.error };
                 }

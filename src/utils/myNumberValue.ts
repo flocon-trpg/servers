@@ -1,7 +1,7 @@
-import * as MyNumberValueModule from '../@shared/ot/room/participant/myNumberValue/v1';
+import { MyNumberValueState } from '@kizahasi/flocon-core';
 
 export namespace MyNumberValue {
-    export const stringify = (source: MyNumberValueModule.State): string => {
+    export const stringify = (source: MyNumberValueState): string => {
         // const range: string | null = (() => {
         //     if (source.valueRangeMin == null && source.valueRangeMax == null) {
         //         return null;

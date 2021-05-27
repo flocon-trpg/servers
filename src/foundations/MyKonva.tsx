@@ -7,12 +7,9 @@ import * as ReactKonva from 'react-konva';
 import { usePrevious } from '../hooks/usePrevious';
 import { animated, useSpring, useTransition } from '@react-spring/konva';
 import { RoomPublicMessageFragment } from '../generated/graphql';
-import produce from 'immer';
-import { __ } from '../@shared/collection';
 import { interval } from 'rxjs';
 import { isDeleted, toText as toTextCore } from '../utils/message';
-import * as MyNumberValue from '../@shared/ot/room/participant/myNumberValue/v1';
-import * as FilePathModule from '../@shared/ot/filePath/v1';
+import { MyNumberValueState, FilePath as CoreFilePath } from '@kizahasi/flocon-core';
 
 export namespace MyKonva {
     export type Vector2 = {
@@ -230,7 +227,7 @@ export namespace MyKonva {
     const imageMinimalSize = 10;
 
     type ImageProps = {
-        filePath: FilePath | FilePathModule.FilePath;
+        filePath: FilePath | CoreFilePath;
         isSelected: boolean;
         draggable: boolean;
         listening: boolean;
@@ -407,7 +404,7 @@ export namespace MyKonva {
     };
 
     type MyNumberValueProps = {
-        myNumberValue: MyNumberValue.State;
+        myNumberValue: MyNumberValueState;
         createdByMe: boolean;
 
         isSelected: boolean;

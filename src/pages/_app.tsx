@@ -14,7 +14,6 @@ import useConstant from 'use-constant';
 import MyAuthContext from '../contexts/MyAuthContext';
 import store from '../store';
 import { appConsole } from '../utils/appConsole';
-import { authToken } from '../@shared/Constants';
 import firebase from 'firebase/app';
 import { useFirebaseUser } from '../hooks/useFirebaseUser';
 import useUserConfig from '../hooks/localStorage/useUserConfig';
@@ -24,6 +23,7 @@ import { print, GraphQLError } from 'graphql';
 import { simpleId } from '../utils/generators';
 import ClientIdContext from '../contexts/ClientIdContext';
 import { enableMapSet } from 'immer';
+import { authToken } from '@kizahasi/util';
 
 enableMapSet();
 

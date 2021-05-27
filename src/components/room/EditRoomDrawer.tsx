@@ -8,7 +8,7 @@ import { editRoomDrawerVisibility } from './RoomComponentsState';
 import { Gutter } from 'antd/lib/grid/row';
 import { useOperate } from '../../hooks/useOperate';
 import { useSelector } from '../../store';
-import * as Room from '../../@shared/ot/room/v1';
+import { UpOperation } from '@kizahasi/flocon-core';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -44,7 +44,7 @@ const EditRoomDrawer: React.FC = () => {
                         <Input size='small'
                             value={name}
                             onChange={e => {
-                                const operation: Room.UpOperation = {
+                                const operation: UpOperation = {
                                     $version: 1,
                                     name: { newValue: e.target.value },
                                 };

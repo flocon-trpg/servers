@@ -26,7 +26,7 @@ import MyNumberValueList from './MyNumberValueList';
 import { useRoomMessageInputTexts } from '../../hooks/useRoomMessageInputTexts';
 import { useMe } from '../../hooks/useMe';
 import { RoomMenu } from './RoomMenu';
-import { recordToArray } from '../../@shared/utils';
+import { recordToArray } from '@kizahasi/util';
 
 const RoomMessagePanels: React.FC<{ roomId: string }> = ({ roomId }: { roomId: string }) => {
     const dispatch = useDispatch();

@@ -1,6 +1,5 @@
+import { $free, $system, __ } from '@kizahasi/util';
 import React from 'react';
-import { __ } from '../@shared/collection';
-import { $free, $system } from '../@shared/Constants';
 import { MessageFilter } from '../states/MessagesPanelConfig';
 import { PrivateChannelSets } from '../utils/PrivateChannelSet';
 import { Message, myValueLog, notification, privateMessage, publicMessage, RoomMessage, soundEffect } from './useRoomMessages';
@@ -82,5 +81,5 @@ export function useMessageFilter(config: MessageFilter): ((message: Message) => 
             case soundEffect:
                 return false;
         }
-    }, [showSystem, showFree, showPublic1, showPublic2, showPublic3, showPublic4, showPublic5, showPublic6, showPublic7, showPublic8, showPublic9, showPublic10, privateChannelsAsString]);
+    }, [showSystem, showFree, showPublic1, showPublic2, showPublic3, showPublic4, showPublic5, showPublic6, showPublic7, showPublic8, showPublic9, showPublic10, privateChannelsAsString, showNotification]);
 }

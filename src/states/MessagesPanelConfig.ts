@@ -2,7 +2,6 @@ import { castToArray, castToBoolean, castToNumber, castToString } from '../utils
 import isObject from '../utils/isObject';
 import { castToPartialDraggablePanelConfigBase, DraggablePanelConfigBase, toCompleteDraggablePanelConfigBase } from './DraggablePanelConfigBase';
 import * as generators from '../utils/generators';
-import { __ } from '../@shared/collection';
 
 export type MessageFilter = {
     showNotification: boolean;

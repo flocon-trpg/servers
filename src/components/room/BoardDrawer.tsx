@@ -15,10 +15,9 @@ import { useStateEditor } from '../../hooks/useStateEditor';
 import { useOperate } from '../../hooks/useOperate';
 import { useSelector } from '../../store';
 import BufferedInput from '../../foundations/BufferedInput';
-import * as Board from '../../@shared/ot/room/participant/board/v1';
-import * as Room from '../../@shared/ot/room/v1';
 import { useBoards } from '../../hooks/state/useBoards';
 import { useMe } from '../../hooks/useMe';
+import { boardDiff, BoardState, UpOperation } from '@kizahasi/flocon-core';
 
 const notFound = 'notFound';
 
@@ -26,7 +25,7 @@ const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
 };
 
-const defaultBoard: Board.State = {
+const defaultBoard: BoardState = {
     $version: 1,
     name: '',
     cellColumnCount: 0,
@@ -53,11 +52,11 @@ const BoardDrawer: React.FC = () => {
         if (drawerType?.type !== update) {
             return;
         }
-        const diffOperation = Board.diff({ prevState, nextState });
+        const diffOperation = boardDiff({ prevState, nextState });
         if (diffOperation == null) {
             return;
         }
-        const operation: Room.UpOperation = {
+        const operation: UpOperation = {
             $version: 1,
             participants: {
                 [drawerType.stateKey.createdBy]: {
@@ -93,17 +92,17 @@ const BoardDrawer: React.FC = () => {
         }
     })();
 
-    const updateBoard = (partialState: Partial<Board.State>) => {
+    const updateBoard = (partialState: Partial<BoardState>) => {
         switch (drawerType?.type) {
             case create:
                 setBoard({ ...board, ...partialState });
                 return;
             case update: {
-                const diffOperation = Board.diff({ prevState: board, nextState: { ...board, ...partialState } });
+                const diffOperation = boardDiff({ prevState: board, nextState: { ...board, ...partialState } });
                 if (diffOperation == null) {
                     return;
                 }
-                const operation: Room.UpOperation = {
+                const operation: UpOperation = {
                     $version: 1,
                     participants: {
                         [drawerType.stateKey.createdBy]: {
@@ -130,7 +129,7 @@ const BoardDrawer: React.FC = () => {
     if (drawerType?.type === create) {
         onOkClick = () => {
             const id = simpleId();
-            const operation: Room.UpOperation = {
+            const operation: UpOperation = {
                 $version: 1,
                 participants: {
                     [me.userUid]: {
@@ -159,7 +158,7 @@ const BoardDrawer: React.FC = () => {
     let onDestroy: (() => void) | undefined = undefined;
     if (drawerType?.type === update) {
         onDestroy = () => {
-            const operation: Room.UpOperation = {
+            const operation: UpOperation = {
                 $version: 1,
                 participants: {
                     [drawerType.stateKey.createdBy]: {

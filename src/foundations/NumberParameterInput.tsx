@@ -1,11 +1,10 @@
 import React from 'react';
 import { Button, Input, InputNumber, Tooltip } from 'antd';
-import { StrIndex20 } from '../@shared/indexes';
 import { EyeInvisibleOutlined, EyeOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import ToggleButton from './ToggleButton';
 import { addParameter, deleteParameter, parameterIsPrivate, parameterIsNotPrivate, parameterIsPrivateAndNotCreatedByMe, parameterIsNotPrivateAndNotCreatedByMe } from '../resource/text/main';
-import * as Character from '../@shared/ot/room/participant/character/v1';
-import * as NumParam from '../@shared/ot/room/participant/character/numParam/v1';
+import { StrIndex20 } from '@kizahasi/util';
+import { CharacterUpOperation, NumParamState } from '@kizahasi/flocon-core';
 
 const inputWidth = 50;
 
@@ -13,10 +12,10 @@ type Props = {
     isCharacterPrivate: boolean;
     isCreate: boolean;
     parameterKey: StrIndex20;
-    numberParameter: NumParam.State | undefined;
-    numberMaxParameter: NumParam.State | undefined;
+    numberParameter: NumParamState | undefined;
+    numberMaxParameter: NumParamState | undefined;
     createdByMe: boolean;
-    onOperate: (operation: Character.UpOperation) => void;
+    onOperate: (operation: CharacterUpOperation) => void;
     compact: boolean;
 }
 
@@ -43,7 +42,7 @@ const NumberParameterInput: React.FC<Props> = ({
                         size='small'
                         disabled={disabled}
                         onClick={() => {
-                            const operation: Character.UpOperation = {
+                            const operation: CharacterUpOperation = {
                                 $version: 1,
                                 numParams: {
                                     [parameterKey]: {
@@ -64,7 +63,7 @@ const NumberParameterInput: React.FC<Props> = ({
                     size='small'
                     disabled={disabled}
                     onClick={() => {
-                        const operation: Character.UpOperation = {
+                        const operation: CharacterUpOperation = {
                             $version: 1,
                             numParams: {
                                 [parameterKey]: {
@@ -91,7 +90,7 @@ const NumberParameterInput: React.FC<Props> = ({
                         size='small'
                         disabled={disabled}
                         onClick={() => {
-                            const operation: Character.UpOperation = {
+                            const operation: CharacterUpOperation = {
                                 $version: 1,
                                 numMaxParams: {
                                     [parameterKey]: {
@@ -112,7 +111,7 @@ const NumberParameterInput: React.FC<Props> = ({
                     size='small'
                     disabled={disabled}
                     onClick={() => {
-                        const operation: Character.UpOperation = {
+                        const operation: CharacterUpOperation = {
                             $version: 1,
                             numMaxParams: {
                                 [parameterKey]: {
@@ -152,7 +151,7 @@ const NumberParameterInput: React.FC<Props> = ({
                 unCheckedChildren={<EyeInvisibleOutlined />}
                 size='small'
                 onChange={e => {
-                    const operation: Character.UpOperation = {
+                    const operation: CharacterUpOperation = {
                         $version: 1,
                         numParams: {
                             [parameterKey]: {
@@ -185,7 +184,7 @@ const NumberParameterInput: React.FC<Props> = ({
                         if (typeof newValue !== 'number') {
                             return;
                         }
-                        const operation: Character.UpOperation = {
+                        const operation: CharacterUpOperation = {
                             $version: 1,
                             numParams: {
                                 [parameterKey]: {
@@ -224,7 +223,7 @@ const NumberParameterInput: React.FC<Props> = ({
                 unCheckedChildren={<EyeInvisibleOutlined />}
                 size='small'
                 onChange={e => {
-                    const operation: Character.UpOperation = {
+                    const operation: CharacterUpOperation = {
                         $version: 1,
                         numMaxParams: {
                             [parameterKey]: {
@@ -257,7 +256,7 @@ const NumberParameterInput: React.FC<Props> = ({
                         if (typeof newValue !== 'number') {
                             return;
                         }
-                        const operation: Character.UpOperation = {
+                        const operation: CharacterUpOperation = {
                             $version: 1,
                             numMaxParams: {
                                 [parameterKey]: {

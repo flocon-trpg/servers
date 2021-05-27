@@ -1,26 +1,22 @@
 import React from 'react';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import { Table, Button, InputNumber, Tooltip } from 'antd';
-import { compositeKeyToString } from '../../@shared/StateMap';
 import { update } from '../../stateManagers/states/types';
-import { __ } from '../../@shared/collection';
 import { myNumberValueDrawerType } from './RoomComponentsState';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import * as Icon from '@ant-design/icons';
 import ToggleButton from '../../foundations/ToggleButton';
 import { getUserUid } from '../../hooks/useFirebaseUser';
 import { useOperate } from '../../hooks/useOperate';
-import { useSelector } from '../../store';
-import { recordToArray, recordToMap } from '../../@shared/utils';
-import * as MyNumberValue from '../../@shared/ot/room/participant/myNumberValue/v1';
-import * as Room from '../../@shared/ot/room/v1';
 import { useParticipants } from '../../hooks/state/useParticipants';
+import { compositeKeyToString, recordToArray, __ } from '@kizahasi/util';
+import { MyNumberValueState, UpOperation } from '@kizahasi/flocon-core';
 
 type DataSource = {
     key: string;
     createdBy: string;
     stateId: string;
-    state: MyNumberValue.State;
+    state: MyNumberValueState;
 }
 
 const MyNumberValueList: React.FC = () => {
@@ -28,7 +24,7 @@ const MyNumberValueList: React.FC = () => {
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
     const dispatchRoomComponentsState = React.useContext(DispatchRoomComponentsStateContext);
     const operate = useOperate();
-    const participantsMap = useParticipants(); 
+    const participantsMap = useParticipants();
 
     if (participantsMap == null) {
         return null;
@@ -82,7 +78,7 @@ const MyNumberValueList: React.FC = () => {
                         size='small'
                         value={state.value}
                         onChange={newValue => {
-                            const operation: Room.UpOperation = {
+                            const operation: UpOperation = {
                                 $version: 1,
                                 participants: {
                                     [createdBy]: {
@@ -111,7 +107,7 @@ const MyNumberValueList: React.FC = () => {
                         unCheckedChildren={<Icon.EyeOutlined />}
                         checked={state.isValuePrivate}
                         onChange={newValue => {
-                            const operation: Room.UpOperation = {
+                            const operation: UpOperation = {
                                 $version: 1,
                                 participants: {
                                     [createdBy]: {

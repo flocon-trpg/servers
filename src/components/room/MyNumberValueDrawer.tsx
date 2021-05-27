@@ -9,18 +9,16 @@ import { DrawerProps } from 'antd/lib/drawer';
 import { create, myNumberValueDrawerType, update } from './RoomComponentsState';
 import { Gutter } from 'antd/lib/grid/row';
 import { useStateEditor } from '../../hooks/useStateEditor';
-import { compositeKeyToString } from '../../@shared/StateMap';
-import { __ } from '../../@shared/collection';
 import { useOperate } from '../../hooks/useOperate';
 import { useMe } from '../../hooks/useMe';
-import * as Room from '../../@shared/ot/room/v1';
-import * as MyNumberValue from '../../@shared/ot/room/participant/myNumberValue/v1';
+import { myNumberValueDiff, MyNumberValueState, toMyNumberValueUpOperation, UpOperation } from '@kizahasi/flocon-core';
+import { compositeKeyToString } from '@kizahasi/util';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
 };
 
-const defaultMyNumberValue: MyNumberValue.State = {
+const defaultMyNumberValue: MyNumberValueState = {
     $version: 1,
     value: 0,
     isValuePrivate: false,
@@ -42,11 +40,11 @@ const MyNumberValueDrawer: React.FC = () => {
         if (myUserUid == null || drawerType?.type !== update) {
             return;
         }
-        const diff = MyNumberValue.diff({ prevState, nextState });
+        const diff = myNumberValueDiff({ prevState, nextState });
         if (diff == null) {
             return;
         }
-        const operation: Room.UpOperation = {
+        const operation: UpOperation = {
             $version: 1,
             participants: {
                 [myUserUid]: {
@@ -56,7 +54,7 @@ const MyNumberValueDrawer: React.FC = () => {
                         myNumberValues: {
                             [drawerType.stateKey]: {
                                 type: update,
-                                update: MyNumberValue.toUpOperation(diff),
+                                update: toMyNumberValueUpOperation(diff),
                             }
                         }
                     }
@@ -79,7 +77,7 @@ const MyNumberValueDrawer: React.FC = () => {
             }
 
             const id = simpleId();
-            const operation: Room.UpOperation = {
+            const operation: UpOperation = {
                 $version: 1,
                 participants: {
                     [myUserUid]: {

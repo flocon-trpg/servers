@@ -1,8 +1,8 @@
 import { castToBoolean, castToNullableString, castToNumber, castToRecord } from '../utils/cast';
 import isObject from '../utils/isObject';
 import { castToPartialDraggablePanelConfigBase, DraggablePanelConfigBase, toCompleteDraggablePanelConfigBase } from './DraggablePanelConfigBase';
-import { chooseRecord } from '../@shared/utils';
 import { BoardConfig, castToPartialBoardConfig, defaultBoardConfig, PartialBoardConfig, toCompleteBoardConfig } from './BoardConfig';
+import { chooseRecord } from '@kizahasi/util';
 
 export type ActiveBoardPanelConfig = {
     boards: Record<string, BoardConfig>;

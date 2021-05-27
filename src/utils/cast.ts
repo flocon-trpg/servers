@@ -1,4 +1,4 @@
-import { __ } from '../@shared/collection';
+import { __ } from '@kizahasi/util';
 import isObject from './isObject';
 
 export const castToArray = <T>(source: unknown, inner: (x: unknown) => T | undefined): T[] | undefined => {

@@ -1,7 +1,3 @@
-import { Input } from 'antd';
-import { ConfigContext as AntdConfigContext } from 'antd/lib/config-provider';
-import { InputProps } from 'antd/lib/input';
-import { TextAreaRef } from 'antd/lib/input/TextArea';
 import classNames from 'classnames';
 import React from 'react';
 import { useBuffer } from '../hooks/useBuffer';

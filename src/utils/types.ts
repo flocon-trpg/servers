@@ -1,5 +1,5 @@
 import { FileSourceType } from '../generated/graphql';
-import * as FilePathModule from '../@shared/ot/filePath/v1';
+import * as Core from '@kizahasi/flocon-core';
 
 export type FilePath = {
     path: string;
@@ -7,13 +7,13 @@ export type FilePath = {
 }
 
 export namespace FilePath {
-    export const toGraphQL = (source: FilePath | FilePathModule.FilePath): FilePath => {
+    export const toGraphQL = (source: FilePath | Core.FilePath): FilePath => {
         let sourceType: FileSourceType;
         switch (source.sourceType) {
-            case FilePathModule.Default:
+            case Core.Default:
                 sourceType = FileSourceType.Default;
                 break;
-            case FilePathModule.FirebaseStorage:
+            case Core.FirebaseStorage:
                 sourceType = FileSourceType.FirebaseStorage;
                 break;
             default:
@@ -26,14 +26,14 @@ export namespace FilePath {
         };
     };
 
-    export const toOt = (source: FilePath | FilePathModule.FilePath): FilePathModule.FilePath => {
-        let sourceType: typeof FilePathModule.Default | typeof FilePathModule.FirebaseStorage;
+    export const toOt = (source: FilePath | Core.FilePath): Core.FilePath => {
+        let sourceType: typeof Core.Default | typeof Core.FirebaseStorage;
         switch (source.sourceType) {
             case FileSourceType.Default:
-                sourceType = FilePathModule.Default;
+                sourceType = Core.Default;
                 break;
             case FileSourceType.FirebaseStorage:
-                sourceType = FilePathModule.FirebaseStorage;
+                sourceType = Core.FirebaseStorage;
                 break;
             default:
                 sourceType = source.sourceType;
