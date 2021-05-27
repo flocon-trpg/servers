@@ -4,7 +4,7 @@ export {
     characterAction as tomlToCharacterAction,
     isValidVarToml,
     toCharacterOperation as characterActionToOperation,
-    variable as tomlVariable,
+    variable as tomlToVariables,
 } from './internal/flocommand';
 export { Default, FirebaseStorage } from './internal/ot/filePath/v1';
 export {
@@ -45,6 +45,9 @@ export {
     Player,
     Spectator,
     ParticipantRole,
+    State as ParticipantState,
+    UpOperation as ParticipantUpOperation,
+    DownOperation as ParticipantDownOperation,
 } from './internal/ot/room/participant/v1';
 export {
     State as CharacterState,
@@ -62,3 +65,10 @@ export {
     createType,
     deleteType,
 } from './internal/ot/room/participant/myNumberValue/log-v1';
+export {
+    replace,
+    update,
+    RecordDownOperationElement,
+    RecordTwoWayOperationElement,
+    RecordUpOperationElement,
+} from './internal/ot/room/util/recordOperationElement';
