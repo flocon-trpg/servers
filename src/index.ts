@@ -1,4 +1,3 @@
-export { __, range } from './internal/collection';
 export { FirebaseConfig, createFirebaseConfig } from './internal/config';
 export { anonymous, authToken, $free, $system } from './internal/constants';
 export {

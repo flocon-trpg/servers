@@ -1,4 +1,4 @@
-import { __ } from './collection';
+import _ from 'lodash';
 
 const keysToString = (keys: ReadonlyArray<string>): string => {
     if (keys.length === 0) {
@@ -6,8 +6,8 @@ const keysToString = (keys: ReadonlyArray<string>): string => {
         return 'root value';
     }
     let result = keys[0];
-    __(keys)
-        .skip(1)
+    _(keys)
+        .drop(1)
         .forEach(key => {
             result = `${result}/${key}`;
         });

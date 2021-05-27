@@ -59,6 +59,7 @@
     },
     "devDependencies": {
         "@size-limit/preset-small-lib": "^4.11.0",
+        "@types/lodash": "^4.14.170",
         "husky": "^6.0.0",
         "size-limit": "^4.11.0",
         "tsdx": "^0.14.1",
@@ -68,6 +69,7 @@
     "dependencies": {
         "@kizahasi/result": "^0.2.0",
         "fp-ts": "^2.10.5",
-        "io-ts": "^2.2.16"
+        "io-ts": "^2.2.16",
+        "lodash": "^4.17.21"
     }
 }
