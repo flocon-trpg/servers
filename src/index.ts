@@ -71,6 +71,9 @@ export {
     State as PieceState,
     UpOperation as PieceUpOperation,
     DownOperation as PieceDownOperation,
+    apply as applyPiece,
+    diff as pieceDiff,
+    toUpOperation as toPieceUpOperation,
 } from './internal/ot/piece/v1';
 export {
     State as BoardState,
