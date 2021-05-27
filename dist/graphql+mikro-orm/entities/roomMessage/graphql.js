@@ -10,8 +10,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RoomMessageEvent = exports.RoomPrivateMessageUpdate = exports.RoomPrivateMessageUpdateType = exports.RoomPublicMessageUpdate = exports.RoomPublicMessageUpdateType = exports.RoomPublicChannelUpdate = exports.RoomPublicChannelUpdateType = exports.EditMessageResult = exports.DeleteMessageResult = exports.MakeMessageNotSecretResult = exports.WriteRoomSoundEffectResult = exports.WriteRoomSoundEffectFailureResult = exports.WriteRoomSoundEffectFailureResultType = exports.WritePublicRoomMessageResult = exports.WritePublicRoomMessageFailureResult = exports.WritePublicRoomMessageFailureResultType = exports.WritePrivateRoomMessageResult = exports.WritePrivateRoomMessageFailureResult = exports.WritePrivateRoomMessageFailureResultType = exports.GetRoomLogResult = exports.GetRoomLogFailureResult = exports.GetRoomLogFailureResultType = exports.GetRoomMessagesResult = exports.GetRoomMessagesFailureResult = exports.GetRoomMessagesFailureResultType = exports.RoomMessages = exports.RoomMessagesType = exports.RoomMessage = exports.RoomSoundEffect = exports.RoomSoundEffectType = exports.MyValueLog = exports.MyValueLogType = exports.RoomPrivateMessage = exports.RoomPrivateMessageType = exports.RoomPublicMessage = exports.RoomPublicMessageType = exports.UpdatedText = exports.CharacterValueForMessage = exports.RoomPublicChannel = exports.RoomPublicChannelType = exports.CommandResult = void 0;
+const util_1 = require("@kizahasi/util");
 const type_graphql_1 = require("type-graphql");
-const Constants_1 = require("../../../@shared/Constants");
 const DeleteMessageFailureType_1 = require("../../../enums/DeleteMessageFailureType");
 const EditMessageFailureType_1 = require("../../../enums/EditMessageFailureType");
 const GetRoomLogFailureType_1 = require("../../../enums/GetRoomLogFailureType");
@@ -39,7 +39,7 @@ exports.RoomPublicChannelType = 'RoomPublicChannel';
 let RoomPublicChannel = class RoomPublicChannel {
 };
 __decorate([
-    type_graphql_1.Field({ description: `現在の仕様では、${Constants_1.$system}, ${Constants_1.$free}, '1', … , '10' の12個のみをサポートしている。このうち、${Constants_1.$system}はシステムメッセージ専用チャンネルであるため誰も書き込むことができない。'1', …, '10'はSpectatorが書き込むことはできないが、${Constants_1.$free}はSpectatorも書き込むことができる。` }),
+    type_graphql_1.Field({ description: `現在の仕様では、${util_1.$system}, ${util_1.$free}, '1', … , '10' の12個のみをサポートしている。このうち、${util_1.$system}はシステムメッセージ専用チャンネルであるため誰も書き込むことができない。'1', …, '10'はSpectatorが書き込むことはできないが、${util_1.$free}はSpectatorも書き込むことができる。` }),
     __metadata("design:type", String)
 ], RoomPublicChannel.prototype, "key", void 0);
 __decorate([
@@ -130,7 +130,7 @@ __decorate([
     __metadata("design:type", Boolean)
 ], RoomPublicMessage.prototype, "isSecret", void 0);
 __decorate([
-    type_graphql_1.Field({ nullable: true, description: `channelKeyが${Constants_1.$system}以外のときは、システムメッセージならばnullishで、そうでないならばnullishではない。${Constants_1.$system}のとき、原則として全てシステムメッセージであるため常にnullishになる。` }),
+    type_graphql_1.Field({ nullable: true, description: `channelKeyが${util_1.$system}以外のときは、システムメッセージならばnullishで、そうでないならばnullishではない。${util_1.$system}のとき、原則として全てシステムメッセージであるため常にnullishになる。` }),
     __metadata("design:type", String)
 ], RoomPublicMessage.prototype, "createdBy", void 0);
 __decorate([

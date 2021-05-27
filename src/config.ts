@@ -1,6 +1,5 @@
+import { createFirebaseConfig, FirebaseConfig, JsonObject } from '@kizahasi/util';
 import fs from 'fs';
-import { createFirebaseConfig, FirebaseConfig } from './@shared/config';
-import { JSONObject } from './@shared/JSONObject';
 import { loadAsMain, loadMigrationCreate, loadMigrationDown, loadMigrationUp } from './utils/commandLineArgs';
 
 export const postgresql = 'postgresql';
@@ -45,7 +44,7 @@ const loadServerConfig = ({ databaseArg }: { databaseArg: typeof postgresql | ty
     }
     const json = JSON.parse(env);
 
-    const j = JSONObject.init(json);
+    const j = JsonObject.init(json);
 
     const postgresqlJson = j.get('database').tryGet('postgresql');
     const sqliteJson = j.get('database').tryGet('sqlite');

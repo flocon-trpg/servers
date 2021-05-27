@@ -4,10 +4,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InMemoryConnectionManager = exports.pubSub = void 0;
+const util_1 = require("@kizahasi/util");
 const apollo_server_express_1 = require("apollo-server-express");
 const node_cache_1 = __importDefault(require("node-cache"));
-const collection_1 = require("../@shared/collection");
-const publicChannelKey_1 = require("../@shared/publicChannelKey");
 const WritingMessageStatusType_1 = require("../enums/WritingMessageStatusType");
 const Topics_1 = require("../graphql+mikro-orm/utils/Topics");
 exports.pubSub = new apollo_server_express_1.PubSub();
@@ -83,7 +82,7 @@ class WritingMessageStatusDatabase {
         this.database = new node_cache_1.default({ stdTTL: 600, maxKeys: 10000, checkperiod: 299 });
     }
     set({ roomId, status, publicChannelKey, userUid }) {
-        if (!publicChannelKey_1.PublicChannelKey.Without$System.isPublicChannelKey(publicChannelKey)) {
+        if (!util_1.PublicChannelKey.Without$System.isPublicChannelKey(publicChannelKey)) {
             return null;
         }
         const key = `${roomId}@${userUid}@${publicChannelKey}`;
@@ -95,7 +94,7 @@ class WritingMessageStatusDatabase {
         return status;
     }
     onDisconnect({ userUid, roomId }) {
-        return collection_1.__(this.database.keys()).compact(key => {
+        return util_1.__(this.database.keys()).compact(key => {
             const split = key.split('@');
             if (split.length !== 3) {
                 return undefined;
@@ -109,7 +108,7 @@ class WritingMessageStatusDatabase {
             if (userUidKey !== userUid) {
                 return undefined;
             }
-            if (!publicChannelKey_1.PublicChannelKey.Without$System.isPublicChannelKey(publicChannelKey)) {
+            if (!util_1.PublicChannelKey.Without$System.isPublicChannelKey(publicChannelKey)) {
                 return undefined;
             }
             this.database.del(key);

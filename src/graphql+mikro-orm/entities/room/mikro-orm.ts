@@ -1,6 +1,6 @@
+import { DbState, DownOperation } from '@kizahasi/flocon-core';
 import { Collection, Entity, IdentifiedReference, JsonType, ManyToOne, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/core';
 import { v4 } from 'uuid';
-import { DownOperation, DbState } from '../../../@shared/ot/room/v1';
 import { EM } from '../../../utils/types';
 import { MyValueLog, RoomPrvMsg, RoomPubCh, RoomSe as RoomSe } from '../roomMessage/mikro-orm';
 

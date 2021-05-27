@@ -1,6 +1,6 @@
 
+import { CustomResult } from '@kizahasi/result';
 import admin from 'firebase-admin';
-import { CustomResult } from '../../@shared/Result';
 import { InMemoryConnectionManager } from '../../connection/main';
 import { PromiseQueue } from '../../utils/PromiseQueue';
 import { EM } from '../../utils/types';

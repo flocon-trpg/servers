@@ -13,8 +13,8 @@ import { ListAvailableGameSystemsResult } from '../results/ListAvailableGameSyst
 import { listAvailableGameSystems } from '../../messageAnalyzer/main';
 import { ServerInfo } from '../entities/serverInfo/graphql';
 import VERSION from '../../VERSION';
-import { alpha, beta, rc } from '../../@shared/semver';
 import { PrereleaseType } from '../../enums/PrereleaseType';
+import { alpha, beta, rc } from '@kizahasi/util';
 
 
 export type PongPayload = {

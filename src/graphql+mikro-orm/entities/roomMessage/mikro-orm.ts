@@ -1,10 +1,10 @@
+import { MyNumberValueLog } from '@kizahasi/flocon-core';
 import { Collection, Entity, Enum, IdentifiedReference, JsonType, ManyToMany, ManyToOne, OneToMany, PrimaryKey, Property, Reference, Unique } from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { FileSourceType } from '../../../enums/FileSourceType';
 import { MyValueLogType } from '../../../enums/MyValueLogType';
 import { Room } from '../room/mikro-orm';
 import { User } from '../user/mikro-orm';
-import * as MyNumberValueLogModule from '../../../@shared/ot/room/participant/myNumberValue/log-v1';
 
 /*
 # 変数展開（仮称）の仕様
@@ -286,7 +286,7 @@ export class MyValueLog {
         createdBy: string;
         room: Room;
         stateId: string;
-        value: MyNumberValueLogModule.Main;
+        value: MyNumberValueLog;
     }) {
         this.createdBy = createdBy;
         this.room = Reference.create(room);
@@ -308,7 +308,7 @@ export class MyValueLog {
     public stateId: string;
 
     @Property({ type: JsonType, nullable: true })
-    public value?: MyNumberValueLogModule.Main;
+    public value?: MyNumberValueLog;
 
     @ManyToOne(() => Room, { wrappedReference: true })
     public room: IdentifiedReference<Room>;

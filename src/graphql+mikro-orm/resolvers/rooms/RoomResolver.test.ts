@@ -1,18 +1,11 @@
-import { ParticipantRole } from '../../../enums/ParticipantRole';
-
 import * as $MikroORM from '../../entities/room/mikro-orm';
-import * as GraphQL from '../../entities/room/graphql';
 import { createPostgreSQL, createSQLite } from '../../../mikro-orm';
 import { EM, ORM } from '../../../utils/types';
 import { User as User$MikroORM } from '../../entities/user/mikro-orm';
-import { v4 } from 'uuid';
 import { ResolverContext } from '../../utils/Contexts';
 import { PromiseQueue } from '../../../utils/PromiseQueue';
-import { RoomResolver } from './RoomResolver';
-import { __ } from '../../../@shared/collection';
-import { GlobalRoom } from '../../entities/room/global';
 import { InMemoryConnectionManager } from '../../../connection/main';
-import * as RoomModule from '../../../@shared/ot/room/v1';
+import { UpOperation } from '@kizahasi/flocon-core';
 
 const timeout = 20000;
 
@@ -25,7 +18,7 @@ const SQLite = { dbName: './test.sqlite3' };
 
 const clientId = (i?: number) => `CLIENT_ID${i ?? ''}`;
 
-type RoomValueOperation = Omit<RoomModule.UpOperation, 'bgms' | 'paramNames' | 'participants'>;
+type RoomValueOperation = Omit<UpOperation, 'bgms' | 'paramNames' | 'participants'>;
 
 const resetDatabase = async (em: EM): Promise<void> => {
     for (const room of await em.find($MikroORM.Room, {})) {

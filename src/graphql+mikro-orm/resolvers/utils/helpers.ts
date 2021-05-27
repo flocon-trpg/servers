@@ -1,17 +1,10 @@
-import * as t from 'io-ts';
-import { anonymous } from '../../../@shared/Constants';
 import { DecodedIdToken, ResolverContext } from '../../utils/Contexts';
-import admin from 'firebase-admin';
 import { EM } from '../../../utils/types';
 import { User } from '../../entities/user/mikro-orm';
 import { Room } from '../../entities/room/mikro-orm';
-import { __ } from '../../../@shared/collection';
-import { Reference } from '@mikro-orm/core';
-import { loadServerConfigAsMain } from '../../../config';
-import * as ParticipantModule from '../../../@shared/ot/room/participant/v1';
-import * as RoomModule from '../../../@shared/ot/room/v1';
-import { recordToArray, recordToMap } from '../../../@shared/utils';
 import { GlobalRoom } from '../../entities/room/global';
+import { ParticipantState, State } from '@kizahasi/flocon-core';
+import {anonymous, recordToArray} from '@kizahasi/util';
 
 const find = <T>(source: Record<string, T | undefined>, key: string): T | undefined => source[key];
 
@@ -67,7 +60,7 @@ export const checkEntry = async ({ em, userUid, globalEntryPhrase }: { em: EM; u
 };
 
 class FindRoomAndMyParticipantResult {
-    public constructor(public readonly room: Room, public readonly roomState: RoomModule.State, public readonly me?: ParticipantModule.State) {
+    public constructor(public readonly room: Room, public readonly roomState: State, public readonly me?: ParticipantState) {
 
     }
 

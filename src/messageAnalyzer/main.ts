@@ -1,12 +1,8 @@
+import { CharacterState, State, tomlToVariables } from '@kizahasi/flocon-core';
+import { Result } from '@kizahasi/result';
+import { recordToArray, analyze as analyzeToExpression, plain } from '@kizahasi/util';
 import { DynamicLoader } from 'bcdice';
 import BcdiceResult from 'bcdice/ts/result';
-import { __ } from '../@shared/collection';
-import { analyze as analyzeToExpression, plain } from '../@shared/expression';
-import * as Flocommand from '../@shared/flocommand';
-import { Result, ResultModule } from '../@shared/Result';
-import * as CharacterModule from '../@shared/ot/room/participant/character/v1';
-import * as RoomModule from '../@shared/ot/room/v1';
-import { recordToArray } from '../@shared/utils';
 
 const loader = new DynamicLoader();
 
@@ -32,11 +28,11 @@ export const chara = 'chara';
 
 export type Context = {
     type: typeof chara;
-    value: CharacterModule.State;
+    value: CharacterState;
 }
 
 // 全てにおいて何も見つからなかった場合、undefinedが返される。
-const getParameter = async ({ parameterPath, context, room }: { parameterPath: string[]; context: Context | null; room: RoomModule.State }): Promise<Result<{ value: string | boolean | number | undefined; stringValue: string }> | undefined> => {
+const getParameter = async ({ parameterPath, context, room }: { parameterPath: string[]; context: Context | null; room: State }): Promise<Result<{ value: string | boolean | number | undefined; stringValue: string }> | undefined> => {
     if (parameterPath.length === 0) {
         throw new Error('parameterPath.length === 0');
     }
@@ -50,23 +46,23 @@ const getParameter = async ({ parameterPath, context, room }: { parameterPath: s
         if ((context.value.privateVarToml ?? '').trim() === '') {
             return null;
         }
-        const result = Flocommand.variable(context.value.privateVarToml ?? '', parameterPath);
+        const result = tomlToVariables(context.value.privateVarToml ?? '', parameterPath);
         if (result.isError) {
             return null;
         }
         return result.value ?? null;
     })();
     if (privateVarValue != null && typeof privateVarValue !== 'object') {
-        return ResultModule.ok({ value: privateVarValue, stringValue: privateVarValue.toString() });
+        return Result.ok({ value: privateVarValue, stringValue: privateVarValue.toString() });
     }
 
     const paramNameValue = await (async () => {
         if (parameterPath.length >= 2) {
-            return ResultModule.ok(undefined);
+            return Result.ok(undefined);
         }
 
         if (context?.type !== chara) {
-            return ResultModule.ok(undefined);
+            return Result.ok(undefined);
         }
 
         const matchedBoolParams = recordToArray(room.boolParamNames).filter(({ value }) => value.name === parameter);
@@ -74,29 +70,29 @@ const getParameter = async ({ parameterPath, context, room }: { parameterPath: s
         const matchedStrParams = recordToArray(room.strParamNames).filter(({ value }) => value.name === parameter);
         const totalLength = matchedBoolParams.length + matchedNumParams.length + matchedStrParams.length;
         if (totalLength >= 2) {
-            return ResultModule.error(`"${parameter}"という名前のパラメーターが複数存在します。パラメーターの名前を変えることを検討してください`);
+            return Result.error(`"${parameter}"という名前のパラメーターが複数存在します。パラメーターの名前を変えることを検討してください`);
         }
 
         if (matchedBoolParams.length !== 0) {
             const matched = matchedBoolParams[0];
-            return ResultModule.ok(context.value.boolParams[matched.key]?.value ?? undefined);
+            return Result.ok(context.value.boolParams[matched.key]?.value ?? undefined);
         }
         if (matchedNumParams.length !== 0) {
             const matched = matchedNumParams[0];
-            return ResultModule.ok(context.value.numParams[matched.key]?.value ?? undefined);
+            return Result.ok(context.value.numParams[matched.key]?.value ?? undefined);
         }
         if (matchedStrParams.length !== 0) {
             const matched = matchedStrParams[0];
-            return ResultModule.ok(context.value.strParams[matched.key]?.value ?? undefined);
+            return Result.ok(context.value.strParams[matched.key]?.value ?? undefined);
         }
 
-        return ResultModule.ok(undefined);
+        return Result.ok(undefined);
     })();
     if (paramNameValue.isError) {
         return paramNameValue;
     }
     if (paramNameValue.value !== undefined) {
-        return ResultModule.ok({
+        return Result.ok({
             stringValue: paramNameValue.value.toString(),
             value: paramNameValue.value,
         });
@@ -118,7 +114,7 @@ export const analyze = async (params: {
     text: string;
     gameType: string;
     context: Context | null;
-    room: RoomModule.State;
+    room: State;
 }): Promise<Result<AnalyzeResult>> => {
     const expressions = analyzeToExpression(params.text);
     if (expressions.isError) {
@@ -141,7 +137,7 @@ export const analyze = async (params: {
     }
 
     const rolled = await roll(message, params.gameType);
-    return ResultModule.ok({
+    return Result.ok({
         message,
         diceResult: rolled == null ? null : {
             result: rolled.text,

@@ -1,11 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.findRoomAndMyParticipant = exports.checkEntry = exports.getUserIfEntry = exports.checkSignInAndNotAnonymous = exports.checkSignIn = exports.AnonymousAccount = exports.NotSignIn = void 0;
-const Constants_1 = require("../../../@shared/Constants");
 const mikro_orm_1 = require("../../entities/user/mikro-orm");
 const mikro_orm_2 = require("../../entities/room/mikro-orm");
-const utils_1 = require("../../../@shared/utils");
 const global_1 = require("../../entities/room/global");
+const util_1 = require("@kizahasi/util");
 const find = (source, key) => source[key];
 exports.NotSignIn = 'NotSignIn';
 exports.AnonymousAccount = 'AnonymousAccount';
@@ -21,7 +20,7 @@ const checkSignInAndNotAnonymous = (context) => {
     if (decodedIdToken == exports.NotSignIn) {
         return exports.NotSignIn;
     }
-    if (decodedIdToken.firebase.sign_in_provider === Constants_1.anonymous) {
+    if (decodedIdToken.firebase.sign_in_provider === util_1.anonymous) {
         return exports.AnonymousAccount;
     }
     return decodedIdToken;
@@ -59,7 +58,7 @@ class FindRoomAndMyParticipantResult {
         this.me = me;
     }
     participantIds() {
-        return new Set(utils_1.recordToArray(this.roomState).map(({ key }) => key));
+        return new Set(util_1.recordToArray(this.roomState).map(({ key }) => key));
     }
 }
 const findRoomAndMyParticipant = async ({ em, userUid, roomId }) => {

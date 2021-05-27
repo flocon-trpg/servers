@@ -30,8 +30,8 @@ const ListAvailableGameSystemsResult_1 = require("../results/ListAvailableGameSy
 const main_1 = require("../../messageAnalyzer/main");
 const graphql_2 = require("../entities/serverInfo/graphql");
 const VERSION_1 = __importDefault(require("../../VERSION"));
-const semver_1 = require("../../@shared/semver");
 const PrereleaseType_1 = require("../../enums/PrereleaseType");
+const util_1 = require("@kizahasi/util");
 let MainResolver = class MainResolver {
     async listAvailableGameSystems() {
         return {
@@ -44,11 +44,11 @@ let MainResolver = class MainResolver {
                 return undefined;
             }
             switch (VERSION_1.default.prerelease.type) {
-                case semver_1.alpha:
+                case util_1.alpha:
                     return Object.assign(Object.assign({}, VERSION_1.default.prerelease), { type: PrereleaseType_1.PrereleaseType.Alpha });
-                case semver_1.beta:
+                case util_1.beta:
                     return Object.assign(Object.assign({}, VERSION_1.default.prerelease), { type: PrereleaseType_1.PrereleaseType.Beta });
-                case semver_1.rc:
+                case util_1.rc:
                     return Object.assign(Object.assign({}, VERSION_1.default.prerelease), { type: PrereleaseType_1.PrereleaseType.Rc });
             }
         })();

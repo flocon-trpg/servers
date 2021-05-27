@@ -1,4 +1,4 @@
-import * as ParticipantRoleModule from '../@shared/ot/room/participant/v1';
+import { Master, Player, Spectator } from '@kizahasi/flocon-core';
 
 export enum ParticipantRole {
     Master = 'Master',
@@ -7,18 +7,18 @@ export enum ParticipantRole {
 }
 
 export namespace ParticipantRole {
-    export const ofString = (source: typeof ParticipantRoleModule.Master | typeof ParticipantRoleModule.Player | typeof ParticipantRoleModule.Spectator): ParticipantRole => {
+    export const ofString = (source: typeof Master | typeof Player | typeof Spectator): ParticipantRole => {
         switch (source) {
-            case ParticipantRoleModule.Master:
+            case Master:
                 return ParticipantRole.Master;
-            case ParticipantRoleModule.Player:
+            case Player:
                 return ParticipantRole.Player;
-            case ParticipantRoleModule.Spectator:
+            case Spectator:
                 return ParticipantRole.Spectator;
         }
     };
 
-    export const ofNullishString = (source: typeof ParticipantRoleModule.Master | typeof ParticipantRoleModule.Player | typeof ParticipantRoleModule.Spectator | null | undefined) => {
+    export const ofNullishString = (source: typeof Master | typeof Player | typeof Spectator | null | undefined) => {
         switch (source) {
             case null:
             case undefined:

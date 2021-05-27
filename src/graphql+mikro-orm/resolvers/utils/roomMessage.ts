@@ -1,5 +1,5 @@
+import { $system } from '@kizahasi/util';
 import { Reference } from '@mikro-orm/core';
-import { $system } from '../../../@shared/Constants';
 import { EM } from '../../../utils/types';
 import { Room } from '../../entities/room/mikro-orm';
 import { RoomPubCh, RoomPubMsg } from '../../entities/roomMessage/mikro-orm';

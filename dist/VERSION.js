@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const semver_1 = require("./@shared/semver");
-const VERSION = new semver_1.SemVer({
+const util_1 = require("@kizahasi/util");
+const VERSION = new util_1.SemVer({
     major: 0,
     minor: 2,
     patch: 0,
     prerelease: {
-        type: semver_1.alpha,
-        version: 8,
+        type: util_1.alpha,
+        version: 9,
     }
 });
 exports.default = VERSION;

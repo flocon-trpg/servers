@@ -1,8 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadServerConfigAsMigrationDown = exports.loadServerConfigAsMigrationUp = exports.loadServerConfigAsMigrationCreate = exports.loadServerConfigAsMain = exports.firebaseConfig = exports.sqlite = exports.postgresql = void 0;
-const config_1 = require("./@shared/config");
-const JSONObject_1 = require("./@shared/JSONObject");
+const util_1 = require("@kizahasi/util");
 const commandLineArgs_1 = require("./utils/commandLineArgs");
 exports.postgresql = 'postgresql';
 exports.sqlite = 'sqlite';
@@ -15,7 +14,7 @@ const loadFirebaseConfig = () => {
         throw 'Firebase config is not found. Set FLOCON_FIREBASE_CONFIG or NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG environment variable.';
     }
     const json = JSON.parse(env);
-    return config_1.createFirebaseConfig(json);
+    return util_1.createFirebaseConfig(json);
 };
 const loadServerConfig = ({ databaseArg }) => {
     var _a, _b;
@@ -24,7 +23,7 @@ const loadServerConfig = ({ databaseArg }) => {
         throw 'Server config is not found. Set FLOCON_API_CONFIG environment variable.';
     }
     const json = JSON.parse(env);
-    const j = JSONObject_1.JSONObject.init(json);
+    const j = util_1.JsonObject.init(json);
     const postgresqlJson = j.get('database').tryGet('postgresql');
     const sqliteJson = j.get('database').tryGet('sqlite');
     let database;

@@ -20,7 +20,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FileSourceTypeModule = exports.FileSourceType = void 0;
-const FilePathModule = __importStar(require("../@shared/ot/filePath/v1"));
+const FilePathModule = __importStar(require("@kizahasi/flocon-core"));
 var FileSourceType;
 (function (FileSourceType) {
     FileSourceType["Default"] = "Default";

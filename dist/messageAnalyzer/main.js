@@ -1,30 +1,10 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.analyze = exports.chara = exports.listAvailableGameSystems = void 0;
+const flocon_core_1 = require("@kizahasi/flocon-core");
+const result_1 = require("@kizahasi/result");
+const util_1 = require("@kizahasi/util");
 const bcdice_1 = require("bcdice");
-const expression_1 = require("../@shared/expression");
-const Flocommand = __importStar(require("../@shared/flocommand"));
-const Result_1 = require("../@shared/Result");
-const utils_1 = require("../@shared/utils");
 const loader = new bcdice_1.DynamicLoader();
 const listAvailableGameSystems = () => {
     return loader.listAvailableGameSystems();
@@ -55,49 +35,49 @@ const getParameter = async ({ parameterPath, context, room }) => {
         if (((_a = context.value.privateVarToml) !== null && _a !== void 0 ? _a : '').trim() === '') {
             return null;
         }
-        const result = Flocommand.variable((_b = context.value.privateVarToml) !== null && _b !== void 0 ? _b : '', parameterPath);
+        const result = flocon_core_1.tomlToVariables((_b = context.value.privateVarToml) !== null && _b !== void 0 ? _b : '', parameterPath);
         if (result.isError) {
             return null;
         }
         return (_c = result.value) !== null && _c !== void 0 ? _c : null;
     })();
     if (privateVarValue != null && typeof privateVarValue !== 'object') {
-        return Result_1.ResultModule.ok({ value: privateVarValue, stringValue: privateVarValue.toString() });
+        return result_1.Result.ok({ value: privateVarValue, stringValue: privateVarValue.toString() });
     }
     const paramNameValue = await (async () => {
         var _a, _b, _c, _d, _e, _f;
         if (parameterPath.length >= 2) {
-            return Result_1.ResultModule.ok(undefined);
+            return result_1.Result.ok(undefined);
         }
         if ((context === null || context === void 0 ? void 0 : context.type) !== exports.chara) {
-            return Result_1.ResultModule.ok(undefined);
+            return result_1.Result.ok(undefined);
         }
-        const matchedBoolParams = utils_1.recordToArray(room.boolParamNames).filter(({ value }) => value.name === parameter);
-        const matchedNumParams = utils_1.recordToArray(room.numParamNames).filter(({ value }) => value.name === parameter);
-        const matchedStrParams = utils_1.recordToArray(room.strParamNames).filter(({ value }) => value.name === parameter);
+        const matchedBoolParams = util_1.recordToArray(room.boolParamNames).filter(({ value }) => value.name === parameter);
+        const matchedNumParams = util_1.recordToArray(room.numParamNames).filter(({ value }) => value.name === parameter);
+        const matchedStrParams = util_1.recordToArray(room.strParamNames).filter(({ value }) => value.name === parameter);
         const totalLength = matchedBoolParams.length + matchedNumParams.length + matchedStrParams.length;
         if (totalLength >= 2) {
-            return Result_1.ResultModule.error(`"${parameter}"という名前のパラメーターが複数存在します。パラメーターの名前を変えることを検討してください`);
+            return result_1.Result.error(`"${parameter}"という名前のパラメーターが複数存在します。パラメーターの名前を変えることを検討してください`);
         }
         if (matchedBoolParams.length !== 0) {
             const matched = matchedBoolParams[0];
-            return Result_1.ResultModule.ok((_b = (_a = context.value.boolParams[matched.key]) === null || _a === void 0 ? void 0 : _a.value) !== null && _b !== void 0 ? _b : undefined);
+            return result_1.Result.ok((_b = (_a = context.value.boolParams[matched.key]) === null || _a === void 0 ? void 0 : _a.value) !== null && _b !== void 0 ? _b : undefined);
         }
         if (matchedNumParams.length !== 0) {
             const matched = matchedNumParams[0];
-            return Result_1.ResultModule.ok((_d = (_c = context.value.numParams[matched.key]) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : undefined);
+            return result_1.Result.ok((_d = (_c = context.value.numParams[matched.key]) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : undefined);
         }
         if (matchedStrParams.length !== 0) {
             const matched = matchedStrParams[0];
-            return Result_1.ResultModule.ok((_f = (_e = context.value.strParams[matched.key]) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : undefined);
+            return result_1.Result.ok((_f = (_e = context.value.strParams[matched.key]) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : undefined);
         }
-        return Result_1.ResultModule.ok(undefined);
+        return result_1.Result.ok(undefined);
     })();
     if (paramNameValue.isError) {
         return paramNameValue;
     }
     if (paramNameValue.value !== undefined) {
-        return Result_1.ResultModule.ok({
+        return result_1.Result.ok({
             stringValue: paramNameValue.value.toString(),
             value: paramNameValue.value,
         });
@@ -105,13 +85,13 @@ const getParameter = async ({ parameterPath, context, room }) => {
     return undefined;
 };
 const analyze = async (params) => {
-    const expressions = expression_1.analyze(params.text);
+    const expressions = util_1.analyze(params.text);
     if (expressions.isError) {
         return expressions;
     }
     let message = '';
     for (const expr of expressions.value) {
-        if (expr.type === expression_1.plain) {
+        if (expr.type === util_1.plain) {
             message += expr.text;
             continue;
         }
@@ -125,7 +105,7 @@ const analyze = async (params) => {
         message += parameterValue.value.stringValue;
     }
     const rolled = await roll(message, params.gameType);
-    return Result_1.ResultModule.ok({
+    return result_1.Result.ok({
         message,
         diceResult: rolled == null ? null : {
             result: rolled.text,

@@ -3,19 +3,19 @@ import express from 'express';
 import path from 'path';
 import admin, { auth } from 'firebase-admin';
 import { ExpressContext } from 'apollo-server-express/dist/ApolloServer';
-import { authToken } from './@shared/Constants';
 import { ResolverContext } from './graphql+mikro-orm/utils/Contexts';
 import registerEnumTypes from './graphql+mikro-orm/registerEnumTypes';
 import { buildSchema } from './buildSchema';
 import { PromiseQueue } from './utils/PromiseQueue';
 import { createPostgreSQL, createSQLite } from './mikro-orm';
 import { firebaseConfig, loadServerConfigAsMain, postgresql, sqlite } from './config';
-import { CustomResult, ResultModule } from './@shared/Result';
 import ws from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import { execute, subscribe } from 'graphql';
 import { checkMigrationsBeforeStart } from './migrate';
 import { InMemoryConnectionManager, pubSub } from './connection/main';
+import { CustomResult, Result } from '@kizahasi/result';
+import { authToken } from '@kizahasi/util';
 
 const main = async (params: { debug: boolean }): Promise<void> => {
     admin.initializeApp({
@@ -46,7 +46,7 @@ const main = async (params: { debug: boolean }): Promise<void> => {
     await checkMigrationsBeforeStart(orm, dbType);
 
     const getDecodedIdToken = async (idToken: string): Promise<CustomResult<admin.auth.DecodedIdToken, any>> => {
-        const decodedIdToken = await admin.auth().verifyIdToken(idToken).then(ResultModule.ok).catch(ResultModule.error);
+        const decodedIdToken = await admin.auth().verifyIdToken(idToken).then(Result.ok).catch(Result.error);
         return decodedIdToken;
     };
 

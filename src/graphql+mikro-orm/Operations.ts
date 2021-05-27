@@ -1,4 +1,4 @@
-import { ApplyError, ComposeAndTransformError } from '../@shared/textOperation';
+import { ApplyError, ComposeAndTransformError } from '@kizahasi/ot-string';
 
 export const TextOperationErrorModule = {
     toString: (error: ApplyError<unknown> | ComposeAndTransformError): string => {

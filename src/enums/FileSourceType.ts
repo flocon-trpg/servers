@@ -1,4 +1,4 @@
-import * as FilePathModule from '../@shared/ot/filePath/v1';
+import * as FilePathModule from '@kizahasi/flocon-core';
 
 export enum FileSourceType {
     Default = 'Default',

@@ -4,10 +4,8 @@ import { Room, RoomOp } from './mikro-orm';
 import { RequestedBy, server } from '../../Types';
 import { EM } from '../../../utils/types';
 import { Reference } from '@mikro-orm/core';
-import * as RoomConverterModule from '../../../@shared/ot/room/converter';
-import * as RoomModule from '../../../@shared/ot/room/v1';
-import * as Converter from '../../../@shared/ot/room/converter';
-import { ResultModule } from '../../../@shared/Result';
+import { Result } from '@kizahasi/result';
+import { composeDownOperation, decodeDbState, decodeDownOperation, DownOperation, exactDbState, parseUpOperation, State, stringifyState, toClientOperation, toClientState, toDownOperation, TwoWayOperation, UpOperation, stringifyUpOperation, apply } from '@kizahasi/flocon-core';
 
 type IsSequentialResult<T> = {
     type: 'DuplicateElement';
@@ -61,13 +59,13 @@ const isSequential = <T>(array: T[], getIndex: (elem: T) => number): IsSequentia
 export namespace GlobalRoom {
     export namespace MikroORM {
         export namespace ToGlobal {
-            export const state = (entity: Room): RoomModule.State => {
-                const result = RoomConverterModule.decodeDbState(entity.value);
+            export const state = (entity: Room): State => {
+                const result = decodeDbState(entity.value);
                 return { ...result, createdBy: entity.createdBy, name: entity.name };
             };
 
             const downOperation = (entity: RoomOp) => {
-                const result = RoomConverterModule.decodeDownOperation(entity.value);
+                const result = decodeDownOperation(entity.value);
                 return result;
             };
 
@@ -83,25 +81,25 @@ export namespace GlobalRoom {
                 const operationEntities = await em.find(RoomOp, { room: { id: roomId }, prevRevision: { $gte: revisionRange.from } });
                 const isSequentialResult = isSequential(operationEntities, o => o.prevRevision);
                 if (isSequentialResult.type === 'NotSequential') {
-                    return ResultModule.error('Database error. There are missing operations. Multiple server apps edit same database simultaneously?');
+                    return Result.error('Database error. There are missing operations. Multiple server apps edit same database simultaneously?');
                 }
                 if (isSequentialResult.type === 'DuplicateElement') {
-                    return ResultModule.error('Database error. There are duplicate operations. Multiple server apps edit same database simultaneously?');
+                    return Result.error('Database error. There are duplicate operations. Multiple server apps edit same database simultaneously?');
                 }
                 if (isSequentialResult.type === 'EmptyArray') {
-                    return ResultModule.ok(undefined);
+                    return Result.ok(undefined);
                 }
                 if (isSequentialResult.minIndex !== revisionRange.from) {
-                    return ResultModule.error('revision out of range(too small)');
+                    return Result.error('revision out of range(too small)');
                 }
                 if (revisionRange.expectedTo !== undefined) {
                     if (isSequentialResult.maxIndex !== (revisionRange.expectedTo - 1)) {
-                        return ResultModule.error('Database error. Revision of latest operation is not same as revision of state. Multiple server apps edit same database simultaneously?');
+                        return Result.error('Database error. Revision of latest operation is not same as revision of state. Multiple server apps edit same database simultaneously?');
                     }
                 }
 
                 const sortedOperationEntities = operationEntities.sort((x, y) => x.prevRevision - y.prevRevision);
-                let operation: RoomModule.DownOperation | undefined = sortedOperationEntities.length === 0 ? undefined : downOperation(sortedOperationEntities[0]);
+                let operation: DownOperation | undefined = sortedOperationEntities.length === 0 ? undefined : downOperation(sortedOperationEntities[0]);
 
                 let isFirst = false;
                 for (const model of sortedOperationEntities) {
@@ -114,22 +112,22 @@ export namespace GlobalRoom {
                         operation = second;
                         continue;
                     }
-                    const composed = RoomModule.composeDownOperation({ first: operation, second });
+                    const composed = composeDownOperation({ first: operation, second });
                     if (composed.isError) {
                         return composed;
                     }
                     operation = composed.value;
                 }
-                return ResultModule.ok(operation);
+                return Result.ok(operation);
             };
         }
     }
 
     export namespace Global {
         export namespace ToGraphQL {
-            export const state = ({ source, requestedBy }: { source: RoomModule.State; requestedBy: RequestedBy }): Omit<RoomGetState, 'revision' | 'createdBy'> => {
+            export const state = ({ source, requestedBy }: { source: State; requestedBy: RequestedBy }): Omit<RoomGetState, 'revision' | 'createdBy'> => {
                 return {
-                    stateJson: RoomConverterModule.stringifyState(RoomModule.toClientState(requestedBy)(source)),
+                    stateJson: stringifyState(toClientState(requestedBy)(source)),
                 };
             };
 
@@ -139,17 +137,17 @@ export namespace GlobalRoom {
                 nextState,
                 requestedBy,
             }: {
-                operation: RoomModule.TwoWayOperation;
-                prevState: RoomModule.State;
-                nextState: RoomModule.State;
+                operation: TwoWayOperation;
+                prevState: State;
+                nextState: State;
                 requestedBy: RequestedBy;
             }): string => {
-                const upOperationBase: RoomModule.UpOperation = RoomModule.toClientOperation(requestedBy)({
+                const upOperationBase: UpOperation = toClientOperation(requestedBy)({
                     prevState,
                     nextState,
                     diff: operation,
                 });
-                return RoomConverterModule.stringifyUpOperation(upOperationBase);
+                return stringifyUpOperation(upOperationBase);
             };
         }
 
@@ -162,10 +160,10 @@ export namespace GlobalRoom {
         }: {
             em: EM;
             target: Room;
-            prevState: RoomModule.State;
-            operation: RoomModule.TwoWayOperation;
+            prevState: State;
+            operation: TwoWayOperation;
         }) => {
-            const nextState = RoomModule.apply({
+            const nextState = apply({
                 state: prevState,
                 operation,
             });
@@ -173,12 +171,12 @@ export namespace GlobalRoom {
                 throw nextState.error;
             }
             target.name = nextState.value.name;
-            target.value = RoomConverterModule.exactDbState(nextState.value);
+            target.value = exactDbState(nextState.value);
             const prevRevision = target.revision;
             target.revision += 1;
             const op = new RoomOp({
                 prevRevision,
-                value: RoomModule.toDownOperation(operation),
+                value: toDownOperation(operation),
             });
             op.room = Reference.create<Room>(target);
 
@@ -189,8 +187,8 @@ export namespace GlobalRoom {
 
     export namespace GraphQL {
         export namespace ToGlobal {
-            export const upOperation = (source: RoomOperationInput): RoomModule.UpOperation => {
-                return Converter.parseUpOperation(source.valueJson);
+            export const upOperation = (source: RoomOperationInput): UpOperation => {
+                return parseUpOperation(source.valueJson);
             };
         }
     }

@@ -7,18 +7,18 @@ const apollo_server_express_1 = require("apollo-server-express");
 const express_1 = __importDefault(require("express"));
 const path_1 = __importDefault(require("path"));
 const firebase_admin_1 = __importDefault(require("firebase-admin"));
-const Constants_1 = require("./@shared/Constants");
 const registerEnumTypes_1 = __importDefault(require("./graphql+mikro-orm/registerEnumTypes"));
 const buildSchema_1 = require("./buildSchema");
 const PromiseQueue_1 = require("./utils/PromiseQueue");
 const mikro_orm_1 = require("./mikro-orm");
 const config_1 = require("./config");
-const Result_1 = require("./@shared/Result");
 const ws_1 = __importDefault(require("ws"));
 const ws_2 = require("graphql-ws/lib/use/ws");
 const graphql_1 = require("graphql");
 const migrate_1 = require("./migrate");
 const main_1 = require("./connection/main");
+const result_1 = require("@kizahasi/result");
+const util_1 = require("@kizahasi/util");
 const main = async (params) => {
     var _a;
     firebase_admin_1.default.initializeApp({
@@ -45,7 +45,7 @@ const main = async (params) => {
     })();
     await migrate_1.checkMigrationsBeforeStart(orm, dbType);
     const getDecodedIdToken = async (idToken) => {
-        const decodedIdToken = await firebase_admin_1.default.auth().verifyIdToken(idToken).then(Result_1.ResultModule.ok).catch(Result_1.ResultModule.error);
+        const decodedIdToken = await firebase_admin_1.default.auth().verifyIdToken(idToken).then(result_1.Result.ok).catch(result_1.Result.error);
         return decodedIdToken;
     };
     const getDecodedIdTokenFromBearer = async (bearer) => {
@@ -86,7 +86,7 @@ const main = async (params) => {
                 var _a, _b;
                 let authTokenValue;
                 if (ctx.connectionParams != null) {
-                    const authTokenValueAsUnknown = ctx.connectionParams[Constants_1.authToken];
+                    const authTokenValueAsUnknown = ctx.connectionParams[util_1.authToken];
                     if (typeof authTokenValueAsUnknown === 'string') {
                         authTokenValue = authTokenValueAsUnknown;
                     }

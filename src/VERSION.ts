@@ -1,4 +1,4 @@
-import { alpha, SemVer } from './@shared/semver';
+import { SemVer, alpha } from '@kizahasi/util';
 
 const VERSION = new SemVer({
     major: 0,
@@ -6,7 +6,7 @@ const VERSION = new SemVer({
     patch: 0,
     prerelease: {
         type: alpha,
-        version: 8,
+        version: 9,
     }
 });
 
