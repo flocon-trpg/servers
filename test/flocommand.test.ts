@@ -1,7 +1,7 @@
-import { characterAction } from '../src/index';
+import { tomlToCharacterAction } from '../src/index';
 
 it('tests characterAction', () => {
-    const actual = characterAction(`
+    const actual = tomlToCharacterAction(`
 ["コマンド"]
 
 chara.name = "new name"`);
