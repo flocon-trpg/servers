@@ -13,7 +13,7 @@ import {
     FirebaseStorage,
     sourceType,
 } from './ot/filePath/v1';
-import * as Character from './ot/room/participant/character/v1';
+import * as Character from './ot/room/character/v1';
 import { Result } from '@kizahasi/result';
 
 namespace Util {

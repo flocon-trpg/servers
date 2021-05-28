@@ -1,7 +1,4 @@
 import * as t from 'io-ts';
-import * as Board from './board/v1';
-import * as Character from './character/v1';
-import * as MyNumberValue from './myNumberValue/v1';
 import {
     recordDownOperationElementFactory,
     RecordTwoWayOperationElement,
@@ -47,9 +44,6 @@ export const state = t.type({
 
     name: t.string,
     role: maybe(participantRole),
-    boards: t.record(t.string, Board.state),
-    characters: t.record(t.string, Character.state),
-    myNumberValues: t.record(t.string, MyNumberValue.state),
 });
 
 export type State = t.TypeOf<typeof state>;
@@ -57,24 +51,6 @@ export type State = t.TypeOf<typeof state>;
 export const downOperation = operation(1, {
     name: t.type({ oldValue: t.string }),
     role: t.type({ oldValue: maybe(participantRole) }),
-    boards: t.record(
-        t.string,
-        recordDownOperationElementFactory(Board.state, Board.downOperation)
-    ),
-    characters: t.record(
-        t.string,
-        recordDownOperationElementFactory(
-            Character.state,
-            Character.downOperation
-        )
-    ),
-    myNumberValues: t.record(
-        t.string,
-        recordDownOperationElementFactory(
-            MyNumberValue.state,
-            MyNumberValue.downOperation
-        )
-    ),
 });
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
@@ -82,21 +58,6 @@ export type DownOperation = t.TypeOf<typeof downOperation>;
 export const upOperation = operation(1, {
     name: t.type({ newValue: t.string }),
     role: t.type({ newValue: maybe(participantRole) }),
-    boards: t.record(
-        t.string,
-        recordUpOperationElementFactory(Board.state, Board.upOperation)
-    ),
-    characters: t.record(
-        t.string,
-        recordUpOperationElementFactory(Character.state, Character.upOperation)
-    ),
-    myNumberValues: t.record(
-        t.string,
-        recordUpOperationElementFactory(
-            MyNumberValue.state,
-            MyNumberValue.upOperation
-        )
-    ),
 });
 
 export type UpOperation = t.TypeOf<typeof upOperation>;
@@ -106,187 +67,24 @@ export type TwoWayOperation = {
 
     name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
     role?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<ParticipantRole>>;
-    boards?: Record<
-        string,
-        RecordTwoWayOperationElement<Board.State, Board.TwoWayOperation>
-    >;
-    characters?: Record<
-        string,
-        RecordTwoWayOperationElement<Character.State, Character.TwoWayOperation>
-    >;
-    myNumberValues?: Record<
-        string,
-        RecordTwoWayOperationElement<
-            MyNumberValue.State,
-            MyNumberValue.TwoWayOperation
-        >
-    >;
 };
 
-export const toClientState = (
-    createdByMe: boolean,
-    activeBoardSecondKey: string | null | undefined
-) => (source: State): State => {
-    return {
-        ...source,
-        boards: RecordOperation.toClientState({
-            serverState: source.boards,
-            isPrivate: (state, key) => {
-                if (createdByMe) {
-                    return false;
-                }
-                if (key === activeBoardSecondKey) {
-                    return false;
-                }
-                return true;
-            },
-            toClientState: ({ state }) => Board.toClientState(state),
-        }),
-        characters: RecordOperation.toClientState({
-            serverState: source.characters,
-            isPrivate: state => !createdByMe && state.isPrivate,
-            toClientState: ({ state }) =>
-                Character.toClientState(createdByMe)(state),
-        }),
-        myNumberValues: RecordOperation.toClientState({
-            serverState: source.myNumberValues,
-            isPrivate: () => false,
-            toClientState: ({ state }) =>
-                MyNumberValue.toClientState(createdByMe)(state),
-        }),
-    };
+export const toClientState = (source: State): State => {
+    return source;
 };
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
-    return {
-        ...source,
-        boards:
-            source.boards == null
-                ? undefined
-                : chooseRecord(source.boards, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: Board.toDownOperation,
-                      })
-                  ),
-        characters:
-            source.characters == null
-                ? undefined
-                : chooseRecord(source.characters, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: Character.toDownOperation,
-                      })
-                  ),
-        myNumberValues:
-            source.myNumberValues == null
-                ? undefined
-                : chooseRecord(source.myNumberValues, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: MyNumberValue.toDownOperation,
-                      })
-                  ),
-    };
+    return source;
 };
 
 export const toUpOperation = (source: TwoWayOperation): UpOperation => {
-    return {
-        ...source,
-        boards:
-            source.boards == null
-                ? undefined
-                : chooseRecord(source.boards, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: Board.toUpOperation,
-                      })
-                  ),
-        characters:
-            source.characters == null
-                ? undefined
-                : chooseRecord(source.characters, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: Character.toUpOperation,
-                      })
-                  ),
-        myNumberValues:
-            source.myNumberValues == null
-                ? undefined
-                : chooseRecord(source.myNumberValues, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: MyNumberValue.toUpOperation,
-                      })
-                  ),
-    };
+    return source;
 };
 
-export const toClientOperation = (
-    createdByMe: boolean,
-    activeBoardSecondKey: string | null | undefined
-) => ({
-    prevState,
-    nextState,
+export const toClientOperation = ({
     diff,
 }: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
-    return {
-        ...diff,
-        boards:
-            diff.boards == null
-                ? undefined
-                : RecordOperation.toClientOperation({
-                      diff: diff.boards,
-                      prevState: prevState.boards,
-                      nextState: nextState.boards,
-                      toClientState: ({ nextState }) =>
-                          Board.toClientState(nextState),
-                      toClientOperation: params =>
-                          Board.toClientOperation(params),
-                      isPrivate: (state, key) => {
-                          if (createdByMe) {
-                              return false;
-                          }
-                          if (key === activeBoardSecondKey) {
-                              return false;
-                          }
-                          return true;
-                      },
-                  }),
-        characters:
-            diff.characters == null
-                ? undefined
-                : RecordOperation.toClientOperation({
-                      diff: diff.characters,
-                      prevState: prevState.characters,
-                      nextState: nextState.characters,
-                      toClientState: ({ nextState }) =>
-                          Character.toClientState(createdByMe)(nextState),
-                      toClientOperation: params =>
-                          Character.toClientOperation(createdByMe)(params),
-                      isPrivate: () => false,
-                  }),
-        myNumberValues:
-            diff.myNumberValues == null
-                ? undefined
-                : RecordOperation.toClientOperation({
-                      diff: diff.myNumberValues,
-                      prevState: prevState.myNumberValues,
-                      nextState: nextState.myNumberValues,
-                      toClientState: ({ nextState }) =>
-                          MyNumberValue.toClientState(createdByMe)(nextState),
-                      toClientOperation: params =>
-                          MyNumberValue.toClientOperation(createdByMe)(params),
-                      isPrivate: () => false,
-                  }),
-    };
+    return diff;
 };
 
 export const apply: Apply<State, UpOperation | TwoWayOperation> = ({
@@ -300,61 +98,6 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({
     if (operation.role != null) {
         result.role = operation.role.newValue;
     }
-
-    const boards = RecordOperation.apply<
-        Board.State,
-        Board.UpOperation | Board.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        prevState: state.boards,
-        operation: operation.boards,
-        innerApply: ({ prevState, operation: upOperation }) => {
-            return Board.apply({ state: prevState, operation: upOperation });
-        },
-    });
-    if (boards.isError) {
-        return boards;
-    }
-    result.boards = boards.value;
-
-    const characters = RecordOperation.apply<
-        Character.State,
-        Character.UpOperation | Character.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        prevState: state.characters,
-        operation: operation.characters,
-        innerApply: ({ prevState, operation: upOperation }) => {
-            return Character.apply({
-                state: prevState,
-                operation: upOperation,
-            });
-        },
-    });
-    if (characters.isError) {
-        return characters;
-    }
-    result.characters = characters.value;
-
-    const myNumberValues = RecordOperation.apply<
-        MyNumberValue.State,
-        MyNumberValue.UpOperation | MyNumberValue.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        prevState: state.myNumberValues,
-        operation: operation.myNumberValues,
-        innerApply: ({ prevState, operation: upOperation }) => {
-            return MyNumberValue.apply({
-                state: prevState,
-                operation: upOperation,
-            });
-        },
-    });
-    if (myNumberValues.isError) {
-        return myNumberValues;
-    }
-    result.myNumberValues = myNumberValues.value;
-
     return Result.ok(result);
 };
 
@@ -370,100 +113,10 @@ export const applyBack: Apply<State, DownOperation> = ({
         result.role = operation.role.oldValue;
     }
 
-    const boards = RecordOperation.applyBack<
-        Board.State,
-        Board.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        nextState: state.boards,
-        operation: operation.boards,
-        innerApplyBack: ({ state, operation }) => {
-            return Board.applyBack({ state, operation });
-        },
-    });
-    if (boards.isError) {
-        return boards;
-    }
-    result.boards = boards.value;
-
-    const characters = RecordOperation.applyBack<
-        Character.State,
-        Character.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        nextState: state.characters,
-        operation: operation.characters,
-        innerApplyBack: ({ state, operation }) => {
-            return Character.applyBack({ state, operation });
-        },
-    });
-    if (characters.isError) {
-        return characters;
-    }
-    result.characters = characters.value;
-
-    const myNumberValues = RecordOperation.applyBack<
-        MyNumberValue.State,
-        MyNumberValue.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        nextState: state.myNumberValues,
-        operation: operation.myNumberValues,
-        innerApplyBack: ({ state, operation }) => {
-            return MyNumberValue.applyBack({ state, operation });
-        },
-    });
-    if (myNumberValues.isError) {
-        return myNumberValues;
-    }
-    result.myNumberValues = myNumberValues.value;
-
     return Result.ok(result);
 };
 
 export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
-    const boards = RecordOperation.composeUpOperation<
-        Board.State,
-        Board.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        first: first.boards,
-        second: second.boards,
-        innerApply: params => Board.apply(params),
-        innerCompose: params => Board.composeUpOperation(params),
-    });
-    if (boards.isError) {
-        return boards;
-    }
-
-    const characters = RecordOperation.composeUpOperation<
-        Character.State,
-        Character.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        first: first.characters,
-        second: second.characters,
-        innerApply: params => Character.apply(params),
-        innerCompose: params => Character.composeUpOperation(params),
-    });
-    if (characters.isError) {
-        return characters;
-    }
-
-    const myNumberValues = RecordOperation.composeUpOperation<
-        MyNumberValue.State,
-        MyNumberValue.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        first: first.myNumberValues,
-        second: second.myNumberValues,
-        innerApply: params => MyNumberValue.apply(params),
-        innerCompose: params => MyNumberValue.composeUpOperation(params),
-    });
-    if (myNumberValues.isError) {
-        return myNumberValues;
-    }
-
     const valueProps: UpOperation = {
         $version: 1,
         name: ReplaceOperation.composeUpOperation(
@@ -474,9 +127,6 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
             first.role ?? undefined,
             second.role ?? undefined
         ),
-        boards: boards.value,
-        characters: characters.value,
-        myNumberValues: myNumberValues.value,
     };
     return Result.ok(valueProps);
 };
@@ -485,48 +135,6 @@ export const composeDownOperation: Compose<DownOperation> = ({
     first,
     second,
 }) => {
-    const boards = RecordOperation.composeDownOperation<
-        Board.State,
-        Board.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        first: first.boards,
-        second: second.boards,
-        innerApplyBack: params => Board.applyBack(params),
-        innerCompose: params => Board.composeDownOperation(params),
-    });
-    if (boards.isError) {
-        return boards;
-    }
-
-    const characters = RecordOperation.composeDownOperation<
-        Character.State,
-        Character.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        first: first.characters,
-        second: second.characters,
-        innerApplyBack: params => Character.applyBack(params),
-        innerCompose: params => Character.composeDownOperation(params),
-    });
-    if (characters.isError) {
-        return characters;
-    }
-
-    const myNumberValues = RecordOperation.composeDownOperation<
-        MyNumberValue.State,
-        MyNumberValue.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        first: first.myNumberValues,
-        second: second.myNumberValues,
-        innerApplyBack: params => MyNumberValue.applyBack(params),
-        innerCompose: params => MyNumberValue.composeDownOperation(params),
-    });
-    if (myNumberValues.isError) {
-        return myNumberValues;
-    }
-
     const valueProps: DownOperation = {
         $version: 1,
         name: ReplaceOperation.composeDownOperation(
@@ -537,9 +145,6 @@ export const composeDownOperation: Compose<DownOperation> = ({
             first.role ?? undefined,
             second.role ?? undefined
         ),
-        boards: boards.value,
-        characters: characters.value,
-        myNumberValues: myNumberValues.value,
     };
     return Result.ok(valueProps);
 };
@@ -552,47 +157,11 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         return Result.ok({ prevState: nextState, twoWayOperation: undefined });
     }
 
-    const boards = RecordOperation.restore({
-        nextState: nextState.boards,
-        downOperation: downOperation.boards,
-        innerDiff: params => Board.diff(params),
-        innerRestore: params => Board.restore(params),
-    });
-    if (boards.isError) {
-        return boards;
-    }
-
-    const characters = RecordOperation.restore({
-        nextState: nextState.characters,
-        downOperation: downOperation.characters,
-        innerDiff: params => Character.diff(params),
-        innerRestore: params => Character.restore(params),
-    });
-    if (characters.isError) {
-        return characters;
-    }
-
-    const myNumberValues = RecordOperation.restore({
-        nextState: nextState.myNumberValues,
-        downOperation: downOperation.myNumberValues,
-        innerDiff: params => MyNumberValue.diff(params),
-        innerRestore: params => MyNumberValue.restore(params),
-    });
-    if (myNumberValues.isError) {
-        return myNumberValues;
-    }
-
     const prevState: State = {
         ...nextState,
-        boards: boards.value.prevState,
-        characters: characters.value.prevState,
-        myNumberValues: myNumberValues.value.prevState,
     };
     const twoWayOperation: TwoWayOperation = {
         $version: 1,
-        boards: boards.value.twoWayOperation,
-        characters: characters.value.twoWayOperation,
-        myNumberValues: myNumberValues.value.twoWayOperation,
     };
 
     if (downOperation.name != null) {
@@ -617,26 +186,8 @@ export const diff: Diff<State, TwoWayOperation> = ({
     prevState,
     nextState,
 }) => {
-    const boards = RecordOperation.diff({
-        prevState: prevState.boards,
-        nextState: nextState.boards,
-        innerDiff: params => Board.diff(params),
-    });
-    const characters = RecordOperation.diff({
-        prevState: prevState.characters,
-        nextState: nextState.characters,
-        innerDiff: params => Character.diff(params),
-    });
-    const myNumberValues = RecordOperation.diff({
-        prevState: prevState.myNumberValues,
-        nextState: nextState.myNumberValues,
-        innerDiff: params => MyNumberValue.diff(params),
-    });
     const result: TwoWayOperation = {
         $version: 1,
-        boards,
-        characters,
-        myNumberValues,
     };
     if (prevState.name !== nextState.name) {
         result.name = { oldValue: prevState.name, newValue: nextState.name };
@@ -664,94 +215,8 @@ export const serverTransform = ({
     clientOperation,
     serverOperation,
 }) => {
-    const boards = RecordOperation.serverTransform({
-        first: serverOperation?.boards,
-        second: clientOperation.boards,
-        prevState: prevState.boards,
-        nextState: currentState.boards,
-        innerTransform: ({ first, second, prevState, nextState }) =>
-            Board.serverTransform({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        toServerState: state => state,
-        cancellationPolicy: {
-            cancelCreate: () =>
-                !RequestedBy.createdByMe({
-                    requestedBy,
-                    userUid: participantKey,
-                }),
-            cancelUpdate: ({ key }) =>
-                !RequestedBy.createdByMe({
-                    requestedBy,
-                    userUid: participantKey,
-                }) && key !== activeBoardSecondKey,
-            cancelRemove: () =>
-                !RequestedBy.createdByMe({
-                    requestedBy,
-                    userUid: participantKey,
-                }),
-        },
-    });
-    if (boards.isError) {
-        return boards;
-    }
-
-    const characters = RecordOperation.serverTransform({
-        first: serverOperation?.characters,
-        second: clientOperation.characters,
-        prevState: prevState.characters,
-        nextState: currentState.characters,
-        innerTransform: ({ first, second, prevState, nextState }) =>
-            Character.serverTransform(
-                RequestedBy.createdByMe({
-                    requestedBy,
-                    userUid: participantKey,
-                })
-            )({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        toServerState: state => state,
-        cancellationPolicy: {},
-    });
-    if (characters.isError) {
-        return characters;
-    }
-
-    const myNumberValues = RecordOperation.serverTransform({
-        first: serverOperation?.myNumberValues,
-        second: clientOperation.myNumberValues,
-        prevState: prevState.myNumberValues,
-        nextState: currentState.myNumberValues,
-        innerTransform: ({ first, second, prevState, nextState }) =>
-            MyNumberValue.serverTransform(
-                RequestedBy.createdByMe({
-                    requestedBy,
-                    userUid: participantKey,
-                })
-            )({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        toServerState: state => state,
-        cancellationPolicy: {},
-    });
-    if (myNumberValues.isError) {
-        return myNumberValues;
-    }
-
     const twoWayOperation: TwoWayOperation = {
         $version: 1,
-        boards: boards.value,
-        characters: characters.value,
-        myNumberValues: myNumberValues.value,
     };
 
     if (RequestedBy.createdByMe({ requestedBy, userUid: participantKey })) {
@@ -781,66 +246,6 @@ export const clientTransform: ClientTransform<UpOperation> = ({
     first,
     second,
 }) => {
-    const boards = RecordOperation.clientTransform<
-        Board.State,
-        Board.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        first: first.boards,
-        second: second.boards,
-        innerTransform: params => Board.clientTransform(params),
-        innerDiff: params => {
-            const diff = Board.diff(params);
-            if (diff == null) {
-                return diff;
-            }
-            return Board.toUpOperation(diff);
-        },
-    });
-    if (boards.isError) {
-        return boards;
-    }
-
-    const characters = RecordOperation.clientTransform<
-        Character.State,
-        Character.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        first: first.characters,
-        second: second.characters,
-        innerTransform: params => Character.clientTransform(params),
-        innerDiff: params => {
-            const diff = Character.diff(params);
-            if (diff == null) {
-                return diff;
-            }
-            return Character.toUpOperation(diff);
-        },
-    });
-    if (characters.isError) {
-        return characters;
-    }
-
-    const myNumberValues = RecordOperation.clientTransform<
-        MyNumberValue.State,
-        MyNumberValue.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        first: first.myNumberValues,
-        second: second.myNumberValues,
-        innerTransform: params => MyNumberValue.clientTransform(params),
-        innerDiff: params => {
-            const diff = MyNumberValue.diff(params);
-            if (diff == null) {
-                return diff;
-            }
-            return MyNumberValue.toUpOperation(diff);
-        },
-    });
-    if (myNumberValues.isError) {
-        return myNumberValues;
-    }
-
     const name = ReplaceOperation.clientTransform({
         first: first.name,
         second: second.name,
@@ -853,18 +258,12 @@ export const clientTransform: ClientTransform<UpOperation> = ({
 
     const firstPrime: UpOperation = {
         $version: 1,
-        boards: boards.value.firstPrime,
-        characters: characters.value.firstPrime,
-        myNumberValues: myNumberValues.value.firstPrime,
         name: name.firstPrime,
         role: role.firstPrime,
     };
 
     const secondPrime: UpOperation = {
         $version: 1,
-        boards: boards.value.secondPrime,
-        characters: characters.value.secondPrime,
-        myNumberValues: myNumberValues.value.secondPrime,
         name: name.secondPrime,
         role: role.secondPrime,
     };

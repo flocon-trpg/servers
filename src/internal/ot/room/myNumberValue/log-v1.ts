@@ -1,7 +1,7 @@
 import * as t from 'io-ts';
-import { recordUpOperationElementFactory } from '../../util/recordOperationElement';
+import { recordUpOperationElementFactory } from '../util/recordOperationElement';
 import * as MyNumberValue from './v1';
-import * as Piece from '../../../piece/v1';
+import * as Piece from '../../piece/v1';
 
 export const updateType = 'update';
 export const createType = 'create';

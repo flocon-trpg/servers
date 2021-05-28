@@ -1,12 +1,12 @@
 import * as t from 'io-ts';
-import { DualKeyRecordTwoWayOperation } from '../../util/dualKeyRecordOperation';
-import * as DualKeyRecordOperation from '../../util/dualKeyRecordOperation';
-import * as Piece from '../../../piece/v1';
+import { DualKeyRecordTwoWayOperation } from '../util/dualKeyRecordOperation';
+import * as DualKeyRecordOperation from '../util/dualKeyRecordOperation';
+import * as Piece from '../../piece/v1';
 import {
     recordDownOperationElementFactory,
     recordUpOperationElementFactory,
-} from '../../util/recordOperationElement';
-import * as ReplaceOperation from '../../util/replaceOperation';
+} from '../util/recordOperationElement';
+import * as ReplaceOperation from '../util/replaceOperation';
 import {
     Apply,
     ClientTransform,
@@ -15,9 +15,9 @@ import {
     Restore,
     ServerTransform,
     ToClientOperationParams,
-} from '../../util/type';
-import { operation } from '../../util/operation';
-import { isIdRecord } from '../../util/record';
+} from '../util/type';
+import { operation } from '../util/operation';
+import { isIdRecord } from '../util/record';
 import { Result } from '@kizahasi/result';
 import {
     ApplyError,

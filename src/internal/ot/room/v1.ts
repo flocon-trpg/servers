@@ -1,8 +1,12 @@
 import * as t from 'io-ts';
 import * as Bgm from './bgm/v1';
+import * as Board from './board/v1';
+import * as Character from './character/v1';
+import * as MyNumberValue from './myNumberValue/v1';
 import * as ParamNames from './paramName/v1';
 import * as Participant from './participant/v1';
 import * as RecordOperation from './util/recordOperation';
+import * as DualKeyRecordOperation from './util/dualKeyRecordOperation';
 import {
     mapRecordOperationElement,
     recordDownOperationElementFactory,
@@ -30,6 +34,7 @@ import {
 } from '@kizahasi/ot-string';
 import {
     chooseRecord,
+    chooseDualKeyRecord,
     isStrIndex20,
     isStrIndex5,
     Maybe,
@@ -44,7 +49,10 @@ export const dbState = t.type({
 
     activeBoardKey: maybe(compositeKey),
     bgms: t.record(t.string, Bgm.state),
+    boards: t.record(t.string, t.record(t.string, Board.state)),
     boolParamNames: t.record(t.string, ParamNames.state),
+    characters: t.record(t.string, t.record(t.string, Character.state)),
+    myNumberValues: t.record(t.string, t.record(t.string, MyNumberValue.state)),
     numParamNames: t.record(t.string, ParamNames.state),
     participants: t.record(t.string, Participant.state),
     publicChannel1Name: t.string,
@@ -79,11 +87,38 @@ export const downOperation = operation(1, {
         t.string,
         recordDownOperationElementFactory(Bgm.state, Bgm.downOperation)
     ),
+    boards: t.record(
+        t.string,
+        t.record(
+            t.string,
+            recordDownOperationElementFactory(Board.state, Board.downOperation)
+        )
+    ),
     boolParamNames: t.record(
         t.string,
         recordDownOperationElementFactory(
             ParamNames.state,
             ParamNames.downOperation
+        )
+    ),
+    characters: t.record(
+        t.string,
+        t.record(
+            t.string,
+            recordDownOperationElementFactory(
+                Character.state,
+                Character.downOperation
+            )
+        )
+    ),
+    myNumberValues: t.record(
+        t.string,
+        t.record(
+            t.string,
+            recordDownOperationElementFactory(
+                MyNumberValue.state,
+                MyNumberValue.downOperation
+            )
         )
     ),
     name: replaceStringDownOperation,
@@ -128,6 +163,13 @@ export const upOperation = operation(1, {
         t.string,
         recordUpOperationElementFactory(Bgm.state, Bgm.upOperation)
     ),
+    boards: t.record(
+        t.string,
+        t.record(
+            t.string,
+            recordUpOperationElementFactory(Board.state, Board.upOperation)
+        )
+    ),
     boolParamNames: t.record(
         t.string,
         recordUpOperationElementFactory(
@@ -135,7 +177,27 @@ export const upOperation = operation(1, {
             ParamNames.upOperation
         )
     ),
+    characters: t.record(
+        t.string,
+        t.record(
+            t.string,
+            recordUpOperationElementFactory(
+                Character.state,
+                Character.upOperation
+            )
+        )
+    ),
     name: replaceStringUpOperation,
+    myNumberValues: t.record(
+        t.string,
+        t.record(
+            t.string,
+            recordUpOperationElementFactory(
+                MyNumberValue.state,
+                MyNumberValue.upOperation
+            )
+        )
+    ),
     numParamNames: t.record(
         t.string,
         recordUpOperationElementFactory(
@@ -181,9 +243,21 @@ export type TwoWayOperation = {
         Bgm.State,
         Bgm.TwoWayOperation
     >;
+    boards?: DualKeyRecordOperation.DualKeyRecordTwoWayOperation<
+        Board.State,
+        Board.TwoWayOperation
+    >;
     boolParamNames?: RecordOperation.RecordTwoWayOperation<
         ParamNames.State,
         ParamNames.TwoWayOperation
+    >;
+    characters?: DualKeyRecordOperation.DualKeyRecordTwoWayOperation<
+        Character.State,
+        Character.TwoWayOperation
+    >;
+    myNumberValues?: DualKeyRecordOperation.DualKeyRecordTwoWayOperation<
+        MyNumberValue.State,
+        MyNumberValue.TwoWayOperation
     >;
     name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
     numParamNames?: RecordOperation.RecordTwoWayOperation<
@@ -220,10 +294,50 @@ export const toClientState = (requestedBy: RequestedBy) => (
             isPrivate: () => false,
             toClientState: ({ state }) => Bgm.toClientState(state),
         }),
+        boards: DualKeyRecordOperation.toClientState<Board.State, Board.State>({
+            serverState: source.boards,
+            isPrivate: (state, key) => {
+                if (
+                    RequestedBy.createdByMe({
+                        requestedBy,
+                        userUid: key.first,
+                    })
+                ) {
+                    return false;
+                }
+                if (key.second !== source.activeBoardKey?.id) {
+                    return true;
+                }
+                return false;
+            },
+            toClientState: ({ state }) => Board.toClientState(state),
+        }),
         boolParamNames: RecordOperation.toClientState({
             serverState: source.boolParamNames,
             isPrivate: () => false,
             toClientState: ({ state }) => ParamNames.toClientState(state),
+        }),
+        characters: DualKeyRecordOperation.toClientState<
+            Character.State,
+            Character.State
+        >({
+            serverState: source.characters,
+            isPrivate: () => false,
+            toClientState: ({ state, key }) =>
+                Character.toClientState(
+                    RequestedBy.createdByMe({ requestedBy, userUid: key.first })
+                )(state),
+        }),
+        myNumberValues: DualKeyRecordOperation.toClientState<
+            MyNumberValue.State,
+            MyNumberValue.State
+        >({
+            serverState: source.myNumberValues,
+            isPrivate: () => false,
+            toClientState: ({ state, key }) =>
+                MyNumberValue.toClientState(
+                    RequestedBy.createdByMe({ requestedBy, userUid: key.first })
+                )(state),
         }),
         numParamNames: RecordOperation.toClientState({
             serverState: source.numParamNames,
@@ -233,11 +347,7 @@ export const toClientState = (requestedBy: RequestedBy) => (
         participants: RecordOperation.toClientState({
             serverState: source.participants,
             isPrivate: () => false,
-            toClientState: ({ state, key }) =>
-                Participant.toClientState(
-                    RequestedBy.createdByMe({ requestedBy, userUid: key }),
-                    source.activeBoardKey?.id
-                )(state),
+            toClientState: ({ state }) => Participant.toClientState(state),
         }),
         strParamNames: RecordOperation.toClientState({
             serverState: source.strParamNames,
@@ -268,6 +378,32 @@ export const toClientOperation = (requestedBy: RequestedBy) => ({
                           Bgm.toClientOperation(params),
                       isPrivate: () => false,
                   }),
+        boards:
+            diff.boards == null
+                ? undefined
+                : DualKeyRecordOperation.toClientOperation({
+                      diff: diff.boards,
+                      prevState: prevState.boards,
+                      nextState: nextState.boards,
+                      toClientState: ({ nextState }) =>
+                          Board.toClientState(nextState),
+                      toClientOperation: params =>
+                          Board.toClientOperation(params),
+                      isPrivate: (state, key) => {
+                          if (
+                              RequestedBy.createdByMe({
+                                  requestedBy,
+                                  userUid: key.first,
+                              })
+                          ) {
+                              return false;
+                          }
+                          if (key.second === nextActiveBoardKey?.id) {
+                              return false;
+                          }
+                          return true;
+                      },
+                  }),
         boolParamNames:
             diff.boolParamNames == null
                 ? undefined
@@ -279,6 +415,56 @@ export const toClientOperation = (requestedBy: RequestedBy) => ({
                           ParamNames.toClientState(nextState),
                       toClientOperation: params =>
                           ParamNames.toClientOperation(params),
+                      isPrivate: () => false,
+                  }),
+        characters:
+            diff.characters == null
+                ? undefined
+                : DualKeyRecordOperation.toClientOperation({
+                      diff: diff.characters,
+                      prevState: prevState.characters,
+                      nextState: nextState.characters,
+                      toClientState: ({ nextState, key }) =>
+                          Character.toClientState(
+                              RequestedBy.createdByMe({
+                                  requestedBy,
+                                  userUid: key.first,
+                              })
+                          )(nextState),
+                      toClientOperation: params =>
+                          Character.toClientOperation(
+                              RequestedBy.createdByMe({
+                                  requestedBy,
+                                  userUid: params.key.first,
+                              })
+                          )(params),
+                      isPrivate: (state, key) =>
+                          !RequestedBy.createdByMe({
+                              requestedBy,
+                              userUid: key.first,
+                          }) && state.isPrivate,
+                  }),
+        myNumberValues:
+            diff.myNumberValues == null
+                ? undefined
+                : DualKeyRecordOperation.toClientOperation({
+                      diff: diff.myNumberValues,
+                      prevState: prevState.myNumberValues,
+                      nextState: nextState.myNumberValues,
+                      toClientState: ({ nextState, key }) =>
+                          MyNumberValue.toClientState(
+                              RequestedBy.createdByMe({
+                                  requestedBy,
+                                  userUid: key.first,
+                              })
+                          )(nextState),
+                      toClientOperation: params =>
+                          MyNumberValue.toClientOperation(
+                              RequestedBy.createdByMe({
+                                  requestedBy,
+                                  userUid: params.key.first,
+                              })
+                          )(params),
                       isPrivate: () => false,
                   }),
         numParamNames:
@@ -302,21 +488,9 @@ export const toClientOperation = (requestedBy: RequestedBy) => ({
                       prevState: prevState.participants,
                       nextState: nextState.participants,
                       toClientState: ({ nextState, key }) =>
-                          Participant.toClientState(
-                              RequestedBy.createdByMe({
-                                  requestedBy,
-                                  userUid: key,
-                              }),
-                              nextActiveBoardKey?.id
-                          )(nextState),
+                          Participant.toClientState(nextState),
                       toClientOperation: params =>
-                          Participant.toClientOperation(
-                              RequestedBy.createdByMe({
-                                  requestedBy,
-                                  userUid: params.key,
-                              }),
-                              nextActiveBoardKey?.id
-                          )(params),
+                          Participant.toClientOperation(params),
                       isPrivate: () => false,
                   }),
         strParamNames:
@@ -348,6 +522,26 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
                           mapOperation: Bgm.toDownOperation,
                       })
                   ),
+        boards:
+            source.boards == null
+                ? undefined
+                : chooseDualKeyRecord(source.boards, operation =>
+                      mapRecordOperationElement({
+                          source: operation,
+                          mapReplace: x => x,
+                          mapOperation: Board.toDownOperation,
+                      })
+                  ),
+        characters:
+            source.characters == null
+                ? undefined
+                : chooseDualKeyRecord(source.characters, operation =>
+                      mapRecordOperationElement({
+                          source: operation,
+                          mapReplace: x => x,
+                          mapOperation: Character.toDownOperation,
+                      })
+                  ),
         boolParamNames:
             source.boolParamNames == null
                 ? undefined
@@ -356,6 +550,16 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
                           source: operation,
                           mapReplace: x => x,
                           mapOperation: ParamNames.toDownOperation,
+                      })
+                  ),
+        myNumberValues:
+            source.myNumberValues == null
+                ? undefined
+                : chooseDualKeyRecord(source.myNumberValues, operation =>
+                      mapRecordOperationElement({
+                          source: operation,
+                          mapReplace: x => x,
+                          mapOperation: MyNumberValue.toDownOperation,
                       })
                   ),
         numParamNames:
@@ -404,6 +608,26 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
                           mapOperation: Bgm.toUpOperation,
                       })
                   ),
+        boards:
+            source.boards == null
+                ? undefined
+                : chooseDualKeyRecord(source.boards, operation =>
+                      mapRecordOperationElement({
+                          source: operation,
+                          mapReplace: x => x,
+                          mapOperation: Board.toUpOperation,
+                      })
+                  ),
+        characters:
+            source.characters == null
+                ? undefined
+                : chooseDualKeyRecord(source.characters, operation =>
+                      mapRecordOperationElement({
+                          source: operation,
+                          mapReplace: x => x,
+                          mapOperation: Character.toUpOperation,
+                      })
+                  ),
         boolParamNames:
             source.boolParamNames == null
                 ? undefined
@@ -412,6 +636,16 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
                           source: operation,
                           mapReplace: x => x,
                           mapOperation: ParamNames.toUpOperation,
+                      })
+                  ),
+        myNumberValues:
+            source.myNumberValues == null
+                ? undefined
+                : chooseDualKeyRecord(source.myNumberValues, operation =>
+                      mapRecordOperationElement({
+                          source: operation,
+                          mapReplace: x => x,
+                          mapOperation: MyNumberValue.toUpOperation,
                       })
                   ),
         numParamNames:
@@ -456,6 +690,60 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({
     if (operation.activeBoardKey != null) {
         result.activeBoardKey = operation.activeBoardKey.newValue;
     }
+
+    const boards = DualKeyRecordOperation.apply<
+        Board.State,
+        Board.UpOperation | Board.TwoWayOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        prevState: state.boards,
+        operation: operation.boards,
+        innerApply: ({ prevState, operation: upOperation }) => {
+            return Board.apply({ state: prevState, operation: upOperation });
+        },
+    });
+    if (boards.isError) {
+        return boards;
+    }
+    result.boards = boards.value;
+
+    const characters = DualKeyRecordOperation.apply<
+        Character.State,
+        Character.UpOperation | Character.TwoWayOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        prevState: state.characters,
+        operation: operation.characters,
+        innerApply: ({ prevState, operation: upOperation }) => {
+            return Character.apply({
+                state: prevState,
+                operation: upOperation,
+            });
+        },
+    });
+    if (characters.isError) {
+        return characters;
+    }
+    result.characters = characters.value;
+
+    const myNumberValues = DualKeyRecordOperation.apply<
+        MyNumberValue.State,
+        MyNumberValue.UpOperation | MyNumberValue.TwoWayOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        prevState: state.myNumberValues,
+        operation: operation.myNumberValues,
+        innerApply: ({ prevState, operation: upOperation }) => {
+            return MyNumberValue.apply({
+                state: prevState,
+                operation: upOperation,
+            });
+        },
+    });
+    if (myNumberValues.isError) {
+        return myNumberValues;
+    }
+    result.myNumberValues = myNumberValues.value;
 
     const bgms = RecordOperation.apply<
         Bgm.State,
@@ -562,6 +850,54 @@ export const applyBack: Apply<State, DownOperation> = ({
         result.activeBoardKey = operation.activeBoardKey.oldValue;
     }
 
+    const boards = DualKeyRecordOperation.applyBack<
+        Board.State,
+        Board.DownOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        nextState: state.boards,
+        operation: operation.boards,
+        innerApplyBack: ({ state, operation }) => {
+            return Board.applyBack({ state, operation });
+        },
+    });
+    if (boards.isError) {
+        return boards;
+    }
+    result.boards = boards.value;
+
+    const characters = DualKeyRecordOperation.applyBack<
+        Character.State,
+        Character.DownOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        nextState: state.characters,
+        operation: operation.characters,
+        innerApplyBack: ({ state, operation }) => {
+            return Character.applyBack({ state, operation });
+        },
+    });
+    if (characters.isError) {
+        return characters;
+    }
+    result.characters = characters.value;
+
+    const myNumberValues = DualKeyRecordOperation.applyBack<
+        MyNumberValue.State,
+        MyNumberValue.DownOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        nextState: state.myNumberValues,
+        operation: operation.myNumberValues,
+        innerApplyBack: ({ state, operation }) => {
+            return MyNumberValue.applyBack({ state, operation });
+        },
+    });
+    if (myNumberValues.isError) {
+        return myNumberValues;
+    }
+    result.myNumberValues = myNumberValues.value;
+
     const bgms = RecordOperation.applyBack<
         Bgm.State,
         Bgm.DownOperation,
@@ -658,6 +994,48 @@ export const applyBack: Apply<State, DownOperation> = ({
 };
 
 export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
+    const boards = DualKeyRecordOperation.composeUpOperation<
+        Board.State,
+        Board.UpOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        first: first.boards,
+        second: second.boards,
+        innerApply: params => Board.apply(params),
+        innerCompose: params => Board.composeUpOperation(params),
+    });
+    if (boards.isError) {
+        return boards;
+    }
+
+    const characters = DualKeyRecordOperation.composeUpOperation<
+        Character.State,
+        Character.UpOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        first: first.characters,
+        second: second.characters,
+        innerApply: params => Character.apply(params),
+        innerCompose: params => Character.composeUpOperation(params),
+    });
+    if (characters.isError) {
+        return characters;
+    }
+
+    const myNumberValues = DualKeyRecordOperation.composeUpOperation<
+        MyNumberValue.State,
+        MyNumberValue.UpOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        first: first.myNumberValues,
+        second: second.myNumberValues,
+        innerApply: params => MyNumberValue.apply(params),
+        innerCompose: params => MyNumberValue.composeUpOperation(params),
+    });
+    if (myNumberValues.isError) {
+        return myNumberValues;
+    }
+
     const bgms = RecordOperation.composeUpOperation({
         first: first.bgms,
         second: second.bgms,
@@ -756,7 +1134,12 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
             second.publicChannel10Name
         ),
         bgms: bgms.value,
+        boards: boards.value,
+        boolParamNames: boolParamNames.value,
+        characters: characters.value,
+        myNumberValues: myNumberValues.value,
         numParamNames: numParamNames.value,
+        strParamNames: strParamNames.value,
         participants: participants.value,
     };
     return Result.ok(valueProps);
@@ -766,6 +1149,48 @@ export const composeDownOperation: Compose<DownOperation> = ({
     first,
     second,
 }) => {
+    const boards = DualKeyRecordOperation.composeDownOperation<
+        Board.State,
+        Board.DownOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        first: first.boards,
+        second: second.boards,
+        innerApplyBack: params => Board.applyBack(params),
+        innerCompose: params => Board.composeDownOperation(params),
+    });
+    if (boards.isError) {
+        return boards;
+    }
+
+    const characters = DualKeyRecordOperation.composeDownOperation<
+        Character.State,
+        Character.DownOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        first: first.characters,
+        second: second.characters,
+        innerApplyBack: params => Character.applyBack(params),
+        innerCompose: params => Character.composeDownOperation(params),
+    });
+    if (characters.isError) {
+        return characters;
+    }
+
+    const myNumberValues = DualKeyRecordOperation.composeDownOperation<
+        MyNumberValue.State,
+        MyNumberValue.DownOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        first: first.myNumberValues,
+        second: second.myNumberValues,
+        innerApplyBack: params => MyNumberValue.applyBack(params),
+        innerCompose: params => MyNumberValue.composeDownOperation(params),
+    });
+    if (myNumberValues.isError) {
+        return myNumberValues;
+    }
+
     const bgms = RecordOperation.composeDownOperation({
         first: first.bgms,
         second: second.bgms,
@@ -864,7 +1289,12 @@ export const composeDownOperation: Compose<DownOperation> = ({
             second.publicChannel10Name
         ),
         bgms: bgms.value,
+        boards: boards.value,
+        boolParamNames: boolParamNames.value,
+        characters: characters.value,
+        myNumberValues: myNumberValues.value,
         numParamNames: numParamNames.value,
+        strParamNames: strParamNames.value,
         participants: participants.value,
     };
     return Result.ok(valueProps);
@@ -876,6 +1306,51 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 }) => {
     if (downOperation === undefined) {
         return Result.ok({ prevState: nextState, twoWayOperation: undefined });
+    }
+
+    const boards = DualKeyRecordOperation.restore<
+        Board.State,
+        Board.DownOperation,
+        Board.TwoWayOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        nextState: nextState.boards,
+        downOperation: downOperation.boards,
+        innerDiff: params => Board.diff(params),
+        innerRestore: params => Board.restore(params),
+    });
+    if (boards.isError) {
+        return boards;
+    }
+
+    const characters = DualKeyRecordOperation.restore<
+        Character.State,
+        Character.DownOperation,
+        Character.TwoWayOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        nextState: nextState.characters,
+        downOperation: downOperation.characters,
+        innerDiff: params => Character.diff(params),
+        innerRestore: params => Character.restore(params),
+    });
+    if (characters.isError) {
+        return characters;
+    }
+
+    const myNumberValues = DualKeyRecordOperation.restore<
+        MyNumberValue.State,
+        MyNumberValue.DownOperation,
+        MyNumberValue.TwoWayOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        nextState: nextState.myNumberValues,
+        downOperation: downOperation.myNumberValues,
+        innerDiff: params => MyNumberValue.diff(params),
+        innerRestore: params => MyNumberValue.restore(params),
+    });
+    if (myNumberValues.isError) {
+        return myNumberValues;
     }
 
     const bgms = RecordOperation.restore({
@@ -931,7 +1406,10 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     const prevState: State = {
         ...nextState,
         bgms: bgms.value.prevState,
+        boards: boards.value.prevState,
         boolParamNames: boolParamNames.value.prevState,
+        characters: characters.value.prevState,
+        myNumberValues: myNumberValues.value.prevState,
         numParamNames: numParamNames.value.prevState,
         strParamNames: strParamNames.value.prevState,
         participants: participants.value.prevState,
@@ -939,7 +1417,10 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     const twoWayOperation: TwoWayOperation = {
         $version: 1,
         bgms: bgms.value.twoWayOperation,
+        boards: boards.value.twoWayOperation,
         boolParamNames: boolParamNames.value.twoWayOperation,
+        characters: characters.value.twoWayOperation,
+        myNumberValues: myNumberValues.value.twoWayOperation,
         numParamNames: numParamNames.value.twoWayOperation,
         strParamNames: strParamNames.value.twoWayOperation,
         participants: participants.value.twoWayOperation,
@@ -980,6 +1461,30 @@ export const diff: Diff<State, TwoWayOperation> = ({
     prevState,
     nextState,
 }) => {
+    const boards = DualKeyRecordOperation.diff<
+        Board.State,
+        Board.TwoWayOperation
+    >({
+        prevState: prevState.boards,
+        nextState: nextState.boards,
+        innerDiff: params => Board.diff(params),
+    });
+    const characters = DualKeyRecordOperation.diff<
+        Character.State,
+        Character.TwoWayOperation
+    >({
+        prevState: prevState.characters,
+        nextState: nextState.characters,
+        innerDiff: params => Character.diff(params),
+    });
+    const myNumberValues = DualKeyRecordOperation.diff<
+        MyNumberValue.State,
+        MyNumberValue.TwoWayOperation
+    >({
+        prevState: prevState.myNumberValues,
+        nextState: nextState.myNumberValues,
+        innerDiff: params => MyNumberValue.diff(params),
+    });
     const bgms = RecordOperation.diff({
         prevState: prevState.bgms,
         nextState: nextState.bgms,
@@ -1008,7 +1513,10 @@ export const diff: Diff<State, TwoWayOperation> = ({
     const result: TwoWayOperation = {
         $version: 1,
         bgms,
+        boards,
         boolParamNames,
+        characters,
+        myNumberValues,
         numParamNames,
         strParamNames,
         participants,
@@ -1050,6 +1558,116 @@ export const serverTransform = (
     serverOperation,
 }) => {
     const currentActiveBoardKey = currentState.activeBoardKey;
+
+    const boards = DualKeyRecordOperation.serverTransform<
+        Board.State,
+        Board.State,
+        Board.TwoWayOperation,
+        Board.UpOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        first: serverOperation?.boards,
+        second: clientOperation.boards,
+        prevState: prevState.boards,
+        nextState: currentState.boards,
+        innerTransform: ({ first, second, prevState, nextState }) =>
+            Board.serverTransform({
+                prevState,
+                currentState: nextState,
+                serverOperation: first,
+                clientOperation: second,
+            }),
+        toServerState: state => state,
+        cancellationPolicy: {
+            cancelCreate: ({ key }) =>
+                !RequestedBy.createdByMe({
+                    requestedBy,
+                    userUid: key.first,
+                }),
+            cancelUpdate: ({ key }) => {
+                if (
+                    RequestedBy.createdByMe({
+                        requestedBy,
+                        userUid: key.first,
+                    })
+                ) {
+                    return false;
+                }
+                if (key.second !== currentState.activeBoardKey?.id) {
+                    return true;
+                }
+                return false;
+            },
+            cancelRemove: ({ key }) =>
+                !RequestedBy.createdByMe({
+                    requestedBy,
+                    userUid: key.first,
+                }),
+        },
+    });
+    if (boards.isError) {
+        return boards;
+    }
+
+    const characters = DualKeyRecordOperation.serverTransform<
+        Character.State,
+        Character.State,
+        Character.TwoWayOperation,
+        Character.UpOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        first: serverOperation?.characters,
+        second: clientOperation.characters,
+        prevState: prevState.characters,
+        nextState: currentState.characters,
+        innerTransform: ({ first, second, prevState, nextState, key }) =>
+            Character.serverTransform(
+                RequestedBy.createdByMe({
+                    requestedBy,
+                    userUid: key.first,
+                })
+            )({
+                prevState,
+                currentState: nextState,
+                serverOperation: first,
+                clientOperation: second,
+            }),
+        toServerState: state => state,
+        cancellationPolicy: {},
+    });
+    if (characters.isError) {
+        return characters;
+    }
+
+    const myNumberValues = DualKeyRecordOperation.serverTransform<
+        MyNumberValue.State,
+        MyNumberValue.State,
+        MyNumberValue.TwoWayOperation,
+        MyNumberValue.UpOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        first: serverOperation?.myNumberValues,
+        second: clientOperation.myNumberValues,
+        prevState: prevState.myNumberValues,
+        nextState: currentState.myNumberValues,
+        innerTransform: ({ first, second, prevState, nextState, key }) =>
+            MyNumberValue.serverTransform(
+                RequestedBy.createdByMe({
+                    requestedBy,
+                    userUid: key.first,
+                })
+            )({
+                prevState,
+                currentState: nextState,
+                serverOperation: first,
+                clientOperation: second,
+            }),
+        toServerState: state => state,
+        cancellationPolicy: {},
+    });
+    if (myNumberValues.isError) {
+        return myNumberValues;
+    }
 
     const bgms = RecordOperation.serverTransform<
         Bgm.State,
@@ -1191,7 +1809,10 @@ export const serverTransform = (
     const twoWayOperation: TwoWayOperation = {
         $version: 1,
         bgms: bgms.value,
+        boards: boards.value,
         boolParamNames: boolParamNames.value,
+        characters: characters.value,
+        myNumberValues: myNumberValues.value,
         numParamNames: numParamNames.value,
         strParamNames: strParamNames.value,
         participants: participants.value,
@@ -1244,6 +1865,66 @@ export const clientTransform: ClientTransform<UpOperation> = ({
         first: first.activeBoardKey,
         second: second.activeBoardKey,
     });
+
+    const boards = DualKeyRecordOperation.clientTransform<
+        Board.State,
+        Board.UpOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        first: first.boards,
+        second: second.boards,
+        innerTransform: params => Board.clientTransform(params),
+        innerDiff: params => {
+            const diff = Board.diff(params);
+            if (diff == null) {
+                return diff;
+            }
+            return Board.toUpOperation(diff);
+        },
+    });
+    if (boards.isError) {
+        return boards;
+    }
+
+    const characters = DualKeyRecordOperation.clientTransform<
+        Character.State,
+        Character.UpOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        first: first.characters,
+        second: second.characters,
+        innerTransform: params => Character.clientTransform(params),
+        innerDiff: params => {
+            const diff = Character.diff(params);
+            if (diff == null) {
+                return diff;
+            }
+            return Character.toUpOperation(diff);
+        },
+    });
+    if (characters.isError) {
+        return characters;
+    }
+
+    const myNumberValues = DualKeyRecordOperation.clientTransform<
+        MyNumberValue.State,
+        MyNumberValue.UpOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        first: first.myNumberValues,
+        second: second.myNumberValues,
+        innerTransform: params => MyNumberValue.clientTransform(params),
+        innerDiff: params => {
+            const diff = MyNumberValue.diff(params);
+            if (diff == null) {
+                return diff;
+            }
+            return MyNumberValue.toUpOperation(diff);
+        },
+    });
+    if (myNumberValues.isError) {
+        return myNumberValues;
+    }
 
     const bgms = RecordOperation.clientTransform<
         Bgm.State,
@@ -1354,7 +2035,10 @@ export const clientTransform: ClientTransform<UpOperation> = ({
         $version: 1,
         activeBoardKey: activeBoardKey.firstPrime,
         bgms: bgms.value.firstPrime,
+        boards: boards.value.firstPrime,
         boolParamNames: boolParamNames.value.firstPrime,
+        characters: characters.value.firstPrime,
+        myNumberValues: myNumberValues.value.firstPrime,
         numParamNames: numParamNames.value.firstPrime,
         strParamNames: strParamNames.value.firstPrime,
         participants: participants.value.firstPrime,
@@ -1364,7 +2048,11 @@ export const clientTransform: ClientTransform<UpOperation> = ({
     const secondPrime: UpOperation = {
         $version: 1,
         activeBoardKey: activeBoardKey.secondPrime,
+        bgms: bgms.value.secondPrime,
+        boards: boards.value.secondPrime,
         boolParamNames: boolParamNames.value.secondPrime,
+        characters: characters.value.secondPrime,
+        myNumberValues: myNumberValues.value.secondPrime,
         numParamNames: numParamNames.value.secondPrime,
         strParamNames: strParamNames.value.secondPrime,
         participants: participants.value.secondPrime,

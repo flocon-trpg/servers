@@ -82,7 +82,7 @@ export {
     apply as applyBoard,
     diff as boardDiff,
     toUpOperation as toBoardUpOperation,
-} from './internal/ot/room/participant/board/v1';
+} from './internal/ot/room/board/v1';
 export {
     State as CharacterState,
     UpOperation as CharacterUpOperation,
@@ -90,17 +90,17 @@ export {
     apply as applyCharacter,
     diff as characterDiff,
     toUpOperation as toCharacterUpOperation,
-} from './internal/ot/room/participant/character/v1';
+} from './internal/ot/room/character/v1';
 export {
     State as BoolParamState,
     UpOperation as BoolParamUpOperation,
     DownOperation as BoolParamCharacterDownOperation,
-} from './internal/ot/room/participant/character/boolParam/v1';
+} from './internal/ot/room/character/boolParam/v1';
 export {
     State as NumParamState,
     UpOperation as NumParamUpOperation,
     DownOperation as NumParamCharacterDownOperation,
-} from './internal/ot/room/participant/character/numParam/v1';
+} from './internal/ot/room/character/numParam/v1';
 export {
     State as StrParamState,
     UpOperation as StrParamUpOperation,
@@ -108,7 +108,7 @@ export {
     apply as applyStrParamCharacter,
     diff as strParamcharacterDiff,
     toUpOperation as toCharacterStrParamUpOperation,
-} from './internal/ot/room/participant/character/strParam/v1';
+} from './internal/ot/room/character/strParam/v1';
 export {
     State as MyNumberValueState,
     UpOperation as MyNumberValuePieceUpOperation,
@@ -116,19 +116,19 @@ export {
     apply as applyMyNumberValue,
     diff as myNumberValueDiff,
     toUpOperation as toMyNumberValueUpOperation,
-} from './internal/ot/room/participant/myNumberValue/v1';
+} from './internal/ot/room/myNumberValue/v1';
 export {
     decode as decodeMyNumberValue,
     parse as parseMyNumberValue,
     exact as exactMyNumberValue,
-} from './internal/ot/room/participant/myNumberValue/converter';
+} from './internal/ot/room/myNumberValue/converter';
 export {
     ofOperation as toMyNumberValueLog,
     Main as MyNumberValueLog,
     updateType,
     createType,
     deleteType,
-} from './internal/ot/room/participant/myNumberValue/log-v1';
+} from './internal/ot/room/myNumberValue/log-v1';
 export { isIdRecord } from './internal/ot/room/util/record';
 export {
     replace,
