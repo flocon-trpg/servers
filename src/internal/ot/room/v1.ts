@@ -15,11 +15,13 @@ import {
 import * as ReplaceOperation from './util/replaceOperation';
 import {
     Apply,
+    client,
     ClientTransform,
     Compose,
     Diff,
     RequestedBy,
     Restore,
+    server,
     ServerTransform,
     ToClientOperationParams,
 } from './util/type';
@@ -39,6 +41,8 @@ import {
     isStrIndex5,
     Maybe,
     maybe,
+    recordToDualKeyMap,
+    dualKeyRecordFind,
 } from '@kizahasi/util';
 
 const replaceStringDownOperation = t.type({ oldValue: t.string });
@@ -357,12 +361,101 @@ export const toClientState = (requestedBy: RequestedBy) => (
     };
 };
 
+// boardsは原則として自分が作ったものしか取得できない。ただし、activeBoardKeyに設定されているboardは例外として誰でも閲覧できる、という仕様。
+// これは  DualKeyRecordOperation.toClientOperation だけでは実現できない(isPrivateによるチェックはdiffに含まれているもののみに行われる)。そのため、独自の処理を行う必要がある。
+const boardsToClientOperation = (requestedBy: RequestedBy) => ({
+    prevState,
+    nextState,
+}: {
+    prevState: State;
+    nextState: State;
+}) => {
+    const prevBoardsMap = recordToDualKeyMap<Board.State>(
+        requestedBy.type === server
+            ? prevState.boards
+            : {
+                  [requestedBy.userUid]:
+                      prevState.boards[requestedBy.userUid] ?? {},
+              }
+    );
+    if (requestedBy.type === client && prevState.activeBoardKey != null) {
+        const prevActiveBoard = dualKeyRecordFind<Board.State>(
+            prevState.boards,
+            {
+                first: prevState.activeBoardKey.createdBy,
+                second: prevState.activeBoardKey.id,
+            }
+        );
+        if (prevActiveBoard != null) {
+            prevBoardsMap.set(
+                {
+                    first: prevState.activeBoardKey.createdBy,
+                    second: prevState.activeBoardKey.id,
+                },
+                prevActiveBoard
+            );
+        }
+    }
+
+    const nextBoardsMap = recordToDualKeyMap<Board.State>(
+        requestedBy.type === server
+            ? nextState.boards
+            : {
+                  [requestedBy.userUid]:
+                      nextState.boards[requestedBy.userUid] ?? {},
+              }
+    );
+    if (requestedBy.type === client && nextState.activeBoardKey != null) {
+        const nextActiveBoard = dualKeyRecordFind<Board.State>(
+            nextState.boards,
+            {
+                first: nextState.activeBoardKey.createdBy,
+                second: nextState.activeBoardKey.id,
+            }
+        );
+        if (nextActiveBoard != null) {
+            nextBoardsMap.set(
+                {
+                    first: nextState.activeBoardKey.createdBy,
+                    second: nextState.activeBoardKey.id,
+                },
+                nextActiveBoard
+            );
+        }
+    }
+
+    const prevBoards = prevBoardsMap.toStringRecord(
+        x => x,
+        x => x
+    );
+    const nextBoards = nextBoardsMap.toStringRecord(
+        x => x,
+        x => x
+    );
+    const diff = DualKeyRecordOperation.diff<
+        Board.State,
+        Board.TwoWayOperation
+    >({
+        prevState: prevBoards,
+        nextState: nextBoards,
+        innerDiff: params => Board.diff(params),
+    });
+
+    return DualKeyRecordOperation.toClientOperation({
+        diff,
+        prevState: prevBoards,
+        nextState: nextBoards,
+        toClientState: ({ nextState }) => Board.toClientState(nextState),
+        toClientOperation: params => Board.toClientOperation(params),
+        isPrivate: () => false,
+    });
+};
+
 export const toClientOperation = (requestedBy: RequestedBy) => ({
     prevState,
     nextState,
     diff,
 }: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
-    const nextActiveBoardKey = nextState.activeBoardKey;
     return {
         ...diff,
         bgms:
@@ -378,32 +471,10 @@ export const toClientOperation = (requestedBy: RequestedBy) => ({
                           Bgm.toClientOperation(params),
                       isPrivate: () => false,
                   }),
-        boards:
-            diff.boards == null
-                ? undefined
-                : DualKeyRecordOperation.toClientOperation({
-                      diff: diff.boards,
-                      prevState: prevState.boards,
-                      nextState: nextState.boards,
-                      toClientState: ({ nextState }) =>
-                          Board.toClientState(nextState),
-                      toClientOperation: params =>
-                          Board.toClientOperation(params),
-                      isPrivate: (state, key) => {
-                          if (
-                              RequestedBy.createdByMe({
-                                  requestedBy,
-                                  userUid: key.first,
-                              })
-                          ) {
-                              return false;
-                          }
-                          if (key.second === nextActiveBoardKey?.id) {
-                              return false;
-                          }
-                          return true;
-                      },
-                  }),
+        boards: boardsToClientOperation(requestedBy)({
+            prevState,
+            nextState,
+        }),
         boolParamNames:
             diff.boolParamNames == null
                 ? undefined
