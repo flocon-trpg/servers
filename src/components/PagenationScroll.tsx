@@ -1,4 +1,4 @@
-import { __ } from '@kizahasi/util';
+import _ from 'lodash';
 import React from 'react';
 
 type Props = {
@@ -9,9 +9,9 @@ type Props = {
 }
 
 function useSkipAndTake<T>(array: ReadonlyArray<T>, skipCount: number, thenTakeCount: number) {
-    const [cache, setCache] = React.useState<ReadonlyArray<T>>(__(array).skip(skipCount).take(thenTakeCount).toArray());
+    const [cache, setCache] = React.useState<ReadonlyArray<T>>(_(array).drop(skipCount).take(thenTakeCount).value());
     React.useEffect(() => {
-        setCache(__(array).skip(skipCount).take(thenTakeCount).toArray());
+        setCache(_(array).drop(skipCount).take(thenTakeCount).value());
     }, [array, skipCount, thenTakeCount]);
     return { result: cache, hasMore: (skipCount + thenTakeCount) < array.length };
 }

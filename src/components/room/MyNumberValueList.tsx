@@ -9,8 +9,9 @@ import ToggleButton from '../../foundations/ToggleButton';
 import { getUserUid } from '../../hooks/useFirebaseUser';
 import { useOperate } from '../../hooks/useOperate';
 import { useParticipants } from '../../hooks/state/useParticipants';
-import { compositeKeyToString, recordToArray, __ } from '@kizahasi/util';
+import { compositeKeyToString, recordToArray } from '@kizahasi/util';
 import { MyNumberValueState, UpOperation } from '@kizahasi/flocon-core';
+import _ from 'lodash';
 
 type DataSource = {
     key: string;
@@ -31,13 +32,13 @@ const MyNumberValueList: React.FC = () => {
     }
 
     const charactersDataSource: DataSource[] =
-        __(participantsMap).flatMap(([userUid, participant]) => recordToArray(participant.myNumberValues).map(({ key: stateId, value: myNumberValue }) => ({
+        _([...participantsMap]).flatMap(([userUid, participant]) => recordToArray(participant.myNumberValues).map(({ key: stateId, value: myNumberValue }) => ({
             key: compositeKeyToString({ createdBy: userUid, id: stateId }),
             createdBy: userUid,
             stateId,
             state: myNumberValue,
             operate,
-        }))).toArray();
+        }))).value();
 
     const columns = [
         {

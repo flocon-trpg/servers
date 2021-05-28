@@ -32,7 +32,8 @@ import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import { useOperate } from '../../hooks/useOperate';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { UpOperation } from '@kizahasi/flocon-core';
-import { PublicChannelKey, recordToMap, __ } from '@kizahasi/util';
+import { PublicChannelKey, recordToMap } from '@kizahasi/util';
+import _ from 'lodash';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -455,14 +456,20 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
             });
     }, []);
 
-    const writingUserUids = __(PublicChannelKey.Without$System.publicChannelKeys).flatMap(key => {
-        const map = writingMessageStatusResult.get(key);
-        if (map == null) {
-            return [];
-        }
-        return [...map].filter(([key, value]) => key !== getUserUid(myAuth) && value.current === WritingMessageStatusType.Writing).map(([key]) => key);
-    }).toSet();
-    const writingUsers = __(writingUserUids).compact(userUid => participantsMap?.get(userUid)?.name).toArray().sort();
+
+    const writingUsers = _(PublicChannelKey.Without$System.publicChannelKeys)
+        .flatMap(key => {
+            const map = writingMessageStatusResult.get(key);
+            if (map == null) {
+                return [];
+            }
+            return [...map].filter(([key, value]) => key !== getUserUid(myAuth) && value.current === WritingMessageStatusType.Writing).map(([key]) => key);
+        })
+        .uniq()
+        .map(userUid => participantsMap?.get(userUid)?.name)
+        .compact()
+        .sort()
+        .value();
     let writingStatus: JSX.Element | null = null;
     // TODO: background-colorが適当
     const writingStatusCss = css`

@@ -1,4 +1,5 @@
-import { $free, $system, __ } from '@kizahasi/util';
+import { $free, $system } from '@kizahasi/util';
+import _ from 'lodash';
 import React from 'react';
 import { MessageFilter } from '../states/MessagesPanelConfig';
 import { PrivateChannelSets } from '../utils/PrivateChannelSet';
@@ -73,7 +74,17 @@ export function useMessageFilter(config: MessageFilter): ((message: Message) => 
                 }
                 const privateChannelSets = new PrivateChannelSets(privateChannelsAsString);
                 return privateChannelSets.toArray().some(set => {
-                    return __(set.toStringSet()).equal(new Set(message.value.visibleTo));
+                    const x = set.toStringSet();
+                    const y = new Set(message.value.visibleTo);
+                    if (x.size !== y.size) {
+                        return false;
+                    }
+                    for (const elem of x) {
+                        if (!y.has(elem)) {
+                            return false;
+                        }
+                    }
+                    return true;
                 });
             }
             case myValueLog:

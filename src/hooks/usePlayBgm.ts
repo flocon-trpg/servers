@@ -5,8 +5,8 @@ import { useFirebaseStorageUrlArray } from './firebaseStorage';
 import { volumeCap } from '../utils/variables';
 import { useSelector } from '../store';
 import { defaultChannelVolume, defaultMasterVolume } from '../states/RoomConfig';
-import { __ } from '@kizahasi/util';
 import { BgmState } from '@kizahasi/flocon-core';
+import _ from 'lodash';
 
 type PlayBgmBehaviorCoreProps = {
     bgm: BgmState | null;
@@ -36,7 +36,7 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmBehaviorCoreProps): void {
             return;
         }
 
-        const src = __(urlArray).compact(x => x).toArray();
+        const src = _(urlArray).compact().value();
         if (src.length === 0) {
             return;
         }

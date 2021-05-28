@@ -20,7 +20,8 @@ import { UseRoomMessageInputTextsResult } from '../../hooks/useRoomMessageInputT
 import roomModule from '../../modules/roomModule';
 import { useSelector } from '../../store';
 import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
-import { $free, isStrIndex10, PublicChannelKey, recordToArray, __ } from '@kizahasi/util';
+import { $free, isStrIndex10, PublicChannelKey, recordToArray } from '@kizahasi/util';
+import _ from 'lodash';
 
 type PrivateMessageDrawerProps = {
     visible: boolean;
@@ -153,16 +154,17 @@ export const ChatInput: React.FC<Props> = ({
 
     const myUserUid = getUserUid(myAuth);
     const selectedParticipantsBase = React.useMemo(() =>
-        __(selectedParticipantIds)
-            .compact(id => {
+        _([...selectedParticipantIds])
+            .map(id => {
                 const found = (participants ?? {})[id];
                 if (found == null) {
                     return null;
                 }
                 return [id, found] as const;
             })
-            .toArray()
-            .sort(([, x], [, y]) => x.name.localeCompare(y.name)), [selectedParticipantIds, participants]);
+            .compact()
+            .sort(([, x], [, y]) => x.name.localeCompare(y.name))
+            .value(), [selectedParticipantIds, participants]);
     const selectedParticipants = React.useMemo(() =>
         selectedParticipantsBase.map(([, participant]) => participant.name), [selectedParticipantsBase]);
     const selectedParticipantElements = React.useMemo(() =>
@@ -174,11 +176,11 @@ export const ChatInput: React.FC<Props> = ({
             }), [selectedParticipantsBase]);
 
     const characters = React.useMemo(() => {
-        return __(recordToArray(participants ?? {}))
+        return _(recordToArray(participants ?? {}))
             .flatMap(participantPair =>
                 recordToArray(participantPair.value.characters)
                     .map(characterPair => ({ key: { createdBy: participantPair.key, id: characterPair.key }, value: characterPair.value })))
-            .toArray();
+            .value();
     }, [participants]);
 
     const myCharacters = React.useMemo(() => {

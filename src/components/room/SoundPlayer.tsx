@@ -11,8 +11,9 @@ import DrawerFooter from '../../layouts/DrawerFooter';
 import { MyStyle } from '../../utils/myStyle';
 import { useSelector } from '../../store';
 import { useOperate } from '../../hooks/useOperate';
-import { StrIndex5, __ } from '@kizahasi/util';
+import { StrIndex5 } from '@kizahasi/util';
 import { BgmState, FilePath, UpOperation } from '@kizahasi/flocon-core';
+import _ from 'lodash';
 
 const defaultVolume = 0.5;
 
@@ -51,7 +52,7 @@ type FilePathViewProps = {
 const FilePathView: React.FC<FilePathViewProps> = ({ filePath, closable, onClose }: FilePathViewProps) => {
     let fileName: string;
     if (filePath.sourceType === FileSourceType.FirebaseStorage) {
-        fileName = __(filePath.path.split('/')).lastOrDefault('');
+        fileName = _(filePath.path.split('/')).last() ?? '';
     } else {
         fileName = filePath.path;
     }

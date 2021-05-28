@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParticipants } from './useParticipants';
-import { createStateMap, ReadonlyStateMap, recordToMap, __ } from '@kizahasi/util';
+import { createStateMap, ReadonlyStateMap, recordToMap } from '@kizahasi/util';
 import { CharacterState } from '@kizahasi/flocon-core';
 
 export const useCharacters = (): ReadonlyStateMap<CharacterState> | undefined => {
@@ -9,9 +9,10 @@ export const useCharacters = (): ReadonlyStateMap<CharacterState> | undefined =>
         if (participants == null) {
             return undefined;
         }
-        const source = __(participants).map(([key, value]) => {
-            return { key, value: recordToMap(value.characters) };
-        }).toMap(x => x);
+        const source = new Map<string, Map<string, CharacterState>>();
+        [...participants].forEach(([key, value]) => {
+            source.set(key, recordToMap(value.characters));
+        });
         return createStateMap(source);
     }, [participants]);
 };

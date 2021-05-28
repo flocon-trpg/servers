@@ -33,7 +33,8 @@ import { Subject } from 'rxjs';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
 import { NewTabLinkify } from '../../foundations/NewTabLinkify';
 import { CharacterState, UpOperation, PieceState, PieceUpOperation, BoardLocationUpOperation, BoardState, BoardLocationState, MyNumberValueState } from '@kizahasi/flocon-core';
-import { $free, CompositeKey, compositeKeyEquals, compositeKeyToString, recordToArray, recordToDualKeyMap, recordToMap, stringToCompositeKey, __ } from '@kizahasi/util';
+import { $free, CompositeKey, compositeKeyEquals, compositeKeyToString, recordToArray, recordToDualKeyMap, recordToMap, stringToCompositeKey } from '@kizahasi/util';
+import _ from 'lodash';
 
 namespace Resource {
     export const cellSizeIsTooSmall = 'セルが小さすぎるため、無効化されています';
@@ -226,14 +227,14 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     })();
 
     const pieces = (() => {
-        const characterPieces = __(characters).compact(([characterKey, character]) => {
-            const piece = __(recordToDualKeyMap<PieceState>(character.pieces)).find(([boardKey$]) => {
+        const characterPieces = _(characters.toArray()).map(([characterKey, character]) => {
+            const piece = recordToDualKeyMap<PieceState>(character.pieces).toArray().find(([boardKey$]) => {
                 return boardKey.createdBy === boardKey$.first && boardKey.id === boardKey$.second;
             });
             if (piece == null) {
                 return null;
             }
-            const [, pieceValue] = piece.value;
+            const [, pieceValue] = piece;
             if (character.image == null) {
                 // TODO: 画像なしでコマを表示する
                 return null;
@@ -279,16 +280,16 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     };
                     operate(operation);
                 }} />;
-        }).toArray();
+        }).compact().value();
 
-        const tachieLocations = __(characters).compact(([characterKey, character]) => {
-            const tachieLocation = __(recordToDualKeyMap<BoardLocationState>(character.tachieLocations)).find(([boardKey$]) => {
+        const tachieLocations = _(characters.toArray()).map(([characterKey, character]) => {
+            const tachieLocation = _(recordToDualKeyMap<BoardLocationState>(character.tachieLocations).toArray()).find(([boardKey$]) => {
                 return boardKey.createdBy === boardKey$.first && boardKey.id === boardKey$.second;
             });
             if (tachieLocation == null) {
                 return null;
             }
-            const [, pieceValue] = tachieLocation.value;
+            const [, pieceValue] = tachieLocation;
             if (character.tachieImage == null) {
                 // TODO: 画像なしでコマを表示する
                 return null;
@@ -342,18 +343,18 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     };
                     operate(operation);
                 }} />;
-        }).toArray();
+        }).compact().value();
 
-        const myNumberValuePieces = __([...participants])
+        const myNumberValuePieces = _([...participants])
             .flatMap(([userUid, participant]) => recordToArray(participant.myNumberValues).map(pair => [userUid, pair.key, pair.value] as const))
-            .compact(([userUid, stateId, myNumberValue]) => {
-                const piece = __(recordToDualKeyMap<PieceState>(myNumberValue.pieces)).find(([boardKey$, piece]) => {
+            .map(([userUid, stateId, myNumberValue]) => {
+                const piece = recordToDualKeyMap<PieceState>(myNumberValue.pieces).toArray().find(([boardKey$]) => {
                     return boardKey.createdBy === boardKey$.first && boardKey.id === boardKey$.second;
                 });
                 if (piece == null) {
                     return null;
                 }
-                const [, pieceValue] = piece.value;
+                const [, pieceValue] = piece;
                 return <MyKonva.MyNumberValue
                     {...Piece.getPosition({ ...board, state: pieceValue })}
                     key={stateId}
@@ -396,7 +397,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         };
                         operate(operation);
                     }} />;
-            }).toArray();
+            }).compact().value();
 
         return (
             <ReactKonva.Layer>
@@ -622,8 +623,8 @@ const Board: React.FC<Props> = ({
                 setContextMenuState({
                     x: e.evt.offsetX,
                     y: e.evt.offsetY,
-                    characterPiecesOnCursor: __(characters.toArray())
-                        .compact(([characterKey, character]) => {
+                    characterPiecesOnCursor: _(characters.toArray())
+                        .map(([characterKey, character]) => {
                             const found = recordToDualKeyMap<PieceState>(character.pieces).toArray()
                                 .find(([boardKey, piece]) => {
                                     if (boardKey.first !== boardKeyToShow.createdBy || boardKey.second !== boardKeyToShow.id) {
@@ -636,9 +637,10 @@ const Board: React.FC<Props> = ({
                             }
                             return { characterKey, character, piece: found[1] };
                         })
-                        .toArray(),
-                    tachiesOnCursor: __(characters.toArray())
-                        .compact(([characterKey, character]) => {
+                        .compact()
+                        .value(),
+                    tachiesOnCursor: _(characters.toArray())
+                        .map(([characterKey, character]) => {
                             const found = recordToDualKeyMap<BoardLocationState>(character.tachieLocations).toArray()
                                 .find(([boardKey, tachie]) => {
                                     if (boardKey.first !== boardKeyToShow.createdBy || boardKey.second !== boardKeyToShow.id) {
@@ -651,10 +653,11 @@ const Board: React.FC<Props> = ({
                             }
                             return { characterKey, character, tachieLocation: found[1] };
                         })
-                        .toArray(),
-                    myNumberValuesOnCursor: __([...(participants ?? [])])
+                        .compact()
+                        .value(),
+                    myNumberValuesOnCursor: _([...(participants ?? [])])
                         .flatMap(([userUid, participant]) => [...recordToMap(participant.myNumberValues)].map(([key, value]) => [userUid, key, value] as const))
-                        .compact(([userUid, myNumberValueKey, myNumberValue]) => {
+                        .map(([userUid, myNumberValueKey, myNumberValue]) => {
                             const found = recordToDualKeyMap<PieceState>(myNumberValue.pieces).toArray()
                                 .find(([boardKey, piece]) => {
                                     if (boardKey.first !== boardKeyToShow.createdBy || boardKey.second !== boardKeyToShow.id) {
@@ -667,7 +670,8 @@ const Board: React.FC<Props> = ({
                             }
                             return { myNumberValueKey, myNumberValue, piece: found[1], userUid };
                         })
-                        .toArray(),
+                        .compact()
+                        .value(),
                 });
             }} />);
     })();
@@ -851,7 +855,7 @@ const Board: React.FC<Props> = ({
                 }
                 characters.push({ key: elem.characterKey, value: elem.character });
             });
-            const itemGroups = __(characters).compact(pair => {
+            const itemGroups = _(characters).map(pair => {
                 if (pair.value.privateCommand.trim() === '') {
                     return null;
                 }
@@ -879,7 +883,7 @@ const Board: React.FC<Props> = ({
                 return (<Menu.ItemGroup key={key} title={pair.value.name}>
                     {menuItems}
                 </Menu.ItemGroup>);
-            }).toArray();
+            }).compact().value();
             if (itemGroups.length === 0) {
                 return null;
             }
@@ -898,7 +902,7 @@ const Board: React.FC<Props> = ({
             }
             return (
                 <Menu.SubMenu title={title}>
-                    {__(characters.toArray()).compact(([key, value]) => {
+                    {_(characters.toArray()).map(([key, value]) => {
                         const pieceExists = recordToDualKeyMap(value.pieces).toArray().some(([boardKey]) => boardKeyToShow.id === boardKey.second && boardKeyToShow.createdBy === boardKey.first);
                         const tachieExists = recordToDualKeyMap(value.tachieLocations).toArray().some(([boardKey]) => boardKeyToShow.id === boardKey.second && boardKeyToShow.createdBy === boardKey.first);
 
@@ -1157,7 +1161,7 @@ const Board: React.FC<Props> = ({
                                 </Menu.SubMenu>
                             </Menu.SubMenu>
                         );
-                    }).toArray()}
+                    }).compact().value()}
                 </Menu.SubMenu>
             );
         })();
@@ -1264,7 +1268,7 @@ const Board: React.FC<Props> = ({
             return (
                 <Menu.SubMenu title={title}>
                     <Menu.SubMenu title='数値'>
-                        {__(recordToArray(me.myNumberValues)).compact(({ key, value }) => {
+                        {_(recordToArray(me.myNumberValues)).map(({ key, value }) => {
                             const pieceExists = recordToDualKeyMap(value.pieces).toArray().some(([boardKey]) => boardKeyToShow.id === boardKey.second && boardKeyToShow.createdBy === boardKey.first);
                             return (
                                 <Menu.SubMenu key={key} title={<span>{pieceExists ? <Icon.CheckOutlined /> : null} {MyNumberValue.stringify(value)}</span>}>
@@ -1308,7 +1312,7 @@ const Board: React.FC<Props> = ({
                                     </Menu.Item>
                                 </Menu.SubMenu>
                             );
-                        }).toArray()}
+                        }).compact().value()}
                         <Menu.Divider />
                         <Menu.SubMenu title='追加'>
                             <Menu.Item

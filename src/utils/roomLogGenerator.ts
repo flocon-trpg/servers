@@ -5,8 +5,8 @@ import moment from 'moment';
 import { PublicChannelNames } from './types';
 import { RoomMessage } from '../components/room/RoomMessage';
 import { isDeleted, toText } from './message';
-import { recordToMap, __, createStateMap } from '@kizahasi/util';
-import { ParticipantState } from '@kizahasi/flocon-core';
+import { recordToMap, createStateMap, recordForEach } from '@kizahasi/util';
+import { CharacterState, ParticipantState } from '@kizahasi/flocon-core';
 
 const privateMessage = 'privateMessage';
 const publicMessage = 'publicMessage';
@@ -72,10 +72,12 @@ const createRoomMessageArray = (props: {
     const publicChannels = new Map<string, RoomPublicChannelFragment>();
     messages.publicChannels.forEach(ch => publicChannels.set(ch.key, ch));
 
-    const charactersSource = __(participants).map(([key, value]) => {
-        return { key, value: recordToMap(value.characters) };
-    }).toMap(x => x);
-    const characters = createStateMap(charactersSource);
+    const characters = createStateMap<CharacterState>();
+    participants.forEach((participant, createdBy) => {
+        recordForEach(participant.characters, (character, id) => {
+            characters.set({ createdBy, id }, character);
+        });
+    });
 
     const createCreatedBy = ({ createdBy, characterStateId, customName }: { createdBy: string; characterStateId?: string; customName?: string }): { rolePlayPart?: string; participantNamePart: string } => {
         const participantNamePart = participants.get(createdBy)?.name ?? createdBy;

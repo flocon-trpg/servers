@@ -19,7 +19,8 @@ import { useCharacters } from '../../hooks/state/useCharacters';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { useBoolParamNames, useNumParamNames, useStrParamNames } from '../../hooks/state/useParamNames';
 import { CharacterState, FilePath, ParamNameState, ParticipantState, UpOperation } from '@kizahasi/flocon-core';
-import { CompositeKey, compositeKeyToString, StrIndex20, strIndex20Array, __ } from '@kizahasi/util';
+import { CompositeKey, compositeKeyToString, StrIndex20, strIndex20Array } from '@kizahasi/util';
+import _ from 'lodash';
 
 type DataSource = {
     key: string;
@@ -228,7 +229,7 @@ const CharacterList: React.FC = () => {
             };
         });
 
-    const columns = __([
+    const columns = _([
         {
             title: '',
             key: 'menu',
@@ -328,7 +329,7 @@ const CharacterList: React.FC = () => {
         ...strIndex20Array.map(key => createNumParameterColumn({ key, numParamNames })),
         ...strIndex20Array.map(key => createBooleanParameterColumn({ key, boolParamNames })),
         ...strIndex20Array.map(key => createStringParameterColumn({ key, strParamNames })),
-    ]).compact(x => x).toArray();
+    ]).compact().value();
 
     return (
         <div>

@@ -4,8 +4,8 @@ import { ParticipantRole } from '../../generated/graphql';
 import Jdenticon from '../../foundations/Jdenticon';
 import { useRoomConnections } from '../../hooks/useRoomConnections';
 import { useParticipants } from '../../hooks/state/useParticipants';
-import { __ } from '@kizahasi/util';
 import { ParticipantState } from '@kizahasi/flocon-core';
+import _ from 'lodash';
 
 type DataSource = {
     key: string;
@@ -33,7 +33,7 @@ const ParticipantList: React.FC = () => {
             };
         }), [participants, roomConnections]);
 
-    const columns = __([
+    const columns = _([
         {
             title: '',
             key: 'identicon',
@@ -72,7 +72,7 @@ const ParticipantList: React.FC = () => {
             key: '接続状態',
             dataIndex: ['participant', 'isConnected'],
         },
-    ]).compact(x => x).toArray();
+    ]).compact().value();
 
     return (
         <div>

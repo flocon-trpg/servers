@@ -1,7 +1,8 @@
 import React from 'react';
 import { useParticipants } from './useParticipants';
-import { createStateMap, ReadonlyStateMap, recordToMap, __ } from '@kizahasi/util';
+import { createStateMap, ReadonlyStateMap, recordToMap } from '@kizahasi/util';
 import { BoardState } from '@kizahasi/flocon-core';
+import _ from 'lodash';
 
 export const useBoards = (): ReadonlyStateMap<BoardState> | undefined => {
     const participants = useParticipants();
@@ -9,9 +10,10 @@ export const useBoards = (): ReadonlyStateMap<BoardState> | undefined => {
         if (participants == null) {
             return undefined;
         }
-        const source = __(participants).map(([key, value]) => {
-            return { key, value: recordToMap(value.boards) };
-        }).toMap(x => x);
+        const source = new Map<string, Map<string, BoardState>>();
+        [...participants].forEach(([key, value]) => {
+            source.set(key, recordToMap(value.boards));
+        });
         return createStateMap(source);
     }, [participants]);
 };
