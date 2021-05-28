@@ -39,7 +39,7 @@ export const ActiveBoardSelectorModal: React.FC<Props> = ({ visible, onComplete 
     const hasSelectedBoardKey: boolean = selectedBoardKey?.delete === false ? myBoards?.has(selectedBoardKey.boardId) === true : false;
 
     const onOk = () => {
-        if (selectedBoardKey == null || hasSelectedBoardKey === false) {
+        if (selectedBoardKey == null) {
             return;
         }
         if (selectedBoardKey.delete) {
