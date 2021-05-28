@@ -106,9 +106,6 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
                         $version: 1,
                         name: create.name,
                         role: create.role,
-                        boards: {},
-                        characters: {},
-                        myNumberValues: {},
                     }
                 },
             };
@@ -569,9 +566,6 @@ let RoomResolver = class RoomResolver {
                             $version: 1,
                             role: flocon_core_1.Master,
                             name: input.participantName,
-                            boards: {},
-                            characters: {},
-                            myNumberValues: {},
                         }
                     },
                     activeBoardKey: null,
@@ -586,7 +580,10 @@ let RoomResolver = class RoomResolver {
                     publicChannel9Name: 'メイン9',
                     publicChannel10Name: 'メイン10',
                     bgms: {},
+                    boards: {},
                     boolParamNames: {},
+                    characters: {},
+                    myNumberValues: {},
                     numParamNames: {},
                     strParamNames: {},
                 }
@@ -905,7 +902,7 @@ let RoomResolver = class RoomResolver {
             };
         }
         const queue = async () => {
-            var _a, _b, _c, _d, _e, _f;
+            var _a, _b, _c, _d;
             const em = context.createEm();
             const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
             await em.flush();
@@ -946,8 +943,7 @@ let RoomResolver = class RoomResolver {
             }
             let chara = undefined;
             if (args.characterStateId != null) {
-                const characters = (_b = (_a = find(roomState.participants, decodedIdToken.uid)) === null || _a === void 0 ? void 0 : _a.characters) !== null && _b !== void 0 ? _b : {};
-                chara = find(characters, args.characterStateId);
+                chara = util_1.dualKeyRecordFind(roomState.characters, { first: decodedIdToken.uid, second: args.characterStateId });
             }
             const entityResult = await analyzeTextAndSetToEntity({
                 type: 'RoomPubMsg',
@@ -973,10 +969,10 @@ let RoomResolver = class RoomResolver {
                 entity.charaStateId = args.characterStateId;
                 entity.charaName = chara.name;
                 entity.charaIsPrivate = chara.isPrivate;
-                entity.charaImagePath = (_c = chara.image) === null || _c === void 0 ? void 0 : _c.path;
-                entity.charaImageSourceType = FileSourceType_1.FileSourceTypeModule.ofNullishString((_d = chara.image) === null || _d === void 0 ? void 0 : _d.sourceType);
-                entity.charaTachieImagePath = (_e = chara.tachieImage) === null || _e === void 0 ? void 0 : _e.path;
-                entity.charaTachieImageSourceType = FileSourceType_1.FileSourceTypeModule.ofNullishString((_f = chara.tachieImage) === null || _f === void 0 ? void 0 : _f.sourceType);
+                entity.charaImagePath = (_a = chara.image) === null || _a === void 0 ? void 0 : _a.path;
+                entity.charaImageSourceType = FileSourceType_1.FileSourceTypeModule.ofNullishString((_b = chara.image) === null || _b === void 0 ? void 0 : _b.sourceType);
+                entity.charaTachieImagePath = (_c = chara.tachieImage) === null || _c === void 0 ? void 0 : _c.path;
+                entity.charaTachieImageSourceType = FileSourceType_1.FileSourceTypeModule.ofNullishString((_d = chara.tachieImage) === null || _d === void 0 ? void 0 : _d.sourceType);
             }
             entity.roomPubCh = core_1.Reference.create(ch);
             await em.persistAndFlush(entity);
@@ -1313,7 +1309,7 @@ let RoomResolver = class RoomResolver {
             };
         }
         const queue = async () => {
-            var _a, _b;
+            var _a;
             const em = context.createEm();
             const entry = await helpers_1.checkEntry({
                 userUid: decodedIdToken.uid,
@@ -1379,60 +1375,39 @@ let RoomResolver = class RoomResolver {
             const operation = transformed.value;
             const prevRevision = room.revision;
             const myValueLogs = [];
-            for (const pair of util_1.recordToArray((_a = operation.participants) !== null && _a !== void 0 ? _a : {})) {
-                const userUid = pair.key;
-                const participant = pair.value;
-                if (participant.type === flocon_core_1.replace) {
-                    if (participant.replace.oldValue != null) {
-                        util_1.recordForEach(participant.replace.oldValue.myNumberValues, async (value, key) => myValueLogs.push(new mikro_orm_1.MyValueLog({
-                            createdBy: userUid,
+            util_1.dualKeyRecordForEach((_a = operation.myNumberValues) !== null && _a !== void 0 ? _a : {}, (value, key) => {
+                if (value.type === flocon_core_1.replace) {
+                    if (value.replace.oldValue != null) {
+                        myValueLogs.push(new mikro_orm_1.MyValueLog({
+                            createdBy: key.first,
                             room,
-                            stateId: key,
+                            stateId: key.second,
                             value: {
                                 $version: 1,
                                 type: flocon_core_1.deleteType
                             },
-                        })));
+                        }));
                     }
-                    if (participant.replace.newValue != null) {
-                        util_1.recordForEach(participant.replace.newValue.myNumberValues, async (value, key) => myValueLogs.push(new mikro_orm_1.MyValueLog({
-                            createdBy: userUid,
+                    if (value.replace.newValue != null) {
+                        myValueLogs.push(new mikro_orm_1.MyValueLog({
+                            createdBy: key.first,
                             room,
-                            stateId: key,
+                            stateId: key.second,
                             value: {
                                 $version: 1,
                                 type: flocon_core_1.createType
                             },
-                        })));
+                        }));
                     }
+                    return;
                 }
-                if (participant.type === flocon_core_1.update) {
-                    util_1.recordForEach((_b = participant.update.myNumberValues) !== null && _b !== void 0 ? _b : {}, (value, key) => {
-                        if (value.type === flocon_core_1.replace) {
-                            myValueLogs.push(new mikro_orm_1.MyValueLog({
-                                createdBy: userUid,
-                                room,
-                                stateId: key,
-                                value: value.replace.newValue == null ? {
-                                    $version: 1,
-                                    type: flocon_core_1.deleteType
-                                } : {
-                                    $version: 1,
-                                    type: flocon_core_1.createType
-                                },
-                            }));
-                        }
-                        else {
-                            myValueLogs.push(new mikro_orm_1.MyValueLog({
-                                createdBy: userUid,
-                                room,
-                                stateId: key,
-                                value: flocon_core_1.toMyNumberValueLog(value.update),
-                            }));
-                        }
-                    });
-                }
-            }
+                myValueLogs.push(new mikro_orm_1.MyValueLog({
+                    createdBy: key.first,
+                    room,
+                    stateId: key.second,
+                    value: flocon_core_1.toMyNumberValueLog(value.update),
+                }));
+            });
             for (const log of myValueLogs) {
                 em.persist(log);
             }
@@ -1516,7 +1491,7 @@ let RoomResolver = class RoomResolver {
             };
         }
         const queue = async () => {
-            var _a, _b, _c, _d, _e, _f;
+            var _a, _b, _c, _d;
             const em = context.createEm();
             const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
             await em.flush();
@@ -1551,8 +1526,7 @@ let RoomResolver = class RoomResolver {
             await entryUser.visibleRoomPrvMsgs.init({ where: { room: { id: room.id } } });
             let chara = undefined;
             if (args.characterStateId != null) {
-                const characters = (_b = (_a = find(roomState.participants, decodedIdToken.uid)) === null || _a === void 0 ? void 0 : _a.characters) !== null && _b !== void 0 ? _b : {};
-                chara = find(characters, args.characterStateId);
+                chara = util_1.dualKeyRecordFind(roomState.characters, { first: decodedIdToken.uid, second: args.characterStateId });
             }
             const entityResult = await analyzeTextAndSetToEntity({
                 type: 'RoomPrvMsg',
@@ -1585,10 +1559,10 @@ let RoomResolver = class RoomResolver {
                 entity.charaStateId = args.characterStateId;
                 entity.charaName = chara.name;
                 entity.charaIsPrivate = chara.isPrivate;
-                entity.charaImagePath = (_c = chara.image) === null || _c === void 0 ? void 0 : _c.path;
-                entity.charaImageSourceType = FileSourceType_1.FileSourceTypeModule.ofNullishString((_d = chara.tachieImage) === null || _d === void 0 ? void 0 : _d.sourceType);
-                entity.charaTachieImagePath = (_e = chara.tachieImage) === null || _e === void 0 ? void 0 : _e.path;
-                entity.charaTachieImageSourceType = FileSourceType_1.FileSourceTypeModule.ofNullishString((_f = chara.tachieImage) === null || _f === void 0 ? void 0 : _f.sourceType);
+                entity.charaImagePath = (_a = chara.image) === null || _a === void 0 ? void 0 : _a.path;
+                entity.charaImageSourceType = FileSourceType_1.FileSourceTypeModule.ofNullishString((_b = chara.tachieImage) === null || _b === void 0 ? void 0 : _b.sourceType);
+                entity.charaTachieImagePath = (_c = chara.tachieImage) === null || _c === void 0 ? void 0 : _c.path;
+                entity.charaTachieImageSourceType = FileSourceType_1.FileSourceTypeModule.ofNullishString((_d = chara.tachieImage) === null || _d === void 0 ? void 0 : _d.sourceType);
             }
             entity.room = core_1.Reference.create(room);
             await em.persistAndFlush(entity);

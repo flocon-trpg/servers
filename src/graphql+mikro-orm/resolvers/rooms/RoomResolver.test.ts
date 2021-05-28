@@ -66,6 +66,9 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }: { em: EM; setupRoom
             boolParamNames: {},
             numParamNames: {},
             strParamNames: {},
+            boards: {},
+            characters: {},
+            myNumberValues: {},
             bgms: {},
             participants: {
                 [creatorUserUid]: {
@@ -74,9 +77,7 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }: { em: EM; setupRoom
                     // 現状はとりあえず全員がMasterのケースのみを考えている。
                     role: 'Master',
                     name: creatorName,
-                    boards: {},
-                    characters: {},
-                    myNumberValues: {},
+                    
                 }
             },
             activeBoardKey: null,

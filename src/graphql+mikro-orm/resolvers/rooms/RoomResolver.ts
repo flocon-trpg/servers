@@ -54,7 +54,7 @@ import { WritingMessageStatusInputType } from '../../../enums/WritingMessageStat
 import { MyValueLogType as MyValueLogTypeEnum } from '../../../enums/MyValueLogType';
 import { FileSourceType, FileSourceTypeModule } from '../../../enums/FileSourceType';
 import { CustomResult, Result } from '@kizahasi/result';
-import { $free, $system, PublicChannelKey, recordForEach, recordToArray } from '@kizahasi/util';
+import { $free, $system, dualKeyRecordFind, dualKeyRecordForEach, PublicChannelKey, recordForEach, recordToArray } from '@kizahasi/util';
 import { createType, deleteType, Master, Player, serverTransform, Spectator, State, toMyNumberValueLog, TwoWayOperation, restore, CharacterState, UpOperation, RecordUpOperationElement, ParticipantState, ParticipantUpOperation, replace, ParticipantRole, update } from '@kizahasi/flocon-core';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
 import { ParticipantRole as ParticipantRoleEnum } from '../../../enums/ParticipantRole';
@@ -159,9 +159,6 @@ const operateParticipantAndFlush = async ({
                         $version: 1,
                         name: create.name,
                         role: create.role,
-                        boards: {},
-                        characters: {},
-                        myNumberValues: {},
                     }
                 },
             };
@@ -702,9 +699,6 @@ export class RoomResolver {
                             $version: 1,
                             role: Master,
                             name: input.participantName,
-                            boards: {},
-                            characters: {},
-                            myNumberValues: {},
                         }
                     },
                     activeBoardKey: null,
@@ -719,7 +713,10 @@ export class RoomResolver {
                     publicChannel9Name: 'メイン9',
                     publicChannel10Name: 'メイン10',
                     bgms: {},
+                    boards: {},
                     boolParamNames: {},
+                    characters: {},
+                    myNumberValues: {},
                     numParamNames: {},
                     strParamNames: {},
                 }
@@ -1108,8 +1105,7 @@ export class RoomResolver {
 
             let chara: CharacterState | undefined = undefined;
             if (args.characterStateId != null) {
-                const characters = find(roomState.participants, decodedIdToken.uid)?.characters ?? {};
-                chara = find(characters, args.characterStateId);
+                chara = dualKeyRecordFind(roomState.characters, { first: decodedIdToken.uid, second: args.characterStateId });
             }
             const entityResult = await analyzeTextAndSetToEntity({
                 type: 'RoomPubMsg',
@@ -1597,64 +1593,39 @@ export class RoomResolver {
             const prevRevision = room.revision;
 
             const myValueLogs: MyValueLog$MikroORM[] = [];
-            for (const pair of recordToArray(operation.participants ?? {})) {
-                const userUid = pair.key;
-                const participant = pair.value;
-                if (participant.type === replace) {
-                    if (participant.replace.oldValue != null) {
-                        recordForEach(participant.replace.oldValue.myNumberValues, async (value, key) =>
-                            myValueLogs.push(new MyValueLog$MikroORM({
-                                createdBy: userUid,
-                                room,
-                                stateId: key,
-                                value: {
-                                    $version: 1,
-                                    type: deleteType
-                                },
-                            }))
-                        );
+            dualKeyRecordForEach(operation.myNumberValues ?? {}, (value, key) => {
+                if (value.type === replace) {
+                    if (value.replace.oldValue != null) {
+                        myValueLogs.push(new MyValueLog$MikroORM({
+                            createdBy: key.first,
+                            room,
+                            stateId: key.second,
+                            value: {
+                                $version: 1,
+                                type: deleteType
+                            },
+                        }));
                     }
-                    if (participant.replace.newValue != null) {
-                        recordForEach(participant.replace.newValue.myNumberValues, async (value, key) =>
-                            myValueLogs.push(new MyValueLog$MikroORM({
-                                createdBy: userUid,
-                                room,
-                                stateId: key,
-                                value: {
-                                    $version: 1,
-                                    type: createType
-                                },
-                            }))
-                        );
+                    if (value.replace.newValue != null) {
+                        myValueLogs.push(new MyValueLog$MikroORM({
+                            createdBy: key.first,
+                            room,
+                            stateId: key.second,
+                            value: {
+                                $version: 1,
+                                type: createType
+                            },
+                        }));
                     }
+                    return;
                 }
-                if (participant.type === update) {
-                    recordForEach(participant.update.myNumberValues ?? {}, (value, key) => {
-                        if (value.type === replace) {
-                            myValueLogs.push(new MyValueLog$MikroORM({
-                                createdBy: userUid,
-                                room,
-                                stateId: key,
-                                value:
-                                    value.replace.newValue == null ? {
-                                        $version: 1,
-                                        type: deleteType
-                                    } : {
-                                        $version: 1,
-                                        type: createType
-                                    },
-                            }));
-                        } else {
-                            myValueLogs.push(new MyValueLog$MikroORM({
-                                createdBy: userUid,
-                                room,
-                                stateId: key,
-                                value: toMyNumberValueLog(value.update),
-                            }));
-                        }
-                    });
-                }
-            }
+                myValueLogs.push(new MyValueLog$MikroORM({
+                    createdBy: key.first,
+                    room,
+                    stateId: key.second,
+                    value: toMyNumberValueLog(value.update),
+                }));
+            });
             for (const log of myValueLogs) {
                 em.persist(log);
             }
@@ -1789,8 +1760,7 @@ export class RoomResolver {
 
             let chara: CharacterState | undefined = undefined;
             if (args.characterStateId != null) {
-                const characters = find(roomState.participants, decodedIdToken.uid)?.characters ?? {};
-                chara = find(characters, args.characterStateId);
+                chara = dualKeyRecordFind(roomState.characters, { first: decodedIdToken.uid, second: args.characterStateId });
             }
             const entityResult = await analyzeTextAndSetToEntity({
                 type: 'RoomPrvMsg',
