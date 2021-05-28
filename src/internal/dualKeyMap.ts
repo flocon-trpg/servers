@@ -153,7 +153,7 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
     }
 
     public toArray() {
-        return [...this];
+        return Array.from(this);
     }
 
     public toMap() {

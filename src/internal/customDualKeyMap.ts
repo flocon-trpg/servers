@@ -120,7 +120,7 @@ export class CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TValue> {
     }
 
     public toArray() {
-        return [...this];
+        return Array.from(this);
     }
 
     public get size(): number {

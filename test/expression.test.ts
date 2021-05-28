@@ -1,4 +1,4 @@
-import { analyze, expr1, plain } from '../src/internal/expression';
+import { analyze, expr1, plain } from '../dist';
 
 it('tests {HP}', () => {
     const actual = analyze('{HP}');
