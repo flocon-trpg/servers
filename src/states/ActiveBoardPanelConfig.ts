@@ -39,7 +39,7 @@ export const defaultActiveBoardPanelsConfig = (): ActiveBoardPanelConfig => {
         y: 0,
         width: 400,
         height: 400,
-        zIndex: -1,
+        zIndex: 0,
         isMinimized: false,
     };
 };

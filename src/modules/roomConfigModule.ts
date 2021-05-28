@@ -309,7 +309,7 @@ const roomConfigModule = createSlice({
                 return;
             }
             const panelId = generators.simpleId();
-            state.panels.boardEditorPanels[panelId] = { ...action.payload.panel, zIndex: -1 };
+            state.panels.boardEditorPanels[panelId] = { ...action.payload.panel, zIndex: 0 };
             bringPanelToFront(state, { roomId: action.payload.roomId, target: { type: boardEditorPanel, panelId } });
         },
         updateBoardEditorPanel: (state: RoomConfig | null, action: PayloadAction<UpdateBoardEditorPanelAction>) => {
@@ -454,7 +454,7 @@ const roomConfigModule = createSlice({
                 return;
             }
             const panelId = generators.simpleId();
-            state.panels.messagePanels[panelId] = { ...action.payload.panel, zIndex: -1 };
+            state.panels.messagePanels[panelId] = { ...action.payload.panel, zIndex: 0 };
             bringPanelToFront(state, { roomId: action.payload.roomId, target: { type: messagePanel, panelId } });
         },
         updateMessagePanel: (state: RoomConfig | null, action: PayloadAction<UpdateMessagePanelAction>) => {

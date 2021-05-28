@@ -37,11 +37,11 @@ export const toCompleteBoardEditorPanelConfig = (source: PartialBoardEditorPanel
 
 export const defaultBoardEditorPanelsConfig = (): Record<string, BoardEditorPanelConfig> => {
     const config: BoardEditorPanelConfig = {
-        x: 0,
-        y: 0,
+        x: 50,
+        y: 50,
         width: 400,
         height: 400,
-        zIndex: -1,
+        zIndex: 0,
         activeBoardKey: null,
         boards: {},
         isMinimized: false,

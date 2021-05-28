@@ -84,6 +84,7 @@ const Room: React.FC = () => {
     const { userUid: myUserUid } = useMe();
     const roomIdOfRoomConfig = useSelector(state => state.roomConfigModule?.roomId);
     const activeBoardPanelConfig = useSelector(state => state.roomConfigModule?.panels.activeBoardPanel);
+    console.info(activeBoardPanelConfig);
     const boardEditorPanelsConfig = useSelector(state => state.roomConfigModule?.panels.boardEditorPanels);
     const characterPanel = useSelector(state => state.roomConfigModule?.panels.characterPanel);
     const gameEffectPanel = useSelector(state => state.roomConfigModule?.panels.gameEffectPanel);
