@@ -58,7 +58,7 @@ class FindRoomAndMyParticipantResult {
         this.me = me;
     }
     participantIds() {
-        return new Set(util_1.recordToArray(this.roomState).map(({ key }) => key));
+        return new Set(util_1.recordToArray(this.roomState.participants).map(({ key }) => key));
     }
 }
 const findRoomAndMyParticipant = async ({ em, userUid, roomId }) => {

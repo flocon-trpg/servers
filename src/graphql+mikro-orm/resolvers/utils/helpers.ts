@@ -65,7 +65,7 @@ class FindRoomAndMyParticipantResult {
     }
 
     public participantIds(): Set<string> {
-        return new Set(recordToArray(this.roomState).map(({ key }) => key));
+        return new Set(recordToArray(this.roomState.participants).map(({ key }) => key));
     }
 }
 
