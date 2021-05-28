@@ -1,19 +1,19 @@
 import React from 'react';
-import { useParticipants } from './useParticipants';
-import { createStateMap, ReadonlyStateMap, recordToMap } from '@kizahasi/util';
+import { createStateMap, ReadonlyStateMap, dualKeyRecordForEach } from '@kizahasi/util';
 import { BoardState } from '@kizahasi/flocon-core';
 import _ from 'lodash';
+import { useSelector } from '../../store';
 
 export const useBoards = (): ReadonlyStateMap<BoardState> | undefined => {
-    const participants = useParticipants();
+    const boards = useSelector(state => state.roomModule.roomState?.state?.boards);
     return React.useMemo(() => {
-        if (participants == null) {
+        if (boards == null) {
             return undefined;
         }
-        const source = new Map<string, Map<string, BoardState>>();
-        [...participants].forEach(([key, value]) => {
-            source.set(key, recordToMap(value.boards));
+        const result = createStateMap<BoardState>();
+        dualKeyRecordForEach<BoardState>(boards, (value, key) => {
+            result.set({ createdBy: key.first, id: key.second }, value);
         });
-        return createStateMap(source);
-    }, [participants]);
+        return result;
+    }, [boards]);
 };

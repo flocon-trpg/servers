@@ -28,17 +28,11 @@ export const executeCharacterFlocommand = ({
     }
     const result: UpOperation = {
         $version: 1,
-        participants: {
+        characters: {
             [characterKey.createdBy]: {
-                type: update,
-                update: {
-                    $version: 1,
-                    characters: {
-                        [characterKey.id]: {
-                            type: update,
-                            update: operation,
-                        }
-                    }
+                [characterKey.id]: {
+                    type: update,
+                    update: operation,
                 }
             }
         }

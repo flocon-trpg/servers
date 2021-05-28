@@ -21,6 +21,7 @@ import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { recordToArray } from '@kizahasi/util';
+import { useCharacters } from '../../hooks/state/useCharacters';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -307,7 +308,8 @@ export const RoomMenu: React.FC = () => {
     const roomId = useSelector(state => state.roomModule.roomId);
     const createdBy = useSelector(state => state.roomModule.roomState?.state?.createdBy);
     const publicChannelNames = usePublicChannelNames();
-    const participantsMap = useParticipants();
+    const characters = useCharacters();
+    const participants = useParticipants();
     const activeBoardPanel = useSelector(state => state.roomConfigModule?.panels.activeBoardPanel);
     const boardPanels = useSelector(state => state.roomConfigModule?.panels.boardEditorPanels);
     const characterPanel = useSelector(state => state.roomConfigModule?.panels.characterPanel);
@@ -321,10 +323,14 @@ export const RoomMenu: React.FC = () => {
     const [isChangeMyParticipantNameModalVisible, setIsChangeMyParticipantNameModalVisible] = React.useState(false);
     const [isDeleteRoomModalVisible, setIsDeleteRoomModalVisible] = React.useState(false);
 
-    const participantsMapRef = React.useRef(participantsMap);
+    const charactersRef = React.useRef(characters);
     React.useEffect(() => {
-        participantsMapRef.current = participantsMap;
-    }, [participantsMap]);
+        charactersRef.current = characters;
+    }, [characters]);
+    const participantsRef = React.useRef(participants);
+    React.useEffect(() => {
+        participantsRef.current = participants;
+    }, [participants]);
     const publicChannelNamesRef = React.useRef(publicChannelNames);
     React.useEffect(() => {
         publicChannelNamesRef.current = publicChannelNames;
@@ -339,13 +345,14 @@ export const RoomMenu: React.FC = () => {
             // TODO: エラーメッセージを出す
             return;
         }
-        if (publicChannelNamesRef.current == null || participantsMapRef.current == null) {
+        if (charactersRef.current == null || publicChannelNamesRef.current == null || participantsRef.current == null) {
             return;
         }
         fileDownload(generateAsStaticHtml({
             ...publicChannelNamesRef.current,
+            characters: charactersRef.current,
             messages: data.result,
-            participants: participantsMapRef.current,
+            participants: participantsRef.current,
         }), `log_${moment(new Date()).format('YYYYMMDDHHmmss')}.html`);
     }, [getLogQueryResult.data]);
 
@@ -353,7 +360,7 @@ export const RoomMenu: React.FC = () => {
         return null;
     }
 
-    const me = participantsMap?.get(myAuth.uid);
+    const me = participants?.get(myAuth.uid);
 
     return <><Menu triggerSubMenuAction='click' selectable={false} mode="horizontal">
         <Menu.SubMenu title="部屋">

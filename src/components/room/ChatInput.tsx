@@ -22,6 +22,8 @@ import { useSelector } from '../../store';
 import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import { $free, isStrIndex10, PublicChannelKey, recordToArray } from '@kizahasi/util';
 import _ from 'lodash';
+import { useParticipants } from '../../hooks/state/useParticipants';
+import { useCharacters } from '../../hooks/state/useCharacters';
 
 type PrivateMessageDrawerProps = {
     visible: boolean;
@@ -131,7 +133,8 @@ export const ChatInput: React.FC<Props> = ({
     const miniInputMaxWidth = 200;
 
     const dispatch = useDispatch();
-    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
+    const participants = useParticipants();
+    const characters = useCharacters();
     const publicChannelNames = usePublicChannelNames();
     const availableGameSystems = useListAvailableGameSystemsQuery();
     React.useEffect(() => {
@@ -156,7 +159,7 @@ export const ChatInput: React.FC<Props> = ({
     const selectedParticipantsBase = React.useMemo(() =>
         _([...selectedParticipantIds])
             .map(id => {
-                const found = (participants ?? {})[id];
+                const found = participants?.get(id);
                 if (found == null) {
                     return null;
                 }
@@ -175,27 +178,16 @@ export const ChatInput: React.FC<Props> = ({
                 </div>);
             }), [selectedParticipantsBase]);
 
-    const characters = React.useMemo(() => {
-        return _(recordToArray(participants ?? {}))
-            .flatMap(participantPair =>
-                recordToArray(participantPair.value.characters)
-                    .map(characterPair => ({ key: { createdBy: participantPair.key, id: characterPair.key }, value: characterPair.value })))
-            .value();
-    }, [participants]);
-
     const myCharacters = React.useMemo(() => {
         if (myUserUid == null || characters == null) {
             return [];
         }
-        return characters.sort((x, y) => x.value.name.localeCompare(y.value.name)).map(pair => {
-            if (pair.key.createdBy === myUserUid) {
-                return (
-                    <Select.Option key={pair.key.id} value={pair.key.id}>
-                        {pair.value.name}
-                    </Select.Option>
-                );
-            }
-            return null;
+        return [...(characters.getByFirst(myUserUid)?.entries() ?? [])].sort(([, x], [, y]) => x.name.localeCompare(y.name)).map(([key, value]) => {
+            return (
+                <Select.Option key={key} value={key}>
+                    {value.name}
+                </Select.Option>
+            );
         });
     }, [characters, myUserUid]);
 

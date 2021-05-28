@@ -65,17 +65,11 @@ const createBooleanParameterColumn = ({
                         onOperate={characterOperation => {
                             const operation: UpOperation = {
                                 $version: 1,
-                                participants: {
+                                characters: {
                                     [character.stateKey.createdBy]: {
-                                        type: update,
-                                        update: {
-                                            $version: 1,
-                                            characters: {
-                                                [character.stateKey.id]: {
-                                                    type: update,
-                                                    update: characterOperation,
-                                                }
-                                            }
+                                        [character.stateKey.id]: {
+                                            type: update,
+                                            update: characterOperation,
                                         }
                                     }
                                 }
@@ -117,17 +111,11 @@ const createNumParameterColumn = ({
                         onOperate={characterOperation => {
                             const operation: UpOperation = {
                                 $version: 1,
-                                participants: {
+                                characters: {
                                     [character.stateKey.createdBy]: {
-                                        type: update,
-                                        update: {
-                                            $version: 1,
-                                            characters: {
-                                                [character.stateKey.id]: {
-                                                    type: update,
-                                                    update: characterOperation,
-                                                }
-                                            }
+                                        [character.stateKey.id]: {
+                                            type: update,
+                                            update: characterOperation,
                                         }
                                     }
                                 }
@@ -168,17 +156,11 @@ const createStringParameterColumn = ({
                         onOperate={characterOperation => {
                             const operation: UpOperation = {
                                 $version: 1,
-                                participants: {
+                                characters: {
                                     [character.stateKey.createdBy]: {
-                                        type: update,
-                                        update: {
-                                            $version: 1,
-                                            characters: {
-                                                [character.stateKey.id]: {
-                                                    type: update,
-                                                    update: characterOperation,
-                                                }
-                                            }
+                                        [character.stateKey.id]: {
+                                            type: update,
+                                            update: characterOperation,
                                         }
                                     }
                                 }
@@ -262,20 +244,14 @@ const CharacterList: React.FC = () => {
                     onChange={newValue => {
                         const operation: UpOperation = {
                             $version: 1,
-                            participants: {
+                            characters: {
                                 [character.stateKey.createdBy]: {
-                                    type: update,
-                                    update: {
-                                        $version: 1,
-                                        characters: {
-                                            [character.stateKey.id]: {
-                                                type: update,
-                                                update: {
-                                                    $version: 1,
-                                                    isPrivate: { newValue: !newValue },
-                                                },
-                                            }
-                                        }
+                                    [character.stateKey.id]: {
+                                        type: update,
+                                        update: {
+                                            $version: 1,
+                                            isPrivate: { newValue: !newValue },
+                                        },
                                     }
                                 }
                             }
@@ -304,20 +280,14 @@ const CharacterList: React.FC = () => {
                         onChange={newValue => {
                             const operation: UpOperation = {
                                 $version: 1,
-                                participants: {
+                                characters: {
                                     [character.stateKey.createdBy]: {
-                                        type: update,
-                                        update: {
-                                            $version: 1,
-                                            characters: {
-                                                [character.stateKey.id]: {
-                                                    type: update,
-                                                    update: {
-                                                        $version: 1,
-                                                        name: { newValue: newValue.target.value },
-                                                    },
-                                                }
-                                            }
+                                        [character.stateKey.id]: {
+                                            type: update,
+                                            update: {
+                                                $version: 1,
+                                                name: { newValue: newValue.target.value },
+                                            },
                                         }
                                     }
                                 }

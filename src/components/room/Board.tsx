@@ -1,7 +1,7 @@
 import React from 'react';
 import { useImageFromGraphQL } from '../../hooks/image';
 import * as ReactKonva from 'react-konva';
-import { Button, Dropdown, Menu, Modal, Popover, Tooltip } from 'antd';
+import { Button, Dropdown, Menu, Tooltip } from 'antd';
 import * as Icons from '@ant-design/icons';
 import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import { boardDrawerType, characterDrawerType, create, myNumberValueDrawerType } from './RoomComponentsState';
@@ -33,8 +33,9 @@ import { Subject } from 'rxjs';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
 import { NewTabLinkify } from '../../foundations/NewTabLinkify';
 import { CharacterState, UpOperation, PieceState, PieceUpOperation, BoardLocationUpOperation, BoardState, BoardLocationState, MyNumberValueState } from '@kizahasi/flocon-core';
-import { $free, CompositeKey, compositeKeyEquals, compositeKeyToString, recordToArray, recordToDualKeyMap, recordToMap, stringToCompositeKey } from '@kizahasi/util';
+import { $free, CompositeKey, compositeKeyEquals, compositeKeyToString, recordToDualKeyMap, stringToCompositeKey } from '@kizahasi/util';
 import _ from 'lodash';
+import { useMyNumberValues } from '../../hooks/state/useMyNumberValues';
 
 namespace Resource {
     export const cellSizeIsTooSmall = 'セルが小さすぎるため、無効化されています';
@@ -163,6 +164,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const roomId = useSelector(state => state.roomModule.roomId);
     const characters = useCharacters();
     const participants = useParticipants();
+    const myNumberValues = useMyNumberValues();
 
     const onTooltipRef = useReadonlyRef(onTooltip);
 
@@ -186,7 +188,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const publicMessages = useFilteredRoomMessages({ filter: publicMessageFilter });
     const { userUid: myUserUid } = useMe();
 
-    if (myUserUid == null || roomId == null || characters == null || participants == null) {
+    if (myUserUid == null || roomId == null || characters == null || participants == null || myNumberValues == null) {
         return null;
     }
 
@@ -253,23 +255,17 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     const pieceOperation = createPiecePostOperation({ e, piece: pieceValue, board });
                     const operation: UpOperation = {
                         $version: 1,
-                        participants: {
+                        characters: {
                             [characterKey.createdBy]: {
-                                type: update,
-                                update: {
-                                    $version: 1,
-                                    characters: {
-                                        [characterKey.id]: {
-                                            type: update,
-                                            update: {
-                                                $version: 1,
-                                                pieces: {
-                                                    [boardKey.createdBy]: {
-                                                        [boardKey.id]: {
-                                                            type: update,
-                                                            update: pieceOperation,
-                                                        }
-                                                    }
+                                [characterKey.id]: {
+                                    type: update,
+                                    update: {
+                                        $version: 1,
+                                        pieces: {
+                                            [boardKey.createdBy]: {
+                                                [boardKey.id]: {
+                                                    type: update,
+                                                    update: pieceOperation,
                                                 }
                                             }
                                         }
@@ -316,23 +312,17 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     const tachieLocationOperation = createTachieLocationPostOperation({ e });
                     const operation: UpOperation = {
                         $version: 1,
-                        participants: {
+                        characters: {
                             [characterKey.createdBy]: {
-                                type: update,
-                                update: {
-                                    $version: 1,
-                                    characters: {
-                                        [characterKey.id]: {
-                                            type: update,
-                                            update: {
-                                                $version: 1,
-                                                tachieLocations: {
-                                                    [boardKey.createdBy]: {
-                                                        [boardKey.id]: {
-                                                            type: update,
-                                                            update: tachieLocationOperation,
-                                                        }
-                                                    }
+                                [characterKey.id]: {
+                                    type: update,
+                                    update: {
+                                        $version: 1,
+                                        tachieLocations: {
+                                            [boardKey.createdBy]: {
+                                                [boardKey.id]: {
+                                                    type: update,
+                                                    update: tachieLocationOperation,
                                                 }
                                             }
                                         }
@@ -345,9 +335,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 }} />;
         }).compact().value();
 
-        const myNumberValuePieces = _([...participants])
-            .flatMap(([userUid, participant]) => recordToArray(participant.myNumberValues).map(pair => [userUid, pair.key, pair.value] as const))
-            .map(([userUid, stateId, myNumberValue]) => {
+        const myNumberValuePieces = _(myNumberValues.toArray())
+            .map(([myNumberValueKey, myNumberValue]) => {
                 const piece = recordToDualKeyMap<PieceState>(myNumberValue.pieces).toArray().find(([boardKey$]) => {
                     return boardKey.createdBy === boardKey$.first && boardKey.id === boardKey$.second;
                 });
@@ -357,36 +346,30 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 const [, pieceValue] = piece;
                 return <MyKonva.MyNumberValue
                     {...Piece.getPosition({ ...board, state: pieceValue })}
-                    key={stateId}
+                    key={myNumberValueKey.id}
                     myNumberValue={myNumberValue}
-                    createdByMe={userUid === myUserUid}
+                    createdByMe={myNumberValueKey.createdBy === myUserUid}
                     draggable
                     listening
-                    isSelected={selectedPieceKey?.type === 'myNumberValue' && (selectedPieceKey.stateId === stateId)}
-                    onClick={() => setSelectedPieceKey({ type: 'myNumberValue', stateId })}
+                    isSelected={selectedPieceKey?.type === 'myNumberValue' && (selectedPieceKey.stateId === myNumberValueKey.id)}
+                    onClick={() => setSelectedPieceKey({ type: 'myNumberValue', stateId: myNumberValueKey.id })}
                     onMouseEnter={() => mouseOverOnRef.current = { type: 'myNumberValue' }}
                     onMouseLeave={() => mouseOverOnRef.current = { type: 'background' }}
                     onDragEnd={e => {
                         const pieceOperation = createPiecePostOperation({ e, piece: pieceValue, board });
                         const operation: UpOperation = {
                             $version: 1,
-                            participants: {
-                                [userUid]: {
-                                    type: update,
-                                    update: {
-                                        $version: 1,
-                                        myNumberValues: {
-                                            [stateId]: {
-                                                type: update,
-                                                update: {
-                                                    $version: 1,
-                                                    pieces: {
-                                                        [boardKey.createdBy]: {
-                                                            [boardKey.id]: {
-                                                                type: update,
-                                                                update: pieceOperation,
-                                                            }
-                                                        }
+                            myNumberValues: {
+                                [myNumberValueKey.createdBy]: {
+                                    [myNumberValueKey.id]: {
+                                        type: update,
+                                        update: {
+                                            $version: 1,
+                                            pieces: {
+                                                [boardKey.createdBy]: {
+                                                    [boardKey.id]: {
+                                                        type: update,
+                                                        update: pieceOperation,
                                                     }
                                                 }
                                             }
@@ -564,13 +547,13 @@ const Board: React.FC<Props> = ({
     const roomId = useSelector(state => state.roomModule.roomId);
     const boards = useBoards();
     const characters = useCharacters();
-    const participants = useParticipants();
+    const myNumberValues = useMyNumberValues();
     const { participant: me, userUid: myUserUid } = useMe();
     const activeBoardKey = useSelector(state => state.roomModule.roomState?.state?.activeBoardKey);
     const activeBoardPanelConfig = useSelector(state => state.roomConfigModule?.panels.activeBoardPanel);
     const [activeBoardSelectorModalVisibility, setActiveBoardSelectorModalVisibility] = React.useState(false);
 
-    if (me == null || myUserUid == null || roomId == null || boards == null || characters == null) {
+    if (me == null || myUserUid == null || roomId == null || boards == null || characters == null || myNumberValues == null) {
         return null;
     }
 
@@ -655,9 +638,8 @@ const Board: React.FC<Props> = ({
                         })
                         .compact()
                         .value(),
-                    myNumberValuesOnCursor: _([...(participants ?? [])])
-                        .flatMap(([userUid, participant]) => [...recordToMap(participant.myNumberValues)].map(([key, value]) => [userUid, key, value] as const))
-                        .map(([userUid, myNumberValueKey, myNumberValue]) => {
+                    myNumberValuesOnCursor: _(myNumberValues.toArray())
+                        .map(([ myNumberValueKey, myNumberValue]) => {
                             const found = recordToDualKeyMap<PieceState>(myNumberValue.pieces).toArray()
                                 .find(([boardKey, piece]) => {
                                     if (boardKey.first !== boardKeyToShow.createdBy || boardKey.second !== boardKeyToShow.id) {
@@ -668,7 +650,7 @@ const Board: React.FC<Props> = ({
                             if (found === undefined) {
                                 return null;
                             }
-                            return { myNumberValueKey, myNumberValue, piece: found[1], userUid };
+                            return { myNumberValueKey: myNumberValueKey.id, myNumberValue, piece: found[1], userUid: myNumberValueKey.createdBy };
                         })
                         .compact()
                         .value(),
@@ -741,23 +723,17 @@ const Board: React.FC<Props> = ({
                                     onClick={() => {
                                         const operation: UpOperation = {
                                             $version: 1,
-                                            participants: {
+                                            characters: {
                                                 [characterKey.createdBy]: {
-                                                    type: update,
-                                                    update: {
-                                                        $version: 1,
-                                                        characters: {
-                                                            [characterKey.id]: {
-                                                                type: update,
-                                                                update: {
-                                                                    $version: 1,
-                                                                    pieces: {
-                                                                        [boardKeyToShow.createdBy]: {
-                                                                            [boardKeyToShow.id]: {
-                                                                                type: replace,
-                                                                                replace: { newValue: undefined },
-                                                                            }
-                                                                        }
+                                                    [characterKey.id]: {
+                                                        type: update,
+                                                        update: {
+                                                            $version: 1,
+                                                            pieces: {
+                                                                [boardKeyToShow.createdBy]: {
+                                                                    [boardKeyToShow.id]: {
+                                                                        type: replace,
+                                                                        replace: { newValue: undefined },
                                                                     }
                                                                 }
                                                             }
@@ -806,23 +782,17 @@ const Board: React.FC<Props> = ({
                                     onClick={() => {
                                         const operation: UpOperation = {
                                             $version: 1,
-                                            participants: {
+                                            characters: {
                                                 [characterKey.createdBy]: {
-                                                    type: update,
-                                                    update: {
-                                                        $version: 1,
-                                                        characters: {
-                                                            [characterKey.id]: {
-                                                                type: update,
-                                                                update: {
-                                                                    $version: 1,
-                                                                    tachieLocations: {
-                                                                        [boardKeyToShow.createdBy]: {
-                                                                            [boardKeyToShow.id]: {
-                                                                                type: replace,
-                                                                                replace: { newValue: undefined },
-                                                                            }
-                                                                        }
+                                                    [characterKey.id]: {
+                                                        type: update,
+                                                        update: {
+                                                            $version: 1,
+                                                            tachieLocations: {
+                                                                [boardKeyToShow.createdBy]: {
+                                                                    [boardKeyToShow.id]: {
+                                                                        type: replace,
+                                                                        replace: { newValue: undefined },
                                                                     }
                                                                 }
                                                             }
@@ -970,23 +940,17 @@ const Board: React.FC<Props> = ({
                                             onClick={() => {
                                                 const operation: UpOperation = {
                                                     $version: 1,
-                                                    participants: {
+                                                    characters: {
                                                         [key.createdBy]: {
-                                                            type: update,
-                                                            update: {
-                                                                $version: 1,
-                                                                characters: {
-                                                                    [key.id]: {
-                                                                        type: update,
-                                                                        update: {
-                                                                            $version: 1,
-                                                                            pieces: {
-                                                                                [boardKeyToShow.createdBy]: {
-                                                                                    [boardKeyToShow.id]: {
-                                                                                        type: replace,
-                                                                                        replace: { newValue: pieceLocationWhichIsCellMode },
-                                                                                    }
-                                                                                }
+                                                            [key.id]: {
+                                                                type: update,
+                                                                update: {
+                                                                    $version: 1,
+                                                                    pieces: {
+                                                                        [boardKeyToShow.createdBy]: {
+                                                                            [boardKeyToShow.id]: {
+                                                                                type: replace,
+                                                                                replace: { newValue: pieceLocationWhichIsCellMode },
                                                                             }
                                                                         }
                                                                     }
@@ -1005,23 +969,17 @@ const Board: React.FC<Props> = ({
                                         <Menu.Item onClick={() => {
                                             const operation: UpOperation = {
                                                 $version: 1,
-                                                participants: {
+                                                characters: {
                                                     [key.createdBy]: {
-                                                        type: update,
-                                                        update: {
-                                                            $version: 1,
-                                                            characters: {
-                                                                [key.id]: {
-                                                                    type: update,
-                                                                    update: {
-                                                                        $version: 1,
-                                                                        pieces: {
-                                                                            [boardKeyToShow.createdBy]: {
-                                                                                [boardKeyToShow.id]: {
-                                                                                    type: replace,
-                                                                                    replace: { newValue: pieceLocationWhichIsNotCellMode },
-                                                                                }
-                                                                            }
+                                                        [key.id]: {
+                                                            type: update,
+                                                            update: {
+                                                                $version: 1,
+                                                                pieces: {
+                                                                    [boardKeyToShow.createdBy]: {
+                                                                        [boardKeyToShow.id]: {
+                                                                            type: replace,
+                                                                            replace: { newValue: pieceLocationWhichIsNotCellMode },
                                                                         }
                                                                     }
                                                                 }
@@ -1041,23 +999,17 @@ const Board: React.FC<Props> = ({
                                         onClick={() => {
                                             const operation: UpOperation = {
                                                 $version: 1,
-                                                participants: {
+                                                characters: {
                                                     [key.createdBy]: {
-                                                        type: update,
-                                                        update: {
-                                                            $version: 1,
-                                                            characters: {
-                                                                [key.id]: {
-                                                                    type: update,
-                                                                    update: {
-                                                                        $version: 1,
-                                                                        pieces: {
-                                                                            [boardKeyToShow.createdBy]: {
-                                                                                [boardKeyToShow.id]: {
-                                                                                    type: replace,
-                                                                                    replace: { newValue: undefined },
-                                                                                }
-                                                                            }
+                                                        [key.id]: {
+                                                            type: update,
+                                                            update: {
+                                                                $version: 1,
+                                                                pieces: {
+                                                                    [boardKeyToShow.createdBy]: {
+                                                                        [boardKeyToShow.id]: {
+                                                                            type: replace,
+                                                                            replace: { newValue: undefined },
                                                                         }
                                                                     }
                                                                 }
@@ -1093,23 +1045,17 @@ const Board: React.FC<Props> = ({
                                         onClick={() => {
                                             const operation: UpOperation = {
                                                 $version: 1,
-                                                participants: {
+                                                characters: {
                                                     [key.createdBy]: {
-                                                        type: update,
-                                                        update: {
-                                                            $version: 1,
-                                                            characters: {
-                                                                [key.id]: {
-                                                                    type: update,
-                                                                    update: {
-                                                                        $version: 1,
-                                                                        tachieLocations: {
-                                                                            [boardKeyToShow.createdBy]: {
-                                                                                [boardKeyToShow.id]: {
-                                                                                    type: replace,
-                                                                                    replace: { newValue: tachieLocationWhichIsNotCellMode },
-                                                                                }
-                                                                            }
+                                                        [key.id]: {
+                                                            type: update,
+                                                            update: {
+                                                                $version: 1,
+                                                                tachieLocations: {
+                                                                    [boardKeyToShow.createdBy]: {
+                                                                        [boardKeyToShow.id]: {
+                                                                            type: replace,
+                                                                            replace: { newValue: tachieLocationWhichIsNotCellMode },
                                                                         }
                                                                     }
                                                                 }
@@ -1128,23 +1074,17 @@ const Board: React.FC<Props> = ({
                                         onClick={() => {
                                             const operation: UpOperation = {
                                                 $version: 1,
-                                                participants: {
+                                                characters: {
                                                     [key.createdBy]: {
-                                                        type: update,
-                                                        update: {
-                                                            $version: 1,
-                                                            characters: {
-                                                                [key.id]: {
-                                                                    type: update,
-                                                                    update: {
-                                                                        $version: 1,
-                                                                        tachieLocations: {
-                                                                            [boardKeyToShow.createdBy]: {
-                                                                                [boardKeyToShow.id]: {
-                                                                                    type: replace,
-                                                                                    replace: { newValue: undefined },
-                                                                                }
-                                                                            }
+                                                        [key.id]: {
+                                                            type: update,
+                                                            update: {
+                                                                $version: 1,
+                                                                tachieLocations: {
+                                                                    [boardKeyToShow.createdBy]: {
+                                                                        [boardKeyToShow.id]: {
+                                                                            type: replace,
+                                                                            replace: { newValue: undefined },
                                                                         }
                                                                     }
                                                                 }
@@ -1173,7 +1113,7 @@ const Board: React.FC<Props> = ({
             return (
                 <>
                     {
-                        contextMenuState.myNumberValuesOnCursor.map(({ myNumberValueKey, myNumberValue, piece, userUid }) =>
+                        contextMenuState.myNumberValuesOnCursor.map(({ myNumberValueKey, myNumberValue, userUid }) =>
                             // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が下にもあるため、キーを互いに異なるものにするように文字列を付加している。
                             <Menu.SubMenu key={myNumberValueKey + '@selected'} title={MyNumberValue.stringify(myNumberValue)}>
                                 {userUid === myUserUid ? <Menu.Item
@@ -1199,17 +1139,11 @@ const Board: React.FC<Props> = ({
                                     onClick={() => {
                                         const operation: UpOperation = {
                                             $version: 1,
-                                            participants: {
+                                            myNumberValues: {
                                                 [myUserUid]: {
-                                                    type: update,
-                                                    update: {
-                                                        $version: 1,
-                                                        myNumberValues: {
-                                                            [myNumberValueKey]: {
-                                                                type: replace,
-                                                                replace: { newValue: undefined }
-                                                            }
-                                                        }
+                                                    [myNumberValueKey]: {
+                                                        type: replace,
+                                                        replace: { newValue: undefined }
                                                     }
                                                 }
                                             }
@@ -1268,10 +1202,10 @@ const Board: React.FC<Props> = ({
             return (
                 <Menu.SubMenu title={title}>
                     <Menu.SubMenu title='数値'>
-                        {_(recordToArray(me.myNumberValues)).map(({ key, value }) => {
+                        {_(myNumberValues.toArray()).map(([ key, value ]) => {
                             const pieceExists = recordToDualKeyMap(value.pieces).toArray().some(([boardKey]) => boardKeyToShow.id === boardKey.second && boardKeyToShow.createdBy === boardKey.first);
                             return (
-                                <Menu.SubMenu key={key} title={<span>{pieceExists ? <Icon.CheckOutlined /> : null} {MyNumberValue.stringify(value)}</span>}>
+                                <Menu.SubMenu key={key.id} title={<span>{pieceExists ? <Icon.CheckOutlined /> : null} {MyNumberValue.stringify(value)}</span>}>
                                     <Menu.Item
                                         onClick={() => {
                                             dispatchRoomComponentsState({
@@ -1279,7 +1213,7 @@ const Board: React.FC<Props> = ({
                                                 newValue: {
                                                     type: update,
                                                     boardKey: boardKeyToShow,
-                                                    stateKey: key,
+                                                    stateKey: key.id,
                                                 }
                                             });
                                             setContextMenuState(null);
@@ -1290,17 +1224,11 @@ const Board: React.FC<Props> = ({
                                         onClick={() => {
                                             const operation: UpOperation = {
                                                 $version: 1,
-                                                participants: {
+                                                myNumberValues: {
                                                     [myUserUid]: {
-                                                        type: update,
-                                                        update: {
-                                                            $version: 1,
-                                                            myNumberValues: {
-                                                                [key]: {
-                                                                    type: replace,
-                                                                    replace: { newValue: undefined }
-                                                                }
-                                                            }
+                                                        [key.id]: {
+                                                            type: replace,
+                                                            replace: { newValue: undefined }
                                                         }
                                                     }
                                                 }

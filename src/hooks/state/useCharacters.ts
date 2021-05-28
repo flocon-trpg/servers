@@ -1,18 +1,18 @@
 import React from 'react';
-import { useParticipants } from './useParticipants';
-import { createStateMap, ReadonlyStateMap, recordToMap } from '@kizahasi/util';
+import { createStateMap, dualKeyRecordForEach, ReadonlyStateMap } from '@kizahasi/util';
 import { CharacterState } from '@kizahasi/flocon-core';
+import { useSelector } from '../../store';
 
 export const useCharacters = (): ReadonlyStateMap<CharacterState> | undefined => {
-    const participants = useParticipants();
+    const characters = useSelector(state => state.roomModule.roomState?.state?.characters);
     return React.useMemo(() => {
-        if (participants == null) {
+        if (characters == null) {
             return undefined;
         }
-        const source = new Map<string, Map<string, CharacterState>>();
-        [...participants].forEach(([key, value]) => {
-            source.set(key, recordToMap(value.characters));
+        const result = createStateMap<CharacterState>();
+        dualKeyRecordForEach<CharacterState>(characters, (value, key) => {
+            result.set({ createdBy: key.first, id: key.second }, value);
         });
-        return createStateMap(source);
-    }, [participants]);
+        return result;
+    }, [characters]);
 };

@@ -12,7 +12,8 @@ import { useStateEditor } from '../../hooks/useStateEditor';
 import { useOperate } from '../../hooks/useOperate';
 import { useMe } from '../../hooks/useMe';
 import { myNumberValueDiff, MyNumberValueState, toMyNumberValueUpOperation, UpOperation } from '@kizahasi/flocon-core';
-import { compositeKeyToString } from '@kizahasi/util';
+import { compositeKeyToString, dualKeyRecordFind } from '@kizahasi/util';
+import { useSelector } from '../../store';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -33,36 +34,34 @@ const MyNumberValueDrawer: React.FC = () => {
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
     const operate = useOperate();
     const { participant: me, userUid: myUserUid } = useMe();
+    const myNumberValues = useSelector(state => state.roomModule.roomState?.state?.myNumberValues);
 
     const drawerType = componentsState.myNumberValueDrawerType;
 
-    const { state, setState, stateToCreate } = useStateEditor(drawerType?.type === update ? (me?.myNumberValues ?? {})[drawerType.stateKey] : null, defaultMyNumberValue, ({ prevState, nextState }) => {
-        if (myUserUid == null || drawerType?.type !== update) {
-            return;
-        }
-        const diff = myNumberValueDiff({ prevState, nextState });
-        if (diff == null) {
-            return;
-        }
-        const operation: UpOperation = {
-            $version: 1,
-            participants: {
-                [myUserUid]: {
-                    type: update,
-                    update: {
-                        $version: 1,
-                        myNumberValues: {
-                            [drawerType.stateKey]: {
-                                type: update,
-                                update: toMyNumberValueUpOperation(diff),
-                            }
+    const { state, setState, stateToCreate } = useStateEditor(
+        drawerType?.type === update ? dualKeyRecordFind<MyNumberValueState>((myNumberValues ?? {}), { first: myUserUid ?? '', second: drawerType.stateKey }) : null,
+        defaultMyNumberValue,
+        ({ prevState, nextState }) => {
+            if (myUserUid == null || drawerType?.type !== update) {
+                return;
+            }
+            const diff = myNumberValueDiff({ prevState, nextState });
+            if (diff == null) {
+                return;
+            }
+            const operation: UpOperation = {
+                $version: 1,
+                myNumberValues: {
+                    [myUserUid]: {
+                        [drawerType.stateKey]: {
+                            type: update,
+                            update: toMyNumberValueUpOperation(diff),
                         }
                     }
                 }
-            }
-        };
-        operate(operation);
-    });
+            };
+            operate(operation);
+        });
 
     if (myUserUid == null) {
         return null;
@@ -79,22 +78,16 @@ const MyNumberValueDrawer: React.FC = () => {
             const id = simpleId();
             const operation: UpOperation = {
                 $version: 1,
-                participants: {
+                myNumberValues: {
                     [myUserUid]: {
-                        type: update,
-                        update: {
-                            $version: 1,
-                            myNumberValues: {
-                                [id]: {
-                                    type: replace,
-                                    replace: {
-                                        newValue: {
-                                            ...stateToCreate,
-                                            pieces: componentsState.myNumberValueDrawerType.boardKey == null ? {} : {
-                                                [componentsState.myNumberValueDrawerType.boardKey.createdBy]: {
-                                                    [componentsState.myNumberValueDrawerType.boardKey.id]: componentsState.myNumberValueDrawerType.piece,
-                                                }
-                                            }
+                        [id]: {
+                            type: replace,
+                            replace: {
+                                newValue: {
+                                    ...stateToCreate,
+                                    pieces: componentsState.myNumberValueDrawerType.boardKey == null ? {} : {
+                                        [componentsState.myNumberValueDrawerType.boardKey.createdBy]: {
+                                            [componentsState.myNumberValueDrawerType.boardKey.id]: componentsState.myNumberValueDrawerType.piece,
                                         }
                                     }
                                 }

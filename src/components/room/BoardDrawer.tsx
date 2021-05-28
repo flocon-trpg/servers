@@ -58,18 +58,12 @@ const BoardDrawer: React.FC = () => {
         }
         const operation: UpOperation = {
             $version: 1,
-            participants: {
+            boards: {
                 [drawerType.stateKey.createdBy]: {
-                    type: update,
-                    update: {
-                        $version: 1,
-                        boards: {
-                            [drawerType.stateKey.id]: {
-                                type: update,
-                                update: diffOperation,
-                            }
-                        }
-                    },
+                    [drawerType.stateKey.id]: {
+                        type: update,
+                        update: diffOperation,
+                    }
                 }
             }
         };
@@ -104,18 +98,12 @@ const BoardDrawer: React.FC = () => {
                 }
                 const operation: UpOperation = {
                     $version: 1,
-                    participants: {
+                    boards: {
                         [drawerType.stateKey.createdBy]: {
-                            type: update,
-                            update: {
-                                $version: 1,
-                                boards: {
-                                    [drawerType.stateKey.id]: {
-                                        type: update,
-                                        update: diffOperation,
-                                    }
-                                }
-                            },
+                            [drawerType.stateKey.id]: {
+                                type: update,
+                                update: diffOperation,
+                            }
                         }
                     }
                 };
@@ -131,20 +119,14 @@ const BoardDrawer: React.FC = () => {
             const id = simpleId();
             const operation: UpOperation = {
                 $version: 1,
-                participants: {
+                boards: {
                     [me.userUid]: {
-                        type: update,
-                        update: {
-                            $version: 1,
-                            boards: {
-                                [id]: {
-                                    type: replace,
-                                    replace: {
-                                        newValue: board,
-                                    }
-                                }
+                        [id]: {
+                            type: replace,
+                            replace: {
+                                newValue: board,
                             }
-                        },
+                        }
                     }
                 }
             };
@@ -160,20 +142,14 @@ const BoardDrawer: React.FC = () => {
         onDestroy = () => {
             const operation: UpOperation = {
                 $version: 1,
-                participants: {
+                boards: {
                     [drawerType.stateKey.createdBy]: {
-                        type: update,
-                        update: {
-                            $version: 1,
-                            boards: {
-                                [drawerType.stateKey.id]: {
-                                    type: replace,
-                                    replace: {
-                                        newValue: undefined,
-                                    }
-                                }
+                        [drawerType.stateKey.id]: {
+                            type: replace,
+                            replace: {
+                                newValue: undefined,
                             }
-                        },
+                        }
                     }
                 }
             };

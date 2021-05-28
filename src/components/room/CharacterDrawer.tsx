@@ -91,17 +91,11 @@ const CharacterDrawer: React.FC = () => {
         }
         const operation: UpOperation = {
             $version: 1,
-            participants: {
+            characters: {
                 [drawerType.stateKey.createdBy]: {
-                    type: update,
-                    update: {
-                        $version: 1,
-                        characters: {
-                            [drawerType.stateKey.id]: {
-                                type: update,
-                                update: toCharacterUpOperation(diffOperation),
-                            }
-                        }
+                    [drawerType.stateKey.id]: {
+                        type: update,
+                        update: toCharacterUpOperation(diffOperation),
                     }
                 }
             }
@@ -148,17 +142,11 @@ const CharacterDrawer: React.FC = () => {
                 }
                 const operation: UpOperation = {
                     $version: 1,
-                    participants: {
+                    characters: {
                         [drawerType.stateKey.createdBy]: {
-                            type: update,
-                            update: {
-                                $version: 1,
-                                characters: {
-                                    [drawerType.stateKey.id]: {
-                                        type: update,
-                                        update: toCharacterUpOperation(diffOperation),
-                                    }
-                                }
+                            [drawerType.stateKey.id]: {
+                                type: update,
+                                update: toCharacterUpOperation(diffOperation),
                             }
                         }
                     }
@@ -181,17 +169,11 @@ const CharacterDrawer: React.FC = () => {
             case update: {
                 const roomOperation: UpOperation = {
                     $version: 1,
-                    participants: {
+                    characters: {
                         [drawerType.stateKey.createdBy]: {
-                            type: update,
-                            update: {
-                                $version: 1,
-                                characters: {
-                                    [drawerType.stateKey.id]: {
-                                        type: update,
-                                        update: operation,
-                                    }
-                                }
+                            [drawerType.stateKey.id]: {
+                                type: update,
+                                update: operation,
                             }
                         }
                     }
@@ -212,27 +194,21 @@ const CharacterDrawer: React.FC = () => {
         }
         const operation: UpOperation = {
             $version: 1,
-            participants: {
+            characters: {
                 [drawerType.stateKey.createdBy]: {
-                    type: update,
-                    update: {
-                        $version: 1,
-                        characters: {
-                            [drawerType.stateKey.id]: {
-                                type: update,
-                                update: {
-                                    $version: 1,
-                                    pieces: {
-                                        [drawerType.boardKey.createdBy]: {
-                                            [drawerType.boardKey.id]: {
-                                                type: update,
-                                                update: diffOperation,
-                                            }
-                                        }
+                    [drawerType.stateKey.createdBy]: {
+                        type: update,
+                        update: {
+                            $version: 1,
+                            pieces: {
+                                [drawerType.boardKey.createdBy]: {
+                                    [drawerType.boardKey.id]: {
+                                        type: update,
+                                        update: diffOperation,
                                     }
-                                },
+                                }
                             }
-                        }
+                        },
                     }
                 }
             }
@@ -250,27 +226,21 @@ const CharacterDrawer: React.FC = () => {
         }
         const operation: UpOperation = {
             $version: 1,
-            participants: {
+            characters: {
                 [drawerType.stateKey.createdBy]: {
-                    type: update,
-                    update: {
-                        $version: 1,
-                        characters: {
-                            [drawerType.stateKey.id]: {
-                                type: update,
-                                update: {
-                                    $version: 1,
-                                    tachieLocations: {
-                                        [drawerType.boardKey.createdBy]: {
-                                            [drawerType.boardKey.id]: {
-                                                type: update,
-                                                update: diffOperation,
-                                            }
-                                        }
+                    [drawerType.stateKey.id]: {
+                        type: update,
+                        update: {
+                            $version: 1,
+                            tachieLocations: {
+                                [drawerType.boardKey.createdBy]: {
+                                    [drawerType.boardKey.id]: {
+                                        type: update,
+                                        update: diffOperation,
                                     }
-                                },
+                                }
                             }
-                        }
+                        },
                     }
                 }
             }
@@ -287,19 +257,13 @@ const CharacterDrawer: React.FC = () => {
             const id = simpleId();
             const operation: UpOperation = {
                 $version: 1,
-                participants: {
+                characters: {
                     [me.userUid]: {
-                        type: update,
-                        update: {
-                            $version: 1,
-                            characters: {
-                                [id]: {
-                                    type: replace,
-                                    replace: {
-                                        newValue: characterToCreate,
-                                    },
-                                }
-                            }
+                        [id]: {
+                            type: replace,
+                            replace: {
+                                newValue: characterToCreate,
+                            },
                         }
                     }
                 }
@@ -315,19 +279,13 @@ const CharacterDrawer: React.FC = () => {
         onDestroy = () => {
             const operation: UpOperation = {
                 $version: 1,
-                participants: {
+                characters: {
                     [drawerType.stateKey.createdBy]: {
-                        type: update,
-                        update: {
-                            $version: 1,
-                            characters: {
-                                [drawerType.stateKey.id]: {
-                                    type: replace,
-                                    replace: {
-                                        newValue: undefined,
-                                    },
-                                }
-                            }
+                        [drawerType.stateKey.id]: {
+                            type: replace,
+                            replace: {
+                                newValue: undefined,
+                            },
                         }
                     }
                 }
@@ -532,22 +490,16 @@ const CharacterDrawer: React.FC = () => {
                                         const id = simpleId();
                                         const operation: UpOperation = {
                                             $version: 1,
-                                            participants: {
+                                            characters: {
                                                 [me.userUid]: {
-                                                    type: update,
-                                                    update: {
-                                                        $version: 1,
-                                                        characters: {
-                                                            [id]: {
-                                                                type: replace,
-                                                                replace: {
-                                                                    newValue: {
-                                                                        ...character,
-                                                                        name: `${character.name} (複製)`,
-                                                                    },
-                                                                },
-                                                            }
-                                                        }
+                                                    [id]: {
+                                                        type: replace,
+                                                        replace: {
+                                                            newValue: {
+                                                                ...character,
+                                                                name: `${character.name} (複製)`,
+                                                            },
+                                                        },
                                                     }
                                                 }
                                             }

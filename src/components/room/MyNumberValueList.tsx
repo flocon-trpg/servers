@@ -9,9 +9,10 @@ import ToggleButton from '../../foundations/ToggleButton';
 import { getUserUid } from '../../hooks/useFirebaseUser';
 import { useOperate } from '../../hooks/useOperate';
 import { useParticipants } from '../../hooks/state/useParticipants';
-import { compositeKeyToString, recordToArray } from '@kizahasi/util';
+import { compositeKeyToString, dualKeyRecordForEach, recordToArray } from '@kizahasi/util';
 import { MyNumberValueState, UpOperation } from '@kizahasi/flocon-core';
 import _ from 'lodash';
+import { useSelector } from '../../store';
 
 type DataSource = {
     key: string;
@@ -25,20 +26,22 @@ const MyNumberValueList: React.FC = () => {
     const dispatch = React.useContext(DispatchRoomComponentsStateContext);
     const dispatchRoomComponentsState = React.useContext(DispatchRoomComponentsStateContext);
     const operate = useOperate();
-    const participantsMap = useParticipants();
+    const participants = useParticipants();
+    const myNumberValues = useSelector(state => state.roomModule.roomState?.state?.myNumberValues);
 
-    if (participantsMap == null) {
+    if (myNumberValues == null ||participants == null) {
         return null;
     }
 
-    const charactersDataSource: DataSource[] =
-        _([...participantsMap]).flatMap(([userUid, participant]) => recordToArray(participant.myNumberValues).map(({ key: stateId, value: myNumberValue }) => ({
-            key: compositeKeyToString({ createdBy: userUid, id: stateId }),
-            createdBy: userUid,
-            stateId,
-            state: myNumberValue,
-            operate,
-        }))).value();
+    const charactersDataSource: DataSource[] = [];
+    dualKeyRecordForEach<MyNumberValueState>(myNumberValues ?? {}, (value,key) => {
+        charactersDataSource.push({
+            key: compositeKeyToString({ createdBy: key.first, id: key.second }),
+            createdBy: key.first,
+            stateId: key.second,
+            state: value,
+        });
+    });
 
     const columns = [
         {
@@ -81,19 +84,13 @@ const MyNumberValueList: React.FC = () => {
                         onChange={newValue => {
                             const operation: UpOperation = {
                                 $version: 1,
-                                participants: {
+                                myNumberValues: {
                                     [createdBy]: {
-                                        type: update,
-                                        update: {
-                                            $version: 1,
-                                            myNumberValues: {
-                                                [stateId]: {
-                                                    type: update,
-                                                    update: {
-                                                        $version: 1,
-                                                        value: { newValue }
-                                                    }
-                                                }
+                                        [stateId]: {
+                                            type: update,
+                                            update: {
+                                                $version: 1,
+                                                value: { newValue }
                                             }
                                         }
                                     }
@@ -110,19 +107,13 @@ const MyNumberValueList: React.FC = () => {
                         onChange={newValue => {
                             const operation: UpOperation = {
                                 $version: 1,
-                                participants: {
+                                myNumberValues: {
                                     [createdBy]: {
-                                        type: update,
-                                        update: {
-                                            $version: 1,
-                                            myNumberValues: {
-                                                [stateId]: {
-                                                    type: update,
-                                                    update: {
-                                                        $version: 1,
-                                                        isValuePrivate: { newValue }
-                                                    }
-                                                }
+                                        [stateId]: {
+                                            type: update,
+                                            update: {
+                                                $version: 1,
+                                                isValuePrivate: { newValue }
                                             }
                                         }
                                     }
@@ -148,7 +139,7 @@ const MyNumberValueList: React.FC = () => {
             title: '作成者',
             // eslint-disable-next-line react/display-name
             render: (_: unknown, { state, createdBy, stateId }: DataSource) => {
-                return <span>{participantsMap.get(createdBy)?.name}{createdBy === getUserUid(myAuth) && <span style={{ fontWeight: 'bold', paddingLeft: 2 }}>(自分)</span>}</span>;
+                return <span>{participants.get(createdBy)?.name}{createdBy === getUserUid(myAuth) && <span style={{ fontWeight: 'bold', paddingLeft: 2 }}>(自分)</span>}</span>;
             },
         }
     ];

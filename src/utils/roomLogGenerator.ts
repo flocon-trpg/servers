@@ -5,7 +5,7 @@ import moment from 'moment';
 import { PublicChannelNames } from './types';
 import { RoomMessage } from '../components/room/RoomMessage';
 import { isDeleted, toText } from './message';
-import { recordToMap, createStateMap, recordForEach } from '@kizahasi/util';
+import { recordToMap, createStateMap, recordForEach, ReadonlyStateMap } from '@kizahasi/util';
 import { CharacterState, ParticipantState } from '@kizahasi/flocon-core';
 
 const privateMessage = 'privateMessage';
@@ -61,23 +61,18 @@ type RoomMessage = {
 
 const createRoomMessageArray = (props: {
     messages: RoomMessages;
+    characters: ReadonlyStateMap<CharacterState>;
     participants: ReadonlyMap<string, ParticipantState>;
 } & PublicChannelNames) => {
     const {
         messages,
+        characters,
         participants,
     } = props;
 
     const result: RoomMessage[] = [];
     const publicChannels = new Map<string, RoomPublicChannelFragment>();
     messages.publicChannels.forEach(ch => publicChannels.set(ch.key, ch));
-
-    const characters = createStateMap<CharacterState>();
-    participants.forEach((participant, createdBy) => {
-        recordForEach(participant.characters, (character, id) => {
-            characters.set({ createdBy, id }, character);
-        });
-    });
 
     const createCreatedBy = ({ createdBy, characterStateId, customName }: { createdBy: string; characterStateId?: string; customName?: string }): { rolePlayPart?: string; participantNamePart: string } => {
         const participantNamePart = participants.get(createdBy)?.name ?? createdBy;
@@ -166,6 +161,7 @@ const createRoomMessageArray = (props: {
 
 export const generateAsStaticHtml = (params: {
     messages: RoomMessages;
+    characters: ReadonlyStateMap<CharacterState>;
     participants: ReadonlyMap<string, ParticipantState>;
 } & PublicChannelNames) => {
     const elements = createRoomMessageArray(params).sort((x, y) => x.createdAt - y.createdAt).map(msg => {
