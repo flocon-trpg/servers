@@ -1,4 +1,4 @@
-import { Alert, Button } from 'antd';
+import { Alert, Button, Typography } from 'antd';
 import Link from 'next/link';
 import React from 'react';
 import FilesManagerDrawer from '../components/FilesManagerDrawer';
@@ -9,9 +9,11 @@ import { FilesManagerDrawerType, none } from '../utils/types';
 import VERSION from '../VERSION';
 import * as Icon from '@ant-design/icons';
 import { alpha, apiServerRequiresUpdate, beta, rc, SemVer, webServerRequiresUpdate } from '@kizahasi/util';
+import { useRouter } from 'next/router';
 
 const Index: React.FC = () => {
     const [drawerType, setDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
+    const router = useRouter();
 
     const { data: serverInfo, loading, error } = useGetServerInfoQuery();
 
@@ -60,20 +62,35 @@ const Index: React.FC = () => {
         </div>;
     })();
 
+    const spacing = 24;
     return (
         <Layout requiresLogin={false} showEntryForm={false}>
-            <div>
-                <Link href='/rooms'>部屋一覧</Link>
-                <Button onClick={() => setDrawerType({ openFileType: none })}>Open Files Manager</Button>
-                <Link href='/dev-memo'>制作メモ、更新履歴など</Link>
-                <FilesManagerDrawer drawerType={drawerType} onClose={() => setDrawerType(null)} />
+            <div style={{ padding: 32 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', width: 300 }}>
+                    <Button style={{ margin: '0 0 4px 0' }} type='primary' size='large' onClick={() => router.push('/rooms')}>部屋一覧</Button>
+                    <Button style={{ margin: '0 0 8px 0' }} onClick={() => setDrawerType({ openFileType: none })}>ファイルマネージャー</Button>
+                    <FilesManagerDrawer drawerType={drawerType} onClose={() => setDrawerType(null)} />
+                </div>
+                <div style={{ height: spacing }} />
+                <Typography.Title level={3}>バグと対処法</Typography.Title>
+                <ul>
+                    <li>部屋に初めて入ったとき、メッセージパネルがエラーになることがあります。ブラウザを更新すると直ります。</li>
+                </ul>
+                <div style={{ height: spacing }} />
+                <Typography.Title level={3}>バージョン情報</Typography.Title>
+                <div>{`クライアント: ${VERSION.toString()}`}</div>
+                <div>APIサーバー: {loading ? <span><Icon.LoadingOutlined />取得中…</span> : (apiServerSemVer == null ? '(エラーが発生しました)' : apiServerSemVer.toString())}</div>
+                <QueryResultViewer error={error} loading={false} compact>
+                    {versionInfo}
+                </QueryResultViewer>
+                <div style={{ height: spacing }} />
+                <Typography.Title level={3}>ドキュメントなど</Typography.Title>
+                <ul>
+                    <li><Link href='/docs/board'>新しくなったボードの使い方</Link> (New! 2021/05/29)</li>
+                    <li><Link href='/docs/toml'>変数、コマンド</Link></li>
+                    <li><Link href='/docs/dev-memo'>制作メモ、更新履歴など</Link></li>
+                </ul>
             </div>
-            <h2>バージョン情報</h2>
-            <div>{`クライアント: ${VERSION.toString()}`}</div>
-            <div>APIサーバー: {loading ? <span><Icon.LoadingOutlined />取得中…</span> : (apiServerSemVer == null ? '(エラーが発生しました)' : apiServerSemVer.toString())}</div>
-            <QueryResultViewer error={error} loading={false} compact>
-                {versionInfo}
-            </QueryResultViewer>
         </Layout>
     );
 };

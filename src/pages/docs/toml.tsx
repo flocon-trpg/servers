@@ -1,13 +1,14 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { Typography } from 'antd';
-import Layout from '../layouts/Layout';
+import Layout from '../../layouts/Layout';
 import { css } from '@emotion/react';
 
 const $css = css`
+padding: 32px;
 pre {
     background-color: rgba(255, 255, 255, 0.1);
-    padding: 4px 4px;
+    padding: 4px;
 }
 `;
 
@@ -18,10 +19,7 @@ pre {
 const Index: React.FC = () => {
     return (
         <Layout requiresLogin={false} showEntryForm={false}>
-            <div css={$css} style={({ margin: 10 })}>
-                <Typography.Title level={2}>アップデート履歴</Typography.Title>
-                <Typography.Text strong>※ アップデート履歴の記述の手間を省くため、最近のアップデート内容はこのページに記載されていません。正式リリースまではDiscordに貼ってあるTrelloというサイトのほうで管理しています。</Typography.Text>
-
+            <div css={$css}>
                 <Typography.Title level={2}>変数、コマンド</Typography.Title>
 
                 <Typography.Title level={3}>TOMLについて</Typography.Title>
@@ -61,6 +59,8 @@ const Index: React.FC = () => {
                 <p>{'変数に設定した値は、チャットで{"HP"}や{"敏捷"}などとすることで取得できます(パラメーターの左辺の規則が使われます。そのため、{"HP"}は{HP}と書いても全く同じ意味になります)。キャラクターが持つパラメータと変数のパラメータの名前が重複した場合、現状では変数が優先される仕様になっています（後で変えるかもしれません）。'}</p>
 
                 <Typography.Title level={3}>コマンド</Typography.Title>
+
+                <p><strong>⚠️コマンド機能は将来、文法が変更される可能性が高いです。</strong></p>
 
                 <p>現在、キャラクターに対するコマンドのみがとりあえず実装されています。</p>
 
