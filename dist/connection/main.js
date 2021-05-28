@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.InMemoryConnectionManager = exports.pubSub = void 0;
 const util_1 = require("@kizahasi/util");
 const apollo_server_express_1 = require("apollo-server-express");
+const lodash_1 = __importDefault(require("lodash"));
 const node_cache_1 = __importDefault(require("node-cache"));
 const WritingMessageStatusType_1 = require("../enums/WritingMessageStatusType");
 const Topics_1 = require("../graphql+mikro-orm/utils/Topics");
@@ -94,7 +95,7 @@ class WritingMessageStatusDatabase {
         return status;
     }
     onDisconnect({ userUid, roomId }) {
-        return util_1.__(this.database.keys()).compact(key => {
+        return lodash_1.default(this.database.keys()).map(key => {
             const split = key.split('@');
             if (split.length !== 3) {
                 return undefined;
@@ -113,7 +114,7 @@ class WritingMessageStatusDatabase {
             }
             this.database.del(key);
             return { publicChannelKey };
-        }).toArray();
+        }).compact().value();
     }
 }
 class InMemoryConnectionManager {

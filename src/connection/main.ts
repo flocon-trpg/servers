@@ -1,5 +1,6 @@
-import { PublicChannelKey, __ } from '@kizahasi/util';
+import { PublicChannelKey } from '@kizahasi/util';
 import { PubSub } from 'apollo-server-express';
+import _ from 'lodash';
 import NodeCache from 'node-cache';
 import { WritingMessageStatusType } from '../enums/WritingMessageStatusType';
 import { RoomEventPayload } from '../graphql+mikro-orm/resolvers/rooms/RoomResolver';
@@ -96,7 +97,7 @@ class WritingMessageStatusDatabase {
     }
 
     public onDisconnect({ userUid, roomId }: { userUid: string; roomId: string }): { publicChannelKey: PublicChannelKey.Without$System.PublicChannelKey }[] {
-        return __(this.database.keys()).compact(key => {
+        return _(this.database.keys()).map(key => {
             const split = key.split('@');
             if (split.length !== 3) {
                 return undefined;
@@ -115,7 +116,7 @@ class WritingMessageStatusDatabase {
             }
             this.database.del(key);
             return { publicChannelKey };
-        }).toArray();
+        }).compact().value();
     }
 }
 
