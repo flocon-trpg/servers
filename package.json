@@ -2,7 +2,7 @@
     "dependencies": {
         "@apollo/client": "^3.3.15",
         "@emotion/react": "^11.1.5",
-        "@kizahasi/flocon-core": "0.1.0-alpha.11",
+        "@kizahasi/flocon-core": "0.1.0-alpha.12",
         "@kizahasi/result": "^0.2.0",
         "@kizahasi/util": "0.1.0-alpha.4",
         "@next/bundle-analyzer": "^10.1.3",
