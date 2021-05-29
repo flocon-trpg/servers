@@ -82,18 +82,9 @@ export const applyBack = (state: string, action: DownOperation) => {
 export const composeUpOperation = (
     first: UpOperation | undefined,
     second: UpOperation | undefined
-): CustomResult<
-    UpOperation | undefined,
-    TextOperationCore.ComposeAndTransformError
-> => {
-    const first$ =
-        first == null
-            ? undefined
-            : TextOperationCore.TextUpOperation.ofUnit(first);
-    const second$ =
-        second == null
-            ? undefined
-            : TextOperationCore.TextUpOperation.ofUnit(second);
+): CustomResult<UpOperation | undefined, TextOperationCore.ComposeAndTransformError> => {
+    const first$ = first == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(first);
+    const second$ = second == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(second);
     if (first$ == null) {
         return Result.ok(second);
     }
@@ -113,18 +104,9 @@ export const composeUpOperation = (
 export const composeDownOperation = (
     first: DownOperation | undefined,
     second: DownOperation | undefined
-): CustomResult<
-    DownOperation | undefined,
-    TextOperationCore.ComposeAndTransformError
-> => {
-    const first$ =
-        first == null
-            ? undefined
-            : TextOperationCore.TextDownOperation.ofUnit(first);
-    const second$ =
-        second == null
-            ? undefined
-            : TextOperationCore.TextDownOperation.ofUnit(second);
+): CustomResult<DownOperation | undefined, TextOperationCore.ComposeAndTransformError> => {
+    const first$ = first == null ? undefined : TextOperationCore.TextDownOperation.ofUnit(first);
+    const second$ = second == null ? undefined : TextOperationCore.TextDownOperation.ofUnit(second);
     if (first$ == null) {
         return Result.ok(second);
     }
@@ -167,9 +149,7 @@ export const restore = ({
     }
     return Result.ok({
         prevState: result.value.prevState,
-        twoWayOperation: TextOperationCore.TextTwoWayOperation.toUnit(
-            result.value.restored
-        ),
+        twoWayOperation: TextOperationCore.TextTwoWayOperation.toUnit(result.value.restored),
     });
 };
 
@@ -182,38 +162,29 @@ export const serverTransform = ({
     second?: UpOperation;
     prevState: string;
 }) => {
-    const first$ =
-        first == null
-            ? undefined
-            : TextOperationCore.TextTwoWayOperation.ofUnit(first);
+    const first$ = first == null ? undefined : TextOperationCore.TextTwoWayOperation.ofUnit(first);
     if (first$ === undefined) {
         const second$ =
-            second == null
-                ? undefined
-                : TextOperationCore.TextUpOperation.ofUnit(second);
+            second == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(second);
         if (second$ === undefined) {
             return Result.ok({
                 firstPrime: undefined,
                 secondPrime: undefined,
             });
         }
-        const restoreResult = TextOperationCore.TextUpOperation.applyAndRestore(
-            { prevState, action: second$ }
-        );
+        const restoreResult = TextOperationCore.TextUpOperation.applyAndRestore({
+            prevState,
+            action: second$,
+        });
         if (restoreResult.isError) {
             return restoreResult;
         }
         return Result.ok({
             firstPrime: undefined,
-            secondPrime: TextOperationCore.TextTwoWayOperation.toUnit(
-                restoreResult.value.restored
-            ),
+            secondPrime: TextOperationCore.TextTwoWayOperation.toUnit(restoreResult.value.restored),
         });
     }
-    const second$ =
-        second == null
-            ? undefined
-            : TextOperationCore.TextUpOperation.ofUnit(second);
+    const second$ = second == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(second);
     if (second$ === undefined) {
         return Result.ok({
             firstPrime: first$,
@@ -235,12 +206,8 @@ export const serverTransform = ({
         return result;
     }
     return Result.ok({
-        firstPrime: TextOperationCore.TextTwoWayOperation.toUnit(
-            result.value.firstPrime
-        ),
-        secondPrime: TextOperationCore.TextTwoWayOperation.toUnit(
-            result.value.secondPrime
-        ),
+        firstPrime: TextOperationCore.TextTwoWayOperation.toUnit(result.value.firstPrime),
+        secondPrime: TextOperationCore.TextTwoWayOperation.toUnit(result.value.secondPrime),
     });
 };
 
@@ -251,15 +218,10 @@ export const clientTransform = ({
     first?: UpOperation;
     second?: UpOperation;
 }) => {
-    const first$ =
-        first == null
-            ? undefined
-            : TextOperationCore.TextUpOperation.ofUnit(first);
+    const first$ = first == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(first);
     if (first$ === undefined) {
         const second$ =
-            second == null
-                ? undefined
-                : TextOperationCore.TextUpOperation.ofUnit(second);
+            second == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(second);
         if (second$ === undefined) {
             return Result.ok({
                 firstPrime: undefined,
@@ -271,10 +233,7 @@ export const clientTransform = ({
             secondPrime: TextOperationCore.TextUpOperation.toUnit(second$),
         });
     }
-    const second$ =
-        second == null
-            ? undefined
-            : TextOperationCore.TextUpOperation.ofUnit(second);
+    const second$ = second == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(second);
     if (second$ === undefined) {
         return Result.ok({
             firstPrime: TextOperationCore.TextUpOperation.toUnit(first$),
@@ -289,22 +248,12 @@ export const clientTransform = ({
         return result;
     }
     return Result.ok({
-        firstPrime: TextOperationCore.TextUpOperation.toUnit(
-            result.value.firstPrime
-        ),
-        secondPrime: TextOperationCore.TextUpOperation.toUnit(
-            result.value.secondPrime
-        ),
+        firstPrime: TextOperationCore.TextUpOperation.toUnit(result.value.firstPrime),
+        secondPrime: TextOperationCore.TextUpOperation.toUnit(result.value.secondPrime),
     });
 };
 
-export const diff = ({
-    prev,
-    next,
-}: {
-    prev: string;
-    next: string;
-}): TwoWayOperation => {
+export const diff = ({ prev, next }: { prev: string; next: string }): TwoWayOperation => {
     return TextOperationCore.TextTwoWayOperation.toUnit(
         TextOperationCore.TextTwoWayOperation.diff({
             first: prev,
@@ -313,46 +262,30 @@ export const diff = ({
     );
 };
 
-const diffToUpOperation = ({
-    prev,
-    next,
-}: {
-    prev: string;
-    next: string;
-}): UpOperation => {
+const diffToUpOperation = ({ prev, next }: { prev: string; next: string }): UpOperation => {
     const twoWayOperation = TextOperationCore.TextTwoWayOperation.diff({
         first: prev,
         second: next,
     });
-    const upOperation = TextOperationCore.TextTwoWayOperation.toUpOperation(
-        twoWayOperation
-    );
+    const upOperation = TextOperationCore.TextTwoWayOperation.toUpOperation(twoWayOperation);
     return TextOperationCore.TextUpOperation.toUnit(upOperation);
 };
 
 export const toUpOperation = (source: TwoWayOperation): UpOperation => {
-    const twoWayOperation = TextOperationCore.TextTwoWayOperation.ofUnit(
-        source
-    );
+    const twoWayOperation = TextOperationCore.TextTwoWayOperation.ofUnit(source);
     if (twoWayOperation == null) {
         throw new Error('This should not happen');
     }
-    const upOperation = TextOperationCore.TextTwoWayOperation.toUpOperation(
-        twoWayOperation
-    );
+    const upOperation = TextOperationCore.TextTwoWayOperation.toUpOperation(twoWayOperation);
     return TextOperationCore.TextUpOperation.toUnit(upOperation);
 };
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
-    const twoWayOperation = TextOperationCore.TextTwoWayOperation.ofUnit(
-        source
-    );
+    const twoWayOperation = TextOperationCore.TextTwoWayOperation.ofUnit(source);
     if (twoWayOperation == null) {
         throw new Error('This should not happen');
     }
-    const downOperation = TextOperationCore.TextTwoWayOperation.toDownOperation(
-        twoWayOperation
-    );
+    const downOperation = TextOperationCore.TextTwoWayOperation.toDownOperation(twoWayOperation);
     return TextOperationCore.TextDownOperation.toUnit(downOperation);
 };
 

@@ -97,10 +97,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     return Result.ok(result);
 };
 
-export const applyBack: Apply<State, DownOperation> = ({
-    state,
-    operation,
-}) => {
+export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
     const result = { ...state };
 
     if (operation.h !== undefined) {
@@ -126,10 +123,7 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
     const valueProps: UpOperation = {
         $version: 1,
         h: ReplaceOperation.composeUpOperation(first.h, second.h),
-        isPrivate: ReplaceOperation.composeUpOperation(
-            first.isPrivate,
-            second.isPrivate
-        ),
+        isPrivate: ReplaceOperation.composeUpOperation(first.isPrivate, second.isPrivate),
         w: ReplaceOperation.composeUpOperation(first.w, second.w),
         x: ReplaceOperation.composeUpOperation(first.x, second.x),
         y: ReplaceOperation.composeUpOperation(first.y, second.y),
@@ -137,17 +131,11 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
     return Result.ok(valueProps);
 };
 
-export const composeDownOperation: Compose<DownOperation> = ({
-    first,
-    second,
-}) => {
+export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const valueProps: DownOperation = {
         $version: 1,
         h: ReplaceOperation.composeDownOperation(first.h, second.h),
-        isPrivate: ReplaceOperation.composeDownOperation(
-            first.isPrivate,
-            second.isPrivate
-        ),
+        isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
         w: ReplaceOperation.composeDownOperation(first.w, second.w),
         x: ReplaceOperation.composeDownOperation(first.x, second.x),
         y: ReplaceOperation.composeDownOperation(first.y, second.y),
@@ -192,10 +180,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     return Result.ok({ prevState, twoWayOperation });
 };
 
-export const diff: Diff<State, TwoWayOperation> = ({
-    prevState,
-    nextState,
-}) => {
+export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
     const resultType: TwoWayOperation = { $version: 1 };
     if (prevState.h !== nextState.h) {
         resultType.h = { oldValue: prevState.h, newValue: nextState.h };
@@ -221,11 +206,11 @@ export const diff: Diff<State, TwoWayOperation> = ({
     return resultType;
 };
 
-export const serverTransform: ServerTransform<
-    State,
-    TwoWayOperation,
-    UpOperation
-> = ({ prevState, clientOperation, serverOperation }) => {
+export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperation> = ({
+    prevState,
+    clientOperation,
+    serverOperation,
+}) => {
     const twoWayOperation: TwoWayOperation = { $version: 1 };
 
     twoWayOperation.h = ReplaceOperation.serverTransform({
@@ -261,10 +246,7 @@ export const serverTransform: ServerTransform<
     return Result.ok(twoWayOperation);
 };
 
-export const clientTransform: ClientTransform<UpOperation> = ({
-    first,
-    second,
-}) => {
+export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
     const h = ReplaceOperation.clientTransform({
         first: first.h,
         second: second.h,

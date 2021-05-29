@@ -44,9 +44,7 @@ export type TwoWayOperation = {
     value?: TextOperation.TwoWayOperation;
 };
 
-export const toClientState = (createdByMe: boolean) => (
-    source: State
-): State => {
+export const toClientState = (createdByMe: boolean) => (source: State): State => {
     return {
         ...source,
         value: source.isValuePrivate && !createdByMe ? '' : source.value,
@@ -78,27 +76,18 @@ export const toClientOperation = (createdByMe: boolean) => ({
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return {
         ...source,
-        value:
-            source.value == null
-                ? undefined
-                : TextOperation.toDownOperation(source.value),
+        value: source.value == null ? undefined : TextOperation.toDownOperation(source.value),
     };
 };
 
 export const toUpOperation = (source: TwoWayOperation): UpOperation => {
     return {
         ...source,
-        value:
-            source.value == null
-                ? undefined
-                : TextOperation.toUpOperation(source.value),
+        value: source.value == null ? undefined : TextOperation.toUpOperation(source.value),
     };
 };
 
-export const apply: Apply<State, UpOperation | TwoWayOperation> = ({
-    state,
-    operation,
-}) => {
+export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
     const result: State = { ...state };
     if (operation.isValuePrivate != null) {
         result.isValuePrivate = operation.isValuePrivate.newValue;
@@ -113,10 +102,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({
     return Result.ok(result);
 };
 
-export const applyBack: Apply<State, DownOperation> = ({
-    state,
-    operation,
-}) => {
+export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
     const result = { ...state };
 
     if (operation.isValuePrivate !== undefined) {
@@ -149,10 +135,7 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
     return Result.ok(valueProps);
 };
 
-export const composeDownOperation: Compose<DownOperation> = ({
-    first,
-    second,
-}) => {
+export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const value = TextOperation.composeDownOperation(first.value, second.value);
     if (value.isError) {
         return value;
@@ -205,10 +188,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     return Result.ok({ prevState, nextState, twoWayOperation });
 };
 
-export const diff: Diff<State, TwoWayOperation> = ({
-    prevState,
-    nextState,
-}) => {
+export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
     const resultType: TwoWayOperation = { $version: 1 };
     if (prevState.isValuePrivate !== nextState.isValuePrivate) {
         resultType.isValuePrivate = {
@@ -264,10 +244,7 @@ export const serverTransform = (
     return Result.ok(twoWayOperation);
 };
 
-export const clientTransform: ClientTransform<UpOperation> = ({
-    first,
-    second,
-}) => {
+export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
     const isValuePrivate = ReplaceOperation.clientTransform({
         first: first.isValuePrivate,
         second: second.isValuePrivate,

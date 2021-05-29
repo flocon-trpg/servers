@@ -31,17 +31,8 @@ import * as SimpleValueParam from './simpleValueParam/v1';
 import { operation } from '../util/operation';
 import { isIdRecord } from '../util/record';
 import { Result } from '@kizahasi/result';
-import {
-    ApplyError,
-    ComposeAndTransformError,
-    PositiveInt,
-} from '@kizahasi/ot-string';
-import {
-    chooseDualKeyRecord,
-    chooseRecord,
-    Maybe,
-    maybe,
-} from '@kizahasi/util';
+import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
+import { chooseDualKeyRecord, chooseRecord, Maybe, maybe } from '@kizahasi/util';
 
 // privateCommandsは無効化しているが、コードは大部分残している
 
@@ -62,10 +53,7 @@ export const state = t.type({
     strParams: t.record(t.string, StrParam.state),
     pieces: t.record(t.string, t.record(t.string, Piece.state)),
     privateCommands: t.record(t.string, Command.state),
-    tachieLocations: t.record(
-        t.string,
-        t.record(t.string, BoardLocation.state)
-    ),
+    tachieLocations: t.record(t.string, t.record(t.string, BoardLocation.state)),
 });
 
 export type State = t.TypeOf<typeof state>;
@@ -85,10 +73,7 @@ export const downOperation = operation(1, {
     strParams: t.record(t.string, StrParam.downOperation),
     pieces: t.record(
         t.string,
-        t.record(
-            t.string,
-            recordDownOperationElementFactory(Piece.state, Piece.downOperation)
-        )
+        t.record(t.string, recordDownOperationElementFactory(Piece.state, Piece.downOperation))
     ),
     privateCommands: t.record(
         t.string,
@@ -98,10 +83,7 @@ export const downOperation = operation(1, {
         t.string,
         t.record(
             t.string,
-            recordDownOperationElementFactory(
-                BoardLocation.state,
-                BoardLocation.downOperation
-            )
+            recordDownOperationElementFactory(BoardLocation.state, BoardLocation.downOperation)
         )
     ),
 });
@@ -123,10 +105,7 @@ export const upOperation = operation(1, {
     strParams: t.record(t.string, StrParam.upOperation),
     pieces: t.record(
         t.string,
-        t.record(
-            t.string,
-            recordUpOperationElementFactory(Piece.state, Piece.upOperation)
-        )
+        t.record(t.string, recordUpOperationElementFactory(Piece.state, Piece.upOperation))
     ),
     privateCommands: t.record(
         t.string,
@@ -136,10 +115,7 @@ export const upOperation = operation(1, {
         t.string,
         t.record(
             t.string,
-            recordUpOperationElementFactory(
-                BoardLocation.state,
-                BoardLocation.upOperation
-            )
+            recordUpOperationElementFactory(BoardLocation.state, BoardLocation.upOperation)
         )
     ),
 });
@@ -162,10 +138,7 @@ export type TwoWayOperation = {
     numMaxParams?: Record<string, NumParam.TwoWayOperation>;
     strParams?: Record<string, StrParam.TwoWayOperation>;
     pieces?: DualKeyRecordTwoWayOperation<Piece.State, Piece.TwoWayOperation>;
-    privateCommands?: RecordTwoWayOperation<
-        Command.State,
-        Command.TwoWayOperation
-    >;
+    privateCommands?: RecordTwoWayOperation<Command.State, Command.TwoWayOperation>;
     tachieLocations?: DualKeyRecordTwoWayOperation<
         BoardLocation.State,
         BoardLocation.TwoWayOperation
@@ -190,9 +163,7 @@ const defaultStrParamState: StrParam.State = {
     value: '',
 };
 
-export const toClientState = (createdByMe: boolean) => (
-    source: State
-): State => {
+export const toClientState = (createdByMe: boolean) => (source: State): State => {
     return {
         ...source,
         privateCommand: createdByMe ? source.privateCommand : '',
@@ -201,44 +172,31 @@ export const toClientState = (createdByMe: boolean) => (
             serverState: source.boolParams,
             isPrivate: () => false,
             toClientState: ({ state }) =>
-                SimpleValueParam.toClientState<Maybe<boolean>>(
-                    createdByMe,
-                    null
-                )(state),
+                SimpleValueParam.toClientState<Maybe<boolean>>(createdByMe, null)(state),
         }),
         numParams: RecordOperation.toClientState({
             serverState: source.numParams,
             isPrivate: () => false,
             toClientState: ({ state }) =>
-                SimpleValueParam.toClientState<Maybe<number>>(
-                    createdByMe,
-                    null
-                )(state),
+                SimpleValueParam.toClientState<Maybe<number>>(createdByMe, null)(state),
         }),
         numMaxParams: RecordOperation.toClientState({
             serverState: source.numMaxParams,
             isPrivate: () => false,
             toClientState: ({ state }) =>
-                SimpleValueParam.toClientState<Maybe<number>>(
-                    createdByMe,
-                    null
-                )(state),
+                SimpleValueParam.toClientState<Maybe<number>>(createdByMe, null)(state),
         }),
         strParams: RecordOperation.toClientState({
             serverState: source.strParams,
             isPrivate: () => false,
-            toClientState: ({ state }) =>
-                StrParam.toClientState(createdByMe)(state),
+            toClientState: ({ state }) => StrParam.toClientState(createdByMe)(state),
         }),
         pieces: DualKeyRecordOperation.toClientState<Piece.State, Piece.State>({
             serverState: source.pieces,
             isPrivate: () => false,
             toClientState: ({ state }) => Piece.toClientState(state),
         }),
-        privateCommands: RecordOperation.toClientState<
-            Command.State,
-            Command.State
-        >({
+        privateCommands: RecordOperation.toClientState<Command.State, Command.State>({
             serverState: source.privateCommands,
             isPrivate: () => !createdByMe,
             toClientState: ({ state }) => Command.toClientState(state),
@@ -261,10 +219,7 @@ export const toClientOperation = (createdByMe: boolean) => ({
 }: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
     return {
         ...diff,
-        memo:
-            diff.memo == null
-                ? undefined
-                : TextOperation.toUpOperation(diff.memo),
+        memo: diff.memo == null ? undefined : TextOperation.toUpOperation(diff.memo),
         privateCommand:
             diff.privateCommand == null
                 ? undefined
@@ -322,8 +277,7 @@ export const toClientOperation = (createdByMe: boolean) => ({
                       diff: diff.strParams,
                       prevState: prevState.strParams,
                       nextState: nextState.strParams,
-                      toClientOperation: params =>
-                          StrParam.toClientOperation(createdByMe)(params),
+                      toClientOperation: params => StrParam.toClientOperation(createdByMe)(params),
                       defaultState: defaultStrParamState,
                   }),
         pieces:
@@ -333,10 +287,8 @@ export const toClientOperation = (createdByMe: boolean) => ({
                       diff: diff.pieces,
                       prevState: prevState.pieces,
                       nextState: nextState.pieces,
-                      toClientState: ({ nextState }) =>
-                          Piece.toClientState(nextState),
-                      toClientOperation: params =>
-                          Piece.toClientOperation(params),
+                      toClientState: ({ nextState }) => Piece.toClientState(nextState),
+                      toClientOperation: params => Piece.toClientOperation(params),
                       isPrivate: () => false,
                   }),
         privateCommands:
@@ -346,10 +298,8 @@ export const toClientOperation = (createdByMe: boolean) => ({
                       diff: diff.privateCommands,
                       prevState: prevState.privateCommands,
                       nextState: nextState.privateCommands,
-                      toClientState: ({ nextState }) =>
-                          Command.toClientState(nextState),
-                      toClientOperation: params =>
-                          Command.toClientOperation(params),
+                      toClientState: ({ nextState }) => Command.toClientState(nextState),
+                      toClientOperation: params => Command.toClientOperation(params),
                       isPrivate: () => !createdByMe,
                   }),
         tachieLocations:
@@ -359,10 +309,8 @@ export const toClientOperation = (createdByMe: boolean) => ({
                       diff: diff.tachieLocations,
                       prevState: prevState.tachieLocations,
                       nextState: nextState.tachieLocations,
-                      toClientState: ({ nextState }) =>
-                          BoardLocation.toClientState(nextState),
-                      toClientOperation: params =>
-                          BoardLocation.toClientOperation(params),
+                      toClientState: ({ nextState }) => BoardLocation.toClientState(nextState),
+                      toClientOperation: params => BoardLocation.toClientOperation(params),
                       isPrivate: () => false,
                   }),
     };
@@ -371,10 +319,7 @@ export const toClientOperation = (createdByMe: boolean) => ({
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return {
         ...source,
-        memo:
-            source.memo == null
-                ? undefined
-                : TextOperation.toDownOperation(source.memo),
+        memo: source.memo == null ? undefined : TextOperation.toDownOperation(source.memo),
         privateCommand:
             source.privateCommand == null
                 ? undefined
@@ -386,24 +331,15 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
         boolParams:
             source.boolParams == null
                 ? undefined
-                : chooseRecord(
-                      source.boolParams,
-                      SimpleValueParam.toDownOperation
-                  ),
+                : chooseRecord(source.boolParams, SimpleValueParam.toDownOperation),
         numParams:
             source.numParams == null
                 ? undefined
-                : chooseRecord(
-                      source.numParams,
-                      SimpleValueParam.toDownOperation
-                  ),
+                : chooseRecord(source.numParams, SimpleValueParam.toDownOperation),
         numMaxParams:
             source.numMaxParams == null
                 ? undefined
-                : chooseRecord(
-                      source.numMaxParams,
-                      SimpleValueParam.toDownOperation
-                  ),
+                : chooseRecord(source.numMaxParams, SimpleValueParam.toDownOperation),
         strParams:
             source.strParams == null
                 ? undefined
@@ -444,10 +380,7 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
 export const toUpOperation = (source: TwoWayOperation): UpOperation => {
     return {
         ...source,
-        memo:
-            source.memo == null
-                ? undefined
-                : TextOperation.toUpOperation(source.memo),
+        memo: source.memo == null ? undefined : TextOperation.toUpOperation(source.memo),
         privateCommand:
             source.privateCommand == null
                 ? undefined
@@ -459,24 +392,15 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
         boolParams:
             source.boolParams == null
                 ? undefined
-                : chooseRecord(
-                      source.boolParams,
-                      SimpleValueParam.toUpOperation
-                  ),
+                : chooseRecord(source.boolParams, SimpleValueParam.toUpOperation),
         numParams:
             source.numParams == null
                 ? undefined
-                : chooseRecord(
-                      source.numParams,
-                      SimpleValueParam.toUpOperation
-                  ),
+                : chooseRecord(source.numParams, SimpleValueParam.toUpOperation),
         numMaxParams:
             source.numMaxParams == null
                 ? undefined
-                : chooseRecord(
-                      source.numMaxParams,
-                      SimpleValueParam.toUpOperation
-                  ),
+                : chooseRecord(source.numMaxParams, SimpleValueParam.toUpOperation),
         strParams:
             source.strParams == null
                 ? undefined
@@ -514,10 +438,7 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
     };
 };
 
-export const apply: Apply<State, UpOperation | TwoWayOperation> = ({
-    state,
-    operation,
-}) => {
+export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
     const result: State = { ...state };
     if (operation.image != null) {
         result.image = operation.image.newValue;
@@ -537,20 +458,14 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({
     }
 
     if (operation.privateCommand != null) {
-        const valueResult = TextOperation.apply(
-            state.privateCommand,
-            operation.privateCommand
-        );
+        const valueResult = TextOperation.apply(state.privateCommand, operation.privateCommand);
         if (valueResult.isError) {
             return valueResult;
         }
         result.privateCommand = valueResult.value;
     }
     if (operation.privateVarToml != null) {
-        const valueResult = TextOperation.apply(
-            state.privateVarToml,
-            operation.privateVarToml
-        );
+        const valueResult = TextOperation.apply(state.privateVarToml, operation.privateVarToml);
         if (valueResult.isError) {
             return valueResult;
         }
@@ -688,10 +603,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({
     return Result.ok(result);
 };
 
-export const applyBack: Apply<State, DownOperation> = ({
-    state,
-    operation,
-}) => {
+export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
     const result: State = { ...state };
     if (operation.image != null) {
         result.image = operation.image.oldValue;
@@ -710,20 +622,14 @@ export const applyBack: Apply<State, DownOperation> = ({
         result.name = operation.name.oldValue;
     }
     if (operation.privateCommand != null) {
-        const valueResult = TextOperation.applyBack(
-            state.privateCommand,
-            operation.privateCommand
-        );
+        const valueResult = TextOperation.applyBack(state.privateCommand, operation.privateCommand);
         if (valueResult.isError) {
             return valueResult;
         }
         result.privateCommand = valueResult.value;
     }
     if (operation.privateVarToml != null) {
-        const valueResult = TextOperation.applyBack(
-            state.privateVarToml,
-            operation.privateVarToml
-        );
+        const valueResult = TextOperation.applyBack(state.privateVarToml, operation.privateVarToml);
         if (valueResult.isError) {
             return valueResult;
         }
@@ -865,8 +771,7 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
     const boolParams = ParamRecordOperation.compose({
         first: first.boolParams,
         second: second.boolParams,
-        innerCompose: params =>
-            SimpleValueParam.composeUpOperation<Maybe<boolean>>()(params),
+        innerCompose: params => SimpleValueParam.composeUpOperation<Maybe<boolean>>()(params),
     });
     if (boolParams.isError) {
         return boolParams;
@@ -875,8 +780,7 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
     const numParams = ParamRecordOperation.compose({
         first: first.numParams,
         second: second.numParams,
-        innerCompose: params =>
-            SimpleValueParam.composeUpOperation<Maybe<number>>()(params),
+        innerCompose: params => SimpleValueParam.composeUpOperation<Maybe<number>>()(params),
     });
     if (numParams.isError) {
         return numParams;
@@ -885,8 +789,7 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
     const numMaxParams = ParamRecordOperation.compose({
         first: first.numMaxParams,
         second: second.numMaxParams,
-        innerCompose: params =>
-            SimpleValueParam.composeUpOperation<Maybe<number>>()(params),
+        innerCompose: params => SimpleValueParam.composeUpOperation<Maybe<number>>()(params),
     });
     if (numMaxParams.isError) {
         return numMaxParams;
@@ -922,8 +825,7 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
     >({
         first: first.privateCommands,
         second: second.privateCommands,
-        innerApply: ({ state, operation }) =>
-            Command.apply({ state, operation }),
+        innerApply: ({ state, operation }) => Command.apply({ state, operation }),
         innerCompose: params => Command.composeUpOperation(params),
     });
     if (privateCommands.isError) {
@@ -937,8 +839,7 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
     >({
         first: first.tachieLocations,
         second: second.tachieLocations,
-        innerApply: ({ state, operation }) =>
-            BoardLocation.apply({ state, operation }),
+        innerApply: ({ state, operation }) => BoardLocation.apply({ state, operation }),
         innerCompose: params => BoardLocation.composeUpOperation(params),
     });
     if (tachieLocations.isError) {
@@ -969,19 +870,13 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
     const valueProps: UpOperation = {
         $version: 1,
 
-        isPrivate: ReplaceOperation.composeUpOperation(
-            first.isPrivate,
-            second.isPrivate
-        ),
+        isPrivate: ReplaceOperation.composeUpOperation(first.isPrivate, second.isPrivate),
         memo: memo.value,
         name: ReplaceOperation.composeUpOperation(first.name, second.name),
         privateCommand: privateCommand.value,
         privateVarToml: privateVarToml.value,
         image: ReplaceOperation.composeUpOperation(first.image, second.image),
-        tachieImage: ReplaceOperation.composeUpOperation(
-            first.tachieImage,
-            second.tachieImage
-        ),
+        tachieImage: ReplaceOperation.composeUpOperation(first.tachieImage, second.tachieImage),
         boolParams: boolParams.value,
         numParams: numParams.value,
         numMaxParams: numMaxParams.value,
@@ -993,15 +888,11 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
     return Result.ok(valueProps);
 };
 
-export const composeDownOperation: Compose<DownOperation> = ({
-    first,
-    second,
-}) => {
+export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const boolParams = ParamRecordOperation.compose({
         first: first.boolParams,
         second: second.boolParams,
-        innerCompose: params =>
-            SimpleValueParam.composeDownOperation<Maybe<boolean>>()(params),
+        innerCompose: params => SimpleValueParam.composeDownOperation<Maybe<boolean>>()(params),
     });
     if (boolParams.isError) {
         return boolParams;
@@ -1010,8 +901,7 @@ export const composeDownOperation: Compose<DownOperation> = ({
     const numParams = ParamRecordOperation.compose({
         first: first.numParams,
         second: second.numParams,
-        innerCompose: params =>
-            SimpleValueParam.composeDownOperation<Maybe<number>>()(params),
+        innerCompose: params => SimpleValueParam.composeDownOperation<Maybe<number>>()(params),
     });
     if (numParams.isError) {
         return numParams;
@@ -1020,8 +910,7 @@ export const composeDownOperation: Compose<DownOperation> = ({
     const numMaxParams = ParamRecordOperation.compose({
         first: first.numMaxParams,
         second: second.numMaxParams,
-        innerCompose: params =>
-            SimpleValueParam.composeDownOperation<Maybe<number>>()(params),
+        innerCompose: params => SimpleValueParam.composeDownOperation<Maybe<number>>()(params),
     });
     if (numMaxParams.isError) {
         return numMaxParams;
@@ -1043,8 +932,7 @@ export const composeDownOperation: Compose<DownOperation> = ({
     >({
         first: first.pieces,
         second: second.pieces,
-        innerApplyBack: ({ state, operation }) =>
-            Piece.applyBack({ state, operation }),
+        innerApplyBack: ({ state, operation }) => Piece.applyBack({ state, operation }),
         innerCompose: params => Piece.composeDownOperation(params),
     });
     if (pieces.isError) {
@@ -1058,8 +946,7 @@ export const composeDownOperation: Compose<DownOperation> = ({
     >({
         first: first.privateCommands,
         second: second.privateCommands,
-        innerApplyBack: ({ state, operation }) =>
-            Command.applyBack({ state, operation }),
+        innerApplyBack: ({ state, operation }) => Command.applyBack({ state, operation }),
         innerCompose: params => Command.composeDownOperation(params),
     });
     if (privateCommands.isError) {
@@ -1073,8 +960,7 @@ export const composeDownOperation: Compose<DownOperation> = ({
     >({
         first: first.tachieLocations,
         second: second.tachieLocations,
-        innerApplyBack: ({ state, operation }) =>
-            BoardLocation.applyBack({ state, operation }),
+        innerApplyBack: ({ state, operation }) => BoardLocation.applyBack({ state, operation }),
         innerCompose: params => BoardLocation.composeDownOperation(params),
     });
     if (tachieLocations.isError) {
@@ -1103,19 +989,13 @@ export const composeDownOperation: Compose<DownOperation> = ({
     const valueProps: DownOperation = {
         $version: 1,
 
-        isPrivate: ReplaceOperation.composeDownOperation(
-            first.isPrivate,
-            second.isPrivate
-        ),
+        isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
         memo: memo.value,
         name: ReplaceOperation.composeDownOperation(first.name, second.name),
         privateCommand: privateCommand.value,
         privateVarToml: privateVarToml.value,
         image: ReplaceOperation.composeDownOperation(first.image, second.image),
-        tachieImage: ReplaceOperation.composeDownOperation(
-            first.tachieImage,
-            second.tachieImage
-        ),
+        tachieImage: ReplaceOperation.composeDownOperation(first.tachieImage, second.tachieImage),
         boolParams: boolParams.value,
         numParams: numParams.value,
         numMaxParams: numMaxParams.value,
@@ -1138,8 +1018,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     const boolParams = ParamRecordOperation.restore({
         nextState: nextState.boolParams,
         downOperation: downOperation.boolParams,
-        innerRestore: params =>
-            SimpleValueParam.restore<Maybe<boolean>>()(params),
+        innerRestore: params => SimpleValueParam.restore<Maybe<boolean>>()(params),
     });
     if (boolParams.isError) {
         return boolParams;
@@ -1148,8 +1027,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     const numParams = ParamRecordOperation.restore({
         nextState: nextState.numParams,
         downOperation: downOperation.numParams,
-        innerRestore: params =>
-            SimpleValueParam.restore<Maybe<number>>()(params),
+        innerRestore: params => SimpleValueParam.restore<Maybe<number>>()(params),
     });
     if (numParams.isError) {
         return numParams;
@@ -1158,8 +1036,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     const numMaxParams = ParamRecordOperation.restore({
         nextState: nextState.numMaxParams,
         downOperation: downOperation.numMaxParams,
-        innerRestore: params =>
-            SimpleValueParam.restore<Maybe<number>>()(params),
+        innerRestore: params => SimpleValueParam.restore<Maybe<number>>()(params),
     });
     if (numMaxParams.isError) {
         return numMaxParams;
@@ -1305,10 +1182,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     return Result.ok({ prevState, twoWayOperation });
 };
 
-export const diff: Diff<State, TwoWayOperation> = ({
-    prevState,
-    nextState,
-}) => {
+export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
     const boolParams = ParamRecordOperation.diff({
         prevState: prevState.boolParams,
         nextState: nextState.boolParams,
@@ -1377,18 +1251,12 @@ export const diff: Diff<State, TwoWayOperation> = ({
                 },
             }),
     });
-    const pieces = DualKeyRecordOperation.diff<
-        Piece.State,
-        Piece.TwoWayOperation
-    >({
+    const pieces = DualKeyRecordOperation.diff<Piece.State, Piece.TwoWayOperation>({
         prevState: prevState.pieces,
         nextState: nextState.pieces,
         innerDiff: params => Piece.diff(params),
     });
-    const privateCommands = RecordOperation.diff<
-        Command.State,
-        TwoWayOperation
-    >({
+    const privateCommands = RecordOperation.diff<Command.State, TwoWayOperation>({
         prevState: prevState.privateCommands,
         nextState: nextState.privateCommands,
         innerDiff: params => Command.diff(params),
@@ -1690,15 +1558,11 @@ export const serverTransform = (
     });
 };
 
-export const clientTransform: ClientTransform<UpOperation> = ({
-    first,
-    second,
-}) => {
+export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
     const boolParams = ParamRecordOperation.clientTransform({
         first: first.boolParams,
         second: second.boolParams,
-        innerTransform: params =>
-            SimpleValueParam.clientTransform<Maybe<boolean>>()(params),
+        innerTransform: params => SimpleValueParam.clientTransform<Maybe<boolean>>()(params),
     });
     if (boolParams.isError) {
         return boolParams;
@@ -1707,8 +1571,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({
     const numParams = ParamRecordOperation.clientTransform({
         first: first.numParams,
         second: second.numParams,
-        innerTransform: params =>
-            SimpleValueParam.clientTransform<Maybe<number>>()(params),
+        innerTransform: params => SimpleValueParam.clientTransform<Maybe<number>>()(params),
     });
     if (numParams.isError) {
         return numParams;
@@ -1717,8 +1580,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({
     const numMaxParams = ParamRecordOperation.clientTransform({
         first: first.numMaxParams,
         second: second.numMaxParams,
-        innerTransform: params =>
-            SimpleValueParam.clientTransform<Maybe<number>>()(params),
+        innerTransform: params => SimpleValueParam.clientTransform<Maybe<number>>()(params),
     });
     if (numMaxParams.isError) {
         return numMaxParams;

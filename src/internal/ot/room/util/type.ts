@@ -1,8 +1,4 @@
-import {
-    ApplyError,
-    PositiveInt,
-    ComposeAndTransformError,
-} from '@kizahasi/ot-string';
+import { ApplyError, PositiveInt, ComposeAndTransformError } from '@kizahasi/ot-string';
 import { CustomResult } from '@kizahasi/result';
 
 type Error = string | ApplyError<PositiveInt> | ComposeAndTransformError;
@@ -33,11 +29,7 @@ export type Restore<TState, TDownOperation, TTwoWayOperation> = (params: {
     Error
 >;
 
-export type ServerTransform<
-    TServerState,
-    TTwoWayOperation,
-    TUpOperation
-> = (params: {
+export type ServerTransform<TServerState, TTwoWayOperation, TUpOperation> = (params: {
     prevState: TServerState;
     currentState: TServerState;
     serverOperation: TTwoWayOperation | undefined;

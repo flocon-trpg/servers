@@ -25,11 +25,7 @@ export type ProtectedTransformParameters<
 >;
 
 // isPrivateがあるとremoveが必要になるため、isPrivateを実装することは不可能。
-export const toClientOperation = <
-    TSourceState,
-    TSourceOperation,
-    TClientOperation
->({
+export const toClientOperation = <TSourceState, TSourceOperation, TClientOperation>({
     diff,
     prevState,
     nextState,
@@ -65,12 +61,7 @@ export const toClientOperation = <
     return result;
 };
 
-export const restore = <
-    TState,
-    TDownOperation,
-    TTwoWayOperation,
-    TCustomError = string
->({
+export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError = string>({
     nextState,
     downOperation,
     innerRestore,
@@ -81,10 +72,7 @@ export const restore = <
         downOperation: TDownOperation;
         nextState: TState;
         key: string;
-    }) => CustomResult<
-        RestoreResult<TState, TTwoWayOperation> | undefined,
-        string | TCustomError
-    >;
+    }) => CustomResult<RestoreResult<TState, TTwoWayOperation> | undefined, string | TCustomError>;
 }): CustomResult<
     RestoreResult<Record<string, TState>, Record<string, TTwoWayOperation>>,
     string | TCustomError
@@ -102,9 +90,7 @@ export const restore = <
     for (const [key, value] of recordToMap(downOperation)) {
         const nextStateElement = nextState[key];
         if (nextStateElement === undefined) {
-            return Result.error(
-                `tried to update "${key}", but nextState does not have such a key`
-            );
+            return Result.error(`tried to update "${key}", but nextState does not have such a key`);
         }
         const restored = innerRestore({
             downOperation: value,
@@ -215,10 +201,7 @@ export const compose = <TOperation, TCustomError = string>({
         first: TOperation;
         second: TOperation;
     }) => CustomResult<TOperation | undefined, string | TCustomError>;
-}): CustomResult<
-    Record<string, TOperation> | undefined,
-    string | TCustomError
-> => {
+}): CustomResult<Record<string, TOperation> | undefined, string | TCustomError> => {
     if (first == null) {
         return Result.ok(second);
     }
@@ -228,10 +211,7 @@ export const compose = <TOperation, TCustomError = string>({
 
     const result: Record<string, TOperation> = {};
 
-    for (const [key, groupJoined] of groupJoinMap(
-        recordToMap(first),
-        recordToMap(second)
-    )) {
+    for (const [key, groupJoined] of groupJoinMap(recordToMap(first), recordToMap(second))) {
         switch (groupJoined.type) {
             case left:
                 result[key] = groupJoined.left;
@@ -278,17 +258,12 @@ export const serverTransform = <
     first?: Record<string, TFirstOperation>;
     second?: Record<string, TSecondOperation>;
     innerTransform: (
-        params: ProtectedTransformParameters<
-            TServerState,
-            TFirstOperation,
-            TSecondOperation
-        > & { key: string }
+        params: ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> & {
+            key: string;
+        }
     ) => CustomResult<TFirstOperation | undefined, string | TCustomError>;
     defaultState: TServerState;
-}): CustomResult<
-    Record<string, TFirstOperation> | undefined,
-    string | TCustomError
-> => {
+}): CustomResult<Record<string, TFirstOperation> | undefined, string | TCustomError> => {
     if (second === undefined) {
         return Result.ok(undefined);
     }
@@ -352,47 +327,44 @@ export const clientTransform = <TOperation, TError = string>({
     const secondPrime = new Map<string, TOperation>();
     let error = undefined as { error: TError } | undefined;
 
-    groupJoinMap(recordToMap(first), recordToMap(second)).forEach(
-        (group, key) => {
-            if (error != null) {
+    groupJoinMap(recordToMap(first), recordToMap(second)).forEach((group, key) => {
+        if (error != null) {
+            return;
+        }
+        switch (group.type) {
+            case left: {
+                firstPrime.set(key, group.left);
                 return;
             }
-            switch (group.type) {
-                case left: {
-                    firstPrime.set(key, group.left);
+            case right: {
+                secondPrime.set(key, group.right);
+                return;
+            }
+            case both: {
+                const xform = innerTransform({
+                    first: group.left,
+                    second: group.right,
+                });
+                if (xform.isError) {
+                    error = { error: xform.error };
                     return;
                 }
-                case right: {
-                    secondPrime.set(key, group.right);
-                    return;
+                if (xform.value.firstPrime !== undefined) {
+                    firstPrime.set(key, xform.value.firstPrime);
                 }
-                case both: {
-                    const xform = innerTransform({
-                        first: group.left,
-                        second: group.right,
-                    });
-                    if (xform.isError) {
-                        error = { error: xform.error };
-                        return;
-                    }
-                    if (xform.value.firstPrime !== undefined) {
-                        firstPrime.set(key, xform.value.firstPrime);
-                    }
-                    if (xform.value.secondPrime !== undefined) {
-                        secondPrime.set(key, xform.value.secondPrime);
-                    }
-                    return;
+                if (xform.value.secondPrime !== undefined) {
+                    secondPrime.set(key, xform.value.secondPrime);
                 }
+                return;
             }
         }
-    );
+    });
     if (error != null) {
         return Result.error(error.error);
     }
     return Result.ok({
         firstPrime: firstPrime.size === 0 ? undefined : mapToRecord(firstPrime),
-        secondPrime:
-            secondPrime.size === 0 ? undefined : mapToRecord(secondPrime),
+        secondPrime: secondPrime.size === 0 ? undefined : mapToRecord(secondPrime),
     });
 };
 
@@ -410,10 +382,7 @@ export const diff = <TState, TOperation>({
     }) => TOperation | undefined;
 }): Record<string, TOperation> => {
     const result: Record<string, TOperation> = {};
-    for (const [key, value] of groupJoinMap(
-        recordToMap(prevState),
-        recordToMap(nextState)
-    )) {
+    for (const [key, value] of groupJoinMap(recordToMap(prevState), recordToMap(nextState))) {
         let prevState: TState | undefined = undefined;
         let nextState: TState | undefined = undefined;
 

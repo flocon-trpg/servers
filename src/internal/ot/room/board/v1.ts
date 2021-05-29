@@ -96,10 +96,7 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
     return source;
 };
 
-export const apply: Apply<State, UpOperation | TwoWayOperation> = ({
-    state,
-    operation,
-}) => {
+export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
     const result: State = { ...state };
     if (operation.backgroundImage != null) {
         result.backgroundImage = operation.backgroundImage.newValue;
@@ -131,25 +128,19 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({
     return Result.ok(result);
 };
 
-export const applyBack: Apply<State, DownOperation> = ({
-    state,
-    operation,
-}) => {
+export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
     const result: State = {
         ...state,
     };
 
     if (operation.backgroundImage !== undefined) {
-        result.backgroundImage =
-            operation.backgroundImage.oldValue ?? undefined;
+        result.backgroundImage = operation.backgroundImage.oldValue ?? undefined;
     }
     if (operation.backgroundImageZoom !== undefined) {
-        result.backgroundImageZoom =
-            operation.backgroundImageZoom.oldValue ?? undefined;
+        result.backgroundImageZoom = operation.backgroundImageZoom.oldValue ?? undefined;
     }
     if (operation.cellColumnCount !== undefined) {
-        result.cellColumnCount =
-            operation.cellColumnCount.oldValue ?? undefined;
+        result.cellColumnCount = operation.cellColumnCount.oldValue ?? undefined;
     }
     if (operation.cellHeight !== undefined) {
         result.cellHeight = operation.cellHeight.oldValue ?? undefined;
@@ -189,35 +180,17 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
             first.cellColumnCount,
             second.cellColumnCount
         ),
-        cellHeight: ReplaceOperation.composeUpOperation(
-            first.cellHeight,
-            second.cellHeight
-        ),
-        cellOffsetX: ReplaceOperation.composeUpOperation(
-            first.cellOffsetX,
-            second.cellOffsetX
-        ),
-        cellOffsetY: ReplaceOperation.composeUpOperation(
-            first.cellOffsetY,
-            second.cellOffsetY
-        ),
-        cellRowCount: ReplaceOperation.composeUpOperation(
-            first.cellRowCount,
-            second.cellRowCount
-        ),
-        cellWidth: ReplaceOperation.composeUpOperation(
-            first.cellWidth,
-            second.cellWidth
-        ),
+        cellHeight: ReplaceOperation.composeUpOperation(first.cellHeight, second.cellHeight),
+        cellOffsetX: ReplaceOperation.composeUpOperation(first.cellOffsetX, second.cellOffsetX),
+        cellOffsetY: ReplaceOperation.composeUpOperation(first.cellOffsetY, second.cellOffsetY),
+        cellRowCount: ReplaceOperation.composeUpOperation(first.cellRowCount, second.cellRowCount),
+        cellWidth: ReplaceOperation.composeUpOperation(first.cellWidth, second.cellWidth),
         name: ReplaceOperation.composeUpOperation(first.name, second.name),
     };
     return Result.ok(valueProps);
 };
 
-export const composeDownOperation: Compose<DownOperation> = ({
-    first,
-    second,
-}) => {
+export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const valueProps: DownOperation = {
         $version: 1,
 
@@ -233,26 +206,14 @@ export const composeDownOperation: Compose<DownOperation> = ({
             first.cellColumnCount,
             second.cellColumnCount
         ),
-        cellHeight: ReplaceOperation.composeDownOperation(
-            first.cellHeight,
-            second.cellHeight
-        ),
-        cellOffsetX: ReplaceOperation.composeDownOperation(
-            first.cellOffsetX,
-            second.cellOffsetX
-        ),
-        cellOffsetY: ReplaceOperation.composeDownOperation(
-            first.cellOffsetY,
-            second.cellOffsetY
-        ),
+        cellHeight: ReplaceOperation.composeDownOperation(first.cellHeight, second.cellHeight),
+        cellOffsetX: ReplaceOperation.composeDownOperation(first.cellOffsetX, second.cellOffsetX),
+        cellOffsetY: ReplaceOperation.composeDownOperation(first.cellOffsetY, second.cellOffsetY),
         cellRowCount: ReplaceOperation.composeDownOperation(
             first.cellRowCount,
             second.cellRowCount
         ),
-        cellWidth: ReplaceOperation.composeDownOperation(
-            first.cellWidth,
-            second.cellWidth
-        ),
+        cellWidth: ReplaceOperation.composeDownOperation(first.cellWidth, second.cellWidth),
         name: ReplaceOperation.composeDownOperation(first.name, second.name),
     };
     return Result.ok(valueProps);
@@ -272,16 +233,14 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     const twoWayOperation: TwoWayOperation = { $version: 1 };
 
     if (downOperation.backgroundImage !== undefined) {
-        prevState.backgroundImage =
-            downOperation.backgroundImage.oldValue ?? undefined;
+        prevState.backgroundImage = downOperation.backgroundImage.oldValue ?? undefined;
         twoWayOperation.backgroundImage = {
             oldValue: downOperation.backgroundImage.oldValue ?? undefined,
             newValue: nextState.backgroundImage ?? undefined,
         };
     }
     if (downOperation.backgroundImageZoom !== undefined) {
-        prevState.backgroundImageZoom =
-            downOperation.backgroundImageZoom.oldValue;
+        prevState.backgroundImageZoom = downOperation.backgroundImageZoom.oldValue;
         twoWayOperation.backgroundImageZoom = {
             ...downOperation.backgroundImageZoom,
             newValue: nextState.backgroundImageZoom,
@@ -340,10 +299,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     return Result.ok({ prevState, twoWayOperation });
 };
 
-export const diff: Diff<State, TwoWayOperation> = ({
-    prevState,
-    nextState,
-}) => {
+export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
     const resultType: TwoWayOperation = { $version: 1 };
     if (prevState.backgroundImage !== nextState.backgroundImage) {
         resultType.backgroundImage = {
@@ -405,11 +361,11 @@ export const diff: Diff<State, TwoWayOperation> = ({
     return resultType;
 };
 
-export const serverTransform: ServerTransform<
-    State,
-    TwoWayOperation,
-    UpOperation
-> = ({ prevState, clientOperation, serverOperation }) => {
+export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperation> = ({
+    prevState,
+    clientOperation,
+    serverOperation,
+}) => {
     const twoWayOperation: TwoWayOperation = { $version: 1 };
 
     twoWayOperation.backgroundImage = ReplaceOperation.serverTransform({
@@ -465,10 +421,7 @@ export const serverTransform: ServerTransform<
     return Result.ok(twoWayOperation);
 };
 
-export const clientTransform: ClientTransform<UpOperation> = ({
-    first,
-    second,
-}) => {
+export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
     const backgroundImage = ReplaceOperation.clientTransform({
         first: first.backgroundImage,
         second: second.backgroundImage,

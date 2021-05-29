@@ -29,11 +29,7 @@ import { operation } from './util/operation';
 import { isIdRecord } from './util/record';
 import { CompositeKey, compositeKey } from '../compositeKey/v1';
 import { Result } from '@kizahasi/result';
-import {
-    ApplyError,
-    PositiveInt,
-    ComposeAndTransformError,
-} from '@kizahasi/ot-string';
+import { ApplyError, PositiveInt, ComposeAndTransformError } from '@kizahasi/ot-string';
 import {
     chooseRecord,
     chooseDualKeyRecord,
@@ -87,58 +83,37 @@ export type State = t.TypeOf<typeof state>;
 
 export const downOperation = operation(1, {
     activeBoardKey: t.type({ oldValue: maybe(compositeKey) }),
-    bgms: t.record(
-        t.string,
-        recordDownOperationElementFactory(Bgm.state, Bgm.downOperation)
-    ),
+    bgms: t.record(t.string, recordDownOperationElementFactory(Bgm.state, Bgm.downOperation)),
     boards: t.record(
         t.string,
-        t.record(
-            t.string,
-            recordDownOperationElementFactory(Board.state, Board.downOperation)
-        )
+        t.record(t.string, recordDownOperationElementFactory(Board.state, Board.downOperation))
     ),
     boolParamNames: t.record(
         t.string,
-        recordDownOperationElementFactory(
-            ParamNames.state,
-            ParamNames.downOperation
-        )
+        recordDownOperationElementFactory(ParamNames.state, ParamNames.downOperation)
     ),
     characters: t.record(
         t.string,
         t.record(
             t.string,
-            recordDownOperationElementFactory(
-                Character.state,
-                Character.downOperation
-            )
+            recordDownOperationElementFactory(Character.state, Character.downOperation)
         )
     ),
     myNumberValues: t.record(
         t.string,
         t.record(
             t.string,
-            recordDownOperationElementFactory(
-                MyNumberValue.state,
-                MyNumberValue.downOperation
-            )
+            recordDownOperationElementFactory(MyNumberValue.state, MyNumberValue.downOperation)
         )
     ),
     name: replaceStringDownOperation,
     numParamNames: t.record(
         t.string,
-        recordDownOperationElementFactory(
-            ParamNames.state,
-            ParamNames.downOperation
-        )
+        recordDownOperationElementFactory(ParamNames.state, ParamNames.downOperation)
     ),
     participants: t.record(
         t.string,
-        recordDownOperationElementFactory(
-            Participant.state,
-            Participant.downOperation
-        )
+        recordDownOperationElementFactory(Participant.state, Participant.downOperation)
     ),
     publicChannel1Name: replaceStringDownOperation,
     publicChannel2Name: replaceStringDownOperation,
@@ -152,10 +127,7 @@ export const downOperation = operation(1, {
     publicChannel10Name: replaceStringDownOperation,
     strParamNames: t.record(
         t.string,
-        recordDownOperationElementFactory(
-            ParamNames.state,
-            ParamNames.downOperation
-        )
+        recordDownOperationElementFactory(ParamNames.state, ParamNames.downOperation)
     ),
 });
 
@@ -163,58 +135,34 @@ export type DownOperation = t.TypeOf<typeof downOperation>;
 
 export const upOperation = operation(1, {
     activeBoardKey: t.type({ newValue: maybe(compositeKey) }),
-    bgms: t.record(
-        t.string,
-        recordUpOperationElementFactory(Bgm.state, Bgm.upOperation)
-    ),
+    bgms: t.record(t.string, recordUpOperationElementFactory(Bgm.state, Bgm.upOperation)),
     boards: t.record(
         t.string,
-        t.record(
-            t.string,
-            recordUpOperationElementFactory(Board.state, Board.upOperation)
-        )
+        t.record(t.string, recordUpOperationElementFactory(Board.state, Board.upOperation))
     ),
     boolParamNames: t.record(
         t.string,
-        recordUpOperationElementFactory(
-            ParamNames.state,
-            ParamNames.upOperation
-        )
+        recordUpOperationElementFactory(ParamNames.state, ParamNames.upOperation)
     ),
     characters: t.record(
         t.string,
-        t.record(
-            t.string,
-            recordUpOperationElementFactory(
-                Character.state,
-                Character.upOperation
-            )
-        )
+        t.record(t.string, recordUpOperationElementFactory(Character.state, Character.upOperation))
     ),
     name: replaceStringUpOperation,
     myNumberValues: t.record(
         t.string,
         t.record(
             t.string,
-            recordUpOperationElementFactory(
-                MyNumberValue.state,
-                MyNumberValue.upOperation
-            )
+            recordUpOperationElementFactory(MyNumberValue.state, MyNumberValue.upOperation)
         )
     ),
     numParamNames: t.record(
         t.string,
-        recordUpOperationElementFactory(
-            ParamNames.state,
-            ParamNames.upOperation
-        )
+        recordUpOperationElementFactory(ParamNames.state, ParamNames.upOperation)
     ),
     participants: t.record(
         t.string,
-        recordUpOperationElementFactory(
-            Participant.state,
-            Participant.upOperation
-        )
+        recordUpOperationElementFactory(Participant.state, Participant.upOperation)
     ),
     publicChannel1Name: replaceStringUpOperation,
     publicChannel2Name: replaceStringUpOperation,
@@ -228,10 +176,7 @@ export const upOperation = operation(1, {
     publicChannel10Name: replaceStringUpOperation,
     strParamNames: t.record(
         t.string,
-        recordUpOperationElementFactory(
-            ParamNames.state,
-            ParamNames.upOperation
-        )
+        recordUpOperationElementFactory(ParamNames.state, ParamNames.upOperation)
     ),
 });
 
@@ -240,13 +185,8 @@ export type UpOperation = t.TypeOf<typeof upOperation>;
 export type TwoWayOperation = {
     $version: 1;
 
-    activeBoardKey?: ReplaceOperation.ReplaceValueTwoWayOperation<
-        Maybe<CompositeKey>
-    >;
-    bgms?: RecordOperation.RecordTwoWayOperation<
-        Bgm.State,
-        Bgm.TwoWayOperation
-    >;
+    activeBoardKey?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<CompositeKey>>;
+    bgms?: RecordOperation.RecordTwoWayOperation<Bgm.State, Bgm.TwoWayOperation>;
     boards?: DualKeyRecordOperation.DualKeyRecordTwoWayOperation<
         Board.State,
         Board.TwoWayOperation
@@ -288,9 +228,7 @@ export type TwoWayOperation = {
     >;
 };
 
-export const toClientState = (requestedBy: RequestedBy) => (
-    source: State
-): State => {
+export const toClientState = (requestedBy: RequestedBy) => (source: State): State => {
     return {
         ...source,
         bgms: RecordOperation.toClientState({
@@ -321,10 +259,7 @@ export const toClientState = (requestedBy: RequestedBy) => (
             isPrivate: () => false,
             toClientState: ({ state }) => ParamNames.toClientState(state),
         }),
-        characters: DualKeyRecordOperation.toClientState<
-            Character.State,
-            Character.State
-        >({
+        characters: DualKeyRecordOperation.toClientState<Character.State, Character.State>({
             serverState: source.characters,
             isPrivate: () => false,
             toClientState: ({ state, key }) =>
@@ -374,18 +309,14 @@ const boardsToClientOperation = (requestedBy: RequestedBy) => ({
         requestedBy.type === server
             ? prevState.boards
             : {
-                  [requestedBy.userUid]:
-                      prevState.boards[requestedBy.userUid] ?? {},
+                  [requestedBy.userUid]: prevState.boards[requestedBy.userUid] ?? {},
               }
     );
     if (requestedBy.type === client && prevState.activeBoardKey != null) {
-        const prevActiveBoard = dualKeyRecordFind<Board.State>(
-            prevState.boards,
-            {
-                first: prevState.activeBoardKey.createdBy,
-                second: prevState.activeBoardKey.id,
-            }
-        );
+        const prevActiveBoard = dualKeyRecordFind<Board.State>(prevState.boards, {
+            first: prevState.activeBoardKey.createdBy,
+            second: prevState.activeBoardKey.id,
+        });
         if (prevActiveBoard != null) {
             prevBoardsMap.set(
                 {
@@ -401,18 +332,14 @@ const boardsToClientOperation = (requestedBy: RequestedBy) => ({
         requestedBy.type === server
             ? nextState.boards
             : {
-                  [requestedBy.userUid]:
-                      nextState.boards[requestedBy.userUid] ?? {},
+                  [requestedBy.userUid]: nextState.boards[requestedBy.userUid] ?? {},
               }
     );
     if (requestedBy.type === client && nextState.activeBoardKey != null) {
-        const nextActiveBoard = dualKeyRecordFind<Board.State>(
-            nextState.boards,
-            {
-                first: nextState.activeBoardKey.createdBy,
-                second: nextState.activeBoardKey.id,
-            }
-        );
+        const nextActiveBoard = dualKeyRecordFind<Board.State>(nextState.boards, {
+            first: nextState.activeBoardKey.createdBy,
+            second: nextState.activeBoardKey.id,
+        });
         if (nextActiveBoard != null) {
             nextBoardsMap.set(
                 {
@@ -432,10 +359,7 @@ const boardsToClientOperation = (requestedBy: RequestedBy) => ({
         x => x,
         x => x
     );
-    const diff = DualKeyRecordOperation.diff<
-        Board.State,
-        Board.TwoWayOperation
-    >({
+    const diff = DualKeyRecordOperation.diff<Board.State, Board.TwoWayOperation>({
         prevState: prevBoards,
         nextState: nextBoards,
         innerDiff: params => Board.diff(params),
@@ -465,10 +389,8 @@ export const toClientOperation = (requestedBy: RequestedBy) => ({
                       diff: diff.bgms,
                       prevState: prevState.bgms,
                       nextState: nextState.bgms,
-                      toClientState: ({ nextState }) =>
-                          Bgm.toClientState(nextState),
-                      toClientOperation: params =>
-                          Bgm.toClientOperation(params),
+                      toClientState: ({ nextState }) => Bgm.toClientState(nextState),
+                      toClientOperation: params => Bgm.toClientOperation(params),
                       isPrivate: () => false,
                   }),
         boards: boardsToClientOperation(requestedBy)({
@@ -482,10 +404,8 @@ export const toClientOperation = (requestedBy: RequestedBy) => ({
                       diff: diff.boolParamNames,
                       prevState: prevState.boolParamNames,
                       nextState: nextState.boolParamNames,
-                      toClientState: ({ nextState }) =>
-                          ParamNames.toClientState(nextState),
-                      toClientOperation: params =>
-                          ParamNames.toClientOperation(params),
+                      toClientState: ({ nextState }) => ParamNames.toClientState(nextState),
+                      toClientOperation: params => ParamNames.toClientOperation(params),
                       isPrivate: () => false,
                   }),
         characters:
@@ -545,10 +465,8 @@ export const toClientOperation = (requestedBy: RequestedBy) => ({
                       diff: diff.numParamNames,
                       prevState: prevState.numParamNames,
                       nextState: nextState.numParamNames,
-                      toClientState: ({ nextState }) =>
-                          ParamNames.toClientState(nextState),
-                      toClientOperation: params =>
-                          ParamNames.toClientOperation(params),
+                      toClientState: ({ nextState }) => ParamNames.toClientState(nextState),
+                      toClientOperation: params => ParamNames.toClientOperation(params),
                       isPrivate: () => false,
                   }),
         participants:
@@ -558,10 +476,8 @@ export const toClientOperation = (requestedBy: RequestedBy) => ({
                       diff: diff.participants,
                       prevState: prevState.participants,
                       nextState: nextState.participants,
-                      toClientState: ({ nextState, key }) =>
-                          Participant.toClientState(nextState),
-                      toClientOperation: params =>
-                          Participant.toClientOperation(params),
+                      toClientState: ({ nextState, key }) => Participant.toClientState(nextState),
+                      toClientOperation: params => Participant.toClientOperation(params),
                       isPrivate: () => false,
                   }),
         strParamNames:
@@ -571,10 +487,8 @@ export const toClientOperation = (requestedBy: RequestedBy) => ({
                       diff: diff.strParamNames,
                       prevState: prevState.strParamNames,
                       nextState: nextState.strParamNames,
-                      toClientState: ({ nextState }) =>
-                          ParamNames.toClientState(nextState),
-                      toClientOperation: params =>
-                          ParamNames.toClientOperation(params),
+                      toClientState: ({ nextState }) => ParamNames.toClientState(nextState),
+                      toClientOperation: params => ParamNames.toClientOperation(params),
                       isPrivate: () => false,
                   }),
     };
@@ -752,10 +666,7 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
     };
 };
 
-export const apply: Apply<State, UpOperation | TwoWayOperation> = ({
-    state,
-    operation,
-}) => {
+export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
     const result: State = { ...state };
 
     if (operation.activeBoardKey != null) {
@@ -887,8 +798,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({
     ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).forEach(i => {
         const operationElement = operation[`publicChannel${i}Name` as const];
         if (operationElement != null) {
-            result[`publicChannel${i}Name` as const] =
-                operationElement.newValue;
+            result[`publicChannel${i}Name` as const] = operationElement.newValue;
         }
     });
 
@@ -911,10 +821,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({
     return Result.ok(result);
 };
 
-export const applyBack: Apply<State, DownOperation> = ({
-    state,
-    operation,
-}) => {
+export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
     const result: State = { ...state };
 
     if (operation.activeBoardKey != null) {
@@ -1040,8 +947,7 @@ export const applyBack: Apply<State, DownOperation> = ({
     ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).forEach(i => {
         const operationElement = operation[`publicChannel${i}Name` as const];
         if (operationElement != null) {
-            result[`publicChannel${i}Name` as const] =
-                operationElement.oldValue;
+            result[`publicChannel${i}Name` as const] = operationElement.oldValue;
         }
     });
 
@@ -1216,10 +1122,7 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
     return Result.ok(valueProps);
 };
 
-export const composeDownOperation: Compose<DownOperation> = ({
-    first,
-    second,
-}) => {
+export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const boards = DualKeyRecordOperation.composeDownOperation<
         Board.State,
         Board.DownOperation,
@@ -1528,22 +1431,13 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     return Result.ok({ prevState, twoWayOperation });
 };
 
-export const diff: Diff<State, TwoWayOperation> = ({
-    prevState,
-    nextState,
-}) => {
-    const boards = DualKeyRecordOperation.diff<
-        Board.State,
-        Board.TwoWayOperation
-    >({
+export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
+    const boards = DualKeyRecordOperation.diff<Board.State, Board.TwoWayOperation>({
         prevState: prevState.boards,
         nextState: nextState.boards,
         innerDiff: params => Board.diff(params),
     });
-    const characters = DualKeyRecordOperation.diff<
-        Character.State,
-        Character.TwoWayOperation
-    >({
+    const characters = DualKeyRecordOperation.diff<Character.State, Character.TwoWayOperation>({
         prevState: prevState.characters,
         nextState: nextState.characters,
         innerDiff: params => Character.diff(params),
@@ -1593,8 +1487,7 @@ export const diff: Diff<State, TwoWayOperation> = ({
         participants,
     };
     if (
-        prevState.activeBoardKey?.createdBy !==
-            nextState.activeBoardKey?.createdBy ||
+        prevState.activeBoardKey?.createdBy !== nextState.activeBoardKey?.createdBy ||
         prevState.activeBoardKey?.id !== nextState.activeBoardKey?.id
     ) {
         result.activeBoardKey = {
@@ -1928,10 +1821,7 @@ export const serverTransform = (
     return Result.ok(twoWayOperation);
 };
 
-export const clientTransform: ClientTransform<UpOperation> = ({
-    first,
-    second,
-}) => {
+export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
     const activeBoardKey = ReplaceOperation.clientTransform({
         first: first.activeBoardKey,
         second: second.activeBoardKey,

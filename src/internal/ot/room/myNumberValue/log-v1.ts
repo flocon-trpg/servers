@@ -18,10 +18,7 @@ const update = t.intersection([
     t.partial({
         pieces: t.record(
             t.string,
-            t.record(
-                t.string,
-                recordUpOperationElementFactory(Piece.state, Piece.upOperation)
-            )
+            t.record(t.string, recordUpOperationElementFactory(Piece.state, Piece.upOperation))
         ),
     }),
 ]);
@@ -56,9 +53,7 @@ export const ofOperation = (source: MyNumberValue.TwoWayOperation): Main => {
     return {
         $version: 1,
         type: updateType,
-        value:
-            source.value != null &&
-            source.value.oldValue !== source.value.newValue,
+        value: source.value != null && source.value.oldValue !== source.value.newValue,
         isValuePrivate:
             source.isValuePrivate != null &&
             source.isValuePrivate.oldValue !== source.isValuePrivate.newValue,

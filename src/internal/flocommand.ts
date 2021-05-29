@@ -7,12 +7,7 @@ import {
     LocalTime as TomlLocalTime,
     OffsetDateTime as TomlOffsetDateTime,
 } from '@ltd/j-toml';
-import {
-    Default,
-    FilePath,
-    FirebaseStorage,
-    sourceType,
-} from './ot/filePath/v1';
+import { Default, FilePath, FirebaseStorage, sourceType } from './ot/filePath/v1';
 import * as Character from './ot/room/character/v1';
 import { Result } from '@kizahasi/result';
 
@@ -56,11 +51,7 @@ namespace Message {
     export type Action = t.TypeOf<typeof action>;
 }
 
-type TomlDateTime =
-    | TomlLocalDate
-    | TomlLocalDateTime
-    | TomlLocalTime
-    | TomlOffsetDateTime;
+type TomlDateTime = TomlLocalDate | TomlLocalDateTime | TomlLocalTime | TomlOffsetDateTime;
 const dateTime = new t.Type<TomlDateTime>(
     'DateTime',
     (obj): obj is TomlDateTime => true,
@@ -90,10 +81,7 @@ const characterActionElement = t.partial({
 export type CharacterActionElement = t.TypeOf<typeof characterActionElement>;
 
 const $characterAction = t.record(t.string, characterActionElement);
-const exactCharacterAction = t.record(
-    t.string,
-    t.exact(characterActionElement)
-);
+const exactCharacterAction = t.record(t.string, t.exact(characterActionElement));
 
 export type CharacterAction = t.TypeOf<typeof $characterAction>;
 

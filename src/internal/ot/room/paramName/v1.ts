@@ -55,10 +55,7 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
     return source;
 };
 
-export const apply: Apply<State, UpOperation | TwoWayOperation> = ({
-    state,
-    operation,
-}) => {
+export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
     const result: State = { ...state };
     if (operation.name != null) {
         result.name = operation.name.newValue;
@@ -66,10 +63,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({
     return Result.ok(result);
 };
 
-export const applyBack: Apply<State, DownOperation> = ({
-    state,
-    operation,
-}) => {
+export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
     const result = { ...state };
 
     if (operation.name !== undefined) {
@@ -87,10 +81,7 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
     return Result.ok(valueProps);
 };
 
-export const composeDownOperation: Compose<DownOperation> = ({
-    first,
-    second,
-}) => {
+export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const valueProps: DownOperation = {
         $version: 1,
         name: ReplaceOperation.composeDownOperation(first.name, second.name),
@@ -120,10 +111,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     return Result.ok({ prevState, twoWayOperation });
 };
 
-export const diff: Diff<State, TwoWayOperation> = ({
-    prevState,
-    nextState,
-}) => {
+export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
     const resultType: TwoWayOperation = { $version: 1 };
     if (prevState.name !== nextState.name) {
         resultType.name = {
@@ -137,11 +125,11 @@ export const diff: Diff<State, TwoWayOperation> = ({
     return resultType;
 };
 
-export const serverTransform: ServerTransform<
-    State,
-    TwoWayOperation,
-    UpOperation
-> = ({ prevState, clientOperation, serverOperation }) => {
+export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperation> = ({
+    prevState,
+    clientOperation,
+    serverOperation,
+}) => {
     const twoWayOperation: TwoWayOperation = { $version: 1 };
 
     twoWayOperation.name = ReplaceOperation.serverTransform({
@@ -157,10 +145,7 @@ export const serverTransform: ServerTransform<
     return Result.ok({ ...twoWayOperation });
 };
 
-export const clientTransform: ClientTransform<UpOperation> = ({
-    first,
-    second,
-}) => {
+export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
     const name = ReplaceOperation.clientTransform({
         first: first.name,
         second: second.name,

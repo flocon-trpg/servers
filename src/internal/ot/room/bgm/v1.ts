@@ -40,9 +40,7 @@ export type UpOperation = t.TypeOf<typeof upOperation>;
 export type TwoWayOperation = {
     $version: 1;
 
-    files?: ReplaceOperation.ReplaceValueTwoWayOperation<
-        t.TypeOf<typeof filePath>[]
-    >;
+    files?: ReplaceOperation.ReplaceValueTwoWayOperation<t.TypeOf<typeof filePath>[]>;
     volume?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
 };
 
@@ -62,10 +60,7 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
     return source;
 };
 
-export const apply: Apply<State, UpOperation | TwoWayOperation> = ({
-    state,
-    operation,
-}) => {
+export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
     const result: State = { ...state };
     if (operation.files != null) {
         result.files = operation.files.newValue;
@@ -76,10 +71,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({
     return Result.ok(result);
 };
 
-export const applyBack: Apply<State, DownOperation> = ({
-    state,
-    operation,
-}) => {
+export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
     const result: State = { ...state };
     if (operation.files != null) {
         result.files = operation.files.oldValue;
@@ -94,25 +86,16 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
     const valueProps: UpOperation = {
         $version: 1,
         files: ReplaceOperation.composeUpOperation(first.files, second.files),
-        volume: ReplaceOperation.composeUpOperation(
-            first.volume,
-            second.volume
-        ),
+        volume: ReplaceOperation.composeUpOperation(first.volume, second.volume),
     };
     return Result.ok(valueProps);
 };
 
-export const composeDownOperation: Compose<DownOperation> = ({
-    first,
-    second,
-}) => {
+export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const valueProps: DownOperation = {
         $version: 1,
         files: ReplaceOperation.composeDownOperation(first.files, second.files),
-        volume: ReplaceOperation.composeDownOperation(
-            first.volume,
-            second.volume
-        ),
+        volume: ReplaceOperation.composeDownOperation(first.volume, second.volume),
     };
     return Result.ok(valueProps);
 };
@@ -145,16 +128,11 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 
     return Result.ok({
         prevState,
-        twoWayOperation: isIdRecord(twoWayOperation)
-            ? undefined
-            : twoWayOperation,
+        twoWayOperation: isIdRecord(twoWayOperation) ? undefined : twoWayOperation,
     });
 };
 
-export const diff: Diff<State, TwoWayOperation> = ({
-    prevState,
-    nextState,
-}) => {
+export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
     const resultType: TwoWayOperation = { $version: 1 };
     if (prevState.files !== nextState.files) {
         resultType.files = {
@@ -174,11 +152,11 @@ export const diff: Diff<State, TwoWayOperation> = ({
     return resultType;
 };
 
-export const serverTransform: ServerTransform<
-    State,
-    TwoWayOperation,
-    UpOperation
-> = ({ prevState, clientOperation, serverOperation }) => {
+export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperation> = ({
+    prevState,
+    clientOperation,
+    serverOperation,
+}) => {
     const twoWayOperation: TwoWayOperation = { $version: 1 };
 
     twoWayOperation.files = ReplaceOperation.serverTransform({
@@ -199,10 +177,7 @@ export const serverTransform: ServerTransform<
     return Result.ok({ ...twoWayOperation });
 };
 
-export const clientTransform: ClientTransform<UpOperation> = ({
-    first,
-    second,
-}) => {
+export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
     const files = ReplaceOperation.clientTransform({
         first: first.files,
         second: second.files,

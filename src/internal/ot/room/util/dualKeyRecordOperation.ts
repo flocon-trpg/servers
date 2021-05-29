@@ -56,11 +56,7 @@ export const dualKeyMapDownOperationFactory = <
     key2: TKey2,
     state: TState,
     operation: TOperation
-) =>
-    t.record(
-        key1,
-        t.record(key2, recordDownOperationElementFactory(state, operation))
-    );
+) => t.record(key1, t.record(key2, recordDownOperationElementFactory(state, operation)));
 
 export const dualKeyMapUpOperationFactory = <
     TKey1 extends t.Mixed,
@@ -72,22 +68,14 @@ export const dualKeyMapUpOperationFactory = <
     key2: TKey2,
     state: TState,
     operation: TOperation
-) =>
-    t.record(
-        key1,
-        t.record(key2, recordUpOperationElementFactory(state, operation))
-    );
+) => t.record(key1, t.record(key2, recordUpOperationElementFactory(state, operation)));
 
 type RestoreResult<TState, TTwoWayOperation> = {
     prevState: TState;
     twoWayOperation: TTwoWayOperation | undefined;
 };
 
-export type ProtectedTransformParameters<
-    TServerState,
-    TFirstOperation,
-    TSecondOperation
-> = {
+export type ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> = {
     first?: TFirstOperation;
     second: TSecondOperation;
     prevState: TServerState;
@@ -124,10 +112,7 @@ export const toClientState = <TSourceState, TClientState>({
     isPrivate: (state: TSourceState, key: DualKey<string, string>) => boolean;
 
     // 全体がprivateになるケースについて書く必要はない。
-    toClientState: (params: {
-        state: TSourceState;
-        key: DualKey<string, string>;
-    }) => TClientState;
+    toClientState: (params: { state: TSourceState; key: DualKey<string, string> }) => TClientState;
 }) => {
     const result = new DualKeyMap<string, string, TClientState>();
 
@@ -144,12 +129,7 @@ export const toClientState = <TSourceState, TClientState>({
     );
 };
 
-export const toClientOperation = <
-    TSourceState,
-    TClientState,
-    TSourceOperation,
-    TClientOperation
->({
+export const toClientOperation = <TSourceState, TClientState, TSourceOperation, TClientOperation>({
     diff,
     isPrivate,
     prevState,
@@ -159,10 +139,7 @@ export const toClientOperation = <
 }: {
     diff: Record<
         string,
-        Record<
-            string,
-            RecordTwoWayOperationElement<TSourceState, TSourceOperation>
-        >
+        Record<string, RecordTwoWayOperationElement<TSourceState, TSourceOperation>>
     >;
 
     // 対象となるユーザーの視点で、全体がprivateとなるときはtrueを返す。一部がprivateである、もしくはprivateである部分がないときはfalseを返す。
@@ -220,15 +197,11 @@ export const toClientOperation = <
 
         const prevStateElement = dualKeyRecordFind(prevState, key);
         if (prevStateElement === undefined) {
-            throw new Error(
-                `tried to operate "${key}", but not found in prevState.`
-            );
+            throw new Error(`tried to operate "${key}", but not found in prevState.`);
         }
         const nextStateElement = dualKeyRecordFind(nextState, key);
         if (nextStateElement === undefined) {
-            throw new Error(
-                `tried to operate "${key}", but not found in nextState.`
-            );
+            throw new Error(`tried to operate "${key}", but not found in nextState.`);
         }
 
         if (isPrivate(prevStateElement, key)) {
@@ -276,12 +249,7 @@ export const toClientOperation = <
 };
 
 // downOperationは、composeDownOperationLooseによって作成されたものでも構わない。その代わり、innerDiffはdownでなくtwoWayである必要がある。
-export const restore = <
-    TState,
-    TDownOperation,
-    TTwoWayOperation,
-    TCustomError = string
->({
+export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError = string>({
     nextState,
     downOperation,
     innerRestore,
@@ -296,10 +264,7 @@ export const restore = <
         key: DualKey<string, string>;
         downOperation: TDownOperation;
         nextState: TState;
-    }) => CustomResult<
-        RestoreResult<TState, TTwoWayOperation | undefined>,
-        string | TCustomError
-    >;
+    }) => CustomResult<RestoreResult<TState, TTwoWayOperation | undefined>, string | TCustomError>;
     innerDiff: (params: {
         key: DualKey<string, string>;
         prevState: TState;
@@ -410,19 +375,13 @@ export const apply = <TState, TOperation, TCustomError = string>({
     innerApply,
 }: {
     prevState: Record<string, Record<string, TState>>;
-    operation?: Record<
-        string,
-        Record<string, RecordUpOperationElement<TState, TOperation>>
-    >;
+    operation?: Record<string, Record<string, RecordUpOperationElement<TState, TOperation>>>;
     innerApply: (params: {
         key: DualKey<string, string>;
         operation: TOperation;
         prevState: TState;
     }) => CustomResult<TState, string | TCustomError>;
-}): CustomResult<
-    Record<string, Record<string, TState>>,
-    string | TCustomError
-> => {
+}): CustomResult<Record<string, Record<string, TState>>, string | TCustomError> => {
     if (operation == null) {
         return Result.ok(prevState);
     }
@@ -476,19 +435,13 @@ export const applyBack = <TState, TDownOperation, TCustomError = string>({
     innerApplyBack,
 }: {
     nextState: Record<string, Record<string, TState>>;
-    operation?: Record<
-        string,
-        Record<string, RecordDownOperationElement<TState, TDownOperation>>
-    >;
+    operation?: Record<string, Record<string, RecordDownOperationElement<TState, TDownOperation>>>;
     innerApplyBack: (params: {
         key: DualKey<string, string>;
         operation: TDownOperation;
         state: TState;
     }) => CustomResult<TState, string | TCustomError>;
-}): CustomResult<
-    Record<string, Record<string, TState>>,
-    string | TCustomError
-> => {
+}): CustomResult<Record<string, Record<string, TState>>, string | TCustomError> => {
     if (operation == null) {
         return Result.ok(nextState);
     }
@@ -536,11 +489,7 @@ export const applyBack = <TState, TDownOperation, TCustomError = string>({
     );
 };
 
-export const composeUpOperation = <
-    TState,
-    TUpOperation,
-    TCustomError = string
->({
+export const composeUpOperation = <TState, TUpOperation, TCustomError = string>({
     first,
     second,
     innerApply,
@@ -569,11 +518,7 @@ export const composeUpOperation = <
         return Result.ok(first);
     }
 
-    const result = new DualKeyMap<
-        string,
-        string,
-        RecordUpOperationElement<TState, TUpOperation>
-    >();
+    const result = new DualKeyMap<string, string, RecordUpOperationElement<TState, TUpOperation>>();
 
     for (const [key, groupJoined] of groupJoinDualKeyMap(
         DualKeyMap.ofRecord(first),
@@ -617,8 +562,7 @@ export const composeUpOperation = <
                     case 'replace':
                         switch (groupJoined.left.type) {
                             case 'replace': {
-                                const right =
-                                    groupJoined.right.replace.newValue;
+                                const right = groupJoined.right.replace.newValue;
                                 result.set(key, {
                                     type: 'replace',
                                     replace: { newValue: right },
@@ -634,10 +578,7 @@ export const composeUpOperation = <
                     case 'update':
                         switch (groupJoined.left.type) {
                             case 'replace': {
-                                if (
-                                    groupJoined.left.replace.newValue ===
-                                    undefined
-                                ) {
+                                if (groupJoined.left.replace.newValue === undefined) {
                                     return Result.error(
                                         `second is update, but first.newValue is null. the key is "${key}".`
                                     );
@@ -688,11 +629,7 @@ export const composeUpOperation = <
 };
 
 // stateが必要ないため処理を高速化&簡略化できるが、その代わり戻り値のreplaceにおいて oldValue === undefined && newValue === undefined もしくは oldValue !== undefined && newValue !== undefinedになるケースがある。
-export const composeDownOperation = <
-    TState,
-    TDownOperation,
-    TCustomError = string
->({
+export const composeDownOperation = <TState, TDownOperation, TCustomError = string>({
     first,
     second,
     innerApplyBack,
@@ -785,10 +722,7 @@ export const composeDownOperation = <
                     case 'update':
                         switch (groupJoined.right.type) {
                             case 'replace': {
-                                if (
-                                    groupJoined.right.replace.oldValue ===
-                                    undefined
-                                ) {
+                                if (groupJoined.right.replace.oldValue === undefined) {
                                     return Result.error(
                                         `first is update, but second.oldValue is null. the key is "${key}".`
                                     );
@@ -859,21 +793,13 @@ export const serverTransform = <
     nextState: DualKeyRecord<TServerState>;
     first?: DualKeyRecordUpOperation<TServerState, TFirstOperation>;
     second?: DualKeyRecordUpOperation<TClientState, TSecondOperation>;
-    toServerState: (
-        state: TClientState,
-        key: DualKey<string, string>
-    ) => TServerState;
+    toServerState: (state: TClientState, key: DualKey<string, string>) => TServerState;
     innerTransform: (
-        params: ProtectedTransformParameters<
-            TServerState,
-            TFirstOperation,
-            TSecondOperation
-        > & { key: DualKey<string, string> }
+        params: ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> & {
+            key: DualKey<string, string>;
+        }
     ) => CustomResult<TFirstOperation | undefined, string | TCustomError>;
-    cancellationPolicy: CancellationPolicy<
-        DualKey<string, string>,
-        TServerState
-    >;
+    cancellationPolicy: CancellationPolicy<DualKey<string, string>, TServerState>;
 }): CustomResult<
     DualKeyRecordTwoWayOperation<TServerState, TFirstOperation> | undefined,
     string | TCustomError
@@ -955,10 +881,7 @@ export const serverTransform = <
                     type: replace,
                     replace: {
                         oldValue: undefined,
-                        newValue: toServerState(
-                            operation.replace.newValue,
-                            key
-                        ),
+                        newValue: toServerState(operation.replace.newValue, key),
                     },
                 });
                 break;
@@ -969,9 +892,7 @@ export const serverTransform = <
                 const innerFirst = dualKeyRecordFind(first ?? {}, key);
                 if (innerPrevState === undefined) {
                     return Result.error(
-                        `tried to update "${dualKeyToJsonString(
-                            key
-                        )}", but not found.`
+                        `tried to update "${dualKeyToJsonString(key)}", but not found.`
                     );
                 }
                 if (innerNextState === undefined) {
@@ -1021,11 +942,7 @@ export const serverTransform = <
     );
 };
 
-type InnerClientTransform<
-    TFirstOperation,
-    TSecondOperation,
-    TError = string
-> = (params: {
+type InnerClientTransform<TFirstOperation, TSecondOperation, TError = string> = (params: {
     first: TFirstOperation;
     second: TSecondOperation;
 }) => CustomResult<
@@ -1041,12 +958,7 @@ type Diff<TState, TOperation> = (params: {
     nextState: TState;
 }) => TOperation | undefined;
 
-const transformElement = <
-    TState,
-    TFirstOperation,
-    TSecondOperation,
-    TError = string
->({
+const transformElement = <TState, TFirstOperation, TSecondOperation, TError = string>({
     first,
     second,
     innerTransform,
@@ -1054,20 +966,12 @@ const transformElement = <
 }: {
     first: RecordUpOperationElement<TState, TFirstOperation>;
     second: RecordUpOperationElement<TState, TSecondOperation>;
-    innerTransform: InnerClientTransform<
-        TFirstOperation,
-        TSecondOperation,
-        TError
-    >;
+    innerTransform: InnerClientTransform<TFirstOperation, TSecondOperation, TError>;
     innerDiff: Diff<TState, TFirstOperation>;
 }): CustomResult<
     {
-        firstPrime:
-            | RecordUpOperationElement<TState, TFirstOperation>
-            | undefined;
-        secondPrime:
-            | RecordUpOperationElement<TState, TSecondOperation>
-            | undefined;
+        firstPrime: RecordUpOperationElement<TState, TFirstOperation> | undefined;
+        secondPrime: RecordUpOperationElement<TState, TSecondOperation> | undefined;
     },
     TError
 > => {
@@ -1192,43 +1096,42 @@ export const clientTransform = <TState, TOperation, TError = string>({
     >();
     let error = undefined as { error: TError } | undefined;
 
-    groupJoinDualKeyMap(
-        recordToDualKeyMap(first),
-        recordToDualKeyMap(second)
-    ).forEach((group, key) => {
-        if (error != null) {
-            return;
-        }
-        switch (group.type) {
-            case left: {
-                firstPrime.set(key, group.left);
+    groupJoinDualKeyMap(recordToDualKeyMap(first), recordToDualKeyMap(second)).forEach(
+        (group, key) => {
+            if (error != null) {
                 return;
             }
-            case right: {
-                secondPrime.set(key, group.right);
-                return;
-            }
-            case both: {
-                const xform = transformElement({
-                    first: group.left,
-                    second: group.right,
-                    innerTransform,
-                    innerDiff,
-                });
-                if (xform.isError) {
-                    error = { error: xform.error };
+            switch (group.type) {
+                case left: {
+                    firstPrime.set(key, group.left);
                     return;
                 }
-                if (xform.value.firstPrime !== undefined) {
-                    firstPrime.set(key, xform.value.firstPrime);
+                case right: {
+                    secondPrime.set(key, group.right);
+                    return;
                 }
-                if (xform.value.secondPrime !== undefined) {
-                    secondPrime.set(key, xform.value.secondPrime);
+                case both: {
+                    const xform = transformElement({
+                        first: group.left,
+                        second: group.right,
+                        innerTransform,
+                        innerDiff,
+                    });
+                    if (xform.isError) {
+                        error = { error: xform.error };
+                        return;
+                    }
+                    if (xform.value.firstPrime !== undefined) {
+                        firstPrime.set(key, xform.value.firstPrime);
+                    }
+                    if (xform.value.secondPrime !== undefined) {
+                        secondPrime.set(key, xform.value.secondPrime);
+                    }
+                    return;
                 }
-                return;
             }
         }
-    });
+    );
     if (error != null) {
         return Result.error(error.error);
     }

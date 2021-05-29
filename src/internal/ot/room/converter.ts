@@ -47,8 +47,6 @@ export const decodeDownOperation = (source: unknown): Room.DownOperation => {
     return result.right;
 };
 
-export const exactDownOperation = (
-    source: Room.DownOperation
-): Room.DownOperation => {
+export const exactDownOperation = (source: Room.DownOperation): Room.DownOperation => {
     return t.exact(Room.downOperation).encode(source);
 };

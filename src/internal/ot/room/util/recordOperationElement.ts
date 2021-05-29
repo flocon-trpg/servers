@@ -37,10 +37,7 @@ export type RecordDownOperationElement<TState, TOperation> =
           update: TOperation;
       };
 
-export const recordUpOperationElementFactory = <
-    TState extends t.Mixed,
-    TOperation extends t.Mixed
->(
+export const recordUpOperationElementFactory = <TState extends t.Mixed, TOperation extends t.Mixed>(
     state: TState,
     operation: TOperation
 ) =>
@@ -82,12 +79,7 @@ export type RecordTwoWayOperationElement<TState, TOperation> =
           update: TOperation;
       };
 
-export const mapRecordOperationElement = <
-    TReplace1,
-    TReplace2,
-    TOperation1,
-    TOperation2
->({
+export const mapRecordOperationElement = <TReplace1, TReplace2, TOperation1, TOperation2>({
     source,
     mapOperation,
     mapReplace,

@@ -132,10 +132,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     return Result.ok(result);
 };
 
-export const applyBack: Apply<State, DownOperation> = ({
-    state,
-    operation,
-}) => {
+export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
     const result = { ...state };
 
     if (operation.cellH !== undefined) {
@@ -180,14 +177,8 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
         cellX: ReplaceOperation.composeUpOperation(first.cellX, second.cellX),
         cellY: ReplaceOperation.composeUpOperation(first.cellY, second.cellY),
         h: ReplaceOperation.composeUpOperation(first.h, second.h),
-        isCellMode: ReplaceOperation.composeUpOperation(
-            first.isCellMode,
-            second.isCellMode
-        ),
-        isPrivate: ReplaceOperation.composeUpOperation(
-            first.isPrivate,
-            second.isPrivate
-        ),
+        isCellMode: ReplaceOperation.composeUpOperation(first.isCellMode, second.isCellMode),
+        isPrivate: ReplaceOperation.composeUpOperation(first.isPrivate, second.isPrivate),
         w: ReplaceOperation.composeUpOperation(first.w, second.w),
         x: ReplaceOperation.composeUpOperation(first.x, second.x),
         y: ReplaceOperation.composeUpOperation(first.y, second.y),
@@ -195,10 +186,7 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
     return Result.ok(valueProps);
 };
 
-export const composeDownOperation: Compose<DownOperation> = ({
-    first,
-    second,
-}) => {
+export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const valueProps: DownOperation = {
         $version: 1,
         cellH: ReplaceOperation.composeDownOperation(first.cellH, second.cellH),
@@ -206,14 +194,8 @@ export const composeDownOperation: Compose<DownOperation> = ({
         cellX: ReplaceOperation.composeDownOperation(first.cellX, second.cellX),
         cellY: ReplaceOperation.composeDownOperation(first.cellY, second.cellY),
         h: ReplaceOperation.composeDownOperation(first.h, second.h),
-        isCellMode: ReplaceOperation.composeDownOperation(
-            first.isCellMode,
-            second.isCellMode
-        ),
-        isPrivate: ReplaceOperation.composeDownOperation(
-            first.isPrivate,
-            second.isPrivate
-        ),
+        isCellMode: ReplaceOperation.composeDownOperation(first.isCellMode, second.isCellMode),
+        isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
         w: ReplaceOperation.composeDownOperation(first.w, second.w),
         x: ReplaceOperation.composeDownOperation(first.x, second.x),
         y: ReplaceOperation.composeDownOperation(first.y, second.y),
@@ -296,10 +278,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     return Result.ok({ prevState, twoWayOperation });
 };
 
-export const diff: Diff<State, TwoWayOperation> = ({
-    prevState,
-    nextState,
-}) => {
+export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
     const resultType: TwoWayOperation = { $version: 1 };
     if (prevState.cellH !== nextState.cellH) {
         resultType.cellH = {
@@ -355,11 +334,11 @@ export const diff: Diff<State, TwoWayOperation> = ({
     return resultType;
 };
 
-export const serverTransform: ServerTransform<
-    State,
-    TwoWayOperation,
-    UpOperation
-> = ({ prevState, clientOperation, serverOperation }) => {
+export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperation> = ({
+    prevState,
+    clientOperation,
+    serverOperation,
+}) => {
     const twoWayOperation: TwoWayOperation = { $version: 1 };
 
     twoWayOperation.cellH = ReplaceOperation.serverTransform({
@@ -420,10 +399,7 @@ export const serverTransform: ServerTransform<
     return Result.ok(twoWayOperation);
 };
 
-export const clientTransform: ClientTransform<UpOperation> = ({
-    first,
-    second,
-}) => {
+export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
     const cellH = ReplaceOperation.clientTransform({
         first: first.cellH,
         second: second.cellH,

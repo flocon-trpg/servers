@@ -21,22 +21,14 @@ import * as ReplaceOperation from '../util/replaceOperation';
 import { operation } from '../util/operation';
 import { isIdRecord } from '../util/record';
 import { Result } from '@kizahasi/result';
-import {
-    ApplyError,
-    ComposeAndTransformError,
-    PositiveInt,
-} from '@kizahasi/ot-string';
+import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
 import { maybe, Maybe, chooseRecord } from '@kizahasi/util';
 
 export const Player = 'Player';
 export const Spectator = 'Spectator';
 export const Master = 'Master';
 
-const participantRole = t.union([
-    t.literal(Player),
-    t.literal(Spectator),
-    t.literal(Master),
-]);
+const participantRole = t.union([t.literal(Player), t.literal(Spectator), t.literal(Master)]);
 export type ParticipantRole = t.TypeOf<typeof participantRole>;
 
 export const state = t.type({
@@ -87,10 +79,7 @@ export const toClientOperation = ({
     return diff;
 };
 
-export const apply: Apply<State, UpOperation | TwoWayOperation> = ({
-    state,
-    operation,
-}) => {
+export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
     const result: State = { ...state };
     if (operation.name != null) {
         result.name = operation.name.newValue;
@@ -101,10 +90,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({
     return Result.ok(result);
 };
 
-export const applyBack: Apply<State, DownOperation> = ({
-    state,
-    operation,
-}) => {
+export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
     const result: State = { ...state };
     if (operation.name != null) {
         result.name = operation.name.oldValue;
@@ -131,10 +117,7 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
     return Result.ok(valueProps);
 };
 
-export const composeDownOperation: Compose<DownOperation> = ({
-    first,
-    second,
-}) => {
+export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const valueProps: DownOperation = {
         $version: 1,
         name: ReplaceOperation.composeDownOperation(
@@ -182,10 +165,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     return Result.ok({ prevState, twoWayOperation });
 };
 
-export const diff: Diff<State, TwoWayOperation> = ({
-    prevState,
-    nextState,
-}) => {
+export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
     const result: TwoWayOperation = {
         $version: 1,
     };
@@ -242,10 +222,7 @@ export const serverTransform = ({
     return Result.ok(twoWayOperation);
 };
 
-export const clientTransform: ClientTransform<UpOperation> = ({
-    first,
-    second,
-}) => {
+export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
     const name = ReplaceOperation.clientTransform({
         first: first.name,
         second: second.name,

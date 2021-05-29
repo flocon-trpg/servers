@@ -1135,10 +1135,10 @@
     "@types/yargs" "^15.0.0"
     chalk "^4.0.0"
 
-"@kizahasi/ot-string@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@kizahasi/ot-string/-/ot-string-0.2.0.tgz#e9367b039b8053477d611fa8fd08cdbbebc9ea93"
-  integrity sha512-uUNr1LGupl/1HFIn/WUcpFgl8V/ZxEx1u1Iy0S9QVoZqKabTBlcO8GRIKHlqDElg1dFrxpf0pTN1p/AM4xYEPA==
+"@kizahasi/ot-string@0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@kizahasi/ot-string/-/ot-string-0.2.1.tgz#3ee2dd9454a9e018207d6a53efc1f23d4a67eab4"
+  integrity sha512-L99DypSqkPN8VNbHVd39uTNQRv7YGWdVyuHMkuwY6p5G16BTXxUXGYyu06OMYfdA66SAfeUKFKC4Olo1UJLJTQ==
   dependencies:
     "@kizahasi/result" "^0.2.0"
     diff-match-patch "^1.0.5"

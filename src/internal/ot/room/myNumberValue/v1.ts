@@ -19,11 +19,7 @@ import {
 import { operation } from '../util/operation';
 import { isIdRecord } from '../util/record';
 import { Result } from '@kizahasi/result';
-import {
-    ApplyError,
-    ComposeAndTransformError,
-    PositiveInt,
-} from '@kizahasi/ot-string';
+import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
 import { chooseDualKeyRecord } from '@kizahasi/util';
 
 export const state = t.type({
@@ -40,10 +36,7 @@ export const downOperation = operation(1, {
     value: t.type({ oldValue: t.number }),
     pieces: t.record(
         t.string,
-        t.record(
-            t.string,
-            recordDownOperationElementFactory(Piece.state, Piece.downOperation)
-        )
+        t.record(t.string, recordDownOperationElementFactory(Piece.state, Piece.downOperation))
     ),
 });
 
@@ -54,10 +47,7 @@ export const upOperation = operation(1, {
     value: t.type({ newValue: t.number }),
     pieces: t.record(
         t.string,
-        t.record(
-            t.string,
-            recordUpOperationElementFactory(Piece.state, Piece.upOperation)
-        )
+        t.record(t.string, recordUpOperationElementFactory(Piece.state, Piece.upOperation))
     ),
 });
 
@@ -70,15 +60,12 @@ export type TwoWayOperation = {
     pieces?: DualKeyRecordTwoWayOperation<Piece.State, Piece.TwoWayOperation>;
 };
 
-export const toClientState = (createdByMe: boolean) => (
-    source: State
-): State => {
+export const toClientState = (createdByMe: boolean) => (source: State): State => {
     return {
         ...source,
         value: source.isValuePrivate && !createdByMe ? 0 : source.value,
-        pieces: chooseDualKeyRecord<Piece.State, Piece.State>(
-            source.pieces,
-            state => Piece.toClientState(state)
+        pieces: chooseDualKeyRecord<Piece.State, Piece.State>(source.pieces, state =>
+            Piece.toClientState(state)
         ),
     };
 };
@@ -110,10 +97,8 @@ export const toClientOperation = (createdByMe: boolean) => ({
                       isPrivate: () => false,
                       prevState: prevState.pieces,
                       nextState: nextState.pieces,
-                      toClientState: ({ nextState }) =>
-                          Piece.toClientState(nextState),
-                      toClientOperation: params =>
-                          Piece.toClientOperation(params),
+                      toClientState: ({ nextState }) => Piece.toClientState(nextState),
+                      toClientOperation: params => Piece.toClientOperation(params),
                   }),
     };
 };
@@ -126,10 +111,7 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
     return source;
 };
 
-export const apply: Apply<State, UpOperation | TwoWayOperation> = ({
-    state,
-    operation,
-}) => {
+export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
     const result: State = { ...state };
     if (operation.isValuePrivate != null) {
         result.isValuePrivate = operation.isValuePrivate.newValue;
@@ -157,10 +139,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({
     return Result.ok(result);
 };
 
-export const applyBack: Apply<State, DownOperation> = ({
-    state,
-    operation,
-}) => {
+export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
     const result: State = { ...state };
     if (operation.isValuePrivate != null) {
         result.isValuePrivate = operation.isValuePrivate.oldValue;
@@ -220,10 +199,7 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
     return Result.ok(valueProps);
 };
 
-export const composeDownOperation: Compose<DownOperation> = ({
-    first,
-    second,
-}) => {
+export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const pieces = DualKeyRecordOperation.composeDownOperation<
         Piece.State,
         Piece.DownOperation,
@@ -302,14 +278,8 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     return Result.ok({ prevState, nextState, twoWayOperation });
 };
 
-export const diff: Diff<State, TwoWayOperation> = ({
-    prevState,
-    nextState,
-}) => {
-    const pieces = DualKeyRecordOperation.diff<
-        Piece.State,
-        Piece.TwoWayOperation
-    >({
+export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
+    const pieces = DualKeyRecordOperation.diff<Piece.State, Piece.TwoWayOperation>({
         prevState: prevState.pieces,
         nextState: nextState.pieces,
         innerDiff: params => Piece.diff(params),
@@ -402,10 +372,7 @@ export const serverTransform = (
     return Result.ok({ ...twoWayOperation });
 };
 
-export const clientTransform: ClientTransform<UpOperation> = ({
-    first,
-    second,
-}) => {
+export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
     const pieces = DualKeyRecordOperation.clientTransform<
         Piece.State,
         Piece.UpOperation,

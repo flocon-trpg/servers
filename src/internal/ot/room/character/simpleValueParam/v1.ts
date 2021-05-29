@@ -45,15 +45,11 @@ export const toClientState = <T>(createdByMe: boolean, defaultValue: T) => (
 ): State<T> => {
     return {
         ...source,
-        value:
-            source.isValuePrivate && !createdByMe ? defaultValue : source.value,
+        value: source.isValuePrivate && !createdByMe ? defaultValue : source.value,
     };
 };
 
-export const toClientOperation = <T>(
-    createdByMe: boolean,
-    defaultValue: T
-) => ({
+export const toClientOperation = <T>(createdByMe: boolean, defaultValue: T) => ({
     prevState,
     nextState,
     diff,
@@ -75,22 +71,18 @@ export const toClientOperation = <T>(
     };
 };
 
-export const toDownOperation = <T>(
-    source: TwoWayOperation<T>
-): DownOperation<T> => {
+export const toDownOperation = <T>(source: TwoWayOperation<T>): DownOperation<T> => {
     return source;
 };
 
-export const toUpOperation = <T>(
-    source: TwoWayOperation<T>
-): UpOperation<T> => {
+export const toUpOperation = <T>(source: TwoWayOperation<T>): UpOperation<T> => {
     return source;
 };
 
-export const apply = <T>(): Apply<
-    State<T>,
-    UpOperation<T> | TwoWayOperation<T>
-> => ({ state, operation }) => {
+export const apply = <T>(): Apply<State<T>, UpOperation<T> | TwoWayOperation<T>> => ({
+    state,
+    operation,
+}) => {
     const result: State<T> = { ...state };
     if (operation.isValuePrivate != null) {
         result.isValuePrivate = operation.isValuePrivate.newValue;
@@ -101,10 +93,7 @@ export const apply = <T>(): Apply<
     return Result.ok(result);
 };
 
-export const applyBack = <T>(): Apply<State<T>, DownOperation<T>> => ({
-    state,
-    operation,
-}) => {
+export const applyBack = <T>(): Apply<State<T>, DownOperation<T>> => ({ state, operation }) => {
     const result: State<T> = { ...state };
     if (operation.isValuePrivate != null) {
         result.isValuePrivate = operation.isValuePrivate.oldValue;
@@ -115,47 +104,34 @@ export const applyBack = <T>(): Apply<State<T>, DownOperation<T>> => ({
     return Result.ok(result);
 };
 
-export const composeUpOperation = <T>(): Compose<UpOperation<T>> => ({
-    first,
-    second,
-}) => {
+export const composeUpOperation = <T>(): Compose<UpOperation<T>> => ({ first, second }) => {
     const valueProps: UpOperation<T> = {
         $version: 1,
         isValuePrivate: ReplaceValueOperation.composeUpOperation(
             first.isValuePrivate,
             second.isValuePrivate
         ),
-        value: ReplaceValueOperation.composeUpOperation(
-            first.value,
-            second.value
-        ),
+        value: ReplaceValueOperation.composeUpOperation(first.value, second.value),
     };
     return Result.ok(valueProps);
 };
 
-export const composeDownOperation = <T>(): Compose<DownOperation<T>> => ({
-    first,
-    second,
-}) => {
+export const composeDownOperation = <T>(): Compose<DownOperation<T>> => ({ first, second }) => {
     const valueProps: DownOperation<T> = {
         $version: 1,
         isValuePrivate: ReplaceValueOperation.composeDownOperation(
             first.isValuePrivate,
             second.isValuePrivate
         ),
-        value: ReplaceValueOperation.composeDownOperation(
-            first.value,
-            second.value
-        ),
+        value: ReplaceValueOperation.composeDownOperation(first.value, second.value),
     };
     return Result.ok(valueProps);
 };
 
-export const restore = <T>(): Restore<
-    State<T>,
-    DownOperation<T>,
-    TwoWayOperation<T>
-> => ({ nextState, downOperation }) => {
+export const restore = <T>(): Restore<State<T>, DownOperation<T>, TwoWayOperation<T>> => ({
+    nextState,
+    downOperation,
+}) => {
     if (downOperation === undefined) {
         return Result.ok({
             prevState: nextState,
@@ -185,10 +161,7 @@ export const restore = <T>(): Restore<
     return Result.ok({ prevState, nextState, twoWayOperation });
 };
 
-export const diff = <T>(): Diff<State<T>, TwoWayOperation<T>> => ({
-    prevState,
-    nextState,
-}) => {
+export const diff = <T>(): Diff<State<T>, TwoWayOperation<T>> => ({ prevState, nextState }) => {
     const resultType: TwoWayOperation<T> = { $version: 1 };
     if (prevState.isValuePrivate !== nextState.isValuePrivate) {
         resultType.isValuePrivate = {
@@ -240,10 +213,7 @@ export const serverTransform = <T>(
     return Result.ok({ ...twoWayOperation });
 };
 
-export const clientTransform = <T>(): ClientTransform<UpOperation<T>> => ({
-    first,
-    second,
-}) => {
+export const clientTransform = <T>(): ClientTransform<UpOperation<T>> => ({ first, second }) => {
     const isValuePrivate = ReplaceOperation.clientTransform({
         first: first.isValuePrivate,
         second: second.isValuePrivate,
