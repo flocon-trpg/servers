@@ -250,7 +250,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                             strIndex20Array.map(createNumParamName)
                         }
                         {
-                            strIndex20Array.filter(key => numParamNamesMap.has(key) ? <div style={({ padding: 6 })} /> : null)
+                            strIndex20Array.some(key => numParamNamesMap.has(key)) ? <div style={({ padding: 6 })} /> : null
                         }
                         <div style={({ display: 'flex', flexDirection: 'row' })}>
                             <Select
@@ -297,7 +297,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                             strIndex20Array.map(createBoolParamName)
                         }
                         {
-                            strIndex20Array.filter(key => boolParamNamesMap.has(key) ? <div style={({ padding: 6 })} /> : null)
+                            strIndex20Array.some(key => boolParamNamesMap.has(key)) ? <div style={({ padding: 6 })} /> : null
                         }
                         <div style={({ display: 'flex', flexDirection: 'row' })}>
                             <Select
@@ -344,7 +344,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                             strIndex20Array.map(createStrParamName)
                         }
                         {
-                            strIndex20Array.filter(key => strParamNamesMap.has(key) ? <div style={({ padding: 6 })} /> : null)
+                            strIndex20Array.some(key => strParamNamesMap.has(key)) ? <div style={({ padding: 6 })} /> : null
                         }
                         <div style={({ display: 'flex', flexDirection: 'row' })}>
                             <Select
