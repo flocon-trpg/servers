@@ -10,12 +10,14 @@ import { PromiseQueue } from './utils/PromiseQueue';
 import { createPostgreSQL, createSQLite } from './mikro-orm';
 import { firebaseConfig, loadServerConfigAsMain, postgresql, sqlite } from './config';
 import ws from 'ws';
-import { useServer } from 'graphql-ws/lib/use/ws';
+import { Extra, useServer } from 'graphql-ws/lib/use/ws';
 import { execute, subscribe } from 'graphql';
 import { checkMigrationsBeforeStart } from './migrate';
 import { InMemoryConnectionManager, pubSub } from './connection/main';
 import { CustomResult, Result } from '@kizahasi/result';
 import { authToken } from '@kizahasi/util';
+import { Context } from 'graphql-ws/lib/server';
+
 
 const main = async (params: { debug: boolean }): Promise<void> => {
     admin.initializeApp({
@@ -60,6 +62,17 @@ const main = async (params: { debug: boolean }): Promise<void> => {
         return await getDecodedIdToken(idToken);
     };
 
+    const getDecodedIdTokenFromContext = async (ctx: Context<Extra>) => {
+        let authTokenValue: string | undefined;
+        if (ctx.connectionParams != null) {
+            const authTokenValueAsUnknown = ctx.connectionParams[authToken];
+            if (typeof authTokenValueAsUnknown === 'string') {
+                authTokenValue = authTokenValueAsUnknown;
+            }
+        }
+        return authTokenValue == null ? undefined : await getDecodedIdToken(authTokenValue);
+    };
+
     // TODO: queueLimitの値をきちんと決める
     const promiseQueue = new PromiseQueue({ queueLimit: 50 });
 
@@ -101,15 +114,17 @@ const main = async (params: { debug: boolean }): Promise<void> => {
             schema,
             execute,
             subscribe,
-            context: async (ctx, message) => {
-                let authTokenValue: string | undefined;
-                if (ctx.connectionParams != null) {
-                    const authTokenValueAsUnknown = ctx.connectionParams[authToken];
-                    if (typeof authTokenValueAsUnknown === 'string') {
-                        authTokenValue = authTokenValueAsUnknown;
-                    }
-                }
-                const decodedIdToken = authTokenValue == null ? undefined : await getDecodedIdToken(authTokenValue);
+            context: async ctx => {
+                const decodedIdToken = await getDecodedIdTokenFromContext(ctx); 
+                return {
+                    decodedIdToken,
+                    promiseQueue,
+                    connectionManager,
+                    createEm: () => orm.em.fork(),
+                } as ResolverContext;
+            },
+            onSubscribe: async (ctx, message) => {
+                const decodedIdToken = await getDecodedIdTokenFromContext(ctx); 
                 if (decodedIdToken?.isError === false && message.payload.operationName?.toLowerCase() === 'roomevent') {
                     const roomId = message.payload.variables?.id;
                     if (typeof roomId === 'string') {
@@ -122,12 +137,6 @@ const main = async (params: { debug: boolean }): Promise<void> => {
                         console.warn('(typeof RoomEvent.id) should be string');
                     }
                 }
-                return {
-                    decodedIdToken,
-                    promiseQueue,
-                    connectionManager,
-                    createEm: () => orm.em.fork(),
-                } as ResolverContext;
             },
             onDisconnect: ctx => {
                 for (const key in ctx.subscriptions) {

@@ -82,7 +82,7 @@ export const findRoomAndMyParticipant = async ({
     if (room == null) {
         return null;
     }
-    const jsonState = GlobalRoom.MikroORM.ToGlobal.state(room);
-    const me = find(jsonState.participants, userUid);
-    return new FindRoomAndMyParticipantResult(room, { ...jsonState, name: room.name }, me);
+    const state = GlobalRoom.MikroORM.ToGlobal.state(room);
+    const me = find(state.participants, userUid);
+    return new FindRoomAndMyParticipantResult(room, state, me);
 };

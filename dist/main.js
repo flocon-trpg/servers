@@ -55,6 +55,16 @@ const main = async (params) => {
         const idToken = bearer.replace('Bearer ', '');
         return await getDecodedIdToken(idToken);
     };
+    const getDecodedIdTokenFromContext = async (ctx) => {
+        let authTokenValue;
+        if (ctx.connectionParams != null) {
+            const authTokenValueAsUnknown = ctx.connectionParams[util_1.authToken];
+            if (typeof authTokenValueAsUnknown === 'string') {
+                authTokenValue = authTokenValueAsUnknown;
+            }
+        }
+        return authTokenValue == null ? undefined : await getDecodedIdToken(authTokenValue);
+    };
     const promiseQueue = new PromiseQueue_1.PromiseQueue({ queueLimit: 50 });
     const context = async (context) => {
         return {
@@ -82,16 +92,18 @@ const main = async (params) => {
             schema,
             execute: graphql_1.execute,
             subscribe: graphql_1.subscribe,
-            context: async (ctx, message) => {
+            context: async (ctx) => {
+                const decodedIdToken = await getDecodedIdTokenFromContext(ctx);
+                return {
+                    decodedIdToken,
+                    promiseQueue,
+                    connectionManager,
+                    createEm: () => orm.em.fork(),
+                };
+            },
+            onSubscribe: async (ctx, message) => {
                 var _a, _b;
-                let authTokenValue;
-                if (ctx.connectionParams != null) {
-                    const authTokenValueAsUnknown = ctx.connectionParams[util_1.authToken];
-                    if (typeof authTokenValueAsUnknown === 'string') {
-                        authTokenValue = authTokenValueAsUnknown;
-                    }
-                }
-                const decodedIdToken = authTokenValue == null ? undefined : await getDecodedIdToken(authTokenValue);
+                const decodedIdToken = await getDecodedIdTokenFromContext(ctx);
                 if ((decodedIdToken === null || decodedIdToken === void 0 ? void 0 : decodedIdToken.isError) === false && ((_a = message.payload.operationName) === null || _a === void 0 ? void 0 : _a.toLowerCase()) === 'roomevent') {
                     const roomId = (_b = message.payload.variables) === null || _b === void 0 ? void 0 : _b.id;
                     if (typeof roomId === 'string') {
@@ -105,12 +117,6 @@ const main = async (params) => {
                         console.warn('(typeof RoomEvent.id) should be string');
                     }
                 }
-                return {
-                    decodedIdToken,
-                    promiseQueue,
-                    connectionManager,
-                    createEm: () => orm.em.fork(),
-                };
             },
             onDisconnect: ctx => {
                 for (const key in ctx.subscriptions) {
