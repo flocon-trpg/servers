@@ -115,7 +115,7 @@ const main = async (params: { debug: boolean }): Promise<void> => {
             execute,
             subscribe,
             context: async ctx => {
-                const decodedIdToken = await getDecodedIdTokenFromContext(ctx); 
+                const decodedIdToken = await getDecodedIdTokenFromContext(ctx);
                 return {
                     decodedIdToken,
                     promiseQueue,
@@ -124,25 +124,33 @@ const main = async (params: { debug: boolean }): Promise<void> => {
                 } as ResolverContext;
             },
             onSubscribe: async (ctx, message) => {
-                const decodedIdToken = await getDecodedIdTokenFromContext(ctx); 
-                if (decodedIdToken?.isError === false && message.payload.operationName?.toLowerCase() === 'roomevent') {
-                    const roomId = message.payload.variables?.id;
-                    if (typeof roomId === 'string') {
-                        connectionManager.onConnectToRoom({
-                            connectionId: message.id,
-                            userUid: decodedIdToken.value.uid,
-                            roomId,
-                        });
-                    } else {
-                        console.warn('(typeof RoomEvent.id) should be string');
-                    }
+                if (message.payload.operationName?.toLowerCase() !== 'roomevent') {
+                    return;
+                }
+                const decodedIdToken = await getDecodedIdTokenFromContext(ctx);
+                if (decodedIdToken?.isError !== false) {
+                    return;
+                }
+                
+                const roomId = message.payload.variables?.id;
+                if (typeof roomId === 'string') {
+                    connectionManager.onConnectToRoom({
+                        connectionId: message.id,
+                        userUid: decodedIdToken.value.uid,
+                        roomId,
+                    });
+                } else {
+                    console.warn('(typeof RoomEvent.id) should be string');
                 }
             },
-            onDisconnect: ctx => {
+            onComplete: async (ctx, message) => {
+                connectionManager.onLeaveRoom({ connectionId: message.id });
+            },
+            onClose: ctx => {
                 for (const key in ctx.subscriptions) {
                     connectionManager.onLeaveRoom({ connectionId: key });
                 }
-            },
+            }
         }, wsServer);
 
         console.log(`🚀 Server ready at http://localhost:${PORT}${apolloServer.graphqlPath}`);

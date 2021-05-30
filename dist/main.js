@@ -103,26 +103,33 @@ const main = async (params) => {
             },
             onSubscribe: async (ctx, message) => {
                 var _a, _b;
+                if (((_a = message.payload.operationName) === null || _a === void 0 ? void 0 : _a.toLowerCase()) !== 'roomevent') {
+                    return;
+                }
                 const decodedIdToken = await getDecodedIdTokenFromContext(ctx);
-                if ((decodedIdToken === null || decodedIdToken === void 0 ? void 0 : decodedIdToken.isError) === false && ((_a = message.payload.operationName) === null || _a === void 0 ? void 0 : _a.toLowerCase()) === 'roomevent') {
-                    const roomId = (_b = message.payload.variables) === null || _b === void 0 ? void 0 : _b.id;
-                    if (typeof roomId === 'string') {
-                        connectionManager.onConnectToRoom({
-                            connectionId: message.id,
-                            userUid: decodedIdToken.value.uid,
-                            roomId,
-                        });
-                    }
-                    else {
-                        console.warn('(typeof RoomEvent.id) should be string');
-                    }
+                if ((decodedIdToken === null || decodedIdToken === void 0 ? void 0 : decodedIdToken.isError) !== false) {
+                    return;
+                }
+                const roomId = (_b = message.payload.variables) === null || _b === void 0 ? void 0 : _b.id;
+                if (typeof roomId === 'string') {
+                    connectionManager.onConnectToRoom({
+                        connectionId: message.id,
+                        userUid: decodedIdToken.value.uid,
+                        roomId,
+                    });
+                }
+                else {
+                    console.warn('(typeof RoomEvent.id) should be string');
                 }
             },
-            onDisconnect: ctx => {
+            onComplete: async (ctx, message) => {
+                connectionManager.onLeaveRoom({ connectionId: message.id });
+            },
+            onClose: ctx => {
                 for (const key in ctx.subscriptions) {
                     connectionManager.onLeaveRoom({ connectionId: key });
                 }
-            },
+            }
         }, wsServer);
         console.log(`🚀 Server ready at http://localhost:${PORT}${apolloServer.graphqlPath}`);
         console.log(`🚀 Subscriptions ready at ws://localhost:${PORT}${apolloServer.subscriptionsPath}`);
