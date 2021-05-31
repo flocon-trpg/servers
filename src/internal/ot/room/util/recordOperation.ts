@@ -390,7 +390,7 @@ export const serverTransform = <
         return result;
     }
 
-    return Result.ok((result.value === undefined ? undefined : result.value[dummyKey]) ?? {});
+    return Result.ok(result.value === undefined ? undefined : result.value[dummyKey]);
 };
 
 type InnerClientTransform<TFirstOperation, TSecondOperation, TError = string> = (params: {

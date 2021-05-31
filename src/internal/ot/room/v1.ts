@@ -1521,6 +1521,14 @@ export const serverTransform = (
     clientOperation,
     serverOperation,
 }) => {
+    if (requestedBy.type === client) {
+        const me = currentState.participants[requestedBy.userUid];
+        if (me == null || me.role == null || me.role === Participant.Spectator) {
+            // エラーを返すべきかもしれない
+            return Result.ok(undefined);
+        }
+    }
+
     const currentActiveBoardKey = currentState.activeBoardKey;
 
     const boards = DualKeyRecordOperation.serverTransform<

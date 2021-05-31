@@ -150,3 +150,4 @@ export {
     diff as textDiff,
     toUpOperation as toTextUpOperation,
 } from './internal/ot/room/util/textOperation';
+export { client, server, RequestedBy } from './internal/ot/room/util/type';

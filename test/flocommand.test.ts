@@ -1,4 +1,4 @@
-import { tomlToCharacterAction } from '../src/index';
+import { tomlToCharacterAction } from '../dist/index';
 
 it('tests characterAction', () => {
     const actual = tomlToCharacterAction(`
