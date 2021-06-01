@@ -1,12 +1,13 @@
 import * as t from 'io-ts';
-import { DualKeyRecordTwoWayOperation } from '../util/dualKeyRecordOperation';
-import * as DualKeyRecordOperation from '../util/dualKeyRecordOperation';
-import * as Piece from '../../piece/v1';
+import { DualKeyRecordTwoWayOperation } from '../../util/dualKeyRecordOperation';
+import * as DualKeyRecordOperation from '../../util/dualKeyRecordOperation';
+import * as DieValue from './dieValue/v1';
+import * as Piece from '../../../piece/v1';
 import {
     recordDownOperationElementFactory,
     recordUpOperationElementFactory,
-} from '../util/recordOperationElement';
-import * as ReplaceOperation from '../util/replaceOperation';
+} from '../../util/recordOperationElement';
+import * as ReplaceOperation from '../../util/replaceOperation';
 import {
     Apply,
     ClientTransform,
@@ -15,25 +16,28 @@ import {
     Restore,
     ServerTransform,
     ToClientOperationParams,
-} from '../util/type';
-import { operation } from '../util/operation';
-import { isIdRecord } from '../util/record';
+} from '../../util/type';
+import { createOperation } from '../../util/createOperation';
+import { isIdRecord } from '../../util/record';
 import { Result } from '@kizahasi/result';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
-import { chooseDualKeyRecord } from '@kizahasi/util';
+import { chooseDualKeyRecord, chooseRecord, maybe } from '@kizahasi/util';
+import { RecordTwoWayOperation } from '../../util/recordOperation';
+import * as RecordOperation from '../../util/recordOperation';
 
 export const state = t.type({
     $version: t.literal(1),
-    isValuePrivate: t.boolean,
-    value: t.number,
+    dice: t.record(t.string, DieValue.state),
     pieces: t.record(t.string, t.record(t.string, Piece.state)),
 });
 
 export type State = t.TypeOf<typeof state>;
 
-export const downOperation = operation(1, {
-    isValuePrivate: t.type({ oldValue: t.boolean }),
-    value: t.type({ oldValue: t.number }),
+export const downOperation = createOperation(1, {
+    dice: t.record(
+        t.string,
+        recordDownOperationElementFactory(DieValue.state, DieValue.downOperation)
+    ),
     pieces: t.record(
         t.string,
         t.record(t.string, recordDownOperationElementFactory(Piece.state, Piece.downOperation))
@@ -42,9 +46,8 @@ export const downOperation = operation(1, {
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
-export const upOperation = operation(1, {
-    isValuePrivate: t.type({ newValue: t.boolean }),
-    value: t.type({ newValue: t.number }),
+export const upOperation = createOperation(1, {
+    dice: t.record(t.string, recordUpOperationElementFactory(DieValue.state, DieValue.upOperation)),
     pieces: t.record(
         t.string,
         t.record(t.string, recordUpOperationElementFactory(Piece.state, Piece.upOperation))
@@ -55,15 +58,14 @@ export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
     $version: 1;
-    isValuePrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
-    value?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
+    dice?: RecordTwoWayOperation<DieValue.State, DieValue.TwoWayOperation>;
     pieces?: DualKeyRecordTwoWayOperation<Piece.State, Piece.TwoWayOperation>;
 };
 
 export const toClientState = (createdByMe: boolean) => (source: State): State => {
     return {
         ...source,
-        value: source.isValuePrivate && !createdByMe ? 0 : source.value,
+        dice: chooseRecord(source.dice, state => DieValue.toClientState(createdByMe)(state)),
         pieces: chooseDualKeyRecord<Piece.State, Piece.State>(source.pieces, state =>
             Piece.toClientState(state)
         ),
@@ -75,20 +77,20 @@ export const toClientOperation = (createdByMe: boolean) => ({
     nextState,
     diff,
 }: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
-    return {
+    const result = {
         ...diff,
-        value: ReplaceOperation.toPrivateClientOperation({
-            oldValue: {
-                value: prevState.value,
-                isValuePrivate: prevState.isValuePrivate,
-            },
-            newValue: {
-                value: nextState.value,
-                isValuePrivate: nextState.isValuePrivate,
-            },
-            defaultState: 0,
-            createdByMe,
-        }),
+        dice:
+            diff.dice == null
+                ? undefined
+                : RecordOperation.toClientOperation({
+                      diff: diff.dice,
+                      isPrivate: () => false,
+                      prevState: prevState.dice,
+                      nextState: nextState.dice,
+                      toClientState: ({ nextState }) =>
+                          DieValue.toClientState(createdByMe)(nextState),
+                      toClientOperation: params => DieValue.toClientOperation(createdByMe)(params),
+                  }),
         pieces:
             diff.pieces == null
                 ? undefined
@@ -101,6 +103,7 @@ export const toClientOperation = (createdByMe: boolean) => ({
                       toClientOperation: params => Piece.toClientOperation(params),
                   }),
     };
+    return result;
 };
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
@@ -113,12 +116,22 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
 
 export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
     const result: State = { ...state };
-    if (operation.isValuePrivate != null) {
-        result.isValuePrivate = operation.isValuePrivate.newValue;
+
+    const dice = RecordOperation.apply<
+        DieValue.State,
+        DieValue.UpOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        prevState: state.dice,
+        operation: operation.dice,
+        innerApply: ({ prevState, operation: upOperation }) => {
+            return DieValue.apply({ state: prevState, operation: upOperation });
+        },
+    });
+    if (dice.isError) {
+        return dice;
     }
-    if (operation.value != null) {
-        result.value = operation.value.newValue;
-    }
+    result.dice = dice.value;
 
     const pieces = DualKeyRecordOperation.apply<
         Piece.State,
@@ -141,12 +154,22 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
 
 export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
     const result: State = { ...state };
-    if (operation.isValuePrivate != null) {
-        result.isValuePrivate = operation.isValuePrivate.oldValue;
+
+    const dice = RecordOperation.applyBack<
+        DieValue.State,
+        DieValue.DownOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        nextState: state.dice,
+        operation: operation.dice,
+        innerApplyBack: ({ state: nextState, operation }) => {
+            return DieValue.applyBack({ state: nextState, operation });
+        },
+    });
+    if (dice.isError) {
+        return dice;
     }
-    if (operation.value != null) {
-        result.value = operation.value.oldValue;
-    }
+    result.dice = dice.value;
 
     const pieces = DualKeyRecordOperation.applyBack<
         Piece.State,
@@ -168,6 +191,22 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 };
 
 export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
+    const dice = RecordOperation.composeUpOperation<
+        DieValue.State,
+        DieValue.UpOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        first: first.dice,
+        second: second.dice,
+        innerApply: ({ state, operation }) => {
+            return DieValue.apply({ state, operation });
+        },
+        innerCompose: params => DieValue.composeUpOperation(params),
+    });
+    if (dice.isError) {
+        return dice;
+    }
+
     const pieces = DualKeyRecordOperation.composeUpOperation<
         Piece.State,
         Piece.UpOperation,
@@ -186,20 +225,29 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
 
     const valueProps: UpOperation = {
         $version: 1,
-        isValuePrivate: ReplaceOperation.composeUpOperation(
-            first.isValuePrivate ?? undefined,
-            second.isValuePrivate ?? undefined
-        ),
-        value: ReplaceOperation.composeUpOperation(
-            first.value ?? undefined,
-            second.value ?? undefined
-        ),
+        dice: dice.value,
         pieces: pieces.value,
     };
     return Result.ok(valueProps);
 };
 
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
+    const dice = RecordOperation.composeDownOperation<
+        DieValue.State,
+        DieValue.DownOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        first: first.dice,
+        second: second.dice,
+        innerApplyBack: ({ state, operation }) => {
+            return DieValue.applyBack({ state, operation });
+        },
+        innerCompose: params => DieValue.composeDownOperation(params),
+    });
+    if (dice.isError) {
+        return dice;
+    }
+
     const pieces = DualKeyRecordOperation.composeDownOperation<
         Piece.State,
         Piece.DownOperation,
@@ -218,14 +266,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
 
     const valueProps: DownOperation = {
         $version: 1,
-        isValuePrivate: ReplaceOperation.composeDownOperation(
-            first.isValuePrivate ?? undefined,
-            second.isValuePrivate ?? undefined
-        ),
-        value: ReplaceOperation.composeDownOperation(
-            first.value ?? undefined,
-            second.value ?? undefined
-        ),
+        dice: dice.value,
         pieces: pieces.value,
     };
     return Result.ok(valueProps);
@@ -237,6 +278,21 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 }) => {
     if (downOperation === undefined) {
         return Result.ok({ prevState: nextState, twoWayOperation: undefined });
+    }
+
+    const dice = RecordOperation.restore<
+        DieValue.State,
+        DieValue.DownOperation,
+        DieValue.TwoWayOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        nextState: nextState.dice,
+        downOperation: downOperation.dice,
+        innerDiff: params => DieValue.diff(params),
+        innerRestore: params => DieValue.restore(params),
+    });
+    if (dice.isError) {
+        return dice;
     }
 
     const pieces = DualKeyRecordOperation.restore<
@@ -254,31 +310,26 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         return pieces;
     }
 
-    const prevState: State = { ...nextState, pieces: pieces.value.prevState };
+    const prevState: State = {
+        ...nextState,
+        dice: dice.value.prevState,
+        pieces: pieces.value.prevState,
+    };
     const twoWayOperation: TwoWayOperation = {
         $version: 1,
+        dice: dice.value.twoWayOperation,
         pieces: pieces.value.twoWayOperation,
     };
-
-    if (downOperation.isValuePrivate != null) {
-        prevState.isValuePrivate = downOperation.isValuePrivate.oldValue;
-        twoWayOperation.isValuePrivate = {
-            ...downOperation.isValuePrivate,
-            newValue: nextState.isValuePrivate,
-        };
-    }
-    if (downOperation.value != null) {
-        prevState.value = downOperation.value.oldValue;
-        twoWayOperation.value = {
-            ...downOperation.value,
-            newValue: nextState.value,
-        };
-    }
 
     return Result.ok({ prevState, nextState, twoWayOperation });
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
+    const dice = RecordOperation.diff<DieValue.State, DieValue.TwoWayOperation>({
+        prevState: prevState.dice,
+        nextState: nextState.dice,
+        innerDiff: params => DieValue.diff(params),
+    });
     const pieces = DualKeyRecordOperation.diff<Piece.State, Piece.TwoWayOperation>({
         prevState: prevState.pieces,
         nextState: nextState.pieces,
@@ -286,24 +337,13 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     });
     const resultType: TwoWayOperation = {
         $version: 1,
+        dice,
         pieces,
     };
-    if (prevState.isValuePrivate !== nextState.isValuePrivate) {
-        resultType.isValuePrivate = {
-            oldValue: prevState.isValuePrivate,
-            newValue: nextState.isValuePrivate,
-        };
-    }
-    if (prevState.value !== nextState.value) {
-        resultType.value = {
-            oldValue: prevState.value,
-            newValue: nextState.value,
-        };
-    }
     if (isIdRecord(resultType)) {
         return undefined;
     }
-    return { ...resultType };
+    return resultType;
 };
 
 export const serverTransform = (
@@ -317,6 +357,35 @@ export const serverTransform = (
     if (!createdByMe) {
         // 自分以外はどのプロパティも編集できない。
         return Result.ok(undefined);
+    }
+
+    const dice = RecordOperation.serverTransform<
+        DieValue.State,
+        DieValue.State,
+        DieValue.TwoWayOperation,
+        DieValue.UpOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        prevState: prevState.dice,
+        nextState: currentState.dice,
+        first: serverOperation?.dice,
+        second: clientOperation.dice,
+        innerTransform: ({ prevState, nextState, first, second }) =>
+            DieValue.serverTransform(createdByMe)({
+                prevState,
+                currentState: nextState,
+                serverOperation: first,
+                clientOperation: second,
+            }),
+        toServerState: state => state,
+        cancellationPolicy: {
+            cancelCreate: ({ key }) => !createdByMe || ['1', '2', '3'].every(x => x !== key),
+            cancelRemove: () => !createdByMe,
+            cancelUpdate: () => !createdByMe,
+        },
+    });
+    if (dice.isError) {
+        return dice;
     }
 
     const pieces = DualKeyRecordOperation.serverTransform<
@@ -350,29 +419,32 @@ export const serverTransform = (
 
     const twoWayOperation: TwoWayOperation = {
         $version: 1,
+        dice: dice.value,
         pieces: pieces.value,
     };
-
-    twoWayOperation.isValuePrivate = ReplaceOperation.serverTransform({
-        first: serverOperation?.isValuePrivate ?? undefined,
-        second: clientOperation.isValuePrivate ?? undefined,
-        prevState: prevState.isValuePrivate,
-    });
-    // !createdByMe の場合は最初の方ですべて弾いているため、isValuePrivateのチェックをする必要はない。
-    twoWayOperation.value = ReplaceOperation.serverTransform({
-        first: serverOperation?.value ?? undefined,
-        second: clientOperation.value ?? undefined,
-        prevState: prevState.value,
-    });
 
     if (isIdRecord(twoWayOperation)) {
         return Result.ok(undefined);
     }
 
-    return Result.ok({ ...twoWayOperation });
+    return Result.ok(twoWayOperation);
 };
 
 export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
+    const dice = RecordOperation.clientTransform<
+        DieValue.State,
+        DieValue.UpOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        first: first.dice,
+        second: second.dice,
+        innerTransform: params => DieValue.clientTransform(params),
+        innerDiff: params => DieValue.diff(params),
+    });
+    if (dice.isError) {
+        return dice;
+    }
+
     const pieces = DualKeyRecordOperation.clientTransform<
         Piece.State,
         Piece.UpOperation,
@@ -387,28 +459,16 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         return pieces;
     }
 
-    const isValuePrivate = ReplaceOperation.clientTransform({
-        first: first.isValuePrivate,
-        second: second.isValuePrivate,
-    });
-
-    const value = ReplaceOperation.clientTransform({
-        first: first.value,
-        second: second.value,
-    });
-
     const firstPrime: UpOperation = {
         $version: 1,
+        dice: dice.value.firstPrime,
         pieces: pieces.value.firstPrime,
-        isValuePrivate: isValuePrivate.firstPrime,
-        value: value.firstPrime,
     };
 
     const secondPrime: UpOperation = {
         $version: 1,
+        dice: dice.value.secondPrime,
         pieces: pieces.value.secondPrime,
-        isValuePrivate: isValuePrivate.secondPrime,
-        value: value.secondPrime,
     };
 
     return Result.ok({

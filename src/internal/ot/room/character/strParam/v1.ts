@@ -10,7 +10,7 @@ import {
     ServerTransform,
     ToClientOperationParams,
 } from '../../util/type';
-import { operation } from '../../util/operation';
+import { createOperation } from '../../util/createOperation';
 import { isIdRecord } from '../../util/record';
 import { Result } from '@kizahasi/result';
 
@@ -23,14 +23,14 @@ export const state = t.type({
 
 export type State = t.TypeOf<typeof state>;
 
-export const downOperation = operation(1, {
+export const downOperation = createOperation(1, {
     isValuePrivate: t.type({ oldValue: t.boolean }),
     value: TextOperation.downOperation,
 });
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
-export const upOperation = operation(1, {
+export const upOperation = createOperation(1, {
     isValuePrivate: t.type({ newValue: t.boolean }),
     value: TextOperation.upOperation,
 });
@@ -254,7 +254,6 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         first: first.value,
         second: second.value,
     });
-
     if (value.isError) {
         return value;
     }
