@@ -21,14 +21,37 @@ export const chooseDualKeyRecord = <TSource, TResult>(
     source: Record<string, Record<string, TSource>>,
     chooser: (element: TSource) => TResult | undefined
 ): Record<string, Record<string, TResult>> => {
-    const result: Record<string, Record<string, TResult>> = {};
+    return chooseRecord(source, inner =>
+        inner === undefined
+            ? undefined
+            : chooseRecord(inner, value => chooser(value))
+    );
+};
+
+export const mapRecord = <TSource, TResult>(
+    source: Record<string, TSource>,
+    mapping: (element: TSource) => TResult
+): Record<string, TResult> => {
+    const result: Record<string, TResult> = {};
     for (const key in source) {
         const element = source[key];
         if (element !== undefined) {
-            result[key] = chooseRecord(element, chooser);
+            const newElement = mapping(element);
+            result[key] = newElement;
         }
     }
     return result;
+};
+
+export const mapDualKeyRecord = <TSource, TResult>(
+    source: Record<string, Record<string, TSource>>,
+    mapping: (element: TSource) => TResult
+): Record<string, Record<string, TResult>> => {
+    return chooseRecord(source, inner =>
+        inner === undefined
+            ? undefined
+            : mapRecord(inner, value => mapping(value))
+    );
 };
 
 export const recordToArray = <T>(
@@ -55,7 +78,7 @@ export const recordToMap = <T>(source: Record<string, T>): Map<string, T> => {
     return result;
 };
 
-export const recordToDualKeyMap = <T>(
+export const dualKeyRecordToDualKeyMap = <T>(
     source: Record<string, Record<string, T>>
 ): DualKeyMap<string, string, T> => {
     const result = new DualKeyMap<string, string, T>();
@@ -72,6 +95,11 @@ export const recordToDualKeyMap = <T>(
     }
     return result;
 };
+
+/**
+ * @deprecated Use dualKeyRecordToDualKeyMap instead.
+ */
+export const recordToDualKeyMap = dualKeyRecordToDualKeyMap;
 
 export const mapToRecord = <TValue>(
     source: Map<string, TValue>
@@ -136,25 +164,6 @@ export const dualKeyRecordForEach = <T>(
             action(value, { first, second });
         }
     }
-};
-
-export const recordCompact = <T1, T2>(
-    source: Record<string, T1 | undefined>,
-    mapping: (value: T1, key: string) => T2 | undefined
-) => {
-    const result: Record<string, T2> = {};
-    for (const key in source) {
-        const prevValue = source[key];
-        if (prevValue === undefined) {
-            continue;
-        }
-        const nextValue = mapping(prevValue, key);
-        if (nextValue === undefined) {
-            continue;
-        }
-        result[key] = nextValue;
-    }
-    return result;
 };
 
 export const dualKeyRecordFind = <T>(
