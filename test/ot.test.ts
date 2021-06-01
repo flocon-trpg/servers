@@ -74,7 +74,7 @@ namespace Resources {
         boolParamNames: {},
         numParamNames: {},
         strParamNames: {},
-        myNumberValues: {},
+        memo: {},
         publicChannel1Name: '',
         publicChannel2Name: '',
         publicChannel3Name: '',
@@ -294,6 +294,7 @@ describe.each`
             },
         ],
         volume: 0.5,
+        isPaused: false,
     };
 
     const clientOperation: UpOperation = {

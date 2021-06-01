@@ -1,6 +1,6 @@
 import * as t from 'io-ts';
 import * as ReplaceOperation from '../../util/replaceOperation';
-import { operation } from '../../util/operation';
+import { createOperation } from '../../util/createOperation';
 import { maybe, Maybe } from '@kizahasi/util';
 
 export const state = t.type({
@@ -12,14 +12,14 @@ export const state = t.type({
 
 export type State = t.TypeOf<typeof state>;
 
-export const downOperation = operation(1, {
+export const downOperation = createOperation(1, {
     isValuePrivate: t.type({ oldValue: t.boolean }),
     value: t.type({ oldValue: maybe(t.boolean) }),
 });
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
-export const upOperation = operation(1, {
+export const upOperation = createOperation(1, {
     isValuePrivate: t.type({ newValue: t.boolean }),
     value: t.type({ newValue: maybe(t.boolean) }),
 });

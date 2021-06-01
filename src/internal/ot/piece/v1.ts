@@ -1,6 +1,6 @@
 import { Result } from '@kizahasi/result';
 import * as t from 'io-ts';
-import { operation } from '../room/util/operation';
+import { createOperation } from '../room/util/createOperation';
 import { isIdRecord } from '../room/util/record';
 import * as ReplaceOperation from '../room/util/replaceOperation';
 import {
@@ -34,7 +34,7 @@ export const state = t.type({
 
 export type State = t.TypeOf<typeof state>;
 
-export const downOperation = operation(1, {
+export const downOperation = createOperation(1, {
     cellH: numberDownOperation,
     cellW: numberDownOperation,
     cellX: numberDownOperation,
@@ -49,7 +49,7 @@ export const downOperation = operation(1, {
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
-export const upOperation = operation(1, {
+export const upOperation = createOperation(1, {
     cellH: numberUpOperation,
     cellW: numberUpOperation,
     cellX: numberUpOperation,

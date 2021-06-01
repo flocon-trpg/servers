@@ -1148,10 +1148,10 @@
   resolved "https://registry.yarnpkg.com/@kizahasi/result/-/result-0.2.0.tgz#a38c8c6c109124ec7350c796d36cf55fa826f6d9"
   integrity sha512-4IkSRH36XepOM4+eWNqnOfCrjHtOe10aYWWANot5cUbRPrghGbBdyNyONr2bCma6FnnrtnGqj8e2lX5hDKjwLQ==
 
-"@kizahasi/util@0.1.0-alpha.4":
-  version "0.1.0-alpha.4"
-  resolved "https://registry.yarnpkg.com/@kizahasi/util/-/util-0.1.0-alpha.4.tgz#7ee208fecca1db3a85427f6eef0e6c407aa6ba82"
-  integrity sha512-bej/pMD5m/sTMpfDixHxnz6FC/yjM+lNKEc4UkZUW6Nk9wXWpcQtEYPvNfh/OK7XaZxre9xbtnoO1WUHh/ufVg==
+"@kizahasi/util@0.1.0-alpha.5":
+  version "0.1.0-alpha.5"
+  resolved "https://registry.yarnpkg.com/@kizahasi/util/-/util-0.1.0-alpha.5.tgz#2d1d272f006cb5d3f7630acd86a2133352ca8e11"
+  integrity sha512-EXO1KP0FPlWvoq6cQOuKRLSJTtZpJuyJ/1LK+AlDDF2Vjok/E5T/7w326jZj0Nw3SlNrBpF9cmW/RHdRXYX1KA==
   dependencies:
     "@kizahasi/result" "^0.2.0"
     fp-ts "^2.10.5"

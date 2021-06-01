@@ -1,12 +1,5 @@
 import * as t from 'io-ts';
 import {
-    recordDownOperationElementFactory,
-    RecordTwoWayOperationElement,
-    recordUpOperationElementFactory,
-    mapRecordOperationElement,
-} from '../util/recordOperationElement';
-import * as RecordOperation from '../util/recordOperation';
-import {
     Apply,
     ClientTransform,
     Compose,
@@ -18,11 +11,10 @@ import {
     ToClientOperationParams,
 } from '../util/type';
 import * as ReplaceOperation from '../util/replaceOperation';
-import { operation } from '../util/operation';
+import { createOperation } from '../util/createOperation';
 import { isIdRecord } from '../util/record';
 import { Result } from '@kizahasi/result';
-import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
-import { maybe, Maybe, chooseRecord } from '@kizahasi/util';
+import { maybe, Maybe } from '@kizahasi/util';
 
 export const Player = 'Player';
 export const Spectator = 'Spectator';
@@ -40,14 +32,14 @@ export const state = t.type({
 
 export type State = t.TypeOf<typeof state>;
 
-export const downOperation = operation(1, {
+export const downOperation = createOperation(1, {
     name: t.type({ oldValue: t.string }),
     role: t.type({ oldValue: maybe(participantRole) }),
 });
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
-export const upOperation = operation(1, {
+export const upOperation = createOperation(1, {
     name: t.type({ newValue: t.string }),
     role: t.type({ newValue: maybe(participantRole) }),
 });
