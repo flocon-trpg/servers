@@ -8,6 +8,7 @@ import { FilePath, filePath } from '../../filePath/v1';
 import * as TextOperation from '../util/textOperation';
 import * as Piece from '../../piece/v1';
 import * as BoardLocation from '../../boardLocation/v1';
+import * as DicePieceValue from './dicePieceValue/v1';
 import * as NumberPieceValue from './numberPieceValue/v1';
 import * as ReplaceOperation from '../util/replaceOperation';
 import * as DualKeyRecordOperation from '../util/dualKeyRecordOperation';
@@ -20,7 +21,6 @@ import {
     ClientTransform,
     Compose,
     Diff,
-    RequestedBy,
     Restore,
     ServerTransform,
     ToClientOperationParams,
@@ -56,7 +56,8 @@ export const state = t.type({
     pieces: t.record(t.string, t.record(t.string, Piece.state)),
     privateCommands: t.record(t.string, Command.state),
     tachieLocations: t.record(t.string, t.record(t.string, BoardLocation.state)),
-    numberPieceValues: t.record(t.string, t.record(t.string, NumberPieceValue.state)),
+    dicePieceValues: t.record(t.string, DicePieceValue.state),
+    numberPieceValues: t.record(t.string, NumberPieceValue.state),
 });
 
 export type State = t.TypeOf<typeof state>;
@@ -89,15 +90,13 @@ export const downOperation = createOperation(1, {
             recordDownOperationElementFactory(BoardLocation.state, BoardLocation.downOperation)
         )
     ),
+    dicePieceValues: t.record(
+        t.string,
+        recordDownOperationElementFactory(DicePieceValue.state, DicePieceValue.downOperation)
+    ),
     numberPieceValues: t.record(
         t.string,
-        t.record(
-            t.string,
-            recordDownOperationElementFactory(
-                NumberPieceValue.state,
-                NumberPieceValue.downOperation
-            )
-        )
+        recordDownOperationElementFactory(NumberPieceValue.state, NumberPieceValue.downOperation)
     ),
 });
 
@@ -131,12 +130,13 @@ export const upOperation = createOperation(1, {
             recordUpOperationElementFactory(BoardLocation.state, BoardLocation.upOperation)
         )
     ),
+    dicePieceValues: t.record(
+        t.string,
+        recordUpOperationElementFactory(DicePieceValue.state, DicePieceValue.upOperation)
+    ),
     numberPieceValues: t.record(
         t.string,
-        t.record(
-            t.string,
-            recordUpOperationElementFactory(NumberPieceValue.state, NumberPieceValue.upOperation)
-        )
+        recordUpOperationElementFactory(NumberPieceValue.state, NumberPieceValue.upOperation)
     ),
 });
 
@@ -163,7 +163,11 @@ export type TwoWayOperation = {
         BoardLocation.State,
         BoardLocation.TwoWayOperation
     >;
-    numberPieceValues?: DualKeyRecordOperation.DualKeyRecordTwoWayOperation<
+    dicePieceValues?: RecordOperation.RecordTwoWayOperation<
+        DicePieceValue.State,
+        DicePieceValue.TwoWayOperation
+    >;
+    numberPieceValues?: RecordOperation.RecordTwoWayOperation<
         NumberPieceValue.State,
         NumberPieceValue.TwoWayOperation
     >;
@@ -233,13 +237,18 @@ export const toClientState = (createdByMe: boolean) => (source: State): State =>
             isPrivate: () => false,
             toClientState: ({ state }) => BoardLocation.toClientState(state),
         }),
-        numberPieceValues: DualKeyRecordOperation.toClientState<
+        dicePieceValues: RecordOperation.toClientState<DicePieceValue.State, DicePieceValue.State>({
+            serverState: source.dicePieceValues,
+            isPrivate: () => false,
+            toClientState: ({ state }) => DicePieceValue.toClientState(createdByMe)(state),
+        }),
+        numberPieceValues: RecordOperation.toClientState<
             NumberPieceValue.State,
             NumberPieceValue.State
         >({
             serverState: source.numberPieceValues,
             isPrivate: () => false,
-            toClientState: ({ state, key }) => NumberPieceValue.toClientState(createdByMe)(state),
+            toClientState: ({ state }) => NumberPieceValue.toClientState(createdByMe)(state),
         }),
     };
 };
@@ -345,14 +354,27 @@ export const toClientOperation = (createdByMe: boolean) => ({
                       toClientOperation: params => BoardLocation.toClientOperation(params),
                       isPrivate: () => false,
                   }),
+        dicePieceValues:
+            diff.dicePieceValues == null
+                ? undefined
+                : RecordOperation.toClientOperation({
+                      diff: diff.dicePieceValues,
+                      prevState: prevState.dicePieceValues,
+                      nextState: nextState.dicePieceValues,
+                      toClientState: ({ nextState }) =>
+                          DicePieceValue.toClientState(createdByMe)(nextState),
+                      toClientOperation: params =>
+                          DicePieceValue.toClientOperation(createdByMe)(params),
+                      isPrivate: () => false,
+                  }),
         numberPieceValues:
             diff.numberPieceValues == null
                 ? undefined
-                : DualKeyRecordOperation.toClientOperation({
+                : RecordOperation.toClientOperation({
                       diff: diff.numberPieceValues,
                       prevState: prevState.numberPieceValues,
                       nextState: nextState.numberPieceValues,
-                      toClientState: ({ nextState, key }) =>
+                      toClientState: ({ nextState }) =>
                           NumberPieceValue.toClientState(createdByMe)(nextState),
                       toClientOperation: params =>
                           NumberPieceValue.toClientOperation(createdByMe)(params),
@@ -419,10 +441,20 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
                           mapOperation: BoardLocation.toDownOperation,
                       })
                   ),
+        dicePieceValues:
+            source.dicePieceValues == null
+                ? undefined
+                : chooseRecord(source.dicePieceValues, operation =>
+                      mapRecordOperationElement({
+                          source: operation,
+                          mapReplace: x => x,
+                          mapOperation: DicePieceValue.toDownOperation,
+                      })
+                  ),
         numberPieceValues:
             source.numberPieceValues == null
                 ? undefined
-                : chooseDualKeyRecord(source.numberPieceValues, operation =>
+                : chooseRecord(source.numberPieceValues, operation =>
                       mapRecordOperationElement({
                           source: operation,
                           mapReplace: x => x,
@@ -490,10 +522,20 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
                           mapOperation: BoardLocation.toUpOperation,
                       })
                   ),
+        dicePieceValues:
+            source.dicePieceValues == null
+                ? undefined
+                : chooseRecord(source.dicePieceValues, operation =>
+                      mapRecordOperationElement({
+                          source: operation,
+                          mapReplace: x => x,
+                          mapOperation: DicePieceValue.toUpOperation,
+                      })
+                  ),
         numberPieceValues:
             source.numberPieceValues == null
                 ? undefined
-                : chooseDualKeyRecord(source.numberPieceValues, operation =>
+                : chooseRecord(source.numberPieceValues, operation =>
                       mapRecordOperationElement({
                           source: operation,
                           mapReplace: x => x,
@@ -665,7 +707,26 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     }
     result.tachieLocations = tachieLocations.value;
 
-    const numberPieceValues = DualKeyRecordOperation.apply<
+    const dicePieceValues = RecordOperation.apply<
+        DicePieceValue.State,
+        DicePieceValue.UpOperation | DicePieceValue.TwoWayOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        prevState: state.dicePieceValues,
+        operation: operation.dicePieceValues,
+        innerApply: ({ prevState, operation: upOperation }) => {
+            return DicePieceValue.apply({
+                state: prevState,
+                operation: upOperation,
+            });
+        },
+    });
+    if (dicePieceValues.isError) {
+        return dicePieceValues;
+    }
+    result.dicePieceValues = dicePieceValues.value;
+
+    const numberPieceValues = RecordOperation.apply<
         NumberPieceValue.State,
         NumberPieceValue.UpOperation | NumberPieceValue.TwoWayOperation,
         string | ApplyError<PositiveInt> | ComposeAndTransformError
@@ -848,7 +909,23 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     }
     result.tachieLocations = tachieLocations.value;
 
-    const numberPieceValues = DualKeyRecordOperation.applyBack<
+    const dicePieceValues = RecordOperation.applyBack<
+        DicePieceValue.State,
+        DicePieceValue.DownOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        nextState: state.dicePieceValues,
+        operation: operation.dicePieceValues,
+        innerApplyBack: ({ state, operation }) => {
+            return DicePieceValue.applyBack({ state, operation });
+        },
+    });
+    if (dicePieceValues.isError) {
+        return dicePieceValues;
+    }
+    result.dicePieceValues = dicePieceValues.value;
+
+    const numberPieceValues = RecordOperation.applyBack<
         NumberPieceValue.State,
         NumberPieceValue.DownOperation,
         string | ApplyError<PositiveInt> | ComposeAndTransformError
@@ -946,7 +1023,21 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
         return tachieLocations;
     }
 
-    const numberPieceValues = DualKeyRecordOperation.composeUpOperation<
+    const dicePieceValues = RecordOperation.composeUpOperation<
+        DicePieceValue.State,
+        DicePieceValue.UpOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        first: first.dicePieceValues,
+        second: second.dicePieceValues,
+        innerApply: params => DicePieceValue.apply(params),
+        innerCompose: params => DicePieceValue.composeUpOperation(params),
+    });
+    if (dicePieceValues.isError) {
+        return dicePieceValues;
+    }
+
+    const numberPieceValues = RecordOperation.composeUpOperation<
         NumberPieceValue.State,
         NumberPieceValue.UpOperation,
         string | ApplyError<PositiveInt> | ComposeAndTransformError
@@ -998,6 +1089,7 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
         pieces: pieces.value,
         privateCommands: privateCommands.value,
         tachieLocations: tachieLocations.value,
+        dicePieceValues: dicePieceValues.value,
         numberPieceValues: numberPieceValues.value,
     };
     return Result.ok(valueProps);
@@ -1082,7 +1174,21 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
         return tachieLocations;
     }
 
-    const numberPieceValues = DualKeyRecordOperation.composeDownOperation<
+    const dicePieceValues = RecordOperation.composeDownOperation<
+        DicePieceValue.State,
+        DicePieceValue.DownOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        first: first.dicePieceValues,
+        second: second.dicePieceValues,
+        innerApplyBack: params => DicePieceValue.applyBack(params),
+        innerCompose: params => DicePieceValue.composeDownOperation(params),
+    });
+    if (dicePieceValues.isError) {
+        return dicePieceValues;
+    }
+
+    const numberPieceValues = RecordOperation.composeDownOperation<
         NumberPieceValue.State,
         NumberPieceValue.DownOperation,
         string | ApplyError<PositiveInt> | ComposeAndTransformError
@@ -1132,6 +1238,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
         pieces: pieces.value,
         privateCommands: privateCommands.value,
         tachieLocations: tachieLocations.value,
+        dicePieceValues: dicePieceValues.value,
         numberPieceValues: numberPieceValues.value,
     };
     return Result.ok(valueProps);
@@ -1226,7 +1333,22 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         return tachieLocations;
     }
 
-    const numberPieceValues = DualKeyRecordOperation.restore<
+    const dicePieceValues = RecordOperation.restore<
+        DicePieceValue.State,
+        DicePieceValue.DownOperation,
+        DicePieceValue.TwoWayOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        nextState: nextState.dicePieceValues,
+        downOperation: downOperation.dicePieceValues,
+        innerDiff: params => DicePieceValue.diff(params),
+        innerRestore: params => DicePieceValue.restore(params),
+    });
+    if (dicePieceValues.isError) {
+        return dicePieceValues;
+    }
+
+    const numberPieceValues = RecordOperation.restore<
         NumberPieceValue.State,
         NumberPieceValue.DownOperation,
         NumberPieceValue.TwoWayOperation,
@@ -1250,6 +1372,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         pieces: pieces.value.prevState,
         privateCommands: privateCommands.value.prevState,
         tachieLocations: tachieLocations.value.prevState,
+        dicePieceValues: dicePieceValues.value.prevState,
         numberPieceValues: numberPieceValues.value.prevState,
     };
     const twoWayOperation: TwoWayOperation = {
@@ -1261,6 +1384,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         pieces: pieces.value.twoWayOperation,
         privateCommands: privateCommands.value.twoWayOperation,
         tachieLocations: tachieLocations.value.twoWayOperation,
+        dicePieceValues: dicePieceValues.value.twoWayOperation,
         numberPieceValues: numberPieceValues.value.twoWayOperation,
     };
 
@@ -1416,7 +1540,15 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         nextState: nextState.tachieLocations,
         innerDiff: params => BoardLocation.diff(params),
     });
-    const numberPieceValues = DualKeyRecordOperation.diff<
+    const dicePieceValues = RecordOperation.diff<
+        DicePieceValue.State,
+        DicePieceValue.TwoWayOperation
+    >({
+        prevState: prevState.dicePieceValues,
+        nextState: nextState.dicePieceValues,
+        innerDiff: params => DicePieceValue.diff(params),
+    });
+    const numberPieceValues = RecordOperation.diff<
         NumberPieceValue.State,
         NumberPieceValue.TwoWayOperation
     >({
@@ -1433,6 +1565,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         pieces,
         privateCommands,
         tachieLocations,
+        dicePieceValues,
         numberPieceValues,
     };
     if (prevState.image !== nextState.image) {
@@ -1636,7 +1769,36 @@ export const serverTransform = (
         return tachieLocations;
     }
 
-    const numberPieceValues = DualKeyRecordOperation.serverTransform<
+    const dicePieceValues = RecordOperation.serverTransform<
+        DicePieceValue.State,
+        DicePieceValue.State,
+        DicePieceValue.TwoWayOperation,
+        DicePieceValue.UpOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        first: serverOperation?.dicePieceValues,
+        second: clientOperation.dicePieceValues,
+        prevState: prevState.dicePieceValues,
+        nextState: currentState.dicePieceValues,
+        innerTransform: ({ first, second, prevState, nextState, key }) =>
+            DicePieceValue.serverTransform(createdByMe)({
+                prevState,
+                currentState: nextState,
+                serverOperation: first,
+                clientOperation: second,
+            }),
+        toServerState: state => state,
+        cancellationPolicy: {
+            cancelCreate: () => !createdByMe,
+            cancelUpdate: () => !createdByMe,
+            cancelRemove: () => !createdByMe,
+        },
+    });
+    if (dicePieceValues.isError) {
+        return dicePieceValues;
+    }
+
+    const numberPieceValues = RecordOperation.serverTransform<
         NumberPieceValue.State,
         NumberPieceValue.State,
         NumberPieceValue.TwoWayOperation,
@@ -1655,7 +1817,11 @@ export const serverTransform = (
                 clientOperation: second,
             }),
         toServerState: state => state,
-        cancellationPolicy: {},
+        cancellationPolicy: {
+            cancelCreate: () => !createdByMe,
+            cancelUpdate: () => !createdByMe,
+            cancelRemove: () => !createdByMe,
+        },
     });
     if (numberPieceValues.isError) {
         return numberPieceValues;
@@ -1736,6 +1902,7 @@ export const serverTransform = (
         strParams: strParams.value,
         pieces: pieces.value,
         tachieLocations: tachieLocations.value,
+        dicePieceValues: dicePieceValues.value,
         numberPieceValues: numberPieceValues.value,
     });
 };
@@ -1825,7 +1992,27 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         return tachieLocations;
     }
 
-    const numberPieceValues = DualKeyRecordOperation.clientTransform<
+    const dicePieceValues = RecordOperation.clientTransform<
+        DicePieceValue.State,
+        DicePieceValue.UpOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        first: first.dicePieceValues,
+        second: second.dicePieceValues,
+        innerTransform: params => DicePieceValue.clientTransform(params),
+        innerDiff: params => {
+            const diff = DicePieceValue.diff(params);
+            if (diff == null) {
+                return diff;
+            }
+            return DicePieceValue.toUpOperation(diff);
+        },
+    });
+    if (dicePieceValues.isError) {
+        return dicePieceValues;
+    }
+
+    const numberPieceValues = RecordOperation.clientTransform<
         NumberPieceValue.State,
         NumberPieceValue.UpOperation,
         string | ApplyError<PositiveInt> | ComposeAndTransformError
@@ -1898,6 +2085,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         pieces: pieces.value.firstPrime,
         privateCommands: privateCommands.value.firstPrime,
         tachieLocations: tachieLocations.value.firstPrime,
+        dicePieceValues: dicePieceValues.value.firstPrime,
         numberPieceValues: numberPieceValues.value.firstPrime,
         image: image.firstPrime,
         tachieImage: tachieImage.firstPrime,
@@ -1915,6 +2103,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         pieces: pieces.value.secondPrime,
         privateCommands: privateCommands.value.secondPrime,
         tachieLocations: tachieLocations.value.secondPrime,
+        dicePieceValues: dicePieceValues.value.secondPrime,
         numberPieceValues: numberPieceValues.value.secondPrime,
         image: image.secondPrime,
         tachieImage: tachieImage.secondPrime,
