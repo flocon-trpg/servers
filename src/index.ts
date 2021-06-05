@@ -151,7 +151,7 @@ export {
     UpOperation as NumberPieceValuePieceUpOperation,
     DownOperation as NumberPieceValueDownOperation,
     apply as applyNumberPieceValue,
-    diff as myNumberValueDiff,
+    diff as numberPieceValueDiff,
     toUpOperation as toNumberPieceValueUpOperation,
 } from './internal/ot/room/character/numberPieceValue/v1';
 
