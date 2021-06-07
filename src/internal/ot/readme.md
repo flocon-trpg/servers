@@ -12,4 +12,4 @@ io-ts のインスタンスにおける T | null | undefined (a.k.a. Maybe&lt;T&
 
 composeDownOperationは、例えば { oldValue: undefined, newValue: 1 }, { oldValue:1, newValue: undefined } をcomposeしたときにこれはidになるべき(oldValueとnewValueのうち1つのみがnullishであるべき)だがidにできないという仕様があるため注意。composeUpOperationも同様。
 
-board,character,myNumbervalueなどのfirst keyはuserUid(participantのfirst key)と等しい。これらをparticipantの子として持たせていない理由は、UndoやRedo処理をparticipantの削除などなしで行いやすくするため。
+board,characterなどのfirst keyはuserUid(participantのfirst key)と等しい。これらをparticipantの子として持たせていない理由は、UndoやRedo処理をparticipantの削除などなしで行いやすくするため。

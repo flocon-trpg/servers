@@ -1,9 +1,7 @@
 import { StrIndex10 } from '@kizahasi/util';
-import * as t from 'io-ts';
 import {
     State,
     UpOperation,
-    toClientState,
     Player,
     Spectator,
     serverTransform,
@@ -12,6 +10,8 @@ import {
     RequestedBy,
     server,
     replace,
+    CharacterState,
+    update,
 } from '../dist/index';
 
 namespace Resources {
@@ -39,6 +39,28 @@ namespace Resources {
         export namespace None {
             export const userUid = 'NONE_PARTICIPANT';
         }
+    }
+
+    export namespace Character {
+        export const emptyState: CharacterState = {
+            $version: 1,
+            memo: '',
+            name: '',
+            image: undefined,
+            privateVarToml: '',
+            privateCommand: '',
+            privateCommands: {},
+            tachieImage: undefined,
+            isPrivate: false,
+            boolParams: {},
+            numParams: {},
+            numMaxParams: {},
+            strParams: {},
+            dicePieceValues: {},
+            numberPieceValues: {},
+            pieces: {},
+            tachieLocations: {},
+        };
     }
 
     export const state: State = {
@@ -342,5 +364,124 @@ describe.each`
         testName: 'tests Player',
         requestedBy: { type: client, userUid: Resources.Participant.Player1.userUid },
         expected,
+    });
+});
+
+describe('tests creating DicePieceValue', () => {
+    const characterKey = 'CHARACTER_KEY';
+    const dicePieceValueKey = 'DICE_KEY';
+
+    const state: State = {
+        ...Resources.state,
+        characters: {
+            [Resources.Participant.Player1.userUid]: {
+                [characterKey]: Resources.Character.emptyState,
+            },
+        },
+    };
+
+    const newValue = {
+        $version: 1 as const,
+        files: [
+            {
+                $version: 1 as const,
+                sourceType: 'Default' as const,
+                path: 'PATH',
+            },
+        ],
+        volume: 0.5,
+        isPaused: false,
+    };
+
+    const clientOperation: UpOperation = {
+        $version: 1,
+        characters: {
+            [Resources.Participant.Player1.userUid]: {
+                [characterKey]: {
+                    type: update,
+                    update: {
+                        $version: 1,
+                        dicePieceValues: {
+                            [dicePieceValueKey]: {
+                                type: replace,
+                                replace: {
+                                    newValue: {
+                                        $version: 1,
+                                        dice: {
+                                            '1': {
+                                                $version: 1,
+                                                dieType: 'D6',
+                                                value: 1,
+                                                isValuePrivate: false,
+                                            },
+                                        },
+                                        pieces: {},
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    };
+
+    Test.Basic.testServerTransformToReject({
+        prevState: state,
+        currentState: state,
+        serverOperation: undefined,
+        clientOperation,
+    });
+
+    const tester = Test.Basic.setupTestServerTransform({
+        prevState: state,
+        currentState: state,
+        serverOperation: undefined,
+        clientOperation,
+    });
+
+    const expected: TwoWayOperation = {
+        $version: 1,
+        characters: {
+            [Resources.Participant.Player1.userUid]: {
+                [characterKey]: {
+                    type: update,
+                    update: {
+                        $version: 1,
+                        dicePieceValues: {
+                            [dicePieceValueKey]: {
+                                type: replace,
+                                replace: {
+                                    newValue: {
+                                        $version: 1,
+                                        dice: {
+                                            '1': {
+                                                $version: 1,
+                                                dieType: 'D6',
+                                                value: 1,
+                                                isValuePrivate: false,
+                                            },
+                                        },
+                                        pieces: {},
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    };
+
+    tester({ testName: 'tests server', requestedBy: { type: server }, expected });
+    tester({
+        testName: 'tests Owner Player',
+        requestedBy: { type: client, userUid: Resources.Participant.Player1.userUid },
+        expected,
+    });
+    tester({
+        testName: 'tests Non-owner Player',
+        requestedBy: { type: client, userUid: Resources.Participant.Player2.userUid },
+        expected: undefined,
     });
 });

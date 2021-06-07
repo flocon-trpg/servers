@@ -935,10 +935,12 @@ export const serverTransform = <
         }
     }
     return Result.ok(
-        result.toStringRecord(
-            x => x,
-            x => x
-        )
+        result.isEmpty
+            ? undefined
+            : result.toStringRecord(
+                  x => x,
+                  x => x
+              )
     );
 };
 

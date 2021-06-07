@@ -1780,7 +1780,7 @@ export const serverTransform = (
         second: clientOperation.dicePieceValues,
         prevState: prevState.dicePieceValues,
         nextState: currentState.dicePieceValues,
-        innerTransform: ({ first, second, prevState, nextState, key }) =>
+        innerTransform: ({ first, second, prevState, nextState }) =>
             DicePieceValue.serverTransform(createdByMe)({
                 prevState,
                 currentState: nextState,
@@ -1809,7 +1809,7 @@ export const serverTransform = (
         second: clientOperation.numberPieceValues,
         prevState: prevState.numberPieceValues,
         nextState: currentState.numberPieceValues,
-        innerTransform: ({ first, second, prevState, nextState, key }) =>
+        innerTransform: ({ first, second, prevState, nextState }) =>
             NumberPieceValue.serverTransform(createdByMe)({
                 prevState,
                 currentState: nextState,
@@ -1836,6 +1836,8 @@ export const serverTransform = (
         pieces: pieces.value,
         // privateCommands: privateCommands.value,
         tachieLocations: tachieLocations.value,
+        dicePieceValues: dicePieceValues.value,
+        numberPieceValues: numberPieceValues.value,
     };
 
     twoWayOperation.image = ReplaceOperation.serverTransform({
@@ -1894,17 +1896,7 @@ export const serverTransform = (
         return Result.ok(undefined);
     }
 
-    return Result.ok({
-        ...twoWayOperation,
-        boolParams: boolParams.value,
-        numParams: numParams.value,
-        numMaxParams: numMaxParams.value,
-        strParams: strParams.value,
-        pieces: pieces.value,
-        tachieLocations: tachieLocations.value,
-        dicePieceValues: dicePieceValues.value,
-        numberPieceValues: numberPieceValues.value,
-    });
+    return Result.ok(twoWayOperation);
 };
 
 export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {

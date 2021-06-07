@@ -4,7 +4,7 @@ import {
     replace as replaceKey,
     update as updateKey,
 } from '../../util/recordOperationElement';
-import * as MyNumberValue from './v1';
+import * as DicePieceValue from './v1';
 import * as Piece from '../../../piece/v1';
 import * as DieValue from './dieValue/v1';
 import { chooseRecord } from '@kizahasi/util';
@@ -69,7 +69,7 @@ export const exactMain = t.union([
 
 export type Main = t.TypeOf<typeof main>;
 
-export const ofOperation = (source: MyNumberValue.TwoWayOperation): Main => {
+export const ofOperation = (source: DicePieceValue.TwoWayOperation): Main => {
     return {
         $version: 1,
         type: updateType,

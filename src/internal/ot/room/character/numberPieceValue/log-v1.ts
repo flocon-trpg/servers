@@ -1,6 +1,6 @@
 import * as t from 'io-ts';
 import { recordUpOperationElementFactory } from '../../util/recordOperationElement';
-import * as MyNumberValue from './v1';
+import * as NumberPieceValue from './v1';
 import * as Piece from '../../../piece/v1';
 
 export const updateType = 'update';
@@ -49,7 +49,7 @@ export const exactMain = t.union([
 
 export type Main = t.TypeOf<typeof main>;
 
-export const ofOperation = (source: MyNumberValue.TwoWayOperation): Main => {
+export const ofOperation = (source: NumberPieceValue.TwoWayOperation): Main => {
     return {
         $version: 1,
         type: updateType,
