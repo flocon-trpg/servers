@@ -306,7 +306,6 @@ export const RoomMenu: React.FC = () => {
     const roomId = useSelector(state => state.roomModule.roomId);
     const createdBy = useSelector(state => state.roomModule.roomState?.state?.createdBy);
     const publicChannelNames = usePublicChannelNames();
-    const characters = useCharacters();
     const participants = useParticipants();
     const activeBoardPanel = useSelector(state => state.roomConfigModule?.panels.activeBoardPanel);
     const boardPanels = useSelector(state => state.roomConfigModule?.panels.boardEditorPanels);
@@ -321,10 +320,6 @@ export const RoomMenu: React.FC = () => {
     const [isChangeMyParticipantNameModalVisible, setIsChangeMyParticipantNameModalVisible] = React.useState(false);
     const [isDeleteRoomModalVisible, setIsDeleteRoomModalVisible] = React.useState(false);
 
-    const charactersRef = React.useRef(characters);
-    React.useEffect(() => {
-        charactersRef.current = characters;
-    }, [characters]);
     const participantsRef = React.useRef(participants);
     React.useEffect(() => {
         participantsRef.current = participants;
@@ -343,12 +338,11 @@ export const RoomMenu: React.FC = () => {
             // TODO: エラーメッセージを出す
             return;
         }
-        if (charactersRef.current == null || publicChannelNamesRef.current == null || participantsRef.current == null) {
+        if (publicChannelNamesRef.current == null || participantsRef.current == null) {
             return;
         }
         fileDownload(generateAsStaticHtml({
             ...publicChannelNamesRef.current,
-            characters: charactersRef.current,
             messages: data.result,
             participants: participantsRef.current,
         }), `log_${moment(new Date()).format('YYYYMMDDHHmmss')}.html`);

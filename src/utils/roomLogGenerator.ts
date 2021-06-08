@@ -62,12 +62,10 @@ type RoomMessage = {
 
 const createRoomMessageArray = (props: {
     messages: RoomMessages;
-    characters: ReadonlyStateMap<CharacterState>;
     participants: ReadonlyMap<string, ParticipantState>;
 } & PublicChannelNames) => {
     const {
         messages,
-        characters,
         participants,
     } = props;
 
@@ -75,13 +73,12 @@ const createRoomMessageArray = (props: {
     const publicChannels = new Map<string, RoomPublicChannelFragment>();
     messages.publicChannels.forEach(ch => publicChannels.set(ch.key, ch));
 
-    const createCreatedBy = ({ createdBy, characterStateId, customName }: { createdBy: string; characterStateId?: string; customName?: string }): { rolePlayPart?: string; participantNamePart: string } => {
+    const createCreatedBy = ({ createdBy, characterName, customName }: { createdBy: string; characterName?: string; customName?: string }): { rolePlayPart?: string; participantNamePart: string } => {
         const participantNamePart = participants.get(createdBy)?.name ?? createdBy;
         if (customName != null) {
             return { rolePlayPart: customName, participantNamePart };
         }
-        if (characterStateId != null) {
-            const characterName = characters.get({ createdBy, id: characterStateId })?.name ?? characterStateId;
+        if (characterName != null) {
             return { rolePlayPart: characterName, participantNamePart };
         }
         return { participantNamePart };
@@ -100,7 +97,7 @@ const createRoomMessageArray = (props: {
                 createdAt: msg.createdAt,
                 value: {
                     text: null,
-                    createdBy: createCreatedBy({ createdBy: msg.createdBy, characterStateId: msg.character?.stateId ?? undefined, customName: msg.customName ?? undefined }),
+                    createdBy: createCreatedBy({ createdBy: msg.createdBy, characterName: msg.character?.name, customName: msg.customName ?? undefined }),
                     channelName,
                     commandResult: msg.commandResult?.text ?? null,
                     textColor: msg.textColor ?? null,
@@ -114,7 +111,7 @@ const createRoomMessageArray = (props: {
             createdAt: msg.createdAt,
             value: {
                 text: toText(msg) ?? '',
-                createdBy: msg.createdBy == null ? null : createCreatedBy({ createdBy: msg.createdBy, characterStateId: msg.character?.stateId ?? undefined, customName: msg.customName ?? undefined }),
+                createdBy: msg.createdBy == null ? null : createCreatedBy({ createdBy: msg.createdBy, characterName: msg.character?.name, customName: msg.customName ?? undefined }),
                 channelName,
                 commandResult: msg.commandResult?.text ?? null,
                 textColor: msg.textColor ?? null,
@@ -135,7 +132,7 @@ const createRoomMessageArray = (props: {
                 createdAt: msg.createdAt,
                 value: {
                     text: null,
-                    createdBy: createCreatedBy({ createdBy: msg.createdBy, characterStateId: msg.character?.stateId ?? undefined, customName: msg.customName ?? undefined }),
+                    createdBy: createCreatedBy({ createdBy: msg.createdBy, characterName: msg.character?.name, customName: msg.customName ?? undefined }),
                     channelName,
                     commandResult: msg.commandResult?.text ?? null,
                     textColor: msg.textColor ?? null,
@@ -149,7 +146,7 @@ const createRoomMessageArray = (props: {
             createdAt: msg.createdAt,
             value: {
                 text: toText(msg) ?? '',
-                createdBy: msg.createdBy == null ? null : createCreatedBy({ createdBy: msg.createdBy, characterStateId: msg.character?.stateId ?? undefined, customName: msg.customName ?? undefined }),
+                createdBy: msg.createdBy == null ? null : createCreatedBy({ createdBy: msg.createdBy, characterName: msg.character?.name, customName: msg.customName ?? undefined }),
                 channelName,
                 commandResult: msg.commandResult?.text ?? null,
                 textColor: msg.textColor ?? null,
@@ -162,7 +159,6 @@ const createRoomMessageArray = (props: {
 
 export const generateAsStaticHtml = (params: {
     messages: RoomMessages;
-    characters: ReadonlyStateMap<CharacterState>;
     participants: ReadonlyMap<string, ParticipantState>;
 } & PublicChannelNames) => {
     const elements = createRoomMessageArray(params).sort((x, y) => x.createdAt - y.createdAt).map(msg => {
