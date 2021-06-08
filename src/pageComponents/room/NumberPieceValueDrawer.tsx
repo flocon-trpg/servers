@@ -14,7 +14,7 @@ import { useNumberPieceValues } from '../../hooks/state/useNumberPieceValues';
 import { useDispatch } from 'react-redux';
 import { useSelector } from '../../store';
 import { create, roomDrawerModule, update } from '../../modules/roomDrawerModule';
-import { MyCharactersSelect } from '../../foundations/MyCharactersSelect';
+import { MyCharactersSelect } from '../../components/MyCharactersSelect';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,

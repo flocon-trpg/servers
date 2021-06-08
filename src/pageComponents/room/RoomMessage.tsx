@@ -6,9 +6,9 @@ import { pieceValueLog, privateMessage, publicMessage } from '../../hooks/useRoo
 import { PrivateChannelSet } from '../../utils/PrivateChannelSet';
 import { PublicChannelNames } from '../../utils/types';
 import * as Icon from '@ant-design/icons';
-import Jdenticon from '../../foundations/Jdenticon';
+import Jdenticon from '../../components/Jdenticon';
 import { isDeleted, toText } from '../../utils/message';
-import { NewTabLinkify } from '../../foundations/NewTabLinkify';
+import { NewTabLinkify } from '../../components/NewTabLinkify';
 import { isIdRecord, ParticipantState, PieceState, PieceUpOperation, RecordUpOperationElement, replace, update, parseNumberPieceValue, parseDicePieceValue } from '@kizahasi/flocon-core';
 import { $free, compositeKeyToString, dualKeyRecordToDualKeyMap, recordToMap } from '@kizahasi/util';
 import { tripleKeyToString } from '../../utils/tripleKeyToString';

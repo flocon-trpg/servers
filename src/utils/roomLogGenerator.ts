@@ -3,7 +3,7 @@ import { PrivateChannelSet } from './PrivateChannelSet';
 import { escape } from 'html-escaper';
 import moment from 'moment';
 import { PublicChannelNames } from './types';
-import { RoomMessage } from '../components/room/RoomMessage';
+import { RoomMessage } from '../pageComponents/room/RoomMessage';
 import { isDeleted, toText } from './message';
 import { recordToMap, createStateMap, recordForEach, ReadonlyStateMap } from '@kizahasi/util';
 import { CharacterState, ParticipantState } from '@kizahasi/flocon-core';

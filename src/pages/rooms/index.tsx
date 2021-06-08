@@ -5,7 +5,7 @@ import moment from 'moment';
 import Link from 'next/link';
 import { Button, Col, Row, Space, Table, Tooltip } from 'antd';
 import { useRouter } from 'next/router';
-import QueryResultViewer from '../../foundations/QueryResultViewer';
+import QueryResultViewer from '../../components/QueryResultViewer';
 
 type Data = RoomAsListItemFragment;
 

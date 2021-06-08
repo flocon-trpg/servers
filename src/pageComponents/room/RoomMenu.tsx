@@ -7,7 +7,7 @@ import { useSelector } from '../../store';
 import * as Icon from '@ant-design/icons';
 import { boardEditorPanel } from '../../states/RoomConfig';
 import VolumeBarPanel from './VolumeBarPanel';
-import Jdenticon from '../../foundations/Jdenticon';
+import Jdenticon from '../../components/Jdenticon';
 import roomStateModule, { Notification } from '../../modules/roomStateModule';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import path from '../../utils/path';

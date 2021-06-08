@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table } from 'antd';
 import { ParticipantRole } from '../../generated/graphql';
-import Jdenticon from '../../foundations/Jdenticon';
+import Jdenticon from '../../components/Jdenticon';
 import { useRoomConnections } from '../../hooks/useRoomConnections';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { ParticipantState } from '@kizahasi/flocon-core';

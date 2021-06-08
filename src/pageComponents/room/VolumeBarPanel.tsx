@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import VolumeBar from '../../foundations/VolumeBar';
+import VolumeBar from '../../components/VolumeBar';
 import roomConfigModule from '../../modules/roomConfigModule';
 import { defaultChannelVolume } from '../../states/RoomConfig';
 import { useSelector } from '../../store';

@@ -3,7 +3,7 @@ import MyAuthContext from '../../contexts/MyAuthContext';
 import { Table, Button, InputNumber, Tooltip } from 'antd';
 import { update } from '../../stateManagers/states/types';
 import * as Icon from '@ant-design/icons';
-import ToggleButton from '../../foundations/ToggleButton';
+import ToggleButton from '../../components/ToggleButton';
 import { getUserUid } from '../../hooks/useFirebaseUser';
 import { useOperate } from '../../hooks/useOperate';
 import { useParticipants } from '../../hooks/state/useParticipants';

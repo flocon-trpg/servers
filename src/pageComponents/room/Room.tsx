@@ -1,6 +1,6 @@
 import React from 'react';
 import { Layout as AntdLayout, Result, Modal } from 'antd';
-import DraggableCard, { horizontalPadding } from '../../foundations/DraggableCard';
+import DraggableCard, { horizontalPadding } from '../../components/DraggableCard';
 import CharacterList from './CharacterList';
 import { useSelector } from '../../store';
 import roomConfigModule from '../../modules/roomConfigModule';
@@ -14,7 +14,7 @@ import { activeBoardPanel, boardEditorPanel, messagePanel } from '../../states/R
 import SoundPlayer from './SoundPlayer';
 import EditRoomDrawer from './EditRoomDrawer';
 import ParticipantList from './ParticipantList';
-import LoadingResult from '../../foundations/Result/LoadingResult';
+import LoadingResult from '../../components/Result/LoadingResult';
 import { usePlayBgm } from '../../hooks/usePlayBgm';
 import { usePlaySoundEffect } from '../../hooks/usePlaySoundEffect';
 import { useMessageNotification } from '../../hooks/useMessageNotification';

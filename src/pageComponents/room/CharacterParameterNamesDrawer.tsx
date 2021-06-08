@@ -1,10 +1,10 @@
 import { Button, Collapse, Drawer, Form, Input, Select, Space } from 'antd';
 import React from 'react';
 import DrawerFooter from '../../layouts/DrawerFooter';
-import InputModal from '../InputModal';
+import InputModal from '../../components/InputModal';
 import { replace, update } from '../../stateManagers/states/types';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-import BufferedInput from '../../foundations/BufferedInput';
+import BufferedInput from '../../components/BufferedInput';
 import { useSelector } from '../../store';
 import { useOperate } from '../../hooks/useOperate';
 import { recordToMap, StrIndex20, strIndex20Array } from '@kizahasi/util';
