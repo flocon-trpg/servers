@@ -380,19 +380,6 @@ describe('tests creating DicePieceValue', () => {
         },
     };
 
-    const newValue = {
-        $version: 1 as const,
-        files: [
-            {
-                $version: 1 as const,
-                sourceType: 'Default' as const,
-                path: 'PATH',
-            },
-        ],
-        volume: 0.5,
-        isPaused: false,
-    };
-
     const clientOperation: UpOperation = {
         $version: 1,
         characters: {
@@ -485,3 +472,219 @@ describe('tests creating DicePieceValue', () => {
         expected: undefined,
     });
 });
+
+describe('tests creating Character', () => {
+    const characterKey = 'CHARACTER_KEY';
+
+    const state: State = Resources.state;
+
+    const clientOperation: UpOperation = {
+        $version: 1,
+        characters: {
+            [Resources.Participant.Player1.userUid]: {
+                [characterKey]: {
+                    type: replace,
+                    replace: {
+                        newValue: Resources.Character.emptyState,
+                    },
+                },
+            },
+        },
+    };
+
+    Test.Basic.testServerTransformToReject({
+        prevState: state,
+        currentState: state,
+        serverOperation: undefined,
+        clientOperation,
+    });
+
+    const tester = Test.Basic.setupTestServerTransform({
+        prevState: state,
+        currentState: state,
+        serverOperation: undefined,
+        clientOperation,
+    });
+
+    const expected: TwoWayOperation = {
+        $version: 1,
+        characters: {
+            [Resources.Participant.Player1.userUid]: {
+                [characterKey]: {
+                    type: replace,
+                    replace: {
+                        newValue: Resources.Character.emptyState,
+                    },
+                },
+            },
+        },
+    };
+
+    tester({ testName: 'tests server', requestedBy: { type: server }, expected });
+    tester({
+        testName: 'tests Owner Player',
+        requestedBy: { type: client, userUid: Resources.Participant.Player1.userUid },
+        expected,
+    });
+    tester({
+        testName: 'tests Non-owner Player',
+        requestedBy: { type: client, userUid: Resources.Participant.Player2.userUid },
+        expected: undefined,
+    });
+});
+
+describe.each([[true], [false]])(
+    'tests updating Character when isPrivate === %o',
+    (isPrivate: boolean) => {
+        const characterKey = 'CHARACTER_KEY';
+        const newName = 'NEW_NAME';
+
+        const state: State = {
+            ...Resources.state,
+            characters: {
+                [Resources.Participant.Player1.userUid]: {
+                    [characterKey]: {
+                        ...Resources.Character.emptyState,
+                        isPrivate,
+                    },
+                },
+            },
+        };
+
+        const clientOperation: UpOperation = {
+            $version: 1,
+            characters: {
+                [Resources.Participant.Player1.userUid]: {
+                    [characterKey]: {
+                        type: update,
+                        update: {
+                            $version: 1,
+                            name: { newValue: newName },
+                        },
+                    },
+                },
+            },
+        };
+
+        Test.Basic.testServerTransformToReject({
+            prevState: state,
+            currentState: state,
+            serverOperation: undefined,
+            clientOperation,
+        });
+
+        const tester = Test.Basic.setupTestServerTransform({
+            prevState: state,
+            currentState: state,
+            serverOperation: undefined,
+            clientOperation,
+        });
+
+        const expected: TwoWayOperation = {
+            $version: 1,
+            characters: {
+                [Resources.Participant.Player1.userUid]: {
+                    [characterKey]: {
+                        type: update,
+                        update: {
+                            $version: 1,
+                            name: {
+                                oldValue: Resources.Character.emptyState.name,
+                                newValue: newName,
+                            },
+                        },
+                    },
+                },
+            },
+        };
+
+        tester({ testName: 'tests server', requestedBy: { type: server }, expected });
+        tester({
+            testName: 'tests Owner Player',
+            requestedBy: { type: client, userUid: Resources.Participant.Player1.userUid },
+            expected,
+        });
+        tester({
+            testName: 'tests Non-owner Player',
+            requestedBy: { type: client, userUid: Resources.Participant.Player2.userUid },
+            expected: isPrivate ? undefined : expected,
+        });
+    }
+);
+
+describe.each([[true], [false]])(
+    'tests deleting Character when isPrivate === %o',
+    (isPrivate: boolean) => {
+        const characterKey = 'CHARACTER_KEY';
+
+        const state: State = {
+            ...Resources.state,
+            characters: {
+                [Resources.Participant.Player1.userUid]: {
+                    [characterKey]: {
+                        ...Resources.Character.emptyState,
+                        isPrivate,
+                    },
+                },
+            },
+        };
+
+        const clientOperation: UpOperation = {
+            $version: 1,
+            characters: {
+                [Resources.Participant.Player1.userUid]: {
+                    [characterKey]: {
+                        type: replace,
+                        replace: {
+                            newValue: undefined,
+                        },
+                    },
+                },
+            },
+        };
+
+        Test.Basic.testServerTransformToReject({
+            prevState: state,
+            currentState: state,
+            serverOperation: undefined,
+            clientOperation,
+        });
+
+        const tester = Test.Basic.setupTestServerTransform({
+            prevState: state,
+            currentState: state,
+            serverOperation: undefined,
+            clientOperation,
+        });
+
+        const expected: TwoWayOperation = {
+            $version: 1,
+            characters: {
+                [Resources.Participant.Player1.userUid]: {
+                    [characterKey]: {
+                        type: replace,
+                        replace: {
+                            oldValue: {
+                                ...Resources.Character.emptyState,
+                                isPrivate,
+                            },
+                            newValue: undefined,
+                        },
+                    },
+                },
+            },
+        };
+
+        tester({ testName: 'tests server', requestedBy: { type: server }, expected });
+        tester({
+            testName: 'tests Owner Player',
+            requestedBy: { type: client, userUid: Resources.Participant.Player1.userUid },
+            expected,
+        });
+        tester({
+            testName: 'tests Non-owner Player',
+            requestedBy: { type: client, userUid: Resources.Participant.Player2.userUid },
+            expected: isPrivate ? undefined : expected,
+        });
+    }
+);

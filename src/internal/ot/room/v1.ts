@@ -37,8 +37,8 @@ import {
     isStrIndex5,
     Maybe,
     maybe,
-    recordToDualKeyMap,
     dualKeyRecordFind,
+    dualKeyRecordToDualKeyMap,
 } from '@kizahasi/util';
 
 const replaceStringDownOperation = t.type({ oldValue: t.string });
@@ -246,7 +246,11 @@ export const toClientState = (requestedBy: RequestedBy) => (source: State): Stat
         }),
         characters: DualKeyRecordOperation.toClientState<Character.State, Character.State>({
             serverState: source.characters,
-            isPrivate: () => false,
+            isPrivate: (state, key) =>
+                !RequestedBy.createdByMe({
+                    requestedBy,
+                    userUid: key.first,
+                }) && state.isPrivate,
             toClientState: ({ state, key }) =>
                 Character.toClientState(
                     RequestedBy.createdByMe({ requestedBy, userUid: key.first })
@@ -284,7 +288,7 @@ const boardsToClientOperation = (requestedBy: RequestedBy) => ({
     prevState: State;
     nextState: State;
 }) => {
-    const prevBoardsMap = recordToDualKeyMap<Board.State>(
+    const prevBoardsMap = dualKeyRecordToDualKeyMap<Board.State>(
         requestedBy.type === server
             ? prevState.boards
             : {
@@ -307,7 +311,7 @@ const boardsToClientOperation = (requestedBy: RequestedBy) => ({
         }
     }
 
-    const nextBoardsMap = recordToDualKeyMap<Board.State>(
+    const nextBoardsMap = dualKeyRecordToDualKeyMap<Board.State>(
         requestedBy.type === server
             ? nextState.boards
             : {
@@ -1553,7 +1557,16 @@ export const serverTransform = (
                 clientOperation: second,
             }),
         toServerState: state => state,
-        cancellationPolicy: {},
+        cancellationPolicy: {
+            cancelCreate: ({ key }) =>
+                !RequestedBy.createdByMe({ requestedBy, userUid: key.first }),
+            cancelUpdate: ({ key, nextState }) =>
+                !RequestedBy.createdByMe({ requestedBy, userUid: key.first }) &&
+                nextState.isPrivate,
+            cancelRemove: ({ key, nextState }) =>
+                !RequestedBy.createdByMe({ requestedBy, userUid: key.first }) &&
+                nextState.isPrivate,
+        },
     });
     if (characters.isError) {
         return characters;
