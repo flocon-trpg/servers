@@ -7,6 +7,7 @@ import { RoomMessage } from '../components/room/RoomMessage';
 import { isDeleted, toText } from './message';
 import { recordToMap, createStateMap, recordForEach, ReadonlyStateMap } from '@kizahasi/util';
 import { CharacterState, ParticipantState } from '@kizahasi/flocon-core';
+import { Color } from './color';
 
 const privateMessage = 'privateMessage';
 const publicMessage = 'publicMessage';
@@ -168,23 +169,27 @@ export const generateAsStaticHtml = (params: {
         const left = msg.value.createdBy == null ?
             '<span>システムメッセージ</span>' :
             `<span>${escape(msg.value.createdBy.rolePlayPart ?? '')}</span>
-${(msg.value.createdBy.rolePlayPart == null) ? '' : '<span> - <span>'}
+${(msg.value.createdBy.rolePlayPart == null) ? '' : '<span> - </span>'}
 <span>${escape(msg.value.createdBy.participantNamePart)}</span>
 <span> (${escape(msg.value.channelName)})</span>
-<span> <span>`;
+<span> </span>`;
 
         return `<div class="message" style="${msg.value.textColor == null ? '' : `color: ${msg.value.textColor}`}">
 ${left}
 <span> @ ${moment(new Date(msg.createdAt)).format('MM/DD HH:mm:ss')} </span>
 ${msg.value.text == null ? '<span class="text gray">(削除済み)</span>' : `<span class="text">${escape(msg.value.text ?? '')} ${escape(msg.value.commandResult ?? '')}</span>`}
 </div>`;
-    }).reduce((seed, elem) => seed + elem, '');
+    }).reduce((seed, elem) => seed + '\r\n' + elem, '');
 
     return `<!DOCTYPE html>
 <html lang="ja">
     <head>
         <meta charset="utf-8">
         <style>
+            html {
+                background-color: ${Color.chatBackgroundColor};
+                color: white;
+            }
             .message {
                 font-size: small;
                 white-space: nowrap;

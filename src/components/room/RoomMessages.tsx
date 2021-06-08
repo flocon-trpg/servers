@@ -32,6 +32,7 @@ import { useParticipants } from '../../hooks/state/useParticipants';
 import { UpOperation } from '@kizahasi/flocon-core';
 import { PublicChannelKey, recordToMap } from '@kizahasi/util';
 import _ from 'lodash';
+import { Color } from '../../utils/color';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -532,7 +533,7 @@ const RoomMessages: React.FC<Props> = (props: Props) => {
             key={tab.key}
             tabKey={tab.key}
             closable={false}
-            style={{ backgroundColor: '#FFFFFF08', padding: '0 4px' }}
+            style={{ backgroundColor: Color.chatBackgroundColor, padding: '0 4px' }}
             tab={<div style={{ display: 'flex', flexDirection: 'row', justifyItems: 'center' }}>
                 <div style={{ flex: '0 0 auto', maxWidth: 100 }}>{TabConfig.toTabName(tab)}</div>
                 <div style={{ flex: 1 }} />
