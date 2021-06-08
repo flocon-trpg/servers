@@ -13,17 +13,22 @@ import { createOperation } from '../../util/createOperation';
 export const updateType = 'update';
 export const createType = 'create';
 export const deleteType = 'delete';
+
 const dieValueState = t.type({
     $version: t.literal(1),
     dieType: DieValue.dieType,
     isValuePrivate: t.boolean,
 });
 
+type DieValueState = t.TypeOf<typeof dieValueState>;
+
 const dieValueUpOperation = createOperation(1, {
     dieType: t.type({ newValue: DieValue.dieType }),
     isValuePrivate: t.type({ newValue: t.boolean }),
     isValueChanged: t.boolean,
 });
+
+type DieValueUpOperation = t.TypeOf<typeof dieValueUpOperation>;
 
 const update = t.intersection([
     t.type({
@@ -78,27 +83,34 @@ export const ofOperation = (source: DicePieceValue.TwoWayOperation): Main => {
                 ? undefined
                 : chooseRecord(source.dice, element => {
                       switch (element.type) {
-                          case updateKey:
+                          case updateKey: {
+                              const update: DieValueUpOperation = {
+                                  $version: 1,
+                                  dieType: element.update.dieType,
+                                  isValuePrivate: element.update.isValuePrivate,
+                                  isValueChanged: element.update.value != null,
+                              };
                               return {
                                   type: updateKey,
-                                  update: {
-                                      ...element.update,
-                                      isValueChanged: element.update.value != null,
-                                  },
+                                  update,
                               } as const;
-                          case replaceKey:
+                          }
+                          case replaceKey: {
+                              const newValue: DieValueState | undefined =
+                                  element.replace.newValue == null
+                                      ? undefined
+                                      : {
+                                            $version: 1,
+                                            dieType: element.replace.newValue.dieType,
+                                            isValuePrivate: element.replace.newValue.isValuePrivate,
+                                        };
                               return {
                                   type: replaceKey,
                                   replace: {
-                                      newValue:
-                                          element.replace.newValue == null
-                                              ? undefined
-                                              : {
-                                                    ...element.replace.newValue,
-                                                    value: undefined,
-                                                },
+                                      newValue,
                                   },
                               } as const;
+                          }
                       }
                   }),
         pieces: source.pieces,

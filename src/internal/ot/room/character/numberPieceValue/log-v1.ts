@@ -12,7 +12,7 @@ const update = t.intersection([
         $version: t.literal(1),
 
         type: t.literal(updateType),
-        value: t.boolean,
+        isValueChanged: t.boolean,
         isValuePrivate: t.boolean,
     }),
     t.partial({
@@ -53,7 +53,7 @@ export const ofOperation = (source: NumberPieceValue.TwoWayOperation): Main => {
     return {
         $version: 1,
         type: updateType,
-        value: source.value != null && source.value.oldValue !== source.value.newValue,
+        isValueChanged: source.value != null && source.value.oldValue !== source.value.newValue,
         isValuePrivate:
             source.isValuePrivate != null &&
             source.isValuePrivate.oldValue !== source.isValuePrivate.newValue,
