@@ -28,6 +28,12 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmBehaviorCoreProps): void {
         volumeRef.current = volume;
     }, [volume]);
 
+    const isPausedRef = React.useRef(bgm?.isPaused);
+    React.useEffect(() => {
+        console.info('isPaused',bgm?.isPaused);
+        isPausedRef.current = bgm?.isPaused;
+    }, [bgm?.isPaused]);
+
     const urlArray = useFirebaseStorageUrlArray(bgm?.files);
     const howlRef = React.useRef<Howl>();
 
@@ -46,8 +52,11 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmBehaviorCoreProps): void {
             volume: Math.min(volumeRef.current, volumeCap),
         });
         howlRef.current = howl;
-        howl.play();
+        if ((isPausedRef.current ?? true) === false) {
+            howl.play();
+        }
         return (() => {
+            howlRef.current = undefined;
             howl.fade(howl.volume(), 0, 1000);
             setTimeout(() => howl.stop(), 1000);
         });
@@ -63,6 +72,23 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmBehaviorCoreProps): void {
         }
         howl.volume(Math.min(volume, volumeCap));
     }, [volume]);
+
+    React.useEffect(() => {
+        if (bgm?.isPaused == null) {
+            return;
+        }
+        const howl = howlRef.current;
+        if (howl == null) {
+            return;
+        }
+        if (bgm.isPaused) {
+            howl.fade(howl.volume(), 0, 1000);
+            return;
+        }
+        howl.stop();
+        howl.volume(Math.min(volumeRef.current ?? 0, volumeCap));
+        howl.play();
+    }, [bgm?.isPaused]);
 }
 
 export function usePlayBgm(): void {

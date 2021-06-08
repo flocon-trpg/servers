@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Divider, Drawer, Tag, Tooltip, Typography } from 'antd';
+import { Button, Checkbox, Divider, Drawer, Tag, Tooltip, Typography } from 'antd';
 import { FilePathInput, FileSourceType, useWriteRoomSoundEffectMutation } from '../../generated/graphql';
 import * as Icon from '@ant-design/icons';
 import FilesManagerDrawer from '../../components/FilesManagerDrawer';
@@ -77,10 +77,12 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({ channelKey, bgmState,
 
     const [filesInput, setFilesInput] = React.useState<FilePathInput[]>([]);
     const [volumeInput, setVolumeInput] = React.useState<number>(defaultVolume);
+    const [isNotPausedInput, setIsNotPausedInput] = React.useState(false);
 
     React.useEffect(() => {
         setFilesInput([]);
         setVolumeInput(defaultVolume);
+        setIsNotPausedInput(false);
     }, [visible]);
 
     const tags = filesInput.map(file => {
@@ -118,7 +120,7 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({ channelKey, bgmState,
                                             $version: 1,
                                             files: filesInput.map(x => ({ ...x, $version: 1 })),
                                             volume: volumeInput,
-                                            isPaused: false,
+                                            isPaused: !isNotPausedInput,
                                         }
                                     },
                                 }
@@ -140,6 +142,9 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({ channelKey, bgmState,
                                     },
                                     volume: {
                                         newValue: volumeInput,
+                                    },
+                                    isPaused: {
+                                        newValue: !isNotPausedInput,
                                     }
                                 },
                             }
@@ -152,6 +157,7 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({ channelKey, bgmState,
         {<FilesManagerDrawer drawerType={filesManagerDrawerType} onClose={() => setFilesManagerDrawerType(null)} />}
         <div style={{ display: 'flex', flexDirection: 'column' }}>
             <VolumeBarForSoundPlayer volumeBarValue={volumeInput} onVolumeBarValueChange={i => setVolumeInput(i)} />
+            <Checkbox checked={isNotPausedInput} onChange={e => setIsNotPausedInput(e.target.checked)}>すぐ再生を開始する</Checkbox>
             <Divider />
             <Typography.Title level={4}>BGMプレイリスト</Typography.Title>
             {tags.length === 0 ? 'BGMに指定するファイルが1つも選択されていません。' : tags}
@@ -261,7 +267,11 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
         <BgmPlayerDrawer channelKey={channelKey} visible={isDrawerVisible} onClose={() => setIsDrawerVisible(false)} bgmState={bgmState} />
         <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
             <div style={MyStyle.Text.larger}>
-                {(bgmState?.files ?? []).length !== 0 && <Tooltip title='再生中'><Icon.SoundOutlined /></Tooltip>}
+                {
+                    (bgmState != null && (bgmState.files ?? []).length !== 0) ?
+                        /* 本当はPauseアイコンではなく停止アイコンを使いたいが、antdでは見つからなかったので暫定的にPauseアイコンを用いている */
+                        (bgmState.isPaused ? <Icon.PauseOutlined /> : <Icon.CaretRightOutlined />) :
+                        null}
                 <span>{`BGMチャンネル${channelKey}`}</span>
             </div>
             {(bgmState?.files ?? []).length !== 0 &&
@@ -312,6 +322,31 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                 size='small'
                 disabled={(bgmState?.files ?? []).length === 0}
                 onClick={() => {
+                    if (bgmState == null) {
+                        return;
+                    }
+                    const operation: UpOperation = {
+                        $version: 1,
+                        bgms: {
+                            [channelKey]: {
+                                type: update,
+                                update: {
+                                    $version: 1,
+                                    isPaused: {
+                                        newValue: !bgmState.isPaused
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    operate(operation);
+                }}>
+                {bgmState?.isPaused === true ? '再生' : '停止'}
+            </Button>
+            <Button
+                size='small'
+                disabled={(bgmState?.files ?? []).length === 0}
+                onClick={() => {
                     const operation: UpOperation = {
                         $version: 1,
                         bgms: {
@@ -323,7 +358,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                     };
                     operate(operation);
                 }}>
-                停止
+                クリア
             </Button>
         </div>
     </div >;
