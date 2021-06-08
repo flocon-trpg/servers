@@ -427,15 +427,6 @@ export type MutationWriteRoomSoundEffectArgs = {
   volume: Scalars['Float'];
 };
 
-export type MyValueLog = {
-  __typename?: 'MyValueLog';
-  createdAt: Scalars['Float'];
-  messageId: Scalars['String'];
-  stateId: Scalars['String'];
-  stateUserUid: Scalars['String'];
-  valueJson: Scalars['String'];
-};
-
 export type OperateRoomFailureResult = {
   __typename?: 'OperateRoomFailureResult';
   failureType: OperateRoomFailureType;
@@ -478,6 +469,22 @@ export enum ParticipantRole {
   Spectator = 'Spectator',
   OfNullishString = 'ofNullishString',
   OfString = 'ofString'
+}
+
+export type PieceValueLog = {
+  __typename?: 'PieceValueLog';
+  characterCreatedBy: Scalars['String'];
+  characterId: Scalars['String'];
+  createdAt: Scalars['Float'];
+  logType: PieceValueLogType;
+  messageId: Scalars['String'];
+  stateId: Scalars['String'];
+  valueJson: Scalars['String'];
+};
+
+export enum PieceValueLogType {
+  Dice = 'Dice',
+  Number = 'Number'
 }
 
 export type Pong = {
@@ -599,11 +606,11 @@ export type RoomGetState = {
   stateJson: Scalars['String'];
 };
 
-export type RoomMessageEvent = MyValueLog | RoomPrivateMessage | RoomPrivateMessageUpdate | RoomPublicChannel | RoomPublicChannelUpdate | RoomPublicMessage | RoomPublicMessageUpdate | RoomSoundEffect;
+export type RoomMessageEvent = PieceValueLog | RoomPrivateMessage | RoomPrivateMessageUpdate | RoomPublicChannel | RoomPublicChannelUpdate | RoomPublicMessage | RoomPublicMessageUpdate | RoomSoundEffect;
 
 export type RoomMessages = {
   __typename?: 'RoomMessages';
-  myValueLogs: Array<MyValueLog>;
+  pieceValueLogs: Array<PieceValueLog>;
   privateMessages: Array<RoomPrivateMessage>;
   publicChannels: Array<RoomPublicChannel>;
   publicMessages: Array<RoomPublicMessage>;
@@ -892,9 +899,9 @@ type JoinRoomResult_JoinRoomSuccessResult_Fragment = (
 
 export type JoinRoomResultFragment = JoinRoomResult_JoinRoomFailureResult_Fragment | JoinRoomResult_JoinRoomSuccessResult_Fragment;
 
-export type MyValueLogFragment = (
-  { __typename?: 'MyValueLog' }
-  & Pick<MyValueLog, 'messageId' | 'stateUserUid' | 'stateId' | 'createdAt' | 'valueJson'>
+export type PieceValueLogFragment = (
+  { __typename?: 'PieceValueLog' }
+  & Pick<PieceValueLog, 'messageId' | 'characterCreatedBy' | 'characterId' | 'stateId' | 'createdAt' | 'logType' | 'valueJson'>
 );
 
 export type RoomAsListItemFragment = (
@@ -960,9 +967,9 @@ export type RoomSoundEffectFragment = (
   ) }
 );
 
-type RoomMessageEvent_MyValueLog_Fragment = (
-  { __typename?: 'MyValueLog' }
-  & MyValueLogFragment
+type RoomMessageEvent_PieceValueLog_Fragment = (
+  { __typename?: 'PieceValueLog' }
+  & PieceValueLogFragment
 );
 
 type RoomMessageEvent_RoomPrivateMessage_Fragment = (
@@ -1014,7 +1021,7 @@ type RoomMessageEvent_RoomSoundEffect_Fragment = (
   & RoomSoundEffectFragment
 );
 
-export type RoomMessageEventFragment = RoomMessageEvent_MyValueLog_Fragment | RoomMessageEvent_RoomPrivateMessage_Fragment | RoomMessageEvent_RoomPrivateMessageUpdate_Fragment | RoomMessageEvent_RoomPublicChannel_Fragment | RoomMessageEvent_RoomPublicChannelUpdate_Fragment | RoomMessageEvent_RoomPublicMessage_Fragment | RoomMessageEvent_RoomPublicMessageUpdate_Fragment | RoomMessageEvent_RoomSoundEffect_Fragment;
+export type RoomMessageEventFragment = RoomMessageEvent_PieceValueLog_Fragment | RoomMessageEvent_RoomPrivateMessage_Fragment | RoomMessageEvent_RoomPrivateMessageUpdate_Fragment | RoomMessageEvent_RoomPublicChannel_Fragment | RoomMessageEvent_RoomPublicChannelUpdate_Fragment | RoomMessageEvent_RoomPublicMessage_Fragment | RoomMessageEvent_RoomPublicMessageUpdate_Fragment | RoomMessageEvent_RoomSoundEffect_Fragment;
 
 export type SemVerFragment = (
   { __typename?: 'SemVer' }
@@ -1086,9 +1093,9 @@ export type GetMessagesQuery = (
     )>, privateMessages: Array<(
       { __typename?: 'RoomPrivateMessage' }
       & RoomPrivateMessageFragment
-    )>, myValueLogs: Array<(
-      { __typename?: 'MyValueLog' }
-      & MyValueLogFragment
+    )>, pieceValueLogs: Array<(
+      { __typename?: 'PieceValueLog' }
+      & PieceValueLogFragment
     )>, publicChannels: Array<(
       { __typename?: 'RoomPublicChannel' }
       & RoomPublicChannelFragment
@@ -1117,9 +1124,9 @@ export type GetLogQuery = (
     )>, privateMessages: Array<(
       { __typename?: 'RoomPrivateMessage' }
       & RoomPrivateMessageFragment
-    )>, myValueLogs: Array<(
-      { __typename?: 'MyValueLog' }
-      & MyValueLogFragment
+    )>, pieceValueLogs: Array<(
+      { __typename?: 'PieceValueLog' }
+      & PieceValueLogFragment
     )>, publicChannels: Array<(
       { __typename?: 'RoomPublicChannel' }
       & RoomPublicChannelFragment
@@ -1486,8 +1493,8 @@ export type RoomEventSubscription = (
       { __typename?: 'DeleteRoomOperation' }
       & Pick<DeleteRoomOperation, 'deletedBy'>
     )>, roomMessageEvent?: Maybe<(
-      { __typename?: 'MyValueLog' }
-      & RoomMessageEvent_MyValueLog_Fragment
+      { __typename?: 'PieceValueLog' }
+      & RoomMessageEvent_PieceValueLog_Fragment
     ) | (
       { __typename?: 'RoomPrivateMessage' }
       & RoomMessageEvent_RoomPrivateMessage_Fragment
@@ -1705,12 +1712,14 @@ export const RoomPrivateMessageFragmentDoc = gql`
   updatedAt
 }
     ${CharacterValueForMessageFragmentDoc}`;
-export const MyValueLogFragmentDoc = gql`
-    fragment MyValueLog on MyValueLog {
+export const PieceValueLogFragmentDoc = gql`
+    fragment PieceValueLog on PieceValueLog {
   messageId
-  stateUserUid
+  characterCreatedBy
+  characterId
   stateId
   createdAt
+  logType
   valueJson
 }
     `;
@@ -1728,8 +1737,8 @@ export const RoomMessageEventFragmentDoc = gql`
   ... on RoomPrivateMessage {
     ...RoomPrivateMessage
   }
-  ... on MyValueLog {
-    ...MyValueLog
+  ... on PieceValueLog {
+    ...PieceValueLog
   }
   ... on RoomPublicChannelUpdate {
     key
@@ -1772,7 +1781,7 @@ export const RoomMessageEventFragmentDoc = gql`
 ${RoomPublicMessageFragmentDoc}
 ${RoomPublicChannelFragmentDoc}
 ${RoomPrivateMessageFragmentDoc}
-${MyValueLogFragmentDoc}`;
+${PieceValueLogFragmentDoc}`;
 export const SemVerFragmentDoc = gql`
     fragment SemVer on SemVer {
   major
@@ -1884,8 +1893,8 @@ export const GetMessagesDocument = gql`
       privateMessages {
         ...RoomPrivateMessage
       }
-      myValueLogs {
-        ...MyValueLog
+      pieceValueLogs {
+        ...PieceValueLog
       }
       publicChannels {
         ...RoomPublicChannel
@@ -1901,7 +1910,7 @@ export const GetMessagesDocument = gql`
 }
     ${RoomPublicMessageFragmentDoc}
 ${RoomPrivateMessageFragmentDoc}
-${MyValueLogFragmentDoc}
+${PieceValueLogFragmentDoc}
 ${RoomPublicChannelFragmentDoc}
 ${RoomSoundEffectFragmentDoc}`;
 
@@ -1942,8 +1951,8 @@ export const GetLogDocument = gql`
       privateMessages {
         ...RoomPrivateMessage
       }
-      myValueLogs {
-        ...MyValueLog
+      pieceValueLogs {
+        ...PieceValueLog
       }
       publicChannels {
         ...RoomPublicChannel
@@ -1959,7 +1968,7 @@ export const GetLogDocument = gql`
 }
     ${RoomPublicMessageFragmentDoc}
 ${RoomPrivateMessageFragmentDoc}
-${MyValueLogFragmentDoc}
+${PieceValueLogFragmentDoc}
 ${RoomPublicChannelFragmentDoc}
 ${RoomSoundEffectFragmentDoc}`;
 

@@ -3,7 +3,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { Tabs, Button, Menu, Dropdown, Tooltip, Popover, Drawer, Col, Row, Checkbox, Divider, Radio, Alert, Input, Modal, Result } from 'antd';
 import moment from 'moment';
-import { AllRoomMessagesSuccessResult, apolloError, failure, loading, publicMessage, privateMessage, soundEffect, AllRoomMessagesResult, useFilteredAndMapRoomMessages, Message, myValueLog } from '../../hooks/useRoomMessages';
+import { apolloError, failure, loading, publicMessage, privateMessage, soundEffect, useFilteredAndMapRoomMessages, Message, pieceValueLog } from '../../hooks/useRoomMessages';
 import { PrivateChannelSet, PrivateChannelSets } from '../../utils/PrivateChannelSet';
 import ChatInput from './ChatInput';
 import MyAuthContext from '../../contexts/MyAuthContext';
@@ -16,17 +16,15 @@ import { getUserUid } from '../../hooks/useFirebaseUser';
 import PagenationScroll from '../PagenationScroll';
 import { MessagePanelConfig, MessageFilter, TabConfig } from '../../states/MessagesPanelConfig';
 import { Gutter } from 'antd/lib/grid/row';
-import { PublicChannelNames } from '../../utils/types';
 import DrawerFooter from '../../layouts/DrawerFooter';
 import BufferedInput from '../../foundations/BufferedInput';
-import { Room } from '../../stateManagers/states/room';
 import QueryResultViewer from '../../foundations/QueryResultViewer';
 import { useMessageFilter } from '../../hooks/useMessageFilter';
 import { RoomMessage as RoomMessageNameSpace } from './RoomMessage';
 import { UseRoomMessageInputTextsResult } from '../../hooks/useRoomMessageInputTexts';
-import { useWritingMessageStatus, WritingMessageStatusResult } from '../../hooks/useWritingMessageStatus';
+import { useWritingMessageStatus } from '../../hooks/useWritingMessageStatus';
 import { isDeleted, toText } from '../../utils/message';
-import { Notification } from '../../modules/roomModule';
+import { Notification } from '../../modules/roomStateModule';
 import { useSelector } from '../../store';
 import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import { useOperate } from '../../hooks/useOperate';
@@ -316,7 +314,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
         createdByMe = (myAuth.uid === roomMessage.createdBy);
     }
 
-    const createdAt = message.type === privateMessage || message.type === publicMessage || message.type === myValueLog ? message.value.createdAt : message.createdAt as number | undefined;
+    const createdAt = message.type === privateMessage || message.type === publicMessage || message.type === pieceValueLog ? message.value.createdAt : message.createdAt as number | undefined;
     let datetime: string | null = null;
     if (createdAt != null) {
         datetime = moment(new Date(createdAt)).format('YYYY/MM/DD HH:mm:ss');
@@ -393,7 +391,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
                 {updatedInfo}
                 <div style={({ flex: 1 })} />
             </div>
-            {message.type === privateMessage || message.type === publicMessage || message.type === myValueLog ? <RoomMessageNameSpace.Content style={{ overflowWrap: 'break-word', gridRow: '2 / 3', gridColumn: '1 / 2', minHeight: contentMinHeight }} message={message} /> : <div style={{ overflowWrap: 'break-word', gridRow: '2 / 3', gridColumn: '1 / 2', minHeight: contentMinHeight }}>{message.message}</div>}
+            {message.type === privateMessage || message.type === publicMessage || message.type === pieceValueLog ? <RoomMessageNameSpace.Content style={{ overflowWrap: 'break-word', gridRow: '2 / 3', gridColumn: '1 / 2', minHeight: contentMinHeight }} message={message} /> : <div style={{ overflowWrap: 'break-word', gridRow: '2 / 3', gridColumn: '1 / 2', minHeight: contentMinHeight }}>{message.message}</div>}
             <div style={({ gridRow: '1 / 3', gridColumn: '2 / 3', justifySelf: 'center', alignSelf: 'center' })} >
                 {allMenuItemsAreNull ? null : <Dropdown overlay={<Menu>{menuItems}</Menu>} trigger={['click']}>
                     <Button type='text' size='small'><Icon.EllipsisOutlined /></Button>
@@ -452,7 +450,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
                 }
                 return (<RoomMessageComponent
                     key={message.type === privateMessage || message.type === publicMessage ? message.value.messageId : message.value.createdAt}
-                    message={message.type === publicMessage || message.type === privateMessage || message.type === myValueLog ? message : message.value} />);
+                    message={message.type === publicMessage || message.type === privateMessage || message.type === pieceValueLog ? message : message.value} />);
             });
     }, []);
 

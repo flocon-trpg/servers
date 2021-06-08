@@ -8,25 +8,23 @@ import { useDispatch } from 'react-redux';
 import Board from './Board';
 import RoomMessages from './RoomMessages';
 import CharacterParameterNamesDrawer from './CharacterParameterNamesDrawer';
-import { defaultRoomComponentsState, reduceComponentsState } from './RoomComponentsState';
-import ComponentsStateContext from './contexts/RoomComponentsStateContext';
-import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import CharacterDrawer from './CharacterDrawer';
 import BoardDrawer from './BoardDrawer';
 import { activeBoardPanel, boardEditorPanel, messagePanel } from '../../states/RoomConfig';
 import SoundPlayer from './SoundPlayer';
 import EditRoomDrawer from './EditRoomDrawer';
 import ParticipantList from './ParticipantList';
-import MyNumberValueDrawer from './MyNumberValueDrawer';
 import LoadingResult from '../../foundations/Result/LoadingResult';
 import { usePlayBgm } from '../../hooks/usePlayBgm';
 import { usePlaySoundEffect } from '../../hooks/usePlaySoundEffect';
 import { useMessageNotification } from '../../hooks/useMessageNotification';
-import MyNumberValueList from './MyNumberValueList';
 import { useRoomMessageInputTexts } from '../../hooks/useRoomMessageInputTexts';
 import { useMe } from '../../hooks/useMe';
 import { RoomMenu } from './RoomMenu';
 import { recordToArray } from '@kizahasi/util';
+import { NumberPieceValueList } from './NumberPieceValueList';
+import { NumberPieceValueDrawer } from './NumberPieceValueDrawer';
+import { DicePieceValueDrawer } from './DicePieceValueDrawer';
 
 const RoomMessagePanels: React.FC<{ roomId: string }> = ({ roomId }: { roomId: string }) => {
     const dispatch = useDispatch();
@@ -91,7 +89,6 @@ const Room: React.FC = () => {
     const participantPanel = useSelector(state => state.roomConfigModule?.panels.participantPanel);
 
     const dispatch = useDispatch();
-    const [componentsState, dispatchComponentsState] = React.useReducer(reduceComponentsState, defaultRoomComponentsState);
 
     usePlayBgm();
     usePlaySoundEffect();
@@ -144,99 +141,97 @@ const Room: React.FC = () => {
     });
 
     return (
-        <ComponentsStateContext.Provider value={componentsState}>
-            <DispatchRoomComponentsStateContext.Provider value={dispatchComponentsState}>
-                <AntdLayout>
-                    <AntdLayout.Content>
-                        <RoomMenu />
-                        <div>
-                            {activeBoardPanelConfig.isMinimized ? null : <DraggableCard
-                                header="ボードビュアー"
-                                onDragStop={e => dispatch(roomConfigModule.actions.moveBoardPanel({ ...e, roomId, boardEditorPanelId: null }))}
-                                onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeBoardPanel({ roomId, boardEditorPanelId: null, dir, delta }))}
-                                onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: activeBoardPanel } }))}
-                                onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: activeBoardPanel }, newValue: true }))}
-                                childrenContainerStyle={({ overflow: 'hidden' })}
-                                position={activeBoardPanelConfig}
-                                size={activeBoardPanelConfig}
-                                minHeight={150}
-                                minWidth={150}
-                                zIndex={activeBoardPanelConfig.zIndex}>
-                                <Board
-                                    canvasWidth={activeBoardPanelConfig.width}
-                                    canvasHeight={activeBoardPanelConfig.height}
-                                    type='activeBoard'
-                                    activeBoardPanel={activeBoardPanelConfig} />
-                            </DraggableCard>}
-                            {boardEditorPanels}
-                            <RoomMessagePanels roomId={roomId} />
-                            {characterPanel.isMinimized ? null : <DraggableCard
-                                header="Characters"
-                                onDragStop={e => dispatch(roomConfigModule.actions.moveCharacterPanel({ ...e, roomId }))}
-                                onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeCharacterPanel({ roomId, dir, delta }))}
-                                onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: 'characterPanel' } }))}
-                                onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: 'characterPanel' }, newValue: true }))}
-                                childrenContainerStyle={({ padding: childrenContainerPadding, overflowY: 'scroll' })}
-                                position={characterPanel}
-                                size={characterPanel}
-                                minHeight={150}
-                                minWidth={150}
-                                zIndex={characterPanel.zIndex}>
-                                <CharacterList />
-                            </DraggableCard>}
-                            {gameEffectPanel.isMinimized ? null : <DraggableCard
-                                header="SE, BGM"
-                                onDragStop={e => dispatch(roomConfigModule.actions.moveGameEffectPanel({ ...e, roomId }))}
-                                onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeGameEffectPanel({ roomId, dir, delta }))}
-                                onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: 'gameEffectPanel' } }))}
-                                onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: 'gameEffectPanel' }, newValue: true }))}
-                                childrenContainerStyle={({ padding: childrenContainerPadding, overflowY: 'scroll' })}
-                                position={gameEffectPanel}
-                                size={gameEffectPanel}
-                                minHeight={150}
-                                minWidth={150}
-                                zIndex={gameEffectPanel.zIndex}>
-                                <SoundPlayer />
-                            </DraggableCard>}
-                            {participantPanel.isMinimized ? null : <DraggableCard
-                                header="Participants"
-                                onDragStop={e => dispatch(roomConfigModule.actions.moveParticipantPanel({ ...e, roomId }))}
-                                onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeParticipantPanel({ roomId, dir, delta }))}
-                                onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: 'participantPanel' } }))}
-                                onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: 'participantPanel' }, newValue: true }))}
-                                childrenContainerStyle={({ padding: childrenContainerPadding, overflowY: 'scroll' })}
-                                position={participantPanel}
-                                size={participantPanel}
-                                minHeight={150}
-                                minWidth={150}
-                                zIndex={participantPanel.zIndex}>
-                                <ParticipantList />
-                            </DraggableCard>}
-                            {myValuePanel.isMinimized ? null : <DraggableCard
-                                header="コマ"
-                                onDragStop={e => dispatch(roomConfigModule.actions.moveMyValuePanel({ ...e, roomId }))}
-                                onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeMyValuePanel({ roomId, dir, delta }))}
-                                onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: 'myValuePanel' } }))}
-                                onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: 'myValuePanel' }, newValue: true }))}
-                                childrenContainerStyle={({ padding: childrenContainerPadding, overflowY: 'scroll' })}
-                                position={myValuePanel}
-                                size={myValuePanel}
-                                minHeight={150}
-                                minWidth={150}
-                                zIndex={myValuePanel.zIndex}>
-                                <MyNumberValueList />
-                            </DraggableCard>}
-                        </div>
+        <AntdLayout>
+            <AntdLayout.Content>
+                <RoomMenu />
+                <div>
+                    {activeBoardPanelConfig.isMinimized ? null : <DraggableCard
+                        header="ボードビュアー"
+                        onDragStop={e => dispatch(roomConfigModule.actions.moveBoardPanel({ ...e, roomId, boardEditorPanelId: null }))}
+                        onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeBoardPanel({ roomId, boardEditorPanelId: null, dir, delta }))}
+                        onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: activeBoardPanel } }))}
+                        onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: activeBoardPanel }, newValue: true }))}
+                        childrenContainerStyle={({ overflow: 'hidden' })}
+                        position={activeBoardPanelConfig}
+                        size={activeBoardPanelConfig}
+                        minHeight={150}
+                        minWidth={150}
+                        zIndex={activeBoardPanelConfig.zIndex}>
+                        <Board
+                            canvasWidth={activeBoardPanelConfig.width}
+                            canvasHeight={activeBoardPanelConfig.height}
+                            type='activeBoard'
+                            activeBoardPanel={activeBoardPanelConfig} />
+                    </DraggableCard>}
+                    {boardEditorPanels}
+                    <RoomMessagePanels roomId={roomId} />
+                    {characterPanel.isMinimized ? null : <DraggableCard
+                        header="Characters"
+                        onDragStop={e => dispatch(roomConfigModule.actions.moveCharacterPanel({ ...e, roomId }))}
+                        onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeCharacterPanel({ roomId, dir, delta }))}
+                        onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: 'characterPanel' } }))}
+                        onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: 'characterPanel' }, newValue: true }))}
+                        childrenContainerStyle={({ padding: childrenContainerPadding, overflowY: 'scroll' })}
+                        position={characterPanel}
+                        size={characterPanel}
+                        minHeight={150}
+                        minWidth={150}
+                        zIndex={characterPanel.zIndex}>
+                        <CharacterList />
+                    </DraggableCard>}
+                    {gameEffectPanel.isMinimized ? null : <DraggableCard
+                        header="SE, BGM"
+                        onDragStop={e => dispatch(roomConfigModule.actions.moveGameEffectPanel({ ...e, roomId }))}
+                        onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeGameEffectPanel({ roomId, dir, delta }))}
+                        onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: 'gameEffectPanel' } }))}
+                        onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: 'gameEffectPanel' }, newValue: true }))}
+                        childrenContainerStyle={({ padding: childrenContainerPadding, overflowY: 'scroll' })}
+                        position={gameEffectPanel}
+                        size={gameEffectPanel}
+                        minHeight={150}
+                        minWidth={150}
+                        zIndex={gameEffectPanel.zIndex}>
+                        <SoundPlayer />
+                    </DraggableCard>}
+                    {participantPanel.isMinimized ? null : <DraggableCard
+                        header="Participants"
+                        onDragStop={e => dispatch(roomConfigModule.actions.moveParticipantPanel({ ...e, roomId }))}
+                        onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeParticipantPanel({ roomId, dir, delta }))}
+                        onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: 'participantPanel' } }))}
+                        onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: 'participantPanel' }, newValue: true }))}
+                        childrenContainerStyle={({ padding: childrenContainerPadding, overflowY: 'scroll' })}
+                        position={participantPanel}
+                        size={participantPanel}
+                        minHeight={150}
+                        minWidth={150}
+                        zIndex={participantPanel.zIndex}>
+                        <ParticipantList />
+                    </DraggableCard>}
+                    {myValuePanel.isMinimized ? null : <DraggableCard
+                        header="コマ"
+                        onDragStop={e => dispatch(roomConfigModule.actions.moveMyValuePanel({ ...e, roomId }))}
+                        onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeMyValuePanel({ roomId, dir, delta }))}
+                        onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: 'myValuePanel' } }))}
+                        onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: 'myValuePanel' }, newValue: true }))}
+                        childrenContainerStyle={({ padding: childrenContainerPadding, overflowY: 'scroll' })}
+                        position={myValuePanel}
+                        size={myValuePanel}
+                        minHeight={150}
+                        minWidth={150}
+                        zIndex={myValuePanel.zIndex}>
+                        <NumberPieceValueList />
+                    </DraggableCard>}
+                </div>
 
-                        <BoardDrawer />
-                        <CharacterDrawer />
-                        <MyNumberValueDrawer />
-                        <CharacterParameterNamesDrawer />
-                        <EditRoomDrawer />
-                    </AntdLayout.Content>
-                </AntdLayout>
-            </DispatchRoomComponentsStateContext.Provider>
-        </ComponentsStateContext.Provider>);
+                <BoardDrawer />
+                <CharacterDrawer />
+                <DicePieceValueDrawer />
+                <NumberPieceValueDrawer />
+                <CharacterParameterNamesDrawer />
+                <EditRoomDrawer />
+            </AntdLayout.Content>
+        </AntdLayout>
+    );
 };
 
 export default Room;

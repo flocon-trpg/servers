@@ -4,12 +4,11 @@ import { useDispatch } from 'react-redux';
 import { DeleteRoomFailureType, ParticipantRole, PromoteFailureType, useChangeParticipantNameMutation, useDeleteRoomMutation, useGetLogLazyQuery, useLeaveRoomMutation, usePromoteToPlayerMutation, useRequiresPhraseToJoinAsPlayerLazyQuery } from '../../generated/graphql';
 import roomConfigModule from '../../modules/roomConfigModule';
 import { useSelector } from '../../store';
-import { editRoomDrawerVisibility } from './RoomComponentsState';
 import * as Icon from '@ant-design/icons';
 import { boardEditorPanel } from '../../states/RoomConfig';
 import VolumeBarPanel from './VolumeBarPanel';
 import Jdenticon from '../../foundations/Jdenticon';
-import roomModule, { Notification } from '../../modules/roomModule';
+import roomStateModule, { Notification } from '../../modules/roomStateModule';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import path from '../../utils/path';
 import { useRouter } from 'next/router';
@@ -18,10 +17,10 @@ import fileDownload from 'js-file-download';
 import { generateAsStaticHtml } from '../../utils/roomLogGenerator';
 import moment from 'moment';
 import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
-import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { recordToArray } from '@kizahasi/util';
 import { useCharacters } from '../../hooks/state/useCharacters';
+import { roomDrawerModule } from '../../modules/roomDrawerModule';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -69,7 +68,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, 
                     setIsPosting(true);
                     promoteToPlayer({ variables: { roomId, phrase: inputValue } }).then(e => {
                         if (e.errors != null) {
-                            dispatch(roomModule.actions.addNotification({
+                            dispatch(roomStateModule.actions.addNotification({
                                 type: Notification.graphQLErrors,
                                 createdAt: new Date().getTime(),
                                 errors: e.errors
@@ -91,7 +90,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, 
                                     text = undefined;
                                     break;
                             }
-                            dispatch(roomModule.actions.addNotification({
+                            dispatch(roomStateModule.actions.addNotification({
                                 type: 'text',
                                 notification: {
                                     type: 'warning',
@@ -121,7 +120,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, 
                 setIsPosting(true);
                 promoteToPlayer({ variables: { roomId } }).then(e => {
                     if (e.errors != null) {
-                        dispatch(roomModule.actions.addNotification({
+                        dispatch(roomStateModule.actions.addNotification({
                             type: Notification.graphQLErrors,
                             createdAt: new Date().getTime(),
                             errors: e.errors
@@ -143,7 +142,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, 
                                 text = undefined;
                                 break;
                         }
-                        dispatch(roomModule.actions.addNotification({
+                        dispatch(roomStateModule.actions.addNotification({
                             type: 'text',
                             notification: {
                                 type: 'warning',
@@ -194,7 +193,7 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({ roomId, visible, onOk
                 setIsPosting(true);
                 deleteRoom({ variables: { id: roomId } }).then(e => {
                     if (e.errors != null) {
-                        dispatch(roomModule.actions.addNotification({
+                        dispatch(roomStateModule.actions.addNotification({
                             type: Notification.graphQLErrors,
                             createdAt: new Date().getTime(),
                             errors: e.errors
@@ -213,7 +212,7 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({ roomId, visible, onOk
                                 text = undefined;
                                 break;
                         }
-                        dispatch(roomModule.actions.addNotification({
+                        dispatch(roomStateModule.actions.addNotification({
                             type: 'text',
                             notification: {
                                 type: 'warning',
@@ -262,7 +261,7 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
         setIsPosting(true);
         changeParticipantName({ variables: { roomId, newName: inputValue } }).then(e => {
             if (e.errors != null) {
-                dispatch(roomModule.actions.addNotification({
+                dispatch(roomStateModule.actions.addNotification({
                     type: Notification.graphQLErrors,
                     createdAt: new Date().getTime(),
                     errors: e.errors
@@ -272,7 +271,7 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
             }
 
             if (e.data?.result.failureType != null) {
-                dispatch(roomModule.actions.addNotification({
+                dispatch(roomStateModule.actions.addNotification({
                     type: Notification.text,
                     notification: {
                         type: 'warning',
@@ -302,7 +301,6 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
 
 export const RoomMenu: React.FC = () => {
     const myAuth = React.useContext(MyAuthContext);
-    const dispatchComponentsState = React.useContext(DispatchRoomComponentsStateContext);
     const router = useRouter();
     const dispatch = useDispatch();
     const roomId = useSelector(state => state.roomModule.roomId);
@@ -364,7 +362,7 @@ export const RoomMenu: React.FC = () => {
 
     return <><Menu triggerSubMenuAction='click' selectable={false} mode="horizontal">
         <Menu.SubMenu title="部屋">
-            <Menu.Item onClick={() => dispatchComponentsState({ type: editRoomDrawerVisibility, newValue: true })}>
+            <Menu.Item onClick={() => dispatch(roomDrawerModule.actions.set({ editRoomDrawerVisibility: true }))}>
                 編集
             </Menu.Item>
             <Menu.Item onClick={() => setIsDeleteRoomModalVisible(true)}>

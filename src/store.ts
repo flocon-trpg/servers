@@ -6,13 +6,15 @@ import { createEpicMiddleware } from 'redux-observable';
 import roomConfigModule from './modules/roomConfigModule';
 import { rootEpic } from './epics/rootEpic';
 import userConfigModule from './modules/userConfigModule';
-import roomModule from './modules/roomModule';
+import roomStateModule from './modules/roomStateModule';
+import { roomDrawerModule } from './modules/roomDrawerModule';
 
 // rootReducer の準備
 const rootReducer = combineReducers({
     roomConfigModule: roomConfigModule.reducer,
     userConfigModule: userConfigModule.reducer,
-    roomModule: roomModule.reducer,
+    roomModule: roomStateModule.reducer,
+    roomDrawerModule: roomDrawerModule.reducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

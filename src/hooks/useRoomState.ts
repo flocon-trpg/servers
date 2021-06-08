@@ -10,7 +10,7 @@ import { Room } from '../stateManagers/states/room';
 import { authNotFound, notSignIn } from './useFirebaseUser';
 import { useClientId } from './useClientId';
 import { useDispatch } from 'react-redux';
-import roomModule, { Notification } from '../modules/roomModule';
+import roomStateModule, { Notification } from '../modules/roomStateModule';
 import { State, UpOperation } from '@kizahasi/flocon-core';
 
 const sampleTime = 3000;
@@ -169,13 +169,13 @@ export const useRoomState = (roomId: string, roomEventSubscription: Observable<R
                     });
                 } catch (e) {
                     if (e instanceof ApolloError) {
-                        dispatch(roomModule.actions.addNotification({
+                        dispatch(roomStateModule.actions.addNotification({
                             type: Notification.apolloError,
                             error: e,
                             createdAt: new Date().getTime(),
                         }));
                     } else {
-                        dispatch(roomModule.actions.addNotification({
+                        dispatch(roomStateModule.actions.addNotification({
                             type: Notification.text,
                             notification: {
                                 type: 'error',
@@ -212,7 +212,7 @@ export const useRoomState = (roomId: string, roomEventSubscription: Observable<R
                         onRoomStateManagerUpdate();
                         break;
                     case 'OperateRoomNonJoinedResult':
-                        dispatch(roomModule.actions.addNotification({
+                        dispatch(roomStateModule.actions.addNotification({
                             type: Notification.text,
                             notification: {
                                 type: 'error',
@@ -226,7 +226,7 @@ export const useRoomState = (roomId: string, roomEventSubscription: Observable<R
                         });
                         break;
                     case 'OperateRoomFailureResult':
-                        dispatch(roomModule.actions.addNotification({
+                        dispatch(roomStateModule.actions.addNotification({
                             type: Notification.text,
                             notification: {
                                 type: 'error',

@@ -1,16 +1,18 @@
 import { Popover, Tooltip } from 'antd';
 import React from 'react';
-import { FilePathFragment, MyValueLogFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment } from '../../generated/graphql';
+import { FilePathFragment, PieceValueLogFragment, PieceValueLogType, RoomPrivateMessageFragment, RoomPublicMessageFragment } from '../../generated/graphql';
 import { useFirebaseStorageUrl } from '../../hooks/firebaseStorage';
-import { myValueLog, privateMessage, publicMessage } from '../../hooks/useRoomMessages';
+import { pieceValueLog, privateMessage, publicMessage } from '../../hooks/useRoomMessages';
 import { PrivateChannelSet } from '../../utils/PrivateChannelSet';
 import { PublicChannelNames } from '../../utils/types';
 import * as Icon from '@ant-design/icons';
 import Jdenticon from '../../foundations/Jdenticon';
 import { isDeleted, toText } from '../../utils/message';
 import { NewTabLinkify } from '../../foundations/NewTabLinkify';
-import { isIdRecord, ParticipantState, PieceState, PieceUpOperation, RecordUpOperationElement, replace, update, parseMyNumberValue } from '@kizahasi/flocon-core';
-import { $free, compositeKeyToString, recordToDualKeyMap } from '@kizahasi/util';
+import { isIdRecord, ParticipantState, PieceState, PieceUpOperation, RecordUpOperationElement, replace, update, parseNumberPieceValue, parseDicePieceValue } from '@kizahasi/flocon-core';
+import { $free, compositeKeyToString, dualKeyRecordToDualKeyMap, recordToMap } from '@kizahasi/util';
+import { tripleKeyToString } from '../../utils/tripleKeyToString';
+import { min } from 'lodash';
 
 export namespace RoomMessage {
     const Image: React.FC<{ filePath: FilePathFragment | undefined }> = ({ filePath }: { filePath: FilePathFragment | undefined }) => {
@@ -28,8 +30,8 @@ export namespace RoomMessage {
         type: typeof publicMessage;
         value: Omit<RoomPublicMessageFragment, 'createdAt'> & { createdAt?: number };
     } | {
-        type: typeof myValueLog;
-        value: Omit<MyValueLogFragment, 'createdAt'> & { createdAt?: number };
+        type: typeof pieceValueLog;
+        value: Omit<PieceValueLogFragment, 'createdAt'> & { createdAt?: number };
     }
 
     type ContentProps = {
@@ -38,39 +40,114 @@ export namespace RoomMessage {
     }
 
     export const Content: React.FC<ContentProps> = ({ style, message }: ContentProps) => {
-        if (message.type === myValueLog) {
-            const key = compositeKeyToString({ createdBy: message.value.stateUserUid, id: message.value.stateId });
-            const value = parseMyNumberValue(message.value.valueJson);
+        if (message.type === pieceValueLog) {
+            switch (message.value.logType) {
+                case PieceValueLogType.Dice: {
+                    const key = tripleKeyToString(message.value.characterCreatedBy, message.value.characterId, message.value.stateId);
+                    const value = parseDicePieceValue(message.value.valueJson);
+                    if (value.type === 'create') {
+                        return (<div style={style}>
+                            <Tooltip title={<div style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(value, null, 2)}</div>}>
+                                {`ダイスコマ(${key})が新規作成されました`}
+                            </Tooltip>
+                        </div>);
+                    }
+                    if (value.type === 'delete') {
+                        return (<div style={style}>
+                            <Tooltip title={<div style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(value, null, 2)}</div>}>
+                                {`ダイスコマ(${key})が削除されました`}
+                            </Tooltip>
+                        </div>);
+                    }
 
-            if (value.type === 'create') {
-                return (<div style={style}>
-                    {`数値コマ(${key})が新規作成されました`}
-                </div>);
-            }
-            if (value.type === 'delete') {
-                return (<div style={style}>
-                    {`数値コマ(${key})が削除されました`}
-                </div>);
-            }
+                    const pieces = dualKeyRecordToDualKeyMap<RecordUpOperationElement<PieceState, PieceUpOperation>>(value.pieces ?? {});
+                    const dice = recordToMap(value.dice ?? {});
 
-            const pieces = recordToDualKeyMap<RecordUpOperationElement<PieceState, PieceUpOperation>>(value.pieces ?? {});
+                    const changed: (string | null)[] = [];
+                    ['1', '2', '3'].forEach(i => {
+                        const die = dice.get(i);
+                        if (die == null) {
+                            return;
+                        }
+                        if (die.type === replace) {
+                            if (die.replace.newValue == null) {
+                                changed.push(`ダイス${i}の削除`);
+                                return;
+                            }
+                            changed.push(`ダイス${i}の追加`);
+                            return;
+                        }
+                        if (die.update.dieType != null) {
+                            changed.push(`ダイス${i}が${die.update.dieType.newValue}に変更`);
+                        }
+                        if (die.update.isValueChanged != null) {
+                            changed.push(`ダイス${i}の公開状態`);
+                        }
+                        if (die.update.isValueChanged === true) {
+                            changed.push(`ダイス${i}の値`);
+                        }
+                    });
 
-            const changed = [
-                value.value ? '値' : null,
-                value.isValuePrivate ? '公開状態' : null,
-                pieces.toArray().some(([, piece]) => piece.type === replace && piece.replace.newValue != null) ? null : 'コマ作成',
-                pieces.toArray().some(([, piece]) => piece.type === replace && piece.replace.newValue == null) ? null : 'コマ削除',
-                pieces.toArray().some(([, piece]) => piece.type === update && !isIdRecord(piece.update)) ? null : 'コマ編集',
-            ].reduce((seed, elem) => {
-                if (elem == null) {
-                    return seed;
+                    changed.push(
+                        pieces.toArray().some(([, piece]) => piece.type === replace && piece.replace.newValue != null) ? 'コマ作成' : null,
+                        pieces.toArray().some(([, piece]) => piece.type === replace && piece.replace.newValue == null) ? 'コマ削除' : null,
+                        pieces.toArray().some(([, piece]) => piece.type === update && !isIdRecord(piece.update)) ? 'コマ編集' : null,
+                    );
+                    const changedMessage = changed.reduce((seed, elem) => {
+                        if (elem == null) {
+                            return seed;
+                        }
+                        return seed === '' ? elem : `${seed},${elem}`;
+                    }, '');
+
+                    return (<div style={style}>
+                        <Tooltip title={<div style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(value, null, 2)}</div>}>
+                            {`ダイスコマ(${key})において次の変更がありました: ${changedMessage}`}
+                        </Tooltip>
+                    </div>);
                 }
-                return seed === '' ? elem : `${seed},${elem}`;
-            }, '');
+                case PieceValueLogType.Number: {
+                    const key = tripleKeyToString(message.value.characterCreatedBy, message.value.characterId, message.value.stateId);
+                    const value = parseNumberPieceValue(message.value.valueJson);
 
-            return (<div style={style}>
-                {`数値コマ(${key})において次の変更がありました: ${changed}`}
-            </div>);
+                    if (value.type === 'create') {
+                        return (<div style={style}>
+                            <Tooltip title={<div style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(value, null, 2)}</div>}>
+                                {`数値コマ(${key})が新規作成されました`}
+                            </Tooltip>
+                        </div>);
+                    }
+                    if (value.type === 'delete') {
+                        return (<div style={style}>
+                            <Tooltip title={<div style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(value, null, 2)}</div>}>
+                                {`数値コマ(${key})が削除されました`}
+                            </Tooltip>
+                        </div>);
+                    }
+
+                    const pieces = dualKeyRecordToDualKeyMap<RecordUpOperationElement<PieceState, PieceUpOperation>>(value.pieces ?? {});
+
+                    const changed = [
+                        value.isValueChanged ? '値' : null,
+                        value.isValuePrivate ? '公開状態' : null,
+                        pieces.toArray().some(([, piece]) => piece.type === replace && piece.replace.newValue != null) ? 'コマ作成' : null,
+                        pieces.toArray().some(([, piece]) => piece.type === replace && piece.replace.newValue == null) ? 'コマ削除' : null,
+                        pieces.toArray().some(([, piece]) => piece.type === update && !isIdRecord(piece.update)) ? 'コマ編集' : null,
+                    ].reduce((seed, elem) => {
+                        if (elem == null) {
+                            return seed;
+                        }
+                        return seed === '' ? elem : `${seed},${elem}`;
+                    }, '');
+
+                    return (<div style={style}>
+                        <Tooltip title={<div style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(value, null, 2)}</div>}>
+                            {`数値コマ(${key})において次の変更がありました: ${changed}`}
+                        </Tooltip>
+                    </div>);
+                }
+
+            }
         }
         if (isDeleted(message.value)) {
             // 当初、削除された場合斜体にして表そうと考えたが、現状はボツにしている。
@@ -94,7 +171,7 @@ export namespace RoomMessage {
     };
 
     export const userName = (message: MessageState, participants: ReadonlyMap<string, ParticipantState>) => {
-        if (message.type === myValueLog || message.value.createdBy == null) {
+        if (message.type === pieceValueLog || message.value.createdBy == null) {
             return null;
         }
         let participantName: string | null = null;
@@ -133,7 +210,7 @@ export namespace RoomMessage {
     };
 
     export const toChannelName = (message: MessageState, publicChannelNames: PublicChannelNames, participants: ReadonlyMap<string, ParticipantState>) => {
-        if (message.type === myValueLog || message.value.createdBy == null) {
+        if (message.type === pieceValueLog || message.value.createdBy == null) {
             return 'システムメッセージ';
         }
         switch (message.type) {

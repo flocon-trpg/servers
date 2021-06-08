@@ -118,6 +118,7 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({ channelKey, bgmState,
                                             $version: 1,
                                             files: filesInput.map(x => ({ ...x, $version: 1 })),
                                             volume: volumeInput,
+                                            isPaused: false,
                                         }
                                     },
                                 }

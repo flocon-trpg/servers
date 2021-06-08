@@ -1,11 +1,8 @@
 import { Button, Checkbox, Col, Drawer, InputNumber, Row, Space, Tooltip, Typography } from 'antd';
 import React from 'react';
 import DrawerFooter from '../../layouts/DrawerFooter';
-import ComponentsStateContext from './contexts/RoomComponentsStateContext';
-import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import { simpleId } from '../../utils/generators';
 import { replace } from '../../stateManagers/states/types';
-import { characterDrawerType, create, update } from './RoomComponentsState';
 import { DrawerProps } from 'antd/lib/drawer';
 import InputFile from '../InputFile';
 import { FilePath, FilesManagerDrawerType } from '../../utils/types';
@@ -28,6 +25,9 @@ import { useBoolParamNames, useNumParamNames, useStrParamNames } from '../../hoo
 import { useMe } from '../../hooks/useMe';
 import { applyCharacter, boardLocationDiff, BoardLocationState, characterDiff, CharacterState, CharacterUpOperation, PieceState, toCharacterUpOperation, UpOperation, pieceDiff } from '@kizahasi/flocon-core';
 import { dualKeyRecordFind, strIndex20Array } from '@kizahasi/util';
+import { useSelector } from '../../store';
+import { useDispatch } from 'react-redux';
+import { create, roomDrawerModule, update } from '../../modules/roomDrawerModule';
 
 const notFound = 'notFound';
 
@@ -51,6 +51,8 @@ const defaultCharacter: CharacterState = {
     numMaxParams: {},
     strParams: {},
     pieces: {},
+    dicePieceValues: {},
+    numberPieceValues: {},
 };
 
 const defaultPieceLocation: PieceState = {
@@ -72,9 +74,8 @@ const inputSpan = 16;
 
 const CharacterDrawer: React.FC = () => {
     const me = useMe();
-    const componentsState = React.useContext(ComponentsStateContext);
-    const drawerType = componentsState.characterDrawerType;
-    const dispatch = React.useContext(DispatchRoomComponentsStateContext);
+    const drawerType = useSelector(state => state.roomDrawerModule.characterDrawerType);
+    const dispatch = useDispatch();
     const operate = useOperate();
     const characters = useCharacters();
     const boolParamNames = useBoolParamNames();
@@ -270,7 +271,7 @@ const CharacterDrawer: React.FC = () => {
             };
             operate(operation);
             resetCharacterToCreate();
-            dispatch({ type: characterDrawerType, newValue: null });
+            dispatch(roomDrawerModule.actions.set({ characterDrawerType: null }));
         };
     }
 
@@ -291,7 +292,7 @@ const CharacterDrawer: React.FC = () => {
                 }
             };
             operate(operation);
-            dispatch({ type: characterDrawerType, newValue: null });
+            dispatch(roomDrawerModule.actions.set({ characterDrawerType: null }));
         };
     }
 
@@ -445,12 +446,12 @@ const CharacterDrawer: React.FC = () => {
             title={drawerType?.type === create ? 'キャラクターの新規作成' : 'キャラクターの編集'}
             visible={drawerType != null}
             closable
-            onClose={() => dispatch({ type: characterDrawerType, newValue: null })}
+            onClose={() => dispatch(roomDrawerModule.actions.set({ characterDrawerType: null }))}
             footer={(
                 <DrawerFooter
                     close={({
                         textType: drawerType?.type === create ? 'cancel' : 'close',
-                        onClick: () => dispatch({ type: characterDrawerType, newValue: null })
+                        onClick: () => dispatch(roomDrawerModule.actions.set({ characterDrawerType: null }))
                     })}
                     ok={onOkClick == null ? undefined : ({ textType: 'create', onClick: onOkClick })}
                     destroy={onDestroy == null ? undefined : {

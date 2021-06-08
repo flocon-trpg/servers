@@ -17,7 +17,7 @@ import { SketchPicker } from 'react-color';
 import classNames from 'classnames';
 import { VisibleTo } from '../../utils/visibleTo';
 import { UseRoomMessageInputTextsResult } from '../../hooks/useRoomMessageInputTexts';
-import roomModule from '../../modules/roomModule';
+import roomStateModule from '../../modules/roomStateModule';
 import { useSelector } from '../../store';
 import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import { $free, isStrIndex10, PublicChannelKey, recordToArray } from '@kizahasi/util';
@@ -141,7 +141,7 @@ export const ChatInput: React.FC<Props> = ({
         if (availableGameSystems.error == null) {
             return;
         }
-        dispatch(roomModule.actions.addNotification({
+        dispatch(roomStateModule.actions.addNotification({
             type: apolloError,
             error: availableGameSystems.error,
             createdAt: new Date().getTime(),

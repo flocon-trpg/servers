@@ -9,7 +9,9 @@ import { animated, useSpring, useTransition } from '@react-spring/konva';
 import { RoomPublicMessageFragment } from '../generated/graphql';
 import { interval } from 'rxjs';
 import { isDeleted, toText as toTextCore } from '../utils/message';
-import { MyNumberValueState, FilePath as CoreFilePath } from '@kizahasi/flocon-core';
+import { DicePieceValueState, FilePath as CoreFilePath, NumberPieceValueState } from '@kizahasi/flocon-core';
+import { DicePieceValue } from '../utils/dicePieceValue';
+import { NumberPieceValue } from '../utils/numberPieceValue';
 
 export namespace MyKonva {
     export type Vector2 = {
@@ -403,10 +405,224 @@ export namespace MyKonva {
         );
     };
 
-    type MyNumberValueProps = {
-        myNumberValue: MyNumberValueState;
-        createdByMe: boolean;
+    export const numberPiece = 'numberPiece';
+    export const dicePiece = 'dicePiece';
 
+    export type PieceState = {
+        type: typeof numberPiece;
+        state: NumberPieceValueState;
+    } | {
+        type: typeof dicePiece;
+        state: DicePieceValueState;
+    };
+
+    namespace PieceState {
+        type NumberPieceValueContentProps = {
+            createdByMe: boolean;
+            state: NumberPieceValueState;
+        } & Size;
+
+        const NumberPieceValueContent: React.FC<NumberPieceValueContentProps> = (props: NumberPieceValueContentProps) => {
+            const text = NumberPieceValue.toKonvaText(props.state, props.createdByMe);
+
+            const prevText = usePrevious(text);
+
+            const duration = 300;
+
+            const baseColor = '#F0F0F0FF';
+            const transitionColor = '#A0F0F0FF';
+            const [rectSpringProps] = useSpring(() => ({
+                config: {
+                    duration,
+                },
+                from: {
+                    scaleX: 1,
+                    x: 0,
+                    fill: prevText === '?' || text === '?' ? baseColor : transitionColor,
+                },
+                to: async (next, cancel) => {
+                    if (prevText === '?' || text === '?') {
+                        await next({
+                            scaleX: 0,
+                            x: props.w / 2,
+                            fill: baseColor,
+                        });
+                    } else {
+                        await next({
+                        });
+                    }
+                    await next({
+                        scaleX: 1,
+                        x: 0,
+                        fill: baseColor,
+                    });
+                }
+            }), [text]);
+            const [textSpringProps] = useSpring(() => ({
+                config: {
+                    duration,
+                },
+                from: {
+                    text: (prevText === '?' || text === '?') ? prevText : text,
+                    scaleX: 1,
+                    x: 0,
+                },
+                to: async (next, cancel) => {
+                    if (prevText === '?' || text === '?') {
+                        await next({
+                            scaleX: 0,
+                            x: props.w / 2,
+                        });
+                    } else {
+                        await next({
+                        });
+                    }
+                    await next({
+                        text,
+                        scaleX: 1,
+                        x: 0,
+                    });
+                }
+            }), [text]);
+
+            return <>
+                <animated.Rect
+                    {...rectSpringProps}
+                    y={0}
+                    width={props.w}
+                    height={props.h}
+                    strokeWidth={2}
+                    stroke='#606060B0'
+                    cornerRadius={5} />
+                {
+                    /* fontSizeの決め方は適当 */
+                }
+                <animated.Text
+                    {...textSpringProps}
+                    y={0}
+                    width={props.w}
+                    height={props.h}
+                    fontSize={props.w / 2.5}
+                    fontFamily='Noto Sans JP Regular'
+                    fill='black'
+                    align='center'
+                    verticalAlign='middle' />
+            </>;
+        };
+
+        type DicePieceValueContentProps = {
+            createdByMe: boolean;
+            state: DicePieceValueState;
+        } & Size;
+
+        const DicePieceValueContent: React.FC<DicePieceValueContentProps> = (props: DicePieceValueContentProps) => {
+            const text = DicePieceValue.toKonvaText(props.state, props.createdByMe);
+
+            const prevText = usePrevious(text);
+
+            const duration = 300;
+
+            const baseColor = '#F0F0F0FF';
+            const transitionColor = '#A0F0F0FF';
+            const [rectSpringProps] = useSpring(() => ({
+                config: {
+                    duration,
+                },
+                from: {
+                    scaleX: 1,
+                    x: 0,
+                    fill: prevText === '?' || text === '?' ? baseColor : transitionColor,
+                },
+                to: async (next, cancel) => {
+                    if (prevText === '?' || text === '?') {
+                        await next({
+                            scaleX: 0,
+                            x: props.w / 2,
+                            fill: baseColor,
+                        });
+                    } else {
+                        await next({
+                        });
+                    }
+                    await next({
+                        scaleX: 1,
+                        x: 0,
+                        fill: baseColor,
+                    });
+                }
+            }), [text]);
+            const [textSpringProps] = useSpring(() => ({
+                config: {
+                    duration,
+                },
+                from: {
+                    text: (prevText === '?' || text === '?') ? prevText : text,
+                    scaleX: 1,
+                    x: 0,
+                },
+                to: async (next, cancel) => {
+                    if (prevText === '?' || text === '?') {
+                        await next({
+                            scaleX: 0,
+                            x: props.w / 2,
+                        });
+                    } else {
+                        await next({
+                        });
+                    }
+                    await next({
+                        text,
+                        scaleX: 1,
+                        x: 0,
+                    });
+                }
+            }), [text]);
+
+            return <>
+                <animated.Rect
+                    {...rectSpringProps}
+                    y={0}
+                    width={props.w}
+                    height={props.h}
+                    strokeWidth={2}
+                    stroke='#606060B0'
+                    cornerRadius={5} />
+                {
+                    /* fontSizeの決め方は適当 */
+                }
+                <animated.Text
+                    {...textSpringProps}
+                    y={0}
+                    width={props.w}
+                    height={props.h}
+                    fontSize={props.w / 2.5}
+                    fontFamily='Noto Sans JP Regular'
+                    fill='black'
+                    align='center'
+                    verticalAlign='middle' />
+            </>;
+        };
+
+        type Props = {
+            createdByMe: boolean;
+            state: PieceState;
+        } & Size;
+
+        export const Main: React.FC<Props> = (props: Props) => {
+            switch (props.state.type) {
+                case dicePiece: {
+                    return <DicePieceValueContent {...props} state={props.state.state} />;
+                }
+                case numberPiece: {
+                    return <NumberPieceValueContent {...props} state={props.state.state} />;
+                }
+            }
+        };
+    }
+
+    type Props = {
+        state: PieceState;
+        createdByMe: boolean;
         isSelected: boolean;
         draggable: boolean;
         listening: boolean;
@@ -417,83 +633,11 @@ export namespace MyKonva {
         onMouseLeave?: () => void;
     } & Vector2 & Size
 
-    export const MyNumberValue: React.FC<MyNumberValueProps> = (props: MyNumberValueProps) => {
+    export const Main: React.FC<Props> = (props: Props) => {
         /*
         リサイズや移動の実装方法についてはこちらを参照
         https://konvajs.org/docs/react/Transformer.html
         */
-
-        let text: string;
-        if (props.myNumberValue.isValuePrivate && !props.createdByMe) {
-            text = '?';
-        } else {
-            const number = props.myNumberValue.value?.toString() ?? 'null';
-            if (props.myNumberValue.isValuePrivate) {
-                text = `(${number})`;
-            } else {
-                text = number;
-            }
-        }
-        const prevText = usePrevious(text);
-
-        const duration = 300;
-
-        const [textSpringProps] = useSpring(() => ({
-            config: {
-                duration,
-            },
-            from: {
-                text: (prevText === '?' || text === '?') ? prevText : text,
-                scaleX: 1,
-                x: 0,
-            },
-            to: async (next, cancel) => {
-                if (prevText === '?' || text === '?') {
-                    await next({
-                        scaleX: 0,
-                        x: props.w / 2,
-                    });
-                } else {
-                    await next({
-                    });
-                }
-                await next({
-                    text,
-                    scaleX: 1,
-                    x: 0,
-                });
-            }
-        }), [text]);
-
-        const baseColor = '#F0F0F0FF';
-        const transitionColor = '#A0F0F0FF';
-        const [rectSpringProps] = useSpring(() => ({
-            config: {
-                duration,
-            },
-            from: {
-                scaleX: 1,
-                x: 0,
-                fill: prevText === '?' || text === '?' ? baseColor : transitionColor,
-            },
-            to: async (next, cancel) => {
-                if (prevText === '?' || text === '?') {
-                    await next({
-                        scaleX: 0,
-                        x: props.w / 2,
-                        fill: baseColor,
-                    });
-                } else {
-                    await next({
-                    });
-                }
-                await next({
-                    scaleX: 1,
-                    x: 0,
-                    fill: baseColor,
-                });
-            }
-        }), [text]);
 
         const groupRef = React.useRef<Konva.Group | null>(null);
         const transformerRef = React.useRef<Konva.Transformer | null>(null);
@@ -591,27 +735,7 @@ export namespace MyKonva {
                             },
                         });
                     }}>
-                    <animated.Rect
-                        {...rectSpringProps}
-                        y={0}
-                        width={props.w}
-                        height={props.h}
-                        strokeWidth={2}
-                        stroke='#606060B0'
-                        cornerRadius={5} />
-                    {
-                        /* fontSizeの決め方は適当 */
-                    }
-                    <animated.Text
-                        {...textSpringProps}
-                        y={0}
-                        width={props.w}
-                        height={props.h}
-                        fontSize={props.w / 2.5}
-                        fontFamily='Noto Sans JP Regular'
-                        fill='black'
-                        align='center'
-                        verticalAlign='middle' />
+                    <PieceState.Main {...props} />
                 </ReactKonva.Group>
                 {props.isSelected && (
                     <ReactKonva.Transformer

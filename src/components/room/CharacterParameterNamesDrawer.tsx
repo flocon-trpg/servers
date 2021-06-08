@@ -1,10 +1,7 @@
 import { Button, Collapse, Drawer, Form, Input, Select, Space } from 'antd';
 import React from 'react';
 import DrawerFooter from '../../layouts/DrawerFooter';
-import ComponentsStateContext from './contexts/RoomComponentsStateContext';
-import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import InputModal from '../InputModal';
-import { characterParameterNamesDrawerVisibility } from './RoomComponentsState';
 import { replace, update } from '../../stateManagers/states/types';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import BufferedInput from '../../foundations/BufferedInput';
@@ -12,6 +9,8 @@ import { useSelector } from '../../store';
 import { useOperate } from '../../hooks/useOperate';
 import { recordToMap, StrIndex20, strIndex20Array } from '@kizahasi/util';
 import { UpOperation } from '@kizahasi/flocon-core';
+import { useDispatch } from 'react-redux';
+import { roomDrawerModule } from '../../modules/roomDrawerModule';
 
 type VisibleParameterForm = {
     type: 'Bool' | 'Str' | 'Num';
@@ -19,9 +18,9 @@ type VisibleParameterForm = {
 }
 
 const CharacterParameterNamesDrawer: React.FC = () => {
-    const componentsState = React.useContext(ComponentsStateContext);
+    const characterParameterNamesDrawerVisibility = useSelector(state => state.roomDrawerModule.characterParameterNamesDrawerVisibility);
     const operate = useOperate();
-    const dispatch = React.useContext(DispatchRoomComponentsStateContext);
+    const dispatch = useDispatch();
     const [visibleParameterForm, setVisibleParameterForm] = React.useState<VisibleParameterForm>();
     const [addNumParamSelector, setAddNumParamSelector] = React.useState<StrIndex20>();
     const [addBoolParamSelector, setAddBoolParamSelector] = React.useState<StrIndex20>();
@@ -234,14 +233,14 @@ const CharacterParameterNamesDrawer: React.FC = () => {
         <Drawer
             title="キャラクターのパラメーター名の追加・編集・削除"
             width={600}
-            visible={componentsState.characterParameterNamesDrawerVisibility}
+            visible={characterParameterNamesDrawerVisibility}
             closable
-            onClose={() => dispatch({ type: characterParameterNamesDrawerVisibility, newValue: false })}
+            onClose={() => dispatch(roomDrawerModule.actions.set({ characterParameterNamesDrawerVisibility: false }))}
             footer={(
                 <DrawerFooter
                     close={({
                         textType: 'close',
-                        onClick: () => dispatch({ type: characterParameterNamesDrawerVisibility, newValue: false })
+                        onClick: () => dispatch(roomDrawerModule.actions.set({ characterParameterNamesDrawerVisibility: false }))
                     })} />)}>
             <Form>
                 <Collapse defaultActiveKey={['num', 'str', 'bool']}>

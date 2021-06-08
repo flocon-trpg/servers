@@ -3,8 +3,6 @@ import React from 'react';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import { Table, Button, Input, Tooltip, Popover } from 'antd';
 import { update } from '../../stateManagers/states/types';
-import { characterDrawerType, characterParameterNamesDrawerVisibility, create } from './RoomComponentsState';
-import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import { FilePathFragment } from '../../generated/graphql';
 import NumberParameterInput from '../../foundations/NumberParameterInput';
 import BooleanParameterInput from '../../foundations/BooleanParameterInput';
@@ -21,6 +19,8 @@ import { useBoolParamNames, useNumParamNames, useStrParamNames } from '../../hoo
 import { CharacterState, FilePath, ParamNameState, ParticipantState, UpOperation } from '@kizahasi/flocon-core';
 import { CompositeKey, compositeKeyToString, StrIndex20, strIndex20Array } from '@kizahasi/util';
 import _ from 'lodash';
+import { useDispatch } from 'react-redux';
+import { create, roomDrawerModule } from '../../modules/roomDrawerModule';
 
 type DataSource = {
     key: string;
@@ -182,8 +182,7 @@ const Image: React.FC<{ filePath?: FilePathFragment | FilePath; iconSize: boolea
 
 const CharacterList: React.FC = () => {
     const myAuth = React.useContext(MyAuthContext);
-    const dispatch = React.useContext(DispatchRoomComponentsStateContext);
-    const dispatchRoomComponentsState = React.useContext(DispatchRoomComponentsStateContext);
+    const dispatch = useDispatch();
     const operate = useOperate();
 
     const characters = useCharacters();
@@ -222,7 +221,7 @@ const CharacterList: React.FC = () => {
                     <Button
                         style={({ alignSelf: 'center' })}
                         size='small'
-                        onClick={() => dispatchRoomComponentsState({ type: characterDrawerType, newValue: { type: update, stateKey: character.stateKey } })}>
+                        onClick={() => dispatch(roomDrawerModule.actions.set({ characterDrawerType: { type: update, stateKey: character.stateKey } }))}>
                         <Icon.SettingOutlined />
                     </Button>
                 </Tooltip>),
@@ -303,10 +302,10 @@ const CharacterList: React.FC = () => {
 
     return (
         <div>
-            <Button size='small' onClick={() => dispatch({ type: characterDrawerType, newValue: { type: create } })}>
+            <Button size='small' onClick={() => dispatch(roomDrawerModule.actions.set({ characterDrawerType: { type: create } }))}>
                 キャラクターを作成
             </Button>
-            <Button size='small' onClick={() => dispatch({ type: characterParameterNamesDrawerVisibility, newValue: true })}>
+            <Button size='small' onClick={() => dispatch(roomDrawerModule.actions.set({ characterParameterNamesDrawerVisibility: true }))}>
                 パラメーターを追加・編集・削除
             </Button>
             <Table columns={columns} dataSource={charactersDataSource} size='small' pagination={false} />

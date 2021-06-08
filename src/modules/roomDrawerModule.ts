@@ -1,5 +1,6 @@
 import { PieceState } from '@kizahasi/flocon-core';
 import { CompositeKey } from '@kizahasi/util';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export const create = 'create';
 export const update = 'update';
@@ -26,7 +27,7 @@ export type CharacterEditorDrawerType = {
     boardKey?: CompositeKey;
 }
 
-export type MyNumberValueDrawerType = {
+export type PieceValueDrawerType = {
     // pieceとともに作成するケース
     type: typeof create;
     boardKey: CompositeKey;
@@ -38,70 +39,46 @@ export type MyNumberValueDrawerType = {
     piece: null;
 } | {
     type: typeof update;
+    characterKey: CompositeKey;
     // boardKey != nullならば、pieceが指定されたupdate。そうでないならばpieceが指定されないupdate。
     boardKey: CompositeKey | null;
     stateKey: string;
 }
 
-export type RoomComponentsState = {
+export type State = {
     characterParameterNamesDrawerVisibility: boolean;
     boardDrawerType: BoardEditorDrawerType | null;
     characterDrawerType: CharacterEditorDrawerType | null;
-    myNumberValueDrawerType: MyNumberValueDrawerType | null;
+    dicePieceValueDrawerType: PieceValueDrawerType | null;
+    numberPieceValueDrawerType: PieceValueDrawerType | null;
     editRoomDrawerVisibility: boolean;
 }
 
-export const defaultRoomComponentsState: RoomComponentsState = {
+const initState: State = {
     characterParameterNamesDrawerVisibility: false,
     boardDrawerType: null,
     characterDrawerType: null,
-    myNumberValueDrawerType: null,
+    dicePieceValueDrawerType: null,
+    numberPieceValueDrawerType: null,
     editRoomDrawerVisibility: false,
 };
 
-export type RoomComponentsAction = {
-    type: typeof characterParameterNamesDrawerVisibility;
-    newValue: boolean;
-} | {
-    type: typeof boardDrawerType;
-    newValue: BoardEditorDrawerType | null;
-} | {
-    type: typeof characterDrawerType;
-    newValue: CharacterEditorDrawerType | null;
-} | {
-    type: typeof myNumberValueDrawerType;
-    newValue: MyNumberValueDrawerType | null;
-} | {
-    type: typeof editRoomDrawerVisibility;
-    newValue: boolean;
-}
-
-export const reduceComponentsState = (state: RoomComponentsState, action: RoomComponentsAction): RoomComponentsState => {
-    switch (action.type) {
-        case boardDrawerType:
+export const roomDrawerModule = createSlice({
+    name: 'roomDrawer',
+    initialState: initState as State,
+    reducers: {
+        set: (state: State, action: PayloadAction<Partial<State>>) => {
             return {
-                ...state,
-                boardDrawerType: action.newValue,
+                characterParameterNamesDrawerVisibility: action.payload.characterParameterNamesDrawerVisibility === undefined ? state.characterParameterNamesDrawerVisibility : action.payload.characterParameterNamesDrawerVisibility,
+                boardDrawerType: action.payload.boardDrawerType === undefined ?state.boardDrawerType : action.payload.boardDrawerType,
+                characterDrawerType: action.payload.characterDrawerType === undefined ? state.characterDrawerType : action.payload.characterDrawerType,
+                dicePieceValueDrawerType: action.payload.dicePieceValueDrawerType === undefined ? state.dicePieceValueDrawerType : action.payload.dicePieceValueDrawerType,
+                numberPieceValueDrawerType: action.payload.numberPieceValueDrawerType === undefined ? state.numberPieceValueDrawerType : action.payload.numberPieceValueDrawerType,
+                editRoomDrawerVisibility: action.payload.editRoomDrawerVisibility === undefined ? state.editRoomDrawerVisibility : action.payload.editRoomDrawerVisibility,
             };
-        case characterDrawerType:
-            return {
-                ...state,
-                characterDrawerType: action.newValue,
-            };
-        case myNumberValueDrawerType:
-            return {
-                ...state,
-                myNumberValueDrawerType: action.newValue
-            };
-        case characterParameterNamesDrawerVisibility:
-            return {
-                ...state,
-                characterParameterNamesDrawerVisibility: action.newValue
-            };
-        case editRoomDrawerVisibility:
-            return {
-                ...state,
-                editRoomDrawerVisibility: action.newValue,
-            };
+        },
+        reset: (state: State, action: PayloadAction<void>) => {
+            return initState;
+        },
     }
-};
+});

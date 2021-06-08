@@ -1,13 +1,10 @@
 import { Col, Drawer, Input, InputNumber, Row } from 'antd';
 import React from 'react';
 import DrawerFooter from '../../layouts/DrawerFooter';
-import ComponentsStateContext from './contexts/RoomComponentsStateContext';
-import DispatchRoomComponentsStateContext from './contexts/DispatchRoomComponentsStateContext';
 import { simpleId } from '../../utils/generators';
 import { replace } from '../../stateManagers/states/types';
 import InputFile from '../InputFile';
 import { DrawerProps } from 'antd/lib/drawer';
-import { boardDrawerType, create, update } from './RoomComponentsState';
 import FilesManagerDrawer from '../FilesManagerDrawer';
 import { FilePath, FilesManagerDrawerType } from '../../utils/types';
 import { Gutter } from 'antd/lib/grid/row';
@@ -18,6 +15,8 @@ import BufferedInput from '../../foundations/BufferedInput';
 import { useBoards } from '../../hooks/state/useBoards';
 import { useMe } from '../../hooks/useMe';
 import { boardDiff, BoardState, UpOperation } from '@kizahasi/flocon-core';
+import { useDispatch } from 'react-redux';
+import { create, roomDrawerModule, update } from '../../modules/roomDrawerModule';
 
 const notFound = 'notFound';
 
@@ -43,10 +42,9 @@ const inputSpan = 16;
 
 const BoardDrawer: React.FC = () => {
     const me = useMe();
-    const componentsState = React.useContext(ComponentsStateContext);
-    const dispatch = React.useContext(DispatchRoomComponentsStateContext);
+    const dispatch = useDispatch();
     const operate = useOperate();
-    const drawerType = componentsState.boardDrawerType;
+    const drawerType = useSelector(state => state.roomDrawerModule.boardDrawerType);
     const boards = useBoards();
     const { state: board, setState: setBoard, stateToCreate: boardToCreate, resetStateToCreate: resetBoardToCreate } = useStateEditor(drawerType?.type === update ? boards?.get(drawerType.stateKey) : undefined, defaultBoard, ({ prevState, nextState }) => {
         if (drawerType?.type !== update) {
@@ -80,7 +78,7 @@ const BoardDrawer: React.FC = () => {
             case update:
                 return boards?.get(drawerType.stateKey) ?? notFound;
             case create:
-                return 'create';
+                return create;
             default:
                 return null;
         }
@@ -133,7 +131,7 @@ const BoardDrawer: React.FC = () => {
             operate(operation);
             setBoard(defaultBoard);
             resetBoardToCreate();
-            dispatch({ type: boardDrawerType, newValue: null });
+            dispatch(roomDrawerModule.actions.set({ boardDrawerType: null }));
         };
     }
 
@@ -154,7 +152,7 @@ const BoardDrawer: React.FC = () => {
                 }
             };
             operate(operation);
-            dispatch({ type: boardDrawerType, newValue: null });
+            dispatch(roomDrawerModule.actions.set({ boardDrawerType: null }));
         };
     }
 
@@ -164,12 +162,12 @@ const BoardDrawer: React.FC = () => {
             title={drawerType?.type === create ? 'Boardの新規作成' : 'Boardの編集'}
             visible={drawerType != null}
             closable
-            onClose={() => dispatch({ type: boardDrawerType, newValue: null })}
+            onClose={() => dispatch(roomDrawerModule.actions.set({ boardDrawerType: null }))}
             footer={(
                 <DrawerFooter
                     close={({
                         textType: drawerType?.type === create ? 'cancel' : 'close',
-                        onClick: () => dispatch({ type: boardDrawerType, newValue: null })
+                        onClick: () => dispatch(roomDrawerModule.actions.set({ boardDrawerType: null }))
                     })}
                     ok={onOkClick == null ? undefined : ({ textType: 'create', onClick: onOkClick })}
                     destroy={onDestroy == null ? undefined : {
