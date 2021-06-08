@@ -6,6 +6,7 @@ import { useRoomConnections } from '../../hooks/useRoomConnections';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { ParticipantState } from '@kizahasi/flocon-core';
 import _ from 'lodash';
+import { useMe } from '../../hooks/useMe';
 
 type DataSource = {
     key: string;
@@ -19,6 +20,7 @@ type DataSource = {
 const ParticipantList: React.FC = () => {
     const roomConnections = useRoomConnections();
     const participants = useParticipants();
+    const { userUid: myUserUid } = useMe();
 
     const dataSource: DataSource[] =
         React.useMemo(() => [...(participants ?? [])].map(([key, participant]) => {
@@ -28,10 +30,11 @@ const ParticipantList: React.FC = () => {
                 participant: {
                     userUid: key,
                     state: participant,
-                    isConnected: connection?.isConnected === true ? '接続' : '未接続',
+                    // 自分自身のisConnectedは、接続しているのにfalseが返されることがあるバグが報告されている。ただし、自分自身の接続状況は非表示にしているのでUI上は関係ない。
+                    isConnected: key === myUserUid ? '' : (connection?.isConnected === true ? '接続' : '未接続'),
                 },
             };
-        }), [participants, roomConnections]);
+        }), [participants, roomConnections, myUserUid]);
 
     const columns = _([
         {
