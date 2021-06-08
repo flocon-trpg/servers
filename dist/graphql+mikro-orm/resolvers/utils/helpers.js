@@ -26,11 +26,11 @@ const checkSignInAndNotAnonymous = (context) => {
     return decodedIdToken;
 };
 exports.checkSignInAndNotAnonymous = checkSignInAndNotAnonymous;
-const getUserIfEntry = async ({ em, userUid, globalEntryPhrase }) => {
-    const user = await em.findOne(mikro_orm_1.User, { userUid });
+const getUserIfEntry = async ({ em, userUid, baasType, globalEntryPhrase, }) => {
+    const user = await em.findOne(mikro_orm_1.User, { userUid, baasType });
     if (user == null) {
         if (globalEntryPhrase == null) {
-            const newUser = new mikro_orm_1.User({ userUid });
+            const newUser = new mikro_orm_1.User({ userUid, baasType, });
             newUser.isEntry = true;
             em.persist(newUser);
             return user;
@@ -47,8 +47,8 @@ const getUserIfEntry = async ({ em, userUid, globalEntryPhrase }) => {
     return null;
 };
 exports.getUserIfEntry = getUserIfEntry;
-const checkEntry = async ({ em, userUid, globalEntryPhrase }) => {
-    return (await exports.getUserIfEntry({ em, userUid, globalEntryPhrase })) != null;
+const checkEntry = async ({ em, userUid, baasType, globalEntryPhrase }) => {
+    return (await exports.getUserIfEntry({ em, userUid, baasType, globalEntryPhrase })) != null;
 };
 exports.checkEntry = checkEntry;
 class FindRoomAndMyParticipantResult {

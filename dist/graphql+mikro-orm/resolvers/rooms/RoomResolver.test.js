@@ -24,6 +24,7 @@ const mikro_orm_1 = require("../../../mikro-orm");
 const mikro_orm_2 = require("../../entities/user/mikro-orm");
 const PromiseQueue_1 = require("../../../utils/PromiseQueue");
 const main_1 = require("../../../connection/main");
+const BaasType_1 = require("../../../enums/BaasType");
 const timeout = 20000;
 const PostgreSQL = {
     dbName: 'test',
@@ -44,6 +45,7 @@ const createResolverContext = (orm, uid) => ({
     decodedIdToken: {
         isError: false,
         value: {
+            type: BaasType_1.BaasType.Firebase,
             uid,
             firebase: {
                 sign_in_provider: 'DUMMY_SIGN_IN_PROVIDER'
@@ -72,8 +74,8 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }) => {
             strParamNames: {},
             boards: {},
             characters: {},
-            myNumberValues: {},
             bgms: {},
+            memo: {},
             participants: {
                 [creatorUserUid]: {
                     $version: 1,
@@ -97,7 +99,7 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }) => {
     if (setupRoom != null) {
         setupRoom(room);
     }
-    const creatorUser = new mikro_orm_2.User({ userUid: creatorUserUid });
+    const creatorUser = new mikro_orm_2.User({ userUid: creatorUserUid, baasType: BaasType_1.BaasType.Firebase });
     creatorUser.isEntry = true;
     em.persist([room]);
     return {

@@ -32,6 +32,7 @@ const graphql_2 = require("../entities/serverInfo/graphql");
 const VERSION_1 = __importDefault(require("../../VERSION"));
 const PrereleaseType_1 = require("../../enums/PrereleaseType");
 const util_1 = require("@kizahasi/util");
+const BaasType_1 = require("../../enums/BaasType");
 let MainResolver = class MainResolver {
     async listAvailableGameSystems() {
         return {
@@ -68,7 +69,7 @@ let MainResolver = class MainResolver {
             }
             let user = await em.findOne(mikro_orm_1.User, { userUid: decodedIdToken.uid });
             if (user == null) {
-                user = new mikro_orm_1.User({ userUid: decodedIdToken.uid });
+                user = new mikro_orm_1.User({ userUid: decodedIdToken.uid, baasType: BaasType_1.BaasType.Firebase });
                 user.isEntry = false;
                 em.persist(user);
             }

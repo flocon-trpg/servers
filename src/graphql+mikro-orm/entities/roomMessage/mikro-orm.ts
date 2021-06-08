@@ -1,8 +1,7 @@
-import { MyNumberValueLog } from '@kizahasi/flocon-core';
+import { DicePieceValueLog as DicePieceValueLogState, NumberPieceValueLog as NumberPieceValueLogState } from '@kizahasi/flocon-core';
 import { Collection, Entity, Enum, IdentifiedReference, JsonType, ManyToMany, ManyToOne, OneToMany, PrimaryKey, Property, Reference, Unique } from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { FileSourceType } from '../../../enums/FileSourceType';
-import { MyValueLogType } from '../../../enums/MyValueLogType';
 import { Room } from '../room/mikro-orm';
 import { User } from '../user/mikro-orm';
 
@@ -55,13 +54,13 @@ export class RoomPubCh {
     public id: string = v4();
 
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-    @Property({ version: true })
+    @Property({ version: true, index: true })
     public version: number = 1;
 
-    @Property({ type: Date, nullable: true, onUpdate: () => new Date() })
+    @Property({ type: Date, nullable: true, onUpdate: () => new Date(), index: true })
     public updatedAt?: Date;
 
-    @Property()
+    @Property({ index: true })
     public key: string;
 
     @Property({ nullable: true })
@@ -86,13 +85,13 @@ export class RoomPubMsg {
     public id: string = v4();
 
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-    @Property({ version: true })
+    @Property({ version: true, index: true })
     public version: number = 1;
 
-    @Property({ type: Date, onCreate: () => new Date() })
+    @Property({ type: Date, onCreate: () => new Date(), index: true })
     public createdAt: Date = new Date();
 
-    @Property({ type: Date, nullable: true, onUpdate: () => new Date() })
+    @Property({ type: Date, nullable: true, onUpdate: () => new Date(), index: true })
     public updatedAt?: Date;
 
     // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
@@ -120,7 +119,7 @@ export class RoomPubMsg {
     public commandResult?: string;
 
     // 成功判定のあるコマンドの場合、成功したかどうかを表す。
-    @Property({ nullable: true, default: null })
+    @Property({ nullable: true, default: null, index: true })
     public commandIsSuccess?: boolean;
 
     // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
@@ -128,12 +127,12 @@ export class RoomPubMsg {
     public altTextToSecret?: string;
 
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-    @Property()
+    @Property({ index: true })
     public isSecret: boolean = false;
 
     // 発言がキャラクターに紐付いているときはnon-nullish、PLとして発言もしくはcreatedByがnullishの場合はnullishという想定。
     // キャラクターが削除/削除をUndoされるケースを考慮して、リレーションは付けていない。
-    @Property({ nullable: true })
+    @Property({ nullable: true, index: true })
     public charaStateId?: string;
 
     // 「書き込んだとき」のCharaのname
@@ -184,13 +183,13 @@ export class RoomPrvMsg {
     public id: string = v4();
 
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-    @Property({ version: true })
+    @Property({ version: true, index: true })
     public version: number = 1;
 
-    @Property({ type: Date, onCreate: () => new Date() })
+    @Property({ type: Date, onCreate: () => new Date(), index: true })
     public createdAt: Date = new Date();
 
-    @Property({ type: Date, nullable: true, onUpdate: () => new Date() })
+    @Property({ type: Date, nullable: true, onUpdate: () => new Date(), index: true })
     public updatedAt?: Date;
 
     // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
@@ -226,12 +225,12 @@ export class RoomPrvMsg {
     public altTextToSecret?: string;
 
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-    @Property()
+    @Property({ index: true })
     public isSecret: boolean = false;
 
     // 発言がキャラクターに紐付いているときはnon-nullish、PLとして発言もしくはcreatedByがnullishの場合はnullishという想定。
     // キャラクターが削除/削除をUndoされるケースを考慮して、リレーションにはしていない。
-    @Property({ nullable: true })
+    @Property({ nullable: true, index: true })
     public charaStateId?: string;
 
     // 「書き込んだとき」のCharaのname
@@ -275,20 +274,22 @@ export class RoomPrvMsg {
 }
 
 @Entity()
-export class MyValueLog {
+export class DicePieceValueLog {
     public constructor({
-        createdBy,
+        characterCreatedBy,
+        characterId,
         room,
         stateId,
         value,
     }: {
-
-        createdBy: string;
+        characterCreatedBy: string;
+        characterId: string;
         room: Room;
         stateId: string;
-        value: MyNumberValueLog;
+        value: DicePieceValueLogState;
     }) {
-        this.createdBy = createdBy;
+        this.characterCreatedBy = characterCreatedBy;
+        this.characterId = characterId;
         this.room = Reference.create(room);
         this.stateId = stateId;
         this.value = value;
@@ -297,18 +298,64 @@ export class MyValueLog {
     @PrimaryKey()
     public id: string = v4();
 
-    // 対象となったmyValueの所有者を表す。ログの作成者ではない。
-    @Property()
-    public createdBy: string;
+    @Property({ index: true })
+    public characterCreatedBy: string;
+
+    @Property({ index: true })
+    public characterId: string;
 
     @Property({ type: Date, onCreate: () => new Date() })
     public createdAt: Date = new Date();
 
-    @Property()
+    @Property({ index: true })
     public stateId: string;
 
     @Property({ type: JsonType, nullable: true })
-    public value?: MyNumberValueLog;
+    public value?: DicePieceValueLogState;
+
+    @ManyToOne(() => Room, { wrappedReference: true })
+    public room: IdentifiedReference<Room>;
+}
+
+@Entity()
+export class NumberPieceValueLog {
+    public constructor({
+        characterCreatedBy,
+        characterId,
+        room,
+        stateId,
+        value,
+    }: {
+        characterCreatedBy: string;
+        characterId: string;
+        room: Room;
+        stateId: string;
+        value: NumberPieceValueLogState;
+    }) {
+        this.characterCreatedBy = characterCreatedBy;
+        this.characterId = characterId;
+        this.room = Reference.create(room);
+        this.stateId = stateId;
+        this.value = value;
+    }
+
+    @PrimaryKey()
+    public id: string = v4();
+
+    @Property({ index: true })
+    public characterCreatedBy: string;
+
+    @Property({ index: true })
+    public characterId: string;
+
+    @Property({ type: Date, onCreate: () => new Date() })
+    public createdAt: Date = new Date();
+
+    @Property({ index: true })
+    public stateId: string;
+
+    @Property({ type: JsonType, nullable: true })
+    public value?: NumberPieceValueLogState;
 
     @ManyToOne(() => Room, { wrappedReference: true })
     public room: IdentifiedReference<Room>;

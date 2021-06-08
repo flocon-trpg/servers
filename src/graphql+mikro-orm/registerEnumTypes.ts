@@ -22,10 +22,11 @@ import { PromoteFailureType } from '../enums/PromoteFailureType';
 import { ChangeParticipantNameFailureType } from '../enums/ChangeParticipantNameFailureType';
 import { DeleteRoomFailureType } from '../enums/DeleteRoomFailureType';
 import { PrereleaseType } from '../enums/PrereleaseType';
-import { MyValueLogType } from '../enums/MyValueLogType';
 import { GetRoomConnectionFailureType } from '../enums/GetRoomConnectionFailureType';
 import { WritingMessageStatusInputType } from '../enums/WritingMessageStatusInputType';
 import { WritingMessageStatusType } from '../enums/WritingMessageStatusType';
+import { PieceValueLogType } from '../enums/PieceValueLogType';
+import { BaasType } from '../enums/BaasType';
 
 let hasRegistered = false;
 const registerEnumTypes = (): void => {
@@ -33,6 +34,9 @@ const registerEnumTypes = (): void => {
         return;
     }
     hasRegistered = true;
+    registerEnumType(BaasType, {
+        name: 'BaasType'
+    });
     registerEnumType(ChangeParticipantNameFailureType, {
         name: 'ChangeParticipantNameFailureType'
     });
@@ -78,14 +82,14 @@ const registerEnumTypes = (): void => {
     registerEnumType(MakeMessageNotSecretFailureType, {
         name: 'MakeMessageNotSecretFailureType'
     });
-    registerEnumType(MyValueLogType, {
-        name: 'MyValueLogType'
-    });
     registerEnumType(OperateRoomFailureType, {
         name: 'OperateRoomFailureType'
     });
     registerEnumType(ParticipantRole, {
         name: 'ParticipantRole'
+    });
+    registerEnumType(PieceValueLogType, {
+        name: 'PieceValueLogType'
     });
     registerEnumType(PrereleaseType, {
         name: 'PrereleaseType'

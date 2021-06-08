@@ -24,16 +24,20 @@ const PromoteFailureType_1 = require("../enums/PromoteFailureType");
 const ChangeParticipantNameFailureType_1 = require("../enums/ChangeParticipantNameFailureType");
 const DeleteRoomFailureType_1 = require("../enums/DeleteRoomFailureType");
 const PrereleaseType_1 = require("../enums/PrereleaseType");
-const MyValueLogType_1 = require("../enums/MyValueLogType");
 const GetRoomConnectionFailureType_1 = require("../enums/GetRoomConnectionFailureType");
 const WritingMessageStatusInputType_1 = require("../enums/WritingMessageStatusInputType");
 const WritingMessageStatusType_1 = require("../enums/WritingMessageStatusType");
+const PieceValueLogType_1 = require("../enums/PieceValueLogType");
+const BaasType_1 = require("../enums/BaasType");
 let hasRegistered = false;
 const registerEnumTypes = () => {
     if (hasRegistered) {
         return;
     }
     hasRegistered = true;
+    type_graphql_1.registerEnumType(BaasType_1.BaasType, {
+        name: 'BaasType'
+    });
     type_graphql_1.registerEnumType(ChangeParticipantNameFailureType_1.ChangeParticipantNameFailureType, {
         name: 'ChangeParticipantNameFailureType'
     });
@@ -79,14 +83,14 @@ const registerEnumTypes = () => {
     type_graphql_1.registerEnumType(MakeMessageNotSecretFailureType_1.MakeMessageNotSecretFailureType, {
         name: 'MakeMessageNotSecretFailureType'
     });
-    type_graphql_1.registerEnumType(MyValueLogType_1.MyValueLogType, {
-        name: 'MyValueLogType'
-    });
     type_graphql_1.registerEnumType(OperateRoomFailureType_1.OperateRoomFailureType, {
         name: 'OperateRoomFailureType'
     });
     type_graphql_1.registerEnumType(ParticipantRole_1.ParticipantRole, {
         name: 'ParticipantRole'
+    });
+    type_graphql_1.registerEnumType(PieceValueLogType_1.PieceValueLogType, {
+        name: 'PieceValueLogType'
     });
     type_graphql_1.registerEnumType(PrereleaseType_1.PrereleaseType, {
         name: 'PrereleaseType'

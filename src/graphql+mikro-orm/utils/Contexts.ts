@@ -1,12 +1,13 @@
 
 import { CustomResult } from '@kizahasi/result';
-import admin from 'firebase-admin';
 import { InMemoryConnectionManager } from '../../connection/main';
+import { BaasType } from '../../enums/BaasType';
 import { PromiseQueue } from '../../utils/PromiseQueue';
 import { EM } from '../../utils/types';
 
 // admin.auth.DecodedIdTokenから必要な要素だけを抽出したもの
 export type DecodedIdToken = {
+    type: BaasType.Firebase;
     uid: string;
     firebase: {
         sign_in_provider: string;

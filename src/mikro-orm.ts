@@ -1,6 +1,6 @@
 import { Connection, IDatabaseDriver, LoggerNamespace, MikroORM } from '@mikro-orm/core';
 import { Room, RoomOp } from './graphql+mikro-orm/entities/room/mikro-orm';
-import { MyValueLog, RoomPrvMsg, RoomPubCh, RoomPubMsg, RoomSe } from './graphql+mikro-orm/entities/roomMessage/mikro-orm';
+import { DicePieceValueLog, NumberPieceValueLog, RoomPrvMsg, RoomPubCh, RoomPubMsg, RoomSe } from './graphql+mikro-orm/entities/roomMessage/mikro-orm';
 import { User } from './graphql+mikro-orm/entities/user/mikro-orm';
 import { EM } from './utils/types';
 
@@ -9,7 +9,8 @@ const entities = [
     RoomOp,
     RoomPubMsg,
     RoomPrvMsg,
-    MyValueLog,
+    DicePieceValueLog,
+    NumberPieceValueLog,
     RoomPubCh,
     RoomSe,
     User,

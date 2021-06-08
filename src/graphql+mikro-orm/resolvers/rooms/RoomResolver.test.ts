@@ -6,6 +6,7 @@ import { ResolverContext } from '../../utils/Contexts';
 import { PromiseQueue } from '../../../utils/PromiseQueue';
 import { InMemoryConnectionManager } from '../../../connection/main';
 import { UpOperation } from '@kizahasi/flocon-core';
+import { BaasType } from '../../../enums/BaasType';
 
 const timeout = 20000;
 
@@ -34,6 +35,7 @@ const createResolverContext = (orm: ORM, uid: string): ResolverContext => ({
     decodedIdToken: {
         isError: false,
         value: {
+            type: BaasType.Firebase,
             uid,
             firebase: {
                 sign_in_provider: 'DUMMY_SIGN_IN_PROVIDER' // 適当な値
@@ -68,8 +70,8 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }: { em: EM; setupRoom
             strParamNames: {},
             boards: {},
             characters: {},
-            myNumberValues: {},
             bgms: {},
+            memo: {},
             participants: {
                 [creatorUserUid]: {
                     $version: 1,
@@ -77,7 +79,7 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }: { em: EM; setupRoom
                     // 現状はとりあえず全員がMasterのケースのみを考えている。
                     role: 'Master',
                     name: creatorName,
-                    
+
                 }
             },
             activeBoardKey: null,
@@ -97,7 +99,7 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }: { em: EM; setupRoom
         setupRoom(room);
     }
 
-    const creatorUser = new User$MikroORM({ userUid: creatorUserUid });
+    const creatorUser = new User$MikroORM({ userUid: creatorUserUid, baasType: BaasType.Firebase });
     creatorUser.isEntry = true;
     em.persist([room]);
 

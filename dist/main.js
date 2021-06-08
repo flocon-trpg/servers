@@ -19,6 +19,7 @@ const migrate_1 = require("./migrate");
 const main_1 = require("./connection/main");
 const result_1 = require("@kizahasi/result");
 const util_1 = require("@kizahasi/util");
+const BaasType_1 = require("./enums/BaasType");
 const main = async (params) => {
     var _a;
     firebase_admin_1.default.initializeApp({
@@ -46,7 +47,10 @@ const main = async (params) => {
     await migrate_1.checkMigrationsBeforeStart(orm, dbType);
     const getDecodedIdToken = async (idToken) => {
         const decodedIdToken = await firebase_admin_1.default.auth().verifyIdToken(idToken).then(result_1.Result.ok).catch(result_1.Result.error);
-        return decodedIdToken;
+        if (decodedIdToken.isError) {
+            return decodedIdToken;
+        }
+        return result_1.Result.ok(Object.assign(Object.assign({}, decodedIdToken.value), { type: BaasType_1.BaasType.Firebase }));
     };
     const getDecodedIdTokenFromBearer = async (bearer) => {
         if (bearer == null || !bearer.startsWith('Bearer ')) {
