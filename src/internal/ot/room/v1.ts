@@ -1626,6 +1626,7 @@ export const serverTransform = (
         return boolParamNames;
     }
 
+    // TODO: ファイルサイズが巨大になりそうなときに拒否する機能
     const memo = RecordOperation.serverTransform<
         Memo.State,
         Memo.State,
