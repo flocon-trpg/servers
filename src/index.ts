@@ -166,6 +166,12 @@ export {
     Main as NumberPieceValueLog,
 } from './internal/ot/room/character/numberPieceValue/log-v1';
 
+export {
+    State as MemoState,
+    UpOperation as MemoUpOperation,
+    DownOperation as MemoDownOperation,
+} from './internal/ot/room/memo/v1';
+
 export { isIdRecord } from './internal/ot/room/util/record';
 
 export {
