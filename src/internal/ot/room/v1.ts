@@ -52,7 +52,7 @@ export const dbState = t.type({
     boards: t.record(t.string, t.record(t.string, Board.state)),
     boolParamNames: t.record(t.string, ParamNames.state), //keyはStrIndex20
     characters: t.record(t.string, t.record(t.string, Character.state)),
-    memo: t.record(t.string, Memo.state),
+    memos: t.record(t.string, Memo.state),
     numParamNames: t.record(t.string, ParamNames.state), //keyはStrIndex20
     participants: t.record(t.string, Participant.state),
     publicChannel1Name: t.string,
@@ -99,7 +99,7 @@ export const downOperation = createOperation(1, {
             recordDownOperationElementFactory(Character.state, Character.downOperation)
         )
     ),
-    memo: t.record(t.string, recordDownOperationElementFactory(Memo.state, Memo.downOperation)),
+    memos: t.record(t.string, recordDownOperationElementFactory(Memo.state, Memo.downOperation)),
     name: replaceStringDownOperation,
     numParamNames: t.record(
         t.string,
@@ -142,7 +142,7 @@ export const upOperation = createOperation(1, {
         t.string,
         t.record(t.string, recordUpOperationElementFactory(Character.state, Character.upOperation))
     ),
-    memo: t.record(t.string, recordUpOperationElementFactory(Memo.state, Memo.upOperation)),
+    memos: t.record(t.string, recordUpOperationElementFactory(Memo.state, Memo.upOperation)),
     name: replaceStringUpOperation,
     numParamNames: t.record(
         t.string,
@@ -187,7 +187,7 @@ export type TwoWayOperation = {
         Character.State,
         Character.TwoWayOperation
     >;
-    memo?: RecordOperation.RecordTwoWayOperation<Memo.State, Memo.TwoWayOperation>;
+    memos?: RecordOperation.RecordTwoWayOperation<Memo.State, Memo.TwoWayOperation>;
     name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
     numParamNames?: RecordOperation.RecordTwoWayOperation<
         ParamNames.State,
@@ -256,8 +256,8 @@ export const toClientState = (requestedBy: RequestedBy) => (source: State): Stat
                     RequestedBy.createdByMe({ requestedBy, userUid: key.first })
                 )(state),
         }),
-        memo: RecordOperation.toClientState({
-            serverState: source.memo,
+        memos: RecordOperation.toClientState({
+            serverState: source.memos,
             isPrivate: () => false,
             toClientState: ({ state }) => Memo.toClientState(state),
         }),
@@ -418,13 +418,13 @@ export const toClientOperation = (requestedBy: RequestedBy) => ({
                               userUid: key.first,
                           }) && state.isPrivate,
                   }),
-        memo:
-            diff.memo == null
+        memos:
+            diff.memos == null
                 ? undefined
                 : RecordOperation.toClientOperation({
-                      diff: diff.memo,
-                      prevState: prevState.memo,
-                      nextState: nextState.memo,
+                      diff: diff.memos,
+                      prevState: prevState.memos,
+                      nextState: nextState.memos,
                       toClientState: ({ nextState }) => Memo.toClientState(nextState),
                       toClientOperation: params => Memo.toClientOperation(params),
                       isPrivate: () => false,
@@ -508,10 +508,10 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
                           mapOperation: ParamNames.toDownOperation,
                       })
                   ),
-        memo:
-            source.memo == null
+        memos:
+            source.memos == null
                 ? undefined
-                : chooseRecord(source.memo, operation =>
+                : chooseRecord(source.memos, operation =>
                       mapRecordOperationElement({
                           source: operation,
                           mapReplace: x => x,
@@ -594,10 +594,10 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
                           mapOperation: ParamNames.toUpOperation,
                       })
                   ),
-        memo:
-            source.memo == null
+        memos:
+            source.memos == null
                 ? undefined
-                : chooseRecord(source.memo, operation =>
+                : chooseRecord(source.memos, operation =>
                       mapRecordOperationElement({
                           source: operation,
                           mapReplace: x => x,
@@ -736,8 +736,8 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
         Memo.UpOperation | Memo.TwoWayOperation,
         string | ApplyError<PositiveInt> | ComposeAndTransformError
     >({
-        prevState: state.memo,
-        operation: operation.memo,
+        prevState: state.memos,
+        operation: operation.memos,
         innerApply: ({ prevState, operation }) => {
             return Memo.apply({ state: prevState, operation });
         },
@@ -745,7 +745,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     if (memo.isError) {
         return memo;
     }
-    result.memo = memo.value;
+    result.memos = memo.value;
 
     const participants = RecordOperation.apply<
         Participant.State,
@@ -885,8 +885,8 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
         Memo.DownOperation,
         string | ApplyError<PositiveInt> | ComposeAndTransformError
     >({
-        nextState: state.memo,
-        operation: operation.memo,
+        nextState: state.memos,
+        operation: operation.memos,
         innerApplyBack: ({ state, operation }) => {
             return Memo.applyBack({ state, operation });
         },
@@ -894,7 +894,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     if (memo.isError) {
         return memo;
     }
-    result.memo = memo.value;
+    result.memos = memo.value;
 
     const participants = RecordOperation.applyBack<
         Participant.State,
@@ -988,8 +988,8 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
     }
 
     const memo = RecordOperation.composeUpOperation({
-        first: first.memo,
-        second: second.memo,
+        first: first.memos,
+        second: second.memos,
         innerApply: params => Memo.apply(params),
         innerCompose: params => Memo.composeUpOperation(params),
     });
@@ -1078,7 +1078,7 @@ export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
         boards: boards.value,
         boolParamNames: boolParamNames.value,
         characters: characters.value,
-        memo: memo.value,
+        memos: memo.value,
         numParamNames: numParamNames.value,
         strParamNames: strParamNames.value,
         participants: participants.value,
@@ -1136,8 +1136,8 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     }
 
     const memo = RecordOperation.composeDownOperation({
-        first: first.memo,
-        second: second.memo,
+        first: first.memos,
+        second: second.memos,
         innerApplyBack: params => Memo.applyBack(params),
         innerCompose: params => Memo.composeDownOperation(params),
     });
@@ -1226,7 +1226,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
         boards: boards.value,
         boolParamNames: boolParamNames.value,
         characters: characters.value,
-        memo: memo.value,
+        memos: memo.value,
         numParamNames: numParamNames.value,
         strParamNames: strParamNames.value,
         participants: participants.value,
@@ -1293,8 +1293,8 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     }
 
     const memo = RecordOperation.restore({
-        nextState: nextState.memo,
-        downOperation: downOperation.memo,
+        nextState: nextState.memos,
+        downOperation: downOperation.memos,
         innerDiff: params => Memo.diff(params),
         innerRestore: params => Memo.restore(params),
     });
@@ -1338,7 +1338,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         boards: boards.value.prevState,
         boolParamNames: boolParamNames.value.prevState,
         characters: characters.value.prevState,
-        memo: memo.value.prevState,
+        memos: memo.value.prevState,
         numParamNames: numParamNames.value.prevState,
         strParamNames: strParamNames.value.prevState,
         participants: participants.value.prevState,
@@ -1349,7 +1349,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         boards: boards.value.twoWayOperation,
         boolParamNames: boolParamNames.value.twoWayOperation,
         characters: characters.value.twoWayOperation,
-        memo: memo.value.twoWayOperation,
+        memos: memo.value.twoWayOperation,
         numParamNames: numParamNames.value.twoWayOperation,
         strParamNames: strParamNames.value.twoWayOperation,
         participants: participants.value.twoWayOperation,
@@ -1408,8 +1408,8 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         innerDiff: params => ParamNames.diff(params),
     });
     const memo = RecordOperation.diff({
-        prevState: prevState.memo,
-        nextState: nextState.memo,
+        prevState: prevState.memos,
+        nextState: nextState.memos,
         innerDiff: params => Memo.diff(params),
     });
     const numParamNames = RecordOperation.diff({
@@ -1433,7 +1433,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         boards,
         boolParamNames,
         characters,
-        memo,
+        memos: memo,
         numParamNames,
         strParamNames,
         participants,
@@ -1634,10 +1634,10 @@ export const serverTransform = (
         Memo.UpOperation,
         string | ApplyError<PositiveInt> | ComposeAndTransformError
     >({
-        prevState: prevState.memo,
-        nextState: currentState.memo,
-        first: serverOperation?.memo,
-        second: clientOperation.memo,
+        prevState: prevState.memos,
+        nextState: currentState.memos,
+        first: serverOperation?.memos,
+        second: clientOperation.memos,
         innerTransform: ({ prevState, nextState, first, second }) =>
             Memo.serverTransform({
                 prevState,
@@ -1878,8 +1878,8 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         Memo.UpOperation,
         string | ApplyError<PositiveInt> | ComposeAndTransformError
     >({
-        first: first.memo,
-        second: second.memo,
+        first: first.memos,
+        second: second.memos,
         innerTransform: params => Memo.clientTransform(params),
         innerDiff: params => {
             const diff = Memo.diff(params);
@@ -1965,7 +1965,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         boards: boards.value.firstPrime,
         boolParamNames: boolParamNames.value.firstPrime,
         characters: characters.value.firstPrime,
-        memo: memo.value.firstPrime,
+        memos: memo.value.firstPrime,
         numParamNames: numParamNames.value.firstPrime,
         strParamNames: strParamNames.value.firstPrime,
         participants: participants.value.firstPrime,
@@ -1979,7 +1979,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         boards: boards.value.secondPrime,
         boolParamNames: boolParamNames.value.secondPrime,
         characters: characters.value.secondPrime,
-        memo: memo.value.secondPrime,
+        memos: memo.value.secondPrime,
         numParamNames: numParamNames.value.secondPrime,
         strParamNames: strParamNames.value.secondPrime,
         participants: participants.value.secondPrime,
