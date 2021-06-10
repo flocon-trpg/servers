@@ -20,6 +20,7 @@ import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { recordToArray } from '@kizahasi/util';
 import { roomDrawerModule } from '../../modules/roomDrawerModule';
+import { defaultMemoPanelConfig } from '../../states/MemoPanelConfig';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -311,8 +312,9 @@ export const RoomMenu: React.FC = () => {
     const characterPanel = useSelector(state => state.roomConfigModule?.panels.characterPanel);
     const gameEffectPanel = useSelector(state => state.roomConfigModule?.panels.gameEffectPanel);
     const participantPanel = useSelector(state => state.roomConfigModule?.panels.participantPanel);
-    const messagePanel = useSelector(state => state.roomConfigModule?.panels.messagePanels);
-    const myValuePanel = useSelector(state => state.roomConfigModule?.panels.pieceValuePanel);
+    const memoPanels = useSelector(state => state.roomConfigModule?.panels.memoPanels);
+    const messagePanels = useSelector(state => state.roomConfigModule?.panels.messagePanels);
+    const pieceValuePanel = useSelector(state => state.roomConfigModule?.panels.pieceValuePanel);
     const [getLogQuery, getLogQueryResult] = useGetLogLazyQuery({ fetchPolicy: 'network-only' });
     const [leaveRoomMutation] = useLeaveRoomMutation();
     const [isBecomePlayerModalVisible, setIsBecomePlayerModalVisible] = React.useState(false);
@@ -347,7 +349,7 @@ export const RoomMenu: React.FC = () => {
         }), `log_${moment(new Date()).format('YYYYMMDDHHmmss')}.html`);
     }, [getLogQueryResult.data]);
 
-    if (typeof myAuth === 'string' || roomId == null || activeBoardPanel == null || boardPanels == null || characterPanel == null || gameEffectPanel == null || participantPanel == null || messagePanel == null || myValuePanel == null) {
+    if (typeof myAuth === 'string' || roomId == null || activeBoardPanel == null || boardPanels == null || characterPanel == null || gameEffectPanel == null || participantPanel == null || memoPanels == null || messagePanels == null || pieceValuePanel == null) {
         return null;
     }
 
@@ -410,7 +412,7 @@ export const RoomMenu: React.FC = () => {
                                 }}>
                                 <div>
                                     <span>{pair.value.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
-                                    <span>{`パネル${i}`}</span>
+                                    <span>{`パネル${i + 1}`}</span>
                                 </div>
                             </Menu.Item>);
                     })
@@ -438,7 +440,7 @@ export const RoomMenu: React.FC = () => {
             </Menu.SubMenu>
             <Menu.SubMenu title="メッセージ">
                 {
-                    recordToArray(boardPanels).map((pair, i) => {
+                    recordToArray(messagePanels).map((pair, i) => {
                         return (
                             <Menu.Item
                                 key={pair.key}
@@ -450,7 +452,7 @@ export const RoomMenu: React.FC = () => {
                                 }}>
                                 <div>
                                     <span>{pair.value.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
-                                    <span>{`パネル${i}`}</span>
+                                    <span>{`パネル${i + 1}`}</span>
                                 </div>
                             </Menu.Item>);
                     })
@@ -470,12 +472,46 @@ export const RoomMenu: React.FC = () => {
                     </div>
                 </Menu.Item>
             </Menu.SubMenu>
+            <Menu.SubMenu title="共有メモ（部屋）">
+                {
+                    recordToArray(memoPanels).map((pair, i) => {
+                        return (
+                            <Menu.Item
+                                key={pair.key}
+                                onClick={() => {
+                                    // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
+                                    dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: 'memoPanel', panelId: pair.key }, newValue: false }));
+
+                                    dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: 'memoPanel', panelId: pair.key } }));
+                                }}>
+                                <div>
+                                    <span>{pair.value.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
+                                    <span>{`パネル${i + 1}`}</span>
+                                </div>
+                            </Menu.Item>);
+                    })
+                }
+                <Menu.Divider />
+                <Menu.Item onClick={() => {
+                    dispatch(roomConfigModule.actions.addMemoPanelConfig({
+                        roomId,
+                        panel: {
+                            ...defaultMemoPanelConfig(),
+                        },
+                    }));
+                }}>
+                    <div>
+                        <span><Icon.PlusOutlined /></span>
+                        <span>新規作成</span>
+                    </div>
+                </Menu.Item>
+            </Menu.SubMenu>
             <Menu.Item onClick={() => {
                 dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: 'pieceValuePanel' }, newValue: false }));
                 dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: 'pieceValuePanel' } }));
             }}>
                 <div>
-                    <span>{myValuePanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
+                    <span>{pieceValuePanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
                     <span>コマ</span>
                 </div>
             </Menu.Item>
