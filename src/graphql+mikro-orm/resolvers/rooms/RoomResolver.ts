@@ -717,7 +717,7 @@ export class RoomResolver {
                     characters: {},
                     numParamNames: {},
                     strParamNames: {},
-                    memo: {},
+                    memos: {},
                 }
             });
             // このRoomのroomOperatedを購読しているユーザーはいないので、roomOperatedは実行する必要がない。

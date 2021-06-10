@@ -71,7 +71,7 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }: { em: EM; setupRoom
             boards: {},
             characters: {},
             bgms: {},
-            memo: {},
+            memos: {},
             participants: {
                 [creatorUserUid]: {
                     $version: 1,

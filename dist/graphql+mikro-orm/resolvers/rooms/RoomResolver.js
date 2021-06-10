@@ -585,7 +585,7 @@ let RoomResolver = class RoomResolver {
                     characters: {},
                     numParamNames: {},
                     strParamNames: {},
-                    memo: {},
+                    memos: {},
                 }
             });
             newRoom.joinAsPlayerPhrase = input.joinAsPlayerPhrase;
