@@ -1627,7 +1627,7 @@ export const serverTransform = (
     }
 
     // TODO: ファイルサイズが巨大になりそうなときに拒否する機能
-    const memo = RecordOperation.serverTransform<
+    const memos = RecordOperation.serverTransform<
         Memo.State,
         Memo.State,
         Memo.TwoWayOperation,
@@ -1650,8 +1650,8 @@ export const serverTransform = (
             cancelCreate: ({ key }) => !isStrIndex5(key),
         },
     });
-    if (memo.isError) {
-        return memo;
+    if (memos.isError) {
+        return memos;
     }
 
     const numParamNames = RecordOperation.serverTransform<
@@ -1743,6 +1743,7 @@ export const serverTransform = (
         boards: boards.value,
         boolParamNames: boolParamNames.value,
         characters: characters.value,
+        memos: memos.value,
         numParamNames: numParamNames.value,
         strParamNames: strParamNames.value,
         participants: participants.value,
