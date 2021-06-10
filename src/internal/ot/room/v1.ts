@@ -1646,9 +1646,7 @@ export const serverTransform = (
                 clientOperation: second,
             }),
         toServerState: state => state,
-        cancellationPolicy: {
-            cancelCreate: ({ key }) => !isStrIndex5(key),
-        },
+        cancellationPolicy: {},
     });
     if (memos.isError) {
         return memos;
@@ -1874,7 +1872,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         return boolParamNames;
     }
 
-    const memo = RecordOperation.clientTransform<
+    const memos = RecordOperation.clientTransform<
         Memo.State,
         Memo.UpOperation,
         string | ApplyError<PositiveInt> | ComposeAndTransformError
@@ -1890,8 +1888,8 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
             return Memo.toUpOperation(diff);
         },
     });
-    if (memo.isError) {
-        return memo;
+    if (memos.isError) {
+        return memos;
     }
 
     const numParamNames = RecordOperation.clientTransform<
@@ -1966,7 +1964,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         boards: boards.value.firstPrime,
         boolParamNames: boolParamNames.value.firstPrime,
         characters: characters.value.firstPrime,
-        memos: memo.value.firstPrime,
+        memos: memos.value.firstPrime,
         numParamNames: numParamNames.value.firstPrime,
         strParamNames: strParamNames.value.firstPrime,
         participants: participants.value.firstPrime,
@@ -1980,7 +1978,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         boards: boards.value.secondPrime,
         boolParamNames: boolParamNames.value.secondPrime,
         characters: characters.value.secondPrime,
-        memos: memo.value.secondPrime,
+        memos: memos.value.secondPrime,
         numParamNames: numParamNames.value.secondPrime,
         strParamNames: strParamNames.value.secondPrime,
         participants: participants.value.secondPrime,
