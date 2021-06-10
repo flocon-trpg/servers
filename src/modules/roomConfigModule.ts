@@ -165,12 +165,17 @@ const bringPanelToFront = (state: RoomConfig | null, action: PanelAction): void 
     }
 
     const panels: { zIndex: number }[] = [];
+    panels.push(state.panels.activeBoardPanel);
     for (const panelId in state.panels.boardEditorPanels) {
         const panel = state.panels.boardEditorPanels[panelId];
         panels.push(panel);
     }
     panels.push(state.panels.characterPanel);
     panels.push(state.panels.gameEffectPanel);
+    for (const panelId in state.panels.memoPanels) {
+        const panel = state.panels.memoPanels[panelId];
+        panels.push(panel);
+    }
     for (const panelId in state.panels.messagePanels) {
         const panel = state.panels.messagePanels[panelId];
         panels.push(panel);
@@ -178,8 +183,8 @@ const bringPanelToFront = (state: RoomConfig | null, action: PanelAction): void 
     panels.push(state.panels.pieceValuePanel);
     panels.push(state.panels.participantPanel);
 
-    // まずzIndexが小さい順に0,1,2,…と割り振っていく。こうすることで、例えば[-100, 5, 10000]のように飛び飛びになっている状態を修正する。zIndexが同一であるパネルが複数ある場合でも異なるzIndexになるため、場合によっては前面に来るパネルが変わる可能性もあるが、直接Configを編集したりしていない限りすべてが異なるzIndexであるはずなので無視している。
-    // 次に、最前面にさせたいパネルのzIndexに(max(割り振ったzIndex) + 1)を代入して完了。
+    // まずzIndexが小さい順に0,1,2,…と割り振っていく。こうすることで、例えば[-100, 5, 10000]のように飛び飛びになっている状態を修正する。zIndexが同一であるパネルが複数ある場合でも異なるzIndexになるため、場合によっては前面に来るパネルが変わる可能性もあるが、直接Configを編集したりしていない限りすべてのzIndexは異なっているはずなので無視している。
+    // 次に、最前面にさせたいパネルのzIndexに(max(割り振ったzIndexの集合) + 1)を代入して完了。
 
     panels.sort((x, y) => x.zIndex - y.zIndex).forEach((panel, i) => {
         panel.zIndex = i;
