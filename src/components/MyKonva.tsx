@@ -399,7 +399,7 @@ export namespace MyKonva {
                     width={props.w}
                     message={props.message == null ? undefined : (messageFilterRef.current(props.message) ? props.message : undefined)}
                     onBalloonChange={balloonExists => {
-                        setOpacitySpringProps({ opacity: balloonExists ? 1 : (props.opacity ?? 1) });
+                        setOpacitySpringProps.start({ opacity: balloonExists ? 1 : (props.opacity ?? 1) });
                     }} />
             </>
         );
