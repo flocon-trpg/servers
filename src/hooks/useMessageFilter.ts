@@ -1,7 +1,7 @@
 import { $free, $system } from '@kizahasi/util';
 import _ from 'lodash';
 import React from 'react';
-import { MessageFilter } from '../states/MessagesPanelConfig';
+import { MessageFilter } from '../states/MessagePanelConfig';
 import { PrivateChannelSets } from '../utils/PrivateChannelSet';
 import { Message, pieceValueLog, notification, privateMessage, publicMessage, RoomMessage, soundEffect } from './useRoomMessages';
 

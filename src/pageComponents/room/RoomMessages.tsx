@@ -14,7 +14,7 @@ import * as Icon from '@ant-design/icons';
 import InputModal from '../../components/InputModal';
 import { getUserUid } from '../../hooks/useFirebaseUser';
 import PagenationScroll from '../../components/PagenationScroll';
-import { MessagePanelConfig, MessageFilter, TabConfig } from '../../states/MessagesPanelConfig';
+import { MessagePanelConfig, MessageFilter, TabConfig } from '../../states/MessagePanelConfig';
 import { Gutter } from 'antd/lib/grid/row';
 import DrawerFooter from '../../layouts/DrawerFooter';
 import BufferedInput from '../../components/BufferedInput';

@@ -10,7 +10,7 @@ import RoomMessages from './RoomMessages';
 import CharacterParameterNamesDrawer from './CharacterParameterNamesDrawer';
 import CharacterDrawer from './CharacterDrawer';
 import BoardDrawer from './BoardDrawer';
-import { activeBoardPanel, boardEditorPanel, messagePanel } from '../../states/RoomConfig';
+import { activeBoardPanel, boardEditorPanel, memoPanel, messagePanel } from '../../states/RoomConfig';
 import SoundPlayer from './SoundPlayer';
 import EditRoomDrawer from './EditRoomDrawer';
 import ParticipantList from './ParticipantList';
@@ -25,6 +25,7 @@ import { recordToArray } from '@kizahasi/util';
 import { NumberPieceValueList } from './NumberPieceValueList';
 import { NumberPieceValueDrawer } from './NumberPieceValueDrawer';
 import { DicePieceValueDrawer } from './DicePieceValueDrawer';
+import { Memos } from './Memos';
 
 const RoomMessagePanels: React.FC<{ roomId: string }> = ({ roomId }: { roomId: string }) => {
     const dispatch = useDispatch();
@@ -85,7 +86,8 @@ const Room: React.FC = () => {
     const boardEditorPanelsConfig = useSelector(state => state.roomConfigModule?.panels.boardEditorPanels);
     const characterPanel = useSelector(state => state.roomConfigModule?.panels.characterPanel);
     const gameEffectPanel = useSelector(state => state.roomConfigModule?.panels.gameEffectPanel);
-    const myValuePanel = useSelector(state => state.roomConfigModule?.panels.myValuePanel);
+    const memoPanelsConfig = useSelector(state => state.roomConfigModule?.panels.memoPanels);
+    const pieceValuePanel = useSelector(state => state.roomConfigModule?.panels.pieceValuePanel);
     const participantPanel = useSelector(state => state.roomConfigModule?.panels.participantPanel);
 
     const dispatch = useDispatch();
@@ -96,7 +98,7 @@ const Room: React.FC = () => {
 
     const roomId = useSelector(state => state.roomModule.roomId);
 
-    if (roomIdOfRoomConfig == null || roomIdOfRoomConfig !== roomId || activeBoardPanelConfig == null || boardEditorPanelsConfig == null || characterPanel == null || gameEffectPanel == null || myValuePanel == null || participantPanel == null) {
+    if (roomIdOfRoomConfig == null || roomIdOfRoomConfig !== roomId || activeBoardPanelConfig == null || boardEditorPanelsConfig == null || characterPanel == null || gameEffectPanel == null || memoPanelsConfig == null || pieceValuePanel == null || participantPanel == null) {
         return (<LoadingResult title='個人設定のデータをブラウザから読み込んでいます…' />);
     }
 
@@ -136,6 +138,30 @@ const Room: React.FC = () => {
                     type='boardEditor'
                     boardEditorPanelId={pair.key}
                     boardEditorPanel={pair.value} />
+            </DraggableCard>
+        );
+    });
+
+    const memoPanels = recordToArray(memoPanelsConfig).map(pair => {
+        if (pair.value.isMinimized) {
+            return null;
+        }
+
+        return (
+            <DraggableCard
+                key={pair.key}
+                header='共有メモ（部屋）'
+                onDragStop={e => dispatch(roomConfigModule.actions.moveMemoPanel({ ...e, roomId, panelId: pair.key }))}
+                onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeMemoPanel({ roomId, panelId: pair.key, dir, delta }))}
+                onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: memoPanel, panelId: pair.key } }))}
+                onClose={() => dispatch(roomConfigModule.actions.removeMemoPanel({ roomId, panelId: pair.key }))}
+                childrenContainerStyle={({ overflow: 'hidden' })}
+                position={pair.value}
+                size={pair.value}
+                minHeight={150}
+                minWidth={150}
+                zIndex={pair.value.zIndex}>
+                <Memos selectedMemoId={pair.value.selectedMemoId} onSelectedMemoIdChange={newId => dispatch(roomConfigModule.actions.updateMemoPanel({roomId, panelId: pair.key, panel: { selectedMemoId: newId } }))} />
             </DraggableCard>
         );
     });
@@ -193,6 +219,7 @@ const Room: React.FC = () => {
                         zIndex={gameEffectPanel.zIndex}>
                         <SoundPlayer />
                     </DraggableCard>}
+                    {memoPanels}
                     {participantPanel.isMinimized ? null : <DraggableCard
                         header="Participants"
                         onDragStop={e => dispatch(roomConfigModule.actions.moveParticipantPanel({ ...e, roomId }))}
@@ -207,18 +234,18 @@ const Room: React.FC = () => {
                         zIndex={participantPanel.zIndex}>
                         <ParticipantList />
                     </DraggableCard>}
-                    {myValuePanel.isMinimized ? null : <DraggableCard
+                    {pieceValuePanel.isMinimized ? null : <DraggableCard
                         header="コマ"
-                        onDragStop={e => dispatch(roomConfigModule.actions.moveMyValuePanel({ ...e, roomId }))}
-                        onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizeMyValuePanel({ roomId, dir, delta }))}
-                        onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: 'myValuePanel' } }))}
-                        onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: 'myValuePanel' }, newValue: true }))}
+                        onDragStop={e => dispatch(roomConfigModule.actions.movePieceValuePanel({ ...e, roomId }))}
+                        onResizeStop={(dir, delta) => dispatch(roomConfigModule.actions.resizePieceValuePanel({ roomId, dir, delta }))}
+                        onMoveToFront={() => dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: 'pieceValuePanel' } }))}
+                        onClose={() => dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: 'pieceValuePanel' }, newValue: true }))}
                         childrenContainerStyle={({ padding: childrenContainerPadding, overflowY: 'scroll' })}
-                        position={myValuePanel}
-                        size={myValuePanel}
+                        position={pieceValuePanel}
+                        size={pieceValuePanel}
                         minHeight={150}
                         minWidth={150}
-                        zIndex={myValuePanel.zIndex}>
+                        zIndex={pieceValuePanel.zIndex}>
                         <NumberPieceValueList />
                     </DraggableCard>}
                 </div>

@@ -8,7 +8,7 @@ import roomConfigModule from '../../modules/roomConfigModule';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import { apolloError } from '../../hooks/useRoomMessages';
 import { getUserUid } from '../../hooks/useFirebaseUser';
-import { MessagePanelConfig } from '../../states/MessagesPanelConfig';
+import { MessagePanelConfig } from '../../states/MessagePanelConfig';
 import * as Icon from '@ant-design/icons';
 import { Gutter } from 'antd/lib/grid/row';
 import DrawerFooter from '../../layouts/DrawerFooter';

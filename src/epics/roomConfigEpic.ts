@@ -34,6 +34,12 @@ const roomConfigEpicCore = (action$: ActionsObservable<AnyAction>, state$: State
                     || roomConfigModule.actions.resetBoard.match(action)
                     || roomConfigModule.actions.updateBoardEditorPanel.match(action)
 
+                    || roomConfigModule.actions.addMemoPanelConfig.match(action)
+                    || roomConfigModule.actions.moveMemoPanel.match(action)
+                    || roomConfigModule.actions.resizeMemoPanel.match(action)
+                    || roomConfigModule.actions.removeMemoPanel.match(action)
+                    || roomConfigModule.actions.updateMemoPanel.match(action)
+
                     || roomConfigModule.actions.addMessagePanelConfig.match(action)
                     || roomConfigModule.actions.moveMessagePanel.match(action)
                     || roomConfigModule.actions.resizeMessagePanel.match(action)
@@ -48,9 +54,9 @@ const roomConfigEpicCore = (action$: ActionsObservable<AnyAction>, state$: State
 
                     || roomConfigModule.actions.moveParticipantPanel.match(action)
                     || roomConfigModule.actions.resizeParticipantPanel.match(action)
-                    
-                    || roomConfigModule.actions.moveMyValuePanel.match(action)
-                    || roomConfigModule.actions.resizeMyValuePanel.match(action)
+
+                    || roomConfigModule.actions.movePieceValuePanel.match(action)
+                    || roomConfigModule.actions.resizePieceValuePanel.match(action)
                 ) {
                     return action;
                 }

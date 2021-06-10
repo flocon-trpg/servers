@@ -12,14 +12,13 @@ import roomStateModule, { Notification } from '../../modules/roomStateModule';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import path from '../../utils/path';
 import { useRouter } from 'next/router';
-import { defaultMessagePanelConfig } from '../../states/MessagesPanelConfig';
+import { defaultMessagePanelConfig } from '../../states/MessagePanelConfig';
 import fileDownload from 'js-file-download';
 import { generateAsStaticHtml } from '../../utils/roomLogGenerator';
 import moment from 'moment';
 import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { recordToArray } from '@kizahasi/util';
-import { useCharacters } from '../../hooks/state/useCharacters';
 import { roomDrawerModule } from '../../modules/roomDrawerModule';
 
 type BecomePlayerModalProps = {
@@ -313,7 +312,7 @@ export const RoomMenu: React.FC = () => {
     const gameEffectPanel = useSelector(state => state.roomConfigModule?.panels.gameEffectPanel);
     const participantPanel = useSelector(state => state.roomConfigModule?.panels.participantPanel);
     const messagePanel = useSelector(state => state.roomConfigModule?.panels.messagePanels);
-    const myValuePanel = useSelector(state => state.roomConfigModule?.panels.myValuePanel);
+    const myValuePanel = useSelector(state => state.roomConfigModule?.panels.pieceValuePanel);
     const [getLogQuery, getLogQueryResult] = useGetLogLazyQuery({ fetchPolicy: 'network-only' });
     const [leaveRoomMutation] = useLeaveRoomMutation();
     const [isBecomePlayerModalVisible, setIsBecomePlayerModalVisible] = React.useState(false);
@@ -472,8 +471,8 @@ export const RoomMenu: React.FC = () => {
                 </Menu.Item>
             </Menu.SubMenu>
             <Menu.Item onClick={() => {
-                dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: 'myValuePanel' }, newValue: false }));
-                dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: 'myValuePanel' } }));
+                dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: 'pieceValuePanel' }, newValue: false }));
+                dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: 'pieceValuePanel' } }));
             }}>
                 <div>
                     <span>{myValuePanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>

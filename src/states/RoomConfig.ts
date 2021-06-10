@@ -2,7 +2,7 @@ import { castToNumber, castToRecord, castToString } from '../utils/cast';
 import isObject from '../utils/isObject';
 import { castToPartialPanelsConfig, defaultPanelsConfig, PanelsConfig, PartialPanelsConfig, toCompletePanelsConfig } from './PanelsConfig';
 import * as Room from '../stateManagers/states/room';
-import { MessageFilter } from './MessagesPanelConfig';
+import { MessageFilter } from './MessagePanelConfig';
 
 export const defaultMasterVolume = 0.5;
 export const defaultChannelVolume = 1;
@@ -44,9 +44,10 @@ export const activeBoardPanel = 'activeBoardPanel';
 export const boardEditorPanel = 'boardEditorPanel';
 export const characterPanel = 'characterPanel';
 export const gameEffectPanel = 'gameEffectPanel';
+export const memoPanel = 'memoPanel';
 export const messagePanel = 'messagePanel';
 export const participantPanel = 'participantPanel';
-export const myValuePanel = 'myValuePanel';
+export const pieceValuePanel = 'pieceValuePanel';
 
 export type PanelAction = {
     roomId: string;
@@ -60,12 +61,15 @@ export type PanelAction = {
     } | {
         type: typeof gameEffectPanel;
     } | {
+        type: typeof memoPanel;
+        panelId: string;
+    } | {
         type: typeof messagePanel;
         panelId: string;
     } | {
         type: typeof participantPanel;
     } | {
-        type: typeof myValuePanel;
+        type: typeof pieceValuePanel;
     };
 }
 

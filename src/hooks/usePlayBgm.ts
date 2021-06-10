@@ -30,7 +30,6 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmBehaviorCoreProps): void {
 
     const isPausedRef = React.useRef(bgm?.isPaused);
     React.useEffect(() => {
-        console.info('isPaused',bgm?.isPaused);
         isPausedRef.current = bgm?.isPaused;
     }, [bgm?.isPaused]);
 

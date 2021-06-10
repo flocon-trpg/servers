@@ -2,14 +2,14 @@ import { castToBoolean } from '../utils/cast';
 import isObject from '../utils/isObject';
 import { castToPartialDraggablePanelConfigBase, DraggablePanelConfigBase, toCompleteDraggablePanelConfigBase } from './DraggablePanelConfigBase';
 
-export type MyValuePanelConfig = {
+export type PieceValuePanelConfig = {
     isMinimized: boolean;
 } & DraggablePanelConfigBase
 
-export type PartialMyValuePanelConfig = Partial<MyValuePanelConfig>;
+export type PartialPieceValuePanelConfig = Partial<PieceValuePanelConfig>;
 
-export const castToPartialMyValuePanelConfig = (source: unknown): PartialMyValuePanelConfig | undefined => {
-    if (!isObject<PartialMyValuePanelConfig>(source)) {
+export const castToPartialPieceValuePanelConfig = (source: unknown): PartialPieceValuePanelConfig | undefined => {
+    if (!isObject<PartialPieceValuePanelConfig>(source)) {
         return;
     }
     return {
@@ -18,14 +18,14 @@ export const castToPartialMyValuePanelConfig = (source: unknown): PartialMyValue
     };
 };
 
-export const toCompleteMyValuePanelConfig = (source: PartialMyValuePanelConfig): MyValuePanelConfig => {
+export const toCompletePieceValuePanelConfig = (source: PartialPieceValuePanelConfig): PieceValuePanelConfig => {
     return {
         ...toCompleteDraggablePanelConfigBase(source),
         isMinimized: source.isMinimized ?? false,
     };
 };
 
-export const defaultMyValuePanelConfig = (): MyValuePanelConfig => {
+export const defaultPieceValuePanelConfig = (): PieceValuePanelConfig => {
     return {
         x: 1000,
         y: 400,

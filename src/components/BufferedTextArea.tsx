@@ -11,6 +11,7 @@ export type OnChangeParams = {
 }
 
 export type Props = {
+    style?: React.CSSProperties;
     value: string;
     rows?: number;
     cols?: number;
@@ -19,7 +20,7 @@ export type Props = {
     bufferDuration: number | 'default' | 'short';
     onChange: (params: OnChangeParams) => void;
     
-    // Bufferされていない状態で、TextAreaの変換を即時に伝える。同じ値が連続して送られることがあるしれない。
+    // Bufferされていない状態で、TextAreaの変換を即時に伝える。同じ値が連続して送られることがあるかもしれない。
     onChangeImmediate?: (newValue: string) => void;
 };
 

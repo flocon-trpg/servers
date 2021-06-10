@@ -3,7 +3,7 @@ import { ArgsProps } from 'antd/lib/notification';
 import { Howl } from 'howler';
 import React from 'react';
 import { RoomMessage } from '../pageComponents/room/RoomMessage';
-import { MessageFilter } from '../states/MessagesPanelConfig';
+import { MessageFilter } from '../states/MessagePanelConfig';
 import { defaultMasterVolume, defaultSeVolume } from '../states/RoomConfig';
 import { useSelector } from '../store';
 import { emptyPublicChannelNames } from '../utils/types';
