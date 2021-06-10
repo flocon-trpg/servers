@@ -69,8 +69,8 @@ export const NumberPieceValueDrawer: React.FC = () => {
             const operation: UpOperation = {
                 $version: 1,
                 characters: {
-                    [myUserUid]: {
-                        [drawerType.characterKey.createdBy]: {
+                    [drawerType.characterKey.createdBy]: {
+                        [drawerType.characterKey.id]: {
                             type: update,
                             update: {
                                 $version: 1,
