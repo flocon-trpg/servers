@@ -130,6 +130,7 @@ export {
     apply as applyDicePieceValue,
     diff as dicePieceValueDiff,
     toUpOperation as toDicePieceValueUpOperation,
+    dicePieceValueStrIndexes,
 } from './internal/ot/room/character/dicePieceValue/v1';
 
 export {

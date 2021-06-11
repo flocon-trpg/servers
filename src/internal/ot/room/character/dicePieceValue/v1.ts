@@ -7,7 +7,6 @@ import {
     recordDownOperationElementFactory,
     recordUpOperationElementFactory,
 } from '../../util/recordOperationElement';
-import * as ReplaceOperation from '../../util/replaceOperation';
 import {
     Apply,
     ClientTransform,
@@ -21,9 +20,11 @@ import { createOperation } from '../../util/createOperation';
 import { isIdRecord } from '../../util/record';
 import { Result } from '@kizahasi/result';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
-import { chooseDualKeyRecord, chooseRecord, maybe } from '@kizahasi/util';
+import { chooseDualKeyRecord, chooseRecord } from '@kizahasi/util';
 import { RecordTwoWayOperation } from '../../util/recordOperation';
 import * as RecordOperation from '../../util/recordOperation';
+
+export const dicePieceValueStrIndexes = ['1', '2', '3', '4'] as const;
 
 export const state = t.type({
     $version: t.literal(1),
@@ -379,7 +380,8 @@ export const serverTransform = (
             }),
         toServerState: state => state,
         cancellationPolicy: {
-            cancelCreate: ({ key }) => !createdByMe || ['1', '2', '3'].every(x => x !== key),
+            cancelCreate: ({ key }) =>
+                !createdByMe || dicePieceValueStrIndexes.every(x => x !== key),
             cancelRemove: () => !createdByMe,
             cancelUpdate: () => !createdByMe,
         },
