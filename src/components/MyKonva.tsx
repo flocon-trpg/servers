@@ -246,6 +246,7 @@ export namespace MyKonva {
 
         onDragEnd?: (resize: DragEndResult) => void;
         onClick?: () => void;
+        onDblClick?: (e: KonvaEventObject<MouseEvent>) => void;
         onMouseEnter?: () => void;
         onMouseLeave?: () => void;
     } & Vector2 & Size
@@ -326,6 +327,10 @@ export namespace MyKonva {
                     onClick={e => {
                         e.cancelBubble = true;
                         props.onClick == null ? undefined : props.onClick();
+                    }}
+                    onDblClick={e => {
+                        e.cancelBubble = true;
+                        props.onDblClick == null ? undefined : props.onDblClick(e);
                     }}
                     onDragEnd={e => onDragEnd(e)}
                     onTouchEnd={e => onDragEnd(e)}
@@ -629,11 +634,12 @@ export namespace MyKonva {
 
         onDragEnd?: (resize: DragEndResult) => void;
         onClick?: () => void;
+        onDblClick?: (e: KonvaEventObject<MouseEvent>) => void;
         onMouseEnter?: () => void;
         onMouseLeave?: () => void;
     } & Vector2 & Size
 
-    export const Main: React.FC<Props> = (props: Props) => {
+    export const Piece: React.FC<Props> = (props: Props) => {
         /*
         リサイズや移動の実装方法についてはこちらを参照
         https://konvajs.org/docs/react/Transformer.html
@@ -690,6 +696,10 @@ export namespace MyKonva {
                     onClick={e => {
                         e.cancelBubble = true;
                         props.onClick == null ? undefined : props.onClick();
+                    }}
+                    onDblClick={e => {
+                        e.cancelBubble = true;
+                        props.onDblClick == null ? undefined : props.onDblClick(e);
                     }}
                     onDragEnd={e => onDragEnd(e)}
                     onTouchEnd={e => onDragEnd(e)}

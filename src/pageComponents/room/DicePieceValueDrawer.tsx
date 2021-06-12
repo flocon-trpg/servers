@@ -8,7 +8,7 @@ import { Gutter } from 'antd/lib/grid/row';
 import { useStateEditor } from '../../hooks/useStateEditor';
 import { useOperate } from '../../hooks/useOperate';
 import { useMe } from '../../hooks/useMe';
-import { UpOperation, toDicePieceValueUpOperation, dicePieceValueDiff, DicePieceValueState, CharacterState } from '@kizahasi/flocon-core';
+import { UpOperation, toDicePieceValueUpOperation, dicePieceValueDiff, DicePieceValueState, CharacterState, dicePieceValueStrIndexes } from '@kizahasi/flocon-core';
 import { compositeKeyToString } from '@kizahasi/util';
 import { useDispatch } from 'react-redux';
 import { useSelector } from '../../store';
@@ -160,7 +160,7 @@ export const DicePieceValueDrawer: React.FC = () => {
                             onSelect={setActiveCharacter} />
                     </Col>
                 </Row>
-                {['1', '2', '3'].map(key => {
+                {dicePieceValueStrIndexes.map(key => {
                     const title = `ダイス${key}`;
                     const value = state.dice[key];
 
@@ -201,9 +201,6 @@ export const DicePieceValueDrawer: React.FC = () => {
                             <Col flex={0}>値</Col>
                             <Col span={inputSpan}>
                                 <InputNumber min={1} max={6} size='small' value={value.value ?? undefined} onChange={e => {
-                                    if (typeof e !== 'number') {
-                                        return;
-                                    }
                                     setState({
                                         ...state,
                                         dice: {

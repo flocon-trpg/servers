@@ -1,7 +1,7 @@
 import React from 'react';
 import { useImageFromGraphQL } from '../../hooks/image';
 import * as ReactKonva from 'react-konva';
-import { Button, Dropdown, Menu, Tooltip } from 'antd';
+import { Button, Dropdown, InputNumber, Menu, Tooltip } from 'antd';
 import * as Icons from '@ant-design/icons';
 import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
@@ -30,17 +30,23 @@ import { Vector2d } from 'konva/types/types';
 import { Subject } from 'rxjs';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
 import { NewTabLinkify } from '../../components/NewTabLinkify';
-import { CharacterState, UpOperation, PieceState, PieceUpOperation, BoardLocationUpOperation, BoardState, BoardLocationState, NumberPieceValueState, DicePieceValueState } from '@kizahasi/flocon-core';
+import { CharacterState, UpOperation, PieceState, PieceUpOperation, BoardLocationUpOperation, BoardState, BoardLocationState, NumberPieceValueState, DicePieceValueState, dicePieceValueStrIndexes } from '@kizahasi/flocon-core';
 import { $free, CompositeKey, compositeKeyEquals, compositeKeyToString, dualKeyRecordToDualKeyMap, ReadonlyStateMap, stringToCompositeKey } from '@kizahasi/util';
 import _ from 'lodash';
-import { useNumberPieceValues } from '../../hooks/state/useNumberPieceValues';
+import { NumberPieceValueElement, useNumberPieceValues } from '../../hooks/state/useNumberPieceValues';
 import { tripleKeyToString } from '../../utils/tripleKeyToString';
 import { create, roomDrawerModule } from '../../modules/roomDrawerModule';
-import { useDicePieceValues } from '../../hooks/state/useDicePieceValues';
+import { DicePieceValueElement, useDicePieceValues } from '../../hooks/state/useDicePieceValues';
 import { DicePieceValue } from '../../utils/dicePieceValue';
+import { InputDie } from '../../components/InputDie';
 
 namespace Resource {
     export const cellSizeIsTooSmall = 'セルが小さすぎるため、無効化されています';
+
+    export namespace Popup {
+        export const backgroundColor = '#202020E8';
+        export const padding = 8;
+    }
 }
 
 const createPiecePostOperation = ({
@@ -111,17 +117,30 @@ type SelectedPieceKey = {
     stateId: string;
 }
 
-type MouseOverOn = {
-    type: typeof background | typeof dicePieceValue | typeof numberPieceValue;
+type ClickOn = {
+    type: typeof dicePieceValue;
+    element: DicePieceValueElement;
+} | {
+    type: typeof numberPieceValue;
+    element: NumberPieceValueElement;
 } | {
     type: typeof character | typeof tachie;
+    characterKey: CompositeKey;
     character: CharacterState;
 }
+
+type MouseOverOn = {
+    type: typeof background;
+} | ClickOn
 
 const publicMessageFilter = (message: Message): boolean => {
     return message.type === publicMessage;
 };
 
+/**
+   * カーソルが一定時間止まったかどうかを示し、一定時間止まったときはその位置を返すHook。
+   * カーソルが動くたびにonMoveを呼び出さなければならない。
+   */
 const useGetStoppedCursor = () => {
     const [stoppedCursor, setStoppedCursor] = React.useState<Vector2d | null>(null);
     const subject = useConstant(() => new Subject<Vector2d>());
@@ -139,6 +158,142 @@ const useGetStoppedCursor = () => {
 
 type OnTooltipParams = { offset: MyKonva.Vector2; mouseOverOn: MouseOverOn };
 
+const PieceTooltip: React.FC<OnTooltipParams> = ({ offset, mouseOverOn }: OnTooltipParams) => {
+    const left = offset.x - 30;
+    const top = offset.y + 1;
+
+    switch (mouseOverOn.type) {
+        case character:
+        case tachie:
+            return (
+                <div style={({
+                    position: 'absolute',
+                    left,
+                    top,
+                    padding: Resource.Popup.padding,
+                    backgroundColor: Resource.Popup.backgroundColor,
+                    maxWidth: 200
+                })}>
+                    <div>{mouseOverOn.character.name}</div>
+                    {mouseOverOn.character.memo.trim() !== '' && <hr style={{ transform: 'scaleY(0.5)', borderWidth: '1px 0 0 0', borderStyle: 'solid', borderColor: '#FFFFFFD0' }} />}
+                    <NewTabLinkify>
+                        <span style={{ whiteSpace: 'pre-wrap' /* これがないと、stringに存在する改行が無視されてしまう */ }}>
+                            {mouseOverOn.character.memo}
+                        </span>
+                    </NewTabLinkify>
+                </div>);
+        default:
+            return null;
+    }
+};
+
+namespace PopupEditorBase {
+    type DicePieceValueProps = {
+        element: DicePieceValueElement;
+    }
+
+    export const DicePieceValue: React.FC<DicePieceValueProps> = ({ element }: DicePieceValueProps) => {
+        const operate = useOperate();
+
+        const characters = useCharacters();
+        const dicePieceValue = React.useMemo(() => {
+            const character = characters?.get({ createdBy: element.characterKey.createdBy, id: element.characterKey.id });
+            if (character == null) {
+                return undefined;
+            }
+            const dicePieceValue = character.dicePieceValues[element.valueId];
+            if (dicePieceValue == null) {
+                return undefined;
+            }
+            return dicePieceValue;
+        }, [characters, element.characterKey.createdBy, element.characterKey.id, element.valueId]);
+
+        if (dicePieceValue == null) {
+            return null;
+        }
+
+        const titleWidth = 60;
+
+        return (<div style={{ display: 'flex', flexDirection: 'column' }}>
+            {dicePieceValueStrIndexes.map(key => {
+                const nullableDie = dicePieceValue.dice[key];
+                const die = nullableDie as (typeof nullableDie) | undefined;
+                if (die == null) {
+                    return null;
+                }
+                return (<div key={key} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                    <div style={{ flex: `0 0 ${titleWidth}` }}>{`ダイス${key}`}</div>
+                    <InputDie state={die} onChange={e => {
+                        operate({
+                            $version: 1,
+                            characters: {
+                                [element.characterKey.createdBy]: {
+                                    [element.characterKey.id]: {
+                                        type: update,
+                                        update: {
+                                            $version: 1,
+                                            dicePieceValues: {
+                                                [element.valueId]: {
+                                                    type: update,
+                                                    update: {
+                                                        $version: 1,
+                                                        dice: {
+                                                            [key]: {
+                                                                type: update,
+                                                                update: {
+                                                                    $version: 1,
+                                                                    value: { newValue: e },
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }} />
+                </div>);
+            })}
+        </div>);
+    };
+}
+
+type OnPopupEditorParams = { offset: MyKonva.Vector2; dblClickOn: ClickOn };
+
+const PopupEditor: React.FC<OnPopupEditorParams> = ({ offset, dblClickOn }: OnPopupEditorParams) => {
+
+    const left = offset.x - 30;
+    const top = offset.y + 1;
+
+    let children: JSX.Element | null;
+    switch (dblClickOn.type) {
+        case dicePieceValue:
+            children = <PopupEditorBase.DicePieceValue element={dblClickOn.element} />;
+            break;
+        default:
+            children = null;
+            break;
+    }
+
+    if (children == null) {
+        return null;
+    }
+
+    return (<div style={({
+        position: 'absolute',
+        left,
+        top,
+        padding: Resource.Popup.padding,
+        backgroundColor: Resource.Popup.backgroundColor,
+        maxWidth: 200
+    })}>
+        {children}
+    </div>);
+};
+
 type BoardCoreProps = {
     board: BoardState;
     boardConfig: BoardConfig;
@@ -147,6 +302,7 @@ type BoardCoreProps = {
     onClick?: (e: KonvaEventObject<MouseEvent>) => void;
     onContextMenu?: (e: KonvaEventObject<PointerEvent>, stateOffset: MyKonva.Vector2) => void; // stateOffsetは、configなどのxy座標を基準にした位置。
     onTooltip?: (params: OnTooltipParams | null) => void;
+    onPopupEditor?: (params: OnPopupEditorParams | null) => void;
     canvasWidth: number;
     canvasHeight: number;
 }
@@ -159,6 +315,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     onClick,
     onContextMenu,
     onTooltip,
+    onPopupEditor,
     canvasWidth,
     canvasHeight
 }: BoardCoreProps) => {
@@ -169,6 +326,13 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const numberPieceValues = useNumberPieceValues();
 
     const onTooltipRef = useReadonlyRef(onTooltip);
+    const onPopoverEditorRef = useReadonlyRef(onPopupEditor);
+    const unsetPopoverEditor = () => {
+        if (onPopoverEditorRef.current == null) {
+            return;
+        }
+        onPopoverEditorRef.current(null);
+    };
 
     const mouseOverOnRef = React.useRef<MouseOverOn>({ type: background });
     const { stoppedCursor, onMove } = useGetStoppedCursor();
@@ -250,8 +414,20 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 draggable
                 listening
                 isSelected={selectedPieceKey?.type === 'character' && compositeKeyEquals(selectedPieceKey.characterKey, characterKey)}
-                onClick={() => setSelectedPieceKey({ type: 'character', characterKey })}
-                onMouseEnter={() => mouseOverOnRef.current = { type: 'character', character }}
+                onClick={() => {
+                    unsetPopoverEditor();
+                    setSelectedPieceKey({ type: 'character', characterKey });
+                }}
+                onDblClick={e => {
+                    if (onPopoverEditorRef.current == null) {
+                        return;
+                    }
+                    onPopoverEditorRef.current({
+                        offset: { x: e.evt.offsetX, y: e.evt.offsetY },
+                        dblClickOn: { type: 'character', character, characterKey }
+                    });
+                }}
+                onMouseEnter={() => mouseOverOnRef.current = { type: 'character', character, characterKey }}
                 onMouseLeave={() => mouseOverOnRef.current = { type: 'background' }}
                 onDragEnd={e => {
                     const pieceOperation = createPiecePostOperation({ e, piece: pieceValue, board });
@@ -307,8 +483,20 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 draggable
                 listening
                 isSelected={selectedPieceKey?.type === 'tachie' && compositeKeyEquals(selectedPieceKey.characterKey, characterKey)}
-                onClick={() => setSelectedPieceKey({ type: 'tachie', characterKey })}
-                onMouseEnter={() => mouseOverOnRef.current = { type: 'tachie', character }}
+                onClick={() => {
+                    unsetPopoverEditor();
+                    setSelectedPieceKey({ type: 'tachie', characterKey });
+                }}
+                onDblClick={e => {
+                    if (onPopoverEditorRef.current == null) {
+                        return;
+                    }
+                    onPopoverEditorRef.current({
+                        offset: { x: e.evt.offsetX, y: e.evt.offsetY },
+                        dblClickOn: { type: 'tachie', character, characterKey }
+                    });
+                }}
+                onMouseEnter={() => mouseOverOnRef.current = { type: 'tachie', character, characterKey }}
                 onMouseLeave={() => mouseOverOnRef.current = { type: 'background' }}
                 onDragEnd={e => {
                     const tachieLocationOperation = createTachieLocationPostOperation({ e });
@@ -346,7 +534,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     return null;
                 }
                 const [, pieceValue] = piece;
-                return <MyKonva.Main
+                return <MyKonva.Piece
                     {...Piece.getPosition({ ...board, state: pieceValue })}
                     key={tripleKeyToString(element.characterKey.createdBy, element.characterKey.id, element.valueId)}
                     state={{ type: MyKonva.dicePiece, state: element.value }}
@@ -354,8 +542,20 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     draggable
                     listening
                     isSelected={selectedPieceKey?.type === 'dicePieceValue' && (selectedPieceKey.stateId === element.valueId)}
-                    onClick={() => setSelectedPieceKey({ type: 'dicePieceValue', stateId: element.valueId })}
-                    onMouseEnter={() => mouseOverOnRef.current = { type: 'dicePieceValue' }}
+                    onClick={() => {
+                        unsetPopoverEditor();
+                        setSelectedPieceKey({ type: 'dicePieceValue', stateId: element.valueId });
+                    }}
+                    onDblClick={e => {
+                        if (onPopoverEditorRef.current == null) {
+                            return;
+                        }
+                        onPopoverEditorRef.current({
+                            offset: { x: e.evt.offsetX, y: e.evt.offsetY },
+                            dblClickOn: { type: 'dicePieceValue', element }
+                        });
+                    }}
+                    onMouseEnter={() => mouseOverOnRef.current = { type: 'dicePieceValue', element }}
                     onMouseLeave={() => mouseOverOnRef.current = { type: 'background' }}
                     onDragEnd={e => {
                         const pieceOperation = createPiecePostOperation({ e, piece: pieceValue, board });
@@ -401,7 +601,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     return null;
                 }
                 const [, pieceValue] = piece;
-                return <MyKonva.Main
+                return <MyKonva.Piece
                     {...Piece.getPosition({ ...board, state: pieceValue })}
                     key={tripleKeyToString(element.characterKey.createdBy, element.characterKey.id, element.valueId)}
                     state={{ type: MyKonva.numberPiece, state: element.value }}
@@ -409,8 +609,20 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     draggable
                     listening
                     isSelected={selectedPieceKey?.type === 'numberPieceValue' && (selectedPieceKey.stateId === element.valueId)}
-                    onClick={() => setSelectedPieceKey({ type: 'numberPieceValue', stateId: element.valueId })}
-                    onMouseEnter={() => mouseOverOnRef.current = { type: 'numberPieceValue' }}
+                    onClick={() => {
+                        unsetPopoverEditor();
+                        setSelectedPieceKey({ type: 'numberPieceValue', stateId: element.valueId });
+                    }}
+                    onDblClick={e => {
+                        if (onPopoverEditorRef.current == null) {
+                            return;
+                        }
+                        onPopoverEditorRef.current({
+                            offset: { x: e.evt.offsetX, y: e.evt.offsetY },
+                            dblClickOn: { type: 'numberPieceValue', element }
+                        });
+                    }}
+                    onMouseEnter={() => mouseOverOnRef.current = { type: 'numberPieceValue', element }}
                     onMouseLeave={() => mouseOverOnRef.current = { type: 'background' }}
                     onDragEnd={e => {
                         const pieceOperation = createPiecePostOperation({ e, piece: pieceValue, board });
@@ -472,6 +684,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             height={canvasHeight}
             onClick={e => {
                 setSelectedPieceKey(undefined);
+                unsetPopoverEditor();
                 onClick == null ? undefined : onClick(e);
             }}
             onContextMenu={e => {
@@ -552,49 +765,50 @@ const BoardCore: React.FC<BoardCoreProps> = ({
         </ReactKonva.Stage>);
 };
 
-type ContextMenuState = {
-    x: number;
-    y: number;
-    characterPiecesOnCursor: ReadonlyArray<{ characterKey: CompositeKey; character: CharacterState; piece: PieceState }>;
-    tachiesOnCursor: ReadonlyArray<{ characterKey: CompositeKey; character: CharacterState; tachieLocation: BoardLocationState }>;
-    dicePieceValuesOnCursor: ReadonlyArray<{
-        characterKey: CompositeKey;
-        dicePieceValueKey: string;
-        dicePieceValue: DicePieceValueState;
-        piece: PieceState;
-    }>;
-    numberPieceValuesOnCursor: ReadonlyArray<{
-        characterKey: CompositeKey;
-        numberPieceValueKey: string;
-        numberPieceValue: NumberPieceValueState;
-        piece: PieceState;
-    }>;
-}
-
-namespace ContextMenuState {
-    const toKonvaPosition = ({
-        contextMenuState,
-        boardConfig,
-    }: {
-        contextMenuState: ContextMenuState;
-        boardConfig: BoardConfig;
-    }): { x: number; y: number } => {
-        const scale = Math.pow(2, boardConfig.zoom);
-        return {
-            x: (contextMenuState.x / scale) + boardConfig.offsetX,
-            y: (contextMenuState.y / scale) + boardConfig.offsetY,
-        };
+const toBoardPosition = ({
+    konvaOffset,
+    boardConfig,
+}: {
+    konvaOffset: { x: number; y: number };
+    boardConfig: BoardConfig;
+}): { x: number; y: number } => {
+    const scale = Math.pow(2, boardConfig.zoom);
+    return {
+        x: (konvaOffset.x / scale) + boardConfig.offsetX,
+        y: (konvaOffset.y / scale) + boardConfig.offsetY,
     };
+};
+
+
+namespace ContextMenu {
+    export type State = {
+        x: number;
+        y: number;
+        characterPiecesOnCursor: ReadonlyArray<{ characterKey: CompositeKey; character: CharacterState; piece: PieceState }>;
+        tachiesOnCursor: ReadonlyArray<{ characterKey: CompositeKey; character: CharacterState; tachieLocation: BoardLocationState }>;
+        dicePieceValuesOnCursor: ReadonlyArray<{
+            characterKey: CompositeKey;
+            dicePieceValueKey: string;
+            dicePieceValue: DicePieceValueState;
+            piece: PieceState;
+        }>;
+        numberPieceValuesOnCursor: ReadonlyArray<{
+            characterKey: CompositeKey;
+            numberPieceValueKey: string;
+            numberPieceValue: NumberPieceValueState;
+            piece: PieceState;
+        }>;
+    }
 
     type SelectedCharacterPiecesMenuProps = {
-        characterPiecesOnCursor: ContextMenuState['characterPiecesOnCursor'];
+        characterPiecesOnCursor: State['characterPiecesOnCursor'];
         onContextMenuClear: () => void;
         boardKey: CompositeKey;
         dispatch: ReturnType<typeof useDispatch>;
         operate: ReturnType<typeof useOperate>;
     }
 
-    export const selectedCharacterPiecesMenu = ({
+    const selectedCharacterPiecesMenu = ({
         characterPiecesOnCursor,
         onContextMenuClear,
         boardKey,
@@ -659,7 +873,7 @@ namespace ContextMenuState {
     };
 
     type SelectedTachiesPiecesMenuProps = {
-        tachiesOnCursor: ContextMenuState['tachiesOnCursor'];
+        tachiesOnCursor: State['tachiesOnCursor'];
         onContextMenuClear: () => void;
         boardKey: CompositeKey;
         dispatch: ReturnType<typeof useDispatch>;
@@ -731,13 +945,13 @@ namespace ContextMenuState {
     };
 
     type SelectedCharacterCommandsMenuProps = {
-        characterPiecesOnCursor: ContextMenuState['characterPiecesOnCursor'];
-        tachiesOnCursor: ContextMenuState['tachiesOnCursor'];
+        characterPiecesOnCursor: State['characterPiecesOnCursor'];
+        tachiesOnCursor: State['tachiesOnCursor'];
         onContextMenuClear: () => void;
         operate: ReturnType<typeof useOperate>;
     }
 
-    export const selectedCharacterCommandsMenu = ({
+    const selectedCharacterCommandsMenu = ({
         characterPiecesOnCursor,
         tachiesOnCursor,
         onContextMenuClear,
@@ -797,7 +1011,7 @@ namespace ContextMenuState {
     const youCannotEditPieceMessage = '自分以外が作成したコマでは、値を編集することはできません。';
 
     type SelectedDicePiecesMenuProps = {
-        dicePieceValuesOnCursor: ContextMenuState['dicePieceValuesOnCursor'];
+        dicePieceValuesOnCursor: State['dicePieceValuesOnCursor'];
         onContextMenuClear: () => void;
         boardKey: CompositeKey;
         myUserUid: string;
@@ -805,7 +1019,7 @@ namespace ContextMenuState {
         operate: ReturnType<typeof useOperate>;
     }
 
-    export const selectedDicePiecesMenu = ({
+    const selectedDicePiecesMenu = ({
         dicePieceValuesOnCursor,
         onContextMenuClear,
         boardKey: boardKeyToShow,
@@ -875,7 +1089,7 @@ namespace ContextMenuState {
     };
 
     type SelectedNumberPiecesMenuProps = {
-        numberPieceValuesOnCursor: ContextMenuState['numberPieceValuesOnCursor'];
+        numberPieceValuesOnCursor: State['numberPieceValuesOnCursor'];
         onContextMenuClear: () => void;
         boardKey: CompositeKey;
         myUserUid: string;
@@ -883,7 +1097,7 @@ namespace ContextMenuState {
         operate: ReturnType<typeof useOperate>;
     }
 
-    export const selectedNumberPiecesMenu = ({
+    const selectedNumberPiecesMenu = ({
         numberPieceValuesOnCursor,
         onContextMenuClear,
         boardKey: boardKeyToShow,
@@ -953,7 +1167,7 @@ namespace ContextMenuState {
     };
 
     type BasicMenuProps = {
-        contextMenuState: ContextMenuState;
+        contextMenuState: State;
         onContextMenuClear: () => void;
         boardKey: CompositeKey;
         boardConfig: BoardConfig;
@@ -963,7 +1177,7 @@ namespace ContextMenuState {
         board: BoardState;
     }
 
-    export const basicMenu = ({
+    const basicMenu = ({
         contextMenuState,
         onContextMenuClear,
         boardKey,
@@ -976,7 +1190,7 @@ namespace ContextMenuState {
         const pieceExists = (character: CharacterState) => dualKeyRecordToDualKeyMap(character.pieces).toArray().some(([pieceBoardKey]) => boardKey.id === pieceBoardKey.second && boardKey.createdBy === pieceBoardKey.first);
         const tachieExists = (character: CharacterState) => dualKeyRecordToDualKeyMap(character.tachieLocations).toArray().some(([pieceBoardKey]) => boardKey.id === pieceBoardKey.second && boardKey.createdBy === pieceBoardKey.first);
 
-        const { x, y } = toKonvaPosition({ contextMenuState, boardConfig });
+        const { x, y } = toBoardPosition({ konvaOffset: contextMenuState, boardConfig });
         const cellPosition = Piece.getCellPosition({ x, y, board });
         // TODO: x,y,w,h の値が適当
         const pieceLocationWhichIsCellMode: PieceState = {
@@ -1237,6 +1451,85 @@ namespace ContextMenuState {
             </Menu.SubMenu>
         </>;
     };
+
+
+    type Props = {
+        contextMenuState: State;
+        boardKey: CompositeKey;
+        onContextMenuClear: () => void;
+        board: BoardState;
+        boardConfig: BoardConfig;
+    }
+
+    export const Main: React.FC<Props> = ({
+        contextMenuState,
+        boardKey,
+        onContextMenuClear,
+        board,
+        boardConfig,
+    }: Props) => {
+        const dispatch = useDispatch();
+        const operate = useOperate();
+        const characters = useCharacters();
+        const { userUid: myUserUid } = useMe();
+
+        if (characters == null || myUserUid == null) {
+            return null;
+        }
+
+        return (
+            <div style={({ position: 'absolute', left: contextMenuState.x, top: contextMenuState.y })}>
+                <Menu>
+                    {/* React.FCなどを用いるとantdがエラーを出すので、単なるJSX.Elementを返す関数として定義している */}
+
+                    {selectedCharacterPiecesMenu({
+                        ...contextMenuState,
+                        onContextMenuClear,
+                        boardKey,
+                        dispatch,
+                        operate,
+                    })}
+                    {selectedTachiePiecesMenu({
+                        ...contextMenuState,
+                        onContextMenuClear,
+                        boardKey,
+                        dispatch,
+                        operate,
+                    })}
+                    {selectedDicePiecesMenu({
+                        ...contextMenuState,
+                        onContextMenuClear,
+                        boardKey,
+                        dispatch,
+                        operate,
+                        myUserUid,
+                    })}
+                    {selectedNumberPiecesMenu({
+                        ...contextMenuState,
+                        onContextMenuClear,
+                        boardKey,
+                        dispatch,
+                        operate,
+                        myUserUid,
+                    })}
+                    {selectedCharacterCommandsMenu({
+                        ...contextMenuState,
+                        onContextMenuClear,
+                        operate,
+                    })}
+                    {board == null ? null : basicMenu({
+                        contextMenuState,
+                        onContextMenuClear,
+                        boardKey,
+                        dispatch,
+                        operate,
+                        boardConfig,
+                        characters,
+                        board,
+                    })}
+                </Menu>
+            </div>);
+    };
 }
 
 type Props = {
@@ -1269,9 +1562,9 @@ const Board: React.FC<Props> = ({
     ...panel
 }: Props) => {
     const dispatch = useDispatch();
-    const operate = useOperate();
-    const [contextMenuState, setContextMenuState] = React.useState<ContextMenuState | null>(null);
+    const [contextMenuState, setContextMenuState] = React.useState<ContextMenu.State | null>(null);
     const [tooltipState, setTooltipState] = React.useState<OnTooltipParams | null>(null);
+    const [popupEditorState, setPopupEditorState] = React.useState<OnPopupEditorParams | null>(null);
     const roomId = useSelector(state => state.roomModule.roomId);
     const boards = useBoards();
     const characters = useCharacters();
@@ -1330,6 +1623,7 @@ const Board: React.FC<Props> = ({
             boardEditorPanelId={boardEditorPanelId}
             onClick={() => setContextMenuState(null)}
             onTooltip={newValue => setTooltipState(newValue)}
+            onPopupEditor={newValue => setPopupEditorState(newValue)}
             onContextMenu={(e, stateOffset) => {
                 e.evt.preventDefault();
                 setContextMenuState({
@@ -1441,92 +1735,6 @@ const Board: React.FC<Props> = ({
         </Menu>
     );
 
-    const contextMenu = (() => {
-        if (contextMenuState == null) {
-            return null;
-        }
-        if (boardKeyToShow == null) {
-            return null;
-        }
-
-        return (
-            <div style={({ position: 'absolute', left: contextMenuState.x, top: contextMenuState.y })}>
-                <Menu>
-                    {/* React.FCなどを用いるとantdがエラーを出すので、単なるJSX.Elementを返す関数として定義している */}
-
-                    {ContextMenuState.selectedCharacterPiecesMenu({
-                        ...contextMenuState,
-                        onContextMenuClear: () => setContextMenuState(null),
-                        boardKey: boardKeyToShow,
-                        dispatch,
-                        operate,
-                    })}
-                    {ContextMenuState.selectedTachiePiecesMenu({
-                        ...contextMenuState,
-                        onContextMenuClear: () => setContextMenuState(null),
-                        boardKey: boardKeyToShow,
-                        dispatch,
-                        operate,
-                    })}
-                    {ContextMenuState.selectedDicePiecesMenu({
-                        ...contextMenuState,
-                        onContextMenuClear: () => setContextMenuState(null),
-                        boardKey: boardKeyToShow,
-                        dispatch,
-                        operate,
-                        myUserUid,
-                    })}
-                    {ContextMenuState.selectedNumberPiecesMenu({
-                        ...contextMenuState,
-                        onContextMenuClear: () => setContextMenuState(null),
-                        boardKey: boardKeyToShow,
-                        dispatch,
-                        operate,
-                        myUserUid,
-                    })}
-                    {ContextMenuState.selectedCharacterCommandsMenu({
-                        ...contextMenuState,
-                        onContextMenuClear: () => setContextMenuState(null),
-                        operate,
-                    })}
-                    {board == null ? null : ContextMenuState.basicMenu({
-                        contextMenuState,
-                        onContextMenuClear: () => setContextMenuState(null),
-                        boardKey: boardKeyToShow,
-                        dispatch,
-                        operate,
-                        boardConfig,
-                        characters,
-                        board,
-                    })}
-                </Menu>
-            </div>);
-    }
-    )();
-
-    const tooltip = (() => {
-        if (tooltipState == null) {
-            return null;
-        }
-
-        switch (tooltipState.mouseOverOn.type) {
-            case 'character':
-            case 'tachie':
-                return (
-                    <div style={({ position: 'absolute', left: tooltipState.offset.x - 30, top: tooltipState.offset.y + 1, padding: 8, backgroundColor: '#202020E8', maxWidth: 200 })}>
-                        <div>{tooltipState.mouseOverOn.character.name}</div>
-                        {tooltipState.mouseOverOn.character.memo.trim() !== '' && <hr style={{ transform: 'scaleY(0.5)', borderWidth: '1px 0 0 0', borderStyle: 'solid', borderColor: '#FFFFFFD0' }} />}
-                        <NewTabLinkify>
-                            <span style={{ whiteSpace: 'pre-wrap' /* これがないと、stringに存在する改行が無視されてしまう */ }}>
-                                {tooltipState.mouseOverOn.character.memo}
-                            </span>
-                        </NewTabLinkify>
-                    </div>);
-            default:
-                return null;
-        }
-    })();
-
     const noActiveBoardText = '';
 
     return (
@@ -1609,12 +1817,19 @@ const Board: React.FC<Props> = ({
                     </Button>
                 </div>
             </div>
-            {tooltip}
-            {contextMenu}
+            {(tooltipState != null && popupEditorState == null) && <PieceTooltip {...tooltipState} />}
+            {popupEditorState != null && <PopupEditor {...popupEditorState} />}
+            {(board != null && boardKeyToShow != null && contextMenuState != null) &&
+                <ContextMenu.Main
+                    contextMenuState={contextMenuState}
+                    board={board}
+                    boardConfig={boardConfig}
+                    boardKey={boardKeyToShow}
+                    onContextMenuClear={() => setContextMenuState(null)} />}
             <ActiveBoardSelectorModal
                 visible={activeBoardSelectorModalVisibility}
                 onComplete={() => setActiveBoardSelectorModalVisibility(false)} />
-        </div >
+        </div>
     );
 };
 
