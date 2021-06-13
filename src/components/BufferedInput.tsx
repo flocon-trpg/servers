@@ -21,7 +21,7 @@ const BufferedInput: React.FC<Props> = (props: Props) => {
     const { value, bufferDuration: bufferDurationCore, onChange } = props;
 
     if (bufferDurationCore < 0) {
-        throw 'bufferDurationCore < 0';
+        throw new Error('bufferDurationCore < 0');
     }
 
     let bufferDuration: number | null;

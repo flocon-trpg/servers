@@ -12,7 +12,7 @@ export const getRoomConfig = async (roomId: string): Promise<RoomConfig> => {
     }
     const complete = toCompleteRoomConfig(partial, roomId);
     if (complete === undefined) {
-        throw 'incorrect config version';
+        throw new Error('incorrect config version');
     }
     return complete;
 };

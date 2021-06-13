@@ -448,7 +448,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
             .map(message => {
                 if (message.type === soundEffect) {
                     // soundEffectはfilterで弾いていなければならない。
-                    throw 'soundEffect is not supported';
+                    throw new Error('soundEffect is not supported');
                 }
                 return (<RoomMessageComponent
                     key={message.type === privateMessage || message.type === publicMessage ? message.value.messageId : message.value.createdAt}

@@ -95,7 +95,7 @@ it('tests StateManager.post', () => {
 
     if (postResult === undefined) {
         expect(postResult).not.toBeUndefined();
-        throw 'Guard';
+        throw new Error('Guard');
     }
     expect(postResult.actualState).toBe(0);
     expect(postResult.operationToPost).toEqual(operation);
@@ -111,7 +111,7 @@ it('tests StateManager: post -> non-id onPosted', () => {
     target.operate(operation);
     const postResult = target.post();
     if (postResult === undefined) {
-        throw 'Guard';
+        throw new Error('Guard');
     }
 
     postResult.onPosted({
@@ -136,7 +136,7 @@ it('tests StateManager: post -> onPosted({ isId: true })', () => {
     target.operate(operation);
     const postResult = target.post();
     if (postResult === undefined) {
-        throw 'Guard';
+        throw new Error('Guard');
     }
 
     postResult.onPosted({
@@ -160,7 +160,7 @@ it('tests StateManager: post -> onPosted({ isSuccess: null })', () => {
     target.operate(operation);
     const postResult = target.post();
     if (postResult === undefined) {
-        throw 'Guard';
+        throw new Error('Guard');
     }
 
     postResult.onPosted({
@@ -180,7 +180,7 @@ it('tests StateManager: post -> onPosted({ isSuccess: false })', () => {
     target.operate(operation);
     const postResult = target.post();
     if (postResult === undefined) {
-        throw 'Guard';
+        throw new Error('Guard');
     }
 
     postResult.onPosted({
@@ -262,7 +262,7 @@ test('tests StateManager: post -> onOthersGet(initRevision + 2) -> onPosted', ()
     target.operate(firstOperation);
     const postResult = target.post();
     if (postResult === undefined) {
-        throw 'Guard';
+        throw new Error('Guard');
     }
 
     target.onOtherClientsGet(secondOperation, initRevision + 2);
@@ -291,7 +291,7 @@ test('tests StateManager: operate -> post -> operate -> onPosted({ isSuccess: tr
 
     const postResult = target.post();
     if (postResult === undefined) {
-        throw 'Guard';
+        throw new Error('Guard');
     }
 
     target.operate(secondOperation);

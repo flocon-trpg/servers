@@ -202,7 +202,7 @@ class StateManagerCore<TState, TGetOperation, TPostOperation> {
 
     public post(): { operationToPost: TPostOperation; actualState: TState; revision: number; requestId: string } | undefined {
         if (this.isPosting) {
-            throw 'cannot execute post when isPosting === true';
+            throw new Error('cannot execute post when isPosting === true');
         }
         if (this._localOperation === undefined) {
             return undefined;
@@ -312,7 +312,7 @@ export class StateManager<TState, TGetOperation, TPostOperation> {
 
     public onOtherClientsGet(operation: TGetOperation, revisionTo: number): void {
         if (this.requiresReload) {
-            throw 'this.requiresReload === true';
+            throw new Error('this.requiresReload === true');
         }
 
         this.core.onGet(operation, revisionTo, false);
@@ -320,7 +320,7 @@ export class StateManager<TState, TGetOperation, TPostOperation> {
 
     public operate(operation: TPostOperation): void {
         if (this.requiresReload) {
-            throw 'this.requiresReload === true';
+            throw new Error('this.requiresReload === true');
         }
 
         this.core.operate(operation);
@@ -334,7 +334,7 @@ export class StateManager<TState, TGetOperation, TPostOperation> {
         onPosted: (onPosted: OnPosted<TGetOperation>) => void;
     } | undefined {
         if (this.requiresReload) {
-            throw 'this.requiresReload === true';
+            throw new Error('this.requiresReload === true');
         }
 
         const toPost = this.core.post();
@@ -387,16 +387,16 @@ export class GetOnlyStateManager<TState, TOperation> {
             applyGetOperation: params.apply,
             applyPostOperation: params.apply,
             composePostOperation: () => {
-                throw 'composePostOperation should not be called';
+                throw new Error('composePostOperation should not be called');
             },
             getFirstTransform: () => {
-                throw 'getFirstTransform should not be called';
+                throw new Error('getFirstTransform should not be called');
             },
             postFirstTransform: () => {
-                throw 'postFirstTransform should not be called';
+                throw new Error('postFirstTransform should not be called');
             },
             diff: () => {
-                throw 'diff should not be called';
+                throw new Error('diff should not be called');
             },
         });
     }

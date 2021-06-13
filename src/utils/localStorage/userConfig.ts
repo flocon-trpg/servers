@@ -11,7 +11,7 @@ export const getUserConfig = async (userUid: string): Promise<UserConfig> => {
     }
     const complete = toCompleteUserConfig(partial, userUid);
     if (complete === undefined) {
-        throw 'incorrect config version';
+        throw new Error('incorrect config version');
     }
     return complete;
 };
