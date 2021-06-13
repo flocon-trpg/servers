@@ -50,7 +50,11 @@ const createStateManager = () => new StateManager<number, Operation, Operation>(
             secondPrime: { oldValue: first.newValue, newValue: first.newValue },
         };
     },
-    diff: ({ prevState: prev, nextState: next }) => ({
+    getOperationDiff: ({ prevState: prev, nextState: next }) => ({
+        oldValue: prev,
+        newValue: next,
+    }),
+    postOperationDiff: ({ prevState: prev, nextState: next }) => ({
         oldValue: prev,
         newValue: next,
     }),

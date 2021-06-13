@@ -30,7 +30,8 @@ export type StateManagerParameters<TState, TGetOperation, TPostOperation> = {
     composePostOperation: Compose<TState, TPostOperation>;
     getFirstTransform: Transform<TGetOperation, TPostOperation>;
     postFirstTransform: Transform<TPostOperation, TGetOperation>;
-    diff: Diff<TState, TGetOperation>;
+    getOperationDiff: Diff<TState, TGetOperation>;
+    postOperationDiff: Diff<TState, TPostOperation>;
 }
 
 // StateManagerから、PostUnknownを受け取る機能とreloadを取り除いたもの。
@@ -131,7 +132,7 @@ class StateManagerCore<TState, TGetOperation, TPostOperation> {
                 this._actualState :
                 this.params.applyPostOperation({ state: this._actualState, operation: this._postingOperation.operation });
             this._actualState = this.params.applyGetOperation({ state: this._actualState, operation: toApply.operation });
-            const diff = this.params.diff({ prevState: expectedState, nextState: this._actualState });
+            const diff = this.params.getOperationDiff({ prevState: expectedState, nextState: this._actualState });
             this._localOperation = (() => {
                 if (this._localOperation === undefined) {
                     return undefined;
@@ -207,7 +208,13 @@ class StateManagerCore<TState, TGetOperation, TPostOperation> {
         if (this._localOperation === undefined) {
             return undefined;
         }
-        const operationToPost = this._localOperation;
+        const prevState = this._actualState;
+        const nextState = this.params.applyPostOperation({ state: prevState, operation: this._localOperation });
+        // 一見、operationToPostにはthis._localOperationをそのまま用いれば良さそうだが、Record内の同一のkeyをremove→addしたoperationがcomposeされてthis._localOperationに入っている場合、remove→addのoperationはupdateであるべきだがthis._localOperationではreplaceとして表現されている。これをupdateにしなければならないため、diffを取っている。
+        const operationToPost = this.params.postOperationDiff({ prevState, nextState });
+        if (operationToPost === undefined) {
+            return undefined;
+        }
         const requestId = simpleId();
         this._postingOperation = { operation: this._localOperation, postedAt: new Date(), requestId };
         this._localOperation = undefined;
@@ -231,7 +238,7 @@ class StateManagerCore<TState, TGetOperation, TPostOperation> {
             return true;
         }
         const nextState = this.params.applyPostOperation({ state: this.actualState, operation: this._postingOperation.operation });
-        const diffBack = this.params.diff({ prevState: nextState, nextState: this.actualState });
+        const diffBack = this.params.getOperationDiff({ prevState: nextState, nextState: this.actualState });
         if (diffBack === undefined) {
             this._postingOperation = undefined;
             this._uiStateCache = undefined;
@@ -395,8 +402,11 @@ export class GetOnlyStateManager<TState, TOperation> {
             postFirstTransform: () => {
                 throw new Error('postFirstTransform should not be called');
             },
-            diff: () => {
-                throw new Error('diff should not be called');
+            getOperationDiff: () => {
+                throw new Error('getOperationDiff should not be called');
+            },
+            postOperationDiff: () => {
+                throw new Error('postOperationDiff should not be called');
             },
         });
     }
@@ -410,7 +420,7 @@ export class GetOnlyStateManager<TState, TOperation> {
     }
 
     public reload({ state, revision }: { state: TState; revision: number }): void {
-        this.reload({state, revision});
+        this.reload({ state, revision });
     }
 
     public onGet(operation: TOperation, revisionTo: number): void {

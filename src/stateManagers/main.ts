@@ -48,7 +48,11 @@ const createParameters = (state: State, revision: number): Parameters => {
                 secondPrime: result.value.secondPrime ?? { $version: 1 },
             };
         },
-        diff: params => {
+        getOperationDiff: params => {
+            const result = diff(params);
+            return toUpOperation(result ?? { $version: 1 });
+        },
+        postOperationDiff: params => {
             const result = diff(params);
             return toUpOperation(result ?? { $version: 1 });
         },
