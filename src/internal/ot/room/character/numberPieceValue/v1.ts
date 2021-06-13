@@ -1,12 +1,12 @@
 import * as t from 'io-ts';
-import { DualKeyRecordTwoWayOperation } from '../../util/dualKeyRecordOperation';
-import * as DualKeyRecordOperation from '../../util/dualKeyRecordOperation';
+import { DualKeyRecordTwoWayOperation } from '../../../util/dualKeyRecordOperation';
+import * as DualKeyRecordOperation from '../../../util/dualKeyRecordOperation';
 import * as Piece from '../../../piece/v1';
 import {
     recordDownOperationElementFactory,
     recordUpOperationElementFactory,
-} from '../../util/recordOperationElement';
-import * as ReplaceOperation from '../../util/replaceOperation';
+} from '../../../util/recordOperationElement';
+import * as ReplaceOperation from '../../../util/replaceOperation';
 import {
     Apply,
     ClientTransform,
@@ -15,9 +15,9 @@ import {
     Restore,
     ServerTransform,
     ToClientOperationParams,
-} from '../../util/type';
-import { createOperation } from '../../util/createOperation';
-import { isIdRecord } from '../../util/record';
+} from '../../../util/type';
+import { createOperation } from '../../../util/createOperation';
+import { isIdRecord, record } from '../../../util/record';
 import { Result } from '@kizahasi/result';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
 import { chooseDualKeyRecord } from '@kizahasi/util';
@@ -26,7 +26,7 @@ export const state = t.type({
     $version: t.literal(1),
     isValuePrivate: t.boolean,
     value: t.number,
-    pieces: t.record(t.string, t.record(t.string, Piece.state)),
+    pieces: record(t.string, record(t.string, Piece.state)),
 });
 
 export type State = t.TypeOf<typeof state>;
@@ -34,9 +34,9 @@ export type State = t.TypeOf<typeof state>;
 export const downOperation = createOperation(1, {
     isValuePrivate: t.type({ oldValue: t.boolean }),
     value: t.type({ oldValue: t.number }),
-    pieces: t.record(
+    pieces: record(
         t.string,
-        t.record(t.string, recordDownOperationElementFactory(Piece.state, Piece.downOperation))
+        record(t.string, recordDownOperationElementFactory(Piece.state, Piece.downOperation))
     ),
 });
 
@@ -45,9 +45,9 @@ export type DownOperation = t.TypeOf<typeof downOperation>;
 export const upOperation = createOperation(1, {
     isValuePrivate: t.type({ newValue: t.boolean }),
     value: t.type({ newValue: t.number }),
-    pieces: t.record(
+    pieces: record(
         t.string,
-        t.record(t.string, recordUpOperationElementFactory(Piece.state, Piece.upOperation))
+        record(t.string, recordUpOperationElementFactory(Piece.state, Piece.upOperation))
     ),
 });
 

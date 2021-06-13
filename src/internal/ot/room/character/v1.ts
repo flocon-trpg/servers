@@ -3,19 +3,19 @@ import {
     mapRecordOperationElement,
     recordDownOperationElementFactory,
     recordUpOperationElementFactory,
-} from '../util/recordOperationElement';
+} from '../../util/recordOperationElement';
 import { FilePath, filePath } from '../../filePath/v1';
-import * as TextOperation from '../util/textOperation';
+import * as TextOperation from '../../util/textOperation';
 import * as Piece from '../../piece/v1';
 import * as BoardLocation from '../../boardLocation/v1';
 import * as DicePieceValue from './dicePieceValue/v1';
 import * as NumberPieceValue from './numberPieceValue/v1';
-import * as ReplaceOperation from '../util/replaceOperation';
-import * as DualKeyRecordOperation from '../util/dualKeyRecordOperation';
-import * as RecordOperation from '../util/recordOperation';
-import * as ParamRecordOperation from '../util/paramRecordOperation';
-import { RecordTwoWayOperation } from '../util/recordOperation';
-import { DualKeyRecordTwoWayOperation } from '../util/dualKeyRecordOperation';
+import * as ReplaceOperation from '../../util/replaceOperation';
+import * as DualKeyRecordOperation from '../../util/dualKeyRecordOperation';
+import * as RecordOperation from '../../util/recordOperation';
+import * as ParamRecordOperation from '../../util/paramRecordOperation';
+import { RecordTwoWayOperation } from '../../util/recordOperation';
+import { DualKeyRecordTwoWayOperation } from '../../util/dualKeyRecordOperation';
 import {
     Apply,
     ClientTransform,
@@ -24,14 +24,14 @@ import {
     Restore,
     ServerTransform,
     ToClientOperationParams,
-} from '../util/type';
+} from '../../util/type';
 import * as BoolParam from './boolParam/v1';
 import * as Command from './command/v1';
 import * as NumParam from './numParam/v1';
 import * as StrParam from './strParam/v1';
 import * as SimpleValueParam from './simpleValueParam/v1';
-import { createOperation } from '../util/createOperation';
-import { isIdRecord } from '../util/record';
+import { createOperation } from '../../util/createOperation';
+import { isIdRecord, record, StringKeyRecord } from '../../util/record';
 import { Result } from '@kizahasi/result';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
 import { chooseDualKeyRecord, chooseRecord, Maybe, maybe } from '@kizahasi/util';
@@ -49,15 +49,15 @@ export const state = t.type({
     privateVarToml: t.string,
     tachieImage: maybe(filePath),
 
-    boolParams: t.record(t.string, BoolParam.state),
-    numParams: t.record(t.string, NumParam.state),
-    numMaxParams: t.record(t.string, NumParam.state),
-    strParams: t.record(t.string, StrParam.state),
-    pieces: t.record(t.string, t.record(t.string, Piece.state)),
-    privateCommands: t.record(t.string, Command.state),
-    tachieLocations: t.record(t.string, t.record(t.string, BoardLocation.state)),
-    dicePieceValues: t.record(t.string, DicePieceValue.state),
-    numberPieceValues: t.record(t.string, NumberPieceValue.state),
+    boolParams: record(t.string, BoolParam.state),
+    numParams: record(t.string, NumParam.state),
+    numMaxParams: record(t.string, NumParam.state),
+    strParams: record(t.string, StrParam.state),
+    pieces: record(t.string, record(t.string, Piece.state)),
+    privateCommands: record(t.string, Command.state),
+    tachieLocations: record(t.string, record(t.string, BoardLocation.state)),
+    dicePieceValues: record(t.string, DicePieceValue.state),
+    numberPieceValues: record(t.string, NumberPieceValue.state),
 });
 
 export type State = t.TypeOf<typeof state>;
@@ -71,30 +71,30 @@ export const downOperation = createOperation(1, {
     privateVarToml: TextOperation.downOperation,
     tachieImage: t.type({ oldValue: maybe(filePath) }),
 
-    boolParams: t.record(t.string, BoolParam.downOperation),
-    numParams: t.record(t.string, NumParam.downOperation),
-    numMaxParams: t.record(t.string, NumParam.downOperation),
-    strParams: t.record(t.string, StrParam.downOperation),
-    pieces: t.record(
+    boolParams: record(t.string, BoolParam.downOperation),
+    numParams: record(t.string, NumParam.downOperation),
+    numMaxParams: record(t.string, NumParam.downOperation),
+    strParams: record(t.string, StrParam.downOperation),
+    pieces: record(
         t.string,
-        t.record(t.string, recordDownOperationElementFactory(Piece.state, Piece.downOperation))
+        record(t.string, recordDownOperationElementFactory(Piece.state, Piece.downOperation))
     ),
-    privateCommands: t.record(
+    privateCommands: record(
         t.string,
         recordDownOperationElementFactory(Command.state, Command.downOperation)
     ),
-    tachieLocations: t.record(
+    tachieLocations: record(
         t.string,
-        t.record(
+        record(
             t.string,
             recordDownOperationElementFactory(BoardLocation.state, BoardLocation.downOperation)
         )
     ),
-    dicePieceValues: t.record(
+    dicePieceValues: record(
         t.string,
         recordDownOperationElementFactory(DicePieceValue.state, DicePieceValue.downOperation)
     ),
-    numberPieceValues: t.record(
+    numberPieceValues: record(
         t.string,
         recordDownOperationElementFactory(NumberPieceValue.state, NumberPieceValue.downOperation)
     ),
@@ -111,30 +111,30 @@ export const upOperation = createOperation(1, {
     privateVarToml: TextOperation.upOperation,
     tachieImage: t.type({ newValue: maybe(filePath) }),
 
-    boolParams: t.record(t.string, BoolParam.upOperation),
-    numParams: t.record(t.string, NumParam.upOperation),
-    numMaxParams: t.record(t.string, NumParam.upOperation),
-    strParams: t.record(t.string, StrParam.upOperation),
-    pieces: t.record(
+    boolParams: record(t.string, BoolParam.upOperation),
+    numParams: record(t.string, NumParam.upOperation),
+    numMaxParams: record(t.string, NumParam.upOperation),
+    strParams: record(t.string, StrParam.upOperation),
+    pieces: record(
         t.string,
-        t.record(t.string, recordUpOperationElementFactory(Piece.state, Piece.upOperation))
+        record(t.string, recordUpOperationElementFactory(Piece.state, Piece.upOperation))
     ),
-    privateCommands: t.record(
+    privateCommands: record(
         t.string,
         recordUpOperationElementFactory(Command.state, Command.upOperation)
     ),
-    tachieLocations: t.record(
+    tachieLocations: record(
         t.string,
-        t.record(
+        record(
             t.string,
             recordUpOperationElementFactory(BoardLocation.state, BoardLocation.upOperation)
         )
     ),
-    dicePieceValues: t.record(
+    dicePieceValues: record(
         t.string,
         recordUpOperationElementFactory(DicePieceValue.state, DicePieceValue.upOperation)
     ),
-    numberPieceValues: t.record(
+    numberPieceValues: record(
         t.string,
         recordUpOperationElementFactory(NumberPieceValue.state, NumberPieceValue.upOperation)
     ),
@@ -153,10 +153,10 @@ export type TwoWayOperation = {
     privateVarToml?: TextOperation.TwoWayOperation;
     tachieImage?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<FilePath>>;
 
-    boolParams?: Record<string, BoolParam.TwoWayOperation>;
-    numParams?: Record<string, NumParam.TwoWayOperation>;
-    numMaxParams?: Record<string, NumParam.TwoWayOperation>;
-    strParams?: Record<string, StrParam.TwoWayOperation>;
+    boolParams?: StringKeyRecord<BoolParam.TwoWayOperation>;
+    numParams?: StringKeyRecord<NumParam.TwoWayOperation>;
+    numMaxParams?: StringKeyRecord<NumParam.TwoWayOperation>;
+    strParams?: StringKeyRecord<StrParam.TwoWayOperation>;
     pieces?: DualKeyRecordTwoWayOperation<Piece.State, Piece.TwoWayOperation>;
     privateCommands?: RecordTwoWayOperation<Command.State, Command.TwoWayOperation>;
     tachieLocations?: DualKeyRecordTwoWayOperation<

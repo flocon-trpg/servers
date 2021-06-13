@@ -1148,12 +1148,17 @@
   resolved "https://registry.yarnpkg.com/@kizahasi/result/-/result-0.2.0.tgz#a38c8c6c109124ec7350c796d36cf55fa826f6d9"
   integrity sha512-4IkSRH36XepOM4+eWNqnOfCrjHtOe10aYWWANot5cUbRPrghGbBdyNyONr2bCma6FnnrtnGqj8e2lX5hDKjwLQ==
 
-"@kizahasi/util@0.1.0-alpha.5":
-  version "0.1.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@kizahasi/util/-/util-0.1.0-alpha.5.tgz#2d1d272f006cb5d3f7630acd86a2133352ca8e11"
-  integrity sha512-EXO1KP0FPlWvoq6cQOuKRLSJTtZpJuyJ/1LK+AlDDF2Vjok/E5T/7w326jZj0Nw3SlNrBpF9cmW/RHdRXYX1KA==
+"@kizahasi/result@^0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@kizahasi/result/-/result-0.2.1.tgz#9505a23325be6cb55d083032c8ac77c487b025ce"
+  integrity sha512-XV6lnES3JJk3+715uiJGUsdRBtxWE+8xVLw1AlF3+a2PvlGhMjEzsjDem9u7nHZ3TYVhB9Nip+KlGKiwJZIIfA==
+
+"@kizahasi/util@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@kizahasi/util/-/util-0.1.0.tgz#3db6641a02ffac025a3e343938534958441b54ba"
+  integrity sha512-Pu/aXDCtyAGFEKmFxGZ88lhFuxEN8Mz7CSxiOxppRVcR+m+GNUDGmJ9Zg6Eb5BNg5OutyEkslehEpbAOMMREIw==
   dependencies:
-    "@kizahasi/result" "^0.2.0"
+    "@kizahasi/result" "^0.2.1"
     fp-ts "^2.10.5"
     io-ts "^2.2.16"
     lodash "^4.17.21"

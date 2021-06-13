@@ -1,7 +1,8 @@
 import * as t from 'io-ts';
-import { recordUpOperationElementFactory } from '../../util/recordOperationElement';
+import { recordUpOperationElementFactory } from '../../../util/recordOperationElement';
 import * as NumberPieceValue from './v1';
 import * as Piece from '../../../piece/v1';
+import { record } from '../../../util/record';
 
 export const updateType = 'update';
 export const createType = 'create';
@@ -16,9 +17,9 @@ const update = t.intersection([
         isValuePrivate: t.boolean,
     }),
     t.partial({
-        pieces: t.record(
+        pieces: record(
             t.string,
-            t.record(t.string, recordUpOperationElementFactory(Piece.state, Piece.upOperation))
+            record(t.string, recordUpOperationElementFactory(Piece.state, Piece.upOperation))
         ),
     }),
 ]);

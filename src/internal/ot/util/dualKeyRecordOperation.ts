@@ -6,14 +6,14 @@ import {
     dualKeyRecordFind,
     dualKeyRecordForEach,
     groupJoinDualKeyMap,
-    recordToDualKeyMap,
     left,
     right,
     both,
+    dualKeyRecordToDualKeyMap,
 } from '@kizahasi/util';
 import * as t from 'io-ts';
+import { DualStringKeyRecord, record } from './record';
 import {
-    DualKeyRecord,
     recordDownOperationElementFactory,
     RecordDownOperationElement,
     RecordTwoWayOperationElement,
@@ -23,17 +23,14 @@ import {
     update,
 } from './recordOperationElement';
 
-export type DualKeyRecordDownOperation<TState, TOperation> = Record<
-    string,
-    Record<string, RecordDownOperationElement<TState, TOperation>>
+export type DualKeyRecordDownOperation<TState, TOperation> = DualStringKeyRecord<
+    RecordDownOperationElement<TState, TOperation>
 >;
-export type DualKeyRecordUpOperation<TState, TOperation> = Record<
-    string,
-    Record<string, RecordUpOperationElement<TState, TOperation>>
+export type DualKeyRecordUpOperation<TState, TOperation> = DualStringKeyRecord<
+    RecordUpOperationElement<TState, TOperation>
 >;
-export type DualKeyRecordTwoWayOperation<TState, TOperation> = Record<
-    string,
-    Record<string, RecordTwoWayOperationElement<TState, TOperation>>
+export type DualKeyRecordTwoWayOperation<TState, TOperation> = DualStringKeyRecord<
+    RecordTwoWayOperationElement<TState, TOperation>
 >;
 
 export const dualKeyMapStateFactory = <
@@ -44,7 +41,7 @@ export const dualKeyMapStateFactory = <
     key1: TKey1,
     key2: TKey2,
     state: TState
-) => t.record(key1, t.record(key2, state));
+) => record(key1, record(key2, state));
 
 export const dualKeyMapDownOperationFactory = <
     TKey1 extends t.Mixed,
@@ -56,7 +53,7 @@ export const dualKeyMapDownOperationFactory = <
     key2: TKey2,
     state: TState,
     operation: TOperation
-) => t.record(key1, t.record(key2, recordDownOperationElementFactory(state, operation)));
+) => record(key1, record(key2, recordDownOperationElementFactory(state, operation)));
 
 export const dualKeyMapUpOperationFactory = <
     TKey1 extends t.Mixed,
@@ -68,7 +65,7 @@ export const dualKeyMapUpOperationFactory = <
     key2: TKey2,
     state: TState,
     operation: TOperation
-) => t.record(key1, t.record(key2, recordUpOperationElementFactory(state, operation)));
+) => record(key1, record(key2, recordUpOperationElementFactory(state, operation)));
 
 type RestoreResult<TState, TTwoWayOperation> = {
     prevState: TState;
@@ -106,7 +103,7 @@ export const toClientState = <TSourceState, TClientState>({
     isPrivate,
     toClientState,
 }: {
-    serverState: Record<string, Record<string, TSourceState>>;
+    serverState: DualStringKeyRecord<TSourceState>;
 
     // 対象となるユーザーの視点で、全体がprivateとなるときはtrueを返す。一部がprivateである、もしくはprivateである部分がないときはfalseを返す。
     isPrivate: (state: TSourceState, key: DualKey<string, string>) => boolean;
@@ -137,16 +134,13 @@ export const toClientOperation = <TSourceState, TClientState, TSourceOperation, 
     toClientState,
     toClientOperation,
 }: {
-    diff: Record<
-        string,
-        Record<string, RecordTwoWayOperationElement<TSourceState, TSourceOperation>>
-    >;
+    diff: DualStringKeyRecord<RecordTwoWayOperationElement<TSourceState, TSourceOperation>>;
 
     // 対象となるユーザーの視点で、全体がprivateとなるときはtrueを返す。一部がprivateである、もしくはprivateである部分がないときはfalseを返す。
     isPrivate: (state: TSourceState, key: DualKey<string, string>) => boolean;
 
-    prevState: Record<string, Record<string, TSourceState>>;
-    nextState: Record<string, Record<string, TSourceState>>;
+    prevState: DualStringKeyRecord<TSourceState>;
+    nextState: DualStringKeyRecord<TSourceState>;
 
     // 全体がprivateになるケースについて書く必要はない。
     toClientState: (params: {
@@ -255,11 +249,8 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
     innerRestore,
     innerDiff,
 }: {
-    nextState: Record<string, Record<string, TState>>;
-    downOperation?: Record<
-        string,
-        Record<string, RecordDownOperationElement<TState, TDownOperation>>
-    >;
+    nextState: DualStringKeyRecord<TState>;
+    downOperation?: DualStringKeyRecord<RecordDownOperationElement<TState, TDownOperation>>;
     innerRestore: (params: {
         key: DualKey<string, string>;
         downOperation: TDownOperation;
@@ -272,7 +263,7 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
     }) => TTwoWayOperation | undefined;
 }): CustomResult<
     RestoreResult<
-        Record<string, Record<string, TState>>,
+        DualStringKeyRecord<TState>,
         DualKeyRecordTwoWayOperation<TState, TTwoWayOperation>
     >,
     string | TCustomError
@@ -374,14 +365,14 @@ export const apply = <TState, TOperation, TCustomError = string>({
     operation,
     innerApply,
 }: {
-    prevState: Record<string, Record<string, TState>>;
-    operation?: Record<string, Record<string, RecordUpOperationElement<TState, TOperation>>>;
+    prevState: DualStringKeyRecord<TState>;
+    operation?: DualStringKeyRecord<RecordUpOperationElement<TState, TOperation>>;
     innerApply: (params: {
         key: DualKey<string, string>;
         operation: TOperation;
         prevState: TState;
     }) => CustomResult<TState, string | TCustomError>;
-}): CustomResult<Record<string, Record<string, TState>>, string | TCustomError> => {
+}): CustomResult<DualStringKeyRecord<TState>, string | TCustomError> => {
     if (operation == null) {
         return Result.ok(prevState);
     }
@@ -434,14 +425,14 @@ export const applyBack = <TState, TDownOperation, TCustomError = string>({
     operation,
     innerApplyBack,
 }: {
-    nextState: Record<string, Record<string, TState>>;
-    operation?: Record<string, Record<string, RecordDownOperationElement<TState, TDownOperation>>>;
+    nextState: DualStringKeyRecord<TState>;
+    operation?: DualStringKeyRecord<RecordDownOperationElement<TState, TDownOperation>>;
     innerApplyBack: (params: {
         key: DualKey<string, string>;
         operation: TDownOperation;
         state: TState;
     }) => CustomResult<TState, string | TCustomError>;
-}): CustomResult<Record<string, Record<string, TState>>, string | TCustomError> => {
+}): CustomResult<DualStringKeyRecord<TState>, string | TCustomError> => {
     if (operation == null) {
         return Result.ok(nextState);
     }
@@ -789,8 +780,8 @@ export const serverTransform = <
     toServerState,
     cancellationPolicy,
 }: {
-    prevState: DualKeyRecord<TServerState>;
-    nextState: DualKeyRecord<TServerState>;
+    prevState: DualStringKeyRecord<TServerState>;
+    nextState: DualStringKeyRecord<TServerState>;
     first?: DualKeyRecordUpOperation<TServerState, TFirstOperation>;
     second?: DualKeyRecordUpOperation<TClientState, TSecondOperation>;
     toServerState: (state: TClientState, key: DualKey<string, string>) => TServerState;
@@ -1098,42 +1089,43 @@ export const clientTransform = <TState, TOperation, TError = string>({
     >();
     let error = undefined as { error: TError } | undefined;
 
-    groupJoinDualKeyMap(recordToDualKeyMap(first), recordToDualKeyMap(second)).forEach(
-        (group, key) => {
-            if (error != null) {
+    groupJoinDualKeyMap(
+        dualKeyRecordToDualKeyMap(first),
+        dualKeyRecordToDualKeyMap(second)
+    ).forEach((group, key) => {
+        if (error != null) {
+            return;
+        }
+        switch (group.type) {
+            case left: {
+                firstPrime.set(key, group.left);
                 return;
             }
-            switch (group.type) {
-                case left: {
-                    firstPrime.set(key, group.left);
+            case right: {
+                secondPrime.set(key, group.right);
+                return;
+            }
+            case both: {
+                const xform = transformElement({
+                    first: group.left,
+                    second: group.right,
+                    innerTransform,
+                    innerDiff,
+                });
+                if (xform.isError) {
+                    error = { error: xform.error };
                     return;
                 }
-                case right: {
-                    secondPrime.set(key, group.right);
-                    return;
+                if (xform.value.firstPrime !== undefined) {
+                    firstPrime.set(key, xform.value.firstPrime);
                 }
-                case both: {
-                    const xform = transformElement({
-                        first: group.left,
-                        second: group.right,
-                        innerTransform,
-                        innerDiff,
-                    });
-                    if (xform.isError) {
-                        error = { error: xform.error };
-                        return;
-                    }
-                    if (xform.value.firstPrime !== undefined) {
-                        firstPrime.set(key, xform.value.firstPrime);
-                    }
-                    if (xform.value.secondPrime !== undefined) {
-                        secondPrime.set(key, xform.value.secondPrime);
-                    }
-                    return;
+                if (xform.value.secondPrime !== undefined) {
+                    secondPrime.set(key, xform.value.secondPrime);
                 }
+                return;
             }
         }
-    );
+    });
     if (error != null) {
         return Result.error(error.error);
     }
@@ -1158,8 +1150,8 @@ export const diff = <TState, TOperation>({
     nextState,
     innerDiff,
 }: {
-    prevState: Record<string, Record<string, TState>>;
-    nextState: Record<string, Record<string, TState>>;
+    prevState: DualStringKeyRecord<TState>;
+    nextState: DualStringKeyRecord<TState>;
     innerDiff: (params: {
         key: DualKey<string, string>;
         prevState: TState;

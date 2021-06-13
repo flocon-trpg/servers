@@ -1,7 +1,5 @@
 import * as t from 'io-ts';
 
-export type DualKeyRecord<T> = Record<string, Record<string, T>>;
-
 export const update = 'update';
 export const replace = 'replace';
 

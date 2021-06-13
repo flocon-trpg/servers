@@ -1,9 +1,9 @@
 import { Result } from '@kizahasi/result';
 import * as t from 'io-ts';
-import { createOperation } from '../util/createOperation';
-import { isIdRecord } from '../util/record';
-import * as ReplaceOperation from '../util/replaceOperation';
-import * as TextOperation from '../util/textOperation';
+import { createOperation } from '../../util/createOperation';
+import { isIdRecord } from '../../util/record';
+import * as ReplaceOperation from '../../util/replaceOperation';
+import * as TextOperation from '../../util/textOperation';
 import {
     Apply,
     ClientTransform,
@@ -12,7 +12,7 @@ import {
     Restore,
     ServerTransform,
     ToClientOperationParams,
-} from '../util/type';
+} from '../../util/type';
 
 export const Plain = 'Plain';
 export const MarkDown = 'MarkDown';

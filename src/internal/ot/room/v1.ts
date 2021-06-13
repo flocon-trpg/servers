@@ -5,14 +5,14 @@ import * as Character from './character/v1';
 import * as Memo from './memo/v1';
 import * as ParamNames from './paramName/v1';
 import * as Participant from './participant/v1';
-import * as RecordOperation from './util/recordOperation';
-import * as DualKeyRecordOperation from './util/dualKeyRecordOperation';
+import * as RecordOperation from '../util/recordOperation';
+import * as DualKeyRecordOperation from '../util/dualKeyRecordOperation';
 import {
     mapRecordOperationElement,
     recordDownOperationElementFactory,
     recordUpOperationElementFactory,
-} from './util/recordOperationElement';
-import * as ReplaceOperation from './util/replaceOperation';
+} from '../util/recordOperationElement';
+import * as ReplaceOperation from '../util/replaceOperation';
 import {
     Apply,
     client,
@@ -24,9 +24,9 @@ import {
     server,
     ServerTransform,
     ToClientOperationParams,
-} from './util/type';
-import { createOperation } from './util/createOperation';
-import { isIdRecord } from './util/record';
+} from '../util/type';
+import { createOperation } from '../util/createOperation';
+import { isIdRecord, record } from '../util/record';
 import { CompositeKey, compositeKey } from '../compositeKey/v1';
 import { Result } from '@kizahasi/result';
 import { ApplyError, PositiveInt, ComposeAndTransformError } from '@kizahasi/ot-string';
@@ -48,13 +48,13 @@ export const dbState = t.type({
     $version: t.literal(1),
 
     activeBoardKey: maybe(compositeKey),
-    bgms: t.record(t.string, Bgm.state), // keyはStrIndex5
-    boards: t.record(t.string, t.record(t.string, Board.state)),
-    boolParamNames: t.record(t.string, ParamNames.state), //keyはStrIndex20
-    characters: t.record(t.string, t.record(t.string, Character.state)),
-    memos: t.record(t.string, Memo.state),
-    numParamNames: t.record(t.string, ParamNames.state), //keyはStrIndex20
-    participants: t.record(t.string, Participant.state),
+    bgms: record(t.string, Bgm.state), // keyはStrIndex5
+    boards: record(t.string, record(t.string, Board.state)),
+    boolParamNames: record(t.string, ParamNames.state), //keyはStrIndex20
+    characters: record(t.string, record(t.string, Character.state)),
+    memos: record(t.string, Memo.state),
+    numParamNames: record(t.string, ParamNames.state), //keyはStrIndex20
+    participants: record(t.string, Participant.state),
     publicChannel1Name: t.string,
     publicChannel2Name: t.string,
     publicChannel3Name: t.string,
@@ -65,7 +65,7 @@ export const dbState = t.type({
     publicChannel8Name: t.string,
     publicChannel9Name: t.string,
     publicChannel10Name: t.string,
-    strParamNames: t.record(t.string, ParamNames.state), //keyはStrIndex20
+    strParamNames: record(t.string, ParamNames.state), //keyはStrIndex20
 });
 
 export type DbState = t.TypeOf<typeof dbState>;
@@ -83,29 +83,29 @@ export type State = t.TypeOf<typeof state>;
 
 export const downOperation = createOperation(1, {
     activeBoardKey: t.type({ oldValue: maybe(compositeKey) }),
-    bgms: t.record(t.string, recordDownOperationElementFactory(Bgm.state, Bgm.downOperation)),
-    boards: t.record(
+    bgms: record(t.string, recordDownOperationElementFactory(Bgm.state, Bgm.downOperation)),
+    boards: record(
         t.string,
-        t.record(t.string, recordDownOperationElementFactory(Board.state, Board.downOperation))
+        record(t.string, recordDownOperationElementFactory(Board.state, Board.downOperation))
     ),
-    boolParamNames: t.record(
+    boolParamNames: record(
         t.string,
         recordDownOperationElementFactory(ParamNames.state, ParamNames.downOperation)
     ),
-    characters: t.record(
+    characters: record(
         t.string,
-        t.record(
+        record(
             t.string,
             recordDownOperationElementFactory(Character.state, Character.downOperation)
         )
     ),
-    memos: t.record(t.string, recordDownOperationElementFactory(Memo.state, Memo.downOperation)),
+    memos: record(t.string, recordDownOperationElementFactory(Memo.state, Memo.downOperation)),
     name: replaceStringDownOperation,
-    numParamNames: t.record(
+    numParamNames: record(
         t.string,
         recordDownOperationElementFactory(ParamNames.state, ParamNames.downOperation)
     ),
-    participants: t.record(
+    participants: record(
         t.string,
         recordDownOperationElementFactory(Participant.state, Participant.downOperation)
     ),
@@ -119,7 +119,7 @@ export const downOperation = createOperation(1, {
     publicChannel8Name: replaceStringDownOperation,
     publicChannel9Name: replaceStringDownOperation,
     publicChannel10Name: replaceStringDownOperation,
-    strParamNames: t.record(
+    strParamNames: record(
         t.string,
         recordDownOperationElementFactory(ParamNames.state, ParamNames.downOperation)
     ),
@@ -129,26 +129,26 @@ export type DownOperation = t.TypeOf<typeof downOperation>;
 
 export const upOperation = createOperation(1, {
     activeBoardKey: t.type({ newValue: maybe(compositeKey) }),
-    bgms: t.record(t.string, recordUpOperationElementFactory(Bgm.state, Bgm.upOperation)),
-    boards: t.record(
+    bgms: record(t.string, recordUpOperationElementFactory(Bgm.state, Bgm.upOperation)),
+    boards: record(
         t.string,
-        t.record(t.string, recordUpOperationElementFactory(Board.state, Board.upOperation))
+        record(t.string, recordUpOperationElementFactory(Board.state, Board.upOperation))
     ),
-    boolParamNames: t.record(
+    boolParamNames: record(
         t.string,
         recordUpOperationElementFactory(ParamNames.state, ParamNames.upOperation)
     ),
-    characters: t.record(
+    characters: record(
         t.string,
-        t.record(t.string, recordUpOperationElementFactory(Character.state, Character.upOperation))
+        record(t.string, recordUpOperationElementFactory(Character.state, Character.upOperation))
     ),
-    memos: t.record(t.string, recordUpOperationElementFactory(Memo.state, Memo.upOperation)),
+    memos: record(t.string, recordUpOperationElementFactory(Memo.state, Memo.upOperation)),
     name: replaceStringUpOperation,
-    numParamNames: t.record(
+    numParamNames: record(
         t.string,
         recordUpOperationElementFactory(ParamNames.state, ParamNames.upOperation)
     ),
-    participants: t.record(
+    participants: record(
         t.string,
         recordUpOperationElementFactory(Participant.state, Participant.upOperation)
     ),
@@ -162,7 +162,7 @@ export const upOperation = createOperation(1, {
     publicChannel8Name: replaceStringUpOperation,
     publicChannel9Name: replaceStringUpOperation,
     publicChannel10Name: replaceStringUpOperation,
-    strParamNames: t.record(
+    strParamNames: record(
         t.string,
         recordUpOperationElementFactory(ParamNames.state, ParamNames.upOperation)
     ),

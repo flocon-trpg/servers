@@ -9,10 +9,10 @@ import {
     server,
     ServerTransform,
     ToClientOperationParams,
-} from '../util/type';
-import * as ReplaceOperation from '../util/replaceOperation';
-import { createOperation } from '../util/createOperation';
-import { isIdRecord } from '../util/record';
+} from '../../util/type';
+import * as ReplaceOperation from '../../util/replaceOperation';
+import { createOperation } from '../../util/createOperation';
+import { isIdRecord } from '../../util/record';
 import { Result } from '@kizahasi/result';
 import { maybe, Maybe } from '@kizahasi/util';
 

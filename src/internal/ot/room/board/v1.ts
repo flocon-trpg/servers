@@ -1,5 +1,5 @@
 import * as t from 'io-ts';
-import * as ReplaceOperation from '../util/replaceOperation';
+import * as ReplaceOperation from '../../util/replaceOperation';
 import { filePath } from '../../filePath/v1';
 import {
     Apply,
@@ -9,9 +9,9 @@ import {
     Restore,
     ServerTransform,
     ToClientOperationParams,
-} from '../util/type';
-import { createOperation } from '../util/createOperation';
-import { isIdRecord } from '../util/record';
+} from '../../util/type';
+import { createOperation } from '../../util/createOperation';
+import { isIdRecord } from '../../util/record';
 import { Result } from '@kizahasi/result';
 import { maybe } from '@kizahasi/util';
 

@@ -1,12 +1,12 @@
 import * as t from 'io-ts';
-import { DualKeyRecordTwoWayOperation } from '../../util/dualKeyRecordOperation';
-import * as DualKeyRecordOperation from '../../util/dualKeyRecordOperation';
+import { DualKeyRecordTwoWayOperation } from '../../../util/dualKeyRecordOperation';
+import * as DualKeyRecordOperation from '../../../util/dualKeyRecordOperation';
 import * as DieValue from './dieValue/v1';
 import * as Piece from '../../../piece/v1';
 import {
     recordDownOperationElementFactory,
     recordUpOperationElementFactory,
-} from '../../util/recordOperationElement';
+} from '../../../util/recordOperationElement';
 import {
     Apply,
     ClientTransform,
@@ -15,43 +15,43 @@ import {
     Restore,
     ServerTransform,
     ToClientOperationParams,
-} from '../../util/type';
-import { createOperation } from '../../util/createOperation';
-import { isIdRecord } from '../../util/record';
+} from '../../../util/type';
+import { createOperation } from '../../../util/createOperation';
+import { isIdRecord, record } from '../../../util/record';
 import { Result } from '@kizahasi/result';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
 import { chooseDualKeyRecord, chooseRecord } from '@kizahasi/util';
-import { RecordTwoWayOperation } from '../../util/recordOperation';
-import * as RecordOperation from '../../util/recordOperation';
+import { RecordTwoWayOperation } from '../../../util/recordOperation';
+import * as RecordOperation from '../../../util/recordOperation';
 
 export const dicePieceValueStrIndexes = ['1', '2', '3', '4'] as const;
 
 export const state = t.type({
     $version: t.literal(1),
-    dice: t.record(t.string, DieValue.state),
-    pieces: t.record(t.string, t.record(t.string, Piece.state)),
+    dice: record(t.string, DieValue.state),
+    pieces: record(t.string, record(t.string, Piece.state)),
 });
 
 export type State = t.TypeOf<typeof state>;
 
 export const downOperation = createOperation(1, {
-    dice: t.record(
+    dice: record(
         t.string,
         recordDownOperationElementFactory(DieValue.state, DieValue.downOperation)
     ),
-    pieces: t.record(
+    pieces: record(
         t.string,
-        t.record(t.string, recordDownOperationElementFactory(Piece.state, Piece.downOperation))
+        record(t.string, recordDownOperationElementFactory(Piece.state, Piece.downOperation))
     ),
 });
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
 export const upOperation = createOperation(1, {
-    dice: t.record(t.string, recordUpOperationElementFactory(DieValue.state, DieValue.upOperation)),
-    pieces: t.record(
+    dice: record(t.string, recordUpOperationElementFactory(DieValue.state, DieValue.upOperation)),
+    pieces: record(
         t.string,
-        t.record(t.string, recordUpOperationElementFactory(Piece.state, Piece.upOperation))
+        record(t.string, recordUpOperationElementFactory(Piece.state, Piece.upOperation))
     ),
 });
 

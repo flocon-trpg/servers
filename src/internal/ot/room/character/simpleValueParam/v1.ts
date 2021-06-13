@@ -6,10 +6,10 @@ import {
     Restore,
     ServerTransform,
     ToClientOperationParams,
-} from '../../util/type';
-import * as ReplaceValueOperation from '../../util/replaceOperation';
-import { isIdRecord } from '../../util/record';
-import * as ReplaceOperation from '../../util/replaceOperation';
+} from '../../../util/type';
+import * as ReplaceValueOperation from '../../../util/replaceOperation';
+import { isIdRecord } from '../../../util/record';
+import * as ReplaceOperation from '../../../util/replaceOperation';
 import { Result } from '@kizahasi/result';
 
 type State<T> = {

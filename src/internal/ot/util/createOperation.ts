@@ -1,12 +1,12 @@
 import * as t from 'io-ts';
 
 export const createOperation = <TVersion extends string | number, TProps extends t.Props>(
-    source: TVersion,
+    version: TVersion,
     props: TProps
 ) =>
     t.intersection([
         t.type({
-            $version: t.literal(source),
+            $version: t.literal(version),
         }),
         t.partial(props),
     ]);

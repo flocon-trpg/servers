@@ -96,7 +96,7 @@ namespace Resources {
         boolParamNames: {},
         numParamNames: {},
         strParamNames: {},
-        memo: {},
+        memos: {},
         publicChannel1Name: '',
         publicChannel2Name: '',
         publicChannel3Name: '',

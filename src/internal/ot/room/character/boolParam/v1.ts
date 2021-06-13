@@ -1,6 +1,6 @@
 import * as t from 'io-ts';
-import * as ReplaceOperation from '../../util/replaceOperation';
-import { createOperation } from '../../util/createOperation';
+import * as ReplaceOperation from '../../../util/replaceOperation';
+import { createOperation } from '../../../util/createOperation';
 import { maybe, Maybe } from '@kizahasi/util';
 
 export const state = t.type({

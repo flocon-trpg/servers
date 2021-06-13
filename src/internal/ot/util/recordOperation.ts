@@ -1,6 +1,7 @@
 import { CustomResult, Result } from '@kizahasi/result';
 import * as t from 'io-ts';
 import * as DualKeyRecordOperation from './dualKeyRecordOperation';
+import { record, StringKeyRecord } from './record';
 import {
     recordDownOperationElementFactory,
     RecordDownOperationElement,
@@ -9,23 +10,20 @@ import {
     RecordUpOperationElement,
 } from './recordOperationElement';
 
-export type RecordDownOperation<TState, TOperation> = Record<
-    string,
+export type RecordDownOperation<TState, TOperation> = StringKeyRecord<
     RecordDownOperationElement<TState, TOperation>
 >;
-export type RecordUpOperation<TState, TOperation> = Record<
-    string,
+export type RecordUpOperation<TState, TOperation> = StringKeyRecord<
     RecordUpOperationElement<TState, TOperation>
 >;
-export type RecordTwoWayOperation<TState, TOperation> = Record<
-    string,
+export type RecordTwoWayOperation<TState, TOperation> = StringKeyRecord<
     RecordTwoWayOperationElement<TState, TOperation>
 >;
 
 export const stateFactory = <TKey extends t.Mixed, TState extends t.Mixed>(
     key: TKey,
     state: TState
-) => t.record(key, state);
+) => record(key, state);
 
 export const downOperationFactory = <
     TKey extends t.Mixed,
@@ -35,7 +33,7 @@ export const downOperationFactory = <
     key: TKey,
     state: TState,
     operation: TOperation
-) => t.record(key, recordDownOperationElementFactory(state, operation));
+) => record(key, recordDownOperationElementFactory(state, operation));
 
 export const upOperationFactory = <
     TKey extends t.Mixed,
@@ -45,7 +43,7 @@ export const upOperationFactory = <
     key: TKey,
     state: TState,
     operation: TOperation
-) => t.record(key, recordUpOperationElementFactory(state, operation));
+) => record(key, recordUpOperationElementFactory(state, operation));
 
 export type ProtectedTransformParameters<
     TServerState,
@@ -76,7 +74,7 @@ export const toClientState = <TSourceState, TClientState>({
     isPrivate,
     toClientState,
 }: {
-    serverState: Record<string, TSourceState>;
+    serverState: StringKeyRecord<TSourceState>;
 
     // 対象となるユーザーの視点で、全体がprivateとなるときはtrueを返す。一部がprivateである、もしくはprivateである部分がないときはfalseを返す。
     isPrivate: (state: TSourceState, key: string) => boolean;
@@ -106,8 +104,8 @@ export const toClientOperation = <TSourceState, TClientState, TSourceOperation, 
     // 対象となるユーザーの視点で、全体がprivateとなるときはtrueを返す。一部がprivateである、もしくはprivateである部分がないときはfalseを返す。
     isPrivate: (state: TSourceState, key: string) => boolean;
 
-    prevState: Record<string, TSourceState>;
-    nextState: Record<string, TSourceState>;
+    prevState: StringKeyRecord<TSourceState>;
+    nextState: StringKeyRecord<TSourceState>;
 
     // 全体がprivateになるケースについて書く必要はない。
     toClientState: (params: {
@@ -150,7 +148,7 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
     innerRestore,
     innerDiff,
 }: {
-    nextState: Record<string, TState>;
+    nextState: StringKeyRecord<TState>;
     downOperation?: RecordDownOperation<TState, TDownOperation>;
     innerRestore: (params: {
         key: string;
@@ -163,7 +161,7 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
         nextState: TState;
     }) => TTwoWayOperation | undefined;
 }): CustomResult<
-    RestoreResult<Record<string, TState>, RecordTwoWayOperation<TState, TTwoWayOperation>>,
+    RestoreResult<StringKeyRecord<TState>, RecordTwoWayOperation<TState, TTwoWayOperation>>,
     string | TCustomError
 > => {
     if (downOperation == null) {
@@ -196,14 +194,14 @@ export const apply = <TState, TOperation, TCustomError = string>({
     operation,
     innerApply,
 }: {
-    prevState: Record<string, TState>;
+    prevState: StringKeyRecord<TState>;
     operation?: RecordUpOperation<TState, TOperation>;
     innerApply: (params: {
         key: string;
         operation: TOperation;
         prevState: TState;
     }) => CustomResult<TState, string | TCustomError>;
-}): CustomResult<Record<string, TState>, string | TCustomError> => {
+}): CustomResult<StringKeyRecord<TState>, string | TCustomError> => {
     if (operation == null) {
         return Result.ok(prevState);
     }
@@ -224,14 +222,14 @@ export const applyBack = <TState, TDownOperation, TCustomError = string>({
     operation,
     innerApplyBack,
 }: {
-    nextState: Record<string, TState>;
-    operation?: Record<string, RecordDownOperationElement<TState, TDownOperation>>;
+    nextState: StringKeyRecord<TState>;
+    operation?: StringKeyRecord<RecordDownOperationElement<TState, TDownOperation>>;
     innerApplyBack: (params: {
         key: string;
         operation: TDownOperation;
         state: TState;
     }) => CustomResult<TState, string | TCustomError>;
-}): CustomResult<Record<string, TState>, string | TCustomError> => {
+}): CustomResult<StringKeyRecord<TState>, string | TCustomError> => {
     if (operation == null) {
         return Result.ok(nextState);
     }
@@ -344,8 +342,8 @@ export const serverTransform = <
     toServerState,
     cancellationPolicy,
 }: {
-    prevState: Record<string, TServerState>;
-    nextState: Record<string, TServerState>;
+    prevState: StringKeyRecord<TServerState>;
+    nextState: StringKeyRecord<TServerState>;
     first?: RecordUpOperation<TServerState, TFirstOperation>;
     second?: RecordUpOperation<TClientState, TSecondOperation>;
     toServerState: (state: TClientState, key: string) => TServerState;
@@ -442,8 +440,8 @@ export const diff = <TState, TOperation>({
     nextState,
     innerDiff,
 }: {
-    prevState: Record<string, TState>;
-    nextState: Record<string, TState>;
+    prevState: StringKeyRecord<TState>;
+    nextState: StringKeyRecord<TState>;
     innerDiff: (params: {
         key: string;
         prevState: TState;

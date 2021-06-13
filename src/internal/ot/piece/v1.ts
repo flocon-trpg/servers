@@ -1,8 +1,8 @@
 import { Result } from '@kizahasi/result';
 import * as t from 'io-ts';
-import { createOperation } from '../room/util/createOperation';
-import { isIdRecord } from '../room/util/record';
-import * as ReplaceOperation from '../room/util/replaceOperation';
+import { createOperation } from '../util/createOperation';
+import { isIdRecord } from '../util/record';
+import * as ReplaceOperation from '../util/replaceOperation';
 import {
     Apply,
     ClientTransform,
@@ -11,7 +11,7 @@ import {
     Restore,
     ServerTransform,
     ToClientOperationParams,
-} from '../room/util/type';
+} from '../util/type';
 
 const numberDownOperation = t.type({ oldValue: t.number });
 const booleanDownOperation = t.type({ oldValue: t.boolean });

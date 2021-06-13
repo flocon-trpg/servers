@@ -3,12 +3,13 @@ import {
     recordUpOperationElementFactory,
     replace as replaceKey,
     update as updateKey,
-} from '../../util/recordOperationElement';
+} from '../../../util/recordOperationElement';
 import * as DicePieceValue from './v1';
 import * as Piece from '../../../piece/v1';
 import * as DieValue from './dieValue/v1';
 import { chooseRecord } from '@kizahasi/util';
-import { createOperation } from '../../util/createOperation';
+import { createOperation } from '../../../util/createOperation';
+import { record } from '../../../util/record';
 
 export const updateType = 'update';
 export const createType = 'create';
@@ -37,13 +38,10 @@ const update = t.intersection([
         type: t.literal(updateType),
     }),
     t.partial({
-        dice: t.record(
+        dice: record(t.string, recordUpOperationElementFactory(dieValueState, dieValueUpOperation)),
+        pieces: record(
             t.string,
-            recordUpOperationElementFactory(dieValueState, dieValueUpOperation)
-        ),
-        pieces: t.record(
-            t.string,
-            t.record(t.string, recordUpOperationElementFactory(Piece.state, Piece.upOperation))
+            record(t.string, recordUpOperationElementFactory(Piece.state, Piece.upOperation))
         ),
     }),
 ]);

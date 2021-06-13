@@ -125,7 +125,7 @@ export {
 
 export {
     State as DicePieceValueState,
-    UpOperation as DicePieceValuePieceUpOperation,
+    UpOperation as DicePieceValueUpOperation,
     DownOperation as DicePieceValueDownOperation,
     apply as applyDicePieceValue,
     diff as dicePieceValueDiff,
@@ -140,6 +140,15 @@ export {
 } from './internal/ot/room/character/dicePieceValue/converter';
 
 export {
+    State as DieValueState,
+    UpOperation as DieValueUpOperation,
+    DownOperation as DieValueDownOperation,
+    apply as applyDieValue,
+    diff as dieValueDiff,
+    toUpOperation as toDieValueUpOperation,
+} from './internal/ot/room/character/dicePieceValue/dieValue/v1';
+
+export {
     ofOperation as toDicePieceValueLog,
     Main as DicePieceValueLog,
     updateType,
@@ -149,7 +158,7 @@ export {
 
 export {
     State as NumberPieceValueState,
-    UpOperation as NumberPieceValuePieceUpOperation,
+    UpOperation as NumberPieceValueUpOperation,
     DownOperation as NumberPieceValueDownOperation,
     apply as applyNumberPieceValue,
     diff as numberPieceValueDiff,
@@ -173,7 +182,7 @@ export {
     DownOperation as MemoDownOperation,
 } from './internal/ot/room/memo/v1';
 
-export { isIdRecord } from './internal/ot/room/util/record';
+export { isIdRecord } from './internal/ot/util/record';
 
 export {
     replace,
@@ -181,13 +190,13 @@ export {
     RecordDownOperationElement,
     RecordTwoWayOperationElement,
     RecordUpOperationElement,
-} from './internal/ot/room/util/recordOperationElement';
+} from './internal/ot/util/recordOperationElement';
 
 export {
     RecordDownOperation,
     RecordUpOperation,
     RecordTwoWayOperation,
-} from './internal/ot/room/util/recordOperation';
+} from './internal/ot/util/recordOperation';
 
 export {
     DownOperation as TextDownOperation,
@@ -196,6 +205,6 @@ export {
     apply as applyText,
     diff as textDiff,
     toUpOperation as toTextUpOperation,
-} from './internal/ot/room/util/textOperation';
+} from './internal/ot/util/textOperation';
 
-export { client, server, RequestedBy } from './internal/ot/room/util/type';
+export { client, server, RequestedBy } from './internal/ot/util/type';

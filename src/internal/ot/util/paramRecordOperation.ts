@@ -9,6 +9,7 @@ import {
     right,
 } from '@kizahasi/util';
 import * as DualKeyRecordOperation from './dualKeyRecordOperation';
+import { StringKeyRecord } from './record';
 
 type RestoreResult<TState, TTwoWayOperation> = {
     prevState: TState;
@@ -32,9 +33,9 @@ export const toClientOperation = <TSourceState, TSourceOperation, TClientOperati
     toClientOperation,
     defaultState,
 }: {
-    diff: Record<string, TSourceOperation>;
-    prevState: Record<string, TSourceState>;
-    nextState: Record<string, TSourceState>;
+    diff: StringKeyRecord<TSourceOperation>;
+    prevState: StringKeyRecord<TSourceState>;
+    nextState: StringKeyRecord<TSourceState>;
     toClientOperation: (params: {
         diff: TSourceOperation;
         key: string;
@@ -43,7 +44,7 @@ export const toClientOperation = <TSourceState, TSourceOperation, TClientOperati
     }) => TClientOperation | null | undefined;
     defaultState: TSourceState;
 }) => {
-    const result: Record<string, TClientOperation> = {};
+    const result: StringKeyRecord<TClientOperation> = {};
     recordForEach(diff, (value, key) => {
         const prevStateElement = prevState[key] ?? defaultState;
         const nextStateElement = nextState[key] ?? defaultState;
@@ -66,15 +67,15 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
     downOperation,
     innerRestore,
 }: {
-    nextState: Record<string, TState>;
-    downOperation?: Record<string, TDownOperation>;
+    nextState: StringKeyRecord<TState>;
+    downOperation?: StringKeyRecord<TDownOperation>;
     innerRestore: (params: {
         downOperation: TDownOperation;
         nextState: TState;
         key: string;
     }) => CustomResult<RestoreResult<TState, TTwoWayOperation> | undefined, string | TCustomError>;
 }): CustomResult<
-    RestoreResult<Record<string, TState>, Record<string, TTwoWayOperation>>,
+    RestoreResult<StringKeyRecord<TState>, StringKeyRecord<TTwoWayOperation>>,
     string | TCustomError
 > => {
     if (downOperation == null) {
@@ -85,7 +86,7 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
     }
 
     const prevState = { ...nextState };
-    const twoWayOperation: Record<string, TTwoWayOperation> = {};
+    const twoWayOperation: StringKeyRecord<TTwoWayOperation> = {};
 
     for (const [key, value] of recordToMap(downOperation)) {
         const nextStateElement = nextState[key];
@@ -119,15 +120,15 @@ export const apply = <TState, TUpOperation, TCustomError = string>({
     innerApply,
     defaultState,
 }: {
-    prevState: Record<string, TState>;
-    operation?: Record<string, TUpOperation>;
+    prevState: StringKeyRecord<TState>;
+    operation?: StringKeyRecord<TUpOperation>;
     innerApply: (params: {
         operation: TUpOperation;
         prevState: TState;
         key: string;
     }) => CustomResult<TState, string | TCustomError>;
     defaultState: TState;
-}): CustomResult<Record<string, TState>, string | TCustomError> => {
+}): CustomResult<StringKeyRecord<TState>, string | TCustomError> => {
     if (operation == null) {
         return Result.ok(prevState);
     }
@@ -157,15 +158,15 @@ export const applyBack = <TState, TDownOperation, TCustomError = string>({
     innerApplyBack,
     defaultState,
 }: {
-    nextState: Record<string, TState>;
-    operation?: Record<string, TDownOperation>;
+    nextState: StringKeyRecord<TState>;
+    operation?: StringKeyRecord<TDownOperation>;
     innerApplyBack: (params: {
         operation: TDownOperation;
         nextState: TState;
         key: string;
     }) => CustomResult<TState, string | TCustomError>;
     defaultState: TState;
-}): CustomResult<Record<string, TState>, string | TCustomError> => {
+}): CustomResult<StringKeyRecord<TState>, string | TCustomError> => {
     if (operation == null) {
         return Result.ok(nextState);
     }
@@ -194,14 +195,14 @@ export const compose = <TOperation, TCustomError = string>({
     second,
     innerCompose,
 }: {
-    first?: Record<string, TOperation>;
-    second?: Record<string, TOperation>;
+    first?: StringKeyRecord<TOperation>;
+    second?: StringKeyRecord<TOperation>;
     innerCompose: (params: {
         key: string;
         first: TOperation;
         second: TOperation;
     }) => CustomResult<TOperation | undefined, string | TCustomError>;
-}): CustomResult<Record<string, TOperation> | undefined, string | TCustomError> => {
+}): CustomResult<StringKeyRecord<TOperation> | undefined, string | TCustomError> => {
     if (first == null) {
         return Result.ok(second);
     }
@@ -209,7 +210,7 @@ export const compose = <TOperation, TCustomError = string>({
         return Result.ok(first);
     }
 
-    const result: Record<string, TOperation> = {};
+    const result: StringKeyRecord<TOperation> = {};
 
     for (const [key, groupJoined] of groupJoinMap(recordToMap(first), recordToMap(second))) {
         switch (groupJoined.type) {
@@ -253,22 +254,22 @@ export const serverTransform = <
     innerTransform,
     defaultState,
 }: {
-    prevState: Record<string, TServerState>;
-    nextState: Record<string, TServerState>;
-    first?: Record<string, TFirstOperation>;
-    second?: Record<string, TSecondOperation>;
+    prevState: StringKeyRecord<TServerState>;
+    nextState: StringKeyRecord<TServerState>;
+    first?: StringKeyRecord<TFirstOperation>;
+    second?: StringKeyRecord<TSecondOperation>;
     innerTransform: (
         params: ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> & {
             key: string;
         }
     ) => CustomResult<TFirstOperation | undefined, string | TCustomError>;
     defaultState: TServerState;
-}): CustomResult<Record<string, TFirstOperation> | undefined, string | TCustomError> => {
+}): CustomResult<StringKeyRecord<TFirstOperation> | undefined, string | TCustomError> => {
     if (second === undefined) {
         return Result.ok(undefined);
     }
 
-    const result: Record<string, TFirstOperation> = {};
+    const result: StringKeyRecord<TFirstOperation> = {};
 
     for (const [key, operation] of recordToMap(second)) {
         const innerPrevState = prevState[key] ?? defaultState;
@@ -306,13 +307,13 @@ export const clientTransform = <TOperation, TError = string>({
     second,
     innerTransform,
 }: {
-    first?: Record<string, TOperation>;
-    second?: Record<string, TOperation>;
+    first?: StringKeyRecord<TOperation>;
+    second?: StringKeyRecord<TOperation>;
     innerTransform: InnerClientTransform<TOperation, TError>;
 }): CustomResult<
     {
-        firstPrime: Record<string, TOperation> | undefined;
-        secondPrime: Record<string, TOperation> | undefined;
+        firstPrime: StringKeyRecord<TOperation> | undefined;
+        secondPrime: StringKeyRecord<TOperation> | undefined;
     },
     TError
 > => {
@@ -373,15 +374,15 @@ export const diff = <TState, TOperation>({
     nextState,
     innerDiff,
 }: {
-    prevState: Record<string, TState>;
-    nextState: Record<string, TState>;
+    prevState: StringKeyRecord<TState>;
+    nextState: StringKeyRecord<TState>;
     innerDiff: (params: {
         prevState: TState | undefined;
         nextState: TState | undefined;
         key: string;
     }) => TOperation | undefined;
-}): Record<string, TOperation> => {
-    const result: Record<string, TOperation> = {};
+}): StringKeyRecord<TOperation> => {
+    const result: StringKeyRecord<TOperation> = {};
     for (const [key, value] of groupJoinMap(recordToMap(prevState), recordToMap(nextState))) {
         let prevState: TState | undefined = undefined;
         let nextState: TState | undefined = undefined;
