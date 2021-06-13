@@ -7,14 +7,14 @@ import roomConfigModule from './modules/roomConfigModule';
 import { rootEpic } from './epics/rootEpic';
 import userConfigModule from './modules/userConfigModule';
 import roomStateModule from './modules/roomStateModule';
-import { roomDrawerModule } from './modules/roomDrawerModule';
+import { roomDrawerAndPopoverModule } from './modules/roomDrawerAndPopoverModule';
 
 // rootReducer の準備
 const rootReducer = combineReducers({
     roomConfigModule: roomConfigModule.reducer,
     userConfigModule: userConfigModule.reducer,
     roomModule: roomStateModule.reducer,
-    roomDrawerModule: roomDrawerModule.reducer,
+    roomDrawerAndPopoverModule: roomDrawerAndPopoverModule.reducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

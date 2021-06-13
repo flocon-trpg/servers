@@ -26,6 +26,7 @@ import { NumberPieceValueList } from './NumberPieceValueList';
 import { NumberPieceValueDrawer } from './NumberPieceValueDrawer';
 import { DicePieceValueDrawer } from './DicePieceValueDrawer';
 import { Memos } from './Memos';
+import { BoardContextMenu, PieceTooltip, PopoverEditor } from './BoardPopover';
 
 const RoomMessagePanels: React.FC<{ roomId: string }> = ({ roomId }: { roomId: string }) => {
     const dispatch = useDispatch();
@@ -250,12 +251,17 @@ const Room: React.FC = () => {
                     </DraggableCard>}
                 </div>
 
+                <BoardContextMenu />
+                <PieceTooltip/>
+                <PopoverEditor />
+
                 <BoardDrawer />
                 <CharacterDrawer />
                 <DicePieceValueDrawer />
                 <NumberPieceValueDrawer />
                 <CharacterParameterNamesDrawer />
                 <EditRoomDrawer />
+
             </AntdLayout.Content>
         </AntdLayout>
     );

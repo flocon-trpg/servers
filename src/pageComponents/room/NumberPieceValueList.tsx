@@ -13,7 +13,7 @@ import _ from 'lodash';
 import { useSelector } from '../../store';
 import { NumberPieceValueElement, useNumberPieceValues } from '../../hooks/state/useNumberPieceValues';
 import { useDispatch } from 'react-redux';
-import { roomDrawerModule } from '../../modules/roomDrawerModule';
+import { roomDrawerAndPopoverModule } from '../../modules/roomDrawerAndPopoverModule';
 
 type DataSource = NumberPieceValueElement;
 
@@ -38,7 +38,7 @@ export const NumberPieceValueList: React.FC = () => {
                     <Button
                         style={({ alignSelf: 'center' })}
                         size='small'
-                        onClick={() => dispatch(roomDrawerModule.actions.set({ numberPieceValueDrawerType: { type: update, boardKey: null, stateKey: valueId, characterKey } }))}>
+                        onClick={() => dispatch(roomDrawerAndPopoverModule.actions.set({ numberPieceValueDrawerType: { type: update, boardKey: null, stateKey: valueId, characterKey } }))}>
                         <Icon.SettingOutlined />
                     </Button>
                 </Tooltip>;

@@ -29,26 +29,14 @@ import { debounceTime } from 'rxjs/operators';
 import { Vector2d } from 'konva/types/types';
 import { Subject } from 'rxjs';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
-import { NewTabLinkify } from '../../components/NewTabLinkify';
-import { CharacterState, UpOperation, PieceState, PieceUpOperation, BoardLocationUpOperation, BoardState, BoardLocationState, NumberPieceValueState, DicePieceValueState, dicePieceValueStrIndexes } from '@kizahasi/flocon-core';
+import { CharacterState, UpOperation, PieceState, PieceUpOperation, BoardLocationUpOperation, BoardState, BoardLocationState, NumberPieceValueState, DicePieceValueState } from '@kizahasi/flocon-core';
 import { $free, CompositeKey, compositeKeyEquals, compositeKeyToString, dualKeyRecordToDualKeyMap, ReadonlyStateMap, stringToCompositeKey } from '@kizahasi/util';
 import _ from 'lodash';
-import { NumberPieceValueElement, useNumberPieceValues } from '../../hooks/state/useNumberPieceValues';
+import { useNumberPieceValues } from '../../hooks/state/useNumberPieceValues';
 import { tripleKeyToString } from '../../utils/tripleKeyToString';
-import { create, roomDrawerModule } from '../../modules/roomDrawerModule';
-import { DicePieceValueElement, useDicePieceValues } from '../../hooks/state/useDicePieceValues';
+import { BoardTooltipState, create, MouseOverOn, BoardPopoverEditorState, roomDrawerAndPopoverModule } from '../../modules/roomDrawerAndPopoverModule';
+import { useDicePieceValues } from '../../hooks/state/useDicePieceValues';
 import { DicePieceValue } from '../../utils/dicePieceValue';
-import { InputDie } from '../../components/InputDie';
-import { noValue } from '../../utils/dice';
-
-namespace Resource {
-    export const cellSizeIsTooSmall = 'セルが小さすぎるため、無効化されています';
-
-    export namespace Popup {
-        export const backgroundColor = '#202020E8';
-        export const padding = 8;
-    }
-}
 
 const createPiecePostOperation = ({
     e,
@@ -118,22 +106,6 @@ type SelectedPieceKey = {
     stateId: string;
 }
 
-type ClickOn = {
-    type: typeof dicePieceValue;
-    element: DicePieceValueElement;
-} | {
-    type: typeof numberPieceValue;
-    element: NumberPieceValueElement;
-} | {
-    type: typeof character | typeof tachie;
-    characterKey: CompositeKey;
-    character: CharacterState;
-}
-
-type MouseOverOn = {
-    type: typeof background;
-} | ClickOn
-
 const publicMessageFilter = (message: Message): boolean => {
     return message.type === publicMessage;
 };
@@ -157,183 +129,6 @@ const useGetStoppedCursor = () => {
     return { stoppedCursor, onMove };
 };
 
-type OnTooltipParams = { offset: MyKonva.Vector2; mouseOverOn: MouseOverOn };
-
-const PieceTooltip: React.FC<OnTooltipParams> = ({ offset, mouseOverOn }: OnTooltipParams) => {
-    const left = offset.x - 30;
-    const top = offset.y + 1;
-
-    switch (mouseOverOn.type) {
-        case character:
-        case tachie:
-            return (
-                <div style={({
-                    position: 'absolute',
-                    left,
-                    top,
-                    padding: Resource.Popup.padding,
-                    backgroundColor: Resource.Popup.backgroundColor,
-                    maxWidth: 200
-                })}>
-                    <div>{mouseOverOn.character.name}</div>
-                    {mouseOverOn.character.memo.trim() !== '' && <hr style={{ transform: 'scaleY(0.5)', borderWidth: '1px 0 0 0', borderStyle: 'solid', borderColor: '#FFFFFFD0' }} />}
-                    <NewTabLinkify>
-                        <span style={{ whiteSpace: 'pre-wrap' /* これがないと、stringに存在する改行が無視されてしまう */ }}>
-                            {mouseOverOn.character.memo}
-                        </span>
-                    </NewTabLinkify>
-                </div>);
-        default:
-            return null;
-    }
-};
-
-namespace PopupEditorBase {
-    type DicePieceValueProps = {
-        element: DicePieceValueElement;
-    }
-
-    export const DicePieceValue: React.FC<DicePieceValueProps> = ({ element }: DicePieceValueProps) => {
-        const operate = useOperate();
-
-        const characters = useCharacters();
-        const dicePieceValue = React.useMemo(() => {
-            const character = characters?.get({ createdBy: element.characterKey.createdBy, id: element.characterKey.id });
-            if (character == null) {
-                return undefined;
-            }
-            const dicePieceValue = character.dicePieceValues[element.valueId];
-            if (dicePieceValue == null) {
-                return undefined;
-            }
-            return dicePieceValue;
-        }, [characters, element.characterKey.createdBy, element.characterKey.id, element.valueId]);
-
-        if (dicePieceValue == null) {
-            return null;
-        }
-
-        const titleWidth = 60;
-
-        return (<div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-            {dicePieceValueStrIndexes.map(key => {
-                const die = dicePieceValue.dice[key];
-                return (<div key={key} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', minHeight: 26 }}>
-                    <div style={{ flex: 0, minWidth: titleWidth, width: titleWidth }}>{`ダイス${key}`}</div>
-                    <InputDie
-                        size='small'
-                        state={die ?? null}
-                        onChange={e => {
-                            operate({
-                                $version: 1,
-                                characters: {
-                                    [element.characterKey.createdBy]: {
-                                        [element.characterKey.id]: {
-                                            type: update,
-                                            update: {
-                                                $version: 1,
-                                                dicePieceValues: {
-                                                    [element.valueId]: {
-                                                        type: update,
-                                                        update: {
-                                                            $version: 1,
-                                                            dice: {
-                                                                [key]: e.type === replace ? {
-                                                                    type: replace,
-                                                                    replace: {
-                                                                        newValue: e.newValue == null ? undefined : {
-                                                                            $version: 1,
-                                                                            dieType: e.newValue.dieType,
-                                                                            isValuePrivate: false,
-                                                                            value: null,
-                                                                        },
-                                                                    }
-                                                                } : {
-                                                                    type: update,
-                                                                    update: {
-                                                                        $version: 1,
-                                                                        value: { newValue: e.newValue === noValue ? null : e.newValue },
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            });
-                        }}
-                        onIsValuePrivateChange={e => {
-                            operate({
-                                $version: 1,
-                                characters: {
-                                    [element.characterKey.createdBy]: {
-                                        [element.characterKey.id]: {
-                                            type: update,
-                                            update: {
-                                                $version: 1,
-                                                dicePieceValues: {
-                                                    [element.valueId]: {
-                                                        type: update,
-                                                        update: {
-                                                            $version: 1,
-                                                            dice: {
-                                                                [key]: {
-                                                                    type: update,
-                                                                    update: {
-                                                                        $version: 1,
-                                                                        isValuePrivate: { newValue: e },
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            });
-                        }} />
-                </div>);
-            })}
-        </div>);
-    };
-}
-
-type OnPopupEditorParams = { offset: MyKonva.Vector2; dblClickOn: ClickOn };
-
-const PopupEditor: React.FC<OnPopupEditorParams> = ({ offset, dblClickOn }: OnPopupEditorParams) => {
-    const left = offset.x - 30;
-    const top = offset.y + 1;
-
-    let children: JSX.Element | null;
-    switch (dblClickOn.type) {
-        case dicePieceValue:
-            children = <PopupEditorBase.DicePieceValue element={dblClickOn.element} />;
-            break;
-        default:
-            children = null;
-            break;
-    }
-
-    if (children == null) {
-        return null;
-    }
-
-    return (<div style={({
-        position: 'absolute',
-        left,
-        top,
-        padding: Resource.Popup.padding,
-        backgroundColor: Resource.Popup.backgroundColor,
-    })}>
-        {children}
-    </div>);
-};
-
 type BoardCoreProps = {
     board: BoardState;
     boardConfig: BoardConfig;
@@ -341,8 +136,8 @@ type BoardCoreProps = {
     boardEditorPanelId: string | null; // nullならばactiveBoardPanelとして扱われる
     onClick?: (e: KonvaEventObject<MouseEvent>) => void;
     onContextMenu?: (e: KonvaEventObject<PointerEvent>, stateOffset: MyKonva.Vector2) => void; // stateOffsetは、configなどのxy座標を基準にした位置。
-    onTooltip?: (params: OnTooltipParams | null) => void;
-    onPopupEditor?: (params: OnPopupEditorParams | null) => void;
+    onTooltip?: (params: BoardTooltipState | null) => void;
+    onPopupEditor?: (params: BoardPopoverEditorState | null) => void;
     canvasWidth: number;
     canvasHeight: number;
 }
@@ -384,7 +179,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             onTooltipRef.current(null);
             return;
         }
-        onTooltipRef.current({ offset: stoppedCursor, mouseOverOn: mouseOverOnRef.current });
+        onTooltipRef.current({ pagePosition: stoppedCursor, mouseOverOn: mouseOverOnRef.current });
     }, [stoppedCursor, onTooltipRef]);
     const [selectedPieceKey, setSelectedPieceKey] = React.useState<SelectedPieceKey>();
     const [isBackgroundDragging, setIsBackgroundDragging] = React.useState(false); // これがないと、pieceをドラッグでリサイズする際に背景が少し動いてしまう。
@@ -466,7 +261,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         return;
                     }
                     onPopoverEditorRef.current({
-                        offset: { x: e.evt.offsetX, y: e.evt.offsetY },
+                        pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
                         dblClickOn: { type: 'character', character, characterKey }
                     });
                 }}
@@ -535,7 +330,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         return;
                     }
                     onPopoverEditorRef.current({
-                        offset: { x: e.evt.offsetX, y: e.evt.offsetY },
+                        pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
                         dblClickOn: { type: 'tachie', character, characterKey }
                     });
                 }}
@@ -594,7 +389,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             return;
                         }
                         onPopoverEditorRef.current({
-                            offset: { x: e.evt.offsetX, y: e.evt.offsetY },
+                            pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
                             dblClickOn: { type: 'dicePieceValue', element }
                         });
                     }}
@@ -661,7 +456,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             return;
                         }
                         onPopoverEditorRef.current({
-                            offset: { x: e.evt.offsetX, y: e.evt.offsetY },
+                            pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
                             dblClickOn: { type: 'numberPieceValue', element }
                         });
                     }}
@@ -743,8 +538,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             onMouseMove={e => {
                 // CONSIDER: scale === 0 のケースに対応していない。configのほうで boardConfig.zoom === -Inf にならないようにするほうが自然か。
                 onMove({
-                    x: e.evt.offsetX,
-                    y: e.evt.offsetY,
+                    x: e.evt.pageX,
+                    y: e.evt.pageY,
                 });
             }}
             offsetX={boardConfig.offsetX}
@@ -808,773 +603,6 @@ const BoardCore: React.FC<BoardCoreProps> = ({
         </ReactKonva.Stage>);
 };
 
-const toBoardPosition = ({
-    konvaOffset,
-    boardConfig,
-}: {
-    konvaOffset: { x: number; y: number };
-    boardConfig: BoardConfig;
-}): { x: number; y: number } => {
-    const scale = Math.pow(2, boardConfig.zoom);
-    return {
-        x: (konvaOffset.x / scale) + boardConfig.offsetX,
-        y: (konvaOffset.y / scale) + boardConfig.offsetY,
-    };
-};
-
-
-namespace ContextMenu {
-    export type State = {
-        x: number;
-        y: number;
-        characterPiecesOnCursor: ReadonlyArray<{ characterKey: CompositeKey; character: CharacterState; piece: PieceState }>;
-        tachiesOnCursor: ReadonlyArray<{ characterKey: CompositeKey; character: CharacterState; tachieLocation: BoardLocationState }>;
-        dicePieceValuesOnCursor: ReadonlyArray<{
-            characterKey: CompositeKey;
-            dicePieceValueKey: string;
-            dicePieceValue: DicePieceValueState;
-            piece: PieceState;
-        }>;
-        numberPieceValuesOnCursor: ReadonlyArray<{
-            characterKey: CompositeKey;
-            numberPieceValueKey: string;
-            numberPieceValue: NumberPieceValueState;
-            piece: PieceState;
-        }>;
-    }
-
-    type SelectedCharacterPiecesMenuProps = {
-        characterPiecesOnCursor: State['characterPiecesOnCursor'];
-        onContextMenuClear: () => void;
-        boardKey: CompositeKey;
-        dispatch: ReturnType<typeof useDispatch>;
-        operate: ReturnType<typeof useOperate>;
-    }
-
-    const selectedCharacterPiecesMenu = ({
-        characterPiecesOnCursor,
-        onContextMenuClear,
-        boardKey,
-        dispatch,
-        operate,
-    }: SelectedCharacterPiecesMenuProps): JSX.Element | null => {
-        if (characterPiecesOnCursor.length === 0) {
-            return null;
-        }
-        return (
-            <>
-                {
-                    characterPiecesOnCursor.map(({ characterKey, character }) =>
-                        // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が他にもあるため、キーを互いに異なるものにするように文字列を付加している。
-                        <Menu.SubMenu key={compositeKeyToString(characterKey) + '@selected-piece'} title={`${character.name} (コマ)`}>
-                            <Menu.Item
-                                onClick={() => {
-                                    dispatch(roomDrawerModule.actions.set({
-                                        characterDrawerType: {
-                                            type: update,
-                                            boardKey,
-                                            stateKey: characterKey,
-                                        }
-                                    }));
-                                    onContextMenuClear();
-                                }}>
-                                編集
-                            </Menu.Item>
-                            <Menu.Item
-                                onClick={() => {
-                                    const operation: UpOperation = {
-                                        $version: 1,
-                                        characters: {
-                                            [characterKey.createdBy]: {
-                                                [characterKey.id]: {
-                                                    type: update,
-                                                    update: {
-                                                        $version: 1,
-                                                        pieces: {
-                                                            [boardKey.createdBy]: {
-                                                                [boardKey.id]: {
-                                                                    type: replace,
-                                                                    replace: { newValue: undefined },
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    };
-                                    operate(operation);
-                                    onContextMenuClear();
-                                }}>
-                                削除
-                            </Menu.Item>
-                        </Menu.SubMenu>
-                    )
-                }
-                <Menu.Divider />
-            </>);
-    };
-
-    type SelectedTachiesPiecesMenuProps = {
-        tachiesOnCursor: State['tachiesOnCursor'];
-        onContextMenuClear: () => void;
-        boardKey: CompositeKey;
-        dispatch: ReturnType<typeof useDispatch>;
-        operate: ReturnType<typeof useOperate>;
-    }
-
-    export const selectedTachiePiecesMenu = ({
-        tachiesOnCursor,
-        onContextMenuClear,
-        boardKey,
-        dispatch,
-        operate,
-    }: SelectedTachiesPiecesMenuProps): JSX.Element | null => {
-        if (tachiesOnCursor.length === 0) {
-            return null;
-        }
-        return (
-            <>
-                {
-                    tachiesOnCursor.map(({ characterKey, character }) =>
-                        // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が他にもあるため、キーを互いに異なるものにするように文字列を付加している。
-                        <Menu.SubMenu key={compositeKeyToString(characterKey) + '@selected-tachie'} title={`${character.name} (立ち絵)`}>
-                            <Menu.Item
-                                onClick={() => {
-                                    dispatch(roomDrawerModule.actions.set({
-                                        characterDrawerType: {
-                                            type: update,
-                                            boardKey: boardKey,
-                                            stateKey: characterKey,
-                                        }
-                                    }));
-                                    onContextMenuClear();
-                                }}>
-                                編集
-                            </Menu.Item>
-                            <Menu.Item
-                                onClick={() => {
-                                    const operation: UpOperation = {
-                                        $version: 1,
-                                        characters: {
-                                            [characterKey.createdBy]: {
-                                                [characterKey.id]: {
-                                                    type: update,
-                                                    update: {
-                                                        $version: 1,
-                                                        tachieLocations: {
-                                                            [boardKey.createdBy]: {
-                                                                [boardKey.id]: {
-                                                                    type: replace,
-                                                                    replace: { newValue: undefined },
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    };
-                                    operate(operation);
-                                    onContextMenuClear();
-                                }}>
-                                削除
-                            </Menu.Item>
-                        </Menu.SubMenu>
-                    )
-                }
-                <Menu.Divider />
-            </>);
-    };
-
-    type SelectedCharacterCommandsMenuProps = {
-        characterPiecesOnCursor: State['characterPiecesOnCursor'];
-        tachiesOnCursor: State['tachiesOnCursor'];
-        onContextMenuClear: () => void;
-        operate: ReturnType<typeof useOperate>;
-    }
-
-    const selectedCharacterCommandsMenu = ({
-        characterPiecesOnCursor,
-        tachiesOnCursor,
-        onContextMenuClear,
-        operate,
-    }: SelectedCharacterCommandsMenuProps): JSX.Element | null => {
-        if (characterPiecesOnCursor.length + tachiesOnCursor.length === 0) {
-            return null;
-        }
-
-        const characters: { key: CompositeKey; value: CharacterState }[] = [];
-        [...characterPiecesOnCursor, ...tachiesOnCursor].forEach(elem => {
-            if (characters.some(exists => exists.key.createdBy === elem.characterKey.createdBy && exists.key.id === elem.characterKey.id)) {
-                return;
-            }
-            characters.push({ key: elem.characterKey, value: elem.character });
-        });
-        const itemGroups = _(characters).map(pair => {
-            if (pair.value.privateCommand.trim() === '') {
-                return null;
-            }
-            const key = compositeKeyToString(pair.key);
-            const commands = listCharacterFlocommand(pair.value.privateCommand);
-            if (commands.isError) {
-                return (<Menu.ItemGroup key={key}>
-                    <Menu.Item disabled><Tooltip title={commands.error}>(コマンド文法エラー)</Tooltip></Menu.Item>
-                </Menu.ItemGroup>);
-            }
-            const menuItems = [...commands.value].map(([commandKey,]) => {
-                return (<Menu.Item
-                    key={commandKey}
-                    onClick={() => {
-                        const operation = executeCharacterFlocommand({ action: commands.value, characterKey: pair.key, character: pair.value, commandKey });
-                        if (operation == null) {
-                            return;
-                        }
-                        operate(operation);
-                        onContextMenuClear();
-                    }}>
-                    {commandKey}
-                </Menu.Item>);
-            });
-            return (<Menu.ItemGroup key={key} title={pair.value.name}>
-                {menuItems}
-            </Menu.ItemGroup>);
-        }).compact().value();
-        if (itemGroups.length === 0) {
-            return null;
-        }
-        return (<>
-            <Menu.SubMenu title='キャラクターコマンド'>
-                {itemGroups}
-            </Menu.SubMenu>
-            <Menu.Divider />
-        </>);
-    };
-
-    const youCannotEditPieceMessage = '自分以外が作成したコマでは、値を編集することはできません。';
-
-    type SelectedDicePiecesMenuProps = {
-        dicePieceValuesOnCursor: State['dicePieceValuesOnCursor'];
-        onContextMenuClear: () => void;
-        boardKey: CompositeKey;
-        myUserUid: string;
-        dispatch: ReturnType<typeof useDispatch>;
-        operate: ReturnType<typeof useOperate>;
-    }
-
-    const selectedDicePiecesMenu = ({
-        dicePieceValuesOnCursor,
-        onContextMenuClear,
-        boardKey: boardKeyToShow,
-        myUserUid,
-        dispatch,
-        operate,
-    }: SelectedDicePiecesMenuProps): JSX.Element | null => {
-        if (dicePieceValuesOnCursor.length === 0) {
-            return null;
-        }
-        return (
-            <>
-                {
-                    dicePieceValuesOnCursor.map(({ dicePieceValueKey, dicePieceValue, characterKey }) =>
-                        // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が下にもあるため、キーを互いに異なるものにするように文字列を付加している。
-                        <Menu.SubMenu key={dicePieceValueKey + '@selected'} title={DicePieceValue.stringify(dicePieceValue, myUserUid === characterKey.createdBy)}>
-                            {characterKey.createdBy === myUserUid ? <Menu.Item
-                                onClick={() => {
-                                    dispatch(roomDrawerModule.actions.set({
-                                        dicePieceValueDrawerType: {
-                                            type: update,
-                                            boardKey: boardKeyToShow,
-                                            stateKey: dicePieceValueKey,
-                                            characterKey,
-                                        }
-                                    }));
-                                    onContextMenuClear();
-                                }}>
-                                編集
-                            </Menu.Item> :
-                                <Menu.Item disabled>
-                                    <Tooltip title={youCannotEditPieceMessage}>
-                                        編集
-                                    </Tooltip>
-                                </Menu.Item>}
-                            <Menu.Item
-                                onClick={() => {
-                                    const operation: UpOperation = {
-                                        $version: 1,
-                                        characters: {
-                                            [characterKey.createdBy]: {
-                                                [characterKey.id]: {
-                                                    type: update,
-                                                    update: {
-                                                        $version: 1,
-                                                        dicePieceValues: {
-                                                            [dicePieceValueKey]: {
-                                                                type: replace,
-                                                                replace: { newValue: undefined }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    };
-                                    operate(operation);
-                                    onContextMenuClear();
-                                }}>
-                                削除
-                            </Menu.Item>
-                        </Menu.SubMenu>
-                    )
-                }
-                <Menu.Divider />
-            </>);
-    };
-
-    type SelectedNumberPiecesMenuProps = {
-        numberPieceValuesOnCursor: State['numberPieceValuesOnCursor'];
-        onContextMenuClear: () => void;
-        boardKey: CompositeKey;
-        myUserUid: string;
-        dispatch: ReturnType<typeof useDispatch>;
-        operate: ReturnType<typeof useOperate>;
-    }
-
-    const selectedNumberPiecesMenu = ({
-        numberPieceValuesOnCursor,
-        onContextMenuClear,
-        boardKey: boardKeyToShow,
-        myUserUid,
-        dispatch,
-        operate,
-    }: SelectedNumberPiecesMenuProps): JSX.Element | null => {
-        if (numberPieceValuesOnCursor.length === 0) {
-            return null;
-        }
-        return (
-            <>
-                {
-                    numberPieceValuesOnCursor.map(({ numberPieceValueKey, numberPieceValue, characterKey }) =>
-                        // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が下にもあるため、キーを互いに異なるものにするように文字列を付加している。
-                        <Menu.SubMenu key={numberPieceValueKey + '@selected'} title={NumberPieceValue.stringify(numberPieceValue)}>
-                            {characterKey.createdBy === myUserUid ? <Menu.Item
-                                onClick={() => {
-                                    dispatch(roomDrawerModule.actions.set({
-                                        numberPieceValueDrawerType: {
-                                            type: update,
-                                            boardKey: boardKeyToShow,
-                                            stateKey: numberPieceValueKey,
-                                            characterKey,
-                                        }
-                                    }));
-                                    onContextMenuClear();
-                                }}>
-                                編集
-                            </Menu.Item> :
-                                <Menu.Item disabled>
-                                    <Tooltip title={youCannotEditPieceMessage}>
-                                        編集
-                                    </Tooltip>
-                                </Menu.Item>}
-                            <Menu.Item
-                                onClick={() => {
-                                    const operation: UpOperation = {
-                                        $version: 1,
-                                        characters: {
-                                            [characterKey.createdBy]: {
-                                                [characterKey.id]: {
-                                                    type: update,
-                                                    update: {
-                                                        $version: 1,
-                                                        numberPieceValues: {
-                                                            [numberPieceValueKey]: {
-                                                                type: replace,
-                                                                replace: { newValue: undefined }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    };
-                                    operate(operation);
-                                    onContextMenuClear();
-                                }}>
-                                削除
-                            </Menu.Item>
-                        </Menu.SubMenu>
-                    )
-                }
-                <Menu.Divider />
-            </>);
-    };
-
-    type BasicMenuProps = {
-        contextMenuState: State;
-        onContextMenuClear: () => void;
-        boardKey: CompositeKey;
-        boardConfig: BoardConfig;
-        dispatch: ReturnType<typeof useDispatch>;
-        operate: ReturnType<typeof useOperate>;
-        characters: ReadonlyStateMap<CharacterState>;
-        board: BoardState;
-    }
-
-    const basicMenu = ({
-        contextMenuState,
-        onContextMenuClear,
-        boardKey,
-        boardConfig,
-        operate,
-        dispatch,
-        characters,
-        board,
-    }: BasicMenuProps): JSX.Element | null => {
-        const pieceExists = (character: CharacterState) => dualKeyRecordToDualKeyMap(character.pieces).toArray().some(([pieceBoardKey]) => boardKey.id === pieceBoardKey.second && boardKey.createdBy === pieceBoardKey.first);
-        const tachieExists = (character: CharacterState) => dualKeyRecordToDualKeyMap(character.tachieLocations).toArray().some(([pieceBoardKey]) => boardKey.id === pieceBoardKey.second && boardKey.createdBy === pieceBoardKey.first);
-
-        const { x, y } = toBoardPosition({ konvaOffset: contextMenuState, boardConfig });
-        const cellPosition = Piece.getCellPosition({ x, y, board });
-        // TODO: x,y,w,h の値が適当
-        const pieceLocationWhichIsCellMode: PieceState = {
-            $version: 1,
-            x: 0,
-            y: 0,
-            w: 50,
-            h: 50,
-            cellX: cellPosition.cellX,
-            cellY: cellPosition.cellY,
-            cellW: 1,
-            cellH: 1,
-            isCellMode: true,
-            isPrivate: false,
-        };
-
-        const pieceLocationWhichIsNotCellMode: PieceState = {
-            $version: 1,
-            x,
-            y,
-            w: 50,
-            h: 50,
-            isCellMode: false,
-            isPrivate: false,
-            cellX: 0,
-            cellY: 0,
-            cellW: 1,
-            cellH: 1,
-        };
-
-        const tachieLocationWhichIsNotCellMode: BoardLocationState = {
-            $version: 1,
-            x,
-            y,
-            w: 100,
-            h: 150,
-            isPrivate: false,
-        };
-
-        const pieceMenus = [...characters.toArray()].map(([characterKey, character]) => {
-            return <Menu.SubMenu key={compositeKeyToString(characterKey)} title={character.name}>
-                <Menu.SubMenu title='追加' disabled={pieceExists(character)}>
-                    <Menu.Item
-                        onClick={() => {
-                            operate({
-                                $version: 1,
-                                characters: {
-                                    [characterKey.createdBy]: {
-                                        [characterKey.id]: {
-                                            type: update,
-                                            update: {
-                                                $version: 1,
-                                                pieces: {
-                                                    [boardKey.createdBy]: {
-                                                        [boardKey.id]: {
-                                                            type: replace,
-                                                            replace: {
-                                                                newValue: pieceLocationWhichIsCellMode,
-                                                            }
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        }
-                                    }
-                                }
-                            });
-                            onContextMenuClear();
-                        }}>
-                        セルにスナップする
-                    </Menu.Item>
-                    <Menu.Item
-                        onClick={() => {
-                            operate({
-                                $version: 1,
-                                characters: {
-                                    [characterKey.createdBy]: {
-                                        [characterKey.id]: {
-                                            type: update,
-                                            update: {
-                                                $version: 1,
-                                                pieces: {
-                                                    [boardKey.createdBy]: {
-                                                        [boardKey.id]: {
-                                                            type: replace,
-                                                            replace: {
-                                                                newValue: pieceLocationWhichIsNotCellMode,
-                                                            }
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        }
-                                    }
-                                }
-                            });
-                            onContextMenuClear();
-                        }}>
-                        セルにスナップしない
-                    </Menu.Item>
-                </Menu.SubMenu>
-                <Menu.Item
-                    disabled={!pieceExists(character)}
-                    onClick={() => {
-                        operate({
-                            $version: 1,
-                            characters: {
-                                [characterKey.createdBy]: {
-                                    [characterKey.id]: {
-                                        type: update,
-                                        update: {
-                                            $version: 1,
-                                            pieces: {
-                                                [boardKey.createdBy]: {
-                                                    [boardKey.id]: {
-                                                        type: replace,
-                                                        replace: {
-                                                            newValue: undefined,
-                                                        }
-                                                    },
-                                                }
-                                            },
-                                        },
-                                    }
-                                }
-                            }
-                        });
-                        onContextMenuClear();
-                    }}>
-                    削除
-                </Menu.Item>
-            </Menu.SubMenu>;
-        });
-
-        const tachieMenus = [...characters.toArray()].map(([characterKey, character]) => {
-            return <Menu.SubMenu key={compositeKeyToString(characterKey)} title={character.name}>
-                <Menu.Item
-                    disabled={tachieExists(character)}
-                    onClick={() => {
-                        operate({
-                            $version: 1,
-                            characters: {
-                                [characterKey.createdBy]: {
-                                    [characterKey.id]: {
-                                        type: update,
-                                        update: {
-                                            $version: 1,
-                                            tachieLocations: {
-                                                [boardKey.createdBy]: {
-                                                    [boardKey.id]: {
-                                                        type: replace,
-                                                        replace: {
-                                                            newValue: tachieLocationWhichIsNotCellMode,
-                                                        }
-                                                    },
-                                                }
-                                            },
-                                        },
-                                    }
-                                }
-                            }
-                        });
-                        onContextMenuClear();
-                    }}>
-                    追加
-                </Menu.Item>
-                <Menu.Item
-                    disabled={!tachieExists(character)}
-                    onClick={() => {
-                        operate({
-                            $version: 1,
-                            characters: {
-                                [characterKey.createdBy]: {
-                                    [characterKey.id]: {
-                                        type: update,
-                                        update: {
-                                            $version: 1,
-                                            tachieLocations: {
-                                                [boardKey.createdBy]: {
-                                                    [boardKey.id]: {
-                                                        type: replace,
-                                                        replace: {
-                                                            newValue: undefined,
-                                                        }
-                                                    },
-                                                }
-                                            },
-                                        },
-                                    }
-                                }
-                            }
-                        });
-                        onContextMenuClear();
-                    }}>
-                    削除
-                </Menu.Item>
-            </Menu.SubMenu>;
-        });
-
-        return <>
-            <Menu.SubMenu title='キャラクターコマ'>
-                {pieceMenus}
-            </Menu.SubMenu>
-            <Menu.SubMenu title='キャラクター立ち絵'>
-                {tachieMenus}
-            </Menu.SubMenu>
-            <Menu.SubMenu title='ダイスコマを追加'>
-                <Menu.Item onClick={() => {
-                    dispatch(roomDrawerModule.actions.set({
-                        dicePieceValueDrawerType: {
-                            type: create,
-                            boardKey,
-                            piece: pieceLocationWhichIsCellMode,
-                        }
-                    }));
-                    onContextMenuClear();
-                }} >
-                    セルにスナップする
-                </Menu.Item>
-                <Menu.Item onClick={() => {
-                    dispatch(roomDrawerModule.actions.set({
-                        dicePieceValueDrawerType: {
-                            type: create,
-                            boardKey,
-                            piece: pieceLocationWhichIsNotCellMode,
-                        }
-                    }));
-                    onContextMenuClear();
-                }} >
-                    セルにスナップしない
-                </Menu.Item>
-            </Menu.SubMenu>
-            <Menu.SubMenu title='数値コマを追加'>
-                <Menu.Item onClick={() => {
-                    dispatch(roomDrawerModule.actions.set({
-                        numberPieceValueDrawerType: {
-                            type: create,
-                            boardKey,
-                            piece: pieceLocationWhichIsCellMode,
-                        }
-                    }));
-                    onContextMenuClear();
-                }} >
-                    セルにスナップする
-                </Menu.Item>
-                <Menu.Item onClick={() => {
-                    dispatch(roomDrawerModule.actions.set({
-                        numberPieceValueDrawerType: {
-                            type: create,
-                            boardKey,
-                            piece: pieceLocationWhichIsNotCellMode,
-                        }
-                    }));
-                    onContextMenuClear();
-                }} >
-                    セルにスナップしない
-                </Menu.Item>
-            </Menu.SubMenu>
-        </>;
-    };
-
-
-    type Props = {
-        contextMenuState: State;
-        boardKey: CompositeKey;
-        onContextMenuClear: () => void;
-        board: BoardState;
-        boardConfig: BoardConfig;
-    }
-
-    export const Main: React.FC<Props> = ({
-        contextMenuState,
-        boardKey,
-        onContextMenuClear,
-        board,
-        boardConfig,
-    }: Props) => {
-        const dispatch = useDispatch();
-        const operate = useOperate();
-        const characters = useCharacters();
-        const { userUid: myUserUid } = useMe();
-
-        if (characters == null || myUserUid == null) {
-            return null;
-        }
-
-        return (
-            <div style={({ position: 'absolute', left: contextMenuState.x, top: contextMenuState.y })}>
-                <Menu>
-                    {/* React.FCなどを用いるとantdがエラーを出すので、単なるJSX.Elementを返す関数として定義している */}
-
-                    {selectedCharacterPiecesMenu({
-                        ...contextMenuState,
-                        onContextMenuClear,
-                        boardKey,
-                        dispatch,
-                        operate,
-                    })}
-                    {selectedTachiePiecesMenu({
-                        ...contextMenuState,
-                        onContextMenuClear,
-                        boardKey,
-                        dispatch,
-                        operate,
-                    })}
-                    {selectedDicePiecesMenu({
-                        ...contextMenuState,
-                        onContextMenuClear,
-                        boardKey,
-                        dispatch,
-                        operate,
-                        myUserUid,
-                    })}
-                    {selectedNumberPiecesMenu({
-                        ...contextMenuState,
-                        onContextMenuClear,
-                        boardKey,
-                        dispatch,
-                        operate,
-                        myUserUid,
-                    })}
-                    {selectedCharacterCommandsMenu({
-                        ...contextMenuState,
-                        onContextMenuClear,
-                        operate,
-                    })}
-                    {board == null ? null : basicMenu({
-                        contextMenuState,
-                        onContextMenuClear,
-                        boardKey,
-                        dispatch,
-                        operate,
-                        boardConfig,
-                        characters,
-                        board,
-                    })}
-                </Menu>
-            </div>);
-    };
-}
-
 type Props = {
     canvasWidth: number;
     canvasHeight: number;
@@ -1605,9 +633,6 @@ const Board: React.FC<Props> = ({
     ...panel
 }: Props) => {
     const dispatch = useDispatch();
-    const [contextMenuState, setContextMenuState] = React.useState<ContextMenu.State | null>(null);
-    const [tooltipState, setTooltipState] = React.useState<OnTooltipParams | null>(null);
-    const [popupEditorState, setPopupEditorState] = React.useState<OnPopupEditorParams | null>(null);
     const roomId = useSelector(state => state.roomModule.roomId);
     const boards = useBoards();
     const characters = useCharacters();
@@ -1664,89 +689,95 @@ const Board: React.FC<Props> = ({
             boardKey={boardKeyToShow}
             boardConfig={boardConfig}
             boardEditorPanelId={boardEditorPanelId}
-            onClick={() => setContextMenuState(null)}
-            onTooltip={newValue => setTooltipState(newValue)}
-            onPopupEditor={newValue => setPopupEditorState(newValue)}
+            onClick={() => dispatch(roomDrawerAndPopoverModule.actions.set({ boardContextMenu: null }))}
+            onTooltip={newValue => dispatch(roomDrawerAndPopoverModule.actions.set({ boardTooltip: newValue }))}
+            onPopupEditor={newValue => dispatch(roomDrawerAndPopoverModule.actions.set({ boardPopoverEditor: newValue }))}
             onContextMenu={(e, stateOffset) => {
                 e.evt.preventDefault();
-                setContextMenuState({
-                    x: e.evt.offsetX,
-                    y: e.evt.offsetY,
-                    characterPiecesOnCursor: _(characters.toArray())
-                        .map(([characterKey, character]) => {
-                            const found = dualKeyRecordToDualKeyMap<PieceState>(character.pieces).toArray()
-                                .find(([boardKey, piece]) => {
-                                    if (boardKey.first !== boardKeyToShow.createdBy || boardKey.second !== boardKeyToShow.id) {
-                                        return false;
-                                    }
-                                    return Piece.isCursorOnIcon({ ...board, state: piece, cursorPosition: stateOffset });
-                                });
-                            if (found === undefined) {
-                                return null;
-                            }
-                            return { characterKey, character, piece: found[1] };
-                        })
-                        .compact()
-                        .value(),
-                    tachiesOnCursor: _(characters.toArray())
-                        .map(([characterKey, character]) => {
-                            const found = dualKeyRecordToDualKeyMap<BoardLocationState>(character.tachieLocations).toArray()
-                                .find(([boardKey, tachie]) => {
-                                    if (boardKey.first !== boardKeyToShow.createdBy || boardKey.second !== boardKeyToShow.id) {
-                                        return false;
-                                    }
-                                    return BoardLocation.isCursorOnIcon({ state: tachie, cursorPosition: stateOffset });
-                                });
-                            if (found === undefined) {
-                                return null;
-                            }
-                            return { characterKey, character, tachieLocation: found[1] };
-                        })
-                        .compact()
-                        .value(),
-                    dicePieceValuesOnCursor: _(dicePieceValues)
-                        .map(element => {
-                            const found = dualKeyRecordToDualKeyMap<PieceState>(element.value.pieces).toArray()
-                                .find(([boardKey, piece]) => {
-                                    if (boardKey.first !== boardKeyToShow.createdBy || boardKey.second !== boardKeyToShow.id) {
-                                        return false;
-                                    }
-                                    return Piece.isCursorOnIcon({ ...board, state: piece, cursorPosition: stateOffset });
-                                });
-                            if (found === undefined) {
-                                return null;
-                            }
-                            return {
-                                dicePieceValueKey: element.valueId,
-                                dicePieceValue: element.value,
-                                piece: found[1],
-                                characterKey: { createdBy: element.characterKey.createdBy, id: element.characterKey.id }
-                            };
-                        })
-                        .compact()
-                        .value(),
-                    numberPieceValuesOnCursor: _(numberPieceValues)
-                        .map(element => {
-                            const found = dualKeyRecordToDualKeyMap<PieceState>(element.value.pieces).toArray()
-                                .find(([boardKey, piece]) => {
-                                    if (boardKey.first !== boardKeyToShow.createdBy || boardKey.second !== boardKeyToShow.id) {
-                                        return false;
-                                    }
-                                    return Piece.isCursorOnIcon({ ...board, state: piece, cursorPosition: stateOffset });
-                                });
-                            if (found === undefined) {
-                                return null;
-                            }
-                            return {
-                                numberPieceValueKey: element.valueId,
-                                numberPieceValue: element.value,
-                                piece: found[1],
-                                characterKey: { createdBy: element.characterKey.createdBy, id: element.characterKey.id }
-                            };
-                        })
-                        .compact()
-                        .value(),
-                });
+                dispatch(roomDrawerAndPopoverModule.actions.set({
+                    boardContextMenu: {
+                        boardKey: boardKeyToShow,
+                        boardConfig,
+                        offsetX: e.evt.offsetX,
+                        offsetY: e.evt.offsetY,
+                        pageX: e.evt.pageX,
+                        pageY: e.evt.pageY,
+                        characterPiecesOnCursor: _(characters.toArray())
+                            .map(([characterKey, character]) => {
+                                const found = dualKeyRecordToDualKeyMap<PieceState>(character.pieces).toArray()
+                                    .find(([boardKey, piece]) => {
+                                        if (boardKey.first !== boardKeyToShow.createdBy || boardKey.second !== boardKeyToShow.id) {
+                                            return false;
+                                        }
+                                        return Piece.isCursorOnIcon({ ...board, state: piece, cursorPosition: stateOffset });
+                                    });
+                                if (found === undefined) {
+                                    return null;
+                                }
+                                return { characterKey, character, piece: found[1] };
+                            })
+                            .compact()
+                            .value(),
+                        tachiesOnCursor: _(characters.toArray())
+                            .map(([characterKey, character]) => {
+                                const found = dualKeyRecordToDualKeyMap<BoardLocationState>(character.tachieLocations).toArray()
+                                    .find(([boardKey, tachie]) => {
+                                        if (boardKey.first !== boardKeyToShow.createdBy || boardKey.second !== boardKeyToShow.id) {
+                                            return false;
+                                        }
+                                        return BoardLocation.isCursorOnIcon({ state: tachie, cursorPosition: stateOffset });
+                                    });
+                                if (found === undefined) {
+                                    return null;
+                                }
+                                return { characterKey, character, tachieLocation: found[1] };
+                            })
+                            .compact()
+                            .value(),
+                        dicePieceValuesOnCursor: _(dicePieceValues)
+                            .map(element => {
+                                const found = dualKeyRecordToDualKeyMap<PieceState>(element.value.pieces).toArray()
+                                    .find(([boardKey, piece]) => {
+                                        if (boardKey.first !== boardKeyToShow.createdBy || boardKey.second !== boardKeyToShow.id) {
+                                            return false;
+                                        }
+                                        return Piece.isCursorOnIcon({ ...board, state: piece, cursorPosition: stateOffset });
+                                    });
+                                if (found === undefined) {
+                                    return null;
+                                }
+                                return {
+                                    dicePieceValueKey: element.valueId,
+                                    dicePieceValue: element.value,
+                                    piece: found[1],
+                                    characterKey: { createdBy: element.characterKey.createdBy, id: element.characterKey.id }
+                                };
+                            })
+                            .compact()
+                            .value(),
+                        numberPieceValuesOnCursor: _(numberPieceValues)
+                            .map(element => {
+                                const found = dualKeyRecordToDualKeyMap<PieceState>(element.value.pieces).toArray()
+                                    .find(([boardKey, piece]) => {
+                                        if (boardKey.first !== boardKeyToShow.createdBy || boardKey.second !== boardKeyToShow.id) {
+                                            return false;
+                                        }
+                                        return Piece.isCursorOnIcon({ ...board, state: piece, cursorPosition: stateOffset });
+                                    });
+                                if (found === undefined) {
+                                    return null;
+                                }
+                                return {
+                                    numberPieceValueKey: element.valueId,
+                                    numberPieceValue: element.value,
+                                    piece: found[1],
+                                    characterKey: { createdBy: element.characterKey.createdBy, id: element.characterKey.id }
+                                };
+                            })
+                            .compact()
+                            .value(),
+                    }
+                }));
             }} />);
     })();
 
@@ -1772,7 +803,7 @@ const Board: React.FC<Props> = ({
             <Menu.Divider />
             <Menu.Item
                 icon={<Icons.PlusOutlined />}
-                onClick={() => dispatch(roomDrawerModule.actions.set({ boardDrawerType: { type: create } }))}>
+                onClick={() => dispatch(roomDrawerAndPopoverModule.actions.set({ boardDrawerType: { type: create } }))}>
                 新規作成
             </Menu.Item>
         </Menu>
@@ -1808,7 +839,7 @@ const Board: React.FC<Props> = ({
                         if (boardKeyToShow == null) {
                             return;
                         }
-                        dispatch(roomDrawerModule.actions.set({ boardDrawerType: { type: update, stateKey: boardKeyToShow } }));
+                        dispatch(roomDrawerAndPopoverModule.actions.set({ boardDrawerType: { type: update, stateKey: boardKeyToShow } }));
                     }}>
                     編集
                 </Button>
@@ -1860,15 +891,6 @@ const Board: React.FC<Props> = ({
                     </Button>
                 </div>
             </div>
-            {(tooltipState != null && popupEditorState == null) && <PieceTooltip {...tooltipState} />}
-            {popupEditorState != null && <PopupEditor {...popupEditorState} />}
-            {(board != null && boardKeyToShow != null && contextMenuState != null) &&
-                <ContextMenu.Main
-                    contextMenuState={contextMenuState}
-                    board={board}
-                    boardConfig={boardConfig}
-                    boardKey={boardKeyToShow}
-                    onContextMenuClear={() => setContextMenuState(null)} />}
             <ActiveBoardSelectorModal
                 visible={activeBoardSelectorModalVisibility}
                 onComplete={() => setActiveBoardSelectorModalVisibility(false)} />

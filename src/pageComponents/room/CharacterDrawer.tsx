@@ -27,7 +27,7 @@ import { applyCharacter, boardLocationDiff, BoardLocationState, characterDiff, C
 import { dualKeyRecordFind, strIndex20Array } from '@kizahasi/util';
 import { useSelector } from '../../store';
 import { useDispatch } from 'react-redux';
-import { create, roomDrawerModule, update } from '../../modules/roomDrawerModule';
+import { create, roomDrawerAndPopoverModule, update } from '../../modules/roomDrawerAndPopoverModule';
 
 const notFound = 'notFound';
 
@@ -74,7 +74,7 @@ const inputSpan = 16;
 
 const CharacterDrawer: React.FC = () => {
     const me = useMe();
-    const drawerType = useSelector(state => state.roomDrawerModule.characterDrawerType);
+    const drawerType = useSelector(state => state.roomDrawerAndPopoverModule.characterDrawerType);
     const dispatch = useDispatch();
     const operate = useOperate();
     const characters = useCharacters();
@@ -271,7 +271,7 @@ const CharacterDrawer: React.FC = () => {
             };
             operate(operation);
             resetCharacterToCreate();
-            dispatch(roomDrawerModule.actions.set({ characterDrawerType: null }));
+            dispatch(roomDrawerAndPopoverModule.actions.set({ characterDrawerType: null }));
         };
     }
 
@@ -292,7 +292,7 @@ const CharacterDrawer: React.FC = () => {
                 }
             };
             operate(operation);
-            dispatch(roomDrawerModule.actions.set({ characterDrawerType: null }));
+            dispatch(roomDrawerAndPopoverModule.actions.set({ characterDrawerType: null }));
         };
     }
 
@@ -446,12 +446,12 @@ const CharacterDrawer: React.FC = () => {
             title={drawerType?.type === create ? 'キャラクターの新規作成' : 'キャラクターの編集'}
             visible={drawerType != null}
             closable
-            onClose={() => dispatch(roomDrawerModule.actions.set({ characterDrawerType: null }))}
+            onClose={() => dispatch(roomDrawerAndPopoverModule.actions.set({ characterDrawerType: null }))}
             footer={(
                 <DrawerFooter
                     close={({
                         textType: drawerType?.type === create ? 'cancel' : 'close',
-                        onClick: () => dispatch(roomDrawerModule.actions.set({ characterDrawerType: null }))
+                        onClick: () => dispatch(roomDrawerAndPopoverModule.actions.set({ characterDrawerType: null }))
                     })}
                     ok={onOkClick == null ? undefined : ({ textType: 'create', onClick: onOkClick })}
                     destroy={onDestroy == null ? undefined : {

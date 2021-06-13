@@ -16,7 +16,7 @@ import { useBoards } from '../../hooks/state/useBoards';
 import { useMe } from '../../hooks/useMe';
 import { boardDiff, BoardState, UpOperation } from '@kizahasi/flocon-core';
 import { useDispatch } from 'react-redux';
-import { create, roomDrawerModule, update } from '../../modules/roomDrawerModule';
+import { create, roomDrawerAndPopoverModule, update } from '../../modules/roomDrawerAndPopoverModule';
 
 const notFound = 'notFound';
 
@@ -44,7 +44,7 @@ const BoardDrawer: React.FC = () => {
     const me = useMe();
     const dispatch = useDispatch();
     const operate = useOperate();
-    const drawerType = useSelector(state => state.roomDrawerModule.boardDrawerType);
+    const drawerType = useSelector(state => state.roomDrawerAndPopoverModule.boardDrawerType);
     const boards = useBoards();
     const { state: board, setState: setBoard, stateToCreate: boardToCreate, resetStateToCreate: resetBoardToCreate } = useStateEditor(drawerType?.type === update ? boards?.get(drawerType.stateKey) : undefined, defaultBoard, ({ prevState, nextState }) => {
         if (drawerType?.type !== update) {
@@ -131,7 +131,7 @@ const BoardDrawer: React.FC = () => {
             operate(operation);
             setBoard(defaultBoard);
             resetBoardToCreate();
-            dispatch(roomDrawerModule.actions.set({ boardDrawerType: null }));
+            dispatch(roomDrawerAndPopoverModule.actions.set({ boardDrawerType: null }));
         };
     }
 
@@ -152,7 +152,7 @@ const BoardDrawer: React.FC = () => {
                 }
             };
             operate(operation);
-            dispatch(roomDrawerModule.actions.set({ boardDrawerType: null }));
+            dispatch(roomDrawerAndPopoverModule.actions.set({ boardDrawerType: null }));
         };
     }
 
@@ -162,12 +162,12 @@ const BoardDrawer: React.FC = () => {
             title={drawerType?.type === create ? 'Boardの新規作成' : 'Boardの編集'}
             visible={drawerType != null}
             closable
-            onClose={() => dispatch(roomDrawerModule.actions.set({ boardDrawerType: null }))}
+            onClose={() => dispatch(roomDrawerAndPopoverModule.actions.set({ boardDrawerType: null }))}
             footer={(
                 <DrawerFooter
                     close={({
                         textType: drawerType?.type === create ? 'cancel' : 'close',
-                        onClick: () => dispatch(roomDrawerModule.actions.set({ boardDrawerType: null }))
+                        onClick: () => dispatch(roomDrawerAndPopoverModule.actions.set({ boardDrawerType: null }))
                     })}
                     ok={onOkClick == null ? undefined : ({ textType: 'create', onClick: onOkClick })}
                     destroy={onDestroy == null ? undefined : {

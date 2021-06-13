@@ -19,7 +19,7 @@ import moment from 'moment';
 import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { recordToArray } from '@kizahasi/util';
-import { roomDrawerModule } from '../../modules/roomDrawerModule';
+import { roomDrawerAndPopoverModule } from '../../modules/roomDrawerAndPopoverModule';
 import { defaultMemoPanelConfig } from '../../states/MemoPanelConfig';
 
 type BecomePlayerModalProps = {
@@ -357,7 +357,7 @@ export const RoomMenu: React.FC = () => {
 
     return <><Menu triggerSubMenuAction='click' selectable={false} mode="horizontal">
         <Menu.SubMenu title="部屋">
-            <Menu.Item onClick={() => dispatch(roomDrawerModule.actions.set({ editRoomDrawerVisibility: true }))}>
+            <Menu.Item onClick={() => dispatch(roomDrawerAndPopoverModule.actions.set({ editRoomDrawerVisibility: true }))}>
                 編集
             </Menu.Item>
             <Menu.Item onClick={() => setIsDeleteRoomModalVisible(true)}>

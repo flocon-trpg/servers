@@ -20,7 +20,7 @@ import { CharacterState, FilePath, ParamNameState, ParticipantState, UpOperation
 import { CompositeKey, compositeKeyToString, StrIndex20, strIndex20Array } from '@kizahasi/util';
 import _ from 'lodash';
 import { useDispatch } from 'react-redux';
-import { create, roomDrawerModule } from '../../modules/roomDrawerModule';
+import { create, roomDrawerAndPopoverModule } from '../../modules/roomDrawerAndPopoverModule';
 
 type DataSource = {
     key: string;
@@ -221,7 +221,7 @@ const CharacterList: React.FC = () => {
                     <Button
                         style={({ alignSelf: 'center' })}
                         size='small'
-                        onClick={() => dispatch(roomDrawerModule.actions.set({ characterDrawerType: { type: update, stateKey: character.stateKey } }))}>
+                        onClick={() => dispatch(roomDrawerAndPopoverModule.actions.set({ characterDrawerType: { type: update, stateKey: character.stateKey } }))}>
                         <Icon.SettingOutlined />
                     </Button>
                 </Tooltip>),
@@ -302,10 +302,10 @@ const CharacterList: React.FC = () => {
 
     return (
         <div>
-            <Button size='small' onClick={() => dispatch(roomDrawerModule.actions.set({ characterDrawerType: { type: create } }))}>
+            <Button size='small' onClick={() => dispatch(roomDrawerAndPopoverModule.actions.set({ characterDrawerType: { type: create } }))}>
                 キャラクターを作成
             </Button>
-            <Button size='small' onClick={() => dispatch(roomDrawerModule.actions.set({ characterParameterNamesDrawerVisibility: true }))}>
+            <Button size='small' onClick={() => dispatch(roomDrawerAndPopoverModule.actions.set({ characterParameterNamesDrawerVisibility: true }))}>
                 パラメーターを追加・編集・削除
             </Button>
             <Table columns={columns} dataSource={charactersDataSource} size='small' pagination={false} />

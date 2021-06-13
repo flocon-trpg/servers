@@ -7,7 +7,7 @@ import { useOperate } from '../../hooks/useOperate';
 import { useSelector } from '../../store';
 import { UpOperation } from '@kizahasi/flocon-core';
 import { useDispatch } from 'react-redux';
-import { roomDrawerModule } from '../../modules/roomDrawerModule';
+import { roomDrawerAndPopoverModule } from '../../modules/roomDrawerAndPopoverModule';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -17,7 +17,7 @@ const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
 const EditRoomDrawer: React.FC = () => {
-    const editRoomDrawerVisibility = useSelector(state => state.roomDrawerModule.editRoomDrawerVisibility);
+    const editRoomDrawerVisibility = useSelector(state => state.roomDrawerAndPopoverModule.editRoomDrawerVisibility);
     const dispatch = useDispatch();
     const operate = useOperate();
     const name = useSelector(state => state.roomModule.roomState?.state?.name);
@@ -28,7 +28,7 @@ const EditRoomDrawer: React.FC = () => {
             title='部屋の設定'
             visible={editRoomDrawerVisibility}
             closable
-            onClose={() => dispatch(roomDrawerModule.actions.set({ editRoomDrawerVisibility: false }))}
+            onClose={() => dispatch(roomDrawerAndPopoverModule.actions.set({ editRoomDrawerVisibility: false }))}
             footer={(
                 <DrawerFooter
                     close={({

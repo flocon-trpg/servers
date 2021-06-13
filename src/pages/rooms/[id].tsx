@@ -16,7 +16,7 @@ import roomStateModule from '../../modules/roomStateModule';
 import { useAllRoomMessages } from '../../hooks/useRoomMessages';
 import { useSelector } from '../../store';
 import useRoomConfig from '../../hooks/localStorage/useRoomConfig';
-import { roomDrawerModule } from '../../modules/roomDrawerModule';
+import { roomDrawerAndPopoverModule } from '../../modules/roomDrawerAndPopoverModule';
 
 type JoinRoomFormProps = {
     roomState: RoomAsListItemFragment;
@@ -128,7 +128,7 @@ const RoomBehavior: React.FC<PropsWithChildren<{ roomId: string }>> = ({ roomId,
     const { state: roomState, refetch: refetchRoomState } = useRoomState(roomId, observable);
     const allRoomMessages = useAllRoomMessages({ roomId, roomEventSubscription });
     React.useEffect(() => {
-        dispatch(roomDrawerModule.actions.reset());
+        dispatch(roomDrawerAndPopoverModule.actions.reset());
     }, [roomId, dispatch]);
 
     React.useEffect(() => {

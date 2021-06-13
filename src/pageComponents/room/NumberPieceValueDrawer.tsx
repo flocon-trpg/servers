@@ -13,7 +13,7 @@ import { compositeKeyToString } from '@kizahasi/util';
 import { useNumberPieceValues } from '../../hooks/state/useNumberPieceValues';
 import { useDispatch } from 'react-redux';
 import { useSelector } from '../../store';
-import { create, roomDrawerModule, update } from '../../modules/roomDrawerModule';
+import { create, roomDrawerAndPopoverModule, update } from '../../modules/roomDrawerAndPopoverModule';
 import { MyCharactersSelect } from '../../components/MyCharactersSelect';
 
 const drawerBaseProps: Partial<DrawerProps> = {
@@ -31,7 +31,7 @@ const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
 const IdView: React.FC = () => {
-    const drawerType = useSelector(state => state.roomDrawerModule.dicePieceValueDrawerType);
+    const drawerType = useSelector(state => state.roomDrawerAndPopoverModule.dicePieceValueDrawerType);
     const { userUid: myUserUid } = useMe();
 
     if (drawerType == null || myUserUid == null) {
@@ -48,7 +48,7 @@ const IdView: React.FC = () => {
 };
 
 export const NumberPieceValueDrawer: React.FC = () => {
-    const drawerType = useSelector(state => state.roomDrawerModule.numberPieceValueDrawerType);
+    const drawerType = useSelector(state => state.roomDrawerAndPopoverModule.numberPieceValueDrawerType);
     const dispatch = useDispatch();
     const operate = useOperate();
     const { userUid: myUserUid } = useMe();
@@ -130,7 +130,7 @@ export const NumberPieceValueDrawer: React.FC = () => {
                 }
             };
             operate(operation);
-            dispatch(roomDrawerModule.actions.set({ numberPieceValueDrawerType: null }));
+            dispatch(roomDrawerAndPopoverModule.actions.set({ numberPieceValueDrawerType: null }));
             setActiveCharacter(undefined);
             setState(defaultNumberPieceValue);
         };
@@ -142,12 +142,12 @@ export const NumberPieceValueDrawer: React.FC = () => {
             title={stateToCreate == null ? '数値コマの編集' : '数値コマの新規作成'}
             visible={drawerType != null}
             closable
-            onClose={() => dispatch(roomDrawerModule.actions.set({ numberPieceValueDrawerType: null }))}
+            onClose={() => dispatch(roomDrawerAndPopoverModule.actions.set({ numberPieceValueDrawerType: null }))}
             footer={(
                 <DrawerFooter
                     close={({
                         textType: stateToCreate == null ? 'close' : 'cancel',
-                        onClick: () => dispatch(roomDrawerModule.actions.set({ numberPieceValueDrawerType: null }))
+                        onClick: () => dispatch(roomDrawerAndPopoverModule.actions.set({ numberPieceValueDrawerType: null }))
                     })}
                     ok={onCreate == null ? undefined : ({ textType: 'create', onClick: onCreate })} />)}>
             <div>

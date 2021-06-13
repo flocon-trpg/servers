@@ -12,7 +12,7 @@ import { UpOperation, toDicePieceValueUpOperation, dicePieceValueDiff, DicePiece
 import { compositeKeyToString } from '@kizahasi/util';
 import { useDispatch } from 'react-redux';
 import { useSelector } from '../../store';
-import { create, roomDrawerModule, update } from '../../modules/roomDrawerModule';
+import { create, roomDrawerAndPopoverModule, update } from '../../modules/roomDrawerAndPopoverModule';
 import { useDicePieceValues } from '../../hooks/state/useDicePieceValues';
 import { MyCharactersSelect } from '../../components/MyCharactersSelect';
 import { InputDie } from '../../components/InputDie';
@@ -32,7 +32,7 @@ const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
 const IdView: React.FC = () => {
-    const drawerType = useSelector(state => state.roomDrawerModule.dicePieceValueDrawerType);
+    const drawerType = useSelector(state => state.roomDrawerAndPopoverModule.dicePieceValueDrawerType);
     const { userUid: myUserUid } = useMe();
 
     if (drawerType == null || myUserUid == null) {
@@ -49,7 +49,7 @@ const IdView: React.FC = () => {
 };
 
 export const DicePieceValueDrawer: React.FC = () => {
-    const drawerType = useSelector(state => state.roomDrawerModule.dicePieceValueDrawerType);
+    const drawerType = useSelector(state => state.roomDrawerAndPopoverModule.dicePieceValueDrawerType);
     const dispatch = useDispatch();
     const operate = useOperate();
     const { userUid: myUserUid } = useMe();
@@ -131,7 +131,7 @@ export const DicePieceValueDrawer: React.FC = () => {
                 }
             };
             operate(operation);
-            dispatch(roomDrawerModule.actions.set({ dicePieceValueDrawerType: null }));
+            dispatch(roomDrawerAndPopoverModule.actions.set({ dicePieceValueDrawerType: null }));
             setActiveCharacter(undefined);
             setState(defaultDicePieceValue);
         };
@@ -143,12 +143,12 @@ export const DicePieceValueDrawer: React.FC = () => {
             title={stateToCreate == null ? 'ダイスコマの編集' : 'ダイスコマの新規作成'}
             visible={drawerType != null}
             closable
-            onClose={() => dispatch(roomDrawerModule.actions.set({ dicePieceValueDrawerType: null }))}
+            onClose={() => dispatch(roomDrawerAndPopoverModule.actions.set({ dicePieceValueDrawerType: null }))}
             footer={(
                 <DrawerFooter
                     close={({
                         textType: stateToCreate == null ? 'close' : 'cancel',
-                        onClick: () => dispatch(roomDrawerModule.actions.set({ dicePieceValueDrawerType: null }))
+                        onClick: () => dispatch(roomDrawerAndPopoverModule.actions.set({ dicePieceValueDrawerType: null }))
                     })}
                     ok={onCreate == null ? undefined : ({ textType: 'create', onClick: onCreate })} />)}>
             <div>
