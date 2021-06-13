@@ -67,11 +67,11 @@ const getMigrationUp = () => {
         if (typeof databaseOption === 'string') {
             const result = toDbType(databaseOption);
             if (result == null) {
-                throw 'This should not happen';
+                throw new Error('This should not happen');
             }
             return result;
         }
-        throw 'This should not happen';
+        throw new Error('This should not happen');
     })();
     return {
         db: database,
@@ -105,12 +105,12 @@ const getMigrationDown = () => {
     if (typeof databaseOption === 'string') {
         const result = toDbType(databaseOption);
         if (result == null) {
-            throw 'This should not happen';
+            throw new Error('This should not happen');
         }
         database = result;
     }
     else {
-        throw 'This should not happen';
+        throw new Error('This should not happen');
     }
     const countOption = options.count;
     let count;
@@ -118,7 +118,7 @@ const getMigrationDown = () => {
         count = countOption;
     }
     else {
-        throw 'This should not happen';
+        throw new Error('This should not happen');
     }
     return {
         db: database,
@@ -151,11 +151,11 @@ const getMigrationCreate = () => {
         if (typeof databaseOption === 'string') {
             const result = toDbType(databaseOption);
             if (result == null) {
-                throw 'This should not happen';
+                throw new Error('This should not happen');
             }
             return result;
         }
-        throw 'This should not happen';
+        throw new Error('This should not happen');
     })();
     return {
         db: database,

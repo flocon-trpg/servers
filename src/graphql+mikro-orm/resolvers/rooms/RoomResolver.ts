@@ -1794,7 +1794,7 @@ export class RoomResolver {
         // **** args guard ****
 
         if (args.visibleTo.length >= 1000) {
-            throw 'visibleTo.length is too large';
+            throw new Error('visibleTo.length is too large');
         }
 
         // **** main ****
@@ -1894,7 +1894,7 @@ export class RoomResolver {
             const visibleToArray = [...visibleTo].sort();
             const result = await createRoomPrivateMessage({ msg: entity, myUserUid: entryUser.userUid, visibleTo: visibleToArray, visibleToMe: true });
             if (result == null) {
-                throw 'This should not happen';
+                throw new Error('This should not happen');
             }
 
             const payload: MessageUpdatePayload = {
@@ -2550,7 +2550,7 @@ export class RoomResolver {
             }
             if (payload.value.__tstype === RoomPrivateMessageUpdateType) {
                 if (payload.visibleTo == null) {
-                    throw 'payload.visibleTo is required.';
+                    throw new Error('payload.visibleTo is required.');
                 }
                 if (payload.visibleTo.every(vt => vt !== userUid)) {
                     return undefined;

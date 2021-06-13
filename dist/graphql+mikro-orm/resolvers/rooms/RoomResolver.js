@@ -1564,7 +1564,7 @@ let RoomResolver = class RoomResolver {
     }
     async writePrivateMessageCore({ args, context }) {
         if (args.visibleTo.length >= 1000) {
-            throw 'visibleTo.length is too large';
+            throw new Error('visibleTo.length is too large');
         }
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
@@ -1654,7 +1654,7 @@ let RoomResolver = class RoomResolver {
             const visibleToArray = [...visibleTo].sort();
             const result = await createRoomPrivateMessage({ msg: entity, myUserUid: entryUser.userUid, visibleTo: visibleToArray, visibleToMe: true });
             if (result == null) {
-                throw 'This should not happen';
+                throw new Error('This should not happen');
             }
             const payload = {
                 type: 'messageUpdatePayload',
@@ -2264,7 +2264,7 @@ let RoomResolver = class RoomResolver {
             }
             if (payload.value.__tstype === graphql_2.RoomPrivateMessageUpdateType) {
                 if (payload.visibleTo == null) {
-                    throw 'payload.visibleTo is required.';
+                    throw new Error('payload.visibleTo is required.');
                 }
                 if (payload.visibleTo.every(vt => vt !== userUid)) {
                     return undefined;
