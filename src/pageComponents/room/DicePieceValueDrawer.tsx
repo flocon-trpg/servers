@@ -15,6 +15,8 @@ import { useSelector } from '../../store';
 import { create, roomDrawerModule, update } from '../../modules/roomDrawerModule';
 import { useDicePieceValues } from '../../hooks/state/useDicePieceValues';
 import { MyCharactersSelect } from '../../components/MyCharactersSelect';
+import { InputDie } from '../../components/InputDie';
+import { noValue } from '../../utils/dice';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -160,79 +162,63 @@ export const DicePieceValueDrawer: React.FC = () => {
                             onSelect={setActiveCharacter} />
                     </Col>
                 </Row>
-                {dicePieceValueStrIndexes.map(key => {
-                    const title = `ダイス${key}`;
-                    const value = state.dice[key];
 
-                    if (value == null) {
-                        return <>
-                            <Typography.Title level={4}>{title}</Typography.Title>
-                            <Row gutter={gutter} align='middle'>
-                                <Col flex='auto' />
-                                <Col flex={0}></Col>
-                                <Col span={inputSpan}>
-                                    <Button
-                                        onClick={() => {
-                                            if (drawerType == null) {
-                                                return;
-                                            }
-                                            setState({
-                                                ...state,
-                                                dice: {
-                                                    ...state.dice,
-                                                    [key]: {
+                {dicePieceValueStrIndexes.map(key => {
+                    const die = state.dice[key];
+
+                    return <Row key={key} style={{ minHeight: 28 }} gutter={gutter} align='middle'>
+                        <Col flex='auto' />
+                        <Col flex={0}>{`ダイス${key}`}</Col>
+                        <Col span={inputSpan}>
+                            <InputDie
+                                size='small'
+                                state={die ?? null}
+                                onChange={e => {
+                                    if (e.type === replace) {
+                                        setState({
+                                            ...state,
+                                            dice: {
+                                                ...state.dice,
+                                                [key]:
+                                                    e.newValue == null ? undefined : {
                                                         $version: 1,
-                                                        dieType: 'D6',
+                                                        dieType: e.newValue.dieType,
                                                         isValuePrivate: false,
                                                         value: null,
                                                     }
-                                                }
-                                            });
-                                        }}>追加</Button>
-                                </Col>
-                            </Row>
-                        </>;
-                    }
-
-                    return <>
-                        <Typography.Title level={4}>{title}</Typography.Title>
-                        <Row gutter={gutter} align='middle'>
-                            <Col flex='auto' />
-                            <Col flex={0}>値</Col>
-                            <Col span={inputSpan}>
-                                <InputNumber min={1} max={6} size='small' value={value.value ?? undefined} onChange={e => {
+                                            }
+                                        });
+                                        return;
+                                    }
+                                    setState({
+                                        ...state,
+                                        dice: {
+                                            ...state.dice,
+                                            [key]: die == null ? undefined : {
+                                                ...die,
+                                                value: e.newValue === noValue ? null : e.newValue,
+                                            }
+                                        }
+                                    });
+                                }}
+                                onIsValuePrivateChange={e => {
+                                    if (die == null) {
+                                        return;
+                                    }
                                     setState({
                                         ...state,
                                         dice: {
                                             ...state.dice,
                                             [key]: {
-                                                ...value,
-                                                value: e,
+                                                ...die,
+                                                isValuePrivate: e,
                                             }
                                         }
                                     });
                                 }} />
-                            </Col>
-                        </Row>
-                        <Row gutter={gutter} align='middle'>
-                            <Col flex='auto' />
-                            <Col flex={0}>値を非公開にする</Col>
-                            <Col span={inputSpan}>
-                                <Checkbox
-                                    checked={value.isValuePrivate}
-                                    onChange={e => setState({
-                                        ...state,
-                                        dice: {
-                                            ...state.dice,
-                                            [key]: {
-                                                ...value,
-                                                isValuePrivate: e.target.checked,
-                                            }
-                                        }
-                                    })} />
-                            </Col>
-                        </Row>
-                    </>;
+
+                        </Col>
+                    </Row>;
                 })}
             </div>
         </Drawer>

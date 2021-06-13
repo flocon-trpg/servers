@@ -1,7 +1,7 @@
 import React from 'react';
 import { useImageFromGraphQL } from '../../hooks/image';
 import * as ReactKonva from 'react-konva';
-import { Button, Dropdown, InputNumber, Menu, Tooltip } from 'antd';
+import { Button, Dropdown, Menu, Tooltip } from 'antd';
 import * as Icons from '@ant-design/icons';
 import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
@@ -39,6 +39,7 @@ import { create, roomDrawerModule } from '../../modules/roomDrawerModule';
 import { DicePieceValueElement, useDicePieceValues } from '../../hooks/state/useDicePieceValues';
 import { DicePieceValue } from '../../utils/dicePieceValue';
 import { InputDie } from '../../components/InputDie';
+import { noValue } from '../../utils/dice';
 
 namespace Resource {
     export const cellSizeIsTooSmall = 'セルが小さすぎるため、無効化されています';
@@ -214,35 +215,45 @@ namespace PopupEditorBase {
 
         const titleWidth = 60;
 
-        return (<div style={{ display: 'flex', flexDirection: 'column' }}>
+        return (<div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
             {dicePieceValueStrIndexes.map(key => {
-                const nullableDie = dicePieceValue.dice[key];
-                const die = nullableDie as (typeof nullableDie) | undefined;
-                if (die == null) {
-                    return null;
-                }
-                return (<div key={key} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                    <div style={{ flex: `0 0 ${titleWidth}` }}>{`ダイス${key}`}</div>
-                    <InputDie state={die} onChange={e => {
-                        operate({
-                            $version: 1,
-                            characters: {
-                                [element.characterKey.createdBy]: {
-                                    [element.characterKey.id]: {
-                                        type: update,
-                                        update: {
-                                            $version: 1,
-                                            dicePieceValues: {
-                                                [element.valueId]: {
-                                                    type: update,
-                                                    update: {
-                                                        $version: 1,
-                                                        dice: {
-                                                            [key]: {
-                                                                type: update,
-                                                                update: {
-                                                                    $version: 1,
-                                                                    value: { newValue: e },
+                const die = dicePieceValue.dice[key];
+                return (<div key={key} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', minHeight: 26 }}>
+                    <div style={{ flex: 0, minWidth: titleWidth, width: titleWidth }}>{`ダイス${key}`}</div>
+                    <InputDie
+                        size='small'
+                        state={die ?? null}
+                        onChange={e => {
+                            operate({
+                                $version: 1,
+                                characters: {
+                                    [element.characterKey.createdBy]: {
+                                        [element.characterKey.id]: {
+                                            type: update,
+                                            update: {
+                                                $version: 1,
+                                                dicePieceValues: {
+                                                    [element.valueId]: {
+                                                        type: update,
+                                                        update: {
+                                                            $version: 1,
+                                                            dice: {
+                                                                [key]: e.type === replace ? {
+                                                                    type: replace,
+                                                                    replace: {
+                                                                        newValue: e.newValue == null ? undefined : {
+                                                                            $version: 1,
+                                                                            dieType: e.newValue.dieType,
+                                                                            isValuePrivate: false,
+                                                                            value: null,
+                                                                        },
+                                                                    }
+                                                                } : {
+                                                                    type: update,
+                                                                    update: {
+                                                                        $version: 1,
+                                                                        value: { newValue: e.newValue === noValue ? null : e.newValue },
+                                                                    }
                                                                 }
                                                             }
                                                         }
@@ -252,9 +263,40 @@ namespace PopupEditorBase {
                                         }
                                     }
                                 }
-                            }
-                        });
-                    }} />
+                            });
+                        }}
+                        onIsValuePrivateChange={e => {
+                            operate({
+                                $version: 1,
+                                characters: {
+                                    [element.characterKey.createdBy]: {
+                                        [element.characterKey.id]: {
+                                            type: update,
+                                            update: {
+                                                $version: 1,
+                                                dicePieceValues: {
+                                                    [element.valueId]: {
+                                                        type: update,
+                                                        update: {
+                                                            $version: 1,
+                                                            dice: {
+                                                                [key]: {
+                                                                    type: update,
+                                                                    update: {
+                                                                        $version: 1,
+                                                                        isValuePrivate: { newValue: e },
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                        }} />
                 </div>);
             })}
         </div>);
@@ -264,7 +306,6 @@ namespace PopupEditorBase {
 type OnPopupEditorParams = { offset: MyKonva.Vector2; dblClickOn: ClickOn };
 
 const PopupEditor: React.FC<OnPopupEditorParams> = ({ offset, dblClickOn }: OnPopupEditorParams) => {
-
     const left = offset.x - 30;
     const top = offset.y + 1;
 
@@ -288,7 +329,6 @@ const PopupEditor: React.FC<OnPopupEditorParams> = ({ offset, dblClickOn }: OnPo
         top,
         padding: Resource.Popup.padding,
         backgroundColor: Resource.Popup.backgroundColor,
-        maxWidth: 200
     })}>
         {children}
     </div>);
@@ -363,6 +403,9 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             return undefined;
         }
         const lastMessage = publicMessages[publicMessages.length - 1];
+        if (lastMessage == null) {
+            return;
+        }
         if (lastMessage.type !== publicMessage) {
             return undefined;
         }

@@ -1,8 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { css } from '@emotion/react';
-import { PropsWithChildren } from 'react';
-import { Row, Col, Button, Tooltip, Typography } from 'antd';
+import { Button, Tooltip } from 'antd';
 import { SizeType } from 'antd/lib/config-provider/SizeContext';
 
 // eslint-disable-next-line @typescript-eslint/ban-types

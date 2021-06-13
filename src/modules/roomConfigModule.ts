@@ -168,17 +168,23 @@ const bringPanelToFront = (state: RoomConfig | null, action: PanelAction): void 
     panels.push(state.panels.activeBoardPanel);
     for (const panelId in state.panels.boardEditorPanels) {
         const panel = state.panels.boardEditorPanels[panelId];
-        panels.push(panel);
+        if (panel != null) {
+            panels.push(panel);
+        }
     }
     panels.push(state.panels.characterPanel);
     panels.push(state.panels.gameEffectPanel);
     for (const panelId in state.panels.memoPanels) {
         const panel = state.panels.memoPanels[panelId];
-        panels.push(panel);
+        if (panel != null) {
+            panels.push(panel);
+        }
     }
     for (const panelId in state.panels.messagePanels) {
         const panel = state.panels.messagePanels[panelId];
-        panels.push(panel);
+        if (panel != null) {
+            panels.push(panel);
+        }
     }
     panels.push(state.panels.pieceValuePanel);
     panels.push(state.panels.participantPanel);

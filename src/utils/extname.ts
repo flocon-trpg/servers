@@ -1,7 +1,8 @@
 export const extname = (fileName: string): string | null => {
     const split = fileName.split('.');
-    if (split.length === 0) {
+    const result = split[split.length - 1];
+    if (result == null) {
         return null;
     }
-    return split[split.length - 1];
+    return result;
 };

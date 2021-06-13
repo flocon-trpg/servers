@@ -65,7 +65,7 @@ const PrivateMessageDrawer: React.FC<PrivateMessageDrawerProps> = ({ visible, se
                     <Col flex={0}>送信先</Col>
                     <Col span={inputSpan}>
                         <div>
-                            {recordToArray(participants.size).length <= 1 ? '(自分以外の入室者がいません)' : recordToArray(participants)
+                            {recordToArray(participants).length <= 1 ? '(自分以外の入室者がいません)' : recordToArray(participants)
                                 .filter(pair => getUserUid(myAuth) !== pair.key)
                                 .sort((x, y) => x.value.name.localeCompare(y.value.name))
                                 .map(pair => {

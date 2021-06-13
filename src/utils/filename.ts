@@ -1,7 +1,8 @@
 export const fileName = (fullPath: string): string => {
     const split = fullPath.split('/');
-    if (split.length === 0) {
+    const result = split[split.length - 1];
+    if (result == null) {
         return fullPath;
     }
-    return split[split.length - 1];
+    return result;
 };

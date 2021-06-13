@@ -215,7 +215,7 @@ const reduceMessages = (state: Message[], action: RoomMessageEventFragment, filt
             }
             return produce(state, draft => {
                 const target = draft[index];
-                if (target.type === pieceValueLog || target.type === soundEffect || target.type === notification) {
+                if (target == null || target.type === pieceValueLog || target.type === soundEffect || target.type === notification) {
                     return;
                 }
                 target.value.altTextToSecret = action.altTextToSecret;

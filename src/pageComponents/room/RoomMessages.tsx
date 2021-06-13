@@ -74,10 +74,11 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
             return new Set();
         }
         const array = new PrivateChannelSets(config.privateChannels).toArray();
-        if (array.length === 0) {
+        const first = array[0];
+        if (first == null) {
             return new Set();
         }
-        return array[0].toStringSet();
+        return first.toStringSet();
     }, [config?.privateChannels]);
 
     const onChange = (newValue: Partial<TabConfig>): void => {
