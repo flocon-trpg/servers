@@ -1,11 +1,12 @@
 import _ from 'lodash';
 
 const keysToString = (keys: ReadonlyArray<string>): string => {
-    if (keys.length === 0) {
+    const firstKey = keys[0];
+    if (firstKey === undefined) {
         // 原則として、ここには来るべきでない
         return 'root value';
     }
-    let result = keys[0];
+    let result = firstKey;
     _(keys)
         .drop(1)
         .forEach(key => {

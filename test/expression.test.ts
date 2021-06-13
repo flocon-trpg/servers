@@ -6,7 +6,7 @@ it('tests {HP}', () => {
         fail('actual.isError');
     }
     expect(actual.value.length).toBe(1);
-    const actual0 = actual.value[0];
+    const actual0 = actual.value[0]!;
     if (actual0.type !== expr1) {
         fail('actual0.type !== expr1');
     }
@@ -24,7 +24,7 @@ it('tests {"敏捷"}', () => {
         fail('actual.isError');
     }
     expect(actual.value.length).toBe(1);
-    const actual0 = actual.value[0];
+    const actual0 = actual.value[0]!;
     if (actual0.type !== expr1) {
         fail('actual0.type !== expr1');
     }
@@ -42,7 +42,7 @@ it('tests {foo.\'bar\'."baz"}', () => {
         fail('actual.isError');
     }
     expect(actual.value.length).toBe(1);
-    const actual0 = actual.value[0];
+    const actual0 = actual.value[0]!;
     if (actual0.type !== expr1) {
         fail('actual0.type !== expr1');
     }
@@ -55,7 +55,7 @@ it("tests {'{foo}'}", () => {
         fail('actual.isError');
     }
     expect(actual.value.length).toBe(1);
-    const actual0 = actual.value[0];
+    const actual0 = actual.value[0]!;
     if (actual0.type !== expr1) {
         fail('actual0.type !== expr1');
     }
@@ -68,7 +68,7 @@ it('tests {"{foo}"}', () => {
         fail('actual.isError');
     }
     expect(actual.value.length).toBe(1);
-    const actual0 = actual.value[0];
+    const actual0 = actual.value[0]!;
     if (actual0.type !== expr1) {
         fail('actual0.type !== expr1');
     }
@@ -81,8 +81,8 @@ it('tests {HP}{MP}', () => {
         fail('actual.isError');
     }
     expect(actual.value.length).toBe(2);
-    const actual0 = actual.value[0];
-    const actual1 = actual.value[1];
+    const actual0 = actual.value[0]!;
+    const actual1 = actual.value[1]!;
 
     if (actual0.type !== expr1) {
         fail('actual0.type !== expr1');
@@ -100,9 +100,9 @@ it('tests a{b}c', () => {
         fail('actual.isError');
     }
     expect(actual.value.length).toBe(3);
-    const actual0 = actual.value[0];
-    const actual1 = actual.value[1];
-    const actual2 = actual.value[2];
+    const actual0 = actual.value[0]!;
+    const actual1 = actual.value[1]!;
+    const actual2 = actual.value[2]!;
 
     if (actual0.type !== plain) {
         fail('actual0.type !== plain');
@@ -126,9 +126,9 @@ it('tests "a{b}c"', () => {
         fail('actual.isError');
     }
     expect(actual.value.length).toBe(3);
-    const actual0 = actual.value[0];
-    const actual1 = actual.value[1];
-    const actual2 = actual.value[2];
+    const actual0 = actual.value[0]!;
+    const actual1 = actual.value[1]!;
+    const actual2 = actual.value[2]!;
 
     if (actual0.type !== plain) {
         fail('actual0.type !== plain');
@@ -152,7 +152,7 @@ it('tests a\\{b\\}c', () => {
         fail('actual.isError');
     }
     expect(actual.value.length).toBe(1);
-    const actual0 = actual.value[0];
+    const actual0 = actual.value[0]!;
 
     if (actual0.type !== plain) {
         fail('actual0.type !== plain');

@@ -19,7 +19,7 @@ export const stringToCompositeKey = (source: string): CompositeKey | null => {
     if (array.length !== 2) {
         return null;
     }
-    return { id: array[0], createdBy: array[1] };
+    return { id: array[0]!, createdBy: array[1]! };
 };
 
 export const toJsonString = (source: CompositeKey): string => {

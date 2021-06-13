@@ -67,7 +67,7 @@
         "typescript": "^4.2.4"
     },
     "dependencies": {
-        "@kizahasi/result": "^0.2.0",
+        "@kizahasi/result": "^0.2.1",
         "fp-ts": "^2.10.5",
         "io-ts": "^2.2.16",
         "lodash": "^4.17.21"
