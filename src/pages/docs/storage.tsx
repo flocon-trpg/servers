@@ -4,7 +4,6 @@ import { Typography } from 'antd';
 import Layout from '../../layouts/Layout';
 import { css } from '@emotion/react';
 import Link from 'next/link';
-import Image from 'next/image';
 
 const $css = css`
 padding: 32px;
@@ -52,7 +51,7 @@ const Index: React.FC = () => {
 
                 <p>参考までに、2021/06/09現在の拡張子判定のコードは下のようになっています。jpg～webpが画像ファイル、mp3～webaが音声ファイル、それ以外はその他という具合です。</p>
 
-                <Image src='/file-types.png' width={361} height={406} />
+                <img src='/file-types.png' width={361} height={406} />
             </div>
         </Layout>
     );
