@@ -8,53 +8,25 @@ type Operation = {
 const initRevision = 0;
 const initState = 0;
 
-const createStateManager = () => new StateManager<number, Operation, Operation>({
+const createStateManager = () => new StateManager<number, Operation>({
     revision: initRevision,
     state: initState,
-    applyGetOperation: ({ state, operation }) => {
+    apply: ({ state, operation }) => {
         if (state !== operation.oldValue) {
-            throw 'Failure at applyGetOperation: state !== operation.oldValue';
+            throw 'Failure at apply: state !== operation.oldValue';
         }
         return operation.newValue;
     },
-    applyPostOperation: ({ state, operation }) => {
-        if (state !== operation.oldValue) {
-            throw 'Failure at applyPostOperation: state !== operation.oldValue';
-        }
-        return operation.newValue;
-    },
-    composePostOperation: ({ first, second }) => {
-        if (first.newValue !== second.oldValue) {
-            throw 'Failure at composePostOperation: first.newValue !== operation.oldValue';
-        }
-        return {
-            oldValue: first.oldValue,
-            newValue: second.newValue,
-        };
-    },
-    getFirstTransform: ({ first, second }) => {
+    transform: ({ first, second }) => {
         if (first.oldValue !== second.oldValue) {
-            throw 'Failure at getFirstTransform: first.oldValue !== second.oldValue';
+            throw 'Failure at transform: first.oldValue !== second.oldValue';
         }
         return {
             firstPrime: { oldValue: second.newValue, newValue: first.newValue },
             secondPrime: { oldValue: first.newValue, newValue: first.newValue },
         };
     },
-    postFirstTransform: ({ first, second }) => {
-        if (first.oldValue !== second.oldValue) {
-            throw 'Failure at postFirstTransform: first.oldValue !== second.oldValue';
-        }
-        return {
-            firstPrime: { oldValue: second.newValue, newValue: first.newValue },
-            secondPrime: { oldValue: first.newValue, newValue: first.newValue },
-        };
-    },
-    getOperationDiff: ({ prevState: prev, nextState: next }) => ({
-        oldValue: prev,
-        newValue: next,
-    }),
-    postOperationDiff: ({ prevState: prev, nextState: next }) => ({
+    diff: ({ prevState: prev, nextState: next }) => prev === next ? undefined : ({
         oldValue: prev,
         newValue: next,
     }),

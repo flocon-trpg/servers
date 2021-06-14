@@ -96,7 +96,7 @@ export const useRoomState = (roomId: string, roomEventSubscription: Observable<R
             return; // This should not happen
         }
 
-        let roomStateManager: StateManager<State, UpOperation, UpOperation> | null = null;
+        let roomStateManager: StateManager<State, UpOperation> | null = null;
 
         const onRoomStateManagerUpdate = () => {
             const $stateManager = roomStateManager;

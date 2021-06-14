@@ -24,6 +24,7 @@ import { $free, isStrIndex10, PublicChannelKey, recordToArray } from '@kizahasi/
 import _ from 'lodash';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { useCharacters } from '../../hooks/state/useCharacters';
+import { TextAreaRef } from 'antd/lib/input/TextArea';
 
 type PrivateMessageDrawerProps = {
     visible: boolean;
@@ -191,7 +192,7 @@ export const ChatInput: React.FC<Props> = ({
         });
     }, [characters, myUserUid]);
 
-    const inputRef = React.useRef<Input | null>(null);
+    const textAreaRef = React.useRef<TextAreaRef | null>(null);
 
     let selectedCharacterType: typeof some | typeof none | typeof custom = none;
     switch (config.selectedCharacterType) {
@@ -291,7 +292,7 @@ export const ChatInput: React.FC<Props> = ({
                     .then(() => useRoomMessageInputTextsResult.setPrivateMessageInputText(undefined, selectedParticipantIds))
                     .finally(() => {
                         setIsPosting(false);
-                        inputRef.current?.focus();
+                        textAreaRef.current?.focus();
                     });
                 break;
             }
@@ -316,7 +317,7 @@ export const ChatInput: React.FC<Props> = ({
                     })
                     .finally(() => {
                         setIsPosting(false);
-                        inputRef.current?.focus();
+                        textAreaRef.current?.focus();
                     });
                 break;
             }
@@ -341,7 +342,7 @@ export const ChatInput: React.FC<Props> = ({
                     })
                     .finally(() => {
                         setIsPosting(false);
-                        inputRef.current?.focus();
+                        textAreaRef.current?.focus();
                     });
                 break;
             }
@@ -510,9 +511,11 @@ export const ChatInput: React.FC<Props> = ({
                         size='small'
                         onClick={() => dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { selectedTextColor: { type: reset } } }))}>リセット</Button>
                 </div>
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                    <Input
-                        ref={inputRef}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center', padding: '0 0 6px 0' }}>
+                    <Input.TextArea
+                        ref={textAreaRef}
+                        style={{ resize: 'none' }}
+                        rows={3}
                         disabled={isPosting}
                         value={(PublicChannelKey.Without$System.isPublicChannelKey(postTo) ? useRoomMessageInputTextsResult.publicMessageInputTexts.get(postTo) : useRoomMessageInputTextsResult.privateMessageInputTexts.get(VisibleTo.toString(postTo))) ?? ''}
                         placeholder={placeholder}
@@ -526,7 +529,7 @@ export const ChatInput: React.FC<Props> = ({
                             useRoomMessageInputTextsResult.setPrivateMessageInputText(e.target.value, $postTo);
                             return;
                         }}
-                        onPressEnter={() => onPost(postTo)} />
+                        onPressEnter={e => e.shiftKey ? undefined : onPost(postTo)} />
                     <Button
                         style={{ width: 80 }}
                         disabled={isPosting || getText(postTo).trim() === ''}

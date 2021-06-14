@@ -10,9 +10,8 @@ import Jdenticon from '../../components/Jdenticon';
 import { isDeleted, toText } from '../../utils/message';
 import { NewTabLinkify } from '../../components/NewTabLinkify';
 import { isIdRecord, ParticipantState, PieceState, PieceUpOperation, RecordUpOperationElement, replace, update, parseNumberPieceValue, parseDicePieceValue } from '@kizahasi/flocon-core';
-import { $free, compositeKeyToString, dualKeyRecordToDualKeyMap, recordToMap } from '@kizahasi/util';
+import { $free, dualKeyRecordToDualKeyMap, recordToMap } from '@kizahasi/util';
 import { tripleKeyToString } from '../../utils/tripleKeyToString';
-import { min } from 'lodash';
 
 export namespace RoomMessage {
     const Image: React.FC<{ filePath: FilePathFragment | undefined }> = ({ filePath }: { filePath: FilePathFragment | undefined }) => {
@@ -156,7 +155,13 @@ export namespace RoomMessage {
             return (<div style={{ ...style, opacity: 0.7 }}>(このメッセージは削除されました)</div>);
         } else {
             return (
-                <div style={{ ...style, color: message.value.textColor ?? undefined }}>
+                <div style={{
+                    ...style,
+                    color: message.value.textColor ?? undefined,
+                    whiteSpace: 'pre-wrap',
+                    maxHeight: 200, // 改行荒らし対策として、maxHeightを設けている。200pxという値は適当
+                    overflowY: 'auto' // maxHeightを上回った場合はスクロールバーを表示する
+                }}>
                     <Popover content={message.value.initTextSource}>
                         <NewTabLinkify>{toText(message.value) ?? message.value.altTextToSecret}</NewTabLinkify>
                     </Popover>
