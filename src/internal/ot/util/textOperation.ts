@@ -253,7 +253,16 @@ export const clientTransform = ({
     });
 };
 
-export const diff = ({ prev, next }: { prev: string; next: string }): TwoWayOperation => {
+export const diff = ({
+    prev,
+    next,
+}: {
+    prev: string;
+    next: string;
+}): TwoWayOperation | undefined => {
+    if (prev === next) {
+        return undefined;
+    }
     return TextOperationCore.TextTwoWayOperation.toUnit(
         TextOperationCore.TextTwoWayOperation.diff({
             first: prev,
@@ -262,7 +271,16 @@ export const diff = ({ prev, next }: { prev: string; next: string }): TwoWayOper
     );
 };
 
-const diffToUpOperation = ({ prev, next }: { prev: string; next: string }): UpOperation => {
+const diffToUpOperation = ({
+    prev,
+    next,
+}: {
+    prev: string;
+    next: string;
+}): UpOperation | undefined => {
+    if (prev === next) {
+        return undefined;
+    }
     const twoWayOperation = TextOperationCore.TextTwoWayOperation.diff({
         first: prev,
         second: next,
