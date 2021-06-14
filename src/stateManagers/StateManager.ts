@@ -96,6 +96,10 @@ class StateManagerCore<TState, TOperation> {
         this._uiStateCore = this.params.apply({ state: this._uiStateCore ?? this._actualState, operation });
     }
 
+    public operateAsState(state: TState) {
+        this._uiStateCore = state;
+    }
+
     private tryApplyPendingGetOperations() {
         const toApply = this._pendingGetOperations.get(this._revision + 1);
         if (toApply === undefined) {
