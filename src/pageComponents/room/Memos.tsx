@@ -150,18 +150,21 @@ const Memo: React.FC<MemoProps> = ({ memoId, state }: MemoProps) => {
             style={{ flex: 1, height: '100%', resize: 'none' }}
             bufferDuration='default'
             value={state.text}
-            onChange={e => operate({
-                $version: 1,
-                memos: {
-                    [memoId]: {
-                        type: update,
-                        update: {
-                            $version: 1,
-                            text: toTextUpOperation(textDiff({ prev: e.previousValue, next: e.currentValue })),
+            onChange={e => {
+                const diff2 = textDiff({ prev: e.previousValue, next: e.currentValue });
+                operate({
+                    $version: 1,
+                    memos: {
+                        [memoId]: {
+                            type: update,
+                            update: {
+                                $version: 1,
+                                text: diff2 === undefined ? undefined : toTextUpOperation(diff2),
+                            }
                         }
                     }
-                }
-            })} />
+                });
+            }} />
     </div>;
 };
 
