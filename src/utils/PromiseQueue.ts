@@ -77,7 +77,7 @@ export class PromiseQueue {
             Rx.concatAll(),
             Rx.publish(),
             Rx.refCount()); // この場合はどちらかというと.refCount()ではなくConnectableObservableを使うのが適切（インスタンス全体を確実にunsubscribeするようなことも可能になる）だと思われるが、少し怠けている。
-        this._result.subscribe(() => undefined, reason => { throw reason; }, () => { throw 'PromiseQueue observable completed for an unknown reason.'; });
+        this._result.subscribe(() => undefined, reason => { throw reason; }, () => { throw new Error('PromiseQueue observable completed for an unknown reason.'); });
     }
 
     private nextCore<T>(execute: () => Promise<T>, timeout: number | null | undefined): Promise<ResultWithTimeout<T>> {
@@ -117,7 +117,7 @@ export class PromiseQueue {
     public async next<T>(execute: () => Promise<T>): Promise<Result<T>> {
         const result = await this.nextCore(execute, undefined);
         if (result.type === timeout) {
-            throw 'not expected timeout. ObjectId collision?';
+            throw new Error('not expected timeout. ObjectId collision?');
         }
         return result;
     }

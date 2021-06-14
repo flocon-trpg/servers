@@ -5,6 +5,7 @@ import { EditMessageFailureType } from '../../../enums/EditMessageFailureType';
 import { GetRoomLogFailureType } from '../../../enums/GetRoomLogFailureType';
 import { GetRoomMessagesFailureType } from '../../../enums/GetRoomMessagesFailureType';
 import { MakeMessageNotSecretFailureType } from '../../../enums/MakeMessageNotSecretFailureType';
+import { PieceValueLogType as PieceValueLogTypeEnum } from '../../../enums/PieceValueLogType';
 import { WritePrivateRoomMessageFailureType } from '../../../enums/WritePrivateRoomMessageFailureType';
 import { WritePublicRoomMessageFailureType } from '../../../enums/WritePublicRoomMessageFailureType';
 import { WriteRoomSoundEffectFailureType } from '../../../enums/WriteRoomSoundEffectFailureType';
@@ -109,7 +110,7 @@ export class RoomPublicMessage {
 
     @Field({ nullable: true })
     public initText?: string;
-    
+
     @Field({ nullable: true })
     public initTextSource?: string
 
@@ -196,23 +197,29 @@ export class RoomPrivateMessage {
     public updatedAt?: number;
 }
 
-export const MyValueLogType = 'MyValueLog';
+export const PieceValueLogType = 'PieceValueLog';
 
 @ObjectType()
-export class MyValueLog {
-    public __tstype!: typeof MyValueLogType;
+export class PieceValueLog {
+    public __tstype!: typeof PieceValueLogType;
 
     @Field()
     public messageId!: string;
 
     @Field()
-    public stateUserUid!: string;
+    public characterCreatedBy!: string;
+
+    @Field()
+    public characterId!: string;
 
     @Field()
     public stateId!: string;
 
     @Field()
     public createdAt!: number;
+
+    @Field(() => PieceValueLogTypeEnum)
+    public logType!: PieceValueLogTypeEnum;
 
     @Field()
     public valueJson!: string;
@@ -244,15 +251,15 @@ export class RoomSoundEffect {
 
 export const RoomMessage = createUnionType({
     name: 'RoomMessage',
-    types: () => [RoomPublicMessage, RoomPrivateMessage, MyValueLog, RoomPublicChannel, RoomSoundEffect] as const,
+    types: () => [RoomPublicMessage, RoomPrivateMessage, PieceValueLog, RoomPublicChannel, RoomSoundEffect] as const,
     resolveType: value => {
         switch (value.__tstype) {
             case RoomPrivateMessageType:
                 return RoomPrivateMessage;
             case RoomPublicChannelType:
                 return RoomPublicMessage;
-            case MyValueLogType:
-                return MyValueLog;
+            case PieceValueLogType:
+                return PieceValueLog;
             case RoomPublicMessageType:
                 return RoomPublicChannel;
             case RoomSoundEffectType:
@@ -274,8 +281,8 @@ export class RoomMessages {
     @Field(() => [RoomPrivateMessage])
     public privateMessages!: RoomPrivateMessage[];
 
-    @Field(() => [MyValueLog])
-    public myValueLogs!: MyValueLog[];
+    @Field(() => [PieceValueLog])
+    public pieceValueLogs!: PieceValueLog[];
 
     @Field(() => [RoomPublicChannel])
     public publicChannels!: RoomPublicChannel[];
@@ -502,7 +509,7 @@ export class RoomPrivateMessageUpdate {
 
 export const RoomMessageEvent = createUnionType({
     name: 'RoomMessageEvent',
-    types: () => [RoomPublicMessage, RoomPrivateMessage, RoomPublicChannel, MyValueLog, RoomSoundEffect, RoomPublicChannelUpdate, RoomPublicMessageUpdate, RoomPrivateMessageUpdate] as const,
+    types: () => [RoomPublicMessage, RoomPrivateMessage, RoomPublicChannel, PieceValueLog, RoomSoundEffect, RoomPublicChannelUpdate, RoomPublicMessageUpdate, RoomPrivateMessageUpdate] as const,
     resolveType: value => {
         switch (value.__tstype) {
             case RoomPublicMessageType:
@@ -511,8 +518,8 @@ export const RoomMessageEvent = createUnionType({
                 return RoomPrivateMessage;
             case RoomPublicChannelType:
                 return RoomPublicChannel;
-            case MyValueLogType:
-                return MyValueLog;
+            case PieceValueLogType:
+                return PieceValueLog;
             case RoomSoundEffectType:
                 return RoomSoundEffect;
             case RoomPublicChannelUpdateType:

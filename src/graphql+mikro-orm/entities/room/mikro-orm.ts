@@ -2,7 +2,7 @@ import { DbState, DownOperation } from '@kizahasi/flocon-core';
 import { Collection, Entity, IdentifiedReference, JsonType, ManyToOne, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { EM } from '../../../utils/types';
-import { MyValueLog, RoomPrvMsg, RoomPubCh, RoomSe as RoomSe } from '../roomMessage/mikro-orm';
+import { DicePieceValueLog as DicePieceValueLogEntity, NumberPieceValueLog as NumberPieceValueLogEntity, RoomPrvMsg, RoomPubCh, RoomSe as RoomSe } from '../roomMessage/mikro-orm';
 
 // Roomは最新の状況を反映するが、RoomOperationを用いて1つ前の状態に戻せるのは一部のプロパティのみ。
 // 例えばrevisionはRoomOperationをいくらapplyしても最新のまま。
@@ -26,10 +26,10 @@ export class Room {
     public id: string = v4();
 
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-    @Property({ version: true })
+    @Property({ version: true, index: true })
     public version: number = 1;
 
-    @Property({ type: Date, nullable: true, onUpdate: () => new Date() })
+    @Property({ type: Date, nullable: true, onUpdate: () => new Date(), index: true })
     public updatedAt?: Date;
 
 
@@ -40,7 +40,7 @@ export class Room {
     public joinAsSpectatorPhrase?: string;
 
     // userUid
-    @Property()
+    @Property({ index: true })
     public createdBy: string;
 
     @Property()
@@ -63,8 +63,11 @@ export class Room {
     @OneToMany(() => RoomPrvMsg, x => x.room, { orphanRemoval: true })
     public roomPrvMsgs = new Collection<RoomPrvMsg>(this);
 
-    @OneToMany(() => MyValueLog, x => x.room, { orphanRemoval: true })
-    public myValueLogs = new Collection<MyValueLog>(this);
+    @OneToMany(() => DicePieceValueLogEntity, x => x.room, { orphanRemoval: true })
+    public dicePieceValueLogs = new Collection<DicePieceValueLogEntity>(this);
+
+    @OneToMany(() => NumberPieceValueLogEntity, x => x.room, { orphanRemoval: true })
+    public numberPieceValueLogs = new Collection<NumberPieceValueLogEntity>(this);
 
     @OneToMany(() => RoomSe, x => x.room, { orphanRemoval: true })
     public roomSes = new Collection<RoomSe>(this);
@@ -87,7 +90,7 @@ export class RoomOp {
     @PrimaryKey()
     public id: string = v4();
 
-    @Property()
+    @Property({ index: true })
     public prevRevision: number;
 
     @Property({ type: JsonType })

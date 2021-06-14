@@ -15,6 +15,7 @@ import { ServerInfo } from '../entities/serverInfo/graphql';
 import VERSION from '../../VERSION';
 import { PrereleaseType } from '../../enums/PrereleaseType';
 import { alpha, beta, rc } from '@kizahasi/util';
+import { BaasType } from '../../enums/BaasType';
 
 
 export type PongPayload = {
@@ -78,7 +79,7 @@ export class MainResolver {
 
             let user = await em.findOne(User, { userUid: decodedIdToken.uid });
             if (user == null) {
-                user = new User({ userUid: decodedIdToken.uid });
+                user = new User({ userUid: decodedIdToken.uid, baasType: BaasType.Firebase });
                 user.isEntry = false;
                 em.persist(user);
             }

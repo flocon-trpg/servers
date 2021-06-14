@@ -1,18 +1,40 @@
-import { MyValueLog as MyValueLog$MikroORM } from './mikro-orm';
-import { MyValueLog as MyValueLog$GraphQL, MyValueLogType } from './graphql';
-import { decodeMyNumberValue } from '@kizahasi/flocon-core';
+import { DicePieceValueLog as DicePieceValueLog$MikroORM, NumberPieceValueLog as NumberPieceValueLog$MikroORM } from './mikro-orm';
+import { PieceValueLog, PieceValueLogType } from './graphql';
+import { decodeDicePieceValue, decodeNumberPieceValue } from '@kizahasi/flocon-core';
+import { PieceValueLogType as PieceValueLogTypeEnum } from '../../../enums/PieceValueLogType';
 
-export namespace MyValueLog {
+export namespace DicePieceValueLog {
     export namespace MikroORM {
         export namespace ToGraphQL {
-            export const state = ( entity: MyValueLog$MikroORM): MyValueLog$GraphQL => {
+            export const state = (entity: DicePieceValueLog$MikroORM): PieceValueLog => {
                 return {
-                    __tstype: MyValueLogType,
+                    __tstype: PieceValueLogType,
                     messageId: entity.id,
                     stateId: entity.stateId,
-                    stateUserUid: entity.createdBy,
+                    characterCreatedBy: entity.characterCreatedBy,
+                    characterId: entity.characterId,
                     createdAt: entity.createdAt.getTime(),
-                    valueJson: JSON.stringify(decodeMyNumberValue(entity.value)),
+                    logType: PieceValueLogTypeEnum.Dice,
+                    valueJson: JSON.stringify(decodeDicePieceValue(entity.value)),
+                };
+            };
+        }
+    }
+}
+
+export namespace NumberPieceValueLog {
+    export namespace MikroORM {
+        export namespace ToGraphQL {
+            export const state = (entity: NumberPieceValueLog$MikroORM): PieceValueLog => {
+                return {
+                    __tstype: PieceValueLogType,
+                    messageId: entity.id,
+                    stateId: entity.stateId,
+                    characterCreatedBy: entity.characterCreatedBy,
+                    characterId: entity.characterId,
+                    createdAt: entity.createdAt.getTime(),
+                    logType: PieceValueLogTypeEnum.Number,
+                    valueJson: JSON.stringify(decodeNumberPieceValue(entity.value)),
                 };
             };
         }

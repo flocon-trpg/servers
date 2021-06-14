@@ -183,7 +183,7 @@ const joinRoomCore = async ({ args, context, globalEntryPhrase, strategy, }) => 
     }
     const queue = async () => {
         const em = context.createEm();
-        const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase, });
+        const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase, });
         await em.flush();
         if (entryUser == null) {
             return {
@@ -261,7 +261,7 @@ const promoteMeCore = async ({ roomId, context, globalEntryPhrase, strategy, }) 
     const queue = async () => {
         var _a;
         const em = context.createEm();
-        const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase, });
+        const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase, });
         await em.flush();
         if (entryUser == null) {
             return {
@@ -487,7 +487,7 @@ let RoomResolver = class RoomResolver {
         }
         const queue = async () => {
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ em, userUid: decodedIdToken.uid, globalEntryPhrase });
+            const entry = await helpers_1.checkEntry({ em, userUid: decodedIdToken.uid, baasType: decodedIdToken.type, globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return {
@@ -516,7 +516,7 @@ let RoomResolver = class RoomResolver {
         }
         const queue = async () => {
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ em, userUid: decodedIdToken.uid, globalEntryPhrase });
+            const entry = await helpers_1.checkEntry({ em, userUid: decodedIdToken.uid, baasType: decodedIdToken.type, globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return {
@@ -549,7 +549,7 @@ let RoomResolver = class RoomResolver {
         }
         const queue = async () => {
             const em = context.createEm();
-            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase, });
+            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase, });
             await em.flush();
             if (entryUser == null) {
                 return {
@@ -583,9 +583,9 @@ let RoomResolver = class RoomResolver {
                     boards: {},
                     boolParamNames: {},
                     characters: {},
-                    myNumberValues: {},
                     numParamNames: {},
                     strParamNames: {},
+                    memos: {},
                 }
             });
             newRoom.joinAsPlayerPhrase = input.joinAsPlayerPhrase;
@@ -617,7 +617,7 @@ let RoomResolver = class RoomResolver {
         const queue = async () => {
             var _a, _b, _c;
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
@@ -670,9 +670,12 @@ let RoomResolver = class RoomResolver {
                 }
                 privateMessages.push(graphQLValue);
             }
-            const myValueLogs = [];
-            for (const msg of await room.myValueLogs.loadItems()) {
-                myValueLogs.push(global_3.MyValueLog.MikroORM.ToGraphQL.state(msg));
+            const pieceValueLogs = [];
+            for (const msg of await room.dicePieceValueLogs.loadItems()) {
+                pieceValueLogs.push(global_3.DicePieceValueLog.MikroORM.ToGraphQL.state(msg));
+            }
+            for (const msg of await room.numberPieceValueLogs.loadItems()) {
+                pieceValueLogs.push(global_3.NumberPieceValueLog.MikroORM.ToGraphQL.state(msg));
             }
             const soundEffects = [];
             for (const se of await room.roomSes.loadItems()) {
@@ -694,7 +697,7 @@ let RoomResolver = class RoomResolver {
                 __tstype: graphql_2.RoomMessagesType,
                 publicMessages,
                 privateMessages,
-                myValueLogs,
+                pieceValueLogs,
                 publicChannels,
                 soundEffects,
             });
@@ -724,7 +727,7 @@ let RoomResolver = class RoomResolver {
         const queue = async () => {
             var _a, _b;
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
@@ -787,9 +790,12 @@ let RoomResolver = class RoomResolver {
                 }
                 privateMessages.push(graphQLValue);
             }
-            const myValueLogs = [];
-            for (const msg of await room.myValueLogs.loadItems()) {
-                myValueLogs.push(global_3.MyValueLog.MikroORM.ToGraphQL.state(msg));
+            const pieceValueLogs = [];
+            for (const msg of await room.dicePieceValueLogs.loadItems()) {
+                pieceValueLogs.push(global_3.DicePieceValueLog.MikroORM.ToGraphQL.state(msg));
+            }
+            for (const msg of await room.numberPieceValueLogs.loadItems()) {
+                pieceValueLogs.push(global_3.NumberPieceValueLog.MikroORM.ToGraphQL.state(msg));
             }
             const soundEffects = [];
             for (const se of await room.roomSes.loadItems()) {
@@ -814,7 +820,7 @@ let RoomResolver = class RoomResolver {
                     __tstype: graphql_2.RoomMessagesType,
                     publicMessages,
                     privateMessages,
-                    myValueLogs,
+                    pieceValueLogs,
                     publicChannels,
                     soundEffects,
                 },
@@ -850,7 +856,7 @@ let RoomResolver = class RoomResolver {
         }
         const queue = async () => {
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
@@ -904,7 +910,7 @@ let RoomResolver = class RoomResolver {
         const queue = async () => {
             var _a, _b, _c, _d;
             const em = context.createEm();
-            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
             await em.flush();
             if (entryUser == null) {
                 return result_1.Result.ok({
@@ -1008,7 +1014,7 @@ let RoomResolver = class RoomResolver {
         }
         const queue = async () => {
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase, });
+            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase, });
             await em.flush();
             if (!entry) {
                 return {
@@ -1143,7 +1149,7 @@ let RoomResolver = class RoomResolver {
         }
         const queue = async () => {
             const em = context.createEm();
-            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase, });
+            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase, });
             await em.flush();
             if (entryUser == null) {
                 return {
@@ -1208,7 +1214,7 @@ let RoomResolver = class RoomResolver {
         }
         const queue = async () => {
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase, });
+            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase, });
             await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
@@ -1313,6 +1319,7 @@ let RoomResolver = class RoomResolver {
             const em = context.createEm();
             const entry = await helpers_1.checkEntry({
                 userUid: decodedIdToken.uid,
+                baasType: decodedIdToken.type,
                 em,
                 globalEntryPhrase,
             });
@@ -1374,41 +1381,110 @@ let RoomResolver = class RoomResolver {
             }
             const operation = transformed.value;
             const prevRevision = room.revision;
-            const myValueLogs = [];
-            util_1.dualKeyRecordForEach((_a = operation.myNumberValues) !== null && _a !== void 0 ? _a : {}, (value, key) => {
-                if (value.type === flocon_core_1.replace) {
-                    if (value.replace.oldValue != null) {
-                        myValueLogs.push(new mikro_orm_1.MyValueLog({
-                            createdBy: key.first,
-                            room,
-                            stateId: key.second,
+            const dicePieceValueLogs = [];
+            const numberPieceValueLogs = [];
+            util_1.dualKeyRecordForEach((_a = operation.characters) !== null && _a !== void 0 ? _a : {}, (character, characterKey) => {
+                var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+                if (character.type === flocon_core_1.replace) {
+                    util_1.recordForEach((_b = (_a = character.replace.oldValue) === null || _a === void 0 ? void 0 : _a.dicePieceValues) !== null && _b !== void 0 ? _b : {}, (dicePiece, dicePieceKey) => {
+                        dicePieceValueLogs.push(new mikro_orm_1.DicePieceValueLog({
+                            characterCreatedBy: characterKey.first,
+                            characterId: characterKey.second,
+                            stateId: dicePieceKey,
                             value: {
                                 $version: 1,
-                                type: flocon_core_1.deleteType
+                                type: flocon_core_1.deleteType,
                             },
-                        }));
-                    }
-                    if (value.replace.newValue != null) {
-                        myValueLogs.push(new mikro_orm_1.MyValueLog({
-                            createdBy: key.first,
                             room,
-                            stateId: key.second,
+                        }));
+                    });
+                    util_1.recordForEach((_d = (_c = character.replace.newValue) === null || _c === void 0 ? void 0 : _c.dicePieceValues) !== null && _d !== void 0 ? _d : {}, (dicePiece, dicePieceKey) => {
+                        dicePieceValueLogs.push(new mikro_orm_1.DicePieceValueLog({
+                            characterCreatedBy: characterKey.first,
+                            characterId: characterKey.second,
+                            stateId: dicePieceKey,
                             value: {
                                 $version: 1,
-                                type: flocon_core_1.createType
+                                type: flocon_core_1.createType,
                             },
+                            room,
                         }));
-                    }
+                    });
+                    util_1.recordForEach((_f = (_e = character.replace.oldValue) === null || _e === void 0 ? void 0 : _e.numberPieceValues) !== null && _f !== void 0 ? _f : {}, (numberPiece, numberPieceKey) => {
+                        numberPieceValueLogs.push(new mikro_orm_1.NumberPieceValueLog({
+                            characterCreatedBy: characterKey.first,
+                            characterId: characterKey.second,
+                            stateId: numberPieceKey,
+                            value: {
+                                $version: 1,
+                                type: flocon_core_1.deleteType,
+                            },
+                            room,
+                        }));
+                    });
+                    util_1.recordForEach((_h = (_g = character.replace.newValue) === null || _g === void 0 ? void 0 : _g.numberPieceValues) !== null && _h !== void 0 ? _h : {}, (dicePiece, dicePieceKey) => {
+                        numberPieceValueLogs.push(new mikro_orm_1.NumberPieceValueLog({
+                            characterCreatedBy: characterKey.first,
+                            characterId: characterKey.second,
+                            stateId: dicePieceKey,
+                            value: {
+                                $version: 1,
+                                type: flocon_core_1.createType,
+                            },
+                            room,
+                        }));
+                    });
                     return;
                 }
-                myValueLogs.push(new mikro_orm_1.MyValueLog({
-                    createdBy: key.first,
-                    room,
-                    stateId: key.second,
-                    value: flocon_core_1.toMyNumberValueLog(value.update),
-                }));
+                util_1.recordForEach((_j = character.update.dicePieceValues) !== null && _j !== void 0 ? _j : {}, (dicePiece, dicePieceKey) => {
+                    if (dicePiece.type === flocon_core_1.replace) {
+                        dicePieceValueLogs.push(new mikro_orm_1.DicePieceValueLog({
+                            characterCreatedBy: characterKey.first,
+                            characterId: characterKey.second,
+                            stateId: dicePieceKey,
+                            value: {
+                                $version: 1,
+                                type: dicePiece.replace.newValue == null ? flocon_core_1.deleteType : flocon_core_1.createType,
+                            },
+                            room,
+                        }));
+                        return;
+                    }
+                    dicePieceValueLogs.push(new mikro_orm_1.DicePieceValueLog({
+                        characterCreatedBy: characterKey.first,
+                        characterId: characterKey.second,
+                        stateId: dicePieceKey,
+                        value: flocon_core_1.toDicePieceValueLog(dicePiece.update),
+                        room,
+                    }));
+                });
+                util_1.recordForEach((_k = character.update.numberPieceValues) !== null && _k !== void 0 ? _k : {}, (numberPiece, numberPieceKey) => {
+                    if (numberPiece.type === flocon_core_1.replace) {
+                        numberPieceValueLogs.push(new mikro_orm_1.NumberPieceValueLog({
+                            characterCreatedBy: characterKey.first,
+                            characterId: characterKey.second,
+                            stateId: numberPieceKey,
+                            value: {
+                                $version: 1,
+                                type: numberPiece.replace.newValue == null ? flocon_core_1.deleteType : flocon_core_1.createType,
+                            },
+                            room,
+                        }));
+                        return;
+                    }
+                    numberPieceValueLogs.push(new mikro_orm_1.NumberPieceValueLog({
+                        characterCreatedBy: characterKey.first,
+                        characterId: characterKey.second,
+                        stateId: numberPieceKey,
+                        value: flocon_core_1.toNumberPieceValueLog(numberPiece.update),
+                        room,
+                    }));
+                });
             });
-            for (const log of myValueLogs) {
+            for (const log of dicePieceValueLogs) {
+                em.persist(log);
+            }
+            for (const log of numberPieceValueLogs) {
                 em.persist(log);
             }
             const nextRoomState = global_2.GlobalRoom.Global.applyToEntity({ em, target: room, prevState: roomState, operation });
@@ -1438,13 +1514,22 @@ let RoomResolver = class RoomResolver {
             const result = {
                 type: 'success',
                 roomOperationPayload,
-                messageUpdatePayload: myValueLogs.map(log => ({
-                    type: 'messageUpdatePayload',
-                    roomId: room.id,
-                    createdBy: undefined,
-                    visibleTo: undefined,
-                    value: global_3.MyValueLog.MikroORM.ToGraphQL.state(log),
-                })),
+                messageUpdatePayload: [
+                    ...dicePieceValueLogs.map(log => ({
+                        type: 'messageUpdatePayload',
+                        roomId: room.id,
+                        createdBy: undefined,
+                        visibleTo: undefined,
+                        value: global_3.DicePieceValueLog.MikroORM.ToGraphQL.state(log),
+                    })),
+                    ...numberPieceValueLogs.map(log => ({
+                        type: 'messageUpdatePayload',
+                        roomId: room.id,
+                        createdBy: undefined,
+                        visibleTo: undefined,
+                        value: global_3.NumberPieceValueLog.MikroORM.ToGraphQL.state(log),
+                    }))
+                ],
                 result: {
                     operation: generateOperation(decodedIdToken.uid)
                 },
@@ -1479,7 +1564,7 @@ let RoomResolver = class RoomResolver {
     }
     async writePrivateMessageCore({ args, context }) {
         if (args.visibleTo.length >= 1000) {
-            throw 'visibleTo.length is too large';
+            throw new Error('visibleTo.length is too large');
         }
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
@@ -1493,7 +1578,7 @@ let RoomResolver = class RoomResolver {
         const queue = async () => {
             var _a, _b, _c, _d;
             const em = context.createEm();
-            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
             await em.flush();
             if (entryUser == null) {
                 return result_1.Result.ok({
@@ -1569,7 +1654,7 @@ let RoomResolver = class RoomResolver {
             const visibleToArray = [...visibleTo].sort();
             const result = await createRoomPrivateMessage({ msg: entity, myUserUid: entryUser.userUid, visibleTo: visibleToArray, visibleToMe: true });
             if (result == null) {
-                throw 'This should not happen';
+                throw new Error('This should not happen');
             }
             const payload = {
                 type: 'messageUpdatePayload',
@@ -1608,7 +1693,7 @@ let RoomResolver = class RoomResolver {
         }
         const queue = async () => {
             const em = context.createEm();
-            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
             await em.flush();
             if (entryUser == null) {
                 return result_1.Result.ok({
@@ -1693,7 +1778,7 @@ let RoomResolver = class RoomResolver {
         const queue = async () => {
             var _a, _b, _c, _d;
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
@@ -1834,7 +1919,7 @@ let RoomResolver = class RoomResolver {
         const queue = async () => {
             var _a, _b, _c, _d;
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
@@ -1972,7 +2057,7 @@ let RoomResolver = class RoomResolver {
         const queue = async () => {
             var _a, _b, _c, _d;
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
@@ -2179,7 +2264,7 @@ let RoomResolver = class RoomResolver {
             }
             if (payload.value.__tstype === graphql_2.RoomPrivateMessageUpdateType) {
                 if (payload.visibleTo == null) {
-                    throw 'payload.visibleTo is required.';
+                    throw new Error('payload.visibleTo is required.');
                 }
                 if (payload.visibleTo.every(vt => vt !== userUid)) {
                     return undefined;

@@ -1,7 +1,7 @@
-import { ApolloServer, PubSub, PubSubEngine } from 'apollo-server-express';
+import { ApolloServer } from 'apollo-server-express';
 import express from 'express';
 import path from 'path';
-import admin, { auth } from 'firebase-admin';
+import admin from 'firebase-admin';
 import { ExpressContext } from 'apollo-server-express/dist/ApolloServer';
 import { ResolverContext } from './graphql+mikro-orm/utils/Contexts';
 import registerEnumTypes from './graphql+mikro-orm/registerEnumTypes';
@@ -17,6 +17,7 @@ import { InMemoryConnectionManager, pubSub } from './connection/main';
 import { CustomResult, Result } from '@kizahasi/result';
 import { authToken } from '@kizahasi/util';
 import { Context } from 'graphql-ws/lib/server';
+import { BaasType } from './enums/BaasType';
 
 
 const main = async (params: { debug: boolean }): Promise<void> => {
@@ -47,12 +48,18 @@ const main = async (params: { debug: boolean }): Promise<void> => {
 
     await checkMigrationsBeforeStart(orm, dbType);
 
-    const getDecodedIdToken = async (idToken: string): Promise<CustomResult<admin.auth.DecodedIdToken, any>> => {
+    const getDecodedIdToken = async (idToken: string): Promise<CustomResult<admin.auth.DecodedIdToken & { type: BaasType.Firebase }, any>> => {
         const decodedIdToken = await admin.auth().verifyIdToken(idToken).then(Result.ok).catch(Result.error);
-        return decodedIdToken;
+        if (decodedIdToken.isError) {
+            return decodedIdToken;
+        }
+        return Result.ok({
+            ...decodedIdToken.value,
+            type: BaasType.Firebase,
+        });
     };
 
-    const getDecodedIdTokenFromBearer = async (bearer: string | undefined): Promise<CustomResult<admin.auth.DecodedIdToken, any> | undefined> => {
+    const getDecodedIdTokenFromBearer = async (bearer: string | undefined): Promise<CustomResult<admin.auth.DecodedIdToken & { type: BaasType.Firebase }, any> | undefined> => {
         // bearerのフォーマットはだいたいこんな感じ
         // 'Bearer aNGoGo3ngC.oepGJoGoeo34Ha.Oge03mvQgeo4H'
         if (bearer == null || !bearer.startsWith('Bearer ')) {
@@ -131,7 +138,7 @@ const main = async (params: { debug: boolean }): Promise<void> => {
                 if (decodedIdToken?.isError !== false) {
                     return;
                 }
-                
+
                 const roomId = message.payload.variables?.id;
                 if (typeof roomId === 'string') {
                     connectionManager.onConnectToRoom({

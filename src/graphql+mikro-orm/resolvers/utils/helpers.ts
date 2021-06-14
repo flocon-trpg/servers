@@ -4,7 +4,8 @@ import { User } from '../../entities/user/mikro-orm';
 import { Room } from '../../entities/room/mikro-orm';
 import { GlobalRoom } from '../../entities/room/global';
 import { ParticipantState, State } from '@kizahasi/flocon-core';
-import {anonymous, recordToArray} from '@kizahasi/util';
+import { anonymous, recordToArray } from '@kizahasi/util';
+import { BaasType } from '../../../enums/BaasType';
 
 const find = <T>(source: Record<string, T | undefined>, key: string): T | undefined => source[key];
 
@@ -30,12 +31,22 @@ export const checkSignInAndNotAnonymous = (context: ResolverContext): DecodedIdT
 };
 
 // Userが見つかっても、entryしていなかったらnullを返す。
-export const getUserIfEntry = async ({ em, userUid, globalEntryPhrase }: { em: EM; userUid: string; globalEntryPhrase: string | undefined }): Promise<User | null> => {
-    const user = await em.findOne(User, { userUid });
+export const getUserIfEntry = async ({
+    em,
+    userUid,
+    baasType,
+    globalEntryPhrase,
+}: {
+    em: EM;
+    userUid: string;
+    baasType: BaasType;
+    globalEntryPhrase: string | undefined;
+}): Promise<User | null> => {
+    const user = await em.findOne(User, { userUid, baasType });
 
     if (user == null) {
         if (globalEntryPhrase == null) {
-            const newUser = new User({ userUid });
+            const newUser = new User({ userUid, baasType, });
             newUser.isEntry = true;
             em.persist(newUser);
             return user;
@@ -55,8 +66,18 @@ export const getUserIfEntry = async ({ em, userUid, globalEntryPhrase }: { em: E
     return null;
 };
 
-export const checkEntry = async ({ em, userUid, globalEntryPhrase }: { em: EM; userUid: string; globalEntryPhrase: string | undefined }): Promise<boolean> => {
-    return (await getUserIfEntry({ em, userUid, globalEntryPhrase })) != null;
+export const checkEntry = async ({
+    em,
+    userUid,
+    baasType,
+    globalEntryPhrase
+}: {
+    em: EM;
+    userUid: string;
+    baasType: BaasType;
+    globalEntryPhrase: string | undefined;
+}): Promise<boolean> => {
+    return (await getUserIfEntry({ em, userUid, baasType, globalEntryPhrase })) != null;
 };
 
 class FindRoomAndMyParticipantResult {

@@ -59,7 +59,7 @@ class PromiseQueue {
                 return rxjs_2.of(timeoutValue);
             })));
         }), Rx.concatAll(), Rx.publish(), Rx.refCount());
-        this._result.subscribe(() => undefined, reason => { throw reason; }, () => { throw 'PromiseQueue observable completed for an unknown reason.'; });
+        this._result.subscribe(() => undefined, reason => { throw reason; }, () => { throw new Error('PromiseQueue observable completed for an unknown reason.'); });
     }
     nextCore(execute, timeout) {
         const id = uuid_1.v4();
@@ -90,7 +90,7 @@ class PromiseQueue {
     async next(execute) {
         const result = await this.nextCore(execute, undefined);
         if (result.type === exports.timeout) {
-            throw 'not expected timeout. ObjectId collision?';
+            throw new Error('not expected timeout. ObjectId collision?');
         }
         return result;
     }

@@ -30,7 +30,7 @@ const loadFirebaseConfig = (): FirebaseConfig => {
         env = process.env['NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG'];
     }
     if (env == null) {
-        throw 'Firebase config is not found. Set FLOCON_FIREBASE_CONFIG or NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG environment variable.';
+        throw new Error('Firebase config is not found. Set FLOCON_FIREBASE_CONFIG or NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG environment variable.');
     }
     const json = JSON.parse(env);
 
@@ -40,7 +40,7 @@ const loadFirebaseConfig = (): FirebaseConfig => {
 const loadServerConfig = ({ databaseArg }: { databaseArg: typeof postgresql | typeof sqlite | null }): ServerConfig => {
     const env = process.env['FLOCON_API_CONFIG'];
     if (env == null) {
-        throw 'Server config is not found. Set FLOCON_API_CONFIG environment variable.';
+        throw new Error('Server config is not found. Set FLOCON_API_CONFIG environment variable.');
     }
     const json = JSON.parse(env);
 
@@ -55,7 +55,7 @@ const loadServerConfig = ({ databaseArg }: { databaseArg: typeof postgresql | ty
             database = (() => {
                 if (sqliteJson != null) {
                     if (postgresqlJson != null) {
-                        throw 'When server config has SQLite and PostgreSQL config, you must use --db parameter.';
+                        throw new Error('When server config has SQLite and PostgreSQL config, you must use --db parameter.');
                     }
                     return {
                         __type: 'sqlite',
@@ -65,7 +65,7 @@ const loadServerConfig = ({ databaseArg }: { databaseArg: typeof postgresql | ty
                     } as const;
                 }
                 if (postgresqlJson == null) {
-                    throw 'database/postgresql or database/sqlite is required.';
+                    throw new Error('database/postgresql or database/sqlite is required.');
                 }
                 return {
                     __type: postgresql,
@@ -78,7 +78,7 @@ const loadServerConfig = ({ databaseArg }: { databaseArg: typeof postgresql | ty
             break;
         case sqlite: {
             if (sqliteJson == null) {
-                throw 'database/sqlite is required.';
+                throw new Error('database/sqlite is required.');
             }
             database = {
                 __type: sqlite,
@@ -90,7 +90,7 @@ const loadServerConfig = ({ databaseArg }: { databaseArg: typeof postgresql | ty
         }
         case postgresql: {
             if (postgresqlJson == null) {
-                throw 'database/postgresql is required.';
+                throw new Error('database/postgresql is required.');
             }
             database = {
                 __type: postgresql,

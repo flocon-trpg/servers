@@ -11,15 +11,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const core_1 = require("@mikro-orm/core");
+const BaasType_1 = require("../../../enums/BaasType");
 const mikro_orm_1 = require("../roomMessage/mikro-orm");
 let User = class User {
-    constructor({ userUid }) {
+    constructor({ userUid, baasType, }) {
         this.isEntry = false;
         this.roomPubMsgs = new core_1.Collection(this);
         this.roomPrvMsgs = new core_1.Collection(this);
         this.roomSEs = new core_1.Collection(this);
         this.visibleRoomPrvMsgs = new core_1.Collection(this);
         this.userUid = userUid;
+        this.baasType = baasType;
     }
 };
 __decorate([
@@ -27,7 +29,11 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "userUid", void 0);
 __decorate([
-    core_1.Property(),
+    core_1.Enum({ items: () => BaasType_1.BaasType, index: true }),
+    __metadata("design:type", String)
+], User.prototype, "baasType", void 0);
+__decorate([
+    core_1.Property({ index: true }),
     __metadata("design:type", Boolean)
 ], User.prototype, "isEntry", void 0);
 __decorate([

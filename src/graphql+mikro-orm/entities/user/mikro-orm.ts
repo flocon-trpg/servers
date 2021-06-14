@@ -1,22 +1,29 @@
-import { Cascade, Collection, Entity, ManyToMany, OneToMany, PrimaryKey, Property } from '@mikro-orm/core';
+import { Collection, Entity, Enum, ManyToMany, OneToMany, PrimaryKey, Property } from '@mikro-orm/core';
+import { BaasType } from '../../../enums/BaasType';
 import { RoomPrvMsg, RoomPubMsg, RoomSe } from '../roomMessage/mikro-orm';
 
 // ユーザーがアカウント登録した時点では作られず、初めてentryなどをしたときに作られる。
 @Entity()
 export class User {
     public constructor({
-        userUid
+        userUid,
+        baasType,
     }: {
         userUid: string;
+        baasType: BaasType;
     }) {
         this.userUid = userUid;
+        this.baasType = baasType;
     }
 
     @PrimaryKey()
     public userUid: string;
 
+    @Enum({ items: () => BaasType, index: true })
+    public baasType: BaasType;
+
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-    @Property()
+    @Property({ index: true })
     public isEntry: boolean = false;
 
     @OneToMany(() => RoomPubMsg, x => x.createdBy, { orphanRemoval: true })
