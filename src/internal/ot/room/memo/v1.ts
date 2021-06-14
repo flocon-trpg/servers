@@ -222,7 +222,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         };
     }
     if (prevState.text !== nextState.text) {
-        resultType.text = TextOperation.diff({ prev: prevState.name, next: nextState.name });
+        resultType.text = TextOperation.diff({ prev: prevState.text, next: nextState.text });
     }
     if (prevState.textType !== nextState.textType) {
         resultType.textType = {
