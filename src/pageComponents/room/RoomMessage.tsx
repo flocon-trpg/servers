@@ -80,11 +80,11 @@ export namespace RoomMessage {
                         if (die.update.dieType != null) {
                             changed.push(`ダイス${i}が${die.update.dieType.newValue}に変更`);
                         }
-                        if (die.update.isValueChanged != null) {
-                            changed.push(`ダイス${i}の公開状態`);
-                        }
                         if (die.update.isValueChanged === true) {
                             changed.push(`ダイス${i}の値`);
+                        }
+                        if (die.update.isValuePrivate != null) {
+                            changed.push(`ダイス${i}の公開状態`);
                         }
                     });
 
