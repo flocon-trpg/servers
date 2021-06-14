@@ -524,7 +524,7 @@ export namespace MyKonva {
             state: DicePieceValueState;
         } & Size;
 
-        const DicePieceValueContent: React.FC<DicePieceValueContentProps> = ({ state, w, h }: DicePieceValueContentProps) => {
+        const DicePieceValueContent: React.FC<DicePieceValueContentProps> = ({ createdByMe, state, w, h }: DicePieceValueContentProps) => {
             const largeDieWidth = w * 2 / 3;
             const largeDieHeight = h * 2 / 3;
             const dieWidth = w / 2 - w / 20;
@@ -612,17 +612,19 @@ export namespace MyKonva {
             if (count === 0) {
                 return <ReactKonva.Group width={w} height={h}>
                     {background}
-                    {/* ダイスがないと透明ならば行方不明になってしまうので、暫定的に空ダイスを1つ表示させている */}
+                    {/* ダイスがないと透明、ということにすると行方不明になってしまうので、暫定的に空ダイスを1つ表示させている */}
                     <KonvaD6 x={positions[1][0].x} y={positions[1][0].y} width={positions[1][0].w} height={positions[1][0].h} value={null} />
                 </ReactKonva.Group>;
             }
 
+            const diceOpacity = (isValuePrivate: boolean) => isValuePrivate ? 0.5 : 1;
+
             return <ReactKonva.Group width={w} height={h}>
                 {background}
-                {dice[0] != null && <KonvaD6 x={positions[count][0].x} y={positions[count][0].y} width={positions[count][0].w} height={positions[count][0].h} value={dice[0].value} />}
-                {(dice[1] != null && count !== 1) && <KonvaD6 x={positions[count][1].x} y={positions[count][1].y} width={positions[count][1].w} height={positions[count][1].h} value={dice[1].value} />}
-                {(dice[2] != null && (count === 3 || count === 4)) && <KonvaD6 x={positions[count][2].x} y={positions[count][2].y} width={positions[count][2].w} height={positions[count][2].h} value={dice[2].value} />}
-                {(dice[3] != null && count === 4) && <KonvaD6 x={positions[count][3].x} y={positions[count][3].y} width={positions[count][3].w} height={positions[count][3].h} value={dice[3].value} />}
+                {dice[0] != null && <KonvaD6 x={positions[count][0].x} y={positions[count][0].y} width={positions[count][0].w} height={positions[count][0].h} value={dice[0].value} opacity={diceOpacity(dice[0].isValuePrivate)} />}
+                {(dice[1] != null && count !== 1) && <KonvaD6 x={positions[count][1].x} y={positions[count][1].y} width={positions[count][1].w} height={positions[count][1].h} value={dice[1].value} opacity={diceOpacity(dice[1].isValuePrivate)}  />}
+                {(dice[2] != null && (count === 3 || count === 4)) && <KonvaD6 x={positions[count][2].x} y={positions[count][2].y} width={positions[count][2].w} height={positions[count][2].h} value={dice[2].value} opacity={diceOpacity(dice[2].isValuePrivate)}   />}
+                {(dice[3] != null && count === 4) && <KonvaD6 x={positions[count][3].x} y={positions[count][3].y} width={positions[count][3].w} height={positions[count][3].h} value={dice[3].value} opacity={diceOpacity(dice[3].isValuePrivate)}  />}
             </ReactKonva.Group>;
         };
 

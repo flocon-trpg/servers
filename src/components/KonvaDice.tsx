@@ -3,6 +3,8 @@ import * as ReactKonva from 'react-konva';
 import { animated, useTransition } from '@react-spring/konva';
 import { success, useImage } from '../hooks/image';
 
+export const question = 'question';
+
 const isD6Value = (source: number | null): boolean => {
     if (source == null || !Number.isInteger(source)) {
         return false;
@@ -11,15 +13,29 @@ const isD6Value = (source: number | null): boolean => {
 };
 
 type KonvaD6Props = {
-    value: number | null;
+    value: number | null | typeof question;
     x?: number;
     y?: number;
     width?: number;
     height?: number;
+    opacity?: number;
 }
 
-export const KonvaD6: React.FC<KonvaD6Props> = ({ value, x, y, width, height }: KonvaD6Props) => {
-    const image = useImage(isD6Value(value) ? `/dice/${value}-6.png` : '/dice/0-6.png');
+export const KonvaD6: React.FC<KonvaD6Props> = ({
+    value,
+    x,
+    y,
+    width,
+    height,
+    opacity
+}: KonvaD6Props) => {
+    let src: string;
+    if (value === question) {
+        src = '/dice/q-6.png';
+    } else {
+        src = isD6Value(value) ? `/dice/${value}-6.png` : '/dice/0-6.png';
+    }
+    const image = useImage(src);
 
     const transitions = useTransition(value, {
         from: { opacity: 0 },
@@ -29,7 +45,7 @@ export const KonvaD6: React.FC<KonvaD6Props> = ({ value, x, y, width, height }: 
     if (image.type !== success) {
         return null;
     }
-    return (<ReactKonva.Group>
+    return (<ReactKonva.Group opacity={opacity ?? 1}>
         {transitions(style => {
             return (<animated.Image
                 {...style}
