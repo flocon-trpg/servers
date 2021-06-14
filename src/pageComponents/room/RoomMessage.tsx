@@ -13,6 +13,9 @@ import { isIdRecord, ParticipantState, PieceState, PieceUpOperation, RecordUpOpe
 import { $free, dualKeyRecordToDualKeyMap, recordToMap } from '@kizahasi/util';
 import { tripleKeyToString } from '../../utils/tripleKeyToString';
 
+// 改行荒らし対策として、maxHeightを設けている。200pxという値は適当
+export const messageContentMaxHeight = 200;
+
 export namespace RoomMessage {
     const Image: React.FC<{ filePath: FilePathFragment | undefined }> = ({ filePath }: { filePath: FilePathFragment | undefined }) => {
         const src = useFirebaseStorageUrl(filePath);
@@ -159,7 +162,7 @@ export namespace RoomMessage {
                     ...style,
                     color: message.value.textColor ?? undefined,
                     whiteSpace: 'pre-wrap',
-                    maxHeight: 200, // 改行荒らし対策として、maxHeightを設けている。200pxという値は適当
+                    maxHeight: messageContentMaxHeight,
                     overflowY: 'auto' // maxHeightを上回った場合はスクロールバーを表示する
                 }}>
                     <Popover content={message.value.initTextSource}>

@@ -1,12 +1,11 @@
-import { RoomMessages, RoomPrivateMessage, RoomPublicChannelFragment, RoomPublicMessage } from '../generated/graphql';
+import { RoomMessages, RoomPublicChannelFragment } from '../generated/graphql';
 import { PrivateChannelSet } from './PrivateChannelSet';
 import { escape } from 'html-escaper';
 import moment from 'moment';
 import { PublicChannelNames } from './types';
-import { RoomMessage } from '../pageComponents/room/RoomMessage';
+import { messageContentMaxHeight, RoomMessage } from '../pageComponents/room/RoomMessage';
 import { isDeleted, toText } from './message';
-import { recordToMap, createStateMap, recordForEach, ReadonlyStateMap } from '@kizahasi/util';
-import { CharacterState, ParticipantState } from '@kizahasi/flocon-core';
+import { ParticipantState } from '@kizahasi/flocon-core';
 import { Color } from './color';
 
 const privateMessage = 'privateMessage';
@@ -196,6 +195,9 @@ ${msg.value.text == null ? '<span class="text gray">(削除済み)</span>' : `<s
             }
             .text {
                 font-weight: bold;
+                white-space: pre-wrap;
+                max-height: ${messageContentMaxHeight}px;
+                overflow-y: auto;
             }
         </style>
     </head>
