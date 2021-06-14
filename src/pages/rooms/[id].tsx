@@ -1,21 +1,22 @@
 import { useRouter } from 'next/router';
 import React, { PropsWithChildren, ReactNode } from 'react';
-import RoomComponent from '../../components/room/Room';
-import { GetRoomFailureType, JoinRoomAsPlayerMutation, JoinRoomFailureType, ParticipantRole, RoomAsListItemFragment, RoomGetStateFragment, useJoinRoomAsPlayerMutation, useJoinRoomAsSpectatorMutation, useRoomEventSubscription } from '../../generated/graphql';
+import RoomComponent from '../../pageComponents/room/Room';
+import { GetRoomFailureType, JoinRoomAsPlayerMutation, JoinRoomFailureType, RoomAsListItemFragment, useJoinRoomAsPlayerMutation, useJoinRoomAsSpectatorMutation } from '../../generated/graphql';
 import { Alert, Button, Card, Input, Result, Spin, notification as antdNotification } from 'antd';
 import Layout from '../../layouts/Layout';
-import { ApolloProvider, FetchResult } from '@apollo/client';
+import { FetchResult } from '@apollo/client';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import { deleted, getRoomFailure, joined, loading, mutationFailure, myAuthIsUnavailable, nonJoined, useRoomState } from '../../hooks/useRoomState';
-import Center from '../../foundations/Center';
-import LoadingResult from '../../foundations/Result/LoadingResult';
-import NotSignInResult from '../../foundations/Result/NotSignInResult';
+import Center from '../../components/Center';
+import LoadingResult from '../../components/Result/LoadingResult';
+import NotSignInResult from '../../components/Result/NotSignInResult';
 import { usePublishRoomEventSubscription } from '../../hooks/usePublishRoomEventSubscription';
 import { useDispatch } from 'react-redux';
-import roomModule, { Notification } from '../../modules/roomModule';
+import roomStateModule from '../../modules/roomStateModule';
 import { useAllRoomMessages } from '../../hooks/useRoomMessages';
 import { useSelector } from '../../store';
 import useRoomConfig from '../../hooks/localStorage/useRoomConfig';
+import { roomDrawerAndPopoverModule } from '../../modules/roomDrawerAndPopoverModule';
 
 type JoinRoomFormProps = {
     roomState: RoomAsListItemFragment;
@@ -126,19 +127,22 @@ const RoomBehavior: React.FC<PropsWithChildren<{ roomId: string }>> = ({ roomId,
     const { observable, data: roomEventSubscription, error } = usePublishRoomEventSubscription(roomId);
     const { state: roomState, refetch: refetchRoomState } = useRoomState(roomId, observable);
     const allRoomMessages = useAllRoomMessages({ roomId, roomEventSubscription });
+    React.useEffect(() => {
+        dispatch(roomDrawerAndPopoverModule.actions.reset());
+    }, [roomId, dispatch]);
 
     React.useEffect(() => {
-        dispatch(roomModule.actions.reset());
-        dispatch(roomModule.actions.setRoom({ roomId }));
+        dispatch(roomStateModule.actions.reset());
+        dispatch(roomStateModule.actions.setRoom({ roomId }));
     }, [dispatch, roomId]);
     React.useEffect(() => {
-        dispatch(roomModule.actions.setRoom({ roomState }));
+        dispatch(roomStateModule.actions.setRoom({ roomState }));
     }, [dispatch, roomState]);
     React.useEffect(() => {
-        dispatch(roomModule.actions.setRoom({ roomEventSubscription }));
+        dispatch(roomStateModule.actions.setRoom({ roomEventSubscription }));
     }, [dispatch, roomEventSubscription]);
     React.useEffect(() => {
-        dispatch(roomModule.actions.setRoom({ allRoomMessagesResult: allRoomMessages }));
+        dispatch(roomStateModule.actions.setRoom({ allRoomMessagesResult: allRoomMessages }));
     }, [dispatch, allRoomMessages]);
 
     const newNotification = useSelector(state => state.roomModule.notifications.newValue);

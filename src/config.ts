@@ -8,7 +8,7 @@ import fs from 'fs';
 const loadConfig = () => {
     const firebaseFile = process.env['NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG'];
     if (firebaseFile == null) {
-        throw 'Firebase config is not found. Set NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG environment variable.';
+        throw new Error('Firebase config is not found. Set NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG environment variable.');
     }
 
     const firebaseJson = JSON.parse(firebaseFile.toString());
@@ -16,7 +16,7 @@ const loadConfig = () => {
 
     const webConfigFile = process.env['NEXT_PUBLIC_FLOCON_WEB_CONFIG'];
     if (webConfigFile == null) {
-        throw 'Web config is not found. Set NEXT_PUBLIC_FLOCON_WEB_CONFIG environment variable.';
+        throw new Error('Web config is not found. Set NEXT_PUBLIC_FLOCON_WEB_CONFIG environment variable.');
     }
 
     const webConfigJson = JSON.parse(webConfigFile.toString());

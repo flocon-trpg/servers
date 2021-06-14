@@ -2,7 +2,7 @@ import { Drawer } from 'antd';
 import React from 'react';
 import { interval } from 'rxjs';
 import useConstant from 'use-constant';
-import BufferedInput, { OnChangeParams } from '../../foundations/BufferedInput';
+import BufferedInput, { OnChangeParams } from '../../components/BufferedInput';
 
 const Main: React.FC = () => {
     const [changelog, setChangelog] = React.useState<OnChangeParams[]>([]);

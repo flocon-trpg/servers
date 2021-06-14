@@ -20,7 +20,7 @@ const heightMultiplier = 3;
 
 function PagenationScroll({ source, height, elementMinHeight }: Props): JSX.Element | null {
     if (elementMinHeight <= 0) {
-        throw 'elementMinHeight <= 0';
+        throw new Error('elementMinHeight <= 0');
     }
 
     const threshold = elementMinHeight * 2;

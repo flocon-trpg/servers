@@ -1,44 +1,20 @@
 import { State, UpOperation, apply, composeUpOperation, clientTransform, diff, toUpOperation } from '@kizahasi/flocon-core';
 import { StateManager, StateManagerParameters } from './StateManager';
 
-type Parameters = StateManagerParameters<State, UpOperation, UpOperation>;
+type Parameters = StateManagerParameters<State, UpOperation>;
 
 const createParameters = (state: State, revision: number): Parameters => {
     return {
         state,
         revision,
-        applyGetOperation: params => {
+        apply: params => {
             const result = apply(params);
             if (result.isError) {
                 throw result.error;
             }
             return result.value;
         },
-        applyPostOperation: params => {
-            const result = apply(params);
-            if (result.isError) {
-                throw result.error;
-            }
-            return result.value;
-        },
-        composePostOperation: params => {
-            const result = composeUpOperation(params);
-            if (result.isError) {
-                throw result.error;
-            }
-            return result.value ?? { $version: 1 };
-        },
-        getFirstTransform: params => {
-            const result = clientTransform(params);
-            if (result.isError) {
-                throw result.error;
-            }
-            return {
-                firstPrime: result.value.firstPrime ?? { $version: 1 },
-                secondPrime: result.value.secondPrime ?? { $version: 1 },
-            };
-        },
-        postFirstTransform: params => {
+        transform: params => {
             const result = clientTransform(params);
             if (result.isError) {
                 throw result.error;
@@ -55,6 +31,6 @@ const createParameters = (state: State, revision: number): Parameters => {
     };
 };
 
-export const create = (state: State, revision: number): StateManager<State, UpOperation, UpOperation> => {
+export const create = (state: State, revision: number): StateManager<State, UpOperation> => {
     return new StateManager(createParameters(state, revision));
 };

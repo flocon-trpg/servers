@@ -17,7 +17,7 @@ export function useBuffer<TValue, TComponent>({
     setValueToComponent: (params: { value: TValue; component: TComponent }) => void;
 }) {
     if (bufferDuration != null && bufferDuration < 0) {
-        throw 'bufferDuration < 0';
+        throw new Error('bufferDuration < 0');
     }
 
     const onChangeRef = React.useRef(onChangeOutput);

@@ -2,7 +2,7 @@ import { Alert, Button, Typography } from 'antd';
 import Link from 'next/link';
 import React from 'react';
 import FilesManagerDrawer from '../components/FilesManagerDrawer';
-import QueryResultViewer from '../foundations/QueryResultViewer';
+import QueryResultViewer from '../components/QueryResultViewer';
 import { PrereleaseType, useGetServerInfoQuery } from '../generated/graphql';
 import Layout from '../layouts/Layout';
 import { FilesManagerDrawerType, none } from '../utils/types';
@@ -86,9 +86,11 @@ const Index: React.FC = () => {
                     {versionInfo}
                 </QueryResultViewer>
                 <div style={{ height: spacing }} />
-                <Typography.Title level={3}>ドキュメントなど</Typography.Title>
+                <Typography.Title level={3}>ドキュメント、コラムなど</Typography.Title>
                 <ul>
-                    <li><Link href='/docs/board'>新しくなったボードの使い方</Link> (New! 2021/05/29)</li>
+                    <li><Link href='/docs/auth'>Floconにおけるユーザー認証の仕組み</Link> (New! 2021/06/09)</li>
+                    <li><Link href='/docs/storage'>ファイルアップローダーの仕様</Link> (New! 2021/06/09)</li>
+                    <li><Link href='/docs/board'>新しくなったボードの使い方</Link> (2021/05/29)</li>
                     <li><Link href='/docs/toml'>変数、コマンド</Link></li>
                     <li><Link href='/docs/dev-memo'>制作メモ、更新履歴など</Link></li>
                 </ul>

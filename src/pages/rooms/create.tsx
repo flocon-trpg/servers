@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import React from 'react';
 import Layout from '../../layouts/Layout';
 import { CreateRoomFailureType, CreateRoomInput, useCreateRoomMutation } from '../../generated/graphql';
-import Center from '../../foundations/Center';
+import Center from '../../components/Center';
 import MyAuthContext from '../../contexts/MyAuthContext';
 
 const labelCol = 10;

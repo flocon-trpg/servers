@@ -1,14 +1,15 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 //import { BoardConfig, BoardsPanelConfig } from '../states/BoardsPanelConfig';
-import { activeBoardPanel, boardEditorPanel, characterPanel, gameEffectPanel, messagePanel, myValuePanel, PanelAction, participantPanel, RoomConfig } from '../states/RoomConfig';
+import { activeBoardPanel, boardEditorPanel, characterPanel, gameEffectPanel, messagePanel, pieceValuePanel, PanelAction, participantPanel, RoomConfig, memoPanel } from '../states/RoomConfig';
 import * as generators from '../utils/generators';
 import { ResizableDelta } from 'react-rnd';
 import { ResizeDirection } from 're-resizable';
 import { BoardEditorPanelConfig } from '../states/BoardEditorPanelConfig';
-import { MessageFilter, MessagePanelConfig } from '../states/MessagesPanelConfig';
+import { MessageFilter, MessagePanelConfig } from '../states/MessagePanelConfig';
 import { reset, Reset } from '../utils/types';
 import { BoardConfig, defaultBoardConfig } from '../states/BoardConfig';
 import { StrIndex5, CompositeKey, recordToArray, compositeKeyToString } from '@kizahasi/util';
+import { MemoPanelConfig } from '../states/MemoPanelConfig';
 
 export type SetOtherValuesAction = {
     roomId: string;
@@ -82,6 +83,22 @@ export type UpdateChannelVisibilityAction = {
     newValue: boolean | undefined;
 }
 
+export type AddMemoPanelConfigAction = {
+    roomId: string;
+    panel: Omit<MemoPanelConfig, 'zIndex'>;
+}
+
+export type UpdateMemoPanelAction = {
+    roomId: string;
+    panelId: string;
+    panel: Partial<MemoPanelConfig>;
+}
+
+export type RemoveMemoPanelAction = {
+    roomId: string;
+    panelId: string;
+}
+
 export type AddMessagePanelConfigAction = {
     roomId: string;
     panel: Omit<MessagePanelConfig, 'zIndex'>;
@@ -138,6 +155,7 @@ const fixRoomConfig = (config: RoomConfig): void => {
     };
     recordToArray(config.panels.boardEditorPanels).forEach(pair => fixPosition(pair.value));
     fixPosition(config.panels.characterPanel);
+    recordToArray(config.panels.memoPanels).forEach(pair => fixPosition(pair.value));
     recordToArray(config.panels.messagePanels).forEach(pair => fixPosition(pair.value));
 };
 
@@ -147,21 +165,32 @@ const bringPanelToFront = (state: RoomConfig | null, action: PanelAction): void 
     }
 
     const panels: { zIndex: number }[] = [];
+    panels.push(state.panels.activeBoardPanel);
     for (const panelId in state.panels.boardEditorPanels) {
         const panel = state.panels.boardEditorPanels[panelId];
-        panels.push(panel);
+        if (panel != null) {
+            panels.push(panel);
+        }
     }
     panels.push(state.panels.characterPanel);
     panels.push(state.panels.gameEffectPanel);
+    for (const panelId in state.panels.memoPanels) {
+        const panel = state.panels.memoPanels[panelId];
+        if (panel != null) {
+            panels.push(panel);
+        }
+    }
     for (const panelId in state.panels.messagePanels) {
         const panel = state.panels.messagePanels[panelId];
-        panels.push(panel);
+        if (panel != null) {
+            panels.push(panel);
+        }
     }
-    panels.push(state.panels.myValuePanel);
+    panels.push(state.panels.pieceValuePanel);
     panels.push(state.panels.participantPanel);
 
-    // まずzIndexが小さい順に0,1,2,…と割り振っていく。こうすることで、例えば[-100, 5, 10000]のように飛び飛びになっている状態を修正する。zIndexが同一であるパネルが複数ある場合でも異なるzIndexになるため、場合によっては前面に来るパネルが変わる可能性もあるが、直接Configを編集したりしていない限りすべてが異なるzIndexであるはずなので無視している。
-    // 次に、最前面にさせたいパネルのzIndexに(max(割り振ったzIndex) + 1)を代入して完了。
+    // まずzIndexが小さい順に0,1,2,…と割り振っていく。こうすることで、例えば[-100, 5, 10000]のように飛び飛びになっている状態を修正する。zIndexが同一であるパネルが複数ある場合でも異なるzIndexになるため、場合によっては前面に来るパネルが変わる可能性もあるが、直接Configを編集したりしていない限りすべてのzIndexは異なっているはずなので無視している。
+    // 次に、最前面にさせたいパネルのzIndexに(max(割り振ったzIndexの集合) + 1)を代入して完了。
 
     panels.sort((x, y) => x.zIndex - y.zIndex).forEach((panel, i) => {
         panel.zIndex = i;
@@ -188,6 +217,14 @@ const bringPanelToFront = (state: RoomConfig | null, action: PanelAction): void 
             state.panels.gameEffectPanel.zIndex = panels.length;
             return;
         }
+        case memoPanel: {
+            const targetPanel = state.panels.memoPanels[action.target.panelId];
+            if (targetPanel == null) {
+                return;
+            }
+            targetPanel.zIndex = panels.length;
+            return;
+        }
         case messagePanel: {
             const targetPanel = state.panels.messagePanels[action.target.panelId];
             if (targetPanel == null) {
@@ -200,8 +237,8 @@ const bringPanelToFront = (state: RoomConfig | null, action: PanelAction): void 
             state.panels.participantPanel.zIndex = panels.length;
             return;
         }
-        case myValuePanel: {
-            state.panels.myValuePanel.zIndex = panels.length;
+        case pieceValuePanel: {
+            state.panels.pieceValuePanel.zIndex = panels.length;
             return;
         }
     }
@@ -285,6 +322,14 @@ const roomConfigModule = createSlice({
                     state.panels.gameEffectPanel.isMinimized = action.payload.newValue;
                     return;
                 }
+                case memoPanel: {
+                    const targetPanel = state.panels.memoPanels[action.payload.target.panelId];
+                    if (targetPanel == null) {
+                        return;
+                    }
+                    targetPanel.isMinimized = action.payload.newValue;
+                    return;
+                }
                 case messagePanel: {
                     const targetPanel = state.panels.messagePanels[action.payload.target.panelId];
                     if (targetPanel == null) {
@@ -297,8 +342,8 @@ const roomConfigModule = createSlice({
                     state.panels.participantPanel.isMinimized = action.payload.newValue;
                     return;
                 }
-                case myValuePanel: {
-                    state.panels.myValuePanel.isMinimized = action.payload.newValue;
+                case pieceValuePanel: {
+                    state.panels.pieceValuePanel.isMinimized = action.payload.newValue;
                     return;
                 }
             }
@@ -448,6 +493,60 @@ const roomConfigModule = createSlice({
             }
             resizePanel(targetPanel, action.payload.dir, action.payload.delta);
         },
+        
+        addMemoPanelConfig: (state: RoomConfig | null, action: PayloadAction<AddMemoPanelConfigAction>) => {
+            if (state == null || state.roomId !== action.payload.roomId) {
+                return;
+            }
+            const panelId = generators.simpleId();
+            state.panels.memoPanels[panelId] = { ...action.payload.panel, zIndex: 0 };
+            bringPanelToFront(state, { roomId: action.payload.roomId, target: { type: memoPanel, panelId } });
+        },
+        updateMemoPanel: (state: RoomConfig | null, action: PayloadAction<UpdateMemoPanelAction>) => {
+            if (state == null || state.roomId !== action.payload.roomId) {
+                return;
+            }
+            const targetPanel = state.panels.memoPanels[action.payload.panelId];
+            if (targetPanel == null) {
+                return;
+            }
+            state.panels.memoPanels[action.payload.panelId] = {
+                ...targetPanel,
+                isMinimized: action.payload.panel.isMinimized ?? targetPanel.isMinimized,
+                x: action.payload.panel.x ?? targetPanel.x,
+                y: action.payload.panel.y ?? targetPanel.y,
+                width: action.payload.panel.width ?? targetPanel.width,
+                height: action.payload.panel.height ?? targetPanel.height,
+                zIndex: action.payload.panel.zIndex ?? targetPanel.zIndex,
+                selectedMemoId: action.payload.panel.selectedMemoId ?? targetPanel.selectedMemoId,
+            };
+        },
+        moveMemoPanel: (state: RoomConfig | null, action: PayloadAction<MovePanelAction & { panelId: string }>) => {
+            if (state == null || state.roomId !== action.payload.roomId) {
+                return;
+            }
+            const targetPanel = state.panels.memoPanels[action.payload.panelId];
+            if (targetPanel == null) {
+                return;
+            }
+            movePanel(targetPanel, action.payload);
+        },
+        resizeMemoPanel: (state: RoomConfig | null, action: PayloadAction<ResizePanelAction & { panelId: string }>) => {
+            if (state == null || state.roomId !== action.payload.roomId) {
+                return;
+            }
+            const targetPanel = state.panels.memoPanels[action.payload.panelId];
+            if (targetPanel == null) {
+                return;
+            }
+            resizePanel(targetPanel, action.payload.dir, action.payload.delta);
+        },
+        removeMemoPanel: (state: RoomConfig | null, action: PayloadAction<RemoveMemoPanelAction>) => {
+            if (state == null) {
+                return;
+            }
+            delete state.panels.memoPanels[action.payload.panelId];
+        },
 
         addMessagePanelConfig: (state: RoomConfig | null, action: PayloadAction<AddMessagePanelConfigAction>) => {
             if (state == null || state.roomId !== action.payload.roomId) {
@@ -537,21 +636,21 @@ const roomConfigModule = createSlice({
             resizePanel(targetPanel, action.payload.dir, action.payload.delta);
         },
 
-        moveMyValuePanel: (state: RoomConfig | null, action: PayloadAction<MovePanelAction>) => {
+        movePieceValuePanel: (state: RoomConfig | null, action: PayloadAction<MovePanelAction>) => {
             if (state == null || state.roomId !== action.payload.roomId) {
                 return;
             }
-            const targetPanel = state.panels.myValuePanel;
+            const targetPanel = state.panels.pieceValuePanel;
             if (targetPanel == null) {
                 return;
             }
             movePanel(targetPanel, action.payload);
         },
-        resizeMyValuePanel: (state: RoomConfig | null, action: PayloadAction<ResizePanelAction>) => {
+        resizePieceValuePanel: (state: RoomConfig | null, action: PayloadAction<ResizePanelAction>) => {
             if (state == null || state.roomId !== action.payload.roomId) {
                 return;
             }
-            const targetPanel = state.panels.myValuePanel;
+            const targetPanel = state.panels.pieceValuePanel;
             if (targetPanel == null) {
                 return;
             }

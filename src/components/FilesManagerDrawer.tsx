@@ -11,10 +11,25 @@ import FirebaseStorageLink from './FirebaseStorageLink';
 import { FilesManagerDrawerType, some } from '../utils/types';
 import ConfigContext from '../contexts/ConfigContext';
 import copy from 'clipboard-copy';
+import { fileName } from '../utils/filename';
+import { extname } from '../utils/extname';
+import { InformationIcon } from './InformationIcon';
 
 type Reference = firebase.default.storage.Reference;
 
-type Column = ColumnGroupType<Reference> | ColumnType<Reference>;
+const image = 'image';
+const sound = 'sound';
+const others = 'others';
+type FileType = typeof image | typeof sound | typeof others;
+
+type DataSource = {
+    reference: Reference;
+    fullPath: string;
+    fileName: string;
+    fileType: FileType;
+}
+
+type Column = ColumnGroupType<DataSource> | ColumnType<DataSource>;
 
 const ForceReloadPublicListKeyContext = React.createContext(0);
 const SetForceReloadPublicListKeyContext = React.createContext<React.Dispatch<React.SetStateAction<number>>>(() => undefined);
@@ -91,12 +106,53 @@ const FirebaseUploader: React.FC<FirebaseUploaderProps> = ({ authUser, onUploade
     );
 };
 
+
 const fileNameColumn: Column = {
-    title: 'Name',
+    title: 'ファイル名',
     dataIndex: 'name',
+    sorter: (x, y) => x.fileName.localeCompare(y.fileName),
+    sortDirections: ['ascend', 'descend'],
     // eslint-disable-next-line react/display-name
-    render: (_, record: Reference) => {
-        return (<FirebaseStorageLink key={record.fullPath} reference={record} />);
+    render: (_, record: DataSource) => {
+        return (<FirebaseStorageLink key={record.reference.fullPath} reference={record.reference} />);
+    },
+};
+
+const fileTypeColumn: Column = {
+    title: (<span>種類 <InformationIcon title='種類の分類はあくまで簡易的なものです。誤った分類がされることがあります。' /></span>),
+    dataIndex: '',
+    key: 'fileType',
+    filters: [
+        { text: '画像', value: image },
+        { text: '音声', value: sound },
+        { text: 'その他', value: others },
+    ],
+    onFilter: (value, record) => value === record.fileType,
+    sorter: (x, y) => {
+        const toNumber = (fileType: FileType): number => {
+            switch(fileType) {
+                case image:
+                    return 1;
+                case sound:
+                    return 2;
+                default:
+                    return 3;
+            }
+        };
+        return toNumber(x.fileType) - toNumber(y.fileType);
+    },
+    sortDirections: ['ascend', 'descend'],
+    width: 100,
+    // eslint-disable-next-line react/display-name
+    render: (_, record: DataSource) => {
+        switch (record.fileType) {
+            case image:
+                return '画像';
+            case sound:
+                return '音声';
+            default:
+                return 'その他';
+        }
     },
 };
 
@@ -105,11 +161,10 @@ const openButtonColumn = (onClick: (ref: Reference) => void): Column => ({
     dataIndex: '',
     key: 'Open',
     // eslint-disable-next-line react/display-name
-    render: (_, record: Reference) => {
-        return (<Button key={record.fullPath} onClick={() => onClick(record)}>選択</Button>);
+    render: (_, record: DataSource) => {
+        return (<Button key={record.reference.fullPath} onClick={() => onClick(record.reference)}>選択</Button>);
     },
 });
-
 
 type FileOptionsMenuProps = {
     reference: Reference;
@@ -168,11 +223,11 @@ const fileOptionsColumn = (storageType: StorageType): Column => ({
     dataIndex: 'options',
     width: 40,
     // eslint-disable-next-line react/display-name
-    render: (_, record: Reference) => {
+    render: (_, record: DataSource) => {
         return (
             <Dropdown.Button
                 icon={<Icons.MoreOutlined />}
-                overlay={<FileOptionsMenu reference={record} storageType={storageType} />}
+                overlay={<FileOptionsMenu reference={record.reference} storageType={storageType} />}
                 type={'text' as any}
                 trigger={['click']} />
         );
@@ -186,13 +241,51 @@ type FirebaseFilesListProps = {
 }
 
 const FirebaseFilesList: React.FC<FirebaseFilesListProps> = ({ files, onFlieOpen, storageType }: FirebaseFilesListProps) => {
+    const dataSource: DataSource[] = React.useMemo(() =>
+        files.map(file => {
+            const name = fileName(file.fullPath);
+            let fileType: FileType;
+            switch (extname(name)?.toLowerCase()) {
+                case 'jpg':
+                case 'jpeg':
+                case 'png':
+                case 'gif':
+                case 'bmp':
+                case 'webp':
+                    fileType = image;
+                    break;
+                case 'mp3':
+                case 'ogg':
+                case 'oga':
+                case 'wav':
+                case 'aac':
+                case 'weba':
+                    fileType = sound;
+                    break;
+                default:
+                    fileType = others;
+                    break;
+            }
+            return {
+                reference: file,
+                fullPath: file.fullPath,
+                fileName: name,
+                fileType,
+            };
+        })
+    , [files]);
     const columns = (() => {
         if (onFlieOpen != null) {
-            return [fileNameColumn, openButtonColumn(onFlieOpen), fileOptionsColumn(storageType)];
+            return [fileNameColumn, fileTypeColumn, openButtonColumn(onFlieOpen), fileOptionsColumn(storageType)];
         }
-        return [fileNameColumn, fileOptionsColumn(storageType)];
+        return [fileNameColumn, fileTypeColumn, fileOptionsColumn(storageType)];
     })();
-    return (<Table rowKey='fullPath' columns={columns} dataSource={files} />);
+    return (<Table
+        size='small'
+        pagination={{ pageSize: 15 }}
+        rowKey='fullPath'
+        columns={columns}
+        dataSource={dataSource} />);
 };
 
 type FirebaseFilesManagerProps = {
@@ -360,7 +453,7 @@ const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => 
                             closable
                             visible={drawerType != null}
                             onClose={() => onClose()}
-                            width={600}
+                            width={700}
                             footer={(<DrawerFooter
                                 close={({
                                     textType: 'close',

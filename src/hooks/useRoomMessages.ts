@@ -1,11 +1,11 @@
 import { ApolloError } from '@apollo/client';
 import produce from 'immer';
 import React from 'react';
-import { useGetMessagesQuery, RoomMessageEventFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment, RoomPublicChannelFragment, RoomSoundEffectFragment, MyValueLogFragment, RoomEventSubscription, GetRoomMessagesFailureType, useGetMessagesLazyQuery } from '../generated/graphql';
+import { useGetMessagesQuery, RoomMessageEventFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment, RoomPublicChannelFragment, RoomSoundEffectFragment, PieceValueLogFragment, RoomEventSubscription, GetRoomMessagesFailureType, useGetMessagesLazyQuery } from '../generated/graphql';
 import { appConsole } from '../utils/appConsole';
 import { PrivateChannelSet, PrivateChannelSets } from '../utils/PrivateChannelSet';
 import { usePrevious } from './usePrevious';
-import { Notification } from '../modules/roomModule';
+import { Notification } from '../modules/roomStateModule';
 import { useSelector } from '../store';
 import { useMe } from './useMe';
 
@@ -16,7 +16,7 @@ import { useMe } from './useMe';
 
 export const privateMessage = 'privateMessage';
 export const publicMessage = 'publicMessage';
-export const myValueLog = 'myValueLog';
+export const pieceValueLog = 'pieceValueLog';
 export const publicChannel = 'publicChannel';
 export const soundEffect = 'soundEffect';
 
@@ -27,14 +27,14 @@ export type RoomMessage = {
     type: typeof publicMessage;
     value: RoomPublicMessageFragment;
 } | {
-    type: typeof myValueLog;
-    value: MyValueLogFragment;
+    type: typeof pieceValueLog;
+    value: PieceValueLogFragment;
 } | {
     type: typeof soundEffect;
     value: RoomSoundEffectFragment;
 };
 
-const createRoomMessage = (source: RoomPrivateMessageFragment | RoomPublicMessageFragment | MyValueLogFragment | RoomSoundEffectFragment): RoomMessage | undefined => {
+const createRoomMessage = (source: RoomPrivateMessageFragment | RoomPublicMessageFragment | PieceValueLogFragment | RoomSoundEffectFragment): RoomMessage | undefined => {
     switch (source.__typename) {
         case 'RoomPrivateMessage':
             return {
@@ -46,9 +46,9 @@ const createRoomMessage = (source: RoomPrivateMessageFragment | RoomPublicMessag
                 type: publicMessage,
                 value: source,
             };
-        case 'MyValueLog':
+        case 'PieceValueLog':
             return {
-                type: myValueLog,
+                type: pieceValueLog,
                 value: source,
             };
         case 'RoomSoundEffect':
@@ -93,7 +93,7 @@ const reduceInit = (actions: RoomMessageEventFragment[]): StateToReduce => {
                 break;
             case 'RoomPrivateMessage':
             case 'RoomPublicMessage':
-            case 'MyValueLog':
+            case 'PieceValueLog':
             case 'RoomSoundEffect': {
                 const newValue = createRoomMessage(action);
                 if (newValue == null) {
@@ -193,7 +193,7 @@ const reduceMessages = (state: Message[], action: RoomMessageEventFragment, filt
     switch (action.__typename) {
         case 'RoomPrivateMessage':
         case 'RoomPublicMessage':
-        case 'MyValueLog':
+        case 'PieceValueLog':
         case 'RoomSoundEffect': {
             const newValue = createRoomMessage(action);
             if (newValue == null) {
@@ -215,7 +215,7 @@ const reduceMessages = (state: Message[], action: RoomMessageEventFragment, filt
             }
             return produce(state, draft => {
                 const target = draft[index];
-                if (target.type === myValueLog || target.type === soundEffect || target.type === notification) {
+                if (target == null || target.type === pieceValueLog || target.type === soundEffect || target.type === notification) {
                     return;
                 }
                 target.value.altTextToSecret = action.altTextToSecret;
@@ -277,7 +277,7 @@ const reduce = (state: StateToReduce, action: RoomMessageEventFragment, filter: 
         case 'RoomPublicMessage':
         case 'RoomPrivateMessageUpdate':
         case 'RoomPublicMessageUpdate':
-        case 'MyValueLog':
+        case 'PieceValueLog':
         case 'RoomSoundEffect':
         case undefined: {
             return {
@@ -367,7 +367,7 @@ export const useAllRoomMessages = ({ roomId, roomEventSubscription }: { roomId: 
                         messagesData.result.privateMessages.forEach(msg => {
                             actions.push(msg);
                         });
-                        messagesData.result.myValueLogs.forEach(msg => {
+                        messagesData.result.pieceValueLogs.forEach(msg => {
                             actions.push(msg);
                         });
                         messagesData.result.soundEffects.forEach(se => {

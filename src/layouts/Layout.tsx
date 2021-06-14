@@ -3,14 +3,14 @@ import MyAuthContext from '../contexts/MyAuthContext';
 import { useRouter } from 'next/router';
 import { Button, Layout as AntdLayout, Row, Col, Space, Form, Input, Spin, Card, Alert, Result } from 'antd';
 import { EntryToServerResultType, useEntryToServerMutation } from '../generated/graphql';
-import Center from '../foundations/Center';
+import Center from '../components/Center';
 import useConstant from 'use-constant';
 import { getAuth } from '../utils/firebaseHelpers';
 import Link from 'next/link';
 import ConfigContext from '../contexts/ConfigContext';
-import NotSignInResult from '../foundations/Result/NotSignInResult';
+import NotSignInResult from '../components/Result/NotSignInResult';
 import { authNotFound, loading, notSignIn } from '../hooks/useFirebaseUser';
-import LoadingResult from '../foundations/Result/LoadingResult';
+import LoadingResult from '../components/Result/LoadingResult';
 const { Header, Content } = AntdLayout;
 
 type EntryFormComponentProps = {

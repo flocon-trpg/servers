@@ -1,14 +1,7 @@
 import React from 'react';
 import ConfigContext from '../contexts/ConfigContext';
-import { getStorage, getStorageForce } from '../utils/firebaseHelpers';
-
-const fileName = (fullPath: string): string => {
-    const split = fullPath.split('/');
-    if (split.length === 0) {
-        return fullPath;
-    }
-    return split[split.length - 1];
-};
+import { fileName } from '../utils/filename';
+import { getStorageForce } from '../utils/firebaseHelpers';
 
 type Props = {
     reference: firebase.default.storage.Reference | string;

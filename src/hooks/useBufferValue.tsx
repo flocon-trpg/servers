@@ -17,7 +17,7 @@ export function useBufferValue<T>({
     bufferDuration: number | null;
 }) {
     if (bufferDuration != null && bufferDuration < 0) {
-        throw 'bufferDuration < 0';
+        throw new Error('bufferDuration < 0');
     }
 
     const subject = useConstant(() => new Subject<T>());

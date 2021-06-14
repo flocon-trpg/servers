@@ -2,20 +2,22 @@ import { castToRecord } from '../utils/cast';
 import isObject from '../utils/isObject';
 import { castToPartialCharactersPanelConfig, CharactersPanelConfig as CharacterPanelConfig, defaultCharactersPanelConfig as defaultCharacterPanelConfig, PartialCharactersPanelConfig as PartialCharacterPanelConfig, toCompleteCharactersPanelConfig } from './CharactersPanelConfig';
 import { BoardEditorPanelConfig, castToPartialBoardEditorPanelConfig, defaultBoardEditorPanelsConfig as defaultBoardEditorPanelsConfig, PartialBoardEditorPanelConfig, toCompleteBoardEditorPanelConfig } from './BoardEditorPanelConfig';
-import { castToPartialMessagePanelConfig, defaultMessagePanelsConfig, MessagePanelConfig, PartialMessagePanelConfig, toCompleteMessagePanelConfig } from './MessagesPanelConfig';
+import { castToPartialMessagePanelConfig, defaultMessagePanelsConfig, MessagePanelConfig, PartialMessagePanelConfig, toCompleteMessagePanelConfig } from './MessagePanelConfig';
 import { castToPartialGameEffectPanelConfig, defaultGameEffectPanelConfig, GameEffectPanelConfig, PartialGameEffectPanelConfig, toCompleteGameEffectPanelConfig } from './GameEffectPanelConfig';
 import { castToPartialParticipantPanelConfig, defaultParticipantPanelConfig, PartialParticipantPanelConfig, ParticipantPanelConfig, toCompleteParticipantsPanelConfig } from './ParticipantsPanelConfig';
-import { castToPartialMyValuePanelConfig, defaultMyValuePanelConfig, MyValuePanelConfig, PartialMyValuePanelConfig, toCompleteMyValuePanelConfig } from './MyValuePanelConfig';
+import { castToPartialPieceValuePanelConfig, defaultPieceValuePanelConfig, PieceValuePanelConfig, PartialPieceValuePanelConfig, toCompletePieceValuePanelConfig } from './PieceValuePanelConfig';
 import { ActiveBoardPanelConfig, castToPartialActiveBoardPanelConfig, defaultActiveBoardPanelsConfig, PartialActiveBoardPanelConfig, toCompleteActiveBoardPanelConfig } from './ActiveBoardPanelConfig';
 import { chooseRecord } from '@kizahasi/util';
+import { castToPartialMemoPanelConfig, defaultMemoPanelsConfig, MemoPanelConfig, PartialMemoPanelConfig, toCompleteMemoPanelConfig } from './MemoPanelConfig';
 
 export type PanelsConfig = {
     activeBoardPanel: ActiveBoardPanelConfig;
     boardEditorPanels: Record<string, BoardEditorPanelConfig>;
     characterPanel: CharacterPanelConfig;
     gameEffectPanel: GameEffectPanelConfig;
+    memoPanels: Record<string, MemoPanelConfig>;
     messagePanels: Record<string, MessagePanelConfig>;
-    myValuePanel: MyValuePanelConfig;
+    pieceValuePanel: PieceValuePanelConfig;
     participantPanel: ParticipantPanelConfig;
 }
 
@@ -25,7 +27,8 @@ export type PartialPanelsConfig = {
     characterPanel?: PartialCharacterPanelConfig;
     gameEffectPanel?: PartialGameEffectPanelConfig;
     messagePanels?: Record<string, PartialMessagePanelConfig>;
-    myValuePanel?: PartialMyValuePanelConfig;
+    memoPanels?: Record<string, PartialMemoPanelConfig>;
+    pieceValuePanel?: PartialPieceValuePanelConfig;
     participantPanel?: PartialParticipantPanelConfig;
 }
 
@@ -38,8 +41,9 @@ export const castToPartialPanelsConfig = (source: unknown): PartialPanelsConfig 
         boardEditorPanels: castToRecord(source.boardEditorPanels, castToPartialBoardEditorPanelConfig),
         characterPanel: castToPartialCharactersPanelConfig(source.characterPanel),
         gameEffectPanel: castToPartialGameEffectPanelConfig(source.gameEffectPanel),
+        memoPanels: castToRecord(source.memoPanels, castToPartialMemoPanelConfig),
         messagePanels: castToRecord(source.messagePanels, castToPartialMessagePanelConfig),
-        myValuePanel: castToPartialMyValuePanelConfig(source.myValuePanel),
+        pieceValuePanel: castToPartialPieceValuePanelConfig(source.pieceValuePanel),
         participantPanel: castToPartialParticipantPanelConfig(source.participantPanel),
     };
 };
@@ -50,8 +54,9 @@ export const toCompletePanelsConfig = (source: PartialPanelsConfig): PanelsConfi
         boardEditorPanels: chooseRecord(source.boardEditorPanels ?? {}, toCompleteBoardEditorPanelConfig),
         characterPanel: toCompleteCharactersPanelConfig(source.characterPanel ?? {}),
         gameEffectPanel: toCompleteGameEffectPanelConfig(source.gameEffectPanel ?? {}),
+        memoPanels: chooseRecord(source.memoPanels ?? {}, toCompleteMemoPanelConfig),
         messagePanels: chooseRecord(source.messagePanels ?? {}, toCompleteMessagePanelConfig),
-        myValuePanel: toCompleteMyValuePanelConfig(source.myValuePanel ?? {}),
+        pieceValuePanel: toCompletePieceValuePanelConfig(source.pieceValuePanel ?? {}),
         participantPanel: toCompleteParticipantsPanelConfig(source.participantPanel ?? {}),
     };
 };
@@ -62,8 +67,9 @@ export const defaultPanelsConfig = (): PanelsConfig => {
         boardEditorPanels: defaultBoardEditorPanelsConfig(),
         characterPanel: defaultCharacterPanelConfig(),
         gameEffectPanel: defaultGameEffectPanelConfig(),
+        memoPanels: defaultMemoPanelsConfig(),
         messagePanels: defaultMessagePanelsConfig(),
-        myValuePanel: defaultMyValuePanelConfig(),
+        pieceValuePanel: defaultPieceValuePanelConfig(),
         participantPanel: defaultParticipantPanelConfig(),
     };
 };

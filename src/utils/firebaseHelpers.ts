@@ -37,7 +37,7 @@ export const getAuth = (config: Config): firebase.auth.Auth | null => {
 export const getAuthForce = (config: Config): firebase.auth.Auth => {
     const auth = getAuth(config);
     if (auth == null) {
-        throw 'auth == null';
+        throw new Error('auth == null');
     }
     return auth;
 };
@@ -57,7 +57,7 @@ export const getStorage = (config: Config): firebase.storage.Storage | null => {
 export const getStorageForce = (config: Config): firebase.storage.Storage => {
     const storage = getStorage(config);
     if (storage == null) {
-        throw 'storage == null';
+        throw new Error('storage == null');
     }
     return storage;
 };

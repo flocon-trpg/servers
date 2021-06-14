@@ -22,31 +22,28 @@ export type Diff<TState, TOperation> = (params: {
     nextState: TState;
 }) => TOperation | undefined;
 
-export type StateManagerParameters<TState, TGetOperation, TPostOperation> = {
+export type StateManagerParameters<TState, TOperation> = {
     revision: number;
     state: TState;
-    applyGetOperation: Apply<TState, TGetOperation>;
-    applyPostOperation: Apply<TState, TPostOperation>;
-    composePostOperation: Compose<TState, TPostOperation>;
-    getFirstTransform: Transform<TGetOperation, TPostOperation>;
-    postFirstTransform: Transform<TPostOperation, TGetOperation>;
-    diff: Diff<TState, TGetOperation>;
+    apply: Apply<TState, TOperation>;
+    transform: Transform<TOperation, TOperation>;
+    diff: Diff<TState, TOperation>;
 }
 
 // StateManagerから、PostUnknownを受け取る機能とreloadを取り除いたもの。
-class StateManagerCore<TState, TGetOperation, TPostOperation> {
+// ユーザーが行ったOperationを保持する際、composeしていく戦略ではなく、stateをapplyしていき、operationが欲しい場合はdiffをとるという戦略を取っている。理由の1つ目は、Recordで同一キーでremove→addされた場合、upOperationではcomposeできないので困るため。TwoWayOperationならばcomposeしても情報は失われないが、prevValueをミスなく設定する必要が出てくる。理由の2つ目は、useStateEditorではOperationではなくStateをセットしたいため、その際に便利だから。
+class StateManagerCore<TState, TOperation> {
     private _revision: number;
     private _actualState: TState;
     // operationは、transformの結果idになることもあり得るので、undefinedも代入可能にしている。
     // requestIdにはブラウザで生成したランダムな文字列を入れる。サーバーはこのrequestIdとともに結果を返すので、送信した値に対する応答かどうかをチェックできる。
-    private _postingOperation: { operation: TPostOperation | undefined; postedAt: Date; requestId: string } | undefined;
-    private _localOperation: TPostOperation | undefined;
-    // apply(apply(_actualState, _postingOperation), _localOperation) の結果をキャッシュする。_actualStateか_postingOperationか_localOperationのいずれかが変化したらundefinedを代入してキャッシュを削除する。
-    private _uiStateCache: TState | undefined;
+    private _postingState: { operation: TOperation | undefined; state: TState; postedAt: Date; requestId: string } | undefined;
+    // ブラウザに表示するstate。_actualStateか_postingState.stateと明らかに等しい場合はundefinedを代わりに代入する。
+    private _uiStateCore: TState | undefined;
 
-    private readonly _pendingGetOperations = new Map<number, { operation: TGetOperation; isByMyClient: boolean; addedAt: Date }>(); // keyはrevision。isByMyClient===trueである要素は1個以下になるはず。
+    private readonly _pendingGetOperations = new Map<number, { operation: TOperation; isByMyClient: boolean; addedAt: Date }>(); // keyはrevision。isByMyClient===trueである要素は1個以下になるはず。
 
-    public constructor(private readonly params: StateManagerParameters<TState, TGetOperation, TPostOperation>) {
+    public constructor(private readonly params: StateManagerParameters<TState, TOperation>) {
         this._revision = params.revision;
         this._actualState = params.state;
     }
@@ -54,8 +51,8 @@ class StateManagerCore<TState, TGetOperation, TPostOperation> {
     // 現在時刻 - waitingResponseSince の値が数秒程度の場合は正常だが、古すぎる場合は通信に問題が生じた（もしくはコードにバグがある）可能性が高い。
     public waitingResponseSince(): Date | null {
         const dates: Date[] = [];
-        if (this._postingOperation !== undefined) {
-            dates.push(this._postingOperation.postedAt);
+        if (this._postingState !== undefined) {
+            dates.push(this._postingState.postedAt);
         }
         this._pendingGetOperations.forEach(value => dates.push(value.addedAt));
         let result: Date | null = null;
@@ -72,7 +69,7 @@ class StateManagerCore<TState, TGetOperation, TPostOperation> {
     }
 
     public get isPosting() {
-        return this._postingOperation !== undefined;
+        return this._postingState !== undefined;
     }
 
     public get actualState() {
@@ -80,28 +77,27 @@ class StateManagerCore<TState, TGetOperation, TPostOperation> {
     }
 
     public get uiState() {
-        if (this._uiStateCache === undefined) {
-            let uiState = this.actualState;
-            const first = this._postingOperation?.operation;
-            if (first !== undefined) {
-                uiState = this.params.applyPostOperation({ state: uiState, operation: first });
-            }
-            const second = this._localOperation;
-            if (second !== undefined) {
-                uiState = this.params.applyPostOperation({ state: uiState, operation: second });
-            }
-            this._uiStateCache = uiState;
-        }
-        return this._uiStateCache;
+        return this._uiStateCore ?? this._postingState?.state ?? this._actualState;
     }
 
     public get revision() {
         return this._revision;
     }
 
-    public operate(operation: TPostOperation) {
-        this._localOperation = this._localOperation === undefined ? operation : this.params.composePostOperation({ state: this.actualState, first: this._localOperation, second: operation });
-        this._uiStateCache = undefined;
+    // post中の場合は、post後にクライアント側でたまっているoperation。post中でないときは、単にクライアント側でたまっているoperation。
+    public get localOperation(): TOperation | undefined {
+        if (this._uiStateCore === undefined) {
+            return undefined;
+        }
+        return this.params.diff({ prevState: this._postingState?.state ?? this._actualState, nextState: this._uiStateCore });
+    }
+
+    public operate(operation: TOperation) {
+        this._uiStateCore = this.params.apply({ state: this._uiStateCore ?? this._actualState, operation });
+    }
+
+    public operateAsState(state: TState) {
+        this._uiStateCore = state;
     }
 
     private tryApplyPendingGetOperations() {
@@ -115,76 +111,72 @@ class StateManagerCore<TState, TGetOperation, TPostOperation> {
             /*                                      prev actualState
              *                                          /        \
              *                                         /          \
-             *                 this._postingOperation /            \ toApply.operation
+             *                this._postingState.diff /            \ toApply.operation
              *                                       /              \
              *                                      /      diff      \
-             * expectedState(expected next actualState) ------------- next actualState
+             *              this._postingState.state  ------------- next actualState
              *                        /                                  /
              *                       /                                  /
-             * this._localOperation /                                  / (xform)
+             *  this.localOperation /                                  / (xform)
              *                     /                                  /
              *                    /                                  /
-             *              prev uiState                        next uiState
+             *              this._uiState                      next uiState
              */
 
-            const expectedState = this._postingOperation?.operation === undefined ?
-                this._actualState :
-                this.params.applyPostOperation({ state: this._actualState, operation: this._postingOperation.operation });
-            this._actualState = this.params.applyGetOperation({ state: this._actualState, operation: toApply.operation });
-            const diff = this.params.diff({ prevState: expectedState, nextState: this._actualState });
-            this._localOperation = (() => {
-                if (this._localOperation === undefined) {
-                    return undefined;
+            this._actualState = this.params.apply({ state: this._actualState, operation: toApply.operation });
+            const diff = this.params.diff({ prevState: this._postingState?.state ?? this._actualState, nextState: this._actualState });
+            if (this.localOperation === undefined) {
+                this._uiStateCore = undefined;
+            } else {
+                if (diff !== undefined) {
+                    const xform = this.params.transform({ first: this.localOperation, second: diff });
+                    this._uiStateCore = this.params.apply({ state: this._actualState, operation: xform.firstPrime });
                 }
-                if (diff === undefined) {
-                    return this._localOperation;
-                }
-                return this.params.postFirstTransform({ first: this._localOperation, second: diff }).firstPrime;
-            })();
-            this._postingOperation = undefined;
+            }
+            this._postingState = undefined;
 
             this._revision++;
-            this._uiStateCache = undefined;
             this.tryApplyPendingGetOperations();
             return;
         }
 
-        /*                       prev actualState
-         *                           /        \
-         *   this._postingOperation /          \ toApply.operation
-         *                         /            \
-         *         (expected posted state)    next actualState
-         *                       / \ (xform)    /
-         * this._localOperation /   ----       / next this._postingOperation
+        /*                    prev this._actualState
+         *                            /        \
+         *   this._postingState.diff /          \ toApply.operation
+         *                          /            \
+         *        this._postingState.state    next this._actualState
+         *                       / \            /
+         * this._localOperation /  (xform)     / next this._postingOperation
          *                     /        \     /
-         *              prev uiState     --- (expected posted state')
+         *        prev this._uiState     --- (expected posted state')
          *                     \            /
          *              (xform) \          / next this._localOperation
          *                       \        /
-         *                      next uiState
+         *                  next this._uiState
          */
 
-        this._actualState = this.params.applyGetOperation({ state: this._actualState, operation: toApply.operation });
+        this._actualState = this.params.apply({ state: this._actualState, operation: toApply.operation });
         const { postedStateDiff, nextPostingOperation } = (() => {
-            if (this._postingOperation?.operation === undefined) {
+            if (this._postingState?.operation === undefined) {
                 return { postedStateDiff: toApply.operation, nextPostingOperation: undefined };
             }
-            const xform = this.params.getFirstTransform({ first: toApply.operation, second: this._postingOperation.operation });
+            const xform = this.params.transform({ first: toApply.operation, second: this._postingState.operation });
             return { postedStateDiff: xform.firstPrime, nextPostingOperation: xform.secondPrime };
         })();
-        if (this._postingOperation !== undefined) {
-            this._postingOperation = { ...this._postingOperation, operation: nextPostingOperation };
+        if (this._postingState !== undefined) {
+            this._postingState = { ...this._postingState, operation: nextPostingOperation };
         }
-        const nextLocalOperation = this._localOperation === undefined ? undefined : this.params.getFirstTransform({ first: postedStateDiff, second: this._localOperation }).secondPrime;
-        this._localOperation = nextLocalOperation;
+        const nextLocalOperation = this.localOperation === undefined ? undefined : this.params.transform({ first: postedStateDiff, second: this.localOperation }).secondPrime;
+        if (nextLocalOperation !== undefined) {
+            this._uiStateCore = this.params.apply({ state: this._uiStateCore ?? this._actualState, operation: nextLocalOperation });
+        }
 
         this._revision++;
-        this._uiStateCache = undefined;
         this.tryApplyPendingGetOperations();
     }
 
     //  === true の場合、revisionToで対応関係がわかるため、requestIdは必要ない。
-    public onGet(operation: TGetOperation, revisionTo: number, isByMyClient: boolean) {
+    public onGet(operation: TOperation, revisionTo: number, isByMyClient: boolean) {
         if (!Number.isInteger(revisionTo)) {
             appConsole.warn(`${revisionTo} is not an integer. onGet is cancelled.`);
             return;
@@ -200,65 +192,52 @@ class StateManagerCore<TState, TGetOperation, TPostOperation> {
         this.tryApplyPendingGetOperations();
     }
 
-    public post(): { operationToPost: TPostOperation; actualState: TState; revision: number; requestId: string } | undefined {
+    public post(): { operationToPost: TOperation; actualState: TState; revision: number; requestId: string } | undefined {
         if (this.isPosting) {
-            throw 'cannot execute post when isPosting === true';
+            throw new Error('cannot execute post when isPosting === true');
         }
-        if (this._localOperation === undefined) {
+        if (this._uiStateCore === undefined) {
             return undefined;
         }
-        const operationToPost = this._localOperation;
+        const localOperation = this.localOperation;
+        if (localOperation === undefined) {
+            this._uiStateCore = undefined;
+            return undefined;
+        }
         const requestId = simpleId();
-        this._postingOperation = { operation: this._localOperation, postedAt: new Date(), requestId };
-        this._localOperation = undefined;
-        return { operationToPost, actualState: this._actualState, revision: this._revision, requestId };
+        this._postingState = { operation: localOperation, state: this._uiStateCore, postedAt: new Date(), requestId };
+        return { operationToPost: localOperation, actualState: this._actualState, revision: this._revision, requestId };
     }
 
     public endPostAsId(requestId: string): boolean {
-        if (this._postingOperation === undefined) {
+        if (this._postingState === undefined) {
             return false;
         }
-        if (this._postingOperation.requestId !== requestId) {
+        if (this._postingState.requestId !== requestId) {
             return false;
         }
-        if (this._postingOperation.operation === undefined) {
-            this._postingOperation = undefined;
+        const localOperation = this.localOperation;
+        if (localOperation === undefined) {
+            this._postingState = undefined;
+            this._uiStateCore = undefined;
             return true;
         }
-        if (this._localOperation === undefined) {
-            this._postingOperation = undefined;
-            this._uiStateCache = undefined;
+        const undoOperation = this.params.diff({ prevState: this._postingState.state, nextState: this._actualState });
+        if (undoOperation === undefined) {
+            this._postingState = undefined;
             return true;
         }
-        const nextState = this.params.applyPostOperation({ state: this.actualState, operation: this._postingOperation.operation });
-        const diffBack = this.params.diff({ prevState: nextState, nextState: this.actualState });
-        if (diffBack === undefined) {
-            this._postingOperation = undefined;
-            this._uiStateCache = undefined;
-            return true;
-        }
-        const transformedLocalOperation = this.params.getFirstTransform({ first: diffBack, second: this._localOperation });
-        this._postingOperation = undefined;
-        this._localOperation = transformedLocalOperation.secondPrime;
-        this._uiStateCache = undefined;
+        const newLocalOperation = this.params.transform({ first: undoOperation, second: localOperation }).secondPrime;
+        this._uiStateCore = this.params.apply({ state: this._postingState.state, operation: newLocalOperation });
+        this._postingState = undefined;
         return true;
     }
 
     public cancelPost(): boolean {
-        if (this._postingOperation === undefined) {
+        if (this._postingState === undefined) {
             return false;
         }
-        if (this._localOperation === undefined) {
-            this._localOperation = this._postingOperation.operation;
-            this._postingOperation = undefined;
-            return true;
-        }
-        if (this._postingOperation.operation === undefined) {
-            this._postingOperation = undefined;
-            return true;
-        }
-        this._localOperation = this.params.composePostOperation({ state: this.actualState, first: this._postingOperation.operation, second: this._localOperation });
-        this._postingOperation = undefined;
+        this._postingState = undefined;
         return true;
     }
 }
@@ -276,12 +255,12 @@ type OnPosted<T> = {
     isSuccess: false | null; // 確実に失敗したときはfalse、成功したか失敗したかわからないときはnull
 }
 
-export class StateManager<TState, TGetOperation, TPostOperation> {
-    private core: StateManagerCore<TState, TGetOperation, TPostOperation>;
+export class StateManager<TState, TOperation> {
+    private core: StateManagerCore<TState, TOperation>;
     private _requiresReload = false;
 
-    public constructor(private readonly params: StateManagerParameters<TState, TGetOperation, TPostOperation>) {
-        this.core = new StateManagerCore<TState, TGetOperation, TPostOperation>(params);
+    public constructor(private readonly params: StateManagerParameters<TState, TOperation>) {
+        this.core = new StateManagerCore<TState, TOperation>(params);
     }
 
     public get isPosting(): boolean {
@@ -310,31 +289,31 @@ export class StateManager<TState, TGetOperation, TPostOperation> {
         return this.core.waitingResponseSince();
     }
 
-    public onOtherClientsGet(operation: TGetOperation, revisionTo: number): void {
+    public onOtherClientsGet(operation: TOperation, revisionTo: number): void {
         if (this.requiresReload) {
-            throw 'this.requiresReload === true';
+            throw new Error('this.requiresReload === true');
         }
 
         this.core.onGet(operation, revisionTo, false);
     }
 
-    public operate(operation: TPostOperation): void {
+    public operate(operation: TOperation): void {
         if (this.requiresReload) {
-            throw 'this.requiresReload === true';
+            throw new Error('this.requiresReload === true');
         }
 
         this.core.operate(operation);
     }
 
     public post(): {
-        operationToPost: TPostOperation;
+        operationToPost: TOperation;
         actualState: TState;
         revision: number;
         requestId: string;
-        onPosted: (onPosted: OnPosted<TGetOperation>) => void;
+        onPosted: (onPosted: OnPosted<TOperation>) => void;
     } | undefined {
         if (this.requiresReload) {
-            throw 'this.requiresReload === true';
+            throw new Error('this.requiresReload === true');
         }
 
         const toPost = this.core.post();
@@ -342,7 +321,7 @@ export class StateManager<TState, TGetOperation, TPostOperation> {
             return undefined;
         }
         let isOnPostedExecuted = false;
-        const onPosted = (onPosted: OnPosted<TGetOperation>) => {
+        const onPosted = (onPosted: OnPosted<TOperation>) => {
             if (isOnPostedExecuted) {
                 return;
             }
@@ -367,7 +346,7 @@ export class StateManager<TState, TGetOperation, TPostOperation> {
     }
 
     public reload({ state, revision }: { state: TState; revision: number }): void {
-        this.core = new StateManagerCore<TState, TGetOperation, TPostOperation>({ ...this.params, revision: revision, state });
+        this.core = new StateManagerCore<TState, TOperation>({ ...this.params, revision: revision, state });
         this._requiresReload = false;
     }
 }
@@ -379,24 +358,16 @@ export type GetOnlyStateManagerParameters<TState, TOperation> = {
 }
 
 export class GetOnlyStateManager<TState, TOperation> {
-    private readonly core: StateManager<TState, TOperation, TOperation>;
+    private readonly core: StateManager<TState, TOperation>;
 
     public constructor(private readonly params: GetOnlyStateManagerParameters<TState, TOperation>) {
-        this.core = new StateManager<TState, TOperation, TOperation>({
+        this.core = new StateManager<TState, TOperation>({
             ...params,
-            applyGetOperation: params.apply,
-            applyPostOperation: params.apply,
-            composePostOperation: () => {
-                throw 'composePostOperation should not be called';
-            },
-            getFirstTransform: () => {
-                throw 'getFirstTransform should not be called';
-            },
-            postFirstTransform: () => {
-                throw 'postFirstTransform should not be called';
+            transform: () => {
+                throw new Error('transform should not be called');
             },
             diff: () => {
-                throw 'diff should not be called';
+                throw new Error('diff should not be called');
             },
         });
     }
@@ -410,7 +381,7 @@ export class GetOnlyStateManager<TState, TOperation> {
     }
 
     public reload({ state, revision }: { state: TState; revision: number }): void {
-        this.reload({state, revision});
+        this.reload({ state, revision });
     }
 
     public onGet(operation: TOperation, revisionTo: number): void {

@@ -158,6 +158,10 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
 
     const clientId = useConstant(() => simpleId());
 
+    React.useEffect(() => {
+        appConsole.log(`clientId: ${clientId}`);
+    }, [clientId]);
+
     if (apolloClient == null) {
         return (<div style={({ padding: 5 })}>
             {'しばらくお待ち下さい… / Please wait…'}

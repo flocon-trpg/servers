@@ -46,7 +46,7 @@ export function useImage(src: string | null, size?: Size, crossOrigin?: string):
     React.useEffect(
         function () {
             if (src == null) {
-                setState({type: argNull});
+                setState({ type: argNull });
                 return;
             }
             const img = document.createElement('img');
