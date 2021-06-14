@@ -191,6 +191,8 @@ export const ChatInput: React.FC<Props> = ({
         });
     }, [characters, myUserUid]);
 
+    const inputRef = React.useRef<Input | null>(null);
+
     let selectedCharacterType: typeof some | typeof none | typeof custom = none;
     switch (config.selectedCharacterType) {
         case 'some':
@@ -287,7 +289,10 @@ export const ChatInput: React.FC<Props> = ({
                     }
                 })
                     .then(() => useRoomMessageInputTextsResult.setPrivateMessageInputText(undefined, selectedParticipantIds))
-                    .finally(() => setIsPosting(false));
+                    .finally(() => {
+                        setIsPosting(false);
+                        inputRef.current?.focus();
+                    });
                 break;
             }
             case publicChannelKey: {
@@ -309,7 +314,10 @@ export const ChatInput: React.FC<Props> = ({
                         }
                         useRoomMessageInputTextsResult.setPublicMessageInputText(undefined, postTo);
                     })
-                    .finally(() => setIsPosting(false));
+                    .finally(() => {
+                        setIsPosting(false);
+                        inputRef.current?.focus();
+                    });
                 break;
             }
             case freeChannelKey: {
@@ -331,7 +339,10 @@ export const ChatInput: React.FC<Props> = ({
                         }
                         useRoomMessageInputTextsResult.setPublicMessageInputText(undefined, postTo);
                     })
-                    .finally(() => setIsPosting(false));
+                    .finally(() => {
+                        setIsPosting(false);
+                        inputRef.current?.focus();
+                    });
                 break;
             }
         }
@@ -501,6 +512,7 @@ export const ChatInput: React.FC<Props> = ({
                 </div>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                     <Input
+                        ref={inputRef}
                         disabled={isPosting}
                         value={(PublicChannelKey.Without$System.isPublicChannelKey(postTo) ? useRoomMessageInputTextsResult.publicMessageInputTexts.get(postTo) : useRoomMessageInputTextsResult.privateMessageInputTexts.get(VisibleTo.toString(postTo))) ?? ''}
                         placeholder={placeholder}
