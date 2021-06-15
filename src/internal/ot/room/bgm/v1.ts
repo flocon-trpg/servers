@@ -92,16 +92,6 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     return Result.ok(result);
 };
 
-export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
-    const valueProps: UpOperation = {
-        $version: 1,
-        isPaused: ReplaceOperation.composeUpOperation(first.isPaused, second.isPaused),
-        files: ReplaceOperation.composeUpOperation(first.files, second.files),
-        volume: ReplaceOperation.composeUpOperation(first.volume, second.volume),
-    };
-    return Result.ok(valueProps);
-};
-
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const valueProps: DownOperation = {
         $version: 1,

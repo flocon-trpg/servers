@@ -169,23 +169,6 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     return Result.ok(result);
 };
 
-export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
-    const valueProps: UpOperation = {
-        $version: 1,
-        cellH: ReplaceOperation.composeUpOperation(first.cellH, second.cellH),
-        cellW: ReplaceOperation.composeUpOperation(first.cellW, second.cellW),
-        cellX: ReplaceOperation.composeUpOperation(first.cellX, second.cellX),
-        cellY: ReplaceOperation.composeUpOperation(first.cellY, second.cellY),
-        h: ReplaceOperation.composeUpOperation(first.h, second.h),
-        isCellMode: ReplaceOperation.composeUpOperation(first.isCellMode, second.isCellMode),
-        isPrivate: ReplaceOperation.composeUpOperation(first.isPrivate, second.isPrivate),
-        w: ReplaceOperation.composeUpOperation(first.w, second.w),
-        x: ReplaceOperation.composeUpOperation(first.x, second.x),
-        y: ReplaceOperation.composeUpOperation(first.y, second.y),
-    };
-    return Result.ok(valueProps);
-};
-
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const valueProps: DownOperation = {
         $version: 1,

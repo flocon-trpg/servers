@@ -124,25 +124,6 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     return Result.ok(result);
 };
 
-export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
-    const valueProps: UpOperation = {
-        $version: 1,
-        dieType: ReplaceOperation.composeUpOperation(
-            first.dieType ?? undefined,
-            second.dieType ?? undefined
-        ),
-        isValuePrivate: ReplaceOperation.composeUpOperation(
-            first.isValuePrivate ?? undefined,
-            second.isValuePrivate ?? undefined
-        ),
-        value: ReplaceOperation.composeUpOperation(
-            first.value ?? undefined,
-            second.value ?? undefined
-        ),
-    };
-    return Result.ok(valueProps);
-};
-
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const valueProps: DownOperation = {
         $version: 1,

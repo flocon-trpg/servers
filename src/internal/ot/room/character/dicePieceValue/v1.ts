@@ -191,47 +191,6 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     return Result.ok(result);
 };
 
-export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
-    const dice = RecordOperation.composeUpOperation<
-        DieValue.State,
-        DieValue.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        first: first.dice,
-        second: second.dice,
-        innerApply: ({ state, operation }) => {
-            return DieValue.apply({ state, operation });
-        },
-        innerCompose: params => DieValue.composeUpOperation(params),
-    });
-    if (dice.isError) {
-        return dice;
-    }
-
-    const pieces = DualKeyRecordOperation.composeUpOperation<
-        Piece.State,
-        Piece.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        first: first.pieces,
-        second: second.pieces,
-        innerApply: ({ state, operation }) => {
-            return Piece.apply({ state, operation });
-        },
-        innerCompose: params => Piece.composeUpOperation(params),
-    });
-    if (pieces.isError) {
-        return pieces;
-    }
-
-    const valueProps: UpOperation = {
-        $version: 1,
-        dice: dice.value,
-        pieces: pieces.value,
-    };
-    return Result.ok(valueProps);
-};
-
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const dice = RecordOperation.composeDownOperation<
         DieValue.State,

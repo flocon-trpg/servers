@@ -33,19 +33,6 @@ export const composeDownOperation = <T>(
     return { oldValue: first.oldValue };
 };
 
-export const composeUpOperation = <T>(
-    first: { newValue: T } | undefined,
-    second: { newValue: T } | undefined
-): { newValue: T } | undefined => {
-    if (first === undefined) {
-        return second;
-    }
-    if (second === undefined) {
-        return first;
-    }
-    return { newValue: second.newValue };
-};
-
 export const serverTransform = <T>({
     first,
     second,

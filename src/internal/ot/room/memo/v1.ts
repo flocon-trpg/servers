@@ -129,21 +129,6 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     return Result.ok(result);
 };
 
-export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
-    const text = TextOperation.composeUpOperation(first.text, second.text);
-    if (text.isError) {
-        return text;
-    }
-    const valueProps: UpOperation = {
-        $version: 1,
-        name: ReplaceOperation.composeUpOperation(first.name, second.name),
-        dir: ReplaceOperation.composeUpOperation(first.dir, second.dir),
-        text: text.value,
-        textType: ReplaceOperation.composeUpOperation(first.textType, second.textType),
-    };
-    return Result.ok(valueProps);
-};
-
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const text = TextOperation.composeDownOperation(first.text, second.text);
     if (text.isError) {

@@ -245,44 +245,6 @@ export const applyBack = <TState, TDownOperation, TCustomError = string>({
     return Result.ok(result.value[dummyKey] ?? {});
 };
 
-export const composeUpOperation = <TState, TUpOperation, TCustomError = string>({
-    first,
-    second,
-    innerApply,
-    innerCompose,
-}: {
-    first?: RecordUpOperation<TState, TUpOperation>;
-    second?: RecordUpOperation<TState, TUpOperation>;
-    innerApply: (params: {
-        key: string;
-        operation: TUpOperation;
-        state: TState;
-    }) => CustomResult<TState, string | TCustomError>;
-    innerCompose: (params: {
-        key: string;
-        first: TUpOperation;
-        second: TUpOperation;
-    }) => CustomResult<TUpOperation | undefined, string | TCustomError>;
-}): CustomResult<RecordUpOperation<TState, TUpOperation> | undefined, string | TCustomError> => {
-    if (first == null) {
-        return Result.ok(second);
-    }
-    if (second == null) {
-        return Result.ok(first);
-    }
-
-    const result = DualKeyRecordOperation.composeUpOperation({
-        first: { [dummyKey]: first },
-        second: { [dummyKey]: second },
-        innerApply: ({ key, ...params }) => innerApply({ ...params, key: key.second }),
-        innerCompose: ({ key, ...params }) => innerCompose({ ...params, key: key.second }),
-    });
-    if (result.isError) {
-        return result;
-    }
-    return Result.ok(result.value === undefined ? undefined : result.value[dummyKey]);
-};
-
 // stateが必要ないため処理を高速化&簡略化できるが、その代わり戻り値のreplaceにおいて oldValue === undefined && newValue === undefined もしくは oldValue !== undefined && newValue !== undefinedになるケースがある。
 export const composeDownOperation = <TState, TDownOperation, TCustomError = string>({
     first,

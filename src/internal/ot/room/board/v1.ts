@@ -164,32 +164,6 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     return Result.ok(result);
 };
 
-export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
-    const valueProps: UpOperation = {
-        $version: 1,
-
-        backgroundImage: ReplaceOperation.composeUpOperation(
-            first.backgroundImage,
-            second.backgroundImage
-        ),
-        backgroundImageZoom: ReplaceOperation.composeUpOperation(
-            first.backgroundImageZoom,
-            second.backgroundImageZoom
-        ),
-        cellColumnCount: ReplaceOperation.composeUpOperation(
-            first.cellColumnCount,
-            second.cellColumnCount
-        ),
-        cellHeight: ReplaceOperation.composeUpOperation(first.cellHeight, second.cellHeight),
-        cellOffsetX: ReplaceOperation.composeUpOperation(first.cellOffsetX, second.cellOffsetX),
-        cellOffsetY: ReplaceOperation.composeUpOperation(first.cellOffsetY, second.cellOffsetY),
-        cellRowCount: ReplaceOperation.composeUpOperation(first.cellRowCount, second.cellRowCount),
-        cellWidth: ReplaceOperation.composeUpOperation(first.cellWidth, second.cellWidth),
-        name: ReplaceOperation.composeUpOperation(first.name, second.name),
-    };
-    return Result.ok(valueProps);
-};
-
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const valueProps: DownOperation = {
         $version: 1,

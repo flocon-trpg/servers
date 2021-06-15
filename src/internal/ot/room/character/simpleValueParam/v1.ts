@@ -104,18 +104,6 @@ export const applyBack = <T>(): Apply<State<T>, DownOperation<T>> => ({ state, o
     return Result.ok(result);
 };
 
-export const composeUpOperation = <T>(): Compose<UpOperation<T>> => ({ first, second }) => {
-    const valueProps: UpOperation<T> = {
-        $version: 1,
-        isValuePrivate: ReplaceValueOperation.composeUpOperation(
-            first.isValuePrivate,
-            second.isValuePrivate
-        ),
-        value: ReplaceValueOperation.composeUpOperation(first.value, second.value),
-    };
-    return Result.ok(valueProps);
-};
-
 export const composeDownOperation = <T>(): Compose<DownOperation<T>> => ({ first, second }) => {
     const valueProps: DownOperation<T> = {
         $version: 1,

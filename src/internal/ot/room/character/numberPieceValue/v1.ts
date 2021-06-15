@@ -167,38 +167,6 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     return Result.ok(result);
 };
 
-export const composeUpOperation: Compose<UpOperation> = ({ first, second }) => {
-    const pieces = DualKeyRecordOperation.composeUpOperation<
-        Piece.State,
-        Piece.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        first: first.pieces,
-        second: second.pieces,
-        innerApply: ({ state, operation }) => {
-            return Piece.apply({ state, operation });
-        },
-        innerCompose: params => Piece.composeUpOperation(params),
-    });
-    if (pieces.isError) {
-        return pieces;
-    }
-
-    const valueProps: UpOperation = {
-        $version: 1,
-        isValuePrivate: ReplaceOperation.composeUpOperation(
-            first.isValuePrivate ?? undefined,
-            second.isValuePrivate ?? undefined
-        ),
-        value: ReplaceOperation.composeUpOperation(
-            first.value ?? undefined,
-            second.value ?? undefined
-        ),
-        pieces: pieces.value,
-    };
-    return Result.ok(valueProps);
-};
-
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const pieces = DualKeyRecordOperation.composeDownOperation<
         Piece.State,
