@@ -21,6 +21,7 @@ import {
     ClientTransform,
     Compose,
     Diff,
+    RequestedBy,
     Restore,
     ServerTransform,
     ToClientOperationParams,
@@ -34,7 +35,7 @@ import { createOperation } from '../../util/createOperation';
 import { isIdRecord, record, StringKeyRecord } from '../../util/record';
 import { Result } from '@kizahasi/result';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
-import { chooseDualKeyRecord, chooseRecord, Maybe, maybe } from '@kizahasi/util';
+import { chooseDualKeyRecord, chooseRecord, CompositeKey, Maybe, maybe } from '@kizahasi/util';
 
 // privateCommandsは無効化しているが、コードは大部分残している
 
@@ -191,7 +192,11 @@ const defaultStrParamState: StrParam.State = {
     value: '',
 };
 
-export const toClientState = (createdByMe: boolean) => (source: State): State => {
+export const toClientState = (
+    createdByMe: boolean,
+    requestedBy: RequestedBy,
+    activeBoardKey: CompositeKey | null
+) => (source: State): State => {
     return {
         ...source,
         privateCommand: createdByMe ? source.privateCommand : '',
@@ -219,11 +224,7 @@ export const toClientState = (createdByMe: boolean) => (source: State): State =>
             isPrivate: () => false,
             toClientState: ({ state }) => StrParam.toClientState(createdByMe)(state),
         }),
-        pieces: DualKeyRecordOperation.toClientState<Piece.State, Piece.State>({
-            serverState: source.pieces,
-            isPrivate: () => false,
-            toClientState: ({ state }) => Piece.toClientState(state),
-        }),
+        pieces: Piece.toClientStateMany(requestedBy, activeBoardKey)(source.pieces),
         privateCommands: RecordOperation.toClientState<Command.State, Command.State>({
             serverState: source.privateCommands,
             isPrivate: () => !createdByMe,
@@ -240,7 +241,8 @@ export const toClientState = (createdByMe: boolean) => (source: State): State =>
         dicePieceValues: RecordOperation.toClientState<DicePieceValue.State, DicePieceValue.State>({
             serverState: source.dicePieceValues,
             isPrivate: () => false,
-            toClientState: ({ state }) => DicePieceValue.toClientState(createdByMe)(state),
+            toClientState: ({ state }) =>
+                DicePieceValue.toClientState(createdByMe, requestedBy, activeBoardKey)(state),
         }),
         numberPieceValues: RecordOperation.toClientState<
             NumberPieceValue.State,
@@ -248,138 +250,9 @@ export const toClientState = (createdByMe: boolean) => (source: State): State =>
         >({
             serverState: source.numberPieceValues,
             isPrivate: () => false,
-            toClientState: ({ state }) => NumberPieceValue.toClientState(createdByMe)(state),
+            toClientState: ({ state }) =>
+                NumberPieceValue.toClientState(createdByMe, requestedBy, activeBoardKey)(state),
         }),
-    };
-};
-
-export const toClientOperation = (createdByMe: boolean) => ({
-    prevState,
-    nextState,
-    diff,
-}: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
-    return {
-        ...diff,
-        memo: diff.memo == null ? undefined : TextOperation.toUpOperation(diff.memo),
-        privateCommand:
-            diff.privateCommand == null
-                ? undefined
-                : TextOperation.toUpOperation(diff.privateCommand),
-        privateVarToml:
-            diff.privateVarToml == null
-                ? undefined
-                : TextOperation.toUpOperation(diff.privateVarToml),
-        boolParams:
-            diff.boolParams == null
-                ? undefined
-                : ParamRecordOperation.toClientOperation({
-                      diff: diff.boolParams,
-                      prevState: prevState.boolParams,
-                      nextState: nextState.boolParams,
-                      toClientOperation: params =>
-                          SimpleValueParam.toClientOperation<Maybe<boolean>>(
-                              createdByMe,
-                              null
-                          )(params),
-                      defaultState: defaultBoolParamState,
-                  }),
-        numParams:
-            diff.numParams == null
-                ? undefined
-                : ParamRecordOperation.toClientOperation({
-                      diff: diff.numParams,
-                      prevState: prevState.numParams,
-                      nextState: nextState.numParams,
-                      toClientOperation: params =>
-                          SimpleValueParam.toClientOperation<Maybe<number>>(
-                              createdByMe,
-                              null
-                          )(params),
-                      defaultState: defaultNumParamState,
-                  }),
-        numMaxParams:
-            diff.numMaxParams == null
-                ? undefined
-                : ParamRecordOperation.toClientOperation({
-                      diff: diff.numMaxParams,
-                      prevState: prevState.numMaxParams,
-                      nextState: nextState.numMaxParams,
-                      toClientOperation: params =>
-                          SimpleValueParam.toClientOperation<Maybe<number>>(
-                              createdByMe,
-                              null
-                          )(params),
-                      defaultState: defaultNumParamState,
-                  }),
-        strParams:
-            diff.strParams == null
-                ? undefined
-                : ParamRecordOperation.toClientOperation({
-                      diff: diff.strParams,
-                      prevState: prevState.strParams,
-                      nextState: nextState.strParams,
-                      toClientOperation: params => StrParam.toClientOperation(createdByMe)(params),
-                      defaultState: defaultStrParamState,
-                  }),
-        pieces:
-            diff.pieces == null
-                ? undefined
-                : DualKeyRecordOperation.toClientOperation({
-                      diff: diff.pieces,
-                      prevState: prevState.pieces,
-                      nextState: nextState.pieces,
-                      toClientState: ({ nextState }) => Piece.toClientState(nextState),
-                      toClientOperation: params => Piece.toClientOperation(params),
-                      isPrivate: () => false,
-                  }),
-        privateCommands:
-            diff.privateCommands == null
-                ? undefined
-                : RecordOperation.toClientOperation({
-                      diff: diff.privateCommands,
-                      prevState: prevState.privateCommands,
-                      nextState: nextState.privateCommands,
-                      toClientState: ({ nextState }) => Command.toClientState(nextState),
-                      toClientOperation: params => Command.toClientOperation(params),
-                      isPrivate: () => !createdByMe,
-                  }),
-        tachieLocations:
-            diff.tachieLocations == null
-                ? undefined
-                : DualKeyRecordOperation.toClientOperation({
-                      diff: diff.tachieLocations,
-                      prevState: prevState.tachieLocations,
-                      nextState: nextState.tachieLocations,
-                      toClientState: ({ nextState }) => BoardLocation.toClientState(nextState),
-                      toClientOperation: params => BoardLocation.toClientOperation(params),
-                      isPrivate: () => false,
-                  }),
-        dicePieceValues:
-            diff.dicePieceValues == null
-                ? undefined
-                : RecordOperation.toClientOperation({
-                      diff: diff.dicePieceValues,
-                      prevState: prevState.dicePieceValues,
-                      nextState: nextState.dicePieceValues,
-                      toClientState: ({ nextState }) =>
-                          DicePieceValue.toClientState(createdByMe)(nextState),
-                      toClientOperation: params =>
-                          DicePieceValue.toClientOperation(createdByMe)(params),
-                      isPrivate: () => false,
-                  }),
-        numberPieceValues:
-            diff.numberPieceValues == null
-                ? undefined
-                : RecordOperation.toClientOperation({
-                      diff: diff.numberPieceValues,
-                      prevState: prevState.numberPieceValues,
-                      nextState: nextState.numberPieceValues,
-                      toClientState: ({ nextState }) =>
-                          NumberPieceValue.toClientState(createdByMe)(nextState),
-                      toClientOperation: params =>
-                          NumberPieceValue.toClientOperation(createdByMe)(params),
-                      isPrivate: () => false,
-                  }),
     };
 };
 

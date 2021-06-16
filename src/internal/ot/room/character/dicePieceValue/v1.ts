@@ -12,6 +12,7 @@ import {
     ClientTransform,
     Compose,
     Diff,
+    RequestedBy,
     Restore,
     ServerTransform,
     ToClientOperationParams,
@@ -20,7 +21,7 @@ import { createOperation } from '../../../util/createOperation';
 import { isIdRecord, record } from '../../../util/record';
 import { Result } from '@kizahasi/result';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
-import { chooseDualKeyRecord, chooseRecord } from '@kizahasi/util';
+import { chooseDualKeyRecord, chooseRecord, CompositeKey } from '@kizahasi/util';
 import { RecordTwoWayOperation } from '../../../util/recordOperation';
 import * as RecordOperation from '../../../util/recordOperation';
 
@@ -63,48 +64,16 @@ export type TwoWayOperation = {
     pieces?: DualKeyRecordTwoWayOperation<Piece.State, Piece.TwoWayOperation>;
 };
 
-export const toClientState = (createdByMe: boolean) => (source: State): State => {
+export const toClientState = (
+    createdByMe: boolean,
+    requestedBy: RequestedBy,
+    activeBoardKey: CompositeKey | null
+) => (source: State): State => {
     return {
         ...source,
         dice: chooseRecord(source.dice, state => DieValue.toClientState(createdByMe)(state)),
-        pieces: chooseDualKeyRecord<Piece.State, Piece.State>(source.pieces, state =>
-            Piece.toClientState(state)
-        ),
+        pieces: Piece.toClientStateMany(requestedBy, activeBoardKey)(source.pieces),
     };
-};
-
-export const toClientOperation = (createdByMe: boolean) => ({
-    prevState,
-    nextState,
-    diff,
-}: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
-    const result = {
-        ...diff,
-        dice:
-            diff.dice == null
-                ? undefined
-                : RecordOperation.toClientOperation({
-                      diff: diff.dice,
-                      isPrivate: () => false,
-                      prevState: prevState.dice,
-                      nextState: nextState.dice,
-                      toClientState: ({ nextState }) =>
-                          DieValue.toClientState(createdByMe)(nextState),
-                      toClientOperation: params => DieValue.toClientOperation(createdByMe)(params),
-                  }),
-        pieces:
-            diff.pieces == null
-                ? undefined
-                : DualKeyRecordOperation.toClientOperation({
-                      diff: diff.pieces,
-                      isPrivate: () => false,
-                      prevState: prevState.pieces,
-                      nextState: nextState.pieces,
-                      toClientState: ({ nextState }) => Piece.toClientState(nextState),
-                      toClientOperation: params => Piece.toClientOperation(params),
-                  }),
-    };
-    return result;
 };
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {

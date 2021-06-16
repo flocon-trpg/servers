@@ -19,7 +19,6 @@ export {
     downOperation,
     DownOperation,
     TwoWayOperation,
-    toClientOperation,
     toClientState,
     toUpOperation,
     toDownOperation,

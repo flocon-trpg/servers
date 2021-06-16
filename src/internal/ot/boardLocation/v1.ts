@@ -63,12 +63,6 @@ export const toClientState = (source: State): State => {
     return source;
 };
 
-export const toClientOperation = ({
-    diff,
-}: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
-    return diff;
-};
-
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return source;
 };

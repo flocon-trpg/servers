@@ -65,12 +65,6 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
     return source;
 };
 
-export const toClientOperation = ({
-    diff,
-}: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
-    return diff;
-};
-
 export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
     const result: State = { ...state };
     if (operation.name != null) {

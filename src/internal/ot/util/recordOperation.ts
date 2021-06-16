@@ -91,56 +91,6 @@ export const toClientState = <TSourceState, TClientState>({
     );
 };
 
-export const toClientOperation = <TSourceState, TClientState, TSourceOperation, TClientOperation>({
-    diff,
-    isPrivate,
-    prevState,
-    nextState,
-    toClientState,
-    toClientOperation,
-}: {
-    diff: RecordTwoWayOperation<TSourceState, TSourceOperation>;
-
-    // 対象となるユーザーの視点で、全体がprivateとなるときはtrueを返す。一部がprivateである、もしくはprivateである部分がないときはfalseを返す。
-    isPrivate: (state: TSourceState, key: string) => boolean;
-
-    prevState: StringKeyRecord<TSourceState>;
-    nextState: StringKeyRecord<TSourceState>;
-
-    // 全体がprivateになるケースについて書く必要はない。
-    toClientState: (params: {
-        prevState: TSourceState | undefined;
-        nextState: TSourceState;
-        key: string;
-    }) => TClientState;
-
-    // 全体がprivateになるケースについて書く必要はない。
-    toClientOperation: (params: {
-        diff: TSourceOperation;
-        key: string;
-        prevState: TSourceState;
-        nextState: TSourceState;
-    }) => TClientOperation | null | undefined;
-}) => {
-    return (
-        DualKeyRecordOperation.toClientOperation({
-            diff: { [dummyKey]: diff },
-            isPrivate: (state, key) => isPrivate(state, key.second),
-            prevState: { [dummyKey]: prevState },
-            nextState: { [dummyKey]: nextState },
-            toClientState: ({ prevState, nextState, key }) =>
-                toClientState({ prevState, nextState, key: key.second }),
-            toClientOperation: ({ diff, key, prevState, nextState }) =>
-                toClientOperation({
-                    diff,
-                    key: key.second,
-                    prevState,
-                    nextState,
-                }),
-        })[dummyKey] ?? {}
-    );
-};
-
 // downOperationは、composeDownOperationLooseによって作成されたものでも構わない。その代わり、innerDiffはdownでなくtwoWayである必要がある。
 export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError = string>({
     nextState,

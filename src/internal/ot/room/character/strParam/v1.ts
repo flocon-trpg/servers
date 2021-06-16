@@ -51,28 +51,6 @@ export const toClientState = (createdByMe: boolean) => (source: State): State =>
     };
 };
 
-export const toClientOperation = (createdByMe: boolean) => ({
-    prevState,
-    nextState,
-    diff,
-}: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
-    return {
-        ...diff,
-        value: TextOperation.toPrivateClientOperation({
-            oldValue: {
-                value: prevState.value,
-                isValuePrivate: prevState.isValuePrivate,
-            },
-            newValue: {
-                value: nextState.value,
-                isValuePrivate: nextState.isValuePrivate,
-            },
-            diff: diff.value,
-            createdByMe,
-        }),
-    };
-};
-
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return {
         ...source,

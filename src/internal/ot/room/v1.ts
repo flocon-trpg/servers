@@ -26,7 +26,7 @@ import {
     ToClientOperationParams,
 } from '../util/type';
 import { createOperation } from '../util/createOperation';
-import { isIdRecord, record } from '../util/record';
+import { DualStringKeyRecord, isIdRecord, record } from '../util/record';
 import { CompositeKey, compositeKey } from '../compositeKey/v1';
 import { Result } from '@kizahasi/result';
 import { ApplyError, PositiveInt, ComposeAndTransformError } from '@kizahasi/ot-string';
@@ -213,6 +213,29 @@ export type TwoWayOperation = {
     >;
 };
 
+const boardsToClientState = (requestedBy: RequestedBy, activeBoardKey: CompositeKey | null) => (
+    source: DualStringKeyRecord<Board.State>
+): DualStringKeyRecord<Board.State> => {
+    return DualKeyRecordOperation.toClientState<Board.State, Board.State>({
+        serverState: source,
+        isPrivate: (state, key) => {
+            if (
+                RequestedBy.createdByMe({
+                    requestedBy,
+                    userUid: key.first,
+                })
+            ) {
+                return false;
+            }
+            if (key.second !== activeBoardKey?.id) {
+                return true;
+            }
+            return false;
+        },
+        toClientState: ({ state }) => Board.toClientState(state),
+    });
+};
+
 export const toClientState = (requestedBy: RequestedBy) => (source: State): State => {
     return {
         ...source,
@@ -221,24 +244,7 @@ export const toClientState = (requestedBy: RequestedBy) => (source: State): Stat
             isPrivate: () => false,
             toClientState: ({ state }) => Bgm.toClientState(state),
         }),
-        boards: DualKeyRecordOperation.toClientState<Board.State, Board.State>({
-            serverState: source.boards,
-            isPrivate: (state, key) => {
-                if (
-                    RequestedBy.createdByMe({
-                        requestedBy,
-                        userUid: key.first,
-                    })
-                ) {
-                    return false;
-                }
-                if (key.second !== source.activeBoardKey?.id) {
-                    return true;
-                }
-                return false;
-            },
-            toClientState: ({ state }) => Board.toClientState(state),
-        }),
+        boards: boardsToClientState(requestedBy, source.activeBoardKey ?? null)(source.boards),
         boolParamNames: RecordOperation.toClientState({
             serverState: source.boolParamNames,
             isPrivate: () => false,
@@ -253,7 +259,9 @@ export const toClientState = (requestedBy: RequestedBy) => (source: State): Stat
                 }) && state.isPrivate,
             toClientState: ({ state, key }) =>
                 Character.toClientState(
-                    RequestedBy.createdByMe({ requestedBy, userUid: key.first })
+                    RequestedBy.createdByMe({ requestedBy, userUid: key.first }),
+                    requestedBy,
+                    source.activeBoardKey ?? null
                 )(state),
         }),
         memos: RecordOperation.toClientState({
@@ -276,192 +284,6 @@ export const toClientState = (requestedBy: RequestedBy) => (source: State): Stat
             isPrivate: () => false,
             toClientState: ({ state }) => ParamNames.toClientState(state),
         }),
-    };
-};
-
-// boardsは原則として自分が作ったものしか取得できない。ただし、activeBoardKeyに設定されているboardは例外として誰でも閲覧できる、という仕様。
-// これは  DualKeyRecordOperation.toClientOperation だけでは実現できない(isPrivateによるチェックはdiffに含まれているもののみに行われる)。そのため、独自の処理をここで書いている。
-const boardsToClientOperation = (requestedBy: RequestedBy) => ({
-    prevState,
-    nextState,
-}: {
-    prevState: State;
-    nextState: State;
-}) => {
-    const prevBoardsMap = dualKeyRecordToDualKeyMap<Board.State>(
-        requestedBy.type === server
-            ? prevState.boards
-            : {
-                  [requestedBy.userUid]: prevState.boards[requestedBy.userUid] ?? {},
-              }
-    );
-    if (requestedBy.type === client && prevState.activeBoardKey != null) {
-        const prevActiveBoard = dualKeyRecordFind<Board.State>(prevState.boards, {
-            first: prevState.activeBoardKey.createdBy,
-            second: prevState.activeBoardKey.id,
-        });
-        if (prevActiveBoard != null) {
-            prevBoardsMap.set(
-                {
-                    first: prevState.activeBoardKey.createdBy,
-                    second: prevState.activeBoardKey.id,
-                },
-                prevActiveBoard
-            );
-        }
-    }
-
-    const nextBoardsMap = dualKeyRecordToDualKeyMap<Board.State>(
-        requestedBy.type === server
-            ? nextState.boards
-            : {
-                  [requestedBy.userUid]: nextState.boards[requestedBy.userUid] ?? {},
-              }
-    );
-    if (requestedBy.type === client && nextState.activeBoardKey != null) {
-        const nextActiveBoard = dualKeyRecordFind<Board.State>(nextState.boards, {
-            first: nextState.activeBoardKey.createdBy,
-            second: nextState.activeBoardKey.id,
-        });
-        if (nextActiveBoard != null) {
-            nextBoardsMap.set(
-                {
-                    first: nextState.activeBoardKey.createdBy,
-                    second: nextState.activeBoardKey.id,
-                },
-                nextActiveBoard
-            );
-        }
-    }
-
-    const prevBoards = prevBoardsMap.toStringRecord(
-        x => x,
-        x => x
-    );
-    const nextBoards = nextBoardsMap.toStringRecord(
-        x => x,
-        x => x
-    );
-    const diff = DualKeyRecordOperation.diff<Board.State, Board.TwoWayOperation>({
-        prevState: prevBoards,
-        nextState: nextBoards,
-        innerDiff: params => Board.diff(params),
-    });
-
-    return DualKeyRecordOperation.toClientOperation({
-        diff,
-        prevState: prevBoards,
-        nextState: nextBoards,
-        toClientState: ({ nextState }) => Board.toClientState(nextState),
-        toClientOperation: params => Board.toClientOperation(params),
-        isPrivate: () => false,
-    });
-};
-
-export const toClientOperation = (requestedBy: RequestedBy) => ({
-    prevState,
-    nextState,
-    diff,
-}: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
-    return {
-        ...diff,
-        bgms:
-            diff.bgms == null
-                ? undefined
-                : RecordOperation.toClientOperation({
-                      diff: diff.bgms,
-                      prevState: prevState.bgms,
-                      nextState: nextState.bgms,
-                      toClientState: ({ nextState }) => Bgm.toClientState(nextState),
-                      toClientOperation: params => Bgm.toClientOperation(params),
-                      isPrivate: () => false,
-                  }),
-        boards: boardsToClientOperation(requestedBy)({
-            prevState,
-            nextState,
-        }),
-        boolParamNames:
-            diff.boolParamNames == null
-                ? undefined
-                : RecordOperation.toClientOperation({
-                      diff: diff.boolParamNames,
-                      prevState: prevState.boolParamNames,
-                      nextState: nextState.boolParamNames,
-                      toClientState: ({ nextState }) => ParamNames.toClientState(nextState),
-                      toClientOperation: params => ParamNames.toClientOperation(params),
-                      isPrivate: () => false,
-                  }),
-        characters:
-            diff.characters == null
-                ? undefined
-                : DualKeyRecordOperation.toClientOperation({
-                      diff: diff.characters,
-                      prevState: prevState.characters,
-                      nextState: nextState.characters,
-                      toClientState: ({ nextState, key }) =>
-                          Character.toClientState(
-                              RequestedBy.createdByMe({
-                                  requestedBy,
-                                  userUid: key.first,
-                              })
-                          )(nextState),
-                      toClientOperation: params =>
-                          Character.toClientOperation(
-                              RequestedBy.createdByMe({
-                                  requestedBy,
-                                  userUid: params.key.first,
-                              })
-                          )(params),
-                      isPrivate: (state, key) =>
-                          !RequestedBy.createdByMe({
-                              requestedBy,
-                              userUid: key.first,
-                          }) && state.isPrivate,
-                  }),
-        memos:
-            diff.memos == null
-                ? undefined
-                : RecordOperation.toClientOperation({
-                      diff: diff.memos,
-                      prevState: prevState.memos,
-                      nextState: nextState.memos,
-                      toClientState: ({ nextState }) => Memo.toClientState(nextState),
-                      toClientOperation: params => Memo.toClientOperation(params),
-                      isPrivate: () => false,
-                  }),
-        numParamNames:
-            diff.numParamNames == null
-                ? undefined
-                : RecordOperation.toClientOperation({
-                      diff: diff.numParamNames,
-                      prevState: prevState.numParamNames,
-                      nextState: nextState.numParamNames,
-                      toClientState: ({ nextState }) => ParamNames.toClientState(nextState),
-                      toClientOperation: params => ParamNames.toClientOperation(params),
-                      isPrivate: () => false,
-                  }),
-        participants:
-            diff.participants == null
-                ? undefined
-                : RecordOperation.toClientOperation({
-                      diff: diff.participants,
-                      prevState: prevState.participants,
-                      nextState: nextState.participants,
-                      toClientState: ({ nextState, key }) => Participant.toClientState(nextState),
-                      toClientOperation: params => Participant.toClientOperation(params),
-                      isPrivate: () => false,
-                  }),
-        strParamNames:
-            diff.strParamNames == null
-                ? undefined
-                : RecordOperation.toClientOperation({
-                      diff: diff.strParamNames,
-                      prevState: prevState.strParamNames,
-                      nextState: nextState.strParamNames,
-                      toClientState: ({ nextState }) => ParamNames.toClientState(nextState),
-                      toClientOperation: params => ParamNames.toClientOperation(params),
-                      isPrivate: () => false,
-                  }),
     };
 };
 

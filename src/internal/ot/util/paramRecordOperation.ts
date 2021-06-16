@@ -25,43 +25,6 @@ export type ProtectedTransformParameters<
     TSecondOperation
 >;
 
-// isPrivateがあるとremoveが必要になるため、isPrivateを実装することは不可能。
-export const toClientOperation = <TSourceState, TSourceOperation, TClientOperation>({
-    diff,
-    prevState,
-    nextState,
-    toClientOperation,
-    defaultState,
-}: {
-    diff: StringKeyRecord<TSourceOperation>;
-    prevState: StringKeyRecord<TSourceState>;
-    nextState: StringKeyRecord<TSourceState>;
-    toClientOperation: (params: {
-        diff: TSourceOperation;
-        key: string;
-        prevState: TSourceState;
-        nextState: TSourceState;
-    }) => TClientOperation | null | undefined;
-    defaultState: TSourceState;
-}) => {
-    const result: StringKeyRecord<TClientOperation> = {};
-    recordForEach(diff, (value, key) => {
-        const prevStateElement = prevState[key] ?? defaultState;
-        const nextStateElement = nextState[key] ?? defaultState;
-
-        const operation = toClientOperation({
-            diff: value,
-            key,
-            prevState: prevStateElement,
-            nextState: nextStateElement,
-        });
-        if (operation != null) {
-            result[key] = operation;
-        }
-    });
-    return result;
-};
-
 export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError = string>({
     nextState,
     downOperation,

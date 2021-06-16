@@ -1,16 +1,19 @@
 import { Result } from '@kizahasi/result';
+import { CompositeKey, DualKeyMap, dualKeyRecordToDualKeyMap } from '@kizahasi/util';
 import * as t from 'io-ts';
 import { createOperation } from '../util/createOperation';
-import { isIdRecord } from '../util/record';
+import { DualStringKeyRecord, isIdRecord } from '../util/record';
 import * as ReplaceOperation from '../util/replaceOperation';
+import * as DualKeyRecordOperation from '../util/dualKeyRecordOperation';
 import {
     Apply,
     ClientTransform,
     Compose,
     Diff,
+    RequestedBy,
     Restore,
+    server,
     ServerTransform,
-    ToClientOperationParams,
 } from '../util/type';
 
 const numberDownOperation = t.type({ oldValue: t.number });
@@ -79,14 +82,28 @@ export type TwoWayOperation = {
     y?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
 };
 
-export const toClientState = (source: State): State => {
-    return source;
-};
-
-export const toClientOperation = ({
-    diff,
-}: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
-    return diff;
+export const toClientStateMany = (
+    requestedBy: RequestedBy,
+    activeBoardKey: CompositeKey | null
+) => (source: DualStringKeyRecord<State>): DualStringKeyRecord<State> => {
+    return DualKeyRecordOperation.toClientState<State, State>({
+        serverState: source,
+        isPrivate: (state, key) => {
+            if (
+                RequestedBy.createdByMe({
+                    requestedBy,
+                    userUid: key.first,
+                })
+            ) {
+                return false;
+            }
+            if (key.second !== activeBoardKey?.id) {
+                return true;
+            }
+            return false;
+        },
+        toClientState: ({ state }) => state,
+    });
 };
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {

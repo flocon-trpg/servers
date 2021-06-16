@@ -50,12 +50,6 @@ export type TwoWayOperation = {
 
 export const toClientState = (source: State): State => source;
 
-export const toClientOperation = ({
-    diff,
-}: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
-    return diff;
-};
-
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return source;
 };

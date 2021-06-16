@@ -12,6 +12,7 @@ import {
     ClientTransform,
     Compose,
     Diff,
+    RequestedBy,
     Restore,
     ServerTransform,
     ToClientOperationParams,
@@ -20,7 +21,7 @@ import { createOperation } from '../../../util/createOperation';
 import { isIdRecord, record } from '../../../util/record';
 import { Result } from '@kizahasi/result';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
-import { chooseDualKeyRecord } from '@kizahasi/util';
+import { chooseDualKeyRecord, CompositeKey } from '@kizahasi/util';
 
 export const state = t.type({
     $version: t.literal(1),
@@ -60,46 +61,15 @@ export type TwoWayOperation = {
     pieces?: DualKeyRecordTwoWayOperation<Piece.State, Piece.TwoWayOperation>;
 };
 
-export const toClientState = (createdByMe: boolean) => (source: State): State => {
+export const toClientState = (
+    createdByMe: boolean,
+    requestedBy: RequestedBy,
+    activeBoardKey: CompositeKey | null
+) => (source: State): State => {
     return {
         ...source,
         value: source.isValuePrivate && !createdByMe ? 0 : source.value,
-        pieces: chooseDualKeyRecord<Piece.State, Piece.State>(source.pieces, state =>
-            Piece.toClientState(state)
-        ),
-    };
-};
-
-export const toClientOperation = (createdByMe: boolean) => ({
-    prevState,
-    nextState,
-    diff,
-}: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
-    return {
-        ...diff,
-        value: ReplaceOperation.toPrivateClientOperation({
-            oldValue: {
-                value: prevState.value,
-                isValuePrivate: prevState.isValuePrivate,
-            },
-            newValue: {
-                value: nextState.value,
-                isValuePrivate: nextState.isValuePrivate,
-            },
-            defaultState: 0,
-            createdByMe,
-        }),
-        pieces:
-            diff.pieces == null
-                ? undefined
-                : DualKeyRecordOperation.toClientOperation({
-                      diff: diff.pieces,
-                      isPrivate: () => false,
-                      prevState: prevState.pieces,
-                      nextState: nextState.pieces,
-                      toClientState: ({ nextState }) => Piece.toClientState(nextState),
-                      toClientOperation: params => Piece.toClientOperation(params),
-                  }),
+        pieces: Piece.toClientStateMany(requestedBy, activeBoardKey)(source.pieces),
     };
 };
 
