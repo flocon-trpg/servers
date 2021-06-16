@@ -22,7 +22,7 @@ import { useRoomMessageInputTexts } from '../../hooks/useRoomMessageInputTexts';
 import { useMe } from '../../hooks/useMe';
 import { RoomMenu } from './RoomMenu';
 import { recordToArray } from '@kizahasi/util';
-import { NumberPieceValueList } from './NumberPieceValueList';
+import { PieceValueList } from './PieceValueList';
 import { NumberPieceValueDrawer } from './NumberPieceValueDrawer';
 import { DicePieceValueDrawer } from './DicePieceValueDrawer';
 import { Memos } from './Memos';
@@ -247,7 +247,7 @@ const Room: React.FC = () => {
                         minHeight={150}
                         minWidth={150}
                         zIndex={pieceValuePanel.zIndex}>
-                        <NumberPieceValueList />
+                        <PieceValueList />
                     </DraggableCard>}
                 </div>
 

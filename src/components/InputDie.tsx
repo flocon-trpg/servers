@@ -72,7 +72,6 @@ background-color: ${selectedColor};
     }
 }
 
-
 type InputD6Props = {
     value: number | typeof noValue;
     onValueChange: (newValue: D6Value | typeof noDie | typeof noValue) => void;

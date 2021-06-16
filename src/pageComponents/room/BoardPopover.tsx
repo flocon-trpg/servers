@@ -465,7 +465,9 @@ namespace ContextMenuModule {
                 {
                     dicePieceValuesOnCursor.map(({ dicePieceValueKey, dicePieceValue, characterKey }) =>
                         // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が下にもあるため、キーを互いに異なるものにするように文字列を付加している。
-                        <Menu.SubMenu key={dicePieceValueKey + '@selected'} title={DicePieceValue.stringify(dicePieceValue, myUserUid === characterKey.createdBy)}>
+                        <Menu.SubMenu
+                            key={dicePieceValueKey + '@selected'}
+                            title={<DicePieceValue.images state={dicePieceValue} size={22} padding='6px 0 0 0' />}>
                             {characterKey.createdBy === myUserUid ? <Menu.Item
                                 onClick={() => {
                                     dispatch(roomDrawerAndPopoverModule.actions.set({
@@ -661,7 +663,7 @@ namespace ContextMenuModule {
         };
 
         const pieceMenus = [...characters.toArray()].map(([characterKey, character]) => {
-            return <Menu.SubMenu key={compositeKeyToString(characterKey)} title={character.name}>
+            return <Menu.SubMenu key={compositeKeyToString(characterKey) + '@piece'} title={character.name}>
                 <Menu.SubMenu title='追加' disabled={pieceExists(character)}>
                     <Menu.Item
                         onClick={() => {
@@ -756,7 +758,7 @@ namespace ContextMenuModule {
         });
 
         const tachieMenus = [...characters.toArray()].map(([characterKey, character]) => {
-            return <Menu.SubMenu key={compositeKeyToString(characterKey)} title={character.name}>
+            return <Menu.SubMenu key={compositeKeyToString(characterKey) + '@tachie'} title={character.name}>
                 <Menu.Item
                     disabled={tachieExists(character)}
                     onClick={() => {

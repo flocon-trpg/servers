@@ -13,6 +13,7 @@ import { DicePieceValueState, dicePieceValueStrIndexes, FilePath as CoreFilePath
 import { NumberPieceValue } from '../utils/numberPieceValue';
 import { KonvaD6 } from './KonvaDice';
 import { State as DieValueState } from '@kizahasi/flocon-core/dist/internal/ot/room/character/dicePieceValue/dieValue/v1';
+import { DicePieceValue } from '../utils/dicePieceValue';
 
 export namespace MyKonva {
     export type Vector2 = {
@@ -617,7 +618,7 @@ export namespace MyKonva {
                 </ReactKonva.Group>;
             }
 
-            const diceOpacity = (isValuePrivate: boolean) => isValuePrivate ? 0.5 : 1;
+            const diceOpacity = (isValuePrivate: boolean) => isValuePrivate ? DicePieceValue.privateValueOpacity : 1;
 
             return <ReactKonva.Group width={w} height={h}>
                 {background}
