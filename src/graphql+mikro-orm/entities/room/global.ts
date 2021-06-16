@@ -5,7 +5,7 @@ import { RequestedBy, server } from '../../Types';
 import { EM } from '../../../utils/types';
 import { Reference } from '@mikro-orm/core';
 import { Result } from '@kizahasi/result';
-import { composeDownOperation, decodeDbState, decodeDownOperation, DownOperation, exactDbState, parseUpOperation, State, stringifyState, toClientOperation, toClientState, toDownOperation, TwoWayOperation, UpOperation, stringifyUpOperation, apply } from '@kizahasi/flocon-core';
+import { composeDownOperation, decodeDbState, decodeDownOperation, DownOperation, exactDbState, parseUpOperation, State, stringifyState, toClientState, toDownOperation, TwoWayOperation, UpOperation, stringifyUpOperation, apply, diff, toUpOperation } from '@kizahasi/flocon-core';
 
 type IsSequentialResult<T> = {
     type: 'DuplicateElement';
@@ -132,22 +132,19 @@ export namespace GlobalRoom {
             };
 
             export const operation = ({
-                operation,
                 prevState,
                 nextState,
                 requestedBy,
             }: {
-                operation: TwoWayOperation;
                 prevState: State;
                 nextState: State;
                 requestedBy: RequestedBy;
             }): string => {
-                const upOperationBase: UpOperation = toClientOperation(requestedBy)({
-                    prevState,
-                    nextState,
-                    diff: operation,
-                });
-                return stringifyUpOperation(upOperationBase);
+                const prevClientState = toClientState(requestedBy)(prevState);
+                const nextClientState = toClientState(requestedBy)(nextState);
+                const diffOperation = diff({ prevState: prevClientState, nextState: nextClientState });
+                const upOperation = diffOperation == null ? undefined : toUpOperation(diffOperation);
+                return stringifyUpOperation(upOperation ?? { $version: 1 });
             };
         }
 

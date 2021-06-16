@@ -104,13 +104,12 @@ var GlobalRoom;
                     stateJson: flocon_core_1.stringifyState(flocon_core_1.toClientState(requestedBy)(source)),
                 };
             };
-            ToGraphQL.operation = ({ operation, prevState, nextState, requestedBy, }) => {
-                const upOperationBase = flocon_core_1.toClientOperation(requestedBy)({
-                    prevState,
-                    nextState,
-                    diff: operation,
-                });
-                return flocon_core_1.stringifyUpOperation(upOperationBase);
+            ToGraphQL.operation = ({ prevState, nextState, requestedBy, }) => {
+                const prevClientState = flocon_core_1.toClientState(requestedBy)(prevState);
+                const nextClientState = flocon_core_1.toClientState(requestedBy)(nextState);
+                const diffOperation = flocon_core_1.diff({ prevState: prevClientState, nextState: nextClientState });
+                const upOperation = diffOperation == null ? undefined : flocon_core_1.toUpOperation(diffOperation);
+                return flocon_core_1.stringifyUpOperation(upOperation !== null && upOperation !== void 0 ? upOperation : { $version: 1 });
             };
         })(ToGraphQL = Global.ToGraphQL || (Global.ToGraphQL = {}));
         Global.applyToEntity = ({ em, target, prevState, operation, }) => {

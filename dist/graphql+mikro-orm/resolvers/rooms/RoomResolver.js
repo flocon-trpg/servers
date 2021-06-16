@@ -157,7 +157,6 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
             revisionTo: prevRevision + 1,
             operatedBy: undefined,
             valueJson: global_2.GlobalRoom.Global.ToGraphQL.operation({
-                operation: transformedValue,
                 prevState: roomState,
                 nextState: nextRoomState,
                 requestedBy: { type: Types_1.client, userUid: deliverTo },
@@ -1498,7 +1497,6 @@ let RoomResolver = class RoomResolver {
                         clientId: args.operation.clientId,
                     },
                     valueJson: global_2.GlobalRoom.Global.ToGraphQL.operation({
-                        operation,
                         prevState: roomState,
                         nextState: nextRoomState,
                         requestedBy: { type: Types_1.client, userUid: deliverTo },

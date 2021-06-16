@@ -17,7 +17,6 @@ import { PrereleaseType } from '../../enums/PrereleaseType';
 import { alpha, beta, rc } from '@kizahasi/util';
 import { BaasType } from '../../enums/BaasType';
 
-
 export type PongPayload = {
     value: number;
     createdBy?: string;
