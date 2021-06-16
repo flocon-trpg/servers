@@ -21,6 +21,8 @@ import { useParticipants } from '../../hooks/state/useParticipants';
 import { recordToArray } from '@kizahasi/util';
 import { roomDrawerAndPopoverModule } from '../../modules/roomDrawerAndPopoverModule';
 import { defaultMemoPanelConfig } from '../../states/MemoPanelConfig';
+import FilesManagerDrawer from '../../components/FilesManagerDrawer';
+import { FilesManagerDrawerType, none } from '../../utils/types';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -320,6 +322,7 @@ export const RoomMenu: React.FC = () => {
     const [isBecomePlayerModalVisible, setIsBecomePlayerModalVisible] = React.useState(false);
     const [isChangeMyParticipantNameModalVisible, setIsChangeMyParticipantNameModalVisible] = React.useState(false);
     const [isDeleteRoomModalVisible, setIsDeleteRoomModalVisible] = React.useState(false);
+    const [filesManagerDrawerType, setFilesManagerDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
 
     const participantsRef = React.useRef(participants);
     React.useEffect(() => {
@@ -539,6 +542,9 @@ export const RoomMenu: React.FC = () => {
                 ボリューム
             </Popover>
         </Menu.Item>
+        <Menu.Item onClick={() => setFilesManagerDrawerType({ openFileType: none })}>
+            アップローダー
+        </Menu.Item>
         {(me == null || myAuth == null) || <Menu.SubMenu
             title={<div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                 <Jdenticon hashOrValue={myAuth.uid} size={20} tooltipMode={{ type: 'userUid' }} />
@@ -565,6 +571,7 @@ export const RoomMenu: React.FC = () => {
             </Menu.Item>
         </Menu.SubMenu>}
     </Menu>
+    <FilesManagerDrawer drawerType={filesManagerDrawerType} onClose={() => setFilesManagerDrawerType(null)} />
     <BecomePlayerModal
         visible={isBecomePlayerModalVisible}
         onOk={() => setIsBecomePlayerModalVisible(false)}

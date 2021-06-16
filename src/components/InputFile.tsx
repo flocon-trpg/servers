@@ -52,18 +52,6 @@ const InputFile: React.FC<Props> = ({ filePath, onPathChange, openFilesManager, 
                 return (<FirebaseStorageLink reference={filePath.path} />);
         }
     })();
-    const button = (() => {
-        if (filePath == null) {
-            return (<Button onClick={() => {
-                openFilesManager({ openFileType: some, onOpen });
-            }}>Open</Button>);
-        }
-        return (<Button onClick={() => {
-            if (onPathChange != null) {
-                onPathChange(null);
-            }
-        }}>Remove</Button>);
-    })();
 
     return (
         <div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
@@ -71,7 +59,14 @@ const InputFile: React.FC<Props> = ({ filePath, onPathChange, openFilesManager, 
             {imageElement == null ? null : <div style={({ width: 4 })} />}
             {fileNameElement}
             <div style={({ width: 4 })} />
-            {button}
+            <Button onClick={() => {
+                openFilesManager({ openFileType: some, onOpen });
+            }}>Open</Button>
+            {filePath != null && <Button onClick={() => {
+                if (onPathChange != null) {
+                    onPathChange(null);
+                }
+            }}>Remove</Button>}
         </div>
     );
 };

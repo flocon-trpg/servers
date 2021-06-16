@@ -619,6 +619,9 @@ const boardsDropDownStyle: React.CSSProperties = {
     position: 'absolute',
     top: 20,
     right: 20,
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
 };
 
 const zoomButtonStyle: React.CSSProperties = {
@@ -654,7 +657,10 @@ const Board: React.FC<Props> = ({
         if (panel.boardEditorPanel.activeBoardKey == null) {
             return null;
         }
-        return stringToCompositeKey(panel.boardEditorPanel.activeBoardKey);
+        return {
+            createdBy: myUserUid,
+            id: panel.boardEditorPanel.activeBoardKey,
+        };
     })();
 
     const boardConfig = (() => {
@@ -781,18 +787,23 @@ const Board: React.FC<Props> = ({
             }} />);
     })();
 
-    const dropDownItems = boardEditorPanelId == null ? null : boards.toArray().map(([key, board]) => (
-        <Menu.Item
+    const dropDownItems = boardEditorPanelId == null ? null : boards.toArray().map(([key, board]) => {
+        if (key.createdBy !== myUserUid) {
+            // 自分が作成者でないBoardはActiveBoardとして含まれていることがあるが、エディターで表示させると混乱を招くので除外している
+            return null;
+        }
+        return <Menu.Item
             key={compositeKeyToString(key)}
             onClick={() => dispatch(roomConfigModule.actions.updateBoardEditorPanel({
                 boardEditorPanelId,
                 roomId,
                 panel: {
-                    activeBoardKey: compositeKeyToString(key),
+                    activeBoardKey: key.id,
                 }
             }))}>
             {board.name === '' ? '(名前なし)' : board.name}
-        </Menu.Item>));
+        </Menu.Item>;
+    });
 
     // activeBoardPanelモードのときは boardsMenu==null
     const boardsMenu = dropDownItems == null ? null : (
@@ -814,25 +825,22 @@ const Board: React.FC<Props> = ({
     return (
         <div style={({ position: 'relative' })}>
             {boardComponent}
-            <span style={boardsDropDownStyle}>
+            <div style={boardsDropDownStyle}>
                 {boardsMenu != null
                     ? <Dropdown overlay={boardsMenu} trigger={['click']}>
                         <Button>
                             {boardKeyToShow == null ? noActiveBoardText : (boards.get(boardKeyToShow)?.name ?? noActiveBoardText)} <Icons.DownOutlined />
                         </Button>
                     </Dropdown>
-                    : <Dropdown
-                        trigger={['click']}
-                        overlay={<Menu>
-                            <Menu.Item
-                                onClick={() => {
-                                    setActiveBoardSelectorModalVisibility(true);
-                                }}>
-                                表示ボードの変更
-                            </Menu.Item>
-                        </Menu>}>
-                        <Button>{board?.name}<Icons.DownOutlined /></Button>
-                    </Dropdown>}
+                    : <>
+                        <div style={{ marginRight: 4, padding: 4, background: '#E0E0E010' }}>{board?.name}</div>
+                        <Button
+                            onClick={() => {
+                                setActiveBoardSelectorModalVisibility(true);
+                            }}>
+                            表示ボードの変更
+                        </Button>
+                    </>}
                 <Button
                     disabled={boardKeyToShow == null}
                     onClick={() => {
@@ -843,7 +851,7 @@ const Board: React.FC<Props> = ({
                     }}>
                     編集
                 </Button>
-            </span>
+            </div>
             <div style={zoomButtonStyle}>
                 <div style={({ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' })}>
                     <Button onClick={() => {
