@@ -1,4 +1,4 @@
-import { State, UpOperation, apply, composeUpOperation, clientTransform, diff, toUpOperation } from '@kizahasi/flocon-core';
+import { State, UpOperation, apply, clientTransform, diff, toUpOperation } from '@kizahasi/flocon-core';
 import { StateManager, StateManagerParameters } from './StateManager';
 
 type Parameters = StateManagerParameters<State, UpOperation>;
