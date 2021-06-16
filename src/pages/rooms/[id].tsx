@@ -126,7 +126,7 @@ const RoomBehavior: React.FC<PropsWithChildren<{ roomId: string }>> = ({ roomId,
     const dispatch = useDispatch();
     const { observable, data: roomEventSubscription, error } = usePublishRoomEventSubscription(roomId);
     const { state: roomState, refetch: refetchRoomState } = useRoomState(roomId, observable);
-    const allRoomMessages = useAllRoomMessages({ roomId, roomEventSubscription });
+    const allRoomMessages = useAllRoomMessages({ roomId, roomEventSubscription, beginFetch: roomState.type === 'joined' });
     React.useEffect(() => {
         dispatch(roomDrawerAndPopoverModule.actions.reset());
     }, [roomId, dispatch]);

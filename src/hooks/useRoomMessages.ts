@@ -331,17 +331,27 @@ export type AllRoomMessagesResult = {
     failureType: GetRoomMessagesFailureType;
 } | AllRoomMessagesSuccessResult
 
-export const useAllRoomMessages = ({ roomId, roomEventSubscription }: { roomId: string; roomEventSubscription: RoomEventSubscription | undefined }): AllRoomMessagesResult => {
+export const useAllRoomMessages = ({ 
+    roomId, 
+    roomEventSubscription, 
+    beginFetch
+}: {
+    roomId: string; 
+    roomEventSubscription: RoomEventSubscription | undefined;
+
+    // もしこれがないと、Room作成者以外がRoomに入室するとき、まだnonJoinedの段階でuseGetMessagesLazyQueryを呼び出してしまうためNotParticipantエラーが返され、メッセージウィンドウがエラーになる。これはブラウザを更新するだけで直る軽微なバグではあるが、beginFetchを設けることでuseGetMessagesLazyQueryが呼び出されるタイミングを遅らせることでバグを回避している。
+    beginFetch: boolean; 
+}): AllRoomMessagesResult => {
     const { userUid: myUserUid } = useMe();
     const [result, setResult] = React.useState<AllRoomMessagesResultCore>({ type: loading, events: [] });
     const [getMessages, messages] = useGetMessagesLazyQuery({ fetchPolicy: 'network-only' });
 
     React.useEffect(() => {
-        if (myUserUid == null) {
+        if (myUserUid == null || !beginFetch) {
             return;
         }
         getMessages({ variables: { roomId } });
-    }, [roomId, myUserUid, getMessages]);
+    }, [roomId, myUserUid, beginFetch, getMessages]);
 
     React.useEffect(() => {
         const messagesData = messages.data;

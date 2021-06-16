@@ -74,7 +74,6 @@ const Index: React.FC = () => {
                 <div style={{ height: spacing }} />
                 <Typography.Title level={3}>バグと対処法</Typography.Title>
                 <ul>
-                    <li>部屋に初めて入ったとき、メッセージパネルがエラーになることがあります。ブラウザを更新すると直ります。</li>
                     <li>ブラウザはChrome系(Edgeを含む)を推奨します。Firefoxでも概ね動きますがメッセージのスクロールが正常にできないという不具合があります。</li>
                     <li>AdblockやAdblock Plusを使用していると正常にサイトが動かないという不具合が報告されています。これらの拡張機能を無効にしてからの利用を推奨します。</li>
                 </ul>

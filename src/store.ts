@@ -1,5 +1,5 @@
 import { combineReducers, AnyAction } from 'redux';
-import { configureStore, getDefaultMiddleware, PayloadAction } from '@reduxjs/toolkit';
+import { configureStore } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook } from 'react-redux';
 import { useSelector as useReduxSelector } from 'react-redux';
 import { createEpicMiddleware } from 'redux-observable';
