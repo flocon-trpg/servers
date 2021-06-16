@@ -125,11 +125,12 @@ class StateManagerCore<TState, TOperation> {
 
             this._actualState = this.params.apply({ state: this._actualState, operation: toApply.operation });
             const diff = this.params.diff({ prevState: this._postingState?.state ?? this._actualState, nextState: this._actualState });
-            if (this.localOperation === undefined) {
+            const localOperation = this.localOperation;
+            if (localOperation === undefined) {
                 this._uiStateCore = undefined;
             } else {
                 if (diff !== undefined) {
-                    const xform = this.params.transform({ first: this.localOperation, second: diff });
+                    const xform = this.params.transform({ first: localOperation, second: diff });
                     this._uiStateCore = this.params.apply({ state: this._actualState, operation: xform.firstPrime });
                 }
             }
@@ -146,7 +147,7 @@ class StateManagerCore<TState, TOperation> {
          *                          /            \
          *        this._postingState.state    next this._actualState
          *                       / \            /
-         * this._localOperation /  (xform)     / next this._postingOperation
+         * this._localOperation /  (xform)     / next this._postingOperation.diff
          *                     /        \     /
          *        prev this._uiState     --- (expected posted state')
          *                     \            /
@@ -155,20 +156,29 @@ class StateManagerCore<TState, TOperation> {
          *                  next this._uiState
          */
 
+        const prevLocalOperation = this.localOperation;
         this._actualState = this.params.apply({ state: this._actualState, operation: toApply.operation });
-        const { postedStateDiff, nextPostingOperation } = (() => {
+        const { toApplyOperationPrime, nextPostingOperation } = (() => {
             if (this._postingState?.operation === undefined) {
-                return { postedStateDiff: toApply.operation, nextPostingOperation: undefined };
+                return { toApplyOperationPrime: toApply.operation, nextPostingOperation: undefined };
             }
             const xform = this.params.transform({ first: toApply.operation, second: this._postingState.operation });
-            return { postedStateDiff: xform.firstPrime, nextPostingOperation: xform.secondPrime };
+            return { toApplyOperationPrime: xform.firstPrime, nextPostingOperation: xform.secondPrime };
         })();
         if (this._postingState !== undefined) {
-            this._postingState = { ...this._postingState, operation: nextPostingOperation };
+            this._postingState = {
+                ...this._postingState,
+                state: nextPostingOperation == null ?
+                    this._actualState :
+                    this.params.apply({ state: this._actualState, operation: nextPostingOperation }),
+                operation: nextPostingOperation
+            };
         }
-        const nextLocalOperation = this.localOperation === undefined ? undefined : this.params.transform({ first: postedStateDiff, second: this.localOperation }).secondPrime;
+        const nextLocalOperation = prevLocalOperation === undefined ? undefined : this.params.transform({ first: toApplyOperationPrime, second: prevLocalOperation }).firstPrime;
         if (nextLocalOperation !== undefined) {
             this._uiStateCore = this.params.apply({ state: this._uiStateCore ?? this._actualState, operation: nextLocalOperation });
+        } else {
+            this._uiStateCore = undefined;
         }
 
         this._revision++;
