@@ -1,5 +1,6 @@
 import { FileSourceType } from '../generated/graphql';
 import * as Core from '@kizahasi/flocon-core';
+import { FilterValue } from 'antd/lib/table/interface';
 
 export type FilePath = {
     path: string;
@@ -52,9 +53,11 @@ export const some = 'some';
 
 export type FilesManagerDrawerType = {
     openFileType: typeof none;
+    defaultFilteredValue?: FilterValue | undefined;
 } | {
     openFileType: typeof some;
     onOpen: (path: FilePath) => void;
+    defaultFilteredValue: FilterValue | undefined;
 }
 
 export type PublicChannelNames = {

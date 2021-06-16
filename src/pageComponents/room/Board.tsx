@@ -1,13 +1,13 @@
 import React from 'react';
 import { useImageFromGraphQL } from '../../hooks/image';
 import * as ReactKonva from 'react-konva';
-import { Button, Dropdown, Menu, Tooltip } from 'antd';
+import { Button, Dropdown, Menu } from 'antd';
 import * as Icons from '@ant-design/icons';
 import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
 import { BoardEditorPanelConfig } from '../../states/BoardEditorPanelConfig';
 import { KonvaEventObject } from 'konva/types/Node';
-import { replace, update } from '../../stateManagers/states/types';
+import { update } from '../../stateManagers/states/types';
 import * as Icon from '@ant-design/icons';
 import { MyKonva } from '../../components/MyKonva';
 import { Message, publicMessage, useFilteredRoomMessages } from '../../hooks/useRoomMessages';
@@ -18,25 +18,22 @@ import { useCharacters } from '../../hooks/state/useCharacters';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { Piece } from '../../utils/piece';
 import { useBoards } from '../../hooks/state/useBoards';
-import { NumberPieceValue } from '../../utils/numberPieceValue';
 import { BoardLocation } from '../../utils/boardLocation';
 import { BoardConfig, defaultBoardConfig } from '../../states/BoardConfig';
 import { ActiveBoardPanelConfig } from '../../states/ActiveBoardPanelConfig';
 import { ActiveBoardSelectorModal } from './ActiveBoardSelecterModal';
-import { executeCharacterFlocommand, listCharacterFlocommand } from '../../flocommand/main';
 import useConstant from 'use-constant';
 import { debounceTime } from 'rxjs/operators';
 import { Vector2d } from 'konva/types/types';
 import { Subject } from 'rxjs';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
-import { CharacterState, UpOperation, PieceState, PieceUpOperation, BoardLocationUpOperation, BoardState, BoardLocationState, NumberPieceValueState, DicePieceValueState } from '@kizahasi/flocon-core';
-import { $free, CompositeKey, compositeKeyEquals, compositeKeyToString, dualKeyRecordToDualKeyMap, ReadonlyStateMap, stringToCompositeKey } from '@kizahasi/util';
+import { UpOperation, PieceState, PieceUpOperation, BoardLocationUpOperation, BoardState, BoardLocationState } from '@kizahasi/flocon-core';
+import { $free, CompositeKey, compositeKeyEquals, compositeKeyToString, dualKeyRecordToDualKeyMap } from '@kizahasi/util';
 import _ from 'lodash';
 import { useNumberPieceValues } from '../../hooks/state/useNumberPieceValues';
 import { tripleKeyToString } from '../../utils/tripleKeyToString';
 import { BoardTooltipState, create, MouseOverOn, BoardPopoverEditorState, roomDrawerAndPopoverModule } from '../../modules/roomDrawerAndPopoverModule';
 import { useDicePieceValues } from '../../hooks/state/useDicePieceValues';
-import { DicePieceValue } from '../../utils/dicePieceValue';
 
 const createPiecePostOperation = ({
     e,

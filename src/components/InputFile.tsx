@@ -5,6 +5,8 @@ import { useFirebaseStorageUrl } from '../hooks/firebaseStorage';
 import { FilePath, some } from '../utils/types';
 import FirebaseStorageLink from './FirebaseStorageLink';
 import * as Core from '@kizahasi/flocon-core';
+import { FilterValue } from 'antd/lib/table/interface';
+import { image } from './FilesManagerDrawer';
 
 type ImageProps = {
     filePath?: FilePath | Core.FilePath;
@@ -24,7 +26,7 @@ const Image: React.FC<ImageProps> = ({ filePath }: ImageProps) => {
 type Props = {
     filePath?: FilePath | Core.FilePath;
     onPathChange?: (path: FilePath | Core.FilePath | null) => void;
-    openFilesManager: (drawerType: { openFileType: typeof some; onOpen: (path: FilePath | Core.FilePath) => void }) => void;
+    openFilesManager: (drawerType: { openFileType: typeof some; onOpen: (path: FilePath | Core.FilePath) => void; defaultFilteredValue: FilterValue | undefined }) => void;
     showImage?: boolean;
 }
 
@@ -60,7 +62,7 @@ const InputFile: React.FC<Props> = ({ filePath, onPathChange, openFilesManager, 
             {fileNameElement}
             <div style={({ width: 4 })} />
             <Button onClick={() => {
-                openFilesManager({ openFileType: some, onOpen });
+                openFilesManager({ openFileType: some, onOpen, defaultFilteredValue: [image] });
             }}>Open</Button>
             {filePath != null && <Button onClick={() => {
                 if (onPathChange != null) {

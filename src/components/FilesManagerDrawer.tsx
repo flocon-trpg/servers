@@ -14,12 +14,16 @@ import copy from 'clipboard-copy';
 import { fileName } from '../utils/filename';
 import { extname } from '../utils/extname';
 import { InformationIcon } from './InformationIcon';
+import { useMe } from '../hooks/useMe';
+import { FilterValue } from 'antd/lib/table/interface';
+import { useMemoAsync } from '../hooks/useMemoAsync';
+import moment from 'moment';
 
 type Reference = firebase.default.storage.Reference;
 
-const image = 'image';
-const sound = 'sound';
-const others = 'others';
+export const image = 'image';
+export const sound = 'sound';
+export const others = 'others';
 type FileType = typeof image | typeof sound | typeof others;
 
 type DataSource = {
@@ -27,6 +31,7 @@ type DataSource = {
     fullPath: string;
     fileName: string;
     fileType: FileType;
+    metadata: unknown;
 }
 
 type Column = ColumnGroupType<DataSource> | ColumnType<DataSource>;
@@ -52,12 +57,12 @@ const unlisted = 'unlisted';
 type StorageType = typeof $public | typeof unlisted;
 
 type FirebaseUploaderProps = {
-    authUser: firebase.default.User;
     onUploaded: () => void;
     storageType: StorageType;
 }
 
-const FirebaseUploader: React.FC<FirebaseUploaderProps> = ({ authUser, onUploaded, storageType }: FirebaseUploaderProps) => {
+const FirebaseUploader: React.FC<FirebaseUploaderProps> = ({ onUploaded, storageType }: FirebaseUploaderProps) => {
+    const { userUid: myUserUid } = useMe();
     const config = React.useContext(ConfigContext);
 
     if (storageType === $public) {
@@ -73,6 +78,9 @@ const FirebaseUploader: React.FC<FirebaseUploaderProps> = ({ authUser, onUploade
         <Upload.Dragger
             accept={accept}
             customRequest={options => {
+                if (myUserUid == null) {
+                    return;
+                }
                 if (typeof options.file === 'string' || !('name' in options.file)) {
                     return;
                 }
@@ -80,7 +88,7 @@ const FirebaseUploader: React.FC<FirebaseUploaderProps> = ({ authUser, onUploade
                     if (!webConfig.firebase.storage.enableUnlisted) {
                         return null;
                     }
-                    return getStorageForce(config).ref(Path.unlisted.file(authUser.uid, options.file.name));
+                    return getStorageForce(config).ref(Path.unlisted.file(myUserUid, options.file.name));
                 })();
                 if (storageRef == null) {
                     return;
@@ -109,7 +117,6 @@ const FirebaseUploader: React.FC<FirebaseUploaderProps> = ({ authUser, onUploade
 
 const fileNameColumn: Column = {
     title: 'ファイル名',
-    dataIndex: 'name',
     sorter: (x, y) => x.fileName.localeCompare(y.fileName),
     sortDirections: ['ascend', 'descend'],
     // eslint-disable-next-line react/display-name
@@ -118,9 +125,8 @@ const fileNameColumn: Column = {
     },
 };
 
-const fileTypeColumn: Column = {
+const fileTypeColumn = (defaultFilteredValue: FilterValue | null | undefined): Column => ({
     title: (<span>種類 <InformationIcon title='種類の分類はあくまで簡易的なものです。誤った分類がされることがあります。' /></span>),
-    dataIndex: '',
     key: 'fileType',
     filters: [
         { text: '画像', value: image },
@@ -128,9 +134,10 @@ const fileTypeColumn: Column = {
         { text: 'その他', value: others },
     ],
     onFilter: (value, record) => value === record.fileType,
+    defaultFilteredValue,
     sorter: (x, y) => {
         const toNumber = (fileType: FileType): number => {
-            switch(fileType) {
+            switch (fileType) {
                 case image:
                     return 1;
                 case sound:
@@ -154,11 +161,29 @@ const fileTypeColumn: Column = {
                 return 'その他';
         }
     },
+});
+
+const getTimeCreated = (metadata: unknown): string | undefined => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const timeCreated = (metadata as any)?.timeCreated;
+    if (typeof timeCreated === 'string') {
+        return timeCreated;
+    }
+    return undefined;
+};
+
+const createdAtColumn: Column = {
+    title: 'アップロード日時',
+    sorter: (x, y) => (getTimeCreated(x.metadata) ?? '').localeCompare((getTimeCreated(y.metadata) ?? '')),
+    sortDirections: ['ascend', 'descend'],
+    // eslint-disable-next-line react/display-name
+    render: (_, record: DataSource) => {
+        return moment(getTimeCreated(record.metadata)).format('YYYY/MM/DD HH:mm:ss');
+    },
 };
 
 const openButtonColumn = (onClick: (ref: Reference) => void): Column => ({
     title: 'Open',
-    dataIndex: '',
     key: 'Open',
     // eslint-disable-next-line react/display-name
     render: (_, record: DataSource) => {
@@ -238,11 +263,18 @@ type FirebaseFilesListProps = {
     files: Reference[];
     onFlieOpen?: (ref: Reference) => void;
     storageType: StorageType;
+    defaultFilteredValue?: FilterValue;
 }
 
-const FirebaseFilesList: React.FC<FirebaseFilesListProps> = ({ files, onFlieOpen, storageType }: FirebaseFilesListProps) => {
-    const dataSource: DataSource[] = React.useMemo(() =>
-        files.map(file => {
+const FirebaseFilesList: React.FC<FirebaseFilesListProps> = ({
+    files,
+    onFlieOpen,
+    storageType,
+    defaultFilteredValue
+}: FirebaseFilesListProps) => {
+    const dataSource: DataSource[] | undefined = useMemoAsync(async () => {
+        const promises = files.map(async file => {
+            const metadata = await file.getMetadata();
             const name = fileName(file.fullPath);
             let fileType: FileType;
             switch (extname(name)?.toLowerCase()) {
@@ -271,29 +303,33 @@ const FirebaseFilesList: React.FC<FirebaseFilesListProps> = ({ files, onFlieOpen
                 fullPath: file.fullPath,
                 fileName: name,
                 fileType,
+                metadata,
             };
-        })
+        });
+        return await Promise.all(promises);
+    }
     , [files]);
     const columns = (() => {
         if (onFlieOpen != null) {
-            return [fileNameColumn, fileTypeColumn, openButtonColumn(onFlieOpen), fileOptionsColumn(storageType)];
+            return [fileNameColumn, fileTypeColumn(defaultFilteredValue), createdAtColumn, openButtonColumn(onFlieOpen), fileOptionsColumn(storageType)];
         }
-        return [fileNameColumn, fileTypeColumn, fileOptionsColumn(storageType)];
+        return [fileNameColumn, fileTypeColumn(defaultFilteredValue), createdAtColumn, fileOptionsColumn(storageType)];
     })();
     return (<Table
         size='small'
         pagination={{ pageSize: 15 }}
         rowKey='fullPath'
         columns={columns}
-        dataSource={dataSource} />);
+        dataSource={dataSource ?? []} />);
 };
 
 type FirebaseFilesManagerProps = {
-    myAuth: FirebaseApp.User;
     onFlieOpen?: (path: FilePathFragment) => void;
+    defaultFilteredValue?: FilterValue;
 }
 
-const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({ myAuth, onFlieOpen }: FirebaseFilesManagerProps) => {
+const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({ onFlieOpen, defaultFilteredValue }: FirebaseFilesManagerProps) => {
+    const { userUid: myUserUid } = useMe();
     const [publicFiles, setPublicFiles] = React.useState<Reference[]>([]);
     const [unlistedFiles, setUnlistedFiles] = React.useState<Reference[]>([]);
     const forceReloadPublicListKey = React.useContext(ForceReloadPublicListKeyContext);
@@ -321,13 +357,15 @@ const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({ myAuth, onF
     }, [forceReloadPublicListKey, config]); // もしpublicでアクセスできるファイルがUserによって異なるように変更した場合、depsにmyAuth.uidなどを含めるほうがいい。
 
     React.useEffect(() => {
+        if (myUserUid == null) {
+            return;
+        }
         let unsubscribed = false;
         const main = async () => {
-            const userUid = myAuth.uid;
             if (!config.web.firebase.storage.enableUnlisted) {
                 return;
             }
-            const unlisted = await getStorageForce(config).ref(Path.unlisted.list(userUid)).listAll();
+            const unlisted = await getStorageForce(config).ref(Path.unlisted.list(myUserUid)).listAll();
             if (unsubscribed) {
                 return;
             }
@@ -337,7 +375,7 @@ const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({ myAuth, onF
         return () => {
             unsubscribed = true;
         };
-    }, [myAuth.uid, forceReloadUnlistedListKey, config]);
+    }, [myUserUid, forceReloadUnlistedListKey, config]);
 
     if (!config.web.firebase.storage.enablePublic && !config.web.firebase.storage.enableUnlisted) {
         return (<div>Firebase StorageのUIは管理者によって全て無効化されています。</div>);
@@ -359,10 +397,10 @@ const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({ myAuth, onF
             return (
                 <Tabs.TabPane tab="unlisted" key="storage1">
                     <div>
-                        <FirebaseUploader storageType={unlisted} authUser={myAuth} onUploaded={() => {
+                        <FirebaseUploader storageType={unlisted} onUploaded={() => {
                             setForceReloadUnlistedListKey(oldValue => oldValue + 1);
                         }} />
-                        <FirebaseFilesList files={unlistedFiles} onFlieOpen={onFirebaseFileOpen} storageType="unlisted" />
+                        <FirebaseFilesList files={unlistedFiles} onFlieOpen={onFirebaseFileOpen} storageType="unlisted" defaultFilteredValue={defaultFilteredValue} />
                     </div>
                 </Tabs.TabPane>
             );
@@ -377,10 +415,10 @@ const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({ myAuth, onF
             return (
                 <Tabs.TabPane tab="public" key="storage2">
                     <div>
-                        <FirebaseUploader storageType={$public} authUser={myAuth} onUploaded={() => {
+                        <FirebaseUploader storageType={$public} onUploaded={() => {
                             setForceReloadPublicListKey(oldValue => oldValue + 1);
                         }} />
-                        <FirebaseFilesList files={publicFiles} onFlieOpen={onFirebaseFileOpen} storageType="public" />
+                        <FirebaseFilesList files={publicFiles} onFlieOpen={onFirebaseFileOpen} storageType="public" defaultFilteredValue={defaultFilteredValue} />
                     </div>
                 </Tabs.TabPane>
             );
@@ -423,7 +461,7 @@ const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => 
         return (
             <Tabs>
                 <Tabs.TabPane tab="Firebase Storage" key="1">
-                    <FirebaseFilesManager myAuth={myAuth} onFlieOpen={onFileOpen} />
+                    <FirebaseFilesManager onFlieOpen={onFileOpen} defaultFilteredValue={drawerType?.defaultFilteredValue} />
                 </Tabs.TabPane>
                 {drawerType?.openFileType === some && <Tabs.TabPane tab="URL" key="2">
                     <div>
@@ -453,7 +491,7 @@ const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => 
                             closable
                             visible={drawerType != null}
                             onClose={() => onClose()}
-                            width={700}
+                            width={800}
                             footer={(<DrawerFooter
                                 close={({
                                     textType: 'close',
