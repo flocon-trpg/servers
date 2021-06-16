@@ -1,11 +1,10 @@
 import React from 'react';
 import * as Icons from '@ant-design/icons';
-import { useSelector } from '../../store';
 import { useMemos } from '../../hooks/state/useMemos';
 import BufferedTextArea from '../../components/BufferedTextArea';
 import { MemoState, replace, textDiff, toTextUpOperation, update } from '@kizahasi/flocon-core';
 import { useOperate } from '../../hooks/useOperate';
-import { Button, Popover, Tree } from 'antd';
+import { Button, Popover, Tree, Modal } from 'antd';
 import { DataNode } from 'rc-tree/lib/interface';
 import { simpleId } from '../../utils/generators';
 import BufferedInput from '../../components/BufferedInput';
@@ -205,6 +204,30 @@ export const Memos: React.FC<Props> = ({
                 });
                 onSelectedMemoIdChange(id);
             }}>新規作成</Button>
+            <Button
+                disabled={memo == null}
+                onClick={() => {
+                    if (selectedMemoId == null) {
+                        return;
+                    }
+                    Modal.confirm({
+                        title: '現在開いているメモを削除してよろしいですか？',
+                        onOk: () => {
+                            operate({
+                                $version: 1,
+                                memos: {
+                                    [selectedMemoId]: {
+                                        type: replace,
+                                        replace: {
+                                            newValue: undefined,
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }}>削除</Button>
+            <div style={{ width: 12 }} />
             <Popover
                 trigger='click'
                 onVisibleChange={newValue => setPopoverVisible(newValue)}
