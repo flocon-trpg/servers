@@ -21,9 +21,7 @@ import {
     Diff,
     RequestedBy,
     Restore,
-    server,
     ServerTransform,
-    ToClientOperationParams,
 } from '../util/type';
 import { createOperation } from '../util/createOperation';
 import { DualStringKeyRecord, isIdRecord, record } from '../util/record';
@@ -37,8 +35,6 @@ import {
     isStrIndex5,
     Maybe,
     maybe,
-    dualKeyRecordFind,
-    dualKeyRecordToDualKeyMap,
 } from '@kizahasi/util';
 
 const replaceStringDownOperation = t.type({ oldValue: t.string });

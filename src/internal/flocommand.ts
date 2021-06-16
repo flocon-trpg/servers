@@ -75,13 +75,21 @@ const chara = t.partial({
 });
 
 const characterActionElement = t.partial({
+    name: t.string,
     chara,
 });
 
 export type CharacterActionElement = t.TypeOf<typeof characterActionElement>;
 
-const $characterAction = t.record(t.string, characterActionElement);
-const exactCharacterAction = t.record(t.string, t.exact(characterActionElement));
+const characterActionElements = t.array(characterActionElement);
+const exactCharacterActionElements = t.array(t.exact(characterActionElement));
+
+const $characterAction = t.type({
+    command: characterActionElements,
+});
+const exactCharacterAction = t.strict({
+    command: exactCharacterActionElements,
+});
 
 export type CharacterAction = t.TypeOf<typeof $characterAction>;
 
@@ -161,13 +169,13 @@ export const characterAction = (toml: string): Result<CharacterAction> => {
 export const toCharacterOperation = ({
     action,
     currentState,
-    commandKey,
+    commandIndex,
 }: {
-    action: ReadonlyMap<string, CharacterActionElement>;
+    action: ReadonlyArray<CharacterActionElement>;
     currentState: Character.State;
-    commandKey: string;
+    commandIndex: number;
 }) => {
-    const command = action.get(commandKey);
+    const command = action[commandIndex];
     if (command?.chara == null) {
         return undefined;
     }
