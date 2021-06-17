@@ -679,7 +679,7 @@ const Board: React.FC<Props> = ({
 
     const boardComponent = (() => {
         if (boardKeyToShow == null) {
-            return (<div>ボードビュアーに表示するボードが指定されていません。</div>);
+            return (<div>{`${panel.type === 'activeBoard' ? 'ボードビュアー' : 'ボードエディター'}に表示するボードが指定されていません。`}</div>);
         }
         if (board == null) {
             return (<div>{`キーが ${compositeKeyToString(boardKeyToShow)} であるボードが見つかりませんでした。`}</div>);
