@@ -69,7 +69,9 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmBehaviorCoreProps): void {
         if (howl == null) {
             return;
         }
-        howl.volume(Math.min(volume, volumeCap));
+        if (isPausedRef.current === false) {
+            howl.volume(Math.min(volume, volumeCap));
+        }
     }, [volume]);
 
     React.useEffect(() => {
