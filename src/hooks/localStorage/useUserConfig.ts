@@ -10,7 +10,7 @@ const useUserConfig = (userUid: string | null, dispatch: Dispatch<any>): void =>
     React.useEffect(() => {
         let unmounted = false;
         const main = async () => {
-            dispatch(userConfigModule.actions.setUserConfig(null));
+            dispatch(userConfigModule.actions.reset(null));
             if (userUid == null) {
                 return;
             }
@@ -18,7 +18,7 @@ const useUserConfig = (userUid: string | null, dispatch: Dispatch<any>): void =>
             if (unmounted) {
                 return;
             }
-            dispatch(userConfigModule.actions.setUserConfig(userConfig));
+            dispatch(userConfigModule.actions.reset(userConfig));
         };
         main();
         return () => {

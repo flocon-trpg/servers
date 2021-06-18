@@ -25,6 +25,7 @@ import _ from 'lodash';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { useCharacters } from '../../hooks/state/useCharacters';
 import { TextAreaRef } from 'antd/lib/input/TextArea';
+import { UserConfig } from '../../states/UserConfig';
 
 type PrivateMessageDrawerProps = {
     visible: boolean;
@@ -137,6 +138,8 @@ export const ChatInput: React.FC<Props> = ({
     const participants = useParticipants();
     const characters = useCharacters();
     const publicChannelNames = usePublicChannelNames();
+    const roomMessagesFontSizeDelta = useSelector(state => state.userConfigModule?.roomMessagesFontSizeDelta);
+    const fontSize = UserConfig.getRoomMessagesFontSize(roomMessagesFontSizeDelta ?? 0);
     const availableGameSystems = useListAvailableGameSystemsQuery();
     React.useEffect(() => {
         if (availableGameSystems.error == null) {
@@ -514,7 +517,7 @@ export const ChatInput: React.FC<Props> = ({
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center', padding: '0 0 6px 0' }}>
                     <Input.TextArea
                         ref={textAreaRef}
-                        style={{ resize: 'none' }}
+                        style={{ fontSize, resize: 'none' }}
                         rows={3}
                         disabled={isPosting}
                         value={(PublicChannelKey.Without$System.isPublicChannelKey(postTo) ? useRoomMessageInputTextsResult.publicMessageInputTexts.get(postTo) : useRoomMessageInputTextsResult.privateMessageInputTexts.get(VisibleTo.toString(postTo))) ?? ''}

@@ -33,6 +33,10 @@ import { UpOperation } from '@kizahasi/flocon-core';
 import { PublicChannelKey, recordToMap } from '@kizahasi/util';
 import _ from 'lodash';
 import { Color } from '../../utils/color';
+import userConfigModule from '../../modules/userConfigModule';
+import useUserConfig from '../../hooks/localStorage/useUserConfig';
+import { UserConfig } from '../../states/UserConfig';
+import * as Icons from '@ant-design/icons';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -300,6 +304,9 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
     const [isEditModalVisible, setIsEditModalVisible] = React.useState(false);
     const roomId = useSelector(state => state.roomModule.roomId);
     const publicChannelNames = usePublicChannelNames();
+    const roomMessagesFontSizeDelta = useSelector(state => state.userConfigModule?.roomMessagesFontSizeDelta);
+
+    const fontSize = UserConfig.getRoomMessagesFontSize(roomMessagesFontSizeDelta ?? 0);
 
     const participantsMap = React.useMemo(() => participants == null ? null : recordToMap(participants), [participants]);
 
@@ -381,7 +388,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
         </>;
     return (
         <div style={({ display: 'grid', gridTemplateRows: `${headerHeight}px 1fr`, gridTemplateColumns: '1fr 40px', marginBottom: 4, marginTop: 4 })}>
-            <div style={({ gridRow: '1 / 2', gridColumn: '1 / 2', display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
+            <div style={({ fontSize, gridRow: '1 / 2', gridColumn: '1 / 2', display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
                 <div style={({ flex: '0 0 auto' })}>
                     {message.type === privateMessage || message.type === publicMessage && RoomMessageNameSpace.userName(message, participantsMap ?? new Map())}
                 </div>
@@ -393,7 +400,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
                 {updatedInfo}
                 <div style={({ flex: 1 })} />
             </div>
-            {message.type === privateMessage || message.type === publicMessage || message.type === pieceValueLog ? <RoomMessageNameSpace.Content style={{ overflowWrap: 'break-word', gridRow: '2 / 3', gridColumn: '1 / 2', minHeight: contentMinHeight }} message={message} /> : <div style={{ overflowWrap: 'break-word', gridRow: '2 / 3', gridColumn: '1 / 2', minHeight: contentMinHeight }}>{message.message}</div>}
+            {message.type === privateMessage || message.type === publicMessage || message.type === pieceValueLog ? <RoomMessageNameSpace.Content style={{ fontSize, overflowWrap: 'break-word', gridRow: '2 / 3', gridColumn: '1 / 2', minHeight: contentMinHeight }} message={message} /> : <div style={{ fontSize, overflowWrap: 'break-word', gridRow: '2 / 3', gridColumn: '1 / 2', minHeight: contentMinHeight }}>{message.message}</div>}
             <div style={({ gridRow: '1 / 3', gridColumn: '2 / 3', justifySelf: 'center', alignSelf: 'center' })} >
                 {allMenuItemsAreNull ? null : <Dropdown overlay={<Menu>{menuItems}</Menu>} trigger={['click']}>
                     <Button type='text' size='small'><Icon.EllipsisOutlined /></Button>
@@ -513,6 +520,7 @@ const RoomMessages: React.FC<Props> = (props: Props) => {
 
     const roomId = useSelector(state => state.roomModule.roomId);
     const allRoomMessagesResult = useSelector(state => state.roomModule.allRoomMessagesResult);
+    const roomMessagesFontSizeDelta = useSelector(state => state.userConfigModule?.roomMessagesFontSizeDelta);
 
     if (roomId == null || allRoomMessagesResult == null) {
         return null;
@@ -587,7 +595,18 @@ const RoomMessages: React.FC<Props> = (props: Props) => {
                 }));
             }} />
         <ChannelNamesEditor {...props} visible={isChannelNamesEditorVisible} onClose={() => setIsChannelNamesEditorVisible(false)} />
-        <Button style={{ margin: `4px ${marginX}px 4px ${marginX}px`, width: 170 }} size='small' onClick={() => setIsChannelNamesEditorVisible(true)}>チャンネルの名前を編集</Button>
+        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+            <Button style={{ margin: `4px ${marginX}px 4px ${marginX}px`, width: 170 }} size='small' onClick={() => setIsChannelNamesEditorVisible(true)}>チャンネルの名前を編集</Button>
+            <div style={{ width: 16 }} />
+            <div>フォントサイズ</div>
+            <Button size='small' onClick={() => {
+                dispatch(userConfigModule.actions.set({ roomMessagesFontSizeDelta: (roomMessagesFontSizeDelta ?? 0) - 1 }));
+            }}><Icons.MinusOutlined /></Button>
+            <Button size='small' onClick={() => {
+                dispatch(userConfigModule.actions.set({ roomMessagesFontSizeDelta: (roomMessagesFontSizeDelta ?? 0) + 1 }));
+            }}><Icons.PlusOutlined /></Button>
+
+        </div>
         <Tabs
             style={{ flexBasis: `${tabsHeight}px`, margin: `0 ${marginX}px 4px ${marginX}px` }}
             type='editable-card'

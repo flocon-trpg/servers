@@ -4,7 +4,6 @@ import { ActionsObservable, StateObservable, combineEpics } from 'redux-observab
 import * as Rx from 'rxjs/operators';
 import { RootState } from '../store';
 import roomConfigModule from '../modules/roomConfigModule';
-import localforage from 'localforage';
 import { setRoomConfig } from '../utils/localStorage/roomConfig';
 
 const saveToStorageSampleTime = 500;
