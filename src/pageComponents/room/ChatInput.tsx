@@ -517,8 +517,7 @@ export const ChatInput: React.FC<Props> = ({
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center', padding: '0 0 6px 0' }}>
                     <Input.TextArea
                         ref={textAreaRef}
-                        style={{ fontSize, resize: 'none' }}
-                        rows={3}
+                        style={{ fontSize, resize: 'none', height: 70 /* PagenationScrollはheightを指定しなければならないという仕様の影響で、もしこれが可変だとPagenationScrollのheightの指定が無理とは言わないまでも面倒になる。そのため、70pxという適当な値で固定している */ }}
                         disabled={isPosting}
                         value={(PublicChannelKey.Without$System.isPublicChannelKey(postTo) ? useRoomMessageInputTextsResult.publicMessageInputTexts.get(postTo) : useRoomMessageInputTextsResult.privateMessageInputTexts.get(VisibleTo.toString(postTo))) ?? ''}
                         placeholder={placeholder}

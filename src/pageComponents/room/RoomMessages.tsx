@@ -448,7 +448,6 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
     const participantsMap = React.useMemo(() => participants == null ? null : recordToMap(participants), [participants]);
 
     const filter = useMessageFilter(config);
-
     const thenMap = React.useCallback((messages: ReadonlyArray<Message>) => {
         return [...messages]
             .sort((x, y) => y.value.createdAt - x.value.createdAt)
@@ -462,7 +461,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
                     message={message.type === publicMessage || message.type === privateMessage || message.type === pieceValueLog ? message : message.value} />);
             });
     }, []);
-
+    const messages = useFilteredAndMapRoomMessages({ filter, thenMap });
 
     const writingUsers = _(PublicChannelKey.Without$System.publicChannelKeys)
         .flatMap(key => {
@@ -489,7 +488,6 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
         writingStatus = <div css={writingStatusCss}>{writingUsers.reduce((seed, elem, i) => i === 0 ? elem : `${seed}, ${elem}`, '') + ' が書き込み中…'}</div>;
     }
 
-    const messages = useFilteredAndMapRoomMessages({ filter, thenMap });
     return <div style={{ display: 'flex', flexDirection: 'column' }}>
         <PagenationScroll source={messages} elementMinHeight={headerHeight + contentMinHeight} height={writingStatus == null ? contentHeight : (contentHeight - writingStatusHeight)} />
         {writingStatus}
@@ -506,8 +504,8 @@ type Props = {
 const RoomMessages: React.FC<Props> = (props: Props) => {
     const { height, panelId, config } = props;
 
-    const contentHeight = Math.max(0, height - 270);
-    const tabsHeight = Math.max(0, height - 230);
+    const contentHeight = Math.max(0, height - 310);
+    const tabsHeight = Math.max(0, height - 270);
 
     const dispatch = useDispatch();
 
