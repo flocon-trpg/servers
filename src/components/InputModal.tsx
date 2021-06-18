@@ -6,13 +6,14 @@ type Props = {
     title?: string;
     label?: string;
     visible: boolean;
+    isTextArea: boolean;
     onOk: (value: string, setValue: React.Dispatch<React.SetStateAction<string>>) => void;
     onClose: (setValue: React.Dispatch<React.SetStateAction<string>>) => void;
     onOpen?: (setValue: React.Dispatch<React.SetStateAction<string>>) => void;
     disabled?: (value: string) => boolean;
 }
 
-const InputModal: React.FC<Props> = ({ title, label, visible, onOk: onOkCore, onClose, onOpen, disabled }: Props) => {
+export const InputModal: React.FC<Props> = ({ title, label, visible, isTextArea, onOk: onOkCore, onClose, onOpen, disabled }: Props) => {
     const [value, setValue] = React.useState('');
     const [disabledValue, setDisabledValue] = React.useState(disabled == null ? false : disabled(''));
     const prevVisible = React.useRef(visible);
@@ -59,20 +60,33 @@ const InputModal: React.FC<Props> = ({ title, label, visible, onOk: onOkCore, on
             onCancel={() => onClose(setValue)}>
             <div>
                 <div>{label}</div>
-                <Input
+                {!isTextArea && <Input
                     autoFocus
                     value={value}
                     onChange={e => {
                         setValue(e.target.value);
                         setDisabledValue(disabled == null ? false : disabled(e.target.value));
                     }}
-                    onKeyDown={e => {
-                        if (e.key === 'Enter') {
-                            onOk();
+                    onPressEnter={() => {
+                        onOk();
+                    }} />}
+                { /* Enterキーを押したときは改行せずにonOkの処理に入るのが想定された挙動だが、isOkExecutedがないとTextAreaの文字が一瞬改行されたように見えてしまう（onOkに渡される文字は改行されていない正常なもの）。混乱や不自然さを防ぐため、isOkExecutedを用いることでTextAreaを隠している。 */ }
+                {isTextArea && <Input.TextArea
+                    style={{ resize: 'none', height: 100 }}
+                    autoFocus
+                    value={value}
+                    onChange={e => {
+                        setValue(e.target.value);
+                        setDisabledValue(disabled == null ? false : disabled(e.target.value));
+                    }}
+                    onPressEnter={e => {
+                        if (e.shiftKey) {
+                            return;
                         }
-                    }} />
+                        // これがないと、TextAreaの文字が一瞬改行されたように見えてしまう（onOkに渡される文字は、改行されていない正常なものではあるが）。
+                        e.preventDefault();
+                        onOk();
+                    }} />}
             </div>
         </Modal>);
 };
-
-export default InputModal;

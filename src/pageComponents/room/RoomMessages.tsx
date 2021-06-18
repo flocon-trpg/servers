@@ -11,7 +11,6 @@ import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
 import { useDeleteMessageMutation, useEditMessageMutation, useMakeMessageNotSecretMutation, WritingMessageStatusType } from '../../generated/graphql';
 import * as Icon from '@ant-design/icons';
-import InputModal from '../../components/InputModal';
 import { getUserUid } from '../../hooks/useFirebaseUser';
 import PagenationScroll from '../../components/PagenationScroll';
 import { MessagePanelConfig, MessageFilter, TabConfig } from '../../states/MessagePanelConfig';
@@ -37,6 +36,7 @@ import userConfigModule from '../../modules/userConfigModule';
 import useUserConfig from '../../hooks/localStorage/useUserConfig';
 import { UserConfig } from '../../states/UserConfig';
 import * as Icons from '@ant-design/icons';
+import { InputModal } from '../../components/InputModal';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -409,6 +409,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (props: RoomMe
             <InputModal
                 title='メッセージの編集'
                 visible={isEditModalVisible}
+                isTextArea={true}
                 onOk={(value, setValue) => {
                     if (roomMessage == null) {
                         return;

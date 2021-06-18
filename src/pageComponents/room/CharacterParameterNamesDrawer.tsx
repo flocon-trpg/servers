@@ -1,7 +1,6 @@
 import { Button, Collapse, Drawer, Form, Input, Select, Space } from 'antd';
 import React from 'react';
 import DrawerFooter from '../../layouts/DrawerFooter';
-import InputModal from '../../components/InputModal';
 import { replace, update } from '../../stateManagers/states/types';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import BufferedInput from '../../components/BufferedInput';
@@ -11,6 +10,7 @@ import { recordToMap, StrIndex20, strIndex20Array } from '@kizahasi/util';
 import { UpOperation } from '@kizahasi/flocon-core';
 import { useDispatch } from 'react-redux';
 import { roomDrawerAndPopoverModule } from '../../modules/roomDrawerAndPopoverModule';
+import { InputModal } from '../../components/InputModal';
 
 type VisibleParameterForm = {
     type: 'Bool' | 'Str' | 'Num';
@@ -390,6 +390,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
             { operate == null ? null : <InputModal
                 title={modalTitle}
                 visible={visibleParameterForm != null}
+                isTextArea={false}
                 onOk={value => {
                     if (visibleParameterForm == null) {
                         return;
