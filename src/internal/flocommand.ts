@@ -9,17 +9,32 @@ import {
 } from '@ltd/j-toml';
 import { Default, FilePath, FirebaseStorage, sourceType } from './ot/filePath/v1';
 import * as Character from './ot/room/character/v1';
+import * as Room from './ot/room/v1';
+import * as Bgm from './ot/room/bgm/v1';
 import { Result } from '@kizahasi/result';
+import { CompositeKey, dualKeyRecordToDualKeyMap, StrIndex5, strIndex5Array } from '@kizahasi/util';
+import { RecordUpOperation } from './ot/util/recordOperation';
+import { replace, update } from './ot/util/recordOperationElement';
 
-namespace Util {
-    const imageObject = t.type({
-        src: t.string,
+const REMOVE = '';
+const canBeArray = <T extends t.Mixed>(source: T) => t.union([source, t.array(source)]);
+const canBeArrayToArray = <T>(source: T | T[]) => {
+    if (Array.isArray(source)) {
+        return source;
+    }
+    return [source];
+};
+const removable = <T extends t.Mixed>(source: T) => t.union([source, t.literal(REMOVE)]);
+
+namespace File {
+    const fileObject = t.type({
+        path: t.string,
         type: sourceType,
     });
-    export const image = t.union([imageObject, t.string]);
-    export type Image = t.TypeOf<typeof image>;
+    export const main = t.union([fileObject, t.string]);
+    export type Main = t.TypeOf<typeof main>;
 
-    export const toFilePath = (source: Image): FilePath => {
+    export const toFilePath = (source: Main): FilePath => {
         if (typeof source === 'string') {
             const replaced = source.replace(/^firebase:/, '');
             if (source === replaced) {
@@ -38,7 +53,7 @@ namespace Util {
         return {
             $version: 1,
             sourceType: source.type,
-            path: source.src,
+            path: source.path,
         };
     };
 }
@@ -67,31 +82,79 @@ const dateTime = new t.Type<TomlDateTime>(
     t.identity
 );
 
-const chara = t.partial({
+const bgmElement = t.partial({
+    file: canBeArray(File.main),
+});
+
+const bgm = t.partial({
+    '1': bgmElement,
+    '2': bgmElement,
+    '3': bgmElement,
+    '4': bgmElement,
+    '5': bgmElement,
+});
+
+type BgmCommand = t.TypeOf<typeof bgm>;
+
+const se = t.partial({
+    file: File.main,
+    volume: t.number,
+});
+
+const image = t.partial({
+    file: File.main,
+});
+
+const piece = t.partial({
+    // hide: t.boolean,
+    image,
+});
+
+const portrait = t.partial({
+    // hide: t.boolean,
+    image,
+});
+
+const characterAction = t.partial({
     name: t.string,
-    icon: Util.image,
-    tachie: Util.image,
-    message: Message.action,
+    piece,
+    portrait,
+    'write-message': Message.action,
 });
 
-const characterActionElement = t.partial({
+type CharacterAction = t.TypeOf<typeof characterAction>;
+
+const characterFilter = t.partial({
     name: t.string,
-    chara,
 });
 
-export type CharacterActionElement = t.TypeOf<typeof characterActionElement>;
+type CharacterFilter = t.TypeOf<typeof characterFilter>;
 
-const characterActionElements = t.array(characterActionElement);
-const exactCharacterActionElements = t.array(t.exact(characterActionElement));
-
-const $characterAction = t.type({
-    command: characterActionElements,
-});
-const exactCharacterAction = t.strict({
-    command: exactCharacterActionElements,
+const characterCommand = t.partial({
+    filter: characterFilter,
+    filtered: characterAction,
+    self: characterAction,
 });
 
-export type CharacterAction = t.TypeOf<typeof $characterAction>;
+type CharacterCommand = t.TypeOf<typeof characterCommand>;
+
+const commandElement = t.partial({
+    name: t.string,
+    bgm,
+    character: canBeArray(characterCommand),
+    se,
+});
+
+export type CommandElement = t.TypeOf<typeof commandElement>;
+
+const commands = t.type({
+    _: canBeArray(commandElement),
+});
+const exactCommands = t.strict({
+    _: canBeArray(t.exact(commandElement)),
+});
+
+export type Commands = t.TypeOf<typeof commands>;
 
 const errorToMessage = (source: t.Errors): string => {
     return source[0]?.message ?? '不明なエラーが発生しました';
@@ -121,7 +184,7 @@ export const isValidVarToml = (toml: string): Result<undefined> => {
     return Result.ok(undefined);
 };
 
-export const variable = (toml: string, path: ReadonlyArray<string>) => {
+export const getVariableFromToml = (toml: string, path: ReadonlyArray<string>) => {
     const tomlResult = parse(toml);
     if (tomlResult.isError) {
         return tomlResult;
@@ -153,44 +216,188 @@ export const variable = (toml: string, path: ReadonlyArray<string>) => {
     }
 };
 
-export const characterAction = (toml: string): Result<CharacterAction> => {
+export const parseToCommands = (toml: string): Result<Commands> => {
     // CONSIDER: TOMLのDateTimeに未対応
     const object = parse(toml);
     if (object.isError) {
         return object;
     }
-    const decoded = exactCharacterAction.decode(object.value);
+    const decoded = exactCommands.decode(object.value);
     if (decoded._tag === 'Left') {
         return Result.error(errorToMessage(decoded.left));
     }
     return Result.ok(decoded.right);
 };
 
-export const toCharacterOperation = ({
-    action,
-    currentState,
-    commandIndex,
+const applyBgmCommand = ({
+    bgmState,
+    bgmCommand,
 }: {
-    action: ReadonlyArray<CharacterActionElement>;
-    currentState: Character.State;
-    commandIndex: number;
+    bgmState: Record<string, Bgm.State | undefined>;
+    bgmCommand: BgmCommand;
 }) => {
-    const command = action[commandIndex];
-    if (command?.chara == null) {
-        return undefined;
-    }
-
-    const result: Character.UpOperation = { $version: 1 };
-    if (command.chara.name != null) {
-        result.name = { newValue: command.chara.name };
-    }
-    if (command.chara.icon != null) {
-        result.image = { newValue: Util.toFilePath(command.chara.icon) };
-    }
-    if (command.chara.tachie != null) {
-        result.tachieImage = {
-            newValue: Util.toFilePath(command.chara.tachie),
+    const result = { ...bgmState };
+    strIndex5Array.forEach(i => {
+        const elem = bgmCommand[i];
+        if (elem == null) {
+            return;
+        }
+        const fileCommand = elem.file == null ? undefined : canBeArrayToArray(elem.file);
+        if (fileCommand?.length === 0) {
+            if (bgmState[i] == null) {
+                return;
+            }
+            result[i] = undefined;
+            return;
+        }
+        const bgmStateElement = bgmState[i];
+        if (bgmStateElement == null) {
+            if (fileCommand == null) {
+                return;
+            }
+            const newValue: Bgm.State = {
+                $version: 1,
+                files: fileCommand.map(File.toFilePath),
+                isPaused: false,
+                volume: 1,
+            };
+            result[i] = newValue;
+            return;
+        }
+        if (fileCommand == null) {
+            return;
+        }
+        result[i] = {
+            ...bgmStateElement,
+            files: fileCommand.map(File.toFilePath),
         };
+    });
+    return result;
+};
+
+const applyCharacterAction = ({
+    state,
+    action,
+}: {
+    state: Character.State;
+    action: CharacterAction;
+}) => {
+    const result = { ...state };
+    if (action.name != null) {
+        result.name = action.name;
+    }
+    if (action.piece?.image?.file != null) {
+        result.image = File.toFilePath(action.piece.image.file);
+    }
+    if (action.portrait?.image?.file != null) {
+        result.tachieImage = File.toFilePath(action.portrait.image.file);
     }
     return result;
+};
+
+const filterCharacter = ({
+    state,
+    filter,
+}: {
+    state: Character.State;
+    filter: CharacterFilter;
+}): boolean => {
+    if (filter.name != null) {
+        if (state.name !== filter.name) {
+            return false;
+        }
+    }
+
+    return true;
+};
+
+const applyCharacterCommand = ({
+    characterState,
+    characterCommand,
+    selfCharacterId,
+}: {
+    characterState: Record<string, Record<string, Character.State | undefined> | undefined>;
+    characterCommand: CharacterCommand;
+    selfCharacterId: CompositeKey | undefined;
+}) => {
+    const result = dualKeyRecordToDualKeyMap(characterState);
+    const self =
+        selfCharacterId == null
+            ? undefined
+            : result.get({ first: selfCharacterId.createdBy, second: selfCharacterId.id });
+
+    if (characterCommand.self != null && selfCharacterId != null && self != null) {
+        const newCharacter = applyCharacterAction({
+            state: self,
+            action: characterCommand.self,
+        });
+        result.set({ first: selfCharacterId.createdBy, second: selfCharacterId.id }, newCharacter);
+    }
+
+    const actionFiltered = characterCommand.filtered;
+    if (actionFiltered == null) {
+        return result.toStringRecord(
+            x => x,
+            x => x
+        );
+    }
+
+    [...result]
+        .filter(([, value]) =>
+            characterCommand.filter == null
+                ? true
+                : filterCharacter({ state: value, filter: characterCommand.filter })
+        )
+        .forEach(([characterKey, character]) => {
+            result.set(
+                characterKey,
+                applyCharacterAction({ state: character, action: actionFiltered })
+            );
+        });
+    return result.toStringRecord(
+        x => x,
+        x => x
+    );
+};
+
+export const applyCommands = ({
+    commands,
+    room,
+    selfCharacterId,
+    commandIndex,
+}: {
+    commands: Commands;
+    room: Room.State;
+    selfCharacterId: CompositeKey | undefined;
+    commandIndex: number;
+}) => {
+    const command = canBeArrayToArray(commands._)[commandIndex];
+    if (command == null) {
+        return null;
+    }
+    const result = { ...room };
+
+    if (command.bgm != null) {
+        result.bgms = applyBgmCommand({ bgmState: room.bgms, bgmCommand: command.bgm });
+    }
+
+    if (command.character != null) {
+        canBeArrayToArray(command.character).forEach(characterCommand => {
+            result.characters = applyCharacterCommand({
+                characterState: room.characters,
+                characterCommand,
+                selfCharacterId,
+            });
+        });
+    }
+
+    const se =
+        command.se?.file == null
+            ? undefined
+            : {
+                  file: File.toFilePath(command.se.file),
+                  volume: (command.se.volume ?? 100) / 100,
+              };
+
+    return { room: result, se };
 };

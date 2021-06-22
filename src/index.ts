@@ -1,10 +1,10 @@
 export {
-    CharacterAction,
-    CharacterActionElement,
-    characterAction as tomlToCharacterAction,
+    Commands as CharacterAction,
+    CommandElement as CharacterActionElement,
+    parseToCommands,
     isValidVarToml,
-    toCharacterOperation as characterActionToOperation,
-    variable as tomlToVariables,
+    applyCommands,
+    getVariableFromToml,
 } from './internal/flocommand';
 
 export { Default, FirebaseStorage, FilePath } from './internal/ot/filePath/v1';
