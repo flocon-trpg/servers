@@ -1,4 +1,4 @@
-import { CharacterState, State, tomlToVariables } from '@kizahasi/flocon-core';
+import { CharacterState, getVariableFromToml, State } from '@kizahasi/flocon-core';
 import { Result } from '@kizahasi/result';
 import { recordToArray, analyze as analyzeToExpression, plain } from '@kizahasi/util';
 import { DynamicLoader } from 'bcdice';
@@ -46,7 +46,7 @@ const getParameter = async ({ parameterPath, context, room }: { parameterPath: s
         if ((context.value.privateVarToml ?? '').trim() === '') {
             return null;
         }
-        const result = tomlToVariables(context.value.privateVarToml ?? '', parameterPath);
+        const result = getVariableFromToml(context.value.privateVarToml ?? '', parameterPath);
         if (result.isError) {
             return null;
         }

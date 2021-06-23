@@ -35,7 +35,7 @@ const getParameter = async ({ parameterPath, context, room }) => {
         if (((_a = context.value.privateVarToml) !== null && _a !== void 0 ? _a : '').trim() === '') {
             return null;
         }
-        const result = flocon_core_1.tomlToVariables((_b = context.value.privateVarToml) !== null && _b !== void 0 ? _b : '', parameterPath);
+        const result = flocon_core_1.getVariableFromToml((_b = context.value.privateVarToml) !== null && _b !== void 0 ? _b : '', parameterPath);
         if (result.isError) {
             return null;
         }
