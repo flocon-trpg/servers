@@ -1,6 +1,6 @@
 export {
-    Commands as CharacterAction,
-    CommandElement as CharacterActionElement,
+    Commands,
+    CommandElement,
     parseToCommands,
     isValidVarToml,
     applyCommands,
