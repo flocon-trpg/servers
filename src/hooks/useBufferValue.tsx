@@ -29,11 +29,6 @@ export function useBufferValue<T>({
     const [result, setResult] = React.useState<Result<T>>({ currentValue: value, isSkipping: false });
 
     React.useEffect(() => {
-        subjectNext(value);
-        setResult(old => ({ ...old, isSkipping: true }));
-    }, [value, subjectNext]);
-
-    React.useEffect(() => {
         const newSubscription = (bufferDuration == null ? subject : subject.pipe(debounceTime(bufferDuration))).subscribe(newValue => {
             setResult(oldResult => {
                 return {
@@ -51,6 +46,11 @@ export function useBufferValue<T>({
             newSubscription.unsubscribe();
         });
     }, [subject, bufferDuration]);
+
+    React.useEffect(() => {
+        subjectNext(value);
+        setResult(old => ({ ...old, isSkipping: true }));
+    }, [value, subjectNext]);
 
     return result;
 }
