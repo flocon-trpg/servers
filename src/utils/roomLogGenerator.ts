@@ -1,4 +1,4 @@
-import { RoomMessages, RoomPublicChannelFragment } from '../generated/graphql';
+import { RoomMessages, RoomPrivateMessage, RoomPublicChannel, RoomPublicChannelFragment, RoomPublicMessage } from '../generated/graphql';
 import { PrivateChannelSet } from './PrivateChannelSet';
 import { escape } from 'html-escaper';
 import moment from 'moment';
@@ -59,13 +59,20 @@ type RoomMessage = {
     };
 };
 
+type RoomMessageFilter = {
+    privateMessage: (value: RoomPrivateMessage) => boolean;
+    publicMessage: (value: RoomPublicMessage) => boolean;
+}
+
 const createRoomMessageArray = (props: {
     messages: RoomMessages;
     participants: ReadonlyMap<string, ParticipantState>;
+    filter: RoomMessageFilter;
 } & PublicChannelNames) => {
     const {
         messages,
         participants,
+        filter,
     } = props;
 
     const result: RoomMessage[] = [];
@@ -83,75 +90,79 @@ const createRoomMessageArray = (props: {
         return { participantNamePart };
     };
 
-    messages.privateMessages.forEach(msg => {
-        const privateChannelSet = new PrivateChannelSet(new Set(msg.visibleTo));
-        const channelName = privateChannelSet.toChannelNameBase(participants).reduce((seed, elem, i) => i === 0 ? elem : `${seed}, ${elem}`, '');
-        if (isDeleted(msg)) {
-            if (msg.createdBy == null) {
+    messages.privateMessages
+        .filter(msg => filter.privateMessage(msg))
+        .forEach(msg => {
+            const privateChannelSet = new PrivateChannelSet(new Set(msg.visibleTo));
+            const channelName = privateChannelSet.toChannelNameBase(participants).reduce((seed, elem, i) => i === 0 ? elem : `${seed}, ${elem}`, '');
+            if (isDeleted(msg)) {
+                if (msg.createdBy == null) {
+                    return;
+                }
+                result.push({
+                    type: privateMessage,
+                    deleted: true,
+                    createdAt: msg.createdAt,
+                    value: {
+                        text: null,
+                        createdBy: createCreatedBy({ createdBy: msg.createdBy, characterName: msg.character?.name, customName: msg.customName ?? undefined }),
+                        channelName,
+                        commandResult: msg.commandResult?.text ?? null,
+                        textColor: msg.textColor ?? null,
+                    }
+                });
                 return;
             }
             result.push({
                 type: privateMessage,
-                deleted: true,
+                deleted: false,
                 createdAt: msg.createdAt,
                 value: {
-                    text: null,
-                    createdBy: createCreatedBy({ createdBy: msg.createdBy, characterName: msg.character?.name, customName: msg.customName ?? undefined }),
+                    text: toText(msg) ?? '',
+                    createdBy: msg.createdBy == null ? null : createCreatedBy({ createdBy: msg.createdBy, characterName: msg.character?.name, customName: msg.customName ?? undefined }),
                     channelName,
                     commandResult: msg.commandResult?.text ?? null,
                     textColor: msg.textColor ?? null,
                 }
             });
-            return;
-        }
-        result.push({
-            type: privateMessage,
-            deleted: false,
-            createdAt: msg.createdAt,
-            value: {
-                text: toText(msg) ?? '',
-                createdBy: msg.createdBy == null ? null : createCreatedBy({ createdBy: msg.createdBy, characterName: msg.character?.name, customName: msg.customName ?? undefined }),
-                channelName,
-                commandResult: msg.commandResult?.text ?? null,
-                textColor: msg.textColor ?? null,
-            }
         });
-    });
 
-    messages.publicMessages.forEach(msg => {
-        const channelName = RoomMessage.toChannelName({ type: publicMessage, value: msg }, props, new Map());
+    messages.publicMessages
+        .filter(msg => filter.publicMessage(msg))
+        .forEach(msg => {
+            const channelName = RoomMessage.toChannelName({ type: publicMessage, value: msg }, props, new Map());
 
-        if (isDeleted(msg)) {
-            if (msg.createdBy == null) {
+            if (isDeleted(msg)) {
+                if (msg.createdBy == null) {
+                    return;
+                }
+                result.push({
+                    type: publicMessage,
+                    deleted: true,
+                    createdAt: msg.createdAt,
+                    value: {
+                        text: null,
+                        createdBy: createCreatedBy({ createdBy: msg.createdBy, characterName: msg.character?.name, customName: msg.customName ?? undefined }),
+                        channelName,
+                        commandResult: msg.commandResult?.text ?? null,
+                        textColor: msg.textColor ?? null,
+                    }
+                });
                 return;
             }
             result.push({
                 type: publicMessage,
-                deleted: true,
+                deleted: false,
                 createdAt: msg.createdAt,
                 value: {
-                    text: null,
-                    createdBy: createCreatedBy({ createdBy: msg.createdBy, characterName: msg.character?.name, customName: msg.customName ?? undefined }),
+                    text: toText(msg) ?? '',
+                    createdBy: msg.createdBy == null ? null : createCreatedBy({ createdBy: msg.createdBy, characterName: msg.character?.name, customName: msg.customName ?? undefined }),
                     channelName,
                     commandResult: msg.commandResult?.text ?? null,
                     textColor: msg.textColor ?? null,
                 }
             });
-            return;
-        }
-        result.push({
-            type: publicMessage,
-            deleted: false,
-            createdAt: msg.createdAt,
-            value: {
-                text: toText(msg) ?? '',
-                createdBy: msg.createdBy == null ? null : createCreatedBy({ createdBy: msg.createdBy, characterName: msg.character?.name, customName: msg.customName ?? undefined }),
-                channelName,
-                commandResult: msg.commandResult?.text ?? null,
-                textColor: msg.textColor ?? null,
-            }
         });
-    });
 
     return result;
 };
@@ -159,6 +170,7 @@ const createRoomMessageArray = (props: {
 export const generateAsStaticHtml = (params: {
     messages: RoomMessages;
     participants: ReadonlyMap<string, ParticipantState>;
+    filter: RoomMessageFilter;
 } & PublicChannelNames) => {
     const elements = createRoomMessageArray(params).sort((x, y) => x.createdAt - y.createdAt).map(msg => {
         const left = msg.value.createdBy == null ?
