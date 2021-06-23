@@ -1,4 +1,4 @@
-import { BoardLocationState, BoardState, CharacterState, dicePieceValueStrIndexes, PieceState, UpOperation } from '@kizahasi/flocon-core';
+import { applyCommands, BoardLocationState, BoardState, CharacterState, dicePieceValueStrIndexes, parseToCommands, PieceState, State, UpOperation, diff, toUpOperation, FilePath } from '@kizahasi/flocon-core';
 import { CompositeKey, compositeKeyToString, dualKeyRecordToDualKeyMap, ReadonlyStateMap } from '@kizahasi/util';
 import { Menu, Tooltip } from 'antd';
 import _ from 'lodash';
@@ -6,7 +6,7 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import { InputDie } from '../../components/InputDie';
 import { NewTabLinkify } from '../../components/NewTabLinkify';
-import { executeCharacterFlocommand, listCharacterFlocommand } from '../../flocommand/main';
+import { FileSourceType, useWriteRoomSoundEffectMutation } from '../../generated/graphql';
 import { useBoards } from '../../hooks/state/useBoards';
 import { useCharacters } from '../../hooks/state/useCharacters';
 import { DicePieceValueElement } from '../../hooks/state/useDicePieceValues';
@@ -177,7 +177,6 @@ namespace PopupEditorBase {
         </div>);
     };
 }
-
 
 export const PopoverEditor: React.FC = () => {
     const popoverEditor = useSelector(state => state.roomDrawerAndPopoverModule.boardPopoverEditor);
@@ -374,19 +373,21 @@ namespace ContextMenuModule {
             </>);
     };
 
-    type SelectedCharacterCommandsMenuProps = {
-        characterPiecesOnCursor: ContextMenuState['characterPiecesOnCursor'];
-        tachiesOnCursor: ContextMenuState['tachiesOnCursor'];
-        onContextMenuClear: () => void;
-        operate: ReturnType<typeof useOperate>;
-    }
-
     const selectedCharacterCommandsMenu = ({
         characterPiecesOnCursor,
         tachiesOnCursor,
         onContextMenuClear,
         operate,
-    }: SelectedCharacterCommandsMenuProps): JSX.Element | null => {
+        room,
+        onSe,
+    }: {
+        characterPiecesOnCursor: ContextMenuState['characterPiecesOnCursor'];
+        tachiesOnCursor: ContextMenuState['tachiesOnCursor'];
+        onContextMenuClear: () => void;
+        operate: ReturnType<typeof useOperate>;
+        room: State;
+        onSe: (filePath: FilePath, volume: number) => void;
+    }): JSX.Element | null => {
         if (characterPiecesOnCursor.length + tachiesOnCursor.length === 0) {
             return null;
         }
@@ -403,24 +404,39 @@ namespace ContextMenuModule {
                 return null;
             }
             const key = compositeKeyToString(pair.key);
-            const commands = listCharacterFlocommand(pair.value.privateCommand);
+            const commands = parseToCommands(pair.value.privateCommand);
             if (commands.isError) {
                 return (<Menu.ItemGroup key={key}>
                     <Menu.Item disabled><Tooltip title={commands.error}>(コマンド文法エラー)</Tooltip></Menu.Item>
                 </Menu.ItemGroup>);
             }
-            const menuItems = [...commands.value].map(([commandKey,]) => {
+            const _ = Array.isArray(commands.value._) ? commands.value._ : [commands.value._];
+            const menuItems = _.map((command, i) => {
                 return (<Menu.Item
-                    key={commandKey}
+                    key={i}
                     onClick={() => {
-                        const operation = executeCharacterFlocommand({ action: commands.value, characterKey: pair.key, character: pair.value, commandKey });
-                        if (operation == null) {
+                        const applyCommandResult = applyCommands({
+                            commands: commands.value,
+                            room,
+                            selfCharacterId: pair.key,
+                            commandIndex: i,
+                        });
+                        if (applyCommandResult == null) {
                             return;
                         }
-                        operate(operation);
+                        const operation = diff({
+                            prevState: room,
+                            nextState: applyCommandResult.room,
+                        });
+                        if (operation != null) {
+                            operate(toUpOperation(operation));
+                        }
+                        if (applyCommandResult.se != null) {
+                            onSe(applyCommandResult.se.file, applyCommandResult.se.volume);
+                        }
                         onContextMenuClear();
                     }}>
-                    {commandKey}
+                    {command.name ?? `(コマンド${i})`}
                 </Menu.Item>);
             });
             return (<Menu.ItemGroup key={key} title={pair.value.name}>
@@ -887,12 +903,15 @@ namespace ContextMenuModule {
     export const Main: React.FC = () => {
         const dispatch = useDispatch();
         const operate = useOperate();
+        const room = useSelector(state => state.roomModule.roomState?.state);
         const boards = useBoards();
         const characters = useCharacters();
         const { userUid: myUserUid } = useMe();
         const contextMenuState = useSelector(state => state.roomDrawerAndPopoverModule.boardContextMenu);
+        const roomId = useSelector(state => state.roomModule.roomId);
+        const [writeSe] = useWriteRoomSoundEffectMutation();
 
-        if (contextMenuState == null || characters == null || myUserUid == null) {
+        if (contextMenuState == null || characters == null || myUserUid == null || roomId == null || room == null) {
             return null;
         }
 
@@ -944,6 +963,15 @@ namespace ContextMenuModule {
                         ...contextMenuState,
                         onContextMenuClear,
                         operate,
+                        room,
+                        onSe: (se, volume) => writeSe({
+                            variables: {
+                                roomId, volume, file: {
+                                    ...se,
+                                    sourceType: se.sourceType === 'Default' ? FileSourceType.Default : FileSourceType.FirebaseStorage,
+                                }
+                            }
+                        }),
                     })}
                     {board == null ? null : basicMenu({
                         contextMenuState,

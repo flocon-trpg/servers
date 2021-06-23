@@ -1,4 +1,4 @@
-import { isValidVarToml, tomlToCharacterAction } from '@kizahasi/flocon-core';
+import { isValidVarToml, parseToCommands } from '@kizahasi/flocon-core';
 import React from 'react';
 import { useBufferValue } from '../hooks/useBufferValue';
 import BufferedTextArea, { Props as BufferedTextAreaProps } from './BufferedTextArea';
@@ -35,7 +35,7 @@ export const TomlInput: React.FC<Props> = (props: Props) => {
                 return { type: 'ok' };
             }
             case characterCommand: {
-                const result = tomlToCharacterAction(toml);
+                const result = parseToCommands(toml);
                 if (result.isError) {
                     return { type: 'error', message: result.error };
                 }
