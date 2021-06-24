@@ -17,7 +17,6 @@ export {
     groupJoin3 as groupJoin3DualKeyMap,
     groupJoin4 as groupJoin4DualKeyMap,
 } from './internal/dualKeyMap';
-export { Expression, plain, expr1, analyze } from './internal/expression';
 export {
     StrIndex5,
     strIndex5Array,
