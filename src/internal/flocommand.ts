@@ -12,9 +12,8 @@ import * as Character from './ot/room/character/v1';
 import * as Room from './ot/room/v1';
 import * as Bgm from './ot/room/bgm/v1';
 import { Result } from '@kizahasi/result';
-import { CompositeKey, dualKeyRecordToDualKeyMap, StrIndex5, strIndex5Array } from '@kizahasi/util';
-import { RecordUpOperation } from './ot/util/recordOperation';
-import { replace, update } from './ot/util/recordOperationElement';
+import { CompositeKey, dualKeyRecordToDualKeyMap, strIndex5Array } from '@kizahasi/util';
+import { analyze, expr1 } from './expression';
 
 const REMOVE = '';
 const canBeArray = <T extends t.Mixed>(source: T) => t.union([source, t.array(source)]);
@@ -184,12 +183,8 @@ export const isValidVarToml = (toml: string): Result<undefined> => {
     return Result.ok(undefined);
 };
 
-export const getVariableFromToml = (toml: string, path: ReadonlyArray<string>) => {
-    const tomlResult = parse(toml);
-    if (tomlResult.isError) {
-        return tomlResult;
-    }
-    let current: any = tomlResult.value;
+export const getVariableFromVarTomlObject = (tomlObject: unknown, path: ReadonlyArray<string>) => {
+    let current: any = tomlObject;
     for (const key of path) {
         if (typeof current !== 'object') {
             return Result.ok(undefined);
@@ -400,4 +395,59 @@ export const applyCommands = ({
               };
 
     return { room: result, se };
+};
+
+const exactChatPalette = t.strict({
+    var: t.UnknownRecord,
+
+    // paletteではなくわざわざ冗長なpalette.textにしたのは、[var]→チャットパレットの文字列 の順で書けるようにするため。
+    palette: t.strict({
+        text: t.string,
+    }),
+});
+
+// palette.textに例えば {foo} のような文字列が含まれている場合、varで定義されていればそれに置き換える。定義が見つからなければそのまま残す。
+export const generateChatPalette = (toml: string): Result<string[]> => {
+    // CONSIDER: TOMLのDateTimeに未対応
+    const object = parse(toml);
+    if (object.isError) {
+        return object;
+    }
+    const decoded = exactChatPalette.decode(object.value);
+    if (decoded._tag === 'Left') {
+        return Result.error(errorToMessage(decoded.left));
+    }
+
+    const lines = decoded.right.palette.text.split(/(?:\r\n|\r|\n)/).map(line => {
+        const analyzeResult = analyze(line);
+        if (analyzeResult.isError) {
+            return line;
+        }
+        return analyzeResult.value
+            .map(expr => {
+                switch (expr.type) {
+                    case expr1: {
+                        const replaced = getVariableFromVarTomlObject(decoded.right.var, expr.path);
+                        if (replaced.isError) {
+                            return expr.raw;
+                        }
+                        // TODO: replaced.valueがstring以外のときの処理の仕様が今は曖昧
+                        switch (typeof replaced.value) {
+                            case 'string':
+                            case 'number':
+                            case 'boolean':
+                                return replaced.value.toString();
+                            default:
+                                return '';
+                        }
+                    }
+                    default: {
+                        return expr.text;
+                    }
+                }
+            })
+            .reduce((seed, elem) => seed + elem, '');
+    });
+
+    return Result.ok(lines);
 };

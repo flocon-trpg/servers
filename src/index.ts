@@ -4,10 +4,13 @@ export {
     parseToCommands,
     isValidVarToml,
     applyCommands,
-    getVariableFromToml,
+    getVariableFromVarTomlObject,
+    generateChatPalette,
 } from './internal/flocommand';
 
 export { Default, FirebaseStorage, FilePath } from './internal/ot/filePath/v1';
+
+export { Expression, plain, expr1, analyze } from './internal/expression';
 
 export {
     dbState,
