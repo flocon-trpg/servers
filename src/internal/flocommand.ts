@@ -178,7 +178,7 @@ const parseTomlCore = (toml: string) => {
 export const parseToml = (toml: string) => {
     const core = parseTomlCore(toml);
     if (core.isError) {
-        return core.error;
+        return core;
     }
     return Result.ok(core.value as unknown);
 };
