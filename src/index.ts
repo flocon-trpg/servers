@@ -3,6 +3,7 @@ export {
     CommandElement,
     parseToCommands,
     isValidVarToml,
+    parseToml,
     applyCommands,
     getVariableFromVarTomlObject,
     generateChatPalette,

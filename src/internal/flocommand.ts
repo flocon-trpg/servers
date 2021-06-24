@@ -159,7 +159,7 @@ const errorToMessage = (source: t.Errors): string => {
     return source[0]?.message ?? '不明なエラーが発生しました';
 };
 
-const parse = (toml: string) => {
+const parseTomlCore = (toml: string) => {
     let object;
     try {
         object = parseCore(toml, 1.0, '\r\n', false);
@@ -175,8 +175,16 @@ const parse = (toml: string) => {
     return Result.ok(object);
 };
 
+export const parseToml = (toml: string) => {
+    const core = parseTomlCore(toml);
+    if (core.isError) {
+        return core.error;
+    }
+    return Result.ok(core.value as unknown);
+};
+
 export const isValidVarToml = (toml: string): Result<undefined> => {
-    const parsed = parse(toml);
+    const parsed = parseTomlCore(toml);
     if (parsed.isError) {
         return parsed;
     }
@@ -213,7 +221,7 @@ export const getVariableFromVarTomlObject = (tomlObject: unknown, path: Readonly
 
 export const parseToCommands = (toml: string): Result<Commands> => {
     // CONSIDER: TOMLのDateTimeに未対応
-    const object = parse(toml);
+    const object = parseTomlCore(toml);
     if (object.isError) {
         return object;
     }
@@ -409,7 +417,7 @@ const exactChatPalette = t.strict({
 // palette.textに例えば {foo} のような文字列が含まれている場合、varで定義されていればそれに置き換える。定義が見つからなければそのまま残す。
 export const generateChatPalette = (toml: string): Result<string[]> => {
     // CONSIDER: TOMLのDateTimeに未対応
-    const object = parse(toml);
+    const object = parseTomlCore(toml);
     if (object.isError) {
         return object;
     }
