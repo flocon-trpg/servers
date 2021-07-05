@@ -1,6 +1,6 @@
-import { CharacterState, getVariableFromToml, State } from '@kizahasi/flocon-core';
+import { CharacterState, getVariableFromVarTomlObject, State, analyze as analyzeToExpression, plain, parseToml } from '@kizahasi/flocon-core';
 import { Result } from '@kizahasi/result';
-import { recordToArray, analyze as analyzeToExpression, plain } from '@kizahasi/util';
+import { recordToArray } from '@kizahasi/util';
 import { DynamicLoader } from 'bcdice';
 import BcdiceResult from 'bcdice/ts/result';
 
@@ -46,7 +46,11 @@ const getParameter = async ({ parameterPath, context, room }: { parameterPath: s
         if ((context.value.privateVarToml ?? '').trim() === '') {
             return null;
         }
-        const result = getVariableFromToml(context.value.privateVarToml ?? '', parameterPath);
+        const tomlObject = parseToml(context.value.privateVarToml ?? '');
+        if (tomlObject.isError) {
+            return null;
+        }
+        const result = getVariableFromVarTomlObject(tomlObject.value, parameterPath);
         if (result.isError) {
             return null;
         }

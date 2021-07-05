@@ -35,7 +35,11 @@ const getParameter = async ({ parameterPath, context, room }) => {
         if (((_a = context.value.privateVarToml) !== null && _a !== void 0 ? _a : '').trim() === '') {
             return null;
         }
-        const result = flocon_core_1.getVariableFromToml((_b = context.value.privateVarToml) !== null && _b !== void 0 ? _b : '', parameterPath);
+        const tomlObject = flocon_core_1.parseToml((_b = context.value.privateVarToml) !== null && _b !== void 0 ? _b : '');
+        if (tomlObject.isError) {
+            return null;
+        }
+        const result = flocon_core_1.getVariableFromVarTomlObject(tomlObject.value, parameterPath);
         if (result.isError) {
             return null;
         }
@@ -85,13 +89,13 @@ const getParameter = async ({ parameterPath, context, room }) => {
     return undefined;
 };
 const analyze = async (params) => {
-    const expressions = util_1.analyze(params.text);
+    const expressions = flocon_core_1.analyze(params.text);
     if (expressions.isError) {
         return expressions;
     }
     let message = '';
     for (const expr of expressions.value) {
-        if (expr.type === util_1.plain) {
+        if (expr.type === flocon_core_1.plain) {
             message += expr.text;
             continue;
         }
