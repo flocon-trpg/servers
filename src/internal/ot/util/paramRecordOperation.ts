@@ -26,8 +26,8 @@ export type ProtectedTransformParameters<
 >;
 
 export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError = string>({
-    nextState,
-    downOperation,
+    nextState: unsafeNextState,
+    downOperation: unsafeDownOperation,
     innerRestore,
 }: {
     nextState: StringKeyRecord<TState>;
@@ -41,18 +41,20 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
     RestoreResult<StringKeyRecord<TState>, StringKeyRecord<TTwoWayOperation>>,
     string | TCustomError
 > => {
-    if (downOperation == null) {
+    const nextState = recordToMap(unsafeNextState);
+
+    if (unsafeDownOperation == null) {
         return Result.ok({
-            prevState: nextState,
+            prevState: mapToRecord(nextState),
             twoWayOperation: undefined,
         });
     }
 
-    const prevState = { ...nextState };
-    const twoWayOperation: StringKeyRecord<TTwoWayOperation> = {};
+    const prevState = new Map(nextState);
+    const twoWayOperation = new Map<string, TTwoWayOperation>();
 
-    for (const [key, value] of recordToMap(downOperation)) {
-        const nextStateElement = nextState[key];
+    for (const [key, value] of recordToMap(unsafeDownOperation)) {
+        const nextStateElement = nextState.get(key);
         if (nextStateElement === undefined) {
             return Result.error(`tried to update "${key}", but nextState does not have such a key`);
         }
@@ -67,18 +69,21 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
         if (restored.value === undefined) {
             continue;
         }
-        prevState[key] = restored.value.prevState;
+        prevState.set(key, restored.value.prevState);
         if (restored.value.twoWayOperation !== undefined) {
-            twoWayOperation[key] = restored.value.twoWayOperation;
+            twoWayOperation.set(key, restored.value.twoWayOperation);
         }
         break;
     }
 
-    return Result.ok({ prevState, twoWayOperation });
+    return Result.ok({
+        prevState: mapToRecord(prevState),
+        twoWayOperation: mapToRecord(twoWayOperation),
+    });
 };
 
 export const apply = <TState, TUpOperation, TCustomError = string>({
-    prevState,
+    prevState: unsafePrevState,
     operation,
     innerApply,
     defaultState,
@@ -93,13 +98,14 @@ export const apply = <TState, TUpOperation, TCustomError = string>({
     defaultState: TState;
 }): CustomResult<StringKeyRecord<TState>, string | TCustomError> => {
     if (operation == null) {
-        return Result.ok(prevState);
+        return Result.ok(unsafePrevState);
     }
 
-    const nextState = { ...prevState };
+    const prevState = recordToMap(unsafePrevState);
+    const nextState = new Map(prevState);
 
     for (const [key, value] of recordToMap(operation)) {
-        const prevStateElement = prevState[key] ?? defaultState;
+        const prevStateElement = prevState.get(key) ?? defaultState;
         const newValue = innerApply({
             operation: value,
             prevState: prevStateElement,
@@ -108,15 +114,15 @@ export const apply = <TState, TUpOperation, TCustomError = string>({
         if (newValue.isError) {
             return newValue;
         }
-        nextState[key] = newValue.value;
+        nextState.set(key, newValue.value);
         break;
     }
 
-    return Result.ok(nextState);
+    return Result.ok(mapToRecord(nextState));
 };
 
 export const applyBack = <TState, TDownOperation, TCustomError = string>({
-    nextState,
+    nextState: unsafeNextState,
     operation,
     innerApplyBack,
     defaultState,
@@ -131,13 +137,14 @@ export const applyBack = <TState, TDownOperation, TCustomError = string>({
     defaultState: TState;
 }): CustomResult<StringKeyRecord<TState>, string | TCustomError> => {
     if (operation == null) {
-        return Result.ok(nextState);
+        return Result.ok(unsafeNextState);
     }
 
-    const prevState = { ...nextState };
+    const nextState = recordToMap(unsafeNextState);
+    const prevState = new Map(nextState);
 
     for (const [key, value] of recordToMap(operation)) {
-        const nextStateElement = nextState[key] ?? defaultState;
+        const nextStateElement = nextState.get(key) ?? defaultState;
         const oldValue = innerApplyBack({
             operation: value,
             nextState: nextStateElement,
@@ -146,11 +153,11 @@ export const applyBack = <TState, TDownOperation, TCustomError = string>({
         if (oldValue.isError) {
             return oldValue;
         }
-        prevState[key] = oldValue.value;
+        prevState.set(key, oldValue.value);
         break;
     }
 
-    return Result.ok(prevState);
+    return Result.ok(mapToRecord(prevState));
 };
 
 export const compose = <TOperation, TCustomError = string>({
@@ -173,15 +180,15 @@ export const compose = <TOperation, TCustomError = string>({
         return Result.ok(first);
     }
 
-    const result: StringKeyRecord<TOperation> = {};
+    const result = new Map<string, TOperation>();
 
     for (const [key, groupJoined] of groupJoinMap(recordToMap(first), recordToMap(second))) {
         switch (groupJoined.type) {
             case left:
-                result[key] = groupJoined.left;
+                result.set(key, groupJoined.left);
                 continue;
             case right:
-                result[key] = groupJoined.right;
+                result.set(key, groupJoined.right);
                 continue;
             case both: {
                 const update = innerCompose({
@@ -193,13 +200,13 @@ export const compose = <TOperation, TCustomError = string>({
                     return update;
                 }
                 if (update.value !== undefined) {
-                    result[key] = update.value;
+                    result.set(key, update.value);
                 }
                 continue;
             }
         }
     }
-    return Result.ok(result);
+    return Result.ok(mapToRecord(result));
 };
 
 // Make sure these:
@@ -210,10 +217,10 @@ export const serverTransform = <
     TSecondOperation,
     TCustomError = string
 >({
-    first,
-    second,
-    prevState,
-    nextState,
+    first: unsafeFirst,
+    second: unsafeSecond,
+    prevState: unsafePrevState,
+    nextState: unsafeNextState,
     innerTransform,
     defaultState,
 }: {
@@ -228,16 +235,19 @@ export const serverTransform = <
     ) => CustomResult<TFirstOperation | undefined, string | TCustomError>;
     defaultState: TServerState;
 }): CustomResult<StringKeyRecord<TFirstOperation> | undefined, string | TCustomError> => {
-    if (second === undefined) {
+    if (unsafeSecond === undefined) {
         return Result.ok(undefined);
     }
 
-    const result: StringKeyRecord<TFirstOperation> = {};
+    const result = new Map<string, TFirstOperation>();
+    const prevState = recordToMap(unsafePrevState);
+    const nextState = recordToMap(unsafeNextState);
+    const first = unsafeFirst == null ? undefined : recordToMap(unsafeFirst);
 
-    for (const [key, operation] of recordToMap(second)) {
-        const innerPrevState = prevState[key] ?? defaultState;
-        const innerNextState = nextState[key] ?? defaultState;
-        const innerFirst = first == null ? undefined : first[key];
+    for (const [key, operation] of recordToMap(unsafeSecond)) {
+        const innerPrevState = prevState.get(key) ?? defaultState;
+        const innerNextState = nextState.get(key) ?? defaultState;
+        const innerFirst = first == null ? undefined : first.get(key);
 
         const transformed = innerTransform({
             first: innerFirst,
@@ -251,10 +261,10 @@ export const serverTransform = <
         }
         const transformedUpdate = transformed.value;
         if (transformedUpdate !== undefined) {
-            result[key] = transformedUpdate;
+            result.set(key, transformedUpdate);
         }
     }
-    return Result.ok(result);
+    return Result.ok(mapToRecord(result));
 };
 
 type InnerClientTransform<TOperation, TError = string> = (params: {
@@ -345,7 +355,7 @@ export const diff = <TState, TOperation>({
         key: string;
     }) => TOperation | undefined;
 }): StringKeyRecord<TOperation> => {
-    const result: StringKeyRecord<TOperation> = {};
+    const result = new Map<string, TOperation>();
     for (const [key, value] of groupJoinMap(recordToMap(prevState), recordToMap(nextState))) {
         let prevState: TState | undefined = undefined;
         let nextState: TState | undefined = undefined;
@@ -368,8 +378,8 @@ export const diff = <TState, TOperation>({
         if (diffResult === undefined) {
             continue;
         }
-        result[key] = diffResult;
+        result.set(key, diffResult);
         continue;
     }
-    return result;
+    return mapToRecord(result);
 };
