@@ -164,7 +164,7 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
     public toStringRecord(
         createStringKey1: (first: TKey1) => string,
         createStringKey2: (second: TKey2) => string
-    ) {
+    ): Record<string, Record<string, TValue>> {
         const result = new Map<string, Record<string, TValue>>();
         this._core.forEach((inner, first) => {
             const innerRecord = new Map<string, TValue>();
@@ -173,7 +173,7 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
             });
             result.set(createStringKey1(first), mapToRecord(innerRecord));
         });
-        return result;
+        return mapToRecord(result);
     }
 
     public get size(): number {
