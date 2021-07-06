@@ -1,4 +1,5 @@
 import { both, GroupJoinResult, left, right } from './types';
+import { mapToRecord } from './utils';
 
 export type DualKey<T1, T2> = {
     readonly first: T1;
@@ -164,13 +165,13 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
         createStringKey1: (first: TKey1) => string,
         createStringKey2: (second: TKey2) => string
     ) {
-        const result: Record<string, Record<string, TValue>> = {};
+        const result = new Map<string, Record<string, TValue>>();
         this._core.forEach((inner, first) => {
-            const innerRecord: Record<string, TValue> = {};
+            const innerRecord = new Map<string, TValue>();
             inner.forEach((value, second) => {
-                innerRecord[createStringKey2(second)] = value;
+                innerRecord.set(createStringKey2(second), value);
             });
-            result[createStringKey1(first)] = innerRecord;
+            result.set(createStringKey1(first), mapToRecord(innerRecord));
         });
         return result;
     }

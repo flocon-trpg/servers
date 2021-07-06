@@ -1,20 +1,34 @@
 import { DualKey, DualKeyMap } from './dualKeyMap';
 
+export const mapToRecord = <TValue>(
+    source: Map<string, TValue>
+): Record<string, TValue> => {
+    const result: Record<string, TValue> = {};
+    source.forEach((value, key) => {
+        if (result[key] !== undefined) {
+            // プロトタイプ汚染などを防いでいる。ただ、これで十分なのだろうか？
+            throw new Error(`${key} already exists`);
+        }
+        result[key] = value;
+    });
+    return result;
+};
+
 export const chooseRecord = <TSource, TResult>(
     source: Record<string, TSource | undefined>,
     chooser: (element: TSource) => TResult | undefined
 ): Record<string, TResult> => {
-    const result: Record<string, TResult> = {};
+    const result = new Map<string, TResult>();
     for (const key in source) {
         const element = source[key];
         if (element !== undefined) {
             const newElement = chooser(element);
             if (newElement !== undefined) {
-                result[key] = newElement;
+                result.set(key, newElement);
             }
         }
     }
-    return result;
+    return mapToRecord(result);
 };
 
 export const chooseDualKeyRecord = <TSource, TResult>(
@@ -32,15 +46,15 @@ export const mapRecord = <TSource, TResult>(
     source: Record<string, TSource | undefined>,
     mapping: (element: TSource) => TResult
 ): Record<string, TResult> => {
-    const result: Record<string, TResult> = {};
+    const result = new Map<string, TResult>();
     for (const key in source) {
         const element = source[key];
         if (element !== undefined) {
             const newElement = mapping(element);
-            result[key] = newElement;
+            result.set(key, newElement);
         }
     }
-    return result;
+    return mapToRecord(result);
 };
 
 export const mapDualKeyRecord = <TSource, TResult>(
@@ -102,16 +116,6 @@ export const dualKeyRecordToDualKeyMap = <T>(
  * @deprecated Use dualKeyRecordToDualKeyMap instead.
  */
 export const recordToDualKeyMap = dualKeyRecordToDualKeyMap;
-
-export const mapToRecord = <TValue>(
-    source: Map<string, TValue>
-): Record<string, TValue> => {
-    const result: Record<string, TValue> = {};
-    source.forEach((value, key) => {
-        result[key] = value;
-    });
-    return result;
-};
 
 export const recordForEach = <T>(
     source: Record<string, T | undefined>,

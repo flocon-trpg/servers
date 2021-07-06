@@ -1,4 +1,8 @@
-import { chooseDualKeyRecord, mapDualKeyRecord } from '../dist/index';
+import {
+    chooseDualKeyRecord,
+    mapDualKeyRecord,
+    mapRecord,
+} from '../dist/index';
 
 it('tests mapDualKeyRecord', () => {
     const source: Record<
@@ -28,6 +32,13 @@ it('tests mapDualKeyRecord {}', () => {
     const source: Record<string, Record<string, number>> = {};
     const actual = mapDualKeyRecord<number, string>(source, x => x.toString());
     expect(actual).toEqual({});
+});
+
+it('tests mapRecord (__proto__)', () => {
+    const source: Record<string, number | undefined> = JSON.parse(
+        '{ "__proto__": 1 }'
+    );
+    expect(() => mapRecord(source, x => x)).toThrow();
 });
 
 it('tests chooseDualKeyRecord', () => {
