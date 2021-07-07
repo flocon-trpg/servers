@@ -158,7 +158,8 @@ export const NumberPieceValueDrawer: React.FC = () => {
                     <Col flex={0}>所有者</Col>
                     <Col span={inputSpan}>
                         <MyCharactersSelect
-                            fixedCharacterId={drawerType?.type === update ? drawerType.characterKey.id : undefined}
+                            selectedCharacterId={drawerType?.type === update ? drawerType.characterKey.id : activeCharacter?.key}
+                            readOnly={drawerType?.type === update}
                             onSelect={setActiveCharacter} />
                     </Col>
                 </Row>
