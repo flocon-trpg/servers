@@ -60,6 +60,8 @@ export namespace Notification {
     export const initialState: State = { values: [], newValue: null };
 }
 
+
+
 // 例えばRoomのルートに近い方でContext.ProviderでroomState.stateなどを渡してから下階層の各地でuseContextで取得する方法は、roomState.stateの一部が変わるだけでRoomほぼ全体が再レンダリングされるため、非常に重くなると思われる。そのため、Reduxを使うことで高速化を狙っている。
 // Room.State のオブジェクトは複雑であり、パフォーマンスの低下を招きそうなので immer を使いたくない(そもそもTypescriptの型チェックを通らないため、不具合も生じる可能性がある)ため、createSliceを避けて直接書いている。
 namespace roomModule {
@@ -75,7 +77,7 @@ namespace roomModule {
         notifications: Notification.initialState,
     };
 
-    type Action = Partial<Omit<State, 'notification'>>;
+    type SetRoomAction = Partial<Omit<State, 'notification'>>;
 
     const setRoomType = 'roomModule:setRoom';
     const addNotificationType = 'roomModule:addNotification';
@@ -84,7 +86,7 @@ namespace roomModule {
     export const reducer: Reducer<State, AnyAction> = (state, action): State => {
         switch (action.type) {
             case setRoomType: {
-                const payload: Action = action.payload;
+                const payload: SetRoomAction = action.payload;
                 return {
                     roomId: payload.roomId ?? state?.roomId,
                     roomState: payload.roomState ?? state?.roomState,
@@ -113,7 +115,7 @@ namespace roomModule {
     };
 
     export namespace actions {
-        export const setRoom = (payload: Action) => {
+        export const setRoom = (payload: SetRoomAction) => {
             return {
                 type: setRoomType,
                 payload,
@@ -126,7 +128,7 @@ namespace roomModule {
                 payload,
             };
         };
-        
+
         export const reset = () => {
             return {
                 type: resetType,

@@ -2,10 +2,10 @@ import { BoardState } from '@kizahasi/flocon-core';
 import { dualKeyRecordForEach } from '@kizahasi/util';
 import React from 'react';
 import { useSelector } from '../../store';
-import { useMe } from '../useMe';
+import { useMyUserUid } from '../useMyUserUid';
 
 export const useMyBoards = (): ReadonlyMap<string, BoardState> | undefined => {
-    const { userUid: myUserUid } = useMe();
+    const myUserUid = useMyUserUid();
     const boards = useSelector(state => state.roomModule.roomState?.state?.boards);
     return React.useMemo(() => {
         if (boards == null) {

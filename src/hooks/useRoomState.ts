@@ -10,7 +10,7 @@ import { Room } from '../stateManagers/states/room';
 import { authNotFound, notSignIn } from './useFirebaseUser';
 import { useClientId } from './useClientId';
 import { useDispatch } from 'react-redux';
-import roomStateModule, { Notification } from '../modules/roomStateModule';
+import roomStateModule, { Notification } from '../modules/roomModule';
 import { State, UpOperation } from '@kizahasi/flocon-core';
 
 const sampleTime = 3000;

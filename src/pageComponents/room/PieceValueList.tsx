@@ -10,9 +10,9 @@ import { useDispatch } from 'react-redux';
 import { roomDrawerAndPopoverModule } from '../../modules/roomDrawerAndPopoverModule';
 import { DicePieceValueElement, useDicePieceValues } from '../../hooks/state/useDicePieceValues';
 import { DicePieceValue } from '../../utils/dicePieceValue';
-import { useMe } from '../../hooks/useMe';
 import { NumberPieceValue } from '../../utils/numberPieceValue';
 import { tripleKeyToString } from '../../utils/tripleKeyToString';
+import { useMyUserUid } from '../../hooks/useMyUserUid';
 
 type DataSource = {
     type: 'dice';
@@ -24,7 +24,7 @@ type DataSource = {
     value: NumberPieceValueElement;
 };
 export const PieceValueList: React.FC = () => {
-    const { userUid: myUserUid } = useMe();
+    const myUserUid = useMyUserUid();
     const dispatch = useDispatch();
     const participants = useParticipants();
     const dicePieceValues = useDicePieceValues();

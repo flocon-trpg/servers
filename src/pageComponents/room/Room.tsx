@@ -19,7 +19,6 @@ import { usePlayBgm } from '../../hooks/usePlayBgm';
 import { usePlaySoundEffect } from '../../hooks/usePlaySoundEffect';
 import { useMessageNotification } from '../../hooks/useMessageNotification';
 import { useRoomMessageInputTexts } from '../../hooks/useRoomMessageInputTexts';
-import { useMe } from '../../hooks/useMe';
 import { RoomMenu } from './RoomMenu';
 import { recordToArray } from '@kizahasi/util';
 import { PieceValueList } from './PieceValueList';
@@ -27,6 +26,7 @@ import { NumberPieceValueDrawer } from './NumberPieceValueDrawer';
 import { DicePieceValueDrawer } from './DicePieceValueDrawer';
 import { Memos } from './Memos';
 import { BoardContextMenu, PieceTooltip, PopoverEditor } from './BoardPopover';
+import { useMyUserUid } from '../../hooks/useMyUserUid';
 
 const RoomMessagePanels: React.FC<{ roomId: string }> = ({ roomId }: { roomId: string }) => {
     const dispatch = useDispatch();
@@ -81,7 +81,7 @@ const childrenContainerPadding = `12px ${horizontalPadding}px`;
 const bottomContainerPadding = `0px ${horizontalPadding}px`;
 
 const Room: React.FC = () => {
-    const { userUid: myUserUid } = useMe();
+    const myUserUid = useMyUserUid();
     const roomIdOfRoomConfig = useSelector(state => state.roomConfigModule?.roomId);
     const activeBoardPanelConfig = useSelector(state => state.roomConfigModule?.panels.activeBoardPanel);
     const boardEditorPanelsConfig = useSelector(state => state.roomConfigModule?.panels.boardEditorPanels);

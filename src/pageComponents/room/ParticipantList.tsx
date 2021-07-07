@@ -7,6 +7,7 @@ import { useParticipants } from '../../hooks/state/useParticipants';
 import { ParticipantState } from '@kizahasi/flocon-core';
 import _ from 'lodash';
 import { useMe } from '../../hooks/useMe';
+import { useMyUserUid } from '../../hooks/useMyUserUid';
 
 type DataSource = {
     key: string;
@@ -20,7 +21,7 @@ type DataSource = {
 const ParticipantList: React.FC = () => {
     const roomConnections = useRoomConnections();
     const participants = useParticipants();
-    const { userUid: myUserUid } = useMe();
+    const myUserUid = useMyUserUid();
 
     const dataSource: DataSource[] =
         React.useMemo(() => [...(participants ?? [])].map(([key, participant]) => {

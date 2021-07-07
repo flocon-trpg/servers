@@ -2,10 +2,10 @@ import { CharacterState } from '@kizahasi/flocon-core';
 import { dualKeyRecordForEach } from '@kizahasi/util';
 import React from 'react';
 import { useSelector } from '../../store';
-import { useMe } from '../useMe';
+import { useMyUserUid } from '../useMyUserUid';
 
 export const useMyCharacters = (): ReadonlyMap<string, CharacterState> | undefined => {
-    const { userUid: myUserUid } = useMe();
+    const myUserUid = useMyUserUid();
     const characters = useSelector(state => state.roomModule.roomState?.state?.characters);
     return React.useMemo(() => {
         if (characters == null) {

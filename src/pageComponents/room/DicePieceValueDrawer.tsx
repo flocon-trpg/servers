@@ -17,6 +17,7 @@ import { useDicePieceValues } from '../../hooks/state/useDicePieceValues';
 import { MyCharactersSelect } from '../../components/MyCharactersSelect';
 import { InputDie } from '../../components/InputDie';
 import { noValue } from '../../utils/dice';
+import { useMyUserUid } from '../../hooks/useMyUserUid';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -33,7 +34,7 @@ const inputSpan = 16;
 
 const IdView: React.FC = () => {
     const drawerType = useSelector(state => state.roomDrawerAndPopoverModule.dicePieceValueDrawerType);
-    const { userUid: myUserUid } = useMe();
+    const myUserUid = useMyUserUid();
 
     if (drawerType == null || myUserUid == null) {
         return null;
@@ -52,7 +53,7 @@ export const DicePieceValueDrawer: React.FC = () => {
     const drawerType = useSelector(state => state.roomDrawerAndPopoverModule.dicePieceValueDrawerType);
     const dispatch = useDispatch();
     const operate = useOperate();
-    const { userUid: myUserUid } = useMe();
+    const myUserUid = useMyUserUid();
     const dicePieceValues = useDicePieceValues();
     const [activeCharacter, setActiveCharacter] = React.useState<{ key: string; state: CharacterState }>();
 

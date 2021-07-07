@@ -17,7 +17,7 @@ import { SketchPicker } from 'react-color';
 import classNames from 'classnames';
 import { VisibleTo } from '../../utils/visibleTo';
 import { UseRoomMessageInputTextsResult } from '../../hooks/useRoomMessageInputTexts';
-import roomStateModule from '../../modules/roomStateModule';
+import roomStateModule from '../../modules/roomModule';
 import { useSelector } from '../../store';
 import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import { $free, isStrIndex10, PublicChannelKey, recordToArray } from '@kizahasi/util';

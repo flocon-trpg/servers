@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Checkbox, Divider, Drawer, Tag, Tooltip, Typography } from 'antd';
 import { FilePathInput, FileSourceType, useWriteRoomSoundEffectMutation } from '../../generated/graphql';
 import * as Icon from '@ant-design/icons';
-import FilesManagerDrawer, { sound } from '../../components/FilesManagerDrawer';
+import FilesManagerDrawer from '../../components/FilesManagerDrawer';
 import { FilesManagerDrawerType, some } from '../../utils/types';
 import { replace, update } from '../../stateManagers/states/types';
 import { filePathEquals } from '../../stateManagers/states/comparer';
@@ -14,7 +14,7 @@ import { useOperate } from '../../hooks/useOperate';
 import { StrIndex5 } from '@kizahasi/util';
 import { BgmState, FilePath, UpOperation } from '@kizahasi/flocon-core';
 import _ from 'lodash';
-import { soundEffect } from '../../hooks/useRoomMessages';
+import { FirebaseStorageFile } from '../../modules/fileModule';
 
 const defaultVolume = 0.5;
 
@@ -168,7 +168,7 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({ channelKey, bgmState,
                 size='small'
                 onClick={() => setFilesManagerDrawerType({
                     openFileType: some,
-                    defaultFilteredValue: [sound],
+                    defaultFilteredValue: [FirebaseStorageFile.sound],
                     onOpen: file => {
                         setFilesInput(oldValue => [...oldValue, file]);
                     }
@@ -237,7 +237,7 @@ const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({ visible, onClose }: SeP
                 size='small'
                 onClick={() => setFilesManagerDrawerType({
                     openFileType: some,
-                    defaultFilteredValue: [sound],
+                    defaultFilteredValue: [FirebaseStorageFile.sound],
                     onOpen: file => {
                         setFileInput(file);
                     }

@@ -12,11 +12,12 @@ import LoadingResult from '../../components/Result/LoadingResult';
 import NotSignInResult from '../../components/Result/NotSignInResult';
 import { usePublishRoomEventSubscription } from '../../hooks/usePublishRoomEventSubscription';
 import { useDispatch } from 'react-redux';
-import roomStateModule from '../../modules/roomStateModule';
+import roomStateModule from '../../modules/roomModule';
 import { useAllRoomMessages } from '../../hooks/useRoomMessages';
 import { useSelector } from '../../store';
 import useRoomConfig from '../../hooks/localStorage/useRoomConfig';
 import { roomDrawerAndPopoverModule } from '../../modules/roomDrawerAndPopoverModule';
+import { useMyUserUid } from '../../hooks/useMyUserUid';
 
 type JoinRoomFormProps = {
     roomState: RoomAsListItemFragment;
@@ -134,7 +135,7 @@ const RoomBehavior: React.FC<PropsWithChildren<{ roomId: string }>> = ({ roomId,
     React.useEffect(() => {
         dispatch(roomStateModule.actions.reset());
         dispatch(roomStateModule.actions.setRoom({ roomId }));
-    }, [dispatch, roomId]);
+    }, [dispatch, roomId ]);
     React.useEffect(() => {
         dispatch(roomStateModule.actions.setRoom({ roomState }));
     }, [dispatch, roomState]);

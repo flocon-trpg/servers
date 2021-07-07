@@ -12,6 +12,7 @@ import { useMessageFilter } from './useMessageFilter';
 import { usePublicChannelNames } from './state/usePublicChannelNames';
 import { newEvent, privateMessage, publicMessage } from './useRoomMessages';
 import { useParticipants } from './state/useParticipants';
+import { useMyUserUid } from './useMyUserUid';
 
 const argsBase: Omit<ArgsProps, 'message'> = {
     placement: 'bottomRight',
@@ -28,7 +29,7 @@ export function useMessageNotification(): void {
         volumeRef.current = (masterVolume ?? defaultMasterVolume) * (seVolume ?? defaultSeVolume);
     }, [masterVolume, seVolume]);
 
-    const { userUid: myUserUid } = useMe();
+    const myUserUid = useMyUserUid();
     const myUserUidRef = React.useRef(myUserUid);
     React.useEffect(() => {
         myUserUidRef.current = myUserUid;

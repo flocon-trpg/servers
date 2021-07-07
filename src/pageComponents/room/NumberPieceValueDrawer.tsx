@@ -15,6 +15,7 @@ import { useDispatch } from 'react-redux';
 import { useSelector } from '../../store';
 import { create, roomDrawerAndPopoverModule, update } from '../../modules/roomDrawerAndPopoverModule';
 import { MyCharactersSelect } from '../../components/MyCharactersSelect';
+import { useMyUserUid } from '../../hooks/useMyUserUid';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -32,7 +33,7 @@ const inputSpan = 16;
 
 const IdView: React.FC = () => {
     const drawerType = useSelector(state => state.roomDrawerAndPopoverModule.dicePieceValueDrawerType);
-    const { userUid: myUserUid } = useMe();
+    const myUserUid = useMyUserUid();
 
     if (drawerType == null || myUserUid == null) {
         return null;
@@ -51,7 +52,7 @@ export const NumberPieceValueDrawer: React.FC = () => {
     const drawerType = useSelector(state => state.roomDrawerAndPopoverModule.numberPieceValueDrawerType);
     const dispatch = useDispatch();
     const operate = useOperate();
-    const { userUid: myUserUid } = useMe();
+    const myUserUid = useMyUserUid();
     const numberPieceValues = useNumberPieceValues();
     const [activeCharacter, setActiveCharacter] = React.useState<{ key: string; state: CharacterState }>();
 

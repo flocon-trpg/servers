@@ -23,7 +23,7 @@ import { RoomMessage as RoomMessageNameSpace } from './RoomMessage';
 import { UseRoomMessageInputTextsResult } from '../../hooks/useRoomMessageInputTexts';
 import { useWritingMessageStatus } from '../../hooks/useWritingMessageStatus';
 import { isDeleted, toText } from '../../utils/message';
-import { Notification } from '../../modules/roomStateModule';
+import { Notification } from '../../modules/roomModule';
 import { useSelector } from '../../store';
 import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import { useOperate } from '../../hooks/useOperate';

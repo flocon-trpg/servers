@@ -5,9 +5,10 @@ import { useGetMessagesQuery, RoomMessageEventFragment, RoomPrivateMessageFragme
 import { appConsole } from '../utils/appConsole';
 import { PrivateChannelSet, PrivateChannelSets } from '../utils/PrivateChannelSet';
 import { usePrevious } from './usePrevious';
-import { Notification } from '../modules/roomStateModule';
+import { Notification } from '../modules/roomModule';
 import { useSelector } from '../store';
 import { useMe } from './useMe';
+import { useMyUserUid } from './useMyUserUid';
 
 // 使い方:
 // 1. どこかでuseAllRoomMessagesを呼ぶ。冗長な通信を避けるため、useAllRoomMessagesを呼ぶ箇所はなるべく少なくする。
@@ -342,7 +343,7 @@ export const useAllRoomMessages = ({
     // もしこれがないと、Room作成者以外がRoomに入室するとき、まだnonJoinedの段階でuseGetMessagesLazyQueryを呼び出してしまうためNotParticipantエラーが返され、メッセージウィンドウがエラーになる。これはブラウザを更新するだけで直る軽微なバグではあるが、beginFetchを設けることでuseGetMessagesLazyQueryが呼び出されるタイミングを遅らせることでバグを回避している。
     beginFetch: boolean; 
 }): AllRoomMessagesResult => {
-    const { userUid: myUserUid } = useMe();
+    const myUserUid = useMyUserUid();
     const [result, setResult] = React.useState<AllRoomMessagesResultCore>({ type: loading, events: [] });
     const [getMessages, messages] = useGetMessagesLazyQuery({ fetchPolicy: 'network-only' });
 

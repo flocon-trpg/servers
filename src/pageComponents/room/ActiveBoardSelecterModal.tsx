@@ -4,6 +4,7 @@ import Modal from 'antd/lib/modal/Modal';
 import React from 'react';
 import { useMyBoards } from '../../hooks/state/useMyBoards';
 import { useMe } from '../../hooks/useMe';
+import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useOperate } from '../../hooks/useOperate';
 
 type Props = {
@@ -19,7 +20,7 @@ type SelectedBoardKey = {
 }
 
 export const ActiveBoardSelectorModal: React.FC<Props> = ({ visible, onComplete }: Props) => {
-    const { userUid: myUserUid } = useMe();
+    const myUserUid = useMyUserUid();
     const myBoards = useMyBoards();
     const operate = useOperate();
     const [selectedBoardKey, setSelectedBoardKey] = React.useState<SelectedBoardKey | undefined>(undefined);

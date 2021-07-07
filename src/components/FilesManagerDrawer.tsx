@@ -5,7 +5,6 @@ import { ColumnGroupType, ColumnType } from 'antd/lib/table';
 import { getStorageForce } from '../utils/firebaseHelpers';
 import MyAuthContext from '../contexts/MyAuthContext';
 import DrawerFooter from '../layouts/DrawerFooter';
-import FirebaseApp from 'firebase/app';
 import * as Icons from '@ant-design/icons';
 import FirebaseStorageLink from './FirebaseStorageLink';
 import { FilesManagerDrawerType, some } from '../utils/types';
@@ -14,32 +13,17 @@ import copy from 'clipboard-copy';
 import { fileName } from '../utils/filename';
 import { extname } from '../utils/extname';
 import { InformationIcon } from './InformationIcon';
-import { useMe } from '../hooks/useMe';
 import { FilterValue } from 'antd/lib/table/interface';
-import { useMemoAsync } from '../hooks/useMemoAsync';
 import moment from 'moment';
+import { useMyUserUid } from '../hooks/useMyUserUid';
+import { FirebaseStorageFile } from '../modules/fileModule';
+import { useSelector } from '../store';
+import { useDispatch } from 'react-redux';
+import { fileModule } from '../modules/fileModule';
 
-type Reference = firebase.default.storage.Reference;
-
-export const image = 'image';
-export const sound = 'sound';
-export const others = 'others';
-type FileType = typeof image | typeof sound | typeof others;
-
-type DataSource = {
-    reference: Reference;
-    fullPath: string;
-    fileName: string;
-    fileType: FileType;
-    metadata: unknown;
-}
+type DataSource = FirebaseStorageFile.State;
 
 type Column = ColumnGroupType<DataSource> | ColumnType<DataSource>;
-
-const ForceReloadPublicListKeyContext = React.createContext(0);
-const SetForceReloadPublicListKeyContext = React.createContext<React.Dispatch<React.SetStateAction<number>>>(() => undefined);
-const ForceReloadUnlistedListKeyContext = React.createContext(0);
-const SetForceReloadUnlistedListKeyContext = React.createContext<React.Dispatch<React.SetStateAction<number>>>(() => undefined);
 
 const Path = {
     public: {
@@ -62,7 +46,7 @@ type FirebaseUploaderProps = {
 }
 
 const FirebaseUploader: React.FC<FirebaseUploaderProps> = ({ onUploaded, storageType }: FirebaseUploaderProps) => {
-    const { userUid: myUserUid } = useMe();
+    const myUserUid = useMyUserUid();
     const config = React.useContext(ConfigContext);
 
     if (storageType === $public) {
@@ -129,18 +113,18 @@ const fileTypeColumn = (defaultFilteredValue: FilterValue | null | undefined): C
     title: (<span>種類 <InformationIcon title='種類の分類はあくまで簡易的なものです。誤った分類がされることがあります。' /></span>),
     key: 'fileType',
     filters: [
-        { text: '画像', value: image },
-        { text: '音声', value: sound },
-        { text: 'その他', value: others },
+        { text: '画像', value: FirebaseStorageFile.image },
+        { text: '音声', value: FirebaseStorageFile.sound },
+        { text: 'その他', value: FirebaseStorageFile.others },
     ],
     onFilter: (value, record) => value === record.fileType,
     defaultFilteredValue,
     sorter: (x, y) => {
-        const toNumber = (fileType: FileType): number => {
+        const toNumber = (fileType: FirebaseStorageFile.FileType): number => {
             switch (fileType) {
-                case image:
+                case FirebaseStorageFile.image:
                     return 1;
-                case sound:
+                case FirebaseStorageFile.sound:
                     return 2;
                 default:
                     return 3;
@@ -153,9 +137,9 @@ const fileTypeColumn = (defaultFilteredValue: FilterValue | null | undefined): C
     // eslint-disable-next-line react/display-name
     render: (_, record: DataSource) => {
         switch (record.fileType) {
-            case image:
+            case FirebaseStorageFile.image:
                 return '画像';
-            case sound:
+            case FirebaseStorageFile.sound:
                 return '音声';
             default:
                 return 'その他';
@@ -182,7 +166,7 @@ const createdAtColumn: Column = {
     },
 };
 
-const openButtonColumn = (onClick: (ref: Reference) => void): Column => ({
+const openButtonColumn = (onClick: (ref: FirebaseStorageFile.Reference) => void): Column => ({
     title: 'Open',
     key: 'Open',
     // eslint-disable-next-line react/display-name
@@ -192,13 +176,12 @@ const openButtonColumn = (onClick: (ref: Reference) => void): Column => ({
 });
 
 type FileOptionsMenuProps = {
-    reference: Reference;
+    reference: FirebaseStorageFile.Reference;
     storageType: StorageType;
 }
 
 const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({ reference, storageType }: FileOptionsMenuProps) => {
-    const setForceReloadPublicListKey = React.useContext(SetForceReloadPublicListKeyContext);
-    const setForceReloadUnlistedListKey = React.useContext(SetForceReloadUnlistedListKeyContext);
+    const dispatch = useDispatch();
 
     return (
         <div>
@@ -221,10 +204,10 @@ const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({ reference, storageTyp
                             reference.delete().then(() => {
                                 switch (storageType) {
                                     case $public:
-                                        setForceReloadPublicListKey(oldValue => oldValue + 1);
+                                        dispatch(fileModule.actions.reloadFirebaseStoragePublicFiles());
                                         break;
                                     case unlisted:
-                                        setForceReloadUnlistedListKey(oldValue => oldValue + 1);
+                                        dispatch(fileModule.actions.reloadFirebaseStorageUnlistedFiles());
                                         break;
                                 }
                             });
@@ -260,55 +243,19 @@ const fileOptionsColumn = (storageType: StorageType): Column => ({
 });
 
 type FirebaseFilesListProps = {
-    files: Reference[];
-    onFlieOpen?: (ref: Reference) => void;
+    onFlieOpen?: (ref: FirebaseStorageFile.Reference) => void;
     storageType: StorageType;
     defaultFilteredValue?: FilterValue;
 }
 
 const FirebaseFilesList: React.FC<FirebaseFilesListProps> = ({
-    files,
     onFlieOpen,
     storageType,
     defaultFilteredValue
 }: FirebaseFilesListProps) => {
-    const dataSource: DataSource[] | undefined = useMemoAsync(async () => {
-        const promises = files.map(async file => {
-            const metadata = await file.getMetadata();
-            const name = fileName(file.fullPath);
-            let fileType: FileType;
-            switch (extname(name)?.toLowerCase()) {
-                case 'jpg':
-                case 'jpeg':
-                case 'png':
-                case 'gif':
-                case 'bmp':
-                case 'webp':
-                    fileType = image;
-                    break;
-                case 'mp3':
-                case 'ogg':
-                case 'oga':
-                case 'wav':
-                case 'aac':
-                case 'weba':
-                    fileType = sound;
-                    break;
-                default:
-                    fileType = others;
-                    break;
-            }
-            return {
-                reference: file,
-                fullPath: file.fullPath,
-                fileName: name,
-                fileType,
-                metadata,
-            };
-        });
-        return await Promise.all(promises);
-    }
-    , [files]);
+    const unlistedFiles = useSelector(state => state.fileModule.firebaseStorageUnlistedFiles);
+    const publicFiles = useSelector(state => state.fileModule.firebaseStoragePublicFiles);
+
     const columns = (() => {
         if (onFlieOpen != null) {
             return [fileNameColumn, fileTypeColumn(defaultFilteredValue), createdAtColumn, openButtonColumn(onFlieOpen), fileOptionsColumn(storageType)];
@@ -320,7 +267,44 @@ const FirebaseFilesList: React.FC<FirebaseFilesListProps> = ({
         pagination={{ pageSize: 15 }}
         rowKey='fullPath'
         columns={columns}
-        dataSource={dataSource ?? []} />);
+        dataSource={(storageType === unlisted ? unlistedFiles : publicFiles) ?? []} />);
+};
+
+const referencesToDataSource = (files: ReadonlyArray<FirebaseStorageFile.Reference>): Promise<DataSource[]> => {
+    const promises = files.map(async file => {
+        const metadata = await file.getMetadata();
+        const name = fileName(file.fullPath);
+        let fileType: FirebaseStorageFile.FileType;
+        switch (extname(name)?.toLowerCase()) {
+            case 'jpg':
+            case 'jpeg':
+            case 'png':
+            case 'gif':
+            case 'bmp':
+            case 'webp':
+                fileType = FirebaseStorageFile.image;
+                break;
+            case 'mp3':
+            case 'ogg':
+            case 'oga':
+            case 'wav':
+            case 'aac':
+            case 'weba':
+                fileType = FirebaseStorageFile.sound;
+                break;
+            default:
+                fileType = FirebaseStorageFile.others;
+                break;
+        }
+        return {
+            reference: file,
+            fullPath: file.fullPath,
+            fileName: name,
+            fileType,
+            metadata,
+        };
+    });
+    return Promise.all(promises);
 };
 
 type FirebaseFilesManagerProps = {
@@ -329,13 +313,10 @@ type FirebaseFilesManagerProps = {
 }
 
 const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({ onFlieOpen, defaultFilteredValue }: FirebaseFilesManagerProps) => {
-    const { userUid: myUserUid } = useMe();
-    const [publicFiles, setPublicFiles] = React.useState<Reference[]>([]);
-    const [unlistedFiles, setUnlistedFiles] = React.useState<Reference[]>([]);
-    const forceReloadPublicListKey = React.useContext(ForceReloadPublicListKeyContext);
-    const setForceReloadPublicListKey = React.useContext(SetForceReloadPublicListKeyContext);
-    const forceReloadUnlistedListKey = React.useContext(ForceReloadUnlistedListKeyContext);
-    const setForceReloadUnlistedListKey = React.useContext(SetForceReloadUnlistedListKeyContext);
+    const myUserUid = useMyUserUid();
+    const dispatch = useDispatch();
+    const reloadFirebaseStorageUnlistedFilesKey = useSelector(state => state.fileModule.reloadFirebaseStorageUnlistedFilesKey);
+    const reloadFirebaseStoragePublicFilesKey = useSelector(state => state.fileModule.reloadFirebaseStoragePublicFilesKey);
     const config = React.useContext(ConfigContext);
 
     React.useEffect(() => {
@@ -345,16 +326,17 @@ const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({ onFlieOpen,
                 return;
             }
             const $public = await getStorageForce(config).ref(Path.public.list).listAll();
+            const newState = await referencesToDataSource($public.items);
             if (unsubscribed) {
                 return;
             }
-            setPublicFiles($public.items);
+            dispatch(fileModule.actions.set({ firebaseStoragePublicFiles: newState }));
         };
         main();
         return () => {
             unsubscribed = true;
         };
-    }, [forceReloadPublicListKey, config]); // もしpublicでアクセスできるファイルがUserによって異なるように変更した場合、depsにmyAuth.uidなどを含めるほうがいい。
+    }, [dispatch, reloadFirebaseStoragePublicFilesKey, config]); // もしpublicでアクセスできるファイルがUserによって異なるように変更した場合、depsにmyAuth.uidなどを含めるほうがいい。
 
     React.useEffect(() => {
         if (myUserUid == null) {
@@ -366,22 +348,23 @@ const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({ onFlieOpen,
                 return;
             }
             const unlisted = await getStorageForce(config).ref(Path.unlisted.list(myUserUid)).listAll();
+            const newState = await referencesToDataSource(unlisted.items);
             if (unsubscribed) {
                 return;
             }
-            setUnlistedFiles(unlisted.items);
+            dispatch(fileModule.actions.set({ firebaseStorageUnlistedFiles: newState }));
         };
         main();
         return () => {
             unsubscribed = true;
         };
-    }, [myUserUid, forceReloadUnlistedListKey, config]);
+    }, [myUserUid, dispatch, reloadFirebaseStorageUnlistedFilesKey, config]);
 
     if (!config.web.firebase.storage.enablePublic && !config.web.firebase.storage.enableUnlisted) {
         return (<div>Firebase StorageのUIは管理者によって全て無効化されています。</div>);
     }
 
-    let onFirebaseFileOpen: ((ref: Reference) => void) | undefined = undefined;
+    let onFirebaseFileOpen: ((ref: FirebaseStorageFile.Reference) => void) | undefined = undefined;
     if (onFlieOpen != null) {
         onFirebaseFileOpen = ref => {
             const path = {
@@ -398,9 +381,9 @@ const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({ onFlieOpen,
                 <Tabs.TabPane tab="unlisted" key="storage1">
                     <div>
                         <FirebaseUploader storageType={unlisted} onUploaded={() => {
-                            setForceReloadUnlistedListKey(oldValue => oldValue + 1);
+                            dispatch(fileModule.actions.reloadFirebaseStorageUnlistedFiles());
                         }} />
-                        <FirebaseFilesList files={unlistedFiles} onFlieOpen={onFirebaseFileOpen} storageType="unlisted" defaultFilteredValue={defaultFilteredValue} />
+                        <FirebaseFilesList onFlieOpen={onFirebaseFileOpen} storageType="unlisted" defaultFilteredValue={defaultFilteredValue} />
                     </div>
                 </Tabs.TabPane>
             );
@@ -416,9 +399,9 @@ const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({ onFlieOpen,
                 <Tabs.TabPane tab="public" key="storage2">
                     <div>
                         <FirebaseUploader storageType={$public} onUploaded={() => {
-                            setForceReloadPublicListKey(oldValue => oldValue + 1);
+                            dispatch(fileModule.actions.reloadFirebaseStoragePublicFiles());
                         }} />
-                        <FirebaseFilesList files={publicFiles} onFlieOpen={onFirebaseFileOpen} storageType="public" defaultFilteredValue={defaultFilteredValue} />
+                        <FirebaseFilesList onFlieOpen={onFirebaseFileOpen} storageType="public" defaultFilteredValue={defaultFilteredValue} />
                     </div>
                 </Tabs.TabPane>
             );
@@ -443,8 +426,6 @@ type Props = {
 
 const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => {
     const myAuth = React.useContext(MyAuthContext);
-    const [forceReloadPublicListKey, setForceReloadPublicListKey] = React.useState(0);
-    const [forceReloadUnlistedListKey, setForceReloadUnlistedListKey] = React.useState(0);
     const [input, setInput] = React.useState<string>('');
 
     const child = (() => {
@@ -482,27 +463,19 @@ const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => 
     })();
 
     return (
-        <ForceReloadPublicListKeyContext.Provider value={forceReloadPublicListKey}>
-            <SetForceReloadPublicListKeyContext.Provider value={setForceReloadPublicListKey}>
-                <ForceReloadUnlistedListKeyContext.Provider value={forceReloadUnlistedListKey}>
-                    <SetForceReloadUnlistedListKeyContext.Provider value={setForceReloadUnlistedListKey}>
-                        <Drawer
-                            className='cancel-rnd'
-                            closable
-                            visible={drawerType != null}
-                            onClose={() => onClose()}
-                            width={800}
-                            footer={(<DrawerFooter
-                                close={({
-                                    textType: 'close',
-                                    onClick: () => onClose()
-                                })} />)}>
-                            {child}
-                        </Drawer>
-                    </SetForceReloadUnlistedListKeyContext.Provider>
-                </ForceReloadUnlistedListKeyContext.Provider>
-            </SetForceReloadPublicListKeyContext.Provider>
-        </ForceReloadPublicListKeyContext.Provider>
+        <Drawer
+            className='cancel-rnd'
+            closable
+            visible={drawerType != null}
+            onClose={() => onClose()}
+            width={800}
+            footer={(<DrawerFooter
+                close={({
+                    textType: 'close',
+                    onClick: () => onClose()
+                })} />)}>
+            {child}
+        </Drawer>
     );
 };
 

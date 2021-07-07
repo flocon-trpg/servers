@@ -8,7 +8,7 @@ import * as Icon from '@ant-design/icons';
 import { boardEditorPanel } from '../../states/RoomConfig';
 import VolumeBarPanel from './VolumeBarPanel';
 import Jdenticon from '../../components/Jdenticon';
-import roomStateModule, { Notification } from '../../modules/roomStateModule';
+import roomStateModule, { Notification } from '../../modules/roomModule';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import path from '../../utils/path';
 import { useRouter } from 'next/router';

@@ -11,6 +11,7 @@ import { useBoards } from '../../hooks/state/useBoards';
 import { useCharacters } from '../../hooks/state/useCharacters';
 import { DicePieceValueElement } from '../../hooks/state/useDicePieceValues';
 import { useMe } from '../../hooks/useMe';
+import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useOperate } from '../../hooks/useOperate';
 import { character, ContextMenuState, create, dicePieceValue, roomDrawerAndPopoverModule, tachie } from '../../modules/roomDrawerAndPopoverModule';
 import { replace, update } from '../../stateManagers/states/types';
@@ -906,7 +907,7 @@ namespace ContextMenuModule {
         const room = useSelector(state => state.roomModule.roomState?.state);
         const boards = useBoards();
         const characters = useCharacters();
-        const { userUid: myUserUid } = useMe();
+        const myUserUid = useMyUserUid();
         const contextMenuState = useSelector(state => state.roomDrawerAndPopoverModule.boardContextMenu);
         const roomId = useSelector(state => state.roomModule.roomId);
         const [writeSe] = useWriteRoomSoundEffectMutation();

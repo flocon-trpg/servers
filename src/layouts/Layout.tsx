@@ -4,13 +4,16 @@ import { useRouter } from 'next/router';
 import { Button, Layout as AntdLayout, Row, Col, Space, Form, Input, Spin, Card, Alert, Result } from 'antd';
 import { EntryToServerResultType, useEntryToServerMutation } from '../generated/graphql';
 import Center from '../components/Center';
-import useConstant from 'use-constant';
 import { getAuth } from '../utils/firebaseHelpers';
 import Link from 'next/link';
 import ConfigContext from '../contexts/ConfigContext';
 import NotSignInResult from '../components/Result/NotSignInResult';
 import { authNotFound, loading, notSignIn } from '../hooks/useFirebaseUser';
 import LoadingResult from '../components/Result/LoadingResult';
+import { useDispatch } from 'react-redux';
+import roomModule from '../modules/roomModule';
+import { fileModule } from '../modules/fileModule';
+import { roomDrawerAndPopoverModule } from '../modules/roomDrawerAndPopoverModule';
 const { Header, Content } = AntdLayout;
 
 type EntryFormComponentProps = {
@@ -83,6 +86,7 @@ type Props = {
 
 const Layout: React.FC<PropsWithChildren<Props>> = ({ children, showEntryForm, onEntry, requiresLogin }: PropsWithChildren<Props>) => {
     const router = useRouter();
+    const dispatch = useDispatch();
     const myAuth = React.useContext(MyAuthContext);
     const config = React.useContext(ConfigContext);
     const auth = getAuth(config);
@@ -121,7 +125,16 @@ const Layout: React.FC<PropsWithChildren<Props>> = ({ children, showEntryForm, o
                             {typeof myAuth === 'string' ? null : <div style={({ color: 'white' })}>{myAuth.displayName} - {myAuth.uid}</div>}
                             {typeof myAuth === 'string'
                                 ? <Button key="2" onClick={() => router.push('/signin')}>Log in</Button>
-                                : <Button key="2" onClick={() => auth.signOut()}>Logout</Button>}
+                                : <Button 
+                                    key="2" 
+                                    onClick={() => auth.signOut().then(() => {
+                                        // 前にログインしていたユーザーの部屋やファイル一覧などといったデータの閲覧を防いでいる
+                                        dispatch(roomModule.actions.reset());
+                                        dispatch(fileModule.actions.reset());
+                                        dispatch(roomDrawerAndPopoverModule.actions.reset());
+                                    })}>
+                                    Logout
+                                </Button>}
                         </Space>
                     </Col>
                 </Row>
