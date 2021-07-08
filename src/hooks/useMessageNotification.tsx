@@ -7,7 +7,6 @@ import { MessageFilter } from '../states/MessagePanelConfig';
 import { defaultMasterVolume, defaultSeVolume } from '../states/RoomConfig';
 import { useSelector } from '../store';
 import { emptyPublicChannelNames } from '../utils/types';
-import { useMe } from './useMe';
 import { useMessageFilter } from './useMessageFilter';
 import { usePublicChannelNames } from './state/usePublicChannelNames';
 import { newEvent, privateMessage, publicMessage } from './useRoomMessages';

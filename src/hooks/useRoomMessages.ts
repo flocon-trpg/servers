@@ -1,13 +1,12 @@
 import { ApolloError } from '@apollo/client';
 import produce from 'immer';
 import React from 'react';
-import { useGetMessagesQuery, RoomMessageEventFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment, RoomPublicChannelFragment, RoomSoundEffectFragment, PieceValueLogFragment, RoomEventSubscription, GetRoomMessagesFailureType, useGetMessagesLazyQuery } from '../generated/graphql';
+import { RoomMessageEventFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment, RoomPublicChannelFragment, RoomSoundEffectFragment, PieceValueLogFragment, RoomEventSubscription, GetRoomMessagesFailureType, useGetMessagesLazyQuery } from '../generated/graphql';
 import { appConsole } from '../utils/appConsole';
 import { PrivateChannelSet, PrivateChannelSets } from '../utils/PrivateChannelSet';
 import { usePrevious } from './usePrevious';
 import { Notification } from '../modules/roomModule';
 import { useSelector } from '../store';
-import { useMe } from './useMe';
 import { useMyUserUid } from './useMyUserUid';
 
 // 使い方:

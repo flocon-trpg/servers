@@ -34,6 +34,7 @@ import { useNumberPieceValues } from '../../hooks/state/useNumberPieceValues';
 import { tripleKeyToString } from '../../utils/tripleKeyToString';
 import { BoardTooltipState, create, MouseOverOn, BoardPopoverEditorState, roomDrawerAndPopoverModule } from '../../modules/roomDrawerAndPopoverModule';
 import { useDicePieceValues } from '../../hooks/state/useDicePieceValues';
+import { useMyUserUid } from '../../hooks/useMyUserUid';
 
 const createPiecePostOperation = ({
     e,
@@ -184,7 +185,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const dispatch = useDispatch();
     const operate = useOperate();
     const publicMessages = useFilteredRoomMessages({ filter: publicMessageFilter });
-    const { userUid: myUserUid } = useMe();
+    const myUserUid  = useMyUserUid();
 
     if (myUserUid == null || roomId == null || characters == null || participants == null || numberPieceValues == null) {
         return null;
@@ -638,7 +639,8 @@ const Board: React.FC<Props> = ({
     const characters = useCharacters();
     const dicePieceValues = useDicePieceValues();
     const numberPieceValues = useNumberPieceValues();
-    const { participant: me, userUid: myUserUid } = useMe();
+    const myUserUid = useMyUserUid();
+    const me = useMe();
     const activeBoardKey = useSelector(state => state.roomModule.roomState?.state?.activeBoardKey);
     const activeBoardPanelConfig = useSelector(state => state.roomConfigModule?.panels.activeBoardPanel);
     const [activeBoardSelectorModalVisibility, setActiveBoardSelectorModalVisibility] = React.useState(false);

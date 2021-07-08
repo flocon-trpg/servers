@@ -1,6 +1,5 @@
 import localforage from 'localforage';
 import { castToPartialRoomConfig, defaultRoomConfig, RoomConfig, toCompleteRoomConfig } from '../../states/RoomConfig';
-import * as Room from '../../stateManagers/states/room';
 
 const roomConfigKey = (roomId: string) => `room@${roomId}`;
 

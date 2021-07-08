@@ -3,7 +3,6 @@ import { triggerFocus } from 'antd/lib/input/Input';
 import Modal from 'antd/lib/modal/Modal';
 import React from 'react';
 import { useMyBoards } from '../../hooks/state/useMyBoards';
-import { useMe } from '../../hooks/useMe';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useOperate } from '../../hooks/useOperate';
 

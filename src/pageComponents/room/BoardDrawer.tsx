@@ -17,6 +17,7 @@ import { useMe } from '../../hooks/useMe';
 import { boardDiff, BoardState, UpOperation } from '@kizahasi/flocon-core';
 import { useDispatch } from 'react-redux';
 import { create, roomDrawerAndPopoverModule, update } from '../../modules/roomDrawerAndPopoverModule';
+import { useMyUserUid } from '../../hooks/useMyUserUid';
 
 const notFound = 'notFound';
 
@@ -41,7 +42,7 @@ const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
 const BoardDrawer: React.FC = () => {
-    const me = useMe();
+    const myUserUid = useMyUserUid();
     const dispatch = useDispatch();
     const operate = useOperate();
     const drawerType = useSelector(state => state.roomDrawerAndPopoverModule.boardDrawerType);
@@ -69,7 +70,7 @@ const BoardDrawer: React.FC = () => {
     });
     const [filesManagerDrawerType, setFilesManagerDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
 
-    if (me.userUid == null) {
+    if (myUserUid == null) {
         return null;
     }
 
@@ -118,7 +119,7 @@ const BoardDrawer: React.FC = () => {
             const operation: UpOperation = {
                 $version: 1,
                 boards: {
-                    [me.userUid]: {
+                    [myUserUid]: {
                         [id]: {
                             type: replace,
                             replace: {

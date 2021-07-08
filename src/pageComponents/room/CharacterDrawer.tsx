@@ -28,6 +28,7 @@ import { dualKeyRecordFind, strIndex20Array } from '@kizahasi/util';
 import { useSelector } from '../../store';
 import { useDispatch } from 'react-redux';
 import { create, roomDrawerAndPopoverModule, update } from '../../modules/roomDrawerAndPopoverModule';
+import { useMyUserUid } from '../../hooks/useMyUserUid';
 
 const notFound = 'notFound';
 
@@ -73,7 +74,7 @@ const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
 const CharacterDrawer: React.FC = () => {
-    const me = useMe();
+    const myUserUid = useMyUserUid();
     const drawerType = useSelector(state => state.roomDrawerAndPopoverModule.characterDrawerType);
     const dispatch = useDispatch();
     const operate = useOperate();
@@ -106,7 +107,7 @@ const CharacterDrawer: React.FC = () => {
     const [filesManagerDrawerType, setFilesManagerDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
 
 
-    if (boolParamNames == null || numParamNames == null || strParamNames == null || participants == null || me.userUid == null) {
+    if (boolParamNames == null || numParamNames == null || strParamNames == null || participants == null || myUserUid == null) {
         return null;
     }
 
@@ -114,7 +115,7 @@ const CharacterDrawer: React.FC = () => {
         if (drawerType?.type !== update) {
             return true;
         }
-        return drawerType.stateKey.createdBy === me.userUid;
+        return drawerType.stateKey.createdBy === myUserUid;
     })();
 
     const piece = (() => {
@@ -259,7 +260,7 @@ const CharacterDrawer: React.FC = () => {
             const operation: UpOperation = {
                 $version: 1,
                 characters: {
-                    [me.userUid]: {
+                    [myUserUid]: {
                         [id]: {
                             type: replace,
                             replace: {
@@ -492,7 +493,7 @@ const CharacterDrawer: React.FC = () => {
                                         const operation: UpOperation = {
                                             $version: 1,
                                             characters: {
-                                                [me.userUid]: {
+                                                [myUserUid]: {
                                                     [id]: {
                                                         type: replace,
                                                         replace: {

@@ -25,6 +25,7 @@ import FilesManagerDrawer from '../../components/FilesManagerDrawer';
 import { FilesManagerDrawerType, none } from '../../utils/types';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
 import { useMe } from '../../hooks/useMe';
+import { useMyUserUid } from '../../hooks/useMyUserUid';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -515,7 +516,8 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
 
 
 export const RoomMenu: React.FC = () => {
-    const { participant: me, userUid: myUserUid } = useMe();
+    const me = useMe();
+    const myUserUid  = useMyUserUid();
     const router = useRouter();
     const dispatch = useDispatch();
     const roomId = useSelector(state => state.roomModule.roomId);
