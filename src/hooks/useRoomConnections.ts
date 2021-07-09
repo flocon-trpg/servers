@@ -1,6 +1,6 @@
 import produce from 'immer';
 import React from 'react';
-import { useGetRoomConnectionsLazyQuery, useGetRoomConnectionsQuery } from '../generated/graphql';
+import { useGetRoomConnectionsLazyQuery } from '../generated/graphql';
 import { useSelector } from '../store';
 
 export type RoomConnectionsResult = {

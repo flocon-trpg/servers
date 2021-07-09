@@ -8,7 +8,7 @@ import { DrawerProps } from 'antd/lib/drawer';
 import FilesManagerDrawer from '../../components/FilesManagerDrawer';
 import { FilePath, FilesManagerDrawerType } from '../../utils/types';
 import { Gutter } from 'antd/lib/grid/row';
-import { useStateEditor } from '../../hooks/useStateEditor';
+import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
 import { useOperate } from '../../hooks/useOperate';
 import { useSelector } from '../../store';
 import BufferedInput from '../../components/BufferedInput';
@@ -47,43 +47,49 @@ const BoardDrawer: React.FC = () => {
     const operate = useOperate();
     const drawerType = useSelector(state => state.roomDrawerAndPopoverModule.boardDrawerType);
     const boards = useBoards();
-    const { state: board, setState: setBoard, stateToCreate: boardToCreate, resetStateToCreate: resetBoardToCreate } = useStateEditor(drawerType?.type === update ? boards?.get(drawerType.stateKey) : undefined, defaultBoard, ({ prevState, nextState }) => {
-        if (drawerType?.type !== update) {
-            return;
-        }
-        const diffOperation = boardDiff({ prevState, nextState });
-        if (diffOperation == null) {
-            return;
-        }
-        const operation: UpOperation = {
-            $version: 1,
-            boards: {
-                [drawerType.stateKey.createdBy]: {
-                    [drawerType.stateKey.id]: {
-                        type: update,
-                        update: diffOperation,
+    let stateEditorParams: StateEditorParams<BoardState | undefined>;
+    switch (drawerType?.type) {
+        case create:
+        case undefined:
+            stateEditorParams = {
+                type: create,
+                initState: defaultBoard,
+            };
+            break;
+        case update:
+            stateEditorParams = {
+                type: update,
+                state: boards?.get(drawerType.stateKey),
+                onUpdate: ({ prevState, nextState }) => {
+                    if (prevState == null || nextState == null) {
+                        return;
                     }
+                    const diffOperation = boardDiff({ prevState, nextState });
+                    if (diffOperation == null) {
+                        return;
+                    }
+                    const operation: UpOperation = {
+                        $version: 1,
+                        boards: {
+                            [drawerType.stateKey.createdBy]: {
+                                [drawerType.stateKey.id]: {
+                                    type: update,
+                                    update: diffOperation,
+                                }
+                            }
+                        }
+                    };
+                    operate(operation);
                 }
-            }
-        };
-        operate(operation);
-    });
+            };
+            break;
+    }
+    const { uiState: board, updateUiState: setBoard, resetUiState: resetBoardToCreate } = useStateEditor(stateEditorParams);
     const [filesManagerDrawerType, setFilesManagerDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
 
-    if (myUserUid == null) {
+    if (myUserUid == null || board == null) {
         return null;
     }
-
-    const boardForUseEffect = (() => {
-        switch (drawerType?.type) {
-            case update:
-                return boards?.get(drawerType.stateKey) ?? notFound;
-            case create:
-                return create;
-            default:
-                return null;
-        }
-    })();
 
     const updateBoard = (partialState: Partial<BoardState>) => {
         switch (drawerType?.type) {

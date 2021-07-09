@@ -14,7 +14,7 @@ import StringParameterInput from '../../components/StringParameterInput';
 import ToggleButton from '../../components/ToggleButton';
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import { characterIsPrivate, characterIsNotPrivate, characterIsNotPrivateAndNotCreatedByMe } from '../../resource/text/main';
-import { useStateEditor } from '../../hooks/useStateEditor';
+import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
 import { useOperate } from '../../hooks/useOperate';
 import BufferedInput from '../../components/BufferedInput';
 import BufferedTextArea from '../../components/BufferedTextArea';
@@ -22,7 +22,6 @@ import { characterCommand, characterVariable, TomlInput } from '../../components
 import { useCharacters } from '../../hooks/state/useCharacters';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { useBoolParamNames, useNumParamNames, useStrParamNames } from '../../hooks/state/useParamNames';
-import { useMe } from '../../hooks/useMe';
 import { applyCharacter, boardLocationDiff, BoardLocationState, characterDiff, CharacterState, CharacterUpOperation, PieceState, toCharacterUpOperation, UpOperation, pieceDiff } from '@kizahasi/flocon-core';
 import { dualKeyRecordFind, strIndex20Array } from '@kizahasi/util';
 import { useSelector } from '../../store';
@@ -83,31 +82,48 @@ const CharacterDrawer: React.FC = () => {
     const numParamNames = useNumParamNames();
     const strParamNames = useStrParamNames();
     const participants = useParticipants();
-    const { state: character, setState: setCharacter, stateToCreate: characterToCreate, resetStateToCreate: resetCharacterToCreate } = useStateEditor(drawerType?.type === update ? characters?.get(drawerType.stateKey) : undefined, defaultCharacter, ({ prevState, nextState }) => {
-        if (drawerType?.type !== update) {
-            return;
-        }
-        const diffOperation = characterDiff({ prevState, nextState });
-        if (diffOperation == null) {
-            return;
-        }
-        const operation: UpOperation = {
-            $version: 1,
-            characters: {
-                [drawerType.stateKey.createdBy]: {
-                    [drawerType.stateKey.id]: {
-                        type: update,
-                        update: toCharacterUpOperation(diffOperation),
+    let stateEditorParams: StateEditorParams<CharacterState | undefined>;
+    switch (drawerType?.type) {
+        case create:
+        case undefined:
+            stateEditorParams = {
+                type: create,
+                initState: defaultCharacter,
+            };
+            break;
+        case update:
+            stateEditorParams = {
+                type: update,
+                state: characters?.get(drawerType.stateKey),
+                onUpdate: ({ prevState, nextState }) => {
+                    if (prevState == null || nextState == null) {
+                        return;
                     }
+                    const diffOperation = characterDiff({ prevState, nextState });
+                    if (diffOperation == null) {
+                        return;
+                    }
+                    const operation: UpOperation = {
+                        $version: 1,
+                        characters: {
+                            [drawerType.stateKey.createdBy]: {
+                                [drawerType.stateKey.id]: {
+                                    type: update,
+                                    update: toCharacterUpOperation(diffOperation),
+                                }
+                            }
+                        }
+                    };
+                    operate(operation);
                 }
-            }
-        };
-        operate(operation);
-    });
+            };
+            break;
+    }
+    const { uiState: character, updateUiState: setCharacter, resetUiState: resetCharacterToCreate } = useStateEditor(stateEditorParams);
     const [filesManagerDrawerType, setFilesManagerDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
 
 
-    if (boolParamNames == null || numParamNames == null || strParamNames == null || participants == null || myUserUid == null) {
+    if (boolParamNames == null || numParamNames == null || strParamNames == null || participants == null || myUserUid == null || character == null) {
         return null;
     }
 
@@ -253,9 +269,6 @@ const CharacterDrawer: React.FC = () => {
     let onOkClick: (() => void) | undefined = undefined;
     if (drawerType?.type === create) {
         onOkClick = () => {
-            if (characterToCreate == null) {
-                return;
-            }
             const id = simpleId();
             const operation: UpOperation = {
                 $version: 1,
@@ -264,7 +277,7 @@ const CharacterDrawer: React.FC = () => {
                         [id]: {
                             type: replace,
                             replace: {
-                                newValue: characterToCreate,
+                                newValue: character,
                             },
                         }
                     }
@@ -475,7 +488,7 @@ const CharacterDrawer: React.FC = () => {
                     </Row>
                 </>}
 
-                {characterToCreate != null ? null :
+                {character == null || drawerType?.type !== update ? null :
                     <>
                         <Typography.Title level={4}>複製</Typography.Title>
 
@@ -486,9 +499,6 @@ const CharacterDrawer: React.FC = () => {
                                 {/* TODO: 複製したことを何らかの形で通知したほうがいい */}
                                 <Tooltip title='コマの情報を除き、このキャラクターを複製します。'>
                                     <Button size='small' onClick={() => {
-                                        if (characterToCreate != null) {
-                                            return;
-                                        }
                                         const id = simpleId();
                                         const operation: UpOperation = {
                                             $version: 1,

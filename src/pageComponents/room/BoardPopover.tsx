@@ -73,7 +73,7 @@ namespace PopupEditorBase {
         const operate = useOperate();
 
         const characters = useCharacters();
-        const dicePieceValue = React.useMemo(() => {
+        const dicePieceValue = (() => {
             const character = characters?.get({ createdBy: element.characterKey.createdBy, id: element.characterKey.id });
             if (character == null) {
                 return undefined;
@@ -83,7 +83,7 @@ namespace PopupEditorBase {
                 return undefined;
             }
             return dicePieceValue;
-        }, [characters, element.characterKey.createdBy, element.characterKey.id, element.valueId]);
+        })();
 
         if (dicePieceValue == null) {
             return null;

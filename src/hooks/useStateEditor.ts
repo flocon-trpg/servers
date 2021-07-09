@@ -1,83 +1,73 @@
 import React from 'react';
+import { useReadonlyRef } from './useReadonlyRef';
+import { usePrevious } from './usePrevious';
 
-function useStateEditorCore<T>(state: T | undefined, defaultState: T, onUpdate: (params: { prevState: T; nextState: T }) => void) {
-    const [result, setResultCore] = React.useState<T>(defaultState);
-    
-    const stateRef = React.useRef(state);
-    React.useEffect(() => {
-        stateRef.current = state;
-    }, [state]);
+export const update = 'update';
+export const create = 'create';
 
-    const defaultStateRef = React.useRef(defaultState);
-    React.useEffect(() => {
-        defaultStateRef.current = defaultState;
-    }, [defaultState]);
-
-    const resetStateToCreate = React.useCallback(() => {
-        if (stateRef.current !== undefined) {
-            return false;
-        }
-        setResultCore(defaultStateRef.current);
-        return true;
-    }, []);
-
-    const onUpdateRef = React.useRef(onUpdate);
-    React.useEffect(() => {
-        onUpdateRef.current = onUpdate;
-    }, [onUpdate]);
-
-    const setResult = React.useCallback((newState: T) => {
-        if (stateRef.current == null) {
-            setResultCore(newState);
-            return;
-        }
-        onUpdateRef.current({ prevState: stateRef.current, nextState: newState });
-    }, []);
-
-    React.useEffect(() => {
-        if (state === undefined) {
-            setResultCore(defaultStateRef.current);
-            return;
-        }
-        setResultCore(state);
-    }, [state]);
-
-    return {
-        state: result,
-        setState: setResult,
-        stateToCreate: state === undefined ? result : undefined,
-        resetStateToCreate,
-    };
+export type StateEditorParams<T> = {
+    type: typeof update;
+    state: T;
+    onUpdate: (params: { prevState: T; nextState: T }) => void;
+} | {
+    type: typeof create;
+    initState: T;
 }
 
-/**
- * stateのcreateとupdateを自動的に切り替える機能をサポートするhook。createはボタンなどを押すまで作成されず、updateは値が変わるたびにstateにその変更が反映される場面を想定。
- * 
- * @example
- * ```
- * const diffCharacter = …;
- * const operateCharacter = …;
- * const createCharacter = …;
- * 
- * const { result, setResult, stateToCreate } = useEditState(room.characters.get('TARGET_ID'), { name: 'New character', … }, ({ prevState, nextState }) => {
- *     const operation = diffCharacter(prevState, nextState);
- *     operateCharacter(operation); // これにより room.characters.get('TARGET_ID') の値を変える(変更する必要がないとoperateCharacterの内部が判断した場合は変えなくてもよい)。引き続きupdateモードとなるならば、resultの値もそれに合わせて変わる。
- * }));
- * 
- * return (<div>
- *     <CharacterEditor character={result} onCharacterChange={setResult} />
- *     <Button disabled={stateToCreate === undefined} onClick={() => createCharacter(stateToCreate)}>作成</Button>
- * </div>);
- * ```
- * 
- * @typeParam T - nullやundefinedが含まれない型にすることを推奨。
- * 
- * @param state - nullishならばcreateモード、そうでないならばそのstateに対するupdateモードとなる。
- * @param defaultState - createする際、初期状態を表すstate。
- * @param onUpdate - updateの際に行われる処理。通常は、これによりstateの変更を誘発させうる処理を書く。
- * 
- * @returns stateは、UIに表示させる値。updateの場合はstateが、createの場合は内部のuseStateで保存されている値が返される。stateToCreateは、createさせたい際に用いる値。updateモードならばundefinedとなる。resetStateToCreateを実行すると、createモードならば戻り値のstateがdefaultStateになる。updateモードならば何も起こらない。
- */
-export function useStateEditor<T>(state: T | null | undefined, defaultState: T, onUpdate: (params: { prevState: T; nextState: T }) => void) {
-    return useStateEditorCore(state ?? undefined, defaultState, onUpdate);
+// stateのcreateとupdateを自動的に切り替える機能をサポートするhook。createはボタンなどを押すまで作成されず、updateは値が変わるたびにstateにその変更が反映される場面を想定。
+// 注意点として、stateがcreateからcreateに変わった場合は、そのときにもしinitStateが変わっても変更が反映されないという仕様。これにより、作成をキャンセルしてまた作成しようとしたときに前のデータが残るようになるというメリットがある。
+export function useStateEditor<T>(state: StateEditorParams<T>) {
+    const [uiState, setUiState] = React.useState<T>((() => {
+        switch (state.type) {
+            case update:
+                return state.state;
+            case create:
+                return state.initState;
+        }
+    })());
+
+    const stateRef = useReadonlyRef(state);
+
+    const resetUiState = React.useCallback(() => {
+        if (stateRef.current.type !== create) {
+            return false;
+        }
+        setUiState(stateRef.current.initState);
+        return true;
+    }, [stateRef]);
+
+    const updateUiState = React.useCallback((newState: T) => {
+        if (stateRef.current.type === create) {
+            setUiState(newState);
+            return;
+        }
+        stateRef.current.onUpdate({ prevState: stateRef.current.state, nextState: newState });
+    }, [stateRef]);
+
+    const previousState = usePrevious(state);
+
+    React.useEffect(() => {
+        if (state.type === create) {
+            if (previousState?.type === create) {
+                return;
+            }
+            setUiState(state.initState);
+            return;
+        }
+        setUiState(state.state);
+    }, [state, previousState]);
+
+    return {
+        // UIに表示するstate。これを何らかのコンポーネントに渡して表示する。
+        uiState,
+
+        // stateを更新する。
+        // updateモードのときは、onUpdateが実行される（通常はこれによりstate.stateの値が変わるため、それによりuiStateも変わるという流れ）。
+        // createモードのときは、このhook内部で変更が処理されてuiStateが変更される。
+        updateUiState,
+
+        // createモードのとき、uiStateを初期化する。
+        // updateモードのときは何も起こらない。
+        resetUiState,
+    };
 }

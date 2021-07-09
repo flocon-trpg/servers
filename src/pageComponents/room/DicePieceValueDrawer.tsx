@@ -5,9 +5,8 @@ import { simpleId } from '../../utils/generators';
 import { replace } from '../../stateManagers/states/types';
 import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
-import { useStateEditor } from '../../hooks/useStateEditor';
+import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
 import { useOperate } from '../../hooks/useOperate';
-import { useMe } from '../../hooks/useMe';
 import { UpOperation, toDicePieceValueUpOperation, dicePieceValueDiff, DicePieceValueState, CharacterState, dicePieceValueStrIndexes } from '@kizahasi/flocon-core';
 import { compositeKeyToString } from '@kizahasi/util';
 import { useDispatch } from 'react-redux';
@@ -56,49 +55,65 @@ export const DicePieceValueDrawer: React.FC = () => {
     const myUserUid = useMyUserUid();
     const dicePieceValues = useDicePieceValues();
     const [activeCharacter, setActiveCharacter] = React.useState<{ key: string; state: CharacterState }>();
-
-    const { state, setState, stateToCreate } = useStateEditor(
-        drawerType?.type === update ? dicePieceValues?.find(value => value.characterKey.createdBy === myUserUid)?.value : null,
-        defaultDicePieceValue,
-        ({ prevState, nextState }) => {
-            if (myUserUid == null || drawerType?.type !== update) {
-                return;
-            }
-            const diff = dicePieceValueDiff({ prevState, nextState });
-            if (diff == null) {
-                return;
-            }
-            const operation: UpOperation = {
-                $version: 1,
-                characters: {
-                    [drawerType.characterKey.createdBy]: {
-                        [drawerType.characterKey.id]: {
-                            type: update,
-                            update: {
-                                $version: 1,
-                                dicePieceValues: {
-                                    [drawerType.stateKey]: {
-                                        type: update,
-                                        update: toDicePieceValueUpOperation(diff),
+    let stateEditorParams: StateEditorParams<DicePieceValueState | undefined>;
+    switch (drawerType?.type) {
+        case create:
+        case undefined:
+            stateEditorParams = {
+                type: create,
+                initState: defaultDicePieceValue,
+            };
+            break;
+        case update:
+            stateEditorParams = {
+                type: update,
+                state: dicePieceValues?.find(value => value.characterKey.createdBy === myUserUid && value.valueId === drawerType.stateKey)?.value,
+                onUpdate: ({ prevState, nextState }) => {
+                    if (myUserUid == null || drawerType?.type !== update) {
+                        return;
+                    }
+                    if (prevState == null || nextState == null) {
+                        return;
+                    }
+                    const diff = dicePieceValueDiff({ prevState, nextState });
+                    if (diff == null) {
+                        return;
+                    }
+                    const operation: UpOperation = {
+                        $version: 1,
+                        characters: {
+                            [drawerType.characterKey.createdBy]: {
+                                [drawerType.characterKey.id]: {
+                                    type: update,
+                                    update: {
+                                        $version: 1,
+                                        dicePieceValues: {
+                                            [drawerType.stateKey]: {
+                                                type: update,
+                                                update: toDicePieceValueUpOperation(diff),
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
+                    };
+                    operate(operation);
                 }
             };
-            operate(operation);
-        });
+            break;
+    }
+    const { uiState: state, updateUiState: setState } = useStateEditor(stateEditorParams);
 
-    if (myUserUid == null) {
+    if (myUserUid == null || state == null) {
         return null;
     }
 
     let onCreate: (() => void) | undefined = undefined;
     // drawerType != nullを付けていることで、updateから閉じる際に一瞬onCreateボタンが出るのを防いでいる。ただし、これで適切なのかどうかは吟味していない
-    if (drawerType != null && stateToCreate !== undefined) {
+    if (drawerType != null && drawerType.type === create) {
         onCreate = () => {
-            if (drawerType?.type !== create || activeCharacter == null) {
+            if (activeCharacter == null) {
                 return;
             }
 
@@ -116,7 +131,7 @@ export const DicePieceValueDrawer: React.FC = () => {
                                         type: replace,
                                         replace: {
                                             newValue: {
-                                                ...stateToCreate,
+                                                ...state,
                                                 pieces: drawerType.boardKey == null ? {} : {
                                                     [drawerType.boardKey.createdBy]: {
                                                         [drawerType.boardKey.id]: drawerType.piece,
@@ -141,14 +156,14 @@ export const DicePieceValueDrawer: React.FC = () => {
     return (
         <Drawer
             {...drawerBaseProps}
-            title={stateToCreate == null ? 'ダイスコマの編集' : 'ダイスコマの新規作成'}
+            title={drawerType?.type === update ? 'ダイスコマの編集' : 'ダイスコマの新規作成'}
             visible={drawerType != null}
             closable
             onClose={() => dispatch(roomDrawerAndPopoverModule.actions.set({ dicePieceValueDrawerType: null }))}
             footer={(
                 <DrawerFooter
                     close={({
-                        textType: stateToCreate == null ? 'close' : 'cancel',
+                        textType: drawerType?.type === update ? 'close' : 'cancel',
                         onClick: () => dispatch(roomDrawerAndPopoverModule.actions.set({ dicePieceValueDrawerType: null }))
                     })}
                     ok={onCreate == null ? undefined : ({ textType: 'create', onClick: onCreate })} />)}>

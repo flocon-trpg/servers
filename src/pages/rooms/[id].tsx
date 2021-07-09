@@ -135,7 +135,7 @@ const RoomBehavior: React.FC<PropsWithChildren<{ roomId: string }>> = ({ roomId,
     React.useEffect(() => {
         dispatch(roomStateModule.actions.reset());
         dispatch(roomStateModule.actions.setRoom({ roomId }));
-    }, [dispatch, roomId ]);
+    }, [dispatch, roomId]);
     React.useEffect(() => {
         dispatch(roomStateModule.actions.setRoom({ roomState }));
     }, [dispatch, roomState]);
