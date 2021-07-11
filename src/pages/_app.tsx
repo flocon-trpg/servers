@@ -24,6 +24,7 @@ import { simpleId } from '../utils/generators';
 import ClientIdContext from '../contexts/ClientIdContext';
 import { enableMapSet } from 'immer';
 import { authToken } from '@kizahasi/util';
+import Head from 'next/head';
 
 enableMapSet();
 
@@ -168,15 +169,20 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         </div>);
     }
     return (
-        <ClientIdContext.Provider value={clientId}>
-            <ApolloProvider client={apolloClient}>
-                <Provider store={store}>
-                    <MyAuthContext.Provider value={user}>
-                        <Component {...pageProps} />
-                    </MyAuthContext.Provider>
-                </Provider>
-            </ApolloProvider>
-        </ClientIdContext.Provider>
+        <>
+            <Head>
+                <link rel="shortcut icon" href="/logo.png" />
+            </Head>
+            <ClientIdContext.Provider value={clientId}>
+                <ApolloProvider client={apolloClient}>
+                    <Provider store={store}>
+                        <MyAuthContext.Provider value={user}>
+                            <Component {...pageProps} />
+                        </MyAuthContext.Provider>
+                    </Provider>
+                </ApolloProvider>
+            </ClientIdContext.Provider>
+        </>
     );
 };
 

@@ -17,7 +17,6 @@ import { useAllRoomMessages } from '../../hooks/useRoomMessages';
 import { useSelector } from '../../store';
 import useRoomConfig from '../../hooks/localStorage/useRoomConfig';
 import { roomDrawerAndPopoverModule } from '../../modules/roomDrawerAndPopoverModule';
-import { useMyUserUid } from '../../hooks/useMyUserUid';
 
 type JoinRoomFormProps = {
     roomState: RoomAsListItemFragment;
@@ -176,7 +175,7 @@ const RoomBehavior: React.FC<PropsWithChildren<{ roomId: string }>> = ({ roomId,
                     </Layout>);
             }
             return (
-                <Layout requiresLogin showEntryForm={false}>
+                <Layout requiresLogin showEntryForm={false} hideHeader>
                     {children}
                 </Layout>);
         }

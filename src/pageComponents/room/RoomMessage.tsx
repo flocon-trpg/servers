@@ -20,7 +20,7 @@ export namespace RoomMessage {
     const Image: React.FC<{ filePath: FilePathFragment | undefined }> = ({ filePath }: { filePath: FilePathFragment | undefined }) => {
         const src = useFirebaseStorageUrl(filePath);
         if (src == null) {
-            return <Icon.UserOutlined style={({ width: 16, height: 16 })} />;
+            return <Icon.QuestionOutlined style={({ width: 16, height: 16 })} />;
         }
         return (<img src={src} width={16} height={16} />);
     };

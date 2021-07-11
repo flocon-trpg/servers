@@ -14,6 +14,8 @@ import { useDispatch } from 'react-redux';
 import roomModule from '../modules/roomModule';
 import { fileModule } from '../modules/fileModule';
 import { roomDrawerAndPopoverModule } from '../modules/roomDrawerAndPopoverModule';
+import * as Icon from '@ant-design/icons';
+import { useSignOut } from '../hooks/useSignOut';
 const { Header, Content } = AntdLayout;
 
 type EntryFormComponentProps = {
@@ -82,16 +84,22 @@ type Props = {
 
     // EntryFormでのentryが成功したときに呼び出される。
     onEntry?: () => void;
+
+    hideHeader?: boolean;
 }
 
-const Layout: React.FC<PropsWithChildren<Props>> = ({ children, showEntryForm, onEntry, requiresLogin }: PropsWithChildren<Props>) => {
+const Layout: React.FC<PropsWithChildren<Props>> = ({ 
+    children, 
+    showEntryForm, 
+    onEntry, 
+    requiresLogin,
+    hideHeader 
+}: PropsWithChildren<Props>) => {
     const router = useRouter();
-    const dispatch = useDispatch();
     const myAuth = React.useContext(MyAuthContext);
-    const config = React.useContext(ConfigContext);
-    const auth = getAuth(config);
+    const signOut = useSignOut();
 
-    if (auth == null || myAuth === authNotFound) {
+    if (myAuth === authNotFound) {
         return <Result status='info' title='Firebase Authentication インスタンスが見つかりません。' />;
     }
 
@@ -116,29 +124,25 @@ const Layout: React.FC<PropsWithChildren<Props>> = ({ children, showEntryForm, o
 
     return (
         <AntdLayout style={({ height: '100vh' })}>
-            <Header>
+            {!hideHeader && <Header>
                 <Row>
-                    <Col flex={0}><Link href="/">Flocon</Link></Col>
+                    <Col flex={0}><Link href="/"><img style={{ cursor: 'pointer' }} src='/logo.png' width={32} height={32} /></Link></Col>
                     <Col flex={1} />
                     <Col flex={0}>
                         <Space>
+                            {typeof myAuth === 'string' ? null : <Icon.UserOutlined />}
                             {typeof myAuth === 'string' ? null : <div style={({ color: 'white' })}>{myAuth.displayName} - {myAuth.uid}</div>}
                             {typeof myAuth === 'string'
                                 ? <Button key="2" onClick={() => router.push('/signin')}>Log in</Button>
-                                : <Button 
-                                    key="2" 
-                                    onClick={() => auth.signOut().then(() => {
-                                        // 前にログインしていたユーザーの部屋やファイル一覧などといったデータの閲覧を防いでいる
-                                        dispatch(roomModule.actions.reset());
-                                        dispatch(fileModule.actions.reset());
-                                        dispatch(roomDrawerAndPopoverModule.actions.reset());
-                                    })}>
+                                : <Button
+                                    key="2"
+                                    onClick={() => signOut()}>
                                     Logout
                                 </Button>}
                         </Space>
                     </Col>
                 </Row>
-            </Header>
+            </Header> }
             <Content>
                 {content}
             </Content>

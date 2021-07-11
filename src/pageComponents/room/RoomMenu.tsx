@@ -26,6 +26,7 @@ import { FilesManagerDrawerType, none } from '../../utils/types';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
 import { useMe } from '../../hooks/useMe';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
+import { useSignOut } from '../../hooks/useSignOut';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -517,9 +518,11 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
 
 export const RoomMenu: React.FC = () => {
     const me = useMe();
-    const myUserUid  = useMyUserUid();
+    const myUserUid = useMyUserUid();
+    const myAuth = React.useContext(MyAuthContext);
     const router = useRouter();
     const dispatch = useDispatch();
+    const signOut = useSignOut();
     const roomId = useSelector(state => state.roomModule.roomId);
     const createdBy = useSelector(state => state.roomModule.roomState?.state?.createdBy);
 
@@ -538,12 +541,13 @@ export const RoomMenu: React.FC = () => {
     const [isGenerateLogModalVisible, setIsGenerateLogModalVisible] = React.useState(false);
     const [filesManagerDrawerType, setFilesManagerDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
 
-    if (me == null || myUserUid == null || roomId == null || activeBoardPanel == null || boardPanels == null || characterPanel == null || gameEffectPanel == null || participantPanel == null || memoPanels == null || messagePanels == null || pieceValuePanel == null) {
+    if (me == null || myUserUid == null || typeof myAuth === 'string' || roomId == null || activeBoardPanel == null || boardPanels == null || characterPanel == null || gameEffectPanel == null || participantPanel == null || memoPanels == null || messagePanels == null || pieceValuePanel == null) {
         return null;
     }
 
     return <>
         <Menu triggerSubMenuAction='click' selectable={false} mode="horizontal">
+            <Menu.Item icon={<img src='/logo.png' width={24} height={24} />} onClick={() => router.push('/')} />
             <Menu.SubMenu title="部屋">
                 <Menu.Item onClick={() => dispatch(roomDrawerAndPopoverModule.actions.set({ editRoomDrawerVisibility: true }))}>
                     編集
@@ -742,6 +746,11 @@ export const RoomMenu: React.FC = () => {
                     });
                 }}>
                     退室する
+                </Menu.Item>
+            </Menu.SubMenu>
+            <Menu.SubMenu icon={<Icon.UserOutlined />} title={<span>{myAuth.displayName} - {myAuth.uid}</span>}>
+                <Menu.Item onClick={() => signOut()}>
+                    ログアウト
                 </Menu.Item>
             </Menu.SubMenu>
         </Menu>
