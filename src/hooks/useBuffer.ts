@@ -30,14 +30,14 @@ export function useBuffer<TValue, TComponent>({
     });
     const [, setSubscription] = React.useState<Subscription>();
     const [changeParams, setChangeParams] = React.useState<{ previousValue?: TValue; currentValue: TValue }>({ currentValue: value });
-    const [updateSubscriptionKey, setUpdateSubscriptionKey] = React.useState(0);
+    const [subscriptionUpdateKey, setSubscriptionUpdateKey] = React.useState(0);
 
     React.useEffect(() => {
         if (ref.current != null) {
             setValueToComponentRef.current({ value, component: ref.current });
         }
 
-        setUpdateSubscriptionKey(oldState => oldState + 1);
+        setSubscriptionUpdateKey(oldState => oldState + 1);
         setChangeParams({ currentValue: value });
     }, [setValueToComponentRef, value]);
 
@@ -57,7 +57,7 @@ export function useBuffer<TValue, TComponent>({
         return (() => {
             newSubscription.unsubscribe();
         });
-    }, [subject, bufferDuration, updateSubscriptionKey]);
+    }, [subject, bufferDuration, subscriptionUpdateKey]);
 
     React.useEffect(() => {
         if (changeParams.previousValue !== undefined) {
