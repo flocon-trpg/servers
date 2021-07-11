@@ -940,6 +940,9 @@ export const diff = <TState, TOperation>({
             }
         }
     }
+    if (result.isEmpty) {
+        return undefined;
+    }
     return result.toStringRecord(
         x => x,
         x => x

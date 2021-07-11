@@ -354,7 +354,7 @@ export const diff = <TState, TOperation>({
         nextState: TState | undefined;
         key: string;
     }) => TOperation | undefined;
-}): StringKeyRecord<TOperation> => {
+}): StringKeyRecord<TOperation> | undefined => {
     const result = new Map<string, TOperation>();
     for (const [key, value] of groupJoinMap(recordToMap(prevState), recordToMap(nextState))) {
         let prevState: TState | undefined = undefined;
@@ -380,6 +380,9 @@ export const diff = <TState, TOperation>({
         }
         result.set(key, diffResult);
         continue;
+    }
+    if (result.size === 0) {
+        return undefined;
     }
     return mapToRecord(result);
 };

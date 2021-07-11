@@ -360,9 +360,13 @@ export const diff = <TState, TOperation>({
         nextState: TState;
     }) => TOperation | undefined;
 }) => {
-    return DualKeyRecordOperation.diff({
+    const dualKeyResult = DualKeyRecordOperation.diff({
         prevState: { [dummyKey]: prevState },
         nextState: { [dummyKey]: nextState },
         innerDiff: ({ key, ...params }) => innerDiff({ ...params, key: key.second }),
-    })[dummyKey];
+    });
+    if (dualKeyResult == null) {
+        return undefined;
+    }
+    return dualKeyResult[dummyKey];
 };

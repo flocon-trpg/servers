@@ -12,6 +12,7 @@ import {
     replace,
     CharacterState,
     update,
+    diff,
 } from '../dist/index';
 
 namespace Resources {
@@ -63,7 +64,7 @@ namespace Resources {
         };
     }
 
-    export const state: State = {
+    export const minimumState: State = {
         $version: 1,
         activeBoardKey: null,
         createdBy: 'CREATED_BY',
@@ -97,6 +98,213 @@ namespace Resources {
         numParamNames: {},
         strParamNames: {},
         memos: {},
+        publicChannel1Name: '',
+        publicChannel2Name: '',
+        publicChannel3Name: '',
+        publicChannel4Name: '',
+        publicChannel5Name: '',
+        publicChannel6Name: '',
+        publicChannel7Name: '',
+        publicChannel8Name: '',
+        publicChannel9Name: '',
+        publicChannel10Name: '',
+    };
+
+    export const complexState: State = {
+        $version: 1,
+        activeBoardKey: null,
+        createdBy: 'CREATED_BY',
+        name: 'ROOM_NAME',
+        bgms: {
+            '1': {
+                $version: 1,
+                isPaused: false,
+                files: [{ $version: 1, path: 'BGM_FILE_PATH', sourceType: 'Default' }],
+                volume: 1,
+            },
+        },
+        boards: {
+            BOARD_CREATED_BY: {
+                BOARD_ID: {
+                    $version: 1,
+                    backgroundImage: {
+                        $version: 1,
+                        path: 'BOARD_IMAGE_PATH',
+                        sourceType: 'Default',
+                    },
+                    backgroundImageZoom: 1,
+                    cellColumnCount: 10,
+                    cellHeight: 10,
+                    cellOffsetX: 10,
+                    cellOffsetY: 10,
+                    cellRowCount: 10,
+                    cellWidth: 10,
+                    name: 'BOARD_NAME',
+                },
+            },
+        },
+        characters: {
+            CHARA_FIRST_KEY: {
+                CHARA_SECOND_KEY: {
+                    $version: 1,
+                    image: {
+                        $version: 1,
+                        path: 'CHARA_IMAGE_PATH',
+                        sourceType: 'Default',
+                    },
+                    isPrivate: false,
+                    memo: 'CHARA_MEMO',
+                    name: 'CHARA_NAME',
+                    privateCommand: 'CHARA_PRIVATE_COMMAND',
+                    privateCommands: {},
+                    privateVarToml: '',
+                    tachieImage: {
+                        $version: 1,
+                        path: 'TACHIE_IMAGE_PATH',
+                        sourceType: 'Default',
+                    },
+                    boolParams: {
+                        '1': {
+                            $version: 1,
+                            isValuePrivate: false,
+                            value: false,
+                        },
+                    },
+                    numParams: {
+                        '1': {
+                            $version: 1,
+                            isValuePrivate: false,
+                            value: 10,
+                        },
+                    },
+                    numMaxParams: {
+                        '1': {
+                            $version: 1,
+                            isValuePrivate: false,
+                            value: 20,
+                        },
+                    },
+                    strParams: {
+                        '1': {
+                            $version: 1,
+                            isValuePrivate: false,
+                            value: 'STR_PARAM_VALUE',
+                        },
+                    },
+                    pieces: {
+                        CHARA_PIECE_FIRST_KEY: {
+                            CHARA_PIECE_SECOND_KEY: {
+                                $version: 1,
+                                cellH: 1,
+                                cellW: 2,
+                                cellX: 3,
+                                cellY: 4,
+                                isCellMode: false,
+                                isPrivate: false,
+                                h: 5,
+                                w: 6,
+                                x: 7,
+                                y: 8,
+                            },
+                        },
+                    },
+                    tachieLocations: {
+                        TACHIE_LOCATION_FIRST_KEY: {
+                            TACHIE_LOCATION_SECOND_KEY: {
+                                $version: 1,
+                                isPrivate: false,
+                                h: 5,
+                                w: 6,
+                                x: 7,
+                                y: 8,
+                            },
+                        },
+                    },
+                    dicePieceValues: {
+                        DICE_PIECE_KEY: {
+                            $version: 1,
+                            dice: {
+                                '1': {
+                                    $version: 1,
+                                    dieType: 'D6',
+                                    isValuePrivate: false,
+                                    value: 3,
+                                },
+                            },
+                            pieces: {
+                                DICE_PIECE_FIRST_KEY: {
+                                    DICE_PIECE_SECOND_KEY: {
+                                        $version: 1,
+                                        cellH: 1,
+                                        cellW: 2,
+                                        cellX: 3,
+                                        cellY: 4,
+                                        isCellMode: false,
+                                        isPrivate: false,
+                                        h: 5,
+                                        w: 6,
+                                        x: 7,
+                                        y: 8,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    numberPieceValues: {
+                        NUM_PIECE_KEY: {
+                            $version: 1,
+                            isValuePrivate: false,
+                            value: 1,
+                            pieces: {
+                                DICE_PIECE_FIRST_KEY: {
+                                    DICE_PIECE_SECOND_KEY: {
+                                        $version: 1,
+                                        cellH: 1,
+                                        cellW: 2,
+                                        cellX: 3,
+                                        cellY: 4,
+                                        isCellMode: false,
+                                        isPrivate: false,
+                                        h: 5,
+                                        w: 6,
+                                        x: 7,
+                                        y: 8,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        participants: minimumState.participants,
+        boolParamNames: {
+            '1': {
+                $version: 1,
+                name: 'BOOL_PARAM_NAME',
+            },
+        },
+        numParamNames: {
+            '1': {
+                $version: 1,
+                name: 'NUM_PARAM_NAME',
+            },
+        },
+        strParamNames: {
+            '1': {
+                $version: 1,
+                name: 'STR_PARAM_NAME',
+            },
+        },
+        memos: {
+            MEMO_ID: {
+                $version: 1,
+                name: 'MEMO_NAME',
+                dir: ['MEMO_DIR'],
+                text: 'MEMO_TEXT',
+                textType: 'Plain',
+            },
+        },
         publicChannel1Name: '',
         publicChannel2Name: '',
         publicChannel3Name: '',
@@ -176,21 +384,21 @@ namespace Test {
     }
 }
 
-describe('tests id', () => {
+describe.each([Resources.minimumState, Resources.complexState])('tests id', state => {
     const clientOperation: UpOperation = {
         $version: 1,
     };
 
     Test.Basic.testServerTransformToReject({
-        prevState: Resources.state,
-        currentState: Resources.state,
+        prevState: state,
+        currentState: state,
         serverOperation: undefined,
         clientOperation,
     });
 
     const tester = Test.Basic.setupTestServerTransform({
-        prevState: Resources.state,
-        currentState: Resources.state,
+        prevState: state,
+        currentState: state,
         serverOperation: undefined,
         clientOperation,
     });
@@ -203,7 +411,7 @@ describe('tests id', () => {
     });
 });
 
-describe('tests name', () => {
+describe.each([Resources.minimumState, Resources.complexState])('tests name', state => {
     const newName = 'NEW_NAME';
 
     const clientOperation: UpOperation = {
@@ -212,15 +420,15 @@ describe('tests name', () => {
     };
 
     Test.Basic.testServerTransformToReject({
-        prevState: Resources.state,
-        currentState: Resources.state,
+        prevState: state,
+        currentState: state,
         serverOperation: undefined,
         clientOperation,
     });
 
     const tester = Test.Basic.setupTestServerTransform({
-        prevState: Resources.state,
-        currentState: Resources.state,
+        prevState: state,
+        currentState: state,
         serverOperation: undefined,
         clientOperation,
     });
@@ -228,7 +436,7 @@ describe('tests name', () => {
     const expected: TwoWayOperation = {
         $version: 1,
         name: {
-            oldValue: Resources.state.name,
+            oldValue: state.name,
             newValue: newName,
         },
     };
@@ -264,15 +472,15 @@ describe.each`
     };
 
     Test.Basic.testServerTransformToReject({
-        prevState: Resources.state,
-        currentState: Resources.state,
+        prevState: Resources.minimumState,
+        currentState: Resources.minimumState,
         serverOperation: undefined,
         clientOperation,
     });
 
     const tester = Test.Basic.setupTestServerTransform({
-        prevState: Resources.state,
-        currentState: Resources.state,
+        prevState: Resources.minimumState,
+        currentState: Resources.minimumState,
         serverOperation: undefined,
         clientOperation,
     });
@@ -280,7 +488,7 @@ describe.each`
     const expected: TwoWayOperation = {
         $version: 1,
         [key]: {
-            oldValue: Resources.state[key],
+            oldValue: Resources.minimumState[key],
             newValue: newName,
         },
     };
@@ -332,15 +540,15 @@ describe.each`
     };
 
     Test.Basic.testServerTransformToReject({
-        prevState: Resources.state,
-        currentState: Resources.state,
+        prevState: Resources.minimumState,
+        currentState: Resources.minimumState,
         serverOperation: undefined,
         clientOperation,
     });
 
     const tester = Test.Basic.setupTestServerTransform({
-        prevState: Resources.state,
-        currentState: Resources.state,
+        prevState: Resources.minimumState,
+        currentState: Resources.minimumState,
         serverOperation: undefined,
         clientOperation,
     });
@@ -372,7 +580,7 @@ describe('tests creating DicePieceValue', () => {
     const dicePieceValueKey = 'DICE_KEY';
 
     const state: State = {
-        ...Resources.state,
+        ...Resources.minimumState,
         characters: {
             [Resources.Participant.Player1.userUid]: {
                 [characterKey]: Resources.Character.emptyState,
@@ -476,7 +684,7 @@ describe('tests creating DicePieceValue', () => {
 describe('tests creating Character', () => {
     const characterKey = 'CHARACTER_KEY';
 
-    const state: State = Resources.state;
+    const state: State = Resources.minimumState;
 
     const clientOperation: UpOperation = {
         $version: 1,
@@ -540,7 +748,7 @@ describe.each([[true], [false]])(
         const newName = 'NEW_NAME';
 
         const state: State = {
-            ...Resources.state,
+            ...Resources.minimumState,
             characters: {
                 [Resources.Participant.Player1.userUid]: {
                     [characterKey]: {
@@ -618,7 +826,7 @@ describe.each([[true], [false]])(
         const characterKey = 'CHARACTER_KEY';
 
         const state: State = {
-            ...Resources.state,
+            ...Resources.minimumState,
             characters: {
                 [Resources.Participant.Player1.userUid]: {
                     [characterKey]: {
@@ -688,3 +896,8 @@ describe.each([[true], [false]])(
         });
     }
 );
+
+it.each([Resources.minimumState, Resources.complexState])('tests diff of no change', state => {
+    const diffResult = diff({ prevState: state, nextState: state });
+    expect(diffResult).toBeUndefined();
+});
