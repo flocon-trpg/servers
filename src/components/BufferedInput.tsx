@@ -41,10 +41,6 @@ const BufferedInput: React.FC<Props> = (props: Props) => {
         value,
         bufferDuration,
         onChangeOutput: onChange,
-        equal: ({ value, component }) => {
-            const inputValue = component.input.value;
-            return inputValue === value;
-        },
         setValueToComponent: ({ value, component }) => {
             component.setValue(value);
         },

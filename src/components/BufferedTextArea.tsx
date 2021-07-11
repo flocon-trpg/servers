@@ -48,10 +48,6 @@ const BufferedTextArea: React.FC<Props> = (props: Props) => {
         value,
         bufferDuration,
         onChangeOutput: onChange,
-        equal: ({ value, component }) => {
-            const inputValue = component.value;
-            return inputValue === value;
-        },
         setValueToComponent: ({ value, component }) => {
             component.value = value;
             if (onChangeImmediate != null) {
