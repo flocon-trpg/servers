@@ -514,8 +514,6 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
     );
 };
 
-
-
 export const RoomMenu: React.FC = () => {
     const me = useMe();
     const myUserUid = useMyUserUid();
@@ -547,7 +545,9 @@ export const RoomMenu: React.FC = () => {
 
     return <>
         <Menu triggerSubMenuAction='click' selectable={false} mode="horizontal">
-            <Menu.Item icon={<img src='/logo.png' width={24} height={24} />} onClick={() => router.push('/')} />
+            <Menu.Item onClick={() => router.push('/')} >
+                <img src='/logo.png' width={24} height={24} />
+            </Menu.Item>
             <Menu.SubMenu title="部屋">
                 <Menu.Item onClick={() => dispatch(roomDrawerAndPopoverModule.actions.set({ editRoomDrawerVisibility: true }))}>
                     編集

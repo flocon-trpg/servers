@@ -130,6 +130,7 @@ const Layout: React.FC<PropsWithChildren<Props>> = ({
                     <Col flex={1} />
                     <Col flex={0}>
                         <Space>
+                            {/* UserOutlinedを付けている理由は、room/[id] を開いたときにヘッダーを隠して代わりにメニューにユーザーを表示する仕組みであり、そちらのユーザー名のほうにもUserOutlinedを付けることでそれがユーザー名だということが連想され、入室時の名前と区別させやすくなるようにするため。 */}
                             {typeof myAuth === 'string' ? null : <Icon.UserOutlined />}
                             {typeof myAuth === 'string' ? null : <div style={({ color: 'white' })}>{myAuth.displayName} - {myAuth.uid}</div>}
                             {typeof myAuth === 'string'
