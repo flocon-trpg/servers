@@ -3,15 +3,15 @@
 import { mapToRecord } from '@kizahasi/util';
 import { Option } from '@kizahasi/option';
 
-type SObjectBase = {
-    get(property: SValue): SValue;
-    set(property: SValue, newValue: SValue): void;
+type FObjectBase = {
+    get(property: FValue): FValue;
+    set(property: FValue, newValue: FValue): void;
     toPrimitiveAsNumber(): number;
     toPrimitiveAsString(): string;
     toPrimitiveAsDefault?(): number | string;
 };
 
-export namespace SType {
+export namespace FType {
     export const Boolean = 'Boolean';
     export const Number = 'Number';
     export const String = 'String';
@@ -20,17 +20,17 @@ export namespace SType {
     export const Function = 'Function';
 }
 
-const tryToPropertyName = (value: SValue): string | undefined => {
+const tryToPropertyName = (value: FValue): string | undefined => {
     switch (value?.type) {
-        case SType.Number:
-        case SType.String:
+        case FType.Number:
+        case FType.String:
             return value.raw.toString();
         default:
             return undefined;
     }
 };
 
-export const toTypeName = (value: SValue) => {
+export const toTypeName = (value: FValue) => {
     if (value === null) {
         return 'null';
     }
@@ -40,61 +40,49 @@ export const toTypeName = (value: SValue) => {
     return value.type;
 };
 
-const toNumberOrUndefined = (value: SValue): number | undefined => {
+const toNumberOrUndefined = (value: FValue): number | undefined => {
     if (value === undefined) {
         return undefined;
     }
-    if (value?.type !== SType.Number) {
-        throw new Error(
-            `Expected type is Number or undefined, but actually ${toTypeName(
-                value
-            )}`
-        );
+    if (value?.type !== FType.Number) {
+        throw new Error(`Expected type is Number or undefined, but actually ${toTypeName(value)}`);
     }
     return value.raw;
 };
 
-const toNumberOrString = (value: SValue): number | string => {
+const toNumberOrString = (value: FValue): number | string => {
     switch (value?.type) {
-        case SType.Number:
-        case SType.String:
+        case FType.Number:
+        case FType.String:
             break;
         default:
-            throw new Error(
-                `Expected type is Number or String, but actually ${toTypeName(
-                    value
-                )}`
-            );
+            throw new Error(`Expected type is Number or String, but actually ${toTypeName(value)}`);
     }
     return value.raw;
 };
 
-const toFunction = (value: SValue): ((args: SValue[]) => SValue) => {
+const toFunction = (value: FValue): ((args: FValue[]) => FValue) => {
     switch (value?.type) {
-        case SType.Function:
-            return (args: SValue[]) => value.exec(args, false);
+        case FType.Function:
+            return (args: FValue[]) => value.exec(args, false);
         default:
-            throw new Error(
-                `Expected type is Number or String, but actually ${toTypeName(
-                    value
-                )}`
-            );
+            throw new Error(`Expected type is Number or String, but actually ${toTypeName(value)}`);
     }
 };
 
-export class SBoolean implements SObjectBase {
+export class FBoolean implements FObjectBase {
     public constructor(public readonly raw: boolean) {}
 
-    public get type(): typeof SType.Boolean {
-        return SType.Boolean;
+    public get type(): typeof FType.Boolean {
+        return FType.Boolean;
     }
 
-    public get(property: SValue): SValue {
+    public get(property: FValue): FValue {
         const propertyName = tryToPropertyName(property);
         switch (propertyName) {
             case 'toString':
-                return new SFunction(() => {
-                    return new SString(this.raw.toString());
+                return new FFunction(() => {
+                    return new FString(this.raw.toString());
                 });
             default:
                 return undefined;
@@ -118,23 +106,21 @@ export class SBoolean implements SObjectBase {
     }
 }
 
-export class SNumber implements SObjectBase {
+export class FNumber implements FObjectBase {
     public constructor(public readonly raw: number) {}
 
-    public get type(): typeof SType.Number {
-        return SType.Number;
+    public get type(): typeof FType.Number {
+        return FType.Number;
     }
 
-    public get(property: SValue): SValue {
+    public get(property: FValue): FValue {
         const propertyName = tryToPropertyName(property);
         switch (propertyName) {
             // TODO: もっと実装する
             case 'toString':
-                return new SFunction(args => {
+                return new FFunction(args => {
                     const radix = args[0];
-                    return new SString(
-                        this.raw.toString(toNumberOrUndefined(radix))
-                    );
+                    return new FString(this.raw.toString(toNumberOrUndefined(radix)));
                 });
             default:
                 return undefined;
@@ -158,20 +144,20 @@ export class SNumber implements SObjectBase {
     }
 }
 
-export class SString implements SObjectBase {
+export class FString implements FObjectBase {
     public constructor(public readonly raw: string) {}
 
-    public get type(): typeof SType.String {
-        return SType.String;
+    public get type(): typeof FType.String {
+        return FType.String;
     }
 
-    public get(property: SValue): SValue {
+    public get(property: FValue): FValue {
         const propertyName = tryToPropertyName(property);
         switch (propertyName) {
             // TODO: もっと実装する
             case 'toString':
-                return new SFunction(() => {
-                    return new SString(this.raw.toString());
+                return new FFunction(() => {
+                    return new FString(this.raw.toString());
                 });
             default:
                 return undefined;
@@ -195,43 +181,39 @@ export class SString implements SObjectBase {
     }
 }
 
-export class SArray implements SObjectBase {
-    public constructor(public readonly raw: SValue[]) {}
+export class FArray implements FObjectBase {
+    public constructor(public readonly raw: FValue[]) {}
 
-    public get type(): typeof SType.Array {
-        return SType.Array;
+    public get type(): typeof FType.Array {
+        return FType.Array;
     }
 
     private static isValidIndex(index: string): boolean {
         return index === '0' || /^[1-9][0-9]*$/.test(index);
     }
 
-    public get(property: SValue): SValue {
+    public get(property: FValue): FValue {
         const index = toNumberOrString(property).toString();
-        if (SArray.isValidIndex(index)) {
+        if (FArray.isValidIndex(index)) {
             return this.raw[index as unknown as number];
         }
         const propertyName = index;
         switch (propertyName) {
             case 'filter':
-                return new SFunction(args => {
+                return new FFunction(args => {
                     const predicate = toFunction(args[0]);
                     const raw = this.raw.filter((value, index, array) =>
-                        predicate([
-                            value,
-                            new SNumber(index),
-                            new SArray(array),
-                        ])?.toJObject()
+                        predicate([value, new FNumber(index), new FArray(array)])?.toJObject()
                     );
-                    return new SArray(raw);
+                    return new FArray(raw);
                 });
         }
         throw new Error(`"${index}" is an invalid index`);
     }
 
-    public set(property: SValue, newValue: SValue): void {
+    public set(property: FValue, newValue: FValue): void {
         const index = toNumberOrString(property).toString();
-        if (SArray.isValidIndex(index)) {
+        if (FArray.isValidIndex(index)) {
             this.raw[index as unknown as number] = newValue;
             return;
         }
@@ -252,24 +234,27 @@ export class SArray implements SObjectBase {
     }
 }
 
-export class SObject implements SObjectBase {
-    private readonly raw = new Map<string, SValue>();
+// Mapに変換することで、外界から受け取ったオブジェクトに対する破壊的な操作を起こせないようにしている。
+export class FObject implements FObjectBase {
+    private readonly raw: Map<string, FValue>;
 
-    public constructor(base?: SObject) {
+    public constructor(base?: FObject) {
         if (base != null) {
             this.raw = new Map(base.raw);
+        } else {
+            this.raw = new Map();
         }
     }
 
-    public get type(): typeof SType.Record {
-        return SType.Record;
+    public get type(): typeof FType.Record {
+        return FType.Record;
     }
 
-    protected onGetting(key: string | number): Option<SValue> {
+    protected onGetting(key: string | number): Option<FValue> {
         return Option.none();
     }
 
-    public get(property: SValue): SValue {
+    public get(property: FValue): FValue {
         const key = toNumberOrString(property);
         const onGettingResult = this.onGetting(key);
         if (!onGettingResult.isNone) {
@@ -279,11 +264,11 @@ export class SObject implements SObjectBase {
     }
 
     // setを拒否したい場合は何かをthrowする。
-    protected onSetting(key: string | number, newValue: SValue): void {
+    protected onSetting(key: string | number, newValue: FValue): void {
         return;
     }
 
-    public set(property: SValue, newValue: SValue): void {
+    public set(property: FValue, newValue: FValue): void {
         const key = toNumberOrString(property);
         this.onSetting(key, newValue);
         this.raw.set(key.toString(), newValue);
@@ -306,24 +291,22 @@ export class SObject implements SObjectBase {
     }
 }
 
-export class SFunction implements SObjectBase {
-    public constructor(
-        private func: (args: SValue[], isNew: boolean) => SValue
-    ) {}
+export class FFunction implements FObjectBase {
+    public constructor(private func: (args: FValue[], isNew: boolean) => FValue) {}
 
-    public get type(): typeof SType.Function {
-        return SType.Function;
+    public get type(): typeof FType.Function {
+        return FType.Function;
     }
 
-    public exec(args: SValue[], isNew: boolean): SValue {
+    public exec(args: FValue[], isNew: boolean): FValue {
         return this.func(args, isNew);
     }
 
-    protected onGetting(key: string | number): Option<SValue> {
+    protected onGetting(key: string | number): Option<FValue> {
         return Option.none();
     }
 
-    public get(property: SValue): SValue {
+    public get(property: FValue): FValue {
         const key = toNumberOrString(property);
         const onGettingResult = this.onGetting(key);
         if (!onGettingResult.isNone) {
@@ -357,23 +340,15 @@ export class SFunction implements SObjectBase {
     }
 }
 
-export type SValue =
-    | null
-    | undefined
-    | SBoolean
-    | SNumber
-    | SString
-    | SArray
-    | SObject
-    | SFunction;
+export type FValue = null | undefined | FBoolean | FNumber | FString | FArray | FObject | FFunction;
 
 const self = 'self';
 const globalThis = 'globalThis';
 
 // keyが'self'か'globalThis'のときは自分自身を返すSRecord
 // baseでkeyが'self'か'globalThis'である要素は全て無視される
-export class SGlobalRecord extends SObject {
-    public constructor(base?: SObject) {
+export class FGlobalRecord extends FObject {
+    public constructor(base?: FObject) {
         super(base);
     }
 
@@ -393,7 +368,7 @@ export class SGlobalRecord extends SObject {
     }
 }
 
-function createSValue(source: unknown): SValue {
+export function createFValue(source: unknown): FValue {
     if (source === null) {
         return null;
     }
@@ -402,51 +377,49 @@ function createSValue(source: unknown): SValue {
     }
     switch (typeof source) {
         case 'boolean':
-            return new SBoolean(source);
+            return new FBoolean(source);
         case 'number':
-            return new SNumber(source);
+            return new FNumber(source);
         case 'string':
-            return new SString(source);
+            return new FString(source);
         case 'function':
             // eslint-disable-next-line prefer-spread
-            return new SFunction(args => source.apply(null, args));
+            return new FFunction(args => source.apply(null, args));
         default:
             break;
     }
     if (
-        source instanceof SArray ||
-        source instanceof SBoolean ||
-        source instanceof SFunction ||
-        source instanceof SNumber ||
-        source instanceof SObject ||
-        source instanceof SString
+        source instanceof FArray ||
+        source instanceof FBoolean ||
+        source instanceof FFunction ||
+        source instanceof FNumber ||
+        source instanceof FObject ||
+        source instanceof FString
     ) {
         return source;
     }
     if (Array.isArray(source)) {
-        return new SArray(source.map(x => createSValue(x)));
+        return new FArray(source.map(x => createFValue(x)));
     }
-    return createSRecord(source as Record<string, unknown>);
+    return createFObject(source as Record<string, unknown>);
 }
 
 // __proto__ のチェックなどは行われない
-function createSRecord(source: Record<string, unknown>): SObject {
-    const result = new SObject();
+function createFObject(source: Record<string, unknown>): FObject {
+    const result = new FObject();
     for (const key in source) {
-        result.set(new SString(key), createSValue(source[key]));
+        result.set(new FString(key), createFValue(source[key]));
     }
     return result;
 }
 
 // keyが'self'か'globalThis'である要素は無視されることに注意
-export function createSGlobalRecord(
-    source: Record<string, unknown>
-): SGlobalRecord {
-    return new SGlobalRecord(createSRecord(source));
+export function createFGlobalRecord(source: Record<string, unknown>): FGlobalRecord {
+    return new FGlobalRecord(createFObject(source));
 }
 
 // https://ja.javascript.info/object-toprimitive
-const toPrimitive = (value: SValue, hint: 'default' | 'string' | 'number') => {
+const toPrimitive = (value: FValue, hint: 'default' | 'string' | 'number') => {
     if (value == null) {
         return value;
     }
@@ -459,7 +432,7 @@ const toPrimitive = (value: SValue, hint: 'default' | 'string' | 'number') => {
         return value.toPrimitiveAsNumber();
     }
 
-    const obj: SObjectBase = value;
+    const obj: FObjectBase = value;
     if (obj.toPrimitiveAsDefault == null) {
         return obj.toPrimitiveAsNumber();
     }
@@ -467,7 +440,7 @@ const toPrimitive = (value: SValue, hint: 'default' | 'string' | 'number') => {
     return obj.toPrimitiveAsDefault();
 };
 
-export const eqeqeq = (x: SValue, y: SValue): boolean => {
+export const eqeqeq = (x: FValue, y: FValue): boolean => {
     if (x === null) {
         return y === null;
     }
@@ -475,9 +448,9 @@ export const eqeqeq = (x: SValue, y: SValue): boolean => {
         return y === undefined;
     }
     switch (x.type) {
-        case SType.Boolean:
-        case SType.Number:
-        case SType.String:
+        case FType.Boolean:
+        case FType.Number:
+        case FType.String:
             if (y?.type !== x.type) {
                 return false;
             }
@@ -489,7 +462,7 @@ export const eqeqeq = (x: SValue, y: SValue): boolean => {
 
 // 例えばxとyがObjectのときは x === y で比較されるため、「toPrimitiveで変換してから==で比較」という作戦は使えない。そのため、ここで専用の関数を定義している。
 // https://developer.mozilla.org/ja/docs/Web/JavaScript/Equality_comparisons_and_sameness
-export const eqeq = (x: SValue, y: SValue): boolean => {
+export const eqeq = (x: FValue, y: FValue): boolean => {
     if (x == null) {
         return y == null;
     }
@@ -498,13 +471,13 @@ export const eqeq = (x: SValue, y: SValue): boolean => {
     }
 
     switch (x.type) {
-        case SType.Boolean:
-        case SType.Number:
-        case SType.String:
+        case FType.Boolean:
+        case FType.Number:
+        case FType.String:
             switch (y.type) {
-                case SType.Boolean:
-                case SType.Number:
-                case SType.String:
+                case FType.Boolean:
+                case FType.Number:
+                case FType.String:
                     // eslint-disable-next-line eqeqeq
                     return x.raw == y.raw;
                 default:
@@ -513,9 +486,9 @@ export const eqeq = (x: SValue, y: SValue): boolean => {
             }
         default:
             switch (y.type) {
-                case SType.Boolean:
-                case SType.Number:
-                case SType.String:
+                case FType.Boolean:
+                case FType.Number:
+                case FType.String:
                     // eslint-disable-next-line eqeqeq
                     return toPrimitive(x, 'default') == y.raw;
                 default:
@@ -525,8 +498,8 @@ export const eqeq = (x: SValue, y: SValue): boolean => {
 };
 
 const compare = <T>(
-    left: SValue,
-    right: SValue,
+    left: FValue,
+    right: FValue,
     hint: 'default' | 'string' | 'number',
     comparer: (left: unknown, right: unknown) => T
 ): T => {
@@ -534,45 +507,45 @@ const compare = <T>(
 };
 
 export const compareToNumber = (
-    left: SValue,
-    right: SValue,
+    left: FValue,
+    right: FValue,
     hint: 'default' | 'string' | 'number',
     comparer: (left: any, right: any) => number
 ) => {
-    return new SNumber(compare(left, right, hint, comparer));
+    return new FNumber(compare(left, right, hint, comparer));
 };
 
 export const compareToBoolean = (
-    left: SValue,
-    right: SValue,
+    left: FValue,
+    right: FValue,
     hint: 'default' | 'string' | 'number',
     comparer: (left: any, right: any) => boolean
 ) => {
-    return new SBoolean(compare(left, right, hint, comparer));
+    return new FBoolean(compare(left, right, hint, comparer));
 };
 
 export const compareToNumberOrString = (
-    left: SValue,
-    right: SValue,
+    left: FValue,
+    right: FValue,
     hint: 'default',
     comparer: (left: any, right: any) => number | string
 ) => {
     const r = compare(left, right, hint, comparer);
     if (typeof r === 'number') {
-        return new SNumber(r);
+        return new FNumber(r);
     }
-    return new SString(r);
+    return new FString(r);
 };
 
 // https://developer.mozilla.org/ja/docs/Glossary/Falsy
-export const isTruthy = (value: SValue): boolean => {
+export const isTruthy = (value: FValue): boolean => {
     if (value == null) {
         return false;
     }
     switch (value.type) {
-        case SType.Boolean:
-        case SType.Number:
-        case SType.String:
+        case FType.Boolean:
+        case FType.Number:
+        case FType.String:
             if (value.raw) {
                 return true;
             } else {

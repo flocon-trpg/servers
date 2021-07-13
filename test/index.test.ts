@@ -1,4 +1,34 @@
-import { exec, arrayClass } from '../dist';
+import { exec, arrayClass, createFValue } from '../dist';
+
+test('docs.md 例1', () => {
+    const globalThis = { obj: { x: 1 } };
+    const execResult = exec('obj.x = 2', globalThis);
+    const globalThisAfterExec: any = execResult.getGlobalThis();
+
+    expect(globalThis.obj.x).toBe(1);
+    expect(globalThisAfterExec.obj.x).toBe(2);
+});
+
+test('docs.md 例2', () => {
+    const obj = { x: 1 };
+    const globalThis = { obj1: obj, obj2: obj };
+    const execResult = exec('obj1.x = 2; obj2.x;', globalThis);
+    const globalThisAfterExec: any = execResult.getGlobalThis();
+
+    expect(execResult.result).toBe(1);
+    expect(globalThisAfterExec.obj1.x).toBe(2);
+    expect(globalThisAfterExec.obj2.x).toBe(1);
+});
+
+test('docs.md 例3', () => {
+    const obj = createFValue({ x: 1 });
+    const globalThis = { obj1: obj, obj2: obj };
+    const execResult = exec('obj1.x = 2', globalThis);
+    const globalThisAfterExec: any = execResult.getGlobalThis();
+
+    expect(globalThisAfterExec.obj1.x).toBe(2);
+    expect(globalThisAfterExec.obj2.x).toBe(2);
+});
 
 test.each([{}, { x: 0 }, { y: 0 }])('1', globalThis => {
     const actual = exec('1', globalThis);
@@ -58,14 +88,11 @@ test.each([{ x: 0 }, { x: 0, y: 1 }])('x.toString() (this)', globalThis => {
     expect(actual.result).toBe('0');
 });
 
-test.each([{}, { y: 0 }, { x: 0, y: 0 }])(
-    '[1,2,3,4].filter(x => x === 2)',
-    globalThis => {
-        const actual = exec('[1,2,3,4].filter(x => x === 2)', globalThis);
-        expect(actual.result).toEqual([2]);
-        expect(actual.getGlobalThis()).toEqual(globalThis);
-    }
-);
+test.each([{}, { y: 0 }, { x: 0, y: 0 }])('[1,2,3,4].filter(x => x === 2)', globalThis => {
+    const actual = exec('[1,2,3,4].filter(x => x === 2)', globalThis);
+    expect(actual.result).toEqual([2]);
+    expect(actual.getGlobalThis()).toEqual(globalThis);
+});
 
 test('prevent __proto__ attack', () => {
     expect(() => exec('__proto__.foobar = 1', {})).toThrow();

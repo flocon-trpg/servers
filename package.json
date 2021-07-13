@@ -17,7 +17,7 @@
         "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\""
     },
     "prettier": {
-        "printWidth": 80,
+        "printWidth": 100,
         "semi": true,
         "singleQuote": true,
         "trailingComma": "es5",
@@ -27,6 +27,10 @@
     },
     "name": "@kizahasi/flocon-script",
     "author": "kizahasi",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/kizahasi/flocon-script"
+    },
     "devDependencies": {
         "@types/estree": "^0.0.49",
         "@types/jest": "^26.0.24",
