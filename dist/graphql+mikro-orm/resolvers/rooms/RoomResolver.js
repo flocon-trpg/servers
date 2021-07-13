@@ -341,7 +341,6 @@ const promoteMeCore = async ({ roomId, context, globalEntryPhrase, strategy, }) 
 };
 const checkChannelKey = (channelKey, isSpectator) => {
     switch (channelKey) {
-        case '0':
         case '1':
         case '2':
         case '3':
@@ -351,6 +350,7 @@ const checkChannelKey = (channelKey, isSpectator) => {
         case '7':
         case '8':
         case '9':
+        case '10':
             if (isSpectator) {
                 return WritePublicRoomMessageFailureType_1.WritePublicRoomMessageFailureType.NotAuthorized;
             }

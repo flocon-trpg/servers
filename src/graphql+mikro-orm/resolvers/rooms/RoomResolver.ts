@@ -431,7 +431,6 @@ const promoteMeCore = async ({
 
 const checkChannelKey = (channelKey: string, isSpectator: boolean) => {
     switch (channelKey) {
-        case '0':
         case '1':
         case '2':
         case '3':
@@ -441,6 +440,7 @@ const checkChannelKey = (channelKey: string, isSpectator: boolean) => {
         case '7':
         case '8':
         case '9':
+        case '10':
             if (isSpectator) {
                 return WritePublicRoomMessageFailureType.NotAuthorized;
             }
