@@ -1,7 +1,18 @@
 import { Checkbox, Divider, Input, Menu, Modal, Popover, Tooltip, Typography } from 'antd';
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { DeleteRoomFailureType, ParticipantRole, PromoteFailureType, RoomPublicMessage, useChangeParticipantNameMutation, useDeleteRoomMutation, useGetLogLazyQuery, useLeaveRoomMutation, usePromoteToPlayerMutation, useRequiresPhraseToJoinAsPlayerLazyQuery } from '../../generated/graphql';
+import {
+    DeleteRoomFailureType,
+    ParticipantRole,
+    PromoteFailureType,
+    RoomPublicMessage,
+    useChangeParticipantNameMutation,
+    useDeleteRoomMutation,
+    useGetLogLazyQuery,
+    useLeaveRoomMutation,
+    usePromoteToPlayerMutation,
+    useRequiresPhraseToJoinAsPlayerLazyQuery,
+} from '../../generated/graphql';
 import roomConfigModule from '../../modules/roomConfigModule';
 import { useSelector } from '../../store';
 import * as Icon from '@ant-design/icons';
@@ -33,14 +44,22 @@ type BecomePlayerModalProps = {
     visible: boolean;
     onOk: () => void;
     onCancel: () => void;
-}
+};
 
-const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, onOk, onCancel }: BecomePlayerModalProps) => {
+const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
+    roomId,
+    visible,
+    onOk,
+    onCancel,
+}: BecomePlayerModalProps) => {
     const dispatch = useDispatch();
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
     const [promoteToPlayer] = usePromoteToPlayerMutation();
-    const [requiresPhraseToJoinAsPlayer, requiresPhraseToJoinAsPlayerResult] = useRequiresPhraseToJoinAsPlayerLazyQuery();
+    const [
+        requiresPhraseToJoinAsPlayer,
+        requiresPhraseToJoinAsPlayerResult,
+    ] = useRequiresPhraseToJoinAsPlayerLazyQuery();
     const requiresPhraseToJoinAsPlayerRef = React.useRef(requiresPhraseToJoinAsPlayer);
     React.useEffect(() => {
         requiresPhraseToJoinAsPlayerRef.current = requiresPhraseToJoinAsPlayer;
@@ -53,13 +72,16 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, 
 
     const title = '参加者に昇格';
 
-    if (requiresPhraseToJoinAsPlayerResult.data?.result.__typename !== 'RequiresPhraseSuccessResult') {
+    if (
+        requiresPhraseToJoinAsPlayerResult.data?.result.__typename !== 'RequiresPhraseSuccessResult'
+    ) {
         return (
             <Modal
                 visible={visible}
                 title={title}
-                okButtonProps={({ disabled: true })}
-                onCancel={() => onCancel()}>
+                okButtonProps={{ disabled: true }}
+                onCancel={() => onCancel()}
+            >
                 サーバーと通信中です…
             </Modal>
         );
@@ -69,16 +91,18 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, 
             <Modal
                 visible={visible}
                 title={title}
-                okButtonProps={({ disabled: isPosting })}
+                okButtonProps={{ disabled: isPosting }}
                 onOk={() => {
                     setIsPosting(true);
                     promoteToPlayer({ variables: { roomId, phrase: inputValue } }).then(e => {
                         if (e.errors != null) {
-                            dispatch(roomStateModule.actions.addNotification({
-                                type: Notification.graphQLErrors,
-                                createdAt: new Date().getTime(),
-                                errors: e.errors
-                            }));
+                            dispatch(
+                                roomStateModule.actions.addNotification({
+                                    type: Notification.graphQLErrors,
+                                    createdAt: new Date().getTime(),
+                                    errors: e.errors,
+                                })
+                            );
                             onOk();
                             return;
                         }
@@ -96,15 +120,17 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, 
                                     text = undefined;
                                     break;
                             }
-                            dispatch(roomStateModule.actions.addNotification({
-                                type: 'text',
-                                notification: {
-                                    type: 'warning',
-                                    message: '参加者への昇格に失敗しました。',
-                                    description: text,
-                                    createdAt: new Date().getTime(),
-                                },
-                            }));
+                            dispatch(
+                                roomStateModule.actions.addNotification({
+                                    type: 'text',
+                                    notification: {
+                                        type: 'warning',
+                                        message: '参加者への昇格に失敗しました。',
+                                        description: text,
+                                        createdAt: new Date().getTime(),
+                                    },
+                                })
+                            );
                             onOk();
                             return;
                         }
@@ -112,8 +138,13 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, 
                         onOk();
                     });
                 }}
-                onCancel={() => onCancel()}>
-                <Input placeholder='フレーズ' value={inputValue} onChange={e => setInputValue(e.target.value)} />
+                onCancel={() => onCancel()}
+            >
+                <Input
+                    placeholder="フレーズ"
+                    value={inputValue}
+                    onChange={e => setInputValue(e.target.value)}
+                />
             </Modal>
         );
     }
@@ -121,16 +152,18 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, 
         <Modal
             visible={visible}
             title={title}
-            okButtonProps={({ disabled: isPosting })}
+            okButtonProps={{ disabled: isPosting }}
             onOk={() => {
                 setIsPosting(true);
                 promoteToPlayer({ variables: { roomId } }).then(e => {
                     if (e.errors != null) {
-                        dispatch(roomStateModule.actions.addNotification({
-                            type: Notification.graphQLErrors,
-                            createdAt: new Date().getTime(),
-                            errors: e.errors
-                        }));
+                        dispatch(
+                            roomStateModule.actions.addNotification({
+                                type: Notification.graphQLErrors,
+                                createdAt: new Date().getTime(),
+                                errors: e.errors,
+                            })
+                        );
                         onOk();
                         return;
                     }
@@ -148,15 +181,17 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, 
                                 text = undefined;
                                 break;
                         }
-                        dispatch(roomStateModule.actions.addNotification({
-                            type: 'text',
-                            notification: {
-                                type: 'warning',
-                                message: '参加者への昇格に失敗しました。',
-                                description: text,
-                                createdAt: new Date().getTime(),
-                            },
-                        }));
+                        dispatch(
+                            roomStateModule.actions.addNotification({
+                                type: 'text',
+                                notification: {
+                                    type: 'warning',
+                                    message: '参加者への昇格に失敗しました。',
+                                    description: text,
+                                    createdAt: new Date().getTime(),
+                                },
+                            })
+                        );
                         onOk();
                         return;
                     }
@@ -164,7 +199,8 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({ roomId, visible, 
                     onOk();
                 });
             }}
-            onCancel={() => onCancel()}>
+            onCancel={() => onCancel()}
+        >
             フレーズなしで参加者に昇格できます。昇格しますか？
         </Modal>
     );
@@ -176,9 +212,15 @@ type DeleteRoomModalProps = {
     visible: boolean;
     onOk: () => void;
     onCancel: () => void;
-}
+};
 
-const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({ roomId, visible, onOk, onCancel, roomCreatedByMe }: DeleteRoomModalProps) => {
+const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
+    roomId,
+    visible,
+    onOk,
+    onCancel,
+    roomCreatedByMe,
+}: DeleteRoomModalProps) => {
     const dispatch = useDispatch();
     const [isPosting, setIsPosting] = React.useState(false);
     const [deleteRoom] = useDeleteRoomMutation();
@@ -190,20 +232,22 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({ roomId, visible, onOk
     return (
         <Modal
             visible={visible}
-            title='部屋の削除'
-            okButtonProps={({ disabled })}
-            okType='danger'
-            okText='削除する'
+            title="部屋の削除"
+            okButtonProps={{ disabled }}
+            okType="danger"
+            okText="削除する"
             cancelText={disabled ? '閉じる' : 'キャンセル'}
             onOk={() => {
                 setIsPosting(true);
                 deleteRoom({ variables: { id: roomId } }).then(e => {
                     if (e.errors != null) {
-                        dispatch(roomStateModule.actions.addNotification({
-                            type: Notification.graphQLErrors,
-                            createdAt: new Date().getTime(),
-                            errors: e.errors
-                        }));
+                        dispatch(
+                            roomStateModule.actions.addNotification({
+                                type: Notification.graphQLErrors,
+                                createdAt: new Date().getTime(),
+                                errors: e.errors,
+                            })
+                        );
                         onOk();
                         return;
                     }
@@ -218,15 +262,17 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({ roomId, visible, onOk
                                 text = undefined;
                                 break;
                         }
-                        dispatch(roomStateModule.actions.addNotification({
-                            type: 'text',
-                            notification: {
-                                type: 'warning',
-                                message: '部屋の削除に失敗しました。',
-                                description: text,
-                                createdAt: new Date().getTime(),
-                            },
-                        }));
+                        dispatch(
+                            roomStateModule.actions.addNotification({
+                                type: 'text',
+                                notification: {
+                                    type: 'warning',
+                                    message: '部屋の削除に失敗しました。',
+                                    description: text,
+                                    createdAt: new Date().getTime(),
+                                },
+                            })
+                        );
                         onOk();
                         return;
                     }
@@ -234,14 +280,21 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({ roomId, visible, onOk
                     onOk();
                 });
             }}
-            onCancel={() => onCancel()}>
-            {roomCreatedByMe ?
+            onCancel={() => onCancel()}
+        >
+            {roomCreatedByMe ? (
                 <div>
-                    <p>この部屋を削除します。この部屋を作成したユーザーでない限り、部屋を削除することはできません。</p>
-                    <p style={({ fontWeight: 'bold' })}>部屋を削除すると元に戻すことはできず、ログ出力もできません。</p>
+                    <p>
+                        この部屋を削除します。この部屋を作成したユーザーでない限り、部屋を削除することはできません。
+                    </p>
+                    <p style={{ fontWeight: 'bold' }}>
+                        部屋を削除すると元に戻すことはできず、ログ出力もできません。
+                    </p>
                     <p>本当によろしいですか？</p>
-                </div> :
-                <div>この部屋の作成者でないため、削除することができません。</div>}
+                </div>
+            ) : (
+                <div>この部屋の作成者でないため、削除することができません。</div>
+            )}
         </Modal>
     );
 };
@@ -260,7 +313,7 @@ type GenerateAsStaticHtmlOptions = {
     includesFreeChannel: boolean;
     includesPrivateChannels: boolean;
     includesSystem: boolean;
-}
+};
 
 namespace GenerateAsStaticHtmlOptions {
     export const toFilter = (source: GenerateAsStaticHtmlOptions) => {
@@ -305,13 +358,21 @@ type GenerateLogModalProps = {
     visible: boolean;
     onOk: () => void;
     onCancel: () => void;
-}
+};
 
-const GenerateLogModal: React.FC<GenerateLogModalProps> = ({ roomId, visible, onOk, onCancel }: GenerateLogModalProps) => {
+const GenerateLogModal: React.FC<GenerateLogModalProps> = ({
+    roomId,
+    visible,
+    onOk,
+    onCancel,
+}: GenerateLogModalProps) => {
     const publicChannelNames = usePublicChannelNames();
     const participants = useParticipants();
 
-    const [generateAsStaticHtmlOptions, setGenerateAsStaticHtmlOptions] = React.useState<GenerateAsStaticHtmlOptions>({
+    const [
+        generateAsStaticHtmlOptions,
+        setGenerateAsStaticHtmlOptions,
+    ] = React.useState<GenerateAsStaticHtmlOptions>({
         includesPublicChannel1: true,
         includesPublicChannel2: true,
         includesPublicChannel3: true,
@@ -345,13 +406,23 @@ const GenerateLogModal: React.FC<GenerateLogModalProps> = ({ roomId, visible, on
         if (publicChannelNamesRef.current == null || participantsRef.current == null) {
             return;
         }
-        fileDownload(generateAsStaticHtml({
-            ...publicChannelNamesRef.current,
-            messages: data.result,
-            participants: participantsRef.current,
-            filter: GenerateAsStaticHtmlOptions.toFilter(generateAsStaticHtmlOptionsRef.current),
-        }), `log_${moment(new Date()).format('YYYYMMDDHHmmss')}.html`);
-    }, [getLogQueryResult.data, participantsRef, publicChannelNamesRef, generateAsStaticHtmlOptionsRef]);
+        fileDownload(
+            generateAsStaticHtml({
+                ...publicChannelNamesRef.current,
+                messages: data.result,
+                participants: participantsRef.current,
+                filter: GenerateAsStaticHtmlOptions.toFilter(
+                    generateAsStaticHtmlOptionsRef.current
+                ),
+            }),
+            `log_${moment(new Date()).format('YYYYMMDDHHmmss')}.html`
+        );
+    }, [
+        getLogQueryResult.data,
+        participantsRef,
+        publicChannelNamesRef,
+        generateAsStaticHtmlOptionsRef,
+    ]);
 
     if (publicChannelNames == null) {
         return null;
@@ -360,93 +431,174 @@ const GenerateLogModal: React.FC<GenerateLogModalProps> = ({ roomId, visible, on
     return (
         <Modal
             visible={visible}
-            title='ログのダウンロード'
+            title="ログのダウンロード"
             onOk={() => {
                 getLogQuery({ variables: { roomId } });
                 onOk();
             }}
-            onCancel={() => onCancel()}>
+            onCancel={() => onCancel()}
+        >
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <div>ログには、秘話などの非公開情報も含めることが可能です。また、ログをダウンロードすると、システムメッセージによって全員に通知されます。</div>
+                <div>
+                    ログには、秘話などの非公開情報も含めることが可能です。また、ログをダウンロードすると、システムメッセージによって全員に通知されます。
+                </div>
                 <div style={{ marginTop: 8 }}>特殊チャンネル</div>
                 <div>
                     <Checkbox
                         checked={generateAsStaticHtmlOptions.includesSystem}
-                        onChange={e => setGenerateAsStaticHtmlOptions(state => ({ ...state, includesSystem: e.target.checked }))}>
+                        onChange={e =>
+                            setGenerateAsStaticHtmlOptions(state => ({
+                                ...state,
+                                includesSystem: e.target.checked,
+                            }))
+                        }
+                    >
                         システムメッセージ
                     </Checkbox>
                     <br />
                     <Checkbox
                         checked={generateAsStaticHtmlOptions.includesFreeChannel}
-                        onChange={e => setGenerateAsStaticHtmlOptions(state => ({ ...state, includesFreeChannel: e.target.checked }))}>
+                        onChange={e =>
+                            setGenerateAsStaticHtmlOptions(state => ({
+                                ...state,
+                                includesFreeChannel: e.target.checked,
+                            }))
+                        }
+                    >
                         雑談
                     </Checkbox>
                     <br />
                     <Checkbox
                         checked={generateAsStaticHtmlOptions.includesPrivateChannels}
-                        onChange={e => setGenerateAsStaticHtmlOptions(state => ({ ...state, includesPrivateChannels: e.target.checked }))}>
+                        onChange={e =>
+                            setGenerateAsStaticHtmlOptions(state => ({
+                                ...state,
+                                includesPrivateChannels: e.target.checked,
+                            }))
+                        }
+                    >
                         秘話
                     </Checkbox>
                 </div>
-                <div style={{ marginTop: 4 }} >一般チャンネル</div>
+                <div style={{ marginTop: 4 }}>一般チャンネル</div>
                 <div>
                     <Checkbox
                         checked={generateAsStaticHtmlOptions.includesPublicChannel1}
-                        onChange={e => setGenerateAsStaticHtmlOptions(state => ({ ...state, includesPublicChannel1: e.target.checked }))}>
+                        onChange={e =>
+                            setGenerateAsStaticHtmlOptions(state => ({
+                                ...state,
+                                includesPublicChannel1: e.target.checked,
+                            }))
+                        }
+                    >
                         {publicChannelNames.publicChannel1Name}
                     </Checkbox>
                     <br />
                     <Checkbox
                         checked={generateAsStaticHtmlOptions.includesPublicChannel2}
-                        onChange={e => setGenerateAsStaticHtmlOptions(state => ({ ...state, includesPublicChannel2: e.target.checked }))}>
+                        onChange={e =>
+                            setGenerateAsStaticHtmlOptions(state => ({
+                                ...state,
+                                includesPublicChannel2: e.target.checked,
+                            }))
+                        }
+                    >
                         {publicChannelNames.publicChannel2Name}
                     </Checkbox>
                     <br />
                     <Checkbox
                         checked={generateAsStaticHtmlOptions.includesPublicChannel3}
-                        onChange={e => setGenerateAsStaticHtmlOptions(state => ({ ...state, includesPublicChannel3: e.target.checked }))}>
+                        onChange={e =>
+                            setGenerateAsStaticHtmlOptions(state => ({
+                                ...state,
+                                includesPublicChannel3: e.target.checked,
+                            }))
+                        }
+                    >
                         {publicChannelNames.publicChannel3Name}
                     </Checkbox>
                     <br />
                     <Checkbox
                         checked={generateAsStaticHtmlOptions.includesPublicChannel4}
-                        onChange={e => setGenerateAsStaticHtmlOptions(state => ({ ...state, includesPublicChannel4: e.target.checked }))}>
+                        onChange={e =>
+                            setGenerateAsStaticHtmlOptions(state => ({
+                                ...state,
+                                includesPublicChannel4: e.target.checked,
+                            }))
+                        }
+                    >
                         {publicChannelNames.publicChannel4Name}
                     </Checkbox>
                     <br />
                     <Checkbox
                         checked={generateAsStaticHtmlOptions.includesPublicChannel5}
-                        onChange={e => setGenerateAsStaticHtmlOptions(state => ({ ...state, includesPublicChannel5: e.target.checked }))}>
+                        onChange={e =>
+                            setGenerateAsStaticHtmlOptions(state => ({
+                                ...state,
+                                includesPublicChannel5: e.target.checked,
+                            }))
+                        }
+                    >
                         {publicChannelNames.publicChannel5Name}
                     </Checkbox>
                     <br />
                     <Checkbox
                         checked={generateAsStaticHtmlOptions.includesPublicChannel6}
-                        onChange={e => setGenerateAsStaticHtmlOptions(state => ({ ...state, includesPublicChannel6: e.target.checked }))}>
+                        onChange={e =>
+                            setGenerateAsStaticHtmlOptions(state => ({
+                                ...state,
+                                includesPublicChannel6: e.target.checked,
+                            }))
+                        }
+                    >
                         {publicChannelNames.publicChannel6Name}
                     </Checkbox>
                     <br />
                     <Checkbox
                         checked={generateAsStaticHtmlOptions.includesPublicChannel7}
-                        onChange={e => setGenerateAsStaticHtmlOptions(state => ({ ...state, includesPublicChannel7: e.target.checked }))}>
+                        onChange={e =>
+                            setGenerateAsStaticHtmlOptions(state => ({
+                                ...state,
+                                includesPublicChannel7: e.target.checked,
+                            }))
+                        }
+                    >
                         {publicChannelNames.publicChannel7Name}
                     </Checkbox>
                     <br />
                     <Checkbox
                         checked={generateAsStaticHtmlOptions.includesPublicChannel8}
-                        onChange={e => setGenerateAsStaticHtmlOptions(state => ({ ...state, includesPublicChannel8: e.target.checked }))}>
+                        onChange={e =>
+                            setGenerateAsStaticHtmlOptions(state => ({
+                                ...state,
+                                includesPublicChannel8: e.target.checked,
+                            }))
+                        }
+                    >
                         {publicChannelNames.publicChannel8Name}
                     </Checkbox>
                     <br />
                     <Checkbox
                         checked={generateAsStaticHtmlOptions.includesPublicChannel9}
-                        onChange={e => setGenerateAsStaticHtmlOptions(state => ({ ...state, includesPublicChannel9: e.target.checked }))}>
+                        onChange={e =>
+                            setGenerateAsStaticHtmlOptions(state => ({
+                                ...state,
+                                includesPublicChannel9: e.target.checked,
+                            }))
+                        }
+                    >
                         {publicChannelNames.publicChannel9Name}
                     </Checkbox>
                     <br />
                     <Checkbox
                         checked={generateAsStaticHtmlOptions.includesPublicChannel10}
-                        onChange={e => setGenerateAsStaticHtmlOptions(state => ({ ...state, includesPublicChannel10: e.target.checked }))}>
+                        onChange={e =>
+                            setGenerateAsStaticHtmlOptions(state => ({
+                                ...state,
+                                includesPublicChannel10: e.target.checked,
+                            }))
+                        }
+                    >
                         {publicChannelNames.publicChannel10Name}
                     </Checkbox>
                 </div>
@@ -460,9 +612,14 @@ type ChangeMyParticipantNameModalProps = {
     visible: boolean;
     onOk: () => void;
     onCancel: () => void;
-}
+};
 
-const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> = ({ roomId, visible, onOk: onOkCore, onCancel }: ChangeMyParticipantNameModalProps) => {
+const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> = ({
+    roomId,
+    visible,
+    onOk: onOkCore,
+    onCancel,
+}: ChangeMyParticipantNameModalProps) => {
     const dispatch = useDispatch();
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
@@ -476,24 +633,28 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
         setIsPosting(true);
         changeParticipantName({ variables: { roomId, newName: inputValue } }).then(e => {
             if (e.errors != null) {
-                dispatch(roomStateModule.actions.addNotification({
-                    type: Notification.graphQLErrors,
-                    createdAt: new Date().getTime(),
-                    errors: e.errors
-                }));
+                dispatch(
+                    roomStateModule.actions.addNotification({
+                        type: Notification.graphQLErrors,
+                        createdAt: new Date().getTime(),
+                        errors: e.errors,
+                    })
+                );
                 onOkCore();
                 return;
             }
 
             if (e.data?.result.failureType != null) {
-                dispatch(roomStateModule.actions.addNotification({
-                    type: Notification.text,
-                    notification: {
-                        type: 'warning',
-                        message: '名前の変更に失敗しました。',
-                        createdAt: new Date().getTime(),
-                    },
-                }));
+                dispatch(
+                    roomStateModule.actions.addNotification({
+                        type: Notification.text,
+                        notification: {
+                            type: 'warning',
+                            message: '名前の変更に失敗しました。',
+                            createdAt: new Date().getTime(),
+                        },
+                    })
+                );
                 onOkCore();
                 return;
             }
@@ -505,11 +666,18 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
     return (
         <Modal
             visible={visible}
-            title='名前を変更'
-            okButtonProps={({ disabled: isPosting })}
+            title="名前を変更"
+            okButtonProps={{ disabled: isPosting }}
             onOk={() => onOk()}
-            onCancel={() => onCancel()}>
-            <Input placeholder='新しい名前' autoFocus value={inputValue} onChange={e => setInputValue(e.target.value)} onPressEnter={() => onOk()} />
+            onCancel={() => onCancel()}
+        >
+            <Input
+                placeholder="新しい名前"
+                autoFocus
+                value={inputValue}
+                onChange={e => setInputValue(e.target.value)}
+                onPressEnter={() => onOk()}
+            />
         </Modal>
     );
 };
@@ -534,247 +702,476 @@ export const RoomMenu: React.FC = () => {
     const pieceValuePanel = useSelector(state => state.roomConfigModule?.panels.pieceValuePanel);
     const [leaveRoomMutation] = useLeaveRoomMutation();
     const [isBecomePlayerModalVisible, setIsBecomePlayerModalVisible] = React.useState(false);
-    const [isChangeMyParticipantNameModalVisible, setIsChangeMyParticipantNameModalVisible] = React.useState(false);
+    const [
+        isChangeMyParticipantNameModalVisible,
+        setIsChangeMyParticipantNameModalVisible,
+    ] = React.useState(false);
     const [isDeleteRoomModalVisible, setIsDeleteRoomModalVisible] = React.useState(false);
     const [isGenerateLogModalVisible, setIsGenerateLogModalVisible] = React.useState(false);
-    const [filesManagerDrawerType, setFilesManagerDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
+    const [
+        filesManagerDrawerType,
+        setFilesManagerDrawerType,
+    ] = React.useState<FilesManagerDrawerType | null>(null);
 
-    if (me == null || myUserUid == null || typeof myAuth === 'string' || roomId == null || activeBoardPanel == null || boardPanels == null || characterPanel == null || gameEffectPanel == null || participantPanel == null || memoPanels == null || messagePanels == null || pieceValuePanel == null) {
+    if (
+        me == null ||
+        myUserUid == null ||
+        typeof myAuth === 'string' ||
+        roomId == null ||
+        activeBoardPanel == null ||
+        boardPanels == null ||
+        characterPanel == null ||
+        gameEffectPanel == null ||
+        participantPanel == null ||
+        memoPanels == null ||
+        messagePanels == null ||
+        pieceValuePanel == null
+    ) {
         return null;
     }
 
-    return <>
-        <Menu triggerSubMenuAction='click' selectable={false} mode="horizontal">
-            <Menu.Item onClick={() => router.push('/')} >
-                <img src='/logo.png' width={24} height={24} />
-            </Menu.Item>
-            <Menu.SubMenu title="部屋">
-                <Menu.Item onClick={() => dispatch(roomDrawerAndPopoverModule.actions.set({ editRoomDrawerVisibility: true }))}>
-                    編集
+    return (
+        <>
+            <Menu triggerSubMenuAction="click" selectable={false} mode="horizontal">
+                <Menu.Item onClick={() => router.push('/')}>
+                    <img src="/logo.png" width={24} height={24} />
                 </Menu.Item>
-                <Menu.Item onClick={() => setIsDeleteRoomModalVisible(true)}>
-                    <span style={({ color: 'red' })}>削除</span>
-                </Menu.Item>
-                <Menu.Divider />
-                <Menu.Item onClick={() => setIsGenerateLogModalVisible(true)}>
-                    ログをダウンロード
-                </Menu.Item>
-            </Menu.SubMenu>
-            <Menu.SubMenu title="ウィンドウ">
-                <Menu.Item onClick={() => {
-                    dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: 'characterPanel' }, newValue: false }));
-                    dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: 'characterPanel' } }));
-                }}>
-                    <div>
-                        <span>{characterPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
-                        <span>キャラクター一覧</span>
-                    </div>
-                </Menu.Item>
-                <Menu.Item onClick={() => {
-                    dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: 'activeBoardPanel' }, newValue: false }));
-                    dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: 'activeBoardPanel' } }));
-                }}>
-                    <div>
-                        <span>{activeBoardPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
-                        <span>ボードビュアー</span>
-                    </div>
-                </Menu.Item>
-                <Menu.SubMenu title="ボードエディター">
-                    {
-                        recordToArray(boardPanels).map((pair, i) => {
-                            return (
-                                <Menu.Item
-                                    key={pair.key}
-                                    onClick={() => {
-                                        // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
-                                        dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: boardEditorPanel, panelId: pair.key }, newValue: false }));
-
-                                        dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: boardEditorPanel, panelId: pair.key } }));
-                                    }}>
-                                    <div>
-                                        <span>{pair.value.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
-                                        <span>{`パネル${i + 1}`}</span>
-                                    </div>
-                                </Menu.Item>);
-                        })
-                    }
-                    <Menu.Divider />
-                    <Menu.Item onClick={() => {
-                        dispatch(roomConfigModule.actions.addBoardEditorPanelConfig({
-                            roomId,
-                            panel: {
-                                activeBoardKey: null,
-                                boards: {},
-                                isMinimized: false,
-                                x: 10,
-                                y: 10,
-                                width: 400,
-                                height: 300,
-                            },
-                        }));
-                    }}>
-                        <div>
-                            <span><Icon.PlusOutlined /></span>
-                            <span>新規作成</span>
-                        </div>
-                    </Menu.Item>
-                </Menu.SubMenu>
-                <Menu.SubMenu title="メッセージ">
-                    {
-                        recordToArray(messagePanels).map((pair, i) => {
-                            return (
-                                <Menu.Item
-                                    key={pair.key}
-                                    onClick={() => {
-                                        // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
-                                        dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: 'messagePanel', panelId: pair.key }, newValue: false }));
-
-                                        dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: 'messagePanel', panelId: pair.key } }));
-                                    }}>
-                                    <div>
-                                        <span>{pair.value.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
-                                        <span>{`パネル${i + 1}`}</span>
-                                    </div>
-                                </Menu.Item>);
-                        })
-                    }
-                    <Menu.Divider />
-                    <Menu.Item onClick={() => {
-                        dispatch(roomConfigModule.actions.addMessagePanelConfig({
-                            roomId,
-                            panel: {
-                                ...defaultMessagePanelConfig(),
-                            },
-                        }));
-                    }}>
-                        <div>
-                            <span><Icon.PlusOutlined /></span>
-                            <span>新規作成</span>
-                        </div>
-                    </Menu.Item>
-                </Menu.SubMenu>
-                <Menu.SubMenu title="共有メモ（部屋）">
-                    {
-                        recordToArray(memoPanels).map((pair, i) => {
-                            return (
-                                <Menu.Item
-                                    key={pair.key}
-                                    onClick={() => {
-                                        // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
-                                        dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: 'memoPanel', panelId: pair.key }, newValue: false }));
-
-                                        dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: 'memoPanel', panelId: pair.key } }));
-                                    }}>
-                                    <div>
-                                        <span>{pair.value.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
-                                        <span>{`パネル${i + 1}`}</span>
-                                    </div>
-                                </Menu.Item>);
-                        })
-                    }
-                    <Menu.Divider />
-                    <Menu.Item onClick={() => {
-                        dispatch(roomConfigModule.actions.addMemoPanelConfig({
-                            roomId,
-                            panel: {
-                                ...defaultMemoPanelConfig(),
-                            },
-                        }));
-                    }}>
-                        <div>
-                            <span><Icon.PlusOutlined /></span>
-                            <span>新規作成</span>
-                        </div>
-                    </Menu.Item>
-                </Menu.SubMenu>
-                <Menu.Item onClick={() => {
-                    dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: 'pieceValuePanel' }, newValue: false }));
-                    dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: 'pieceValuePanel' } }));
-                }}>
-                    <div>
-                        <span>{pieceValuePanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
-                        <span>コマ</span>
-                    </div>
-                </Menu.Item>
-                <Menu.Item onClick={() => {
-                    dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: 'gameEffectPanel' }, newValue: false }));
-                    dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: 'gameEffectPanel' } }));
-                }}>
-                    <div>
-                        <span>{gameEffectPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
-                        <span>SE, BGM</span>
-                    </div>
-                </Menu.Item>
-                <Menu.Item onClick={() => {
-                    dispatch(roomConfigModule.actions.setIsMinimized({ roomId, target: { type: 'participantPanel' }, newValue: false }));
-                    dispatch(roomConfigModule.actions.bringPanelToFront({ roomId, target: { type: 'participantPanel' } }));
-                }}>
-                    <div>
-                        <span>{participantPanel.isMinimized ? <Icon.BorderOutlined /> : <Icon.CheckSquareOutlined />}</span>
-                        <span>入室者</span>
-                    </div>
-                </Menu.Item>
-            </Menu.SubMenu>
-            <Menu.Item>
-                <Popover trigger='click' content={<VolumeBarPanel roomId={roomId} />}>
-                    ボリューム
-                </Popover>
-            </Menu.Item>
-            <Menu.Item onClick={() => setFilesManagerDrawerType({ openFileType: none })}>
-                アップローダー
-            </Menu.Item>
-            <Menu.SubMenu
-                title={<div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                    <Jdenticon hashOrValue={myUserUid} size={20} tooltipMode={{ type: 'userUid' }} />
-                    <span style={({ marginLeft: 4 })}>{me.name}</span>
-                </div>}>
-                <Menu.Item
-                    onClick={() => setIsChangeMyParticipantNameModalVisible(true)}>
-                    名前を変更
-                </Menu.Item>
-                <Menu.Item
-                    disabled={me.role === ParticipantRole.Player || me.role === ParticipantRole.Master}
-                    onClick={() => setIsBecomePlayerModalVisible(true)}>
-                    {me.role === ParticipantRole.Player || me.role === ParticipantRole.Master ? <Tooltip title='すでに昇格済みです。'>参加者に昇格</Tooltip> : '参加者に昇格'}
-                </Menu.Item>
-                <Menu.Item onClick={() => {
-                    leaveRoomMutation({ variables: { id: roomId } }).then(result => {
-                        if (result.data == null) {
-                            return;
+                <Menu.SubMenu title="部屋">
+                    <Menu.Item
+                        onClick={() =>
+                            dispatch(
+                                roomDrawerAndPopoverModule.actions.set({
+                                    editRoomDrawerVisibility: true,
+                                })
+                            )
                         }
-                        router.push(path.rooms.index);
-                    });
-                }}>
-                    退室する
+                    >
+                        編集
+                    </Menu.Item>
+                    <Menu.Item onClick={() => setIsDeleteRoomModalVisible(true)}>
+                        <span style={{ color: 'red' }}>削除</span>
+                    </Menu.Item>
+                    <Menu.Divider />
+                    <Menu.Item onClick={() => setIsGenerateLogModalVisible(true)}>
+                        ログをダウンロード
+                    </Menu.Item>
+                </Menu.SubMenu>
+                <Menu.SubMenu title="ウィンドウ">
+                    <Menu.Item
+                        onClick={() => {
+                            dispatch(
+                                roomConfigModule.actions.setIsMinimized({
+                                    roomId,
+                                    target: { type: 'characterPanel' },
+                                    newValue: false,
+                                })
+                            );
+                            dispatch(
+                                roomConfigModule.actions.bringPanelToFront({
+                                    roomId,
+                                    target: { type: 'characterPanel' },
+                                })
+                            );
+                        }}
+                    >
+                        <div>
+                            <span>
+                                {characterPanel.isMinimized ? (
+                                    <Icon.BorderOutlined />
+                                ) : (
+                                    <Icon.CheckSquareOutlined />
+                                )}
+                            </span>
+                            <span>キャラクター一覧</span>
+                        </div>
+                    </Menu.Item>
+                    <Menu.Item
+                        onClick={() => {
+                            dispatch(
+                                roomConfigModule.actions.setIsMinimized({
+                                    roomId,
+                                    target: { type: 'activeBoardPanel' },
+                                    newValue: false,
+                                })
+                            );
+                            dispatch(
+                                roomConfigModule.actions.bringPanelToFront({
+                                    roomId,
+                                    target: { type: 'activeBoardPanel' },
+                                })
+                            );
+                        }}
+                    >
+                        <div>
+                            <span>
+                                {activeBoardPanel.isMinimized ? (
+                                    <Icon.BorderOutlined />
+                                ) : (
+                                    <Icon.CheckSquareOutlined />
+                                )}
+                            </span>
+                            <span>ボードビュアー</span>
+                        </div>
+                    </Menu.Item>
+                    <Menu.SubMenu title="ボードエディター">
+                        {recordToArray(boardPanels).map((pair, i) => {
+                            return (
+                                <Menu.Item
+                                    key={pair.key}
+                                    onClick={() => {
+                                        // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
+                                        dispatch(
+                                            roomConfigModule.actions.setIsMinimized({
+                                                roomId,
+                                                target: {
+                                                    type: boardEditorPanel,
+                                                    panelId: pair.key,
+                                                },
+                                                newValue: false,
+                                            })
+                                        );
+
+                                        dispatch(
+                                            roomConfigModule.actions.bringPanelToFront({
+                                                roomId,
+                                                target: {
+                                                    type: boardEditorPanel,
+                                                    panelId: pair.key,
+                                                },
+                                            })
+                                        );
+                                    }}
+                                >
+                                    <div>
+                                        <span>
+                                            {pair.value.isMinimized ? (
+                                                <Icon.BorderOutlined />
+                                            ) : (
+                                                <Icon.CheckSquareOutlined />
+                                            )}
+                                        </span>
+                                        <span>{`パネル${i + 1}`}</span>
+                                    </div>
+                                </Menu.Item>
+                            );
+                        })}
+                        <Menu.Divider />
+                        <Menu.Item
+                            onClick={() => {
+                                dispatch(
+                                    roomConfigModule.actions.addBoardEditorPanelConfig({
+                                        roomId,
+                                        panel: {
+                                            activeBoardKey: null,
+                                            boards: {},
+                                            isMinimized: false,
+                                            x: 10,
+                                            y: 10,
+                                            width: 400,
+                                            height: 300,
+                                        },
+                                    })
+                                );
+                            }}
+                        >
+                            <div>
+                                <span>
+                                    <Icon.PlusOutlined />
+                                </span>
+                                <span>新規作成</span>
+                            </div>
+                        </Menu.Item>
+                    </Menu.SubMenu>
+                    <Menu.SubMenu title="メッセージ">
+                        {recordToArray(messagePanels).map((pair, i) => {
+                            return (
+                                <Menu.Item
+                                    key={pair.key}
+                                    onClick={() => {
+                                        // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
+                                        dispatch(
+                                            roomConfigModule.actions.setIsMinimized({
+                                                roomId,
+                                                target: { type: 'messagePanel', panelId: pair.key },
+                                                newValue: false,
+                                            })
+                                        );
+
+                                        dispatch(
+                                            roomConfigModule.actions.bringPanelToFront({
+                                                roomId,
+                                                target: { type: 'messagePanel', panelId: pair.key },
+                                            })
+                                        );
+                                    }}
+                                >
+                                    <div>
+                                        <span>
+                                            {pair.value.isMinimized ? (
+                                                <Icon.BorderOutlined />
+                                            ) : (
+                                                <Icon.CheckSquareOutlined />
+                                            )}
+                                        </span>
+                                        <span>{`パネル${i + 1}`}</span>
+                                    </div>
+                                </Menu.Item>
+                            );
+                        })}
+                        <Menu.Divider />
+                        <Menu.Item
+                            onClick={() => {
+                                dispatch(
+                                    roomConfigModule.actions.addMessagePanelConfig({
+                                        roomId,
+                                        panel: {
+                                            ...defaultMessagePanelConfig(),
+                                        },
+                                    })
+                                );
+                            }}
+                        >
+                            <div>
+                                <span>
+                                    <Icon.PlusOutlined />
+                                </span>
+                                <span>新規作成</span>
+                            </div>
+                        </Menu.Item>
+                    </Menu.SubMenu>
+                    <Menu.SubMenu title="共有メモ（部屋）">
+                        {recordToArray(memoPanels).map((pair, i) => {
+                            return (
+                                <Menu.Item
+                                    key={pair.key}
+                                    onClick={() => {
+                                        // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
+                                        dispatch(
+                                            roomConfigModule.actions.setIsMinimized({
+                                                roomId,
+                                                target: { type: 'memoPanel', panelId: pair.key },
+                                                newValue: false,
+                                            })
+                                        );
+
+                                        dispatch(
+                                            roomConfigModule.actions.bringPanelToFront({
+                                                roomId,
+                                                target: { type: 'memoPanel', panelId: pair.key },
+                                            })
+                                        );
+                                    }}
+                                >
+                                    <div>
+                                        <span>
+                                            {pair.value.isMinimized ? (
+                                                <Icon.BorderOutlined />
+                                            ) : (
+                                                <Icon.CheckSquareOutlined />
+                                            )}
+                                        </span>
+                                        <span>{`パネル${i + 1}`}</span>
+                                    </div>
+                                </Menu.Item>
+                            );
+                        })}
+                        <Menu.Divider />
+                        <Menu.Item
+                            onClick={() => {
+                                dispatch(
+                                    roomConfigModule.actions.addMemoPanelConfig({
+                                        roomId,
+                                        panel: {
+                                            ...defaultMemoPanelConfig(),
+                                        },
+                                    })
+                                );
+                            }}
+                        >
+                            <div>
+                                <span>
+                                    <Icon.PlusOutlined />
+                                </span>
+                                <span>新規作成</span>
+                            </div>
+                        </Menu.Item>
+                    </Menu.SubMenu>
+                    <Menu.Item
+                        onClick={() => {
+                            dispatch(
+                                roomConfigModule.actions.setIsMinimized({
+                                    roomId,
+                                    target: { type: 'pieceValuePanel' },
+                                    newValue: false,
+                                })
+                            );
+                            dispatch(
+                                roomConfigModule.actions.bringPanelToFront({
+                                    roomId,
+                                    target: { type: 'pieceValuePanel' },
+                                })
+                            );
+                        }}
+                    >
+                        <div>
+                            <span>
+                                {pieceValuePanel.isMinimized ? (
+                                    <Icon.BorderOutlined />
+                                ) : (
+                                    <Icon.CheckSquareOutlined />
+                                )}
+                            </span>
+                            <span>コマ</span>
+                        </div>
+                    </Menu.Item>
+                    <Menu.Item
+                        onClick={() => {
+                            dispatch(
+                                roomConfigModule.actions.setIsMinimized({
+                                    roomId,
+                                    target: { type: 'gameEffectPanel' },
+                                    newValue: false,
+                                })
+                            );
+                            dispatch(
+                                roomConfigModule.actions.bringPanelToFront({
+                                    roomId,
+                                    target: { type: 'gameEffectPanel' },
+                                })
+                            );
+                        }}
+                    >
+                        <div>
+                            <span>
+                                {gameEffectPanel.isMinimized ? (
+                                    <Icon.BorderOutlined />
+                                ) : (
+                                    <Icon.CheckSquareOutlined />
+                                )}
+                            </span>
+                            <span>SE, BGM</span>
+                        </div>
+                    </Menu.Item>
+                    <Menu.Item
+                        onClick={() => {
+                            dispatch(
+                                roomConfigModule.actions.setIsMinimized({
+                                    roomId,
+                                    target: { type: 'participantPanel' },
+                                    newValue: false,
+                                })
+                            );
+                            dispatch(
+                                roomConfigModule.actions.bringPanelToFront({
+                                    roomId,
+                                    target: { type: 'participantPanel' },
+                                })
+                            );
+                        }}
+                    >
+                        <div>
+                            <span>
+                                {participantPanel.isMinimized ? (
+                                    <Icon.BorderOutlined />
+                                ) : (
+                                    <Icon.CheckSquareOutlined />
+                                )}
+                            </span>
+                            <span>入室者</span>
+                        </div>
+                    </Menu.Item>
+                </Menu.SubMenu>
+                <Menu.Item>
+                    <Popover trigger="click" content={<VolumeBarPanel roomId={roomId} />}>
+                        ボリューム
+                    </Popover>
                 </Menu.Item>
-            </Menu.SubMenu>
-            <Menu.SubMenu icon={<Icon.UserOutlined />} title={<span>{myAuth.displayName} - {myAuth.uid}</span>}>
-                <Menu.Item onClick={() => signOut()}>
-                    ログアウト
+                <Menu.Item onClick={() => setFilesManagerDrawerType({ openFileType: none })}>
+                    アップローダー
                 </Menu.Item>
-            </Menu.SubMenu>
-        </Menu>
-        <FilesManagerDrawer drawerType={filesManagerDrawerType} onClose={() => setFilesManagerDrawerType(null)} />
-        <BecomePlayerModal
-            visible={isBecomePlayerModalVisible}
-            onOk={() => setIsBecomePlayerModalVisible(false)}
-            onCancel={() => setIsBecomePlayerModalVisible(false)}
-            roomId={roomId} />
-        <ChangeMyParticipantNameModal
-            visible={isChangeMyParticipantNameModalVisible}
-            onOk={() => setIsChangeMyParticipantNameModalVisible(false)}
-            onCancel={() => setIsChangeMyParticipantNameModalVisible(false)}
-            roomId={roomId} />
-        <DeleteRoomModal
-            visible={isDeleteRoomModalVisible}
-            onOk={() => setIsDeleteRoomModalVisible(false)}
-            onCancel={() => setIsDeleteRoomModalVisible(false)}
-            roomId={roomId}
-            roomCreatedByMe={myUserUid === createdBy} />
-        <GenerateLogModal
-            visible={isGenerateLogModalVisible}
-            onOk={() => setIsGenerateLogModalVisible(false)}
-            onCancel={() => setIsGenerateLogModalVisible(false)}
-            roomId={roomId} />
-    </>;
+                <Menu.SubMenu
+                    title={
+                        <div
+                            style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}
+                        >
+                            <Jdenticon
+                                hashOrValue={myUserUid}
+                                size={20}
+                                tooltipMode={{ type: 'userUid' }}
+                            />
+                            <span style={{ marginLeft: 4 }}>{me.name}</span>
+                        </div>
+                    }
+                >
+                    <Menu.Item onClick={() => setIsChangeMyParticipantNameModalVisible(true)}>
+                        名前を変更
+                    </Menu.Item>
+                    <Menu.Item
+                        disabled={
+                            me.role === ParticipantRole.Player || me.role === ParticipantRole.Master
+                        }
+                        onClick={() => setIsBecomePlayerModalVisible(true)}
+                    >
+                        {me.role === ParticipantRole.Player ||
+                        me.role === ParticipantRole.Master ? (
+                            <Tooltip title="すでに昇格済みです。">参加者に昇格</Tooltip>
+                        ) : (
+                            '参加者に昇格'
+                        )}
+                    </Menu.Item>
+                    <Menu.Item
+                        onClick={() => {
+                            leaveRoomMutation({ variables: { id: roomId } }).then(result => {
+                                if (result.data == null) {
+                                    return;
+                                }
+                                router.push(path.rooms.index);
+                            });
+                        }}
+                    >
+                        退室する
+                    </Menu.Item>
+                </Menu.SubMenu>
+                <Menu.SubMenu
+                    icon={<Icon.UserOutlined />}
+                    title={
+                        <span>
+                            {myAuth.displayName} - {myAuth.uid}
+                        </span>
+                    }
+                >
+                    <Menu.Item onClick={() => signOut()}>ログアウト</Menu.Item>
+                </Menu.SubMenu>
+            </Menu>
+            <FilesManagerDrawer
+                drawerType={filesManagerDrawerType}
+                onClose={() => setFilesManagerDrawerType(null)}
+            />
+            <BecomePlayerModal
+                visible={isBecomePlayerModalVisible}
+                onOk={() => setIsBecomePlayerModalVisible(false)}
+                onCancel={() => setIsBecomePlayerModalVisible(false)}
+                roomId={roomId}
+            />
+            <ChangeMyParticipantNameModal
+                visible={isChangeMyParticipantNameModalVisible}
+                onOk={() => setIsChangeMyParticipantNameModalVisible(false)}
+                onCancel={() => setIsChangeMyParticipantNameModalVisible(false)}
+                roomId={roomId}
+            />
+            <DeleteRoomModal
+                visible={isDeleteRoomModalVisible}
+                onOk={() => setIsDeleteRoomModalVisible(false)}
+                onCancel={() => setIsDeleteRoomModalVisible(false)}
+                roomId={roomId}
+                roomCreatedByMe={myUserUid === createdBy}
+            />
+            <GenerateLogModal
+                visible={isGenerateLogModalVisible}
+                onOk={() => setIsGenerateLogModalVisible(false)}
+                onCancel={() => setIsGenerateLogModalVisible(false)}
+                roomId={roomId}
+            />
+        </>
+    );
 };

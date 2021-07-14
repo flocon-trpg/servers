@@ -20,10 +20,12 @@ const argsBase: Omit<ArgsProps, 'message'> = {
 export function useMessageNotification(): void {
     const publicChannelNames = usePublicChannelNames();
     const allRoomMessagesResult = useSelector(state => state.roomModule.allRoomMessagesResult);
-    const participantsMap = useParticipants(); 
+    const participantsMap = useParticipants();
     const masterVolume = useSelector(state => state.roomConfigModule?.masterVolume);
     const seVolume = useSelector(state => state.roomConfigModule?.seVolume);
-    const volumeRef = React.useRef((masterVolume ?? defaultMasterVolume) * (seVolume ?? defaultSeVolume));
+    const volumeRef = React.useRef(
+        (masterVolume ?? defaultMasterVolume) * (seVolume ?? defaultSeVolume)
+    );
     React.useEffect(() => {
         volumeRef.current = (masterVolume ?? defaultMasterVolume) * (seVolume ?? defaultSeVolume);
     }, [masterVolume, seVolume]);
@@ -34,10 +36,15 @@ export function useMessageNotification(): void {
         myUserUidRef.current = myUserUid;
     }, [myUserUid]);
 
-    const messageNotificationFilter = useSelector(state => state.roomConfigModule?.messageNotificationFilter);
-    const messageNotificationFilterRef = React.useRef(messageNotificationFilter ?? MessageFilter.createEmpty());
+    const messageNotificationFilter = useSelector(
+        state => state.roomConfigModule?.messageNotificationFilter
+    );
+    const messageNotificationFilterRef = React.useRef(
+        messageNotificationFilter ?? MessageFilter.createEmpty()
+    );
     React.useEffect(() => {
-        messageNotificationFilterRef.current = messageNotificationFilter ?? MessageFilter.createEmpty();
+        messageNotificationFilterRef.current =
+            messageNotificationFilter ?? MessageFilter.createEmpty();
     }, [messageNotificationFilter]);
 
     const messageFilter = useMessageFilter(messageNotificationFilterRef.current);
@@ -63,7 +70,12 @@ export function useMessageNotification(): void {
         let message: RoomMessage.MessageState;
         switch (allRoomMessagesResult.event.__typename) {
             case 'RoomPrivateMessage':
-                if (!messageFilterRef.current({ type: privateMessage, value: allRoomMessagesResult.event })) {
+                if (
+                    !messageFilterRef.current({
+                        type: privateMessage,
+                        value: allRoomMessagesResult.event,
+                    })
+                ) {
                     return;
                 }
                 message = {
@@ -72,7 +84,12 @@ export function useMessageNotification(): void {
                 };
                 break;
             case 'RoomPublicMessage':
-                if (!messageFilterRef.current({ type: publicMessage, value: allRoomMessagesResult.event })) {
+                if (
+                    !messageFilterRef.current({
+                        type: publicMessage,
+                        value: allRoomMessagesResult.event,
+                    })
+                ) {
                     return;
                 }
                 message = {
@@ -99,11 +116,18 @@ export function useMessageNotification(): void {
         }
         notification.open({
             ...argsBase,
-            message: (<div style={{ display: 'flex', flexDirection: 'row' }}>
-                {RoomMessage.userName(message, participantsMapRef.current ?? new Map())}
-                <div style={{ margin: '0 4px' }}>-</div>
-                {RoomMessage.toChannelName(message, publicChannelNameRef.current ?? emptyPublicChannelNames, participantsMapRef.current ?? new Map())}</div>),
-            description: <RoomMessage.Content style={{}} message={message} />
+            message: (
+                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    {RoomMessage.userName(message, participantsMapRef.current ?? new Map())}
+                    <div style={{ margin: '0 4px' }}>-</div>
+                    {RoomMessage.toChannelName(
+                        message,
+                        publicChannelNameRef.current ?? emptyPublicChannelNames,
+                        participantsMapRef.current ?? new Map()
+                    )}
+                </div>
+            ),
+            description: <RoomMessage.Content style={{}} message={message} />,
         });
     }, [allRoomMessagesResult]);
 }

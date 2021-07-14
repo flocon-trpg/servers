@@ -10,7 +10,7 @@ import { FirebaseStorageFile } from '../modules/fileModule';
 
 type ImageProps = {
     filePath?: FilePath | Core.FilePath;
-}
+};
 
 const Image: React.FC<ImageProps> = ({ filePath }: ImageProps) => {
     const src = useFirebaseStorageUrl(filePath);
@@ -18,19 +18,29 @@ const Image: React.FC<ImageProps> = ({ filePath }: ImageProps) => {
         return null;
     }
     return (
-        <a href={src} target='_blank' rel='noopener noreferrer'>
+        <a href={src} target="_blank" rel="noopener noreferrer">
             <img src={src} width={30} height={30} />
-        </a>);
+        </a>
+    );
 };
 
 type Props = {
     filePath?: FilePath | Core.FilePath;
     onPathChange?: (path: FilePath | Core.FilePath | null) => void;
-    openFilesManager: (drawerType: { openFileType: typeof some; onOpen: (path: FilePath | Core.FilePath) => void; defaultFilteredValue: FilterValue | undefined }) => void;
+    openFilesManager: (drawerType: {
+        openFileType: typeof some;
+        onOpen: (path: FilePath | Core.FilePath) => void;
+        defaultFilteredValue: FilterValue | undefined;
+    }) => void;
     showImage?: boolean;
-}
+};
 
-const InputFile: React.FC<Props> = ({ filePath, onPathChange, openFilesManager, showImage }: Props) => {
+const InputFile: React.FC<Props> = ({
+    filePath,
+    onPathChange,
+    openFilesManager,
+    showImage,
+}: Props) => {
     const onOpen = (path: FilePath | Core.FilePath) => {
         if (onPathChange != null) {
             onPathChange(path);
@@ -41,7 +51,7 @@ const InputFile: React.FC<Props> = ({ filePath, onPathChange, openFilesManager, 
         if (filePath == null || showImage !== true) {
             return null;
         }
-        return (<Image filePath={filePath} />);
+        return <Image filePath={filePath} />;
     })();
     const fileNameElement = (() => {
         if (filePath == null) {
@@ -49,26 +59,44 @@ const InputFile: React.FC<Props> = ({ filePath, onPathChange, openFilesManager, 
         }
         switch (filePath.sourceType) {
             case FileSourceType.Default:
-                return (<a href={filePath.path} target='_blank' rel='noopener noreferrer'>{filePath.path}</a>);
+                return (
+                    <a href={filePath.path} target="_blank" rel="noopener noreferrer">
+                        {filePath.path}
+                    </a>
+                );
             case FileSourceType.FirebaseStorage:
-                return (<FirebaseStorageLink reference={filePath.path} />);
+                return <FirebaseStorageLink reference={filePath.path} />;
         }
     })();
 
     return (
-        <div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
+        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
             {imageElement}
-            {imageElement == null ? null : <div style={({ width: 4 })} />}
+            {imageElement == null ? null : <div style={{ width: 4 }} />}
             {fileNameElement}
-            <div style={({ width: 4 })} />
-            <Button onClick={() => {
-                openFilesManager({ openFileType: some, onOpen, defaultFilteredValue: [FirebaseStorageFile.image] });
-            }}>Open</Button>
-            {filePath != null && <Button onClick={() => {
-                if (onPathChange != null) {
-                    onPathChange(null);
-                }
-            }}>Remove</Button>}
+            <div style={{ width: 4 }} />
+            <Button
+                onClick={() => {
+                    openFilesManager({
+                        openFileType: some,
+                        onOpen,
+                        defaultFilteredValue: [FirebaseStorageFile.image],
+                    });
+                }}
+            >
+                Open
+            </Button>
+            {filePath != null && (
+                <Button
+                    onClick={() => {
+                        if (onPathChange != null) {
+                            onPathChange(null);
+                        }
+                    }}
+                >
+                    Remove
+                </Button>
+            )}
         </div>
     );
 };

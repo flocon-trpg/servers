@@ -1,6 +1,12 @@
 import { castToNumber, castToRecord, castToString } from '../utils/cast';
 import isObject from '../utils/isObject';
-import { castToPartialPanelsConfig, defaultPanelsConfig, PanelsConfig, PartialPanelsConfig, toCompletePanelsConfig } from './PanelsConfig';
+import {
+    castToPartialPanelsConfig,
+    defaultPanelsConfig,
+    PanelsConfig,
+    PartialPanelsConfig,
+    toCompletePanelsConfig,
+} from './PanelsConfig';
 import * as Room from '../stateManagers/states/room';
 import { MessageFilter } from './MessagePanelConfig';
 
@@ -17,7 +23,7 @@ export type RoomConfig = {
     masterVolume: number;
     channelVolumes: Record<string, number>;
     seVolume: number;
-}
+};
 
 export type PartialRoomConfig = {
     // PartialRoomConfigはlocalforage.getItemで使われるが、localforage.setItemでは使われない。
@@ -30,15 +36,17 @@ export type PartialRoomConfig = {
     masterVolume?: number;
     channelVolumes?: Record<string, number>;
     seVolume?: number;
-}
+};
 
 export type UpdateGameSystemAction = {
     roomId: string;
-    gameSystem: {
-        id: string;
-        name: string;
-    } | undefined;
-}
+    gameSystem:
+        | {
+              id: string;
+              name: string;
+          }
+        | undefined;
+};
 
 export const activeBoardPanel = 'activeBoardPanel';
 export const boardEditorPanel = 'boardEditorPanel';
@@ -51,27 +59,35 @@ export const pieceValuePanel = 'pieceValuePanel';
 
 export type PanelAction = {
     roomId: string;
-    target: {
-        type: typeof activeBoardPanel;
-    } | {
-        type: typeof boardEditorPanel;
-        panelId: string;
-    } | {
-        type: typeof characterPanel;
-    } | {
-        type: typeof gameEffectPanel;
-    } | {
-        type: typeof memoPanel;
-        panelId: string;
-    } | {
-        type: typeof messagePanel;
-        panelId: string;
-    } | {
-        type: typeof participantPanel;
-    } | {
-        type: typeof pieceValuePanel;
-    };
-}
+    target:
+        | {
+              type: typeof activeBoardPanel;
+          }
+        | {
+              type: typeof boardEditorPanel;
+              panelId: string;
+          }
+        | {
+              type: typeof characterPanel;
+          }
+        | {
+              type: typeof gameEffectPanel;
+          }
+        | {
+              type: typeof memoPanel;
+              panelId: string;
+          }
+        | {
+              type: typeof messagePanel;
+              panelId: string;
+          }
+        | {
+              type: typeof participantPanel;
+          }
+        | {
+              type: typeof pieceValuePanel;
+          };
+};
 
 export const castToPartialRoomConfig = (source: unknown): PartialRoomConfig | undefined => {
     if (!isObject<PartialRoomConfig>(source)) {
@@ -88,14 +104,18 @@ export const castToPartialRoomConfig = (source: unknown): PartialRoomConfig | un
 
 // versionが未対応のものの場合はundefinedを返す。
 // TODO: Configをユーザーがリセットできないと、versionが不正になってしまったときに永遠に使用できなくなる問題への対処。
-export const toCompleteRoomConfig = (source: PartialRoomConfig, roomId: string): RoomConfig | undefined => {
+export const toCompleteRoomConfig = (
+    source: PartialRoomConfig,
+    roomId: string
+): RoomConfig | undefined => {
     if (source.version !== 1) {
         return;
     }
     return {
         roomId,
         version: source.version,
-        panels: source.panels == null ? defaultPanelsConfig() : toCompletePanelsConfig(source.panels),
+        panels:
+            source.panels == null ? defaultPanelsConfig() : toCompletePanelsConfig(source.panels),
         messageNotificationFilter: source.messageNotificationFilter ?? MessageFilter.createAll(),
         masterVolume: source.masterVolume ?? defaultMasterVolume,
         channelVolumes: source.channelVolumes ?? {},

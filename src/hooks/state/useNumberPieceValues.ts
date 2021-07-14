@@ -7,7 +7,7 @@ export type NumberPieceValueElement = {
     characterKey: CompositeKey;
     valueId: string;
     value: NumberPieceValueState;
-}
+};
 
 export const useNumberPieceValues = (): ReadonlyArray<NumberPieceValueElement> | undefined => {
     const characters = useCharacters();

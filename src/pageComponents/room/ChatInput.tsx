@@ -2,7 +2,11 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { Button, Col, Drawer, Input, Select, Row, Checkbox, Alert, Popover } from 'antd';
-import { useListAvailableGameSystemsQuery, useWritePrivateMessageMutation, useWritePublicMessageMutation } from '../../generated/graphql';
+import {
+    useListAvailableGameSystemsQuery,
+    useWritePrivateMessageMutation,
+    useWritePublicMessageMutation,
+} from '../../generated/graphql';
 import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
 import MyAuthContext from '../../contexts/MyAuthContext';
@@ -32,13 +36,18 @@ type PrivateMessageDrawerProps = {
     selectedParticipants: ReadonlySet<string>;
     onChange: (selectedParticipants: ReadonlySet<string>) => void;
     onClose: () => void;
-}
+};
 
 const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 18;
 
 // TODO: playerの場合、characterの情報も一緒に載せたほうがわかりやすい
-const PrivateMessageDrawer: React.FC<PrivateMessageDrawerProps> = ({ visible, selectedParticipants, onChange, onClose }: PrivateMessageDrawerProps) => {
+const PrivateMessageDrawer: React.FC<PrivateMessageDrawerProps> = ({
+    visible,
+    selectedParticipants,
+    onChange,
+    onClose,
+}: PrivateMessageDrawerProps) => {
     const myAuth = React.useContext(MyAuthContext);
     const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
 
@@ -49,53 +58,70 @@ const PrivateMessageDrawer: React.FC<PrivateMessageDrawerProps> = ({ visible, se
 
     return (
         <Drawer
-            className='cancel-rnd'
+            className="cancel-rnd"
             width={600}
-            title='秘話の送信先'
+            title="秘話の送信先"
             visible={visible}
             closable
             onClose={() => onClose()}
-            footer={(
+            footer={
                 <DrawerFooter
-                    close={({
+                    close={{
                         textType: 'close',
-                        onClick: () => onClose()
-                    })} />)}>
+                        onClick: () => onClose(),
+                    }}
+                />
+            }
+        >
             <div>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
+                <Row gutter={gutter} align="middle">
+                    <Col flex="auto" />
                     <Col flex={0}>送信先</Col>
                     <Col span={inputSpan}>
                         <div>
-                            {recordToArray(participants).length <= 1 ? '(自分以外の入室者がいません)' : recordToArray(participants)
-                                .filter(pair => getUserUid(myAuth) !== pair.key)
-                                .sort((x, y) => x.value.name.localeCompare(y.value.name))
-                                .map(pair => {
-                                    return (
-                                        <React.Fragment key={pair.key}>
-                                            <Checkbox
-                                                checked={selectedParticipants.has(pair.key)}
-                                                onChange={newValue => {
-                                                    const newSelectedParticipants = new Set(selectedParticipants);
-                                                    if (newValue.target.checked) {
-                                                        newSelectedParticipants.add(pair.key);
-                                                    } else {
-                                                        newSelectedParticipants.delete(pair.key);
-                                                    }
-                                                    onChange(newSelectedParticipants);
-                                                }}>
-                                                {pair.value.name}
-                                            </Checkbox>
-                                            <br />
-                                        </React.Fragment>);
-                                })}
+                            {recordToArray(participants).length <= 1
+                                ? '(自分以外の入室者がいません)'
+                                : recordToArray(participants)
+                                      .filter(pair => getUserUid(myAuth) !== pair.key)
+                                      .sort((x, y) => x.value.name.localeCompare(y.value.name))
+                                      .map(pair => {
+                                          return (
+                                              <React.Fragment key={pair.key}>
+                                                  <Checkbox
+                                                      checked={selectedParticipants.has(pair.key)}
+                                                      onChange={newValue => {
+                                                          const newSelectedParticipants = new Set(
+                                                              selectedParticipants
+                                                          );
+                                                          if (newValue.target.checked) {
+                                                              newSelectedParticipants.add(pair.key);
+                                                          } else {
+                                                              newSelectedParticipants.delete(
+                                                                  pair.key
+                                                              );
+                                                          }
+                                                          onChange(newSelectedParticipants);
+                                                      }}
+                                                  >
+                                                      {pair.value.name}
+                                                  </Checkbox>
+                                                  <br />
+                                              </React.Fragment>
+                                          );
+                                      })}
                         </div>
                     </Col>
                 </Row>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
+                <Row gutter={gutter} align="middle">
+                    <Col flex="auto" />
                     <Col span={inputSpan}>
-                        {selectedParticipants.size === 0 ? <Alert message="送信先のユーザーが選択されていないため、独り言になります。独り言を使うことで、自分の考えをログに残すことができます。" type="info" showIcon /> : null}
+                        {selectedParticipants.size === 0 ? (
+                            <Alert
+                                message="送信先のユーザーが選択されていないため、独り言になります。独り言を使うことで、自分の考えをログに残すことができます。"
+                                type="info"
+                                showIcon
+                            />
+                        ) : null}
                     </Col>
                 </Row>
             </div>
@@ -123,7 +149,7 @@ type Props = {
 
     // メッセージ書き込み中通知機能を実現するため、*MessageTextは全てのChatInputで共通にしている。そのため、ChatInput内部でuseStateせず、外部でuseStateしたものを受け取る形にしている。
     useRoomMessageInputTextsResult: UseRoomMessageInputTextsResult;
-}
+};
 
 export const ChatInput: React.FC<Props> = ({
     roomId,
@@ -138,61 +164,78 @@ export const ChatInput: React.FC<Props> = ({
     const participants = useParticipants();
     const characters = useCharacters();
     const publicChannelNames = usePublicChannelNames();
-    const roomMessagesFontSizeDelta = useSelector(state => state.userConfigModule?.roomMessagesFontSizeDelta);
+    const roomMessagesFontSizeDelta = useSelector(
+        state => state.userConfigModule?.roomMessagesFontSizeDelta
+    );
     const fontSize = UserConfig.getRoomMessagesFontSize(roomMessagesFontSizeDelta ?? 0);
     const availableGameSystems = useListAvailableGameSystemsQuery();
     React.useEffect(() => {
         if (availableGameSystems.error == null) {
             return;
         }
-        dispatch(roomStateModule.actions.addNotification({
-            type: apolloError,
-            error: availableGameSystems.error,
-            createdAt: new Date().getTime(),
-        }));
+        dispatch(
+            roomStateModule.actions.addNotification({
+                type: apolloError,
+                error: availableGameSystems.error,
+                createdAt: new Date().getTime(),
+            })
+        );
     }, [availableGameSystems.error, dispatch]);
     const myAuth = React.useContext(MyAuthContext);
     const [writePublicMessage] = useWritePublicMessageMutation();
     const [writePrivateMessage] = useWritePrivateMessageMutation();
     const [isPosting, setIsPosting] = React.useState(false); // 現状、チャンネルごとに並列的に投稿することはできないが、この制限はstateを増やすなどにより取り除くことができる。
-    const [selectedParticipantIds, setSelectedParticipantIds] = React.useState<ReadonlySet<string>>(new Set());
+    const [selectedParticipantIds, setSelectedParticipantIds] = React.useState<ReadonlySet<string>>(
+        new Set()
+    );
 
     const [isDrawerVisible, setIsDrawerVisible] = React.useState(false);
 
     const myUserUid = getUserUid(myAuth);
-    const selectedParticipantsBase = React.useMemo(() =>
-        _([...selectedParticipantIds])
-            .map(id => {
-                const found = participants?.get(id);
-                if (found == null) {
-                    return null;
-                }
-                return [id, found] as const;
-            })
-            .compact()
-            .sort(([, x], [, y]) => x.name.localeCompare(y.name))
-            .value(), [selectedParticipantIds, participants]);
-    const selectedParticipants = React.useMemo(() =>
-        selectedParticipantsBase.map(([, participant]) => participant.name), [selectedParticipantsBase]);
-    const selectedParticipantElements = React.useMemo(() =>
-        selectedParticipantsBase
-            .map(([id, participant]) => {
-                return (<div key={id} style={{ maxWidth: '60px' }}>
-                    {participant.name}
-                </div>);
-            }), [selectedParticipantsBase]);
+    const selectedParticipantsBase = React.useMemo(
+        () =>
+            _([...selectedParticipantIds])
+                .map(id => {
+                    const found = participants?.get(id);
+                    if (found == null) {
+                        return null;
+                    }
+                    return [id, found] as const;
+                })
+                .compact()
+                .sort(([, x], [, y]) => x.name.localeCompare(y.name))
+                .value(),
+        [selectedParticipantIds, participants]
+    );
+    const selectedParticipants = React.useMemo(
+        () => selectedParticipantsBase.map(([, participant]) => participant.name),
+        [selectedParticipantsBase]
+    );
+    const selectedParticipantElements = React.useMemo(
+        () =>
+            selectedParticipantsBase.map(([id, participant]) => {
+                return (
+                    <div key={id} style={{ maxWidth: '60px' }}>
+                        {participant.name}
+                    </div>
+                );
+            }),
+        [selectedParticipantsBase]
+    );
 
     const myCharacters = React.useMemo(() => {
         if (myUserUid == null || characters == null) {
             return [];
         }
-        return [...(characters.getByFirst(myUserUid)?.entries() ?? [])].sort(([, x], [, y]) => x.name.localeCompare(y.name)).map(([key, value]) => {
-            return (
-                <Select.Option key={key} value={key}>
-                    {value.name}
-                </Select.Option>
-            );
-        });
+        return [...(characters.getByFirst(myUserUid)?.entries() ?? [])]
+            .sort(([, x], [, y]) => x.name.localeCompare(y.name))
+            .map(([key, value]) => {
+                return (
+                    <Select.Option key={key} value={key}>
+                        {value.name}
+                    </Select.Option>
+                );
+            });
     }, [characters, myUserUid]);
 
     const textAreaRef = React.useRef<TextAreaRef | null>(null);
@@ -206,7 +249,10 @@ export const ChatInput: React.FC<Props> = ({
             break;
     }
 
-    let selectedChannelType: typeof publicChannelKey | typeof privateChannelKey | typeof freeChannelKey = freeChannelKey;
+    let selectedChannelType:
+        | typeof publicChannelKey
+        | typeof privateChannelKey
+        | typeof freeChannelKey = freeChannelKey;
     switch (config.selectedChannelType) {
         case publicChannelKey:
         case privateChannelKey:
@@ -239,29 +285,45 @@ export const ChatInput: React.FC<Props> = ({
             break;
         case publicChannelKey:
             postTo = selectedPublicChannel;
-            placeholder = `${publicChannelNames == null ? '?' : publicChannelNames[`publicChannel${selectedPublicChannel}Name` as const]}へ投稿`;
+            placeholder = `${
+                publicChannelNames == null
+                    ? '?'
+                    : publicChannelNames[`publicChannel${selectedPublicChannel}Name` as const]
+            }へ投稿`;
             break;
         case privateChannelKey:
             postTo = selectedParticipantIds;
-            placeholder = `秘話 (${selectedParticipants.length === 0 ? '自分のみ' : selectedParticipants.reduce((seed, elem, i) => {
-                if (i === 0) {
-                    return elem;
-                }
-                return `${seed}, ${elem}`;
-            }, '')}) へ投稿`;
+            placeholder = `秘話 (${
+                selectedParticipants.length === 0
+                    ? '自分のみ'
+                    : selectedParticipants.reduce((seed, elem, i) => {
+                          if (i === 0) {
+                              return elem;
+                          }
+                          return `${seed}, ${elem}`;
+                      }, '')
+            }) へ投稿`;
             break;
     }
 
-    const getText = (postTo: PublicChannelKey.Without$System.PublicChannelKey | ReadonlySet<string>): string => {
+    const getText = (
+        postTo: PublicChannelKey.Without$System.PublicChannelKey | ReadonlySet<string>
+    ): string => {
         if (PublicChannelKey.Without$System.isPublicChannelKey(postTo)) {
             return useRoomMessageInputTextsResult.publicMessageInputTexts.get(postTo) ?? '';
         } else {
-            return useRoomMessageInputTextsResult.privateMessageInputTexts.get(VisibleTo.toString(postTo)) ?? '';
+            return (
+                useRoomMessageInputTextsResult.privateMessageInputTexts.get(
+                    VisibleTo.toString(postTo)
+                ) ?? ''
+            );
         }
     };
 
     // postToは、ReadonlySet<string>のときは秘話を表す
-    const onPost = (postTo: PublicChannelKey.Without$System.PublicChannelKey | ReadonlySet<string>) => {
+    const onPost = (
+        postTo: PublicChannelKey.Without$System.PublicChannelKey | ReadonlySet<string>
+    ) => {
         const text = getText(postTo);
         if (isPosting || text.trim() === '') {
             return;
@@ -290,9 +352,14 @@ export const ChatInput: React.FC<Props> = ({
                         characterStateId,
                         customName: customNameVariable,
                         gameType: config.selectedGameSystem,
-                    }
+                    },
                 })
-                    .then(() => useRoomMessageInputTextsResult.setPrivateMessageInputText(undefined, selectedParticipantIds))
+                    .then(() =>
+                        useRoomMessageInputTextsResult.setPrivateMessageInputText(
+                            undefined,
+                            selectedParticipantIds
+                        )
+                    )
                     .finally(() => {
                         setIsPosting(false);
                         textAreaRef.current?.focus();
@@ -310,7 +377,7 @@ export const ChatInput: React.FC<Props> = ({
                         characterStateId,
                         customName: customNameVariable,
                         gameType: config.selectedGameSystem,
-                    }
+                    },
                 })
                     .then(() => {
                         if (!PublicChannelKey.Without$System.isPublicChannelKey(postTo)) {
@@ -358,129 +425,207 @@ export const ChatInput: React.FC<Props> = ({
                 visible={isDrawerVisible}
                 onClose={() => setIsDrawerVisible(false)}
                 selectedParticipants={selectedParticipantIds}
-                onChange={x => setSelectedParticipantIds(x)} />
+                onChange={x => setSelectedParticipantIds(x)}
+            />
             <div style={{ ...style, display: 'flex', flexDirection: 'column' }}>
-                <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                    <div style={titleStyle}>
-                        送信先
-                    </div>
+                <div
+                    style={{
+                        flex: '0 0 auto',
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                    }}
+                >
+                    <div style={titleStyle}>送信先</div>
                     <Select
                         style={{ flex: 1, maxWidth: miniInputMaxWidth }}
                         value={selectedChannelType}
-                        onSelect={newValue => dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { selectedChannelType: newValue } }))}>
-                        <Select.Option value={publicChannelKey}>
-                            メイン
-                        </Select.Option>
-                        <Select.Option value={freeChannelKey}>
-                            雑談
-                        </Select.Option>
-                        <Select.Option value={privateChannelKey}>
-                            秘話
-                        </Select.Option>
+                        onSelect={newValue =>
+                            dispatch(
+                                roomConfigModule.actions.updateMessagePanel({
+                                    roomId,
+                                    panelId,
+                                    panel: { selectedChannelType: newValue },
+                                })
+                            )
+                        }
+                    >
+                        <Select.Option value={publicChannelKey}>メイン</Select.Option>
+                        <Select.Option value={freeChannelKey}>雑談</Select.Option>
+                        <Select.Option value={privateChannelKey}>秘話</Select.Option>
                     </Select>
-                    {selectedChannelType !== freeChannelKey && <div style={{ flex: '0 0 auto', margin: '3px 0' }}><Icon.RightOutlined /></div>}
-                    {selectedChannelType === publicChannelKey && <Select
-                        style={{ flex: 1, maxWidth: miniInputMaxWidth }}
-                        value={selectedPublicChannel}
-                        onSelect={(value, option) => {
-                            if (typeof option.key !== 'string' || !isStrIndex10(option.key)) {
-                                return;
-                            }
-                            dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { selectedPublicChannelKey: option.key } }));
-                        }}>
-                        <Select.Option key='1' value='1'>
-                            {publicChannelNames?.publicChannel1Name}
-                        </Select.Option>
-                        <Select.Option key='2' value='2'>
-                            {publicChannelNames?.publicChannel2Name}
-                        </Select.Option>
-                        <Select.Option key='3' value='3'>
-                            {publicChannelNames?.publicChannel3Name}
-                        </Select.Option>
-                        <Select.Option key='4' value='4'>
-                            {publicChannelNames?.publicChannel4Name}
-                        </Select.Option>
-                        <Select.Option key='5' value='5'>
-                            {publicChannelNames?.publicChannel5Name}
-                        </Select.Option>
-                        <Select.Option key='6' value='6'>
-                            {publicChannelNames?.publicChannel6Name}
-                        </Select.Option>
-                        <Select.Option key='7' value='7'>
-                            {publicChannelNames?.publicChannel7Name}
-                        </Select.Option>
-                        <Select.Option key='8' value='8'>
-                            {publicChannelNames?.publicChannel8Name}
-                        </Select.Option>
-                        <Select.Option key='9' value='9'>
-                            {publicChannelNames?.publicChannel9Name}
-                        </Select.Option>
-                        <Select.Option key='10' value='10'>
-                            {publicChannelNames?.publicChannel10Name}
-                        </Select.Option>
-                    </Select>}
-                    {selectedChannelType === privateChannelKey && <>
-                        <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'row' }}>
-                            {selectedParticipantElements.length === 0 ? '(自分のみ)' : selectedParticipantElements}
+                    {selectedChannelType !== freeChannelKey && (
+                        <div style={{ flex: '0 0 auto', margin: '3px 0' }}>
+                            <Icon.RightOutlined />
                         </div>
-                        <Button style={{ flex: '0 0 auto' }} onClick={() => setIsDrawerVisible(true)}>編集</Button>
-                    </>}
+                    )}
+                    {selectedChannelType === publicChannelKey && (
+                        <Select
+                            style={{ flex: 1, maxWidth: miniInputMaxWidth }}
+                            value={selectedPublicChannel}
+                            onSelect={(value, option) => {
+                                if (typeof option.key !== 'string' || !isStrIndex10(option.key)) {
+                                    return;
+                                }
+                                dispatch(
+                                    roomConfigModule.actions.updateMessagePanel({
+                                        roomId,
+                                        panelId,
+                                        panel: { selectedPublicChannelKey: option.key },
+                                    })
+                                );
+                            }}
+                        >
+                            <Select.Option key="1" value="1">
+                                {publicChannelNames?.publicChannel1Name}
+                            </Select.Option>
+                            <Select.Option key="2" value="2">
+                                {publicChannelNames?.publicChannel2Name}
+                            </Select.Option>
+                            <Select.Option key="3" value="3">
+                                {publicChannelNames?.publicChannel3Name}
+                            </Select.Option>
+                            <Select.Option key="4" value="4">
+                                {publicChannelNames?.publicChannel4Name}
+                            </Select.Option>
+                            <Select.Option key="5" value="5">
+                                {publicChannelNames?.publicChannel5Name}
+                            </Select.Option>
+                            <Select.Option key="6" value="6">
+                                {publicChannelNames?.publicChannel6Name}
+                            </Select.Option>
+                            <Select.Option key="7" value="7">
+                                {publicChannelNames?.publicChannel7Name}
+                            </Select.Option>
+                            <Select.Option key="8" value="8">
+                                {publicChannelNames?.publicChannel8Name}
+                            </Select.Option>
+                            <Select.Option key="9" value="9">
+                                {publicChannelNames?.publicChannel9Name}
+                            </Select.Option>
+                            <Select.Option key="10" value="10">
+                                {publicChannelNames?.publicChannel10Name}
+                            </Select.Option>
+                        </Select>
+                    )}
+                    {selectedChannelType === privateChannelKey && (
+                        <>
+                            <div
+                                style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'row' }}
+                            >
+                                {selectedParticipantElements.length === 0
+                                    ? '(自分のみ)'
+                                    : selectedParticipantElements}
+                            </div>
+                            <Button
+                                style={{ flex: '0 0 auto' }}
+                                onClick={() => setIsDrawerVisible(true)}
+                            >
+                                編集
+                            </Button>
+                        </>
+                    )}
                     <div style={{ flex: 1 }} />
-                </div >
-                <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                    <div style={titleStyle}>
-                        キャラクター
-                    </div>
+                </div>
+                <div
+                    style={{
+                        flex: '0 0 auto',
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                    }}
+                >
+                    <div style={titleStyle}>キャラクター</div>
                     <Select
                         style={{ flex: 1, maxWidth: miniInputMaxWidth }}
                         value={selectedCharacterType}
-                        onSelect={newValue => dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { selectedCharacterType: newValue } }))}>
-                        <Select.Option value={none}>
-                            なし
-                        </Select.Option>
-                        <Select.Option value={some}>
-                            あり
-                        </Select.Option>
-                        <Select.Option value={custom}>
-                            カスタム
-                        </Select.Option>
+                        onSelect={newValue =>
+                            dispatch(
+                                roomConfigModule.actions.updateMessagePanel({
+                                    roomId,
+                                    panelId,
+                                    panel: { selectedCharacterType: newValue },
+                                })
+                            )
+                        }
+                    >
+                        <Select.Option value={none}>なし</Select.Option>
+                        <Select.Option value={some}>あり</Select.Option>
+                        <Select.Option value={custom}>カスタム</Select.Option>
                     </Select>
-                    {selectedCharacterType === none ? <div style={{ flex: 1 }} /> : <div style={{ flex: '0 0 auto', margin: '3px 0' }}><Icon.RightOutlined /></div>}
-                    {selectedCharacterType === some && <Select
-                        style={{ flex: 1, maxWidth: miniInputMaxWidth }}
-                        placeholder='キャラクター'
-                        value={config.selectedCharacterStateId}
-                        onSelect={(value, option) => {
-                            if (typeof option.key !== 'string') {
-                                return;
-                            }
-                            dispatch(roomConfigModule.actions.updateMessagePanel({
-                                roomId,
-                                panelId,
-                                panel: {
-                                    selectedCharacterStateId: option.key,
+                    {selectedCharacterType === none ? (
+                        <div style={{ flex: 1 }} />
+                    ) : (
+                        <div style={{ flex: '0 0 auto', margin: '3px 0' }}>
+                            <Icon.RightOutlined />
+                        </div>
+                    )}
+                    {selectedCharacterType === some && (
+                        <Select
+                            style={{ flex: 1, maxWidth: miniInputMaxWidth }}
+                            placeholder="キャラクター"
+                            value={config.selectedCharacterStateId}
+                            onSelect={(value, option) => {
+                                if (typeof option.key !== 'string') {
+                                    return;
                                 }
-                            }));
-                        }}>
-                        {myCharacters}
-                    </Select>}
-                    {selectedCharacterType === custom && <Input style={{ flex: 1, maxWidth: miniInputMaxWidth }} placeholder='名前' value={config.customCharacterName} onChange={e => dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { customCharacterName: e.target.value } }))} />}
+                                dispatch(
+                                    roomConfigModule.actions.updateMessagePanel({
+                                        roomId,
+                                        panelId,
+                                        panel: {
+                                            selectedCharacterStateId: option.key,
+                                        },
+                                    })
+                                );
+                            }}
+                        >
+                            {myCharacters}
+                        </Select>
+                    )}
+                    {selectedCharacterType === custom && (
+                        <Input
+                            style={{ flex: 1, maxWidth: miniInputMaxWidth }}
+                            placeholder="名前"
+                            value={config.customCharacterName}
+                            onChange={e =>
+                                dispatch(
+                                    roomConfigModule.actions.updateMessagePanel({
+                                        roomId,
+                                        panelId,
+                                        panel: { customCharacterName: e.target.value },
+                                    })
+                                )
+                            }
+                        />
+                    )}
                     <div style={{ flex: 1 }} />
                 </div>
-                <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                    <div style={titleStyle}>
-                        ダイス
-                    </div>
+                <div
+                    style={{
+                        flex: '0 0 auto',
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                    }}
+                >
+                    <div style={titleStyle}>ダイス</div>
                     <Select
                         style={{ flex: 1, maxWidth: miniInputMaxWidth }}
-                        placeholder='ゲームの種類'
+                        placeholder="ゲームの種類"
                         showSearch
                         value={config.selectedGameSystem}
                         onSelect={(value, option) => {
                             if (typeof option.key !== 'string') {
                                 return;
                             }
-                            dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { selectedGameSystem: option.key } }));
+                            dispatch(
+                                roomConfigModule.actions.updateMessagePanel({
+                                    roomId,
+                                    panelId,
+                                    panel: { selectedGameSystem: option.key },
+                                })
+                            );
                         }}
                         filterOption={(input, option) => {
                             const value: unknown = option?.value;
@@ -488,59 +633,151 @@ export const ChatInput: React.FC<Props> = ({
                                 return false;
                             }
                             return value.toLowerCase().indexOf(input.toLowerCase()) >= 0;
-                        }}>
-                        {[...availableGameSystems.data?.result.value ?? []].sort((x, y) => x.sortKey.localeCompare(y.sortKey)).map(gs => {
-                            return (<Select.Option key={gs.id} value={gs.id}>{gs.name}</Select.Option>);
-                        })}
+                        }}
+                    >
+                        {[...(availableGameSystems.data?.result.value ?? [])]
+                            .sort((x, y) => x.sortKey.localeCompare(y.sortKey))
+                            .map(gs => {
+                                return (
+                                    <Select.Option key={gs.id} value={gs.id}>
+                                        {gs.name}
+                                    </Select.Option>
+                                );
+                            })}
                     </Select>
                     <div style={{ flex: 1 }} />
                 </div>
-                <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                    <div style={titleStyle}>
-                        文字色
-                    </div>
+                <div
+                    style={{
+                        flex: '0 0 auto',
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                    }}
+                >
+                    <div style={titleStyle}>文字色</div>
                     <Popover
-                        trigger='click'
-                        content={<SketchPicker
-                            className={classNames('cancel-rnd')}
-                            css={css`color: black`}
-                            disableAlpha
-                            color={config.selectedTextColor == null ? '#000000' : config.selectedTextColor}
-                            onChange={e => dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { selectedTextColor: e.hex } }))}
-                            presetColors={['#F26262', '#F2A962', '#F1F262', '#AAF262', '#63F262', '#62F2AB', '#62F2F2', '#62ABF2', '#6362F2', '#AA62F2', '#F162F2', '#F262A9', '#9D9D9D']} />}>
-                        <Button style={{ color: config.selectedTextColor, width: 80, margin: '4px 4px 4px 0' }} type='dashed' size='small' >{config.selectedTextColor?.toUpperCase() ?? 'デフォルト'}</Button>
+                        trigger="click"
+                        content={
+                            <SketchPicker
+                                className={classNames('cancel-rnd')}
+                                css={css`
+                                    color: black;
+                                `}
+                                disableAlpha
+                                color={
+                                    config.selectedTextColor == null
+                                        ? '#000000'
+                                        : config.selectedTextColor
+                                }
+                                onChange={e =>
+                                    dispatch(
+                                        roomConfigModule.actions.updateMessagePanel({
+                                            roomId,
+                                            panelId,
+                                            panel: { selectedTextColor: e.hex },
+                                        })
+                                    )
+                                }
+                                presetColors={[
+                                    '#F26262',
+                                    '#F2A962',
+                                    '#F1F262',
+                                    '#AAF262',
+                                    '#63F262',
+                                    '#62F2AB',
+                                    '#62F2F2',
+                                    '#62ABF2',
+                                    '#6362F2',
+                                    '#AA62F2',
+                                    '#F162F2',
+                                    '#F262A9',
+                                    '#9D9D9D',
+                                ]}
+                            />
+                        }
+                    >
+                        <Button
+                            style={{
+                                color: config.selectedTextColor,
+                                width: 80,
+                                margin: '4px 4px 4px 0',
+                            }}
+                            type="dashed"
+                            size="small"
+                        >
+                            {config.selectedTextColor?.toUpperCase() ?? 'デフォルト'}
+                        </Button>
                     </Popover>
                     <Button
-                        size='small'
-                        onClick={() => dispatch(roomConfigModule.actions.updateMessagePanel({ roomId, panelId, panel: { selectedTextColor: { type: reset } } }))}>リセット</Button>
+                        size="small"
+                        onClick={() =>
+                            dispatch(
+                                roomConfigModule.actions.updateMessagePanel({
+                                    roomId,
+                                    panelId,
+                                    panel: { selectedTextColor: { type: reset } },
+                                })
+                            )
+                        }
+                    >
+                        リセット
+                    </Button>
                 </div>
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center', padding: '0 0 6px 0' }}>
+                <div
+                    style={{
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        padding: '0 0 6px 0',
+                    }}
+                >
                     <Input.TextArea
                         ref={textAreaRef}
-                        style={{ fontSize, resize: 'none', height: 70 /* PagenationScrollはheightを指定しなければならないという仕様の影響で、もしこれが可変だとPagenationScrollのheightの指定が無理とは言わないまでも面倒になる。そのため、70pxという適当な値で固定している */ }}
+                        style={{
+                            fontSize,
+                            resize: 'none',
+                            height: 70 /* PagenationScrollはheightを指定しなければならないという仕様の影響で、もしこれが可変だとPagenationScrollのheightの指定が無理とは言わないまでも面倒になる。そのため、70pxという適当な値で固定している */,
+                        }}
                         disabled={isPosting}
-                        value={(PublicChannelKey.Without$System.isPublicChannelKey(postTo) ? useRoomMessageInputTextsResult.publicMessageInputTexts.get(postTo) : useRoomMessageInputTextsResult.privateMessageInputTexts.get(VisibleTo.toString(postTo))) ?? ''}
+                        value={
+                            (PublicChannelKey.Without$System.isPublicChannelKey(postTo)
+                                ? useRoomMessageInputTextsResult.publicMessageInputTexts.get(postTo)
+                                : useRoomMessageInputTextsResult.privateMessageInputTexts.get(
+                                      VisibleTo.toString(postTo)
+                                  )) ?? ''
+                        }
                         placeholder={placeholder}
                         onChange={e => {
                             if (PublicChannelKey.Without$System.isPublicChannelKey(postTo)) {
                                 const $postTo = postTo;
-                                useRoomMessageInputTextsResult.setPublicMessageInputText(e.target.value, $postTo);
+                                useRoomMessageInputTextsResult.setPublicMessageInputText(
+                                    e.target.value,
+                                    $postTo
+                                );
                                 return;
                             }
                             const $postTo = postTo;
-                            useRoomMessageInputTextsResult.setPrivateMessageInputText(e.target.value, $postTo);
+                            useRoomMessageInputTextsResult.setPrivateMessageInputText(
+                                e.target.value,
+                                $postTo
+                            );
                             return;
                         }}
-                        onPressEnter={e => e.shiftKey ? undefined : onPost(postTo)} />
+                        onPressEnter={e => (e.shiftKey ? undefined : onPost(postTo))}
+                    />
                     <Button
                         style={{ width: 80 }}
                         disabled={isPosting || getText(postTo).trim() === ''}
-                        onClick={() => onPost(postTo)}>
+                        onClick={() => onPost(postTo)}
+                    >
                         {isPosting ? <Icon.LoadingOutlined /> : '投稿'}
                     </Button>
                 </div>
             </div>
-        </>);
+        </>
+    );
 };
 
 export default ChatInput;

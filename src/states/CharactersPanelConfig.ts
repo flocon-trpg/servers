@@ -1,21 +1,29 @@
 import * as Room from '../stateManagers/states/room';
 import isObject from '../utils/isObject';
-import { castToPartialDraggablePanelConfigBase, DraggablePanelConfigBase, toCompleteDraggablePanelConfigBase } from './DraggablePanelConfigBase';
+import {
+    castToPartialDraggablePanelConfigBase,
+    DraggablePanelConfigBase,
+    toCompleteDraggablePanelConfigBase,
+} from './DraggablePanelConfigBase';
 
 export type CharactersPanelConfig = {
     isMinimized: boolean;
-} & DraggablePanelConfigBase
+} & DraggablePanelConfigBase;
 
 export type PartialCharactersPanelConfig = Partial<CharactersPanelConfig>;
 
-export const castToPartialCharactersPanelConfig = (source: unknown): PartialCharactersPanelConfig | undefined => {
+export const castToPartialCharactersPanelConfig = (
+    source: unknown
+): PartialCharactersPanelConfig | undefined => {
     if (!isObject<PartialCharactersPanelConfig>(source)) {
         return;
     }
     return castToPartialDraggablePanelConfigBase(source);
 };
 
-export const toCompleteCharactersPanelConfig = (source: PartialCharactersPanelConfig): CharactersPanelConfig => {
+export const toCompleteCharactersPanelConfig = (
+    source: PartialCharactersPanelConfig
+): CharactersPanelConfig => {
     return {
         ...toCompleteDraggablePanelConfigBase(source),
         isMinimized: source.isMinimized ?? false,

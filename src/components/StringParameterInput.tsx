@@ -2,10 +2,20 @@ import React from 'react';
 import { Tooltip } from 'antd';
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 import ToggleButton from './ToggleButton';
-import { parameterIsPrivate, parameterIsNotPrivate, parameterIsPrivateAndNotCreatedByMe, parameterIsNotPrivateAndNotCreatedByMe } from '../resource/text/main';
+import {
+    parameterIsPrivate,
+    parameterIsNotPrivate,
+    parameterIsPrivateAndNotCreatedByMe,
+    parameterIsNotPrivateAndNotCreatedByMe,
+} from '../resource/text/main';
 import BufferedInput from './BufferedInput';
 import { StrIndex20 } from '@kizahasi/util';
-import { CharacterUpOperation, StrParamState, textDiff, toTextUpOperation } from '@kizahasi/flocon-core';
+import {
+    CharacterUpOperation,
+    StrParamState,
+    textDiff,
+    toTextUpOperation,
+} from '@kizahasi/flocon-core';
 
 const inputWidth = 150;
 
@@ -17,7 +27,7 @@ type Props = {
     createdByMe: boolean;
     onOperate: (operation: CharacterUpOperation) => void;
     compact: boolean;
-}
+};
 
 const StringParameterInput: React.FC<Props> = ({
     isCharacterPrivate,
@@ -30,9 +40,9 @@ const StringParameterInput: React.FC<Props> = ({
 }: Props) => {
     const input = ({ disabled }: { disabled: boolean }) => (
         <BufferedInput
-            style={({ width: inputWidth })}
-            size='small'
-            bufferDuration='default'
+            style={{ width: inputWidth }}
+            size="small"
+            bufferDuration="default"
             disabled={disabled}
             value={parameter?.value ?? ''}
             onChange={e => {
@@ -46,21 +56,28 @@ const StringParameterInput: React.FC<Props> = ({
                         [parameterKey]: {
                             $version: 1,
                             value: diff2 === undefined ? undefined : toTextUpOperation(diff2),
-                        }
-                    }
+                        },
+                    },
                 };
                 onOperate(operation);
-            }} />
+            }}
+        />
     );
 
     if (!createdByMe && parameter?.isValuePrivate === true) {
         if (compact) {
-            return (<Tooltip title={parameterIsPrivateAndNotCreatedByMe}><EyeInvisibleOutlined /></Tooltip>);
+            return (
+                <Tooltip title={parameterIsPrivateAndNotCreatedByMe}>
+                    <EyeInvisibleOutlined />
+                </Tooltip>
+            );
         }
         return (
             <>
                 {input({ disabled: true })}
-                <Tooltip title={parameterIsPrivateAndNotCreatedByMe}><EyeInvisibleOutlined /></Tooltip>
+                <Tooltip title={parameterIsPrivateAndNotCreatedByMe}>
+                    <EyeInvisibleOutlined />
+                </Tooltip>
             </>
         );
     }
@@ -70,10 +87,14 @@ const StringParameterInput: React.FC<Props> = ({
             disabled={createdByMe ? false : parameterIsNotPrivateAndNotCreatedByMe}
             hideWhenDisabled={compact}
             showAsTextWhenDisabled={!compact}
-            tooltip={(parameter?.isValuePrivate ?? false) ? parameterIsPrivate({ isCharacterPrivate, isCreate }) : parameterIsNotPrivate({ isCharacterPrivate, isCreate })}
+            tooltip={
+                parameter?.isValuePrivate ?? false
+                    ? parameterIsPrivate({ isCharacterPrivate, isCreate })
+                    : parameterIsNotPrivate({ isCharacterPrivate, isCreate })
+            }
             checkedChildren={<EyeOutlined />}
             unCheckedChildren={<EyeInvisibleOutlined />}
-            size='small'
+            size="small"
             onChange={e => {
                 const operation: CharacterUpOperation = {
                     $version: 1,
@@ -81,17 +102,19 @@ const StringParameterInput: React.FC<Props> = ({
                         [parameterKey]: {
                             $version: 1,
                             isValuePrivate: { newValue: !e },
-                        }
-                    }
+                        },
+                    },
                 };
                 onOperate(operation);
-            }} />
+            }}
+        />
     );
     return (
-        <div style={({ whiteSpace: 'nowrap' })}>
+        <div style={{ whiteSpace: 'nowrap' }}>
             {input({ disabled: false })}
-            {(compact && !createdByMe) ? null : isPrivateButton}
-        </div>);
+            {compact && !createdByMe ? null : isPrivateButton}
+        </div>
+    );
 };
 
 export default StringParameterInput;

@@ -5,26 +5,30 @@ import { usePrevious } from './usePrevious';
 export const update = 'update';
 export const create = 'create';
 
-export type StateEditorParams<T> = {
-    type: typeof update;
-    state: T;
-    onUpdate: (params: { prevState: T; nextState: T }) => void;
-} | {
-    type: typeof create;
-    initState: T;
-}
+export type StateEditorParams<T> =
+    | {
+          type: typeof update;
+          state: T;
+          onUpdate: (params: { prevState: T; nextState: T }) => void;
+      }
+    | {
+          type: typeof create;
+          initState: T;
+      };
 
 // stateのcreateとupdateを自動的に切り替える機能をサポートするhook。createはボタンなどを押すまで作成されず、updateは値が変わるたびにstateにその変更が反映される場面を想定。
 // 注意点として、stateがcreateからcreateに変わった場合は、そのときにもしinitStateが変わっても変更が反映されないという仕様。これにより、作成をキャンセルしてまた作成しようとしたときに前のデータが残るようになるというメリットがある。
 export function useStateEditor<T>(state: StateEditorParams<T>) {
-    const [uiState, setUiState] = React.useState<T>((() => {
-        switch (state.type) {
-            case update:
-                return state.state;
-            case create:
-                return state.initState;
-        }
-    })());
+    const [uiState, setUiState] = React.useState<T>(
+        (() => {
+            switch (state.type) {
+                case update:
+                    return state.state;
+                case create:
+                    return state.initState;
+            }
+        })()
+    );
 
     const stateRef = useReadonlyRef(state);
 
@@ -36,13 +40,16 @@ export function useStateEditor<T>(state: StateEditorParams<T>) {
         return true;
     }, [stateRef]);
 
-    const updateUiState = React.useCallback((newState: T) => {
-        if (stateRef.current.type === create) {
-            setUiState(newState);
-            return;
-        }
-        stateRef.current.onUpdate({ prevState: stateRef.current.state, nextState: newState });
-    }, [stateRef]);
+    const updateUiState = React.useCallback(
+        (newState: T) => {
+            if (stateRef.current.type === create) {
+                setUiState(newState);
+                return;
+            }
+            stateRef.current.onUpdate({ prevState: stateRef.current.state, nextState: newState });
+        },
+        [stateRef]
+    );
 
     const previousState = usePrevious(state);
 

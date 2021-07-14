@@ -29,18 +29,27 @@ const Jdenticon: React.FC<Props> = ({ hashOrValue, size, tooltipMode }: Props) =
     } else {
         tooltipTitle = hashOrValue;
     }
-    return <Popover
-        trigger='hover'
-        content={
-            <div style={({ display: 'flex', flexDirection: 'column' })}>
-                <img src={src} width={70} height={70} />
-                <span>
-                    {tooltipTitle}
-                    {tooltipTitle2 && <><br /><span>{tooltipTitle2}</span></>}
-                </span>
-            </div>}>
-        <img src={src} width={size} height={size} />
-    </Popover>;
+    return (
+        <Popover
+            trigger="hover"
+            content={
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <img src={src} width={70} height={70} />
+                    <span>
+                        {tooltipTitle}
+                        {tooltipTitle2 && (
+                            <>
+                                <br />
+                                <span>{tooltipTitle2}</span>
+                            </>
+                        )}
+                    </span>
+                </div>
+            }
+        >
+            <img src={src} width={size} height={size} />
+        </Popover>
+    );
 };
 
 export default Jdenticon;

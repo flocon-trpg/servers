@@ -1,4 +1,4 @@
-import { PayloadAction,createSlice } from '@reduxjs/toolkit';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 export namespace FirebaseStorageFile {
     export type Reference = firebase.default.storage.Reference;
@@ -9,7 +9,7 @@ export namespace FirebaseStorageFile {
 
     export const others = 'others';
 
-    export type FileType = typeof image | typeof sound | typeof others
+    export type FileType = typeof image | typeof sound | typeof others;
 
     export type State = {
         reference: Reference;
@@ -17,7 +17,7 @@ export namespace FirebaseStorageFile {
         fileName: string;
         fileType: FileType;
         metadata: unknown;
-    }
+    };
 }
 
 export type State = {
@@ -25,13 +25,15 @@ export type State = {
     reloadFirebaseStorageUnlistedFilesKey: number;
     firebaseStoragePublicFiles?: ReadonlyArray<FirebaseStorageFile.State>;
     reloadFirebaseStoragePublicFilesKey: number;
-}
+};
 
-type SetAction = Partial<Omit<State, 'reloadFirebaseStorageUnlistedFilesKey' | 'reloadFirebaseStoragePublicFilesKey'>>
+type SetAction = Partial<
+    Omit<State, 'reloadFirebaseStorageUnlistedFilesKey' | 'reloadFirebaseStoragePublicFilesKey'>
+>;
 
 const initState: State = {
     reloadFirebaseStoragePublicFilesKey: 0,
-    reloadFirebaseStorageUnlistedFilesKey: 0
+    reloadFirebaseStorageUnlistedFilesKey: 0,
 };
 
 export const fileModule = createSlice({
@@ -41,8 +43,11 @@ export const fileModule = createSlice({
         set: (state: State, action: PayloadAction<SetAction>) => {
             return {
                 ...state,
-                firebaseStoragePublicFiles: action.payload.firebaseStoragePublicFiles ?? state.firebaseStoragePublicFiles,
-                firebaseStorageUnlistedFiles: action.payload.firebaseStorageUnlistedFiles ?? state.firebaseStorageUnlistedFiles,
+                firebaseStoragePublicFiles:
+                    action.payload.firebaseStoragePublicFiles ?? state.firebaseStoragePublicFiles,
+                firebaseStorageUnlistedFiles:
+                    action.payload.firebaseStorageUnlistedFiles ??
+                    state.firebaseStorageUnlistedFiles,
             };
         },
         reloadFirebaseStoragePublicFiles: (state: State, action: PayloadAction<void>) => {
@@ -54,11 +59,12 @@ export const fileModule = createSlice({
         reloadFirebaseStorageUnlistedFiles: (state: State, action: PayloadAction<void>) => {
             return {
                 ...state,
-                reloadFirebaseStorageUnlistedFilesKey: state.reloadFirebaseStorageUnlistedFilesKey + 1,
+                reloadFirebaseStorageUnlistedFilesKey:
+                    state.reloadFirebaseStorageUnlistedFilesKey + 1,
             };
         },
         reset: (state: State, action: PayloadAction<void>) => {
             return initState;
         },
-    }
+    },
 });

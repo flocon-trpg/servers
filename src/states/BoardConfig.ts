@@ -6,7 +6,7 @@ export type BoardConfig = {
     offsetY: number;
     // ズーム倍率 = 2^zoom
     zoom: number;
-}
+};
 
 export type PartialBoardConfig = Partial<BoardConfig>;
 

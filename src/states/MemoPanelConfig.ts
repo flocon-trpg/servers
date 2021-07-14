@@ -1,16 +1,22 @@
 import { castToArray, castToBoolean, castToNumber, castToString } from '../utils/cast';
 import isObject from '../utils/isObject';
-import { castToPartialDraggablePanelConfigBase, DraggablePanelConfigBase, toCompleteDraggablePanelConfigBase } from './DraggablePanelConfigBase';
+import {
+    castToPartialDraggablePanelConfigBase,
+    DraggablePanelConfigBase,
+    toCompleteDraggablePanelConfigBase,
+} from './DraggablePanelConfigBase';
 import * as generators from '../utils/generators';
 
 export type MemoPanelConfig = {
     isMinimized: boolean;
     selectedMemoId?: string;
-} & DraggablePanelConfigBase
+} & DraggablePanelConfigBase;
 
 export type PartialMemoPanelConfig = Partial<MemoPanelConfig>;
 
-export const castToPartialMemoPanelConfig = (source: unknown): PartialMemoPanelConfig | undefined => {
+export const castToPartialMemoPanelConfig = (
+    source: unknown
+): PartialMemoPanelConfig | undefined => {
     if (!isObject<PartialMemoPanelConfig>(source)) {
         return;
     }

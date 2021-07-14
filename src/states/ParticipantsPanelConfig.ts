@@ -1,14 +1,20 @@
 import { castToBoolean } from '../utils/cast';
 import isObject from '../utils/isObject';
-import { castToPartialDraggablePanelConfigBase, DraggablePanelConfigBase, toCompleteDraggablePanelConfigBase } from './DraggablePanelConfigBase';
+import {
+    castToPartialDraggablePanelConfigBase,
+    DraggablePanelConfigBase,
+    toCompleteDraggablePanelConfigBase,
+} from './DraggablePanelConfigBase';
 
 export type ParticipantPanelConfig = {
     isMinimized: boolean;
-} & DraggablePanelConfigBase
+} & DraggablePanelConfigBase;
 
 export type PartialParticipantPanelConfig = Partial<ParticipantPanelConfig>;
 
-export const castToPartialParticipantPanelConfig = (source: unknown): PartialParticipantPanelConfig | undefined => {
+export const castToPartialParticipantPanelConfig = (
+    source: unknown
+): PartialParticipantPanelConfig | undefined => {
     if (!isObject<PartialParticipantPanelConfig>(source)) {
         return;
     }
@@ -18,7 +24,9 @@ export const castToPartialParticipantPanelConfig = (source: unknown): PartialPar
     };
 };
 
-export const toCompleteParticipantsPanelConfig = (source: PartialParticipantPanelConfig): ParticipantPanelConfig => {
+export const toCompleteParticipantsPanelConfig = (
+    source: PartialParticipantPanelConfig
+): ParticipantPanelConfig => {
     return {
         ...toCompleteDraggablePanelConfigBase(source),
         isMinimized: source.isMinimized ?? false,
@@ -35,4 +43,3 @@ export const defaultParticipantPanelConfig = (): ParticipantPanelConfig => {
         isMinimized: false,
     };
 };
-

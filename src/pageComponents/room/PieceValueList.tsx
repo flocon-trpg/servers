@@ -5,7 +5,10 @@ import * as Icon from '@ant-design/icons';
 import { useOperate } from '../../hooks/useOperate';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import _ from 'lodash';
-import { NumberPieceValueElement, useNumberPieceValues } from '../../hooks/state/useNumberPieceValues';
+import {
+    NumberPieceValueElement,
+    useNumberPieceValues,
+} from '../../hooks/state/useNumberPieceValues';
 import { useDispatch } from 'react-redux';
 import { roomDrawerAndPopoverModule } from '../../modules/roomDrawerAndPopoverModule';
 import { DicePieceValueElement, useDicePieceValues } from '../../hooks/state/useDicePieceValues';
@@ -14,15 +17,17 @@ import { NumberPieceValue } from '../../utils/numberPieceValue';
 import { tripleKeyToString } from '../../utils/tripleKeyToString';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 
-type DataSource = {
-    type: 'dice';
-    key: string;
-    value: DicePieceValueElement;
-} | {
-    type: 'number';
-    key: string;
-    value: NumberPieceValueElement;
-};
+type DataSource =
+    | {
+          type: 'dice';
+          key: string;
+          value: DicePieceValueElement;
+      }
+    | {
+          type: 'number';
+          key: string;
+          value: NumberPieceValueElement;
+      };
 export const PieceValueList: React.FC = () => {
     const myUserUid = useMyUserUid();
     const dispatch = useDispatch();
@@ -40,27 +45,40 @@ export const PieceValueList: React.FC = () => {
             key: 'menu',
             // eslint-disable-next-line react/display-name
             render: (_: unknown, dataSource: DataSource) => {
-                return <Tooltip title='編集'>
-                    <Button
-                        style={({ alignSelf: 'center' })}
-                        size='small'
-                        onClick={() => dispatch(roomDrawerAndPopoverModule.actions.set({
-                            dicePieceValueDrawerType: dataSource.type === 'dice' ? {
-                                type: update,
-                                boardKey: null,
-                                stateKey: dataSource.value.valueId,
-                                characterKey: dataSource.value.characterKey,
-                            } : undefined,
-                            numberPieceValueDrawerType: dataSource.type === 'number' ? {
-                                type: update,
-                                boardKey: null,
-                                stateKey: dataSource.value.valueId,
-                                characterKey: dataSource.value.characterKey,
-                            } : undefined,
-                        }))}>
-                        <Icon.SettingOutlined />
-                    </Button>
-                </Tooltip>;
+                return (
+                    <Tooltip title="編集">
+                        <Button
+                            style={{ alignSelf: 'center' }}
+                            size="small"
+                            onClick={() =>
+                                dispatch(
+                                    roomDrawerAndPopoverModule.actions.set({
+                                        dicePieceValueDrawerType:
+                                            dataSource.type === 'dice'
+                                                ? {
+                                                      type: update,
+                                                      boardKey: null,
+                                                      stateKey: dataSource.value.valueId,
+                                                      characterKey: dataSource.value.characterKey,
+                                                  }
+                                                : undefined,
+                                        numberPieceValueDrawerType:
+                                            dataSource.type === 'number'
+                                                ? {
+                                                      type: update,
+                                                      boardKey: null,
+                                                      stateKey: dataSource.value.valueId,
+                                                      characterKey: dataSource.value.characterKey,
+                                                  }
+                                                : undefined,
+                                    })
+                                )
+                            }
+                        >
+                            <Icon.SettingOutlined />
+                        </Button>
+                    </Tooltip>
+                );
             },
         },
         {
@@ -68,9 +86,17 @@ export const PieceValueList: React.FC = () => {
             key: '種類',
             // eslint-disable-next-line react/display-name
             render: (_: unknown, dataSource: DataSource) => {
-                return <div style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                    {dataSource.type === 'dice' ? 'ダイスコマ' : '数値コマ'}
-                </div>;
+                return (
+                    <div
+                        style={{
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                            textOverflow: 'ellipsis',
+                        }}
+                    >
+                        {dataSource.type === 'dice' ? 'ダイスコマ' : '数値コマ'}
+                    </div>
+                );
             },
         },
         {
@@ -78,9 +104,21 @@ export const PieceValueList: React.FC = () => {
             key: 'ID',
             // eslint-disable-next-line react/display-name
             render: (_: unknown, dataSource: DataSource) => {
-                return <div style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                    {tripleKeyToString(dataSource.value.characterKey.createdBy, dataSource.value.characterKey.id, dataSource.value.valueId)}
-                </div>;
+                return (
+                    <div
+                        style={{
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                            textOverflow: 'ellipsis',
+                        }}
+                    >
+                        {tripleKeyToString(
+                            dataSource.value.characterKey.createdBy,
+                            dataSource.value.characterKey.id,
+                            dataSource.value.valueId
+                        )}
+                    </div>
+                );
             },
         },
         {
@@ -100,25 +138,41 @@ export const PieceValueList: React.FC = () => {
             // eslint-disable-next-line react/display-name
             render: (_: unknown, dataSource: DataSource) => {
                 const createdBy = dataSource.value.characterKey.createdBy;
-                return <span>{participants.get(createdBy)?.name}{createdBy === myUserUid && <span style={{ fontWeight: 'bold', paddingLeft: 2 }}>(自分)</span>}</span>;
+                return (
+                    <span>
+                        {participants.get(createdBy)?.name}
+                        {createdBy === myUserUid && (
+                            <span style={{ fontWeight: 'bold', paddingLeft: 2 }}>(自分)</span>
+                        )}
+                    </span>
+                );
             },
-        }
+        },
     ];
 
-    const dataSource: DataSource[] =
-        [
-            ...dicePieceValues.map(value => ({
-                type: 'dice' as const,
-                value,
-                key: `${tripleKeyToString(value.characterKey.createdBy, value.characterKey.id, value.valueId)}@dice`
-            })),
-            ...numberPieceValues.map(value => ({
-                type: 'number' as const,
-                value,
-                key: `${tripleKeyToString(value.characterKey.createdBy, value.characterKey.id, value.valueId)}@number`
-            }))];
+    const dataSource: DataSource[] = [
+        ...dicePieceValues.map(value => ({
+            type: 'dice' as const,
+            value,
+            key: `${tripleKeyToString(
+                value.characterKey.createdBy,
+                value.characterKey.id,
+                value.valueId
+            )}@dice`,
+        })),
+        ...numberPieceValues.map(value => ({
+            type: 'number' as const,
+            value,
+            key: `${tripleKeyToString(
+                value.characterKey.createdBy,
+                value.characterKey.id,
+                value.valueId
+            )}@number`,
+        })),
+    ];
     return (
         <div>
-            <Table columns={columns} dataSource={dataSource} size='small' pagination={false} />
-        </div>);
+            <Table columns={columns} dataSource={dataSource} size="small" pagination={false} />
+        </div>
+    );
 };

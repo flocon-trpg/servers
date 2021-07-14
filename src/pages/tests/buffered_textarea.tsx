@@ -12,14 +12,24 @@ const Main: React.FC = () => {
         });
     }, []);
 
-    return <div>
-        <BufferedTextArea value={value} bufferDuration='default' onChange={e => {
-            setChangelog(state => [...state, e]);
-        }} />
+    return (
         <div>
-            {changelog.map((log, i) => <div key={i}>{`previousValue: ${log.previousValue}, currentValue: ${log.currentValue}`}</div>)}
+            <BufferedTextArea
+                value={value}
+                bufferDuration="default"
+                onChange={e => {
+                    setChangelog(state => [...state, e]);
+                }}
+            />
+            <div>
+                {changelog.map((log, i) => (
+                    <div
+                        key={i}
+                    >{`previousValue: ${log.previousValue}, currentValue: ${log.currentValue}`}</div>
+                ))}
+            </div>
         </div>
-    </div>;
+    );
 };
 
 export default Main;

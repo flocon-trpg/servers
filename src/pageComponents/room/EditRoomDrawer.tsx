@@ -17,7 +17,9 @@ const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
 const EditRoomDrawer: React.FC = () => {
-    const editRoomDrawerVisibility = useSelector(state => state.roomDrawerAndPopoverModule.editRoomDrawerVisibility);
+    const editRoomDrawerVisibility = useSelector(
+        state => state.roomDrawerAndPopoverModule.editRoomDrawerVisibility
+    );
     const dispatch = useDispatch();
     const operate = useOperate();
     const name = useSelector(state => state.roomModule.roomState?.state?.name);
@@ -25,22 +27,31 @@ const EditRoomDrawer: React.FC = () => {
     return (
         <Drawer
             {...drawerBaseProps}
-            title='部屋の設定'
+            title="部屋の設定"
             visible={editRoomDrawerVisibility}
             closable
-            onClose={() => dispatch(roomDrawerAndPopoverModule.actions.set({ editRoomDrawerVisibility: false }))}
-            footer={(
+            onClose={() =>
+                dispatch(
+                    roomDrawerAndPopoverModule.actions.set({ editRoomDrawerVisibility: false })
+                )
+            }
+            footer={
                 <DrawerFooter
-                    close={({
+                    close={{
                         textType: 'close',
-                        onClick: () => dispatch({ type: editRoomDrawerVisibility, newValue: false })
-                    })} />)}>
+                        onClick: () =>
+                            dispatch({ type: editRoomDrawerVisibility, newValue: false }),
+                    }}
+                />
+            }
+        >
             <div>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
+                <Row gutter={gutter} align="middle">
+                    <Col flex="auto" />
                     <Col flex={0}>名前</Col>
                     <Col span={inputSpan}>
-                        <Input size='small'
+                        <Input
+                            size="small"
                             value={name}
                             onChange={e => {
                                 const operation: UpOperation = {
@@ -48,7 +59,8 @@ const EditRoomDrawer: React.FC = () => {
                                     name: { newValue: e.target.value },
                                 };
                                 operate(operation);
-                            }} />
+                            }}
+                        />
                     </Col>
                 </Row>
             </div>

@@ -20,23 +20,44 @@ type Props = {
     size?: SizeType;
 };
 
-const ToggleButton: React.FC<Props> = ({ checkedChildren, checkedIcon, unCheckedChildren, unCheckedIcon, tooltip, disabled: disabledCore, showAsTextWhenDisabled, hideWhenDisabled, checked, onChange, size }: Props) => {
+const ToggleButton: React.FC<Props> = ({
+    checkedChildren,
+    checkedIcon,
+    unCheckedChildren,
+    unCheckedIcon,
+    tooltip,
+    disabled: disabledCore,
+    showAsTextWhenDisabled,
+    hideWhenDisabled,
+    checked,
+    onChange,
+    size,
+}: Props) => {
     const disabled = typeof disabledCore === 'string' ? true : disabledCore;
     let button: JSX.Element;
     if (disabled && hideWhenDisabled) {
         return null;
     }
     if (disabled && showAsTextWhenDisabled === true) {
-        button = <span css={css`padding: 0 5px;`}>{checked ? checkedChildren : unCheckedChildren}</span>;
+        button = (
+            <span
+                css={css`
+                    padding: 0 5px;
+                `}
+            >
+                {checked ? checkedChildren : unCheckedChildren}
+            </span>
+        );
     } else {
         button = (
             <Button
                 type={disabled && showAsTextWhenDisabled === true ? 'text' : 'dashed'}
                 icon={checked ? checkedIcon : unCheckedIcon}
-                shape='circle'
+                shape="circle"
                 onClick={() => onChange(!checked)}
                 disabled={disabled}
-                size={size}>
+                size={size}
+            >
                 {checked ? checkedChildren : unCheckedChildren}
             </Button>
         );

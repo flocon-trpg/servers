@@ -10,7 +10,7 @@ export type UserConfig = {
 
     // +ボタンを押すと1増え、-ボタンを押すと1減る。+ボタンや-ボタンがどれだけ押されたかを見て、適切なフォントの大きさをコンポーネント側が決めて表示する。
     roomMessagesFontSizeDelta: number;
-}
+};
 
 export namespace UserConfig {
     export const getRoomMessagesFontSize = (roomMessagesFontSizeDelta: number): number => {
@@ -46,7 +46,7 @@ export type PartialUserConfig = {
     version?: number;
 
     roomMessagesFontSizeDelta?: number;
-}
+};
 
 export const castToPartialUserConfig = (source: unknown): PartialUserConfig | undefined => {
     if (!isObject<PartialUserConfig>(source)) {
@@ -60,7 +60,10 @@ export const castToPartialUserConfig = (source: unknown): PartialUserConfig | un
 
 // versionが未対応のものの場合はundefinedを返す。
 // TODO: Configをユーザーがリセットできないと、versionが不正になってしまったときに永遠に使用できなくなる問題への対処。
-export const toCompleteUserConfig = (source: PartialUserConfig, userUid: string): UserConfig | undefined => {
+export const toCompleteUserConfig = (
+    source: PartialUserConfig,
+    userUid: string
+): UserConfig | undefined => {
     if (source.version !== 1) {
         return;
     }

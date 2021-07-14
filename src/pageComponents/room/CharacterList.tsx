@@ -10,13 +10,27 @@ import StringParameterInput from '../../components/StringParameterInput';
 import { useFirebaseStorageUrl } from '../../hooks/firebaseStorage';
 import * as Icon from '@ant-design/icons';
 import ToggleButton from '../../components/ToggleButton';
-import { characterIsPrivate, characterIsNotPrivate, characterIsNotPrivateAndNotCreatedByMe } from '../../resource/text/main';
+import {
+    characterIsPrivate,
+    characterIsNotPrivate,
+    characterIsNotPrivateAndNotCreatedByMe,
+} from '../../resource/text/main';
 import { getUserUid } from '../../hooks/useFirebaseUser';
 import { useOperate } from '../../hooks/useOperate';
 import { useCharacters } from '../../hooks/state/useCharacters';
 import { useParticipants } from '../../hooks/state/useParticipants';
-import { useBoolParamNames, useNumParamNames, useStrParamNames } from '../../hooks/state/useParamNames';
-import { CharacterState, FilePath, ParamNameState, ParticipantState, UpOperation } from '@kizahasi/flocon-core';
+import {
+    useBoolParamNames,
+    useNumParamNames,
+    useStrParamNames,
+} from '../../hooks/state/useParamNames';
+import {
+    CharacterState,
+    FilePath,
+    ParamNameState,
+    ParticipantState,
+    UpOperation,
+} from '@kizahasi/flocon-core';
 import { CompositeKey, compositeKeyToString, StrIndex20, strIndex20Array } from '@kizahasi/util';
 import _ from 'lodash';
 import { useDispatch } from 'react-redux';
@@ -31,7 +45,7 @@ type DataSource = {
     };
     participants: ReadonlyMap<string, ParticipantState>;
     operate: (operation: UpOperation) => void;
-}
+};
 
 const minNumParameter = -1000000;
 const maxNumParameter = 1000000;
@@ -70,13 +84,15 @@ const createBooleanParameterColumn = ({
                                         [character.stateKey.id]: {
                                             type: update,
                                             update: characterOperation,
-                                        }
-                                    }
-                                }
+                                        },
+                                    },
+                                },
                             };
                             operate(operation);
-                        }} />
-                </>);
+                        }}
+                    />
+                </>
+            );
         },
     };
 };
@@ -116,13 +132,15 @@ const createNumParameterColumn = ({
                                         [character.stateKey.id]: {
                                             type: update,
                                             update: characterOperation,
-                                        }
-                                    }
-                                }
+                                        },
+                                    },
+                                },
                             };
                             operate(operation);
-                        }} />
-                </>);
+                        }}
+                    />
+                </>
+            );
         },
     };
 };
@@ -161,23 +179,31 @@ const createStringParameterColumn = ({
                                         [character.stateKey.id]: {
                                             type: update,
                                             update: characterOperation,
-                                        }
-                                    }
-                                }
+                                        },
+                                    },
+                                },
                             };
                             operate(operation);
-                        }} />
-                </>);
+                        }}
+                    />
+                </>
+            );
         },
     };
 };
 
-const Image: React.FC<{ filePath?: FilePathFragment | FilePath; iconSize: boolean }> = ({ filePath, iconSize }: { filePath?: FilePathFragment | FilePath; iconSize: boolean }) => {
+const Image: React.FC<{ filePath?: FilePathFragment | FilePath; iconSize: boolean }> = ({
+    filePath,
+    iconSize,
+}: {
+    filePath?: FilePathFragment | FilePath;
+    iconSize: boolean;
+}) => {
     const src = useFirebaseStorageUrl(filePath);
     if (src == null) {
         return null;
     }
-    return (<img src={src} width={iconSize ? 20 : 150} height={iconSize ? 20 : 150} />);
+    return <img src={src} width={iconSize ? 20 : 150} height={iconSize ? 20 : 150} />;
 };
 
 const CharacterList: React.FC = () => {
@@ -191,24 +217,29 @@ const CharacterList: React.FC = () => {
     const numParamNames = useNumParamNames();
     const strParamNames = useStrParamNames();
 
-    if (characters == null || participants == null || boolParamNames == null || numParamNames == null || strParamNames == null) {
+    if (
+        characters == null ||
+        participants == null ||
+        boolParamNames == null ||
+        numParamNames == null ||
+        strParamNames == null
+    ) {
         return null;
     }
 
-    const charactersDataSource: DataSource[] =
-        characters.toArray().map(([key, character]) => {
-            const createdByMe = getUserUid(myAuth) === key.createdBy;
-            return {
-                key: compositeKeyToString(key), // antdのtableのkeyとして必要
-                character: {
-                    stateKey: key,
-                    state: character,
-                    createdByMe,
-                },
-                participants,
-                operate,
-            };
-        });
+    const charactersDataSource: DataSource[] = characters.toArray().map(([key, character]) => {
+        const createdByMe = getUserUid(myAuth) === key.createdBy;
+        return {
+            key: compositeKeyToString(key), // antdのtableのkeyとして必要
+            character: {
+                stateKey: key,
+                state: character,
+                createdByMe,
+            },
+            participants,
+            operate,
+        };
+    });
 
     const columns = _([
         {
@@ -217,14 +248,25 @@ const CharacterList: React.FC = () => {
             width: 36,
             // eslint-disable-next-line react/display-name
             render: (_: unknown, { character }: DataSource) => (
-                <Tooltip title='編集'>
+                <Tooltip title="編集">
                     <Button
-                        style={({ alignSelf: 'center' })}
-                        size='small'
-                        onClick={() => dispatch(roomDrawerAndPopoverModule.actions.set({ characterDrawerType: { type: update, stateKey: character.stateKey } }))}>
+                        style={{ alignSelf: 'center' }}
+                        size="small"
+                        onClick={() =>
+                            dispatch(
+                                roomDrawerAndPopoverModule.actions.set({
+                                    characterDrawerType: {
+                                        type: update,
+                                        stateKey: character.stateKey,
+                                    },
+                                })
+                            )
+                        }
+                    >
                         <Icon.SettingOutlined />
                     </Button>
-                </Tooltip>),
+                </Tooltip>
+            ),
         },
         {
             title: '',
@@ -233,13 +275,19 @@ const CharacterList: React.FC = () => {
             // eslint-disable-next-line react/display-name
             render: (_: unknown, { character, operate }: DataSource) => (
                 <ToggleButton
-                    size='small'
+                    size="small"
                     checked={!character.state.isPrivate}
-                    disabled={character.createdByMe ? false : characterIsNotPrivateAndNotCreatedByMe}
+                    disabled={
+                        character.createdByMe ? false : characterIsNotPrivateAndNotCreatedByMe
+                    }
                     showAsTextWhenDisabled
                     checkedChildren={<Icon.EyeOutlined />}
                     unCheckedChildren={<Icon.EyeInvisibleOutlined />}
-                    tooltip={character.state.isPrivate ? characterIsPrivate({ isCreate: false }) : characterIsNotPrivate({ isCreate: false })}
+                    tooltip={
+                        character.state.isPrivate
+                            ? characterIsPrivate({ isCreate: false })
+                            : characterIsNotPrivate({ isCreate: false })
+                    }
                     onChange={newValue => {
                         const operation: UpOperation = {
                             $version: 1,
@@ -251,31 +299,46 @@ const CharacterList: React.FC = () => {
                                             $version: 1,
                                             isPrivate: { newValue: !newValue },
                                         },
-                                    }
-                                }
-                            }
+                                    },
+                                },
+                            },
                         };
                         operate(operation);
-                    }} />)
+                    }}
+                />
+            ),
         },
         {
             title: '名前',
             key: 'name',
             // eslint-disable-next-line react/display-name
             render: (_: unknown, { character }: DataSource) => (
-                <div style={({ display: 'flex', flexDirection: 'row', alignItems: 'center' })}>
-                    {character.state.image == null ?
-                        <Icon.UserOutlined /> :
-                        <Popover trigger='hover' content={<Image filePath={character.state.image ?? undefined} iconSize={false} />}>
+                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                    {character.state.image == null ? (
+                        <Icon.UserOutlined />
+                    ) : (
+                        <Popover
+                            trigger="hover"
+                            content={
+                                <Image
+                                    filePath={character.state.image ?? undefined}
+                                    iconSize={false}
+                                />
+                            }
+                        >
                             <div>
-                                <Image filePath={character.state.image ?? undefined} iconSize={true} />
+                                <Image
+                                    filePath={character.state.image ?? undefined}
+                                    iconSize={true}
+                                />
                             </div>
-                        </Popover>}
-                    <div style={({ width: 4 })} />
+                        </Popover>
+                    )}
+                    <div style={{ width: 4 }} />
                     <Input
-                        style={({ minWidth: 100 })}
+                        style={{ minWidth: 100 }}
                         value={character.state.name}
-                        size='small'
+                        size="small"
                         onChange={newValue => {
                             const operation: UpOperation = {
                                 $version: 1,
@@ -287,29 +350,57 @@ const CharacterList: React.FC = () => {
                                                 $version: 1,
                                                 name: { newValue: newValue.target.value },
                                             },
-                                        }
-                                    }
-                                }
+                                        },
+                                    },
+                                },
                             };
                             operate(operation);
-                        }} />
-                </div>),
+                        }}
+                    />
+                </div>
+            ),
         },
         ...strIndex20Array.map(key => createNumParameterColumn({ key, numParamNames })),
         ...strIndex20Array.map(key => createBooleanParameterColumn({ key, boolParamNames })),
         ...strIndex20Array.map(key => createStringParameterColumn({ key, strParamNames })),
-    ]).compact().value();
+    ])
+        .compact()
+        .value();
 
     return (
         <div>
-            <Button size='small' onClick={() => dispatch(roomDrawerAndPopoverModule.actions.set({ characterDrawerType: { type: create } }))}>
+            <Button
+                size="small"
+                onClick={() =>
+                    dispatch(
+                        roomDrawerAndPopoverModule.actions.set({
+                            characterDrawerType: { type: create },
+                        })
+                    )
+                }
+            >
                 キャラクターを作成
             </Button>
-            <Button size='small' onClick={() => dispatch(roomDrawerAndPopoverModule.actions.set({ characterParameterNamesDrawerVisibility: true }))}>
+            <Button
+                size="small"
+                onClick={() =>
+                    dispatch(
+                        roomDrawerAndPopoverModule.actions.set({
+                            characterParameterNamesDrawerVisibility: true,
+                        })
+                    )
+                }
+            >
                 パラメーターを追加・編集・削除
             </Button>
-            <Table columns={columns} dataSource={charactersDataSource} size='small' pagination={false} />
-        </div>);
+            <Table
+                columns={columns}
+                dataSource={charactersDataSource}
+                size="small"
+                pagination={false}
+            />
+        </div>
+    );
 };
 
 export default CharacterList;

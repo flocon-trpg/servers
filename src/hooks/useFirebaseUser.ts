@@ -6,7 +6,11 @@ import ConfigContext from '../contexts/ConfigContext';
 export const loading = 'loading';
 export const notSignIn = 'notSignIn';
 export const authNotFound = 'authNotFound';
-export type FirebaseUserState = firebase.User | typeof loading | typeof notSignIn | typeof authNotFound;
+export type FirebaseUserState =
+    | firebase.User
+    | typeof loading
+    | typeof notSignIn
+    | typeof authNotFound;
 
 // _app.tsxで1回のみ呼ばれることを想定。firebase authのデータを取得したい場合はContextで行う。
 export const useFirebaseUser = (): FirebaseUserState => {

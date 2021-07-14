@@ -1,7 +1,17 @@
 import { ApolloError } from '@apollo/client';
 import produce from 'immer';
 import React from 'react';
-import { RoomMessageEventFragment, RoomPrivateMessageFragment, RoomPublicMessageFragment, RoomPublicChannelFragment, RoomSoundEffectFragment, PieceValueLogFragment, RoomEventSubscription, GetRoomMessagesFailureType, useGetMessagesLazyQuery } from '../generated/graphql';
+import {
+    RoomMessageEventFragment,
+    RoomPrivateMessageFragment,
+    RoomPublicMessageFragment,
+    RoomPublicChannelFragment,
+    RoomSoundEffectFragment,
+    PieceValueLogFragment,
+    RoomEventSubscription,
+    GetRoomMessagesFailureType,
+    useGetMessagesLazyQuery,
+} from '../generated/graphql';
 import { appConsole } from '../utils/appConsole';
 import { PrivateChannelSet, PrivateChannelSets } from '../utils/PrivateChannelSet';
 import { usePrevious } from './usePrevious';
@@ -13,28 +23,37 @@ import { useMyUserUid } from './useMyUserUid';
 // 1. どこかでuseAllRoomMessagesを呼ぶ。冗長な通信を避けるため、useAllRoomMessagesを呼ぶ箇所はなるべく少なくする。
 // 2. フィルタリングしたい場合、useAllRoomMessagesによって得た値をuseFilteredRoomMessagesに渡す。配列に対して毎回filterメソッドを実行するより軽いはず。
 
-
 export const privateMessage = 'privateMessage';
 export const publicMessage = 'publicMessage';
 export const pieceValueLog = 'pieceValueLog';
 export const publicChannel = 'publicChannel';
 export const soundEffect = 'soundEffect';
 
-export type RoomMessage = {
-    type: typeof privateMessage;
-    value: RoomPrivateMessageFragment;
-} | {
-    type: typeof publicMessage;
-    value: RoomPublicMessageFragment;
-} | {
-    type: typeof pieceValueLog;
-    value: PieceValueLogFragment;
-} | {
-    type: typeof soundEffect;
-    value: RoomSoundEffectFragment;
-};
+export type RoomMessage =
+    | {
+          type: typeof privateMessage;
+          value: RoomPrivateMessageFragment;
+      }
+    | {
+          type: typeof publicMessage;
+          value: RoomPublicMessageFragment;
+      }
+    | {
+          type: typeof pieceValueLog;
+          value: PieceValueLogFragment;
+      }
+    | {
+          type: typeof soundEffect;
+          value: RoomSoundEffectFragment;
+      };
 
-const createRoomMessage = (source: RoomPrivateMessageFragment | RoomPublicMessageFragment | PieceValueLogFragment | RoomSoundEffectFragment): RoomMessage | undefined => {
+const createRoomMessage = (
+    source:
+        | RoomPrivateMessageFragment
+        | RoomPublicMessageFragment
+        | PieceValueLogFragment
+        | RoomSoundEffectFragment
+): RoomMessage | undefined => {
     switch (source.__typename) {
         case 'RoomPrivateMessage':
             return {
@@ -61,17 +80,18 @@ const createRoomMessage = (source: RoomPrivateMessageFragment | RoomPublicMessag
     }
 };
 
-export type RoomMessageEvent = {
-    type: typeof publicChannel;
-    value: RoomPublicChannelFragment;
-} | RoomMessage
-
+export type RoomMessageEvent =
+    | {
+          type: typeof publicChannel;
+          value: RoomPublicChannelFragment;
+      }
+    | RoomMessage;
 
 type StateToReduce = {
     messages: Message[];
     publicChannels: Map<string, RoomPublicChannelFragment>;
     privateChannels: PrivateChannelSets;
-}
+};
 
 export type ReadonlyStateToReduce = {
     messages: ReadonlyArray<Message>;
@@ -79,7 +99,7 @@ export type ReadonlyStateToReduce = {
     privateChannels: {
         toArray(): PrivateChannelSet[];
     };
-}
+};
 
 // Addのとき、同じmessageIdがstateに既に存在する場合も正常に処理される。その代わりに重い。
 const reduceInit = (actions: RoomMessageEventFragment[]): StateToReduce => {
@@ -189,7 +209,11 @@ const reduceInit = (actions: RoomMessageEventFragment[]): StateToReduce => {
 // Updateのときは同じmessageIdがないかどうか探すため、重さはreduceInitと同じ。ただし、UpdateはAddと比べて発生する頻度が少ないと想定している。
 //
 // UpdateによってRoomMessageの状態が変わったときでも、filterは再実行されない。理由は、現状ではChannelの振り分けなどにのみ使われるため必要性が薄いから(ChannelはUpdateによって変わることはない)。ユーザーによる検索はantdのComponentなどのほうで行う。
-const reduceMessages = (state: Message[], action: RoomMessageEventFragment, filter: (message: RoomMessage) => boolean): Message[] => {
+const reduceMessages = (
+    state: Message[],
+    action: RoomMessageEventFragment,
+    filter: (message: RoomMessage) => boolean
+): Message[] => {
     switch (action.__typename) {
         case 'RoomPrivateMessage':
         case 'RoomPublicMessage':
@@ -209,13 +233,20 @@ const reduceMessages = (state: Message[], action: RoomMessageEventFragment, filt
             return state;
         case 'RoomPrivateMessageUpdate':
         case 'RoomPublicMessageUpdate': {
-            const index = state.findIndex(msg => msg.type !== notification && msg.value.messageId === action.messageId);
+            const index = state.findIndex(
+                msg => msg.type !== notification && msg.value.messageId === action.messageId
+            );
             if (index === -1) {
                 return state;
             }
             return produce(state, draft => {
                 const target = draft[index];
-                if (target == null || target.type === pieceValueLog || target.type === soundEffect || target.type === notification) {
+                if (
+                    target == null ||
+                    target.type === pieceValueLog ||
+                    target.type === soundEffect ||
+                    target.type === notification
+                ) {
                     return;
                 }
                 target.value.altTextToSecret = action.altTextToSecret;
@@ -232,7 +263,11 @@ const reduceMessages = (state: Message[], action: RoomMessageEventFragment, filt
     }
 };
 
-const reduce = (state: StateToReduce, action: RoomMessageEventFragment, filter: (message: RoomMessage) => boolean): StateToReduce => {
+const reduce = (
+    state: StateToReduce,
+    action: RoomMessageEventFragment,
+    filter: (message: RoomMessage) => boolean
+): StateToReduce => {
     const messages = reduceMessages(state.messages, action, filter);
     switch (action.__typename) {
         case 'RoomPrivateMessage': {
@@ -282,7 +317,7 @@ const reduce = (state: StateToReduce, action: RoomMessageEventFragment, filter: 
         case undefined: {
             return {
                 ...state,
-                messages
+                messages,
             };
         }
     }
@@ -294,56 +329,70 @@ export const failure = 'failure';
 export const loaded = 'loaded';
 export const newEvent = 'newEvent';
 
-type AllRoomMessagesResultCore = {
-    type: typeof loading;
-    events: RoomMessageEventFragment[];
-} | {
-    type: typeof apolloError;
-    error: ApolloError;
-} | {
-    type: typeof failure;
-    failureType: GetRoomMessagesFailureType;
-} | {
-    type: typeof loaded;
-    value: StateToReduce;
-} | {
-    type: typeof newEvent;
-    value: StateToReduce;
-    event: RoomMessageEventFragment;
-}
+type AllRoomMessagesResultCore =
+    | {
+          type: typeof loading;
+          events: RoomMessageEventFragment[];
+      }
+    | {
+          type: typeof apolloError;
+          error: ApolloError;
+      }
+    | {
+          type: typeof failure;
+          failureType: GetRoomMessagesFailureType;
+      }
+    | {
+          type: typeof loaded;
+          value: StateToReduce;
+      }
+    | {
+          type: typeof newEvent;
+          value: StateToReduce;
+          event: RoomMessageEventFragment;
+      };
 
-export type AllRoomMessagesSuccessResult = {
-    type: typeof loaded;
-    value: ReadonlyStateToReduce;
-} | {
-    type: typeof newEvent;
-    value: ReadonlyStateToReduce;
-    event: RoomMessageEventFragment;
-}
+export type AllRoomMessagesSuccessResult =
+    | {
+          type: typeof loaded;
+          value: ReadonlyStateToReduce;
+      }
+    | {
+          type: typeof newEvent;
+          value: ReadonlyStateToReduce;
+          event: RoomMessageEventFragment;
+      };
 
-export type AllRoomMessagesResult = {
-    type: typeof loading;
-} | {
-    type: typeof apolloError;
-    error: ApolloError;
-} | {
-    type: typeof failure;
-    failureType: GetRoomMessagesFailureType;
-} | AllRoomMessagesSuccessResult
+export type AllRoomMessagesResult =
+    | {
+          type: typeof loading;
+      }
+    | {
+          type: typeof apolloError;
+          error: ApolloError;
+      }
+    | {
+          type: typeof failure;
+          failureType: GetRoomMessagesFailureType;
+      }
+    | AllRoomMessagesSuccessResult;
 
-export const useAllRoomMessages = ({ 
-    roomId, 
-    roomEventSubscription, 
-    beginFetch
+export const useAllRoomMessages = ({
+    roomId,
+    roomEventSubscription,
+    beginFetch,
 }: {
-    roomId: string; 
+    roomId: string;
     roomEventSubscription: RoomEventSubscription | undefined;
 
     // もしこれがないと、Room作成者以外がRoomに入室するとき、まだnonJoinedの段階でuseGetMessagesLazyQueryを呼び出してしまうためNotParticipantエラーが返され、メッセージウィンドウがエラーになる。これはブラウザを更新するだけで直る軽微なバグではあるが、beginFetchを設けることでuseGetMessagesLazyQueryが呼び出されるタイミングを遅らせることでバグを回避している。
-    beginFetch: boolean; 
+    beginFetch: boolean;
 }): AllRoomMessagesResult => {
     const myUserUid = useMyUserUid();
-    const [result, setResult] = React.useState<AllRoomMessagesResultCore>({ type: loading, events: [] });
+    const [result, setResult] = React.useState<AllRoomMessagesResultCore>({
+        type: loading,
+        events: [],
+    });
     const [getMessages, messages] = useGetMessagesLazyQuery({ fetchPolicy: 'network-only' });
 
     React.useEffect(() => {
@@ -400,7 +449,8 @@ export const useAllRoomMessages = ({
     }, [messages.data, messages.error]);
 
     React.useEffect(() => {
-        const messageEvent: RoomMessageEventFragment | null | undefined = roomEventSubscription?.roomEvent?.roomMessageEvent;
+        const messageEvent: RoomMessageEventFragment | null | undefined =
+            roomEventSubscription?.roomEvent?.roomMessageEvent;
         if (messageEvent != null) {
             setResult(oldValue => {
                 switch (oldValue.type) {
@@ -428,10 +478,12 @@ export const useAllRoomMessages = ({
 
 export const notification = 'notification';
 
-export type Message = {
-    type: typeof notification;
-    value: Notification.StateElement;
-} | RoomMessage
+export type Message =
+    | {
+          type: typeof notification;
+          value: Notification.StateElement;
+      }
+    | RoomMessage;
 
 const emptyArray: Message[] = [];
 
@@ -456,7 +508,10 @@ export const useFilteredRoomMessages = ({
     };
 
     React.useEffect(() => {
-        const toRoomMessages = () => allRoomMessagesResult?.type === loaded || allRoomMessagesResult?.type === newEvent ? allRoomMessagesResult.value.messages : [];
+        const toRoomMessages = () =>
+            allRoomMessagesResult?.type === loaded || allRoomMessagesResult?.type === newEvent
+                ? allRoomMessagesResult.value.messages
+                : [];
         const toNotificationMessages = () => {
             if (logNotifications == null) {
                 return [];
@@ -468,14 +523,20 @@ export const useFilteredRoomMessages = ({
             if (oldValue == null || prevFilter !== filter) {
                 // RoomMessage[]がない、もしくはfilterが変更された場合にここに来る。
                 // RoomMessage[]を更新し、以後は（filterが変更されない限り）eventを利用して差分のみが更新される
-                return ([...toRoomMessages(), ...toNotificationMessages()].filter(filter ?? (() => true)).sort(sort));
+                return [...toRoomMessages(), ...toNotificationMessages()]
+                    .filter(filter ?? (() => true))
+                    .sort(sort);
             }
 
             let result = oldValue;
             if (allRoomMessagesResult !== prevAllRoomMessagesResult) {
                 switch (allRoomMessagesResult?.type) {
                     case newEvent:
-                        result = reduceMessages(result, allRoomMessagesResult.event, filter ?? (() => true));
+                        result = reduceMessages(
+                            result,
+                            allRoomMessagesResult.event,
+                            filter ?? (() => true)
+                        );
                         break;
                     default:
                         break;
@@ -483,7 +544,10 @@ export const useFilteredRoomMessages = ({
             }
 
             if (logNotifications !== prevLogNotifications && logNotifications?.newValue != null) {
-                const newMessage = { type: notification, value: logNotifications.newValue } as const;
+                const newMessage = {
+                    type: notification,
+                    value: logNotifications.newValue,
+                } as const;
                 if (filter == null || filter(newMessage)) {
                     // RoomMessageは通信のラグがあるため、createdAtの時系列は多少ずれるかもしれないが、それは仕様ということにしている。ただし、oldValueの末尾の要素を数十個程度だけ見ることで、あまり重くせずに時系列を事実上完全に揃えることができると思われる。
                     result = [...oldValue, newMessage];
@@ -492,7 +556,14 @@ export const useFilteredRoomMessages = ({
 
             return result;
         });
-    }, [allRoomMessagesResult, prevAllRoomMessagesResult, logNotifications, prevLogNotifications, filter, prevFilter]);
+    }, [
+        allRoomMessagesResult,
+        prevAllRoomMessagesResult,
+        logNotifications,
+        prevLogNotifications,
+        filter,
+        prevFilter,
+    ]);
 
     return result ?? emptyArray;
 };

@@ -10,6 +10,6 @@ export const useBoard = (boardKey: CompositeKey): BoardState | undefined => {
         if (boards == null) {
             return undefined;
         }
-        return boards.get({createdBy: boardKey.createdBy, id: boardKey.id});
+        return boards.get({ createdBy: boardKey.createdBy, id: boardKey.id });
     }, [boards, boardKey.createdBy, boardKey.id]);
 };

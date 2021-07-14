@@ -27,12 +27,31 @@ import { debounceTime } from 'rxjs/operators';
 import { Vector2d } from 'konva/types/types';
 import { Subject } from 'rxjs';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
-import { UpOperation, PieceState, PieceUpOperation, BoardLocationUpOperation, BoardState, BoardLocationState } from '@kizahasi/flocon-core';
-import { $free, CompositeKey, compositeKeyEquals, compositeKeyToString, dualKeyRecordToDualKeyMap } from '@kizahasi/util';
+import {
+    UpOperation,
+    PieceState,
+    PieceUpOperation,
+    BoardLocationUpOperation,
+    BoardState,
+    BoardLocationState,
+} from '@kizahasi/flocon-core';
+import {
+    $free,
+    CompositeKey,
+    compositeKeyEquals,
+    compositeKeyToString,
+    dualKeyRecordToDualKeyMap,
+} from '@kizahasi/util';
 import _ from 'lodash';
 import { useNumberPieceValues } from '../../hooks/state/useNumberPieceValues';
 import { tripleKeyToString } from '../../utils/tripleKeyToString';
-import { BoardTooltipState, create, MouseOverOn, BoardPopoverEditorState, roomDrawerAndPopoverModule } from '../../modules/roomDrawerAndPopoverModule';
+import {
+    BoardTooltipState,
+    create,
+    MouseOverOn,
+    BoardPopoverEditorState,
+    roomDrawerAndPopoverModule,
+} from '../../modules/roomDrawerAndPopoverModule';
 import { useDicePieceValues } from '../../hooks/state/useDicePieceValues';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 
@@ -93,32 +112,38 @@ const tachie = 'tachie';
 const dicePieceValue = 'dicePieceValue';
 const numberPieceValue = 'numberPieceValue';
 
-type SelectedPieceKey = {
-    type: typeof character;
-    characterKey: CompositeKey;
-} | {
-    type: typeof tachie;
-    characterKey: CompositeKey;
-} | {
-    type: typeof dicePieceValue | typeof numberPieceValue;
-    stateId: string;
-}
+type SelectedPieceKey =
+    | {
+          type: typeof character;
+          characterKey: CompositeKey;
+      }
+    | {
+          type: typeof tachie;
+          characterKey: CompositeKey;
+      }
+    | {
+          type: typeof dicePieceValue | typeof numberPieceValue;
+          stateId: string;
+      };
 
 const publicMessageFilter = (message: Message): boolean => {
     return message.type === publicMessage;
 };
 
 /**
-   * カーソルが一定時間止まったかどうかを示し、一定時間止まったときはその位置を返すHook。
-   * カーソルが動くたびにonMoveを呼び出さなければならない。
-   */
+ * カーソルが一定時間止まったかどうかを示し、一定時間止まったときはその位置を返すHook。
+ * カーソルが動くたびにonMoveを呼び出さなければならない。
+ */
 const useGetStoppedCursor = () => {
     const [stoppedCursor, setStoppedCursor] = React.useState<Vector2d | null>(null);
     const subject = useConstant(() => new Subject<Vector2d>());
-    const onMove = React.useCallback((newCursor: Vector2d) => {
-        setStoppedCursor(null);
-        subject.next(newCursor);
-    }, [subject]);
+    const onMove = React.useCallback(
+        (newCursor: Vector2d) => {
+            setStoppedCursor(null);
+            subject.next(newCursor);
+        },
+        [subject]
+    );
     React.useEffect(() => {
         subject.pipe(debounceTime(500)).subscribe(cursor => {
             setStoppedCursor(cursor);
@@ -138,7 +163,7 @@ type BoardCoreProps = {
     onPopupEditor?: (params: BoardPopoverEditorState | null) => void;
     canvasWidth: number;
     canvasHeight: number;
-}
+};
 
 const BoardCore: React.FC<BoardCoreProps> = ({
     board,
@@ -150,7 +175,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     onTooltip,
     onPopupEditor,
     canvasWidth,
-    canvasHeight
+    canvasHeight,
 }: BoardCoreProps) => {
     const roomId = useSelector(state => state.roomModule.roomId);
     const characters = useCharacters();
@@ -185,9 +210,15 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const dispatch = useDispatch();
     const operate = useOperate();
     const publicMessages = useFilteredRoomMessages({ filter: publicMessageFilter });
-    const myUserUid  = useMyUserUid();
+    const myUserUid = useMyUserUid();
 
-    if (myUserUid == null || roomId == null || characters == null || participants == null || numberPieceValues == null) {
+    if (
+        myUserUid == null ||
+        roomId == null ||
+        characters == null ||
+        participants == null ||
+        numberPieceValues == null
+    ) {
         return null;
     }
 
@@ -206,10 +237,12 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     })();
 
     const grid = (() => {
-        if (board.cellRowCount <= 0 ||
+        if (
+            board.cellRowCount <= 0 ||
             board.cellColumnCount <= 0 ||
             board.cellHeight <= 0 ||
-            board.cellWidth <= 0) {
+            board.cellWidth <= 0
+        ) {
             return null;
         }
         const cellWidth = board.cellWidth;
@@ -217,283 +250,407 @@ const BoardCore: React.FC<BoardCoreProps> = ({
         // TODO: Lineの色を変える
         const verticalLines = [...new Array(board.cellRowCount + 1)].map((_, i) => {
             const height = board.cellColumnCount * cellHeight;
-            return (<ReactKonva.Line key={i} points={[i * cellWidth + board.cellOffsetX, board.cellOffsetY, i * cellHeight + board.cellOffsetX, height + board.cellOffsetY]} stroke={'red'} tension={1} />);
+            return (
+                <ReactKonva.Line
+                    key={i}
+                    points={[
+                        i * cellWidth + board.cellOffsetX,
+                        board.cellOffsetY,
+                        i * cellHeight + board.cellOffsetX,
+                        height + board.cellOffsetY,
+                    ]}
+                    stroke={'red'}
+                    tension={1}
+                />
+            );
         });
         const horizontalLines = [...new Array(board.cellColumnCount + 1)].map((_, i) => {
             const width = board.cellRowCount * cellWidth;
-            return (<ReactKonva.Line key={i} points={[board.cellOffsetX, i * cellWidth + board.cellOffsetY, width + board.cellOffsetX, i * cellHeight + board.cellOffsetY]} stroke={'red'} tension={1} />);
+            return (
+                <ReactKonva.Line
+                    key={i}
+                    points={[
+                        board.cellOffsetX,
+                        i * cellWidth + board.cellOffsetY,
+                        width + board.cellOffsetX,
+                        i * cellHeight + board.cellOffsetY,
+                    ]}
+                    stroke={'red'}
+                    tension={1}
+                />
+            );
         });
         return (
             <>
                 {verticalLines}
                 {horizontalLines}
-            </>);
+            </>
+        );
     })();
 
     const pieces = (() => {
-        const characterPieces = _(characters.toArray()).map(([characterKey, character]) => {
-            const piece = dualKeyRecordToDualKeyMap<PieceState>(character.pieces).toArray().find(([boardKey$]) => {
-                return boardKey.createdBy === boardKey$.first && boardKey.id === boardKey$.second;
-            });
-            if (piece == null) {
-                return null;
-            }
-            const [, pieceValue] = piece;
-            if (character.image == null) {
-                // TODO: 画像なしでコマを表示する
-                return null;
-            }
-            return <MyKonva.Image
-                {...Piece.getPosition({ ...board, state: pieceValue })}
-                key={compositeKeyToString(characterKey)}
-                filePath={character.image}
-                draggable
-                listening
-                isSelected={selectedPieceKey?.type === 'character' && compositeKeyEquals(selectedPieceKey.characterKey, characterKey)}
-                onClick={() => {
-                    unsetPopoverEditor();
-                    setSelectedPieceKey({ type: 'character', characterKey });
-                }}
-                onDblClick={e => {
-                    if (onPopoverEditorRef.current == null) {
-                        return;
-                    }
-                    onPopoverEditorRef.current({
-                        pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
-                        dblClickOn: { type: 'character', character, characterKey }
+        const characterPieces = _(characters.toArray())
+            .map(([characterKey, character]) => {
+                const piece = dualKeyRecordToDualKeyMap<PieceState>(character.pieces)
+                    .toArray()
+                    .find(([boardKey$]) => {
+                        return (
+                            boardKey.createdBy === boardKey$.first &&
+                            boardKey.id === boardKey$.second
+                        );
                     });
-                }}
-                onMouseEnter={() => mouseOverOnRef.current = { type: 'character', character, characterKey }}
-                onMouseLeave={() => mouseOverOnRef.current = { type: 'background' }}
-                onDragEnd={e => {
-                    const pieceOperation = createPiecePostOperation({ e, piece: pieceValue, board });
-                    const operation: UpOperation = {
-                        $version: 1,
-                        characters: {
-                            [characterKey.createdBy]: {
-                                [characterKey.id]: {
-                                    type: update,
-                                    update: {
-                                        $version: 1,
-                                        pieces: {
-                                            [boardKey.createdBy]: {
-                                                [boardKey.id]: {
-                                                    type: update,
-                                                    update: pieceOperation,
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                if (piece == null) {
+                    return null;
+                }
+                const [, pieceValue] = piece;
+                if (character.image == null) {
+                    // TODO: 画像なしでコマを表示する
+                    return null;
+                }
+                return (
+                    <MyKonva.Image
+                        {...Piece.getPosition({ ...board, state: pieceValue })}
+                        key={compositeKeyToString(characterKey)}
+                        filePath={character.image}
+                        draggable
+                        listening
+                        isSelected={
+                            selectedPieceKey?.type === 'character' &&
+                            compositeKeyEquals(selectedPieceKey.characterKey, characterKey)
                         }
-                    };
-                    operate(operation);
-                }} />;
-        }).compact().value();
+                        onClick={() => {
+                            unsetPopoverEditor();
+                            setSelectedPieceKey({ type: 'character', characterKey });
+                        }}
+                        onDblClick={e => {
+                            if (onPopoverEditorRef.current == null) {
+                                return;
+                            }
+                            onPopoverEditorRef.current({
+                                pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
+                                dblClickOn: { type: 'character', character, characterKey },
+                            });
+                        }}
+                        onMouseEnter={() =>
+                            (mouseOverOnRef.current = {
+                                type: 'character',
+                                character,
+                                characterKey,
+                            })
+                        }
+                        onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
+                        onDragEnd={e => {
+                            const pieceOperation = createPiecePostOperation({
+                                e,
+                                piece: pieceValue,
+                                board,
+                            });
+                            const operation: UpOperation = {
+                                $version: 1,
+                                characters: {
+                                    [characterKey.createdBy]: {
+                                        [characterKey.id]: {
+                                            type: update,
+                                            update: {
+                                                $version: 1,
+                                                pieces: {
+                                                    [boardKey.createdBy]: {
+                                                        [boardKey.id]: {
+                                                            type: update,
+                                                            update: pieceOperation,
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            };
+                            operate(operation);
+                        }}
+                    />
+                );
+            })
+            .compact()
+            .value();
 
-        const tachieLocations = _(characters.toArray()).map(([characterKey, character]) => {
-            const tachieLocation = _(dualKeyRecordToDualKeyMap<BoardLocationState>(character.tachieLocations).toArray()).find(([boardKey$]) => {
-                return boardKey.createdBy === boardKey$.first && boardKey.id === boardKey$.second;
-            });
-            if (tachieLocation == null) {
-                return null;
-            }
-            const [, pieceValue] = tachieLocation;
-            if (character.tachieImage == null) {
-                // TODO: 画像なしでコマを表示する
-                return null;
-            }
-            return <MyKonva.Image
-                message={lastPublicMessage}
-                messageFilter={msg => {
-                    return msg.createdBy === characterKey.createdBy && msg.character?.stateId === characterKey.id && msg.channelKey !== $free;
-                }}
-                x={pieceValue.x}
-                y={pieceValue.y}
-                w={pieceValue.w}
-                h={pieceValue.h}
-                opacity={0.75 /* TODO: opacityの値が適当 */}
-                key={compositeKeyToString(characterKey)}
-                filePath={character.tachieImage}
-                draggable
-                listening
-                isSelected={selectedPieceKey?.type === 'tachie' && compositeKeyEquals(selectedPieceKey.characterKey, characterKey)}
-                onClick={() => {
-                    unsetPopoverEditor();
-                    setSelectedPieceKey({ type: 'tachie', characterKey });
-                }}
-                onDblClick={e => {
-                    if (onPopoverEditorRef.current == null) {
-                        return;
-                    }
-                    onPopoverEditorRef.current({
-                        pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
-                        dblClickOn: { type: 'tachie', character, characterKey }
-                    });
-                }}
-                onMouseEnter={() => mouseOverOnRef.current = { type: 'tachie', character, characterKey }}
-                onMouseLeave={() => mouseOverOnRef.current = { type: 'background' }}
-                onDragEnd={e => {
-                    const tachieLocationOperation = createTachieLocationPostOperation({ e });
-                    const operation: UpOperation = {
-                        $version: 1,
-                        characters: {
-                            [characterKey.createdBy]: {
-                                [characterKey.id]: {
-                                    type: update,
-                                    update: {
-                                        $version: 1,
-                                        tachieLocations: {
-                                            [boardKey.createdBy]: {
-                                                [boardKey.id]: {
-                                                    type: update,
-                                                    update: tachieLocationOperation,
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+        const tachieLocations = _(characters.toArray())
+            .map(([characterKey, character]) => {
+                const tachieLocation = _(
+                    dualKeyRecordToDualKeyMap<BoardLocationState>(
+                        character.tachieLocations
+                    ).toArray()
+                ).find(([boardKey$]) => {
+                    return (
+                        boardKey.createdBy === boardKey$.first && boardKey.id === boardKey$.second
+                    );
+                });
+                if (tachieLocation == null) {
+                    return null;
+                }
+                const [, pieceValue] = tachieLocation;
+                if (character.tachieImage == null) {
+                    // TODO: 画像なしでコマを表示する
+                    return null;
+                }
+                return (
+                    <MyKonva.Image
+                        message={lastPublicMessage}
+                        messageFilter={msg => {
+                            return (
+                                msg.createdBy === characterKey.createdBy &&
+                                msg.character?.stateId === characterKey.id &&
+                                msg.channelKey !== $free
+                            );
+                        }}
+                        x={pieceValue.x}
+                        y={pieceValue.y}
+                        w={pieceValue.w}
+                        h={pieceValue.h}
+                        opacity={0.75 /* TODO: opacityの値が適当 */}
+                        key={compositeKeyToString(characterKey)}
+                        filePath={character.tachieImage}
+                        draggable
+                        listening
+                        isSelected={
+                            selectedPieceKey?.type === 'tachie' &&
+                            compositeKeyEquals(selectedPieceKey.characterKey, characterKey)
                         }
-                    };
-                    operate(operation);
-                }} />;
-        }).compact().value();
+                        onClick={() => {
+                            unsetPopoverEditor();
+                            setSelectedPieceKey({ type: 'tachie', characterKey });
+                        }}
+                        onDblClick={e => {
+                            if (onPopoverEditorRef.current == null) {
+                                return;
+                            }
+                            onPopoverEditorRef.current({
+                                pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
+                                dblClickOn: { type: 'tachie', character, characterKey },
+                            });
+                        }}
+                        onMouseEnter={() =>
+                            (mouseOverOnRef.current = { type: 'tachie', character, characterKey })
+                        }
+                        onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
+                        onDragEnd={e => {
+                            const tachieLocationOperation = createTachieLocationPostOperation({
+                                e,
+                            });
+                            const operation: UpOperation = {
+                                $version: 1,
+                                characters: {
+                                    [characterKey.createdBy]: {
+                                        [characterKey.id]: {
+                                            type: update,
+                                            update: {
+                                                $version: 1,
+                                                tachieLocations: {
+                                                    [boardKey.createdBy]: {
+                                                        [boardKey.id]: {
+                                                            type: update,
+                                                            update: tachieLocationOperation,
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            };
+                            operate(operation);
+                        }}
+                    />
+                );
+            })
+            .compact()
+            .value();
 
         const dicePieces = _(dicePieceValues)
             .map(element => {
-                const piece = dualKeyRecordToDualKeyMap<PieceState>(element.value.pieces).toArray().find(([boardKey$]) => {
-                    return boardKey.createdBy === boardKey$.first && boardKey.id === boardKey$.second;
-                });
+                const piece = dualKeyRecordToDualKeyMap<PieceState>(element.value.pieces)
+                    .toArray()
+                    .find(([boardKey$]) => {
+                        return (
+                            boardKey.createdBy === boardKey$.first &&
+                            boardKey.id === boardKey$.second
+                        );
+                    });
                 if (piece == null) {
                     return null;
                 }
                 const [, pieceValue] = piece;
-                return <MyKonva.Piece
-                    {...Piece.getPosition({ ...board, state: pieceValue })}
-                    key={tripleKeyToString(element.characterKey.createdBy, element.characterKey.id, element.valueId)}
-                    state={{ type: MyKonva.dicePiece, state: element.value }}
-                    createdByMe={element.characterKey.createdBy === myUserUid}
-                    draggable
-                    listening
-                    isSelected={selectedPieceKey?.type === 'dicePieceValue' && (selectedPieceKey.stateId === element.valueId)}
-                    onClick={() => {
-                        unsetPopoverEditor();
-                        setSelectedPieceKey({ type: 'dicePieceValue', stateId: element.valueId });
-                    }}
-                    onDblClick={e => {
-                        if (onPopoverEditorRef.current == null) {
-                            return;
+                return (
+                    <MyKonva.Piece
+                        {...Piece.getPosition({ ...board, state: pieceValue })}
+                        key={tripleKeyToString(
+                            element.characterKey.createdBy,
+                            element.characterKey.id,
+                            element.valueId
+                        )}
+                        state={{ type: MyKonva.dicePiece, state: element.value }}
+                        createdByMe={element.characterKey.createdBy === myUserUid}
+                        draggable
+                        listening
+                        isSelected={
+                            selectedPieceKey?.type === 'dicePieceValue' &&
+                            selectedPieceKey.stateId === element.valueId
                         }
-                        onPopoverEditorRef.current({
-                            pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
-                            dblClickOn: { type: 'dicePieceValue', element }
-                        });
-                    }}
-                    onMouseEnter={() => mouseOverOnRef.current = { type: 'dicePieceValue', element }}
-                    onMouseLeave={() => mouseOverOnRef.current = { type: 'background' }}
-                    onDragEnd={e => {
-                        const pieceOperation = createPiecePostOperation({ e, piece: pieceValue, board });
-                        const operation: UpOperation = {
-                            $version: 1,
-                            characters: {
-                                [element.characterKey.createdBy]: {
-                                    [element.characterKey.id]: {
-                                        type: update,
-                                        update: {
-                                            $version: 1,
-                                            dicePieceValues: {
-                                                [element.valueId]: {
-                                                    type: update,
-                                                    update: {
-                                                        $version: 1,
-                                                        pieces: {
-                                                            [boardKey.createdBy]: {
-                                                                [boardKey.id]: {
-                                                                    type: update,
-                                                                    update: pieceOperation,
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+                        onClick={() => {
+                            unsetPopoverEditor();
+                            setSelectedPieceKey({
+                                type: 'dicePieceValue',
+                                stateId: element.valueId,
+                            });
+                        }}
+                        onDblClick={e => {
+                            if (onPopoverEditorRef.current == null) {
+                                return;
                             }
-                        };
-                        operate(operation);
-                    }} />;
-            }).compact().value();
+                            onPopoverEditorRef.current({
+                                pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
+                                dblClickOn: { type: 'dicePieceValue', element },
+                            });
+                        }}
+                        onMouseEnter={() =>
+                            (mouseOverOnRef.current = { type: 'dicePieceValue', element })
+                        }
+                        onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
+                        onDragEnd={e => {
+                            const pieceOperation = createPiecePostOperation({
+                                e,
+                                piece: pieceValue,
+                                board,
+                            });
+                            const operation: UpOperation = {
+                                $version: 1,
+                                characters: {
+                                    [element.characterKey.createdBy]: {
+                                        [element.characterKey.id]: {
+                                            type: update,
+                                            update: {
+                                                $version: 1,
+                                                dicePieceValues: {
+                                                    [element.valueId]: {
+                                                        type: update,
+                                                        update: {
+                                                            $version: 1,
+                                                            pieces: {
+                                                                [boardKey.createdBy]: {
+                                                                    [boardKey.id]: {
+                                                                        type: update,
+                                                                        update: pieceOperation,
+                                                                    },
+                                                                },
+                                                            },
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            };
+                            operate(operation);
+                        }}
+                    />
+                );
+            })
+            .compact()
+            .value();
 
         const numberPieces = _(numberPieceValues)
             .map(element => {
-                const piece = dualKeyRecordToDualKeyMap<PieceState>(element.value.pieces).toArray().find(([boardKey$]) => {
-                    return boardKey.createdBy === boardKey$.first && boardKey.id === boardKey$.second;
-                });
+                const piece = dualKeyRecordToDualKeyMap<PieceState>(element.value.pieces)
+                    .toArray()
+                    .find(([boardKey$]) => {
+                        return (
+                            boardKey.createdBy === boardKey$.first &&
+                            boardKey.id === boardKey$.second
+                        );
+                    });
                 if (piece == null) {
                     return null;
                 }
                 const [, pieceValue] = piece;
-                return <MyKonva.Piece
-                    {...Piece.getPosition({ ...board, state: pieceValue })}
-                    key={tripleKeyToString(element.characterKey.createdBy, element.characterKey.id, element.valueId)}
-                    state={{ type: MyKonva.numberPiece, state: element.value }}
-                    createdByMe={element.characterKey.createdBy === myUserUid}
-                    draggable
-                    listening
-                    isSelected={selectedPieceKey?.type === 'numberPieceValue' && (selectedPieceKey.stateId === element.valueId)}
-                    onClick={() => {
-                        unsetPopoverEditor();
-                        setSelectedPieceKey({ type: 'numberPieceValue', stateId: element.valueId });
-                    }}
-                    onDblClick={e => {
-                        if (onPopoverEditorRef.current == null) {
-                            return;
+                return (
+                    <MyKonva.Piece
+                        {...Piece.getPosition({ ...board, state: pieceValue })}
+                        key={tripleKeyToString(
+                            element.characterKey.createdBy,
+                            element.characterKey.id,
+                            element.valueId
+                        )}
+                        state={{ type: MyKonva.numberPiece, state: element.value }}
+                        createdByMe={element.characterKey.createdBy === myUserUid}
+                        draggable
+                        listening
+                        isSelected={
+                            selectedPieceKey?.type === 'numberPieceValue' &&
+                            selectedPieceKey.stateId === element.valueId
                         }
-                        onPopoverEditorRef.current({
-                            pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
-                            dblClickOn: { type: 'numberPieceValue', element }
-                        });
-                    }}
-                    onMouseEnter={() => mouseOverOnRef.current = { type: 'numberPieceValue', element }}
-                    onMouseLeave={() => mouseOverOnRef.current = { type: 'background' }}
-                    onDragEnd={e => {
-                        const pieceOperation = createPiecePostOperation({ e, piece: pieceValue, board });
-                        const operation: UpOperation = {
-                            $version: 1,
-                            characters: {
-                                [element.characterKey.createdBy]: {
-                                    [element.characterKey.id]: {
-                                        type: update,
-                                        update: {
-                                            $version: 1,
-                                            numberPieceValues: {
-                                                [element.valueId]: {
-                                                    type: update,
-                                                    update: {
-                                                        $version: 1,
-                                                        pieces: {
-                                                            [boardKey.createdBy]: {
-                                                                [boardKey.id]: {
-                                                                    type: update,
-                                                                    update: pieceOperation,
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+                        onClick={() => {
+                            unsetPopoverEditor();
+                            setSelectedPieceKey({
+                                type: 'numberPieceValue',
+                                stateId: element.valueId,
+                            });
+                        }}
+                        onDblClick={e => {
+                            if (onPopoverEditorRef.current == null) {
+                                return;
                             }
-                        };
-                        operate(operation);
-                    }} />;
-            }).compact().value();
+                            onPopoverEditorRef.current({
+                                pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
+                                dblClickOn: { type: 'numberPieceValue', element },
+                            });
+                        }}
+                        onMouseEnter={() =>
+                            (mouseOverOnRef.current = { type: 'numberPieceValue', element })
+                        }
+                        onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
+                        onDragEnd={e => {
+                            const pieceOperation = createPiecePostOperation({
+                                e,
+                                piece: pieceValue,
+                                board,
+                            });
+                            const operation: UpOperation = {
+                                $version: 1,
+                                characters: {
+                                    [element.characterKey.createdBy]: {
+                                        [element.characterKey.id]: {
+                                            type: update,
+                                            update: {
+                                                $version: 1,
+                                                numberPieceValues: {
+                                                    [element.valueId]: {
+                                                        type: update,
+                                                        update: {
+                                                            $version: 1,
+                                                            pieces: {
+                                                                [boardKey.createdBy]: {
+                                                                    [boardKey.id]: {
+                                                                        type: update,
+                                                                        update: pieceOperation,
+                                                                    },
+                                                                },
+                                                            },
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            };
+                            operate(operation);
+                        }}
+                    />
+                );
+            })
+            .compact()
+            .value();
 
         return (
             <ReactKonva.Layer>
@@ -501,16 +658,19 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 {characterPieces}
                 {dicePieces}
                 {numberPieces}
-            </ReactKonva.Layer>);
+            </ReactKonva.Layer>
+        );
     })();
 
-    const backgroundImageKonva = backgroundImage.type === 'success' ?
-        <ReactKonva.Image
-            image={backgroundImage.image}
-            scaleX={Math.max(board.backgroundImageZoom, 0)}
-            scaleY={Math.max(board.backgroundImageZoom, 0)}
-            onClick={e => e.evt.preventDefault()} /> :
-        null;
+    const backgroundImageKonva =
+        backgroundImage.type === 'success' ? (
+            <ReactKonva.Image
+                image={backgroundImage.image}
+                scaleX={Math.max(board.backgroundImageZoom, 0)}
+                scaleY={Math.max(board.backgroundImageZoom, 0)}
+                onClick={e => e.evt.preventDefault()}
+            />
+        ) : null;
 
     const scale = Math.pow(2, boardConfig.zoom);
 
@@ -529,8 +689,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 }
                 // CONSIDER: scale === 0 のケースに対応していない。configのほうで boardConfig.zoom === -Inf にならないようにするほうが自然か。
                 onContextMenu(e, {
-                    x: (e.evt.offsetX / scale) + boardConfig.offsetX,
-                    y: (e.evt.offsetY / scale) + boardConfig.offsetY,
+                    x: e.evt.offsetX / scale + boardConfig.offsetX,
+                    y: e.evt.offsetY / scale + boardConfig.offsetY,
                 });
             }}
             onMouseMove={e => {
@@ -546,15 +706,18 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             scaleY={scale}
             onWheel={e => {
                 e.evt.preventDefault();
-                dispatch(roomConfigModule.actions.zoomBoard({
-                    roomId,
-                    boardKey,
-                    boardEditorPanelId: boardEditorPanelId,
-                    zoomDelta: e.evt.deltaY > 0 ? -0.25 : 0.25,
-                    prevCanvasWidth: canvasWidth,
-                    prevCanvasHeight: canvasHeight,
-                }));
-            }}>
+                dispatch(
+                    roomConfigModule.actions.zoomBoard({
+                        roomId,
+                        boardKey,
+                        boardEditorPanelId: boardEditorPanelId,
+                        zoomDelta: e.evt.deltaY > 0 ? -0.25 : 0.25,
+                        prevCanvasWidth: canvasWidth,
+                        prevCanvasHeight: canvasHeight,
+                    })
+                );
+            }}
+        >
             {/* background: ドラッグで全体を動かせる */}
             <ReactKonva.Layer
                 onMouseDown={e => {
@@ -579,39 +742,42 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         return;
                     }
                     const nonZeroScale = scale === 0 ? 0.01 : scale;
-                    dispatch(roomConfigModule.actions.updateBoard({
-                        roomId,
-                        boardKey,
-                        boardEditorPanelId: boardEditorPanelId,
-                        offsetXDelta: -e.evt.movementX / nonZeroScale,
-                        offsetYDelta: -e.evt.movementY / nonZeroScale,
-                    }));
-                }}>
+                    dispatch(
+                        roomConfigModule.actions.updateBoard({
+                            roomId,
+                            boardKey,
+                            boardEditorPanelId: boardEditorPanelId,
+                            offsetXDelta: -e.evt.movementX / nonZeroScale,
+                            offsetYDelta: -e.evt.movementY / nonZeroScale,
+                        })
+                    );
+                }}
+            >
                 {/* このRectがないと画像がないところで位置をドラッグで変えることができない。ただもっといい方法があるかも */}
-                <ReactKonva.Rect
-                    x={-100000}
-                    y={-100000}
-                    width={200000}
-                    height={200000} />
+                <ReactKonva.Rect x={-100000} y={-100000} width={200000} height={200000} />
                 {backgroundImageKonva}
                 {grid}
             </ReactKonva.Layer>
             {/* pieces: ドラッグでpieceのみを動かせる */}
             {pieces}
-        </ReactKonva.Stage>);
+        </ReactKonva.Stage>
+    );
 };
 
 type Props = {
     canvasWidth: number;
     canvasHeight: number;
-} & ({
-    type: 'activeBoard';
-    activeBoardPanel: ActiveBoardPanelConfig;
-} | {
-    type: 'boardEditor';
-    boardEditorPanel: BoardEditorPanelConfig;
-    boardEditorPanelId: string;
-})
+} & (
+    | {
+          type: 'activeBoard';
+          activeBoardPanel: ActiveBoardPanelConfig;
+      }
+    | {
+          type: 'boardEditor';
+          boardEditorPanel: BoardEditorPanelConfig;
+          boardEditorPanelId: string;
+      }
+);
 
 const boardsDropDownStyle: React.CSSProperties = {
     position: 'absolute',
@@ -628,11 +794,7 @@ const zoomButtonStyle: React.CSSProperties = {
     right: 20,
 };
 
-const Board: React.FC<Props> = ({
-    canvasWidth,
-    canvasHeight,
-    ...panel
-}: Props) => {
+const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: Props) => {
     const dispatch = useDispatch();
     const roomId = useSelector(state => state.roomModule.roomId);
     const boards = useBoards();
@@ -642,10 +804,22 @@ const Board: React.FC<Props> = ({
     const myUserUid = useMyUserUid();
     const me = useMe();
     const activeBoardKey = useSelector(state => state.roomModule.roomState?.state?.activeBoardKey);
-    const activeBoardPanelConfig = useSelector(state => state.roomConfigModule?.panels.activeBoardPanel);
-    const [activeBoardSelectorModalVisibility, setActiveBoardSelectorModalVisibility] = React.useState(false);
+    const activeBoardPanelConfig = useSelector(
+        state => state.roomConfigModule?.panels.activeBoardPanel
+    );
+    const [
+        activeBoardSelectorModalVisibility,
+        setActiveBoardSelectorModalVisibility,
+    ] = React.useState(false);
 
-    if (me == null || myUserUid == null || roomId == null || boards == null || characters == null || numberPieceValues == null) {
+    if (
+        me == null ||
+        myUserUid == null ||
+        roomId == null ||
+        boards == null ||
+        characters == null ||
+        numberPieceValues == null
+    ) {
         return null;
     }
 
@@ -662,18 +836,19 @@ const Board: React.FC<Props> = ({
         };
     })();
 
-    const boardConfig = (() => {
-        if (boardKeyToShow == null) {
-            return null;
-        }
-        if (panel.type === 'activeBoard') {
-            if (activeBoardPanelConfig == null) {
+    const boardConfig =
+        (() => {
+            if (boardKeyToShow == null) {
                 return null;
             }
-            return activeBoardPanelConfig.boards[compositeKeyToString(boardKeyToShow)];
-        }
-        return panel.boardEditorPanel.boards[compositeKeyToString(boardKeyToShow)];
-    })() ?? defaultBoardConfig();
+            if (panel.type === 'activeBoard') {
+                if (activeBoardPanelConfig == null) {
+                    return null;
+                }
+                return activeBoardPanelConfig.boards[compositeKeyToString(boardKeyToShow)];
+            }
+            return panel.boardEditorPanel.boards[compositeKeyToString(boardKeyToShow)];
+        })() ?? defaultBoardConfig();
 
     const boardEditorPanelId = panel.type === 'boardEditor' ? panel.boardEditorPanelId : null;
 
@@ -681,226 +856,338 @@ const Board: React.FC<Props> = ({
 
     const boardComponent = (() => {
         if (boardKeyToShow == null) {
-            return (<div>{`${panel.type === 'activeBoard' ? 'ボードビュアー' : 'ボードエディター'}に表示するボードが指定されていません。`}</div>);
+            return (
+                <div>{`${
+                    panel.type === 'activeBoard' ? 'ボードビュアー' : 'ボードエディター'
+                }に表示するボードが指定されていません。`}</div>
+            );
         }
         if (board == null) {
-            return (<div>{`キーが ${compositeKeyToString(boardKeyToShow)} であるボードが見つかりませんでした。`}</div>);
+            return (
+                <div>{`キーが ${compositeKeyToString(
+                    boardKeyToShow
+                )} であるボードが見つかりませんでした。`}</div>
+            );
         }
 
-        return (<BoardCore
-            canvasWidth={canvasWidth}
-            canvasHeight={canvasHeight}
-            board={board}
-            boardKey={boardKeyToShow}
-            boardConfig={boardConfig}
-            boardEditorPanelId={boardEditorPanelId}
-            onClick={() => dispatch(roomDrawerAndPopoverModule.actions.set({ boardContextMenu: null }))}
-            onTooltip={newValue => dispatch(roomDrawerAndPopoverModule.actions.set({ boardTooltip: newValue }))}
-            onPopupEditor={newValue => dispatch(roomDrawerAndPopoverModule.actions.set({ boardPopoverEditor: newValue }))}
-            onContextMenu={(e, stateOffset) => {
-                e.evt.preventDefault();
-                dispatch(roomDrawerAndPopoverModule.actions.set({
-                    boardContextMenu: {
-                        boardKey: boardKeyToShow,
-                        boardConfig,
-                        offsetX: e.evt.offsetX,
-                        offsetY: e.evt.offsetY,
-                        pageX: e.evt.pageX,
-                        pageY: e.evt.pageY,
-                        characterPiecesOnCursor: _(characters.toArray())
-                            .map(([characterKey, character]) => {
-                                const found = dualKeyRecordToDualKeyMap<PieceState>(character.pieces).toArray()
-                                    .find(([boardKey, piece]) => {
-                                        if (boardKey.first !== boardKeyToShow.createdBy || boardKey.second !== boardKeyToShow.id) {
-                                            return false;
+        return (
+            <BoardCore
+                canvasWidth={canvasWidth}
+                canvasHeight={canvasHeight}
+                board={board}
+                boardKey={boardKeyToShow}
+                boardConfig={boardConfig}
+                boardEditorPanelId={boardEditorPanelId}
+                onClick={() =>
+                    dispatch(roomDrawerAndPopoverModule.actions.set({ boardContextMenu: null }))
+                }
+                onTooltip={newValue =>
+                    dispatch(roomDrawerAndPopoverModule.actions.set({ boardTooltip: newValue }))
+                }
+                onPopupEditor={newValue =>
+                    dispatch(
+                        roomDrawerAndPopoverModule.actions.set({ boardPopoverEditor: newValue })
+                    )
+                }
+                onContextMenu={(e, stateOffset) => {
+                    e.evt.preventDefault();
+                    dispatch(
+                        roomDrawerAndPopoverModule.actions.set({
+                            boardContextMenu: {
+                                boardKey: boardKeyToShow,
+                                boardConfig,
+                                offsetX: e.evt.offsetX,
+                                offsetY: e.evt.offsetY,
+                                pageX: e.evt.pageX,
+                                pageY: e.evt.pageY,
+                                characterPiecesOnCursor: _(characters.toArray())
+                                    .map(([characterKey, character]) => {
+                                        const found = dualKeyRecordToDualKeyMap<PieceState>(
+                                            character.pieces
+                                        )
+                                            .toArray()
+                                            .find(([boardKey, piece]) => {
+                                                if (
+                                                    boardKey.first !== boardKeyToShow.createdBy ||
+                                                    boardKey.second !== boardKeyToShow.id
+                                                ) {
+                                                    return false;
+                                                }
+                                                return Piece.isCursorOnIcon({
+                                                    ...board,
+                                                    state: piece,
+                                                    cursorPosition: stateOffset,
+                                                });
+                                            });
+                                        if (found === undefined) {
+                                            return null;
                                         }
-                                        return Piece.isCursorOnIcon({ ...board, state: piece, cursorPosition: stateOffset });
-                                    });
-                                if (found === undefined) {
-                                    return null;
-                                }
-                                return { characterKey, character, piece: found[1] };
-                            })
-                            .compact()
-                            .value(),
-                        tachiesOnCursor: _(characters.toArray())
-                            .map(([characterKey, character]) => {
-                                const found = dualKeyRecordToDualKeyMap<BoardLocationState>(character.tachieLocations).toArray()
-                                    .find(([boardKey, tachie]) => {
-                                        if (boardKey.first !== boardKeyToShow.createdBy || boardKey.second !== boardKeyToShow.id) {
-                                            return false;
+                                        return { characterKey, character, piece: found[1] };
+                                    })
+                                    .compact()
+                                    .value(),
+                                tachiesOnCursor: _(characters.toArray())
+                                    .map(([characterKey, character]) => {
+                                        const found = dualKeyRecordToDualKeyMap<BoardLocationState>(
+                                            character.tachieLocations
+                                        )
+                                            .toArray()
+                                            .find(([boardKey, tachie]) => {
+                                                if (
+                                                    boardKey.first !== boardKeyToShow.createdBy ||
+                                                    boardKey.second !== boardKeyToShow.id
+                                                ) {
+                                                    return false;
+                                                }
+                                                return BoardLocation.isCursorOnIcon({
+                                                    state: tachie,
+                                                    cursorPosition: stateOffset,
+                                                });
+                                            });
+                                        if (found === undefined) {
+                                            return null;
                                         }
-                                        return BoardLocation.isCursorOnIcon({ state: tachie, cursorPosition: stateOffset });
-                                    });
-                                if (found === undefined) {
-                                    return null;
-                                }
-                                return { characterKey, character, tachieLocation: found[1] };
-                            })
-                            .compact()
-                            .value(),
-                        dicePieceValuesOnCursor: _(dicePieceValues)
-                            .map(element => {
-                                const found = dualKeyRecordToDualKeyMap<PieceState>(element.value.pieces).toArray()
-                                    .find(([boardKey, piece]) => {
-                                        if (boardKey.first !== boardKeyToShow.createdBy || boardKey.second !== boardKeyToShow.id) {
-                                            return false;
+                                        return {
+                                            characterKey,
+                                            character,
+                                            tachieLocation: found[1],
+                                        };
+                                    })
+                                    .compact()
+                                    .value(),
+                                dicePieceValuesOnCursor: _(dicePieceValues)
+                                    .map(element => {
+                                        const found = dualKeyRecordToDualKeyMap<PieceState>(
+                                            element.value.pieces
+                                        )
+                                            .toArray()
+                                            .find(([boardKey, piece]) => {
+                                                if (
+                                                    boardKey.first !== boardKeyToShow.createdBy ||
+                                                    boardKey.second !== boardKeyToShow.id
+                                                ) {
+                                                    return false;
+                                                }
+                                                return Piece.isCursorOnIcon({
+                                                    ...board,
+                                                    state: piece,
+                                                    cursorPosition: stateOffset,
+                                                });
+                                            });
+                                        if (found === undefined) {
+                                            return null;
                                         }
-                                        return Piece.isCursorOnIcon({ ...board, state: piece, cursorPosition: stateOffset });
-                                    });
-                                if (found === undefined) {
-                                    return null;
-                                }
-                                return {
-                                    dicePieceValueKey: element.valueId,
-                                    dicePieceValue: element.value,
-                                    piece: found[1],
-                                    characterKey: { createdBy: element.characterKey.createdBy, id: element.characterKey.id }
-                                };
-                            })
-                            .compact()
-                            .value(),
-                        numberPieceValuesOnCursor: _(numberPieceValues)
-                            .map(element => {
-                                const found = dualKeyRecordToDualKeyMap<PieceState>(element.value.pieces).toArray()
-                                    .find(([boardKey, piece]) => {
-                                        if (boardKey.first !== boardKeyToShow.createdBy || boardKey.second !== boardKeyToShow.id) {
-                                            return false;
+                                        return {
+                                            dicePieceValueKey: element.valueId,
+                                            dicePieceValue: element.value,
+                                            piece: found[1],
+                                            characterKey: {
+                                                createdBy: element.characterKey.createdBy,
+                                                id: element.characterKey.id,
+                                            },
+                                        };
+                                    })
+                                    .compact()
+                                    .value(),
+                                numberPieceValuesOnCursor: _(numberPieceValues)
+                                    .map(element => {
+                                        const found = dualKeyRecordToDualKeyMap<PieceState>(
+                                            element.value.pieces
+                                        )
+                                            .toArray()
+                                            .find(([boardKey, piece]) => {
+                                                if (
+                                                    boardKey.first !== boardKeyToShow.createdBy ||
+                                                    boardKey.second !== boardKeyToShow.id
+                                                ) {
+                                                    return false;
+                                                }
+                                                return Piece.isCursorOnIcon({
+                                                    ...board,
+                                                    state: piece,
+                                                    cursorPosition: stateOffset,
+                                                });
+                                            });
+                                        if (found === undefined) {
+                                            return null;
                                         }
-                                        return Piece.isCursorOnIcon({ ...board, state: piece, cursorPosition: stateOffset });
-                                    });
-                                if (found === undefined) {
-                                    return null;
-                                }
-                                return {
-                                    numberPieceValueKey: element.valueId,
-                                    numberPieceValue: element.value,
-                                    piece: found[1],
-                                    characterKey: { createdBy: element.characterKey.createdBy, id: element.characterKey.id }
-                                };
-                            })
-                            .compact()
-                            .value(),
-                    }
-                }));
-            }} />);
+                                        return {
+                                            numberPieceValueKey: element.valueId,
+                                            numberPieceValue: element.value,
+                                            piece: found[1],
+                                            characterKey: {
+                                                createdBy: element.characterKey.createdBy,
+                                                id: element.characterKey.id,
+                                            },
+                                        };
+                                    })
+                                    .compact()
+                                    .value(),
+                            },
+                        })
+                    );
+                }}
+            />
+        );
     })();
 
-    const dropDownItems = boardEditorPanelId == null ? null : boards.toArray().map(([key, board]) => {
-        if (key.createdBy !== myUserUid) {
-            // 自分が作成者でないBoardはActiveBoardとして含まれていることがあるが、エディターで表示させると混乱を招くので除外している
-            return null;
-        }
-        return <Menu.Item
-            key={compositeKeyToString(key)}
-            onClick={() => dispatch(roomConfigModule.actions.updateBoardEditorPanel({
-                boardEditorPanelId,
-                roomId,
-                panel: {
-                    activeBoardKey: key.id,
-                }
-            }))}>
-            {board.name === '' ? '(名前なし)' : board.name}
-        </Menu.Item>;
-    });
+    const dropDownItems =
+        boardEditorPanelId == null
+            ? null
+            : boards.toArray().map(([key, board]) => {
+                  if (key.createdBy !== myUserUid) {
+                      // 自分が作成者でないBoardはActiveBoardとして含まれていることがあるが、エディターで表示させると混乱を招くので除外している
+                      return null;
+                  }
+                  return (
+                      <Menu.Item
+                          key={compositeKeyToString(key)}
+                          onClick={() =>
+                              dispatch(
+                                  roomConfigModule.actions.updateBoardEditorPanel({
+                                      boardEditorPanelId,
+                                      roomId,
+                                      panel: {
+                                          activeBoardKey: key.id,
+                                      },
+                                  })
+                              )
+                          }
+                      >
+                          {board.name === '' ? '(名前なし)' : board.name}
+                      </Menu.Item>
+                  );
+              });
 
     // activeBoardPanelモードのときは boardsMenu==null
-    const boardsMenu = dropDownItems == null ? null : (
-        <Menu>
-            <Menu.ItemGroup title="ボード一覧">
-                {dropDownItems}
-            </Menu.ItemGroup>
-            <Menu.Divider />
-            <Menu.Item
-                icon={<Icons.PlusOutlined />}
-                onClick={() => dispatch(roomDrawerAndPopoverModule.actions.set({ boardDrawerType: { type: create } }))}>
-                新規作成
-            </Menu.Item>
-        </Menu>
-    );
+    const boardsMenu =
+        dropDownItems == null ? null : (
+            <Menu>
+                <Menu.ItemGroup title="ボード一覧">{dropDownItems}</Menu.ItemGroup>
+                <Menu.Divider />
+                <Menu.Item
+                    icon={<Icons.PlusOutlined />}
+                    onClick={() =>
+                        dispatch(
+                            roomDrawerAndPopoverModule.actions.set({
+                                boardDrawerType: { type: create },
+                            })
+                        )
+                    }
+                >
+                    新規作成
+                </Menu.Item>
+            </Menu>
+        );
 
     const noActiveBoardText = '';
 
     return (
-        <div style={({ position: 'relative' })}>
+        <div style={{ position: 'relative' }}>
             {boardComponent}
             <div style={boardsDropDownStyle}>
-                {boardsMenu != null
-                    ? <Dropdown overlay={boardsMenu} trigger={['click']}>
+                {boardsMenu != null ? (
+                    <Dropdown overlay={boardsMenu} trigger={['click']}>
                         <Button>
-                            {boardKeyToShow == null ? noActiveBoardText : (boards.get(boardKeyToShow)?.name ?? noActiveBoardText)} <Icons.DownOutlined />
+                            {boardKeyToShow == null
+                                ? noActiveBoardText
+                                : boards.get(boardKeyToShow)?.name ?? noActiveBoardText}{' '}
+                            <Icons.DownOutlined />
                         </Button>
                     </Dropdown>
-                    : <>
-                        <div style={{ marginRight: 4, padding: 4, background: '#E0E0E010' }}>{board?.name}</div>
+                ) : (
+                    <>
+                        <div style={{ marginRight: 4, padding: 4, background: '#E0E0E010' }}>
+                            {board?.name}
+                        </div>
                         <Button
                             onClick={() => {
                                 setActiveBoardSelectorModalVisibility(true);
-                            }}>
+                            }}
+                        >
                             表示ボードの変更
                         </Button>
-                    </>}
+                    </>
+                )}
                 <Button
                     disabled={boardKeyToShow == null}
                     onClick={() => {
                         if (boardKeyToShow == null) {
                             return;
                         }
-                        dispatch(roomDrawerAndPopoverModule.actions.set({ boardDrawerType: { type: update, stateKey: boardKeyToShow } }));
-                    }}>
+                        dispatch(
+                            roomDrawerAndPopoverModule.actions.set({
+                                boardDrawerType: { type: update, stateKey: boardKeyToShow },
+                            })
+                        );
+                    }}
+                >
                     編集
                 </Button>
             </div>
             <div style={zoomButtonStyle}>
-                <div style={({ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' })}>
-                    <Button onClick={() => {
-                        if (boardKeyToShow == null) {
-                            return;
-                        }
-                        dispatch(roomConfigModule.actions.zoomBoard({
-                            roomId,
-                            boardKey: boardKeyToShow,
-                            boardEditorPanelId,
-                            zoomDelta: 0.25,
-                            prevCanvasWidth: canvasWidth,
-                            prevCanvasHeight: canvasHeight,
-                        }));
-                    }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <Button
+                        onClick={() => {
+                            if (boardKeyToShow == null) {
+                                return;
+                            }
+                            dispatch(
+                                roomConfigModule.actions.zoomBoard({
+                                    roomId,
+                                    boardKey: boardKeyToShow,
+                                    boardEditorPanelId,
+                                    zoomDelta: 0.25,
+                                    prevCanvasWidth: canvasWidth,
+                                    prevCanvasHeight: canvasHeight,
+                                })
+                            );
+                        }}
+                    >
                         <Icon.ZoomInOutlined />
                     </Button>
-                    <Button onClick={() => {
-                        if (boardKeyToShow == null) {
-                            return;
-                        }
-                        dispatch(roomConfigModule.actions.zoomBoard({
-                            roomId,
-                            boardKey: boardKeyToShow,
-                            boardEditorPanelId,
-                            zoomDelta: -0.25,
-                            prevCanvasWidth: canvasWidth,
-                            prevCanvasHeight: canvasHeight,
-                        }));
-                    }}>
+                    <Button
+                        onClick={() => {
+                            if (boardKeyToShow == null) {
+                                return;
+                            }
+                            dispatch(
+                                roomConfigModule.actions.zoomBoard({
+                                    roomId,
+                                    boardKey: boardKeyToShow,
+                                    boardEditorPanelId,
+                                    zoomDelta: -0.25,
+                                    prevCanvasWidth: canvasWidth,
+                                    prevCanvasHeight: canvasHeight,
+                                })
+                            );
+                        }}
+                    >
                         <Icon.ZoomOutOutlined />
                     </Button>
-                    <div style={({ height: 6 })} />
-                    <Button onClick={() => {
-                        if (boardKeyToShow == null) {
-                            return;
-                        }
-                        dispatch(roomConfigModule.actions.resetBoard({
-                            roomId,
-                            boardKey: boardKeyToShow,
-                            boardEditorPanelId,
-                        }));
-                    }}>
+                    <div style={{ height: 6 }} />
+                    <Button
+                        onClick={() => {
+                            if (boardKeyToShow == null) {
+                                return;
+                            }
+                            dispatch(
+                                roomConfigModule.actions.resetBoard({
+                                    roomId,
+                                    boardKey: boardKeyToShow,
+                                    boardEditorPanelId,
+                                })
+                            );
+                        }}
+                    >
                         Boardの位置とズームをリセット
                     </Button>
                 </div>
             </div>
             <ActiveBoardSelectorModal
                 visible={activeBoardSelectorModalVisibility}
-                onComplete={() => setActiveBoardSelectorModalVisibility(false)} />
+                onComplete={() => setActiveBoardSelectorModalVisibility(false)}
+            />
         </div>
     );
 };

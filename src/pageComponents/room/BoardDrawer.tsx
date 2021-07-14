@@ -16,7 +16,11 @@ import { useBoards } from '../../hooks/state/useBoards';
 import { useMe } from '../../hooks/useMe';
 import { boardDiff, BoardState, UpOperation } from '@kizahasi/flocon-core';
 import { useDispatch } from 'react-redux';
-import { create, roomDrawerAndPopoverModule, update } from '../../modules/roomDrawerAndPopoverModule';
+import {
+    create,
+    roomDrawerAndPopoverModule,
+    update,
+} from '../../modules/roomDrawerAndPopoverModule';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 
 const notFound = 'notFound';
@@ -75,17 +79,24 @@ const BoardDrawer: React.FC = () => {
                                 [drawerType.stateKey.id]: {
                                     type: update,
                                     update: diffOperation,
-                                }
-                            }
-                        }
+                                },
+                            },
+                        },
                     };
                     operate(operation);
-                }
+                },
             };
             break;
     }
-    const { uiState: board, updateUiState: setBoard, resetUiState: resetBoardToCreate } = useStateEditor(stateEditorParams);
-    const [filesManagerDrawerType, setFilesManagerDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
+    const {
+        uiState: board,
+        updateUiState: setBoard,
+        resetUiState: resetBoardToCreate,
+    } = useStateEditor(stateEditorParams);
+    const [
+        filesManagerDrawerType,
+        setFilesManagerDrawerType,
+    ] = React.useState<FilesManagerDrawerType | null>(null);
 
     if (myUserUid == null || board == null) {
         return null;
@@ -97,7 +108,10 @@ const BoardDrawer: React.FC = () => {
                 setBoard({ ...board, ...partialState });
                 return;
             case update: {
-                const diffOperation = boardDiff({ prevState: board, nextState: { ...board, ...partialState } });
+                const diffOperation = boardDiff({
+                    prevState: board,
+                    nextState: { ...board, ...partialState },
+                });
                 if (diffOperation == null) {
                     return;
                 }
@@ -108,9 +122,9 @@ const BoardDrawer: React.FC = () => {
                             [drawerType.stateKey.id]: {
                                 type: update,
                                 update: diffOperation,
-                            }
-                        }
-                    }
+                            },
+                        },
+                    },
                 };
                 operate(operation);
                 return;
@@ -130,10 +144,10 @@ const BoardDrawer: React.FC = () => {
                             type: replace,
                             replace: {
                                 newValue: board,
-                            }
-                        }
-                    }
-                }
+                            },
+                        },
+                    },
+                },
             };
             operate(operation);
             setBoard(defaultBoard);
@@ -153,10 +167,10 @@ const BoardDrawer: React.FC = () => {
                             type: replace,
                             replace: {
                                 newValue: undefined,
-                            }
-                        }
-                    }
-                }
+                            },
+                        },
+                    },
+                },
             };
             operate(operation);
             dispatch(roomDrawerAndPopoverModule.actions.set({ boardDrawerType: null }));
@@ -169,52 +183,72 @@ const BoardDrawer: React.FC = () => {
             title={drawerType?.type === create ? 'Boardの新規作成' : 'Boardの編集'}
             visible={drawerType != null}
             closable
-            onClose={() => dispatch(roomDrawerAndPopoverModule.actions.set({ boardDrawerType: null }))}
-            footer={(
+            onClose={() =>
+                dispatch(roomDrawerAndPopoverModule.actions.set({ boardDrawerType: null }))
+            }
+            footer={
                 <DrawerFooter
-                    close={({
+                    close={{
                         textType: drawerType?.type === create ? 'cancel' : 'close',
-                        onClick: () => dispatch(roomDrawerAndPopoverModule.actions.set({ boardDrawerType: null }))
-                    })}
-                    ok={onOkClick == null ? undefined : ({ textType: 'create', onClick: onOkClick })}
-                    destroy={onDestroy == null ? undefined : {
-                        modal: {
-                            title: 'Boardの削除の確認',
-                            content: `このBoard "${board.name}" を削除します。よろしいですか？`,
-                        },
-                        onClick: onDestroy,
+                        onClick: () =>
+                            dispatch(
+                                roomDrawerAndPopoverModule.actions.set({ boardDrawerType: null })
+                            ),
                     }}
-                />)}>
+                    ok={onOkClick == null ? undefined : { textType: 'create', onClick: onOkClick }}
+                    destroy={
+                        onDestroy == null
+                            ? undefined
+                            : {
+                                  modal: {
+                                      title: 'Boardの削除の確認',
+                                      content: `このBoard "${board.name}" を削除します。よろしいですか？`,
+                                  },
+                                  onClick: onDestroy,
+                              }
+                    }
+                />
+            }
+        >
             <div>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
+                <Row gutter={gutter} align="middle">
+                    <Col flex="auto" />
                     <Col flex={0}>名前</Col>
                     <Col span={inputSpan}>
                         <BufferedInput
-                            bufferDuration='default'
-                            size='small'
+                            bufferDuration="default"
+                            size="small"
                             value={board.name}
                             onChange={e => {
                                 if (e.previousValue === e.currentValue) {
                                     return;
                                 }
                                 updateBoard({ name: e.currentValue });
-                            }} />
+                            }}
+                        />
                     </Col>
                 </Row>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
+                <Row gutter={gutter} align="middle">
+                    <Col flex="auto" />
                     <Col flex={0}>背景画像</Col>
                     <Col span={inputSpan}>
-                        <InputFile filePath={board.backgroundImage ?? undefined} onPathChange={path => updateBoard({ backgroundImage: path == null ? undefined : FilePath.toOt(path) })} openFilesManager={setFilesManagerDrawerType} />
+                        <InputFile
+                            filePath={board.backgroundImage ?? undefined}
+                            onPathChange={path =>
+                                updateBoard({
+                                    backgroundImage: path == null ? undefined : FilePath.toOt(path),
+                                })
+                            }
+                            openFilesManager={setFilesManagerDrawerType}
+                        />
                     </Col>
                 </Row>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
+                <Row gutter={gutter} align="middle">
+                    <Col flex="auto" />
                     <Col flex={0}>背景画像の拡大率</Col>
                     <Col span={inputSpan}>
                         <InputNumber
-                            size='small'
+                            size="small"
                             value={board.backgroundImageZoom * 100}
                             min={0}
                             formatter={value => `${value}%`}
@@ -228,53 +262,89 @@ const BoardDrawer: React.FC = () => {
                                 }
                                 return num;
                             }}
-                            onChange={newValue => typeof newValue === 'number' ? updateBoard({ backgroundImageZoom: newValue / 100 }) : undefined} />
+                            onChange={newValue =>
+                                typeof newValue === 'number'
+                                    ? updateBoard({ backgroundImageZoom: newValue / 100 })
+                                    : undefined
+                            }
+                        />
                     </Col>
                 </Row>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
+                <Row gutter={gutter} align="middle">
+                    <Col flex="auto" />
                     <Col flex={0}>グリッドの数</Col>
                     <Col span={inputSpan}>
                         <span>x=</span>
                         <InputNumber
-                            size='small'
-                            style={({ width: 80 })}
+                            size="small"
+                            style={{ width: 80 }}
                             value={board.cellColumnCount}
-                            onChange={newValue => typeof newValue === 'number' ? updateBoard({ cellColumnCount: newValue }) : undefined} />
-                        <span style={({ marginLeft: 10 })}>y=</span>
+                            onChange={newValue =>
+                                typeof newValue === 'number'
+                                    ? updateBoard({ cellColumnCount: newValue })
+                                    : undefined
+                            }
+                        />
+                        <span style={{ marginLeft: 10 }}>y=</span>
                         <InputNumber
-                            size='small'
-                            style={({ width: 80 })}
+                            size="small"
+                            style={{ width: 80 }}
                             value={board.cellRowCount}
-                            onChange={newValue => typeof newValue === 'number' ? updateBoard({ cellRowCount: newValue }) : undefined} />
+                            onChange={newValue =>
+                                typeof newValue === 'number'
+                                    ? updateBoard({ cellRowCount: newValue })
+                                    : undefined
+                            }
+                        />
                     </Col>
                 </Row>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
+                <Row gutter={gutter} align="middle">
+                    <Col flex="auto" />
                     <Col flex={0}>グリッドの大きさ</Col>
                     <Col span={inputSpan}>
                         {/* cellWidth === cellHeight という前提だが、もし異なる場合は代表してcellWidthの値を用いることにしている */}
-                        <InputNumber size='small' value={board.cellWidth} onChange={newValue => typeof newValue === 'number' ? updateBoard({ cellWidth: newValue, cellHeight: newValue }) : undefined} />
+                        <InputNumber
+                            size="small"
+                            value={board.cellWidth}
+                            onChange={newValue =>
+                                typeof newValue === 'number'
+                                    ? updateBoard({ cellWidth: newValue, cellHeight: newValue })
+                                    : undefined
+                            }
+                        />
                     </Col>
                 </Row>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
+                <Row gutter={gutter} align="middle">
+                    <Col flex="auto" />
                     <Col flex={0}>グリッドの基準点</Col>
                     <Col span={inputSpan}>
                         <span>x=</span>
                         <InputNumber
-                            size='small'
+                            size="small"
                             value={board.cellOffsetX}
-                            onChange={newValue => typeof newValue === 'number' ? updateBoard({ cellOffsetX: newValue }) : undefined} />
-                        <span style={({ marginLeft: 10 })}>y=</span>
+                            onChange={newValue =>
+                                typeof newValue === 'number'
+                                    ? updateBoard({ cellOffsetX: newValue })
+                                    : undefined
+                            }
+                        />
+                        <span style={{ marginLeft: 10 }}>y=</span>
                         <InputNumber
-                            size='small'
+                            size="small"
                             value={board.cellOffsetY}
-                            onChange={newValue => typeof newValue === 'number' ? updateBoard({ cellOffsetY: newValue }) : undefined} />
+                            onChange={newValue =>
+                                typeof newValue === 'number'
+                                    ? updateBoard({ cellOffsetY: newValue })
+                                    : undefined
+                            }
+                        />
                     </Col>
                 </Row>
             </div>
-            <FilesManagerDrawer drawerType={filesManagerDrawerType} onClose={() => setFilesManagerDrawerType(null)} />
+            <FilesManagerDrawer
+                drawerType={filesManagerDrawerType}
+                onClose={() => setFilesManagerDrawerType(null)}
+            />
         </Drawer>
     );
 };

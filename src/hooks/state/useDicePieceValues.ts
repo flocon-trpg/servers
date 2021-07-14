@@ -7,7 +7,7 @@ export type DicePieceValueElement = {
     characterKey: CompositeKey;
     valueId: string;
     value: DicePieceValueState;
-}
+};
 
 export const useDicePieceValues = (): ReadonlyArray<DicePieceValueElement> | undefined => {
     const characters = useCharacters();

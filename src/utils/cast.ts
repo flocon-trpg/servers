@@ -1,7 +1,10 @@
 import _ from 'lodash';
 import isObject from './isObject';
 
-export const castToArray = <T>(source: unknown, inner: (x: unknown) => T | undefined): T[] | undefined => {
+export const castToArray = <T>(
+    source: unknown,
+    inner: (x: unknown) => T | undefined
+): T[] | undefined => {
     if (Array.isArray(source)) {
         return _(source.map(inner)).compact().value();
     }
@@ -22,7 +25,10 @@ export const castToNumber = (source: unknown): number | undefined => {
     return undefined;
 };
 
-export const castToRecord = <T>(source: unknown, inner: (x: unknown) => T | undefined): Record<string, T> | undefined => {
+export const castToRecord = <T>(
+    source: unknown,
+    inner: (x: unknown) => T | undefined
+): Record<string, T> | undefined => {
     if (!isObject<Record<string, T>>(source)) {
         return;
     }

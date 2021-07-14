@@ -23,7 +23,7 @@ type Props = {
         };
         disabled?: boolean;
     };
-}
+};
 
 const DrawerFooter: React.FC<Props> = ({ close, ok, destroy }: Props) => {
     if (close == null && ok == null && destroy == null) {
@@ -39,9 +39,11 @@ const DrawerFooter: React.FC<Props> = ({ close, ok, destroy }: Props) => {
                         close.onClick();
                     }
                 }}
-                style={{ marginLeft: 8 }}>
+                style={{ marginLeft: 8 }}
+            >
                 {close.textType}
-            </Button>);
+            </Button>
+        );
     }
 
     let destroyButton: JSX.Element | null = null;
@@ -71,9 +73,11 @@ const DrawerFooter: React.FC<Props> = ({ close, ok, destroy }: Props) => {
                     }
                 }}
                 style={{ marginLeft: 8 }}
-                danger>
+                danger
+            >
                 削除
-            </Button>);
+            </Button>
+        );
     }
 
     let okButton: JSX.Element | null = null;
@@ -85,14 +89,15 @@ const DrawerFooter: React.FC<Props> = ({ close, ok, destroy }: Props) => {
                 }}
                 disabled={ok.disabled ?? false}
                 type="primary"
-                style={{ marginLeft: 8 }}>
+                style={{ marginLeft: 8 }}
+            >
                 {ok.textType}
-            </Button>);
+            </Button>
+        );
     }
 
     return (
-        <div
-            style={{ textAlign: 'right' }}>
+        <div style={{ textAlign: 'right' }}>
             {closeButton}
             {destroyButton}
             {okButton}

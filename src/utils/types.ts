@@ -5,7 +5,7 @@ import { FilterValue } from 'antd/lib/table/interface';
 export type FilePath = {
     path: string;
     sourceType: FileSourceType;
-}
+};
 
 export namespace FilePath {
     export const toGraphQL = (source: FilePath | Core.FilePath): FilePath => {
@@ -51,14 +51,16 @@ export namespace FilePath {
 export const none = 'none';
 export const some = 'some';
 
-export type FilesManagerDrawerType = {
-    openFileType: typeof none;
-    defaultFilteredValue?: FilterValue | undefined;
-} | {
-    openFileType: typeof some;
-    onOpen: (path: FilePath) => void;
-    defaultFilteredValue: FilterValue | undefined;
-}
+export type FilesManagerDrawerType =
+    | {
+          openFileType: typeof none;
+          defaultFilteredValue?: FilterValue | undefined;
+      }
+    | {
+          openFileType: typeof some;
+          onOpen: (path: FilePath) => void;
+          defaultFilteredValue: FilterValue | undefined;
+      };
 
 export type PublicChannelNames = {
     publicChannel1Name: string;
@@ -71,7 +73,7 @@ export type PublicChannelNames = {
     publicChannel8Name: string;
     publicChannel9Name: string;
     publicChannel10Name: string;
-}
+};
 
 export const emptyPublicChannelNames: PublicChannelNames = {
     publicChannel1Name: '',
@@ -88,4 +90,4 @@ export const emptyPublicChannelNames: PublicChannelNames = {
 
 export const reset = 'reset';
 
-export type Reset = { type: typeof reset }
+export type Reset = { type: typeof reset };

@@ -1,6 +1,10 @@
 import { castToArray, castToBoolean, castToNumber, castToString } from '../utils/cast';
 import isObject from '../utils/isObject';
-import { castToPartialDraggablePanelConfigBase, DraggablePanelConfigBase, toCompleteDraggablePanelConfigBase } from './DraggablePanelConfigBase';
+import {
+    castToPartialDraggablePanelConfigBase,
+    DraggablePanelConfigBase,
+    toCompleteDraggablePanelConfigBase,
+} from './DraggablePanelConfigBase';
 import * as generators from '../utils/generators';
 
 export type MessageFilter = {
@@ -19,7 +23,7 @@ export type MessageFilter = {
     showPublic10: boolean;
     // trueならばプライベートメッセージをすべて含める、falseならすべて除外。stringならばPrivateChannelSetsを表し、そのプライベートメッセージのみ含める。
     privateChannels: string | boolean;
-}
+};
 
 export type TabConfig = {
     // keyとcreatedAtはReactのkeyに使われる
@@ -32,37 +36,41 @@ export type TabConfig = {
 
 export namespace MessageFilter {
     export const isEmpty = (source: MessageFilter): boolean => {
-        return source.privateChannels === false
-            && !source.showNotification
-            && !source.showFree
-            && !source.showPublic1
-            && !source.showPublic10
-            && !source.showPublic2
-            && !source.showPublic3
-            && !source.showPublic4
-            && !source.showPublic5
-            && !source.showPublic6
-            && !source.showPublic7
-            && !source.showPublic8
-            && !source.showPublic9
-            && !source.showSystem;
+        return (
+            source.privateChannels === false &&
+            !source.showNotification &&
+            !source.showFree &&
+            !source.showPublic1 &&
+            !source.showPublic10 &&
+            !source.showPublic2 &&
+            !source.showPublic3 &&
+            !source.showPublic4 &&
+            !source.showPublic5 &&
+            !source.showPublic6 &&
+            !source.showPublic7 &&
+            !source.showPublic8 &&
+            !source.showPublic9 &&
+            !source.showSystem
+        );
     };
 
     export const isAll = (source: MessageFilter): boolean => {
-        return source.privateChannels === true
-            && source.showNotification
-            && source.showFree
-            && source.showPublic1
-            && source.showPublic10
-            && source.showPublic2
-            && source.showPublic3
-            && source.showPublic4
-            && source.showPublic5
-            && source.showPublic6
-            && source.showPublic7
-            && source.showPublic8
-            && source.showPublic9
-            && source.showSystem;
+        return (
+            source.privateChannels === true &&
+            source.showNotification &&
+            source.showFree &&
+            source.showPublic1 &&
+            source.showPublic10 &&
+            source.showPublic2 &&
+            source.showPublic3 &&
+            source.showPublic4 &&
+            source.showPublic5 &&
+            source.showPublic6 &&
+            source.showPublic7 &&
+            source.showPublic8 &&
+            source.showPublic9 &&
+            source.showSystem
+        );
     };
 
     export const createEmpty = (): MessageFilter => {
@@ -154,7 +162,8 @@ export const castToPartialMessageFilter = (source: unknown): PartialMessageFilte
         return;
     }
     return {
-        privateChannels: castToBoolean(source.privateChannels) ?? castToString(source.privateChannels),
+        privateChannels:
+            castToBoolean(source.privateChannels) ?? castToString(source.privateChannels),
         showNotification: castToBoolean(source.showNotification),
         showFree: castToBoolean(source.showFree),
         showPublic10: castToBoolean(source.showPublic10),
@@ -221,11 +230,13 @@ export type MessagePanelConfig = {
     selectedCharacterStateId?: string;
     customCharacterName: string;
     selectedGameSystem?: string;
-} & DraggablePanelConfigBase
+} & DraggablePanelConfigBase;
 
 export type PartialMessagePanelConfig = Partial<MessagePanelConfig>;
 
-export const castToPartialMessagePanelConfig = (source: unknown): PartialMessagePanelConfig | undefined => {
+export const castToPartialMessagePanelConfig = (
+    source: unknown
+): PartialMessagePanelConfig | undefined => {
     if (!isObject<PartialMessagePanelConfig>(source)) {
         return;
     }
@@ -243,7 +254,9 @@ export const castToPartialMessagePanelConfig = (source: unknown): PartialMessage
     };
 };
 
-export const toCompleteMessagePanelConfig = (source: PartialMessagePanelConfig): MessagePanelConfig => {
+export const toCompleteMessagePanelConfig = (
+    source: PartialMessagePanelConfig
+): MessagePanelConfig => {
     return {
         ...toCompleteDraggablePanelConfigBase(source),
         isMinimized: source.isMinimized ?? false,

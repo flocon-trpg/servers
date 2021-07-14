@@ -21,7 +21,7 @@ const userConfigModule = createSlice({
                 }
             }
         },
-    }
+    },
 });
 
 export default userConfigModule;

@@ -8,7 +8,7 @@ export namespace DicePieceValue {
         state: DicePieceValueState;
         size: number;
         padding?: number | string;
-    }
+    };
 
     export const images: React.FC<ImageProps> = ({ state, size, padding }: ImageProps) => {
         const img = (state: DieValueState | undefined) => {
@@ -21,13 +21,22 @@ export namespace DicePieceValue {
             } else {
                 src = `/dice/${state.value}-6.png`;
             }
-            return <img width={size} height={size} style={{ opacity: state.isValuePrivate ? privateValueOpacity : undefined }} src={src} />;
+            return (
+                <img
+                    width={size}
+                    height={size}
+                    style={{ opacity: state.isValuePrivate ? privateValueOpacity : undefined }}
+                    src={src}
+                />
+            );
         };
-        return <div style={{ display: 'flex', flexDirection: 'row', padding }}>
-            {img(state.dice[1])}
-            {img(state.dice[2])}
-            {img(state.dice[3])}
-            {img(state.dice[4])}
-        </div>;
+        return (
+            <div style={{ display: 'flex', flexDirection: 'row', padding }}>
+                {img(state.dice[1])}
+                {img(state.dice[2])}
+                {img(state.dice[3])}
+                {img(state.dice[4])}
+            </div>
+        );
     };
 }

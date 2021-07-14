@@ -7,11 +7,22 @@ import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
 import { useOperate } from '../../hooks/useOperate';
-import { UpOperation, toDicePieceValueUpOperation, dicePieceValueDiff, DicePieceValueState, CharacterState, dicePieceValueStrIndexes } from '@kizahasi/flocon-core';
+import {
+    UpOperation,
+    toDicePieceValueUpOperation,
+    dicePieceValueDiff,
+    DicePieceValueState,
+    CharacterState,
+    dicePieceValueStrIndexes,
+} from '@kizahasi/flocon-core';
 import { compositeKeyToString } from '@kizahasi/util';
 import { useDispatch } from 'react-redux';
 import { useSelector } from '../../store';
-import { create, roomDrawerAndPopoverModule, update } from '../../modules/roomDrawerAndPopoverModule';
+import {
+    create,
+    roomDrawerAndPopoverModule,
+    update,
+} from '../../modules/roomDrawerAndPopoverModule';
 import { useDicePieceValues } from '../../hooks/state/useDicePieceValues';
 import { MyCharactersSelect } from '../../components/MyCharactersSelect';
 import { InputDie } from '../../components/InputDie';
@@ -32,29 +43,40 @@ const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
 const IdView: React.FC = () => {
-    const drawerType = useSelector(state => state.roomDrawerAndPopoverModule.dicePieceValueDrawerType);
+    const drawerType = useSelector(
+        state => state.roomDrawerAndPopoverModule.dicePieceValueDrawerType
+    );
     const myUserUid = useMyUserUid();
 
     if (drawerType == null || myUserUid == null) {
         return null;
     }
 
-    return <Row gutter={gutter} align='middle'>
-        <Col flex='auto' />
-        <Col flex={0}>ID</Col>
-        <Col span={inputSpan}>
-            {drawerType.type === update ? compositeKeyToString({ createdBy: myUserUid, id: drawerType.stateKey }) : '(なし)'}
-        </Col>
-    </Row>;
+    return (
+        <Row gutter={gutter} align="middle">
+            <Col flex="auto" />
+            <Col flex={0}>ID</Col>
+            <Col span={inputSpan}>
+                {drawerType.type === update
+                    ? compositeKeyToString({ createdBy: myUserUid, id: drawerType.stateKey })
+                    : '(なし)'}
+            </Col>
+        </Row>
+    );
 };
 
 export const DicePieceValueDrawer: React.FC = () => {
-    const drawerType = useSelector(state => state.roomDrawerAndPopoverModule.dicePieceValueDrawerType);
+    const drawerType = useSelector(
+        state => state.roomDrawerAndPopoverModule.dicePieceValueDrawerType
+    );
     const dispatch = useDispatch();
     const operate = useOperate();
     const myUserUid = useMyUserUid();
     const dicePieceValues = useDicePieceValues();
-    const [activeCharacter, setActiveCharacter] = React.useState<{ key: string; state: CharacterState }>();
+    const [activeCharacter, setActiveCharacter] = React.useState<{
+        key: string;
+        state: CharacterState;
+    }>();
     let stateEditorParams: StateEditorParams<DicePieceValueState | undefined>;
     switch (drawerType?.type) {
         case create:
@@ -67,7 +89,11 @@ export const DicePieceValueDrawer: React.FC = () => {
         case update:
             stateEditorParams = {
                 type: update,
-                state: dicePieceValues?.find(value => value.characterKey.createdBy === myUserUid && value.valueId === drawerType.stateKey)?.value,
+                state: dicePieceValues?.find(
+                    value =>
+                        value.characterKey.createdBy === myUserUid &&
+                        value.valueId === drawerType.stateKey
+                )?.value,
                 onUpdate: ({ prevState, nextState }) => {
                     if (myUserUid == null || drawerType?.type !== update) {
                         return;
@@ -91,15 +117,15 @@ export const DicePieceValueDrawer: React.FC = () => {
                                             [drawerType.stateKey]: {
                                                 type: update,
                                                 update: toDicePieceValueUpOperation(diff),
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
                     };
                     operate(operation);
-                }
+                },
             };
             break;
     }
@@ -132,19 +158,23 @@ export const DicePieceValueDrawer: React.FC = () => {
                                         replace: {
                                             newValue: {
                                                 ...state,
-                                                pieces: drawerType.boardKey == null ? {} : {
-                                                    [drawerType.boardKey.createdBy]: {
-                                                        [drawerType.boardKey.id]: drawerType.piece,
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                                                pieces:
+                                                    drawerType.boardKey == null
+                                                        ? {}
+                                                        : {
+                                                              [drawerType.boardKey.createdBy]: {
+                                                                  [drawerType.boardKey.id]:
+                                                                      drawerType.piece,
+                                                              },
+                                                          },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
             };
             operate(operation);
             dispatch(roomDrawerAndPopoverModule.actions.set({ dicePieceValueDrawerType: null }));
@@ -159,83 +189,108 @@ export const DicePieceValueDrawer: React.FC = () => {
             title={drawerType?.type === update ? 'ダイスコマの編集' : 'ダイスコマの新規作成'}
             visible={drawerType != null}
             closable
-            onClose={() => dispatch(roomDrawerAndPopoverModule.actions.set({ dicePieceValueDrawerType: null }))}
-            footer={(
+            onClose={() =>
+                dispatch(roomDrawerAndPopoverModule.actions.set({ dicePieceValueDrawerType: null }))
+            }
+            footer={
                 <DrawerFooter
-                    close={({
+                    close={{
                         textType: drawerType?.type === update ? 'close' : 'cancel',
-                        onClick: () => dispatch(roomDrawerAndPopoverModule.actions.set({ dicePieceValueDrawerType: null }))
-                    })}
-                    ok={onCreate == null ? undefined : ({ textType: 'create', onClick: onCreate })} />)}>
+                        onClick: () =>
+                            dispatch(
+                                roomDrawerAndPopoverModule.actions.set({
+                                    dicePieceValueDrawerType: null,
+                                })
+                            ),
+                    }}
+                    ok={onCreate == null ? undefined : { textType: 'create', onClick: onCreate }}
+                />
+            }
+        >
             <div>
                 <IdView />
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
+                <Row gutter={gutter} align="middle">
+                    <Col flex="auto" />
                     <Col flex={0}>所有者</Col>
                     <Col span={inputSpan}>
                         <MyCharactersSelect
-                            selectedCharacterId={drawerType?.type === update ? drawerType.characterKey.id : activeCharacter?.key}
+                            selectedCharacterId={
+                                drawerType?.type === update
+                                    ? drawerType.characterKey.id
+                                    : activeCharacter?.key
+                            }
                             readOnly={drawerType?.type === update}
-                            onSelect={setActiveCharacter} />
+                            onSelect={setActiveCharacter}
+                        />
                     </Col>
                 </Row>
 
                 {dicePieceValueStrIndexes.map(key => {
                     const die = state.dice[key];
 
-                    return <Row key={key} style={{ minHeight: 28 }} gutter={gutter} align='middle'>
-                        <Col flex='auto' />
-                        <Col flex={0}>{`ダイス${key}`}</Col>
-                        <Col span={inputSpan}>
-                            <InputDie
-                                size='small'
-                                state={die ?? null}
-                                onChange={e => {
-                                    if (e.type === replace) {
+                    return (
+                        <Row key={key} style={{ minHeight: 28 }} gutter={gutter} align="middle">
+                            <Col flex="auto" />
+                            <Col flex={0}>{`ダイス${key}`}</Col>
+                            <Col span={inputSpan}>
+                                <InputDie
+                                    size="small"
+                                    state={die ?? null}
+                                    onChange={e => {
+                                        if (e.type === replace) {
+                                            setState({
+                                                ...state,
+                                                dice: {
+                                                    ...state.dice,
+                                                    [key]:
+                                                        e.newValue == null
+                                                            ? undefined
+                                                            : {
+                                                                  $version: 1,
+                                                                  dieType: e.newValue.dieType,
+                                                                  isValuePrivate: false,
+                                                                  value: null,
+                                                              },
+                                                },
+                                            });
+                                            return;
+                                        }
                                         setState({
                                             ...state,
                                             dice: {
                                                 ...state.dice,
                                                 [key]:
-                                                    e.newValue == null ? undefined : {
-                                                        $version: 1,
-                                                        dieType: e.newValue.dieType,
-                                                        isValuePrivate: false,
-                                                        value: null,
-                                                    }
-                                            }
+                                                    die == null
+                                                        ? undefined
+                                                        : {
+                                                              ...die,
+                                                              value:
+                                                                  e.newValue === noValue
+                                                                      ? null
+                                                                      : e.newValue,
+                                                          },
+                                            },
                                         });
-                                        return;
-                                    }
-                                    setState({
-                                        ...state,
-                                        dice: {
-                                            ...state.dice,
-                                            [key]: die == null ? undefined : {
-                                                ...die,
-                                                value: e.newValue === noValue ? null : e.newValue,
-                                            }
+                                    }}
+                                    onIsValuePrivateChange={e => {
+                                        if (die == null) {
+                                            return;
                                         }
-                                    });
-                                }}
-                                onIsValuePrivateChange={e => {
-                                    if (die == null) {
-                                        return;
-                                    }
-                                    setState({
-                                        ...state,
-                                        dice: {
-                                            ...state.dice,
-                                            [key]: {
-                                                ...die,
-                                                isValuePrivate: e,
-                                            }
-                                        }
-                                    });
-                                }} />
-
-                        </Col>
-                    </Row>;
+                                        setState({
+                                            ...state,
+                                            dice: {
+                                                ...state.dice,
+                                                [key]: {
+                                                    ...die,
+                                                    isValuePrivate: e,
+                                                },
+                                            },
+                                        });
+                                    }}
+                                />
+                            </Col>
+                        </Row>
+                    );
                 })}
             </div>
         </Drawer>

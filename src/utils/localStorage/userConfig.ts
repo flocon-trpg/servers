@@ -1,5 +1,10 @@
 import localforage from 'localforage';
-import { castToPartialUserConfig, defaultUserConfig, toCompleteUserConfig, UserConfig } from '../../states/UserConfig';
+import {
+    castToPartialUserConfig,
+    defaultUserConfig,
+    toCompleteUserConfig,
+    UserConfig,
+} from '../../states/UserConfig';
 
 const userConfigKey = (userUid: string) => `user@${userUid}`;
 

@@ -9,7 +9,7 @@ import { useBuffer } from '../hooks/useBuffer';
 export type OnChangeParams = {
     previousValue: string;
     currentValue: string;
-}
+};
 
 export type Props = Omit<InputProps, 'defaultValue' | 'value' | 'ref' | 'onChange'> & {
     value: string;
@@ -47,9 +47,15 @@ const BufferedInput: React.FC<Props> = (props: Props) => {
     });
 
     return (
-        <Input {...props} value={undefined} ref={ref} defaultValue={undefined} onChange={e => {
-            onChangeInput(e.currentTarget.value);
-        }} />
+        <Input
+            {...props}
+            value={undefined}
+            ref={ref}
+            defaultValue={undefined}
+            onChange={e => {
+                onChangeInput(e.currentTarget.value);
+            }}
+        />
     );
 };
 

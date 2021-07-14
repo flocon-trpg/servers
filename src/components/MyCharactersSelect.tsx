@@ -13,7 +13,11 @@ type Props = {
     readOnly: boolean;
 };
 
-export const MyCharactersSelect: React.FC<Props> = ({ onSelect, selectedCharacterId, readOnly }: Props) => {
+export const MyCharactersSelect: React.FC<Props> = ({
+    onSelect,
+    selectedCharacterId,
+    readOnly,
+}: Props) => {
     const myCharacters = useMyCharacters();
     const selectedCharacter = React.useMemo(() => {
         return selectedCharacterId == null ? undefined : myCharacters?.get(selectedCharacterId);
@@ -23,9 +27,11 @@ export const MyCharactersSelect: React.FC<Props> = ({ onSelect, selectedCharacte
             return [];
         }
         return [...myCharacters].map(([characterKey, character]) => {
-            return <Select.Option key={characterKey} value={characterKey}>
-                {character.name}
-            </Select.Option>;
+            return (
+                <Select.Option key={characterKey} value={characterKey}>
+                    {character.name}
+                </Select.Option>
+            );
         });
     }, [myCharacters]);
 
@@ -33,25 +39,28 @@ export const MyCharactersSelect: React.FC<Props> = ({ onSelect, selectedCharacte
         return <span>{selectedCharacter?.name}</span>;
     }
 
-    return <Select
-        style={{ minWidth: 150 }}
-        size='small'
-        value={selectedCharacterId}
-        onSelect={value => {
-            if (value == null) {
-                onSelect(undefined);
-                return;
-            }
-            if (typeof value === 'string') {
-                const selected = myCharacters?.get(value);
-                if (selected == null) {
+    return (
+        <Select
+            style={{ minWidth: 150 }}
+            size="small"
+            value={selectedCharacterId}
+            onSelect={value => {
+                if (value == null) {
                     onSelect(undefined);
                     return;
                 }
-                onSelect({ key: value, state: selected });
-                return;
-            }
-        }}>
-        {options}
-    </Select>;
+                if (typeof value === 'string') {
+                    const selected = myCharacters?.get(value);
+                    if (selected == null) {
+                        onSelect(undefined);
+                        return;
+                    }
+                    onSelect({ key: value, state: selected });
+                    return;
+                }
+            }}
+        >
+            {options}
+        </Select>
+    );
 };

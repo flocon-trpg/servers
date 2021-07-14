@@ -1,7 +1,19 @@
 import React, { PropsWithChildren } from 'react';
 import MyAuthContext from '../contexts/MyAuthContext';
 import { useRouter } from 'next/router';
-import { Button, Layout as AntdLayout, Row, Col, Space, Form, Input, Spin, Card, Alert, Result } from 'antd';
+import {
+    Button,
+    Layout as AntdLayout,
+    Row,
+    Col,
+    Space,
+    Form,
+    Input,
+    Spin,
+    Card,
+    Alert,
+    Result,
+} from 'antd';
 import { EntryToServerResultType, useEntryToServerMutation } from '../generated/graphql';
 import Center from '../components/Center';
 import { getAuth } from '../utils/firebaseHelpers';
@@ -21,7 +33,7 @@ const { Header, Content } = AntdLayout;
 type EntryFormComponentProps = {
     // entryが成功したときに呼び出される。
     onEntry: (() => void) | undefined;
-}
+};
 
 const EntryFormComponent: React.FC<EntryFormComponentProps> = (props: EntryFormComponentProps) => {
     const [entryToServer, entryToServerResult] = useEntryToServerMutation();
@@ -56,21 +68,30 @@ const EntryFormComponent: React.FC<EntryFormComponentProps> = (props: EntryFormC
                     setIsFinishedSuccessfully(true);
                     props.onEntry();
                 });
-            }}>
-            <Form.Item
-                label="Phrase"
-                name={phraseName}>
+            }}
+        >
+            <Form.Item label="Phrase" name={phraseName}>
                 <Input />
             </Form.Item>
 
             <Form.Item>
-                <Button disabled={isSubmitting || isFinishedSuccessfully} type="primary" htmlType="submit">
+                <Button
+                    disabled={isSubmitting || isFinishedSuccessfully}
+                    type="primary"
+                    htmlType="submit"
+                >
                     Submit
                 </Button>
-                {isSubmitting ? (<Spin />) : null}
-                {entryToServerResult?.data?.result.type === EntryToServerResultType.WrongPhrase ? (<Alert message='wrong phrase' type='error' showIcon />) : null}
-                {entryToServerResult?.error == null ? null : (<Alert message={entryToServerResult.error.message} type='error' showIcon />)}
-                {isFinishedSuccessfully ? (<Alert message='success' type='success' showIcon />) : null}
+                {isSubmitting ? <Spin /> : null}
+                {entryToServerResult?.data?.result.type === EntryToServerResultType.WrongPhrase ? (
+                    <Alert message="wrong phrase" type="error" showIcon />
+                ) : null}
+                {entryToServerResult?.error == null ? null : (
+                    <Alert message={entryToServerResult.error.message} type="error" showIcon />
+                )}
+                {isFinishedSuccessfully ? (
+                    <Alert message="success" type="success" showIcon />
+                ) : null}
             </Form.Item>
         </Form>
     );
@@ -86,26 +107,28 @@ type Props = {
     onEntry?: () => void;
 
     hideHeader?: boolean;
-}
+};
 
-const Layout: React.FC<PropsWithChildren<Props>> = ({ 
-    children, 
-    showEntryForm, 
-    onEntry, 
+const Layout: React.FC<PropsWithChildren<Props>> = ({
+    children,
+    showEntryForm,
+    onEntry,
     requiresLogin,
-    hideHeader 
+    hideHeader,
 }: PropsWithChildren<Props>) => {
     const router = useRouter();
     const myAuth = React.useContext(MyAuthContext);
     const signOut = useSignOut();
 
     if (myAuth === authNotFound) {
-        return <Result status='info' title='Firebase Authentication インスタンスが見つかりません。' />;
+        return (
+            <Result status="info" title="Firebase Authentication インスタンスが見つかりません。" />
+        );
     }
 
     const content = (() => {
         if (myAuth === loading) {
-            return <LoadingResult title='Firebase Authentication による認証を行っています…' />;
+            return <LoadingResult title="Firebase Authentication による認証を行っています…" />;
         }
         if (requiresLogin && myAuth === notSignIn) {
             return <NotSignInResult />;
@@ -113,7 +136,7 @@ const Layout: React.FC<PropsWithChildren<Props>> = ({
         if (showEntryForm) {
             return (
                 <Center>
-                    <Card title="サーバーのパスフレーズ入力" >
+                    <Card title="サーバーのパスフレーズ入力">
                         <EntryFormComponent onEntry={onEntry} />
                     </Card>
                 </Center>
@@ -123,30 +146,45 @@ const Layout: React.FC<PropsWithChildren<Props>> = ({
     })();
 
     return (
-        <AntdLayout style={({ height: '100vh' })}>
-            {!hideHeader && <Header>
-                <Row>
-                    <Col flex={0}><Link href="/"><img style={{ cursor: 'pointer' }} src='/logo.png' width={32} height={32} /></Link></Col>
-                    <Col flex={1} />
-                    <Col flex={0}>
-                        <Space>
-                            {/* UserOutlinedを付けている理由は、room/[id] を開いたときにヘッダーを隠して代わりにメニューにユーザーを表示する仕組みであり、そちらのユーザー名のほうにもUserOutlinedを付けることでそれがユーザー名だということが連想され、入室時の名前と区別させやすくなるようにするため。 */}
-                            {typeof myAuth === 'string' ? null : <Icon.UserOutlined />}
-                            {typeof myAuth === 'string' ? null : <div style={({ color: 'white' })}>{myAuth.displayName} - {myAuth.uid}</div>}
-                            {typeof myAuth === 'string'
-                                ? <Button key="2" onClick={() => router.push('/signin')}>Log in</Button>
-                                : <Button
-                                    key="2"
-                                    onClick={() => signOut()}>
-                                    Logout
-                                </Button>}
-                        </Space>
-                    </Col>
-                </Row>
-            </Header> }
-            <Content>
-                {content}
-            </Content>
+        <AntdLayout style={{ height: '100vh' }}>
+            {!hideHeader && (
+                <Header>
+                    <Row>
+                        <Col flex={0}>
+                            <Link href="/">
+                                <img
+                                    style={{ cursor: 'pointer' }}
+                                    src="/logo.png"
+                                    width={32}
+                                    height={32}
+                                />
+                            </Link>
+                        </Col>
+                        <Col flex={1} />
+                        <Col flex={0}>
+                            <Space>
+                                {/* UserOutlinedを付けている理由は、room/[id] を開いたときにヘッダーを隠して代わりにメニューにユーザーを表示する仕組みであり、そちらのユーザー名のほうにもUserOutlinedを付けることでそれがユーザー名だということが連想され、入室時の名前と区別させやすくなるようにするため。 */}
+                                {typeof myAuth === 'string' ? null : <Icon.UserOutlined />}
+                                {typeof myAuth === 'string' ? null : (
+                                    <div style={{ color: 'white' }}>
+                                        {myAuth.displayName} - {myAuth.uid}
+                                    </div>
+                                )}
+                                {typeof myAuth === 'string' ? (
+                                    <Button key="2" onClick={() => router.push('/signin')}>
+                                        Log in
+                                    </Button>
+                                ) : (
+                                    <Button key="2" onClick={() => signOut()}>
+                                        Logout
+                                    </Button>
+                                )}
+                            </Space>
+                        </Col>
+                    </Row>
+                </Header>
+            )}
+            <Content>{content}</Content>
         </AntdLayout>
     );
 };

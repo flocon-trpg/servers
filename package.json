@@ -65,6 +65,15 @@
         "prettier": "^2.2.1",
         "ts-jest": "^26.5.5"
     },
+    "prettier": {
+        "printWidth": 100,
+        "semi": true,
+        "singleQuote": true,
+        "trailingComma": "es5",
+        "tabWidth": 4,
+        "endOfLine": "crlf",
+        "arrowParens": "avoid"
+    },
     "scripts": {
         "dev": "run-s build:less dev:next",
         "dev:next": "next",
@@ -76,7 +85,8 @@
         "start": "next start",
         "serve": "serve ./out",
         "test": "jest",
-        "type-check": "tsc"
+        "type-check": "tsc",
+        "prettier": "prettier --write \"src/**/*.ts\" \"src/**/*.tsx\""
     },
     "license": "MIT"
 }

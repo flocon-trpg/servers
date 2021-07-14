@@ -7,7 +7,7 @@ type Result<T> = {
     previousValue?: T;
     currentValue: T;
     isSkipping: boolean;
-}
+};
 
 export function useBufferValue<T>({
     value,
@@ -21,15 +21,21 @@ export function useBufferValue<T>({
     }
 
     const subject = useConstant(() => new Subject<T>());
-    const subjectNext: ((value: T) => void) = useConstant(() => {
+    const subjectNext: (value: T) => void = useConstant(() => {
         // もし return subect.next としてしまうとsubject.next内でthisがundefinedであるというエラーが出る
-        return (x => subject.next(x));
+        return x => subject.next(x);
     });
     const [, setSubscription] = React.useState<Subscription>();
-    const [result, setResult] = React.useState<Result<T>>({ currentValue: value, isSkipping: false });
+    const [result, setResult] = React.useState<Result<T>>({
+        currentValue: value,
+        isSkipping: false,
+    });
 
     React.useEffect(() => {
-        const newSubscription = (bufferDuration == null ? subject : subject.pipe(debounceTime(bufferDuration))).subscribe(newValue => {
+        const newSubscription = (bufferDuration == null
+            ? subject
+            : subject.pipe(debounceTime(bufferDuration))
+        ).subscribe(newValue => {
             setResult(oldResult => {
                 return {
                     previousValue: oldResult.currentValue,
@@ -42,9 +48,9 @@ export function useBufferValue<T>({
             oldSubscription?.unsubscribe();
             return newSubscription;
         });
-        return (() => {
+        return () => {
             newSubscription.unsubscribe();
-        });
+        };
     }, [subject, bufferDuration]);
 
     React.useEffect(() => {

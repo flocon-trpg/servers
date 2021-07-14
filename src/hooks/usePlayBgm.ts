@@ -11,7 +11,7 @@ import _ from 'lodash';
 type PlayBgmBehaviorCoreProps = {
     bgm: BgmState | null;
     volumeConfig: number;
-}
+};
 
 function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmBehaviorCoreProps): void {
     // bgm == null ⇔ volume == null
@@ -54,11 +54,11 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmBehaviorCoreProps): void {
         if ((isPausedRef.current ?? true) === false) {
             howl.play();
         }
-        return (() => {
+        return () => {
             howlRef.current = undefined;
             howl.fade(howl.volume(), 0, 1000);
             setTimeout(() => howl.stop(), 1000);
-        });
+        };
     }, [urlArray]);
 
     React.useEffect(() => {
@@ -94,12 +94,28 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmBehaviorCoreProps): void {
 
 export function usePlayBgm(): void {
     const bgms = useSelector(state => state.roomModule.roomState?.state?.bgms) ?? {};
-    const masterVolume = useSelector(state => state.roomConfigModule?.masterVolume) ?? defaultMasterVolume;
+    const masterVolume =
+        useSelector(state => state.roomConfigModule?.masterVolume) ?? defaultMasterVolume;
     const channelVolumes = useSelector(state => state.roomConfigModule?.channelVolumes) ?? {};
 
-    usePlayBgmCore({ bgm: bgms['1'] ?? null, volumeConfig: masterVolume * (channelVolumes['1'] ?? defaultChannelVolume) });
-    usePlayBgmCore({ bgm: bgms['2'] ?? null, volumeConfig: masterVolume * (channelVolumes['2'] ?? defaultChannelVolume) });
-    usePlayBgmCore({ bgm: bgms['3'] ?? null, volumeConfig: masterVolume * (channelVolumes['3'] ?? defaultChannelVolume) });
-    usePlayBgmCore({ bgm: bgms['4'] ?? null, volumeConfig: masterVolume * (channelVolumes['4'] ?? defaultChannelVolume) });
-    usePlayBgmCore({ bgm: bgms['5'] ?? null, volumeConfig: masterVolume * (channelVolumes['5'] ?? defaultChannelVolume) });
+    usePlayBgmCore({
+        bgm: bgms['1'] ?? null,
+        volumeConfig: masterVolume * (channelVolumes['1'] ?? defaultChannelVolume),
+    });
+    usePlayBgmCore({
+        bgm: bgms['2'] ?? null,
+        volumeConfig: masterVolume * (channelVolumes['2'] ?? defaultChannelVolume),
+    });
+    usePlayBgmCore({
+        bgm: bgms['3'] ?? null,
+        volumeConfig: masterVolume * (channelVolumes['3'] ?? defaultChannelVolume),
+    });
+    usePlayBgmCore({
+        bgm: bgms['4'] ?? null,
+        volumeConfig: masterVolume * (channelVolumes['4'] ?? defaultChannelVolume),
+    });
+    usePlayBgmCore({
+        bgm: bgms['5'] ?? null,
+        volumeConfig: masterVolume * (channelVolumes['5'] ?? defaultChannelVolume),
+    });
 }

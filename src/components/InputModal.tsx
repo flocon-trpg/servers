@@ -11,11 +11,22 @@ type Props = {
     onClose: (setValue: React.Dispatch<React.SetStateAction<string>>) => void;
     onOpen?: (setValue: React.Dispatch<React.SetStateAction<string>>) => void;
     disabled?: (value: string) => boolean;
-}
+};
 
-export const InputModal: React.FC<Props> = ({ title, label, visible, isTextArea, onOk: onOkCore, onClose, onOpen, disabled }: Props) => {
+export const InputModal: React.FC<Props> = ({
+    title,
+    label,
+    visible,
+    isTextArea,
+    onOk: onOkCore,
+    onClose,
+    onOpen,
+    disabled,
+}: Props) => {
     const [value, setValue] = React.useState('');
-    const [disabledValue, setDisabledValue] = React.useState(disabled == null ? false : disabled(''));
+    const [disabledValue, setDisabledValue] = React.useState(
+        disabled == null ? false : disabled('')
+    );
     const prevVisible = React.useRef(visible);
     const onOpenRef = React.useRef(onOpen);
 
@@ -52,41 +63,49 @@ export const InputModal: React.FC<Props> = ({ title, label, visible, isTextArea,
     // className='cancel-rnd'がないと、RoomMessageComponent内でInputModalを表示した際に、ドラッグするとカーソルの位置に関わらずメッセージウィンドウが動いてしまう。
     return (
         <Modal
-            className='cancel-rnd'
+            className="cancel-rnd"
             visible={visible}
             title={title}
             onOk={onOk}
-            okButtonProps={(disabledValue ? { disabled: true } : undefined)}
-            onCancel={() => onClose(setValue)}>
+            okButtonProps={disabledValue ? { disabled: true } : undefined}
+            onCancel={() => onClose(setValue)}
+        >
             <div>
                 <div>{label}</div>
-                {!isTextArea && <Input
-                    autoFocus
-                    value={value}
-                    onChange={e => {
-                        setValue(e.target.value);
-                        setDisabledValue(disabled == null ? false : disabled(e.target.value));
-                    }}
-                    onPressEnter={() => {
-                        onOk();
-                    }} />}
-                { /* Enterキーを押したときは改行せずにonOkの処理に入るのが想定された挙動だが、isOkExecutedがないとTextAreaの文字が一瞬改行されたように見えてしまう（onOkに渡される文字は改行されていない正常なもの）。混乱や不自然さを防ぐため、isOkExecutedを用いることでTextAreaを隠している。 */ }
-                {isTextArea && <Input.TextArea
-                    style={{ resize: 'none', height: 100 }}
-                    autoFocus
-                    value={value}
-                    onChange={e => {
-                        setValue(e.target.value);
-                        setDisabledValue(disabled == null ? false : disabled(e.target.value));
-                    }}
-                    onPressEnter={e => {
-                        if (e.shiftKey) {
-                            return;
-                        }
-                        // これがないと、TextAreaの文字が一瞬改行されたように見えてしまう（onOkに渡される文字は、改行されていない正常なものではあるが）。
-                        e.preventDefault();
-                        onOk();
-                    }} />}
+                {!isTextArea && (
+                    <Input
+                        autoFocus
+                        value={value}
+                        onChange={e => {
+                            setValue(e.target.value);
+                            setDisabledValue(disabled == null ? false : disabled(e.target.value));
+                        }}
+                        onPressEnter={() => {
+                            onOk();
+                        }}
+                    />
+                )}
+                {/* Enterキーを押したときは改行せずにonOkの処理に入るのが想定された挙動だが、isOkExecutedがないとTextAreaの文字が一瞬改行されたように見えてしまう（onOkに渡される文字は改行されていない正常なもの）。混乱や不自然さを防ぐため、isOkExecutedを用いることでTextAreaを隠している。 */}
+                {isTextArea && (
+                    <Input.TextArea
+                        style={{ resize: 'none', height: 100 }}
+                        autoFocus
+                        value={value}
+                        onChange={e => {
+                            setValue(e.target.value);
+                            setDisabledValue(disabled == null ? false : disabled(e.target.value));
+                        }}
+                        onPressEnter={e => {
+                            if (e.shiftKey) {
+                                return;
+                            }
+                            // これがないと、TextAreaの文字が一瞬改行されたように見えてしまう（onOkに渡される文字は、改行されていない正常なものではあるが）。
+                            e.preventDefault();
+                            onOk();
+                        }}
+                    />
+                )}
             </div>
-        </Modal>);
+        </Modal>
+    );
 };

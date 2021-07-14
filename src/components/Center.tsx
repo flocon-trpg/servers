@@ -7,11 +7,9 @@ type Props = {};
 
 const Center: React.FC<PropsWithChildren<Props>> = ({ children }: PropsWithChildren<Props>) => {
     return (
-        <Row style={({ height: '100%' })} justify="center" align="middle">
+        <Row style={{ height: '100%' }} justify="center" align="middle">
             <Col flex={1} />
-            <Col flex={0}>
-                {children}
-            </Col>
+            <Col flex={0}>{children}</Col>
             <Col flex={1} />
         </Row>
     );

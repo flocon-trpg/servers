@@ -7,7 +7,7 @@ let _auth: firebase.auth.Auth | null = null;
 let _storage: firebase.storage.Storage | null = null;
 
 const getApp = (config: Config): firebase.app.App | null => {
-    const isBrowser =  typeof window !== 'undefined';
+    const isBrowser = typeof window !== 'undefined';
     if (!isBrowser) {
         // もしこれがないと、next exportなどを実行したときに_appに変なインスタンスが入るので、_app.storage()などを実行すると「storage is not a function」と言われコケてしまう。next devなどでは大丈夫。
         return null;

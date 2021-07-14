@@ -3,34 +3,38 @@ import { StateManager } from './StateManager';
 type Operation = {
     oldValue: number;
     newValue: number;
-}
+};
 
 const initRevision = 0;
 const initState = 0;
 
-const createStateManager = () => new StateManager<number, Operation>({
-    revision: initRevision,
-    state: initState,
-    apply: ({ state, operation }) => {
-        if (state !== operation.oldValue) {
-            throw 'Failure at apply: state !== operation.oldValue';
-        }
-        return operation.newValue;
-    },
-    transform: ({ first, second }) => {
-        if (first.oldValue !== second.oldValue) {
-            throw 'Failure at transform: first.oldValue !== second.oldValue';
-        }
-        return {
-            firstPrime: { oldValue: second.newValue, newValue: first.newValue },
-            secondPrime: { oldValue: first.newValue, newValue: first.newValue },
-        };
-    },
-    diff: ({ prevState: prev, nextState: next }) => prev === next ? undefined : ({
-        oldValue: prev,
-        newValue: next,
-    }),
-});
+const createStateManager = () =>
+    new StateManager<number, Operation>({
+        revision: initRevision,
+        state: initState,
+        apply: ({ state, operation }) => {
+            if (state !== operation.oldValue) {
+                throw 'Failure at apply: state !== operation.oldValue';
+            }
+            return operation.newValue;
+        },
+        transform: ({ first, second }) => {
+            if (first.oldValue !== second.oldValue) {
+                throw 'Failure at transform: first.oldValue !== second.oldValue';
+            }
+            return {
+                firstPrime: { oldValue: second.newValue, newValue: first.newValue },
+                secondPrime: { oldValue: first.newValue, newValue: first.newValue },
+            };
+        },
+        diff: ({ prevState: prev, nextState: next }) =>
+            prev === next
+                ? undefined
+                : {
+                      oldValue: prev,
+                      newValue: next,
+                  },
+    });
 
 it('tests init StateManager', () => {
     const target = createStateManager();

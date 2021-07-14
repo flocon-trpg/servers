@@ -25,7 +25,11 @@ x∈メモ, y∈メモまたはディレクトリ というx,yが存在し、x�
 // 例えばdirが['a','b','c']のとき、dirKeysは['/a', '/a/b', '/a/b/c']のようにして渡さなければならない。
 // rootの場合は、currentNodeに{ children: DataNode[] }を渡す。rootでない場合はDataNodeを渡す。
 // 戻り値は必ずleafである。
-const ensureLeafCore = (dirKeys: string[], memoId: string, currentNode: DataNode | { children: DataNode[] }): DataNode => {
+const ensureLeafCore = (
+    dirKeys: string[],
+    memoId: string,
+    currentNode: DataNode | { children: DataNode[] }
+): DataNode => {
     const dirKey = dirKeys.shift();
     if (dirKey == null) {
         if (currentNode.children == null) {
@@ -85,7 +89,7 @@ const createTreeData = (source: ReadonlyMap<string, MemoState>): DataNode[] => {
 
 type MemoSelectorProps = {
     onChange: (newId: string) => void;
-}
+};
 
 const MemoSelector: React.FC<MemoSelectorProps> = ({ onChange }: MemoSelectorProps) => {
     const memos = useMemos();
@@ -99,23 +103,26 @@ const MemoSelector: React.FC<MemoSelectorProps> = ({ onChange }: MemoSelectorPro
         return null;
     }
 
-    return <Tree
-        treeData={memosArray}
-        showIcon
-        onSelect={e => {
-            e.forEach(key => {
-                if (typeof key !== 'string') {
-                    return;
-                }
-                onChange(key);
-            });
-        }} />;
+    return (
+        <Tree
+            treeData={memosArray}
+            showIcon
+            onSelect={e => {
+                e.forEach(key => {
+                    if (typeof key !== 'string') {
+                        return;
+                    }
+                    onChange(key);
+                });
+            }}
+        />
+    );
 };
 
 type MemoProps = {
     memoId: string | undefined;
     state: MemoState | undefined;
-}
+};
 
 const Memo: React.FC<MemoProps> = ({ memoId, state }: MemoProps) => {
     const operate = useOperate();
@@ -128,118 +135,135 @@ const Memo: React.FC<MemoProps> = ({ memoId, state }: MemoProps) => {
         return <div>指定されたメモが見つかりません。削除された可能性があります。</div>;
     }
 
-    return <div
-        style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <BufferedInput
-            bufferDuration='default'
-            value={state.name}
-            onChange={e => operate({
-                $version: 1,
-                memos: {
-                    [memoId]: {
-                        type: update,
-                        update: {
-                            $version: 1,
-                            name: { newValue: e.currentValue },
-                        }
-                    }
+    return (
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <BufferedInput
+                bufferDuration="default"
+                value={state.name}
+                onChange={e =>
+                    operate({
+                        $version: 1,
+                        memos: {
+                            [memoId]: {
+                                type: update,
+                                update: {
+                                    $version: 1,
+                                    name: { newValue: e.currentValue },
+                                },
+                            },
+                        },
+                    })
                 }
-            })} />
-        <BufferedTextArea
-            style={{ flex: 1, height: '100%', resize: 'none' }}
-            bufferDuration='default'
-            value={state.text}
-            onChange={e => {
-                const diff2 = textDiff({ prev: e.previousValue, next: e.currentValue });
-                operate({
-                    $version: 1,
-                    memos: {
-                        [memoId]: {
-                            type: update,
-                            update: {
-                                $version: 1,
-                                text: diff2 === undefined ? undefined : toTextUpOperation(diff2),
-                            }
-                        }
-                    }
-                });
-            }} />
-    </div>;
+            />
+            <BufferedTextArea
+                style={{ flex: 1, height: '100%', resize: 'none' }}
+                bufferDuration="default"
+                value={state.text}
+                onChange={e => {
+                    const diff2 = textDiff({ prev: e.previousValue, next: e.currentValue });
+                    operate({
+                        $version: 1,
+                        memos: {
+                            [memoId]: {
+                                type: update,
+                                update: {
+                                    $version: 1,
+                                    text:
+                                        diff2 === undefined ? undefined : toTextUpOperation(diff2),
+                                },
+                            },
+                        },
+                    });
+                }}
+            />
+        </div>
+    );
 };
 
 type Props = {
     selectedMemoId: string | undefined;
     onSelectedMemoIdChange: (newId: string) => void;
-}
+};
 
-export const Memos: React.FC<Props> = ({
-    selectedMemoId,
-    onSelectedMemoIdChange
-}: Props) => {
+export const Memos: React.FC<Props> = ({ selectedMemoId, onSelectedMemoIdChange }: Props) => {
     const operate = useOperate();
     const memos = useMemos();
     const memo = selectedMemoId == null ? undefined : memos?.get(selectedMemoId);
     const [popoverVisible, setPopoverVisible] = React.useState(false);
 
-    return <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <div style={{ display: 'flex', flexDirection: 'row' }}>
-            <Button onClick={() => {
-                const id = simpleId();
-                operate({
-                    $version: 1,
-                    memos: {
-                        [id]: {
-                            type: replace,
-                            replace: {
-                                newValue: {
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'row' }}>
+                <Button
+                    onClick={() => {
+                        const id = simpleId();
+                        operate({
+                            $version: 1,
+                            memos: {
+                                [id]: {
+                                    type: replace,
+                                    replace: {
+                                        newValue: {
+                                            $version: 1,
+                                            text: '',
+                                            textType: 'Plain',
+                                            name: 'New memo',
+                                            dir: [],
+                                        },
+                                    },
+                                },
+                            },
+                        });
+                        onSelectedMemoIdChange(id);
+                    }}
+                >
+                    新規作成
+                </Button>
+                <Button
+                    disabled={memo == null}
+                    onClick={() => {
+                        if (selectedMemoId == null) {
+                            return;
+                        }
+                        Modal.confirm({
+                            title: '現在開いているメモを削除してよろしいですか？',
+                            onOk: () => {
+                                operate({
                                     $version: 1,
-                                    text: '',
-                                    textType: 'Plain',
-                                    name: 'New memo',
-                                    dir: [],
-                                }
-                            }
-                        }
+                                    memos: {
+                                        [selectedMemoId]: {
+                                            type: replace,
+                                            replace: {
+                                                newValue: undefined,
+                                            },
+                                        },
+                                    },
+                                });
+                            },
+                        });
+                    }}
+                >
+                    削除
+                </Button>
+                <div style={{ width: 12 }} />
+                <Popover
+                    trigger="click"
+                    onVisibleChange={newValue => setPopoverVisible(newValue)}
+                    visible={popoverVisible}
+                    content={
+                        <MemoSelector
+                            onChange={newId => {
+                                onSelectedMemoIdChange(newId);
+                                setPopoverVisible(false);
+                            }}
+                        />
                     }
-                });
-                onSelectedMemoIdChange(id);
-            }}>新規作成</Button>
-            <Button
-                disabled={memo == null}
-                onClick={() => {
-                    if (selectedMemoId == null) {
-                        return;
-                    }
-                    Modal.confirm({
-                        title: '現在開いているメモを削除してよろしいですか？',
-                        onOk: () => {
-                            operate({
-                                $version: 1,
-                                memos: {
-                                    [selectedMemoId]: {
-                                        type: replace,
-                                        replace: {
-                                            newValue: undefined,
-                                        }
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }}>削除</Button>
-            <div style={{ width: 12 }} />
-            <Popover
-                trigger='click'
-                onVisibleChange={newValue => setPopoverVisible(newValue)}
-                visible={popoverVisible}
-                content={<MemoSelector onChange={newId => {
-                    onSelectedMemoIdChange(newId);
-                    setPopoverVisible(false);
-                }} />}
-                placement='bottom'>
-                <Button>メモ一覧</Button>
-            </Popover>
+                    placement="bottom"
+                >
+                    <Button>メモ一覧</Button>
+                </Popover>
+            </div>
+            <Memo memoId={selectedMemoId} state={memo} />
         </div>
-        <Memo memoId={selectedMemoId} state={memo} />
-    </div>;
+    );
 };

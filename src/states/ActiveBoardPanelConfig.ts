@@ -1,17 +1,31 @@
 import { castToBoolean, castToNullableString, castToNumber, castToRecord } from '../utils/cast';
 import isObject from '../utils/isObject';
-import { castToPartialDraggablePanelConfigBase, DraggablePanelConfigBase, toCompleteDraggablePanelConfigBase } from './DraggablePanelConfigBase';
-import { BoardConfig, castToPartialBoardConfig, defaultBoardConfig, PartialBoardConfig, toCompleteBoardConfig } from './BoardConfig';
+import {
+    castToPartialDraggablePanelConfigBase,
+    DraggablePanelConfigBase,
+    toCompleteDraggablePanelConfigBase,
+} from './DraggablePanelConfigBase';
+import {
+    BoardConfig,
+    castToPartialBoardConfig,
+    defaultBoardConfig,
+    PartialBoardConfig,
+    toCompleteBoardConfig,
+} from './BoardConfig';
 import { chooseRecord } from '@kizahasi/util';
 
 export type ActiveBoardPanelConfig = {
     boards: Record<string, BoardConfig>;
     isMinimized: boolean;
-} & DraggablePanelConfigBase
+} & DraggablePanelConfigBase;
 
-export type PartialActiveBoardPanelConfig = Omit<Partial<ActiveBoardPanelConfig>, 'boards'> & { boards?: Record<string, PartialBoardConfig> };
+export type PartialActiveBoardPanelConfig = Omit<Partial<ActiveBoardPanelConfig>, 'boards'> & {
+    boards?: Record<string, PartialBoardConfig>;
+};
 
-export const castToPartialActiveBoardPanelConfig = (source: unknown): PartialActiveBoardPanelConfig | undefined => {
+export const castToPartialActiveBoardPanelConfig = (
+    source: unknown
+): PartialActiveBoardPanelConfig | undefined => {
     if (!isObject<PartialActiveBoardPanelConfig>(source)) {
         return;
     }
@@ -23,7 +37,9 @@ export const castToPartialActiveBoardPanelConfig = (source: unknown): PartialAct
     };
 };
 
-export const toCompleteActiveBoardPanelConfig = (source: PartialActiveBoardPanelConfig): ActiveBoardPanelConfig => {
+export const toCompleteActiveBoardPanelConfig = (
+    source: PartialActiveBoardPanelConfig
+): ActiveBoardPanelConfig => {
     return {
         ...toCompleteDraggablePanelConfigBase(source),
         boards: chooseRecord(source.boards ?? {}, toCompleteBoardConfig),

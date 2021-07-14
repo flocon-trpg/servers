@@ -31,12 +31,10 @@ const SignInCore: React.FC = () => {
                     // The widget is rendered.
                     // Hide the loader.
                     setIsLoading(false);
-                }
+                },
             },
             signInSuccessUrl: '/',
-            signInOptions: [
-                firebase.auth.EmailAuthProvider.PROVIDER_ID,
-            ],
+            signInOptions: [firebase.auth.EmailAuthProvider.PROVIDER_ID],
             // TODO: Terms of service url
             //tosUrl: '<your-tos-url>',
             // TODO: Privacy policy url.
@@ -46,10 +44,12 @@ const SignInCore: React.FC = () => {
         authUI.start(authContainerRef.current, config);
     }, [auth, authContainerRef]);
 
-    return (<div>
-        <div ref={authContainerRef} />
-        <span>{isLoading ? 'loading...' : null}</span>
-    </div>);
+    return (
+        <div>
+            <div ref={authContainerRef} />
+            <span>{isLoading ? 'loading...' : null}</span>
+        </div>
+    );
 };
 
 export default SignInCore;

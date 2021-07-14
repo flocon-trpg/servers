@@ -4,7 +4,18 @@ import '../css/main.scss';
 
 import React from 'react';
 import { AppProps } from 'next/app';
-import { ApolloClient, ApolloLink, ApolloProvider, FetchResult, HttpLink, InMemoryCache, NormalizedCacheObject, Operation, split, Observable } from '@apollo/client';
+import {
+    ApolloClient,
+    ApolloLink,
+    ApolloProvider,
+    FetchResult,
+    HttpLink,
+    InMemoryCache,
+    NormalizedCacheObject,
+    Operation,
+    split,
+    Observable,
+} from '@apollo/client';
 import 'firebase/auth';
 import 'firebase/storage';
 import { getMainDefinition } from '@apollo/client/utilities';
@@ -40,13 +51,13 @@ class WebSocketLink extends ApolloLink {
     }
 
     public request(operation: Operation): Observable<FetchResult> {
-        return new Observable((sink) => {
+        return new Observable(sink => {
             return this.client.subscribe<FetchResult>(
                 { ...operation, query: print(operation.query) },
                 {
                     next: sink.next.bind(sink),
                     complete: sink.complete.bind(sink),
-                    error: (err) => {
+                    error: err => {
                         if (err instanceof Error) {
                             return sink.error(err);
                         }
@@ -55,27 +66,29 @@ class WebSocketLink extends ApolloLink {
                             return sink.error(
                                 // reason will be available on clean closes
                                 new Error(
-                                    `Socket closed with event ${err.code} ${err.reason || ''}`,
-                                ),
+                                    `Socket closed with event ${err.code} ${err.reason || ''}`
+                                )
                             );
                         }
 
                         return sink.error(
                             new Error(
-                                (err as GraphQLError[])
-                                    .map(({ message }) => message)
-                                    .join(', '),
-                            ),
+                                (err as GraphQLError[]).map(({ message }) => message).join(', ')
+                            )
                         );
                     },
-                },
+                }
             );
         });
     }
 }
 
 // サーバーでWebSocket（GraphQL subscriptionsで使っている）を呼び出そうとすると"Error: Unable to find native implementation, or alternative implementation for WebSocket!"というエラーが出るので、サーバー側で呼び出されるときはomitWebSocket===trueにすることでそれを回避できる。
-const createApolloClient = (config: Config, signedInAs?: firebase.User, omitWebSocket?: boolean) => {
+const createApolloClient = (
+    config: Config,
+    signedInAs?: firebase.User,
+    omitWebSocket?: boolean
+) => {
     // headerについては https://hasura.io/blog/authentication-and-authorization-using-hasura-and-firebase/ を参考にした
 
     // https://www.apollographql.com/docs/react/networking/authentication/#header
@@ -89,7 +102,7 @@ const createApolloClient = (config: Config, signedInAs?: firebase.User, omitWebS
             headers: {
                 ...headers,
                 authorization: `Bearer ${token}`,
-            }
+            },
         };
     });
 
@@ -138,7 +151,7 @@ const createApolloClient = (config: Config, signedInAs?: firebase.User, omitWebS
                 );
             },
             wsLink,
-            authLink.concat(httpLink), // WebSocketLinkのほうはheaderを設定済みなので、httpLinkのほうにだけheaderを設定している
+            authLink.concat(httpLink) // WebSocketLinkのほうはheaderを設定済みなので、httpLinkのほうにだけheaderを設定している
         );
     })();
 
@@ -164,9 +177,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     }, [clientId]);
 
     if (apolloClient == null) {
-        return (<div style={({ padding: 5 })}>
-            {'しばらくお待ち下さい… / Please wait…'}
-        </div>);
+        return <div style={{ padding: 5 }}>{'しばらくお待ち下さい… / Please wait…'}</div>;
     }
     return (
         <>

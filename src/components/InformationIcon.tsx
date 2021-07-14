@@ -11,6 +11,6 @@ export const InformationIcon: React.FC<Props> = ({ title }: Props) => {
     return (
         <Tooltip title={title}>
             <Icons.InfoCircleFilled />
-        </Tooltip> 
+        </Tooltip>
     );
 };

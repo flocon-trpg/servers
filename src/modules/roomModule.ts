@@ -15,21 +15,24 @@ export namespace Notification {
         message: string;
         description?: string;
         createdAt: number;
-    }
+    };
 
     // systemMessageなどとマージするので、createdAtの型はそれに合わせてnumberにしている。
-    export type Payload = {
-        type: typeof text;
-        notification: StateElement;
-    } | {
-        type: typeof graphQLErrors;
-        errors: ReadonlyArray<GraphQLError>;
-        createdAt: number;
-    } | {
-        type: typeof apolloError;
-        error: ApolloError;
-        createdAt: number;
-    }
+    export type Payload =
+        | {
+              type: typeof text;
+              notification: StateElement;
+          }
+        | {
+              type: typeof graphQLErrors;
+              errors: ReadonlyArray<GraphQLError>;
+              createdAt: number;
+          }
+        | {
+              type: typeof apolloError;
+              error: ApolloError;
+              createdAt: number;
+          };
 
     export const toTextNotification = (source: Payload): StateElement => {
         if (source.type === text) {
@@ -55,12 +58,10 @@ export namespace Notification {
     export type State = {
         readonly values: ReadonlyArray<StateElement>;
         readonly newValue: StateElement | null;
-    }
+    };
 
     export const initialState: State = { values: [], newValue: null };
 }
-
-
 
 // 例えばRoomのルートに近い方でContext.ProviderでroomState.stateなどを渡してから下階層の各地でuseContextで取得する方法は、roomState.stateの一部が変わるだけでRoomほぼ全体が再レンダリングされるため、非常に重くなると思われる。そのため、Reduxを使うことで高速化を狙っている。
 // Room.State のオブジェクトは複雑であり、パフォーマンスの低下を招きそうなので immer を使いたくない(そもそもTypescriptの型チェックを通らないため、不具合も生じる可能性がある)ため、createSliceを避けて直接書いている。
@@ -71,7 +72,7 @@ namespace roomModule {
         roomEventSubscription?: RoomEventSubscription;
         allRoomMessagesResult?: AllRoomMessagesResult;
         notifications: Notification.State;
-    }
+    };
 
     const initialState: State = {
         notifications: Notification.initialState,
@@ -90,8 +91,10 @@ namespace roomModule {
                 return {
                     roomId: payload.roomId ?? state?.roomId,
                     roomState: payload.roomState ?? state?.roomState,
-                    roomEventSubscription: payload.roomEventSubscription ?? state?.roomEventSubscription,
-                    allRoomMessagesResult: payload.allRoomMessagesResult ?? state?.allRoomMessagesResult,
+                    roomEventSubscription:
+                        payload.roomEventSubscription ?? state?.roomEventSubscription,
+                    allRoomMessagesResult:
+                        payload.allRoomMessagesResult ?? state?.allRoomMessagesResult,
                     notifications: state?.notifications ?? Notification.initialState,
                 };
             }
@@ -101,7 +104,10 @@ namespace roomModule {
                 return {
                     ...(state ?? initialState),
                     notifications: {
-                        values: state == null ? [textNotification] : [...state.notifications.values, textNotification],
+                        values:
+                            state == null
+                                ? [textNotification]
+                                : [...state.notifications.values, textNotification],
                         newValue: textNotification,
                     },
                 };

@@ -13,7 +13,11 @@ import BooleanParameterInput from '../../components/BooleanParameterInput';
 import StringParameterInput from '../../components/StringParameterInput';
 import ToggleButton from '../../components/ToggleButton';
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
-import { characterIsPrivate, characterIsNotPrivate, characterIsNotPrivateAndNotCreatedByMe } from '../../resource/text/main';
+import {
+    characterIsPrivate,
+    characterIsNotPrivate,
+    characterIsNotPrivateAndNotCreatedByMe,
+} from '../../resource/text/main';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
 import { useOperate } from '../../hooks/useOperate';
 import BufferedInput from '../../components/BufferedInput';
@@ -21,12 +25,31 @@ import BufferedTextArea from '../../components/BufferedTextArea';
 import { characterCommand, characterVariable, TomlInput } from '../../components/Tomllnput';
 import { useCharacters } from '../../hooks/state/useCharacters';
 import { useParticipants } from '../../hooks/state/useParticipants';
-import { useBoolParamNames, useNumParamNames, useStrParamNames } from '../../hooks/state/useParamNames';
-import { applyCharacter, boardLocationDiff, BoardLocationState, characterDiff, CharacterState, CharacterUpOperation, PieceState, toCharacterUpOperation, UpOperation, pieceDiff } from '@kizahasi/flocon-core';
+import {
+    useBoolParamNames,
+    useNumParamNames,
+    useStrParamNames,
+} from '../../hooks/state/useParamNames';
+import {
+    applyCharacter,
+    boardLocationDiff,
+    BoardLocationState,
+    characterDiff,
+    CharacterState,
+    CharacterUpOperation,
+    PieceState,
+    toCharacterUpOperation,
+    UpOperation,
+    pieceDiff,
+} from '@kizahasi/flocon-core';
 import { dualKeyRecordFind, strIndex20Array } from '@kizahasi/util';
 import { useSelector } from '../../store';
 import { useDispatch } from 'react-redux';
-import { create, roomDrawerAndPopoverModule, update } from '../../modules/roomDrawerAndPopoverModule';
+import {
+    create,
+    roomDrawerAndPopoverModule,
+    update,
+} from '../../modules/roomDrawerAndPopoverModule';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 
 const notFound = 'notFound';
@@ -110,20 +133,33 @@ const CharacterDrawer: React.FC = () => {
                                 [drawerType.stateKey.id]: {
                                     type: update,
                                     update: toCharacterUpOperation(diffOperation),
-                                }
-                            }
-                        }
+                                },
+                            },
+                        },
                     };
                     operate(operation);
-                }
+                },
             };
             break;
     }
-    const { uiState: character, updateUiState: setCharacter, resetUiState: resetCharacterToCreate } = useStateEditor(stateEditorParams);
-    const [filesManagerDrawerType, setFilesManagerDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
+    const {
+        uiState: character,
+        updateUiState: setCharacter,
+        resetUiState: resetCharacterToCreate,
+    } = useStateEditor(stateEditorParams);
+    const [
+        filesManagerDrawerType,
+        setFilesManagerDrawerType,
+    ] = React.useState<FilesManagerDrawerType | null>(null);
 
-
-    if (boolParamNames == null || numParamNames == null || strParamNames == null || participants == null || myUserUid == null || character == null) {
+    if (
+        boolParamNames == null ||
+        numParamNames == null ||
+        strParamNames == null ||
+        participants == null ||
+        myUserUid == null ||
+        character == null
+    ) {
         return null;
     }
 
@@ -138,14 +174,24 @@ const CharacterDrawer: React.FC = () => {
         if (drawerType?.type !== update || drawerType.boardKey == null) {
             return null;
         }
-        return dualKeyRecordFind<PieceState>(character.pieces, { first: drawerType.boardKey.createdBy, second: drawerType.boardKey.id }) ?? null;
+        return (
+            dualKeyRecordFind<PieceState>(character.pieces, {
+                first: drawerType.boardKey.createdBy,
+                second: drawerType.boardKey.id,
+            }) ?? null
+        );
     })();
 
     const tachieLocation = (() => {
         if (drawerType?.type !== update || drawerType.boardKey == null) {
             return null;
         }
-        return dualKeyRecordFind<BoardLocationState>(character.tachieLocations, { first: drawerType.boardKey.createdBy, second: drawerType.boardKey.id }) ?? null;
+        return (
+            dualKeyRecordFind<BoardLocationState>(character.tachieLocations, {
+                first: drawerType.boardKey.createdBy,
+                second: drawerType.boardKey.id,
+            }) ?? null
+        );
     })();
 
     const updateCharacter = (partialState: Partial<CharacterState>) => {
@@ -154,7 +200,10 @@ const CharacterDrawer: React.FC = () => {
                 setCharacter({ ...character, ...partialState });
                 return;
             case update: {
-                const diffOperation = characterDiff({ prevState: character, nextState: { ...character, ...partialState } });
+                const diffOperation = characterDiff({
+                    prevState: character,
+                    nextState: { ...character, ...partialState },
+                });
                 if (diffOperation == null) {
                     return;
                 }
@@ -165,9 +214,9 @@ const CharacterDrawer: React.FC = () => {
                             [drawerType.stateKey.id]: {
                                 type: update,
                                 update: toCharacterUpOperation(diffOperation),
-                            }
-                        }
-                    }
+                            },
+                        },
+                    },
                 };
                 operate(operation);
                 return;
@@ -192,9 +241,9 @@ const CharacterDrawer: React.FC = () => {
                             [drawerType.stateKey.id]: {
                                 type: update,
                                 update: operation,
-                            }
-                        }
-                    }
+                            },
+                        },
+                    },
                 };
                 operate(roomOperation);
                 return;
@@ -206,7 +255,10 @@ const CharacterDrawer: React.FC = () => {
         if (piece == null || drawerType?.type !== update || drawerType.boardKey == null) {
             return;
         }
-        const diffOperation = pieceDiff({ prevState: piece, nextState: { ...piece, ...partialState } });
+        const diffOperation = pieceDiff({
+            prevState: piece,
+            nextState: { ...piece, ...partialState },
+        });
         if (diffOperation == null) {
             return;
         }
@@ -223,13 +275,13 @@ const CharacterDrawer: React.FC = () => {
                                     [drawerType.boardKey.id]: {
                                         type: update,
                                         update: diffOperation,
-                                    }
-                                }
-                            }
+                                    },
+                                },
+                            },
                         },
-                    }
-                }
-            }
+                    },
+                },
+            },
         };
         operate(operation);
     };
@@ -238,7 +290,10 @@ const CharacterDrawer: React.FC = () => {
         if (tachieLocation == null || drawerType?.type !== update || drawerType.boardKey == null) {
             return;
         }
-        const diffOperation = boardLocationDiff({ prevState: tachieLocation, nextState: { ...tachieLocation, ...partialState } });
+        const diffOperation = boardLocationDiff({
+            prevState: tachieLocation,
+            nextState: { ...tachieLocation, ...partialState },
+        });
         if (diffOperation == null) {
             return;
         }
@@ -255,13 +310,13 @@ const CharacterDrawer: React.FC = () => {
                                     [drawerType.boardKey.id]: {
                                         type: update,
                                         update: diffOperation,
-                                    }
-                                }
-                            }
+                                    },
+                                },
+                            },
                         },
-                    }
-                }
-            }
+                    },
+                },
+            },
         };
         operate(operation);
     };
@@ -279,9 +334,9 @@ const CharacterDrawer: React.FC = () => {
                             replace: {
                                 newValue: character,
                             },
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             };
             operate(operation);
             resetCharacterToCreate();
@@ -301,9 +356,9 @@ const CharacterDrawer: React.FC = () => {
                             replace: {
                                 newValue: undefined,
                             },
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             };
             operate(operation);
             dispatch(roomDrawerAndPopoverModule.actions.set({ characterDrawerType: null }));
@@ -316,96 +371,139 @@ const CharacterDrawer: React.FC = () => {
         }
         return (
             <>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
+                <Row gutter={gutter} align="middle">
+                    <Col flex="auto" />
                     <Col flex={0}></Col>
                     <Col span={inputSpan}>
                         <Checkbox
                             checked={piece.isPrivate}
-                            onChange={e => updatePiece({ isPrivate: e.target.checked })}>
+                            onChange={e => updatePiece({ isPrivate: e.target.checked })}
+                        >
                             コマを非公開にする
                         </Checkbox>
                     </Col>
                 </Row>
 
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
+                <Row gutter={gutter} align="middle">
+                    <Col flex="auto" />
                     <Col flex={0}></Col>
                     <Col span={inputSpan}>
                         <Checkbox
                             checked={piece.isCellMode}
-                            onChange={e => updatePiece({ isCellMode: e.target.checked })}>
+                            onChange={e => updatePiece({ isCellMode: e.target.checked })}
+                        >
                             セルにスナップする
                         </Checkbox>
                     </Col>
                 </Row>
 
-                {
-                    piece.isCellMode ?
-                        <>
-                            <Row gutter={gutter} align='middle'>
-                                <Col flex='auto' />
-                                <Col flex={0}>位置</Col>
-                                <Col span={inputSpan}>
-                                    <Space>
-                                        <InputNumber
-                                            value={piece.cellX}
-                                            onChange={newValue => typeof newValue === 'number' ? updatePiece({ cellX: newValue }) : undefined} />
-                                        <span>*</span>
-                                        <InputNumber
-                                            value={piece.cellY}
-                                            onChange={newValue => typeof newValue === 'number' ? updatePiece({ cellY: newValue }) : undefined} />
-                                    </Space>
-                                </Col>
-                            </Row>
-                            <Row gutter={gutter} align='middle'>
-                                <Col flex='auto' />
-                                <Col flex={0}>大きさ</Col>
-                                <Col span={inputSpan}>
-                                    <Space>
-                                        <InputNumber
-                                            value={piece.cellW}
-                                            onChange={newValue => typeof newValue === 'number' ? updatePiece({ cellW: newValue }) : undefined} />
-                                        <span>*</span>
-                                        <InputNumber
-                                            value={piece.cellH}
-                                            onChange={newValue => typeof newValue === 'number' ? updatePiece({ cellH: newValue }) : undefined} />
-                                    </Space>
-                                </Col>
-                            </Row>
-                        </> : <>
-                            <Row gutter={gutter} align='middle'>
-                                <Col flex='auto' />
-                                <Col flex={0}>位置</Col>
-                                <Col span={inputSpan}>
-                                    <Space>
-                                        <InputNumber
-                                            value={piece.x}
-                                            onChange={newValue => typeof newValue === 'number' ? updatePiece({ x: newValue }) : undefined} />
-                                        <span>*</span>
-                                        <InputNumber
-                                            value={piece.y}
-                                            onChange={newValue => typeof newValue === 'number' ? updatePiece({ y: newValue }) : undefined} />
-                                    </Space>
-                                </Col>
-                            </Row>
-                            <Row gutter={gutter} align='middle'>
-                                <Col flex='auto' />
-                                <Col flex={0}>大きさ</Col>
-                                <Col span={inputSpan}>
-                                    <Space>
-                                        <InputNumber
-                                            value={piece.w}
-                                            onChange={newValue => typeof newValue === 'number' ? updatePiece({ w: newValue }) : undefined} />
-                                        <span>*</span>
-                                        <InputNumber
-                                            value={piece.h}
-                                            onChange={newValue => typeof newValue === 'number' ? updatePiece({ h: newValue }) : undefined} />
-                                    </Space>
-                                </Col>
-                            </Row>
-                        </>
-                }
+                {piece.isCellMode ? (
+                    <>
+                        <Row gutter={gutter} align="middle">
+                            <Col flex="auto" />
+                            <Col flex={0}>位置</Col>
+                            <Col span={inputSpan}>
+                                <Space>
+                                    <InputNumber
+                                        value={piece.cellX}
+                                        onChange={newValue =>
+                                            typeof newValue === 'number'
+                                                ? updatePiece({ cellX: newValue })
+                                                : undefined
+                                        }
+                                    />
+                                    <span>*</span>
+                                    <InputNumber
+                                        value={piece.cellY}
+                                        onChange={newValue =>
+                                            typeof newValue === 'number'
+                                                ? updatePiece({ cellY: newValue })
+                                                : undefined
+                                        }
+                                    />
+                                </Space>
+                            </Col>
+                        </Row>
+                        <Row gutter={gutter} align="middle">
+                            <Col flex="auto" />
+                            <Col flex={0}>大きさ</Col>
+                            <Col span={inputSpan}>
+                                <Space>
+                                    <InputNumber
+                                        value={piece.cellW}
+                                        onChange={newValue =>
+                                            typeof newValue === 'number'
+                                                ? updatePiece({ cellW: newValue })
+                                                : undefined
+                                        }
+                                    />
+                                    <span>*</span>
+                                    <InputNumber
+                                        value={piece.cellH}
+                                        onChange={newValue =>
+                                            typeof newValue === 'number'
+                                                ? updatePiece({ cellH: newValue })
+                                                : undefined
+                                        }
+                                    />
+                                </Space>
+                            </Col>
+                        </Row>
+                    </>
+                ) : (
+                    <>
+                        <Row gutter={gutter} align="middle">
+                            <Col flex="auto" />
+                            <Col flex={0}>位置</Col>
+                            <Col span={inputSpan}>
+                                <Space>
+                                    <InputNumber
+                                        value={piece.x}
+                                        onChange={newValue =>
+                                            typeof newValue === 'number'
+                                                ? updatePiece({ x: newValue })
+                                                : undefined
+                                        }
+                                    />
+                                    <span>*</span>
+                                    <InputNumber
+                                        value={piece.y}
+                                        onChange={newValue =>
+                                            typeof newValue === 'number'
+                                                ? updatePiece({ y: newValue })
+                                                : undefined
+                                        }
+                                    />
+                                </Space>
+                            </Col>
+                        </Row>
+                        <Row gutter={gutter} align="middle">
+                            <Col flex="auto" />
+                            <Col flex={0}>大きさ</Col>
+                            <Col span={inputSpan}>
+                                <Space>
+                                    <InputNumber
+                                        value={piece.w}
+                                        onChange={newValue =>
+                                            typeof newValue === 'number'
+                                                ? updatePiece({ w: newValue })
+                                                : undefined
+                                        }
+                                    />
+                                    <span>*</span>
+                                    <InputNumber
+                                        value={piece.h}
+                                        onChange={newValue =>
+                                            typeof newValue === 'number'
+                                                ? updatePiece({ h: newValue })
+                                                : undefined
+                                        }
+                                    />
+                                </Space>
+                            </Col>
+                        </Row>
+                    </>
+                )}
             </>
         );
     })();
@@ -418,33 +516,53 @@ const CharacterDrawer: React.FC = () => {
             <>
                 {
                     <>
-                        <Row gutter={gutter} align='middle'>
-                            <Col flex='auto' />
+                        <Row gutter={gutter} align="middle">
+                            <Col flex="auto" />
                             <Col flex={0}>位置</Col>
                             <Col span={inputSpan}>
                                 <Space>
                                     <InputNumber
                                         value={tachieLocation.x}
-                                        onChange={newValue => typeof newValue === 'number' ? updateTachieLocation({ x: newValue }) : undefined} />
+                                        onChange={newValue =>
+                                            typeof newValue === 'number'
+                                                ? updateTachieLocation({ x: newValue })
+                                                : undefined
+                                        }
+                                    />
                                     <span>*</span>
                                     <InputNumber
                                         value={tachieLocation.y}
-                                        onChange={newValue => typeof newValue === 'number' ? updateTachieLocation({ y: newValue }) : undefined} />
+                                        onChange={newValue =>
+                                            typeof newValue === 'number'
+                                                ? updateTachieLocation({ y: newValue })
+                                                : undefined
+                                        }
+                                    />
                                 </Space>
                             </Col>
                         </Row>
-                        <Row gutter={gutter} align='middle'>
-                            <Col flex='auto' />
+                        <Row gutter={gutter} align="middle">
+                            <Col flex="auto" />
                             <Col flex={0}>大きさ</Col>
                             <Col span={inputSpan}>
                                 <Space>
                                     <InputNumber
                                         value={tachieLocation.w}
-                                        onChange={newValue => typeof newValue === 'number' ? updateTachieLocation({ w: newValue }) : undefined} />
+                                        onChange={newValue =>
+                                            typeof newValue === 'number'
+                                                ? updateTachieLocation({ w: newValue })
+                                                : undefined
+                                        }
+                                    />
                                     <span>*</span>
                                     <InputNumber
                                         value={tachieLocation.h}
-                                        onChange={newValue => typeof newValue === 'number' ? updateTachieLocation({ h: newValue }) : undefined} />
+                                        onChange={newValue =>
+                                            typeof newValue === 'number'
+                                                ? updateTachieLocation({ h: newValue })
+                                                : undefined
+                                        }
+                                    />
                                 </Space>
                             </Col>
                         </Row>
@@ -460,257 +578,336 @@ const CharacterDrawer: React.FC = () => {
             title={drawerType?.type === create ? 'キャラクターの新規作成' : 'キャラクターの編集'}
             visible={drawerType != null}
             closable
-            onClose={() => dispatch(roomDrawerAndPopoverModule.actions.set({ characterDrawerType: null }))}
-            footer={(
+            onClose={() =>
+                dispatch(roomDrawerAndPopoverModule.actions.set({ characterDrawerType: null }))
+            }
+            footer={
                 <DrawerFooter
-                    close={({
+                    close={{
                         textType: drawerType?.type === create ? 'cancel' : 'close',
-                        onClick: () => dispatch(roomDrawerAndPopoverModule.actions.set({ characterDrawerType: null }))
-                    })}
-                    ok={onOkClick == null ? undefined : ({ textType: 'create', onClick: onOkClick })}
-                    destroy={onDestroy == null ? undefined : {
-                        modal: {
-                            title: 'キャラクターの削除の確認',
-                            content: `このキャラクター "${character.name}" を削除します。よろしいですか？`,
-                        },
-                        onClick: onDestroy,
+                        onClick: () =>
+                            dispatch(
+                                roomDrawerAndPopoverModule.actions.set({
+                                    characterDrawerType: null,
+                                })
+                            ),
                     }}
-                />)}>
+                    ok={onOkClick == null ? undefined : { textType: 'create', onClick: onOkClick }}
+                    destroy={
+                        onDestroy == null
+                            ? undefined
+                            : {
+                                  modal: {
+                                      title: 'キャラクターの削除の確認',
+                                      content: `このキャラクター "${character.name}" を削除します。よろしいですか？`,
+                                  },
+                                  onClick: onDestroy,
+                              }
+                    }
+                />
+            }
+        >
             <div>
-                {drawerType?.type === update && <>
-                    <Typography.Title level={4}>作成者</Typography.Title>
-                    <Row gutter={gutter} align='middle'>
-                        <Col flex='auto' />
-                        <Col flex={0}>作成者</Col>
-                        <Col span={inputSpan}>
-                            <span>{participants.get(drawerType.stateKey.createdBy)?.name}</span>{createdByMe && <span style={{ paddingLeft: 2, fontWeight: 'bold' }}>(自分)</span>}
-                        </Col>
-                    </Row>
-                </>}
+                {drawerType?.type === update && (
+                    <>
+                        <Typography.Title level={4}>作成者</Typography.Title>
+                        <Row gutter={gutter} align="middle">
+                            <Col flex="auto" />
+                            <Col flex={0}>作成者</Col>
+                            <Col span={inputSpan}>
+                                <span>{participants.get(drawerType.stateKey.createdBy)?.name}</span>
+                                {createdByMe && (
+                                    <span style={{ paddingLeft: 2, fontWeight: 'bold' }}>
+                                        (自分)
+                                    </span>
+                                )}
+                            </Col>
+                        </Row>
+                    </>
+                )}
 
-                {character == null || drawerType?.type !== update ? null :
+                {character == null || drawerType?.type !== update ? null : (
                     <>
                         <Typography.Title level={4}>複製</Typography.Title>
 
-                        <Row gutter={gutter} align='middle'>
-                            <Col flex='auto' />
+                        <Row gutter={gutter} align="middle">
+                            <Col flex="auto" />
                             <Col flex={0}></Col>
                             <Col span={inputSpan}>
                                 {/* TODO: 複製したことを何らかの形で通知したほうがいい */}
-                                <Tooltip title='コマの情報を除き、このキャラクターを複製します。'>
-                                    <Button size='small' onClick={() => {
-                                        const id = simpleId();
-                                        const operation: UpOperation = {
-                                            $version: 1,
-                                            characters: {
-                                                [myUserUid]: {
-                                                    [id]: {
-                                                        type: replace,
-                                                        replace: {
-                                                            newValue: {
-                                                                ...character,
-                                                                name: `${character.name} (複製)`,
+                                <Tooltip title="コマの情報を除き、このキャラクターを複製します。">
+                                    <Button
+                                        size="small"
+                                        onClick={() => {
+                                            const id = simpleId();
+                                            const operation: UpOperation = {
+                                                $version: 1,
+                                                characters: {
+                                                    [myUserUid]: {
+                                                        [id]: {
+                                                            type: replace,
+                                                            replace: {
+                                                                newValue: {
+                                                                    ...character,
+                                                                    name: `${character.name} (複製)`,
+                                                                },
                                                             },
                                                         },
-                                                    }
-                                                }
-                                            }
-                                        };
-                                        operate(operation);
-                                    }} >
+                                                    },
+                                                },
+                                            };
+                                            operate(operation);
+                                        }}
+                                    >
                                         このキャラクターを複製
                                     </Button>
                                 </Tooltip>
                             </Col>
                         </Row>
                     </>
-                }
+                )}
 
                 {pieceElement != null && <Typography.Title level={4}>コマ</Typography.Title>}
 
                 {pieceElement}
 
                 <Typography.Title level={4}>全体公開</Typography.Title>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
+                <Row gutter={gutter} align="middle">
+                    <Col flex="auto" />
                     <Col flex={0}>全体公開</Col>
                     <Col span={inputSpan}>
                         <ToggleButton
-                            size='small'
-                            disabled={(createdByMe || drawerType?.type === create) ? false : characterIsNotPrivateAndNotCreatedByMe}
+                            size="small"
+                            disabled={
+                                createdByMe || drawerType?.type === create
+                                    ? false
+                                    : characterIsNotPrivateAndNotCreatedByMe
+                            }
                             showAsTextWhenDisabled
                             checked={!character.isPrivate}
                             checkedChildren={<EyeOutlined />}
                             unCheckedChildren={<EyeInvisibleOutlined />}
-                            tooltip={character.isPrivate ? characterIsPrivate({ isCreate: drawerType?.type === create }) : characterIsNotPrivate({ isCreate: drawerType?.type === create })}
-                            onChange={newValue => updateCharacter({ isPrivate: !newValue })} />
+                            tooltip={
+                                character.isPrivate
+                                    ? characterIsPrivate({ isCreate: drawerType?.type === create })
+                                    : characterIsNotPrivate({
+                                          isCreate: drawerType?.type === create,
+                                      })
+                            }
+                            onChange={newValue => updateCharacter({ isPrivate: !newValue })}
+                        />
                     </Col>
                 </Row>
 
-                {tachieLocationElement == null ? null : <>
-                    <Typography.Title level={4}>立ち絵</Typography.Title>
-                </>}
+                {tachieLocationElement == null ? null : (
+                    <>
+                        <Typography.Title level={4}>立ち絵</Typography.Title>
+                    </>
+                )}
 
                 {tachieLocationElement}
 
                 <Typography.Title level={4}>パラメーター</Typography.Title>
 
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
+                <Row gutter={gutter} align="middle">
+                    <Col flex="auto" />
                     <Col flex={0}>名前</Col>
                     <Col span={inputSpan}>
                         <BufferedInput
-                            bufferDuration='default'
-                            size='small'
+                            bufferDuration="default"
+                            size="small"
                             value={character.name}
                             onChange={e => {
                                 if (e.previousValue === e.currentValue) {
                                     return;
                                 }
                                 updateCharacter({ name: e.currentValue });
-                            }} />
+                            }}
+                        />
                     </Col>
                 </Row>
 
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
+                <Row gutter={gutter} align="middle">
+                    <Col flex="auto" />
                     <Col flex={0}>アイコン画像</Col>
                     <Col span={inputSpan}>
-                        <InputFile filePath={character.image ?? undefined} onPathChange={path => updateCharacter({ image: path == null ? undefined : FilePath.toOt(path) })} openFilesManager={setFilesManagerDrawerType} showImage />
+                        <InputFile
+                            filePath={character.image ?? undefined}
+                            onPathChange={path =>
+                                updateCharacter({
+                                    image: path == null ? undefined : FilePath.toOt(path),
+                                })
+                            }
+                            openFilesManager={setFilesManagerDrawerType}
+                            showImage
+                        />
                     </Col>
                 </Row>
 
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
+                <Row gutter={gutter} align="middle">
+                    <Col flex="auto" />
                     <Col flex={0}>立ち絵画像</Col>
                     <Col span={inputSpan}>
-                        <InputFile filePath={character.tachieImage ?? undefined} onPathChange={path => updateCharacter({ tachieImage: path == null ? undefined : FilePath.toOt(path) })} openFilesManager={setFilesManagerDrawerType} showImage />
+                        <InputFile
+                            filePath={character.tachieImage ?? undefined}
+                            onPathChange={path =>
+                                updateCharacter({
+                                    tachieImage: path == null ? undefined : FilePath.toOt(path),
+                                })
+                            }
+                            openFilesManager={setFilesManagerDrawerType}
+                            showImage
+                        />
                     </Col>
                 </Row>
 
-                {
-                    strIndex20Array.map(key => {
-                        const paramName = numParamNames.get(key);
-                        if (paramName === undefined) {
-                            return null;
-                        }
-                        const value = character.numParams[key];
-                        const maxValue = character.numMaxParams[key];
-                        return (
-                            <Row key={`numParam${key}Row`} gutter={gutter} align='middle'>
-                                <Col flex='auto' />
-                                <Col flex={0}>{paramName.name}</Col>
-                                <Col span={inputSpan}>
-                                    <NumberParameterInput
-                                        isCharacterPrivate={character.isPrivate}
-                                        isCreate
-                                        compact={false}
-                                        parameterKey={key}
-                                        numberParameter={value}
-                                        numberMaxParameter={maxValue}
-                                        createdByMe={createdByMe}
-                                        onOperate={operation => {
-                                            updateCharacterByOperation(operation);
-                                        }} />
-                                </Col>
-                            </Row>
-                        );
-                    })
-                }
-                {
-                    strIndex20Array.map(key => {
-                        const paramName = boolParamNames.get(key);
-                        if (paramName === undefined) {
-                            return null;
-                        }
-                        const value = character.boolParams[key];
-                        return (
-                            <Row key={`boolParam${key}Row`} gutter={gutter} align='middle'>
-                                <Col flex='auto' />
-                                <Col flex={0}>{paramName.name}</Col>
-                                <Col span={inputSpan}>
-                                    <BooleanParameterInput
-                                        isCharacterPrivate={character.isPrivate}
-                                        isCreate
-                                        compact={false}
-                                        parameterKey={key}
-                                        parameter={value}
-                                        createdByMe={createdByMe}
-                                        onOperate={operation => {
-                                            updateCharacterByOperation(operation);
-                                        }} />
-                                </Col>
-                            </Row>
-                        );
-                    })
-                }
-                {
-                    strIndex20Array.map(key => {
-                        const paramName = strParamNames.get(key);
-                        if (paramName === undefined) {
-                            return null;
-                        }
-                        const value = character.strParams[key];
-                        return (
-                            <Row key={`strParam${key}Row`} gutter={gutter} align='middle'>
-                                <Col flex='auto' />
-                                <Col flex={0}>{paramName.name}</Col>
-                                <Col span={inputSpan}>
-                                    <StringParameterInput
-                                        compact={false}
-                                        isCharacterPrivate={character.isPrivate}
-                                        isCreate
-                                        parameterKey={key}
-                                        parameter={value}
-                                        createdByMe={createdByMe}
-                                        onOperate={operation => {
-                                            updateCharacterByOperation(operation);
-                                        }} />
-                                </Col>
-                            </Row>
-                        );
-                    })
-                }
+                {strIndex20Array.map(key => {
+                    const paramName = numParamNames.get(key);
+                    if (paramName === undefined) {
+                        return null;
+                    }
+                    const value = character.numParams[key];
+                    const maxValue = character.numMaxParams[key];
+                    return (
+                        <Row key={`numParam${key}Row`} gutter={gutter} align="middle">
+                            <Col flex="auto" />
+                            <Col flex={0}>{paramName.name}</Col>
+                            <Col span={inputSpan}>
+                                <NumberParameterInput
+                                    isCharacterPrivate={character.isPrivate}
+                                    isCreate
+                                    compact={false}
+                                    parameterKey={key}
+                                    numberParameter={value}
+                                    numberMaxParameter={maxValue}
+                                    createdByMe={createdByMe}
+                                    onOperate={operation => {
+                                        updateCharacterByOperation(operation);
+                                    }}
+                                />
+                            </Col>
+                        </Row>
+                    );
+                })}
+                {strIndex20Array.map(key => {
+                    const paramName = boolParamNames.get(key);
+                    if (paramName === undefined) {
+                        return null;
+                    }
+                    const value = character.boolParams[key];
+                    return (
+                        <Row key={`boolParam${key}Row`} gutter={gutter} align="middle">
+                            <Col flex="auto" />
+                            <Col flex={0}>{paramName.name}</Col>
+                            <Col span={inputSpan}>
+                                <BooleanParameterInput
+                                    isCharacterPrivate={character.isPrivate}
+                                    isCreate
+                                    compact={false}
+                                    parameterKey={key}
+                                    parameter={value}
+                                    createdByMe={createdByMe}
+                                    onOperate={operation => {
+                                        updateCharacterByOperation(operation);
+                                    }}
+                                />
+                            </Col>
+                        </Row>
+                    );
+                })}
+                {strIndex20Array.map(key => {
+                    const paramName = strParamNames.get(key);
+                    if (paramName === undefined) {
+                        return null;
+                    }
+                    const value = character.strParams[key];
+                    return (
+                        <Row key={`strParam${key}Row`} gutter={gutter} align="middle">
+                            <Col flex="auto" />
+                            <Col flex={0}>{paramName.name}</Col>
+                            <Col span={inputSpan}>
+                                <StringParameterInput
+                                    compact={false}
+                                    isCharacterPrivate={character.isPrivate}
+                                    isCreate
+                                    parameterKey={key}
+                                    parameter={value}
+                                    createdByMe={createdByMe}
+                                    onOperate={operation => {
+                                        updateCharacterByOperation(operation);
+                                    }}
+                                />
+                            </Col>
+                        </Row>
+                    );
+                })}
 
                 <Typography.Title level={4}>メモ</Typography.Title>
 
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
+                <Row gutter={gutter} align="middle">
+                    <Col flex="auto" />
                     <Col flex={0}></Col>
                     <Col span={inputSpan}>
-                        <BufferedTextArea size='small' bufferDuration='default' value={character.memo} rows={8} onChange={e => updateCharacter({ memo: e.currentValue })} />
+                        <BufferedTextArea
+                            size="small"
+                            bufferDuration="default"
+                            value={character.memo}
+                            rows={8}
+                            onChange={e => updateCharacter({ memo: e.currentValue })}
+                        />
                     </Col>
                 </Row>
 
-                {createdByMe &&
+                {createdByMe && (
                     <>
                         <Typography.Title level={4}>変数</Typography.Title>
 
-                        <Row gutter={gutter} align='middle'>
-                            <Col flex='auto' />
+                        <Row gutter={gutter} align="middle">
+                            <Col flex="auto" />
                             <Col flex={0}></Col>
                             <Col span={inputSpan}>
-                                <TomlInput tomlType={characterVariable} size='small' bufferDuration='default' value={character.privateVarToml} rows={8} onChange={e => updateCharacter({ privateVarToml: e.currentValue })} />
+                                <TomlInput
+                                    tomlType={characterVariable}
+                                    size="small"
+                                    bufferDuration="default"
+                                    value={character.privateVarToml}
+                                    rows={8}
+                                    onChange={e =>
+                                        updateCharacter({ privateVarToml: e.currentValue })
+                                    }
+                                />
                             </Col>
                         </Row>
                     </>
-                }
+                )}
 
-                {createdByMe &&
+                {createdByMe && (
                     <>
                         <Typography.Title level={4}>コマンド</Typography.Title>
 
-                        <Row gutter={gutter} align='middle'>
-                            <Col flex='auto' />
+                        <Row gutter={gutter} align="middle">
+                            <Col flex="auto" />
                             <Col flex={0}></Col>
                             <Col span={inputSpan}>
-                                <TomlInput tomlType={characterCommand} size='small' bufferDuration='default' value={character.privateCommand} rows={8} onChange={e => updateCharacter({ privateCommand: e.currentValue })} />
+                                <TomlInput
+                                    tomlType={characterCommand}
+                                    size="small"
+                                    bufferDuration="default"
+                                    value={character.privateCommand}
+                                    rows={8}
+                                    onChange={e =>
+                                        updateCharacter({ privateCommand: e.currentValue })
+                                    }
+                                />
                             </Col>
                         </Row>
                     </>
-                }
+                )}
             </div>
-            <FilesManagerDrawer drawerType={filesManagerDrawerType} onClose={() => setFilesManagerDrawerType(null)} />
+            <FilesManagerDrawer
+                drawerType={filesManagerDrawerType}
+                onClose={() => setFilesManagerDrawerType(null)}
+            />
         </Drawer>
     );
 };

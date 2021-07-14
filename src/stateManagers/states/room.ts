@@ -1,5 +1,15 @@
-import { RoomGetStateFragment, RoomOperationFragment, RoomOperationInput } from '../../generated/graphql';
-import { parseState, parseUpOperation, State, stringifyUpOperation, UpOperation } from '@kizahasi/flocon-core';
+import {
+    RoomGetStateFragment,
+    RoomOperationFragment,
+    RoomOperationInput,
+} from '../../generated/graphql';
+import {
+    parseState,
+    parseUpOperation,
+    State,
+    stringifyUpOperation,
+    UpOperation,
+} from '@kizahasi/flocon-core';
 
 export namespace Room {
     export const createState = (source: RoomGetStateFragment): State => {

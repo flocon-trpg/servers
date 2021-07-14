@@ -1,14 +1,20 @@
 import { castToBoolean } from '../utils/cast';
 import isObject from '../utils/isObject';
-import { castToPartialDraggablePanelConfigBase, DraggablePanelConfigBase, toCompleteDraggablePanelConfigBase } from './DraggablePanelConfigBase';
+import {
+    castToPartialDraggablePanelConfigBase,
+    DraggablePanelConfigBase,
+    toCompleteDraggablePanelConfigBase,
+} from './DraggablePanelConfigBase';
 
 export type GameEffectPanelConfig = {
     isMinimized: boolean;
-} & DraggablePanelConfigBase
+} & DraggablePanelConfigBase;
 
 export type PartialGameEffectPanelConfig = Partial<GameEffectPanelConfig>;
 
-export const castToPartialGameEffectPanelConfig = (source: unknown): PartialGameEffectPanelConfig | undefined => {
+export const castToPartialGameEffectPanelConfig = (
+    source: unknown
+): PartialGameEffectPanelConfig | undefined => {
     if (!isObject<PartialGameEffectPanelConfig>(source)) {
         return;
     }
@@ -18,7 +24,9 @@ export const castToPartialGameEffectPanelConfig = (source: unknown): PartialGame
     };
 };
 
-export const toCompleteGameEffectPanelConfig = (source: PartialGameEffectPanelConfig): GameEffectPanelConfig => {
+export const toCompleteGameEffectPanelConfig = (
+    source: PartialGameEffectPanelConfig
+): GameEffectPanelConfig => {
     return {
         ...toCompleteDraggablePanelConfigBase(source),
         isMinimized: source.isMinimized ?? false,
@@ -35,4 +43,3 @@ export const defaultGameEffectPanelConfig = (): GameEffectPanelConfig => {
         isMinimized: false,
     };
 };
-

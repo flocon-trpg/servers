@@ -1,6 +1,9 @@
 import { FilePathFragment } from '../../generated/graphql';
 
-export const filePathEquals = (x: FilePathFragment | null | undefined, y: FilePathFragment | null | undefined): boolean => {
+export const filePathEquals = (
+    x: FilePathFragment | null | undefined,
+    y: FilePathFragment | null | undefined
+): boolean => {
     if (x == null) {
         return y == null;
     }

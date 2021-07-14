@@ -8,7 +8,7 @@ type Result = {
     data?: RoomEventSubscription;
     loading: boolean;
     error?: ApolloError;
-}
+};
 
 // 1つのSubscriptionのみで、複数の場所でsubscribeできるようにするHook。Rxにおけるpublishのようなことをしている。ただ、現状では必要ないかもしれない。
 export function usePublishRoomEventSubscription(roomId: string): Result {

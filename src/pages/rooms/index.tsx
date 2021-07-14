@@ -1,5 +1,9 @@
 import React from 'react';
-import { GetRoomsListFailureType, RoomAsListItemFragment, useGetRoomsListQuery } from '../../generated/graphql';
+import {
+    GetRoomsListFailureType,
+    RoomAsListItemFragment,
+    useGetRoomsListQuery,
+} from '../../generated/graphql';
 import Layout from '../../layouts/Layout';
 import moment from 'moment';
 import Link from 'next/link';
@@ -24,32 +28,35 @@ const columns = [
         dataIndex: '',
         key: 'Action',
         // eslint-disable-next-line react/display-name
-        render: (_: any, record: Data) => (<Link href={`/rooms/${record.id}`}><a>入室</a></Link>),
+        render: (_: any, record: Data) => (
+            <Link href={`/rooms/${record.id}`}>
+                <a>入室</a>
+            </Link>
+        ),
     },
 ];
 
 type RoomsListComponentProps = {
     rooms: RoomAsListItemFragment[];
-}
+};
 
-const RoomsListComponent: React.FC<RoomsListComponentProps> = ({ rooms }: RoomsListComponentProps) => {
+const RoomsListComponent: React.FC<RoomsListComponentProps> = ({
+    rooms,
+}: RoomsListComponentProps) => {
     const router = useRouter();
 
     return (
-        <div style={({ display: 'flex', flexDirection: 'column', padding: 10 })}>
-            <div style={({ flex: 0, display: 'flex' })}>
-                <div style={({ flex: 0 })}>
+        <div style={{ display: 'flex', flexDirection: 'column', padding: 10 }}>
+            <div style={{ flex: 0, display: 'flex' }}>
+                <div style={{ flex: 0 }}>
                     <Button onClick={() => router.push('rooms/create')}>部屋を作成</Button>
                 </div>
-                <div style={({ flex: 'auto' })} />
+                <div style={{ flex: 'auto' }} />
             </div>
-            <div style={({ flex: '10px' })} />
-            <Table
-                rowKey='id'
-                style={({ flex: 'auto' })}
-                columns={columns}
-                dataSource={rooms} />
-        </div>);
+            <div style={{ flex: '10px' }} />
+            <Table rowKey="id" style={{ flex: 'auto' }} columns={columns} dataSource={rooms} />
+        </div>
+    );
 };
 
 const pollingInterval = 30000;
@@ -93,13 +100,14 @@ const RoomCore: React.FC = () => {
     return (
         <Layout showEntryForm={showEntryForm} onEntry={() => rooms.refetch()} requiresLogin={true}>
             <QueryResultViewer loading={rooms.loading} error={rooms.error} compact={false}>
-                {roomsData == null ? null : (<RoomsListComponent rooms={roomsData ?? []} />)}
+                {roomsData == null ? null : <RoomsListComponent rooms={roomsData ?? []} />}
             </QueryResultViewer>
-        </Layout>);
+        </Layout>
+    );
 };
 
 const Room: React.FC = () => {
-    return (<RoomCore />);
+    return <RoomCore />;
 };
 
 export default Room;

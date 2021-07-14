@@ -13,7 +13,7 @@ import { useFirebaseStorageUrl } from './firebaseStorage';
 type Size = {
     w: number;
     h: number;
-}
+};
 
 export const loading = 'loading';
 export const success = 'success';
@@ -22,21 +22,21 @@ export const argNull = 'argNull';
 
 type LoadingState = {
     type: typeof loading;
-}
+};
 
 type SuccessState = {
     type: typeof success;
     image: HTMLImageElement;
-}
+};
 
 type FailedState = {
     type: typeof failed;
     errorMessage: string;
-}
+};
 
 type ArgNullState = {
     type: typeof argNull;
-}
+};
 
 type State = LoadingState | SuccessState | FailedState | ArgNullState;
 
@@ -83,7 +83,10 @@ export function useImage(src: string | null, size?: Size, crossOrigin?: string):
     return state ?? { type: loading };
 }
 
-export function useImageFromGraphQL(filePath: FilePathFragment | FilePath | null | undefined, crossOrigin?: string): State {
+export function useImageFromGraphQL(
+    filePath: FilePathFragment | FilePath | null | undefined,
+    crossOrigin?: string
+): State {
     const src = useFirebaseStorageUrl(filePath);
 
     return useImage(src, undefined, crossOrigin);

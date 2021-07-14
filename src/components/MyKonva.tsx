@@ -9,7 +9,12 @@ import { animated, useSpring, useTransition } from '@react-spring/konva';
 import { RoomPublicMessageFragment } from '../generated/graphql';
 import { interval } from 'rxjs';
 import { isDeleted, toText as toTextCore } from '../utils/message';
-import { DicePieceValueState, dicePieceValueStrIndexes, FilePath as CoreFilePath, NumberPieceValueState } from '@kizahasi/flocon-core';
+import {
+    DicePieceValueState,
+    dicePieceValueStrIndexes,
+    FilePath as CoreFilePath,
+    NumberPieceValueState,
+} from '@kizahasi/flocon-core';
 import { NumberPieceValue } from '../utils/numberPieceValue';
 import { KonvaD6 } from './KonvaDice';
 import { State as DieValueState } from '@kizahasi/flocon-core/dist/internal/ot/room/character/dicePieceValue/dieValue/v1';
@@ -19,17 +24,17 @@ export namespace MyKonva {
     export type Vector2 = {
         x: number;
         y: number;
-    }
+    };
 
     export type Size = {
         w: number;
         h: number;
-    }
+    };
 
     export type DragEndResult = {
         readonly newLocation?: Vector2;
         readonly newSize?: Size;
-    }
+    };
 
     type BalloonCoreProps = {
         text0?: string;
@@ -40,7 +45,7 @@ export namespace MyKonva {
         x: number;
         y: number;
         width: number;
-    }
+    };
 
     // BalloonCoreにおける1つのtextのheight。BalloonCore全体のheightはtextHeight*5になる
     const balloonCoreTextHeight = 72;
@@ -84,57 +89,67 @@ export namespace MyKonva {
         });
 
         const createLabel = (textIndex: 0 | 1 | 2 | 3 | 4) => {
-            const transitions = [transitions0, transitions1, transitions2, transitions3, transitions4][textIndex];
+            const transitions = [
+                transitions0,
+                transitions1,
+                transitions2,
+                transitions3,
+                transitions4,
+            ][textIndex];
             if (transitions == null) {
                 return;
             }
             return transitions((style, item) => {
-                return <animated.Group
-                    {...style}>
-                    {<ReactKonva.Label
-                        x={width / 2}
-                        y={balloonCoreTextHeight * (textIndex + 1)}
-                        width={width}
-                        height={balloonCoreTextHeight}>
-                        <ReactKonva.Tag
-                            strokeWidth={0}
-                            fill='#303030'
-                            shadowColor='black'
-                            shadowBlur={5}
-                            shadowOffsetX={5}
-                            shadowOffsetY={5}
-                            shadowOpacity={0.3}
-                            pointerWidth={6}
-                            pointerHeight={6}
-                            pointerDirection='down'
-                            lineJoin='round' />
-                        <ReactKonva.Text
-                            text={item}
-                            fontFamily='Noto Sans JP Regular'
-                            fontSize={14}
-                            padding={4}
-                            fill='white'
-                            verticalAlign='middle'
-                            width={width}
-                            height={balloonCoreTextHeight - 7}
-                            wrap='word'
-                            ellipsis />
-                    </ReactKonva.Label>}
-                </animated.Group>;
+                return (
+                    <animated.Group {...style}>
+                        {
+                            <ReactKonva.Label
+                                x={width / 2}
+                                y={balloonCoreTextHeight * (textIndex + 1)}
+                                width={width}
+                                height={balloonCoreTextHeight}
+                            >
+                                <ReactKonva.Tag
+                                    strokeWidth={0}
+                                    fill="#303030"
+                                    shadowColor="black"
+                                    shadowBlur={5}
+                                    shadowOffsetX={5}
+                                    shadowOffsetY={5}
+                                    shadowOpacity={0.3}
+                                    pointerWidth={6}
+                                    pointerHeight={6}
+                                    pointerDirection="down"
+                                    lineJoin="round"
+                                />
+                                <ReactKonva.Text
+                                    text={item}
+                                    fontFamily="Noto Sans JP Regular"
+                                    fontSize={14}
+                                    padding={4}
+                                    fill="white"
+                                    verticalAlign="middle"
+                                    width={width}
+                                    height={balloonCoreTextHeight - 7}
+                                    wrap="word"
+                                    ellipsis
+                                />
+                            </ReactKonva.Label>
+                        }
+                    </animated.Group>
+                );
             });
         };
 
-        return <animated.Group
-            x={x}
-            y={y}
-            width={width}
-            height={balloonCoreTextHeight * 5}>
-            {createLabel(0)}
-            {createLabel(1)}
-            {createLabel(2)}
-            {createLabel(3)}
-            {createLabel(4)}
-        </animated.Group>;
+        return (
+            <animated.Group x={x} y={y} width={width} height={balloonCoreTextHeight * 5}>
+                {createLabel(0)}
+                {createLabel(1)}
+                {createLabel(2)}
+                {createLabel(3)}
+                {createLabel(4)}
+            </animated.Group>
+        );
     };
 
     type BalloonProps = {
@@ -143,7 +158,7 @@ export namespace MyKonva {
         y: number;
         width: number;
         onBalloonChange: (balloonExists: boolean) => void;
-    }
+    };
 
     // 💬を表すコンポーネント。
     const Balloon: React.FC<BalloonProps> = ({
@@ -159,7 +174,9 @@ export namespace MyKonva {
         }, [onBalloonChange]);
 
         // indexが小さいほどcreatedAtが大きい(新しい)。
-        const [recentMessages, setRecentMessages] = React.useState<ReadonlyArray<RoomPublicMessageFragment>>([]);
+        const [recentMessages, setRecentMessages] = React.useState<
+            ReadonlyArray<RoomPublicMessageFragment>
+        >([]);
 
         // 書き込みがあってから💬を画面上にどれだけの期間表示させるか。ただし、サーバーやクライアントの時刻のずれに影響されるため、これらが合っていないと表示期間がゼロになったり短くなったり長くなったりする。
         const timeWindow = 30 * 1000;
@@ -171,7 +188,10 @@ export namespace MyKonva {
 
             const now = new Date().getTime();
             setRecentMessages(recentMessages => {
-                if (recentMessages.some(msg => msg.messageId === message.messageId) || now - message.createdAt > timeWindow) {
+                if (
+                    recentMessages.some(msg => msg.messageId === message.messageId) ||
+                    now - message.createdAt > timeWindow
+                ) {
                     return recentMessages;
                 }
                 return [...recentMessages, message].sort((x, y) => y.createdAt - x.createdAt);
@@ -193,7 +213,9 @@ export namespace MyKonva {
             .filter(msg => !isDeleted(msg))
             .sort((x, y) => y.createdAt - x.createdAt);
 
-        const toText = (message: RoomPublicMessageFragment | null | undefined): string | undefined => {
+        const toText = (
+            message: RoomPublicMessageFragment | null | undefined
+        ): string | undefined => {
             if (message == null) {
                 return undefined;
             }
@@ -212,7 +234,9 @@ export namespace MyKonva {
             toText(texts[0]),
         ];
 
-        const [areAllTextsUndefined, setAreAllTextUndefined] = React.useState([text0, text1, text2, text3, text4].every(t => t === undefined));
+        const [areAllTextsUndefined, setAreAllTextUndefined] = React.useState(
+            [text0, text1, text2, text3, text4].every(t => t === undefined)
+        );
         React.useEffect(() => {
             setAreAllTextUndefined([text0, text1, text2, text3, text4].every(t => t === undefined));
         }, [text0, text1, text2, text3, text4]);
@@ -220,15 +244,18 @@ export namespace MyKonva {
             onTextsChangeRef.current(!areAllTextsUndefined);
         }, [areAllTextsUndefined]);
 
-        return <BalloonCore
-            x={x}
-            y={y}
-            width={width}
-            text0={text0}
-            text1={text1}
-            text2={text2}
-            text3={text3}
-            text4={text4} />;
+        return (
+            <BalloonCore
+                x={x}
+                y={y}
+                width={width}
+                text0={text0}
+                text1={text1}
+                text2={text2}
+                text3={text3}
+                text4={text4}
+            />
+        );
     };
 
     const imageMinimalSize = 10;
@@ -254,7 +281,8 @@ export namespace MyKonva {
         onDblClick?: (e: KonvaEventObject<MouseEvent>) => void;
         onMouseEnter?: () => void;
         onMouseLeave?: () => void;
-    } & Vector2 & Size
+    } & Vector2 &
+        Size;
 
     export const Image: React.FC<ImageProps> = (props: ImageProps) => {
         /*
@@ -262,14 +290,17 @@ export namespace MyKonva {
         https://konvajs.org/docs/react/Transformer.html
         */
 
-        const [opacitySpringProps, setOpacitySpringProps] = useSpring(() => ({
-            config: {
-                duration: 100,
-            },
-            to: {
-                opacity: props.opacity ?? 1,
-            }
-        }), []);
+        const [opacitySpringProps, setOpacitySpringProps] = useSpring(
+            () => ({
+                config: {
+                    duration: 100,
+                },
+                to: {
+                    opacity: props.opacity ?? 1,
+                },
+            }),
+            []
+        );
 
         const messageFilterRef = React.useRef(props.messageFilter ?? (() => true));
         React.useEffect(() => {
@@ -315,7 +346,7 @@ export namespace MyKonva {
                 newLocation: {
                     x,
                     y,
-                }
+                },
             });
         };
 
@@ -377,10 +408,11 @@ export namespace MyKonva {
                             newSize: {
                                 // set minimal value
                                 w: Math.max(imageMinimalSize, node.width() * scaleX),
-                                h: Math.max(imageMinimalSize, node.height() * scaleY)
+                                h: Math.max(imageMinimalSize, node.height() * scaleY),
                             },
                         });
-                    }}>
+                    }}
+                >
                     <animated.Image
                         {...opacitySpringProps}
                         x={0}
@@ -396,21 +428,33 @@ export namespace MyKonva {
                         rotateEnabled={false}
                         boundBoxFunc={(oldBox, newBox) => {
                             // limit resize
-                            if (newBox.width < imageMinimalSize || newBox.height < imageMinimalSize) {
+                            if (
+                                newBox.width < imageMinimalSize ||
+                                newBox.height < imageMinimalSize
+                            ) {
                                 return oldBox;
                             }
                             return newBox;
-                        }}>
-                    </ReactKonva.Transformer>
+                        }}
+                    ></ReactKonva.Transformer>
                 )}
                 <Balloon
                     x={props.x}
-                    y={props.y - (balloonCoreTextHeight * 5)}
+                    y={props.y - balloonCoreTextHeight * 5}
                     width={props.w}
-                    message={props.message == null ? undefined : (messageFilterRef.current(props.message) ? props.message : undefined)}
+                    message={
+                        props.message == null
+                            ? undefined
+                            : messageFilterRef.current(props.message)
+                            ? props.message
+                            : undefined
+                    }
                     onBalloonChange={balloonExists => {
-                        setOpacitySpringProps.start({ opacity: balloonExists ? 1 : (props.opacity ?? 1) });
-                    }} />
+                        setOpacitySpringProps.start({
+                            opacity: balloonExists ? 1 : props.opacity ?? 1,
+                        });
+                    }}
+                />
             </>
         );
     };
@@ -418,13 +462,15 @@ export namespace MyKonva {
     export const numberPiece = 'numberPiece';
     export const dicePiece = 'dicePiece';
 
-    export type PieceState = {
-        type: typeof numberPiece;
-        state: NumberPieceValueState;
-    } | {
-        type: typeof dicePiece;
-        state: DicePieceValueState;
-    };
+    export type PieceState =
+        | {
+              type: typeof numberPiece;
+              state: NumberPieceValueState;
+          }
+        | {
+              type: typeof dicePiece;
+              state: DicePieceValueState;
+          };
 
     namespace PieceState {
         type NumberPieceValueContentProps = {
@@ -432,7 +478,9 @@ export namespace MyKonva {
             state: NumberPieceValueState;
         } & Size;
 
-        const NumberPieceValueContent: React.FC<NumberPieceValueContentProps> = (props: NumberPieceValueContentProps) => {
+        const NumberPieceValueContent: React.FC<NumberPieceValueContentProps> = (
+            props: NumberPieceValueContentProps
+        ) => {
             const text = NumberPieceValue.toKonvaText(props.state, props.createdByMe);
 
             const prevText = usePrevious(text);
@@ -441,83 +489,89 @@ export namespace MyKonva {
 
             const baseColor = '#F0F0F0FF';
             const transitionColor = '#A0F0F0FF';
-            const [rectSpringProps] = useSpring(() => ({
-                config: {
-                    duration,
-                },
-                from: {
-                    scaleX: 1,
-                    x: 0,
-                    fill: prevText === '?' || text === '?' ? baseColor : transitionColor,
-                },
-                to: async (next, cancel) => {
-                    if (prevText === '?' || text === '?') {
+            const [rectSpringProps] = useSpring(
+                () => ({
+                    config: {
+                        duration,
+                    },
+                    from: {
+                        scaleX: 1,
+                        x: 0,
+                        fill: prevText === '?' || text === '?' ? baseColor : transitionColor,
+                    },
+                    to: async (next, cancel) => {
+                        if (prevText === '?' || text === '?') {
+                            await next({
+                                scaleX: 0,
+                                x: props.w / 2,
+                                fill: baseColor,
+                            });
+                        } else {
+                            await next({});
+                        }
                         await next({
-                            scaleX: 0,
-                            x: props.w / 2,
+                            scaleX: 1,
+                            x: 0,
                             fill: baseColor,
                         });
-                    } else {
-                        await next({
-                        });
-                    }
-                    await next({
+                    },
+                }),
+                [text]
+            );
+            const [textSpringProps] = useSpring(
+                () => ({
+                    config: {
+                        duration,
+                    },
+                    from: {
+                        text: prevText === '?' || text === '?' ? prevText : text,
                         scaleX: 1,
                         x: 0,
-                        fill: baseColor,
-                    });
-                }
-            }), [text]);
-            const [textSpringProps] = useSpring(() => ({
-                config: {
-                    duration,
-                },
-                from: {
-                    text: (prevText === '?' || text === '?') ? prevText : text,
-                    scaleX: 1,
-                    x: 0,
-                },
-                to: async (next, cancel) => {
-                    if (prevText === '?' || text === '?') {
+                    },
+                    to: async (next, cancel) => {
+                        if (prevText === '?' || text === '?') {
+                            await next({
+                                scaleX: 0,
+                                x: props.w / 2,
+                            });
+                        } else {
+                            await next({});
+                        }
                         await next({
-                            scaleX: 0,
-                            x: props.w / 2,
+                            text,
+                            scaleX: 1,
+                            x: 0,
                         });
-                    } else {
-                        await next({
-                        });
-                    }
-                    await next({
-                        text,
-                        scaleX: 1,
-                        x: 0,
-                    });
-                }
-            }), [text]);
+                    },
+                }),
+                [text]
+            );
 
-            return <>
-                <animated.Rect
-                    {...rectSpringProps}
-                    y={0}
-                    width={props.w}
-                    height={props.h}
-                    strokeWidth={2}
-                    stroke='#606060B0'
-                    cornerRadius={5} />
-                {
-                    /* fontSizeの決め方は適当 */
-                }
-                <animated.Text
-                    {...textSpringProps}
-                    y={0}
-                    width={props.w}
-                    height={props.h}
-                    fontSize={props.w / 2.5}
-                    fontFamily='Noto Sans JP Regular'
-                    fill='black'
-                    align='center'
-                    verticalAlign='middle' />
-            </>;
+            return (
+                <>
+                    <animated.Rect
+                        {...rectSpringProps}
+                        y={0}
+                        width={props.w}
+                        height={props.h}
+                        strokeWidth={2}
+                        stroke="#606060B0"
+                        cornerRadius={5}
+                    />
+                    {/* fontSizeの決め方は適当 */}
+                    <animated.Text
+                        {...textSpringProps}
+                        y={0}
+                        width={props.w}
+                        height={props.h}
+                        fontSize={props.w / 2.5}
+                        fontFamily="Noto Sans JP Regular"
+                        fill="black"
+                        align="center"
+                        verticalAlign="middle"
+                    />
+                </>
+            );
         };
 
         type DicePieceValueContentProps = {
@@ -525,66 +579,85 @@ export namespace MyKonva {
             state: DicePieceValueState;
         } & Size;
 
-        const DicePieceValueContent: React.FC<DicePieceValueContentProps> = ({ createdByMe, state, w, h }: DicePieceValueContentProps) => {
-            const largeDieWidth = w * 2 / 3;
-            const largeDieHeight = h * 2 / 3;
+        const DicePieceValueContent: React.FC<DicePieceValueContentProps> = ({
+            createdByMe,
+            state,
+            w,
+            h,
+        }: DicePieceValueContentProps) => {
+            const largeDieWidth = (w * 2) / 3;
+            const largeDieHeight = (h * 2) / 3;
             const dieWidth = w / 2 - w / 20;
             const dieHeight = h / 2 - h / 20;
             const positions = {
-                [1]: [{
-                    x: w / 2 - (largeDieWidth / 2),
-                    y: h / 2 - (largeDieHeight / 2),
-                    w: largeDieWidth,
-                    h: largeDieHeight,
-                }] as const,
-                [2]: [{
-                    x: w / 20,
-                    y: h / 2 - (dieHeight / 2),
-                    w: dieWidth,
-                    h: dieHeight,
-                }, {
-                    x: w / 20 + dieWidth,
-                    y: h / 2 - (dieHeight / 2),
-                    w: dieWidth,
-                    h: dieHeight,
-                }] as const,
-                [3]: [{
-                    x: w / 20,
-                    y: h / 20,
-                    w: dieWidth,
-                    h: dieHeight,
-                }, {
-                    x: w / 20 + dieWidth,
-                    y: h / 20,
-                    w: dieWidth,
-                    h: dieHeight,
-                }, {
-                    x: w / 20 + (dieWidth / 2),
-                    y: h / 20 + dieHeight,
-                    w: dieWidth,
-                    h: dieHeight,
-                }] as const,
-                [4]: [{
-                    x: w / 20,
-                    y: h / 20,
-                    w: dieWidth,
-                    h: dieHeight,
-                }, {
-                    x: w / 20 + dieWidth,
-                    y: h / 20,
-                    w: dieWidth,
-                    h: dieHeight,
-                }, {
-                    x: w / 20,
-                    y: h / 20 + dieHeight,
-                    w: dieWidth,
-                    h: dieHeight,
-                }, {
-                    x: w / 20 + dieWidth,
-                    y: h / 20 + dieHeight,
-                    w: dieWidth,
-                    h: dieHeight,
-                }] as const,
+                [1]: [
+                    {
+                        x: w / 2 - largeDieWidth / 2,
+                        y: h / 2 - largeDieHeight / 2,
+                        w: largeDieWidth,
+                        h: largeDieHeight,
+                    },
+                ] as const,
+                [2]: [
+                    {
+                        x: w / 20,
+                        y: h / 2 - dieHeight / 2,
+                        w: dieWidth,
+                        h: dieHeight,
+                    },
+                    {
+                        x: w / 20 + dieWidth,
+                        y: h / 2 - dieHeight / 2,
+                        w: dieWidth,
+                        h: dieHeight,
+                    },
+                ] as const,
+                [3]: [
+                    {
+                        x: w / 20,
+                        y: h / 20,
+                        w: dieWidth,
+                        h: dieHeight,
+                    },
+                    {
+                        x: w / 20 + dieWidth,
+                        y: h / 20,
+                        w: dieWidth,
+                        h: dieHeight,
+                    },
+                    {
+                        x: w / 20 + dieWidth / 2,
+                        y: h / 20 + dieHeight,
+                        w: dieWidth,
+                        h: dieHeight,
+                    },
+                ] as const,
+                [4]: [
+                    {
+                        x: w / 20,
+                        y: h / 20,
+                        w: dieWidth,
+                        h: dieHeight,
+                    },
+                    {
+                        x: w / 20 + dieWidth,
+                        y: h / 20,
+                        w: dieWidth,
+                        h: dieHeight,
+                    },
+                    {
+                        x: w / 20,
+                        y: h / 20 + dieHeight,
+                        w: dieWidth,
+                        h: dieHeight,
+                    },
+                    {
+                        x: w / 20 + dieWidth,
+                        y: h / 20 + dieHeight,
+                        w: dieWidth,
+                        h: dieHeight,
+                    },
+                ] as const,
             };
 
             const dice: DieValueState[] = [];
@@ -608,25 +681,74 @@ export namespace MyKonva {
                     return null;
             }
 
-            const background = <ReactKonva.Rect x={0} y={0} width={w} height={h} fill='transparent' />;
+            const background = (
+                <ReactKonva.Rect x={0} y={0} width={w} height={h} fill="transparent" />
+            );
 
             if (count === 0) {
-                return <ReactKonva.Group width={w} height={h}>
-                    {background}
-                    {/* ダイスがないと透明、ということにすると行方不明になってしまうので、暫定的に空ダイスを1つ表示させている */}
-                    <KonvaD6 x={positions[1][0].x} y={positions[1][0].y} width={positions[1][0].w} height={positions[1][0].h} value={null} />
-                </ReactKonva.Group>;
+                return (
+                    <ReactKonva.Group width={w} height={h}>
+                        {background}
+                        {/* ダイスがないと透明、ということにすると行方不明になってしまうので、暫定的に空ダイスを1つ表示させている */}
+                        <KonvaD6
+                            x={positions[1][0].x}
+                            y={positions[1][0].y}
+                            width={positions[1][0].w}
+                            height={positions[1][0].h}
+                            value={null}
+                        />
+                    </ReactKonva.Group>
+                );
             }
 
-            const diceOpacity = (isValuePrivate: boolean) => isValuePrivate ? DicePieceValue.privateValueOpacity : 1;
+            const diceOpacity = (isValuePrivate: boolean) =>
+                isValuePrivate ? DicePieceValue.privateValueOpacity : 1;
 
-            return <ReactKonva.Group width={w} height={h}>
-                {background}
-                {dice[0] != null && <KonvaD6 x={positions[count][0].x} y={positions[count][0].y} width={positions[count][0].w} height={positions[count][0].h} value={dice[0].value} opacity={diceOpacity(dice[0].isValuePrivate)} />}
-                {(dice[1] != null && count !== 1) && <KonvaD6 x={positions[count][1].x} y={positions[count][1].y} width={positions[count][1].w} height={positions[count][1].h} value={dice[1].value} opacity={diceOpacity(dice[1].isValuePrivate)}  />}
-                {(dice[2] != null && (count === 3 || count === 4)) && <KonvaD6 x={positions[count][2].x} y={positions[count][2].y} width={positions[count][2].w} height={positions[count][2].h} value={dice[2].value} opacity={diceOpacity(dice[2].isValuePrivate)}   />}
-                {(dice[3] != null && count === 4) && <KonvaD6 x={positions[count][3].x} y={positions[count][3].y} width={positions[count][3].w} height={positions[count][3].h} value={dice[3].value} opacity={diceOpacity(dice[3].isValuePrivate)}  />}
-            </ReactKonva.Group>;
+            return (
+                <ReactKonva.Group width={w} height={h}>
+                    {background}
+                    {dice[0] != null && (
+                        <KonvaD6
+                            x={positions[count][0].x}
+                            y={positions[count][0].y}
+                            width={positions[count][0].w}
+                            height={positions[count][0].h}
+                            value={dice[0].value}
+                            opacity={diceOpacity(dice[0].isValuePrivate)}
+                        />
+                    )}
+                    {dice[1] != null && count !== 1 && (
+                        <KonvaD6
+                            x={positions[count][1].x}
+                            y={positions[count][1].y}
+                            width={positions[count][1].w}
+                            height={positions[count][1].h}
+                            value={dice[1].value}
+                            opacity={diceOpacity(dice[1].isValuePrivate)}
+                        />
+                    )}
+                    {dice[2] != null && (count === 3 || count === 4) && (
+                        <KonvaD6
+                            x={positions[count][2].x}
+                            y={positions[count][2].y}
+                            width={positions[count][2].w}
+                            height={positions[count][2].h}
+                            value={dice[2].value}
+                            opacity={diceOpacity(dice[2].isValuePrivate)}
+                        />
+                    )}
+                    {dice[3] != null && count === 4 && (
+                        <KonvaD6
+                            x={positions[count][3].x}
+                            y={positions[count][3].y}
+                            width={positions[count][3].w}
+                            height={positions[count][3].h}
+                            value={dice[3].value}
+                            opacity={diceOpacity(dice[3].isValuePrivate)}
+                        />
+                    )}
+                </ReactKonva.Group>
+            );
         };
 
         type Props = {
@@ -658,7 +780,8 @@ export namespace MyKonva {
         onDblClick?: (e: KonvaEventObject<MouseEvent>) => void;
         onMouseEnter?: () => void;
         onMouseLeave?: () => void;
-    } & Vector2 & Size
+    } & Vector2 &
+        Size;
 
     export const Piece: React.FC<Props> = (props: Props) => {
         /*
@@ -700,7 +823,7 @@ export namespace MyKonva {
                 newLocation: {
                     x,
                     y,
-                }
+                },
             });
         };
 
@@ -762,10 +885,11 @@ export namespace MyKonva {
                             newSize: {
                                 // set minimal value
                                 w: Math.max(imageMinimalSize, node.width() * scaleX),
-                                h: Math.max(imageMinimalSize, node.height() * scaleY)
+                                h: Math.max(imageMinimalSize, node.height() * scaleY),
                             },
                         });
-                    }}>
+                    }}
+                >
                     <PieceState.Main {...props} />
                 </ReactKonva.Group>
                 {props.isSelected && (
@@ -774,12 +898,15 @@ export namespace MyKonva {
                         rotateEnabled={false}
                         boundBoxFunc={(oldBox, newBox) => {
                             // limit resize
-                            if (newBox.width < imageMinimalSize || newBox.height < imageMinimalSize) {
+                            if (
+                                newBox.width < imageMinimalSize ||
+                                newBox.height < imageMinimalSize
+                            ) {
                                 return oldBox;
                             }
                             return newBox;
-                        }}>
-                    </ReactKonva.Transformer>
+                        }}
+                    ></ReactKonva.Transformer>
                 )}
             </>
         );

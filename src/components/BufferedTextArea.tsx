@@ -8,7 +8,7 @@ import { useBuffer } from '../hooks/useBuffer';
 export type OnChangeParams = {
     previousValue: string;
     currentValue: string;
-}
+};
 
 export type Props = {
     style?: React.CSSProperties;
@@ -19,13 +19,20 @@ export type Props = {
     spellCheck?: boolean;
     bufferDuration: number | 'default' | 'short';
     onChange: (params: OnChangeParams) => void;
-    
+
     // Bufferされていない状態で、TextAreaの変換を即時に伝える。同じ値が連続して送られることがあるかもしれない。
     onChangeImmediate?: (newValue: string) => void;
 };
 
 const BufferedTextArea: React.FC<Props> = (props: Props) => {
-    const { value, bufferDuration: bufferDurationCore, onChange, onChangeImmediate, size, ...inputProps } = props;
+    const {
+        value,
+        bufferDuration: bufferDurationCore,
+        onChange,
+        onChangeImmediate,
+        size,
+        ...inputProps
+    } = props;
 
     if (bufferDurationCore < 0) {
         throw new Error('bufferDurationCore < 0');
@@ -70,7 +77,8 @@ const BufferedTextArea: React.FC<Props> = (props: Props) => {
                 if (onChangeImmediate != null) {
                     onChangeImmediate(e.currentTarget.value);
                 }
-            }} />
+            }}
+        />
     );
 };
 

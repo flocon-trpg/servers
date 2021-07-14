@@ -2,7 +2,14 @@ import React from 'react';
 import { Button, Checkbox, Tooltip } from 'antd';
 import { EyeInvisibleOutlined, EyeOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import ToggleButton from './ToggleButton';
-import { addParameter, deleteParameter, parameterIsNotPrivate, parameterIsNotPrivateAndNotCreatedByMe, parameterIsPrivate, parameterIsPrivateAndNotCreatedByMe } from '../resource/text/main';
+import {
+    addParameter,
+    deleteParameter,
+    parameterIsNotPrivate,
+    parameterIsNotPrivateAndNotCreatedByMe,
+    parameterIsPrivate,
+    parameterIsPrivateAndNotCreatedByMe,
+} from '../resource/text/main';
 import { StrIndex20 } from '@kizahasi/util';
 import { BoolParamState, CharacterUpOperation } from '@kizahasi/flocon-core';
 
@@ -14,7 +21,7 @@ type Props = {
     createdByMe: boolean;
     onOperate: (operation: CharacterUpOperation) => void;
     compact: boolean;
-}
+};
 
 const BooleanParameterInput: React.FC<Props> = ({
     isCharacterPrivate,
@@ -36,11 +43,12 @@ const BooleanParameterInput: React.FC<Props> = ({
                         [parameterKey]: {
                             $version: 1,
                             value: { newValue: e.target.checked },
-                        }
-                    }
+                        },
+                    },
                 };
                 onOperate(operation);
-            }} />
+            }}
+        />
     );
 
     const addOrDeleteButton = ({ disabled }: { disabled: boolean }): JSX.Element | null => {
@@ -51,7 +59,7 @@ const BooleanParameterInput: React.FC<Props> = ({
             return (
                 <Tooltip title={addParameter}>
                     <Button
-                        size='small'
+                        size="small"
                         disabled={disabled}
                         onClick={() => {
                             const operation: CharacterUpOperation = {
@@ -60,19 +68,21 @@ const BooleanParameterInput: React.FC<Props> = ({
                                     [parameterKey]: {
                                         $version: 1,
                                         value: { newValue: false },
-                                    }
-                                }
+                                    },
+                                },
                             };
                             onOperate(operation);
-                        }}>
+                        }}
+                    >
                         <PlusOutlined />
                     </Button>
-                </Tooltip>);
+                </Tooltip>
+            );
         }
         return (
             <Tooltip title={deleteParameter}>
                 <Button
-                    size='small'
+                    size="small"
                     disabled={disabled}
                     onClick={() => {
                         const operation: CharacterUpOperation = {
@@ -81,25 +91,33 @@ const BooleanParameterInput: React.FC<Props> = ({
                                 [parameterKey]: {
                                     $version: 1,
                                     value: { newValue: undefined },
-                                }
-                            }
+                                },
+                            },
                         };
                         onOperate(operation);
-                    }}>
+                    }}
+                >
                     <DeleteOutlined />
                 </Button>
-            </Tooltip>);
+            </Tooltip>
+        );
     };
 
     if (!createdByMe && parameter?.isValuePrivate === true) {
         if (compact) {
-            return (<Tooltip title={parameterIsPrivateAndNotCreatedByMe}><EyeInvisibleOutlined /></Tooltip>);
+            return (
+                <Tooltip title={parameterIsPrivateAndNotCreatedByMe}>
+                    <EyeInvisibleOutlined />
+                </Tooltip>
+            );
         }
         return (
             <>
                 {checkbox({ disabled: true })}
                 {addOrDeleteButton({ disabled: true })}
-                <Tooltip title={parameterIsPrivateAndNotCreatedByMe}><EyeInvisibleOutlined /></Tooltip>
+                <Tooltip title={parameterIsPrivateAndNotCreatedByMe}>
+                    <EyeInvisibleOutlined />
+                </Tooltip>
             </>
         );
     }
@@ -109,10 +127,14 @@ const BooleanParameterInput: React.FC<Props> = ({
             disabled={createdByMe ? false : parameterIsNotPrivateAndNotCreatedByMe}
             hideWhenDisabled={compact}
             showAsTextWhenDisabled={!compact}
-            tooltip={(parameter?.isValuePrivate ?? false) ? parameterIsPrivate({ isCharacterPrivate, isCreate }) : parameterIsNotPrivate({ isCharacterPrivate, isCreate })}
+            tooltip={
+                parameter?.isValuePrivate ?? false
+                    ? parameterIsPrivate({ isCharacterPrivate, isCreate })
+                    : parameterIsNotPrivate({ isCharacterPrivate, isCreate })
+            }
             checkedChildren={<EyeOutlined />}
             unCheckedChildren={<EyeInvisibleOutlined />}
-            size='small'
+            size="small"
             onChange={e => {
                 const operation: CharacterUpOperation = {
                     $version: 1,
@@ -120,28 +142,32 @@ const BooleanParameterInput: React.FC<Props> = ({
                         [parameterKey]: {
                             $version: 1,
                             isValuePrivate: { newValue: !e },
-                        }
-                    }
+                        },
+                    },
                 };
                 onOperate(operation);
-            }} />
+            }}
+        />
     );
     if (parameter?.value == null) {
         if (compact) {
             return null;
         }
-        return (<>
-            {checkbox({ disabled: true })}
-            {addOrDeleteButton({ disabled: false })}
-            {isPrivateButton}
-        </>);
+        return (
+            <>
+                {checkbox({ disabled: true })}
+                {addOrDeleteButton({ disabled: false })}
+                {isPrivateButton}
+            </>
+        );
     }
     return (
-        <div style={({ whiteSpace: 'nowrap' })}>
+        <div style={{ whiteSpace: 'nowrap' }}>
             {checkbox({ disabled: false })}
             {addOrDeleteButton({ disabled: false })}
             {isPrivateButton}
-        </div>);
+        </div>
+    );
 };
 
 export default BooleanParameterInput;

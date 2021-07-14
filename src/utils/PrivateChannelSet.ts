@@ -2,7 +2,7 @@ import { ParticipantState } from '@kizahasi/flocon-core';
 import { VisibleTo } from './visibleTo';
 
 export class PrivateChannelSet {
-    private readonly _source: ReadonlySet<string>
+    private readonly _source: ReadonlySet<string>;
 
     public constructor(userUid: string | ReadonlySet<string> | ReadonlyArray<string>) {
         if (typeof userUid === 'string') {
@@ -21,7 +21,10 @@ export class PrivateChannelSet {
     }
 
     // participantsのkeyはUserUid
-    public toChannelNameBase(participants: ReadonlyMap<string, ParticipantState>, skipMe?: { userUid: string }): string[] {
+    public toChannelNameBase(
+        participants: ReadonlyMap<string, ParticipantState>,
+        skipMe?: { userUid: string }
+    ): string[] {
         const result: string[] = [];
         this._source.forEach(userUid => {
             if (userUid === skipMe?.userUid) {
@@ -52,10 +55,13 @@ export class PrivateChannelSets {
 
     public constructor(source?: string) {
         if (source != null) {
-            source.split(',').filter(x => x !== '').forEach(set => {
-                const newValue = new PrivateChannelSet(set);
-                this.add(newValue);
-            });
+            source
+                .split(',')
+                .filter(x => x !== '')
+                .forEach(set => {
+                    const newValue = new PrivateChannelSet(set);
+                    this.add(newValue);
+                });
         }
     }
 
@@ -79,6 +85,8 @@ export class PrivateChannelSets {
     }
 
     public toString(): string {
-        return [...this.core.keys()].sort().reduce((seed, elem, i) => i === 0 ? elem : `${seed},${elem}`, '');
+        return [...this.core.keys()]
+            .sort()
+            .reduce((seed, elem, i) => (i === 0 ? elem : `${seed},${elem}`), '');
     }
 }

@@ -39,11 +39,17 @@ type Props = {
     topElementContainerHeight?: number;
     topElementContainerStyle?: Omit<React.CSSProperties, 'height' | 'backgroundColor'>;
     zIndex: number;
-}
+};
 
 const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) => {
-    const bottomElementContainerHeight = props.bottomElement == null ? 0 : (props.bottomElementContainerHeight ?? defaultBottomElementContainerHeight);
-    const topElementContainerHeight = props.topElement == null ? 0 : (props.topElementContainerHeight ?? defaultTopElementContainerHeight);
+    const bottomElementContainerHeight =
+        props.bottomElement == null
+            ? 0
+            : props.bottomElementContainerHeight ?? defaultBottomElementContainerHeight;
+    const topElementContainerHeight =
+        props.topElement == null
+            ? 0
+            : props.topElementContainerHeight ?? defaultTopElementContainerHeight;
 
     return (
         <Rnd
@@ -55,24 +61,26 @@ const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) => {
             minWidth={props.minWidth}
             onDragStop={(e, data) => props.onDragStop(data)}
             onResizeStop={(e, dir, elementRef, delta) => props.onResizeStop(dir, delta)}
-            style={({ zIndex: props.zIndex })}
+            style={{ zIndex: props.zIndex }}
             onMouseDown={e => {
-                if((e.buttons & 1) !== 1) {
+                if ((e.buttons & 1) !== 1) {
                     return;
                 }
                 props.onMoveToFront();
-            }}>
+            }}
+        >
             <div
-                style={({
+                style={{
                     borderWidth: `0 ${borderWidth}px ${borderWidth}px ${borderWidth}px`,
                     borderStyle: 'solid',
                     borderColor,
                     backgroundColor,
                     height: '100%', // heightとwidthを設定することで、childrenの（親要素の）大きさがDraggableCardの大きさに連動するようになる
                     width: '100%',
-                })}>
+                }}
+            >
                 <div
-                    style={({
+                    style={{
                         alignItems: 'center',
                         background: headerBackgroundColor,
                         color: headerColor,
@@ -80,43 +88,51 @@ const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) => {
                         fontSize: 14,
                         height: props.headerHeight ?? defaultHeaderHeight,
                         padding: `0 ${horizontalPadding}px`,
-                    })}>
-                    <div style={({ flex: 0, whiteSpace: 'nowrap' })}>{props.header}</div>
-                    <div style={({ flex: 'auto' })} />
-                    <div style={({ flex: 0, cursor: 'pointer' })} onClick={() => props.onClose()}><CloseOutlined style={({ opacity: 0.7 })} /></div>
+                    }}
+                >
+                    <div style={{ flex: 0, whiteSpace: 'nowrap' }}>{props.header}</div>
+                    <div style={{ flex: 'auto' }} />
+                    <div style={{ flex: 0, cursor: 'pointer' }} onClick={() => props.onClose()}>
+                        <CloseOutlined style={{ opacity: 0.7 }} />
+                    </div>
                 </div>
                 <div
                     className="cancel-rnd"
-                    style={({
+                    style={{
                         ...props.topElementContainerStyle,
                         backgroundColor,
                         height: `${topElementContainerHeight}px`,
                         //padding: `6px ${horizontalPadding}px`
-                    })}>
+                    }}
+                >
                     {props.topElement}
                 </div>
                 <div
                     className="cancel-rnd"
-                    style={({
+                    style={{
                         ...props.childrenContainerStyle,
                         backgroundColor,
-                        height: `calc(100% - ${props.headerHeight ?? defaultHeaderHeight}px - ${topElementContainerHeight}px - ${bottomElementContainerHeight}px)`,
+                        height: `calc(100% - ${
+                            props.headerHeight ?? defaultHeaderHeight
+                        }px - ${topElementContainerHeight}px - ${bottomElementContainerHeight}px)`,
                         //padding: `12px ${horizontalPadding}px`,
-                    })}>
+                    }}
+                >
                     {props.children}
                 </div>
                 <div
                     className="cancel-rnd"
-                    style={({
+                    style={{
                         ...props.bottomElementContainerStyle,
                         backgroundColor,
                         height: `${bottomElementContainerHeight}px`,
                         //padding: `6px ${horizontalPadding}px`
-                    })}>
+                    }}
+                >
                     {props.bottomElement}
                 </div>
             </div>
-        </Rnd >
+        </Rnd>
     );
 };
 

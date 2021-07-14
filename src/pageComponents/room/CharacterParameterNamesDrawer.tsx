@@ -15,10 +15,12 @@ import { InputModal } from '../../components/InputModal';
 type VisibleParameterForm = {
     type: 'Bool' | 'Str' | 'Num';
     key: StrIndex20;
-}
+};
 
 const CharacterParameterNamesDrawer: React.FC = () => {
-    const characterParameterNamesDrawerVisibility = useSelector(state => state.roomDrawerAndPopoverModule.characterParameterNamesDrawerVisibility);
+    const characterParameterNamesDrawerVisibility = useSelector(
+        state => state.roomDrawerAndPopoverModule.characterParameterNamesDrawerVisibility
+    );
     const operate = useOperate();
     const dispatch = useDispatch();
     const [visibleParameterForm, setVisibleParameterForm] = React.useState<VisibleParameterForm>();
@@ -29,9 +31,18 @@ const CharacterParameterNamesDrawer: React.FC = () => {
     const numParamNames = useSelector(state => state.roomModule.roomState?.state?.numParamNames);
     const strParamNames = useSelector(state => state.roomModule.roomState?.state?.strParamNames);
 
-    const boolParamNamesMap = React.useMemo(() => boolParamNames == null ? undefined : recordToMap(boolParamNames), [boolParamNames]);
-    const numParamNamesMap = React.useMemo(() => numParamNames == null ? undefined : recordToMap(numParamNames), [numParamNames]);
-    const strParamNamesMap = React.useMemo(() => strParamNames == null ? undefined : recordToMap(strParamNames), [strParamNames]);
+    const boolParamNamesMap = React.useMemo(
+        () => (boolParamNames == null ? undefined : recordToMap(boolParamNames)),
+        [boolParamNames]
+    );
+    const numParamNamesMap = React.useMemo(
+        () => (numParamNames == null ? undefined : recordToMap(numParamNames)),
+        [numParamNames]
+    );
+    const strParamNamesMap = React.useMemo(
+        () => (strParamNames == null ? undefined : recordToMap(strParamNames)),
+        [strParamNames]
+    );
 
     if (boolParamNamesMap == null || numParamNamesMap == null || strParamNamesMap == null) {
         return null;
@@ -68,10 +79,11 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                 key={`numParameter${key}`}
                 style={formItemStyle}
                 label={`数値パラメーター${key}`}
-                name={`numParameter${key}`}>
+                name={`numParameter${key}`}
+            >
                 <Space>
                     <BufferedInput
-                        size='small'
+                        size="small"
                         value={state.name}
                         bufferDuration={200}
                         onChange={e => {
@@ -85,15 +97,16 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                         type: update,
                                         update: {
                                             $version: 1,
-                                            name: { newValue: e.currentValue }
-                                        }
-                                    }
-                                }
+                                            name: { newValue: e.currentValue },
+                                        },
+                                    },
+                                },
                             };
                             operate(operation);
-                        }} />
+                        }}
+                    />
                     <Button
-                        size='small'
+                        size="small"
                         onClick={() => {
                             const operation: UpOperation = {
                                 $version: 1,
@@ -102,12 +115,13 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                         type: replace,
                                         replace: {
                                             newValue: undefined,
-                                        }
-                                    }
-                                }
+                                        },
+                                    },
+                                },
                             };
                             operate(operation);
-                        }} >
+                        }}
+                    >
                         <DeleteOutlined />
                     </Button>
                 </Space>
@@ -125,10 +139,11 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                 key={`boolParameter${key}`}
                 style={formItemStyle}
                 label={`チェックマークパラメーター${key}`}
-                name={`boolParameter${key}`}>
+                name={`boolParameter${key}`}
+            >
                 <Space>
                     <BufferedInput
-                        size='small'
+                        size="small"
                         value={state.name}
                         bufferDuration={200}
                         onChange={e => {
@@ -142,15 +157,16 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                         type: update,
                                         update: {
                                             $version: 1,
-                                            name: { newValue: e.currentValue }
-                                        }
-                                    }
-                                }
+                                            name: { newValue: e.currentValue },
+                                        },
+                                    },
+                                },
                             };
                             operate(operation);
-                        }} />
+                        }}
+                    />
                     <Button
-                        size='small'
+                        size="small"
                         onClick={() => {
                             const operation: UpOperation = {
                                 $version: 1,
@@ -159,12 +175,13 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                         type: replace,
                                         replace: {
                                             newValue: undefined,
-                                        }
-                                    }
-                                }
+                                        },
+                                    },
+                                },
                             };
                             operate(operation);
-                        }} >
+                        }}
+                    >
                         <DeleteOutlined />
                     </Button>
                 </Space>
@@ -182,10 +199,11 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                 key={`strParameter${key}`}
                 style={formItemStyle}
                 label={`文字列パラメーター${key}`}
-                name={`strParameter${key}`}>
+                name={`strParameter${key}`}
+            >
                 <Space>
                     <BufferedInput
-                        size='small'
+                        size="small"
                         value={state.name}
                         bufferDuration={200}
                         onChange={e => {
@@ -199,15 +217,16 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                         type: update,
                                         update: {
                                             $version: 1,
-                                            name: { newValue: e.currentValue }
-                                        }
-                                    }
-                                }
+                                            name: { newValue: e.currentValue },
+                                        },
+                                    },
+                                },
                             };
                             operate(operation);
-                        }} />
+                        }}
+                    />
                     <Button
-                        size='small'
+                        size="small"
                         onClick={() => {
                             const operation: UpOperation = {
                                 $version: 1,
@@ -216,12 +235,13 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                         type: replace,
                                         replace: {
                                             newValue: undefined,
-                                        }
-                                    }
-                                }
+                                        },
+                                    },
+                                },
                             };
                             operate(operation);
-                        }} >
+                        }}
+                    >
                         <DeleteOutlined />
                     </Button>
                 </Space>
@@ -235,43 +255,61 @@ const CharacterParameterNamesDrawer: React.FC = () => {
             width={600}
             visible={characterParameterNamesDrawerVisibility}
             closable
-            onClose={() => dispatch(roomDrawerAndPopoverModule.actions.set({ characterParameterNamesDrawerVisibility: false }))}
-            footer={(
+            onClose={() =>
+                dispatch(
+                    roomDrawerAndPopoverModule.actions.set({
+                        characterParameterNamesDrawerVisibility: false,
+                    })
+                )
+            }
+            footer={
                 <DrawerFooter
-                    close={({
+                    close={{
                         textType: 'close',
-                        onClick: () => dispatch(roomDrawerAndPopoverModule.actions.set({ characterParameterNamesDrawerVisibility: false }))
-                    })} />)}>
+                        onClick: () =>
+                            dispatch(
+                                roomDrawerAndPopoverModule.actions.set({
+                                    characterParameterNamesDrawerVisibility: false,
+                                })
+                            ),
+                    }}
+                />
+            }
+        >
             <Form>
                 <Collapse defaultActiveKey={['num', 'str', 'bool']}>
-                    <Collapse.Panel header='数値パラメーター' key='num'>
-                        {
-                            strIndex20Array.map(createNumParamName)
-                        }
-                        {
-                            strIndex20Array.some(key => numParamNamesMap.has(key)) ? <div style={({ padding: 6 })} /> : null
-                        }
-                        <div style={({ display: 'flex', flexDirection: 'row' })}>
+                    <Collapse.Panel header="数値パラメーター" key="num">
+                        {strIndex20Array.map(createNumParamName)}
+                        {strIndex20Array.some(key => numParamNamesMap.has(key)) ? (
+                            <div style={{ padding: 6 }} />
+                        ) : null}
+                        <div style={{ display: 'flex', flexDirection: 'row' }}>
                             <Select
-                                style={({ minWidth: 150 })}
-                                size='small'
+                                style={{ minWidth: 150 }}
+                                size="small"
                                 value={addNumParamSelector}
                                 onSelect={newValue => {
                                     setAddNumParamSelector(newValue);
                                 }}
                                 onDeselect={() => {
                                     setAddNumParamSelector(undefined);
-                                }}>
+                                }}
+                            >
                                 {strIndex20Array.map(key => {
                                     const hasKey = numParamNamesMap.has(key);
                                     if (hasKey) {
                                         return null;
                                     }
-                                    return <Select.Option key={key} value={key}>{`パラメーター${key}`}</Select.Option>;
+                                    return (
+                                        <Select.Option
+                                            key={key}
+                                            value={key}
+                                        >{`パラメーター${key}`}</Select.Option>
+                                    );
                                 })}
                             </Select>
                             <Button
-                                size='small'
+                                size="small"
                                 disabled={addNumParamSelector == null}
                                 icon={<PlusOutlined />}
                                 onClick={() => {
@@ -286,39 +324,44 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                         type: 'Num',
                                         key: addNumParamSelector,
                                     });
-                                }}>
+                                }}
+                            >
                                 追加
                             </Button>
                         </div>
                     </Collapse.Panel>
-                    <Collapse.Panel header='チェックマークパラメーター' key='bool'>
-                        {
-                            strIndex20Array.map(createBoolParamName)
-                        }
-                        {
-                            strIndex20Array.some(key => boolParamNamesMap.has(key)) ? <div style={({ padding: 6 })} /> : null
-                        }
-                        <div style={({ display: 'flex', flexDirection: 'row' })}>
+                    <Collapse.Panel header="チェックマークパラメーター" key="bool">
+                        {strIndex20Array.map(createBoolParamName)}
+                        {strIndex20Array.some(key => boolParamNamesMap.has(key)) ? (
+                            <div style={{ padding: 6 }} />
+                        ) : null}
+                        <div style={{ display: 'flex', flexDirection: 'row' }}>
                             <Select
-                                style={({ minWidth: 150 })}
-                                size='small'
+                                style={{ minWidth: 150 }}
+                                size="small"
                                 value={addBoolParamSelector}
                                 onSelect={newValue => {
                                     setAddBoolParamSelector(newValue);
                                 }}
                                 onDeselect={() => {
                                     setAddBoolParamSelector(undefined);
-                                }}>
+                                }}
+                            >
                                 {strIndex20Array.map(key => {
                                     const hasKey = boolParamNamesMap.has(key);
                                     if (hasKey) {
                                         return null;
                                     }
-                                    return <Select.Option key={key} value={key}>{`パラメーター${key}`}</Select.Option>;
+                                    return (
+                                        <Select.Option
+                                            key={key}
+                                            value={key}
+                                        >{`パラメーター${key}`}</Select.Option>
+                                    );
                                 })}
                             </Select>
                             <Button
-                                size='small'
+                                size="small"
                                 disabled={addBoolParamSelector == null}
                                 icon={<PlusOutlined />}
                                 onClick={() => {
@@ -333,39 +376,44 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                         type: 'Bool',
                                         key: addBoolParamSelector,
                                     });
-                                }}>
+                                }}
+                            >
                                 追加
                             </Button>
                         </div>
                     </Collapse.Panel>
-                    <Collapse.Panel header='文字列パラメーター' key='str'>
-                        {
-                            strIndex20Array.map(createStrParamName)
-                        }
-                        {
-                            strIndex20Array.some(key => strParamNamesMap.has(key)) ? <div style={({ padding: 6 })} /> : null
-                        }
-                        <div style={({ display: 'flex', flexDirection: 'row' })}>
+                    <Collapse.Panel header="文字列パラメーター" key="str">
+                        {strIndex20Array.map(createStrParamName)}
+                        {strIndex20Array.some(key => strParamNamesMap.has(key)) ? (
+                            <div style={{ padding: 6 }} />
+                        ) : null}
+                        <div style={{ display: 'flex', flexDirection: 'row' }}>
                             <Select
-                                style={({ minWidth: 150 })}
-                                size='small'
+                                style={{ minWidth: 150 }}
+                                size="small"
                                 value={addStrParamSelector}
                                 onSelect={newValue => {
                                     setAddStrParamSelector(newValue);
                                 }}
                                 onDeselect={() => {
                                     setAddStrParamSelector(undefined);
-                                }}>
+                                }}
+                            >
                                 {strIndex20Array.map(key => {
                                     const hasKey = strParamNamesMap.has(key);
                                     if (hasKey) {
                                         return null;
                                     }
-                                    return <Select.Option key={key} value={key}>{`パラメーター${key}`}</Select.Option>;
+                                    return (
+                                        <Select.Option
+                                            key={key}
+                                            value={key}
+                                        >{`パラメーター${key}`}</Select.Option>
+                                    );
                                 })}
                             </Select>
                             <Button
-                                size='small'
+                                size="small"
                                 disabled={addStrParamSelector == null}
                                 icon={<PlusOutlined />}
                                 onClick={() => {
@@ -380,88 +428,92 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                         type: 'Str',
                                         key: addStrParamSelector,
                                     });
-                                }}>
+                                }}
+                            >
                                 追加
                             </Button>
                         </div>
                     </Collapse.Panel>
                 </Collapse>
             </Form>
-            { operate == null ? null : <InputModal
-                title={modalTitle}
-                visible={visibleParameterForm != null}
-                isTextArea={false}
-                onOk={value => {
-                    if (visibleParameterForm == null) {
-                        return;
-                    }
-                    let operation: UpOperation;
-                    switch (visibleParameterForm.type) {
-                        case 'Bool':
-                            operation = {
-                                $version: 1,
-                                boolParamNames: {
-                                    [visibleParameterForm.key]: {
-                                        type: replace,
-                                        replace: {
-                                            newValue: {
-                                                $version: 1,
-                                                name: value
-                                            }
-                                        }
-                                    }
-                                }
-                            };
-                            break;
-                        case 'Num':
-                            operation = {
-                                $version: 1,
-                                numParamNames: {
-                                    [visibleParameterForm.key]: {
-                                        type: replace,
-                                        replace: {
-                                            newValue: {
-                                                $version: 1,
-                                                name: value
-                                            }
-                                        }
-                                    }
-                                }
-                            };
-                            break;
-                        case 'Str':
-                            operation = {
-                                $version: 1,
-                                strParamNames: {
-                                    [visibleParameterForm.key]: {
-                                        type: replace,
-                                        replace: {
-                                            newValue: {
-                                                $version: 1,
-                                                name: value
-                                            }
-                                        }
-                                    }
-                                }
-                            };
-                            break;
-                    }
-                    operate(operation);
-                    switch (visibleParameterForm.type) {
-                        case 'Bool':
-                            setAddBoolParamSelector(undefined);
-                            break;
-                        case 'Num':
-                            setAddNumParamSelector(undefined);
-                            break;
-                        case 'Str':
-                            setAddStrParamSelector(undefined);
-                            break;
-                    }
-                    setVisibleParameterForm(undefined);
-                }}
-                disabled={value => value.trim() === ''}
-                onClose={() => setVisibleParameterForm(undefined)} />}
+            {operate == null ? null : (
+                <InputModal
+                    title={modalTitle}
+                    visible={visibleParameterForm != null}
+                    isTextArea={false}
+                    onOk={value => {
+                        if (visibleParameterForm == null) {
+                            return;
+                        }
+                        let operation: UpOperation;
+                        switch (visibleParameterForm.type) {
+                            case 'Bool':
+                                operation = {
+                                    $version: 1,
+                                    boolParamNames: {
+                                        [visibleParameterForm.key]: {
+                                            type: replace,
+                                            replace: {
+                                                newValue: {
+                                                    $version: 1,
+                                                    name: value,
+                                                },
+                                            },
+                                        },
+                                    },
+                                };
+                                break;
+                            case 'Num':
+                                operation = {
+                                    $version: 1,
+                                    numParamNames: {
+                                        [visibleParameterForm.key]: {
+                                            type: replace,
+                                            replace: {
+                                                newValue: {
+                                                    $version: 1,
+                                                    name: value,
+                                                },
+                                            },
+                                        },
+                                    },
+                                };
+                                break;
+                            case 'Str':
+                                operation = {
+                                    $version: 1,
+                                    strParamNames: {
+                                        [visibleParameterForm.key]: {
+                                            type: replace,
+                                            replace: {
+                                                newValue: {
+                                                    $version: 1,
+                                                    name: value,
+                                                },
+                                            },
+                                        },
+                                    },
+                                };
+                                break;
+                        }
+                        operate(operation);
+                        switch (visibleParameterForm.type) {
+                            case 'Bool':
+                                setAddBoolParamSelector(undefined);
+                                break;
+                            case 'Num':
+                                setAddNumParamSelector(undefined);
+                                break;
+                            case 'Str':
+                                setAddStrParamSelector(undefined);
+                                break;
+                        }
+                        setVisibleParameterForm(undefined);
+                    }}
+                    disabled={value => value.trim() === ''}
+                    onClose={() => setVisibleParameterForm(undefined)}
+                />
+            )}
         </Drawer>
     );
 };

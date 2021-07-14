@@ -10,6 +10,6 @@ export const useCharacter = (characterKey: CompositeKey): CharacterState | undef
         if (characters == null) {
             return undefined;
         }
-        return characters.get({createdBy: characterKey.createdBy, id: characterKey.id});
+        return characters.get({ createdBy: characterKey.createdBy, id: characterKey.id });
     }, [characters, characterKey.createdBy, characterKey.id]);
 };

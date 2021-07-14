@@ -1,5 +1,3 @@
-export type ComponentsState = {
+export type ComponentsState = {};
 
-}
-
-export const defaultComponentsState: ComponentsState = { };
+export const defaultComponentsState: ComponentsState = {};
