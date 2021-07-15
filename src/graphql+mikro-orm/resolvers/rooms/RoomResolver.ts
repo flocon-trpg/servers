@@ -1,5 +1,5 @@
 import { Resolver, Query, Args, Mutation, Ctx, PubSub, Subscription, Root, Arg, PubSubEngine } from 'type-graphql';
-import { ResolverContext } from '../../utils/Contexts';
+import { DecodedIdToken, ResolverContext } from '../../utils/Contexts';
 import { GetRoomFailureType } from '../../../enums/GetRoomFailureType';
 import { GetRoomsListFailureType } from '../../../enums/GetRoomsListFailureType';
 import { CreateRoomFailureType } from '../../../enums/CreateRoomFailureType';
@@ -32,7 +32,7 @@ import { client, server } from '../../Types';
 import { EM } from '../../../utils/types';
 import { RoomPrvMsg, RoomPubCh, RoomPubMsg, RoomSe, NumberPieceValueLog as NumberPieceValueLog$MikroORM, DicePieceValueLog as DicePieceValueLog$MikroORM } from '../../entities/roomMessage/mikro-orm';
 import { ChangeParticipantNameArgs, CreateRoomInput, DeleteRoomArgs, EditMessageArgs, GetLogArgs, GetMessagesArgs, GetRoomArgs, GetRoomConnectionFailureResultType, GetRoomConnectionsResult, GetRoomConnectionSuccessResultType, JoinRoomArgs, MessageIdArgs, OperateArgs, PromoteArgs, RoomEvent, UpdateWritingMessageStateArgs, WritePrivateMessageArgs, WritePublicMessageArgs, WriteRoomSoundEffectArgs } from './object+args+input';
-import { CharacterValueForMessage, DeleteMessageResult, EditMessageResult, GetRoomLogFailureResultType, GetRoomLogResult, GetRoomMessagesFailureResultType, GetRoomMessagesResult, MakeMessageNotSecretResult, PieceValueLog, PieceValueLogType, RoomMessageEvent, RoomMessagesType, RoomPrivateMessage, RoomPrivateMessageType, RoomPrivateMessageUpdate, RoomPrivateMessageUpdateType, RoomPublicChannel, RoomPublicChannelType, RoomPublicMessage, RoomPublicMessageType, RoomPublicMessageUpdate, RoomPublicMessageUpdateType, RoomSoundEffect, RoomSoundEffectType, UpdatedText, WritePrivateRoomMessageFailureResultType, WritePrivateRoomMessageResult, WritePublicRoomMessageFailureResultType, WritePublicRoomMessageResult, WriteRoomSoundEffectFailureResultType, WriteRoomSoundEffectResult } from '../../entities/roomMessage/graphql';
+import { CharacterValueForMessage, DeleteMessageResult, EditMessageResult, GetRoomLogFailureResultType, GetRoomLogResult, GetRoomMessagesFailureResultType, GetRoomMessagesResult, MakeMessageNotSecretResult, PieceValueLog, PieceValueLogType, RoomMessageEvent, RoomMessages, RoomMessagesType, RoomPrivateMessage, RoomPrivateMessageType, RoomPrivateMessageUpdate, RoomPrivateMessageUpdateType, RoomPublicChannel, RoomPublicChannelType, RoomPublicMessage, RoomPublicMessageType, RoomPublicMessageUpdate, RoomPublicMessageUpdateType, RoomSoundEffect, RoomSoundEffectType, UpdatedText, WritePrivateRoomMessageFailureResultType, WritePrivateRoomMessageResult, WritePublicRoomMessageFailureResultType, WritePublicRoomMessageResult, WriteRoomSoundEffectFailureResultType, WriteRoomSoundEffectResult } from '../../entities/roomMessage/graphql';
 import { WritePublicRoomMessageFailureType } from '../../../enums/WritePublicRoomMessageFailureType';
 import { analyze, Context } from '../../../messageAnalyzer/main';
 import Color from 'color';
@@ -747,6 +747,74 @@ export class RoomResolver {
         return result.value;
     }
 
+    private async getRoomMessagesFromDb(room: Room$MikroORM.Room, decodedIdToken: DecodedIdToken, mode: 'log' | 'default'): Promise<RoomMessages> {
+        const publicMessages: RoomPublicMessage[] = [];
+        const publicChannels: RoomPublicChannel[] = [];
+        for (const ch of await room.roomChatChs.loadItems()) {
+            publicChannels.push({
+                __tstype: RoomPublicChannelType,
+                key: ch.key,
+                name: ch.name,
+            });
+            for (const msg of await ch.roomPubMsgs.loadItems()) {
+                const createdBy = msg.createdBy?.userUid;
+                if (mode === 'default' && msg.isSecret && (createdBy !== decodedIdToken.uid)) {
+                    continue;
+                }
+                publicMessages.push(createRoomPublicMessage({ msg, channelKey: ch.key }));
+            }
+        }
+
+        const privateMessages: RoomPrivateMessage[] = [];
+        for (const msg of await room.roomPrvMsgs.loadItems()) {
+            const createdBy = msg.createdBy?.userUid;
+            if (mode === 'default' && msg.isSecret && (createdBy !== decodedIdToken.uid)) {
+                continue;
+            }
+            const graphQLValue = await createRoomPrivateMessage({
+                msg,
+                myUserUid: decodedIdToken.uid,
+            });
+            if (graphQLValue == null) {
+                continue;
+            }
+            privateMessages.push(graphQLValue);
+        }
+
+        const pieceValueLogs: PieceValueLog[] = [];
+        for (const msg of await room.dicePieceValueLogs.loadItems()) {
+            pieceValueLogs.push(DicePieceValueLogNameSpace.MikroORM.ToGraphQL.state(msg));
+        }
+        for (const msg of await room.numberPieceValueLogs.loadItems()) {
+            pieceValueLogs.push(NumberPieceValueLogNameSpace.MikroORM.ToGraphQL.state(msg));
+        }
+
+        const soundEffects: RoomSoundEffect[] = [];
+        for (const se of await room.roomSes.loadItems()) {
+            const createdBy = se.createdBy?.userUid;
+            const graphQLValue: RoomSoundEffect = {
+                __tstype: RoomSoundEffectType,
+                messageId: se.id,
+                createdBy,
+                createdAt: se.createdAt.getTime(),
+                file: {
+                    path: se.filePath,
+                    sourceType: se.fileSourceType,
+                },
+                volume: se.volume,
+            };
+            soundEffects.push(graphQLValue);
+        };
+        return {
+            __tstype: RoomMessagesType,
+            publicMessages,
+            privateMessages,
+            pieceValueLogs,
+            publicChannels,
+            soundEffects,
+        };
+    }
+
     public async getMessagesCore({ args, context }: { args: GetMessagesArgs; context: ResolverContext }): Promise<typeof GetRoomMessagesResult> {
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
@@ -778,72 +846,8 @@ export class RoomResolver {
                 });
             }
 
-            const publicMessages: RoomPublicMessage[] = [];
-            const publicChannels: RoomPublicChannel[] = [];
-            for (const ch of await room.roomChatChs.loadItems()) {
-                publicChannels.push({
-                    __tstype: RoomPublicChannelType,
-                    key: ch.key,
-                    name: ch.name,
-                });
-                for (const msg of await ch.roomPubMsgs.loadItems()) {
-                    const createdBy = msg.createdBy?.userUid;
-                    if (msg.isSecret && (createdBy !== decodedIdToken.uid)) {
-                        continue;
-                    }
-                    publicMessages.push(createRoomPublicMessage({ msg, channelKey: ch.key }));
-                }
-            }
-
-            const privateMessages: RoomPrivateMessage[] = [];
-            for (const msg of await room.roomPrvMsgs.loadItems()) {
-                const createdBy = msg.createdBy?.userUid;
-                if (msg.isSecret && (createdBy !== decodedIdToken.uid)) {
-                    continue;
-                }
-                const graphQLValue = await createRoomPrivateMessage({
-                    msg,
-                    myUserUid: decodedIdToken.uid,
-                });
-                if (graphQLValue == null) {
-                    continue;
-                }
-                privateMessages.push(graphQLValue);
-            }
-
-            const pieceValueLogs: PieceValueLog[] = [];
-            for (const msg of await room.dicePieceValueLogs.loadItems()) {
-                pieceValueLogs.push(DicePieceValueLogNameSpace.MikroORM.ToGraphQL.state(msg));
-            }
-            for (const msg of await room.numberPieceValueLogs.loadItems()) {
-                pieceValueLogs.push(NumberPieceValueLogNameSpace.MikroORM.ToGraphQL.state(msg));
-            }
-
-            const soundEffects: RoomSoundEffect[] = [];
-            for (const se of await room.roomSes.loadItems()) {
-                const createdBy = se.createdBy?.userUid;
-                const graphQLValue: RoomSoundEffect = {
-                    __tstype: RoomSoundEffectType,
-                    messageId: se.id,
-                    createdBy,
-                    createdAt: se.createdAt.getTime(),
-                    file: {
-                        path: se.filePath,
-                        sourceType: se.fileSourceType,
-                    },
-                    volume: se.volume,
-                };
-                soundEffects.push(graphQLValue);
-            }
-
-            return Result.ok({
-                __tstype: RoomMessagesType,
-                publicMessages,
-                privateMessages,
-                pieceValueLogs,
-                publicChannels,
-                soundEffects,
-            });
+            const messages = await this.getRoomMessagesFromDb(room, decodedIdToken, 'default');
+            return Result.ok(messages);
         };
         const result = await context.promiseQueue.next(queue);
         if (result.type === queueLimitReached) {
@@ -861,6 +865,7 @@ export class RoomResolver {
     }
 
     public async getLogCore({ args, context }: { args: GetLogArgs; context: ResolverContext }): Promise<{ result: typeof GetRoomLogResult; payload?: MessageUpdatePayload }> {
+        console.time('logCore');
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
             return {
@@ -910,72 +915,16 @@ export class RoomResolver {
                 });
             }
 
-            const publicMessages: RoomPublicMessage[] = [];
-            const publicChannels: RoomPublicChannel[] = [];
-            for (const ch of await room.roomChatChs.loadItems()) {
-                publicChannels.push({
-                    __tstype: RoomPublicChannelType,
-                    key: ch.key,
-                    name: ch.name,
-                });
-                for (const msg of await ch.roomPubMsgs.loadItems()) {
-                    publicMessages.push(createRoomPublicMessage({ msg, channelKey: ch.key }));
-                }
-            }
+            const messages = await this.getRoomMessagesFromDb(room, decodedIdToken, 'log');
 
-            const privateMessages: RoomPrivateMessage[] = [];
-            for (const msg of await room.roomPrvMsgs.loadItems()) {
-                const createdBy = msg.createdBy?.userUid;
-                if (msg.isSecret && (createdBy !== decodedIdToken.uid)) {
-                    continue;
-                }
-                const graphQLValue = await createRoomPrivateMessage({
-                    msg,
-                    myUserUid: decodedIdToken.uid,
-                });
-                if (graphQLValue == null) {
-                    continue;
-                }
-                privateMessages.push(graphQLValue);
-            }
-
-            const pieceValueLogs: PieceValueLog[] = [];
-            for (const msg of await room.dicePieceValueLogs.loadItems()) {
-                pieceValueLogs.push(DicePieceValueLogNameSpace.MikroORM.ToGraphQL.state(msg));
-            }
-            for (const msg of await room.numberPieceValueLogs.loadItems()) {
-                pieceValueLogs.push(NumberPieceValueLogNameSpace.MikroORM.ToGraphQL.state(msg));
-            }
-
-            const soundEffects: RoomSoundEffect[] = [];
-            for (const se of await room.roomSes.loadItems()) {
-                const createdBy = se.createdBy?.userUid;
-                const graphQLValue: RoomSoundEffect = {
-                    __tstype: RoomSoundEffectType,
-                    messageId: se.id,
-                    createdBy,
-                    createdAt: se.createdAt.getTime(),
-                    file: {
-                        path: se.filePath,
-                        sourceType: se.fileSourceType,
-                    },
-                    volume: se.volume,
-                };
-                soundEffects.push(graphQLValue);
-            }
-
+            // em.clear() しないと下にあるem.flush()で非常に重くなり、ログサイズが大きいときに大きな問題となる。
+            // おそらく大量のエンティティ取得でem内部に大量のエンティティが保持され、flushされるときにこれら全てに変更がないかチェックされるため、異常な重さになる。そのため、clear()することで高速化できていると思われる。
+            em.clear();
             const systemMessageEntity = await writeSystemMessage({ em, text: `${me.name}(${decodedIdToken.uid}) が全てのログを出力しました。`, room: room });
             await em.flush();
 
             return Result.ok({
-                result: {
-                    __tstype: RoomMessagesType,
-                    publicMessages,
-                    privateMessages,
-                    pieceValueLogs,
-                    publicChannels,
-                    soundEffects,
-                },
+                result: messages,
                 payload: {
                     type: 'messageUpdatePayload',
                     roomId: room.id,

@@ -53,6 +53,15 @@
     "engines": {
         "node": "14.x"
     },
+    "prettier": {
+        "printWidth": 100,
+        "semi": true,
+        "singleQuote": true,
+        "trailingComma": "es5",
+        "tabWidth": 4,
+        "endOfLine": "crlf",
+        "arrowParens": "avoid"
+    },
     "scripts": {
         "dev": "node dist/index.js",
         "build": "tsc",
