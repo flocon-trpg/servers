@@ -159,12 +159,12 @@ export {
 } from './internal/ot/room/character/dicePieceValue/log-v1';
 
 export {
-    State as ImagePieceState,
-    UpOperation as ImagePieceUpOperation,
-    DownOperation as ImagePieceDownOperation,
-    apply as applyImagePiece,
-    diff as imagePieceDiff,
-    toUpOperation as toImagePieceUpOperation,
+    State as ImagePieceValueState,
+    UpOperation as ImagePieceValueUpOperation,
+    DownOperation as ImagePieceValueDownOperation,
+    apply as applyImagePieceValue,
+    diff as imagePieceValueDiff,
+    toUpOperation as toImagePieceValueUpOperation,
 } from './internal/ot/room/participant/imagePieceValue/v1';
 
 export {
