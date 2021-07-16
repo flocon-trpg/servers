@@ -480,10 +480,8 @@ export const serverTransform =
             second: clientOperation.imagePieces,
             prevState: prevState.imagePieces ?? {},
             nextState: currentState.imagePieces ?? {},
-            innerTransform: ({ first, second, prevState, nextState, key }) =>
-                ImagePiece.serverTransform(
-                    RequestedBy.createdByMe({ requestedBy, userUid: key.first })
-                )({
+            innerTransform: ({ first, second, prevState, nextState }) =>
+                ImagePiece.serverTransform({
                     prevState,
                     currentState: nextState,
                     serverOperation: first,
