@@ -14,7 +14,7 @@ import { useSelector } from '../../store';
 import BufferedInput from '../../components/BufferedInput';
 import { useBoards } from '../../hooks/state/useBoards';
 import { useMe } from '../../hooks/useMe';
-import { boardDiff, BoardState, UpOperation } from '@kizahasi/flocon-core';
+import { boardDiff, BoardState, UpOperation, toBoardUpOperation } from '@kizahasi/flocon-core';
 import { useDispatch } from 'react-redux';
 import {
     create,
@@ -40,6 +40,7 @@ const defaultBoard: BoardState = {
     cellOffsetY: 0,
     backgroundImage: null,
     backgroundImageZoom: 1,
+    imagePieces: {},
 };
 
 const gutter: [Gutter, Gutter] = [16, 16];
@@ -78,7 +79,7 @@ const BoardDrawer: React.FC = () => {
                             [drawerType.stateKey.createdBy]: {
                                 [drawerType.stateKey.id]: {
                                     type: update,
-                                    update: diffOperation,
+                                    update: toBoardUpOperation(diffOperation),
                                 },
                             },
                         },
@@ -121,7 +122,7 @@ const BoardDrawer: React.FC = () => {
                         [drawerType.stateKey.createdBy]: {
                             [drawerType.stateKey.id]: {
                                 type: update,
-                                update: diffOperation,
+                                update: toBoardUpOperation(diffOperation),
                             },
                         },
                     },
