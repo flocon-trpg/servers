@@ -228,7 +228,7 @@ const boardsToClientState =
                 }
                 return false;
             },
-            toClientState: ({ state }) => Board.toClientState(requestedBy)(state),
+            toClientState: ({ state }) => Board.toClientState(state),
         });
     };
 
@@ -275,7 +275,12 @@ export const toClientState =
             participants: RecordOperation.toClientState({
                 serverState: source.participants,
                 isPrivate: () => false,
-                toClientState: ({ state }) => Participant.toClientState(state),
+                toClientState: ({ state, key }) =>
+                    Participant.toClientState(
+                        requestedBy,
+                        key,
+                        source.activeBoardKey ?? null
+                    )(state),
             }),
             strParamNames: RecordOperation.toClientState({
                 serverState: source.strParamNames,

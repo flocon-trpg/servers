@@ -1,8 +1,6 @@
 import * as t from 'io-ts';
-import * as ImagePiece from './imagePiece/v1';
 import { filePath } from '../../filePath/v1';
 import * as ReplaceOperation from '../../util/replaceOperation';
-import * as DualKeyRecordOperation from '../../util/dualKeyRecordOperation';
 import {
     Apply,
     ClientTransform,
@@ -13,15 +11,9 @@ import {
     ServerTransform,
 } from '../../util/type';
 import { createOperation } from '../../util/createOperation';
-import { isIdRecord, record } from '../../util/record';
+import { isIdRecord } from '../../util/record';
 import { Result } from '@kizahasi/result';
-import { maybe, chooseDualKeyRecord } from '@kizahasi/util';
-import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
-import {
-    mapRecordOperationElement,
-    recordDownOperationElementFactory,
-    recordUpOperationElementFactory,
-} from '../../util/recordOperationElement';
+import { maybe } from '@kizahasi/util';
 
 const stringDownOperation = t.type({ oldValue: t.string });
 const stringUpOperation = t.type({ newValue: t.string });
@@ -40,10 +32,6 @@ export const state = t.type({
     cellRowCount: t.number,
     cellWidth: t.number,
     name: t.string,
-
-    // NumberPieceやDicePieceとは異なり、keyは (作成者, ランダムなID)。
-    // TODO: 互換性のため、maybeにしている。互換性を壊していい変更をする場合、このmaybeを外す。
-    imagePieces: maybe(record(t.string, record(t.string, ImagePiece.state))),
 });
 
 export type State = t.TypeOf<typeof state>;
@@ -58,14 +46,6 @@ export const downOperation = createOperation(1, {
     cellRowCount: numberDownOperation,
     cellWidth: numberDownOperation,
     name: stringDownOperation,
-
-    imagePieces: record(
-        t.string,
-        record(
-            t.string,
-            recordDownOperationElementFactory(ImagePiece.state, ImagePiece.downOperation)
-        )
-    ),
 });
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
@@ -80,11 +60,6 @@ export const upOperation = createOperation(1, {
     cellRowCount: numberUpOperation,
     cellWidth: numberUpOperation,
     name: stringUpOperation,
-
-    imagePieces: record(
-        t.string,
-        record(t.string, recordUpOperationElementFactory(ImagePiece.state, ImagePiece.upOperation))
-    ),
 });
 
 export type UpOperation = t.TypeOf<typeof upOperation>;
@@ -103,57 +78,18 @@ export type TwoWayOperation = {
     cellRowCount?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     cellWidth?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
-
-    imagePieces?: DualKeyRecordOperation.DualKeyRecordTwoWayOperation<
-        ImagePiece.State,
-        ImagePiece.TwoWayOperation
-    >;
 };
 
-export const toClientState =
-    (requestedBy: RequestedBy) =>
-    (source: State): State => {
-        return {
-            ...source,
-            imagePieces: DualKeyRecordOperation.toClientState<ImagePiece.State, ImagePiece.State>({
-                serverState: source.imagePieces ?? {},
-                isPrivate: (state, key) =>
-                    RequestedBy.createdByMe({ requestedBy, userUid: key.first }) && state.isPrivate,
-                toClientState: ({ state }) => ImagePiece.toClientState(state),
-            }),
-        };
-    };
+export const toClientState = (source: State): State => {
+    return source;
+};
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
-    return {
-        ...source,
-        imagePieces:
-            source.imagePieces == null
-                ? undefined
-                : chooseDualKeyRecord(source.imagePieces, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: ImagePiece.toDownOperation,
-                      })
-                  ),
-    };
+    return source;
 };
 
 export const toUpOperation = (source: TwoWayOperation): UpOperation => {
-    return {
-        ...source,
-        imagePieces:
-            source.imagePieces == null
-                ? undefined
-                : chooseDualKeyRecord(source.imagePieces, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: ImagePiece.toUpOperation,
-                      })
-                  ),
-    };
+    return source;
 };
 
 export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
@@ -185,21 +121,6 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     if (operation.name != null) {
         result.name = operation.name.newValue;
     }
-    const imagePieces = DualKeyRecordOperation.apply<
-        ImagePiece.State,
-        ImagePiece.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        prevState: state.imagePieces ?? {},
-        operation: operation.imagePieces,
-        innerApply: ({ prevState, operation }) => {
-            return ImagePiece.apply({ state: prevState, operation });
-        },
-    });
-    if (imagePieces.isError) {
-        return imagePieces;
-    }
-    result.imagePieces = imagePieces.value;
 
     return Result.ok(result);
 };
@@ -236,44 +157,13 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     if (operation.name !== undefined) {
         result.name = operation.name.oldValue;
     }
-    const imagePieces = DualKeyRecordOperation.applyBack<
-        ImagePiece.State,
-        ImagePiece.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        nextState: state.imagePieces ?? {},
-        operation: operation.imagePieces,
-        innerApplyBack: ({ state, operation }) => {
-            return ImagePiece.applyBack({ state, operation });
-        },
-    });
-    if (imagePieces.isError) {
-        return imagePieces;
-    }
-    result.imagePieces = imagePieces.value;
 
     return Result.ok(result);
 };
 
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
-    const imagePieces = DualKeyRecordOperation.composeDownOperation<
-        ImagePiece.State,
-        ImagePiece.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        first: first.imagePieces,
-        second: second.imagePieces,
-        innerApplyBack: params => ImagePiece.applyBack(params),
-        innerCompose: params => ImagePiece.composeDownOperation(params),
-    });
-    if (imagePieces.isError) {
-        return imagePieces;
-    }
-
     const valueProps: DownOperation = {
         $version: 1,
-
-        imagePieces: imagePieces.value,
 
         backgroundImage: ReplaceOperation.composeDownOperation(
             first.backgroundImage,
@@ -308,28 +198,11 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         return Result.ok({ prevState: nextState, twoWayOperation: undefined });
     }
 
-    const imagePieces = DualKeyRecordOperation.restore<
-        ImagePiece.State,
-        ImagePiece.DownOperation,
-        ImagePiece.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        nextState: nextState.imagePieces ?? {},
-        downOperation: downOperation.imagePieces,
-        innerDiff: params => ImagePiece.diff(params),
-        innerRestore: params => ImagePiece.restore(params),
-    });
-    if (imagePieces.isError) {
-        return imagePieces;
-    }
-
     const prevState: State = {
         ...nextState,
-        imagePieces: imagePieces.value.prevState,
     };
     const twoWayOperation: TwoWayOperation = {
         $version: 1,
-        imagePieces: imagePieces.value.twoWayOperation,
     };
 
     if (downOperation.backgroundImage !== undefined) {
@@ -400,12 +273,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const imagePieces = DualKeyRecordOperation.diff<ImagePiece.State, ImagePiece.TwoWayOperation>({
-        prevState: prevState.imagePieces ?? {},
-        nextState: nextState.imagePieces ?? {},
-        innerDiff: params => ImagePiece.diff(params),
-    });
-    const resultType: TwoWayOperation = { $version: 1, imagePieces };
+    const resultType: TwoWayOperation = { $version: 1 };
     if (prevState.backgroundImage !== nextState.backgroundImage) {
         resultType.backgroundImage = {
             oldValue: prevState.backgroundImage,
@@ -469,39 +337,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
 export const serverTransform =
     (requestedBy: RequestedBy): ServerTransform<State, TwoWayOperation, UpOperation> =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
-        const imagePieces = DualKeyRecordOperation.serverTransform<
-            ImagePiece.State,
-            ImagePiece.State,
-            ImagePiece.TwoWayOperation,
-            ImagePiece.UpOperation,
-            string | ApplyError<PositiveInt> | ComposeAndTransformError
-        >({
-            first: serverOperation?.imagePieces,
-            second: clientOperation.imagePieces,
-            prevState: prevState.imagePieces ?? {},
-            nextState: currentState.imagePieces ?? {},
-            innerTransform: ({ first, second, prevState, nextState }) =>
-                ImagePiece.serverTransform({
-                    prevState,
-                    currentState: nextState,
-                    serverOperation: first,
-                    clientOperation: second,
-                }),
-            toServerState: state => state,
-            cancellationPolicy: {
-                cancelUpdate: ({ key, nextState }) =>
-                    !RequestedBy.createdByMe({ requestedBy, userUid: key.first }) &&
-                    nextState.isPrivate,
-                cancelRemove: ({ key, nextState }) =>
-                    !RequestedBy.createdByMe({ requestedBy, userUid: key.first }) &&
-                    nextState.isPrivate,
-            },
-        });
-
-        if (imagePieces.isError) {
-            return imagePieces;
-        }
-        const twoWayOperation: TwoWayOperation = { $version: 1, imagePieces: imagePieces.value };
+        const twoWayOperation: TwoWayOperation = { $version: 1 };
 
         twoWayOperation.backgroundImage = ReplaceOperation.serverTransform({
             first: serverOperation?.backgroundImage,
@@ -557,26 +393,6 @@ export const serverTransform =
     };
 
 export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
-    const imagePieces = DualKeyRecordOperation.clientTransform<
-        ImagePiece.State,
-        ImagePiece.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        first: first.imagePieces,
-        second: second.imagePieces,
-        innerTransform: params => ImagePiece.clientTransform(params),
-        innerDiff: params => {
-            const diff = ImagePiece.diff(params);
-            if (diff == null) {
-                return diff;
-            }
-            return ImagePiece.toUpOperation(diff);
-        },
-    });
-    if (imagePieces.isError) {
-        return imagePieces;
-    }
-
     const backgroundImage = ReplaceOperation.clientTransform({
         first: first.backgroundImage,
         second: second.backgroundImage,
@@ -624,7 +440,6 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         cellOffsetY: cellOffsetY.firstPrime,
         cellRowCount: cellRowCount.firstPrime,
         cellWidth: cellWidth.firstPrime,
-        imagePieces: imagePieces.value.firstPrime,
         name: name.firstPrime,
     };
 
@@ -638,7 +453,6 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         cellOffsetY: cellOffsetY.secondPrime,
         cellRowCount: cellRowCount.secondPrime,
         cellWidth: cellWidth.secondPrime,
-        imagePieces: imagePieces.value.secondPrime,
         name: name.secondPrime,
     };
 

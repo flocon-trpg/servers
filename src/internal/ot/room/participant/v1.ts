@@ -11,9 +11,17 @@ import {
 } from '../../util/type';
 import * as ReplaceOperation from '../../util/replaceOperation';
 import { createOperation } from '../../util/createOperation';
-import { isIdRecord } from '../../util/record';
+import { isIdRecord, record } from '../../util/record';
 import { Result } from '@kizahasi/result';
-import { maybe, Maybe } from '@kizahasi/util';
+import { chooseRecord, CompositeKey, maybe, Maybe } from '@kizahasi/util';
+import * as ImagePieceValue from './imagePieceValue/v1';
+import {
+    mapRecordOperationElement,
+    recordDownOperationElementFactory,
+    recordUpOperationElementFactory,
+} from '../../util/recordOperationElement';
+import * as RecordOperation from '../../util/recordOperation';
+import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
 
 export const Player = 'Player';
 export const Spectator = 'Spectator';
@@ -27,6 +35,9 @@ export const state = t.type({
 
     name: t.string,
     role: maybe(participantRole),
+
+    // TODO: 互換性のため、maybeを付けている。互換性を壊しても良くなったときはmaybeを外す。
+    imagePieceValues: maybe(record(t.string, ImagePieceValue.state)),
 });
 
 export type State = t.TypeOf<typeof state>;
@@ -34,6 +45,10 @@ export type State = t.TypeOf<typeof state>;
 export const downOperation = createOperation(1, {
     name: t.type({ oldValue: t.string }),
     role: t.type({ oldValue: maybe(participantRole) }),
+    imagePieceValues: record(
+        t.string,
+        recordDownOperationElementFactory(ImagePieceValue.state, ImagePieceValue.downOperation)
+    ),
 });
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
@@ -41,6 +56,10 @@ export type DownOperation = t.TypeOf<typeof downOperation>;
 export const upOperation = createOperation(1, {
     name: t.type({ newValue: t.string }),
     role: t.type({ newValue: maybe(participantRole) }),
+    imagePieceValues: record(
+        t.string,
+        recordUpOperationElementFactory(ImagePieceValue.state, ImagePieceValue.upOperation)
+    ),
 });
 
 export type UpOperation = t.TypeOf<typeof upOperation>;
@@ -50,18 +69,60 @@ export type TwoWayOperation = {
 
     name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
     role?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<ParticipantRole>>;
+    imagePieceValues?: RecordOperation.RecordTwoWayOperation<
+        ImagePieceValue.State,
+        ImagePieceValue.TwoWayOperation
+    >;
 };
 
-export const toClientState = (source: State): State => {
-    return source;
-};
+export const toClientState =
+    (requestedBy: RequestedBy, participantKey: string, activeBoardKey: CompositeKey | null) =>
+    (source: State): State => {
+        const createdByMe = RequestedBy.createdByMe({ requestedBy, userUid: participantKey });
+        return {
+            ...source,
+            imagePieceValues: RecordOperation.toClientState<
+                ImagePieceValue.State,
+                ImagePieceValue.State
+            >({
+                serverState: source.imagePieceValues ?? {},
+                isPrivate: state => state.isPrivate && !createdByMe,
+                toClientState: ({ state }) =>
+                    ImagePieceValue.toClientState(requestedBy, activeBoardKey)(state),
+            }),
+        };
+    };
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
-    return source;
+    return {
+        ...source,
+        imagePieceValues:
+            source.imagePieceValues == null
+                ? undefined
+                : chooseRecord(source.imagePieceValues, operation =>
+                      mapRecordOperationElement({
+                          source: operation,
+                          mapReplace: x => x,
+                          mapOperation: ImagePieceValue.toDownOperation,
+                      })
+                  ),
+    };
 };
 
 export const toUpOperation = (source: TwoWayOperation): UpOperation => {
-    return source;
+    return {
+        ...source,
+        imagePieceValues:
+            source.imagePieceValues == null
+                ? undefined
+                : chooseRecord(source.imagePieceValues, operation =>
+                      mapRecordOperationElement({
+                          source: operation,
+                          mapReplace: x => x,
+                          mapOperation: ImagePieceValue.toUpOperation,
+                      })
+                  ),
+    };
 };
 
 export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
@@ -72,6 +133,26 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     if (operation.role != null) {
         result.role = operation.role.newValue;
     }
+
+    const imagePieceValues = RecordOperation.apply<
+        ImagePieceValue.State,
+        ImagePieceValue.UpOperation | ImagePieceValue.TwoWayOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        prevState: state.imagePieceValues ?? {},
+        operation: operation.imagePieceValues ?? {},
+        innerApply: ({ prevState, operation: upOperation }) => {
+            return ImagePieceValue.apply({
+                state: prevState,
+                operation: upOperation,
+            });
+        },
+    });
+    if (imagePieceValues.isError) {
+        return imagePieceValues;
+    }
+    result.imagePieceValues = imagePieceValues.value;
+
     return Result.ok(result);
 };
 
@@ -84,10 +165,42 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
         result.role = operation.role.oldValue;
     }
 
+    const imagePieceValues = RecordOperation.applyBack<
+        ImagePieceValue.State,
+        ImagePieceValue.DownOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        nextState: state.imagePieceValues ?? {},
+        operation: operation.imagePieceValues ?? {},
+        innerApplyBack: ({ state, operation }) => {
+            return ImagePieceValue.applyBack({
+                state,
+                operation,
+            });
+        },
+    });
+    if (imagePieceValues.isError) {
+        return imagePieceValues;
+    }
+    result.imagePieceValues = imagePieceValues.value;
+
     return Result.ok(result);
 };
 
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
+    const imagePieceValues = RecordOperation.composeDownOperation<
+        ImagePieceValue.State,
+        ImagePieceValue.DownOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        first: first.imagePieceValues,
+        second: second.imagePieceValues,
+        innerApplyBack: params => ImagePieceValue.applyBack(params),
+        innerCompose: params => ImagePieceValue.composeDownOperation(params),
+    });
+    if (imagePieceValues.isError) {
+        return imagePieceValues;
+    }
     const valueProps: DownOperation = {
         $version: 1,
         name: ReplaceOperation.composeDownOperation(
@@ -98,6 +211,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
             first.role ?? undefined,
             second.role ?? undefined
         ),
+        imagePieceValues: imagePieceValues.value,
     };
     return Result.ok(valueProps);
 };
@@ -110,11 +224,28 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         return Result.ok({ prevState: nextState, twoWayOperation: undefined });
     }
 
+    const imagePieceValues = RecordOperation.restore<
+        ImagePieceValue.State,
+        ImagePieceValue.DownOperation,
+        ImagePieceValue.TwoWayOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        nextState: nextState.imagePieceValues ?? {},
+        downOperation: downOperation.imagePieceValues,
+        innerDiff: params => ImagePieceValue.diff(params),
+        innerRestore: params => ImagePieceValue.restore(params),
+    });
+    if (imagePieceValues.isError) {
+        return imagePieceValues;
+    }
+
     const prevState: State = {
         ...nextState,
+        imagePieceValues: imagePieceValues.value.prevState,
     };
     const twoWayOperation: TwoWayOperation = {
         $version: 1,
+        imagePieceValues: imagePieceValues.value.twoWayOperation,
     };
 
     if (downOperation.name != null) {
@@ -136,8 +267,17 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
+    const imagePieceValues = RecordOperation.diff<
+        ImagePieceValue.State,
+        ImagePieceValue.TwoWayOperation
+    >({
+        prevState: prevState.imagePieceValues ?? {},
+        nextState: nextState.imagePieceValues ?? {},
+        innerDiff: params => ImagePieceValue.diff(params),
+    });
     const result: TwoWayOperation = {
         $version: 1,
+        imagePieceValues,
     };
     if (prevState.name !== nextState.name) {
         result.name = { oldValue: prevState.name, newValue: nextState.name };
@@ -162,11 +302,43 @@ export const serverTransform =
         activeBoardSecondKey: string | null | undefined;
     }): ServerTransform<State, TwoWayOperation, UpOperation> =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
+        const createdByMe = RequestedBy.createdByMe({ requestedBy, userUid: participantKey });
+
+        const imagePieceValues = RecordOperation.serverTransform<
+            ImagePieceValue.State,
+            ImagePieceValue.State,
+            ImagePieceValue.TwoWayOperation,
+            ImagePieceValue.UpOperation,
+            string | ApplyError<PositiveInt> | ComposeAndTransformError
+        >({
+            first: serverOperation?.imagePieceValues,
+            second: clientOperation.imagePieceValues,
+            prevState: prevState.imagePieceValues ?? {},
+            nextState: currentState.imagePieceValues ?? {},
+            innerTransform: ({ first, second, prevState, nextState }) =>
+                ImagePieceValue.serverTransform(createdByMe)({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {
+                cancelCreate: () => !createdByMe,
+                cancelUpdate: state => !createdByMe && state.nextState.isPrivate,
+                cancelRemove: state => !createdByMe && state.nextState.isPrivate,
+            },
+        });
+        if (imagePieceValues.isError) {
+            return imagePieceValues;
+        }
+
         const twoWayOperation: TwoWayOperation = {
             $version: 1,
+            imagePieceValues: imagePieceValues.value,
         };
 
-        if (RequestedBy.createdByMe({ requestedBy, userUid: participantKey })) {
+        if (createdByMe) {
             twoWayOperation.name = ReplaceOperation.serverTransform({
                 first: serverOperation?.name ?? undefined,
                 second: clientOperation.name ?? undefined,
@@ -190,6 +362,26 @@ export const serverTransform =
     };
 
 export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
+    const imagePieceValues = RecordOperation.clientTransform<
+        ImagePieceValue.State,
+        ImagePieceValue.UpOperation,
+        string | ApplyError<PositiveInt> | ComposeAndTransformError
+    >({
+        first: first.imagePieceValues,
+        second: second.imagePieceValues,
+        innerTransform: params => ImagePieceValue.clientTransform(params),
+        innerDiff: params => {
+            const diff = ImagePieceValue.diff(params);
+            if (diff == null) {
+                return diff;
+            }
+            return ImagePieceValue.toUpOperation(diff);
+        },
+    });
+    if (imagePieceValues.isError) {
+        return imagePieceValues;
+    }
+
     const name = ReplaceOperation.clientTransform({
         first: first.name,
         second: second.name,
@@ -202,12 +394,14 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const firstPrime: UpOperation = {
         $version: 1,
+        imagePieceValues: imagePieceValues.value.firstPrime,
         name: name.firstPrime,
         role: role.firstPrime,
     };
 
     const secondPrime: UpOperation = {
         $version: 1,
+        imagePieceValues: imagePieceValues.value.secondPrime,
         name: name.secondPrime,
         role: role.secondPrime,
     };

@@ -165,7 +165,7 @@ export {
     apply as applyImagePiece,
     diff as imagePieceDiff,
     toUpOperation as toImagePieceUpOperation,
-} from './internal/ot/room/board/imagePiece/v1';
+} from './internal/ot/room/participant/imagePieceValue/v1';
 
 export {
     State as NumberPieceValueState,
