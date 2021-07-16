@@ -114,7 +114,12 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
 };
 
 export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
-    const result: State = { ...state, ...Piece.apply({ state, operation }) };
+    const piece = Piece.apply({ state, operation });
+    if (piece.isError) {
+        return piece;
+    }
+
+    const result: State = { ...state, ...piece.value };
     if (operation.image != null) {
         result.image = operation.image.newValue;
     }
@@ -133,7 +138,12 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
 };
 
 export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
-    const result: State = { ...state, ...Piece.applyBack({ state, operation }) };
+    const piece = Piece.applyBack({ state, operation });
+    if (piece.isError) {
+        return piece;
+    }
+
+    const result: State = { ...state, ...piece.value };
     if (operation.image != null) {
         result.image = operation.image.oldValue;
     }
