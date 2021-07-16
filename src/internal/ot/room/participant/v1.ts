@@ -8,7 +8,6 @@ import {
     Restore,
     server,
     ServerTransform,
-    ToClientOperationParams,
 } from '../../util/type';
 import * as ReplaceOperation from '../../util/replaceOperation';
 import { createOperation } from '../../util/createOperation';

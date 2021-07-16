@@ -228,7 +228,7 @@ const boardsToClientState = (requestedBy: RequestedBy, activeBoardKey: Composite
             }
             return false;
         },
-        toClientState: ({ state }) => Board.toClientState(state),
+        toClientState: ({ state }) => Board.toClientState(requestedBy)(state),
     });
 };
 
@@ -455,7 +455,7 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
     };
 };
 
-export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
+export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     const result: State = { ...state };
 
     if (operation.activeBoardKey != null) {
@@ -464,7 +464,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
 
     const boards = DualKeyRecordOperation.apply<
         Board.State,
-        Board.UpOperation | Board.TwoWayOperation,
+        Board.UpOperation,
         string | ApplyError<PositiveInt> | ComposeAndTransformError
     >({
         prevState: state.boards,
@@ -1165,7 +1165,7 @@ export const serverTransform = (
         prevState: prevState.boards,
         nextState: currentState.boards,
         innerTransform: ({ first, second, prevState, nextState }) =>
-            Board.serverTransform({
+            Board.serverTransform(requestedBy)({
                 prevState,
                 currentState: nextState,
                 serverOperation: first,
