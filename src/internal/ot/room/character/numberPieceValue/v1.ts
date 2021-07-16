@@ -15,13 +15,12 @@ import {
     RequestedBy,
     Restore,
     ServerTransform,
-    ToClientOperationParams,
 } from '../../../util/type';
 import { createOperation } from '../../../util/createOperation';
 import { isIdRecord, record } from '../../../util/record';
 import { Result } from '@kizahasi/result';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
-import { chooseDualKeyRecord, CompositeKey } from '@kizahasi/util';
+import { CompositeKey } from '@kizahasi/util';
 
 export const state = t.type({
     $version: t.literal(1),
@@ -61,17 +60,15 @@ export type TwoWayOperation = {
     pieces?: DualKeyRecordTwoWayOperation<Piece.State, Piece.TwoWayOperation>;
 };
 
-export const toClientState = (
-    createdByMe: boolean,
-    requestedBy: RequestedBy,
-    activeBoardKey: CompositeKey | null
-) => (source: State): State => {
-    return {
-        ...source,
-        value: source.isValuePrivate && !createdByMe ? 0 : source.value,
-        pieces: Piece.toClientStateMany(requestedBy, activeBoardKey)(source.pieces),
+export const toClientState =
+    (createdByMe: boolean, requestedBy: RequestedBy, activeBoardKey: CompositeKey | null) =>
+    (source: State): State => {
+        return {
+            ...source,
+            value: source.isValuePrivate && !createdByMe ? 0 : source.value,
+            pieces: Piece.toClientStateMany(requestedBy, activeBoardKey)(source.pieces),
+        };
     };
-};
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return source;
@@ -244,71 +241,66 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     return resultType;
 };
 
-export const serverTransform = (
-    createdByMe: boolean
-): ServerTransform<State, TwoWayOperation, UpOperation> => ({
-    prevState,
-    currentState,
-    clientOperation,
-    serverOperation,
-}) => {
-    if (!createdByMe) {
-        // 自分以外はどのプロパティも編集できない。
-        return Result.ok(undefined);
-    }
+export const serverTransform =
+    (createdByMe: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
+    ({ prevState, currentState, clientOperation, serverOperation }) => {
+        if (!createdByMe) {
+            // 自分以外はどのプロパティも編集できない。
+            return Result.ok(undefined);
+        }
 
-    const pieces = DualKeyRecordOperation.serverTransform<
-        Piece.State,
-        Piece.State,
-        Piece.TwoWayOperation,
-        Piece.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        prevState: prevState.pieces,
-        nextState: currentState.pieces,
-        first: serverOperation?.pieces,
-        second: clientOperation.pieces,
-        innerTransform: ({ prevState, nextState, first, second }) =>
-            Piece.serverTransform({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        toServerState: state => state,
-        cancellationPolicy: {
-            cancelCreate: () => !createdByMe,
-            cancelRemove: params => !createdByMe && params.nextState.isPrivate,
-            cancelUpdate: params => !createdByMe && params.nextState.isPrivate,
-        },
-    });
-    if (pieces.isError) {
-        return pieces;
-    }
+        const pieces = DualKeyRecordOperation.serverTransform<
+            Piece.State,
+            Piece.State,
+            Piece.TwoWayOperation,
+            Piece.UpOperation,
+            string | ApplyError<PositiveInt> | ComposeAndTransformError
+        >({
+            prevState: prevState.pieces,
+            nextState: currentState.pieces,
+            first: serverOperation?.pieces,
+            second: clientOperation.pieces,
+            innerTransform: ({ prevState, nextState, first, second }) =>
+                Piece.serverTransform({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {
+                cancelCreate: () => !createdByMe,
+                cancelRemove: params => !createdByMe && params.nextState.isPrivate,
+                cancelUpdate: params => !createdByMe && params.nextState.isPrivate,
+            },
+        });
+        if (pieces.isError) {
+            return pieces;
+        }
 
-    const twoWayOperation: TwoWayOperation = {
-        $version: 1,
-        pieces: pieces.value,
+        const twoWayOperation: TwoWayOperation = {
+            $version: 1,
+            pieces: pieces.value,
+        };
+
+        twoWayOperation.isValuePrivate = ReplaceOperation.serverTransform({
+            first: serverOperation?.isValuePrivate ?? undefined,
+            second: clientOperation.isValuePrivate ?? undefined,
+            prevState: prevState.isValuePrivate,
+        });
+        // !createdByMe の場合は最初の方ですべて弾いているため、isValuePrivateのチェックをする必要はない。
+        twoWayOperation.value = ReplaceOperation.serverTransform({
+            first: serverOperation?.value ?? undefined,
+            second: clientOperation.value ?? undefined,
+            prevState: prevState.value,
+        });
+
+        if (isIdRecord(twoWayOperation)) {
+            return Result.ok(undefined);
+        }
+
+        return Result.ok(twoWayOperation);
     };
-
-    twoWayOperation.isValuePrivate = ReplaceOperation.serverTransform({
-        first: serverOperation?.isValuePrivate ?? undefined,
-        second: clientOperation.isValuePrivate ?? undefined,
-        prevState: prevState.isValuePrivate,
-    });
-    // !createdByMe の場合は最初の方ですべて弾いているため、isValuePrivateのチェックをする必要はない。
-    twoWayOperation.value = ReplaceOperation.serverTransform({
-        first: serverOperation?.value ?? undefined,
-        second: clientOperation.value ?? undefined,
-        prevState: prevState.value,
-    });
-
-    if (isIdRecord(twoWayOperation)) {
-        return Result.ok(undefined);
-    }
-
-    return Result.ok(twoWayOperation);
-};
 
 export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
     const pieces = DualKeyRecordOperation.clientTransform<

@@ -151,46 +151,43 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     return result;
 };
 
-export const serverTransform = ({
-    requestedBy,
-    participantKey,
-    activeBoardSecondKey,
-}: {
-    requestedBy: RequestedBy;
-    participantKey: string;
-    activeBoardSecondKey: string | null | undefined;
-}): ServerTransform<State, TwoWayOperation, UpOperation> => ({
-    prevState,
-    currentState,
-    clientOperation,
-    serverOperation,
-}) => {
-    const twoWayOperation: TwoWayOperation = {
-        $version: 1,
+export const serverTransform =
+    ({
+        requestedBy,
+        participantKey,
+        activeBoardSecondKey,
+    }: {
+        requestedBy: RequestedBy;
+        participantKey: string;
+        activeBoardSecondKey: string | null | undefined;
+    }): ServerTransform<State, TwoWayOperation, UpOperation> =>
+    ({ prevState, currentState, clientOperation, serverOperation }) => {
+        const twoWayOperation: TwoWayOperation = {
+            $version: 1,
+        };
+
+        if (RequestedBy.createdByMe({ requestedBy, userUid: participantKey })) {
+            twoWayOperation.name = ReplaceOperation.serverTransform({
+                first: serverOperation?.name ?? undefined,
+                second: clientOperation.name ?? undefined,
+                prevState: prevState.name,
+            });
+        }
+
+        if (requestedBy.type === server) {
+            twoWayOperation.role = ReplaceOperation.serverTransform({
+                first: serverOperation?.role ?? undefined,
+                second: clientOperation.role ?? undefined,
+                prevState: prevState.role,
+            });
+        }
+
+        if (isIdRecord(twoWayOperation)) {
+            return Result.ok(undefined);
+        }
+
+        return Result.ok(twoWayOperation);
     };
-
-    if (RequestedBy.createdByMe({ requestedBy, userUid: participantKey })) {
-        twoWayOperation.name = ReplaceOperation.serverTransform({
-            first: serverOperation?.name ?? undefined,
-            second: clientOperation.name ?? undefined,
-            prevState: prevState.name,
-        });
-    }
-
-    if (requestedBy.type === server) {
-        twoWayOperation.role = ReplaceOperation.serverTransform({
-            first: serverOperation?.role ?? undefined,
-            second: clientOperation.role ?? undefined,
-            prevState: prevState.role,
-        });
-    }
-
-    if (isIdRecord(twoWayOperation)) {
-        return Result.ok(undefined);
-    }
-
-    return Result.ok(twoWayOperation);
-};
 
 export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
     const name = ReplaceOperation.clientTransform({

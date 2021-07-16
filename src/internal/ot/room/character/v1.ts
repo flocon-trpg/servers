@@ -24,7 +24,6 @@ import {
     RequestedBy,
     Restore,
     ServerTransform,
-    ToClientOperationParams,
 } from '../../util/type';
 import * as BoolParam from './boolParam/v1';
 import * as Command from './command/v1';
@@ -192,69 +191,70 @@ const defaultStrParamState: StrParam.State = {
     value: '',
 };
 
-export const toClientState = (
-    createdByMe: boolean,
-    requestedBy: RequestedBy,
-    activeBoardKey: CompositeKey | null
-) => (source: State): State => {
-    return {
-        ...source,
-        privateCommand: createdByMe ? source.privateCommand : '',
-        privateVarToml: createdByMe ? source.privateVarToml : '',
-        boolParams: RecordOperation.toClientState({
-            serverState: source.boolParams,
-            isPrivate: () => false,
-            toClientState: ({ state }) =>
-                SimpleValueParam.toClientState<Maybe<boolean>>(createdByMe, null)(state),
-        }),
-        numParams: RecordOperation.toClientState({
-            serverState: source.numParams,
-            isPrivate: () => false,
-            toClientState: ({ state }) =>
-                SimpleValueParam.toClientState<Maybe<number>>(createdByMe, null)(state),
-        }),
-        numMaxParams: RecordOperation.toClientState({
-            serverState: source.numMaxParams,
-            isPrivate: () => false,
-            toClientState: ({ state }) =>
-                SimpleValueParam.toClientState<Maybe<number>>(createdByMe, null)(state),
-        }),
-        strParams: RecordOperation.toClientState({
-            serverState: source.strParams,
-            isPrivate: () => false,
-            toClientState: ({ state }) => StrParam.toClientState(createdByMe)(state),
-        }),
-        pieces: Piece.toClientStateMany(requestedBy, activeBoardKey)(source.pieces),
-        privateCommands: RecordOperation.toClientState<Command.State, Command.State>({
-            serverState: source.privateCommands,
-            isPrivate: () => !createdByMe,
-            toClientState: ({ state }) => Command.toClientState(state),
-        }),
-        tachieLocations: DualKeyRecordOperation.toClientState<
-            BoardLocation.State,
-            BoardLocation.State
-        >({
-            serverState: source.tachieLocations,
-            isPrivate: () => false,
-            toClientState: ({ state }) => BoardLocation.toClientState(state),
-        }),
-        dicePieceValues: RecordOperation.toClientState<DicePieceValue.State, DicePieceValue.State>({
-            serverState: source.dicePieceValues,
-            isPrivate: () => false,
-            toClientState: ({ state }) =>
-                DicePieceValue.toClientState(createdByMe, requestedBy, activeBoardKey)(state),
-        }),
-        numberPieceValues: RecordOperation.toClientState<
-            NumberPieceValue.State,
-            NumberPieceValue.State
-        >({
-            serverState: source.numberPieceValues,
-            isPrivate: () => false,
-            toClientState: ({ state }) =>
-                NumberPieceValue.toClientState(createdByMe, requestedBy, activeBoardKey)(state),
-        }),
+export const toClientState =
+    (createdByMe: boolean, requestedBy: RequestedBy, activeBoardKey: CompositeKey | null) =>
+    (source: State): State => {
+        return {
+            ...source,
+            privateCommand: createdByMe ? source.privateCommand : '',
+            privateVarToml: createdByMe ? source.privateVarToml : '',
+            boolParams: RecordOperation.toClientState({
+                serverState: source.boolParams,
+                isPrivate: () => false,
+                toClientState: ({ state }) =>
+                    SimpleValueParam.toClientState<Maybe<boolean>>(createdByMe, null)(state),
+            }),
+            numParams: RecordOperation.toClientState({
+                serverState: source.numParams,
+                isPrivate: () => false,
+                toClientState: ({ state }) =>
+                    SimpleValueParam.toClientState<Maybe<number>>(createdByMe, null)(state),
+            }),
+            numMaxParams: RecordOperation.toClientState({
+                serverState: source.numMaxParams,
+                isPrivate: () => false,
+                toClientState: ({ state }) =>
+                    SimpleValueParam.toClientState<Maybe<number>>(createdByMe, null)(state),
+            }),
+            strParams: RecordOperation.toClientState({
+                serverState: source.strParams,
+                isPrivate: () => false,
+                toClientState: ({ state }) => StrParam.toClientState(createdByMe)(state),
+            }),
+            pieces: Piece.toClientStateMany(requestedBy, activeBoardKey)(source.pieces),
+            privateCommands: RecordOperation.toClientState<Command.State, Command.State>({
+                serverState: source.privateCommands,
+                isPrivate: () => !createdByMe,
+                toClientState: ({ state }) => Command.toClientState(state),
+            }),
+            tachieLocations: DualKeyRecordOperation.toClientState<
+                BoardLocation.State,
+                BoardLocation.State
+            >({
+                serverState: source.tachieLocations,
+                isPrivate: () => false,
+                toClientState: ({ state }) => BoardLocation.toClientState(state),
+            }),
+            dicePieceValues: RecordOperation.toClientState<
+                DicePieceValue.State,
+                DicePieceValue.State
+            >({
+                serverState: source.dicePieceValues,
+                isPrivate: () => false,
+                toClientState: ({ state }) =>
+                    DicePieceValue.toClientState(createdByMe, requestedBy, activeBoardKey)(state),
+            }),
+            numberPieceValues: RecordOperation.toClientState<
+                NumberPieceValue.State,
+                NumberPieceValue.State
+            >({
+                serverState: source.numberPieceValues,
+                isPrivate: () => false,
+                toClientState: ({ state }) =>
+                    NumberPieceValue.toClientState(createdByMe, requestedBy, activeBoardKey)(state),
+            }),
+        };
     };
-};
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return {
@@ -1332,294 +1332,289 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     return result;
 };
 
-export const serverTransform = (
-    createdByMe: boolean
-): ServerTransform<State, TwoWayOperation, UpOperation> => ({
-    prevState,
-    currentState,
-    clientOperation,
-    serverOperation,
-}) => {
-    if (!createdByMe && currentState.isPrivate) {
-        return Result.ok(undefined);
-    }
+export const serverTransform =
+    (createdByMe: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
+    ({ prevState, currentState, clientOperation, serverOperation }) => {
+        if (!createdByMe && currentState.isPrivate) {
+            return Result.ok(undefined);
+        }
 
-    const boolParams = ParamRecordOperation.serverTransform({
-        prevState: prevState.boolParams,
-        nextState: currentState.boolParams,
-        first: serverOperation?.boolParams,
-        second: clientOperation.boolParams,
-        innerTransform: ({ prevState, nextState, first, second }) =>
-            SimpleValueParam.serverTransform<Maybe<boolean>>(createdByMe)({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        defaultState: defaultBoolParamState,
-    });
-    if (boolParams.isError) {
-        return boolParams;
-    }
+        const boolParams = ParamRecordOperation.serverTransform({
+            prevState: prevState.boolParams,
+            nextState: currentState.boolParams,
+            first: serverOperation?.boolParams,
+            second: clientOperation.boolParams,
+            innerTransform: ({ prevState, nextState, first, second }) =>
+                SimpleValueParam.serverTransform<Maybe<boolean>>(createdByMe)({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            defaultState: defaultBoolParamState,
+        });
+        if (boolParams.isError) {
+            return boolParams;
+        }
 
-    const numParams = ParamRecordOperation.serverTransform({
-        prevState: prevState.numParams,
-        nextState: currentState.numParams,
-        first: serverOperation?.numParams,
-        second: clientOperation.numParams,
-        innerTransform: ({ prevState, nextState, first, second }) =>
-            SimpleValueParam.serverTransform<Maybe<number>>(createdByMe)({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        defaultState: defaultNumParamState,
-    });
-    if (numParams.isError) {
-        return numParams;
-    }
+        const numParams = ParamRecordOperation.serverTransform({
+            prevState: prevState.numParams,
+            nextState: currentState.numParams,
+            first: serverOperation?.numParams,
+            second: clientOperation.numParams,
+            innerTransform: ({ prevState, nextState, first, second }) =>
+                SimpleValueParam.serverTransform<Maybe<number>>(createdByMe)({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            defaultState: defaultNumParamState,
+        });
+        if (numParams.isError) {
+            return numParams;
+        }
 
-    const numMaxParams = ParamRecordOperation.serverTransform({
-        prevState: prevState.numMaxParams,
-        nextState: currentState.numMaxParams,
-        first: serverOperation?.numMaxParams,
-        second: clientOperation.numMaxParams,
-        innerTransform: ({ prevState, nextState, first, second }) =>
-            SimpleValueParam.serverTransform<Maybe<number>>(createdByMe)({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        defaultState: defaultNumParamState,
-    });
-    if (numMaxParams.isError) {
-        return numMaxParams;
-    }
+        const numMaxParams = ParamRecordOperation.serverTransform({
+            prevState: prevState.numMaxParams,
+            nextState: currentState.numMaxParams,
+            first: serverOperation?.numMaxParams,
+            second: clientOperation.numMaxParams,
+            innerTransform: ({ prevState, nextState, first, second }) =>
+                SimpleValueParam.serverTransform<Maybe<number>>(createdByMe)({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            defaultState: defaultNumParamState,
+        });
+        if (numMaxParams.isError) {
+            return numMaxParams;
+        }
 
-    const strParams = ParamRecordOperation.serverTransform({
-        prevState: prevState.strParams,
-        nextState: currentState.strParams,
-        first: serverOperation?.strParams,
-        second: clientOperation.strParams,
-        innerTransform: ({ prevState, nextState, first, second }) =>
-            StrParam.serverTransform(createdByMe)({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        defaultState: defaultStrParamState,
-    });
-    if (strParams.isError) {
-        return strParams;
-    }
+        const strParams = ParamRecordOperation.serverTransform({
+            prevState: prevState.strParams,
+            nextState: currentState.strParams,
+            first: serverOperation?.strParams,
+            second: clientOperation.strParams,
+            innerTransform: ({ prevState, nextState, first, second }) =>
+                StrParam.serverTransform(createdByMe)({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            defaultState: defaultStrParamState,
+        });
+        if (strParams.isError) {
+            return strParams;
+        }
 
-    const pieces = DualKeyRecordOperation.serverTransform<
-        Piece.State,
-        Piece.State,
-        Piece.TwoWayOperation,
-        Piece.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        prevState: prevState.pieces,
-        nextState: currentState.pieces,
-        first: serverOperation?.pieces,
-        second: clientOperation.pieces,
-        innerTransform: ({ prevState, nextState, first, second }) =>
-            Piece.serverTransform({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        toServerState: state => state,
-        cancellationPolicy: {
-            cancelRemove: params => !createdByMe && params.nextState.isPrivate,
-            cancelUpdate: params => !createdByMe && params.nextState.isPrivate,
-        },
-    });
-    if (pieces.isError) {
-        return pieces;
-    }
+        const pieces = DualKeyRecordOperation.serverTransform<
+            Piece.State,
+            Piece.State,
+            Piece.TwoWayOperation,
+            Piece.UpOperation,
+            string | ApplyError<PositiveInt> | ComposeAndTransformError
+        >({
+            prevState: prevState.pieces,
+            nextState: currentState.pieces,
+            first: serverOperation?.pieces,
+            second: clientOperation.pieces,
+            innerTransform: ({ prevState, nextState, first, second }) =>
+                Piece.serverTransform({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {
+                cancelRemove: params => !createdByMe && params.nextState.isPrivate,
+                cancelUpdate: params => !createdByMe && params.nextState.isPrivate,
+            },
+        });
+        if (pieces.isError) {
+            return pieces;
+        }
 
-    // const privateCommands = RecordOperation.serverTransform<Command.State, Command.State, Command.TwoWayOperation, Command.UpOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
-    //     prevState: prevState.privateCommands,
-    //     nextState: currentState.privateCommands,
-    //     first: serverOperation?.privateCommands,
-    //     second: clientOperation.privateCommands,
-    //     innerTransform: ({ prevState, nextState, first, second }) => Command.serverTransform({
-    //         prevState,
-    //         currentState: nextState,
-    //         serverOperation: first,
-    //         clientOperation: second,
-    //     }),
-    //     toServerState: state => state,
-    //     protectedValuePolicy: {
-    //         cancelCreate: () => !createdByMe,
-    //         cancelRemove: () => !createdByMe,
-    //         cancelUpdate: () => !createdByMe,
-    //     },
-    // });
-    // if (privateCommands.isError) {
-    //     return privateCommands;
-    // }
+        // const privateCommands = RecordOperation.serverTransform<Command.State, Command.State, Command.TwoWayOperation, Command.UpOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
+        //     prevState: prevState.privateCommands,
+        //     nextState: currentState.privateCommands,
+        //     first: serverOperation?.privateCommands,
+        //     second: clientOperation.privateCommands,
+        //     innerTransform: ({ prevState, nextState, first, second }) => Command.serverTransform({
+        //         prevState,
+        //         currentState: nextState,
+        //         serverOperation: first,
+        //         clientOperation: second,
+        //     }),
+        //     toServerState: state => state,
+        //     protectedValuePolicy: {
+        //         cancelCreate: () => !createdByMe,
+        //         cancelRemove: () => !createdByMe,
+        //         cancelUpdate: () => !createdByMe,
+        //     },
+        // });
+        // if (privateCommands.isError) {
+        //     return privateCommands;
+        // }
 
-    const tachieLocations = DualKeyRecordOperation.serverTransform<
-        BoardLocation.State,
-        BoardLocation.State,
-        BoardLocation.TwoWayOperation,
-        BoardLocation.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        prevState: prevState.tachieLocations,
-        nextState: currentState.tachieLocations,
-        first: serverOperation?.tachieLocations,
-        second: clientOperation.tachieLocations,
-        innerTransform: ({ prevState, nextState, first, second }) =>
-            BoardLocation.serverTransform({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        toServerState: state => state,
-        cancellationPolicy: {},
-    });
-    if (tachieLocations.isError) {
-        return tachieLocations;
-    }
+        const tachieLocations = DualKeyRecordOperation.serverTransform<
+            BoardLocation.State,
+            BoardLocation.State,
+            BoardLocation.TwoWayOperation,
+            BoardLocation.UpOperation,
+            string | ApplyError<PositiveInt> | ComposeAndTransformError
+        >({
+            prevState: prevState.tachieLocations,
+            nextState: currentState.tachieLocations,
+            first: serverOperation?.tachieLocations,
+            second: clientOperation.tachieLocations,
+            innerTransform: ({ prevState, nextState, first, second }) =>
+                BoardLocation.serverTransform({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {},
+        });
+        if (tachieLocations.isError) {
+            return tachieLocations;
+        }
 
-    const dicePieceValues = RecordOperation.serverTransform<
-        DicePieceValue.State,
-        DicePieceValue.State,
-        DicePieceValue.TwoWayOperation,
-        DicePieceValue.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        first: serverOperation?.dicePieceValues,
-        second: clientOperation.dicePieceValues,
-        prevState: prevState.dicePieceValues,
-        nextState: currentState.dicePieceValues,
-        innerTransform: ({ first, second, prevState, nextState }) =>
-            DicePieceValue.serverTransform(createdByMe)({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        toServerState: state => state,
-        cancellationPolicy: {
-            cancelCreate: () => !createdByMe,
-            cancelUpdate: () => !createdByMe,
-            cancelRemove: () => !createdByMe,
-        },
-    });
-    if (dicePieceValues.isError) {
-        return dicePieceValues;
-    }
+        const dicePieceValues = RecordOperation.serverTransform<
+            DicePieceValue.State,
+            DicePieceValue.State,
+            DicePieceValue.TwoWayOperation,
+            DicePieceValue.UpOperation,
+            string | ApplyError<PositiveInt> | ComposeAndTransformError
+        >({
+            first: serverOperation?.dicePieceValues,
+            second: clientOperation.dicePieceValues,
+            prevState: prevState.dicePieceValues,
+            nextState: currentState.dicePieceValues,
+            innerTransform: ({ first, second, prevState, nextState }) =>
+                DicePieceValue.serverTransform(createdByMe)({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {
+                cancelCreate: () => !createdByMe,
+                cancelUpdate: () => !createdByMe,
+                cancelRemove: () => !createdByMe,
+            },
+        });
+        if (dicePieceValues.isError) {
+            return dicePieceValues;
+        }
 
-    const numberPieceValues = RecordOperation.serverTransform<
-        NumberPieceValue.State,
-        NumberPieceValue.State,
-        NumberPieceValue.TwoWayOperation,
-        NumberPieceValue.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        first: serverOperation?.numberPieceValues,
-        second: clientOperation.numberPieceValues,
-        prevState: prevState.numberPieceValues,
-        nextState: currentState.numberPieceValues,
-        innerTransform: ({ first, second, prevState, nextState }) =>
-            NumberPieceValue.serverTransform(createdByMe)({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        toServerState: state => state,
-        cancellationPolicy: {
-            cancelCreate: () => !createdByMe,
-            cancelUpdate: () => !createdByMe,
-            cancelRemove: () => !createdByMe,
-        },
-    });
-    if (numberPieceValues.isError) {
-        return numberPieceValues;
-    }
+        const numberPieceValues = RecordOperation.serverTransform<
+            NumberPieceValue.State,
+            NumberPieceValue.State,
+            NumberPieceValue.TwoWayOperation,
+            NumberPieceValue.UpOperation,
+            string | ApplyError<PositiveInt> | ComposeAndTransformError
+        >({
+            first: serverOperation?.numberPieceValues,
+            second: clientOperation.numberPieceValues,
+            prevState: prevState.numberPieceValues,
+            nextState: currentState.numberPieceValues,
+            innerTransform: ({ first, second, prevState, nextState }) =>
+                NumberPieceValue.serverTransform(createdByMe)({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {
+                cancelCreate: () => !createdByMe,
+                cancelUpdate: () => !createdByMe,
+                cancelRemove: () => !createdByMe,
+            },
+        });
+        if (numberPieceValues.isError) {
+            return numberPieceValues;
+        }
 
-    const twoWayOperation: TwoWayOperation = {
-        $version: 1,
-        boolParams: boolParams.value,
-        numParams: numParams.value,
-        numMaxParams: numMaxParams.value,
-        strParams: strParams.value,
-        pieces: pieces.value,
-        // privateCommands: privateCommands.value,
-        tachieLocations: tachieLocations.value,
-        dicePieceValues: dicePieceValues.value,
-        numberPieceValues: numberPieceValues.value,
+        const twoWayOperation: TwoWayOperation = {
+            $version: 1,
+            boolParams: boolParams.value,
+            numParams: numParams.value,
+            numMaxParams: numMaxParams.value,
+            strParams: strParams.value,
+            pieces: pieces.value,
+            // privateCommands: privateCommands.value,
+            tachieLocations: tachieLocations.value,
+            dicePieceValues: dicePieceValues.value,
+            numberPieceValues: numberPieceValues.value,
+        };
+
+        twoWayOperation.image = ReplaceOperation.serverTransform({
+            first: serverOperation?.image,
+            second: clientOperation.image,
+            prevState: prevState.image,
+        });
+        twoWayOperation.tachieImage = ReplaceOperation.serverTransform({
+            first: serverOperation?.tachieImage,
+            second: clientOperation.tachieImage,
+            prevState: prevState.tachieImage,
+        });
+        twoWayOperation.isPrivate = ReplaceOperation.serverTransform({
+            first: serverOperation?.isPrivate,
+            second: clientOperation.isPrivate,
+            prevState: prevState.isPrivate,
+        });
+        const transformedMemo = TextOperation.serverTransform({
+            first: serverOperation?.memo,
+            second: clientOperation.memo,
+            prevState: prevState.memo,
+        });
+        if (transformedMemo.isError) {
+            return transformedMemo;
+        }
+        twoWayOperation.memo = transformedMemo.value.secondPrime;
+        twoWayOperation.name = ReplaceOperation.serverTransform({
+            first: serverOperation?.name,
+            second: clientOperation.name,
+            prevState: prevState.name,
+        });
+        if (createdByMe) {
+            const transformed = TextOperation.serverTransform({
+                first: serverOperation?.privateCommand,
+                second: clientOperation.privateCommand,
+                prevState: prevState.privateCommand,
+            });
+            if (transformed.isError) {
+                return transformed;
+            }
+            twoWayOperation.privateCommand = transformed.value.secondPrime;
+        }
+        if (createdByMe) {
+            const transformed = TextOperation.serverTransform({
+                first: serverOperation?.privateVarToml,
+                second: clientOperation.privateVarToml,
+                prevState: prevState.privateVarToml,
+            });
+            if (transformed.isError) {
+                return transformed;
+            }
+            twoWayOperation.privateVarToml = transformed.value.secondPrime;
+        }
+
+        if (isIdRecord(twoWayOperation)) {
+            return Result.ok(undefined);
+        }
+
+        return Result.ok(twoWayOperation);
     };
-
-    twoWayOperation.image = ReplaceOperation.serverTransform({
-        first: serverOperation?.image,
-        second: clientOperation.image,
-        prevState: prevState.image,
-    });
-    twoWayOperation.tachieImage = ReplaceOperation.serverTransform({
-        first: serverOperation?.tachieImage,
-        second: clientOperation.tachieImage,
-        prevState: prevState.tachieImage,
-    });
-    twoWayOperation.isPrivate = ReplaceOperation.serverTransform({
-        first: serverOperation?.isPrivate,
-        second: clientOperation.isPrivate,
-        prevState: prevState.isPrivate,
-    });
-    const transformedMemo = TextOperation.serverTransform({
-        first: serverOperation?.memo,
-        second: clientOperation.memo,
-        prevState: prevState.memo,
-    });
-    if (transformedMemo.isError) {
-        return transformedMemo;
-    }
-    twoWayOperation.memo = transformedMemo.value.secondPrime;
-    twoWayOperation.name = ReplaceOperation.serverTransform({
-        first: serverOperation?.name,
-        second: clientOperation.name,
-        prevState: prevState.name,
-    });
-    if (createdByMe) {
-        const transformed = TextOperation.serverTransform({
-            first: serverOperation?.privateCommand,
-            second: clientOperation.privateCommand,
-            prevState: prevState.privateCommand,
-        });
-        if (transformed.isError) {
-            return transformed;
-        }
-        twoWayOperation.privateCommand = transformed.value.secondPrime;
-    }
-    if (createdByMe) {
-        const transformed = TextOperation.serverTransform({
-            first: serverOperation?.privateVarToml,
-            second: clientOperation.privateVarToml,
-            prevState: prevState.privateVarToml,
-        });
-        if (transformed.isError) {
-            return transformed;
-        }
-        twoWayOperation.privateVarToml = transformed.value.secondPrime;
-    }
-
-    if (isIdRecord(twoWayOperation)) {
-        return Result.ok(undefined);
-    }
-
-    return Result.ok(twoWayOperation);
-};
 
 export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
     const boolParams = ParamRecordOperation.clientTransform({

@@ -110,17 +110,19 @@ export type TwoWayOperation = {
     >;
 };
 
-export const toClientState = (requestedBy: RequestedBy) => (source: State): State => {
-    return {
-        ...source,
-        imagePieces: DualKeyRecordOperation.toClientState<ImagePiece.State, ImagePiece.State>({
-            serverState: source.imagePieces ?? {},
-            isPrivate: (state, key) =>
-                RequestedBy.createdByMe({ requestedBy, userUid: key.first }) && state.isPrivate,
-            toClientState: ({ state }) => ImagePiece.toClientState(state),
-        }),
+export const toClientState =
+    (requestedBy: RequestedBy) =>
+    (source: State): State => {
+        return {
+            ...source,
+            imagePieces: DualKeyRecordOperation.toClientState<ImagePiece.State, ImagePiece.State>({
+                serverState: source.imagePieces ?? {},
+                isPrivate: (state, key) =>
+                    RequestedBy.createdByMe({ requestedBy, userUid: key.first }) && state.isPrivate,
+                toClientState: ({ state }) => ImagePiece.toClientState(state),
+            }),
+        };
     };
-};
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return {
@@ -464,102 +466,97 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     return resultType;
 };
 
-export const serverTransform = (
-    requestedBy: RequestedBy
-): ServerTransform<State, TwoWayOperation, UpOperation> => ({
-    prevState,
-    currentState,
-    clientOperation,
-    serverOperation,
-}) => {
-    const imagePieces = DualKeyRecordOperation.serverTransform<
-        ImagePiece.State,
-        ImagePiece.State,
-        ImagePiece.TwoWayOperation,
-        ImagePiece.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        first: serverOperation?.imagePieces,
-        second: clientOperation.imagePieces,
-        prevState: prevState.imagePieces ?? {},
-        nextState: currentState.imagePieces ?? {},
-        innerTransform: ({ first, second, prevState, nextState, key }) =>
-            ImagePiece.serverTransform(
-                RequestedBy.createdByMe({ requestedBy, userUid: key.first })
-            )({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        toServerState: state => state,
-        cancellationPolicy: {
-            cancelUpdate: ({ key, nextState }) =>
-                !RequestedBy.createdByMe({ requestedBy, userUid: key.first }) &&
-                nextState.isPrivate,
-            cancelRemove: ({ key, nextState }) =>
-                !RequestedBy.createdByMe({ requestedBy, userUid: key.first }) &&
-                nextState.isPrivate,
-        },
-    });
+export const serverTransform =
+    (requestedBy: RequestedBy): ServerTransform<State, TwoWayOperation, UpOperation> =>
+    ({ prevState, currentState, clientOperation, serverOperation }) => {
+        const imagePieces = DualKeyRecordOperation.serverTransform<
+            ImagePiece.State,
+            ImagePiece.State,
+            ImagePiece.TwoWayOperation,
+            ImagePiece.UpOperation,
+            string | ApplyError<PositiveInt> | ComposeAndTransformError
+        >({
+            first: serverOperation?.imagePieces,
+            second: clientOperation.imagePieces,
+            prevState: prevState.imagePieces ?? {},
+            nextState: currentState.imagePieces ?? {},
+            innerTransform: ({ first, second, prevState, nextState, key }) =>
+                ImagePiece.serverTransform(
+                    RequestedBy.createdByMe({ requestedBy, userUid: key.first })
+                )({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {
+                cancelUpdate: ({ key, nextState }) =>
+                    !RequestedBy.createdByMe({ requestedBy, userUid: key.first }) &&
+                    nextState.isPrivate,
+                cancelRemove: ({ key, nextState }) =>
+                    !RequestedBy.createdByMe({ requestedBy, userUid: key.first }) &&
+                    nextState.isPrivate,
+            },
+        });
 
-    if (imagePieces.isError) {
-        return imagePieces;
-    }
-    const twoWayOperation: TwoWayOperation = { $version: 1 };
+        if (imagePieces.isError) {
+            return imagePieces;
+        }
+        const twoWayOperation: TwoWayOperation = { $version: 1 };
 
-    twoWayOperation.backgroundImage = ReplaceOperation.serverTransform({
-        first: serverOperation?.backgroundImage,
-        second: clientOperation.backgroundImage,
-        prevState: prevState.backgroundImage,
-    });
-    twoWayOperation.backgroundImageZoom = ReplaceOperation.serverTransform({
-        first: serverOperation?.backgroundImageZoom,
-        second: clientOperation.backgroundImageZoom,
-        prevState: prevState.backgroundImageZoom,
-    });
-    twoWayOperation.cellColumnCount = ReplaceOperation.serverTransform({
-        first: serverOperation?.cellColumnCount,
-        second: clientOperation.cellColumnCount,
-        prevState: prevState.cellColumnCount,
-    });
-    twoWayOperation.cellHeight = ReplaceOperation.serverTransform({
-        first: serverOperation?.cellHeight,
-        second: clientOperation.cellHeight,
-        prevState: prevState.cellHeight,
-    });
-    twoWayOperation.cellOffsetX = ReplaceOperation.serverTransform({
-        first: serverOperation?.cellOffsetX,
-        second: clientOperation.cellOffsetX,
-        prevState: prevState.cellOffsetX,
-    });
-    twoWayOperation.cellOffsetY = ReplaceOperation.serverTransform({
-        first: serverOperation?.cellOffsetY,
-        second: clientOperation.cellOffsetY,
-        prevState: prevState.cellOffsetY,
-    });
-    twoWayOperation.cellRowCount = ReplaceOperation.serverTransform({
-        first: serverOperation?.cellRowCount,
-        second: clientOperation.cellRowCount,
-        prevState: prevState.cellRowCount,
-    });
-    twoWayOperation.cellWidth = ReplaceOperation.serverTransform({
-        first: serverOperation?.cellWidth,
-        second: clientOperation.cellWidth,
-        prevState: prevState.cellWidth,
-    });
-    twoWayOperation.name = ReplaceOperation.serverTransform({
-        first: serverOperation?.name,
-        second: clientOperation.name,
-        prevState: prevState.name,
-    });
+        twoWayOperation.backgroundImage = ReplaceOperation.serverTransform({
+            first: serverOperation?.backgroundImage,
+            second: clientOperation.backgroundImage,
+            prevState: prevState.backgroundImage,
+        });
+        twoWayOperation.backgroundImageZoom = ReplaceOperation.serverTransform({
+            first: serverOperation?.backgroundImageZoom,
+            second: clientOperation.backgroundImageZoom,
+            prevState: prevState.backgroundImageZoom,
+        });
+        twoWayOperation.cellColumnCount = ReplaceOperation.serverTransform({
+            first: serverOperation?.cellColumnCount,
+            second: clientOperation.cellColumnCount,
+            prevState: prevState.cellColumnCount,
+        });
+        twoWayOperation.cellHeight = ReplaceOperation.serverTransform({
+            first: serverOperation?.cellHeight,
+            second: clientOperation.cellHeight,
+            prevState: prevState.cellHeight,
+        });
+        twoWayOperation.cellOffsetX = ReplaceOperation.serverTransform({
+            first: serverOperation?.cellOffsetX,
+            second: clientOperation.cellOffsetX,
+            prevState: prevState.cellOffsetX,
+        });
+        twoWayOperation.cellOffsetY = ReplaceOperation.serverTransform({
+            first: serverOperation?.cellOffsetY,
+            second: clientOperation.cellOffsetY,
+            prevState: prevState.cellOffsetY,
+        });
+        twoWayOperation.cellRowCount = ReplaceOperation.serverTransform({
+            first: serverOperation?.cellRowCount,
+            second: clientOperation.cellRowCount,
+            prevState: prevState.cellRowCount,
+        });
+        twoWayOperation.cellWidth = ReplaceOperation.serverTransform({
+            first: serverOperation?.cellWidth,
+            second: clientOperation.cellWidth,
+            prevState: prevState.cellWidth,
+        });
+        twoWayOperation.name = ReplaceOperation.serverTransform({
+            first: serverOperation?.name,
+            second: clientOperation.name,
+            prevState: prevState.name,
+        });
 
-    if (isIdRecord(twoWayOperation)) {
-        return Result.ok(undefined);
-    }
+        if (isIdRecord(twoWayOperation)) {
+            return Result.ok(undefined);
+        }
 
-    return Result.ok(twoWayOperation);
-};
+        return Result.ok(twoWayOperation);
+    };
 
 export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
     const imagePieces = DualKeyRecordOperation.clientTransform<

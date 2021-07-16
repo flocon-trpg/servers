@@ -1,13 +1,5 @@
 import { CustomResult, Result } from '@kizahasi/result';
-import {
-    both,
-    groupJoinMap,
-    left,
-    mapToRecord,
-    recordForEach,
-    recordToMap,
-    right,
-} from '@kizahasi/util';
+import { both, groupJoinMap, left, mapToRecord, recordToMap, right } from '@kizahasi/util';
 import * as DualKeyRecordOperation from './dualKeyRecordOperation';
 import { StringKeyRecord } from './record';
 
@@ -15,15 +7,12 @@ type RestoreResult<TState, TTwoWayOperation> = {
     prevState: TState;
     twoWayOperation: TTwoWayOperation | undefined;
 };
-export type ProtectedTransformParameters<
-    TServerState,
-    TFirstOperation,
-    TSecondOperation
-> = DualKeyRecordOperation.ProtectedTransformParameters<
-    TServerState,
-    TFirstOperation,
-    TSecondOperation
->;
+export type ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> =
+    DualKeyRecordOperation.ProtectedTransformParameters<
+        TServerState,
+        TFirstOperation,
+        TSecondOperation
+    >;
 
 export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError = string>({
     nextState: unsafeNextState,

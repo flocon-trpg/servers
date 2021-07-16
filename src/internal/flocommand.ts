@@ -15,7 +15,6 @@ import { Result } from '@kizahasi/result';
 import { CompositeKey, dualKeyRecordToDualKeyMap, strIndex5Array } from '@kizahasi/util';
 import { analyze, expr1 } from './expression';
 
-const REMOVE = '';
 const canBeArray = <T extends t.Mixed>(source: T) => t.union([source, t.array(source)]);
 const canBeArrayToArray = <T>(source: T | T[]) => {
     if (Array.isArray(source)) {
@@ -23,7 +22,6 @@ const canBeArrayToArray = <T>(source: T | T[]) => {
     }
     return [source];
 };
-const removable = <T extends t.Mixed>(source: T) => t.union([source, t.literal(REMOVE)]);
 
 namespace File {
     const fileObject = t.type({

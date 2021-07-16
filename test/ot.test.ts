@@ -140,6 +140,7 @@ namespace Resources {
                     cellRowCount: 10,
                     cellWidth: 10,
                     name: 'BOARD_NAME',
+                    imagePieces: {},
                 },
             },
         },
@@ -349,38 +350,40 @@ namespace Test {
             });
         };
 
-        export const setupTestServerTransform = ({
-            prevState,
-            currentState,
-            serverOperation,
-            clientOperation,
-        }: {
-            prevState: State;
-            currentState: State;
-            serverOperation: TwoWayOperation | undefined;
-            clientOperation: UpOperation;
-        }) => ({
-            testName,
-            requestedBy,
-            expected,
-        }: {
-            testName: string;
-            requestedBy: RequestedBy;
-            expected: TwoWayOperation | undefined;
-        }) => {
-            it(testName, () => {
-                const actualOperation = serverTransform(requestedBy)({
-                    prevState,
-                    currentState,
-                    serverOperation,
-                    clientOperation,
+        export const setupTestServerTransform =
+            ({
+                prevState,
+                currentState,
+                serverOperation,
+                clientOperation,
+            }: {
+                prevState: State;
+                currentState: State;
+                serverOperation: TwoWayOperation | undefined;
+                clientOperation: UpOperation;
+            }) =>
+            ({
+                testName,
+                requestedBy,
+                expected,
+            }: {
+                testName: string;
+                requestedBy: RequestedBy;
+                expected: TwoWayOperation | undefined;
+            }) => {
+                it(testName, () => {
+                    const actualOperation = serverTransform(requestedBy)({
+                        prevState,
+                        currentState,
+                        serverOperation,
+                        clientOperation,
+                    });
+                    if (actualOperation.isError) {
+                        fail('expected not to be an error');
+                    }
+                    expect(actualOperation.value).toEqual(expected);
                 });
-                if (actualOperation.isError) {
-                    fail('expected not to be an error');
-                }
-                expect(actualOperation.value).toEqual(expected);
-            });
-        };
+            };
     }
 }
 

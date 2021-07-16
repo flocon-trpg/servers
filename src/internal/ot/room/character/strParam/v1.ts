@@ -8,7 +8,6 @@ import {
     Diff,
     Restore,
     ServerTransform,
-    ToClientOperationParams,
 } from '../../../util/type';
 import { createOperation } from '../../../util/createOperation';
 import { isIdRecord } from '../../../util/record';
@@ -44,12 +43,14 @@ export type TwoWayOperation = {
     value?: TextOperation.TwoWayOperation;
 };
 
-export const toClientState = (createdByMe: boolean) => (source: State): State => {
-    return {
-        ...source,
-        value: source.isValuePrivate && !createdByMe ? '' : source.value,
+export const toClientState =
+    (createdByMe: boolean) =>
+    (source: State): State => {
+        return {
+            ...source,
+            value: source.isValuePrivate && !createdByMe ? '' : source.value,
+        };
     };
-};
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return {
@@ -170,41 +171,36 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     return { ...resultType };
 };
 
-export const serverTransform = (
-    createdByMe: boolean
-): ServerTransform<State, TwoWayOperation, UpOperation> => ({
-    prevState,
-    currentState,
-    clientOperation,
-    serverOperation,
-}) => {
-    const twoWayOperation: TwoWayOperation = { $version: 1 };
+export const serverTransform =
+    (createdByMe: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
+    ({ prevState, currentState, clientOperation, serverOperation }) => {
+        const twoWayOperation: TwoWayOperation = { $version: 1 };
 
-    if (createdByMe) {
-        twoWayOperation.isValuePrivate = ReplaceOperation.serverTransform({
-            first: serverOperation?.isValuePrivate,
-            second: clientOperation.isValuePrivate,
-            prevState: prevState.isValuePrivate,
-        });
-    }
-    if (createdByMe || !currentState.isValuePrivate) {
-        const transformed = TextOperation.serverTransform({
-            first: serverOperation?.value,
-            second: clientOperation.value,
-            prevState: prevState.value,
-        });
-        if (transformed.isError) {
-            return transformed;
+        if (createdByMe) {
+            twoWayOperation.isValuePrivate = ReplaceOperation.serverTransform({
+                first: serverOperation?.isValuePrivate,
+                second: clientOperation.isValuePrivate,
+                prevState: prevState.isValuePrivate,
+            });
         }
-        twoWayOperation.value = transformed.value.secondPrime;
-    }
+        if (createdByMe || !currentState.isValuePrivate) {
+            const transformed = TextOperation.serverTransform({
+                first: serverOperation?.value,
+                second: clientOperation.value,
+                prevState: prevState.value,
+            });
+            if (transformed.isError) {
+                return transformed;
+            }
+            twoWayOperation.value = transformed.value.secondPrime;
+        }
 
-    if (isIdRecord(twoWayOperation)) {
-        return Result.ok(undefined);
-    }
+        if (isIdRecord(twoWayOperation)) {
+            return Result.ok(undefined);
+        }
 
-    return Result.ok(twoWayOperation);
-};
+        return Result.ok(twoWayOperation);
+    };
 
 export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
     const isValuePrivate = ReplaceOperation.clientTransform({

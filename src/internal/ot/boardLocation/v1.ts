@@ -3,15 +3,7 @@ import * as t from 'io-ts';
 import { createOperation } from '../util/createOperation';
 import { isIdRecord } from '../util/record';
 import * as ReplaceOperation from '../util/replaceOperation';
-import {
-    Apply,
-    ClientTransform,
-    Compose,
-    Diff,
-    Restore,
-    ServerTransform,
-    ToClientOperationParams,
-} from '../util/type';
+import { Apply, ClientTransform, Compose, Diff, Restore, ServerTransform } from '../util/type';
 
 const numberDownOperation = t.type({ oldValue: t.number });
 const booleanDownOperation = t.type({ oldValue: t.boolean });

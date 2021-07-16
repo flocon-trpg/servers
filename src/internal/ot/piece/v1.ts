@@ -1,5 +1,5 @@
 import { Result } from '@kizahasi/result';
-import { CompositeKey, DualKeyMap, dualKeyRecordToDualKeyMap } from '@kizahasi/util';
+import { CompositeKey } from '@kizahasi/util';
 import * as t from 'io-ts';
 import { createOperation } from '../util/createOperation';
 import { DualStringKeyRecord, isIdRecord } from '../util/record';
@@ -12,7 +12,6 @@ import {
     Diff,
     RequestedBy,
     Restore,
-    server,
     ServerTransform,
 } from '../util/type';
 
@@ -82,29 +81,28 @@ export type TwoWayOperation = {
     y?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
 };
 
-export const toClientStateMany = (
-    requestedBy: RequestedBy,
-    activeBoardKey: CompositeKey | null
-) => (source: DualStringKeyRecord<State>): DualStringKeyRecord<State> => {
-    return DualKeyRecordOperation.toClientState<State, State>({
-        serverState: source,
-        isPrivate: (state, key) => {
-            if (
-                RequestedBy.createdByMe({
-                    requestedBy,
-                    userUid: key.first,
-                })
-            ) {
+export const toClientStateMany =
+    (requestedBy: RequestedBy, activeBoardKey: CompositeKey | null) =>
+    (source: DualStringKeyRecord<State>): DualStringKeyRecord<State> => {
+        return DualKeyRecordOperation.toClientState<State, State>({
+            serverState: source,
+            isPrivate: (state, key) => {
+                if (
+                    RequestedBy.createdByMe({
+                        requestedBy,
+                        userUid: key.first,
+                    })
+                ) {
+                    return false;
+                }
+                if (key.second !== activeBoardKey?.id) {
+                    return true;
+                }
                 return false;
-            }
-            if (key.second !== activeBoardKey?.id) {
-                return true;
-            }
-            return false;
-        },
-        toClientState: ({ state }) => state,
-    });
-};
+            },
+            toClientState: ({ state }) => state,
+        });
+    };
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return source;

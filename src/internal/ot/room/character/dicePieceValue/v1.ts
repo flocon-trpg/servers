@@ -15,13 +15,12 @@ import {
     RequestedBy,
     Restore,
     ServerTransform,
-    ToClientOperationParams,
 } from '../../../util/type';
 import { createOperation } from '../../../util/createOperation';
 import { isIdRecord, record } from '../../../util/record';
 import { Result } from '@kizahasi/result';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
-import { chooseDualKeyRecord, chooseRecord, CompositeKey } from '@kizahasi/util';
+import { chooseRecord, CompositeKey } from '@kizahasi/util';
 import { RecordTwoWayOperation } from '../../../util/recordOperation';
 import * as RecordOperation from '../../../util/recordOperation';
 
@@ -64,17 +63,15 @@ export type TwoWayOperation = {
     pieces?: DualKeyRecordTwoWayOperation<Piece.State, Piece.TwoWayOperation>;
 };
 
-export const toClientState = (
-    createdByMe: boolean,
-    requestedBy: RequestedBy,
-    activeBoardKey: CompositeKey | null
-) => (source: State): State => {
-    return {
-        ...source,
-        dice: chooseRecord(source.dice, state => DieValue.toClientState(createdByMe)(state)),
-        pieces: Piece.toClientStateMany(requestedBy, activeBoardKey)(source.pieces),
+export const toClientState =
+    (createdByMe: boolean, requestedBy: RequestedBy, activeBoardKey: CompositeKey | null) =>
+    (source: State): State => {
+        return {
+            ...source,
+            dice: chooseRecord(source.dice, state => DieValue.toClientState(createdByMe)(state)),
+            pieces: Piece.toClientStateMany(requestedBy, activeBoardKey)(source.pieces),
+        };
     };
-};
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return source;
@@ -275,90 +272,85 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     return resultType;
 };
 
-export const serverTransform = (
-    createdByMe: boolean
-): ServerTransform<State, TwoWayOperation, UpOperation> => ({
-    prevState,
-    currentState,
-    clientOperation,
-    serverOperation,
-}) => {
-    if (!createdByMe) {
-        // 自分以外はどのプロパティも編集できない。
-        return Result.ok(undefined);
-    }
+export const serverTransform =
+    (createdByMe: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
+    ({ prevState, currentState, clientOperation, serverOperation }) => {
+        if (!createdByMe) {
+            // 自分以外はどのプロパティも編集できない。
+            return Result.ok(undefined);
+        }
 
-    const dice = RecordOperation.serverTransform<
-        DieValue.State,
-        DieValue.State,
-        DieValue.TwoWayOperation,
-        DieValue.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        prevState: prevState.dice,
-        nextState: currentState.dice,
-        first: serverOperation?.dice,
-        second: clientOperation.dice,
-        innerTransform: ({ prevState, nextState, first, second }) =>
-            DieValue.serverTransform(createdByMe)({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        toServerState: state => state,
-        cancellationPolicy: {
-            cancelCreate: ({ key }) =>
-                !createdByMe || dicePieceValueStrIndexes.every(x => x !== key),
-            cancelRemove: () => !createdByMe,
-            cancelUpdate: () => !createdByMe,
-        },
-    });
-    if (dice.isError) {
-        return dice;
-    }
+        const dice = RecordOperation.serverTransform<
+            DieValue.State,
+            DieValue.State,
+            DieValue.TwoWayOperation,
+            DieValue.UpOperation,
+            string | ApplyError<PositiveInt> | ComposeAndTransformError
+        >({
+            prevState: prevState.dice,
+            nextState: currentState.dice,
+            first: serverOperation?.dice,
+            second: clientOperation.dice,
+            innerTransform: ({ prevState, nextState, first, second }) =>
+                DieValue.serverTransform(createdByMe)({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {
+                cancelCreate: ({ key }) =>
+                    !createdByMe || dicePieceValueStrIndexes.every(x => x !== key),
+                cancelRemove: () => !createdByMe,
+                cancelUpdate: () => !createdByMe,
+            },
+        });
+        if (dice.isError) {
+            return dice;
+        }
 
-    const pieces = DualKeyRecordOperation.serverTransform<
-        Piece.State,
-        Piece.State,
-        Piece.TwoWayOperation,
-        Piece.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        prevState: prevState.pieces,
-        nextState: currentState.pieces,
-        first: serverOperation?.pieces,
-        second: clientOperation.pieces,
-        innerTransform: ({ prevState, nextState, first, second }) =>
-            Piece.serverTransform({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        toServerState: state => state,
-        cancellationPolicy: {
-            cancelCreate: () => !createdByMe,
-            cancelRemove: params => !createdByMe && params.nextState.isPrivate,
-            cancelUpdate: params => !createdByMe && params.nextState.isPrivate,
-        },
-    });
-    if (pieces.isError) {
-        return pieces;
-    }
+        const pieces = DualKeyRecordOperation.serverTransform<
+            Piece.State,
+            Piece.State,
+            Piece.TwoWayOperation,
+            Piece.UpOperation,
+            string | ApplyError<PositiveInt> | ComposeAndTransformError
+        >({
+            prevState: prevState.pieces,
+            nextState: currentState.pieces,
+            first: serverOperation?.pieces,
+            second: clientOperation.pieces,
+            innerTransform: ({ prevState, nextState, first, second }) =>
+                Piece.serverTransform({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {
+                cancelCreate: () => !createdByMe,
+                cancelRemove: params => !createdByMe && params.nextState.isPrivate,
+                cancelUpdate: params => !createdByMe && params.nextState.isPrivate,
+            },
+        });
+        if (pieces.isError) {
+            return pieces;
+        }
 
-    const twoWayOperation: TwoWayOperation = {
-        $version: 1,
-        dice: dice.value,
-        pieces: pieces.value,
+        const twoWayOperation: TwoWayOperation = {
+            $version: 1,
+            dice: dice.value,
+            pieces: pieces.value,
+        };
+
+        if (isIdRecord(twoWayOperation)) {
+            return Result.ok(undefined);
+        }
+
+        return Result.ok(twoWayOperation);
     };
-
-    if (isIdRecord(twoWayOperation)) {
-        return Result.ok(undefined);
-    }
-
-    return Result.ok(twoWayOperation);
-};
 
 export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
     const dice = RecordOperation.clientTransform<

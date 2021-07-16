@@ -7,7 +7,6 @@ import {
     Diff,
     Restore,
     ServerTransform,
-    ToClientOperationParams,
 } from '../../../../util/type';
 import { createOperation } from '../../../../util/createOperation';
 import { isIdRecord } from '../../../../util/record';
@@ -57,12 +56,14 @@ export type TwoWayOperation = {
     value?: ReplaceOperation.ReplaceValueTwoWayOperation<NumberOrNull>;
 };
 
-export const toClientState = (createdByMe: boolean) => (source: State): State => {
-    return {
-        ...source,
-        value: source.isValuePrivate && !createdByMe ? null : source.value,
+export const toClientState =
+    (createdByMe: boolean) =>
+    (source: State): State => {
+        return {
+            ...source,
+            value: source.isValuePrivate && !createdByMe ? null : source.value,
+        };
     };
-};
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return source;
@@ -187,46 +188,41 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     return { ...resultType };
 };
 
-export const serverTransform = (
-    createdByMe: boolean
-): ServerTransform<State, TwoWayOperation, UpOperation> => ({
-    prevState,
-    currentState,
-    clientOperation,
-    serverOperation,
-}) => {
-    if (!createdByMe) {
-        // 自分以外はどのプロパティも編集できない。
-        return Result.ok(undefined);
-    }
+export const serverTransform =
+    (createdByMe: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
+    ({ prevState, currentState, clientOperation, serverOperation }) => {
+        if (!createdByMe) {
+            // 自分以外はどのプロパティも編集できない。
+            return Result.ok(undefined);
+        }
 
-    const twoWayOperation: TwoWayOperation = {
-        $version: 1,
+        const twoWayOperation: TwoWayOperation = {
+            $version: 1,
+        };
+
+        twoWayOperation.dieType = ReplaceOperation.serverTransform({
+            first: serverOperation?.dieType ?? undefined,
+            second: clientOperation.dieType ?? undefined,
+            prevState: prevState.dieType,
+        });
+        twoWayOperation.isValuePrivate = ReplaceOperation.serverTransform({
+            first: serverOperation?.isValuePrivate ?? undefined,
+            second: clientOperation.isValuePrivate ?? undefined,
+            prevState: prevState.isValuePrivate,
+        });
+        // !createdByMe の場合は最初の方ですべて弾いているため、isValuePrivateのチェックをする必要はない。
+        twoWayOperation.value = ReplaceOperation.serverTransform({
+            first: serverOperation?.value ?? undefined,
+            second: clientOperation.value ?? undefined,
+            prevState: prevState.value,
+        });
+
+        if (isIdRecord(twoWayOperation)) {
+            return Result.ok(undefined);
+        }
+
+        return Result.ok({ ...twoWayOperation });
     };
-
-    twoWayOperation.dieType = ReplaceOperation.serverTransform({
-        first: serverOperation?.dieType ?? undefined,
-        second: clientOperation.dieType ?? undefined,
-        prevState: prevState.dieType,
-    });
-    twoWayOperation.isValuePrivate = ReplaceOperation.serverTransform({
-        first: serverOperation?.isValuePrivate ?? undefined,
-        second: clientOperation.isValuePrivate ?? undefined,
-        prevState: prevState.isValuePrivate,
-    });
-    // !createdByMe の場合は最初の方ですべて弾いているため、isValuePrivateのチェックをする必要はない。
-    twoWayOperation.value = ReplaceOperation.serverTransform({
-        first: serverOperation?.value ?? undefined,
-        second: clientOperation.value ?? undefined,
-        prevState: prevState.value,
-    });
-
-    if (isIdRecord(twoWayOperation)) {
-        return Result.ok(undefined);
-    }
-
-    return Result.ok({ ...twoWayOperation });
-};
 
 export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
     const dieType = ReplaceOperation.clientTransform({

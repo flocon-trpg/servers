@@ -211,53 +211,48 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     return result;
 };
 
-export const serverTransform = (
-    createdByMe: boolean
-): ServerTransform<State, TwoWayOperation, UpOperation> => ({
-    prevState,
-    currentState,
-    clientOperation,
-    serverOperation,
-}) => {
-    if (!createdByMe && currentState.isPrivate) {
-        return Result.ok(undefined);
-    }
+export const serverTransform =
+    (createdByMe: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
+    ({ prevState, currentState, clientOperation, serverOperation }) => {
+        if (!createdByMe && currentState.isPrivate) {
+            return Result.ok(undefined);
+        }
 
-    const twoWayOperation: TwoWayOperation = {
-        $version: 1,
+        const twoWayOperation: TwoWayOperation = {
+            $version: 1,
+        };
+
+        twoWayOperation.image = ReplaceOperation.serverTransform({
+            first: serverOperation?.image,
+            second: clientOperation.image,
+            prevState: prevState.image,
+        });
+        twoWayOperation.isPrivate = ReplaceOperation.serverTransform({
+            first: serverOperation?.isPrivate,
+            second: clientOperation.isPrivate,
+            prevState: prevState.isPrivate,
+        });
+        const transformedMemo = TextOperation.serverTransform({
+            first: serverOperation?.memo,
+            second: clientOperation.memo,
+            prevState: prevState.memo,
+        });
+        if (transformedMemo.isError) {
+            return transformedMemo;
+        }
+        twoWayOperation.memo = transformedMemo.value.secondPrime;
+        twoWayOperation.name = ReplaceOperation.serverTransform({
+            first: serverOperation?.name,
+            second: clientOperation.name,
+            prevState: prevState.name,
+        });
+
+        if (isIdRecord(twoWayOperation)) {
+            return Result.ok(undefined);
+        }
+
+        return Result.ok(twoWayOperation);
     };
-
-    twoWayOperation.image = ReplaceOperation.serverTransform({
-        first: serverOperation?.image,
-        second: clientOperation.image,
-        prevState: prevState.image,
-    });
-    twoWayOperation.isPrivate = ReplaceOperation.serverTransform({
-        first: serverOperation?.isPrivate,
-        second: clientOperation.isPrivate,
-        prevState: prevState.isPrivate,
-    });
-    const transformedMemo = TextOperation.serverTransform({
-        first: serverOperation?.memo,
-        second: clientOperation.memo,
-        prevState: prevState.memo,
-    });
-    if (transformedMemo.isError) {
-        return transformedMemo;
-    }
-    twoWayOperation.memo = transformedMemo.value.secondPrime;
-    twoWayOperation.name = ReplaceOperation.serverTransform({
-        first: serverOperation?.name,
-        second: clientOperation.name,
-        prevState: prevState.name,
-    });
-
-    if (isIdRecord(twoWayOperation)) {
-        return Result.ok(undefined);
-    }
-
-    return Result.ok(twoWayOperation);
-};
 
 export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
     const image = ReplaceOperation.clientTransform({

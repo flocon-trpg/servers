@@ -45,15 +45,12 @@ export const upOperationFactory = <
     operation: TOperation
 ) => record(key, recordUpOperationElementFactory(state, operation));
 
-export type ProtectedTransformParameters<
-    TServerState,
-    TFirstOperation,
-    TSecondOperation
-> = DualKeyRecordOperation.ProtectedTransformParameters<
-    TServerState,
-    TFirstOperation,
-    TSecondOperation
->;
+export type ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> =
+    DualKeyRecordOperation.ProtectedTransformParameters<
+        TServerState,
+        TFirstOperation,
+        TSecondOperation
+    >;
 
 export type CancellationPolicy<TKey, TServerState> = DualKeyRecordOperation.CancellationPolicy<
     TKey,

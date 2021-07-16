@@ -209,79 +209,81 @@ export type TwoWayOperation = {
     >;
 };
 
-const boardsToClientState = (requestedBy: RequestedBy, activeBoardKey: CompositeKey | null) => (
-    source: DualStringKeyRecord<Board.State>
-): DualStringKeyRecord<Board.State> => {
-    return DualKeyRecordOperation.toClientState<Board.State, Board.State>({
-        serverState: source,
-        isPrivate: (state, key) => {
-            if (
-                RequestedBy.createdByMe({
-                    requestedBy,
-                    userUid: key.first,
-                })
-            ) {
+const boardsToClientState =
+    (requestedBy: RequestedBy, activeBoardKey: CompositeKey | null) =>
+    (source: DualStringKeyRecord<Board.State>): DualStringKeyRecord<Board.State> => {
+        return DualKeyRecordOperation.toClientState<Board.State, Board.State>({
+            serverState: source,
+            isPrivate: (state, key) => {
+                if (
+                    RequestedBy.createdByMe({
+                        requestedBy,
+                        userUid: key.first,
+                    })
+                ) {
+                    return false;
+                }
+                if (key.second !== activeBoardKey?.id) {
+                    return true;
+                }
                 return false;
-            }
-            if (key.second !== activeBoardKey?.id) {
-                return true;
-            }
-            return false;
-        },
-        toClientState: ({ state }) => Board.toClientState(requestedBy)(state),
-    });
-};
-
-export const toClientState = (requestedBy: RequestedBy) => (source: State): State => {
-    return {
-        ...source,
-        bgms: RecordOperation.toClientState({
-            serverState: source.bgms,
-            isPrivate: () => false,
-            toClientState: ({ state }) => Bgm.toClientState(state),
-        }),
-        boards: boardsToClientState(requestedBy, source.activeBoardKey ?? null)(source.boards),
-        boolParamNames: RecordOperation.toClientState({
-            serverState: source.boolParamNames,
-            isPrivate: () => false,
-            toClientState: ({ state }) => ParamNames.toClientState(state),
-        }),
-        characters: DualKeyRecordOperation.toClientState<Character.State, Character.State>({
-            serverState: source.characters,
-            isPrivate: (state, key) =>
-                !RequestedBy.createdByMe({
-                    requestedBy,
-                    userUid: key.first,
-                }) && state.isPrivate,
-            toClientState: ({ state, key }) =>
-                Character.toClientState(
-                    RequestedBy.createdByMe({ requestedBy, userUid: key.first }),
-                    requestedBy,
-                    source.activeBoardKey ?? null
-                )(state),
-        }),
-        memos: RecordOperation.toClientState({
-            serverState: source.memos,
-            isPrivate: () => false,
-            toClientState: ({ state }) => Memo.toClientState(state),
-        }),
-        numParamNames: RecordOperation.toClientState({
-            serverState: source.numParamNames,
-            isPrivate: () => false,
-            toClientState: ({ state }) => ParamNames.toClientState(state),
-        }),
-        participants: RecordOperation.toClientState({
-            serverState: source.participants,
-            isPrivate: () => false,
-            toClientState: ({ state }) => Participant.toClientState(state),
-        }),
-        strParamNames: RecordOperation.toClientState({
-            serverState: source.strParamNames,
-            isPrivate: () => false,
-            toClientState: ({ state }) => ParamNames.toClientState(state),
-        }),
+            },
+            toClientState: ({ state }) => Board.toClientState(requestedBy)(state),
+        });
     };
-};
+
+export const toClientState =
+    (requestedBy: RequestedBy) =>
+    (source: State): State => {
+        return {
+            ...source,
+            bgms: RecordOperation.toClientState({
+                serverState: source.bgms,
+                isPrivate: () => false,
+                toClientState: ({ state }) => Bgm.toClientState(state),
+            }),
+            boards: boardsToClientState(requestedBy, source.activeBoardKey ?? null)(source.boards),
+            boolParamNames: RecordOperation.toClientState({
+                serverState: source.boolParamNames,
+                isPrivate: () => false,
+                toClientState: ({ state }) => ParamNames.toClientState(state),
+            }),
+            characters: DualKeyRecordOperation.toClientState<Character.State, Character.State>({
+                serverState: source.characters,
+                isPrivate: (state, key) =>
+                    !RequestedBy.createdByMe({
+                        requestedBy,
+                        userUid: key.first,
+                    }) && state.isPrivate,
+                toClientState: ({ state, key }) =>
+                    Character.toClientState(
+                        RequestedBy.createdByMe({ requestedBy, userUid: key.first }),
+                        requestedBy,
+                        source.activeBoardKey ?? null
+                    )(state),
+            }),
+            memos: RecordOperation.toClientState({
+                serverState: source.memos,
+                isPrivate: () => false,
+                toClientState: ({ state }) => Memo.toClientState(state),
+            }),
+            numParamNames: RecordOperation.toClientState({
+                serverState: source.numParamNames,
+                isPrivate: () => false,
+                toClientState: ({ state }) => ParamNames.toClientState(state),
+            }),
+            participants: RecordOperation.toClientState({
+                serverState: source.participants,
+                isPrivate: () => false,
+                toClientState: ({ state }) => Participant.toClientState(state),
+            }),
+            strParamNames: RecordOperation.toClientState({
+                serverState: source.strParamNames,
+                isPrivate: () => false,
+                toClientState: ({ state }) => ParamNames.toClientState(state),
+            }),
+        };
+    };
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return {
@@ -1135,326 +1137,321 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     return result;
 };
 
-export const serverTransform = (
-    requestedBy: RequestedBy
-): ServerTransform<State, TwoWayOperation, UpOperation> => ({
-    prevState,
-    currentState,
-    clientOperation,
-    serverOperation,
-}) => {
-    if (requestedBy.type === client) {
-        const me = currentState.participants[requestedBy.userUid];
-        if (me == null || me.role == null || me.role === Participant.Spectator) {
-            // エラーを返すべきかもしれない
-            return Result.ok(undefined);
+export const serverTransform =
+    (requestedBy: RequestedBy): ServerTransform<State, TwoWayOperation, UpOperation> =>
+    ({ prevState, currentState, clientOperation, serverOperation }) => {
+        if (requestedBy.type === client) {
+            const me = currentState.participants[requestedBy.userUid];
+            if (me == null || me.role == null || me.role === Participant.Spectator) {
+                // エラーを返すべきかもしれない
+                return Result.ok(undefined);
+            }
         }
-    }
 
-    const currentActiveBoardKey = currentState.activeBoardKey;
+        const currentActiveBoardKey = currentState.activeBoardKey;
 
-    const boards = DualKeyRecordOperation.serverTransform<
-        Board.State,
-        Board.State,
-        Board.TwoWayOperation,
-        Board.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        first: serverOperation?.boards,
-        second: clientOperation.boards,
-        prevState: prevState.boards,
-        nextState: currentState.boards,
-        innerTransform: ({ first, second, prevState, nextState }) =>
-            Board.serverTransform(requestedBy)({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        toServerState: state => state,
-        cancellationPolicy: {
-            cancelCreate: ({ key }) =>
-                !RequestedBy.createdByMe({
-                    requestedBy,
-                    userUid: key.first,
+        const boards = DualKeyRecordOperation.serverTransform<
+            Board.State,
+            Board.State,
+            Board.TwoWayOperation,
+            Board.UpOperation,
+            string | ApplyError<PositiveInt> | ComposeAndTransformError
+        >({
+            first: serverOperation?.boards,
+            second: clientOperation.boards,
+            prevState: prevState.boards,
+            nextState: currentState.boards,
+            innerTransform: ({ first, second, prevState, nextState }) =>
+                Board.serverTransform(requestedBy)({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
                 }),
-            cancelUpdate: ({ key }) => {
-                if (
+            toServerState: state => state,
+            cancellationPolicy: {
+                cancelCreate: ({ key }) =>
+                    !RequestedBy.createdByMe({
+                        requestedBy,
+                        userUid: key.first,
+                    }),
+                cancelUpdate: ({ key }) => {
+                    if (
+                        RequestedBy.createdByMe({
+                            requestedBy,
+                            userUid: key.first,
+                        })
+                    ) {
+                        return false;
+                    }
+                    if (key.second !== currentState.activeBoardKey?.id) {
+                        return true;
+                    }
+                    return false;
+                },
+                cancelRemove: ({ key }) =>
+                    !RequestedBy.createdByMe({
+                        requestedBy,
+                        userUid: key.first,
+                    }),
+            },
+        });
+        if (boards.isError) {
+            return boards;
+        }
+
+        const characters = DualKeyRecordOperation.serverTransform<
+            Character.State,
+            Character.State,
+            Character.TwoWayOperation,
+            Character.UpOperation,
+            string | ApplyError<PositiveInt> | ComposeAndTransformError
+        >({
+            first: serverOperation?.characters,
+            second: clientOperation.characters,
+            prevState: prevState.characters,
+            nextState: currentState.characters,
+            innerTransform: ({ first, second, prevState, nextState, key }) =>
+                Character.serverTransform(
                     RequestedBy.createdByMe({
                         requestedBy,
                         userUid: key.first,
                     })
-                ) {
-                    return false;
-                }
-                if (key.second !== currentState.activeBoardKey?.id) {
-                    return true;
-                }
-                return false;
-            },
-            cancelRemove: ({ key }) =>
-                !RequestedBy.createdByMe({
-                    requestedBy,
-                    userUid: key.first,
+                )({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
                 }),
-        },
-    });
-    if (boards.isError) {
-        return boards;
-    }
+            toServerState: state => state,
+            cancellationPolicy: {
+                cancelCreate: ({ key }) =>
+                    !RequestedBy.createdByMe({ requestedBy, userUid: key.first }),
+                cancelUpdate: ({ key, nextState }) =>
+                    !RequestedBy.createdByMe({ requestedBy, userUid: key.first }) &&
+                    nextState.isPrivate,
+                cancelRemove: ({ key, nextState }) =>
+                    !RequestedBy.createdByMe({ requestedBy, userUid: key.first }) &&
+                    nextState.isPrivate,
+            },
+        });
+        if (characters.isError) {
+            return characters;
+        }
 
-    const characters = DualKeyRecordOperation.serverTransform<
-        Character.State,
-        Character.State,
-        Character.TwoWayOperation,
-        Character.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        first: serverOperation?.characters,
-        second: clientOperation.characters,
-        prevState: prevState.characters,
-        nextState: currentState.characters,
-        innerTransform: ({ first, second, prevState, nextState, key }) =>
-            Character.serverTransform(
+        const bgms = RecordOperation.serverTransform<
+            Bgm.State,
+            Bgm.State,
+            Bgm.TwoWayOperation,
+            Bgm.UpOperation,
+            string | ApplyError<PositiveInt> | ComposeAndTransformError
+        >({
+            prevState: prevState.bgms,
+            nextState: currentState.bgms,
+            first: serverOperation?.bgms,
+            second: clientOperation.bgms,
+            innerTransform: ({ prevState, nextState, first, second }) =>
+                Bgm.serverTransform({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {
+                cancelCreate: ({ key }) => !isStrIndex5(key),
+            },
+        });
+        if (bgms.isError) {
+            return bgms;
+        }
+
+        const boolParamNames = RecordOperation.serverTransform<
+            ParamNames.State,
+            ParamNames.State,
+            ParamNames.TwoWayOperation,
+            ParamNames.UpOperation,
+            string | ApplyError<PositiveInt> | ComposeAndTransformError
+        >({
+            prevState: prevState.boolParamNames,
+            nextState: currentState.boolParamNames,
+            first: serverOperation?.boolParamNames,
+            second: clientOperation.boolParamNames,
+            innerTransform: ({ prevState, nextState, first, second }) =>
+                ParamNames.serverTransform({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {
+                cancelCreate: ({ key }) => !isStrIndex20(key),
+            },
+        });
+        if (boolParamNames.isError) {
+            return boolParamNames;
+        }
+
+        // TODO: ファイルサイズが巨大になりそうなときに拒否する機能
+        const memos = RecordOperation.serverTransform<
+            Memo.State,
+            Memo.State,
+            Memo.TwoWayOperation,
+            Memo.UpOperation,
+            string | ApplyError<PositiveInt> | ComposeAndTransformError
+        >({
+            prevState: prevState.memos,
+            nextState: currentState.memos,
+            first: serverOperation?.memos,
+            second: clientOperation.memos,
+            innerTransform: ({ prevState, nextState, first, second }) =>
+                Memo.serverTransform({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {},
+        });
+        if (memos.isError) {
+            return memos;
+        }
+
+        const numParamNames = RecordOperation.serverTransform<
+            ParamNames.State,
+            ParamNames.State,
+            ParamNames.TwoWayOperation,
+            ParamNames.UpOperation,
+            string | ApplyError<PositiveInt> | ComposeAndTransformError
+        >({
+            prevState: prevState.numParamNames,
+            nextState: currentState.numParamNames,
+            first: serverOperation?.numParamNames,
+            second: clientOperation.numParamNames,
+            innerTransform: ({ prevState, nextState, first, second }) =>
+                ParamNames.serverTransform({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {
+                cancelCreate: ({ key }) => !isStrIndex20(key),
+            },
+        });
+        if (numParamNames.isError) {
+            return numParamNames;
+        }
+
+        const strParamNames = RecordOperation.serverTransform<
+            ParamNames.State,
+            ParamNames.State,
+            ParamNames.TwoWayOperation,
+            ParamNames.UpOperation,
+            string | ApplyError<PositiveInt> | ComposeAndTransformError
+        >({
+            prevState: prevState.strParamNames,
+            nextState: currentState.strParamNames,
+            first: serverOperation?.strParamNames,
+            second: clientOperation.strParamNames,
+            innerTransform: ({ prevState, nextState, first, second }) =>
+                ParamNames.serverTransform({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {
+                cancelCreate: ({ key }) => !isStrIndex20(key),
+            },
+        });
+        if (strParamNames.isError) {
+            return strParamNames;
+        }
+
+        const participants = RecordOperation.serverTransform<
+            Participant.State,
+            Participant.State,
+            Participant.TwoWayOperation,
+            Participant.UpOperation,
+            string | ApplyError<PositiveInt> | ComposeAndTransformError
+        >({
+            prevState: prevState.participants,
+            nextState: currentState.participants,
+            first: serverOperation?.participants,
+            second: clientOperation.participants,
+            innerTransform: ({ prevState, nextState, first, second, key }) =>
+                Participant.serverTransform({
+                    requestedBy,
+                    participantKey: key,
+                    activeBoardSecondKey: currentActiveBoardKey?.id,
+                })({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {},
+        });
+        if (participants.isError) {
+            return participants;
+        }
+
+        const twoWayOperation: TwoWayOperation = {
+            $version: 1,
+            bgms: bgms.value,
+            boards: boards.value,
+            boolParamNames: boolParamNames.value,
+            characters: characters.value,
+            memos: memos.value,
+            numParamNames: numParamNames.value,
+            strParamNames: strParamNames.value,
+            participants: participants.value,
+        };
+
+        // activeBoardKeyには、自分が作成したBoardしか設定できない。ただし、nullishにするのは誰でもできる。
+        if (clientOperation.activeBoardKey != null) {
+            if (
+                clientOperation.activeBoardKey.newValue == null ||
                 RequestedBy.createdByMe({
                     requestedBy,
-                    userUid: key.first,
+                    userUid: clientOperation.activeBoardKey.newValue.createdBy,
                 })
-            )({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        toServerState: state => state,
-        cancellationPolicy: {
-            cancelCreate: ({ key }) =>
-                !RequestedBy.createdByMe({ requestedBy, userUid: key.first }),
-            cancelUpdate: ({ key, nextState }) =>
-                !RequestedBy.createdByMe({ requestedBy, userUid: key.first }) &&
-                nextState.isPrivate,
-            cancelRemove: ({ key, nextState }) =>
-                !RequestedBy.createdByMe({ requestedBy, userUid: key.first }) &&
-                nextState.isPrivate,
-        },
-    });
-    if (characters.isError) {
-        return characters;
-    }
-
-    const bgms = RecordOperation.serverTransform<
-        Bgm.State,
-        Bgm.State,
-        Bgm.TwoWayOperation,
-        Bgm.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        prevState: prevState.bgms,
-        nextState: currentState.bgms,
-        first: serverOperation?.bgms,
-        second: clientOperation.bgms,
-        innerTransform: ({ prevState, nextState, first, second }) =>
-            Bgm.serverTransform({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        toServerState: state => state,
-        cancellationPolicy: {
-            cancelCreate: ({ key }) => !isStrIndex5(key),
-        },
-    });
-    if (bgms.isError) {
-        return bgms;
-    }
-
-    const boolParamNames = RecordOperation.serverTransform<
-        ParamNames.State,
-        ParamNames.State,
-        ParamNames.TwoWayOperation,
-        ParamNames.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        prevState: prevState.boolParamNames,
-        nextState: currentState.boolParamNames,
-        first: serverOperation?.boolParamNames,
-        second: clientOperation.boolParamNames,
-        innerTransform: ({ prevState, nextState, first, second }) =>
-            ParamNames.serverTransform({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        toServerState: state => state,
-        cancellationPolicy: {
-            cancelCreate: ({ key }) => !isStrIndex20(key),
-        },
-    });
-    if (boolParamNames.isError) {
-        return boolParamNames;
-    }
-
-    // TODO: ファイルサイズが巨大になりそうなときに拒否する機能
-    const memos = RecordOperation.serverTransform<
-        Memo.State,
-        Memo.State,
-        Memo.TwoWayOperation,
-        Memo.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        prevState: prevState.memos,
-        nextState: currentState.memos,
-        first: serverOperation?.memos,
-        second: clientOperation.memos,
-        innerTransform: ({ prevState, nextState, first, second }) =>
-            Memo.serverTransform({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        toServerState: state => state,
-        cancellationPolicy: {},
-    });
-    if (memos.isError) {
-        return memos;
-    }
-
-    const numParamNames = RecordOperation.serverTransform<
-        ParamNames.State,
-        ParamNames.State,
-        ParamNames.TwoWayOperation,
-        ParamNames.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        prevState: prevState.numParamNames,
-        nextState: currentState.numParamNames,
-        first: serverOperation?.numParamNames,
-        second: clientOperation.numParamNames,
-        innerTransform: ({ prevState, nextState, first, second }) =>
-            ParamNames.serverTransform({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        toServerState: state => state,
-        cancellationPolicy: {
-            cancelCreate: ({ key }) => !isStrIndex20(key),
-        },
-    });
-    if (numParamNames.isError) {
-        return numParamNames;
-    }
-
-    const strParamNames = RecordOperation.serverTransform<
-        ParamNames.State,
-        ParamNames.State,
-        ParamNames.TwoWayOperation,
-        ParamNames.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        prevState: prevState.strParamNames,
-        nextState: currentState.strParamNames,
-        first: serverOperation?.strParamNames,
-        second: clientOperation.strParamNames,
-        innerTransform: ({ prevState, nextState, first, second }) =>
-            ParamNames.serverTransform({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        toServerState: state => state,
-        cancellationPolicy: {
-            cancelCreate: ({ key }) => !isStrIndex20(key),
-        },
-    });
-    if (strParamNames.isError) {
-        return strParamNames;
-    }
-
-    const participants = RecordOperation.serverTransform<
-        Participant.State,
-        Participant.State,
-        Participant.TwoWayOperation,
-        Participant.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        prevState: prevState.participants,
-        nextState: currentState.participants,
-        first: serverOperation?.participants,
-        second: clientOperation.participants,
-        innerTransform: ({ prevState, nextState, first, second, key }) =>
-            Participant.serverTransform({
-                requestedBy,
-                participantKey: key,
-                activeBoardSecondKey: currentActiveBoardKey?.id,
-            })({
-                prevState,
-                currentState: nextState,
-                serverOperation: first,
-                clientOperation: second,
-            }),
-        toServerState: state => state,
-        cancellationPolicy: {},
-    });
-    if (participants.isError) {
-        return participants;
-    }
-
-    const twoWayOperation: TwoWayOperation = {
-        $version: 1,
-        bgms: bgms.value,
-        boards: boards.value,
-        boolParamNames: boolParamNames.value,
-        characters: characters.value,
-        memos: memos.value,
-        numParamNames: numParamNames.value,
-        strParamNames: strParamNames.value,
-        participants: participants.value,
-    };
-
-    // activeBoardKeyには、自分が作成したBoardしか設定できない。ただし、nullishにするのは誰でもできる。
-    if (clientOperation.activeBoardKey != null) {
-        if (
-            clientOperation.activeBoardKey.newValue == null ||
-            RequestedBy.createdByMe({
-                requestedBy,
-                userUid: clientOperation.activeBoardKey.newValue.createdBy,
-            })
-        ) {
-            twoWayOperation.activeBoardKey = ReplaceOperation.serverTransform({
-                first: serverOperation?.activeBoardKey,
-                second: clientOperation.activeBoardKey,
-                prevState: prevState.activeBoardKey,
-            });
+            ) {
+                twoWayOperation.activeBoardKey = ReplaceOperation.serverTransform({
+                    first: serverOperation?.activeBoardKey,
+                    second: clientOperation.activeBoardKey,
+                    prevState: prevState.activeBoardKey,
+                });
+            }
         }
-    }
 
-    twoWayOperation.name = ReplaceOperation.serverTransform({
-        first: serverOperation?.name,
-        second: clientOperation.name,
-        prevState: prevState.name,
-    });
-
-    ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).forEach(i => {
-        const key = `publicChannel${i}Name` as const;
-        twoWayOperation[key] = ReplaceOperation.serverTransform({
-            first: serverOperation == null ? undefined : serverOperation[key],
-            second: clientOperation[key],
-            prevState: prevState[key],
+        twoWayOperation.name = ReplaceOperation.serverTransform({
+            first: serverOperation?.name,
+            second: clientOperation.name,
+            prevState: prevState.name,
         });
-    });
 
-    if (isIdRecord(twoWayOperation)) {
-        return Result.ok(undefined);
-    }
+        ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).forEach(i => {
+            const key = `publicChannel${i}Name` as const;
+            twoWayOperation[key] = ReplaceOperation.serverTransform({
+                first: serverOperation == null ? undefined : serverOperation[key],
+                second: clientOperation[key],
+                prevState: prevState[key],
+            });
+        });
 
-    return Result.ok(twoWayOperation);
-};
+        if (isIdRecord(twoWayOperation)) {
+            return Result.ok(undefined);
+        }
+
+        return Result.ok(twoWayOperation);
+    };
 
 export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
     const activeBoardKey = ReplaceOperation.clientTransform({

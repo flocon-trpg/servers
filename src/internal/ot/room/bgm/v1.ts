@@ -1,15 +1,7 @@
 import * as t from 'io-ts';
 import * as ReplaceOperation from '../../util/replaceOperation';
 import { filePath } from '../../filePath/v1';
-import {
-    Apply,
-    ClientTransform,
-    Compose,
-    Diff,
-    Restore,
-    ServerTransform,
-    ToClientOperationParams,
-} from '../../util/type';
+import { Apply, ClientTransform, Compose, Diff, Restore, ServerTransform } from '../../util/type';
 import { createOperation } from '../../util/createOperation';
 import { isIdRecord } from '../../util/record';
 import { Result } from '@kizahasi/result';
