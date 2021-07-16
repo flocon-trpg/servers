@@ -501,7 +501,7 @@ export const serverTransform =
         if (imagePieces.isError) {
             return imagePieces;
         }
-        const twoWayOperation: TwoWayOperation = { $version: 1 };
+        const twoWayOperation: TwoWayOperation = { $version: 1, imagePieces: imagePieces.value };
 
         twoWayOperation.backgroundImage = ReplaceOperation.serverTransform({
             first: serverOperation?.backgroundImage,
