@@ -159,6 +159,15 @@ export {
 } from './internal/ot/room/character/dicePieceValue/log-v1';
 
 export {
+    State as ImagePieceState,
+    UpOperation as ImagePieceUpOperation,
+    DownOperation as ImagePieceDownOperation,
+    apply as applyImagePiece,
+    diff as imagePieceDiff,
+    toUpOperation as toImagePieceUpOperation,
+} from './internal/ot/room/board/imagePiece/v1';
+
+export {
     State as NumberPieceValueState,
     UpOperation as NumberPieceValueUpOperation,
     DownOperation as NumberPieceValueDownOperation,
