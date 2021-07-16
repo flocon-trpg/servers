@@ -158,6 +158,7 @@ const operateParticipantAndFlush = async ({
                         $version: 1,
                         name: create.name,
                         role: create.role,
+                        imagePieceValues: {},
                     }
                 },
             };
@@ -697,6 +698,7 @@ export class RoomResolver {
                             $version: 1,
                             role: Master,
                             name: input.participantName,
+                            imagePieceValues: {},
                         }
                     },
                     activeBoardKey: null,

@@ -106,6 +106,7 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
                         $version: 1,
                         name: create.name,
                         role: create.role,
+                        imagePieceValues: {},
                     }
                 },
             };
@@ -565,6 +566,7 @@ let RoomResolver = class RoomResolver {
                             $version: 1,
                             role: flocon_core_1.Master,
                             name: input.participantName,
+                            imagePieceValues: {},
                         }
                     },
                     activeBoardKey: null,

@@ -162,7 +162,7 @@ export namespace GlobalRoom {
         }) => {
             const nextState = apply({
                 state: prevState,
-                operation,
+                operation: toUpOperation(operation),
             });
             if (nextState.isError) {
                 throw nextState.error;

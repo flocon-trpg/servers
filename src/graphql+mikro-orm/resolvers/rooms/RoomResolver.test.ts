@@ -79,7 +79,7 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }: { em: EM; setupRoom
                     // 現状はとりあえず全員がMasterのケースのみを考えている。
                     role: 'Master',
                     name: creatorName,
-
+                    imagePieceValues: {},
                 }
             },
             activeBoardKey: null,

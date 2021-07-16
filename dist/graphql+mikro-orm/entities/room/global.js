@@ -115,7 +115,7 @@ var GlobalRoom;
         Global.applyToEntity = ({ em, target, prevState, operation, }) => {
             const nextState = flocon_core_1.apply({
                 state: prevState,
-                operation,
+                operation: flocon_core_1.toUpOperation(operation),
             });
             if (nextState.isError) {
                 throw nextState.error;

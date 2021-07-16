@@ -81,6 +81,7 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }) => {
                     $version: 1,
                     role: 'Master',
                     name: creatorName,
+                    imagePieceValues: {},
                 }
             },
             activeBoardKey: null,
