@@ -461,8 +461,9 @@ export namespace MyKonva {
 
     export const numberPiece = 'numberPiece';
     export const dicePiece = 'dicePiece';
+    export const imagePiece = 'imagePiece';
 
-    export type PieceState =
+    export type DiceOrNumberPieceState =
         | {
               type: typeof numberPiece;
               state: NumberPieceValueState;
@@ -472,7 +473,7 @@ export namespace MyKonva {
               state: DicePieceValueState;
           };
 
-    namespace PieceState {
+    namespace DiceOrNumberPieceState {
         type NumberPieceValueContentProps = {
             createdByMe: boolean;
             state: NumberPieceValueState;
@@ -753,7 +754,7 @@ export namespace MyKonva {
 
         type Props = {
             createdByMe: boolean;
-            state: PieceState;
+            state: DiceOrNumberPieceState;
         } & Size;
 
         export const Main: React.FC<Props> = (props: Props) => {
@@ -768,8 +769,8 @@ export namespace MyKonva {
         };
     }
 
-    type Props = {
-        state: PieceState;
+    type DiceOrNumberPieceProps = {
+        state: DiceOrNumberPieceState;
         createdByMe: boolean;
         isSelected: boolean;
         draggable: boolean;
@@ -783,7 +784,10 @@ export namespace MyKonva {
     } & Vector2 &
         Size;
 
-    export const Piece: React.FC<Props> = (props: Props) => {
+    // ImagePieceはCharacterなどと表示方法が近いので、ここでは実装していない
+    export const DiceOrNumberPiece: React.FC<DiceOrNumberPieceProps> = (
+        props: DiceOrNumberPieceProps
+    ) => {
         /*
         リサイズや移動の実装方法についてはこちらを参照
         https://konvajs.org/docs/react/Transformer.html
@@ -890,7 +894,7 @@ export namespace MyKonva {
                         });
                     }}
                 >
-                    <PieceState.Main {...props} />
+                    <DiceOrNumberPieceState.Main {...props} />
                 </ReactKonva.Group>
                 {props.isSelected && (
                     <ReactKonva.Transformer

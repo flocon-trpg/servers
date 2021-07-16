@@ -32,6 +32,7 @@ import { DicePieceValueDrawer } from './DicePieceValueDrawer';
 import { Memos } from './Memos';
 import { BoardContextMenu, PieceTooltip, PopoverEditor } from './BoardPopover';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
+import { ImagePieceDrawer } from './ImagePieceDrawer';
 
 const RoomMessagePanels: React.FC<{ roomId: string }> = ({ roomId }: { roomId: string }) => {
     const dispatch = useDispatch();
@@ -551,6 +552,7 @@ const Room: React.FC = () => {
                 <BoardDrawer />
                 <CharacterDrawer />
                 <DicePieceValueDrawer />
+                <ImagePieceDrawer />
                 <NumberPieceValueDrawer />
                 <CharacterParameterNamesDrawer />
                 <EditRoomDrawer />

@@ -40,7 +40,6 @@ const defaultBoard: BoardState = {
     cellOffsetY: 0,
     backgroundImage: null,
     backgroundImageZoom: 1,
-    imagePieces: {},
 };
 
 const gutter: [Gutter, Gutter] = [16, 16];

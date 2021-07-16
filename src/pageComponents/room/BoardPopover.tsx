@@ -36,6 +36,7 @@ import {
     ContextMenuState,
     create,
     dicePieceValue,
+    imagePieceValue,
     roomDrawerAndPopoverModule,
     tachie,
 } from '../../modules/roomDrawerAndPopoverModule';
@@ -63,31 +64,30 @@ export const PieceTooltip: React.FC = () => {
     const left = boardTooltipState.pagePosition.x - 30;
     const top = boardTooltipState.pagePosition.y + 1;
 
+    const style: React.CSSProperties = {
+        position: 'absolute',
+        left,
+        top,
+        padding,
+        backgroundColor,
+        zIndex,
+        maxWidth: 200,
+    };
+    const hrStyle: React.CSSProperties = {
+        transform: 'scaleY(0.5)',
+        borderWidth: '1px 0 0 0',
+        borderStyle: 'solid',
+        borderColor: '#FFFFFFD0',
+    };
+
     switch (boardTooltipState.mouseOverOn.type) {
         case character:
         case tachie:
             return (
-                <div
-                    style={{
-                        position: 'absolute',
-                        left,
-                        top,
-                        padding,
-                        backgroundColor,
-                        zIndex,
-                        maxWidth: 200,
-                    }}
-                >
+                <div style={style}>
                     <div>{boardTooltipState.mouseOverOn.character.name}</div>
                     {boardTooltipState.mouseOverOn.character.memo.trim() !== '' && (
-                        <hr
-                            style={{
-                                transform: 'scaleY(0.5)',
-                                borderWidth: '1px 0 0 0',
-                                borderStyle: 'solid',
-                                borderColor: '#FFFFFFD0',
-                            }}
-                        />
+                        <hr style={hrStyle} />
                     )}
                     <NewTabLinkify>
                         <span
@@ -97,6 +97,25 @@ export const PieceTooltip: React.FC = () => {
                             }}
                         >
                             {boardTooltipState.mouseOverOn.character.memo}
+                        </span>
+                    </NewTabLinkify>
+                </div>
+            );
+        case imagePieceValue:
+            return (
+                <div style={style}>
+                    <div>{boardTooltipState.mouseOverOn.element.value.name}</div>
+                    {boardTooltipState.mouseOverOn.element.value.memo.trim() !== '' && (
+                        <hr style={hrStyle} />
+                    )}
+                    <NewTabLinkify>
+                        <span
+                            style={{
+                                whiteSpace:
+                                    'pre-wrap' /* これがないと、stringに存在する改行が無視されてしまう */,
+                            }}
+                        >
+                            {boardTooltipState.mouseOverOn.element.value.memo}
                         </span>
                     </NewTabLinkify>
                 </div>
@@ -753,6 +772,77 @@ namespace ContextMenuModule {
         );
     };
 
+    type SelectedImagePiecesMenuProps = {
+        imagePieceValuesOnCursor: ContextMenuState['imagePieceValuesOnCursor'];
+        onContextMenuClear: () => void;
+        boardKey: CompositeKey;
+        dispatch: ReturnType<typeof useDispatch>;
+        operate: ReturnType<typeof useOperate>;
+    };
+
+    const selectedImagePiecesMenu = ({
+        imagePieceValuesOnCursor,
+        onContextMenuClear,
+        boardKey: boardKeyToShow,
+        dispatch,
+        operate,
+    }: SelectedImagePiecesMenuProps): JSX.Element | null => {
+        if (imagePieceValuesOnCursor.length === 0) {
+            return null;
+        }
+        return (
+            <>
+                {imagePieceValuesOnCursor.map(({ participantKey, valueId, value }) => (
+                    <Menu.SubMenu key={`${participantKey}@${valueId}`} title={value.name}>
+                        <Menu.Item
+                            onClick={() => {
+                                dispatch(
+                                    roomDrawerAndPopoverModule.actions.set({
+                                        imagePieceDrawerType: {
+                                            type: update,
+                                            boardKey: boardKeyToShow,
+                                            participantKey,
+                                            stateKey: valueId,
+                                        },
+                                    })
+                                );
+                                onContextMenuClear();
+                            }}
+                        >
+                            編集
+                        </Menu.Item>
+                        <Menu.Item
+                            onClick={() => {
+                                const operation: UpOperation = {
+                                    $version: 1,
+                                    participants: {
+                                        [participantKey]: {
+                                            type: update,
+                                            update: {
+                                                $version: 1,
+                                                imagePieceValues: {
+                                                    [valueId]: {
+                                                        type: replace,
+                                                        replace: { newValue: undefined },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                };
+                                operate(operation);
+                                onContextMenuClear();
+                            }}
+                        >
+                            削除
+                        </Menu.Item>
+                    </Menu.SubMenu>
+                ))}
+                <Menu.Divider />
+            </>
+        );
+    };
+
     type BasicMenuProps = {
         contextMenuState: ContextMenuState;
         onContextMenuClear: () => void;
@@ -1081,6 +1171,40 @@ namespace ContextMenuModule {
                         セルにスナップしない
                     </Menu.Item>
                 </Menu.SubMenu>
+                <Menu.SubMenu title="画像コマを追加">
+                    <Menu.Item
+                        onClick={() => {
+                            dispatch(
+                                roomDrawerAndPopoverModule.actions.set({
+                                    imagePieceDrawerType: {
+                                        type: create,
+                                        boardKey,
+                                        piece: pieceLocationWhichIsCellMode,
+                                    },
+                                })
+                            );
+                            onContextMenuClear();
+                        }}
+                    >
+                        セルにスナップする
+                    </Menu.Item>
+                    <Menu.Item
+                        onClick={() => {
+                            dispatch(
+                                roomDrawerAndPopoverModule.actions.set({
+                                    imagePieceDrawerType: {
+                                        type: create,
+                                        boardKey,
+                                        piece: pieceLocationWhichIsNotCellMode,
+                                    },
+                                })
+                            );
+                            onContextMenuClear();
+                        }}
+                    >
+                        セルにスナップしない
+                    </Menu.Item>
+                </Menu.SubMenu>
             </>
         );
     };
@@ -1159,6 +1283,13 @@ namespace ContextMenuModule {
                         dispatch,
                         operate,
                         myUserUid,
+                    })}
+                    {selectedImagePiecesMenu({
+                        ...contextMenuState,
+                        onContextMenuClear,
+                        boardKey,
+                        dispatch,
+                        operate,
                     })}
                     {selectedCharacterCommandsMenu({
                         ...contextMenuState,

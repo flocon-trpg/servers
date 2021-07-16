@@ -14,10 +14,13 @@ export type StateEditorParams<T> =
     | {
           type: typeof create;
           initState: T;
+
+          // stateがcreateからcreateに変わった場合は、上のinitStateに置き換わるのではなく、既存のstateをupdateInitStateによって変換された値が使われる(undefinedの場合は変換されない)。これにより、作成をキャンセルしてまた作成しようとしたときに前のデータが残るようになるというメリットがある。
+          // updateInitState != null のときは、StateEditorParamsはuseMemoを用いたものにしないと無限ループになる可能性があるので注意。
+          updateInitState?: (prev: T) => T;
       };
 
 // stateのcreateとupdateを自動的に切り替える機能をサポートするhook。createはボタンなどを押すまで作成されず、updateは値が変わるたびにstateにその変更が反映される場面を想定。
-// 注意点として、stateがcreateからcreateに変わった場合は、そのときにもしinitStateが変わっても変更が反映されないという仕様。これにより、作成をキャンセルしてまた作成しようとしたときに前のデータが残るようになるというメリットがある。
 export function useStateEditor<T>(state: StateEditorParams<T>) {
     const [uiState, setUiState] = React.useState<T>(
         (() => {
@@ -56,6 +59,10 @@ export function useStateEditor<T>(state: StateEditorParams<T>) {
     React.useEffect(() => {
         if (state.type === create) {
             if (previousState?.type === create) {
+                if (state.updateInitState != null) {
+                    const f = state.updateInitState;
+                    setUiState(prev => f(prev));
+                }
                 return;
             }
             setUiState(state.initState);

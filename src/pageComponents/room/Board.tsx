@@ -34,6 +34,7 @@ import {
     BoardLocationUpOperation,
     BoardState,
     BoardLocationState,
+    ImagePieceValueUpOperation,
 } from '@kizahasi/flocon-core';
 import {
     $free,
@@ -54,6 +55,8 @@ import {
 } from '../../modules/roomDrawerAndPopoverModule';
 import { useDicePieceValues } from '../../hooks/state/useDicePieceValues';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
+import { useImagePieces } from '../../hooks/state/useImagePieces';
+import { FilePath, FileSourceType } from '../../generated/graphql';
 
 const createPiecePostOperation = ({
     e,
@@ -111,6 +114,7 @@ const character = 'character';
 const tachie = 'tachie';
 const dicePieceValue = 'dicePieceValue';
 const numberPieceValue = 'numberPieceValue';
+const imagePiece = 'imagePiece';
 
 type SelectedPieceKey =
     | {
@@ -124,6 +128,10 @@ type SelectedPieceKey =
     | {
           type: typeof dicePieceValue | typeof numberPieceValue;
           stateId: string;
+      }
+    | {
+          type: typeof imagePiece;
+          pieceKey: CompositeKey;
       };
 
 const publicMessageFilter = (message: Message): boolean => {
@@ -182,6 +190,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const participants = useParticipants();
     const dicePieceValues = useDicePieceValues();
     const numberPieceValues = useNumberPieceValues();
+    const imagePieces = useImagePieces(boardKey);
 
     const onTooltipRef = useReadonlyRef(onTooltip);
     const onPopoverEditorRef = useReadonlyRef(onPopupEditor);
@@ -466,6 +475,91 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             .compact()
             .value();
 
+        const imagePieceViews = (imagePieces ?? []).map(pieceValueElement => {
+            const defaultImageFilePath: FilePath = {
+                // TODO: 適切な画像に変える
+                path: '/logo.png',
+                sourceType: FileSourceType.Default,
+            };
+            const pieceKey: CompositeKey = {
+                createdBy: pieceValueElement.participantKey,
+                id: pieceValueElement.valueId,
+            };
+            if (pieceValueElement.piece == null) {
+                return null;
+            }
+            const piece = pieceValueElement.piece;
+            return (
+                <MyKonva.Image
+                    {...Piece.getPosition({ ...board, state: pieceValueElement.piece })}
+                    opacity={1}
+                    key={compositeKeyToString(pieceKey)}
+                    filePath={pieceValueElement.value.image ?? defaultImageFilePath}
+                    draggable
+                    listening
+                    isSelected={
+                        selectedPieceKey?.type === 'imagePiece' &&
+                        compositeKeyEquals(selectedPieceKey.pieceKey, pieceKey)
+                    }
+                    onClick={() => {
+                        unsetPopoverEditor();
+                        setSelectedPieceKey({ type: 'imagePiece', pieceKey });
+                    }}
+                    onDblClick={e => {
+                        if (onPopoverEditorRef.current == null) {
+                            return;
+                        }
+                        onPopoverEditorRef.current({
+                            pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
+                            dblClickOn: { type: 'imagePieceValue', element: pieceValueElement },
+                        });
+                    }}
+                    onMouseEnter={() =>
+                        (mouseOverOnRef.current = {
+                            type: 'imagePieceValue',
+                            element: pieceValueElement,
+                        })
+                    }
+                    onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
+                    onDragEnd={e => {
+                        const pieceOperation = createPiecePostOperation({
+                            e,
+                            piece,
+                            board,
+                        });
+                        const operation: UpOperation = {
+                            $version: 1,
+                            participants: {
+                                [pieceValueElement.participantKey]: {
+                                    type: update,
+                                    update: {
+                                        $version: 1,
+                                        imagePieceValues: {
+                                            [pieceValueElement.valueId]: {
+                                                type: update,
+                                                update: {
+                                                    $version: 1,
+                                                    pieces: {
+                                                        [boardKey.createdBy]: {
+                                                            [boardKey.id]: {
+                                                                type: update,
+                                                                update: pieceOperation,
+                                                            },
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        };
+                        operate(operation);
+                    }}
+                />
+            );
+        });
+
         const dicePieces = _(dicePieceValues)
             .map(element => {
                 const piece = dualKeyRecordToDualKeyMap<PieceState>(element.value.pieces)
@@ -481,7 +575,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 }
                 const [, pieceValue] = piece;
                 return (
-                    <MyKonva.Piece
+                    <MyKonva.DiceOrNumberPiece
                         {...Piece.getPosition({ ...board, state: pieceValue })}
                         key={tripleKeyToString(
                             element.characterKey.createdBy,
@@ -574,7 +668,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 }
                 const [, pieceValue] = piece;
                 return (
-                    <MyKonva.Piece
+                    <MyKonva.DiceOrNumberPiece
                         {...Piece.getPosition({ ...board, state: pieceValue })}
                         key={tripleKeyToString(
                             element.characterKey.createdBy,
@@ -656,6 +750,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             <ReactKonva.Layer>
                 {tachieLocations}
                 {characterPieces}
+                {imagePieceViews}
                 {dicePieces}
                 {numberPieces}
             </ReactKonva.Layer>
@@ -812,6 +907,21 @@ const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: Props) 
         setActiveBoardSelectorModalVisibility,
     ] = React.useState(false);
 
+    const boardKeyToShow = (() => {
+        if (panel.type === 'activeBoard') {
+            return activeBoardKey;
+        }
+        if (panel.boardEditorPanel.activeBoardKey == null) {
+            return null;
+        }
+        return {
+            createdBy: myUserUid ?? 'FAKE_USER_ID@Board.tsx',
+            id: panel.boardEditorPanel.activeBoardKey,
+        };
+    })();
+
+    const imagePieces = useImagePieces(boardKeyToShow ?? undefined);
+
     if (
         me == null ||
         myUserUid == null ||
@@ -822,19 +932,6 @@ const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: Props) 
     ) {
         return null;
     }
-
-    const boardKeyToShow = (() => {
-        if (panel.type === 'activeBoard') {
-            return activeBoardKey;
-        }
-        if (panel.boardEditorPanel.activeBoardKey == null) {
-            return null;
-        }
-        return {
-            createdBy: myUserUid,
-            id: panel.boardEditorPanel.activeBoardKey,
-        };
-    })();
 
     const boardConfig =
         (() => {
@@ -955,6 +1052,18 @@ const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: Props) 
                                     })
                                     .compact()
                                     .value(),
+                                imagePieceValuesOnCursor: (imagePieces ?? []).filter(
+                                    pieceValueElement => {
+                                        if (pieceValueElement.piece == null) {
+                                            return false;
+                                        }
+                                        return Piece.isCursorOnIcon({
+                                            ...board,
+                                            state: pieceValueElement.piece,
+                                            cursorPosition: stateOffset,
+                                        });
+                                    }
+                                ),
                                 dicePieceValuesOnCursor: _(dicePieceValues)
                                     .map(element => {
                                         const found = dualKeyRecordToDualKeyMap<PieceState>(

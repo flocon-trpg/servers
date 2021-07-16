@@ -9,6 +9,7 @@ import { CompositeKey } from '@kizahasi/util';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { MyKonva } from '../components/MyKonva';
 import { DicePieceValueElement } from '../hooks/state/useDicePieceValues';
+import { ImagePieceValueElement } from '../hooks/state/useImagePieces';
 import { NumberPieceValueElement } from '../hooks/state/useNumberPieceValues';
 import { BoardConfig } from '../states/BoardConfig';
 
@@ -24,6 +25,7 @@ export const character = 'character';
 export const tachie = 'tachie';
 export const dicePieceValue = 'dicePieceValue';
 export const numberPieceValue = 'numberPieceValue';
+export const imagePieceValue = 'imagePieceValue';
 
 export type BoardEditorDrawerType =
     | {
@@ -67,6 +69,27 @@ export type PieceValueDrawerType =
           stateKey: string;
       };
 
+export type ImagePieceDrawerType =
+    | {
+          // pieceとともに作成するケース
+          type: typeof create;
+          boardKey: CompositeKey;
+          piece: PieceState;
+      }
+    | {
+          // pieceは作成しないケース
+          type: typeof create;
+          boardKey: null;
+          piece: null;
+      }
+    | {
+          type: typeof update;
+          participantKey: string;
+          // boardKey != nullならば、pieceが指定されたupdate。そうでないならばpieceが指定されないupdate。
+          boardKey: CompositeKey | null;
+          stateKey: string;
+      };
+
 export type ClickOn =
     | {
           type: typeof dicePieceValue;
@@ -75,6 +98,10 @@ export type ClickOn =
     | {
           type: typeof numberPieceValue;
           element: NumberPieceValueElement;
+      }
+    | {
+          type: typeof imagePieceValue;
+          element: ImagePieceValueElement;
       }
     | {
           type: typeof character | typeof tachie;
@@ -117,6 +144,7 @@ export type ContextMenuState = {
         numberPieceValue: NumberPieceValueState;
         piece: PieceState;
     }>;
+    imagePieceValuesOnCursor: ReadonlyArray<ImagePieceValueElement>;
 };
 // pageX, pageYではなくpagePositionでまとめられているのには、特に理由はない
 export type BoardTooltipState = { pagePosition: MyKonva.Vector2; mouseOverOn: MouseOverOn };
@@ -127,6 +155,7 @@ export type State = {
     boardDrawerType: BoardEditorDrawerType | null;
     characterDrawerType: CharacterEditorDrawerType | null;
     dicePieceValueDrawerType: PieceValueDrawerType | null;
+    imagePieceDrawerType: ImagePieceDrawerType | null;
     numberPieceValueDrawerType: PieceValueDrawerType | null;
     editRoomDrawerVisibility: boolean;
 
@@ -140,6 +169,7 @@ const initState: State = {
     boardDrawerType: null,
     characterDrawerType: null,
     dicePieceValueDrawerType: null,
+    imagePieceDrawerType: null,
     numberPieceValueDrawerType: null,
     editRoomDrawerVisibility: false,
 
@@ -170,6 +200,10 @@ export const roomDrawerAndPopoverModule = createSlice({
                     action.payload.dicePieceValueDrawerType === undefined
                         ? state.dicePieceValueDrawerType
                         : action.payload.dicePieceValueDrawerType,
+                imagePieceDrawerType:
+                    action.payload.imagePieceDrawerType === undefined
+                        ? state.imagePieceDrawerType
+                        : action.payload.imagePieceDrawerType,
                 numberPieceValueDrawerType:
                     action.payload.numberPieceValueDrawerType === undefined
                         ? state.numberPieceValueDrawerType
