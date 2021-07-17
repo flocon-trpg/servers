@@ -3,6 +3,7 @@ import React from 'react';
 import { ItemContent, Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { usePrevious } from '../hooks/usePrevious';
 import { useReadonlyRef } from '../hooks/useReadonlyRef';
+import { backgroundColor } from './DraggableCard';
 
 type Props<T> = {
     items: ReadonlyArray<T>;
@@ -75,7 +76,7 @@ export function StickToBottomVirtuoso<T>({ items, create, height }: Props<T>) {
                     style={{
                         position: 'absolute',
                         bottom: 5,
-                        backgroundColor: 'black',
+                        backgroundColor,
                         left: '50%',
                         transform: 'translateX(-50%)',
                     }}

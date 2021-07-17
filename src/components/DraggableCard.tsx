@@ -14,7 +14,7 @@ export const horizontalPadding = 24;
 const headerBackgroundColor = 'rgba(32, 49, 117, 1)'; // antdのgeekblue-4と等しい
 const borderColor = 'rgba(32, 49, 117, 0.4)';
 const headerColor = undefined;
-const backgroundColor = '#141414';
+export const backgroundColor = '#141414';
 const defaultHeaderHeight = 28;
 const borderWidth = 2;
 
