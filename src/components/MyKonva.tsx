@@ -194,7 +194,7 @@ export namespace MyKonva {
                 ) {
                     return recentMessages;
                 }
-                return [...recentMessages, message].sort((x, y) => y.createdAt - x.createdAt);
+                return [...recentMessages, message].sort((x, y) => x.createdAt - y.createdAt);
             });
         }, [message, timeWindow]);
 

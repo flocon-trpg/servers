@@ -569,6 +569,7 @@ export const useFilteredRoomMessages = ({
 };
 
 // filterとthenMapは、常に同じ参照にするかuseCallbackなどを使うのを忘れずに。
+// CONSIDER: react-vertuosoを使うようになったため、thenMapの必要性に疑問が生じている。
 export const useFilteredAndMapRoomMessages = <TResult>({
     filter,
     thenMap,

@@ -30,5 +30,6 @@ module.exports = {
         'react-hooks/exhaustive-deps': 'warn',
         '@typescript-eslint/no-namespace': 'off',
         'space-before-blocks': 'warn',
+        'react/prop-types': 'off',
     },
 };

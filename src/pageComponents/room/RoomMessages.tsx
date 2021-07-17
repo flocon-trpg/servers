@@ -44,7 +44,6 @@ import {
 } from '../../generated/graphql';
 import * as Icon from '@ant-design/icons';
 import { getUserUid } from '../../hooks/useFirebaseUser';
-import PagenationScroll from '../../components/PagenationScroll';
 import { MessagePanelConfig, MessageFilter, TabConfig } from '../../states/MessagePanelConfig';
 import { Gutter } from 'antd/lib/grid/row';
 import DrawerFooter from '../../layouts/DrawerFooter';
@@ -69,6 +68,7 @@ import useUserConfig from '../../hooks/localStorage/useUserConfig';
 import { UserConfig } from '../../states/UserConfig';
 import * as Icons from '@ant-design/icons';
 import { InputModal } from '../../components/InputModal';
+import { StickToBottomVirtuoso } from '../../components/StickToBottomVirtuoso';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -405,6 +405,10 @@ type RoomMessageComponentProps = {
     showPrivateMessageMembers?: boolean;
 };
 
+// margin を使うとvirtuosoで問題が発生するので、代わりにpaddingなどを用いなければならない。
+// leftやrightはmarginを使っても大丈夫かもしれないが、改行の有無に関わる可能性があるのでこれらもmarginに置き換えている。
+// https://virtuoso.dev/troubleshooting#list-does-not-scroll-to-the-bottom--items-jump-around
+// また、例えば「roomId == nullならばとりあえず適当に<div style={{minHeight: 20}} />を返す」といったアプローチだとスクロールが正常にできないといった問題点があるのでこれも避けるべき。おそらく、初めはroomId == nullなので20pxになるが、直後にroomId != nullになるためすぐにheightが代わり、メッセージの数が多いとそのheightのずれが積み重なっておかしくなる、というのが原因だと考えられる。
 const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
     props: RoomMessageComponentProps
 ) => {
@@ -429,10 +433,6 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
         () => (participants == null ? null : recordToMap(participants)),
         [participants]
     );
-
-    if (roomId == null || publicChannelNames == null) {
-        return null;
-    }
 
     const roomMessage =
         message.type === privateMessage || message.type === publicMessage ? message.value : null;
@@ -514,6 +514,9 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
         roomMessage.createdBy === getUserUid(myAuth) ? (
             <Menu.Item
                 onClick={() => {
+                    if (roomId == null) {
+                        return;
+                    }
                     makeMessageNotSecret({
                         variables: { messageId: roomMessage.messageId, roomId },
                     });
@@ -536,6 +539,9 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
         roomMessage != null && createdByMe === true ? (
             <Menu.Item
                 onClick={() => {
+                    if (roomId == null) {
+                        return;
+                    }
                     deleteMessageMutation({
                         variables: { messageId: roomMessage.messageId, roomId },
                     });
@@ -559,8 +565,8 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                 display: 'grid',
                 gridTemplateRows: `${headerHeight}px 1fr`,
                 gridTemplateColumns: '1fr 40px',
-                marginBottom: 4,
-                marginTop: 4,
+                paddingBottom: 4,
+                paddingTop: 4,
             }}
         >
             <div
@@ -578,16 +584,18 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                         (message.type === publicMessage &&
                             RoomMessageNameSpace.userName(message, participantsMap ?? new Map()))}
                 </div>
-                <div style={{ flex: '0 0 auto', color: 'gray', marginLeft: 6 }}>
+                <div style={{ flex: '0 0 auto', color: 'gray', paddingLeft: 6 }}>
                     {message.type !== privateMessage && message.type !== publicMessage
                         ? '(ログ)'
+                        : publicChannelNames == null
+                        ? '?'
                         : RoomMessageNameSpace.toChannelName(
                               message,
                               publicChannelNames,
                               participantsMap ?? new Map()
                           )}
                 </div>
-                <div style={{ flex: '0 0 auto', color: 'gray', marginLeft: 6 }}>{datetime}</div>
+                <div style={{ flex: '0 0 auto', color: 'gray', paddingLeft: 6 }}>{datetime}</div>
                 {privateMessageMembersInfo != null && (
                     <div style={{ flex: '0 0 auto', width: 6 }} />
                 )}
@@ -643,7 +651,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                 visible={isEditModalVisible}
                 isTextArea={true}
                 onOk={(value, setValue) => {
-                    if (roomMessage == null) {
+                    if (roomMessage == null || roomId == null) {
                         return;
                     }
                     editMessageMutation({
@@ -686,7 +694,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
     const filter = useMessageFilter(config);
     const thenMap = React.useCallback((messages: ReadonlyArray<Message>) => {
         return [...messages]
-            .sort((x, y) => y.value.createdAt - x.value.createdAt)
+            .sort((x, y) => x.value.createdAt - y.value.createdAt)
             .map(message => {
                 if (message.type === soundEffect) {
                     // soundEffectはfilterで弾いていなければならない。
@@ -750,9 +758,9 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <PagenationScroll
-                source={messages}
-                elementMinHeight={headerHeight + contentMinHeight}
+            <StickToBottomVirtuoso
+                items={messages}
+                create={(index, data) => data}
                 height={writingStatus == null ? contentHeight : contentHeight - writingStatusHeight}
             />
             {writingStatus}

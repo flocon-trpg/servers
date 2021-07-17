@@ -22,7 +22,6 @@ export function useBufferValue<T>({
 
     const subject = useConstant(() => new Subject<T>());
     const subjectNext: (value: T) => void = useConstant(() => {
-        // もし return subect.next としてしまうとsubject.next内でthisがundefinedであるというエラーが出る
         return x => subject.next(x);
     });
     const [, setSubscription] = React.useState<Subscription>();

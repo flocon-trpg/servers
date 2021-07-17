@@ -25,7 +25,6 @@ export function useBuffer<TValue, TComponent>({
     const ref = React.useRef<TComponent | null>(null);
     const subject = useConstant(() => new Subject<TValue>());
     const subjectNext: (value: TValue) => void = useConstant(() => {
-        // もし return subect.next としてしまうとsubject.next内でthisがundefinedであるというエラーが出る
         return x => subject.next(x);
     });
     const [, setSubscription] = React.useState<Subscription>();
