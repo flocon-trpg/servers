@@ -299,6 +299,7 @@ const FirebaseFilesList: React.FC<FirebaseFilesListProps> = ({
     return (
         <div>
             <Button
+                disabled={selectedRowKeys.length === 0}
                 onClick={() => {
                     let selectedFiles: FirebaseStorageFile.State[];
                     if (storageType === $public) {
