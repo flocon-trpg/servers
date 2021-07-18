@@ -744,11 +744,12 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
     const writingStatusCss = css`
         flex-basis: ${writingStatusHeight}px;
         background-color: #10101090;
+        padding: 0 4px;
     `;
     if (writingUsers.length >= 3) {
         writingStatus = <div css={writingStatusCss}>複数人が書き込み中…</div>;
     } else if (writingUsers.length === 0) {
-        writingStatus = <div css={writingStatusCss}/>
+        writingStatus = <div css={writingStatusCss} />;
     } else {
         writingStatus = (
             <div css={writingStatusCss}>
@@ -760,11 +761,15 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <StickToBottomVirtuoso
-                items={messages}
-                create={(index, data) => data}
-                height={writingStatus == null ? contentHeight : contentHeight - writingStatusHeight}
-            />
+            <div style={{ padding: '0 4px' }}>
+                <StickToBottomVirtuoso
+                    items={messages}
+                    create={(index, data) => data}
+                    height={
+                        writingStatus == null ? contentHeight : contentHeight - writingStatusHeight
+                    }
+                />
+            </div>
             {writingStatus}
         </div>
     );
@@ -840,7 +845,7 @@ const RoomMessages: React.FC<Props> = (props: Props) => {
                           key={tab.key}
                           tabKey={tab.key}
                           closable={false}
-                          style={{ backgroundColor: Color.chatBackgroundColor, padding: '0 4px' }}
+                          style={{ backgroundColor: Color.chatBackgroundColor }}
                           tab={
                               <div
                                   style={{
