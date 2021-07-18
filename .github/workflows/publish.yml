@@ -15,10 +15,9 @@ jobs:
         with:
           node-version: 14.x
           registry-url: 'https://registry.npmjs.org'
+          always-auth: true 
       - name: can publish
         run: npx can-npm-publish --verbose
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: install
         run: yarn install
       - name: build
