@@ -1,9 +1,9 @@
 {
-    "version": "0.10.3",
+    "version": "0.11.0",
     "license": "MIT",
     "main": "dist/cjs/index.js",
     "module": "dist/esm/index.js",
-    "typings": "dist/cjs/index.d.ts",
+    "typings": "dist/types/index.d.ts",
     "files": [
         "dist"
     ],
@@ -11,7 +11,7 @@
         "node": ">=14"
     },
     "scripts": {
-        "build": "yarn lint && yarn prettier && rimraf ./dist && tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json",
+        "build": "yarn lint && yarn prettier && rimraf ./dist && tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json",
         "test": "jest",
         "prepare": "yarn build",
         "lint": "eslint src test",
