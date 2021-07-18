@@ -13,7 +13,7 @@ import {
     CharacterState,
     update,
     diff,
-} from '../dist/cjs';
+} from '../src';
 
 namespace Resources {
     export namespace Participant {
