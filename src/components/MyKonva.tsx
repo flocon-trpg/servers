@@ -17,7 +17,7 @@ import {
 } from '@kizahasi/flocon-core';
 import { NumberPieceValue } from '../utils/numberPieceValue';
 import { KonvaD6 } from './KonvaDice';
-import { State as DieValueState } from '@kizahasi/flocon-core/dist/internal/ot/room/character/dicePieceValue/dieValue/v1';
+import { State as DieValueState } from '@kizahasi/flocon-core/dist/types/internal/ot/room/character/dicePieceValue/dieValue/v1';
 import { DicePieceValue } from '../utils/dicePieceValue';
 
 export namespace MyKonva {
