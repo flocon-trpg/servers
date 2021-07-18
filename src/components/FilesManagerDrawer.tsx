@@ -32,6 +32,8 @@ import { FirebaseStorageFile } from '../modules/fileModule';
 import { useSelector } from '../store';
 import { useDispatch } from 'react-redux';
 import { fileModule } from '../modules/fileModule';
+import { $public, StorageType, unlisted } from '../utils/firebaseStorage';
+import { DeleteFirebaseStorageFileModal } from './DeleteFirebaseStorageFileModal';
 
 type DataSource = FirebaseStorageFile.State;
 
@@ -48,10 +50,6 @@ const Path = {
         list: (userId: string) => `version/1/uploader/unlisted/${userId}`,
     },
 };
-
-const $public = 'public';
-const unlisted = 'unlisted';
-type StorageType = typeof $public | typeof unlisted;
 
 type FirebaseUploaderProps = {
     onUploaded: () => void;
@@ -240,33 +238,7 @@ const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({
                 </Menu.Item>
                 <Menu.Item
                     icon={<Icons.DeleteOutlined />}
-                    onClick={() => {
-                        Modal.warn({
-                            title: `${storageType} の ${reference.name} を削除します。よろしいですか？`,
-                            onOk() {
-                                reference.delete().then(() => {
-                                    switch (storageType) {
-                                        case $public:
-                                            dispatch(
-                                                fileModule.actions.reloadFirebaseStoragePublicFiles()
-                                            );
-                                            break;
-                                        case unlisted:
-                                            dispatch(
-                                                fileModule.actions.reloadFirebaseStorageUnlistedFiles()
-                                            );
-                                            break;
-                                    }
-                                });
-                            },
-                            okButtonProps: { danger: true, type: 'primary' },
-                            okText: '削除',
-                            okCancel: true,
-                            keyboard: true,
-                            autoFocusButton: 'cancel',
-                            maskClosable: true,
-                        });
-                    }}
+                    onClick={() => DeleteFirebaseStorageFileModal(storageType, reference, dispatch)}
                 >
                     削除
                 </Menu.Item>
@@ -304,6 +276,8 @@ const FirebaseFilesList: React.FC<FirebaseFilesListProps> = ({
 }: FirebaseFilesListProps) => {
     const unlistedFiles = useSelector(state => state.fileModule.firebaseStorageUnlistedFiles);
     const publicFiles = useSelector(state => state.fileModule.firebaseStoragePublicFiles);
+    const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([]);
+    const dispatch = useDispatch();
 
     const columns = (() => {
         if (onFlieOpen != null) {
@@ -323,13 +297,49 @@ const FirebaseFilesList: React.FC<FirebaseFilesListProps> = ({
         ];
     })();
     return (
-        <Table
-            size="small"
-            pagination={{ pageSize: 15 }}
-            rowKey="fullPath"
-            columns={columns}
-            dataSource={(storageType === unlisted ? unlistedFiles : publicFiles) ?? []}
-        />
+        <div>
+            <Button
+                onClick={() => {
+                    let selectedFiles: FirebaseStorageFile.State[];
+                    if (storageType === $public) {
+                        if (publicFiles == null) {
+                            return;
+                        }
+                        selectedFiles = publicFiles.filter(r =>
+                            selectedRowKeys.some(key => r.fullPath === key)
+                        );
+                    } else {
+                        if (unlistedFiles == null) {
+                            return;
+                        }
+                        selectedFiles = unlistedFiles.filter(r =>
+                            selectedRowKeys.some(key => r.fullPath === key)
+                        );
+                    }
+                    DeleteFirebaseStorageFileModal(
+                        storageType,
+                        selectedFiles.map(s => s.reference),
+                        dispatch
+                    );
+                }}
+            >
+                選択したファイルを削除
+            </Button>
+            <Table
+                rowSelection={{
+                    selectedRowKeys,
+                    onChange: selected => {
+                        setSelectedRowKeys(selected);
+                        console.info(selected);
+                    },
+                }}
+                size="small"
+                pagination={{ pageSize: 15 }}
+                rowKey="fullPath"
+                columns={columns}
+                dataSource={(storageType === unlisted ? unlistedFiles : publicFiles) ?? []}
+            />
+        </div>
     );
 };
 
