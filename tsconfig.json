@@ -1,7 +1,6 @@
 {
     // see https://www.typescriptlang.org/tsconfig to better understand tsconfigs
     "compilerOptions": {
-        "module": "commonjs",
         "lib": ["ES2019"],
         "target": "ES2019",
         "declaration": true,
