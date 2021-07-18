@@ -31,3 +31,4 @@ jobs:
         run: npm run export
         env:
           NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG: ${{ secrets.NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG }}
+          NEXT_PUBLIC_FLOCON_WEB_CONFIG: ${{ secrets.NEXT_PUBLIC_FLOCON_WEB_CONFIG }}
