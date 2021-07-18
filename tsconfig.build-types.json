@@ -1,0 +1,11 @@
+// ts-jestが2021/07/08時点でESMに正式対応していないため、commonjs版が必要となる。
+{
+    "extends": "./tsconfig.json",
+    "include": ["src"],
+    "compilerOptions": {
+        "declaration": true,
+        "emitDeclarationOnly": true,
+        "rootDir": "./src",
+        "outDir": "./dist/types"
+    }
+}
