@@ -2,8 +2,8 @@ name: publish
 
 on:
   push:
-    tags:
-      - v*
+    branches:
+      - main
 
 jobs:
   build:
@@ -18,16 +18,12 @@ jobs:
       - name: can publish
         run: npx can-npm-publish --verbose
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: install
         run: yarn install
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: build
         run: yarn build
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: publish
-        run: yarn publish --access publish
+        run: yarn publish --access=public
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
