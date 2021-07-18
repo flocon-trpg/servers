@@ -747,7 +747,9 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
     `;
     if (writingUsers.length >= 3) {
         writingStatus = <div css={writingStatusCss}>複数人が書き込み中…</div>;
-    } else if (writingUsers.length !== 0) {
+    } else if (writingUsers.length === 0) {
+        writingStatus = <div css={writingStatusCss}/>
+    } else {
         writingStatus = (
             <div css={writingStatusCss}>
                 {writingUsers.reduce((seed, elem, i) => (i === 0 ? elem : `${seed}, ${elem}`), '') +
