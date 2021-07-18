@@ -1,5 +1,7 @@
 name: CI
-on: [push]
+on:
+  push:
+    branches: [main, master, develop]
 jobs:
   build:
     name: Build, and test on Node ${{ matrix.node }} and ${{ matrix.os }}
@@ -27,5 +29,5 @@ jobs:
 
       - name: Next export
         run: npm run export
-
-      
+        env:
+          NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG: ${{ secrets.NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG }}
