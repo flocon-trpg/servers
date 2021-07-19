@@ -1,5 +1,5 @@
 {
-    "version": "0.2.0",
+    "version": "0.3.0",
     "license": "MIT",
     "main": "dist/index.js",
     "typings": "dist/index.d.ts",
@@ -10,7 +10,7 @@
         "node": ">=12"
     },
     "scripts": {
-        "build": "yarn lint && yarn prettier && rimraf ./dist && tsc -p tsconfig.json",
+        "build": "yarn lint && yarn prettier && rimraf ./dist && tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json",
         "test": "jest",
         "prepare": "yarn build",
         "lint": "eslint src test",

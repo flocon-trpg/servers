@@ -1,21 +1,37 @@
-import { FBoolean, FFunction, FType, FValue } from '../scriptValue';
+import { AstInfo, FBoolean, FFunction, FType, FValue, OnGettingParams } from '../scriptValue';
 import { Option } from '@kizahasi/option';
+import { ScriptError } from '..';
 
 class SArrayClass extends FFunction {
     public constructor() {
-        super(() => {
-            throw new Error('Array constructor is not supported');
-        });
+        super(
+            () => {
+                throw new Error('Array constructor is not supported');
+            },
+            undefined,
+            false
+        );
     }
 
-    public onGetting(key: string | number): Option<FValue> {
+    private static prepareStaticMethod(isNew: boolean, astInfo: AstInfo | undefined): void {
+        if (isNew) {
+            throw ScriptError.notConstructorError(astInfo?.range);
+        }
+    }
+
+    public onGetting({ key, astInfo }: OnGettingParams): Option<FValue> {
         switch (key) {
             case 'isArray': {
                 return Option.some(
-                    new FFunction(args => {
-                        const arg = args[0];
-                        return new FBoolean(arg?.type === FType.Array);
-                    })
+                    new FFunction(
+                        ({ args, isNew }) => {
+                            SArrayClass.prepareStaticMethod(isNew, astInfo);
+                            const arg = args[0];
+                            return new FBoolean(arg?.type === FType.Array);
+                        },
+                        this,
+                        false
+                    )
                 );
             }
             default:

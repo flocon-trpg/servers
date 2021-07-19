@@ -4,7 +4,6 @@ import {
     AssignmentExpression,
     AssignmentOperator,
     BaseCallExpression,
-    BaseNodeWithoutComments,
     BinaryExpression,
     BinaryOperator,
     ChainExpression,
@@ -18,10 +17,12 @@ import {
     ObjectExpression,
     Property,
     SimpleCallExpression,
+    ThisExpression,
     UnaryExpression,
     UnaryOperator,
 } from 'estree';
 import { fBlockStatement, FBlockStatement } from './fStatement';
+import { Range, toRange } from './range';
 import { ScriptError } from './ScriptError';
 
 export type FArrayExpression = Omit<ArrayExpression, 'elements'> & {
@@ -35,7 +36,7 @@ function fArrayExpression(expression: ArrayExpression): FArrayExpression {
                 return e;
             }
             if (e.type === 'SpreadElement') {
-                throw new ScriptError(expression, 'SpreadElement is not supported');
+                throw new ScriptError('SpreadElement is not supported', toRange(expression));
             }
             return fExpression(e);
         }),
@@ -49,7 +50,7 @@ export type FArrowFunctionExpression = Omit<ArrowFunctionExpression, 'body' | 'p
 function fArrowFuntionExpression(expression: ArrowFunctionExpression): FArrowFunctionExpression {
     const params = expression.params.map(param => {
         if (param.type !== 'Identifier') {
-            throw new ScriptError(expression, `'${param.type}' is not supported`);
+            throw new ScriptError(`'${param.type}' is not supported`, toRange(expression));
         }
         return param;
     });
@@ -66,12 +67,12 @@ function fArrowFuntionExpression(expression: ArrowFunctionExpression): FArrowFun
     };
 }
 
-function fAssignmentOperator(operator: AssignmentOperator, node: BaseNodeWithoutComments) {
+function fAssignmentOperator(operator: AssignmentOperator, range: Range | undefined) {
     switch (operator) {
         case '=':
             return operator;
         default:
-            throw new ScriptError(node, `'${operator}' is not supported`);
+            throw new ScriptError(`'${operator}' is not supported`, range);
     }
 }
 export type FAssignmentOperator = ReturnType<typeof fAssignmentOperator>;
@@ -91,11 +92,14 @@ function fAssignmentExpression(expression: AssignmentExpression): FAssignmentExp
             left = fMemberExpression(expression.left);
             break;
         default:
-            throw new ScriptError(expression, `'${expression.left.type}' is not supported`);
+            throw new ScriptError(
+                `'${expression.left.type}' is not supported`,
+                toRange(expression)
+            );
     }
     return {
         ...expression,
-        operator: fAssignmentOperator(expression.operator, expression),
+        operator: fAssignmentOperator(expression.operator, toRange(expression)),
         left,
         right: fExpression(expression.right),
     };
@@ -107,25 +111,25 @@ export type FBaseCallExpression = Omit<BaseCallExpression, 'callee' | 'arguments
 };
 function fBaseCallExpression(expression: BaseCallExpression): FBaseCallExpression {
     if (expression.callee.type === 'Super') {
-        throw new ScriptError(expression, `'${expression.callee.type}' is not supported`);
+        throw new ScriptError(`'${expression.callee.type}' is not supported`, toRange(expression));
     }
     return {
         ...expression,
         callee: fExpression(expression.callee),
         arguments: expression.arguments.map(arg => {
             if (arg.type === 'SpreadElement') {
-                throw new ScriptError(arg, `'${arg.type} is not supported'`);
+                throw new ScriptError(`'${arg.type} is not supported'`, toRange(arg));
             }
             return fExpression(arg);
         }),
     };
 }
 
-function fBinaryOperator(operator: BinaryOperator, node: BaseNodeWithoutComments) {
+function fBinaryOperator(operator: BinaryOperator, range: Range | undefined) {
     switch (operator) {
         case 'in':
         case 'instanceof':
-            throw new ScriptError(node, `'${operator}' is not supported`);
+            throw new ScriptError(`'${operator}' is not supported`, range);
         default:
             return operator;
     }
@@ -140,7 +144,7 @@ export type FBinaryExpression = Omit<BinaryExpression, 'operator' | 'left' | 'ri
 function fBinaryExpression(expression: BinaryExpression): FBinaryExpression {
     return {
         ...expression,
-        operator: fBinaryOperator(expression.operator, expression),
+        operator: fBinaryOperator(expression.operator, toRange(expression)),
         left: fExpression(expression.left),
         right: fExpression(expression.right),
     };
@@ -183,10 +187,10 @@ export type FIdentifier = Identifier;
 
 function fLiteral(expression: Literal) {
     if ('bigint' in expression) {
-        throw new ScriptError(expression, `'bigint' is not supported`);
+        throw new ScriptError(`'bigint' is not supported`, toRange(expression));
     }
     if ('regex' in expression) {
-        throw new ScriptError(expression, `'regex' is not supported`);
+        throw new ScriptError(`'regex' is not supported`, toRange(expression));
     }
     return expression;
 }
@@ -210,11 +214,11 @@ export type FMemberExpression = Omit<MemberExpression, 'object' | 'property'> & 
 };
 function fMemberExpression(expression: MemberExpression): FMemberExpression {
     if (expression.object.type === 'Super') {
-        throw new ScriptError(expression, "'Super' is not supported");
+        throw new ScriptError("'Super' is not supported", toRange(expression));
     }
     if (expression.property.type === 'PrivateIdentifier') {
         // 用途が不明
-        throw new ScriptError(expression, "'PrivateIdentifier' is not supported");
+        throw new ScriptError("'PrivateIdentifier' is not supported", toRange(expression));
     }
     return {
         ...expression,
@@ -243,7 +247,7 @@ function fObjectExpression(expression: ObjectExpression): FObjectExpression {
         ...expression,
         properties: expression.properties.map(prop => {
             if (prop.type === 'SpreadElement') {
-                throw new ScriptError(expression, "'SpreadElement' is not supported");
+                throw new ScriptError("'SpreadElement' is not supported", toRange(expression));
             }
             return fProperty(prop);
         }),
@@ -265,14 +269,17 @@ function fProperty(property: Property): FProperty {
             key = fLiteral(property.key);
             break;
         default:
-            throw new ScriptError(property.key, `'${property.key}' is not supported`);
+            throw new ScriptError(`'${property.key}' is not supported`, toRange(property.key));
     }
     switch (property.value.type) {
         case 'ArrayPattern':
         case 'ObjectPattern':
         case 'RestElement':
         case 'AssignmentPattern': {
-            throw new ScriptError(property.value, `'${property.value.type}' is not supported`);
+            throw new ScriptError(
+                `'${property.value.type}' is not supported`,
+                toRange(property.value)
+            );
         }
         default:
             break;
@@ -281,7 +288,7 @@ function fProperty(property: Property): FProperty {
         case 'init':
             break;
         default:
-            throw new ScriptError(property.value, `'${property.kind}' is not supported`);
+            throw new ScriptError(`'${property.kind}' is not supported`, toRange(property.value));
     }
 
     return {
@@ -304,12 +311,13 @@ function fSimpleCallExpression(expression: SimpleCallExpression): FSimpleCallExp
     };
 }
 
-function fUnaryOperator(operator: UnaryOperator, node: BaseNodeWithoutComments) {
+export type FThisExpression = ThisExpression;
+
+function fUnaryOperator(operator: UnaryOperator, range: Range | undefined) {
     switch (operator) {
         case 'delete':
-        case 'typeof':
         case 'void':
-            throw new ScriptError(node, `'${operator}' is not supported`);
+            throw new ScriptError(`'${operator}' is not supported`, range);
         default:
             return operator;
     }
@@ -323,7 +331,7 @@ export type FUnaryExpression = Omit<UnaryExpression, 'operator' | 'argument'> & 
 function fUnaryExpression(expression: UnaryExpression): FUnaryExpression {
     return {
         ...expression,
-        operator: fUnaryOperator(expression.operator, expression),
+        operator: fUnaryOperator(expression.operator, toRange(expression)),
         argument: fExpression(expression.argument),
     };
 }
@@ -341,6 +349,7 @@ export type FExpression =
     | FMemberExpression
     | FNewExpression
     | FObjectExpression
+    | FThisExpression
     | FSimpleCallExpression
     | FUnaryExpression;
 
@@ -372,9 +381,11 @@ export function fExpression(expression: Expression): FExpression {
             return fNewExpression(expression);
         case 'ObjectExpression':
             return fObjectExpression(expression);
+        case 'ThisExpression':
+            return expression;
         case 'UnaryExpression':
             return fUnaryExpression(expression);
         default:
-            throw new ScriptError(expression, `'${expression.type}' is not supported`);
+            throw new ScriptError(`'${expression.type}' is not supported`, toRange(expression));
     }
 }

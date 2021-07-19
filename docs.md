@@ -14,7 +14,7 @@ type FValue = FString | FArray | FObject | …
 // 例1
 
 const globalThis = { obj: { x : 1 } };
-const execResult = exec('obj.x = 2', globalThis);
+const execResult = exec('this.obj.x = 2', globalThis);
 const globalThisAfterExec = execResult.getGlobalThis();
 
 console.log(globalThis.obj.x); // 一見2が出力されそうだが、実際は1
@@ -26,7 +26,7 @@ console.log(globalThisAfterExec.obj.x) // 2
 
 const obj = { x: 1 };
 const globalThis = { obj1: obj, obj2: obj };
-const execResult = exec('obj1.x = 2; obj2.x;', globalThis);
+const execResult = exec('this.obj1.x = 2; this.obj2.x;', globalThis);
 const globalThisAfterExec = execResult.getGlobalThis();
 
 console.log(execResult.result) // 一見2が出力されそうだが、実際は1
@@ -41,9 +41,10 @@ console.log(globalThisAfterExec.obj2.x); // 一見2が出力されそうだが�
 
 const obj = createFValue({ x: 1 });
 const globalThis = { obj1: obj, obj2: obj };
-const execResult = exec('obj1.x = 2', globalThis);
+const execResult = exec('this.obj1.x = 2; this.obj2.x', globalThis);
 const globalThisAfterExec = execResult.getGlobalThis();
 
+console.log(execResult.result) // 2
 console.log(globalThisAfterExec.obj1.x); // 2
 console.log(globalThisAfterExec.obj2.x); // 2
 ```

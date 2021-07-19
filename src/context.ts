@@ -1,3 +1,4 @@
+import { Range } from './range';
 import * as ScriptValue from './scriptValue';
 
 type Ref<T> = { ref: T; isConst: boolean };
@@ -13,10 +14,13 @@ export class Context {
     のようなとき、let f の括弧の外では [{ x: 1 }]、let x = 2 のすぐ上では [{ x: 1 }, {}]、下から ) までは [{ x: 1 }, { x: 2 }] となる。
     */
     private varTables: Map<string, Ref<ScriptValue.FValue>>[] = [new Map()];
+    public currentThis: ScriptValue.FObject | undefined;
 
-    public constructor(public globalThis: ScriptValue.FObject) {}
+    public constructor(public globalThis: ScriptValue.FObject) {
+        this.currentThis = globalThis;
+    }
 
-    public get(name: string): ScriptValue.FValue {
+    public get(name: string, range: Range | undefined): ScriptValue.FValue {
         const found = this.varTables
             .map(table => table.get(name))
             .filter(val => val !== undefined)
@@ -24,14 +28,17 @@ export class Context {
         if (found !== undefined) {
             return found.ref;
         }
-        const prop = this.globalThis.get(new ScriptValue.FString(name));
+        const prop = this.globalThis.get({
+            property: new ScriptValue.FString(name),
+            astInfo: { range },
+        });
         if (prop !== undefined) {
             return prop;
         }
         return undefined;
     }
 
-    public assign(name: string, newValue: ScriptValue.FValue): void {
+    public assign(name: string, newValue: ScriptValue.FValue, range: Range | undefined): void {
         const found = this.varTables
             .map(table => table.get(name))
             .filter(val => val !== undefined)
@@ -43,7 +50,11 @@ export class Context {
             found.ref = newValue;
             return;
         }
-        this.globalThis.set(new ScriptValue.FString(name), newValue);
+        this.globalThis.set({
+            property: new ScriptValue.FString(name),
+            newValue,
+            astInfo: { range },
+        });
     }
 
     public declare(name: string, value: ScriptValue.FValue, type: 'let' | 'const'): void {

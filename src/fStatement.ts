@@ -13,6 +13,7 @@ import {
     VariableDeclaration,
 } from 'estree';
 import { FExpression, fExpression } from './fExpression';
+import { toRange } from './range';
 import { ScriptError } from './ScriptError';
 
 /*
@@ -64,13 +65,13 @@ type FSwitchStatement = Omit<SwitchStatement, 'alternate' | 'consequent' | 'test
 const fVariableDeclaration = (statement: VariableDeclaration) => {
     if (statement.kind === 'var') {
         throw new ScriptError(
-            statement,
-            `'${statement.kind}' is not supported. Use 'let' instead.`
+            `'${statement.kind}' is not supported. Use 'let' instead.`,
+            toRange(statement)
         );
     }
     const declarations = statement.declarations.map(d => {
         if (d.id.type !== 'Identifier') {
-            throw new ScriptError(d.id, `'${d.id.type}' is not supported`);
+            throw new ScriptError(`'${d.id.type}' is not supported`, toRange(d.id));
         }
         return {
             ...d,
@@ -136,6 +137,6 @@ export function fFStatement(statement: Directive | Statement | ModuleDeclaration
         case 'VariableDeclaration':
             return fVariableDeclaration(statement);
         default:
-            throw new ScriptError(statement, `'${statement.type}' is not supported`);
+            throw new ScriptError(`'${statement.type}' is not supported`, toRange(statement));
     }
 }

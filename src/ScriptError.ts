@@ -1,16 +1,11 @@
-import { BaseNodeWithoutComments } from 'estree';
+import { Range } from './range';
 
 export class ScriptError extends Error {
-    public constructor(private readonly node: BaseNodeWithoutComments, message?: string) {
+    public constructor(message?: string, public readonly range?: Range) {
         super(message);
     }
 
-    public get range(): [number, number] | undefined {
-        // @types/estreeとacornでは型が異なる。このライブラリではacornを用いているため、それに合わせて型変換している。
-        const node = this.node as { start?: number; end?: number };
-        if (node.start != null && node.end != null) {
-            return [node.start, node.end];
-        }
-        return undefined;
+    public static notConstructorError(range?: Range) {
+        return new ScriptError('Not a constructor', range);
     }
 }
