@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 const keysToString = (keys: ReadonlyArray<string>): string => {
     const firstKey = keys[0];
     if (firstKey === undefined) {
@@ -7,11 +5,12 @@ const keysToString = (keys: ReadonlyArray<string>): string => {
         return 'root value';
     }
     let result = firstKey;
-    _(keys)
-        .drop(1)
-        .forEach(key => {
-            result = `${result}/${key}`;
-        });
+    keys.forEach((key, i) => {
+        if (i === 0) {
+            return;
+        }
+        result = `${result}/${key}`;
+    });
     return result;
 };
 
