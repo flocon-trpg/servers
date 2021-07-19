@@ -68,95 +68,15 @@ export const toTypeName = (value: FValue) => {
     return value.type;
 };
 
-type ArrayOption = {
-    array: true;
-};
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isArrayOption = (option: any): option is ArrayOption => {
-    if (option == null) {
-        return false;
-    }
-    return option['array'] === true;
-};
-type BooleanOption = {
-    boolean: true;
-};
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isBooleanOption = (option: any): option is BooleanOption => {
-    if (option == null) {
-        return false;
-    }
-    return option['boolean'] === true;
-};
-type FunctionOption = {
-    function: true;
-};
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isFunctionOption = (option: any): option is FunctionOption => {
-    if (option == null) {
-        return false;
-    }
-    return option['function'] === true;
-};
-type NullOption = {
-    null: true;
-};
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isNullOption = (option: any): option is NullOption => {
-    if (option == null) {
-        return false;
-    }
-    return option['null'] === true;
-};
-type NumberOption = {
-    number: true;
-};
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isNumberOption = (option: any): option is NumberOption => {
-    if (option == null) {
-        return false;
-    }
-    return option['number'] === true;
-};
-type ObjectOption = {
-    object: true;
-};
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isObjectOption = (option: any): option is ObjectOption => {
-    if (option == null) {
-        return false;
-    }
-    return option['object'] === true;
-};
-type StringOption = {
-    string: true;
-};
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isStringOption = (option: any): option is StringOption => {
-    if (option == null) {
-        return false;
-    }
-    return option['string'] === true;
-};
-type UndefinedOption = {
-    undefined: true;
-};
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isUndefinedOption = (option: any): option is UndefinedOption => {
-    if (option == null) {
-        return false;
-    }
-    return option['undefined'] === true;
-};
 type TypesOption = {
-    array?: true;
-    boolean?: true;
-    function?: true;
-    null?: true;
-    number?: true;
-    object?: true;
-    string?: true;
-    undefined?: true;
+    array?: boolean;
+    boolean?: boolean;
+    function?: boolean;
+    null?: boolean;
+    number?: boolean;
+    object?: boolean;
+    string?: boolean;
+    undefined?: boolean;
 };
 
 const typesOptionToString = (source: TypesOption) => {
@@ -178,92 +98,123 @@ const typesOptionToString = (source: TypesOption) => {
     return `[${base}]`;
 };
 
-export const toJObject = <T extends TypesOption>(
-    value: FValue,
-    option: T
-):
-    | (T extends ArrayOption ? FValue[] : never)
-    | (T extends BooleanOption ? boolean : never)
-    | (T extends FunctionOption ? (isNew: boolean) => (args: FValue[]) => FValue : never)
-    | (T extends NullOption ? null : never)
-    | (T extends NumberOption ? number : never)
-    | (T extends ObjectOption ? FObject : never)
-    | (T extends StringOption ? string : never)
-    | (T extends UndefinedOption ? undefined : never) => {
-    if (value instanceof FArray) {
-        if (isArrayOption(option)) {
-            const result: FValue[] = value.raw;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            return result as any;
-        } else {
-            throw `Expected type: ${typesOptionToString(option)}, Actual type: array`;
-        }
-    }
-    if (value instanceof FBoolean) {
-        if (isBooleanOption(option)) {
-            const result: boolean = value.raw;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            return result as any;
-        } else {
-            throw `Expected type: ${typesOptionToString(option)}, Actual type: boolean`;
-        }
-    }
-    if (value instanceof FFunction) {
-        if (isFunctionOption(option)) {
-            const result: (isNew: boolean) => (args: FValue[]) => FValue =
-                (isNew: boolean) => (args: FValue[]) =>
-                    value.exec({ args, isNew });
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            return result as any;
-        } else {
-            throw `Expected type: ${typesOptionToString(option)}, Actual type: boolean`;
-        }
-    }
-    if (value === null) {
-        if (isNullOption(option)) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            return null as any;
-        } else {
-            throw `Expected type: ${typesOptionToString(option)}, Actual type: null`;
-        }
-    }
-    if (value instanceof FNumber) {
-        if (isNumberOption(option)) {
-            const result: number = value.raw;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            return result as any;
-        } else {
-            throw `Expected type: ${typesOptionToString(option)}, Actual type: number`;
-            throw '';
-        }
-    }
-    if (value instanceof FObject) {
-        if (isObjectOption(option)) {
-            const result: FObject = value;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            return result as any;
-        } else {
-            throw `Expected type: ${typesOptionToString(option)}, Actual type: object`;
-            throw '';
-        }
-    }
-    if (value instanceof FString) {
-        if (isStringOption(option)) {
-            const result: string = value.raw;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            return result as any;
-        } else {
-            throw `Expected type: ${typesOptionToString(option)}, Actual type: string`;
-        }
+class JObjectCaster<T = never> {
+    private constructor(
+        private readonly source: FValue,
+        private readonly addedTypes: TypesOption,
+        private readonly successfullyCastedValue: Option<T>
+    ) {}
+
+    public static begin(source: FValue) {
+        return new JObjectCaster<never>(source, {}, Option.none());
     }
 
-    if (isUndefinedOption(option)) {
-        const result: undefined = value;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return result as any;
-    } else {
-        throw `Expected type: ${typesOptionToString(option)}, Actual type: undefined`;
+    public cast(errorRange?: Range): T {
+        if (this.successfullyCastedValue.isNone) {
+            throw new ScriptError(
+                `Expected type: ${typesOptionToString(this.addedTypes)}, Actual type: ${toTypeName(
+                    this.source
+                )}`,
+                errorRange
+            );
+        }
+        return this.successfullyCastedValue.value;
     }
+
+    public addArray(): JObjectCaster<T | FValue[]> {
+        if (this.source instanceof FArray) {
+            return new JObjectCaster<T | FValue[]>(
+                this.source,
+                { ...this.addedTypes, array: true },
+                Option.some(this.source.raw)
+            );
+        }
+        return this;
+    }
+
+    public addBoolean(): JObjectCaster<T | boolean> {
+        if (this.source instanceof FBoolean) {
+            return new JObjectCaster<T | boolean>(
+                this.source,
+                { ...this.addedTypes, boolean: true },
+                Option.some(this.source.raw)
+            );
+        }
+        return this;
+    }
+
+    public addFunction(): JObjectCaster<T | ((isNew: boolean) => (args: FValue[]) => FValue)> {
+        if (this.source instanceof FFunction) {
+            const source = this.source;
+            return new JObjectCaster<T | ((isNew: boolean) => (args: FValue[]) => FValue)>(
+                source,
+                { ...this.addedTypes, function: true },
+                Option.some((isNew: boolean) => (args: FValue[]) => source.exec({ args, isNew }))
+            );
+        }
+        return this;
+    }
+
+    public addNull(): JObjectCaster<T | null> {
+        if (this.source === null) {
+            const source = this.source;
+            return new JObjectCaster<T | null>(
+                source,
+                { ...this.addedTypes, null: true },
+                Option.some(null)
+            );
+        }
+        return this;
+    }
+
+    public addNumber(): JObjectCaster<T | number> {
+        if (this.source instanceof FNumber) {
+            return new JObjectCaster<T | number>(
+                this.source,
+                { ...this.addedTypes, number: true },
+                Option.some(this.source.raw)
+            );
+        }
+        return this;
+    }
+
+    public addObject(): JObjectCaster<T | FObject> {
+        if (this.source instanceof FObject) {
+            return new JObjectCaster<T | FObject>(
+                this.source,
+                { ...this.addedTypes, object: true },
+                Option.some(this.source)
+            );
+        }
+        return this;
+    }
+
+    public addString(): JObjectCaster<T | string> {
+        if (this.source instanceof FString) {
+            return new JObjectCaster<T | string>(
+                this.source,
+                { ...this.addedTypes, string: true },
+                Option.some(this.source.raw)
+            );
+        }
+        return this;
+    }
+
+    public addUndefined(): JObjectCaster<T | undefined> {
+        if (this.source === undefined) {
+            const source = this.source;
+            return new JObjectCaster<T | undefined>(
+                source,
+                { ...this.addedTypes, undefined: true },
+                Option.some(undefined)
+            );
+        }
+        return this;
+    }
+}
+
+export const beginCast = (source: FValue) => {
+    return JObjectCaster.begin(source);
 };
 
 export class FBoolean implements FObjectBase {
@@ -358,7 +309,9 @@ export class FNumber implements FObjectBase {
                         const $$this = FNumber.prepareInstanceMethod($this, isNew, astInfo);
                         const radix = args[0];
                         return new FString(
-                            $$this.raw.toString(toJObject(radix, { number: true, undefined: true }))
+                            $$this.raw.toString(
+                                beginCast(radix).addNumber().addUndefined().cast(astInfo?.range)
+                            )
                         );
                     },
                     this,
@@ -474,7 +427,7 @@ export class FArray implements FObjectBase {
     }
 
     public get({ property, astInfo }: GetParams): FValue {
-        const index = toJObject(property, { number: true, string: true }).toString();
+        const index = beginCast(property).addString().addNumber().cast(astInfo?.range).toString();
         if (FArray.isValidIndex(index)) {
             return this.raw[index as unknown as number];
         }
@@ -484,7 +437,9 @@ export class FArray implements FObjectBase {
                 return new FFunction(
                     ({ args, $this, isNew }) => {
                         const $$this = FArray.prepareInstanceMethod($this, isNew, astInfo);
-                        const predicate = toJObject(args[0], { function: true })(false);
+                        const predicate = beginCast(args[0]).addFunction().cast(astInfo?.range)(
+                            false
+                        );
                         const raw = $$this.raw.filter((value, index, array) =>
                             predicate([value, new FNumber(index), new FArray(array)])?.toJObject()
                         );
@@ -498,7 +453,7 @@ export class FArray implements FObjectBase {
     }
 
     public set({ property, newValue, astInfo }: SetParams): void {
-        const index = toJObject(property, { number: true, string: true }).toString();
+        const index = beginCast(property).addNumber().addString().toString();
         if (FArray.isValidIndex(index)) {
             this.raw[index as unknown as number] = newValue;
             return;
@@ -541,7 +496,7 @@ export class FObject implements FObjectBase {
     }
 
     public get({ property, astInfo }: GetParams): FValue {
-        const key = toJObject(property, { number: true, string: true });
+        const key = beginCast(property).addString().addNumber().cast(astInfo?.range);
         const onGettingResult = this.onGetting({ key, astInfo });
         if (!onGettingResult.isNone) {
             return onGettingResult.value;
@@ -555,7 +510,7 @@ export class FObject implements FObjectBase {
     }
 
     public set({ property, newValue, astInfo }: SetParams): void {
-        const key = toJObject(property, { number: true, string: true });
+        const key = beginCast(property).addNumber().addString().cast(astInfo?.range);
         this.onSetting({ key, newValue, astInfo });
         this.raw.set(key.toString(), newValue);
     }
@@ -612,7 +567,7 @@ export class FFunction implements FObjectBase {
     }
 
     public get({ property, astInfo }: GetParams): FValue {
-        const key = toJObject(property, { number: true, string: true });
+        const key = beginCast(property).addNumber().addString().cast(astInfo?.range);
         const onGettingResult = this.onGetting({ key, astInfo });
         if (!onGettingResult.isNone) {
             return onGettingResult.value;
