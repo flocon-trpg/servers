@@ -2,9 +2,7 @@ export { exec, test } from './main';
 export { arrayClass } from './builtIn/Array';
 export {
     createFValue,
-    toFunction,
-    toNumberOrString,
-    toNumberOrUndefined,
+    toJObject,
     toTypeName,
     FArray,
     FBoolean,
