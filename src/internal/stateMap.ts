@@ -1,8 +1,4 @@
-import {
-    CustomDualKeyMap,
-    KeyFactory,
-    ReadonlyCustomDualKeyMap,
-} from './customDualKeyMap';
+import { CustomDualKeyMap, KeyFactory, ReadonlyCustomDualKeyMap } from './customDualKeyMap';
 import { DualKeyMap, DualKeyMapSource } from './dualKeyMap';
 
 export type CompositeKey = {
@@ -36,12 +32,7 @@ const keyFactory: KeyFactory<CompositeKey, string, string> = {
 };
 
 export type StateMap<T> = CustomDualKeyMap<CompositeKey, string, string, T>;
-export type ReadonlyStateMap<T> = ReadonlyCustomDualKeyMap<
-    CompositeKey,
-    string,
-    string,
-    T
->;
+export type ReadonlyStateMap<T> = ReadonlyCustomDualKeyMap<CompositeKey, string, string, T>;
 
 export const createStateMap = <T>(
     source?: DualKeyMapSource<string, string, T> | DualKeyMap<string, string, T>

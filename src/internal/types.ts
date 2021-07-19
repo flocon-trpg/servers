@@ -18,7 +18,4 @@ type Both<TLeft, TRight> = {
     right: TRight;
 };
 
-export type GroupJoinResult<TLeft, TRight> =
-    | Left<TLeft>
-    | Right<TRight>
-    | Both<TLeft, TRight>;
+export type GroupJoinResult<TLeft, TRight> = Left<TLeft> | Right<TRight> | Both<TLeft, TRight>;

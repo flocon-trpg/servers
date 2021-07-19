@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 const keysToString = (keys: ReadonlyArray<string>): string => {
     const firstKey = keys[0];
     if (firstKey === undefined) {
@@ -7,11 +5,12 @@ const keysToString = (keys: ReadonlyArray<string>): string => {
         return 'root value';
     }
     let result = firstKey;
-    _(keys)
-        .drop(1)
-        .forEach(key => {
-            result = `${result}/${key}`;
-        });
+    keys.forEach((key, i) => {
+        if (i === 0) {
+            return;
+        }
+        result = `${result}/${key}`;
+    });
     return result;
 };
 
@@ -44,9 +43,7 @@ export class JsonObject {
     public get(key: string): JsonObject {
         const result = this.tryGet(key);
         if (result == null) {
-            throw new Error(
-                `${keysToString([...this.currentPath, key])} is not object.`
-            );
+            throw new Error(`${keysToString([...this.currentPath, key])} is not object.`);
         }
         return result;
     }
@@ -62,17 +59,13 @@ export class JsonObject {
         if (this.jsonObject === null || typeof this.jsonObject === 'string') {
             return this.jsonObject;
         }
-        throw new Error(
-            `${keysToString(this.currentPath)} must be string or null.`
-        );
+        throw new Error(`${keysToString(this.currentPath)} must be string or null.`);
     }
 
     public valueAsBoolean(): boolean {
         if (typeof this.jsonObject === 'boolean') {
             return this.jsonObject;
         }
-        throw new Error(
-            `${keysToString(this.currentPath)} must be true or false.`
-        );
+        throw new Error(`${keysToString(this.currentPath)} must be true or false.`);
     }
 }

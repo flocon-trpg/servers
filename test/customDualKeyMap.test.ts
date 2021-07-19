@@ -1,4 +1,4 @@
-import { DualKeyMap } from '../dist';
+import { DualKeyMap } from '../src';
 
 it('tests toArray() and spread operator', () => {
     const actual = new DualKeyMap<string, string, number>();

@@ -1,29 +1,13 @@
 export type StrIndex5 = '1' | '2' | '3' | '4' | '5';
 
-export const strIndex5Array: ReadonlyArray<StrIndex5> = [
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-];
+export const strIndex5Array: ReadonlyArray<StrIndex5> = ['1', '2', '3', '4', '5'];
 
 const strIndex5Set: Set<StrIndex5> = new Set(strIndex5Array);
 
 export const isStrIndex5 = (source: string): source is StrIndex5 => {
     return (strIndex5Set as Set<string>).has(source);
 };
-export type StrIndex10 =
-    | '1'
-    | '2'
-    | '3'
-    | '4'
-    | '5'
-    | '6'
-    | '7'
-    | '8'
-    | '9'
-    | '10';
+export type StrIndex10 = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
 
 export const strIndex10Array: ReadonlyArray<StrIndex10> = [
     '1',

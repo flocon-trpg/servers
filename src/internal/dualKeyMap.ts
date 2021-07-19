@@ -44,10 +44,7 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
             }
             const toSet = new Map<TKey2, TValue2>();
             for (const [secondKey, second] of first) {
-                toSet.set(
-                    secondKey,
-                    mapping(second, { first: firstKey, second: secondKey })
-                );
+                toSet.set(secondKey, mapping(second, { first: firstKey, second: secondKey }));
             }
             result.set(firstKey, toSet);
         }
@@ -55,9 +52,7 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
     }
 
     private static create<TKey1, TKey2, TValue1, TValue2>(
-        source:
-            | DualKeyMapSource<TKey1, TKey2, TValue1>
-            | DualKeyMap<TKey1, TKey2, TValue1>,
+        source: DualKeyMapSource<TKey1, TKey2, TValue1> | DualKeyMap<TKey1, TKey2, TValue1>,
         mapping: (source: TValue1, key: DualKey<TKey1, TKey2>) => TValue2
     ): DualKeyMap<TKey1, TKey2, TValue2> {
         const result = new DualKeyMap<TKey1, TKey2, TValue2>();
@@ -68,17 +63,12 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
         return result;
     }
 
-    public static ofRecord<
-        TKey1 extends RecordKey,
-        TKey2 extends RecordKey,
-        TValue
-    >(
+    public static ofRecord<TKey1 extends RecordKey, TKey2 extends RecordKey, TValue>(
         source: Record<TKey1, Record<TKey2, TValue | undefined> | undefined>
     ): DualKeyMap<TKey1, TKey2, TValue> {
         const result = new DualKeyMap<TKey1, TKey2, TValue>();
         for (const key1 in source) {
-            const inner: Record<TKey2, TValue | undefined> | undefined =
-                source[key1];
+            const inner: Record<TKey2, TValue | undefined> | undefined = source[key1];
             if (inner === undefined) {
                 continue;
             }
@@ -143,9 +133,7 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
         return this.get(key) !== undefined;
     }
 
-    *[Symbol.iterator](): IterableIterator<
-        readonly [DualKey<TKey1, TKey2>, TValue]
-    > {
+    *[Symbol.iterator](): IterableIterator<readonly [DualKey<TKey1, TKey2>, TValue]> {
         for (const [firstKey, first] of this._core) {
             for (const [secondKey, second] of first) {
                 yield [{ first: firstKey, second: secondKey }, second] as const;
@@ -184,26 +172,18 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
         return this.size === 0;
     }
 
-    public forEach(
-        action: (value: TValue, key: DualKey<TKey1, TKey2>) => void
-    ): void {
+    public forEach(action: (value: TValue, key: DualKey<TKey1, TKey2>) => void): void {
         for (const [key, value] of this) {
             action(value, key);
         }
     }
 
     public reduce<TResult>(
-        reducer: (
-            seed: TResult,
-            element: TValue,
-            key: DualKey<TKey1, TKey2>
-        ) => TResult,
+        reducer: (seed: TResult, element: TValue, key: DualKey<TKey1, TKey2>) => TResult,
         seed: TResult
     ): TResult {
         let result = seed;
-        this.forEach(
-            (element, key) => (result = reducer(result, element, key))
-        );
+        this.forEach((element, key) => (result = reducer(result, element, key)));
         return result;
     }
 
@@ -225,9 +205,7 @@ export type ReadonlyDualKeyMap<TKey1, TKey2, TValue> = Omit<
     Readonly<DualKeyMap<TKey1, TKey2, TValue>>,
     'set' | 'delete' | 'getByFirst'
 > & {
-    [Symbol.iterator](): IterableIterator<
-        readonly [DualKey<TKey1, TKey2>, TValue]
-    >;
+    [Symbol.iterator](): IterableIterator<readonly [DualKey<TKey1, TKey2>, TValue]>;
     getByFirst(key: TKey1): ReadonlyMap<TKey2, TValue> | undefined;
 };
 
@@ -235,11 +213,7 @@ export const groupJoin = <TKey1, TKey2, TLeft, TRight>(
     left: ReadonlyDualKeyMap<TKey1, TKey2, TLeft>,
     right: ReadonlyDualKeyMap<TKey1, TKey2, TRight>
 ): DualKeyMap<TKey1, TKey2, GroupJoinResult<TLeft, TRight>> => {
-    const result = new DualKeyMap<
-        TKey1,
-        TKey2,
-        GroupJoinResult<TLeft, TRight>
-    >();
+    const result = new DualKeyMap<TKey1, TKey2, GroupJoinResult<TLeft, TRight>>();
     const rightClone = right.clone();
     left.forEach((leftElement, key) => {
         const rightElement = rightClone.get(key);
@@ -265,11 +239,7 @@ export const groupJoin3 = <TKey1, TKey2, T1, T2, T3>(
     source1: ReadonlyDualKeyMap<TKey1, TKey2, T1>,
     source2: ReadonlyDualKeyMap<TKey1, TKey2, T2>,
     source3: ReadonlyDualKeyMap<TKey1, TKey2, T3>
-): DualKeyMap<
-    TKey1,
-    TKey2,
-    readonly [T1 | undefined, T2 | undefined, T3 | undefined]
-> => {
+): DualKeyMap<TKey1, TKey2, readonly [T1 | undefined, T2 | undefined, T3 | undefined]> => {
     const source = groupJoin(source1, groupJoin(source2, source3));
     return source.map(group => {
         switch (group.type) {
