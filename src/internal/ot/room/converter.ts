@@ -14,6 +14,14 @@ export const stringifyState = (source: Room.State): string => {
     return JSON.stringify(result);
 };
 
+export const decodeState = (source: unknown): Room.State => {
+    const result = t.exact(Room.state).decode(source);
+    if (result._tag === 'Left') {
+        throw new Error('decodeState failure');
+    }
+    return result.right;
+};
+
 export const decodeDbState = (source: unknown): Room.DbState => {
     const result = t.exact(Room.dbState).decode(source);
     if (result._tag === 'Left') {

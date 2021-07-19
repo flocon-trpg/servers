@@ -1,13 +1,11 @@
 export {
-    Commands,
-    CommandElement,
-    parseToCommands,
     isValidVarToml,
     parseToml,
-    applyCommands,
     getVariableFromVarTomlObject,
     generateChatPalette,
-} from './internal/flocommand';
+} from './internal/toml';
+
+export { execCharacterCommand } from './internal/flocommand/main';
 
 export { Default, FirebaseStorage, FilePath } from './internal/ot/filePath/v1';
 
