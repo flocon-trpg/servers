@@ -9,6 +9,8 @@ import {
     FSimpleCallExpression,
 } from './fExpression';
 import { fFStatement as fStatement, FStatement } from './fStatement';
+import { toRange } from './range';
+import { ScriptError } from './ScriptError';
 import {
     compareToBoolean,
     compareToNumber,
@@ -42,7 +44,8 @@ function ofFLiteral(literal: FLiteral): FBoolean | FNumber | FString | null {
     }
 }
 
-function ofFCallExpressionOrFNewExpression(
+// @types/estree では CallExpression = SimpleCallExpression | NewExpression なのでそれに合わせた命名をしている
+function ofFCallExpression(
     expression: FSimpleCallExpression | FNewExpression,
     context: Context,
     isChain: boolean,
@@ -58,7 +61,7 @@ function ofFCallExpressionOrFNewExpression(
     if (callee?.type !== FType.Function) {
         throw new Error(`${callee} is not a function`);
     }
-    return callee.exec(args, isNew != null);
+    return callee.exec({ args, isNew: isNew != null });
 }
 
 function ofFMemberExpression(
@@ -75,13 +78,23 @@ function ofFMemberExpression(
     }
     if (expression.computed) {
         const property = ofFExpression(expression.property, context);
-        return object.get(property);
+        return object.get({ property, astInfo: { range: toRange(expression) } });
     }
     if (expression.property.type !== 'Identifier') {
         throw new Error('this should not happen');
     }
-    return object.get(new FString(expression.property.name));
+    return object.get({
+        property: new FString(expression.property.name),
+        astInfo: { range: toRange(expression) },
+    });
 }
+
+const bind = (value: FValue, $this: FValue): FValue => {
+    if (value?.type === FType.Function) {
+        return value.bind($this);
+    }
+    return value;
+};
 
 function ofFExpression(expression: FExpression, context: Context): FValue {
     switch (expression.type) {
@@ -97,7 +110,13 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
             return new FArray(result);
         }
         case 'ArrowFunctionExpression': {
-            const f = (args: FValue[]): FValue => {
+            const f = ({ args, isNew }: { args: FValue[]; isNew: boolean }): FValue => {
+                if (isNew) {
+                    throw new ScriptError(
+                        'ArrowFunction is not a constructor',
+                        toRange(expression)
+                    );
+                }
                 context.scopeIn();
                 expression.params.forEach((param, i) => {
                     context.declare(param.name, args[i], 'let');
@@ -114,12 +133,16 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                 context.scopeOut();
                 return result;
             };
-            return new FFunction(f);
+            return new FFunction(f, context.currentThis, true);
         }
         case 'AssignmentExpression': {
             switch (expression.left.type) {
                 case 'Identifier': {
-                    context.assign(expression.left.name, ofFExpression(expression.right, context));
+                    context.assign(
+                        expression.left.name,
+                        bind(ofFExpression(expression.right, context), undefined),
+                        toRange(expression)
+                    );
                     return undefined;
                 }
                 case 'MemberExpression': {
@@ -135,7 +158,11 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                             if (object == null) {
                                 throw new Error(`Object is ${toTypeName(object)}`);
                             }
-                            object.set(property, ofFExpression(expression.right, context));
+                            object.set({
+                                property,
+                                newValue: bind(ofFExpression(expression.right, context), object),
+                                astInfo: { range: toRange(expression) },
+                            });
                             return undefined;
                         }
                     }
@@ -191,12 +218,12 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
             break;
         }
         case 'CallExpression': {
-            return ofFCallExpressionOrFNewExpression(expression, context, false);
+            return ofFCallExpression(expression, context, false);
         }
         case 'ChainExpression': {
             switch (expression.expression.type) {
                 case 'CallExpression': {
-                    return ofFCallExpressionOrFNewExpression(expression.expression, context, true);
+                    return ofFCallExpression(expression.expression, context, true);
                 }
                 case 'MemberExpression': {
                     return ofFMemberExpression(expression.expression, context, true);
@@ -214,7 +241,7 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
         case 'Identifier': {
             // a; のようなコードであれば正常に処理される
             // a.b; のようなコードではbがIdentifierになるがこのケースでは正常に処理されない（代わりにMemberExpressionやAssignmentExpressionで処理されなければならない）
-            return context.get(expression.name);
+            return context.get(expression.name, toRange(expression));
         }
         case 'Literal': {
             return ofFLiteral(expression);
@@ -236,7 +263,7 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
             return ofFMemberExpression(expression, context, false);
         }
         case 'NewExpression': {
-            return ofFCallExpressionOrFNewExpression(expression, context, false, 'new');
+            return ofFCallExpression(expression, context, false, 'new');
         }
         case 'ObjectExpression': {
             const result = new FObject();
@@ -263,12 +290,19 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                 const value = ofFExpression(d.value, context);
                 switch (d.kind) {
                     case 'init':
-                        result.set(new FString(key), value);
+                        result.set({
+                            property: new FString(key),
+                            newValue: value,
+                            astInfo: { range: toRange(d.value) },
+                        });
                         break;
                 }
             });
             return result;
         }
+        case 'ThisExpression':
+            // 現時点ではFunction, class, Function.callなどをサポートしていないため、常にglobalThisを返して構わない。
+            return context.globalThis;
         case 'UnaryExpression': {
             const argument = ofFExpression(expression.argument, context);
             switch (expression.operator) {
@@ -286,9 +320,27 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                     return argument == null
                         ? argument
                         : new FNumber(~argument.toPrimitiveAsNumber());
+                case 'typeof':
+                    if (argument == null) {
+                        return new FString(typeof argument);
+                    }
+                    switch (argument.type) {
+                        case FType.Boolean:
+                            return new FString('boolean');
+                        case FType.Function:
+                            return new FString('function');
+                        case FType.Number:
+                            return new FString('number');
+                        case FType.String:
+                            return new FString('string');
+                        default:
+                            return new FString('object');
+                    }
             }
             break;
         }
+        default:
+            throw new Error('this should not happen');
     }
 }
 
@@ -388,7 +440,7 @@ function ofFStatement(statement: FStatement, context: Context): FStatementResult
                 // let x; のような場合は let x = undefined; と同等とみなして良さそう。const x; はparseの時点で弾かれるはず。
                 context.declare(
                     d.id.name,
-                    d.init == null ? undefined : ofFExpression(d.init, context),
+                    d.init == null ? undefined : bind(ofFExpression(d.init, context), undefined),
                     kind
                 );
             });
@@ -399,16 +451,18 @@ function ofFStatement(statement: FStatement, context: Context): FStatementResult
     }
 }
 
-const ecmaVersion = 2020;
-
 type ExecResult = {
     result: unknown;
-    getGlobalThis(): Record<string, unknown>;
+    getGlobalThis(): unknown;
+};
+
+const toProgram = (script: string) => {
+    return parse(script, { ecmaVersion: 2020, ranges: true }) as unknown as Program;
 };
 
 // globalThisは、SValueであればそのまま維持し、それ以外であればSValueに自動変換される。
 export const exec = (script: string, globalThis: Record<string, unknown>): ExecResult => {
-    const parsed = parse(script, { ecmaVersion }) as unknown as Program;
+    const parsed = toProgram(script);
     const context = new Context(createFGlobalRecord(globalThis));
     const lastResult = parsed.body.map(statement => {
         return ofFStatement(fStatement(statement), context);
@@ -427,7 +481,7 @@ export const exec = (script: string, globalThis: Record<string, unknown>): ExecR
 
 // エディターなどでエラーをチェックする際に用いる
 export const test = (script: string): void => {
-    const parsed = parse(script, { ecmaVersion }) as unknown as Program;
+    const parsed = toProgram(script);
     parsed.body.forEach(statement => {
         fStatement(statement);
     });

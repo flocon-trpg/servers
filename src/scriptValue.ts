@@ -2,10 +2,38 @@
 
 import { mapToRecord } from '@kizahasi/util';
 import { Option } from '@kizahasi/option';
+import { ScriptError } from './ScriptError';
+import { Range } from './range';
+
+export type AstInfo = {
+    range?: Range;
+};
+
+export type GetParams = {
+    property: FValue;
+    astInfo?: AstInfo;
+};
+
+export type SetParams = {
+    property: FValue;
+    newValue: FValue;
+    astInfo?: AstInfo;
+};
+
+export type OnGettingParams = {
+    key: string | number;
+    astInfo?: AstInfo;
+};
+
+export type OnSettingParams = {
+    key: string | number;
+    newValue: FValue;
+    astInfo?: AstInfo;
+};
 
 type FObjectBase = {
-    get(property: FValue): FValue;
-    set(property: FValue, newValue: FValue): void;
+    get(params: GetParams): FValue;
+    set(params: SetParams): void;
     toPrimitiveAsNumber(): number;
     toPrimitiveAsString(): string;
     toPrimitiveAsDefault?(): number | string;
@@ -40,7 +68,107 @@ export const toTypeName = (value: FValue) => {
     return value.type;
 };
 
-const toNumberOrUndefined = (value: FValue): number | undefined => {
+type ArrayOption = {
+    array: true;
+};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isArrayOption = (source: any): source is ArrayOption => {
+    if (source == null) {
+        return false;
+    }
+    return source['array'] === true;
+};
+type BooleanOption = {
+    boolean: true;
+};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isBooleanOption = (source: any): source is BooleanOption => {
+    if (source == null) {
+        return false;
+    }
+    return source['boolean'] === true;
+};
+type NullOption = {
+    null: true;
+};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isNullOption = (source: any): source is NullOption => {
+    if (source == null) {
+        return false;
+    }
+    return source['null'] === true;
+};
+type NumberOption = {
+    number: true;
+};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isNumberOption = (source: any): source is NumberOption => {
+    if (source == null) {
+        return false;
+    }
+    return source['number'] === true;
+};
+type ObjectOption = {
+    object: true;
+};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isObjectOption = (source: any): source is ObjectOption => {
+    if (source == null) {
+        return false;
+    }
+    return source['object'] === true;
+};
+type StringOption = {
+    'string': true;
+}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isStringOption = (source: any): source is StringOption => {
+    if (source == null) {
+        return false;
+    }
+    return source['string'] === true;
+}
+type UndefinedOption = {
+    undefined: true;
+};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isUndefinedOption = (source: any): source is UndefinedOption => {
+    if (source == null) {
+        return false;
+    }
+    return source['undefined'] === true;
+};
+type OptionType = {
+    'array'?: true;
+    'boolean'?: true;
+    'null'?: true;
+    'number'?: true;
+    'object'?: true;
+    'string'?: true;
+    'undefined'?: true;
+}
+
+export const toJObject = <T extends OptionType>(value: FValue, option: T):
+    | (T extends ArrayOption ? FArray : never)
+    | (T extends BooleanOption ? boolean: never)
+    | (T extends NullOption ? null : never)
+    | (T extends NumberOption ? number : never)
+    | (T extends ObjectOption ? FObject : never)
+    | (T extends StringOption ? string : never)
+    | (T extends UndefinedOption ? undefined : never) => {
+        
+
+        if (value === null) {
+            if (isNullOption(option)) {
+                return null as any;
+            }
+
+        }
+    };
+
+toJObject(undefined, { 'string': true });
+
+export const toNumberOrUndefined = (value: FValue): number | undefined => {
     if (value === undefined) {
         return undefined;
     }
@@ -50,7 +178,7 @@ const toNumberOrUndefined = (value: FValue): number | undefined => {
     return value.raw;
 };
 
-const toNumberOrString = (value: FValue): number | string => {
+export const toNumberOrString = (value: FValue): number | string => {
     switch (value?.type) {
         case FType.Number:
         case FType.String:
@@ -61,36 +189,58 @@ const toNumberOrString = (value: FValue): number | string => {
     return value.raw;
 };
 
-const toFunction = (value: FValue): ((args: FValue[]) => FValue) => {
+export const toFunction = (value: FValue, isNew: boolean): ((args: FValue[]) => FValue) => {
     switch (value?.type) {
         case FType.Function:
-            return (args: FValue[]) => value.exec(args, false);
+            return (args: FValue[]) => value.exec({ args, isNew });
         default:
-            throw new Error(`Expected type is Number or String, but actually ${toTypeName(value)}`);
+            throw new Error(`Expected type is Function, but actually ${toTypeName(value)}`);
     }
 };
 
 export class FBoolean implements FObjectBase {
     public constructor(public readonly raw: boolean) {}
 
+    private static prepareInstanceMethod(
+        $this: FValue,
+        isNew: boolean,
+        astInfo: AstInfo | undefined
+    ): FBoolean {
+        if (isNew) {
+            throw ScriptError.notConstructorError(astInfo?.range);
+        }
+        if ($this?.type !== FType.Boolean) {
+            throw new ScriptError(
+                `Expected 'this' to be an Boolean, but actully ${toTypeName($this)}`,
+                astInfo?.range
+            );
+        }
+        return $this;
+    }
+
     public get type(): typeof FType.Boolean {
         return FType.Boolean;
     }
 
-    public get(property: FValue): FValue {
+    public get({ property, astInfo }: GetParams): FValue {
         const propertyName = tryToPropertyName(property);
         switch (propertyName) {
             case 'toString':
-                return new FFunction(() => {
-                    return new FString(this.raw.toString());
-                });
+                return new FFunction(
+                    ({ $this, isNew }) => {
+                        const $$this = FBoolean.prepareInstanceMethod($this, isNew, astInfo);
+                        return new FString($$this.raw.toString());
+                    },
+                    this,
+                    false
+                );
             default:
                 return undefined;
         }
     }
 
-    public set(): void {
-        throw new Error('You cannot set any value to Boolean');
+    public set({ astInfo }: SetParams): void {
+        throw new ScriptError('You cannot set any value to Boolean', astInfo?.range);
     }
 
     public toPrimitiveAsString() {
@@ -109,26 +259,48 @@ export class FBoolean implements FObjectBase {
 export class FNumber implements FObjectBase {
     public constructor(public readonly raw: number) {}
 
+    private static prepareInstanceMethod(
+        $this: FValue,
+        isNew: boolean,
+        astInfo: AstInfo | undefined
+    ): FNumber {
+        if (isNew) {
+            throw ScriptError.notConstructorError(astInfo?.range);
+        }
+        if ($this?.type !== FType.Number) {
+            throw new ScriptError(
+                `Expected 'this' to be an Number, but actully ${toTypeName($this)}`,
+                astInfo?.range
+            );
+        }
+        return $this;
+    }
+
     public get type(): typeof FType.Number {
         return FType.Number;
     }
 
-    public get(property: FValue): FValue {
+    public get({ property, astInfo }: GetParams): FValue {
         const propertyName = tryToPropertyName(property);
         switch (propertyName) {
             // TODO: もっと実装する
             case 'toString':
-                return new FFunction(args => {
-                    const radix = args[0];
-                    return new FString(this.raw.toString(toNumberOrUndefined(radix)));
-                });
+                return new FFunction(
+                    ({ args, $this, isNew }) => {
+                        const $$this = FNumber.prepareInstanceMethod($this, isNew, astInfo);
+                        const radix = args[0];
+                        return new FString($$this.raw.toString(toNumberOrUndefined(radix)));
+                    },
+                    this,
+                    false
+                );
             default:
                 return undefined;
         }
     }
 
-    public set(): void {
-        throw new Error('You cannot set any value to Number');
+    public set({ astInfo }: SetParams): void {
+        throw new ScriptError('You cannot set any value to Number', astInfo?.range);
     }
 
     public toPrimitiveAsString() {
@@ -139,7 +311,7 @@ export class FNumber implements FObjectBase {
         return +this.raw;
     }
 
-    public toJObject() {
+    public toJObject(): number {
         return this.raw;
     }
 }
@@ -147,25 +319,47 @@ export class FNumber implements FObjectBase {
 export class FString implements FObjectBase {
     public constructor(public readonly raw: string) {}
 
+    private static prepareInstanceMethod(
+        $this: FValue,
+        isNew: boolean,
+        astInfo: AstInfo | undefined
+    ): FString {
+        if (isNew) {
+            throw ScriptError.notConstructorError(astInfo?.range);
+        }
+        if ($this?.type !== FType.String) {
+            throw new ScriptError(
+                `Expected 'this' to be an String, but actully ${toTypeName($this)}`,
+                astInfo?.range
+            );
+        }
+        return $this;
+    }
+
     public get type(): typeof FType.String {
         return FType.String;
     }
 
-    public get(property: FValue): FValue {
+    public get({ property, astInfo }: GetParams): FValue {
         const propertyName = tryToPropertyName(property);
         switch (propertyName) {
             // TODO: もっと実装する
             case 'toString':
-                return new FFunction(() => {
-                    return new FString(this.raw.toString());
-                });
+                return new FFunction(
+                    ({ $this, isNew }) => {
+                        const $$this = FString.prepareInstanceMethod($this, isNew, astInfo);
+                        return $$this;
+                    },
+                    this,
+                    false
+                );
             default:
                 return undefined;
         }
     }
 
-    public set(): void {
-        throw new Error('You cannot set any value to String');
+    public set({ astInfo }: SetParams): void {
+        throw new ScriptError('You cannot set any value to String', astInfo?.range);
     }
 
     public toPrimitiveAsString() {
@@ -176,13 +370,30 @@ export class FString implements FObjectBase {
         return +this.raw;
     }
 
-    public toJObject() {
+    public toJObject(): string {
         return this.raw;
     }
 }
 
 export class FArray implements FObjectBase {
     public constructor(public readonly raw: FValue[]) {}
+
+    private static prepareInstanceMethod(
+        $this: FValue,
+        isNew: boolean,
+        astInfo: AstInfo | undefined
+    ): FArray {
+        if (isNew) {
+            throw ScriptError.notConstructorError(astInfo?.range);
+        }
+        if ($this?.type !== FType.Array) {
+            throw new ScriptError(
+                `Expected 'this' to be an Array, but actully ${toTypeName($this)}`,
+                astInfo?.range
+            );
+        }
+        return $this;
+    }
 
     public get type(): typeof FType.Array {
         return FType.Array;
@@ -192,7 +403,7 @@ export class FArray implements FObjectBase {
         return index === '0' || /^[1-9][0-9]*$/.test(index);
     }
 
-    public get(property: FValue): FValue {
+    public get({ property, astInfo }: GetParams): FValue {
         const index = toNumberOrString(property).toString();
         if (FArray.isValidIndex(index)) {
             return this.raw[index as unknown as number];
@@ -200,24 +411,29 @@ export class FArray implements FObjectBase {
         const propertyName = index;
         switch (propertyName) {
             case 'filter':
-                return new FFunction(args => {
-                    const predicate = toFunction(args[0]);
-                    const raw = this.raw.filter((value, index, array) =>
-                        predicate([value, new FNumber(index), new FArray(array)])?.toJObject()
-                    );
-                    return new FArray(raw);
-                });
+                return new FFunction(
+                    ({ args, $this, isNew }) => {
+                        const $$this = FArray.prepareInstanceMethod($this, isNew, astInfo);
+                        const predicate = toFunction(args[0], false);
+                        const raw = $$this.raw.filter((value, index, array) =>
+                            predicate([value, new FNumber(index), new FArray(array)])?.toJObject()
+                        );
+                        return new FArray(raw);
+                    },
+                    this,
+                    false
+                );
         }
-        throw new Error(`"${index}" is an invalid index`);
+        throw new ScriptError(`"${index}" is an invalid index`, astInfo?.range);
     }
 
-    public set(property: FValue, newValue: FValue): void {
+    public set({ property, newValue, astInfo }: SetParams): void {
         const index = toNumberOrString(property).toString();
         if (FArray.isValidIndex(index)) {
             this.raw[index as unknown as number] = newValue;
             return;
         }
-        throw new Error(`"${index}" is an invalid index`);
+        throw new ScriptError(`"${index}" is an invalid index`, astInfo?.range);
     }
 
     public toPrimitiveAsString(): string {
@@ -250,13 +466,13 @@ export class FObject implements FObjectBase {
         return FType.Record;
     }
 
-    protected onGetting(key: string | number): Option<FValue> {
+    protected onGetting(params: OnGettingParams): Option<FValue> {
         return Option.none();
     }
 
-    public get(property: FValue): FValue {
+    public get({ property, astInfo }: GetParams): FValue {
         const key = toNumberOrString(property);
-        const onGettingResult = this.onGetting(key);
+        const onGettingResult = this.onGetting({ key, astInfo });
         if (!onGettingResult.isNone) {
             return onGettingResult.value;
         }
@@ -264,13 +480,13 @@ export class FObject implements FObjectBase {
     }
 
     // setを拒否したい場合は何かをthrowする。
-    protected onSetting(key: string | number, newValue: FValue): void {
+    protected onSetting(params: OnSettingParams): void {
         return;
     }
 
-    public set(property: FValue, newValue: FValue): void {
+    public set({ property, newValue, astInfo }: SetParams): void {
         const key = toNumberOrString(property);
-        this.onSetting(key, newValue);
+        this.onSetting({ key, newValue, astInfo });
         this.raw.set(key.toString(), newValue);
     }
 
@@ -282,7 +498,8 @@ export class FObject implements FObjectBase {
         return +{};
     }
 
-    public toJObject() {
+    // 継承されるケースを考えて、Record<string, unknown>ではなくunknownを返すようにしている
+    public toJObject(): unknown {
         const result = new Map<string, unknown>();
         this.raw.forEach((value, key) => {
             result.set(key, value?.toJObject());
@@ -291,24 +508,42 @@ export class FObject implements FObjectBase {
     }
 }
 
+type FFunctionParams = {
+    args: FValue[];
+    isNew: boolean;
+};
+
 export class FFunction implements FObjectBase {
-    public constructor(private func: (args: FValue[], isNew: boolean) => FValue) {}
+    public constructor(
+        private readonly func: (params: FFunctionParams & { $this: FValue }) => FValue,
+
+        // Function内のthisを表す値。
+        // isArrowFunction === false のとき、fを作成するとして、例えばx.fの場合はxを渡し、単にfの場合はundefinedを渡す。
+        // isArrowFunction === true のときはそこに位置するthisを渡す。
+        private readonly $this: FValue,
+
+        private readonly isArrowFunction: boolean
+    ) {}
+
+    public bind($this: FValue): FFunction {
+        return new FFunction(this.func, $this, this.isArrowFunction);
+    }
 
     public get type(): typeof FType.Function {
         return FType.Function;
     }
 
-    public exec(args: FValue[], isNew: boolean): FValue {
-        return this.func(args, isNew);
+    public exec(params: FFunctionParams): FValue {
+        return this.func({ ...params, $this: this.$this });
     }
 
-    protected onGetting(key: string | number): Option<FValue> {
+    protected onGetting(params: OnGettingParams): Option<FValue> {
         return Option.none();
     }
 
-    public get(property: FValue): FValue {
+    public get({ property, astInfo }: GetParams): FValue {
         const key = toNumberOrString(property);
-        const onGettingResult = this.onGetting(key);
+        const onGettingResult = this.onGetting({ key, astInfo });
         if (!onGettingResult.isNone) {
             return onGettingResult.value;
         }
@@ -316,8 +551,8 @@ export class FFunction implements FObjectBase {
         return undefined;
     }
 
-    public set(): void {
-        throw new Error('You cannot set any value to Function');
+    public set({ astInfo }: SetParams): void {
+        throw new ScriptError('You cannot set any value to Function', astInfo?.range);
     }
 
     public toPrimitiveAsString() {
@@ -352,7 +587,7 @@ export class FGlobalRecord extends FObject {
         super(base);
     }
 
-    protected override onGetting(key: string | number) {
+    protected override onGetting({ key }: OnGettingParams) {
         const keyAsString = key.toString();
         if (keyAsString === self || keyAsString === globalThis) {
             return Option.some(this);
@@ -360,10 +595,13 @@ export class FGlobalRecord extends FObject {
         return Option.none();
     }
 
-    protected override onSetting(key: string | number) {
+    protected override onSetting({ key, astInfo }: OnSettingParams) {
         const keyAsString = key.toString();
         if (keyAsString === self || keyAsString === globalThis) {
-            throw new Error(`Assignment to '${keyAsString}' is not supported`);
+            throw new ScriptError(
+                `Assignment to '${keyAsString}' is not supported`,
+                astInfo?.range
+            );
         }
     }
 }
@@ -383,8 +621,7 @@ export function createFValue(source: unknown): FValue {
         case 'string':
             return new FString(source);
         case 'function':
-            // eslint-disable-next-line prefer-spread
-            return new FFunction(args => source.apply(null, args));
+            throw new Error('Function is not supported. Use FFunction instead.');
         default:
             break;
     }
@@ -408,7 +645,11 @@ export function createFValue(source: unknown): FValue {
 function createFObject(source: Record<string, unknown>): FObject {
     const result = new FObject();
     for (const key in source) {
-        result.set(new FString(key), createFValue(source[key]));
+        result.set({
+            property: new FString(key),
+            newValue: createFValue(source[key]),
+            astInfo: undefined,
+        });
     }
     return result;
 }
