@@ -1,8 +1,6 @@
 import { Button } from 'antd';
 import React from 'react';
 import { ItemContent, Virtuoso, VirtuosoHandle } from 'react-virtuoso';
-import { usePrevious } from '../hooks/usePrevious';
-import { useReadonlyRef } from '../hooks/useReadonlyRef';
 import { backgroundColor } from './DraggableCard';
 
 type Props<T> = {
@@ -12,38 +10,22 @@ type Props<T> = {
 };
 
 // https://virtuoso.dev/stick-to-bottom/ を基にして作成
-export function StickToBottomVirtuoso<T>({ items, create, height }: Props<T>) {
+export function JumpToBottomVirtuoso<T>({ items, create, height }: Props<T>) {
     const virtuosoRef = React.useRef<VirtuosoHandle>(null);
 
-    const scrollToBottom = React.useCallback(
-        (itemsLength: number) => {
-            if (virtuosoRef.current == null) {
-                return;
-            }
-            virtuosoRef.current.scrollToIndex({
-                index: itemsLength - 1,
-                behavior: 'auto',
-            });
-        },
-        [virtuosoRef]
-    );
+    const scrollToBottom = (itemsLength: number) => {
+        if (virtuosoRef.current == null) {
+            return;
+        }
+        virtuosoRef.current.scrollToIndex({
+            index: itemsLength - 1,
+            behavior: 'auto',
+        });
+    };
 
-    const prevItemsLength = usePrevious(items.length);
-    const prevItemsLengthRef = useReadonlyRef(prevItemsLength);
     const [atBottom, setAtBottom] = React.useState(false);
-    const atBottomRef = useReadonlyRef(atBottom);
     const showButtonTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
     const [showButton, setShowButton] = React.useState(false);
-
-    React.useEffect(() => {
-        if (prevItemsLengthRef.current === items.length) {
-            return;
-        }
-        if (!atBottomRef.current) {
-            return;
-        }
-        scrollToBottom(items.length);
-    }, [atBottomRef, items.length, prevItemsLengthRef, scrollToBottom]);
 
     React.useEffect(() => {
         if (showButtonTimeoutRef.current != null) {
