@@ -1,9 +1,4 @@
-import {
-    DualKey,
-    DualKeyMap,
-    DualKeyMapSource,
-    ReadonlyDualKeyMap,
-} from './dualKeyMap';
+import { DualKey, DualKeyMap, DualKeyMapSource, ReadonlyDualKeyMap } from './dualKeyMap';
 import * as $DualKeyMap from './dualKeyMap';
 import { GroupJoinResult } from './types';
 
@@ -26,9 +21,7 @@ export class CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TValue> {
             this._dualKeyMap = params.sourceMap.clone();
             return;
         }
-        this._dualKeyMap = new DualKeyMap<TKeySource1, TKeySource2, TValue>(
-            params.sourceMap
-        );
+        this._dualKeyMap = new DualKeyMap<TKeySource1, TKeySource2, TValue>(params.sourceMap);
     }
 
     public get dualKeyMap() {
@@ -38,12 +31,10 @@ export class CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TValue> {
     public wrap<TResult>(
         dualKeyMap: DualKeyMap<TKeySource1, TKeySource2, TResult>
     ): CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TResult> {
-        const result = new CustomDualKeyMap<
-            TKey,
-            TKeySource1,
-            TKeySource2,
-            TResult
-        >({ ...this.params, sourceMap: undefined });
+        const result = new CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TResult>({
+            ...this.params,
+            sourceMap: undefined,
+        });
         result._dualKeyMap = dualKeyMap;
         return result;
     }
@@ -57,28 +48,21 @@ export class CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TValue> {
     }
 
     public map<TResult>(
-        mapping: (
-            source: TValue,
-            key: DualKey<TKeySource1, TKeySource2>
-        ) => TResult
+        mapping: (source: TValue, key: DualKey<TKeySource1, TKeySource2>) => TResult
     ): CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TResult> {
-        const result = new CustomDualKeyMap<
-            TKey,
-            TKeySource1,
-            TKeySource2,
-            TResult
-        >({ ...this.params, sourceMap: undefined });
+        const result = new CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TResult>({
+            ...this.params,
+            sourceMap: undefined,
+        });
         result._dualKeyMap = this._dualKeyMap.map(mapping);
         return result;
     }
 
     public clone(): CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TValue> {
-        const result = new CustomDualKeyMap<
-            TKey,
-            TKeySource1,
-            TKeySource2,
-            TValue
-        >({ ...this.params, sourceMap: undefined });
+        const result = new CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TValue>({
+            ...this.params,
+            sourceMap: undefined,
+        });
         result._dualKeyMap = this._dualKeyMap.clone();
         return result;
     }
@@ -88,16 +72,11 @@ export class CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TValue> {
         return this._dualKeyMap.get(dualKey);
     }
 
-    public getByFirst(
-        first: TKeySource1
-    ): Map<TKeySource2, TValue> | undefined {
+    public getByFirst(first: TKeySource1): Map<TKeySource2, TValue> | undefined {
         return this._dualKeyMap.getByFirst(first);
     }
 
-    public set(
-        key: TKey,
-        value: TValue
-    ): CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TValue> {
+    public set(key: TKey, value: TValue): CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TValue> {
         const dualKey = this.params.createDualKey(key);
         this._dualKeyMap.set(dualKey, value);
         return this;
@@ -142,9 +121,7 @@ export class CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TValue> {
         seed: TResult
     ): TResult {
         let result = seed;
-        this.forEach(
-            (element, key) => (result = reducer(result, element, key))
-        );
+        this.forEach((element, key) => (result = reducer(result, element, key)));
         return result;
     }
 
@@ -154,12 +131,7 @@ export class CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TValue> {
     }
 }
 
-export type ReadonlyCustomDualKeyMap<
-    TKey,
-    TKeySource1,
-    TKeySource2,
-    TValue
-> = Omit<
+export type ReadonlyCustomDualKeyMap<TKey, TKeySource1, TKeySource2, TValue> = Omit<
     Readonly<CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TValue>>,
     'set' | 'delete' | 'getByFirst' | 'dualKeyMap'
 > & {
@@ -173,12 +145,7 @@ export type ReadonlyCustomDualKeyMap<
 export const groupJoin = <TKey, TKeySource1, TKeySource2, TLeft, TRight>(
     left: ReadonlyCustomDualKeyMap<TKey, TKeySource1, TKeySource2, TLeft>,
     right: ReadonlyCustomDualKeyMap<TKey, TKeySource1, TKeySource2, TRight>
-): CustomDualKeyMap<
-    TKey,
-    TKeySource1,
-    TKeySource2,
-    GroupJoinResult<TLeft, TRight>
-> => {
+): CustomDualKeyMap<TKey, TKeySource1, TKeySource2, GroupJoinResult<TLeft, TRight>> => {
     const result = $DualKeyMap.groupJoin(left.dualKeyMap, right.dualKeyMap);
     return new CustomDualKeyMap({ ...left, sourceMap: result });
 };

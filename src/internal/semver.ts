@@ -43,10 +43,7 @@ export class SemVer {
     public readonly patch: number;
     public readonly prerelease: Readonly<Prerelease> | null;
 
-    private static requireToBePositiveInteger(
-        source: number,
-        propName: string
-    ) {
+    private static requireToBePositiveInteger(source: number, propName: string) {
         if (!Number.isInteger(source)) {
             throw new Error(
                 `Semver error: ${propName} must be integer. Actual value is "${source}"`
@@ -59,10 +56,7 @@ export class SemVer {
         }
     }
 
-    private static requireToBeNonNegativeInteger(
-        source: number,
-        propName: string
-    ) {
+    private static requireToBeNonNegativeInteger(source: number, propName: string) {
         if (!Number.isInteger(source)) {
             throw new Error(
                 `Semver error: ${propName} must be integer. Actual value is "${source}"`
@@ -79,10 +73,7 @@ export class SemVer {
         SemVer.requireToBeNonNegativeInteger(option.minor, 'minor');
         SemVer.requireToBeNonNegativeInteger(option.patch, 'patch');
         if (option.prerelease != null) {
-            SemVer.requireToBePositiveInteger(
-                option.prerelease.version,
-                'prerelease version'
-            );
+            SemVer.requireToBePositiveInteger(option.prerelease.version, 'prerelease version');
         }
 
         this.major = option.major;
@@ -98,11 +89,7 @@ export class SemVer {
         return `${this.major}.${this.minor}.${this.patch}-${this.prerelease.type}.${this.prerelease.version}`;
     }
 
-    private static compareNumbers(
-        left: number,
-        operator: Operator,
-        right: number
-    ): boolean {
+    private static compareNumbers(left: number, operator: Operator, right: number): boolean {
         switch (operator) {
             case '=':
                 return left === right;
@@ -133,11 +120,7 @@ export class SemVer {
         }
     }
 
-    private static compareCore(
-        left: SemVer,
-        operator: '=' | '<' | '>',
-        right: SemVer
-    ): boolean {
+    private static compareCore(left: SemVer, operator: '=' | '<' | '>', right: SemVer): boolean {
         // majorが異なるなら値を即座に返し、同じなら次の判定処理に進むという戦略。他も同様。
         if (left.major !== right.major) {
             return SemVer.compareNumbers(left.major, operator, right.major);
@@ -149,12 +132,8 @@ export class SemVer {
             return SemVer.compareNumbers(left.patch, operator, right.patch);
         }
 
-        const leftPreleaseTypeAsNumber = SemVer.prereleaseTypeToNumber(
-            left.prerelease?.type
-        );
-        const rightPreleaseTypeAsNumber = SemVer.prereleaseTypeToNumber(
-            right.prerelease?.type
-        );
+        const leftPreleaseTypeAsNumber = SemVer.prereleaseTypeToNumber(left.prerelease?.type);
+        const rightPreleaseTypeAsNumber = SemVer.prereleaseTypeToNumber(right.prerelease?.type);
 
         if (leftPreleaseTypeAsNumber !== rightPreleaseTypeAsNumber) {
             return SemVer.compareNumbers(
@@ -175,11 +154,7 @@ export class SemVer {
     /**
     npmのsemverとは異なり、例えば 1.0.0 < 1.0.1-alpha.1 はtrueを返す。注意！
     */
-    public static compare(
-        left: SemVer,
-        operator: Operator,
-        right: SemVer
-    ): boolean {
+    public static compare(left: SemVer, operator: Operator, right: SemVer): boolean {
         switch (operator) {
             case '=':
             case '<':
@@ -196,21 +171,12 @@ export class SemVer {
      *
      * @returns apiサーバーとwebサーバーのバージョンの関係に問題がないならば"ok"。alphaの場合、majorとminorが同じでも互換性がある保証はないため、"alpha"が返される。
      */
-    public static check({
-        api,
-        web,
-    }: {
-        api: SemVer;
-        web: SemVer;
-    }): CheckResult {
+    public static check({ api, web }: { api: SemVer; web: SemVer }): CheckResult {
         if (api.major === web.major) {
             if (api.minor < web.minor) {
                 return apiServerRequiresUpdate;
             }
-            if (
-                api.prerelease?.type === alpha ||
-                web.prerelease?.type === alpha
-            ) {
+            if (api.prerelease?.type === alpha || web.prerelease?.type === alpha) {
                 return alpha;
             }
             return ok;

@@ -11,18 +11,13 @@ export namespace PublicChannelKey {
             $free,
         ];
 
-        export const isPublicChannelKey = (
-            source: unknown
-        ): source is PublicChannelKey => {
+        export const isPublicChannelKey = (source: unknown): source is PublicChannelKey => {
             return publicChannelKeys.find(key => key === source) !== undefined;
         };
     }
 
     export namespace With$System {
-        export type PublicChannelKey =
-            | typeof $free
-            | typeof $system
-            | StrIndex10;
+        export type PublicChannelKey = typeof $free | typeof $system | StrIndex10;
 
         export const publicChannelKeys: ReadonlyArray<PublicChannelKey> = [
             ...strIndex10Array,
@@ -30,9 +25,7 @@ export namespace PublicChannelKey {
             $system,
         ];
 
-        export const isPublicChannelKey = (
-            source: unknown
-        ): source is PublicChannelKey => {
+        export const isPublicChannelKey = (source: unknown): source is PublicChannelKey => {
             return publicChannelKeys.find(key => key === source) !== undefined;
         };
     }

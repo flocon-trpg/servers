@@ -44,9 +44,7 @@ export class JsonObject {
     public get(key: string): JsonObject {
         const result = this.tryGet(key);
         if (result == null) {
-            throw new Error(
-                `${keysToString([...this.currentPath, key])} is not object.`
-            );
+            throw new Error(`${keysToString([...this.currentPath, key])} is not object.`);
         }
         return result;
     }
@@ -62,17 +60,13 @@ export class JsonObject {
         if (this.jsonObject === null || typeof this.jsonObject === 'string') {
             return this.jsonObject;
         }
-        throw new Error(
-            `${keysToString(this.currentPath)} must be string or null.`
-        );
+        throw new Error(`${keysToString(this.currentPath)} must be string or null.`);
     }
 
     public valueAsBoolean(): boolean {
         if (typeof this.jsonObject === 'boolean') {
             return this.jsonObject;
         }
-        throw new Error(
-            `${keysToString(this.currentPath)} must be true or false.`
-        );
+        throw new Error(`${keysToString(this.currentPath)} must be true or false.`);
     }
 }
