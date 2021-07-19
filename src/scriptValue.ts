@@ -119,15 +119,15 @@ const isObjectOption = (source: any): source is ObjectOption => {
     return source['object'] === true;
 };
 type StringOption = {
-    'string': true;
-}
+    string: true;
+};
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isStringOption = (source: any): source is StringOption => {
     if (source == null) {
         return false;
     }
     return source['string'] === true;
-}
+};
 type UndefinedOption = {
     undefined: true;
 };
@@ -139,34 +139,34 @@ const isUndefinedOption = (source: any): source is UndefinedOption => {
     return source['undefined'] === true;
 };
 type OptionType = {
-    'array'?: true;
-    'boolean'?: true;
-    'null'?: true;
-    'number'?: true;
-    'object'?: true;
-    'string'?: true;
-    'undefined'?: true;
-}
+    array?: true;
+    boolean?: true;
+    null?: true;
+    number?: true;
+    object?: true;
+    string?: true;
+    undefined?: true;
+};
 
-export const toJObject = <T extends OptionType>(value: FValue, option: T):
+export const toJObject = <T extends OptionType>(
+    value: FValue,
+    option: T
+):
     | (T extends ArrayOption ? FArray : never)
-    | (T extends BooleanOption ? boolean: never)
+    | (T extends BooleanOption ? boolean : never)
     | (T extends NullOption ? null : never)
     | (T extends NumberOption ? number : never)
     | (T extends ObjectOption ? FObject : never)
     | (T extends StringOption ? string : never)
     | (T extends UndefinedOption ? undefined : never) => {
-        
-
-        if (value === null) {
-            if (isNullOption(option)) {
-                return null as any;
-            }
-
+    if (value === null) {
+        if (isNullOption(option)) {
+            return null as any;
         }
-    };
+    }
+};
 
-toJObject(undefined, { 'string': true });
+toJObject(undefined, { string: true });
 
 export const toNumberOrUndefined = (value: FValue): number | undefined => {
     if (value === undefined) {

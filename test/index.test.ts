@@ -1,4 +1,4 @@
-import { exec, arrayClass, createFValue } from '../dist';
+import { exec, arrayClass, createFValue } from '../src';
 
 test('docs.md 例1', () => {
     const globalThis = { obj: { x: 1 } };
