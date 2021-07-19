@@ -730,10 +730,10 @@
     "@types/yargs" "^16.0.0"
     chalk "^4.0.0"
 
-"@kizahasi/result@^0.2.1":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@kizahasi/result/-/result-0.2.1.tgz#9505a23325be6cb55d083032c8ac77c487b025ce"
-  integrity sha512-XV6lnES3JJk3+715uiJGUsdRBtxWE+8xVLw1AlF3+a2PvlGhMjEzsjDem9u7nHZ3TYVhB9Nip+KlGKiwJZIIfA==
+"@kizahasi/result@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@kizahasi/result/-/result-0.3.0.tgz#289d0b8386af374387e7b19b4a6ff01ae9688001"
+  integrity sha512-hS1wjM91tHgvu66vTkKX0x4Qbyqr45d+90Y2c1Nv2e5fR9KXukmls1jRv/aW/yZugMnNUbLMEvVbsCcpfJZQSw==
 
 "@nodelib/fs.scandir@2.1.4":
   version "2.1.4"
