@@ -1,4 +1,4 @@
-import { analyze, expr1, plain } from '../dist/cjs';
+import { analyze, expr1, plain } from '../src';
 
 it('tests {HP}', () => {
     const actual = analyze('{HP}');
