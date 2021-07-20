@@ -182,9 +182,9 @@ class JObjectCaster<T = never> {
         return this;
     }
 
-    public addObject(): JObjectCaster<T | FRecord> {
-        if (this.source instanceof FRecord) {
-            return new JObjectCaster<T | FRecord>(
+    public addObject(): JObjectCaster<T | FObject> {
+        if (this.source instanceof FObject) {
+            return new JObjectCaster<T | FObject>(
                 this.source,
                 { ...this.addedTypes, object: true },
                 Option.some(this.source)
