@@ -730,33 +730,41 @@
     "@types/yargs" "^16.0.0"
     chalk "^4.0.0"
 
-"@kizahasi/ot-string@0.2.1":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@kizahasi/ot-string/-/ot-string-0.2.1.tgz#3ee2dd9454a9e018207d6a53efc1f23d4a67eab4"
-  integrity sha512-L99DypSqkPN8VNbHVd39uTNQRv7YGWdVyuHMkuwY6p5G16BTXxUXGYyu06OMYfdA66SAfeUKFKC4Olo1UJLJTQ==
+"@kizahasi/flocon-script@^0.4.1":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@kizahasi/flocon-script/-/flocon-script-0.4.1.tgz#1aaac4702a98c2998fa3e2c140c8928492299172"
+  integrity sha512-nP6ZQr1AuQbnDy6rFHJxds3pg2LIa8yKFeHoSUP1FFkMwMea235RUyPCsdZ8kbeqt4nplGksBWvxgA9PsxPEwQ==
   dependencies:
-    "@kizahasi/result" "^0.2.0"
+    "@kizahasi/option" "^0.1.3"
+    "@kizahasi/util" "^0.2.3"
+    acorn "^8.4.1"
+
+"@kizahasi/option@^0.1.3":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@kizahasi/option/-/option-0.1.3.tgz#7652a03eed1e3d69b984310759585202869ede20"
+  integrity sha512-hURh7Lz0zxgTPZlWiEj2Q/SC8ebZFXKMsiDaPDuyJlDI6QvdlEUp81DahKl5Njkq/CS5+d1bpreNj/uQk4vLOg==
+
+"@kizahasi/ot-string@^0.2.2":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@kizahasi/ot-string/-/ot-string-0.2.2.tgz#14480e82f91874e337839f32efc65a9dfcef4282"
+  integrity sha512-YqixEV/DalsGfn3L4aXDVIDiwRrHr9Vx0TzDhi4+S7f+1rVFzTjGyQPy0ALZ0Wh5C0hGad/1LpjfkXQhJIEAlg==
+  dependencies:
+    "@kizahasi/result" "^0.3.0"
     diff-match-patch "^1.0.5"
 
-"@kizahasi/result@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@kizahasi/result/-/result-0.2.0.tgz#a38c8c6c109124ec7350c796d36cf55fa826f6d9"
-  integrity sha512-4IkSRH36XepOM4+eWNqnOfCrjHtOe10aYWWANot5cUbRPrghGbBdyNyONr2bCma6FnnrtnGqj8e2lX5hDKjwLQ==
+"@kizahasi/result@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@kizahasi/result/-/result-0.3.0.tgz#289d0b8386af374387e7b19b4a6ff01ae9688001"
+  integrity sha512-hS1wjM91tHgvu66vTkKX0x4Qbyqr45d+90Y2c1Nv2e5fR9KXukmls1jRv/aW/yZugMnNUbLMEvVbsCcpfJZQSw==
 
-"@kizahasi/result@^0.2.1":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@kizahasi/result/-/result-0.2.1.tgz#9505a23325be6cb55d083032c8ac77c487b025ce"
-  integrity sha512-XV6lnES3JJk3+715uiJGUsdRBtxWE+8xVLw1AlF3+a2PvlGhMjEzsjDem9u7nHZ3TYVhB9Nip+KlGKiwJZIIfA==
-
-"@kizahasi/util@^0.2.2":
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/@kizahasi/util/-/util-0.2.2.tgz#9ce3f5203846f9b4c53595841005444ba02e67e8"
-  integrity sha512-x/SvFvLT9xwUfWAmA4jbHjX57PRseYgy6mnIgLE4LewPrDLyx6h44a+8q7BkBSb9Bma7Dbl5zBkIJ9tHErrD1Q==
+"@kizahasi/util@^0.2.3":
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/@kizahasi/util/-/util-0.2.3.tgz#80839bc2aee44fcd44dc63e76e5f35db972ce90a"
+  integrity sha512-1A99nHefO07LHTFSBSauAQzrGC6DJJbHz7eRm5423C2fgB3FVgPdeMid3kDTVHq2ndT5ITdX9sM8JtDx85Ws2A==
   dependencies:
-    "@kizahasi/result" "^0.2.1"
+    "@kizahasi/result" "^0.3.0"
     fp-ts "^2.10.5"
     io-ts "^2.2.16"
-    lodash "^4.17.21"
 
 "@ltd/j-toml@^1.12.2":
   version "1.12.2"
@@ -885,6 +893,18 @@
   version "7.0.8"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.8.tgz#edf1bf1dbf4e04413ca8e5b17b3b7d7d54b59818"
   integrity sha512-YSBPTLTVm2e2OoQIDYx8HaeWJ5tTToLH67kXR7zYNGupXMEHa2++G8k+DczX2cFVgalypqtyZIcU19AFcmOpmg==
+
+"@types/lodash.clonedeep@^4.5.6":
+  version "4.5.6"
+  resolved "https://registry.yarnpkg.com/@types/lodash.clonedeep/-/lodash.clonedeep-4.5.6.tgz#3b6c40a0affe0799a2ce823b440a6cf33571d32b"
+  integrity sha512-cE1jYr2dEg1wBImvXlNtp0xDoS79rfEdGozQVgliDZj1uERH4k+rmEMTudP9b4VQ8O6nRb5gPqft0QzEQGMQgA==
+  dependencies:
+    "@types/lodash" "*"
+
+"@types/lodash@*":
+  version "4.14.171"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.171.tgz#f01b3a5fe3499e34b622c362a46a609fdb23573b"
+  integrity sha512-7eQ2xYLLI/LsicL2nejW9Wyko3lcpN6O/z0ZLHrEQsg280zIdCv1t/0m6UtBjUHokCGBQ3gYTbHzDkZ1xOBwwg==
 
 "@types/node@*":
   version "15.6.1"
@@ -1021,6 +1041,11 @@ acorn@^8.2.4:
   version "8.2.4"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.2.4.tgz#caba24b08185c3b56e3168e97d15ed17f4d31fd0"
   integrity sha512-Ibt84YwBDDA890eDiDCEqcbwvHlBvzzDkU2cGBBDDI1QWT12jTiXIOn2CIw5KK4i6N5Z2HUxwYjzriDyqaqqZg==
+
+acorn@^8.4.1:
+  version "8.4.1"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.4.1.tgz#56c36251fc7cabc7096adc18f05afe814321a28c"
+  integrity sha512-asabaBSkEKosYKMITunzX177CXxQ4Q8BSSzMTKD+FefUhipQC70gfW5SiUDhYQ3vk8G+81HqQk7Fv9OXwwn9KA==
 
 agent-base@6:
   version "6.0.2"
@@ -2609,7 +2634,7 @@ lodash.truncate@^4.4.2:
   resolved "https://registry.yarnpkg.com/lodash.truncate/-/lodash.truncate-4.4.2.tgz#5a350da0b1113b837ecfffd5812cbe58d6eae193"
   integrity sha1-WjUNoLERO4N+z//VgSy+WNbq4ZM=
 
-lodash@4.x, lodash@^4.17.21, lodash@^4.7.0:
+lodash@4.x, lodash@^4.7.0:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
