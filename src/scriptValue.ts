@@ -20,16 +20,20 @@ export type SetParams = {
     astInfo?: AstInfo;
 };
 
-export type OnGettingParams = {
+export type GetCoreParams = {
     key: string | number;
     astInfo?: AstInfo;
 };
 
-export type OnSettingParams = {
+export type OnGettingParams = GetCoreParams;
+
+export type SetCoreParams = {
     key: string | number;
     newValue: FValue;
     astInfo?: AstInfo;
 };
+
+export type OnSettingParams = SetCoreParams;
 
 type FObjectBase = {
     get(params: GetParams): FValue;
@@ -476,7 +480,7 @@ export class FArray implements FObjectBase {
 }
 
 export abstract class FObject implements FObjectBase {
-    protected abstract getCore(params: OnGettingParams): FValue;
+    protected abstract getCore(params: GetCoreParams): FValue;
 
     public get({ property, astInfo }: GetParams): FValue {
         const key = beginCast(property).addString().addNumber().cast(astInfo?.range);
@@ -484,7 +488,7 @@ export abstract class FObject implements FObjectBase {
     }
 
     // setを拒否したい場合は何かをthrowする。
-    protected abstract setCore(params: OnSettingParams): void;
+    protected abstract setCore(params: SetCoreParams): void;
 
     public set({ property, newValue, astInfo }: SetParams): void {
         const key = beginCast(property).addNumber().addString().cast(astInfo?.range);
@@ -519,11 +523,11 @@ export class FRecord extends FObject {
         }
     }
 
-    protected override getCore({ key }: OnGettingParams): FValue {
+    protected override getCore({ key }: GetCoreParams): FValue {
         return this.raw.get(key.toString());
     }
 
-    protected override setCore({ key, newValue }: OnSettingParams): void {
+    protected override setCore({ key, newValue }: SetCoreParams): void {
         this.raw.set(key.toString(), newValue);
     }
 
@@ -565,7 +569,7 @@ export class FFunction implements FObjectBase {
         return this.func({ ...params, $this: this.$this });
     }
 
-    protected onGetting(params: OnGettingParams): Option<FValue> {
+    protected onGetting(params: GetCoreParams): Option<FValue> {
         return Option.none();
     }
 
@@ -615,7 +619,7 @@ export class FGlobalRecord extends FRecord {
         super(base);
     }
 
-    protected override getCore(params: OnGettingParams): FValue {
+    protected override getCore(params: GetCoreParams): FValue {
         const keyAsString = params.key.toString();
         if (keyAsString === self || keyAsString === globalThis) {
             return this;
@@ -623,7 +627,7 @@ export class FGlobalRecord extends FRecord {
         return super.getCore(params);
     }
 
-    protected override setCore({ key, newValue, astInfo }: OnSettingParams): void {
+    protected override setCore({ key, newValue, astInfo }: SetCoreParams): void {
         const keyAsString = key.toString();
         if (keyAsString === self || keyAsString === globalThis) {
             throw new ScriptError(

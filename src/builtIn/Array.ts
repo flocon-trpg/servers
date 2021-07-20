@@ -1,4 +1,4 @@
-import { AstInfo, FBoolean, FFunction, FType, FValue, OnGettingParams } from '../scriptValue';
+import { AstInfo, FBoolean, FFunction, FType, FValue, GetCoreParams } from '../scriptValue';
 import { Option } from '@kizahasi/option';
 import { ScriptError } from '..';
 
@@ -19,7 +19,7 @@ class SArrayClass extends FFunction {
         }
     }
 
-    public onGetting({ key, astInfo }: OnGettingParams): Option<FValue> {
+    public onGetting({ key, astInfo }: GetCoreParams): Option<FValue> {
         switch (key) {
             case 'isArray': {
                 return Option.some(
