@@ -1,5 +1,5 @@
 {
-    "version": "0.5.2",
+    "version": "0.5.3",
     "license": "MIT",
     "main": "dist/cjs/index.js",
     "module": "dist/esm/index.js",
@@ -28,6 +28,7 @@
     },
     "name": "@kizahasi/flocon-script",
     "author": "kizahasi",
+    "description": "Executes javascript safely, but some features are not supported.",
     "repository": {
         "type": "git",
         "url": "https://github.com/kizahasi/flocon-script"
