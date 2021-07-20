@@ -81,14 +81,14 @@ type TypesOption = {
 
 const typesOptionToString = (source: TypesOption) => {
     const base = [
-        source.array == null ? 'array' : null,
-        source.boolean == null ? 'boolean' : null,
-        source.function == null ? 'function' : null,
-        source.null == null ? 'null' : null,
-        source.number == null ? 'number' : null,
-        source.object == null ? 'object' : null,
-        source.string == null ? 'string' : null,
-        source.undefined == null ? 'undefined' : null,
+        source.array ? 'array' : null,
+        source.boolean ? 'boolean' : null,
+        source.function ? 'function' : null,
+        source.null ? 'null' : null,
+        source.number ? 'number' : null,
+        source.object ? 'object' : null,
+        source.string ? 'string' : null,
+        source.undefined ? 'undefined' : null,
     ].reduce((seed, elem) => {
         if (seed === '') {
             return elem;
