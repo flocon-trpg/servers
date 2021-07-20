@@ -2,12 +2,11 @@ import {
     FObject,
     FString,
     FValue,
-    OnGettingParams,
-    OnSettingParams,
     ScriptError,
     beginCast,
+    GetCoreParams,
+    SetCoreParams,
 } from '@kizahasi/flocon-script';
-import { Option } from '@kizahasi/option';
 import * as Room from '../ot/room/v1';
 import * as Character from '../ot/room/character/v1';
 import { CompositeKey, dualKeyRecordFind } from '@kizahasi/util';
@@ -40,7 +39,7 @@ export class FRoom extends FObject {
         return new FCharacter(character);
     }
 
-    private onGettingCore({ key }: OnGettingParams): FValue {
+    override getCore({ key }: GetCoreParams): FValue {
         switch (key) {
             case name:
                 return new FString(this._room.name);
@@ -49,11 +48,7 @@ export class FRoom extends FObject {
         }
     }
 
-    override onGetting(params: OnGettingParams): Option<FValue> {
-        return Option.some(this.onGettingCore(params));
-    }
-
-    override onSetting({ key, newValue, astInfo }: OnSettingParams): void {
+    override setCore({ key, newValue, astInfo }: SetCoreParams): void {
         switch (key) {
             case name: {
                 const $newValue = beginCast(newValue).addString().cast(astInfo?.range);
@@ -63,5 +58,9 @@ export class FRoom extends FObject {
             default:
                 throw new ScriptError(`'${key}' is not supported.`, astInfo?.range);
         }
+    }
+
+    override toJObject(): unknown {
+        return this._room;
     }
 }

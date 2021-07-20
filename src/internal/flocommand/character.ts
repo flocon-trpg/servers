@@ -7,7 +7,6 @@ import {
     ScriptError,
     beginCast,
 } from '@kizahasi/flocon-script';
-import { Option } from '@kizahasi/option';
 import * as Character from '../ot/room/character/v1';
 
 const name = 'name';
@@ -17,7 +16,7 @@ export class FCharacter extends FObject {
         super();
     }
 
-    private onGettingCore({ key }: OnGettingParams): FValue {
+    override getCore({ key }: OnGettingParams): FValue {
         switch (key) {
             case name:
                 return new FString(this.character.name);
@@ -26,11 +25,7 @@ export class FCharacter extends FObject {
         }
     }
 
-    override onGetting(params: OnGettingParams): Option<FValue> {
-        return Option.some(this.onGettingCore(params));
-    }
-
-    override onSetting({ key, newValue, astInfo }: OnSettingParams): void {
+    override setCore({ key, newValue, astInfo }: OnSettingParams): void {
         switch (key) {
             case name: {
                 const $newValue = beginCast(newValue).addString().cast(astInfo?.range);
@@ -40,5 +35,9 @@ export class FCharacter extends FObject {
             default:
                 throw new ScriptError(`'${key}' is not supported.`, astInfo?.range);
         }
+    }
+
+    override toJObject(): unknown {
+        return this.character;
     }
 }

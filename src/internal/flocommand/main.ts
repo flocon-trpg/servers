@@ -1,19 +1,39 @@
 import * as Room from '../ot/room/v1';
-import { exec, ScriptError } from '@kizahasi/flocon-script';
+import { exec, ScriptError, test } from '@kizahasi/flocon-script';
 import { FRoom } from './room';
 import { CompositeKey, compositeKeyToString } from '@kizahasi/util';
 import { CustomResult, Result } from '@kizahasi/result';
 import { decodeState } from '../ot/room/converter';
 
+type CommandError = {
+    message: string;
+    range?: readonly [number, number];
+};
+
+export const testCommand = (script: string): CustomResult<undefined, CommandError> => {
+    try {
+        test(script);
+    } catch (e: unknown) {
+        if (e instanceof ScriptError) {
+            return Result.error({
+                message: e.message,
+                range: e.range,
+            });
+        }
+        if (e instanceof Error) {
+            return Result.error({
+                message: e.message,
+            });
+        }
+        throw e;
+    }
+    return Result.ok(undefined);
+};
+
 type CharacterCommandParams = {
     script: string;
     room: Room.State;
     characterKey: CompositeKey;
-};
-
-type CommandError = {
-    message: string;
-    range?: readonly [number, number];
 };
 
 type CommandResult = CustomResult<Room.State, CommandError>;

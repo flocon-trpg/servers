@@ -28,6 +28,7 @@
     },
     "name": "@kizahasi/flocon-core",
     "author": "kizahasi",
+    "description": "Core library for Flocon project(not released yet).",
     "repository": {
         "type": "git",
         "url": "https://github.com/kizahasi/flocon-core"
@@ -46,7 +47,7 @@
         "typescript": "^4.3.5"
     },
     "dependencies": {
-        "@kizahasi/flocon-script": "^0.4.1",
+        "@kizahasi/flocon-script": "^0.5.3",
         "@kizahasi/ot-string": "^0.2.2",
         "@kizahasi/result": "^0.3.0",
         "@kizahasi/util": "^0.2.3",

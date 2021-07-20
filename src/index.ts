@@ -5,7 +5,7 @@ export {
     generateChatPalette,
 } from './internal/toml';
 
-export { execCharacterCommand } from './internal/flocommand/main';
+export { testCommand, execCharacterCommand } from './internal/flocommand/main';
 
 export { Default, FirebaseStorage, FilePath } from './internal/ot/filePath/v1';
 
