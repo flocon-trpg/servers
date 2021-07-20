@@ -9,6 +9,7 @@ export {
     FFunction,
     FNumber,
     FObject,
+    FRecord,
     FString,
     FValue,
     FType,

@@ -23,7 +23,7 @@ import {
     FBoolean,
     FFunction,
     FNumber,
-    FObject,
+    FRecord,
     FString,
     FType,
     FValue,
@@ -266,7 +266,7 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
             return ofFCallExpression(expression, context, false, 'new');
         }
         case 'ObjectExpression': {
-            const result = new FObject();
+            const result = new FRecord();
             expression.properties.forEach(d => {
                 let key: string | number;
                 switch (d.key.type) {

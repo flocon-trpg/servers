@@ -44,7 +44,7 @@ export namespace FType {
     export const Number = 'Number';
     export const String = 'String';
     export const Array = 'Array';
-    export const Record = 'Record';
+    export const Object = 'Object';
     export const Function = 'Function';
 }
 
@@ -178,9 +178,9 @@ class JObjectCaster<T = never> {
         return this;
     }
 
-    public addObject(): JObjectCaster<T | FObject> {
-        if (this.source instanceof FObject) {
-            return new JObjectCaster<T | FObject>(
+    public addObject(): JObjectCaster<T | FRecord> {
+        if (this.source instanceof FRecord) {
+            return new JObjectCaster<T | FRecord>(
                 this.source,
                 { ...this.addedTypes, object: true },
                 Option.some(this.source)
@@ -475,44 +475,24 @@ export class FArray implements FObjectBase {
     }
 }
 
-// Mapに変換することで、外界から受け取ったオブジェクトに対する破壊的な操作を起こせないようにしている。
-export class FObject implements FObjectBase {
-    private readonly raw: Map<string, FValue>;
-
-    public constructor(base?: FObject) {
-        if (base != null) {
-            this.raw = new Map(base.raw);
-        } else {
-            this.raw = new Map();
-        }
-    }
-
-    public get type(): typeof FType.Record {
-        return FType.Record;
-    }
-
-    protected onGetting(params: OnGettingParams): Option<FValue> {
-        return Option.none();
-    }
+export abstract class FObject implements FObjectBase {
+    protected abstract getCore(params: OnGettingParams): FValue;
 
     public get({ property, astInfo }: GetParams): FValue {
         const key = beginCast(property).addString().addNumber().cast(astInfo?.range);
-        const onGettingResult = this.onGetting({ key, astInfo });
-        if (!onGettingResult.isNone) {
-            return onGettingResult.value;
-        }
-        return this.raw.get(key.toString());
+        return this.getCore({ key, astInfo });
     }
 
     // setを拒否したい場合は何かをthrowする。
-    protected onSetting(params: OnSettingParams): void {
-        return;
-    }
+    protected abstract setCore(params: OnSettingParams): void;
 
     public set({ property, newValue, astInfo }: SetParams): void {
         const key = beginCast(property).addNumber().addString().cast(astInfo?.range);
-        this.onSetting({ key, newValue, astInfo });
-        this.raw.set(key.toString(), newValue);
+        this.setCore({ key, newValue, astInfo });
+    }
+
+    public get type(): typeof FType.Object {
+        return FType.Object;
     }
 
     public toPrimitiveAsString() {
@@ -523,8 +503,31 @@ export class FObject implements FObjectBase {
         return +{};
     }
 
-    // 継承されるケースを考えて、Record<string, unknown>ではなくunknownを返すようにしている
-    public toJObject(): unknown {
+    public abstract toJObject(): unknown;
+}
+
+// Mapに変換することで、外界から受け取ったオブジェクトに対する破壊的な操作を起こせないようにしている。
+export class FRecord extends FObject {
+    private readonly raw: Map<string, FValue>;
+
+    public constructor(base?: FRecord) {
+        super();
+        if (base != null) {
+            this.raw = new Map(base.raw);
+        } else {
+            this.raw = new Map();
+        }
+    }
+
+    protected override getCore({ key }: OnGettingParams): FValue {
+        return this.raw.get(key.toString());
+    }
+
+    protected override setCore({ key, newValue }: OnSettingParams): void {
+        this.raw.set(key.toString(), newValue);
+    }
+
+    public override toJObject(): unknown {
         const result = new Map<string, unknown>();
         this.raw.forEach((value, key) => {
             result.set(key, value?.toJObject());
@@ -600,27 +603,27 @@ export class FFunction implements FObjectBase {
     }
 }
 
-export type FValue = null | undefined | FBoolean | FNumber | FString | FArray | FObject | FFunction;
+export type FValue = null | undefined | FBoolean | FNumber | FString | FArray | FRecord | FFunction;
 
 const self = 'self';
 const globalThis = 'globalThis';
 
-// keyが'self'か'globalThis'のときは自分自身を返すSRecord
+// keyが'self'か'globalThis'のときは自分自身を返すRecord
 // baseでkeyが'self'か'globalThis'である要素は全て無視される
-export class FGlobalRecord extends FObject {
-    public constructor(base?: FObject) {
+export class FGlobalRecord extends FRecord {
+    public constructor(base?: FRecord) {
         super(base);
     }
 
-    protected override onGetting({ key }: OnGettingParams) {
-        const keyAsString = key.toString();
+    protected override getCore(params: OnGettingParams): FValue {
+        const keyAsString = params.key.toString();
         if (keyAsString === self || keyAsString === globalThis) {
-            return Option.some(this);
+            return this;
         }
-        return Option.none();
+        return super.getCore(params);
     }
 
-    protected override onSetting({ key, astInfo }: OnSettingParams) {
+    protected override setCore({ key, newValue, astInfo }: OnSettingParams): void {
         const keyAsString = key.toString();
         if (keyAsString === self || keyAsString === globalThis) {
             throw new ScriptError(
@@ -628,6 +631,7 @@ export class FGlobalRecord extends FObject {
                 astInfo?.range
             );
         }
+        super.setCore({ key, newValue, astInfo });
     }
 }
 
@@ -655,7 +659,7 @@ export function createFValue(source: unknown): FValue {
         source instanceof FBoolean ||
         source instanceof FFunction ||
         source instanceof FNumber ||
-        source instanceof FObject ||
+        source instanceof FRecord ||
         source instanceof FString
     ) {
         return source;
@@ -667,8 +671,8 @@ export function createFValue(source: unknown): FValue {
 }
 
 // __proto__ のチェックなどは行われない
-function createFObject(source: Record<string, unknown>): FObject {
-    const result = new FObject();
+function createFObject(source: Record<string, unknown>): FRecord {
+    const result = new FRecord();
     for (const key in source) {
         result.set({
             property: new FString(key),
