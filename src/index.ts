@@ -17,5 +17,7 @@ export {
     SetParams,
     OnGettingParams,
     OnSettingParams,
+    GetCoreParams,
+    SetCoreParams,
 } from './scriptValue';
 export { ScriptError } from './ScriptError';
