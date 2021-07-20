@@ -607,7 +607,7 @@ export class FFunction implements FObjectBase {
     }
 }
 
-export type FValue = null | undefined | FBoolean | FNumber | FString | FArray | FRecord | FFunction;
+export type FValue = null | undefined | FBoolean | FNumber | FString | FArray | FObject | FFunction;
 
 const self = 'self';
 const globalThis = 'globalThis';
@@ -663,7 +663,7 @@ export function createFValue(source: unknown): FValue {
         source instanceof FBoolean ||
         source instanceof FFunction ||
         source instanceof FNumber ||
-        source instanceof FRecord ||
+        source instanceof FObject ||
         source instanceof FString
     ) {
         return source;
@@ -671,11 +671,11 @@ export function createFValue(source: unknown): FValue {
     if (Array.isArray(source)) {
         return new FArray(source.map(x => createFValue(x)));
     }
-    return createFObject(source as Record<string, unknown>);
+    return createFRecord(source as Record<string, unknown>);
 }
 
 // __proto__ のチェックなどは行われない
-function createFObject(source: Record<string, unknown>): FRecord {
+function createFRecord(source: Record<string, unknown>): FRecord {
     const result = new FRecord();
     for (const key in source) {
         result.set({
@@ -689,7 +689,7 @@ function createFObject(source: Record<string, unknown>): FRecord {
 
 // keyが'self'か'globalThis'である要素は無視されることに注意
 export function createFGlobalRecord(source: Record<string, unknown>): FGlobalRecord {
-    return new FGlobalRecord(createFObject(source));
+    return new FGlobalRecord(createFRecord(source));
 }
 
 // https://ja.javascript.info/object-toprimitive
