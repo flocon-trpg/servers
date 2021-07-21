@@ -1,10 +1,9 @@
 import {
-    applyCommands,
+    execCharacterCommand,
     BoardLocationState,
     BoardState,
     CharacterState,
     dicePieceValueStrIndexes,
-    parseToCommands,
     PieceState,
     State,
     UpOperation,
@@ -17,6 +16,8 @@ import {
     compositeKeyToString,
     dualKeyRecordToDualKeyMap,
     ReadonlyStateMap,
+    recordToArray,
+    recordToMap,
 } from '@kizahasi/util';
 import { Menu, Tooltip } from 'antd';
 import _ from 'lodash';
@@ -529,48 +530,40 @@ namespace ContextMenuModule {
                     return null;
                 }
                 const key = compositeKeyToString(pair.key);
-                const commands = parseToCommands(pair.value.privateCommand);
-                if (commands.isError) {
-                    return (
-                        <Menu.ItemGroup key={key}>
-                            <Menu.Item disabled>
-                                <Tooltip title={commands.error}>(コマンド文法エラー)</Tooltip>
-                            </Menu.Item>
-                        </Menu.ItemGroup>
-                    );
-                }
-                const _ = Array.isArray(commands.value._) ? commands.value._ : [commands.value._];
-                const menuItems = _.map((command, i) => {
-                    return (
+                const menuItems = recordToArray(pair.value.privateCommands).map(
+                    ({ key, value }) => {
+                        const commandResult = execCharacterCommand({
+                            script: value.value,
+                            room,
+                            characterKey: pair.key,
+                        });
+                        if (commandResult.isError) {
+                            return (
+                                <Menu.Item key={key} disabled>
+                                    <Tooltip title={commandResult.error}>
+                                        (コマンド文法エラー)
+                                    </Tooltip>
+                                </Menu.Item>
+                            );
+                        }
                         <Menu.Item
-                            key={i}
+                            key={key}
                             onClick={() => {
-                                const applyCommandResult = applyCommands({
-                                    commands: commands.value,
-                                    room,
-                                    selfCharacterId: pair.key,
-                                    commandIndex: i,
-                                });
-                                if (applyCommandResult == null) {
-                                    return;
-                                }
                                 const operation = diff({
                                     prevState: room,
-                                    nextState: applyCommandResult.room,
+                                    nextState: commandResult.value,
                                 });
                                 if (operation != null) {
                                     operate(toUpOperation(operation));
                                 }
-                                if (applyCommandResult.se != null) {
-                                    onSe(applyCommandResult.se.file, applyCommandResult.se.volume);
-                                }
                                 onContextMenuClear();
                             }}
                         >
-                            {command.name ?? `(コマンド${i})`}
-                        </Menu.Item>
-                    );
-                });
+                            {key}
+                        </Menu.Item>;
+                    }
+                );
+
                 return (
                     <Menu.ItemGroup key={key} title={pair.value.name}>
                         {menuItems}

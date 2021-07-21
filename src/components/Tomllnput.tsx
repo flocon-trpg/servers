@@ -1,81 +1,25 @@
-import { isValidVarToml, parseToCommands } from '@kizahasi/flocon-core';
+import { isValidVarToml } from '@kizahasi/flocon-core';
 import React from 'react';
-import { useBufferValue } from '../hooks/useBufferValue';
-import BufferedTextArea, { Props as BufferedTextAreaProps } from './BufferedTextArea';
+import {
+    BufferedTextArea,
+    BottomElementParams,
+    Props as BufferedTextAreaProps,
+} from './BufferedTextArea';
 
-export const characterVariable = 'characterVariable';
-export const characterCommand = 'characterCommand';
-
-type TomlType = typeof characterVariable | typeof characterCommand;
-
-type Props = BufferedTextAreaProps & {
-    tomlType: TomlType;
-};
-
-type TomlError =
-    | {
-          type: 'error';
-          message: string;
-      }
-    | {
-          type: 'ok';
-      }
-    | {
-          type: 'skip';
-      };
+type Props = Omit<BufferedTextAreaProps, 'spellCheck'>;
 
 export const TomlInput: React.FC<Props> = (props: Props) => {
     const { ...inputProps } = props;
-    const [currentText, setCurrentText] = React.useState<string>(props.value);
-    const { currentValue: bufferedText, isSkipping } = useBufferValue({
-        value: currentText,
-        bufferDuration: 1000,
-    });
-    const validator = React.useCallback((toml: string, tomlType: TomlType): TomlError => {
-        switch (tomlType) {
-            case characterVariable: {
-                const result = isValidVarToml(toml);
-                if (result.isError) {
-                    return { type: 'error', message: result.error };
-                }
-                return { type: 'ok' };
-            }
-            case characterCommand: {
-                const result = parseToCommands(toml);
-                if (result.isError) {
-                    return { type: 'error', message: result.error };
-                }
-                return { type: 'ok' };
-            }
+    const validator = (params: BottomElementParams): JSX.Element | null => {
+        if (params.isSkipping) {
+            return <div>編集中…</div>;
         }
-    }, []);
-
-    const [tomlError, setTomlError] = React.useState<TomlError>(() =>
-        validator(props.value, props.tomlType)
-    );
-
-    React.useEffect(() => {
-        if (isSkipping) {
-            setTomlError({ type: 'skip' });
-            return;
+        const result = isValidVarToml(params.currentValue);
+        if (result.isError) {
+            return <div>TOML文法エラー</div>;
         }
-        setTomlError(validator(bufferedText, props.tomlType));
-    }, [bufferedText, isSkipping, props.tomlType, validator]);
+        return <div>OK</div>;
+    };
 
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <BufferedTextArea
-                {...inputProps}
-                spellCheck={false}
-                onChangeImmediate={newValue => {
-                    setCurrentText(newValue);
-                }}
-            />
-            {tomlError.type === 'error'
-                ? tomlError.message
-                : tomlError.type === 'ok'
-                ? 'エラーなし'
-                : '不明'}
-        </div>
-    );
+    return <BufferedTextArea {...inputProps} spellCheck={false} bottomElement={validator} />;
 };

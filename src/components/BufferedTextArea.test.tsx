@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import BufferedTextArea, { OnChangeParams } from './BufferedTextArea';
+import { BufferedTextArea, OnChangeParams } from './BufferedTextArea';
 
 const delayTime = 1100;
 

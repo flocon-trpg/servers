@@ -23,11 +23,11 @@ import {
 } from '../../modules/roomDrawerAndPopoverModule';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useImagePieces } from '../../hooks/state/useImagePieces';
-import BufferedTextArea from '../../components/BufferedTextArea';
 import InputFile from '../../components/InputFile';
 import { FilePath, FilesManagerDrawerType } from '../../utils/types';
 import FilesManagerDrawer from '../../components/FilesManagerDrawer';
 import BufferedInput from '../../components/BufferedInput';
+import { BufferedTextArea } from '../../components/BufferedTextArea';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,

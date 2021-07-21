@@ -21,8 +21,7 @@ import {
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
 import { useOperate } from '../../hooks/useOperate';
 import BufferedInput from '../../components/BufferedInput';
-import BufferedTextArea from '../../components/BufferedTextArea';
-import { characterCommand, characterVariable, TomlInput } from '../../components/Tomllnput';
+import { TomlInput } from '../../components/Tomllnput';
 import { useCharacters } from '../../hooks/state/useCharacters';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import {
@@ -41,6 +40,7 @@ import {
     toCharacterUpOperation,
     UpOperation,
     pieceDiff,
+    testCommand,
 } from '@kizahasi/flocon-core';
 import { dualKeyRecordFind, strIndex20Array } from '@kizahasi/util';
 import { useSelector } from '../../store';
@@ -51,6 +51,7 @@ import {
     update,
 } from '../../modules/roomDrawerAndPopoverModule';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
+import { BufferedTextArea } from '../../components/BufferedTextArea';
 
 const notFound = 'notFound';
 
@@ -867,7 +868,6 @@ const CharacterDrawer: React.FC = () => {
                             <Col flex={0}></Col>
                             <Col span={inputSpan}>
                                 <TomlInput
-                                    tomlType={characterVariable}
                                     size="small"
                                     bufferDuration="default"
                                     value={character.privateVarToml}
@@ -889,8 +889,7 @@ const CharacterDrawer: React.FC = () => {
                             <Col flex="auto" />
                             <Col flex={0}></Col>
                             <Col span={inputSpan}>
-                                <TomlInput
-                                    tomlType={characterCommand}
+                                <BufferedTextArea
                                     size="small"
                                     bufferDuration="default"
                                     value={character.privateCommand}
@@ -898,6 +897,13 @@ const CharacterDrawer: React.FC = () => {
                                     onChange={e =>
                                         updateCharacter({ privateCommand: e.currentValue })
                                     }
+                                    bottomElement={params => {
+                                        if (params.isSkipping) {
+                                            return <div>編集中…</div>;
+                                        }
+                                        const result = testCommand(params.currentValue);
+                                        return <div>{ result.isError ? result.error.message : 'エラーなし' }</div>
+                                    }}
                                 />
                             </Col>
                         </Row>
