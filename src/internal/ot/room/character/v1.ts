@@ -36,7 +36,7 @@ import { Result } from '@kizahasi/result';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
 import { chooseDualKeyRecord, chooseRecord, CompositeKey, Maybe, maybe } from '@kizahasi/util';
 
-// privateCommandsは無効化しているが、コードは大部分残している
+// privateCommandは無効化しているが、コードは大部分残している
 
 export const state = t.type({
     $version: t.literal(1),
@@ -1439,27 +1439,34 @@ export const serverTransform =
             return pieces;
         }
 
-        // const privateCommands = RecordOperation.serverTransform<Command.State, Command.State, Command.TwoWayOperation, Command.UpOperation, string | ApplyError<PositiveInt> | ComposeAndTransformError>({
-        //     prevState: prevState.privateCommands,
-        //     nextState: currentState.privateCommands,
-        //     first: serverOperation?.privateCommands,
-        //     second: clientOperation.privateCommands,
-        //     innerTransform: ({ prevState, nextState, first, second }) => Command.serverTransform({
-        //         prevState,
-        //         currentState: nextState,
-        //         serverOperation: first,
-        //         clientOperation: second,
-        //     }),
-        //     toServerState: state => state,
-        //     protectedValuePolicy: {
-        //         cancelCreate: () => !createdByMe,
-        //         cancelRemove: () => !createdByMe,
-        //         cancelUpdate: () => !createdByMe,
-        //     },
-        // });
-        // if (privateCommands.isError) {
-        //     return privateCommands;
-        // }
+        const privateCommands = RecordOperation.serverTransform<
+            Command.State,
+            Command.State,
+            Command.TwoWayOperation,
+            Command.UpOperation,
+            string | ApplyError<PositiveInt> | ComposeAndTransformError
+        >({
+            prevState: prevState.privateCommands,
+            nextState: currentState.privateCommands,
+            first: serverOperation?.privateCommands,
+            second: clientOperation.privateCommands,
+            innerTransform: ({ prevState, nextState, first, second }) =>
+                Command.serverTransform({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {
+                cancelCreate: () => !createdByMe,
+                cancelRemove: () => !createdByMe,
+                cancelUpdate: () => !createdByMe,
+            },
+        });
+        if (privateCommands.isError) {
+            return privateCommands;
+        }
 
         const tachieLocations = DualKeyRecordOperation.serverTransform<
             BoardLocation.State,
@@ -1551,7 +1558,7 @@ export const serverTransform =
             numMaxParams: numMaxParams.value,
             strParams: strParams.value,
             pieces: pieces.value,
-            // privateCommands: privateCommands.value,
+            privateCommands: privateCommands.value,
             tachieLocations: tachieLocations.value,
             dicePieceValues: dicePieceValues.value,
             numberPieceValues: numberPieceValues.value,
@@ -1597,17 +1604,17 @@ export const serverTransform =
             }
             twoWayOperation.privateCommand = transformed.value.secondPrime;
         }
-        if (createdByMe) {
-            const transformed = TextOperation.serverTransform({
-                first: serverOperation?.privateVarToml,
-                second: clientOperation.privateVarToml,
-                prevState: prevState.privateVarToml,
-            });
-            if (transformed.isError) {
-                return transformed;
-            }
-            twoWayOperation.privateVarToml = transformed.value.secondPrime;
-        }
+        // if (createdByMe) {
+        //     const transformed = TextOperation.serverTransform({
+        //         first: serverOperation?.privateVarToml,
+        //         second: clientOperation.privateVarToml,
+        //         prevState: prevState.privateVarToml,
+        //     });
+        //     if (transformed.isError) {
+        //         return transformed;
+        //     }
+        //     twoWayOperation.privateVarToml = transformed.value.secondPrime;
+        // }
 
         if (isIdRecord(twoWayOperation)) {
             return Result.ok(undefined);
