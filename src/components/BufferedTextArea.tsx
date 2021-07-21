@@ -47,23 +47,16 @@ export const BufferedTextArea: React.FC<Props> = (props: Props) => {
             if (params.isSkipping) {
                 return <Icons.EditOutlined />;
             }
-            return <Icons.CheckOutlined />
+            return <Icons.CheckOutlined />;
         }
         return createBottomElementCore(params);
-    }
+    };
     const [bottomElement, setBottomElement] = React.useState<JSX.Element | null>(() => {
-        if (createBottomElement == null) {
-            return null;
-        }
         return createBottomElement({ isSkipping: false, currentValue: value });
     });
     const onChangeOutput = (params: OnChangeParams) => {
         if (onChange != null) {
             onChange(params);
-        }
-        if (createBottomElement == null) {
-            setBottomElement(null);
-            return;
         }
         setBottomElement(createBottomElement({ ...params, isSkipping: false }));
     };
@@ -91,10 +84,6 @@ export const BufferedTextArea: React.FC<Props> = (props: Props) => {
         onChangeOutput,
         setValueToComponent: ({ value, component }) => {
             component.value = value;
-            if (createBottomElement == null) {
-                return;
-            }
-            setBottomElement(createBottomElement({ isSkipping: true }));
         },
     });
 
@@ -109,6 +98,7 @@ export const BufferedTextArea: React.FC<Props> = (props: Props) => {
                 ref={ref}
                 defaultValue={undefined}
                 onChange={e => {
+                    setBottomElement(createBottomElement({ isSkipping: true }));
                     onChangeInput(e.currentTarget.value);
                 }}
             />
@@ -116,4 +106,3 @@ export const BufferedTextArea: React.FC<Props> = (props: Props) => {
         </div>
     );
 };
-
