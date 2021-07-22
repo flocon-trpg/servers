@@ -1,3 +1,26 @@
+import * as Command from './internal/ot/room/character/command/v1';
+import * as RecordOperation from './internal/ot/util/recordOperation';
+
+export const privateCommandsDiff = ({
+    prevState,
+    nextState,
+}: {
+    prevState: Record<string, Command.State>;
+    nextState: Record<string, Command.State>;
+}) => {
+    return RecordOperation.diff<Command.State, Command.UpOperation>({
+        prevState,
+        nextState,
+        innerDiff: params => {
+            const twoWayDiff = Command.diff(params);
+            if (twoWayDiff == null) {
+                return undefined;
+            }
+            return Command.toUpOperation(twoWayDiff);
+        },
+    });
+};
+
 export {
     isValidVarToml,
     parseToml,
