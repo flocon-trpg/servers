@@ -36,6 +36,7 @@ import ClientIdContext from '../contexts/ClientIdContext';
 import { enableMapSet } from 'immer';
 import { authToken } from '@kizahasi/util';
 import Head from 'next/head';
+import { useMonaco } from '@monaco-editor/react';
 
 enableMapSet();
 
@@ -171,10 +172,40 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     useUserConfig(typeof user === 'string' ? null : user.uid, store.dispatch);
 
     const clientId = useConstant(() => simpleId());
-
     React.useEffect(() => {
         appConsole.log(`clientId: ${clientId}`);
     }, [clientId]);
+
+    const monaco = useMonaco();
+    React.useEffect(() => {
+        if (monaco == null) {
+            return;
+        }
+        const opts = monaco.languages.typescript.typescriptDefaults.getCompilerOptions();
+        monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+            ...opts,
+            noLib: true,
+            allowTsExtensions: true,
+        });
+        const libSource = `
+declare class Room {
+    private constructor();
+
+    public name: string;
+}
+declare class Character {
+    private constructor();
+
+    /**
+     * 名前の取得、設定を行えます。
+     */
+    public name: string;
+}
+declare var room: Room;
+declare var character: Character;
+        `;
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(libSource);
+    }, [monaco]);
 
     if (apolloClient == null) {
         return <div style={{ padding: 5 }}>{'しばらくお待ち下さい… / Please wait…'}</div>;

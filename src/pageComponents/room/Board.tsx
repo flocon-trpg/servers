@@ -51,8 +51,8 @@ import {
     create,
     MouseOverOn,
     BoardPopoverEditorState,
-    roomDrawerAndPopoverModule,
-} from '../../modules/roomDrawerAndPopoverModule';
+    roomDrawerAndPopoverAndModalModule,
+} from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useDicePieceValues } from '../../hooks/state/useDicePieceValues';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useImagePieces } from '../../hooks/state/useImagePieces';
@@ -976,20 +976,26 @@ const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: Props) 
                 boardConfig={boardConfig}
                 boardEditorPanelId={boardEditorPanelId}
                 onClick={() =>
-                    dispatch(roomDrawerAndPopoverModule.actions.set({ boardContextMenu: null }))
+                    dispatch(
+                        roomDrawerAndPopoverAndModalModule.actions.set({ boardContextMenu: null })
+                    )
                 }
                 onTooltip={newValue =>
-                    dispatch(roomDrawerAndPopoverModule.actions.set({ boardTooltip: newValue }))
+                    dispatch(
+                        roomDrawerAndPopoverAndModalModule.actions.set({ boardTooltip: newValue })
+                    )
                 }
                 onPopupEditor={newValue =>
                     dispatch(
-                        roomDrawerAndPopoverModule.actions.set({ boardPopoverEditor: newValue })
+                        roomDrawerAndPopoverAndModalModule.actions.set({
+                            boardPopoverEditor: newValue,
+                        })
                     )
                 }
                 onContextMenu={(e, stateOffset) => {
                     e.evt.preventDefault();
                     dispatch(
-                        roomDrawerAndPopoverModule.actions.set({
+                        roomDrawerAndPopoverAndModalModule.actions.set({
                             boardContextMenu: {
                                 boardKey: boardKeyToShow,
                                 boardConfig,
@@ -1178,7 +1184,7 @@ const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: Props) 
                     icon={<Icons.PlusOutlined />}
                     onClick={() =>
                         dispatch(
-                            roomDrawerAndPopoverModule.actions.set({
+                            roomDrawerAndPopoverAndModalModule.actions.set({
                                 boardDrawerType: { type: create },
                             })
                         )
@@ -1225,7 +1231,7 @@ const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: Props) 
                             return;
                         }
                         dispatch(
-                            roomDrawerAndPopoverModule.actions.set({
+                            roomDrawerAndPopoverAndModalModule.actions.set({
                                 boardDrawerType: { type: update, stateKey: boardKeyToShow },
                             })
                         );

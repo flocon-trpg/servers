@@ -9,7 +9,7 @@ import { useOperate } from '../../hooks/useOperate';
 import { recordToMap, StrIndex20, strIndex20Array } from '@kizahasi/util';
 import { UpOperation } from '@kizahasi/flocon-core';
 import { useDispatch } from 'react-redux';
-import { roomDrawerAndPopoverModule } from '../../modules/roomDrawerAndPopoverModule';
+import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { InputModal } from '../../components/InputModal';
 
 type VisibleParameterForm = {
@@ -19,7 +19,7 @@ type VisibleParameterForm = {
 
 const CharacterParameterNamesDrawer: React.FC = () => {
     const characterParameterNamesDrawerVisibility = useSelector(
-        state => state.roomDrawerAndPopoverModule.characterParameterNamesDrawerVisibility
+        state => state.roomDrawerAndPopoverAndModalModule.characterParameterNamesDrawerVisibility
     );
     const operate = useOperate();
     const dispatch = useDispatch();
@@ -257,7 +257,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
             closable
             onClose={() =>
                 dispatch(
-                    roomDrawerAndPopoverModule.actions.set({
+                    roomDrawerAndPopoverAndModalModule.actions.set({
                         characterParameterNamesDrawerVisibility: false,
                     })
                 )
@@ -268,7 +268,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                         textType: 'close',
                         onClick: () =>
                             dispatch(
-                                roomDrawerAndPopoverModule.actions.set({
+                                roomDrawerAndPopoverAndModalModule.actions.set({
                                     characterParameterNamesDrawerVisibility: false,
                                 })
                             ),

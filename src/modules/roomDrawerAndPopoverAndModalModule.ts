@@ -26,6 +26,7 @@ export const tachie = 'tachie';
 export const dicePieceValue = 'dicePieceValue';
 export const numberPieceValue = 'numberPieceValue';
 export const imagePieceValue = 'imagePieceValue';
+export const characterCommand = 'characterCommand';
 
 export type BoardEditorDrawerType =
     | {
@@ -89,6 +90,11 @@ export type ImagePieceDrawerType =
           boardKey: CompositeKey | null;
           stateKey: string;
       };
+
+export type CommandEditorModalType = {
+    type: typeof characterCommand;
+    characterKey: CompositeKey;
+};
 
 export type ClickOn =
     | {
@@ -158,6 +164,7 @@ export type State = {
     imagePieceDrawerType: ImagePieceDrawerType | null;
     numberPieceValueDrawerType: PieceValueDrawerType | null;
     editRoomDrawerVisibility: boolean;
+    commandEditorModalType: CommandEditorModalType | null;
 
     boardContextMenu: ContextMenuState | null;
     boardTooltip: BoardTooltipState | null;
@@ -172,14 +179,15 @@ const initState: State = {
     imagePieceDrawerType: null,
     numberPieceValueDrawerType: null,
     editRoomDrawerVisibility: false,
+    commandEditorModalType: null,
 
     boardContextMenu: null,
     boardTooltip: null,
     boardPopoverEditor: null,
 };
 
-export const roomDrawerAndPopoverModule = createSlice({
-    name: 'roomDrawer',
+export const roomDrawerAndPopoverAndModalModule = createSlice({
+    name: 'roomDrawerAndPopoverAndModal',
     initialState: initState as State,
     reducers: {
         set: (state: State, action: PayloadAction<Partial<State>>) => {
@@ -212,6 +220,10 @@ export const roomDrawerAndPopoverModule = createSlice({
                     action.payload.editRoomDrawerVisibility === undefined
                         ? state.editRoomDrawerVisibility
                         : action.payload.editRoomDrawerVisibility,
+                commandEditorModalType:
+                    action.payload.commandEditorModalType === undefined
+                        ? state.commandEditorModalType
+                        : action.payload.commandEditorModalType,
 
                 boardContextMenu:
                     action.payload.boardContextMenu === undefined

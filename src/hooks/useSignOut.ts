@@ -2,7 +2,7 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import ConfigContext from '../contexts/ConfigContext';
 import { fileModule } from '../modules/fileModule';
-import { roomDrawerAndPopoverModule } from '../modules/roomDrawerAndPopoverModule';
+import { roomDrawerAndPopoverAndModalModule } from '../modules/roomDrawerAndPopoverAndModalModule';
 import roomModule from '../modules/roomModule';
 import { getAuth } from '../utils/firebaseHelpers';
 
@@ -19,7 +19,7 @@ export function useSignOut() {
         // 前にログインしていたユーザーの部屋やファイル一覧などといったデータの閲覧を防いでいる
         dispatch(roomModule.actions.reset());
         dispatch(fileModule.actions.reset());
-        dispatch(roomDrawerAndPopoverModule.actions.reset());
+        dispatch(roomDrawerAndPopoverAndModalModule.actions.reset());
         return true;
     }, [auth, dispatch]);
 }

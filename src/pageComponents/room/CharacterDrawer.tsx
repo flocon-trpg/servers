@@ -46,10 +46,11 @@ import { dualKeyRecordFind, strIndex20Array } from '@kizahasi/util';
 import { useSelector } from '../../store';
 import { useDispatch } from 'react-redux';
 import {
+    characterCommand,
     create,
-    roomDrawerAndPopoverModule,
+    roomDrawerAndPopoverAndModalModule,
     update,
-} from '../../modules/roomDrawerAndPopoverModule';
+} from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
 
@@ -98,7 +99,9 @@ const inputSpan = 16;
 
 const CharacterDrawer: React.FC = () => {
     const myUserUid = useMyUserUid();
-    const drawerType = useSelector(state => state.roomDrawerAndPopoverModule.characterDrawerType);
+    const drawerType = useSelector(
+        state => state.roomDrawerAndPopoverAndModalModule.characterDrawerType
+    );
     const dispatch = useDispatch();
     const operate = useOperate();
     const characters = useCharacters();
@@ -341,7 +344,7 @@ const CharacterDrawer: React.FC = () => {
             };
             operate(operation);
             resetCharacterToCreate();
-            dispatch(roomDrawerAndPopoverModule.actions.set({ characterDrawerType: null }));
+            dispatch(roomDrawerAndPopoverAndModalModule.actions.set({ characterDrawerType: null }));
         };
     }
 
@@ -362,7 +365,7 @@ const CharacterDrawer: React.FC = () => {
                 },
             };
             operate(operation);
-            dispatch(roomDrawerAndPopoverModule.actions.set({ characterDrawerType: null }));
+            dispatch(roomDrawerAndPopoverAndModalModule.actions.set({ characterDrawerType: null }));
         };
     }
 
@@ -580,7 +583,9 @@ const CharacterDrawer: React.FC = () => {
             visible={drawerType != null}
             closable
             onClose={() =>
-                dispatch(roomDrawerAndPopoverModule.actions.set({ characterDrawerType: null }))
+                dispatch(
+                    roomDrawerAndPopoverAndModalModule.actions.set({ characterDrawerType: null })
+                )
             }
             footer={
                 <DrawerFooter
@@ -588,7 +593,7 @@ const CharacterDrawer: React.FC = () => {
                         textType: drawerType?.type === create ? 'cancel' : 'close',
                         onClick: () =>
                             dispatch(
-                                roomDrawerAndPopoverModule.actions.set({
+                                roomDrawerAndPopoverAndModalModule.actions.set({
                                     characterDrawerType: null,
                                 })
                             ),
@@ -881,7 +886,7 @@ const CharacterDrawer: React.FC = () => {
                     </>
                 )}
 
-                {createdByMe && (
+                {createdByMe && drawerType?.type === update && (
                     <>
                         <Typography.Title level={4}>コマンド</Typography.Title>
 
@@ -889,27 +894,26 @@ const CharacterDrawer: React.FC = () => {
                             <Col flex="auto" />
                             <Col flex={0}></Col>
                             <Col span={inputSpan}>
-                                <BufferedTextArea
-                                    size="small"
-                                    bufferDuration="default"
-                                    value={character.privateCommand}
-                                    rows={8}
-                                    onChange={e =>
-                                        updateCharacter({ privateCommand: e.currentValue })
+                                <Button
+                                    onClick={() =>
+                                        dispatch(
+                                            roomDrawerAndPopoverAndModalModule.actions.set({
+                                                commandEditorModalType: {
+                                                    type: characterCommand,
+                                                    characterKey: drawerType.stateKey,
+                                                },
+                                            })
+                                        )
                                     }
-                                    bottomElement={params => {
-                                        if (params.isSkipping) {
-                                            return <div>編集中…</div>;
-                                        }
-                                        const result = testCommand(params.currentValue);
-                                        return <div>{ result.isError ? result.error.message : 'エラーなし' }</div>
-                                    }}
-                                />
+                                >
+                                    編集
+                                </Button>
                             </Col>
                         </Row>
                     </>
                 )}
             </div>
+
             <FilesManagerDrawer
                 drawerType={filesManagerDrawerType}
                 onClose={() => setFilesManagerDrawerType(null)}

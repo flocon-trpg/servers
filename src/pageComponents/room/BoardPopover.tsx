@@ -38,12 +38,13 @@ import {
     create,
     dicePieceValue,
     imagePieceValue,
-    roomDrawerAndPopoverModule,
+    roomDrawerAndPopoverAndModalModule,
     tachie,
-} from '../../modules/roomDrawerAndPopoverModule';
+} from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { replace, update } from '../../stateManagers/states/types';
 import { BoardConfig } from '../../states/BoardConfig';
 import { useSelector } from '../../store';
+import { testCommand } from '../../utils/command';
 import { noValue } from '../../utils/dice';
 import { DicePieceValue } from '../../utils/dicePieceValue';
 import { NumberPieceValue } from '../../utils/numberPieceValue';
@@ -56,7 +57,9 @@ const padding = 8;
 const zIndex = 500; // .ant-drawerによると、antdのDrawerのz-indexは100
 
 export const PieceTooltip: React.FC = () => {
-    const boardTooltipState = useSelector(state => state.roomDrawerAndPopoverModule.boardTooltip);
+    const boardTooltipState = useSelector(
+        state => state.roomDrawerAndPopoverAndModalModule.boardTooltip
+    );
 
     if (boardTooltipState == null) {
         return null;
@@ -280,7 +283,9 @@ namespace PopupEditorBase {
 }
 
 export const PopoverEditor: React.FC = () => {
-    const popoverEditor = useSelector(state => state.roomDrawerAndPopoverModule.boardPopoverEditor);
+    const popoverEditor = useSelector(
+        state => state.roomDrawerAndPopoverAndModalModule.boardPopoverEditor
+    );
 
     if (popoverEditor == null) {
         return null;
@@ -365,7 +370,7 @@ namespace ContextMenuModule {
                         <Menu.Item
                             onClick={() => {
                                 dispatch(
-                                    roomDrawerAndPopoverModule.actions.set({
+                                    roomDrawerAndPopoverAndModalModule.actions.set({
                                         characterDrawerType: {
                                             type: update,
                                             boardKey,
@@ -443,7 +448,7 @@ namespace ContextMenuModule {
                         <Menu.Item
                             onClick={() => {
                                 dispatch(
-                                    roomDrawerAndPopoverModule.actions.set({
+                                    roomDrawerAndPopoverAndModalModule.actions.set({
                                         characterDrawerType: {
                                             type: update,
                                             boardKey: boardKey,
@@ -525,48 +530,49 @@ namespace ContextMenuModule {
             characters.push({ key: elem.characterKey, value: elem.character });
         });
         const itemGroups = _(characters)
-            .map(pair => {
-                if (pair.value.privateCommand.trim() === '') {
-                    return null;
-                }
-                const key = compositeKeyToString(pair.key);
-                const menuItems = recordToArray(pair.value.privateCommands).map(
+            .map(characterPair => {
+                const privateCommands = recordToArray(characterPair.value.privateCommands).map(
                     ({ key, value }) => {
-                        const commandResult = execCharacterCommand({
-                            script: value.value,
-                            room,
-                            characterKey: pair.key,
-                        });
-                        if (commandResult.isError) {
+                        const testResult = testCommand(value.value);
+                        if (testResult.isError) {
                             return (
-                                <Menu.Item key={key} disabled>
-                                    <Tooltip title={commandResult.error}>
-                                        (コマンド文法エラー)
-                                    </Tooltip>
+                                <Menu.Item key={key} title={value.name} disabled>
+                                    <Tooltip title={testResult.error}>(コマンド文法エラー)</Tooltip>
                                 </Menu.Item>
                             );
                         }
-                        <Menu.Item
-                            key={key}
-                            onClick={() => {
-                                const operation = diff({
-                                    prevState: room,
-                                    nextState: commandResult.value,
-                                });
-                                if (operation != null) {
-                                    operate(toUpOperation(operation));
-                                }
-                                onContextMenuClear();
-                            }}
-                        >
-                            {key}
-                        </Menu.Item>;
+                        return (
+                            <Menu.Item
+                                key={key}
+                                onClick={() => {
+                                    const commandResult = execCharacterCommand({
+                                        script: value.value,
+                                        room,
+                                        characterKey: characterPair.key,
+                                    });
+                                    if (commandResult.isError) {
+                                        // TODO: 通知する
+                                        return;
+                                    }
+                                    const operation = diff({
+                                        prevState: room,
+                                        nextState: commandResult.value,
+                                    });
+                                    if (operation != null) {
+                                        operate(toUpOperation(operation));
+                                    }
+                                    onContextMenuClear();
+                                }}
+                            >
+                                {value.name}
+                            </Menu.Item>
+                        );
                     }
                 );
-
+                const characterKey = compositeKeyToString(characterPair.key);
                 return (
-                    <Menu.ItemGroup key={key} title={pair.value.name}>
-                        {menuItems}
+                    <Menu.ItemGroup key={characterKey} title={characterPair.value.name}>
+                        {privateCommands}
                     </Menu.ItemGroup>
                 );
             })
@@ -624,7 +630,7 @@ namespace ContextMenuModule {
                                 <Menu.Item
                                     onClick={() => {
                                         dispatch(
-                                            roomDrawerAndPopoverModule.actions.set({
+                                            roomDrawerAndPopoverAndModalModule.actions.set({
                                                 dicePieceValueDrawerType: {
                                                     type: update,
                                                     boardKey: boardKeyToShow,
@@ -711,7 +717,7 @@ namespace ContextMenuModule {
                                 <Menu.Item
                                     onClick={() => {
                                         dispatch(
-                                            roomDrawerAndPopoverModule.actions.set({
+                                            roomDrawerAndPopoverAndModalModule.actions.set({
                                                 numberPieceValueDrawerType: {
                                                     type: update,
                                                     boardKey: boardKeyToShow,
@@ -790,7 +796,7 @@ namespace ContextMenuModule {
                         <Menu.Item
                             onClick={() => {
                                 dispatch(
-                                    roomDrawerAndPopoverModule.actions.set({
+                                    roomDrawerAndPopoverAndModalModule.actions.set({
                                         imagePieceDrawerType: {
                                             type: update,
                                             boardKey: boardKeyToShow,
@@ -1100,7 +1106,7 @@ namespace ContextMenuModule {
                     <Menu.Item
                         onClick={() => {
                             dispatch(
-                                roomDrawerAndPopoverModule.actions.set({
+                                roomDrawerAndPopoverAndModalModule.actions.set({
                                     dicePieceValueDrawerType: {
                                         type: create,
                                         boardKey,
@@ -1116,7 +1122,7 @@ namespace ContextMenuModule {
                     <Menu.Item
                         onClick={() => {
                             dispatch(
-                                roomDrawerAndPopoverModule.actions.set({
+                                roomDrawerAndPopoverAndModalModule.actions.set({
                                     dicePieceValueDrawerType: {
                                         type: create,
                                         boardKey,
@@ -1134,7 +1140,7 @@ namespace ContextMenuModule {
                     <Menu.Item
                         onClick={() => {
                             dispatch(
-                                roomDrawerAndPopoverModule.actions.set({
+                                roomDrawerAndPopoverAndModalModule.actions.set({
                                     numberPieceValueDrawerType: {
                                         type: create,
                                         boardKey,
@@ -1150,7 +1156,7 @@ namespace ContextMenuModule {
                     <Menu.Item
                         onClick={() => {
                             dispatch(
-                                roomDrawerAndPopoverModule.actions.set({
+                                roomDrawerAndPopoverAndModalModule.actions.set({
                                     numberPieceValueDrawerType: {
                                         type: create,
                                         boardKey,
@@ -1168,7 +1174,7 @@ namespace ContextMenuModule {
                     <Menu.Item
                         onClick={() => {
                             dispatch(
-                                roomDrawerAndPopoverModule.actions.set({
+                                roomDrawerAndPopoverAndModalModule.actions.set({
                                     imagePieceDrawerType: {
                                         type: create,
                                         boardKey,
@@ -1184,7 +1190,7 @@ namespace ContextMenuModule {
                     <Menu.Item
                         onClick={() => {
                             dispatch(
-                                roomDrawerAndPopoverModule.actions.set({
+                                roomDrawerAndPopoverAndModalModule.actions.set({
                                     imagePieceDrawerType: {
                                         type: create,
                                         boardKey,
@@ -1210,7 +1216,7 @@ namespace ContextMenuModule {
         const characters = useCharacters();
         const myUserUid = useMyUserUid();
         const contextMenuState = useSelector(
-            state => state.roomDrawerAndPopoverModule.boardContextMenu
+            state => state.roomDrawerAndPopoverAndModalModule.boardContextMenu
         );
         const roomId = useSelector(state => state.roomModule.roomId);
         const [writeSe] = useWriteRoomSoundEffectMutation();
@@ -1233,7 +1239,7 @@ namespace ContextMenuModule {
         }
 
         const onContextMenuClear = () =>
-            dispatch(roomDrawerAndPopoverModule.actions.set({ boardContextMenu: null }));
+            dispatch(roomDrawerAndPopoverAndModalModule.actions.set({ boardContextMenu: null }));
 
         return (
             <div

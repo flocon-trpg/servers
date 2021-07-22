@@ -10,7 +10,7 @@ import {
     useNumberPieceValues,
 } from '../../hooks/state/useNumberPieceValues';
 import { useDispatch } from 'react-redux';
-import { roomDrawerAndPopoverModule } from '../../modules/roomDrawerAndPopoverModule';
+import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { DicePieceValueElement, useDicePieceValues } from '../../hooks/state/useDicePieceValues';
 import { DicePieceValue } from '../../utils/dicePieceValue';
 import { NumberPieceValue } from '../../utils/numberPieceValue';
@@ -52,7 +52,7 @@ export const PieceValueList: React.FC = () => {
                             size="small"
                             onClick={() =>
                                 dispatch(
-                                    roomDrawerAndPopoverModule.actions.set({
+                                    roomDrawerAndPopoverAndModalModule.actions.set({
                                         dicePieceValueDrawerType:
                                             dataSource.type === 'dice'
                                                 ? {

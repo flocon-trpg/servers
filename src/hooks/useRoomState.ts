@@ -35,35 +35,41 @@ export const getRoomFailure = 'getRoomFailure';
 export const mutationFailure = 'mutationFailure';
 export const deleted = 'deleted';
 
+// operate === undefined ⇔ operateAsState === undefined
 export type RoomState =
     | {
           type: typeof loading;
           state?: undefined;
           operate?: undefined;
+          operateAsState?: undefined;
       }
     | {
           type: typeof joined;
           state: State;
-          // undefinedならばrefetchが必要。
+          // operateとoperateAsStateは、undefinedならばrefetchが必要。
           operate: ((operation: UpOperation) => void) | undefined;
+          operateAsState: ((state: State) => void) | undefined;
           // participantの更新は、mutationを直接呼び出すことで行う。
       }
     | {
           type: typeof myAuthIsUnavailable;
           state?: undefined;
           operate?: undefined;
+          operateAsState?: undefined;
           error: typeof loading | typeof notSignIn | typeof authNotFound;
       }
     | {
           type: typeof nonJoined;
           state?: undefined;
           operate?: undefined;
+          operateAsState?: undefined;
           nonJoinedRoom: RoomAsListItemFragment;
       }
     | {
           type: typeof getRoomFailure;
           state?: undefined;
           operate?: undefined;
+          operateAsState?: undefined;
           getRoomFailureType: GetRoomFailureType;
       }
     | {
@@ -71,11 +77,13 @@ export type RoomState =
           type: typeof mutationFailure;
           state?: undefined;
           operate?: undefined;
+          operateAsState?: undefined;
       }
     | {
           type: typeof deleted;
           state?: undefined;
           operate?: undefined;
+          operateAsState?: undefined;
           deletedBy: string;
       };
 
@@ -318,7 +326,17 @@ export const useRoomState = (
 
                         roomOperationCache.clear(); // 早めのメモリ解放
                         roomStateManager = newRoomStateManager;
-                        const operate = (operation: UpOperation) => {
+                        const operateCore = (
+                            operation:
+                                | {
+                                      type: 'operation';
+                                      operation: UpOperation;
+                                  }
+                                | {
+                                      type: 'state';
+                                      state: State;
+                                  }
+                        ) => {
                             const $stateManager = roomStateManager;
                             if ($stateManager == null) {
                                 return;
@@ -335,7 +353,11 @@ export const useRoomState = (
                                 });
                                 return;
                             }
-                            $stateManager.operate(operation);
+                            if (operation.type === 'operation') {
+                                $stateManager.operate(operation.operation);
+                            } else {
+                                $stateManager.operateAsState(operation.state);
+                            }
                             onRoomStateManagerUpdate();
                             postTrigger.next();
                         };
@@ -343,7 +365,12 @@ export const useRoomState = (
                         setState({
                             type: joined,
                             state: newRoomStateManager.uiState,
-                            operate: newRoomStateManager.requiresReload ? undefined : operate,
+                            operate: newRoomStateManager.requiresReload
+                                ? undefined
+                                : op => operateCore({ type: 'operation', operation: op }),
+                            operateAsState: newRoomStateManager.requiresReload
+                                ? undefined
+                                : state => operateCore({ type: 'state', state }),
                         });
 
                         break;
