@@ -5,18 +5,18 @@ export const privateCommandsDiff = ({
     prevState,
     nextState,
 }: {
-    prevState: Record<string, Command.State>;
-    nextState: Record<string, Command.State>;
-}) => {
+    prevState: Record<string, Command.State | undefined>;
+    nextState: Record<string, Command.State | undefined>;
+}): RecordOperation.RecordUpOperation<Command.State, Command.UpOperation> | undefined => {
     return RecordOperation.diff<Command.State, Command.UpOperation>({
         prevState,
         nextState,
         innerDiff: params => {
-            const twoWayDiff = Command.diff(params);
-            if (twoWayDiff == null) {
+            const diff = Command.diff(params);
+            if (diff == null) {
                 return undefined;
             }
-            return Command.toUpOperation(twoWayDiff);
+            return Command.toUpOperation(diff);
         },
     });
 };
