@@ -92,23 +92,25 @@ export const CommandEditorModal: React.FC = () => {
 
     const setCommandValue = (key: string, command: string) => {
         setPrivateCommands(privateCommands => {
-            const found = privateCommands.get(key);
+            const newState = new Map(privateCommands);
+            const found = newState.get(key);
             if (found == null) {
                 return privateCommands;
             }
-            privateCommands.set(key, { ...found, value: command });
-            return privateCommands;
+            newState.set(key, { ...found, value: command });
+            return newState;
         });
     };
 
     const setCommandName = (key: string, name: string) => {
         setPrivateCommands(privateCommands => {
-            const found = privateCommands.get(key);
+            const newState = new Map(privateCommands);
+            const found = newState.get(key);
             if (found == null) {
                 return privateCommands;
             }
-            privateCommands.set(key, { ...found, name });
-            return privateCommands;
+            newState.set(key, { ...found, name });
+            return newState;
         });
     };
 
@@ -142,9 +144,6 @@ export const CommandEditorModal: React.FC = () => {
                     placeholder="コマンド名"
                     value={privateCommand.name}
                     onChange={e => {
-                        if (selectedKey == null) {
-                            return;
-                        }
                         setCommandName(selectedKey, e.target.value);
                     }}
                 />
