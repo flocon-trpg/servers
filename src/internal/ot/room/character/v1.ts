@@ -45,6 +45,7 @@ export const state = t.type({
     isPrivate: t.boolean,
     memo: t.string,
     name: t.string,
+    chatPalette: maybe(t.string), // 互換性を保つため、maybeにしている。nullishのときは '' とみなす
     privateCommand: t.string,
     privateVarToml: t.string,
     tachieImage: maybe(filePath),
@@ -67,6 +68,7 @@ export const downOperation = createOperation(1, {
     isPrivate: t.type({ oldValue: t.boolean }),
     memo: TextOperation.downOperation,
     name: t.type({ oldValue: t.string }),
+    chatPalette: TextOperation.downOperation,
     privateCommand: TextOperation.downOperation,
     privateVarToml: TextOperation.downOperation,
     tachieImage: t.type({ oldValue: maybe(filePath) }),
@@ -107,6 +109,7 @@ export const upOperation = createOperation(1, {
     isPrivate: t.type({ newValue: t.boolean }),
     memo: TextOperation.upOperation,
     name: t.type({ newValue: t.string }),
+    chatPalette: TextOperation.upOperation,
     privateCommand: TextOperation.upOperation,
     privateVarToml: TextOperation.upOperation,
     tachieImage: t.type({ newValue: maybe(filePath) }),
@@ -149,6 +152,7 @@ export type TwoWayOperation = {
     isPrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     memo?: TextOperation.TwoWayOperation;
     name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
+    chatPalette?: TextOperation.TwoWayOperation;
     privateCommand?: TextOperation.TwoWayOperation;
     privateVarToml?: TextOperation.TwoWayOperation;
     tachieImage?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<FilePath>>;
@@ -196,6 +200,7 @@ export const toClientState =
     (source: State): State => {
         return {
             ...source,
+            chatPalette: createdByMe ? source.chatPalette : '',
             privateCommand: createdByMe ? source.privateCommand : '',
             privateVarToml: createdByMe ? source.privateVarToml : '',
             boolParams: RecordOperation.toClientState({
@@ -260,6 +265,10 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return {
         ...source,
         memo: source.memo == null ? undefined : TextOperation.toDownOperation(source.memo),
+        chatPalette:
+            source.chatPalette == null
+                ? undefined
+                : TextOperation.toDownOperation(source.chatPalette),
         privateCommand:
             source.privateCommand == null
                 ? undefined
@@ -341,6 +350,10 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
     return {
         ...source,
         memo: source.memo == null ? undefined : TextOperation.toUpOperation(source.memo),
+        chatPalette:
+            source.chatPalette == null
+                ? undefined
+                : TextOperation.toUpOperation(source.chatPalette),
         privateCommand:
             source.privateCommand == null
                 ? undefined
@@ -437,6 +450,13 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
         result.name = operation.name.newValue;
     }
 
+    if (operation.chatPalette != null) {
+        const valueResult = TextOperation.apply(state.chatPalette ?? '', operation.chatPalette);
+        if (valueResult.isError) {
+            return valueResult;
+        }
+        result.chatPalette = valueResult.value;
+    }
     if (operation.privateCommand != null) {
         const valueResult = TextOperation.apply(state.privateCommand, operation.privateCommand);
         if (valueResult.isError) {
@@ -638,6 +658,13 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     }
     if (operation.name != null) {
         result.name = operation.name.oldValue;
+    }
+    if (operation.chatPalette != null) {
+        const valueResult = TextOperation.applyBack(state.chatPalette ?? '', operation.chatPalette);
+        if (valueResult.isError) {
+            return valueResult;
+        }
+        result.chatPalette = valueResult.value;
     }
     if (operation.privateCommand != null) {
         const valueResult = TextOperation.applyBack(state.privateCommand, operation.privateCommand);
@@ -928,6 +955,10 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     if (memo.isError) {
         return memo;
     }
+    const chatPalette = TextOperation.composeDownOperation(first.chatPalette, second.chatPalette);
+    if (chatPalette.isError) {
+        return chatPalette;
+    }
     const privateCommand = TextOperation.composeDownOperation(
         first.privateCommand,
         second.privateCommand
@@ -949,6 +980,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
         isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
         memo: memo.value,
         name: ReplaceOperation.composeDownOperation(first.name, second.name),
+        chatPalette: chatPalette.value,
         privateCommand: privateCommand.value,
         privateVarToml: privateVarToml.value,
         image: ReplaceOperation.composeDownOperation(first.image, second.image),
@@ -1149,6 +1181,17 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
             newValue: nextState.name,
         };
     }
+    if (downOperation.chatPalette !== undefined) {
+        const restored = TextOperation.restore({
+            nextState: nextState.chatPalette ?? '',
+            downOperation: downOperation.chatPalette,
+        });
+        if (restored.isError) {
+            return restored;
+        }
+        prevState.chatPalette = restored.value.prevState;
+        twoWayOperation.chatPalette = restored.value.twoWayOperation;
+    }
     if (downOperation.privateCommand !== undefined) {
         const restored = TextOperation.restore({
             nextState: nextState.privateCommand,
@@ -1313,6 +1356,12 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     }
     if (prevState.name !== nextState.name) {
         result.name = { oldValue: prevState.name, newValue: nextState.name };
+    }
+    if ((prevState.chatPalette ?? '') !== (nextState.chatPalette ?? '')) {
+        result.chatPalette = TextOperation.diff({
+            prev: prevState.chatPalette ?? '',
+            next: nextState.chatPalette ?? '',
+        });
     }
     if (prevState.privateCommand !== nextState.privateCommand) {
         result.privateCommand = TextOperation.diff({
@@ -1594,27 +1643,37 @@ export const serverTransform =
             prevState: prevState.name,
         });
         if (createdByMe) {
+            const transformedChatPalette = TextOperation.serverTransform({
+                first: serverOperation?.chatPalette,
+                second: clientOperation.chatPalette,
+                prevState: prevState.chatPalette ?? '',
+            });
+            if (transformedChatPalette.isError) {
+                return transformedChatPalette;
+            }
+            twoWayOperation.chatPalette = transformedChatPalette.value.secondPrime;
+
+            // const transformedPrivateCommand = TextOperation.serverTransform({
+            //     first: serverOperation?.privateCommand,
+            //     second: clientOperation.privateCommand,
+            //     prevState: prevState.privateCommand,
+            // });
+            // if (transformedPrivateCommand.isError) {
+            //     return transformedPrivateCommand;
+            // }
+            // twoWayOperation.privateCommand = transformedPrivateCommand.value.secondPrime;
+        }
+        if (createdByMe) {
             const transformed = TextOperation.serverTransform({
-                first: serverOperation?.privateCommand,
-                second: clientOperation.privateCommand,
-                prevState: prevState.privateCommand,
+                first: serverOperation?.privateVarToml,
+                second: clientOperation.privateVarToml,
+                prevState: prevState.privateVarToml,
             });
             if (transformed.isError) {
                 return transformed;
             }
-            twoWayOperation.privateCommand = transformed.value.secondPrime;
+            twoWayOperation.privateVarToml = transformed.value.secondPrime;
         }
-        // if (createdByMe) {
-        //     const transformed = TextOperation.serverTransform({
-        //         first: serverOperation?.privateVarToml,
-        //         second: clientOperation.privateVarToml,
-        //         prevState: prevState.privateVarToml,
-        //     });
-        //     if (transformed.isError) {
-        //         return transformed;
-        //     }
-        //     twoWayOperation.privateVarToml = transformed.value.secondPrime;
-        // }
 
         if (isIdRecord(twoWayOperation)) {
             return Result.ok(undefined);
@@ -1776,6 +1835,14 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         second: second.name,
     });
 
+    const chatPalette = TextOperation.clientTransform({
+        first: first.chatPalette,
+        second: second.chatPalette,
+    });
+    if (chatPalette.isError) {
+        return chatPalette;
+    }
+
     const privateCommand = TextOperation.clientTransform({
         first: first.privateCommand,
         second: second.privateCommand,
@@ -1808,6 +1875,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         image: image.firstPrime,
         memo: memo.value.firstPrime,
         name: name.firstPrime,
+        chatPalette: chatPalette.value.firstPrime,
         privateCommand: privateCommand.value.firstPrime,
         privateVarToml: privateVarToml.value.firstPrime,
         tachieImage: tachieImage.firstPrime,
@@ -1828,6 +1896,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         image: image.secondPrime,
         memo: memo.value.secondPrime,
         name: name.secondPrime,
+        chatPalette: chatPalette.value.secondPrime,
         privateCommand: privateCommand.value.secondPrime,
         privateVarToml: privateVarToml.value.secondPrime,
         tachieImage: tachieImage.secondPrime,

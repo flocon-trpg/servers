@@ -144,3 +144,16 @@ export const generateChatPalette = (toml: string): Result<string[]> => {
 
     return Result.ok(lines);
 };
+
+export const isValidChatPalette = (toml: string): Result<undefined> => {
+    // CONSIDER: TOMLのDateTimeに未対応
+    const object = parseTomlCore(toml);
+    if (object.isError) {
+        return object;
+    }
+    const decoded = exactChatPalette.decode(object.value);
+    if (decoded._tag === 'Left') {
+        return Result.error(errorToMessage(decoded.left));
+    }
+    return Result.ok(undefined);
+};
