@@ -32,7 +32,7 @@ import roomStateModule from '../../modules/roomModule';
 import { useAllRoomMessages } from '../../hooks/useRoomMessages';
 import { useSelector } from '../../store';
 import useRoomConfig from '../../hooks/localStorage/useRoomConfig';
-import { roomDrawerAndPopoverModule } from '../../modules/roomDrawerAndPopoverModule';
+import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 
 type JoinRoomFormProps = {
     roomState: RoomAsListItemFragment;
@@ -189,7 +189,7 @@ const RoomBehavior: React.FC<PropsWithChildren<{ roomId: string }>> = ({
         beginFetch: roomState.type === 'joined',
     });
     React.useEffect(() => {
-        dispatch(roomDrawerAndPopoverModule.actions.reset());
+        dispatch(roomDrawerAndPopoverAndModalModule.actions.reset());
     }, [roomId, dispatch]);
 
     React.useEffect(() => {

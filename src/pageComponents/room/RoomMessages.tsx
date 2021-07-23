@@ -68,7 +68,7 @@ import useUserConfig from '../../hooks/localStorage/useUserConfig';
 import { UserConfig } from '../../states/UserConfig';
 import * as Icons from '@ant-design/icons';
 import { InputModal } from '../../components/InputModal';
-import { StickToBottomVirtuoso } from '../../components/StickToBottomVirtuoso';
+import { JumpToBottomVirtuoso } from '../../components/JumpToBottomVirtuoso';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -762,7 +762,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
     return (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ padding: '0 4px' }}>
-                <StickToBottomVirtuoso
+                <JumpToBottomVirtuoso
                     items={messages}
                     create={(index, data) => data}
                     height={

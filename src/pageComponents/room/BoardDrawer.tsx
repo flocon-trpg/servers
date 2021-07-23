@@ -18,9 +18,9 @@ import { boardDiff, BoardState, UpOperation, toBoardUpOperation } from '@kizahas
 import { useDispatch } from 'react-redux';
 import {
     create,
-    roomDrawerAndPopoverModule,
+    roomDrawerAndPopoverAndModalModule,
     update,
-} from '../../modules/roomDrawerAndPopoverModule';
+} from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 
 const notFound = 'notFound';
@@ -49,7 +49,9 @@ const BoardDrawer: React.FC = () => {
     const myUserUid = useMyUserUid();
     const dispatch = useDispatch();
     const operate = useOperate();
-    const drawerType = useSelector(state => state.roomDrawerAndPopoverModule.boardDrawerType);
+    const drawerType = useSelector(
+        state => state.roomDrawerAndPopoverAndModalModule.boardDrawerType
+    );
     const boards = useBoards();
     let stateEditorParams: StateEditorParams<BoardState | undefined>;
     switch (drawerType?.type) {
@@ -152,7 +154,7 @@ const BoardDrawer: React.FC = () => {
             operate(operation);
             setBoard(defaultBoard);
             resetBoardToCreate();
-            dispatch(roomDrawerAndPopoverModule.actions.set({ boardDrawerType: null }));
+            dispatch(roomDrawerAndPopoverAndModalModule.actions.set({ boardDrawerType: null }));
         };
     }
 
@@ -173,7 +175,7 @@ const BoardDrawer: React.FC = () => {
                 },
             };
             operate(operation);
-            dispatch(roomDrawerAndPopoverModule.actions.set({ boardDrawerType: null }));
+            dispatch(roomDrawerAndPopoverAndModalModule.actions.set({ boardDrawerType: null }));
         };
     }
 
@@ -184,7 +186,7 @@ const BoardDrawer: React.FC = () => {
             visible={drawerType != null}
             closable
             onClose={() =>
-                dispatch(roomDrawerAndPopoverModule.actions.set({ boardDrawerType: null }))
+                dispatch(roomDrawerAndPopoverAndModalModule.actions.set({ boardDrawerType: null }))
             }
             footer={
                 <DrawerFooter
@@ -192,7 +194,9 @@ const BoardDrawer: React.FC = () => {
                         textType: drawerType?.type === create ? 'cancel' : 'close',
                         onClick: () =>
                             dispatch(
-                                roomDrawerAndPopoverModule.actions.set({ boardDrawerType: null })
+                                roomDrawerAndPopoverAndModalModule.actions.set({
+                                    boardDrawerType: null,
+                                })
                             ),
                     }}
                     ok={onOkClick == null ? undefined : { textType: 'create', onClick: onOkClick }}

@@ -18,16 +18,16 @@ import { useDispatch } from 'react-redux';
 import { useSelector } from '../../store';
 import {
     create,
-    roomDrawerAndPopoverModule,
+    roomDrawerAndPopoverAndModalModule,
     update,
-} from '../../modules/roomDrawerAndPopoverModule';
+} from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useImagePieces } from '../../hooks/state/useImagePieces';
-import BufferedTextArea from '../../components/BufferedTextArea';
 import InputFile from '../../components/InputFile';
 import { FilePath, FilesManagerDrawerType } from '../../utils/types';
 import FilesManagerDrawer from '../../components/FilesManagerDrawer';
 import BufferedInput from '../../components/BufferedInput';
+import { BufferedTextArea } from '../../components/BufferedTextArea';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -46,7 +46,9 @@ const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
 const IdView: React.FC = () => {
-    const drawerType = useSelector(state => state.roomDrawerAndPopoverModule.imagePieceDrawerType);
+    const drawerType = useSelector(
+        state => state.roomDrawerAndPopoverAndModalModule.imagePieceDrawerType
+    );
     const myUserUid = useMyUserUid();
 
     if (drawerType == null || myUserUid == null) {
@@ -70,7 +72,9 @@ const IdView: React.FC = () => {
 };
 
 export const ImagePieceDrawer: React.FC = () => {
-    const drawerType = useSelector(state => state.roomDrawerAndPopoverModule.imagePieceDrawerType);
+    const drawerType = useSelector(
+        state => state.roomDrawerAndPopoverAndModalModule.imagePieceDrawerType
+    );
     const dispatch = useDispatch();
     const operate = useOperate();
     const myUserUid = useMyUserUid();
@@ -174,7 +178,9 @@ export const ImagePieceDrawer: React.FC = () => {
                 },
             };
             operate(operation);
-            dispatch(roomDrawerAndPopoverModule.actions.set({ imagePieceDrawerType: null }));
+            dispatch(
+                roomDrawerAndPopoverAndModalModule.actions.set({ imagePieceDrawerType: null })
+            );
             setState(undefined);
         };
     }
@@ -186,7 +192,9 @@ export const ImagePieceDrawer: React.FC = () => {
             visible={drawerType != null}
             closable
             onClose={() =>
-                dispatch(roomDrawerAndPopoverModule.actions.set({ imagePieceDrawerType: null }))
+                dispatch(
+                    roomDrawerAndPopoverAndModalModule.actions.set({ imagePieceDrawerType: null })
+                )
             }
             footer={
                 <DrawerFooter
@@ -194,7 +202,7 @@ export const ImagePieceDrawer: React.FC = () => {
                         textType: drawerType?.type === update ? 'close' : 'cancel',
                         onClick: () =>
                             dispatch(
-                                roomDrawerAndPopoverModule.actions.set({
+                                roomDrawerAndPopoverAndModalModule.actions.set({
                                     imagePieceDrawerType: null,
                                 })
                             ),

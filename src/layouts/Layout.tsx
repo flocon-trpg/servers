@@ -25,7 +25,7 @@ import LoadingResult from '../components/Result/LoadingResult';
 import { useDispatch } from 'react-redux';
 import roomModule from '../modules/roomModule';
 import { fileModule } from '../modules/fileModule';
-import { roomDrawerAndPopoverModule } from '../modules/roomDrawerAndPopoverModule';
+import { roomDrawerAndPopoverAndModalModule } from '../modules/roomDrawerAndPopoverAndModalModule';
 import * as Icon from '@ant-design/icons';
 import { useSignOut } from '../hooks/useSignOut';
 const { Header, Content } = AntdLayout;

@@ -1,13 +1,13 @@
 import React from 'react';
 import * as Icons from '@ant-design/icons';
 import { useMemos } from '../../hooks/state/useMemos';
-import BufferedTextArea from '../../components/BufferedTextArea';
 import { MemoState, replace, textDiff, toTextUpOperation, update } from '@kizahasi/flocon-core';
 import { useOperate } from '../../hooks/useOperate';
 import { Button, Popover, Tree, Modal } from 'antd';
 import { DataNode } from 'rc-tree/lib/interface';
 import { simpleId } from '../../utils/generators';
 import BufferedInput from '../../components/BufferedInput';
+import { BufferedTextArea } from '../../components/BufferedTextArea';
 
 /*
 DataNodeの仕様:

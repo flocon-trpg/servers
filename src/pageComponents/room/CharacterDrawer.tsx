@@ -21,8 +21,7 @@ import {
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
 import { useOperate } from '../../hooks/useOperate';
 import BufferedInput from '../../components/BufferedInput';
-import BufferedTextArea from '../../components/BufferedTextArea';
-import { characterCommand, characterVariable, TomlInput } from '../../components/Tomllnput';
+import { TomlInput } from '../../components/Tomllnput';
 import { useCharacters } from '../../hooks/state/useCharacters';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import {
@@ -41,16 +40,19 @@ import {
     toCharacterUpOperation,
     UpOperation,
     pieceDiff,
+    testCommand,
 } from '@kizahasi/flocon-core';
 import { dualKeyRecordFind, strIndex20Array } from '@kizahasi/util';
 import { useSelector } from '../../store';
 import { useDispatch } from 'react-redux';
 import {
+    characterCommand,
     create,
-    roomDrawerAndPopoverModule,
+    roomDrawerAndPopoverAndModalModule,
     update,
-} from '../../modules/roomDrawerAndPopoverModule';
+} from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
+import { BufferedTextArea } from '../../components/BufferedTextArea';
 
 const notFound = 'notFound';
 
@@ -97,7 +99,9 @@ const inputSpan = 16;
 
 const CharacterDrawer: React.FC = () => {
     const myUserUid = useMyUserUid();
-    const drawerType = useSelector(state => state.roomDrawerAndPopoverModule.characterDrawerType);
+    const drawerType = useSelector(
+        state => state.roomDrawerAndPopoverAndModalModule.characterDrawerType
+    );
     const dispatch = useDispatch();
     const operate = useOperate();
     const characters = useCharacters();
@@ -340,7 +344,7 @@ const CharacterDrawer: React.FC = () => {
             };
             operate(operation);
             resetCharacterToCreate();
-            dispatch(roomDrawerAndPopoverModule.actions.set({ characterDrawerType: null }));
+            dispatch(roomDrawerAndPopoverAndModalModule.actions.set({ characterDrawerType: null }));
         };
     }
 
@@ -361,7 +365,7 @@ const CharacterDrawer: React.FC = () => {
                 },
             };
             operate(operation);
-            dispatch(roomDrawerAndPopoverModule.actions.set({ characterDrawerType: null }));
+            dispatch(roomDrawerAndPopoverAndModalModule.actions.set({ characterDrawerType: null }));
         };
     }
 
@@ -579,7 +583,9 @@ const CharacterDrawer: React.FC = () => {
             visible={drawerType != null}
             closable
             onClose={() =>
-                dispatch(roomDrawerAndPopoverModule.actions.set({ characterDrawerType: null }))
+                dispatch(
+                    roomDrawerAndPopoverAndModalModule.actions.set({ characterDrawerType: null })
+                )
             }
             footer={
                 <DrawerFooter
@@ -587,7 +593,7 @@ const CharacterDrawer: React.FC = () => {
                         textType: drawerType?.type === create ? 'cancel' : 'close',
                         onClick: () =>
                             dispatch(
-                                roomDrawerAndPopoverModule.actions.set({
+                                roomDrawerAndPopoverAndModalModule.actions.set({
                                     characterDrawerType: null,
                                 })
                             ),
@@ -867,7 +873,6 @@ const CharacterDrawer: React.FC = () => {
                             <Col flex={0}></Col>
                             <Col span={inputSpan}>
                                 <TomlInput
-                                    tomlType={characterVariable}
                                     size="small"
                                     bufferDuration="default"
                                     value={character.privateVarToml}
@@ -881,7 +886,7 @@ const CharacterDrawer: React.FC = () => {
                     </>
                 )}
 
-                {createdByMe && (
+                {createdByMe && drawerType?.type === update && (
                     <>
                         <Typography.Title level={4}>コマンド</Typography.Title>
 
@@ -889,21 +894,26 @@ const CharacterDrawer: React.FC = () => {
                             <Col flex="auto" />
                             <Col flex={0}></Col>
                             <Col span={inputSpan}>
-                                <TomlInput
-                                    tomlType={characterCommand}
-                                    size="small"
-                                    bufferDuration="default"
-                                    value={character.privateCommand}
-                                    rows={8}
-                                    onChange={e =>
-                                        updateCharacter({ privateCommand: e.currentValue })
+                                <Button
+                                    onClick={() =>
+                                        dispatch(
+                                            roomDrawerAndPopoverAndModalModule.actions.set({
+                                                commandEditorModalType: {
+                                                    type: characterCommand,
+                                                    characterKey: drawerType.stateKey,
+                                                },
+                                            })
+                                        )
                                     }
-                                />
+                                >
+                                    編集
+                                </Button>
                             </Col>
                         </Row>
                     </>
                 )}
             </div>
+
             <FilesManagerDrawer
                 drawerType={filesManagerDrawerType}
                 onClose={() => setFilesManagerDrawerType(null)}

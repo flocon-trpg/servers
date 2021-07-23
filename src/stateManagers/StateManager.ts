@@ -392,6 +392,14 @@ export class StateManager<TState, TOperation> {
         this.core.operate(operation);
     }
 
+    public operateAsState(state: TState): void {
+        if (this.requiresReload) {
+            throw new Error('this.requiresReload === true');
+        }
+
+        this.core.operateAsState(state);
+    }
+
     public post():
         | {
               operationToPost: TOperation;

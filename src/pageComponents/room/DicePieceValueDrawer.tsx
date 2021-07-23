@@ -20,9 +20,9 @@ import { useDispatch } from 'react-redux';
 import { useSelector } from '../../store';
 import {
     create,
-    roomDrawerAndPopoverModule,
+    roomDrawerAndPopoverAndModalModule,
     update,
-} from '../../modules/roomDrawerAndPopoverModule';
+} from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useDicePieceValues } from '../../hooks/state/useDicePieceValues';
 import { MyCharactersSelect } from '../../components/MyCharactersSelect';
 import { InputDie } from '../../components/InputDie';
@@ -44,7 +44,7 @@ const inputSpan = 16;
 
 const IdView: React.FC = () => {
     const drawerType = useSelector(
-        state => state.roomDrawerAndPopoverModule.dicePieceValueDrawerType
+        state => state.roomDrawerAndPopoverAndModalModule.dicePieceValueDrawerType
     );
     const myUserUid = useMyUserUid();
 
@@ -67,7 +67,7 @@ const IdView: React.FC = () => {
 
 export const DicePieceValueDrawer: React.FC = () => {
     const drawerType = useSelector(
-        state => state.roomDrawerAndPopoverModule.dicePieceValueDrawerType
+        state => state.roomDrawerAndPopoverAndModalModule.dicePieceValueDrawerType
     );
     const dispatch = useDispatch();
     const operate = useOperate();
@@ -177,7 +177,9 @@ export const DicePieceValueDrawer: React.FC = () => {
                 },
             };
             operate(operation);
-            dispatch(roomDrawerAndPopoverModule.actions.set({ dicePieceValueDrawerType: null }));
+            dispatch(
+                roomDrawerAndPopoverAndModalModule.actions.set({ dicePieceValueDrawerType: null })
+            );
             setActiveCharacter(undefined);
             setState(defaultDicePieceValue);
         };
@@ -190,7 +192,11 @@ export const DicePieceValueDrawer: React.FC = () => {
             visible={drawerType != null}
             closable
             onClose={() =>
-                dispatch(roomDrawerAndPopoverModule.actions.set({ dicePieceValueDrawerType: null }))
+                dispatch(
+                    roomDrawerAndPopoverAndModalModule.actions.set({
+                        dicePieceValueDrawerType: null,
+                    })
+                )
             }
             footer={
                 <DrawerFooter
@@ -198,7 +204,7 @@ export const DicePieceValueDrawer: React.FC = () => {
                         textType: drawerType?.type === update ? 'close' : 'cancel',
                         onClick: () =>
                             dispatch(
-                                roomDrawerAndPopoverModule.actions.set({
+                                roomDrawerAndPopoverAndModalModule.actions.set({
                                     dicePieceValueDrawerType: null,
                                 })
                             ),

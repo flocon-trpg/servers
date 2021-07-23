@@ -34,7 +34,10 @@ import {
 import { CompositeKey, compositeKeyToString, StrIndex20, strIndex20Array } from '@kizahasi/util';
 import _ from 'lodash';
 import { useDispatch } from 'react-redux';
-import { create, roomDrawerAndPopoverModule } from '../../modules/roomDrawerAndPopoverModule';
+import {
+    create,
+    roomDrawerAndPopoverAndModalModule,
+} from '../../modules/roomDrawerAndPopoverAndModalModule';
 
 type DataSource = {
     key: string;
@@ -254,7 +257,7 @@ const CharacterList: React.FC = () => {
                         size="small"
                         onClick={() =>
                             dispatch(
-                                roomDrawerAndPopoverModule.actions.set({
+                                roomDrawerAndPopoverAndModalModule.actions.set({
                                     characterDrawerType: {
                                         type: update,
                                         stateKey: character.stateKey,
@@ -373,7 +376,7 @@ const CharacterList: React.FC = () => {
                 size="small"
                 onClick={() =>
                     dispatch(
-                        roomDrawerAndPopoverModule.actions.set({
+                        roomDrawerAndPopoverAndModalModule.actions.set({
                             characterDrawerType: { type: create },
                         })
                     )
@@ -385,7 +388,7 @@ const CharacterList: React.FC = () => {
                 size="small"
                 onClick={() =>
                     dispatch(
-                        roomDrawerAndPopoverModule.actions.set({
+                        roomDrawerAndPopoverAndModalModule.actions.set({
                             characterParameterNamesDrawerVisibility: true,
                         })
                     )

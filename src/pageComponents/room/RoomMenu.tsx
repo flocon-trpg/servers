@@ -30,7 +30,7 @@ import moment from 'moment';
 import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { $free, $system, recordToArray } from '@kizahasi/util';
-import { roomDrawerAndPopoverModule } from '../../modules/roomDrawerAndPopoverModule';
+import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { defaultMemoPanelConfig } from '../../states/MemoPanelConfig';
 import FilesManagerDrawer from '../../components/FilesManagerDrawer';
 import { FilesManagerDrawerType, none } from '../../utils/types';
@@ -740,7 +740,7 @@ export const RoomMenu: React.FC = () => {
                     <Menu.Item
                         onClick={() =>
                             dispatch(
-                                roomDrawerAndPopoverModule.actions.set({
+                                roomDrawerAndPopoverAndModalModule.actions.set({
                                     editRoomDrawerVisibility: true,
                                 })
                             )

@@ -33,6 +33,7 @@ import { Memos } from './Memos';
 import { BoardContextMenu, PieceTooltip, PopoverEditor } from './BoardPopover';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { ImagePieceDrawer } from './ImagePieceDrawer';
+import { CommandEditorModal } from './CommandEditorModal';
 
 const RoomMessagePanels: React.FC<{ roomId: string }> = ({ roomId }: { roomId: string }) => {
     const dispatch = useDispatch();
@@ -556,6 +557,8 @@ const Room: React.FC = () => {
                 <NumberPieceValueDrawer />
                 <CharacterParameterNamesDrawer />
                 <EditRoomDrawer />
+
+                <CommandEditorModal />
             </AntdLayout.Content>
         </AntdLayout>
     );
