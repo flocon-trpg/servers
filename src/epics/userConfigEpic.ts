@@ -1,10 +1,8 @@
 import { AnyAction } from 'redux';
 import { Observable } from 'rxjs';
-import { ActionsObservable, StateObservable, combineEpics } from 'redux-observable';
+import { StateObservable } from 'redux-observable';
 import * as Rx from 'rxjs/operators';
 import { RootState } from '../store';
-import roomConfigModule from '../modules/roomConfigModule';
-import { setRoomConfig } from '../utils/localStorage/roomConfig';
 import userConfigModule from '../modules/userConfigModule';
 import { setUserConfig } from '../utils/localStorage/userConfig';
 
@@ -18,7 +16,7 @@ const isNotNullOrUndefined = <T>(source: T | null | undefined): source is T => {
 };
 
 export const userConfigEpic = (
-    action$: ActionsObservable<AnyAction>,
+    action$: Observable<AnyAction>,
     state$: StateObservable<RootState>
 ): Observable<AnyAction> => {
     return new Observable<AnyAction>(observer => {

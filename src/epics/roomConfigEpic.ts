@@ -1,6 +1,6 @@
 import { AnyAction } from 'redux';
 import { Observable } from 'rxjs';
-import { ActionsObservable, StateObservable, combineEpics } from 'redux-observable';
+import { StateObservable, combineEpics } from 'redux-observable';
 import * as Rx from 'rxjs/operators';
 import { RootState } from '../store';
 import roomConfigModule from '../modules/roomConfigModule';
@@ -16,7 +16,7 @@ const isNotNullOrUndefined = <T>(source: T | null | undefined): source is T => {
 };
 
 const roomConfigEpicCore = (
-    action$: ActionsObservable<AnyAction>,
+    action$: Observable<AnyAction>,
     state$: StateObservable<RootState>
 ): Observable<AnyAction> => {
     return new Observable<AnyAction>(observer => {
