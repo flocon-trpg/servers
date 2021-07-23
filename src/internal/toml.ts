@@ -93,13 +93,14 @@ export const getVariableFromVarTomlObject = (tomlObject: unknown, path: Readonly
 const exactChatPalette = t.strict({
     var: t.UnknownRecord,
 
-    // paletteではなくわざわざ冗長なpalette.textにしたのは、[var]→チャットパレットの文字列 の順で書けるようにするため。
-    palette: t.strict({
-        text: t.string,
+    // textではなくわざわざ冗長なtext.valueにしたのは、[var]→チャットパレットの文字列 の順で書けるようにするため。
+    // また、将来的に例えばtext.typeに何かをセットして…という拡張もできる余地がある。
+    text: t.strict({
+        value: t.string,
     }),
 });
 
-// palette.textに例えば {foo} のような文字列が含まれている場合、varで定義されていればそれに置き換える。定義が見つからなければそのまま残す。
+// text.valueに例えば {foo} のような文字列が含まれている場合、varで定義されていればそれに置き換える。定義が見つからなければそのまま残す。
 export const generateChatPalette = (toml: string): Result<string[]> => {
     // CONSIDER: TOMLのDateTimeに未対応
     const object = parseTomlCore(toml);
@@ -111,7 +112,7 @@ export const generateChatPalette = (toml: string): Result<string[]> => {
         return Result.error(errorToMessage(decoded.left));
     }
 
-    const lines = decoded.right.palette.text.split(/(?:\r\n|\r|\n)/).map(line => {
+    const lines = decoded.right.text.value.split(/(?:\r\n|\r|\n)/).map(line => {
         const analyzeResult = analyze(line);
         if (analyzeResult.isError) {
             return line;
