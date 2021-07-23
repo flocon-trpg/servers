@@ -112,33 +112,33 @@ const loadServerConfig = ({ databaseArg }: { databaseArg: typeof postgresql | ty
 export const firebaseConfig = loadFirebaseConfig();
 
 let serverConfigAsMainCache: ServerConfig | null = null;
-export const loadServerConfigAsMain = (): ServerConfig => {
+export const loadServerConfigAsMain = async (): Promise<ServerConfig> => {
     if (serverConfigAsMainCache == null) {
-        serverConfigAsMainCache = loadServerConfig({ databaseArg: loadAsMain().db ?? null });
+        serverConfigAsMainCache = loadServerConfig({ databaseArg: (await loadAsMain()).db ?? null });
     }
     return serverConfigAsMainCache;
 };
 
 let serverConfigAsMigrationCreateCache: ServerConfig | null = null;
-export const loadServerConfigAsMigrationCreate = (): ServerConfig => {
+export const loadServerConfigAsMigrationCreate = async (): Promise<ServerConfig> => {
     if (serverConfigAsMigrationCreateCache == null) {
-        serverConfigAsMigrationCreateCache = loadServerConfig({ databaseArg: loadMigrationCreate().db });
+        serverConfigAsMigrationCreateCache = loadServerConfig({ databaseArg: (await loadMigrationCreate()).db });
     }
     return serverConfigAsMigrationCreateCache;
 };
 
 let serverConfigAsMigrationUpCache: ServerConfig | null = null;
-export const loadServerConfigAsMigrationUp = (): ServerConfig => {
+export const loadServerConfigAsMigrationUp = async (): Promise<ServerConfig> => {
     if (serverConfigAsMigrationUpCache == null) {
-        serverConfigAsMigrationUpCache = loadServerConfig({ databaseArg: loadMigrationUp().db });
+        serverConfigAsMigrationUpCache = loadServerConfig({ databaseArg: (await loadMigrationUp()).db });
     }
     return serverConfigAsMigrationUpCache;
 };
 
 let serverConfigAsMigrationDownCache: ServerConfig & { count: number } | null = null;
-export const loadServerConfigAsMigrationDown = (): ServerConfig & { count: number } => {
+export const loadServerConfigAsMigrationDown = async (): Promise<ServerConfig & { count: number }> => {
     if (serverConfigAsMigrationDownCache == null) {
-        const loaded = loadMigrationDown();
+        const loaded = await loadMigrationDown();
         serverConfigAsMigrationDownCache = {
             ...loadServerConfig({ databaseArg: loaded.db }),
             count: loaded.count,

@@ -1,5 +1,5 @@
 import { PublicChannelKey } from '@kizahasi/util';
-import { PubSub } from 'apollo-server-express';
+import { PubSub } from 'graphql-subscriptions';
 import _ from 'lodash';
 import NodeCache from 'node-cache';
 import { WritingMessageStatusType } from '../enums/WritingMessageStatusType';

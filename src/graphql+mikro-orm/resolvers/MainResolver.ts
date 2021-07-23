@@ -68,7 +68,7 @@ export class MainResolver {
         const queue = async () => {
             const em = context.createEm();
 
-            const globalEntryPhrase = loadServerConfigAsMain().globalEntryPhrase;
+            const globalEntryPhrase =(await loadServerConfigAsMain()).globalEntryPhrase;
             const decodedIdToken = checkSignIn(context);
             if (decodedIdToken === NotSignIn) {
                 return {

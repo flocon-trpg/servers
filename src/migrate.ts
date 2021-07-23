@@ -42,7 +42,7 @@ export const checkMigrationsBeforeStart = async (orm: MikroORM<IDatabaseDriver<C
 };
 
 export const migrate = async (type: typeof check | typeof create | typeof createInitial | typeof up | typeof down) => {
-    const serverConfig = (() => {
+    const serverConfig = await (() => {
         switch (type) {
             case up:
                 return loadServerConfigAsMigrationUp();
@@ -118,7 +118,7 @@ export const migrate = async (type: typeof check | typeof create | typeof create
         case down: {
             console.log(`Migration-down is started. DB is ${prettify(dbType)}. / マイグレーションのdownを開始します。DBは${prettify(dbType)}です。`);
             
-            const config = loadServerConfigAsMigrationDown();
+            const config = await loadServerConfigAsMigrationDown();
             if (!Number.isInteger(config.count)) {
                 console.log('❌ "--count" must be integer');
                 return;

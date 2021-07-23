@@ -630,8 +630,8 @@ export class RoomResolver {
     }
 
     @Query(() => GetRoomsListResult)
-    public getRoomsList(@Ctx() context: ResolverContext): Promise<typeof GetRoomsListResult> {
-        return this.getRoomsListCore({ context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+    public async getRoomsList(@Ctx() context: ResolverContext): Promise<typeof GetRoomsListResult> {
+        return this.getRoomsListCore({ context, globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase });
     }
 
     public async requiresPhraseToJoinAsPlayerCore({ roomId, context, globalEntryPhrase }: { roomId: string; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<typeof RequiresPhraseResult> {
@@ -669,8 +669,12 @@ export class RoomResolver {
     }
 
     @Query(() => RequiresPhraseResult)
-    public requiresPhraseToJoinAsPlayer(@Arg('roomId') roomId: string, @Ctx() context: ResolverContext): Promise<typeof RequiresPhraseResult> {
-        return this.requiresPhraseToJoinAsPlayerCore({ roomId, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+    public async requiresPhraseToJoinAsPlayer(@Arg('roomId') roomId: string, @Ctx() context: ResolverContext): Promise<typeof RequiresPhraseResult> {
+        return this.requiresPhraseToJoinAsPlayerCore({
+            roomId,
+            context,
+            globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase,
+        });
     }
 
     public async createRoomCore({ input, context, globalEntryPhrase }: { input: CreateRoomInput; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<typeof CreateRoomResult> {
@@ -825,7 +829,7 @@ export class RoomResolver {
 
         const queue = async (): Promise<Result<typeof GetRoomMessagesResult>> => {
             const em = context.createEm();
-            const entry = await checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+            const entry = await checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return Result.ok({
@@ -880,7 +884,7 @@ export class RoomResolver {
 
         const queue = async (): Promise<Result<{ result: typeof GetRoomLogResult; payload?: MessageUpdatePayload }>> => {
             const em = context.createEm();
-            const entry = await checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+            const entry = await checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return Result.ok({
@@ -962,7 +966,7 @@ export class RoomResolver {
         }
         const queue = async (): Promise<Result<typeof GetRoomConnectionsResult>> => {
             const em = context.createEm();
-            const entry = await checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+            const entry = await checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return Result.ok({
@@ -1020,7 +1024,7 @@ export class RoomResolver {
 
         const queue = async (): Promise<Result<{ result: typeof WritePublicRoomMessageResult; payload?: MessageUpdatePayload }>> => {
             const em = context.createEm();
-            const entryUser = await getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+            const entryUser = await getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase });
             await em.flush();
             if (entryUser == null) {
                 return Result.ok({
@@ -1119,8 +1123,8 @@ export class RoomResolver {
     }
 
     @Mutation(() => CreateRoomResult)
-    public createRoom(@Arg('input') input: CreateRoomInput, @Ctx() context: ResolverContext): Promise<typeof CreateRoomResult> {
-        return this.createRoomCore({ input, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+    public async createRoom(@Arg('input') input: CreateRoomInput, @Ctx() context: ResolverContext): Promise<typeof CreateRoomResult> {
+        return this.createRoomCore({ input, context, globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase });
     }
 
     public async deleteRoomCore({ args, context, globalEntryPhrase }: { args: DeleteRoomArgs; context: ResolverContext; globalEntryPhrase: string | undefined }): Promise<{ result: DeleteRoomResult; payload: RoomEventPayload | undefined }> {
@@ -1180,7 +1184,7 @@ export class RoomResolver {
 
     @Mutation(() => DeleteRoomResult)
     public async deleteRoom(@Args() args: DeleteRoomArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<DeleteRoomResult> {
-        const { result, payload } = await this.deleteRoomCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+        const { result, payload } = await this.deleteRoomCore({ args, context, globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
         }
@@ -1211,7 +1215,7 @@ export class RoomResolver {
 
     @Mutation(() => JoinRoomResult)
     public async joinRoomAsPlayer(@Args() args: JoinRoomArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<typeof JoinRoomResult> {
-        const { result, payload } = await this.joinRoomAsPlayerCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+        const { result, payload } = await this.joinRoomAsPlayerCore({ args, context, globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
         }
@@ -1242,7 +1246,7 @@ export class RoomResolver {
 
     @Mutation(() => JoinRoomResult)
     public async joinRoomAsSpectator(@Args() args: JoinRoomArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<typeof JoinRoomResult> {
-        const { result, payload } = await this.joinRoomAsSpectatorCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+        const { result, payload } = await this.joinRoomAsSpectatorCore({ args, context, globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
         }
@@ -1275,7 +1279,7 @@ export class RoomResolver {
 
     @Mutation(() => PromoteResult)
     public async promoteToPlayer(@Args() args: PromoteArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<PromoteResult> {
-        const { result, payload } = await this.promoteToPlayerCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+        const { result, payload } = await this.promoteToPlayerCore({ args, context, globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
         }
@@ -1348,7 +1352,7 @@ export class RoomResolver {
 
     @Mutation(() => ChangeParticipantNameResult)
     public async changeParticipantName(@Args() args: ChangeParticipantNameArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<ChangeParticipantNameResult> {
-        const { result, payload } = await this.changeParticipantNameCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+        const { result, payload } = await this.changeParticipantNameCore({ args, context, globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
         }
@@ -1404,8 +1408,8 @@ export class RoomResolver {
     }
 
     @Query(() => GetRoomResult)
-    public getRoom(@Args() args: GetRoomArgs, @Ctx() context: ResolverContext): Promise<typeof GetRoomResult> {
-        return this.getRoomCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+    public async getRoom(@Args() args: GetRoomArgs, @Ctx() context: ResolverContext): Promise<typeof GetRoomResult> {
+        return this.getRoomCore({ args, context, globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase });
     }
 
     public async leaveRoomCore({ id, context }: { id: string; context: ResolverContext }): Promise<{ result: LeaveRoomResult; payload: RoomEventPayload | undefined }> {
@@ -1720,7 +1724,7 @@ export class RoomResolver {
 
     @Mutation(() => OperateRoomResult)
     public async operate(@Args() args: OperateArgs, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<typeof OperateRoomResult> {
-        const operateResult = await this.operateCore({ args, context, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+        const operateResult = await this.operateCore({ args, context, globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase });
         if (operateResult.type === 'success') {
             await publishRoomEvent(pubSub, operateResult.roomOperationPayload);
             for (const messageUpdate of operateResult.messageUpdatePayload) {
@@ -1760,7 +1764,7 @@ export class RoomResolver {
 
         const queue = async (): Promise<Result<{ result: typeof WritePrivateRoomMessageResult; payload?: MessageUpdatePayload }>> => {
             const em = context.createEm();
-            const entryUser = await getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+            const entryUser = await getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase });
             await em.flush();
             if (entryUser == null) {
                 return Result.ok({
@@ -1888,7 +1892,7 @@ export class RoomResolver {
 
         const queue = async (): Promise<Result<{ result: typeof WriteRoomSoundEffectResult; payload?: MessageUpdatePayload }>> => {
             const em = context.createEm();
-            const entryUser = await getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+            const entryUser = await getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase });
             await em.flush();
             if (entryUser == null) {
                 return Result.ok({
@@ -1987,7 +1991,7 @@ export class RoomResolver {
 
         const queue = async (): Promise<Result<{ result: MakeMessageNotSecretResult; payload?: MessageUpdatePayload }>> => {
             const em = context.createEm();
-            const entry = await checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+            const entry = await checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return Result.ok({
@@ -2134,7 +2138,7 @@ export class RoomResolver {
 
         const queue = async (): Promise<Result<{ result: DeleteMessageResult; payload?: MessageUpdatePayload }>> => {
             const em = context.createEm();
-            const entry = await checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+            const entry = await checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return Result.ok({
@@ -2278,7 +2282,7 @@ export class RoomResolver {
 
         const queue = async (): Promise<Result<{ result: EditMessageResult; payload?: MessageUpdatePayload }>> => {
             const em = context.createEm();
-            const entry = await checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: loadServerConfigAsMain().globalEntryPhrase });
+            const entry = await checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return Result.ok({

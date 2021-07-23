@@ -5,12 +5,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InMemoryConnectionManager = exports.pubSub = void 0;
 const util_1 = require("@kizahasi/util");
-const apollo_server_express_1 = require("apollo-server-express");
+const graphql_subscriptions_1 = require("graphql-subscriptions");
 const lodash_1 = __importDefault(require("lodash"));
 const node_cache_1 = __importDefault(require("node-cache"));
 const WritingMessageStatusType_1 = require("../enums/WritingMessageStatusType");
 const Topics_1 = require("../graphql+mikro-orm/utils/Topics");
-exports.pubSub = new apollo_server_express_1.PubSub();
+exports.pubSub = new graphql_subscriptions_1.PubSub();
 class ConnectionIdDatabase {
     constructor() {
         this.userUidDatabase = new node_cache_1.default({ stdTTL: 60 * 60 * 48 });

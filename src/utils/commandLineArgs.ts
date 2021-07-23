@@ -22,9 +22,9 @@ type Main = {
     debug: boolean;
 }
 
-const getMain = (): Main => {
+const getMain = async (): Promise<Main> => {
     const options =
-        yargs(process.argv.slice(2))
+        await yargs(process.argv.slice(2))
             .options({
                 'db': {
                     type: 'string',
@@ -51,9 +51,9 @@ const getMain = (): Main => {
     return result;
 };
 let mainCache: Main | null = null;
-export const loadAsMain = (): Main => {
+export const loadAsMain = async (): Promise<Main> => {
     if (mainCache == null) {
-        mainCache = getMain();
+        mainCache = await getMain();
     }
     return mainCache;
 };
@@ -62,9 +62,9 @@ type MigrationUp = {
     db: DbType;
 }
 
-const getMigrationUp = (): MigrationUp => {
+const getMigrationUp = async (): Promise<MigrationUp> => {
     const options =
-        yargs(process.argv.slice(2))
+        await yargs(process.argv.slice(2))
             .options({
                 'db': {
                     type: 'string',
@@ -90,9 +90,9 @@ const getMigrationUp = (): MigrationUp => {
     };
 };
 let migrationUpCache: MigrationUp | null = null;
-export const loadMigrationUp = (): MigrationUp => {
+export const loadMigrationUp = async (): Promise<MigrationUp> => {
     if (migrationUpCache == null) {
-        migrationUpCache = getMigrationUp();
+        migrationUpCache = await getMigrationUp();
     }
     return migrationUpCache;
 };
@@ -102,9 +102,9 @@ type MigrationDown = {
     count: number;
 }
 
-const getMigrationDown = (): MigrationDown => {
+const getMigrationDown = async (): Promise<MigrationDown> => {
     const options =
-        yargs(process.argv.slice(2))
+        await yargs(process.argv.slice(2))
             .options({
                 'db': {
                     type: 'string',
@@ -145,9 +145,9 @@ const getMigrationDown = (): MigrationDown => {
     };
 };
 let migrationDownCache: MigrationDown | null = null;
-export const loadMigrationDown = (): MigrationDown => {
+export const loadMigrationDown = async (): Promise<MigrationDown> => {
     if (migrationDownCache == null) {
-        migrationDownCache = getMigrationDown();
+        migrationDownCache = await getMigrationDown();
     }
     return migrationDownCache;
 };
@@ -157,9 +157,9 @@ type MigrationCreate = {
     init: boolean;
 }
 
-const getMigrationCreate = (): MigrationCreate => {
+const getMigrationCreate = async (): Promise<MigrationCreate> => {
     const options =
-        yargs(process.argv.slice(2))
+        await yargs(process.argv.slice(2))
             .options({
                 'db': {
                     type: 'string',
@@ -189,9 +189,9 @@ const getMigrationCreate = (): MigrationCreate => {
     };
 };
 let migrationCreateCache: MigrationCreate | null = null;
-export const loadMigrationCreate = (): MigrationCreate => {
+export const loadMigrationCreate = async (): Promise<MigrationCreate> => {
     if (migrationCreateCache == null) {
-        migrationCreateCache = getMigrationCreate();
+        migrationCreateCache = await getMigrationCreate();
     }
     return migrationCreateCache;
 };

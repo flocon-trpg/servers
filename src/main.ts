@@ -19,7 +19,6 @@ import { authToken } from '@kizahasi/util';
 import { Context } from 'graphql-ws/lib/server';
 import { BaasType } from './enums/BaasType';
 
-
 const main = async (params: { debug: boolean }): Promise<void> => {
     admin.initializeApp({
         projectId: firebaseConfig.projectId,
@@ -30,7 +29,7 @@ const main = async (params: { debug: boolean }): Promise<void> => {
     registerEnumTypes();
 
     const schema = await buildSchema({ emitSchemaFile: false, pubSub });
-    const serverConfig = loadServerConfigAsMain();
+    const serverConfig = await loadServerConfigAsMain();
     const dbType = serverConfig.database.__type;
     const orm = await (async () => {
         try {
@@ -100,6 +99,7 @@ const main = async (params: { debug: boolean }): Promise<void> => {
         context,
         debug: params.debug,
     });
+    await apolloServer.start();
 
     const app = express();
 
@@ -111,10 +111,12 @@ const main = async (params: { debug: boolean }): Promise<void> => {
 
     // https://github.com/enisdenjo/graphql-ws のコードを使用
     const server = app.listen(PORT, () => {
+        const subscriptionsPath = '/graphql';
+
         // create and use the websocket server
         const wsServer = new ws.Server({
             server,
-            path: '/graphql',
+            path: subscriptionsPath,
         });
 
         useServer({
@@ -161,7 +163,7 @@ const main = async (params: { debug: boolean }): Promise<void> => {
         }, wsServer);
 
         console.log(`🚀 Server ready at http://localhost:${PORT}${apolloServer.graphqlPath}`);
-        console.log(`🚀 Subscriptions ready at ws://localhost:${PORT}${apolloServer.subscriptionsPath}`);
+        console.log(`🚀 Subscriptions ready at ws://localhost:${PORT}${subscriptionsPath}`);
     });
 };
 

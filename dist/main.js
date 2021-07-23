@@ -28,7 +28,7 @@ const main = async (params) => {
     const connectionManager = new main_1.InMemoryConnectionManager();
     registerEnumTypes_1.default();
     const schema = await buildSchema_1.buildSchema({ emitSchemaFile: false, pubSub: main_1.pubSub });
-    const serverConfig = config_1.loadServerConfigAsMain();
+    const serverConfig = await config_1.loadServerConfigAsMain();
     const dbType = serverConfig.database.__type;
     const orm = await (async () => {
         try {
@@ -83,14 +83,16 @@ const main = async (params) => {
         context,
         debug: params.debug,
     });
+    await apolloServer.start();
     const app = express_1.default();
     apolloServer.applyMiddleware({ app });
     app.use(express_1.default.static(path_1.default.join(process.cwd(), 'root')));
     const PORT = (_a = process.env.PORT) !== null && _a !== void 0 ? _a : 4000;
     const server = app.listen(PORT, () => {
+        const subscriptionsPath = '/graphql';
         const wsServer = new ws_1.default.Server({
             server,
-            path: '/graphql',
+            path: subscriptionsPath,
         });
         ws_2.useServer({
             schema,
@@ -136,7 +138,7 @@ const main = async (params) => {
             }
         }, wsServer);
         console.log(`🚀 Server ready at http://localhost:${PORT}${apolloServer.graphqlPath}`);
-        console.log(`🚀 Subscriptions ready at ws://localhost:${PORT}${apolloServer.subscriptionsPath}`);
+        console.log(`🚀 Subscriptions ready at ws://localhost:${PORT}${subscriptionsPath}`);
     });
 };
 exports.default = main;

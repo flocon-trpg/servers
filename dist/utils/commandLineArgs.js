@@ -18,8 +18,8 @@ const toDbType = (source) => {
             return undefined;
     }
 };
-const getMain = () => {
-    const options = yargs_1.default(process.argv.slice(2))
+const getMain = async () => {
+    const options = await yargs_1.default(process.argv.slice(2))
         .options({
         'db': {
             type: 'string',
@@ -45,15 +45,15 @@ const getMain = () => {
     return result;
 };
 let mainCache = null;
-const loadAsMain = () => {
+const loadAsMain = async () => {
     if (mainCache == null) {
-        mainCache = getMain();
+        mainCache = await getMain();
     }
     return mainCache;
 };
 exports.loadAsMain = loadAsMain;
-const getMigrationUp = () => {
-    const options = yargs_1.default(process.argv.slice(2))
+const getMigrationUp = async () => {
+    const options = await yargs_1.default(process.argv.slice(2))
         .options({
         'db': {
             type: 'string',
@@ -78,15 +78,15 @@ const getMigrationUp = () => {
     };
 };
 let migrationUpCache = null;
-const loadMigrationUp = () => {
+const loadMigrationUp = async () => {
     if (migrationUpCache == null) {
-        migrationUpCache = getMigrationUp();
+        migrationUpCache = await getMigrationUp();
     }
     return migrationUpCache;
 };
 exports.loadMigrationUp = loadMigrationUp;
-const getMigrationDown = () => {
-    const options = yargs_1.default(process.argv.slice(2))
+const getMigrationDown = async () => {
+    const options = await yargs_1.default(process.argv.slice(2))
         .options({
         'db': {
             type: 'string',
@@ -126,15 +126,15 @@ const getMigrationDown = () => {
     };
 };
 let migrationDownCache = null;
-const loadMigrationDown = () => {
+const loadMigrationDown = async () => {
     if (migrationDownCache == null) {
-        migrationDownCache = getMigrationDown();
+        migrationDownCache = await getMigrationDown();
     }
     return migrationDownCache;
 };
 exports.loadMigrationDown = loadMigrationDown;
-const getMigrationCreate = () => {
-    const options = yargs_1.default(process.argv.slice(2))
+const getMigrationCreate = async () => {
+    const options = await yargs_1.default(process.argv.slice(2))
         .options({
         'db': {
             type: 'string',
@@ -163,9 +163,9 @@ const getMigrationCreate = () => {
     };
 };
 let migrationCreateCache = null;
-const loadMigrationCreate = () => {
+const loadMigrationCreate = async () => {
     if (migrationCreateCache == null) {
-        migrationCreateCache = getMigrationCreate();
+        migrationCreateCache = await getMigrationCreate();
     }
     return migrationCreateCache;
 };

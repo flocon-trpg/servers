@@ -506,8 +506,8 @@ let RoomResolver = class RoomResolver {
         }
         return result.value;
     }
-    getRoomsList(context) {
-        return this.getRoomsListCore({ context, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+    async getRoomsList(context) {
+        return this.getRoomsListCore({ context, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
     }
     async requiresPhraseToJoinAsPlayerCore({ roomId, context, globalEntryPhrase }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
@@ -539,8 +539,12 @@ let RoomResolver = class RoomResolver {
         }
         return result.value;
     }
-    requiresPhraseToJoinAsPlayer(roomId, context) {
-        return this.requiresPhraseToJoinAsPlayerCore({ roomId, context, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+    async requiresPhraseToJoinAsPlayer(roomId, context) {
+        return this.requiresPhraseToJoinAsPlayerCore({
+            roomId,
+            context,
+            globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
+        });
     }
     async createRoomCore({ input, context, globalEntryPhrase }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
@@ -683,7 +687,7 @@ let RoomResolver = class RoomResolver {
         }
         const queue = async () => {
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
@@ -733,7 +737,7 @@ let RoomResolver = class RoomResolver {
         }
         const queue = async () => {
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
@@ -807,7 +811,7 @@ let RoomResolver = class RoomResolver {
         }
         const queue = async () => {
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
@@ -861,7 +865,7 @@ let RoomResolver = class RoomResolver {
         const queue = async () => {
             var _a, _b, _c, _d;
             const em = context.createEm();
-            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
             await em.flush();
             if (entryUser == null) {
                 return result_1.Result.ok({
@@ -952,8 +956,8 @@ let RoomResolver = class RoomResolver {
         }
         return result.value.value;
     }
-    createRoom(input, context) {
-        return this.createRoomCore({ input, context, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+    async createRoom(input, context) {
+        return this.createRoomCore({ input, context, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
     }
     async deleteRoomCore({ args, context, globalEntryPhrase }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
@@ -1005,7 +1009,7 @@ let RoomResolver = class RoomResolver {
         return result.value;
     }
     async deleteRoom(args, context, pubSub) {
-        const { result, payload } = await this.deleteRoomCore({ args, context, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+        const { result, payload } = await this.deleteRoomCore({ args, context, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
         }
@@ -1033,7 +1037,7 @@ let RoomResolver = class RoomResolver {
         });
     }
     async joinRoomAsPlayer(args, context, pubSub) {
-        const { result, payload } = await this.joinRoomAsPlayerCore({ args, context, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+        const { result, payload } = await this.joinRoomAsPlayerCore({ args, context, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
         }
@@ -1061,7 +1065,7 @@ let RoomResolver = class RoomResolver {
         });
     }
     async joinRoomAsSpectator(args, context, pubSub) {
-        const { result, payload } = await this.joinRoomAsSpectatorCore({ args, context, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+        const { result, payload } = await this.joinRoomAsSpectatorCore({ args, context, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
         }
@@ -1087,7 +1091,7 @@ let RoomResolver = class RoomResolver {
             } }));
     }
     async promoteToPlayer(args, context, pubSub) {
-        const { result, payload } = await this.promoteToPlayerCore({ args, context, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+        const { result, payload } = await this.promoteToPlayerCore({ args, context, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
         }
@@ -1152,7 +1156,7 @@ let RoomResolver = class RoomResolver {
         return result.value;
     }
     async changeParticipantName(args, context, pubSub) {
-        const { result, payload } = await this.changeParticipantNameCore({ args, context, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+        const { result, payload } = await this.changeParticipantNameCore({ args, context, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
         }
@@ -1199,8 +1203,8 @@ let RoomResolver = class RoomResolver {
         }
         return result.value.value;
     }
-    getRoom(args, context) {
-        return this.getRoomCore({ args, context, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+    async getRoom(args, context) {
+        return this.getRoomCore({ args, context, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
     }
     async leaveRoomCore({ id, context }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
@@ -1496,7 +1500,7 @@ let RoomResolver = class RoomResolver {
         return result.value.value;
     }
     async operate(args, context, pubSub) {
-        const operateResult = await this.operateCore({ args, context, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+        const operateResult = await this.operateCore({ args, context, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
         if (operateResult.type === 'success') {
             await publishRoomEvent(pubSub, operateResult.roomOperationPayload);
             for (const messageUpdate of operateResult.messageUpdatePayload) {
@@ -1528,7 +1532,7 @@ let RoomResolver = class RoomResolver {
         const queue = async () => {
             var _a, _b, _c, _d;
             const em = context.createEm();
-            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
             await em.flush();
             if (entryUser == null) {
                 return result_1.Result.ok({
@@ -1643,7 +1647,7 @@ let RoomResolver = class RoomResolver {
         }
         const queue = async () => {
             const em = context.createEm();
-            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
             await em.flush();
             if (entryUser == null) {
                 return result_1.Result.ok({
@@ -1728,7 +1732,7 @@ let RoomResolver = class RoomResolver {
         const queue = async () => {
             var _a, _b, _c, _d;
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
@@ -1869,7 +1873,7 @@ let RoomResolver = class RoomResolver {
         const queue = async () => {
             var _a, _b, _c, _d;
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
@@ -2007,7 +2011,7 @@ let RoomResolver = class RoomResolver {
         const queue = async () => {
             var _a, _b, _c, _d;
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: config_1.loadServerConfigAsMain().globalEntryPhrase });
+            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
             await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
@@ -2271,147 +2275,184 @@ __decorate([
 ], RoomResolver.prototype, "getRoomsList", null);
 __decorate([
     type_graphql_1.Query(() => RequiresPhraseResult_1.RequiresPhraseResult),
-    __param(0, type_graphql_1.Arg('roomId')), __param(1, type_graphql_1.Ctx()),
+    __param(0, type_graphql_1.Arg('roomId')),
+    __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "requiresPhraseToJoinAsPlayer", null);
 __decorate([
     type_graphql_1.Query(() => graphql_2.GetRoomMessagesResult),
-    __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()),
+    __param(0, type_graphql_1.Args()),
+    __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.GetMessagesArgs, Object]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "getMessages", null);
 __decorate([
     type_graphql_1.Query(() => graphql_2.GetRoomLogResult),
-    __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
+    __param(0, type_graphql_1.Args()),
+    __param(1, type_graphql_1.Ctx()),
+    __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.GetLogArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "getLog", null);
 __decorate([
     type_graphql_1.Query(() => object_args_input_1.GetRoomConnectionsResult),
-    __param(0, type_graphql_1.Arg('roomId')), __param(1, type_graphql_1.Ctx()),
+    __param(0, type_graphql_1.Arg('roomId')),
+    __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "getRoomConnections", null);
 __decorate([
     type_graphql_1.Mutation(() => CreateRoomResult_1.CreateRoomResult),
-    __param(0, type_graphql_1.Arg('input')), __param(1, type_graphql_1.Ctx()),
+    __param(0, type_graphql_1.Arg('input')),
+    __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.CreateRoomInput, Object]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "createRoom", null);
 __decorate([
     type_graphql_1.Mutation(() => DeleteRoomResult_1.DeleteRoomResult),
-    __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
+    __param(0, type_graphql_1.Args()),
+    __param(1, type_graphql_1.Ctx()),
+    __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.DeleteRoomArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "deleteRoom", null);
 __decorate([
     type_graphql_1.Mutation(() => JoinRoomResult_1.JoinRoomResult),
-    __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
+    __param(0, type_graphql_1.Args()),
+    __param(1, type_graphql_1.Ctx()),
+    __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.JoinRoomArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "joinRoomAsPlayer", null);
 __decorate([
     type_graphql_1.Mutation(() => JoinRoomResult_1.JoinRoomResult),
-    __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
+    __param(0, type_graphql_1.Args()),
+    __param(1, type_graphql_1.Ctx()),
+    __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.JoinRoomArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "joinRoomAsSpectator", null);
 __decorate([
     type_graphql_1.Mutation(() => PromoteMeResult_1.PromoteResult),
-    __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
+    __param(0, type_graphql_1.Args()),
+    __param(1, type_graphql_1.Ctx()),
+    __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.PromoteArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "promoteToPlayer", null);
 __decorate([
     type_graphql_1.Mutation(() => ChangeParticipantNameResult_1.ChangeParticipantNameResult),
-    __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
+    __param(0, type_graphql_1.Args()),
+    __param(1, type_graphql_1.Ctx()),
+    __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.ChangeParticipantNameArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "changeParticipantName", null);
 __decorate([
     type_graphql_1.Query(() => GetRoomResult_1.GetRoomResult),
-    __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()),
+    __param(0, type_graphql_1.Args()),
+    __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.GetRoomArgs, Object]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "getRoom", null);
 __decorate([
     type_graphql_1.Mutation(() => LeaveRoomResult_1.LeaveRoomResult),
-    __param(0, type_graphql_1.Arg('id')), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
+    __param(0, type_graphql_1.Arg('id')),
+    __param(1, type_graphql_1.Ctx()),
+    __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "leaveRoom", null);
 __decorate([
     type_graphql_1.Mutation(() => OperateRoomResult_1.OperateRoomResult),
-    __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
+    __param(0, type_graphql_1.Args()),
+    __param(1, type_graphql_1.Ctx()),
+    __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.OperateArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "operate", null);
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.WritePublicRoomMessageResult),
-    __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
+    __param(0, type_graphql_1.Args()),
+    __param(1, type_graphql_1.Ctx()),
+    __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.WritePublicMessageArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "writePublicMessage", null);
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.WritePrivateRoomMessageResult),
-    __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
+    __param(0, type_graphql_1.Args()),
+    __param(1, type_graphql_1.Ctx()),
+    __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.WritePrivateMessageArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "writePrivateMessage", null);
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.WriteRoomSoundEffectResult),
-    __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
+    __param(0, type_graphql_1.Args()),
+    __param(1, type_graphql_1.Ctx()),
+    __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.WriteRoomSoundEffectArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "writeRoomSoundEffect", null);
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.MakeMessageNotSecretResult),
-    __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
+    __param(0, type_graphql_1.Args()),
+    __param(1, type_graphql_1.Ctx()),
+    __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.MessageIdArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "makeMessageNotSecret", null);
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.DeleteMessageResult),
-    __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
+    __param(0, type_graphql_1.Args()),
+    __param(1, type_graphql_1.Ctx()),
+    __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.MessageIdArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "deleteMessage", null);
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.EditMessageResult),
-    __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
+    __param(0, type_graphql_1.Args()),
+    __param(1, type_graphql_1.Ctx()),
+    __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.EditMessageArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "editMessage", null);
 __decorate([
     type_graphql_1.Mutation(() => Boolean),
-    __param(0, type_graphql_1.Args()), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
+    __param(0, type_graphql_1.Args()),
+    __param(1, type_graphql_1.Ctx()),
+    __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.UpdateWritingMessageStateArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "updateWritingMessageStatus", null);
 __decorate([
     type_graphql_1.Subscription(() => object_args_input_1.RoomEvent, { topics: Topics_1.ROOM_EVENT, nullable: true }),
-    __param(0, type_graphql_1.Root()), __param(1, type_graphql_1.Arg('id')), __param(2, type_graphql_1.Ctx()),
+    __param(0, type_graphql_1.Root()),
+    __param(1, type_graphql_1.Arg('id')),
+    __param(2, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Object)

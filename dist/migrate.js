@@ -34,7 +34,7 @@ const checkMigrationsBeforeStart = async (orm, dbType) => {
 };
 exports.checkMigrationsBeforeStart = checkMigrationsBeforeStart;
 const migrate = async (type) => {
-    const serverConfig = (() => {
+    const serverConfig = await (() => {
         switch (type) {
             case up:
                 return config_1.loadServerConfigAsMigrationUp();
@@ -104,7 +104,7 @@ const migrate = async (type) => {
         }
         case down: {
             console.log(`Migration-down is started. DB is ${prettify(dbType)}. / マイグレーションのdownを開始します。DBは${prettify(dbType)}です。`);
-            const config = config_1.loadServerConfigAsMigrationDown();
+            const config = await config_1.loadServerConfigAsMigrationDown();
             if (!Number.isInteger(config.count)) {
                 console.log('❌ "--count" must be integer');
                 return;
