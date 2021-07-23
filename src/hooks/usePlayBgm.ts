@@ -7,6 +7,7 @@ import { useSelector } from '../store';
 import { defaultChannelVolume, defaultMasterVolume } from '../states/RoomConfig';
 import { BgmState } from '@kizahasi/flocon-core';
 import _ from 'lodash';
+import { getDirectLink } from '../utils/getDirectLink';
 
 type PlayBgmBehaviorCoreProps = {
     bgm: BgmState | null;
@@ -46,7 +47,7 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmBehaviorCoreProps): void {
             return;
         }
         const howl = new Howl({
-            src,
+            src: src.map(s => getDirectLink(s).directLink),
             loop: true,
             volume: Math.min(volumeRef.current, volumeCap),
         });
