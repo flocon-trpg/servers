@@ -80,7 +80,8 @@
         "watch:codegen": "graphql-codegen --config codegen.yml --watch",
         "watch:schema": "nodemon --config nodemon.buildSchema.json",
         "watch:node": "nodemon --config nodemon.node.json",
-        "prepare": "husky install"
+        "prepare": "husky install",
+        "prettier": "prettier --write \"src/**/*.ts\""
     },
     "license": "MIT"
 }

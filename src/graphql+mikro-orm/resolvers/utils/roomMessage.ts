@@ -5,7 +5,15 @@ import { Room } from '../../entities/room/mikro-orm';
 import { RoomPubCh, RoomPubMsg } from '../../entities/roomMessage/mikro-orm';
 
 // flushはこのメソッドでは行われないため、flushのし忘れに注意。
-export const writeSystemMessage = async ({ em, text, room }: { em: EM; text: string; room: Room }) => {
+export const writeSystemMessage = async ({
+    em,
+    text,
+    room,
+}: {
+    em: EM;
+    text: string;
+    room: Room;
+}) => {
     const entity = new RoomPubMsg({ initText: text, initTextSource: undefined });
     entity.initText = text;
     let ch = await em.findOne(RoomPubCh, { key: $system, room: room.id });

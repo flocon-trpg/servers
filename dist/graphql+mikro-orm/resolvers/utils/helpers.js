@@ -30,7 +30,7 @@ const getUserIfEntry = async ({ em, userUid, baasType, globalEntryPhrase, }) => 
     const user = await em.findOne(mikro_orm_1.User, { userUid, baasType });
     if (user == null) {
         if (globalEntryPhrase == null) {
-            const newUser = new mikro_orm_1.User({ userUid, baasType, });
+            const newUser = new mikro_orm_1.User({ userUid, baasType });
             newUser.isEntry = true;
             em.persist(newUser);
             return user;
@@ -47,7 +47,7 @@ const getUserIfEntry = async ({ em, userUid, baasType, globalEntryPhrase, }) => 
     return null;
 };
 exports.getUserIfEntry = getUserIfEntry;
-const checkEntry = async ({ em, userUid, baasType, globalEntryPhrase }) => {
+const checkEntry = async ({ em, userUid, baasType, globalEntryPhrase, }) => {
     return (await exports.getUserIfEntry({ em, userUid, baasType, globalEntryPhrase })) != null;
 };
 exports.checkEntry = checkEntry;
@@ -61,7 +61,7 @@ class FindRoomAndMyParticipantResult {
         return new Set(util_1.recordToArray(this.roomState.participants).map(({ key }) => key));
     }
 }
-const findRoomAndMyParticipant = async ({ em, userUid, roomId }) => {
+const findRoomAndMyParticipant = async ({ em, userUid, roomId, }) => {
     const room = await em.findOne(mikro_orm_2.Room, { id: roomId });
     if (room == null) {
         return null;

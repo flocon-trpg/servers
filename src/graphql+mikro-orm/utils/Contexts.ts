@@ -1,4 +1,3 @@
-
 import { CustomResult } from '@kizahasi/result';
 import { InMemoryConnectionManager } from '../../connection/main';
 import { BaasType } from '../../enums/BaasType';
@@ -12,7 +11,7 @@ export type DecodedIdToken = {
     firebase: {
         sign_in_provider: string;
     };
-}
+};
 
 export type ResolverContext = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -20,4 +19,4 @@ export type ResolverContext = {
     promiseQueue: PromiseQueue;
     connectionManager: InMemoryConnectionManager;
     createEm: () => EM;
-}
+};

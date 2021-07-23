@@ -1,8 +1,24 @@
 import { DbState, DownOperation } from '@kizahasi/flocon-core';
-import { Collection, Entity, IdentifiedReference, JsonType, ManyToOne, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/core';
+import {
+    Collection,
+    Entity,
+    IdentifiedReference,
+    JsonType,
+    ManyToOne,
+    OneToMany,
+    PrimaryKey,
+    Property,
+    Unique,
+} from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { EM } from '../../../utils/types';
-import { DicePieceValueLog as DicePieceValueLogEntity, NumberPieceValueLog as NumberPieceValueLogEntity, RoomPrvMsg, RoomPubCh, RoomSe as RoomSe } from '../roomMessage/mikro-orm';
+import {
+    DicePieceValueLog as DicePieceValueLogEntity,
+    NumberPieceValueLog as NumberPieceValueLogEntity,
+    RoomPrvMsg,
+    RoomPubCh,
+    RoomSe as RoomSe,
+} from '../roomMessage/mikro-orm';
 
 // Roomは最新の状況を反映するが、RoomOperationを用いて1つ前の状態に戻せるのは一部のプロパティのみ。
 // 例えばrevisionはRoomOperationをいくらapplyしても最新のまま。
@@ -32,7 +48,6 @@ export class Room {
     @Property({ type: Date, nullable: true, onUpdate: () => new Date(), index: true })
     public updatedAt?: Date;
 
-
     @Property({ nullable: true })
     public joinAsPlayerPhrase?: string;
 
@@ -48,7 +63,6 @@ export class Room {
 
     @Property({ type: JsonType })
     public value: DbState;
-
 
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property()
@@ -76,13 +90,7 @@ export class Room {
 @Entity()
 @Unique({ properties: ['prevRevision', 'room'] })
 export class RoomOp {
-    public constructor({
-        prevRevision,
-        value,
-    }: {
-        prevRevision: number;
-        value: DownOperation;
-    }) {
+    public constructor({ prevRevision, value }: { prevRevision: number; value: DownOperation }) {
         this.prevRevision = prevRevision;
         this.value = value;
     }

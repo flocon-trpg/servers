@@ -323,7 +323,7 @@ exports.GetRoomConnectionsResult = type_graphql_1.createUnionType({
             case exports.GetRoomConnectionFailureResultType:
                 return GetRoomConnectionsFailureResult;
         }
-    }
+    },
 });
 let RoomConnectionEvent = class RoomConnectionEvent {
 };

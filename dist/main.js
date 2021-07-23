@@ -46,7 +46,11 @@ const main = async (params) => {
     })();
     await migrate_1.checkMigrationsBeforeStart(orm, dbType);
     const getDecodedIdToken = async (idToken) => {
-        const decodedIdToken = await firebase_admin_1.default.auth().verifyIdToken(idToken).then(result_1.Result.ok).catch(result_1.Result.error);
+        const decodedIdToken = await firebase_admin_1.default
+            .auth()
+            .verifyIdToken(idToken)
+            .then(result_1.Result.ok)
+            .catch(result_1.Result.error);
         if (decodedIdToken.isError) {
             return decodedIdToken;
         }
@@ -135,7 +139,7 @@ const main = async (params) => {
                 for (const key in ctx.subscriptions) {
                     connectionManager.onLeaveRoom({ connectionId: key });
                 }
-            }
+            },
         }, wsServer);
         console.log(`🚀 Server ready at http://localhost:${PORT}${apolloServer.graphqlPath}`);
         console.log(`🚀 Subscriptions ready at ws://localhost:${PORT}${subscriptionsPath}`);

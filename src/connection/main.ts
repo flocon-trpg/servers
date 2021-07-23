@@ -12,12 +12,24 @@ class ConnectionIdDatabase {
     private userUidDatabase = new NodeCache({ stdTTL: 60 * 60 * 48 });
     private roomIdDatabase = new NodeCache({ stdTTL: 60 * 60 * 48 });
 
-    public set({ roomId, connectionId, userUid }: { roomId: string; connectionId: string; userUid: string }): void {
+    public set({
+        roomId,
+        connectionId,
+        userUid,
+    }: {
+        roomId: string;
+        connectionId: string;
+        userUid: string;
+    }): void {
         this.userUidDatabase.set(connectionId, userUid);
         this.roomIdDatabase.set(connectionId, roomId);
     }
 
-    public del({ connectionId }: { connectionId: string }): { roomId: string; userUid: string } | null {
+    public del({
+        connectionId,
+    }: {
+        connectionId: string;
+    }): { roomId: string; userUid: string } | null {
         const userUid = this.userUidDatabase.get(connectionId);
         this.userUidDatabase.del(connectionId);
         const roomId = this.roomIdDatabase.get(connectionId);
@@ -82,8 +94,18 @@ class ConnectionCountDatabase {
 class WritingMessageStatusDatabase {
     private database = new NodeCache({ stdTTL: 600, maxKeys: 10000, checkperiod: 299 });
 
-    // 戻り値がnullの場合、subscriptionで送信する必要はない 
-    public set({ roomId, status, publicChannelKey, userUid }: { roomId: string; userUid: string; publicChannelKey: string; status: WritingMessageStatusType }): WritingMessageStatusType | null {
+    // 戻り値がnullの場合、subscriptionで送信する必要はない
+    public set({
+        roomId,
+        status,
+        publicChannelKey,
+        userUid,
+    }: {
+        roomId: string;
+        userUid: string;
+        publicChannelKey: string;
+        status: WritingMessageStatusType;
+    }): WritingMessageStatusType | null {
         if (!PublicChannelKey.Without$System.isPublicChannelKey(publicChannelKey)) {
             return null;
         }
@@ -96,27 +118,36 @@ class WritingMessageStatusDatabase {
         return status;
     }
 
-    public onDisconnect({ userUid, roomId }: { userUid: string; roomId: string }): { publicChannelKey: PublicChannelKey.Without$System.PublicChannelKey }[] {
-        return _(this.database.keys()).map(key => {
-            const split = key.split('@');
-            if (split.length !== 3) {
-                return undefined;
-            }
-            const roomIdKey = split[0];
-            const userUidKey = split[1];
-            const publicChannelKey = split[2];
-            if (roomIdKey !== roomId) {
-                return undefined;
-            }
-            if (userUidKey !== userUid) {
-                return undefined;
-            }
-            if (!PublicChannelKey.Without$System.isPublicChannelKey(publicChannelKey)) {
-                return undefined;
-            }
-            this.database.del(key);
-            return { publicChannelKey };
-        }).compact().value();
+    public onDisconnect({
+        userUid,
+        roomId,
+    }: {
+        userUid: string;
+        roomId: string;
+    }): { publicChannelKey: PublicChannelKey.Without$System.PublicChannelKey }[] {
+        return _(this.database.keys())
+            .map(key => {
+                const split = key.split('@');
+                if (split.length !== 3) {
+                    return undefined;
+                }
+                const roomIdKey = split[0];
+                const userUidKey = split[1];
+                const publicChannelKey = split[2];
+                if (roomIdKey !== roomId) {
+                    return undefined;
+                }
+                if (userUidKey !== userUid) {
+                    return undefined;
+                }
+                if (!PublicChannelKey.Without$System.isPublicChannelKey(publicChannelKey)) {
+                    return undefined;
+                }
+                this.database.del(key);
+                return { publicChannelKey };
+            })
+            .compact()
+            .value();
     }
 }
 
@@ -125,7 +156,15 @@ export class InMemoryConnectionManager {
     private connectionCountDatabase = new ConnectionCountDatabase();
     private writingMessageStatusDatabase = new WritingMessageStatusDatabase();
 
-    public onConnectToRoom({ connectionId, userUid, roomId }: { connectionId: string; userUid: string; roomId: string }) {
+    public onConnectToRoom({
+        connectionId,
+        userUid,
+        roomId,
+    }: {
+        connectionId: string;
+        userUid: string;
+        roomId: string;
+    }) {
         this.connectionIdDatabase.set({ roomId, connectionId, userUid });
         const newValue = this.connectionCountDatabase.incr({ roomId, userUid });
         if (newValue !== 1) {
@@ -173,7 +212,12 @@ export class InMemoryConnectionManager {
         });
     }
 
-    public onWritingMessageStatusUpdate(params: { roomId: string; userUid: string; publicChannelKey: string; status: WritingMessageStatusType }) {
+    public onWritingMessageStatusUpdate(params: {
+        roomId: string;
+        userUid: string;
+        publicChannelKey: string;
+        status: WritingMessageStatusType;
+    }) {
         return this.writingMessageStatusDatabase.set(params);
     }
 

@@ -5,7 +5,7 @@ import { RoomOperation } from '../entities/room/graphql';
 @ObjectType()
 export class JoinRoomSuccessResult {
     @Field({ nullable: true })
-    public operation?: RoomOperation
+    public operation?: RoomOperation;
 }
 
 @ObjectType()
@@ -25,5 +25,5 @@ export const JoinRoomResult = createUnionType({
             return JoinRoomFailureResult;
         }
         return undefined;
-    }
+    },
 });

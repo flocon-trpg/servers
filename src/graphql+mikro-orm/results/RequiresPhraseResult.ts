@@ -24,5 +24,5 @@ export const RequiresPhraseResult = createUnionType({
             return RequiresPhraseFailureResult;
         }
         return undefined;
-    }
+    },
 });

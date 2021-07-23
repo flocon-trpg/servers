@@ -13,32 +13,43 @@ export const queueLimitReached = 'queueLimitReached';
 
 type RawResult = {
     id: string;
-    result: {
-        type: typeof executed;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        value: any; // Promiseが成功したときの型はanyで、失敗したときのreasonの型もanyなので共用させている
-        isError: boolean;
-    } | {
-        type: typeof timeout;
-    } | {
-        type: typeof queueLimitReached;
-    };
-}
+    result:
+        | {
+              type: typeof executed;
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              value: any; // Promiseが成功したときの型はanyで、失敗したときのreasonの型もanyなので共用させている
+              isError: boolean;
+          }
+        | {
+              type: typeof timeout;
+          }
+        | {
+              type: typeof queueLimitReached;
+          };
+};
 
-type Result<T> = {
-    type: typeof executed;
-    value: T;
-} | {
-    type: typeof queueLimitReached;
-}
+type Result<T> =
+    | {
+          type: typeof executed;
+          value: T;
+      }
+    | {
+          type: typeof queueLimitReached;
+      };
 
-type ResultWithTimeout<T> = Result<T> | {
-    type: typeof timeout;
-}
+type ResultWithTimeout<T> =
+    | Result<T>
+    | {
+          type: typeof timeout;
+      };
 
 export class PromiseQueue {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    readonly _promises = new Subject<{ id: string; execute: () => Promise<any>; timeout: number | null | undefined }>();
+    readonly _promises = new Subject<{
+        id: string;
+        execute: () => Promise<any>;
+        timeout: number | null | undefined;
+    }>();
     // _resultはerrorやcompleteが流されない仕様にしている。もしerrorが流されてきたら、コンストラクタ内でsubscribeしているところで例外がthrowされる。
     readonly _result: Observable<RawResult>;
     readonly _pendingPromises = new Set<string>(); // 値は_coreのid
@@ -55,8 +66,18 @@ export class PromiseQueue {
                     }
 
                     execute()
-                        .then(result => observer.next({ id, result: { type: executed, value: result, isError: false } }))
-                        .catch(reason => observer.next({ id, result: { type: executed, value: reason, isError: true } }))
+                        .then(result =>
+                            observer.next({
+                                id,
+                                result: { type: executed, value: result, isError: false },
+                            })
+                        )
+                        .catch(reason =>
+                            observer.next({
+                                id,
+                                result: { type: executed, value: reason, isError: true },
+                            })
+                        )
                         .finally(() => {
                             this._pendingPromises.delete(id);
                             observer.complete();
@@ -67,25 +88,42 @@ export class PromiseQueue {
                 }
                 const timeoutValue: RawResult = {
                     id,
-                    result: { type: 'timeout' }
+                    result: { type: 'timeout' },
                 };
-                return rawObservable.pipe(Rx.timeoutWith(timeout, defer(() => {
-                    this._pendingPromises.delete(id);
-                    return of(timeoutValue);
-                })));
+                return rawObservable.pipe(
+                    Rx.timeoutWith(
+                        timeout,
+                        defer(() => {
+                            this._pendingPromises.delete(id);
+                            return of(timeoutValue);
+                        })
+                    )
+                );
             }),
             Rx.concatAll(),
             Rx.publish(),
-            Rx.refCount()); // この場合はどちらかというと.refCount()ではなくConnectableObservableを使うのが適切（インスタンス全体を確実にunsubscribeするようなことも可能になる）だと思われるが、少し怠けている。
-        this._result.subscribe(() => undefined, reason => { throw reason; }, () => { throw new Error('PromiseQueue observable completed for an unknown reason.'); });
+            Rx.refCount()
+        ); // この場合はどちらかというと.refCount()ではなくConnectableObservableを使うのが適切（インスタンス全体を確実にunsubscribeするようなことも可能になる）だと思われるが、少し怠けている。
+        this._result.subscribe(
+            () => undefined,
+            reason => {
+                throw reason;
+            },
+            () => {
+                throw new Error('PromiseQueue observable completed for an unknown reason.');
+            }
+        );
     }
 
-    private nextCore<T>(execute: () => Promise<T>, timeout: number | null | undefined): Promise<ResultWithTimeout<T>> {
+    private nextCore<T>(
+        execute: () => Promise<T>,
+        timeout: number | null | undefined
+    ): Promise<ResultWithTimeout<T>> {
         const id = v4();
         this._pendingPromises.add(id);
         const result = new Promise<ResultWithTimeout<T>>((resolver, reject) => {
-            this._result.pipe(Rx.first(x => x.id === id))
-                .subscribe(r => {
+            this._result.pipe(Rx.first(x => x.id === id)).subscribe(
+                r => {
                     switch (r.result.type) {
                         case executed:
                             if (r.result.isError) {
@@ -103,14 +141,18 @@ export class PromiseQueue {
                 // _resultにcompleteはおそらく流されないが、何らかの理由でerrorが流されることはあるかもしれない。そのとき、コンストラクタ内での_result.subscribeでエラーがthrowされるが、これがcatchされて握りつぶされてしまったケースに備えている。
                 // publish=>refCountの仕様についての補足: Observableがpublish=>refCountされていて、常にそれをsubscribeしている場合、nextは当然キャッシュされないが、errorやcompleteはキャッシュされる。
                 () => reject('PromiseQueue observable has thrown an error for an unknown reason.'),
-                () => reject('PromiseQueue observable has completed for an unknown reason.'));
+                () => reject('PromiseQueue observable has completed for an unknown reason.')
+            );
         });
         this._promises.next({ id, execute, timeout });
         return result;
     }
 
     // timeoutは、executeの戻り値のPromiseの実行時間。nextWithTimeoutを呼んでからの時間ではない。
-    public nextWithTimeout<T>(execute: () => Promise<T>, timeout: number): Promise<ResultWithTimeout<T>> {
+    public nextWithTimeout<T>(
+        execute: () => Promise<T>,
+        timeout: number
+    ): Promise<ResultWithTimeout<T>> {
         return this.nextCore(execute, timeout);
     }
 

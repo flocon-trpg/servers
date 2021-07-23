@@ -22,7 +22,7 @@ const roll = async (text, gameType) => {
     return gameSystem.eval(text);
 };
 exports.chara = 'chara';
-const getParameter = async ({ parameterPath, context, room }) => {
+const getParameter = async ({ parameterPath, context, room, }) => {
     if (parameterPath.length === 0) {
         throw new Error('parameterPath.length === 0');
     }
@@ -111,11 +111,13 @@ const analyze = async (params) => {
     const rolled = await roll(message, params.gameType);
     return result_1.Result.ok({
         message,
-        diceResult: rolled == null ? null : {
-            result: rolled.text,
-            isSecret: rolled.secret,
-            isSuccess: (rolled.success === rolled.failure) ? null : rolled.success,
-        },
+        diceResult: rolled == null
+            ? null
+            : {
+                result: rolled.text,
+                isSecret: rolled.secret,
+                isSuccess: rolled.success === rolled.failure ? null : rolled.success,
+            },
     });
 };
 exports.analyze = analyze;

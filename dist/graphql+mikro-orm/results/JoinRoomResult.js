@@ -44,5 +44,5 @@ exports.JoinRoomResult = type_graphql_1.createUnionType({
             return JoinRoomFailureResult;
         }
         return undefined;
-    }
+    },
 });

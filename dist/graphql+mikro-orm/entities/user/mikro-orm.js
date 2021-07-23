@@ -14,7 +14,7 @@ const core_1 = require("@mikro-orm/core");
 const BaasType_1 = require("../../../enums/BaasType");
 const mikro_orm_1 = require("../roomMessage/mikro-orm");
 let User = class User {
-    constructor({ userUid, baasType, }) {
+    constructor({ userUid, baasType }) {
         this.isEntry = false;
         this.roomPubMsgs = new core_1.Collection(this);
         this.roomPrvMsgs = new core_1.Collection(this);

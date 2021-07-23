@@ -1,4 +1,11 @@
-import { CharacterState, getVariableFromVarTomlObject, State, analyze as analyzeToExpression, plain, parseToml } from '@kizahasi/flocon-core';
+import {
+    CharacterState,
+    getVariableFromVarTomlObject,
+    State,
+    analyze as analyzeToExpression,
+    plain,
+    parseToml,
+} from '@kizahasi/flocon-core';
 import { Result } from '@kizahasi/result';
 import { recordToArray } from '@kizahasi/util';
 import { DynamicLoader } from 'bcdice';
@@ -29,10 +36,20 @@ export const chara = 'chara';
 export type Context = {
     type: typeof chara;
     value: CharacterState;
-}
+};
 
 // 全てにおいて何も見つからなかった場合、undefinedが返される。
-const getParameter = async ({ parameterPath, context, room }: { parameterPath: string[]; context: Context | null; room: State }): Promise<Result<{ value: string | boolean | number | undefined; stringValue: string }> | undefined> => {
+const getParameter = async ({
+    parameterPath,
+    context,
+    room,
+}: {
+    parameterPath: string[];
+    context: Context | null;
+    room: State;
+}): Promise<
+    Result<{ value: string | boolean | number | undefined; stringValue: string }> | undefined
+> => {
     if (parameterPath.length === 0) {
         throw new Error('parameterPath.length === 0');
     }
@@ -69,12 +86,21 @@ const getParameter = async ({ parameterPath, context, room }: { parameterPath: s
             return Result.ok(undefined);
         }
 
-        const matchedBoolParams = recordToArray(room.boolParamNames).filter(({ value }) => value.name === parameter);
-        const matchedNumParams = recordToArray(room.numParamNames).filter(({ value }) => value.name === parameter);
-        const matchedStrParams = recordToArray(room.strParamNames).filter(({ value }) => value.name === parameter);
-        const totalLength = matchedBoolParams.length + matchedNumParams.length + matchedStrParams.length;
+        const matchedBoolParams = recordToArray(room.boolParamNames).filter(
+            ({ value }) => value.name === parameter
+        );
+        const matchedNumParams = recordToArray(room.numParamNames).filter(
+            ({ value }) => value.name === parameter
+        );
+        const matchedStrParams = recordToArray(room.strParamNames).filter(
+            ({ value }) => value.name === parameter
+        );
+        const totalLength =
+            matchedBoolParams.length + matchedNumParams.length + matchedStrParams.length;
         if (totalLength >= 2) {
-            return Result.error(`"${parameter}"という名前のパラメーターが複数存在します。パラメーターの名前を変えることを検討してください`);
+            return Result.error(
+                `"${parameter}"という名前のパラメーターが複数存在します。パラメーターの名前を変えることを検討してください`
+            );
         }
 
         if (matchedBoolParams.length !== 0) {
@@ -112,7 +138,7 @@ type AnalyzeResult = {
         // nullの場合は、成功判定のないコマンドを表す
         isSuccess: boolean | null;
     } | null;
-}
+};
 
 export const analyze = async (params: {
     text: string;
@@ -143,10 +169,13 @@ export const analyze = async (params: {
     const rolled = await roll(message, params.gameType);
     return Result.ok({
         message,
-        diceResult: rolled == null ? null : {
-            result: rolled.text,
-            isSecret: rolled.secret,
-            isSuccess: (rolled.success === rolled.failure) ? null : rolled.success,
-        },
+        diceResult:
+            rolled == null
+                ? null
+                : {
+                      result: rolled.text,
+                      isSecret: rolled.secret,
+                      isSuccess: rolled.success === rolled.failure ? null : rolled.success,
+                  },
     });
 };

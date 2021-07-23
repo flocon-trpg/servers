@@ -1,4 +1,7 @@
-import { DicePieceValueLog as DicePieceValueLog$MikroORM, NumberPieceValueLog as NumberPieceValueLog$MikroORM } from './mikro-orm';
+import {
+    DicePieceValueLog as DicePieceValueLog$MikroORM,
+    NumberPieceValueLog as NumberPieceValueLog$MikroORM,
+} from './mikro-orm';
 import { PieceValueLog, PieceValueLogType } from './graphql';
 import { decodeDicePieceValue, decodeNumberPieceValue } from '@kizahasi/flocon-core';
 import { PieceValueLogType as PieceValueLogTypeEnum } from '../../../enums/PieceValueLogType';

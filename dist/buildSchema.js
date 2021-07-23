@@ -13,10 +13,10 @@ const resolvers = [RoomResolver_1.RoomResolver, MainResolver_1.MainResolver];
 const optionBase = {
     resolvers,
 };
-const emitSchemaFileOptions = ({
+const emitSchemaFileOptions = {
     path: path_1.default.resolve(process.cwd(), '../graphql/generated/schema.gql'),
-    commentDescriptions: true
-});
+    commentDescriptions: true,
+};
 const buildSchema = async (options) => {
     registerEnumTypes_1.default();
     let emitSchemaFile = undefined;

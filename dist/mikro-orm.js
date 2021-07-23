@@ -16,12 +16,12 @@ const entities = [
     mikro_orm_2.RoomSe,
     mikro_orm_3.User,
 ];
-const createSQLite = async ({ dbName, debug }) => {
+const createSQLite = async ({ dbName, debug, }) => {
     return await core_1.MikroORM.init({
         entities,
         dbName,
         migrations: {
-            path: './migrations/sqlite'
+            path: './migrations/sqlite',
         },
         type: 'sqlite',
         forceUndefined: true,
@@ -29,12 +29,12 @@ const createSQLite = async ({ dbName, debug }) => {
     });
 };
 exports.createSQLite = createSQLite;
-const createPostgreSQL = async ({ dbName, clientUrl, debug }) => {
+const createPostgreSQL = async ({ dbName, clientUrl, debug, }) => {
     return await core_1.MikroORM.init({
         entities,
         dbName,
         migrations: {
-            path: './migrations/postgresql'
+            path: './migrations/postgresql',
         },
         type: 'postgresql',
         debug,

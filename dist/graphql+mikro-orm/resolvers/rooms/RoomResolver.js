@@ -107,7 +107,7 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
                         name: create.name,
                         role: create.role,
                         imagePieceValues: {},
-                    }
+                    },
                 },
             };
         }
@@ -120,7 +120,7 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
                     $version: 1,
                     role: update.role,
                     name: update.name,
-                }
+                },
             };
         }
     }
@@ -134,9 +134,14 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
         $version: 1,
         participants: {
             [myUserUid]: participantOperation,
-        }
+        },
     };
-    const transformed = flocon_core_1.serverTransform({ type: Types_1.server })({ prevState: roomState, currentState: roomState, clientOperation: roomUpOperation, serverOperation: undefined });
+    const transformed = flocon_core_1.serverTransform({ type: Types_1.server })({
+        prevState: roomState,
+        currentState: roomState,
+        clientOperation: roomUpOperation,
+        serverOperation: undefined,
+    });
     if (transformed.isError) {
         return {
             result: { failureType: JoinRoomFailureType_1.JoinRoomFailureType.TransformError },
@@ -150,7 +155,12 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
             payload: undefined,
         };
     }
-    const nextRoomState = global_2.GlobalRoom.Global.applyToEntity({ em, target: room, prevState: roomState, operation: transformedValue });
+    const nextRoomState = global_2.GlobalRoom.Global.applyToEntity({
+        em,
+        target: room,
+        prevState: roomState,
+        operation: transformedValue,
+    });
     await em.flush();
     const generateOperation = (deliverTo) => {
         return {
@@ -183,7 +193,12 @@ const joinRoomCore = async ({ args, context, globalEntryPhrase, strategy, }) => 
     }
     const queue = async () => {
         const em = context.createEm();
-        const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase, });
+        const entryUser = await helpers_1.getUserIfEntry({
+            userUid: decodedIdToken.uid,
+            baasType: decodedIdToken.type,
+            em,
+            globalEntryPhrase,
+        });
         await em.flush();
         if (entryUser == null) {
             return {
@@ -193,7 +208,11 @@ const joinRoomCore = async ({ args, context, globalEntryPhrase, strategy, }) => 
                 payload: undefined,
             };
         }
-        const findResult = await helpers_1.findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId: args.id });
+        const findResult = await helpers_1.findRoomAndMyParticipant({
+            em,
+            userUid: decodedIdToken.uid,
+            roomId: args.id,
+        });
         if (findResult == null) {
             return {
                 result: {
@@ -242,7 +261,7 @@ const joinRoomCore = async ({ args, context, globalEntryPhrase, strategy, }) => 
                     },
                     update: {
                         role: { newValue: strategyResult },
-                    }
+                    },
                 });
             }
         }
@@ -261,7 +280,12 @@ const promoteMeCore = async ({ roomId, context, globalEntryPhrase, strategy, }) 
     const queue = async () => {
         var _a;
         const em = context.createEm();
-        const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase, });
+        const entryUser = await helpers_1.getUserIfEntry({
+            userUid: decodedIdToken.uid,
+            baasType: decodedIdToken.type,
+            em,
+            globalEntryPhrase,
+        });
         await em.flush();
         if (entryUser == null) {
             return {
@@ -271,7 +295,11 @@ const promoteMeCore = async ({ roomId, context, globalEntryPhrase, strategy, }) 
                 payload: undefined,
             };
         }
-        const findResult = await helpers_1.findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId });
+        const findResult = await helpers_1.findRoomAndMyParticipant({
+            em,
+            userUid: decodedIdToken.uid,
+            roomId,
+        });
         if (findResult == null) {
             return {
                 result: {
@@ -328,7 +356,7 @@ const promoteMeCore = async ({ roomId, context, globalEntryPhrase, strategy, }) 
                         myUserUid: decodedIdToken.uid,
                         update: {
                             role: { newValue: strategyResult },
-                        }
+                        },
                     }))) === null || _a === void 0 ? void 0 : _a.payload,
                 };
             }
@@ -371,7 +399,15 @@ const analyzeTextAndSetToEntity = async (params) => {
     if (analyzed.isError) {
         return analyzed;
     }
-    const targetEntity = params.type === 'RoomPubMsg' ? new mikro_orm_1.RoomPubMsg({ initTextSource: params.textSource, initText: analyzed.value.message }) : new mikro_orm_1.RoomPrvMsg({ initTextSource: params.textSource, initText: analyzed.value.message });
+    const targetEntity = params.type === 'RoomPubMsg'
+        ? new mikro_orm_1.RoomPubMsg({
+            initTextSource: params.textSource,
+            initText: analyzed.value.message,
+        })
+        : new mikro_orm_1.RoomPrvMsg({
+            initTextSource: params.textSource,
+            initText: analyzed.value.message,
+        });
     targetEntity.createdBy = core_1.Reference.create(params.createdBy);
     if (analyzed.value.diceResult != null) {
         if (analyzed.value.diceResult.isSecret) {
@@ -388,21 +424,27 @@ const analyzeTextAndSetToEntity = async (params) => {
     return result_1.Result.ok(targetEntity);
 };
 const toCharacterValueForMessage = (message) => {
-    if (message.charaStateId == null || message.charaName == null || message.charaIsPrivate == null) {
+    if (message.charaStateId == null ||
+        message.charaName == null ||
+        message.charaIsPrivate == null) {
         return undefined;
     }
     return {
         stateId: message.charaStateId,
         isPrivate: message.charaIsPrivate,
         name: message.charaName,
-        image: message.charaImagePath == null || message.charaImageSourceType == null ? undefined : {
-            path: message.charaImagePath,
-            sourceType: message.charaImageSourceType,
-        },
-        tachieImage: message.charaTachieImagePath == null || message.charaTachieImageSourceType == null ? undefined : {
-            path: message.charaTachieImagePath,
-            sourceType: message.charaTachieImageSourceType,
-        },
+        image: message.charaImagePath == null || message.charaImageSourceType == null
+            ? undefined
+            : {
+                path: message.charaImagePath,
+                sourceType: message.charaImageSourceType,
+            },
+        tachieImage: message.charaTachieImagePath == null || message.charaTachieImageSourceType == null
+            ? undefined
+            : {
+                path: message.charaTachieImagePath,
+                sourceType: message.charaTachieImageSourceType,
+            },
     };
 };
 const createUpdatedText = (entity) => {
@@ -427,10 +469,12 @@ const createRoomPublicMessage = ({ msg, channelKey, }) => {
         initTextSource: (_a = msg.initTextSource) !== null && _a !== void 0 ? _a : msg.initText,
         updatedText: createUpdatedText(msg),
         textColor: (_b = msg.textColor) !== null && _b !== void 0 ? _b : undefined,
-        commandResult: msg.commandResult == null ? undefined : {
-            text: msg.commandResult,
-            isSuccess: msg.commandIsSuccess,
-        },
+        commandResult: msg.commandResult == null
+            ? undefined
+            : {
+                text: msg.commandResult,
+                isSuccess: msg.commandIsSuccess,
+            },
         altTextToSecret: (_c = msg.altTextToSecret) !== null && _c !== void 0 ? _c : undefined,
         isSecret: msg.isSecret,
         createdBy: (_d = msg.createdBy) === null || _d === void 0 ? void 0 : _d.userUid,
@@ -460,10 +504,12 @@ const createRoomPrivateMessage = async ({ msg, myUserUid, visibleTo: visibleToCo
         initTextSource: (_c = msg.initTextSource) !== null && _c !== void 0 ? _c : msg.initText,
         updatedText: createUpdatedText(msg),
         textColor: (_d = msg.textColor) !== null && _d !== void 0 ? _d : undefined,
-        commandResult: msg.commandResult == null ? undefined : {
-            text: msg.commandResult,
-            isSuccess: msg.commandIsSuccess,
-        },
+        commandResult: msg.commandResult == null
+            ? undefined
+            : {
+                text: msg.commandResult,
+                isSuccess: msg.commandIsSuccess,
+            },
         altTextToSecret: (_e = msg.altTextToSecret) !== null && _e !== void 0 ? _e : undefined,
         isSecret: msg.isSecret,
     };
@@ -480,14 +526,19 @@ const publishRoomEvent = async (pubSub, payload) => {
     await pubSub.publish(Topics_1.ROOM_EVENT, payload);
 };
 let RoomResolver = class RoomResolver {
-    async getRoomsListCore({ context, globalEntryPhrase }) {
+    async getRoomsListCore({ context, globalEntryPhrase, }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
             return { failureType: GetRoomsListFailureType_1.GetRoomsListFailureType.NotSignIn };
         }
         const queue = async () => {
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ em, userUid: decodedIdToken.uid, baasType: decodedIdToken.type, globalEntryPhrase });
+            const entry = await helpers_1.checkEntry({
+                em,
+                userUid: decodedIdToken.uid,
+                baasType: decodedIdToken.type,
+                globalEntryPhrase,
+            });
             await em.flush();
             if (!entry) {
                 return {
@@ -507,16 +558,24 @@ let RoomResolver = class RoomResolver {
         return result.value;
     }
     async getRoomsList(context) {
-        return this.getRoomsListCore({ context, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
+        return this.getRoomsListCore({
+            context,
+            globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
+        });
     }
-    async requiresPhraseToJoinAsPlayerCore({ roomId, context, globalEntryPhrase }) {
+    async requiresPhraseToJoinAsPlayerCore({ roomId, context, globalEntryPhrase, }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
             return { failureType: RequiresPhraseFailureType_1.RequiresPhraseFailureType.NotSignIn };
         }
         const queue = async () => {
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ em, userUid: decodedIdToken.uid, baasType: decodedIdToken.type, globalEntryPhrase });
+            const entry = await helpers_1.checkEntry({
+                em,
+                userUid: decodedIdToken.uid,
+                baasType: decodedIdToken.type,
+                globalEntryPhrase,
+            });
             await em.flush();
             if (!entry) {
                 return {
@@ -546,14 +605,19 @@ let RoomResolver = class RoomResolver {
             globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
         });
     }
-    async createRoomCore({ input, context, globalEntryPhrase }) {
+    async createRoomCore({ input, context, globalEntryPhrase, }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
             return { failureType: CreateRoomFailureType_1.CreateRoomFailureType.NotSignIn };
         }
         const queue = async () => {
             const em = context.createEm();
-            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase, });
+            const entryUser = await helpers_1.getUserIfEntry({
+                userUid: decodedIdToken.uid,
+                baasType: decodedIdToken.type,
+                em,
+                globalEntryPhrase,
+            });
             await em.flush();
             if (entryUser == null) {
                 return {
@@ -571,7 +635,7 @@ let RoomResolver = class RoomResolver {
                             role: flocon_core_1.Master,
                             name: input.participantName,
                             imagePieceValues: {},
-                        }
+                        },
                     },
                     activeBoardKey: null,
                     publicChannel1Name: 'メイン',
@@ -591,7 +655,7 @@ let RoomResolver = class RoomResolver {
                     numParamNames: {},
                     strParamNames: {},
                     memos: {},
-                }
+                },
             });
             newRoom.joinAsPlayerPhrase = input.joinAsPlayerPhrase;
             newRoom.joinAsSpectatorPhrase = input.joinAsSpectatorPhrase;
@@ -626,7 +690,7 @@ let RoomResolver = class RoomResolver {
             });
             for (const msg of await ch.roomPubMsgs.loadItems()) {
                 const createdBy = (_a = msg.createdBy) === null || _a === void 0 ? void 0 : _a.userUid;
-                if (mode === 'default' && msg.isSecret && (createdBy !== decodedIdToken.uid)) {
+                if (mode === 'default' && msg.isSecret && createdBy !== decodedIdToken.uid) {
                     continue;
                 }
                 publicMessages.push(createRoomPublicMessage({ msg, channelKey: ch.key }));
@@ -635,7 +699,7 @@ let RoomResolver = class RoomResolver {
         const privateMessages = [];
         for (const msg of await room.roomPrvMsgs.loadItems()) {
             const createdBy = (_b = msg.createdBy) === null || _b === void 0 ? void 0 : _b.userUid;
-            if (mode === 'default' && msg.isSecret && (createdBy !== decodedIdToken.uid)) {
+            if (mode === 'default' && msg.isSecret && createdBy !== decodedIdToken.uid) {
                 continue;
             }
             const graphQLValue = await createRoomPrivateMessage({
@@ -670,7 +734,6 @@ let RoomResolver = class RoomResolver {
             };
             soundEffects.push(graphQLValue);
         }
-        ;
         return {
             __tstype: graphql_2.RoomMessagesType,
             publicMessages,
@@ -680,14 +743,22 @@ let RoomResolver = class RoomResolver {
             soundEffects,
         };
     }
-    async getMessagesCore({ args, context }) {
+    async getMessagesCore({ args, context, }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
-            return { __tstype: graphql_2.GetRoomMessagesFailureResultType, failureType: GetRoomMessagesFailureType_1.GetRoomMessagesFailureType.NotSignIn };
+            return {
+                __tstype: graphql_2.GetRoomMessagesFailureResultType,
+                failureType: GetRoomMessagesFailureType_1.GetRoomMessagesFailureType.NotSignIn,
+            };
         }
         const queue = async () => {
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
+            const entry = await helpers_1.checkEntry({
+                userUid: decodedIdToken.uid,
+                baasType: decodedIdToken.type,
+                em,
+                globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
+            });
             await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
@@ -695,7 +766,11 @@ let RoomResolver = class RoomResolver {
                     failureType: GetRoomMessagesFailureType_1.GetRoomMessagesFailureType.NotEntry,
                 });
             }
-            const findResult = await helpers_1.findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId: args.roomId });
+            const findResult = await helpers_1.findRoomAndMyParticipant({
+                em,
+                userUid: decodedIdToken.uid,
+                roomId: args.roomId,
+            });
             if (findResult == null) {
                 return result_1.Result.ok({
                     __tstype: graphql_2.GetRoomMessagesFailureResultType,
@@ -724,36 +799,45 @@ let RoomResolver = class RoomResolver {
     getMessages(args, context) {
         return this.getMessagesCore({ args, context });
     }
-    async getLogCore({ args, context }) {
+    async getLogCore({ args, context, }) {
         console.time('logCore');
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
             return {
                 result: {
                     __tstype: graphql_2.GetRoomLogFailureResultType,
-                    failureType: GetRoomLogFailureType_1.GetRoomLogFailureType.NotSignIn
-                }
+                    failureType: GetRoomLogFailureType_1.GetRoomLogFailureType.NotSignIn,
+                },
             };
         }
         const queue = async () => {
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
+            const entry = await helpers_1.checkEntry({
+                userUid: decodedIdToken.uid,
+                baasType: decodedIdToken.type,
+                em,
+                globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
+            });
             await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
                     result: {
                         __tstype: graphql_2.GetRoomLogFailureResultType,
                         failureType: GetRoomLogFailureType_1.GetRoomLogFailureType.NotEntry,
-                    }
+                    },
                 });
             }
-            const findResult = await helpers_1.findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId: args.roomId });
+            const findResult = await helpers_1.findRoomAndMyParticipant({
+                em,
+                userUid: decodedIdToken.uid,
+                roomId: args.roomId,
+            });
             if (findResult == null) {
                 return result_1.Result.ok({
                     result: {
                         __tstype: graphql_2.GetRoomLogFailureResultType,
                         failureType: GetRoomLogFailureType_1.GetRoomLogFailureType.RoomNotFound,
-                    }
+                    },
                 });
             }
             const { room, me } = findResult;
@@ -762,7 +846,7 @@ let RoomResolver = class RoomResolver {
                     result: {
                         __tstype: graphql_2.GetRoomLogFailureResultType,
                         failureType: GetRoomLogFailureType_1.GetRoomLogFailureType.NotParticipant,
-                    }
+                    },
                 });
             }
             if (me.role === flocon_core_1.Spectator) {
@@ -770,22 +854,29 @@ let RoomResolver = class RoomResolver {
                     result: {
                         __tstype: graphql_2.GetRoomLogFailureResultType,
                         failureType: GetRoomLogFailureType_1.GetRoomLogFailureType.NotAuthorized,
-                    }
+                    },
                 });
             }
             const messages = await this.getRoomMessagesFromDb(room, decodedIdToken, 'log');
             em.clear();
-            const systemMessageEntity = await roomMessage_1.writeSystemMessage({ em, text: `${me.name}(${decodedIdToken.uid}) が全てのログを出力しました。`, room: room });
+            const systemMessageEntity = await roomMessage_1.writeSystemMessage({
+                em,
+                text: `${me.name}(${decodedIdToken.uid}) が全てのログを出力しました。`,
+                room: room,
+            });
             await em.flush();
             return result_1.Result.ok({
                 result: messages,
                 payload: {
                     type: 'messageUpdatePayload',
                     roomId: room.id,
-                    value: createRoomPublicMessage({ msg: systemMessageEntity, channelKey: util_1.$system }),
+                    value: createRoomPublicMessage({
+                        msg: systemMessageEntity,
+                        channelKey: util_1.$system,
+                    }),
                     createdBy: undefined,
                     visibleTo: undefined,
-                }
+                },
             });
         };
         const result = await context.promiseQueue.next(queue);
@@ -804,14 +895,22 @@ let RoomResolver = class RoomResolver {
         }
         return coreResult.result;
     }
-    async getRoomConnectionsCore({ roomId, context }) {
+    async getRoomConnectionsCore({ roomId, context, }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
-            return { __tstype: object_args_input_1.GetRoomConnectionFailureResultType, failureType: GetRoomConnectionFailureType_1.GetRoomConnectionFailureType.NotSignIn };
+            return {
+                __tstype: object_args_input_1.GetRoomConnectionFailureResultType,
+                failureType: GetRoomConnectionFailureType_1.GetRoomConnectionFailureType.NotSignIn,
+            };
         }
         const queue = async () => {
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
+            const entry = await helpers_1.checkEntry({
+                userUid: decodedIdToken.uid,
+                baasType: decodedIdToken.type,
+                em,
+                globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
+            });
             await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
@@ -819,7 +918,11 @@ let RoomResolver = class RoomResolver {
                     failureType: GetRoomConnectionFailureType_1.GetRoomConnectionFailureType.NotEntry,
                 });
             }
-            const findResult = await helpers_1.findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId });
+            const findResult = await helpers_1.findRoomAndMyParticipant({
+                em,
+                userUid: decodedIdToken.uid,
+                roomId,
+            });
             if (findResult == null) {
                 return result_1.Result.ok({
                     __tstype: object_args_input_1.GetRoomConnectionFailureResultType,
@@ -835,7 +938,9 @@ let RoomResolver = class RoomResolver {
             }
             return result_1.Result.ok({
                 __tstype: object_args_input_1.GetRoomConnectionSuccessResultType,
-                connectedUserUids: [...context.connectionManager.listRoomConnections({ roomId })].filter(([key, value]) => value > 0).map(([key]) => key),
+                connectedUserUids: [...context.connectionManager.listRoomConnections({ roomId })]
+                    .filter(([key, value]) => value > 0)
+                    .map(([key]) => key),
                 fetchedAt: new Date().getTime(),
             });
         };
@@ -852,36 +957,45 @@ let RoomResolver = class RoomResolver {
         const coreResult = await this.getRoomConnectionsCore({ roomId, context });
         return coreResult;
     }
-    async writePublicMessageCore({ args, context, channelKey }) {
+    async writePublicMessageCore({ args, context, channelKey, }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
             return {
                 result: {
                     __tstype: graphql_2.WritePublicRoomMessageFailureResultType,
                     failureType: WritePublicRoomMessageFailureType_1.WritePublicRoomMessageFailureType.NotSignIn,
-                }
+                },
             };
         }
         const queue = async () => {
             var _a, _b, _c, _d;
             const em = context.createEm();
-            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
+            const entryUser = await helpers_1.getUserIfEntry({
+                userUid: decodedIdToken.uid,
+                baasType: decodedIdToken.type,
+                em,
+                globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
+            });
             await em.flush();
             if (entryUser == null) {
                 return result_1.Result.ok({
                     result: {
                         __tstype: graphql_2.WritePublicRoomMessageFailureResultType,
                         failureType: WritePublicRoomMessageFailureType_1.WritePublicRoomMessageFailureType.NotEntry,
-                    }
+                    },
                 });
             }
-            const findResult = await helpers_1.findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId: args.roomId });
+            const findResult = await helpers_1.findRoomAndMyParticipant({
+                em,
+                userUid: decodedIdToken.uid,
+                roomId: args.roomId,
+            });
             if (findResult == null) {
                 return result_1.Result.ok({
                     result: {
                         __tstype: graphql_2.WritePublicRoomMessageFailureResultType,
                         failureType: WritePublicRoomMessageFailureType_1.WritePublicRoomMessageFailureType.RoomNotFound,
-                    }
+                    },
                 });
             }
             const { room, me, roomState } = findResult;
@@ -890,7 +1004,7 @@ let RoomResolver = class RoomResolver {
                     result: {
                         __tstype: graphql_2.WritePublicRoomMessageFailureResultType,
                         failureType: WritePublicRoomMessageFailureType_1.WritePublicRoomMessageFailureType.NotParticipant,
-                    }
+                    },
                 });
             }
             const channelKeyFailureType = checkChannelKey(channelKey, me.role === flocon_core_1.Spectator);
@@ -899,12 +1013,15 @@ let RoomResolver = class RoomResolver {
                     result: {
                         __tstype: graphql_2.WritePublicRoomMessageFailureResultType,
                         failureType: WritePublicRoomMessageFailureType_1.WritePublicRoomMessageFailureType.NotAuthorized,
-                    }
+                    },
                 });
             }
             let chara = undefined;
             if (args.characterStateId != null) {
-                chara = util_1.dualKeyRecordFind(roomState.characters, { first: decodedIdToken.uid, second: args.characterStateId });
+                chara = util_1.dualKeyRecordFind(roomState.characters, {
+                    first: decodedIdToken.uid,
+                    second: args.characterStateId,
+                });
             }
             const entityResult = await analyzeTextAndSetToEntity({
                 type: 'RoomPubMsg',
@@ -957,9 +1074,13 @@ let RoomResolver = class RoomResolver {
         return result.value.value;
     }
     async createRoom(input, context) {
-        return this.createRoomCore({ input, context, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
+        return this.createRoomCore({
+            input,
+            context,
+            globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
+        });
     }
-    async deleteRoomCore({ args, context, globalEntryPhrase }) {
+    async deleteRoomCore({ args, context, globalEntryPhrase, }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
             return {
@@ -969,7 +1090,12 @@ let RoomResolver = class RoomResolver {
         }
         const queue = async () => {
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase, });
+            const entry = await helpers_1.checkEntry({
+                userUid: decodedIdToken.uid,
+                baasType: decodedIdToken.type,
+                em,
+                globalEntryPhrase,
+            });
             await em.flush();
             if (!entry) {
                 return {
@@ -1009,13 +1135,17 @@ let RoomResolver = class RoomResolver {
         return result.value;
     }
     async deleteRoom(args, context, pubSub) {
-        const { result, payload } = await this.deleteRoomCore({ args, context, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
+        const { result, payload } = await this.deleteRoomCore({
+            args,
+            context,
+            globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
+        });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
         }
         return result;
     }
-    async joinRoomAsPlayerCore({ args, context, globalEntryPhrase }) {
+    async joinRoomAsPlayerCore({ args, context, globalEntryPhrase, }) {
         return joinRoomCore({
             args,
             context,
@@ -1033,17 +1163,21 @@ let RoomResolver = class RoomResolver {
                     return JoinRoomFailureType_1.JoinRoomFailureType.WrongPhrase;
                 }
                 return flocon_core_1.Player;
-            }
+            },
         });
     }
     async joinRoomAsPlayer(args, context, pubSub) {
-        const { result, payload } = await this.joinRoomAsPlayerCore({ args, context, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
+        const { result, payload } = await this.joinRoomAsPlayerCore({
+            args,
+            context,
+            globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
+        });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
         }
         return result;
     }
-    async joinRoomAsSpectatorCore({ args, context, globalEntryPhrase }) {
+    async joinRoomAsSpectatorCore({ args, context, globalEntryPhrase, }) {
         return joinRoomCore({
             args,
             context,
@@ -1057,21 +1191,26 @@ let RoomResolver = class RoomResolver {
                             return JoinRoomFailureType_1.JoinRoomFailureType.AlreadyParticipant;
                     }
                 }
-                if (room.joinAsSpectatorPhrase != null && room.joinAsSpectatorPhrase !== args.phrase) {
+                if (room.joinAsSpectatorPhrase != null &&
+                    room.joinAsSpectatorPhrase !== args.phrase) {
                     return JoinRoomFailureType_1.JoinRoomFailureType.WrongPhrase;
                 }
                 return flocon_core_1.Spectator;
-            }
+            },
         });
     }
     async joinRoomAsSpectator(args, context, pubSub) {
-        const { result, payload } = await this.joinRoomAsSpectatorCore({ args, context, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
+        const { result, payload } = await this.joinRoomAsSpectatorCore({
+            args,
+            context,
+            globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
+        });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
         }
         return result;
     }
-    async promoteToPlayerCore({ args, context, globalEntryPhrase }) {
+    async promoteToPlayerCore({ args, context, globalEntryPhrase, }) {
         return promoteMeCore(Object.assign(Object.assign({}, args), { context,
             globalEntryPhrase, strategy: ({ me, room }) => {
                 switch (me.role) {
@@ -1079,7 +1218,8 @@ let RoomResolver = class RoomResolver {
                     case flocon_core_1.Player:
                         return PromoteFailureType_1.PromoteFailureType.NoNeedToPromote;
                     case flocon_core_1.Spectator: {
-                        if (room.joinAsPlayerPhrase != null && room.joinAsPlayerPhrase !== args.phrase) {
+                        if (room.joinAsPlayerPhrase != null &&
+                            room.joinAsPlayerPhrase !== args.phrase) {
                             return PromoteFailureType_1.PromoteFailureType.WrongPhrase;
                         }
                         return flocon_core_1.Player;
@@ -1091,20 +1231,32 @@ let RoomResolver = class RoomResolver {
             } }));
     }
     async promoteToPlayer(args, context, pubSub) {
-        const { result, payload } = await this.promoteToPlayerCore({ args, context, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
+        const { result, payload } = await this.promoteToPlayerCore({
+            args,
+            context,
+            globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
+        });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
         }
         return result;
     }
-    async changeParticipantNameCore({ args, context, globalEntryPhrase }) {
+    async changeParticipantNameCore({ args, context, globalEntryPhrase, }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
-            return { result: { failureType: ChangeParticipantNameFailureType_1.ChangeParticipantNameFailureType.NotSignIn }, payload: undefined };
+            return {
+                result: { failureType: ChangeParticipantNameFailureType_1.ChangeParticipantNameFailureType.NotSignIn },
+                payload: undefined,
+            };
         }
         const queue = async () => {
             const em = context.createEm();
-            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase, });
+            const entryUser = await helpers_1.getUserIfEntry({
+                userUid: decodedIdToken.uid,
+                baasType: decodedIdToken.type,
+                em,
+                globalEntryPhrase,
+            });
             await em.flush();
             if (entryUser == null) {
                 return {
@@ -1114,7 +1266,11 @@ let RoomResolver = class RoomResolver {
                     payload: undefined,
                 };
             }
-            const findResult = await helpers_1.findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId: args.roomId });
+            const findResult = await helpers_1.findRoomAndMyParticipant({
+                em,
+                userUid: decodedIdToken.uid,
+                roomId: args.roomId,
+            });
             if (findResult == null) {
                 return {
                     result: {
@@ -1156,27 +1312,40 @@ let RoomResolver = class RoomResolver {
         return result.value;
     }
     async changeParticipantName(args, context, pubSub) {
-        const { result, payload } = await this.changeParticipantNameCore({ args, context, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
+        const { result, payload } = await this.changeParticipantNameCore({
+            args,
+            context,
+            globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
+        });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
         }
         return result;
     }
-    async getRoomCore({ args, context, globalEntryPhrase }) {
+    async getRoomCore({ args, context, globalEntryPhrase, }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
             return { failureType: GetRoomFailureType_1.GetRoomFailureType.NotSignIn };
         }
         const queue = async () => {
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase, });
+            const entry = await helpers_1.checkEntry({
+                userUid: decodedIdToken.uid,
+                baasType: decodedIdToken.type,
+                em,
+                globalEntryPhrase,
+            });
             await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
                     failureType: GetRoomFailureType_1.GetRoomFailureType.NotEntry,
                 });
             }
-            const findResult = await helpers_1.findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId: args.id });
+            const findResult = await helpers_1.findRoomAndMyParticipant({
+                em,
+                userUid: decodedIdToken.uid,
+                roomId: args.id,
+            });
             if (findResult == null) {
                 return result_1.Result.ok({
                     failureType: GetRoomFailureType_1.GetRoomFailureType.NotFound,
@@ -1191,7 +1360,10 @@ let RoomResolver = class RoomResolver {
             const roomState = global_2.GlobalRoom.MikroORM.ToGlobal.state(room);
             return result_1.Result.ok({
                 role: ParticipantRole_1.ParticipantRole.ofString(me.role),
-                room: Object.assign(Object.assign({}, global_2.GlobalRoom.Global.ToGraphQL.state({ source: roomState, requestedBy: { type: Types_1.client, userUid: decodedIdToken.uid } })), { revision: room.revision, createdBy: room.createdBy }),
+                room: Object.assign(Object.assign({}, global_2.GlobalRoom.Global.ToGraphQL.state({
+                    source: roomState,
+                    requestedBy: { type: Types_1.client, userUid: decodedIdToken.uid },
+                })), { revision: room.revision, createdBy: room.createdBy }),
             });
         };
         const result = await context.promiseQueue.next(queue);
@@ -1204,9 +1376,13 @@ let RoomResolver = class RoomResolver {
         return result.value.value;
     }
     async getRoom(args, context) {
-        return this.getRoomCore({ args, context, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
+        return this.getRoomCore({
+            args,
+            context,
+            globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
+        });
     }
-    async leaveRoomCore({ id, context }) {
+    async leaveRoomCore({ id, context, }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
             return {
@@ -1216,7 +1392,11 @@ let RoomResolver = class RoomResolver {
         }
         const queue = async () => {
             const em = context.createEm();
-            const findResult = await helpers_1.findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId: id });
+            const findResult = await helpers_1.findRoomAndMyParticipant({
+                em,
+                userUid: decodedIdToken.uid,
+                roomId: id,
+            });
             if (findResult == null) {
                 return result_1.Result.ok({
                     result: { failureType: LeaveRoomFailureType_1.LeaveRoomFailureType.NotFound },
@@ -1261,12 +1441,12 @@ let RoomResolver = class RoomResolver {
         }
         return result;
     }
-    async operateCore({ args, context, globalEntryPhrase }) {
+    async operateCore({ args, context, globalEntryPhrase, }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
             return {
                 type: 'failure',
-                result: { failureType: OperateRoomFailureType_1.OperateRoomFailureType.NotSignIn }
+                result: { failureType: OperateRoomFailureType_1.OperateRoomFailureType.NotSignIn },
             };
         }
         const queue = async () => {
@@ -1282,14 +1462,18 @@ let RoomResolver = class RoomResolver {
             if (!entry) {
                 return result_1.Result.ok({
                     type: 'failure',
-                    result: { failureType: OperateRoomFailureType_1.OperateRoomFailureType.NotEntry }
+                    result: { failureType: OperateRoomFailureType_1.OperateRoomFailureType.NotEntry },
                 });
             }
-            const findResult = await helpers_1.findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId: args.id });
+            const findResult = await helpers_1.findRoomAndMyParticipant({
+                em,
+                userUid: decodedIdToken.uid,
+                roomId: args.id,
+            });
             if (findResult == null) {
                 return result_1.Result.ok({
                     type: 'failure',
-                    result: { failureType: OperateRoomFailureType_1.OperateRoomFailureType.NotFound }
+                    result: { failureType: OperateRoomFailureType_1.OperateRoomFailureType.NotFound },
                 });
             }
             const { room, me, roomState } = findResult;
@@ -1297,7 +1481,7 @@ let RoomResolver = class RoomResolver {
             if (me === undefined) {
                 return result_1.Result.ok({
                     type: 'nonJoined',
-                    result: { roomAsListItem: global_1.stateToGraphQL({ roomEntity: room }) }
+                    result: { roomAsListItem: global_1.stateToGraphQL({ roomEntity: room }) },
                 });
             }
             const clientOperation = global_2.GlobalRoom.GraphQL.ToGlobal.upOperation(args.operation);
@@ -1314,7 +1498,7 @@ let RoomResolver = class RoomResolver {
             if (downOperation.value !== undefined) {
                 const restoredRoom = flocon_core_1.restore({
                     nextState: roomState,
-                    downOperation: downOperation.value
+                    downOperation: downOperation.value,
                 });
                 if (restoredRoom.isError) {
                     return restoredRoom;
@@ -1399,7 +1583,9 @@ let RoomResolver = class RoomResolver {
                             stateId: dicePieceKey,
                             value: {
                                 $version: 1,
-                                type: dicePiece.replace.newValue == null ? flocon_core_1.deleteType : flocon_core_1.createType,
+                                type: dicePiece.replace.newValue == null
+                                    ? flocon_core_1.deleteType
+                                    : flocon_core_1.createType,
                             },
                             room,
                         }));
@@ -1421,7 +1607,9 @@ let RoomResolver = class RoomResolver {
                             stateId: numberPieceKey,
                             value: {
                                 $version: 1,
-                                type: numberPiece.replace.newValue == null ? flocon_core_1.deleteType : flocon_core_1.createType,
+                                type: numberPiece.replace.newValue == null
+                                    ? flocon_core_1.deleteType
+                                    : flocon_core_1.createType,
                             },
                             room,
                         }));
@@ -1442,7 +1630,12 @@ let RoomResolver = class RoomResolver {
             for (const log of numberPieceValueLogs) {
                 em.persist(log);
             }
-            const nextRoomState = global_2.GlobalRoom.Global.applyToEntity({ em, target: room, prevState: roomState, operation });
+            const nextRoomState = global_2.GlobalRoom.Global.applyToEntity({
+                em,
+                target: room,
+                prevState: roomState,
+                operation,
+            });
             await em.flush();
             const generateOperation = (deliverTo) => {
                 return {
@@ -1482,10 +1675,10 @@ let RoomResolver = class RoomResolver {
                         createdBy: undefined,
                         visibleTo: undefined,
                         value: global_3.NumberPieceValueLog.MikroORM.ToGraphQL.state(log),
-                    }))
+                    })),
                 ],
                 result: {
-                    operation: generateOperation(decodedIdToken.uid)
+                    operation: generateOperation(decodedIdToken.uid),
                 },
             };
             return result_1.Result.ok(result);
@@ -1500,7 +1693,11 @@ let RoomResolver = class RoomResolver {
         return result.value.value;
     }
     async operate(args, context, pubSub) {
-        const operateResult = await this.operateCore({ args, context, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
+        const operateResult = await this.operateCore({
+            args,
+            context,
+            globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
+        });
         if (operateResult.type === 'success') {
             await publishRoomEvent(pubSub, operateResult.roomOperationPayload);
             for (const messageUpdate of operateResult.messageUpdatePayload) {
@@ -1510,13 +1707,17 @@ let RoomResolver = class RoomResolver {
         return operateResult.result;
     }
     async writePublicMessage(args, context, pubSub) {
-        const coreResult = await this.writePublicMessageCore({ args, context, channelKey: args.channelKey });
+        const coreResult = await this.writePublicMessageCore({
+            args,
+            context,
+            channelKey: args.channelKey,
+        });
         if (coreResult.payload != null) {
             await publishRoomEvent(pubSub, coreResult.payload);
         }
         return coreResult.result;
     }
-    async writePrivateMessageCore({ args, context }) {
+    async writePrivateMessageCore({ args, context, }) {
         if (args.visibleTo.length >= 1000) {
             throw new Error('visibleTo.length is too large');
         }
@@ -1526,29 +1727,38 @@ let RoomResolver = class RoomResolver {
                 result: {
                     __tstype: graphql_2.WritePrivateRoomMessageFailureResultType,
                     failureType: WritePrivateRoomMessageFailureType_1.WritePrivateRoomMessageFailureType.NotSignIn,
-                }
+                },
             };
         }
         const queue = async () => {
             var _a, _b, _c, _d;
             const em = context.createEm();
-            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
+            const entryUser = await helpers_1.getUserIfEntry({
+                userUid: decodedIdToken.uid,
+                baasType: decodedIdToken.type,
+                em,
+                globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
+            });
             await em.flush();
             if (entryUser == null) {
                 return result_1.Result.ok({
                     result: {
                         __tstype: graphql_2.WritePrivateRoomMessageFailureResultType,
                         failureType: WritePrivateRoomMessageFailureType_1.WritePrivateRoomMessageFailureType.NotEntry,
-                    }
+                    },
                 });
             }
-            const findResult = await helpers_1.findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId: args.roomId });
+            const findResult = await helpers_1.findRoomAndMyParticipant({
+                em,
+                userUid: decodedIdToken.uid,
+                roomId: args.roomId,
+            });
             if (findResult == null) {
                 return result_1.Result.ok({
                     result: {
                         __tstype: graphql_2.WritePrivateRoomMessageFailureResultType,
                         failureType: WritePrivateRoomMessageFailureType_1.WritePrivateRoomMessageFailureType.RoomNotFound,
-                    }
+                    },
                 });
             }
             const { room, me, roomState } = findResult;
@@ -1557,7 +1767,7 @@ let RoomResolver = class RoomResolver {
                     result: {
                         __tstype: graphql_2.WritePrivateRoomMessageFailureResultType,
                         failureType: WritePrivateRoomMessageFailureType_1.WritePrivateRoomMessageFailureType.NotParticipant,
-                    }
+                    },
                 });
             }
             const visibleTo = new Set(args.visibleTo);
@@ -1565,7 +1775,10 @@ let RoomResolver = class RoomResolver {
             await entryUser.visibleRoomPrvMsgs.init({ where: { room: { id: room.id } } });
             let chara = undefined;
             if (args.characterStateId != null) {
-                chara = util_1.dualKeyRecordFind(roomState.characters, { first: decodedIdToken.uid, second: args.characterStateId });
+                chara = util_1.dualKeyRecordFind(roomState.characters, {
+                    first: decodedIdToken.uid,
+                    second: args.characterStateId,
+                });
             }
             const entityResult = await analyzeTextAndSetToEntity({
                 type: 'RoomPrvMsg',
@@ -1587,10 +1800,9 @@ let RoomResolver = class RoomResolver {
                         result: {
                             __tstype: graphql_2.WritePrivateRoomMessageFailureResultType,
                             failureType: WritePrivateRoomMessageFailureType_1.WritePrivateRoomMessageFailureType.VisibleToIsInvalid,
-                        }
+                        },
                     });
                 }
-                ;
                 entity.visibleTo.add(user);
             }
             entity.customName = args.customName;
@@ -1606,7 +1818,12 @@ let RoomResolver = class RoomResolver {
             entity.room = core_1.Reference.create(room);
             await em.persistAndFlush(entity);
             const visibleToArray = [...visibleTo].sort();
-            const result = await createRoomPrivateMessage({ msg: entity, myUserUid: entryUser.userUid, visibleTo: visibleToArray, visibleToMe: true });
+            const result = await createRoomPrivateMessage({
+                msg: entity,
+                myUserUid: entryUser.userUid,
+                visibleTo: visibleToArray,
+                visibleToMe: true,
+            });
             if (result == null) {
                 throw new Error('This should not happen');
             }
@@ -1635,35 +1852,44 @@ let RoomResolver = class RoomResolver {
         }
         return coreResult.result;
     }
-    async writeRoomSoundEffectCore({ args, context }) {
+    async writeRoomSoundEffectCore({ args, context, }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
             return {
                 result: {
                     __tstype: graphql_2.WriteRoomSoundEffectFailureResultType,
-                    failureType: WriteRoomSoundEffectFailureType_1.WriteRoomSoundEffectFailureType.NotSignIn
-                }
+                    failureType: WriteRoomSoundEffectFailureType_1.WriteRoomSoundEffectFailureType.NotSignIn,
+                },
             };
         }
         const queue = async () => {
             const em = context.createEm();
-            const entryUser = await helpers_1.getUserIfEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
+            const entryUser = await helpers_1.getUserIfEntry({
+                userUid: decodedIdToken.uid,
+                baasType: decodedIdToken.type,
+                em,
+                globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
+            });
             await em.flush();
             if (entryUser == null) {
                 return result_1.Result.ok({
                     result: {
                         __tstype: graphql_2.WriteRoomSoundEffectFailureResultType,
                         failureType: WriteRoomSoundEffectFailureType_1.WriteRoomSoundEffectFailureType.NotEntry,
-                    }
+                    },
                 });
             }
-            const findResult = await helpers_1.findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId: args.roomId });
+            const findResult = await helpers_1.findRoomAndMyParticipant({
+                em,
+                userUid: decodedIdToken.uid,
+                roomId: args.roomId,
+            });
             if (findResult == null) {
                 return result_1.Result.ok({
                     result: {
                         __tstype: graphql_2.WriteRoomSoundEffectFailureResultType,
                         failureType: WriteRoomSoundEffectFailureType_1.WriteRoomSoundEffectFailureType.RoomNotFound,
-                    }
+                    },
                 });
             }
             const { room, me } = findResult;
@@ -1672,7 +1898,7 @@ let RoomResolver = class RoomResolver {
                     result: {
                         __tstype: graphql_2.WriteRoomSoundEffectFailureResultType,
                         failureType: WriteRoomSoundEffectFailureType_1.WriteRoomSoundEffectFailureType.NotParticipant,
-                    }
+                    },
                 });
             }
             if (me.role === flocon_core_1.Spectator) {
@@ -1680,7 +1906,7 @@ let RoomResolver = class RoomResolver {
                     result: {
                         __tstype: graphql_2.WriteRoomSoundEffectFailureResultType,
                         failureType: WriteRoomSoundEffectFailureType_1.WriteRoomSoundEffectFailureType.NotAuthorized,
-                    }
+                    },
                 });
             }
             const entity = new mikro_orm_1.RoomSe({
@@ -1720,33 +1946,42 @@ let RoomResolver = class RoomResolver {
         }
         return coreResult.result;
     }
-    async makeMessageNotSecretCore({ args, context }) {
+    async makeMessageNotSecretCore({ args, context, }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
             return {
                 result: {
-                    failureType: MakeMessageNotSecretFailureType_1.MakeMessageNotSecretFailureType.NotSignIn
-                }
+                    failureType: MakeMessageNotSecretFailureType_1.MakeMessageNotSecretFailureType.NotSignIn,
+                },
             };
         }
         const queue = async () => {
             var _a, _b, _c, _d;
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
+            const entry = await helpers_1.checkEntry({
+                userUid: decodedIdToken.uid,
+                baasType: decodedIdToken.type,
+                em,
+                globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
+            });
             await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
                     result: {
                         failureType: MakeMessageNotSecretFailureType_1.MakeMessageNotSecretFailureType.NotEntry,
-                    }
+                    },
                 });
             }
-            const findResult = await helpers_1.findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId: args.roomId });
+            const findResult = await helpers_1.findRoomAndMyParticipant({
+                em,
+                userUid: decodedIdToken.uid,
+                roomId: args.roomId,
+            });
             if (findResult == null) {
                 return result_1.Result.ok({
                     result: {
                         failureType: MakeMessageNotSecretFailureType_1.MakeMessageNotSecretFailureType.RoomNotFound,
-                    }
+                    },
                 });
             }
             const { room, me } = findResult;
@@ -1754,7 +1989,7 @@ let RoomResolver = class RoomResolver {
                 return result_1.Result.ok({
                     result: {
                         failureType: MakeMessageNotSecretFailureType_1.MakeMessageNotSecretFailureType.NotParticipant,
-                    }
+                    },
                 });
             }
             const publicMsg = await em.findOne(mikro_orm_1.RoomPubMsg, { id: args.messageId });
@@ -1763,14 +1998,14 @@ let RoomResolver = class RoomResolver {
                     return result_1.Result.ok({
                         result: {
                             failureType: MakeMessageNotSecretFailureType_1.MakeMessageNotSecretFailureType.NotYourMessage,
-                        }
+                        },
                     });
                 }
                 if (!publicMsg.isSecret) {
                     return result_1.Result.ok({
                         result: {
                             failureType: MakeMessageNotSecretFailureType_1.MakeMessageNotSecretFailureType.NotSecret,
-                        }
+                        },
                     });
                 }
                 publicMsg.isSecret = false;
@@ -1780,10 +2015,12 @@ let RoomResolver = class RoomResolver {
                     messageId: publicMsg.id,
                     isSecret: publicMsg.isSecret,
                     updatedText: createUpdatedText(publicMsg),
-                    commandResult: publicMsg.commandResult == null ? undefined : {
-                        text: publicMsg.commandResult,
-                        isSuccess: publicMsg.commandIsSuccess,
-                    },
+                    commandResult: publicMsg.commandResult == null
+                        ? undefined
+                        : {
+                            text: publicMsg.commandResult,
+                            isSuccess: publicMsg.commandIsSuccess,
+                        },
                     altTextToSecret: publicMsg.altTextToSecret,
                     updatedAt: publicMsg.textUpdatedAt,
                 };
@@ -1804,14 +2041,14 @@ let RoomResolver = class RoomResolver {
                     return result_1.Result.ok({
                         result: {
                             failureType: MakeMessageNotSecretFailureType_1.MakeMessageNotSecretFailureType.NotYourMessage,
-                        }
+                        },
                     });
                 }
                 if (!privateMsg.isSecret) {
                     return result_1.Result.ok({
                         result: {
                             failureType: MakeMessageNotSecretFailureType_1.MakeMessageNotSecretFailureType.NotSecret,
-                        }
+                        },
                     });
                 }
                 privateMsg.isSecret = false;
@@ -1821,10 +2058,12 @@ let RoomResolver = class RoomResolver {
                     messageId: privateMsg.id,
                     isSecret: privateMsg.isSecret,
                     updatedText: createUpdatedText(privateMsg),
-                    commandResult: privateMsg.commandResult == null ? undefined : {
-                        text: privateMsg.commandResult,
-                        isSuccess: privateMsg.commandIsSuccess,
-                    },
+                    commandResult: privateMsg.commandResult == null
+                        ? undefined
+                        : {
+                            text: privateMsg.commandResult,
+                            isSuccess: privateMsg.commandIsSuccess,
+                        },
                     altTextToSecret: privateMsg.altTextToSecret,
                     updatedAt: privateMsg.textUpdatedAt,
                 };
@@ -1836,13 +2075,13 @@ let RoomResolver = class RoomResolver {
                         visibleTo: (await privateMsg.visibleTo.loadItems()).map(user => user.userUid),
                         createdBy: (_d = privateMsg.createdBy) === null || _d === void 0 ? void 0 : _d.userUid,
                         value: payloadValue,
-                    }
+                    },
                 });
             }
             return result_1.Result.ok({
                 result: {
                     failureType: MakeMessageNotSecretFailureType_1.MakeMessageNotSecretFailureType.MessageNotFound,
-                }
+                },
             });
         };
         const result = await context.promiseQueue.next(queue);
@@ -1861,33 +2100,42 @@ let RoomResolver = class RoomResolver {
         }
         return coreResult.result;
     }
-    async deleteMessageCore({ args, context }) {
+    async deleteMessageCore({ args, context, }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
             return {
                 result: {
-                    failureType: DeleteMessageFailureType_1.DeleteMessageFailureType.NotSignIn
-                }
+                    failureType: DeleteMessageFailureType_1.DeleteMessageFailureType.NotSignIn,
+                },
             };
         }
         const queue = async () => {
             var _a, _b, _c, _d;
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
+            const entry = await helpers_1.checkEntry({
+                userUid: decodedIdToken.uid,
+                baasType: decodedIdToken.type,
+                em,
+                globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
+            });
             await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
                     result: {
                         failureType: DeleteMessageFailureType_1.DeleteMessageFailureType.NotEntry,
-                    }
+                    },
                 });
             }
-            const findResult = await helpers_1.findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId: args.roomId });
+            const findResult = await helpers_1.findRoomAndMyParticipant({
+                em,
+                userUid: decodedIdToken.uid,
+                roomId: args.roomId,
+            });
             if (findResult == null) {
                 return result_1.Result.ok({
                     result: {
                         failureType: DeleteMessageFailureType_1.DeleteMessageFailureType.RoomNotFound,
-                    }
+                    },
                 });
             }
             const { room, me } = findResult;
@@ -1895,7 +2143,7 @@ let RoomResolver = class RoomResolver {
                 return result_1.Result.ok({
                     result: {
                         failureType: DeleteMessageFailureType_1.DeleteMessageFailureType.NotParticipant,
-                    }
+                    },
                 });
             }
             const publicMsg = await em.findOne(mikro_orm_1.RoomPubMsg, { id: args.messageId });
@@ -1904,14 +2152,16 @@ let RoomResolver = class RoomResolver {
                     return result_1.Result.ok({
                         result: {
                             failureType: DeleteMessageFailureType_1.DeleteMessageFailureType.NotYourMessage,
-                        }
+                        },
                     });
                 }
-                if (publicMsg.initText == null && publicMsg.altTextToSecret == null && publicMsg.commandResult == null) {
+                if (publicMsg.initText == null &&
+                    publicMsg.altTextToSecret == null &&
+                    publicMsg.commandResult == null) {
                     return result_1.Result.ok({
                         result: {
                             failureType: DeleteMessageFailureType_1.DeleteMessageFailureType.MessageDeleted,
-                        }
+                        },
                     });
                 }
                 publicMsg.updatedText = undefined;
@@ -1922,10 +2172,12 @@ let RoomResolver = class RoomResolver {
                     messageId: publicMsg.id,
                     isSecret: publicMsg.isSecret,
                     updatedText: createUpdatedText(publicMsg),
-                    commandResult: publicMsg.commandResult == null ? undefined : {
-                        text: publicMsg.commandResult,
-                        isSuccess: publicMsg.commandIsSuccess,
-                    },
+                    commandResult: publicMsg.commandResult == null
+                        ? undefined
+                        : {
+                            text: publicMsg.commandResult,
+                            isSuccess: publicMsg.commandIsSuccess,
+                        },
                     altTextToSecret: publicMsg.altTextToSecret,
                     updatedAt: publicMsg.textUpdatedAt,
                 };
@@ -1937,7 +2189,7 @@ let RoomResolver = class RoomResolver {
                         visibleTo: undefined,
                         createdBy: (_b = publicMsg.createdBy) === null || _b === void 0 ? void 0 : _b.userUid,
                         value: payloadValue,
-                    }
+                    },
                 });
             }
             const privateMsg = await em.findOne(mikro_orm_1.RoomPrvMsg, { id: args.messageId });
@@ -1946,14 +2198,16 @@ let RoomResolver = class RoomResolver {
                     return result_1.Result.ok({
                         result: {
                             failureType: DeleteMessageFailureType_1.DeleteMessageFailureType.NotYourMessage,
-                        }
+                        },
                     });
                 }
-                if (privateMsg.initText == null && privateMsg.altTextToSecret == null && privateMsg.commandResult == null) {
+                if (privateMsg.initText == null &&
+                    privateMsg.altTextToSecret == null &&
+                    privateMsg.commandResult == null) {
                     return result_1.Result.ok({
                         result: {
                             failureType: DeleteMessageFailureType_1.DeleteMessageFailureType.MessageDeleted,
-                        }
+                        },
                     });
                 }
                 privateMsg.updatedText = undefined;
@@ -1974,13 +2228,13 @@ let RoomResolver = class RoomResolver {
                         visibleTo: (await privateMsg.visibleTo.loadItems()).map(user => user.userUid),
                         createdBy: (_d = privateMsg.createdBy) === null || _d === void 0 ? void 0 : _d.userUid,
                         value: payloadValue,
-                    }
+                    },
                 });
             }
             return result_1.Result.ok({
                 result: {
                     failureType: DeleteMessageFailureType_1.DeleteMessageFailureType.MessageNotFound,
-                }
+                },
             });
         };
         const result = await context.promiseQueue.next(queue);
@@ -1999,33 +2253,42 @@ let RoomResolver = class RoomResolver {
         }
         return coreResult.result;
     }
-    async editMessageCore({ args, context }) {
+    async editMessageCore({ args, context, }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
             return {
                 result: {
-                    failureType: EditMessageFailureType_1.EditMessageFailureType.NotSignIn
-                }
+                    failureType: EditMessageFailureType_1.EditMessageFailureType.NotSignIn,
+                },
             };
         }
         const queue = async () => {
             var _a, _b, _c, _d;
             const em = context.createEm();
-            const entry = await helpers_1.checkEntry({ userUid: decodedIdToken.uid, baasType: decodedIdToken.type, em, globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase });
+            const entry = await helpers_1.checkEntry({
+                userUid: decodedIdToken.uid,
+                baasType: decodedIdToken.type,
+                em,
+                globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
+            });
             await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
                     result: {
                         failureType: EditMessageFailureType_1.EditMessageFailureType.NotEntry,
-                    }
+                    },
                 });
             }
-            const findResult = await helpers_1.findRoomAndMyParticipant({ em, userUid: decodedIdToken.uid, roomId: args.roomId });
+            const findResult = await helpers_1.findRoomAndMyParticipant({
+                em,
+                userUid: decodedIdToken.uid,
+                roomId: args.roomId,
+            });
             if (findResult == null) {
                 return result_1.Result.ok({
                     result: {
                         failureType: EditMessageFailureType_1.EditMessageFailureType.RoomNotFound,
-                    }
+                    },
                 });
             }
             const { room, me } = findResult;
@@ -2033,7 +2296,7 @@ let RoomResolver = class RoomResolver {
                 return result_1.Result.ok({
                     result: {
                         failureType: EditMessageFailureType_1.EditMessageFailureType.NotParticipant,
-                    }
+                    },
                 });
             }
             const publicMsg = await em.findOne(mikro_orm_1.RoomPubMsg, { id: args.messageId });
@@ -2042,14 +2305,14 @@ let RoomResolver = class RoomResolver {
                     return result_1.Result.ok({
                         result: {
                             failureType: EditMessageFailureType_1.EditMessageFailureType.NotYourMessage,
-                        }
+                        },
                     });
                 }
                 if (isDeleted(publicMsg)) {
                     return result_1.Result.ok({
                         result: {
                             failureType: EditMessageFailureType_1.EditMessageFailureType.MessageDeleted,
-                        }
+                        },
                     });
                 }
                 publicMsg.updatedText = args.text;
@@ -2060,10 +2323,12 @@ let RoomResolver = class RoomResolver {
                     messageId: publicMsg.id,
                     isSecret: publicMsg.isSecret,
                     updatedText: createUpdatedText(publicMsg),
-                    commandResult: publicMsg.commandResult == null ? undefined : {
-                        text: publicMsg.commandResult,
-                        isSuccess: publicMsg.commandIsSuccess,
-                    },
+                    commandResult: publicMsg.commandResult == null
+                        ? undefined
+                        : {
+                            text: publicMsg.commandResult,
+                            isSuccess: publicMsg.commandIsSuccess,
+                        },
                     altTextToSecret: publicMsg.altTextToSecret,
                     updatedAt: publicMsg.textUpdatedAt,
                 };
@@ -2075,7 +2340,7 @@ let RoomResolver = class RoomResolver {
                         visibleTo: undefined,
                         createdBy: (_b = publicMsg.createdBy) === null || _b === void 0 ? void 0 : _b.userUid,
                         value: payloadValue,
-                    }
+                    },
                 });
             }
             const privateMsg = await em.findOne(mikro_orm_1.RoomPrvMsg, { id: args.messageId });
@@ -2084,14 +2349,14 @@ let RoomResolver = class RoomResolver {
                     return result_1.Result.ok({
                         result: {
                             failureType: EditMessageFailureType_1.EditMessageFailureType.NotYourMessage,
-                        }
+                        },
                     });
                 }
                 if (privateMsg.initText == null) {
                     return result_1.Result.ok({
                         result: {
                             failureType: EditMessageFailureType_1.EditMessageFailureType.MessageDeleted,
-                        }
+                        },
                     });
                 }
                 privateMsg.updatedText = args.text;
@@ -2102,10 +2367,12 @@ let RoomResolver = class RoomResolver {
                     messageId: privateMsg.id,
                     isSecret: privateMsg.isSecret,
                     updatedText: createUpdatedText(privateMsg),
-                    commandResult: privateMsg.commandResult == null ? undefined : {
-                        text: privateMsg.commandResult,
-                        isSuccess: privateMsg.commandIsSuccess,
-                    },
+                    commandResult: privateMsg.commandResult == null
+                        ? undefined
+                        : {
+                            text: privateMsg.commandResult,
+                            isSuccess: privateMsg.commandIsSuccess,
+                        },
                     altTextToSecret: privateMsg.altTextToSecret,
                     updatedAt: privateMsg.textUpdatedAt,
                 };
@@ -2117,13 +2384,13 @@ let RoomResolver = class RoomResolver {
                         visibleTo: (await privateMsg.visibleTo.loadItems()).map(user => user.userUid),
                         createdBy: (_d = privateMsg.createdBy) === null || _d === void 0 ? void 0 : _d.userUid,
                         value: payloadValue,
-                    }
+                    },
                 });
             }
             return result_1.Result.ok({
                 result: {
                     failureType: EditMessageFailureType_1.EditMessageFailureType.MessageNotFound,
-                }
+                },
             });
         };
         const result = await context.promiseQueue.next(queue);
@@ -2197,7 +2464,7 @@ let RoomResolver = class RoomResolver {
                     userUid: payload.userUid,
                     isConnected: payload.isConnected,
                     updatedAt: payload.updatedAt,
-                }
+                },
             };
         }
         if (payload.type === 'writingMessageStatusUpdatePayload') {
@@ -2207,7 +2474,7 @@ let RoomResolver = class RoomResolver {
                     publicChannelKey: payload.publicChannelKey,
                     status: payload.status,
                     updatedAt: payload.updatedAt,
-                }
+                },
             };
         }
         if (payload.type === 'messageUpdatePayload') {
@@ -2227,18 +2494,18 @@ let RoomResolver = class RoomResolver {
             switch (payload.value.__tstype) {
                 case graphql_2.RoomPrivateMessageType:
                 case graphql_2.RoomPublicMessageType: {
-                    if (payload.value.isSecret && (payload.value.createdBy !== userUid)) {
+                    if (payload.value.isSecret && payload.value.createdBy !== userUid) {
                         return {
-                            roomMessageEvent: Object.assign(Object.assign({}, payload.value), { initText: undefined, initTextSource: undefined, commandResult: undefined })
+                            roomMessageEvent: Object.assign(Object.assign({}, payload.value), { initText: undefined, initTextSource: undefined, commandResult: undefined }),
                         };
                     }
                     break;
                 }
                 case graphql_2.RoomPrivateMessageUpdateType:
                 case graphql_2.RoomPublicMessageUpdateType:
-                    if (payload.value.isSecret && (payload.createdBy !== userUid)) {
+                    if (payload.value.isSecret && payload.createdBy !== userUid) {
                         return {
-                            roomMessageEvent: Object.assign(Object.assign({}, payload.value), { initText: undefined, initTextSource: undefined, commandResult: undefined })
+                            roomMessageEvent: Object.assign(Object.assign({}, payload.value), { initText: undefined, initTextSource: undefined, commandResult: undefined }),
                         };
                     }
                     break;
@@ -2253,7 +2520,7 @@ let RoomResolver = class RoomResolver {
                 deleteRoomOperation: {
                     __tstype: graphql_1.deleteRoomOperation,
                     deletedBy: payload.deletedBy,
-                }
+                },
             };
         }
         if (!payload.participants.has(userUid)) {
@@ -2261,7 +2528,7 @@ let RoomResolver = class RoomResolver {
         }
         if (payload.type === 'roomOperationPayload') {
             return {
-                roomOperation: payload.generateOperation(userUid)
+                roomOperation: payload.generateOperation(userUid),
             };
         }
     }

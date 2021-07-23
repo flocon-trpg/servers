@@ -19,7 +19,9 @@ export const checkSignIn = (context: ResolverContext): DecodedIdToken | typeof N
     return context.decodedIdToken.value;
 };
 
-export const checkSignInAndNotAnonymous = (context: ResolverContext): DecodedIdToken | typeof NotSignIn | typeof AnonymousAccount => {
+export const checkSignInAndNotAnonymous = (
+    context: ResolverContext
+): DecodedIdToken | typeof NotSignIn | typeof AnonymousAccount => {
     const decodedIdToken = checkSignIn(context);
     if (decodedIdToken == NotSignIn) {
         return NotSignIn;
@@ -46,7 +48,7 @@ export const getUserIfEntry = async ({
 
     if (user == null) {
         if (globalEntryPhrase == null) {
-            const newUser = new User({ userUid, baasType, });
+            const newUser = new User({ userUid, baasType });
             newUser.isEntry = true;
             em.persist(newUser);
             return user;
@@ -70,7 +72,7 @@ export const checkEntry = async ({
     em,
     userUid,
     baasType,
-    globalEntryPhrase
+    globalEntryPhrase,
 }: {
     em: EM;
     userUid: string;
@@ -81,9 +83,11 @@ export const checkEntry = async ({
 };
 
 class FindRoomAndMyParticipantResult {
-    public constructor(public readonly room: Room, public readonly roomState: State, public readonly me?: ParticipantState) {
-
-    }
+    public constructor(
+        public readonly room: Room,
+        public readonly roomState: State,
+        public readonly me?: ParticipantState
+    ) {}
 
     public participantIds(): Set<string> {
         return new Set(recordToArray(this.roomState.participants).map(({ key }) => key));
@@ -93,7 +97,7 @@ class FindRoomAndMyParticipantResult {
 export const findRoomAndMyParticipant = async ({
     em,
     userUid,
-    roomId
+    roomId,
 }: {
     em: EM;
     userUid: string;

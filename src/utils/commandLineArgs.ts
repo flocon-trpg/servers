@@ -20,23 +20,21 @@ const toDbType = (source: string) => {
 type Main = {
     db?: DbType;
     debug: boolean;
-}
+};
 
 const getMain = async (): Promise<Main> => {
-    const options =
-        await yargs(process.argv.slice(2))
-            .options({
-                'db': {
-                    type: 'string',
-                    nargs: 1,
-                    choices: [postgresql, sqlite],
-                },
-                'debug': {
-                    type: 'boolean',
-                }
-            })
-            .version(VERSION.toString())
-            .argv;
+    const options = await yargs(process.argv.slice(2))
+        .options({
+            db: {
+                type: 'string',
+                nargs: 1,
+                choices: [postgresql, sqlite],
+            },
+            debug: {
+                type: 'boolean',
+            },
+        })
+        .version(VERSION.toString()).argv;
 
     const result: Main = {
         debug: options.debug === true,
@@ -60,19 +58,17 @@ export const loadAsMain = async (): Promise<Main> => {
 
 type MigrationUp = {
     db: DbType;
-}
+};
 
 const getMigrationUp = async (): Promise<MigrationUp> => {
-    const options =
-        await yargs(process.argv.slice(2))
-            .options({
-                'db': {
-                    type: 'string',
-                    demandOption: true,
-                    nargs: 1,
-                    choices: [postgresql, sqlite],
-                }
-            }).argv;
+    const options = await yargs(process.argv.slice(2)).options({
+        db: {
+            type: 'string',
+            demandOption: true,
+            nargs: 1,
+            choices: [postgresql, sqlite],
+        },
+    }).argv;
 
     const databaseOption = options.db;
     const database = (() => {
@@ -100,24 +96,22 @@ export const loadMigrationUp = async (): Promise<MigrationUp> => {
 type MigrationDown = {
     db: DbType;
     count: number;
-}
+};
 
 const getMigrationDown = async (): Promise<MigrationDown> => {
-    const options =
-        await yargs(process.argv.slice(2))
-            .options({
-                'db': {
-                    type: 'string',
-                    demandOption: true,
-                    nargs: 1,
-                    choices: [postgresql, sqlite],
-                },
-                'count': {
-                    type: 'number',
-                    demandOption: true,
-                    nargs: 1,
-                },
-            }).argv;
+    const options = await yargs(process.argv.slice(2)).options({
+        db: {
+            type: 'string',
+            demandOption: true,
+            nargs: 1,
+            choices: [postgresql, sqlite],
+        },
+        count: {
+            type: 'number',
+            demandOption: true,
+            nargs: 1,
+        },
+    }).argv;
 
     const databaseOption = options.db;
     let database: DbType;
@@ -155,22 +149,20 @@ export const loadMigrationDown = async (): Promise<MigrationDown> => {
 type MigrationCreate = {
     db: DbType;
     init: boolean;
-}
+};
 
 const getMigrationCreate = async (): Promise<MigrationCreate> => {
-    const options =
-        await yargs(process.argv.slice(2))
-            .options({
-                'db': {
-                    type: 'string',
-                    demandOption: true,
-                    nargs: 1,
-                    choices: [postgresql, sqlite],
-                },
-                'init': {
-                    type: 'boolean',
-                }
-            }).argv;
+    const options = await yargs(process.argv.slice(2)).options({
+        db: {
+            type: 'string',
+            demandOption: true,
+            nargs: 1,
+            choices: [postgresql, sqlite],
+        },
+        init: {
+            type: 'boolean',
+        },
+    }).argv;
 
     const databaseOption = options.db;
     const database = (() => {

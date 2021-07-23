@@ -4,7 +4,11 @@ import { GetRoomConnectionFailureType } from '../../../enums/GetRoomConnectionFa
 import { WritingMessageStatusInputType } from '../../../enums/WritingMessageStatusInputType';
 import { WritingMessageStatusType } from '../../../enums/WritingMessageStatusType';
 import { FilePath } from '../../entities/filePath/graphql';
-import { DeleteRoomOperation, RoomOperation, RoomOperationInput } from '../../entities/room/graphql';
+import {
+    DeleteRoomOperation,
+    RoomOperation,
+    RoomOperationInput,
+} from '../../entities/room/graphql';
 import { RoomMessageEvent } from '../../entities/roomMessage/graphql';
 
 @InputType()
@@ -125,9 +129,9 @@ export class WritePrivateMessageArgs {
 
     @Field({ nullable: true })
     public customName?: string;
-    
+
     @Field({ nullable: true, description: 'BCDiceのgameType。' })
-    public gameType?: string
+    public gameType?: string;
 }
 
 @ArgsType()
@@ -220,7 +224,7 @@ export const GetRoomConnectionsResult = createUnionType({
             case GetRoomConnectionFailureResultType:
                 return GetRoomConnectionsFailureResult;
         }
-    }
+    },
 });
 
 @ObjectType()

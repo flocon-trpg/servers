@@ -21,17 +21,16 @@ const toDbType = (source) => {
 const getMain = async () => {
     const options = await yargs_1.default(process.argv.slice(2))
         .options({
-        'db': {
+        db: {
             type: 'string',
             nargs: 1,
             choices: [exports.postgresql, exports.sqlite],
         },
-        'debug': {
+        debug: {
             type: 'boolean',
-        }
+        },
     })
-        .version(VERSION_1.default.toString())
-        .argv;
+        .version(VERSION_1.default.toString()).argv;
     const result = {
         debug: options.debug === true,
     };
@@ -53,14 +52,13 @@ const loadAsMain = async () => {
 };
 exports.loadAsMain = loadAsMain;
 const getMigrationUp = async () => {
-    const options = await yargs_1.default(process.argv.slice(2))
-        .options({
-        'db': {
+    const options = await yargs_1.default(process.argv.slice(2)).options({
+        db: {
             type: 'string',
             demandOption: true,
             nargs: 1,
             choices: [exports.postgresql, exports.sqlite],
-        }
+        },
     }).argv;
     const databaseOption = options.db;
     const database = (() => {
@@ -86,15 +84,14 @@ const loadMigrationUp = async () => {
 };
 exports.loadMigrationUp = loadMigrationUp;
 const getMigrationDown = async () => {
-    const options = await yargs_1.default(process.argv.slice(2))
-        .options({
-        'db': {
+    const options = await yargs_1.default(process.argv.slice(2)).options({
+        db: {
             type: 'string',
             demandOption: true,
             nargs: 1,
             choices: [exports.postgresql, exports.sqlite],
         },
-        'count': {
+        count: {
             type: 'number',
             demandOption: true,
             nargs: 1,
@@ -134,17 +131,16 @@ const loadMigrationDown = async () => {
 };
 exports.loadMigrationDown = loadMigrationDown;
 const getMigrationCreate = async () => {
-    const options = await yargs_1.default(process.argv.slice(2))
-        .options({
-        'db': {
+    const options = await yargs_1.default(process.argv.slice(2)).options({
+        db: {
             type: 'string',
             demandOption: true,
             nargs: 1,
             choices: [exports.postgresql, exports.sqlite],
         },
-        'init': {
+        init: {
             type: 'boolean',
-        }
+        },
     }).argv;
     const databaseOption = options.db;
     const database = (() => {

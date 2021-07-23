@@ -4,5 +4,5 @@ import { LeaveRoomFailureType } from '../../enums/LeaveRoomFailureType';
 @ObjectType()
 export class LeaveRoomResult {
     @Field(() => LeaveRoomFailureType, { nullable: true })
-    public failureType?: LeaveRoomFailureType
+    public failureType?: LeaveRoomFailureType;
 }

@@ -16,7 +16,7 @@ const loadFirebaseConfig = () => {
     const json = JSON.parse(env);
     return util_1.createFirebaseConfig(json);
 };
-const loadServerConfig = ({ databaseArg }) => {
+const loadServerConfig = ({ databaseArg, }) => {
     var _a, _b;
     const env = process.env['FLOCON_API_CONFIG'];
     if (env == null) {
@@ -38,7 +38,7 @@ const loadServerConfig = ({ databaseArg }) => {
                         __type: 'sqlite',
                         sqlite: {
                             dbName: sqliteJson.get('dbName').valueAsString(),
-                        }
+                        },
                     };
                 }
                 if (postgresqlJson == null) {
@@ -49,7 +49,7 @@ const loadServerConfig = ({ databaseArg }) => {
                     postgresql: {
                         dbName: postgresqlJson.get('dbName').valueAsString(),
                         clientUrl: postgresqlJson.get('clientUrl').valueAsString(),
-                    }
+                    },
                 };
             })();
             break;
@@ -61,7 +61,7 @@ const loadServerConfig = ({ databaseArg }) => {
                 __type: exports.sqlite,
                 sqlite: {
                     dbName: sqliteJson.get('dbName').valueAsString(),
-                }
+                },
             };
             break;
         }
@@ -74,7 +74,7 @@ const loadServerConfig = ({ databaseArg }) => {
                 postgresql: {
                     dbName: postgresqlJson.get('dbName').valueAsString(),
                     clientUrl: postgresqlJson.get('clientUrl').valueAsString(),
-                }
+                },
             };
             break;
         }
@@ -89,7 +89,9 @@ let serverConfigAsMainCache = null;
 const loadServerConfigAsMain = async () => {
     var _a;
     if (serverConfigAsMainCache == null) {
-        serverConfigAsMainCache = loadServerConfig({ databaseArg: (_a = (await commandLineArgs_1.loadAsMain()).db) !== null && _a !== void 0 ? _a : null });
+        serverConfigAsMainCache = loadServerConfig({
+            databaseArg: (_a = (await commandLineArgs_1.loadAsMain()).db) !== null && _a !== void 0 ? _a : null,
+        });
     }
     return serverConfigAsMainCache;
 };
@@ -97,7 +99,9 @@ exports.loadServerConfigAsMain = loadServerConfigAsMain;
 let serverConfigAsMigrationCreateCache = null;
 const loadServerConfigAsMigrationCreate = async () => {
     if (serverConfigAsMigrationCreateCache == null) {
-        serverConfigAsMigrationCreateCache = loadServerConfig({ databaseArg: (await commandLineArgs_1.loadMigrationCreate()).db });
+        serverConfigAsMigrationCreateCache = loadServerConfig({
+            databaseArg: (await commandLineArgs_1.loadMigrationCreate()).db,
+        });
     }
     return serverConfigAsMigrationCreateCache;
 };
@@ -105,7 +109,9 @@ exports.loadServerConfigAsMigrationCreate = loadServerConfigAsMigrationCreate;
 let serverConfigAsMigrationUpCache = null;
 const loadServerConfigAsMigrationUp = async () => {
     if (serverConfigAsMigrationUpCache == null) {
-        serverConfigAsMigrationUpCache = loadServerConfig({ databaseArg: (await commandLineArgs_1.loadMigrationUp()).db });
+        serverConfigAsMigrationUpCache = loadServerConfig({
+            databaseArg: (await commandLineArgs_1.loadMigrationUp()).db,
+        });
     }
     return serverConfigAsMigrationUpCache;
 };

@@ -1,17 +1,19 @@
-import { Collection, Entity, Enum, ManyToMany, OneToMany, PrimaryKey, Property } from '@mikro-orm/core';
+import {
+    Collection,
+    Entity,
+    Enum,
+    ManyToMany,
+    OneToMany,
+    PrimaryKey,
+    Property,
+} from '@mikro-orm/core';
 import { BaasType } from '../../../enums/BaasType';
 import { RoomPrvMsg, RoomPubMsg, RoomSe } from '../roomMessage/mikro-orm';
 
 // ユーザーがアカウント登録した時点では作られず、初めてentryなどをしたときに作られる。
 @Entity()
 export class User {
-    public constructor({
-        userUid,
-        baasType,
-    }: {
-        userUid: string;
-        baasType: BaasType;
-    }) {
+    public constructor({ userUid, baasType }: { userUid: string; baasType: BaasType }) {
         this.userUid = userUid;
         this.baasType = baasType;
     }

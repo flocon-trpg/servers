@@ -16,11 +16,11 @@ class ConnectionIdDatabase {
         this.userUidDatabase = new node_cache_1.default({ stdTTL: 60 * 60 * 48 });
         this.roomIdDatabase = new node_cache_1.default({ stdTTL: 60 * 60 * 48 });
     }
-    set({ roomId, connectionId, userUid }) {
+    set({ roomId, connectionId, userUid, }) {
         this.userUidDatabase.set(connectionId, userUid);
         this.roomIdDatabase.set(connectionId, roomId);
     }
-    del({ connectionId }) {
+    del({ connectionId, }) {
         const userUid = this.userUidDatabase.get(connectionId);
         this.userUidDatabase.del(connectionId);
         const roomId = this.roomIdDatabase.get(connectionId);
@@ -82,7 +82,7 @@ class WritingMessageStatusDatabase {
     constructor() {
         this.database = new node_cache_1.default({ stdTTL: 600, maxKeys: 10000, checkperiod: 299 });
     }
-    set({ roomId, status, publicChannelKey, userUid }) {
+    set({ roomId, status, publicChannelKey, userUid, }) {
         if (!util_1.PublicChannelKey.Without$System.isPublicChannelKey(publicChannelKey)) {
             return null;
         }
@@ -94,8 +94,9 @@ class WritingMessageStatusDatabase {
         this.database.set(key, status);
         return status;
     }
-    onDisconnect({ userUid, roomId }) {
-        return lodash_1.default(this.database.keys()).map(key => {
+    onDisconnect({ userUid, roomId, }) {
+        return lodash_1.default(this.database.keys())
+            .map(key => {
             const split = key.split('@');
             if (split.length !== 3) {
                 return undefined;
@@ -114,7 +115,9 @@ class WritingMessageStatusDatabase {
             }
             this.database.del(key);
             return { publicChannelKey };
-        }).compact().value();
+        })
+            .compact()
+            .value();
     }
 }
 class InMemoryConnectionManager {
@@ -123,7 +126,7 @@ class InMemoryConnectionManager {
         this.connectionCountDatabase = new ConnectionCountDatabase();
         this.writingMessageStatusDatabase = new WritingMessageStatusDatabase();
     }
-    onConnectToRoom({ connectionId, userUid, roomId }) {
+    onConnectToRoom({ connectionId, userUid, roomId, }) {
         this.connectionIdDatabase.set({ roomId, connectionId, userUid });
         const newValue = this.connectionCountDatabase.incr({ roomId, userUid });
         if (newValue !== 1) {

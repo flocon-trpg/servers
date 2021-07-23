@@ -25,5 +25,5 @@ export const GetRoomsListResult = createUnionType({
             return GetRoomsListFailureResult;
         }
         return undefined;
-    }
+    },
 });

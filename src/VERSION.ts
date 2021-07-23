@@ -7,7 +7,7 @@ const VERSION = new SemVer({
     prerelease: {
         type: alpha,
         version: 11,
-    }
+    },
 });
 
 export default VERSION;

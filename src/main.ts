@@ -35,9 +35,15 @@ const main = async (params: { debug: boolean }): Promise<void> => {
         try {
             switch (serverConfig.database.__type) {
                 case postgresql:
-                    return await createPostgreSQL({ ...serverConfig.database.postgresql, debug: params.debug });
+                    return await createPostgreSQL({
+                        ...serverConfig.database.postgresql,
+                        debug: params.debug,
+                    });
                 case sqlite:
-                    return await createSQLite({ ...serverConfig.database.sqlite, debug: params.debug });
+                    return await createSQLite({
+                        ...serverConfig.database.sqlite,
+                        debug: params.debug,
+                    });
             }
         } catch (error) {
             console.error('Could not connect to the database!');
@@ -47,8 +53,14 @@ const main = async (params: { debug: boolean }): Promise<void> => {
 
     await checkMigrationsBeforeStart(orm, dbType);
 
-    const getDecodedIdToken = async (idToken: string): Promise<CustomResult<admin.auth.DecodedIdToken & { type: BaasType.Firebase }, any>> => {
-        const decodedIdToken = await admin.auth().verifyIdToken(idToken).then(Result.ok).catch(Result.error);
+    const getDecodedIdToken = async (
+        idToken: string
+    ): Promise<CustomResult<admin.auth.DecodedIdToken & { type: BaasType.Firebase }, any>> => {
+        const decodedIdToken = await admin
+            .auth()
+            .verifyIdToken(idToken)
+            .then(Result.ok)
+            .catch(Result.error);
         if (decodedIdToken.isError) {
             return decodedIdToken;
         }
@@ -58,7 +70,11 @@ const main = async (params: { debug: boolean }): Promise<void> => {
         });
     };
 
-    const getDecodedIdTokenFromBearer = async (bearer: string | undefined): Promise<CustomResult<admin.auth.DecodedIdToken & { type: BaasType.Firebase }, any> | undefined> => {
+    const getDecodedIdTokenFromBearer = async (
+        bearer: string | undefined
+    ): Promise<
+        CustomResult<admin.auth.DecodedIdToken & { type: BaasType.Firebase }, any> | undefined
+    > => {
         // bearerのフォーマットはだいたいこんな感じ
         // 'Bearer aNGoGo3ngC.oepGJoGoeo34Ha.Oge03mvQgeo4H'
         if (bearer == null || !bearer.startsWith('Bearer ')) {
@@ -119,48 +135,51 @@ const main = async (params: { debug: boolean }): Promise<void> => {
             path: subscriptionsPath,
         });
 
-        useServer({
-            schema,
-            execute,
-            subscribe,
-            context: async ctx => {
-                const decodedIdToken = await getDecodedIdTokenFromContext(ctx);
-                return {
-                    decodedIdToken,
-                    promiseQueue,
-                    connectionManager,
-                    createEm: () => orm.em.fork(),
-                } as ResolverContext;
-            },
-            onSubscribe: async (ctx, message) => {
-                if (message.payload.operationName?.toLowerCase() !== 'roomevent') {
-                    return;
-                }
-                const decodedIdToken = await getDecodedIdTokenFromContext(ctx);
-                if (decodedIdToken?.isError !== false) {
-                    return;
-                }
+        useServer(
+            {
+                schema,
+                execute,
+                subscribe,
+                context: async ctx => {
+                    const decodedIdToken = await getDecodedIdTokenFromContext(ctx);
+                    return {
+                        decodedIdToken,
+                        promiseQueue,
+                        connectionManager,
+                        createEm: () => orm.em.fork(),
+                    } as ResolverContext;
+                },
+                onSubscribe: async (ctx, message) => {
+                    if (message.payload.operationName?.toLowerCase() !== 'roomevent') {
+                        return;
+                    }
+                    const decodedIdToken = await getDecodedIdTokenFromContext(ctx);
+                    if (decodedIdToken?.isError !== false) {
+                        return;
+                    }
 
-                const roomId = message.payload.variables?.id;
-                if (typeof roomId === 'string') {
-                    connectionManager.onConnectToRoom({
-                        connectionId: message.id,
-                        userUid: decodedIdToken.value.uid,
-                        roomId,
-                    });
-                } else {
-                    console.warn('(typeof RoomEvent.id) should be string');
-                }
+                    const roomId = message.payload.variables?.id;
+                    if (typeof roomId === 'string') {
+                        connectionManager.onConnectToRoom({
+                            connectionId: message.id,
+                            userUid: decodedIdToken.value.uid,
+                            roomId,
+                        });
+                    } else {
+                        console.warn('(typeof RoomEvent.id) should be string');
+                    }
+                },
+                onComplete: async (ctx, message) => {
+                    connectionManager.onLeaveRoom({ connectionId: message.id });
+                },
+                onClose: ctx => {
+                    for (const key in ctx.subscriptions) {
+                        connectionManager.onLeaveRoom({ connectionId: key });
+                    }
+                },
             },
-            onComplete: async (ctx, message) => {
-                connectionManager.onLeaveRoom({ connectionId: message.id });
-            },
-            onClose: ctx => {
-                for (const key in ctx.subscriptions) {
-                    connectionManager.onLeaveRoom({ connectionId: key });
-                }
-            }
-        }, wsServer);
+            wsServer
+        );
 
         console.log(`🚀 Server ready at http://localhost:${PORT}${apolloServer.graphqlPath}`);
         console.log(`🚀 Subscriptions ready at ws://localhost:${PORT}${subscriptionsPath}`);

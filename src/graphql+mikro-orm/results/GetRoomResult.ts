@@ -7,7 +7,7 @@ import { RoomAsListItem } from '../entities/roomAsListItem/graphql';
 @ObjectType()
 export class GetJoinedRoomResult {
     @Field(() => ParticipantRole, { description: '自分の現在のParticipantRole。' })
-    public role!: ParticipantRole
+    public role!: ParticipantRole;
 
     @Field()
     public room!: RoomGetState;
@@ -39,5 +39,5 @@ export const GetRoomResult = createUnionType({
             return GetRoomFailureResult;
         }
         return undefined;
-    }
+    },
 });
