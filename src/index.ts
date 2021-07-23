@@ -25,6 +25,7 @@ export {
     isValidVarToml,
     parseToml,
     getVariableFromVarTomlObject,
+    isValidChatPalette,
     generateChatPalette,
 } from './internal/toml';
 
