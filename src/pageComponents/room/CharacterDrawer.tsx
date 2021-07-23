@@ -151,10 +151,8 @@ const CharacterDrawer: React.FC = () => {
         updateUiState: setCharacter,
         resetUiState: resetCharacterToCreate,
     } = useStateEditor(stateEditorParams);
-    const [
-        filesManagerDrawerType,
-        setFilesManagerDrawerType,
-    ] = React.useState<FilesManagerDrawerType | null>(null);
+    const [filesManagerDrawerType, setFilesManagerDrawerType] =
+        React.useState<FilesManagerDrawerType | null>(null);
 
     if (
         boolParamNames == null ||

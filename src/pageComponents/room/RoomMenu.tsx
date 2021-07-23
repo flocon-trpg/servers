@@ -56,10 +56,8 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
     const [promoteToPlayer] = usePromoteToPlayerMutation();
-    const [
-        requiresPhraseToJoinAsPlayer,
-        requiresPhraseToJoinAsPlayerResult,
-    ] = useRequiresPhraseToJoinAsPlayerLazyQuery();
+    const [requiresPhraseToJoinAsPlayer, requiresPhraseToJoinAsPlayerResult] =
+        useRequiresPhraseToJoinAsPlayerLazyQuery();
     const requiresPhraseToJoinAsPlayerRef = React.useRef(requiresPhraseToJoinAsPlayer);
     React.useEffect(() => {
         requiresPhraseToJoinAsPlayerRef.current = requiresPhraseToJoinAsPlayer;
@@ -369,24 +367,22 @@ const GenerateLogModal: React.FC<GenerateLogModalProps> = ({
     const publicChannelNames = usePublicChannelNames();
     const participants = useParticipants();
 
-    const [
-        generateAsStaticHtmlOptions,
-        setGenerateAsStaticHtmlOptions,
-    ] = React.useState<GenerateAsStaticHtmlOptions>({
-        includesPublicChannel1: true,
-        includesPublicChannel2: true,
-        includesPublicChannel3: true,
-        includesPublicChannel4: true,
-        includesPublicChannel5: true,
-        includesPublicChannel6: true,
-        includesPublicChannel7: true,
-        includesPublicChannel8: true,
-        includesPublicChannel9: true,
-        includesPublicChannel10: true,
-        includesFreeChannel: true,
-        includesPrivateChannels: true,
-        includesSystem: true,
-    });
+    const [generateAsStaticHtmlOptions, setGenerateAsStaticHtmlOptions] =
+        React.useState<GenerateAsStaticHtmlOptions>({
+            includesPublicChannel1: true,
+            includesPublicChannel2: true,
+            includesPublicChannel3: true,
+            includesPublicChannel4: true,
+            includesPublicChannel5: true,
+            includesPublicChannel6: true,
+            includesPublicChannel7: true,
+            includesPublicChannel8: true,
+            includesPublicChannel9: true,
+            includesPublicChannel10: true,
+            includesFreeChannel: true,
+            includesPrivateChannels: true,
+            includesSystem: true,
+        });
 
     const [getLogQuery, getLogQueryResult] = useGetLogLazyQuery({ fetchPolicy: 'network-only' });
 
@@ -702,16 +698,12 @@ export const RoomMenu: React.FC = () => {
     const pieceValuePanel = useSelector(state => state.roomConfigModule?.panels.pieceValuePanel);
     const [leaveRoomMutation] = useLeaveRoomMutation();
     const [isBecomePlayerModalVisible, setIsBecomePlayerModalVisible] = React.useState(false);
-    const [
-        isChangeMyParticipantNameModalVisible,
-        setIsChangeMyParticipantNameModalVisible,
-    ] = React.useState(false);
+    const [isChangeMyParticipantNameModalVisible, setIsChangeMyParticipantNameModalVisible] =
+        React.useState(false);
     const [isDeleteRoomModalVisible, setIsDeleteRoomModalVisible] = React.useState(false);
     const [isGenerateLogModalVisible, setIsGenerateLogModalVisible] = React.useState(false);
-    const [
-        filesManagerDrawerType,
-        setFilesManagerDrawerType,
-    ] = React.useState<FilesManagerDrawerType | null>(null);
+    const [filesManagerDrawerType, setFilesManagerDrawerType] =
+        React.useState<FilesManagerDrawerType | null>(null);
 
     if (
         me == null ||

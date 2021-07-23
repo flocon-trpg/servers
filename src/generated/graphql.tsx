@@ -2212,7 +2212,8 @@ export function useChangeParticipantNameMutation(
 export type ChangeParticipantNameMutationHookResult = ReturnType<
     typeof useChangeParticipantNameMutation
 >;
-export type ChangeParticipantNameMutationResult = Apollo.MutationResult<ChangeParticipantNameMutation>;
+export type ChangeParticipantNameMutationResult =
+    Apollo.MutationResult<ChangeParticipantNameMutation>;
 export type ChangeParticipantNameMutationOptions = Apollo.BaseMutationOptions<
     ChangeParticipantNameMutation,
     ChangeParticipantNameMutationVariables
@@ -2857,7 +2858,8 @@ export function useWriteRoomSoundEffectMutation(
 export type WriteRoomSoundEffectMutationHookResult = ReturnType<
     typeof useWriteRoomSoundEffectMutation
 >;
-export type WriteRoomSoundEffectMutationResult = Apollo.MutationResult<WriteRoomSoundEffectMutation>;
+export type WriteRoomSoundEffectMutationResult =
+    Apollo.MutationResult<WriteRoomSoundEffectMutation>;
 export type WriteRoomSoundEffectMutationOptions = Apollo.BaseMutationOptions<
     WriteRoomSoundEffectMutation,
     WriteRoomSoundEffectMutationVariables
@@ -2998,7 +3000,8 @@ export function useMakeMessageNotSecretMutation(
 export type MakeMessageNotSecretMutationHookResult = ReturnType<
     typeof useMakeMessageNotSecretMutation
 >;
-export type MakeMessageNotSecretMutationResult = Apollo.MutationResult<MakeMessageNotSecretMutation>;
+export type MakeMessageNotSecretMutationResult =
+    Apollo.MutationResult<MakeMessageNotSecretMutation>;
 export type MakeMessageNotSecretMutationOptions = Apollo.BaseMutationOptions<
     MakeMessageNotSecretMutation,
     MakeMessageNotSecretMutationVariables
@@ -3055,7 +3058,8 @@ export function useUpdateWritingMessageStatusMutation(
 export type UpdateWritingMessageStatusMutationHookResult = ReturnType<
     typeof useUpdateWritingMessageStatusMutation
 >;
-export type UpdateWritingMessageStatusMutationResult = Apollo.MutationResult<UpdateWritingMessageStatusMutation>;
+export type UpdateWritingMessageStatusMutationResult =
+    Apollo.MutationResult<UpdateWritingMessageStatusMutation>;
 export type UpdateWritingMessageStatusMutationOptions = Apollo.BaseMutationOptions<
     UpdateWritingMessageStatusMutation,
     UpdateWritingMessageStatusMutationVariables

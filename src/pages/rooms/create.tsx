@@ -23,13 +23,10 @@ const CreateRoomCore: React.FC = () => {
     const [createRoom, createRoomResult] = useCreateRoomMutation();
     const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
     const [showEntryForm, setShowEntryForm] = React.useState<boolean>(false);
-    const [isJoinAsPlayerPhraseEnabled, setIsJoinAsPlayerPhraseEnabled] = React.useState<boolean>(
-        false
-    );
-    const [
-        isJoinAsSpectatorPhraseEnabled,
-        setIsJoinAsSpectatorPhraseEnabled,
-    ] = React.useState<boolean>(false);
+    const [isJoinAsPlayerPhraseEnabled, setIsJoinAsPlayerPhraseEnabled] =
+        React.useState<boolean>(false);
+    const [isJoinAsSpectatorPhraseEnabled, setIsJoinAsSpectatorPhraseEnabled] =
+        React.useState<boolean>(false);
     const myAuth = React.useContext(MyAuthContext);
 
     // TODO: 横幅などが足りないため、Formで表現するようなものではない気がする。

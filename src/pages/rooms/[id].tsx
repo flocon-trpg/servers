@@ -179,9 +179,11 @@ const RoomBehavior: React.FC<PropsWithChildren<{ roomId: string }>> = ({
     useRoomConfig(roomId);
 
     const dispatch = useDispatch();
-    const { observable, data: roomEventSubscription, error } = usePublishRoomEventSubscription(
-        roomId
-    );
+    const {
+        observable,
+        data: roomEventSubscription,
+        error,
+    } = usePublishRoomEventSubscription(roomId);
     const { state: roomState, refetch: refetchRoomState } = useRoomState(roomId, observable);
     const allRoomMessages = useAllRoomMessages({
         roomId,

@@ -211,7 +211,8 @@ namespace PopupEditorBase {
                                                                                                             e
                                                                                                                 .newValue
                                                                                                                 .dieType,
-                                                                                                        isValuePrivate: false,
+                                                                                                        isValuePrivate:
+                                                                                                            false,
                                                                                                         value: null,
                                                                                                     },
                                                                                       },
@@ -945,7 +946,8 @@ namespace ContextMenuModule {
                                                             [boardKey.id]: {
                                                                 type: replace,
                                                                 replace: {
-                                                                    newValue: pieceLocationWhichIsCellMode,
+                                                                    newValue:
+                                                                        pieceLocationWhichIsCellMode,
                                                                 },
                                                             },
                                                         },
@@ -975,7 +977,8 @@ namespace ContextMenuModule {
                                                             [boardKey.id]: {
                                                                 type: replace,
                                                                 replace: {
-                                                                    newValue: pieceLocationWhichIsNotCellMode,
+                                                                    newValue:
+                                                                        pieceLocationWhichIsNotCellMode,
                                                                 },
                                                             },
                                                         },
@@ -1048,7 +1051,8 @@ namespace ContextMenuModule {
                                                         [boardKey.id]: {
                                                             type: replace,
                                                             replace: {
-                                                                newValue: tachieLocationWhichIsNotCellMode,
+                                                                newValue:
+                                                                    tachieLocationWhichIsNotCellMode,
                                                             },
                                                         },
                                                     },

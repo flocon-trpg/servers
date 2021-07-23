@@ -902,10 +902,8 @@ const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: Props) 
     const activeBoardPanelConfig = useSelector(
         state => state.roomConfigModule?.panels.activeBoardPanel
     );
-    const [
-        activeBoardSelectorModalVisibility,
-        setActiveBoardSelectorModalVisibility,
-    ] = React.useState(false);
+    const [activeBoardSelectorModalVisibility, setActiveBoardSelectorModalVisibility] =
+        React.useState(false);
 
     const boardKeyToShow = (() => {
         if (panel.type === 'activeBoard') {

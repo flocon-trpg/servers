@@ -95,10 +95,8 @@ const BoardDrawer: React.FC = () => {
         updateUiState: setBoard,
         resetUiState: resetBoardToCreate,
     } = useStateEditor(stateEditorParams);
-    const [
-        filesManagerDrawerType,
-        setFilesManagerDrawerType,
-    ] = React.useState<FilesManagerDrawerType | null>(null);
+    const [filesManagerDrawerType, setFilesManagerDrawerType] =
+        React.useState<FilesManagerDrawerType | null>(null);
 
     if (myUserUid == null || board == null) {
         return null;

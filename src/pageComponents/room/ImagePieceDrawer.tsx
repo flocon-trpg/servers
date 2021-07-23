@@ -133,10 +133,8 @@ export const ImagePieceDrawer: React.FC = () => {
     const { uiState: state, updateUiState: setState } = useStateEditor<
         ImagePieceValueState | undefined
     >(stateEditorParams);
-    const [
-        filesManagerDrawerType,
-        setFilesManagerDrawerType,
-    ] = React.useState<FilesManagerDrawerType | null>(null);
+    const [filesManagerDrawerType, setFilesManagerDrawerType] =
+        React.useState<FilesManagerDrawerType | null>(null);
 
     if (myUserUid == null || state == null) {
         return null;
