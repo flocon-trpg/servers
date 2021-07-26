@@ -9,6 +9,7 @@ import {
 } from '@ltd/j-toml';
 import { Result } from '@kizahasi/result';
 import { analyze, expr1 } from './expression';
+import { maybe } from '@kizahasi/util';
 
 type TomlDateTime = TomlLocalDate | TomlLocalDateTime | TomlLocalTime | TomlOffsetDateTime;
 const dateTime = new t.Type<TomlDateTime>(
@@ -65,7 +66,7 @@ export const isValidVarToml = (toml: string): Result<undefined> => {
 export const getVariableFromVarTomlObject = (tomlObject: unknown, path: ReadonlyArray<string>) => {
     let current: any = tomlObject;
     for (const key of path) {
-        if (typeof current !== 'object') {
+        if (current == null || typeof current !== 'object') {
             return Result.ok(undefined);
         }
         const next = current[key];
@@ -91,7 +92,7 @@ export const getVariableFromVarTomlObject = (tomlObject: unknown, path: Readonly
 };
 
 const exactChatPalette = t.strict({
-    var: t.UnknownRecord,
+    var: maybe(t.UnknownRecord),
 
     // textではなくわざわざ冗長なtext.valueにしたのは、[var]→チャットパレットの文字列 の順で書けるようにするため。
     // また、将来的に例えばtext.typeに何かをセットして…という拡張もできる余地がある。
