@@ -16,10 +16,10 @@ import {
 import roomConfigModule from '../../modules/roomConfigModule';
 import { useSelector } from '../../store';
 import * as Icon from '@ant-design/icons';
-import { boardEditorPanel } from '../../states/RoomConfig';
+import { boardEditorPanel, chatPalettePanel } from '../../states/RoomConfig';
 import VolumeBarPanel from './VolumeBarPanel';
 import Jdenticon from '../../components/Jdenticon';
-import roomStateModule, { Notification } from '../../modules/roomModule';
+import { roomModule, Notification } from '../../modules/roomModule';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import path from '../../utils/path';
 import { useRouter } from 'next/router';
@@ -95,7 +95,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                     promoteToPlayer({ variables: { roomId, phrase: inputValue } }).then(e => {
                         if (e.errors != null) {
                             dispatch(
-                                roomStateModule.actions.addNotification({
+                                roomModule.actions.addNotification({
                                     type: Notification.graphQLErrors,
                                     createdAt: new Date().getTime(),
                                     errors: e.errors,
@@ -119,7 +119,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                                     break;
                             }
                             dispatch(
-                                roomStateModule.actions.addNotification({
+                                roomModule.actions.addNotification({
                                     type: 'text',
                                     notification: {
                                         type: 'warning',
@@ -156,7 +156,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                 promoteToPlayer({ variables: { roomId } }).then(e => {
                     if (e.errors != null) {
                         dispatch(
-                            roomStateModule.actions.addNotification({
+                            roomModule.actions.addNotification({
                                 type: Notification.graphQLErrors,
                                 createdAt: new Date().getTime(),
                                 errors: e.errors,
@@ -180,7 +180,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                                 break;
                         }
                         dispatch(
-                            roomStateModule.actions.addNotification({
+                            roomModule.actions.addNotification({
                                 type: 'text',
                                 notification: {
                                     type: 'warning',
@@ -240,7 +240,7 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
                 deleteRoom({ variables: { id: roomId } }).then(e => {
                     if (e.errors != null) {
                         dispatch(
-                            roomStateModule.actions.addNotification({
+                            roomModule.actions.addNotification({
                                 type: Notification.graphQLErrors,
                                 createdAt: new Date().getTime(),
                                 errors: e.errors,
@@ -261,7 +261,7 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
                                 break;
                         }
                         dispatch(
-                            roomStateModule.actions.addNotification({
+                            roomModule.actions.addNotification({
                                 type: 'text',
                                 notification: {
                                     type: 'warning',
@@ -630,7 +630,7 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
         changeParticipantName({ variables: { roomId, newName: inputValue } }).then(e => {
             if (e.errors != null) {
                 dispatch(
-                    roomStateModule.actions.addNotification({
+                    roomModule.actions.addNotification({
                         type: Notification.graphQLErrors,
                         createdAt: new Date().getTime(),
                         errors: e.errors,
@@ -642,7 +642,7 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
 
             if (e.data?.result.failureType != null) {
                 dispatch(
-                    roomStateModule.actions.addNotification({
+                    roomModule.actions.addNotification({
                         type: Notification.text,
                         notification: {
                             type: 'warning',
@@ -691,6 +691,9 @@ export const RoomMenu: React.FC = () => {
     const activeBoardPanel = useSelector(state => state.roomConfigModule?.panels.activeBoardPanel);
     const boardPanels = useSelector(state => state.roomConfigModule?.panels.boardEditorPanels);
     const characterPanel = useSelector(state => state.roomConfigModule?.panels.characterPanel);
+    const chatPalettePanels = useSelector(
+        state => state.roomConfigModule?.panels.chatPalettePanels
+    );
     const gameEffectPanel = useSelector(state => state.roomConfigModule?.panels.gameEffectPanel);
     const participantPanel = useSelector(state => state.roomConfigModule?.panels.participantPanel);
     const memoPanels = useSelector(state => state.roomConfigModule?.panels.memoPanels);
@@ -713,6 +716,7 @@ export const RoomMenu: React.FC = () => {
         activeBoardPanel == null ||
         boardPanels == null ||
         characterPanel == null ||
+        chatPalettePanels == null ||
         gameEffectPanel == null ||
         participantPanel == null ||
         memoPanels == null ||
@@ -918,6 +922,75 @@ export const RoomMenu: React.FC = () => {
                                         roomId,
                                         panel: {
                                             ...defaultMessagePanelConfig(),
+                                        },
+                                    })
+                                );
+                            }}
+                        >
+                            <div>
+                                <span>
+                                    <Icon.PlusOutlined />
+                                </span>
+                                <span>新規作成</span>
+                            </div>
+                        </Menu.Item>
+                    </Menu.SubMenu>
+                    <Menu.SubMenu title="チャットパレット">
+                        {recordToArray(chatPalettePanels).map((pair, i) => {
+                            return (
+                                <Menu.Item
+                                    key={pair.key}
+                                    onClick={() => {
+                                        // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
+                                        dispatch(
+                                            roomConfigModule.actions.setIsMinimized({
+                                                roomId,
+                                                target: {
+                                                    type: chatPalettePanel,
+                                                    panelId: pair.key,
+                                                },
+                                                newValue: false,
+                                            })
+                                        );
+
+                                        dispatch(
+                                            roomConfigModule.actions.bringPanelToFront({
+                                                roomId,
+                                                target: {
+                                                    type: chatPalettePanel,
+                                                    panelId: pair.key,
+                                                },
+                                            })
+                                        );
+                                    }}
+                                >
+                                    <div>
+                                        <span>
+                                            {pair.value.isMinimized ? (
+                                                <Icon.BorderOutlined />
+                                            ) : (
+                                                <Icon.CheckSquareOutlined />
+                                            )}
+                                        </span>
+                                        <span>{`パネル${i + 1}`}</span>
+                                    </div>
+                                </Menu.Item>
+                            );
+                        })}
+                        <Menu.Divider />
+                        <Menu.Item
+                            onClick={() => {
+                                dispatch(
+                                    roomConfigModule.actions.addChatPalettePanelConfig({
+                                        roomId,
+                                        panel: {
+                                            isMinimized: false,
+                                            x: 10,
+                                            y: 10,
+                                            width: 400,
+                                            height: 300,
+                                            isPrivateMessageMode: false,
+                                            customCharacterName: '',
                                         },
                                     })
                                 );

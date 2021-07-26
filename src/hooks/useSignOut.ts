@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import ConfigContext from '../contexts/ConfigContext';
 import { fileModule } from '../modules/fileModule';
 import { roomDrawerAndPopoverAndModalModule } from '../modules/roomDrawerAndPopoverAndModalModule';
-import roomModule from '../modules/roomModule';
+import { roomModule } from '../modules/roomModule';
 import { getAuth } from '../utils/firebaseHelpers';
 
 export function useSignOut() {

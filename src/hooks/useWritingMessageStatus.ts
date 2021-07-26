@@ -6,11 +6,8 @@ import { WritingMessageStatusType } from '../generated/graphql';
 import { useSelector } from '../store';
 
 export type WritingMessageStatusResult = ReadonlyMap<
-    PublicChannelKey.Without$System.PublicChannelKey,
-    ReadonlyMap<
-        string,
-        { prev?: WritingMessageStatusType; current: WritingMessageStatusType; __elapsed: number }
-    >
+    string,
+    { prev?: WritingMessageStatusType; current: WritingMessageStatusType; __elapsed: number }
 >;
 
 export function useWritingMessageStatus() {
@@ -30,24 +27,12 @@ export function useWritingMessageStatus() {
         }
         setResult(oldValue =>
             produce(oldValue, draft => {
-                if (
-                    !PublicChannelKey.Without$System.isPublicChannelKey(
-                        writingMessageStatus.publicChannelKey
-                    )
-                ) {
-                    return;
-                }
-                let inner = draft.get(writingMessageStatus.publicChannelKey);
-                if (inner == null) {
-                    inner = new Map();
-                }
-                const prev = inner.get(writingMessageStatus.userUid)?.current;
-                inner.set(writingMessageStatus.userUid, {
+                const prev = draft.get(writingMessageStatus.userUid)?.current;
+                draft.set(writingMessageStatus.userUid, {
                     prev,
                     current: writingMessageStatus.status,
                     __elapsed: 0,
                 });
-                draft.set(writingMessageStatus.publicChannelKey, inner);
             })
         );
     }, [roomEventSubscription?.roomEvent?.writingMessageStatus]);
@@ -57,14 +42,12 @@ export function useWritingMessageStatus() {
         const subscription = interval(2000).subscribe(() => {
             setResult(oldValue =>
                 produce(oldValue, draft => {
-                    draft.forEach(inner => {
-                        inner.forEach((value, key) => {
-                            if (value.__elapsed >= 4000) {
-                                inner.delete(key);
-                                return;
-                            }
-                            value.__elapsed += 2000;
-                        });
+                    draft.forEach((value, key) => {
+                        if (value.__elapsed >= 4000) {
+                            draft.delete(key);
+                            return;
+                        }
+                        value.__elapsed += 2000;
                     });
                 })
             );

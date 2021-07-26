@@ -224,7 +224,7 @@ export type MessagePanelConfig = {
     isMinimized: boolean;
     tabs: TabConfig[];
     selectedTextColor?: string;
-    selectedChannelType?: string;
+    isPrivateMessageMode: boolean;
     selectedPublicChannelKey?: string;
     selectedCharacterType?: string;
     selectedCharacterStateId?: string;
@@ -245,7 +245,7 @@ export const castToPartialMessagePanelConfig = (
         isMinimized: castToBoolean(source.isMinimized),
         tabs: castToArray(source.tabs, castToPartialTabConfig)?.map(toCompleteTabConfig),
         selectedTextColor: castToString(source.selectedTextColor),
-        selectedChannelType: castToString(source.selectedChannelType),
+        isPrivateMessageMode: castToBoolean(source.isPrivateMessageMode),
         selectedPublicChannelKey: castToString(source.selectedPublicChannelKey),
         selectedCharacterType: castToString(source.selectedCharacterType),
         selectedCharacterStateId: castToString(source.selectedCharacterStateId),
@@ -262,7 +262,7 @@ export const toCompleteMessagePanelConfig = (
         isMinimized: source.isMinimized ?? false,
         tabs: source.tabs ?? [],
         selectedTextColor: source.selectedTextColor,
-        selectedChannelType: source.selectedChannelType,
+        isPrivateMessageMode: source.isPrivateMessageMode ?? false,
         selectedPublicChannelKey: source.selectedPublicChannelKey,
         selectedCharacterType: source.selectedCharacterType,
         selectedCharacterStateId: source.selectedCharacterStateId,
@@ -280,6 +280,7 @@ export const defaultMessagePanelConfig = (): MessagePanelConfig => {
         zIndex: 0,
         isMinimized: false,
         tabs: [TabConfig.createAll({})],
+        isPrivateMessageMode: false,
         customCharacterName: '',
     };
 };

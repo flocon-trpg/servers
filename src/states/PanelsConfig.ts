@@ -2,15 +2,15 @@ import { castToRecord } from '../utils/cast';
 import isObject from '../utils/isObject';
 import {
     castToPartialCharactersPanelConfig,
-    CharactersPanelConfig as CharacterPanelConfig,
-    defaultCharactersPanelConfig as defaultCharacterPanelConfig,
-    PartialCharactersPanelConfig as PartialCharacterPanelConfig,
+    CharactersPanelConfig,
+    defaultCharactersPanelConfig,
+    PartialCharactersPanelConfig,
     toCompleteCharactersPanelConfig,
 } from './CharactersPanelConfig';
 import {
     BoardEditorPanelConfig,
     castToPartialBoardEditorPanelConfig,
-    defaultBoardEditorPanelsConfig as defaultBoardEditorPanelsConfig,
+    defaultBoardEditorPanelsConfig,
     PartialBoardEditorPanelConfig,
     toCompleteBoardEditorPanelConfig,
 } from './BoardEditorPanelConfig';
@@ -57,11 +57,19 @@ import {
     PartialMemoPanelConfig,
     toCompleteMemoPanelConfig,
 } from './MemoPanelConfig';
+import {
+    castToPartialChatPalettePanelConfig,
+    ChatPalettePanelConfig,
+    defaultChatPalettePanelsConfig,
+    PartialChatPalettePanelConfig,
+    toCompleteChatPalettePanelConfig,
+} from './ChatPalettePanelConfig';
 
 export type PanelsConfig = {
     activeBoardPanel: ActiveBoardPanelConfig;
     boardEditorPanels: Record<string, BoardEditorPanelConfig>;
-    characterPanel: CharacterPanelConfig;
+    characterPanel: CharactersPanelConfig;
+    chatPalettePanels: Record<string, ChatPalettePanelConfig>;
     gameEffectPanel: GameEffectPanelConfig;
     memoPanels: Record<string, MemoPanelConfig>;
     messagePanels: Record<string, MessagePanelConfig>;
@@ -72,7 +80,8 @@ export type PanelsConfig = {
 export type PartialPanelsConfig = {
     activeBoardPanel?: PartialActiveBoardPanelConfig;
     boardEditorPanels?: Record<string, PartialBoardEditorPanelConfig>;
-    characterPanel?: PartialCharacterPanelConfig;
+    characterPanel?: PartialCharactersPanelConfig;
+    chatPalettePanels?: Record<string, PartialChatPalettePanelConfig>;
     gameEffectPanel?: PartialGameEffectPanelConfig;
     messagePanels?: Record<string, PartialMessagePanelConfig>;
     memoPanels?: Record<string, PartialMemoPanelConfig>;
@@ -91,6 +100,10 @@ export const castToPartialPanelsConfig = (source: unknown): PartialPanelsConfig 
             castToPartialBoardEditorPanelConfig
         ),
         characterPanel: castToPartialCharactersPanelConfig(source.characterPanel),
+        chatPalettePanels: castToRecord(
+            source.chatPalettePanels,
+            castToPartialChatPalettePanelConfig
+        ),
         gameEffectPanel: castToPartialGameEffectPanelConfig(source.gameEffectPanel),
         memoPanels: castToRecord(source.memoPanels, castToPartialMemoPanelConfig),
         messagePanels: castToRecord(source.messagePanels, castToPartialMessagePanelConfig),
@@ -107,6 +120,10 @@ export const toCompletePanelsConfig = (source: PartialPanelsConfig): PanelsConfi
             toCompleteBoardEditorPanelConfig
         ),
         characterPanel: toCompleteCharactersPanelConfig(source.characterPanel ?? {}),
+        chatPalettePanels: chooseRecord(
+            source.chatPalettePanels ?? {},
+            toCompleteChatPalettePanelConfig
+        ),
         gameEffectPanel: toCompleteGameEffectPanelConfig(source.gameEffectPanel ?? {}),
         memoPanels: chooseRecord(source.memoPanels ?? {}, toCompleteMemoPanelConfig),
         messagePanels: chooseRecord(source.messagePanels ?? {}, toCompleteMessagePanelConfig),
@@ -119,7 +136,8 @@ export const defaultPanelsConfig = (): PanelsConfig => {
     return {
         activeBoardPanel: defaultActiveBoardPanelsConfig(),
         boardEditorPanels: defaultBoardEditorPanelsConfig(),
-        characterPanel: defaultCharacterPanelConfig(),
+        characterPanel: defaultCharactersPanelConfig(),
+        chatPalettePanels: defaultChatPalettePanelsConfig(),
         gameEffectPanel: defaultGameEffectPanelConfig(),
         memoPanels: defaultMemoPanelsConfig(),
         messagePanels: defaultMessagePanelsConfig(),

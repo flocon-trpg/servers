@@ -53,6 +53,7 @@ import {
 } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
+import { ChatPaletteTomlInput } from '../../components/ChatPaletteTomlInput';
 
 const notFound = 'notFound';
 
@@ -62,6 +63,7 @@ const drawerBaseProps: Partial<DrawerProps> = {
 
 const defaultCharacter: CharacterState = {
     $version: 1,
+    chatPalette: '',
     memo: '',
     name: '',
     isPrivate: false,
@@ -878,6 +880,26 @@ const CharacterDrawer: React.FC = () => {
                                     onChange={e =>
                                         updateCharacter({ privateVarToml: e.currentValue })
                                     }
+                                />
+                            </Col>
+                        </Row>
+                    </>
+                )}
+
+                {createdByMe && drawerType?.type === update && (
+                    <>
+                        <Typography.Title level={4}>チャットパレット</Typography.Title>
+
+                        <Row gutter={gutter} align="middle">
+                            <Col flex="auto" />
+                            <Col flex={0}></Col>
+                            <Col span={inputSpan}>
+                                <ChatPaletteTomlInput
+                                    size="small"
+                                    bufferDuration="default"
+                                    value={character.chatPalette ?? ''}
+                                    rows={8}
+                                    onChange={e => updateCharacter({ chatPalette: e.currentValue })}
                                 />
                             </Col>
                         </Row>

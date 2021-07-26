@@ -382,7 +382,6 @@ export type MutationPromoteToPlayerArgs = {
 
 export type MutationUpdateWritingMessageStatusArgs = {
     newStatus: WritingMessageStatusInputType;
-    publicChannelKey: Scalars['String'];
     roomId: Scalars['String'];
 };
 
@@ -781,7 +780,6 @@ export type WriteRoomSoundEffectResult = RoomSoundEffect | WriteRoomSoundEffectF
 
 export type WritingMessageStatus = {
     __typename?: 'WritingMessageStatus';
-    publicChannelKey: Scalars['String'];
     status: WritingMessageStatusType;
     updatedAt: Scalars['Float'];
     userUid: Scalars['String'];
@@ -1361,7 +1359,6 @@ export type MakeMessageNotSecretMutation = { __typename?: 'Mutation' } & {
 
 export type UpdateWritingMessageStatusMutationVariables = Exact<{
     roomId: Scalars['String'];
-    publicChannelKey: Scalars['String'];
     newStatus: WritingMessageStatusInputType;
 }>;
 
@@ -1411,7 +1408,7 @@ export type RoomEventSubscription = { __typename?: 'Subscription' } & {
             writingMessageStatus?: Maybe<
                 { __typename?: 'WritingMessageStatus' } & Pick<
                     WritingMessageStatus,
-                    'userUid' | 'status' | 'publicChannelKey'
+                    'userUid' | 'status'
                 >
             >;
         }
@@ -3009,14 +3006,9 @@ export type MakeMessageNotSecretMutationOptions = Apollo.BaseMutationOptions<
 export const UpdateWritingMessageStatusDocument = gql`
     mutation UpdateWritingMessageStatus(
         $roomId: String!
-        $publicChannelKey: String!
         $newStatus: WritingMessageStatusInputType!
     ) {
-        result: updateWritingMessageStatus(
-            roomId: $roomId
-            publicChannelKey: $publicChannelKey
-            newStatus: $newStatus
-        )
+        result: updateWritingMessageStatus(roomId: $roomId, newStatus: $newStatus)
     }
 `;
 export type UpdateWritingMessageStatusMutationFn = Apollo.MutationFunction<
@@ -3038,7 +3030,6 @@ export type UpdateWritingMessageStatusMutationFn = Apollo.MutationFunction<
  * const [updateWritingMessageStatusMutation, { data, loading, error }] = useUpdateWritingMessageStatusMutation({
  *   variables: {
  *      roomId: // value for 'roomId'
- *      publicChannelKey: // value for 'publicChannelKey'
  *      newStatus: // value for 'newStatus'
  *   },
  * });
@@ -3084,7 +3075,6 @@ export const RoomEventDocument = gql`
             writingMessageStatus {
                 userUid
                 status
-                publicChannelKey
             }
         }
     }

@@ -51,6 +51,7 @@ export type UpdateGameSystemAction = {
 export const activeBoardPanel = 'activeBoardPanel';
 export const boardEditorPanel = 'boardEditorPanel';
 export const characterPanel = 'characterPanel';
+export const chatPalettePanel = 'chatPalettePanel';
 export const gameEffectPanel = 'gameEffectPanel';
 export const memoPanel = 'memoPanel';
 export const messagePanel = 'messagePanel';
@@ -69,6 +70,10 @@ export type PanelAction = {
           }
         | {
               type: typeof characterPanel;
+          }
+        | {
+              type: typeof chatPalettePanel;
+              panelId: string;
           }
         | {
               type: typeof gameEffectPanel;

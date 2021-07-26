@@ -1,4 +1,4 @@
-import { isValidVarToml } from '@kizahasi/flocon-core';
+import { isValidChatPalette, isValidVarToml } from '@kizahasi/flocon-core';
 import React from 'react';
 import {
     BufferedTextArea,
@@ -8,15 +8,15 @@ import {
 
 type Props = Omit<BufferedTextAreaProps, 'spellCheck'>;
 
-export const TomlInput: React.FC<Props> = (props: Props) => {
+export const ChatPaletteTomlInput: React.FC<Props> = (props: Props) => {
     const { ...inputProps } = props;
     const bottomElement = (params: BottomElementParams): JSX.Element | null => {
         if (params.isSkipping) {
             return <div>編集中…</div>;
         }
-        const result = isValidVarToml(params.currentValue);
+        const result = isValidChatPalette(params.currentValue);
         if (result.isError) {
-            return <div>TOML文法エラー</div>;
+            return <div>エラー</div>;
         }
         return <div>OK</div>;
     };
