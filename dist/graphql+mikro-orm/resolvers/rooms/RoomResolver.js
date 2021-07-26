@@ -2410,9 +2410,6 @@ let RoomResolver = class RoomResolver {
         return coreResult.result;
     }
     async updateWritingMessageStatus(args, context, pubSub) {
-        if (!util_1.PublicChannelKey.Without$System.isPublicChannelKey(args.publicChannelKey)) {
-            return false;
-        }
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
             return false;
@@ -2432,7 +2429,6 @@ let RoomResolver = class RoomResolver {
         const returns = context.connectionManager.onWritingMessageStatusUpdate({
             roomId: args.roomId,
             userUid: decodedIdToken.uid,
-            publicChannelKey: args.publicChannelKey,
             status,
         });
         if (returns != null) {
@@ -2442,7 +2438,6 @@ let RoomResolver = class RoomResolver {
                 userUid: decodedIdToken.uid,
                 status: returns,
                 updatedAt: new Date().getTime(),
-                publicChannelKey: args.publicChannelKey,
             });
         }
         return true;
@@ -2471,7 +2466,6 @@ let RoomResolver = class RoomResolver {
             return {
                 writingMessageStatus: {
                     userUid: payload.userUid,
-                    publicChannelKey: payload.publicChannelKey,
                     status: payload.status,
                     updatedAt: payload.updatedAt,
                 },

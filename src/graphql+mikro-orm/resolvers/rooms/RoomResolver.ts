@@ -215,7 +215,6 @@ export type WritingMessageStatusUpdatePayload = {
     type: 'writingMessageStatusUpdatePayload';
     roomId: string;
     userUid: string;
-    publicChannelKey: string;
     status: WritingMessageStatusType;
     updatedAt: number;
 };
@@ -3157,9 +3156,6 @@ export class RoomResolver {
         @Ctx() context: ResolverContext,
         @PubSub() pubSub: PubSubEngine
     ): Promise<boolean> {
-        if (!PublicChannelKey.Without$System.isPublicChannelKey(args.publicChannelKey)) {
-            return false;
-        }
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
             return false;
@@ -3180,7 +3176,6 @@ export class RoomResolver {
         const returns = context.connectionManager.onWritingMessageStatusUpdate({
             roomId: args.roomId,
             userUid: decodedIdToken.uid,
-            publicChannelKey: args.publicChannelKey,
             status,
         });
         if (returns != null) {
@@ -3190,7 +3185,6 @@ export class RoomResolver {
                 userUid: decodedIdToken.uid,
                 status: returns,
                 updatedAt: new Date().getTime(),
-                publicChannelKey: args.publicChannelKey,
             });
         }
         return true;
@@ -3228,7 +3222,6 @@ export class RoomResolver {
             return {
                 writingMessageStatus: {
                     userUid: payload.userUid,
-                    publicChannelKey: payload.publicChannelKey,
                     status: payload.status,
                     updatedAt: payload.updatedAt,
                 },

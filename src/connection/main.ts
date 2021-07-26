@@ -1,4 +1,3 @@
-import { PublicChannelKey } from '@kizahasi/util';
 import { PubSub } from 'graphql-subscriptions';
 import _ from 'lodash';
 import NodeCache from 'node-cache';
@@ -98,18 +97,13 @@ class WritingMessageStatusDatabase {
     public set({
         roomId,
         status,
-        publicChannelKey,
         userUid,
     }: {
         roomId: string;
         userUid: string;
-        publicChannelKey: string;
         status: WritingMessageStatusType;
     }): WritingMessageStatusType | null {
-        if (!PublicChannelKey.Without$System.isPublicChannelKey(publicChannelKey)) {
-            return null;
-        }
-        const key = `${roomId}@${userUid}@${publicChannelKey}`;
+        const key = `${roomId}@${userUid}`;
         const oldValue = this.database.get(key);
         if (oldValue === status && status !== WritingMessageStatusType.Writing) {
             return null;
@@ -118,36 +112,22 @@ class WritingMessageStatusDatabase {
         return status;
     }
 
-    public onDisconnect({
-        userUid,
-        roomId,
-    }: {
-        userUid: string;
-        roomId: string;
-    }): { publicChannelKey: PublicChannelKey.Without$System.PublicChannelKey }[] {
-        return _(this.database.keys())
-            .map(key => {
-                const split = key.split('@');
-                if (split.length !== 3) {
-                    return undefined;
-                }
-                const roomIdKey = split[0];
-                const userUidKey = split[1];
-                const publicChannelKey = split[2];
-                if (roomIdKey !== roomId) {
-                    return undefined;
-                }
-                if (userUidKey !== userUid) {
-                    return undefined;
-                }
-                if (!PublicChannelKey.Without$System.isPublicChannelKey(publicChannelKey)) {
-                    return undefined;
-                }
-                this.database.del(key);
-                return { publicChannelKey };
-            })
-            .compact()
-            .value();
+    public onDisconnect({ userUid, roomId }: { userUid: string; roomId: string }): void {
+        return this.database.keys().forEach(key => {
+            const split = key.split('@');
+            if (split.length !== 2) {
+                return undefined;
+            }
+            const roomIdKey = split[0];
+            const userUidKey = split[1];
+            if (roomIdKey !== roomId) {
+                return undefined;
+            }
+            if (userUidKey !== userUid) {
+                return undefined;
+            }
+            this.database.del(key);
+        });
     }
 }
 
@@ -199,23 +179,20 @@ export class InMemoryConnectionManager {
         };
         pubSub.publish(ROOM_EVENT, payload1);
 
-        this.writingMessageStatusDatabase.onDisconnect(deleted).forEach(({ publicChannelKey }) => {
-            const payload2: RoomEventPayload = {
-                type: 'writingMessageStatusUpdatePayload',
-                roomId: deleted.roomId,
-                userUid: deleted.userUid,
-                publicChannelKey,
-                status: WritingMessageStatusType.Disconnected,
-                updatedAt: new Date().getTime(),
-            };
-            pubSub.publish(ROOM_EVENT, payload2);
-        });
+        this.writingMessageStatusDatabase.onDisconnect(deleted);
+        const payload2: RoomEventPayload = {
+            type: 'writingMessageStatusUpdatePayload',
+            roomId: deleted.roomId,
+            userUid: deleted.userUid,
+            status: WritingMessageStatusType.Disconnected,
+            updatedAt: new Date().getTime(),
+        };
+        pubSub.publish(ROOM_EVENT, payload2);
     }
 
     public onWritingMessageStatusUpdate(params: {
         roomId: string;
         userUid: string;
-        publicChannelKey: string;
         status: WritingMessageStatusType;
     }) {
         return this.writingMessageStatusDatabase.set(params);

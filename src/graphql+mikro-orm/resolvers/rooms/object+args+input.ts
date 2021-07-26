@@ -186,9 +186,6 @@ export class UpdateWritingMessageStateArgs {
 
     @Field(() => WritingMessageStatusInputType)
     public newStatus!: WritingMessageStatusInputType;
-
-    @Field()
-    public publicChannelKey!: string;
 }
 
 export const GetRoomConnectionSuccessResultType = 'GetRoomConnectionSuccessResultType';
@@ -249,9 +246,6 @@ export class WritingMessageStatus {
 
     @Field()
     public updatedAt!: number;
-
-    @Field()
-    public publicChannelKey!: string;
 }
 
 @ObjectType()
