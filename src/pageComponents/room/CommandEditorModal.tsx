@@ -81,9 +81,12 @@ export const CommandEditorModal: React.FC = () => {
     const [privateCommands, setPrivateCommands] = React.useState<Map<string, CommandState>>(
         new Map()
     );
-    const [selectedKey, setSelectedKey] = React.useState<string | undefined>();
+    const privateCommandsAsArray = [...privateCommands].sort(([, x], [, y]) =>
+        x.name.localeCompare(y.name)
+    );
+    const [selectedKeyState, setSelectedKeyState] = React.useState<string | undefined>();
     React.useEffect(() => {
-        setSelectedKey(undefined);
+        setSelectedKeyState(undefined);
         if (commandEditorModalType == null) {
             return;
         }
@@ -125,19 +128,19 @@ export const CommandEditorModal: React.FC = () => {
         if (character == null) {
             return null;
         }
-        return [...privateCommands]
-            .sort(([, x], [, y]) => x.name.localeCompare(y.name))
-            .map(([key, value]) => (
-                <Select.Option key={key} value={key}>
-                    {value.name}
-                </Select.Option>
-            ));
+        return privateCommandsAsArray.map(([key, value]) => (
+            <Select.Option key={key} value={key}>
+                {value.name}
+            </Select.Option>
+        ));
     };
 
+    const firstPrivateCommand = privateCommandsAsArray[0];
+    const selectedKey = selectedKeyState ?? firstPrivateCommand?.[0];
     const privateCommand = selectedKey == null ? undefined : privateCommands.get(selectedKey);
     let editorElement: JSX.Element | null;
     if (selectedKey == null) {
-        editorElement = <div>コマンドを選択してください。</div>;
+        editorElement = <div>コマンドがありません。</div>;
     } else if (privateCommand == null) {
         editorElement = <div>指定されたコマンドが見つかりませんでした。</div>;
     } else {
@@ -208,32 +211,49 @@ export const CommandEditorModal: React.FC = () => {
             onCancel={() => close()}
         >
             <div>
-                <Select
-                    value={selectedKey}
-                    onSelect={x => setSelectedKey(x)}
-                    style={{ minWidth: 100 }}
-                >
-                    {options()}
-                </Select>
-                <Button
-                    onClick={() => {
-                        const id = simpleId();
-                        setPrivateCommands(privateCommands => {
-                            if (privateCommands.has(id)) {
-                                return privateCommands;
+                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    <Select
+                        value={selectedKey}
+                        onSelect={x => setSelectedKeyState(x)}
+                        style={{ minWidth: 100 }}
+                    >
+                        {options()}
+                    </Select>
+                    <Button
+                        disabled={selectedKey == null}
+                        onClick={() => {
+                            if (selectedKey == null) {
+                                return;
                             }
-                            privateCommands.set(id, {
-                                $version: 1,
-                                name: '新規作成コマンド',
-                                value: '',
+                            setPrivateCommands(privateCommands => {
+                                const newState = new Map(privateCommands);
+                                newState.delete(selectedKey);
+                                return newState;
                             });
-                            return privateCommands;
-                        });
-                        setSelectedKey(id);
-                    }}
-                >
-                    追加
-                </Button>
+                        }}
+                    >
+                        削除
+                    </Button>
+                    <Button
+                        onClick={() => {
+                            const id = simpleId();
+                            setPrivateCommands(privateCommands => {
+                                if (privateCommands.has(id)) {
+                                    return privateCommands;
+                                }
+                                privateCommands.set(id, {
+                                    $version: 1,
+                                    name: '新規作成コマンド',
+                                    value: '',
+                                });
+                                return privateCommands;
+                            });
+                            setSelectedKeyState(id);
+                        }}
+                    >
+                        新規作成
+                    </Button>
+                </div>
                 {editorElement}
             </div>
         </Modal>
