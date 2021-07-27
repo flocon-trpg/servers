@@ -30,6 +30,7 @@ export namespace Resources {
     export namespace Character {
         export const emptyState: CharacterState = {
             $version: 1,
+            chatPalette: '',
             memo: '',
             name: '',
             image: undefined,
@@ -142,6 +143,7 @@ export namespace Resources {
                         sourceType: 'Default',
                     },
                     isPrivate: false,
+                    chatPalette: '',
                     memo: 'CHARA_MEMO',
                     name: 'CHARA_NAME',
                     privateCommand: 'CHARA_PRIVATE_COMMAND',
