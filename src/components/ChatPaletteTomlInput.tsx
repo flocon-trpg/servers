@@ -1,4 +1,4 @@
-import { isValidChatPalette, isValidVarToml } from '@kizahasi/flocon-core';
+import { isValidChatPalette } from '@kizahasi/flocon-core';
 import React from 'react';
 import {
     BufferedTextArea,

@@ -2,6 +2,7 @@ import classNames from 'classnames';
 import React from 'react';
 import { useBuffer } from '../hooks/useBuffer';
 import * as Icons from '@ant-design/icons';
+import { useReadonlyRef } from '../hooks/useReadonlyRef';
 
 // Inputの制御は、Controlled（useStateなどを用いて値をInputにわたす）ではなくUncontrolled（DOMを直接操作）を採用している。
 // 現段階の状態ではControlledでも書けるが、collaborative editingを実現するためにはカーソルの自動移動も必要だと考えられ、この場合はおそらくDOM操作が必須になる。これを見越してUncontrolledで書いている。
@@ -54,6 +55,12 @@ export const BufferedTextArea: React.FC<Props> = (props: Props) => {
     const [bottomElement, setBottomElement] = React.useState<JSX.Element | null>(() => {
         return createBottomElement({ isSkipping: false, currentValue: value });
     });
+    const createBottomElementRef = useReadonlyRef(createBottomElement);
+    React.useEffect(() => {
+        setBottomElement(
+            createBottomElementRef.current({ isSkipping: false, currentValue: value })
+        );
+    }, [value, createBottomElementRef]);
     const onChangeOutput = (params: OnChangeParams) => {
         if (onChange != null) {
             onChange(params);
