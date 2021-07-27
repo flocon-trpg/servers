@@ -2,7 +2,7 @@
     "dependencies": {
         "@apollo/client": "^3.3.21",
         "@emotion/react": "^11.4.0",
-        "@kizahasi/flocon-core": "^0.14.0",
+        "@kizahasi/flocon-core": "^0.14.1",
         "@kizahasi/result": "^0.3.0",
         "@kizahasi/util": "^0.2.3",
         "@monaco-editor/react": "^4.2.1",
