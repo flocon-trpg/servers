@@ -60,7 +60,11 @@ const ChatPaletteList: React.FC<ChatPaletteListProps> = ({
     }
 
     const options = chatPaletteResult.value.map((value, i) => (
-        <option key={i} value={value}>
+        <option
+            style={{ backgroundColor: i % 2 === 0 ? undefined : '#FFFFFF10' }}
+            key={i}
+            value={value}
+        >
             {value}
         </option>
     ));
