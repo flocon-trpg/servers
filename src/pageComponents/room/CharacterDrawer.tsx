@@ -40,7 +40,6 @@ import {
     toCharacterUpOperation,
     UpOperation,
     pieceDiff,
-    testCommand,
 } from '@kizahasi/flocon-core';
 import { dualKeyRecordFind, strIndex20Array } from '@kizahasi/util';
 import { useSelector } from '../../store';
@@ -53,7 +52,6 @@ import {
 } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
-import { ChatPaletteTomlInput } from '../../components/ChatPaletteTomlInput';
 
 const notFound = 'notFound';
 
@@ -894,13 +892,20 @@ const CharacterDrawer: React.FC = () => {
                             <Col flex="auto" />
                             <Col flex={0}></Col>
                             <Col span={inputSpan}>
-                                <ChatPaletteTomlInput
-                                    size="small"
-                                    bufferDuration="default"
-                                    value={character.chatPalette ?? ''}
-                                    rows={8}
-                                    onChange={e => updateCharacter({ chatPalette: e.currentValue })}
-                                />
+                                <Button
+                                    onClick={() =>
+                                        dispatch(
+                                            roomDrawerAndPopoverAndModalModule.actions.set({
+                                                chatPaletteEditorModalType: {
+                                                    type: characterCommand,
+                                                    characterKey: drawerType.stateKey,
+                                                },
+                                            })
+                                        )
+                                    }
+                                >
+                                    編集
+                                </Button>
                             </Col>
                         </Row>
                     </>
