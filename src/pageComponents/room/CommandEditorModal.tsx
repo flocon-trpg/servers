@@ -20,6 +20,9 @@ type EditorProps = {
 
 const Editor: React.FC<EditorProps> = ({ script, onChange }: EditorProps) => {
     const [scriptState, setScriptState] = React.useState(script);
+    React.useEffect(() => {
+        setScriptState(script);
+    }, [script]);
     const [errorMarkers, setErrorMarkers] = React.useState<{ message: string }[]>([]);
     const { isSkipping, currentValue } = useBufferValue({
         value: scriptState,
@@ -122,11 +125,11 @@ export const CommandEditorModal: React.FC = () => {
         if (character == null) {
             return null;
         }
-        return recordToArray(character.privateCommands)
-            .sort((x, y) => x.value.name.localeCompare(y.value.name))
-            .map(pair => (
-                <Select.Option key={pair.key} value={pair.key}>
-                    {pair.value.name}
+        return [...privateCommands]
+            .sort(([, x], [, y]) => x.name.localeCompare(y.name))
+            .map(([key, value]) => (
+                <Select.Option key={key} value={key}>
+                    {value.name}
                 </Select.Option>
             ));
     };
