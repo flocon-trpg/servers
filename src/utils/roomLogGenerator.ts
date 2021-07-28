@@ -453,7 +453,7 @@ export const generateAsRichLog = async (
     jsFolder.file('preactProps.js', `const preactProps = ${JSON.stringify({ messages: messageProps })}`);
     jsFolder.file(
         'source.txt',
-        'htmPreact.js: https://unpkg.com/htm@3.1.0/preact/standalone.umd.js'
+        'htmPreact.js: https://unpkg.com/browse/htm@3.1.0/preact/standalone.umd.js'
     );
 
     zip.file('index.html', logHtml);
