@@ -450,7 +450,10 @@ export const generateAsRichLog = async (
     }
     jsFolder.file('htmPreact.js', htmPreact);
     jsFolder.file('renderToBody.js', richLogRenderJs);
-    jsFolder.file('preactProps.js', `const preactProps = ${JSON.stringify({ messages: messageProps })}`);
+    jsFolder.file(
+        'preactProps.js',
+        `const preactProps = ${JSON.stringify({ messages: messageProps })}`
+    );
     jsFolder.file(
         'source.txt',
         'htmPreact.js: https://unpkg.com/browse/htm@3.1.0/preact/standalone.umd.js'
@@ -458,5 +461,9 @@ export const generateAsRichLog = async (
 
     zip.file('index.html', logHtml);
 
-    return await zip.generateAsync({ type: 'blob' });
+    return await zip.generateAsync({
+        type: 'blob',
+        compression: 'DEFLATE',
+        compressionOptions: { level: 6 },
+    });
 };
