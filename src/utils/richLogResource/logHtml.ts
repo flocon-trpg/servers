@@ -8,9 +8,9 @@ export const logHtml = `
 <body>
 <script src="./js/htmPreact.js"></script>
 <script src="./js/renderToBody.js"></script>
-<script src="./js/messages.js"></script>
+<script src="./js/preactProps.js"></script>
 <script>
-renderToBody(messages);
+renderToBody(preactProps);
 </script>
 </body>
 </html>

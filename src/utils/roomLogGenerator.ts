@@ -360,10 +360,7 @@ class ImageDownloader {
         const result: ImageResult = {
             // Firebase Storageのファイル名は長すぎる上に%などの文字が含まれており、imgのsrcに渡すと正常に動作しない、messages.jsのファイルサイズが大きくなるという2つの問題点があるため、ランダムな文字列に置き換えている。
             // image1, image2... のように番号を順に割り振ったファイル名のほうがユーザーによるカスタマイズが行いやすいためこちらのほうが良いが、少し面倒なので現時点では却下している。
-            filename:
-                fileExtension == null
-                    ? `${simpleId()}`
-                    : `${simpleId()}.${fileExtension}`,
+            filename: fileExtension == null ? `${simpleId()}` : `${simpleId()}.${fileExtension}`,
             blob: new Blob([image.data]),
         };
         if (filePath.sourceType === FileSourceType.FirebaseStorage) {
@@ -405,7 +402,17 @@ export const generateAsRichLog = async (
     if (imgFolder == null) {
         throw new Error(thisShouldNotHappen);
     }
+    const nonameImage = await axios
+        .get('/log/noname.png', { responseType: 'blob' })
+        .catch(() => null);
+    if (nonameImage != null) {
+        imgFolder.file('noname.png', nonameImage.data);
+    }
 
+    const imgAvatarFolder = imgFolder.folder('avatar');
+    if (imgAvatarFolder == null) {
+        throw new Error(thisShouldNotHappen);
+    }
     const messageProps: RichLogMessageProps[] = [];
     for (const msg of createRoomMessageArray(params).sort((x, y) => x.createdAt - y.createdAt)) {
         if (msg.type === privateMessage) {
@@ -423,14 +430,14 @@ export const generateAsRichLog = async (
         if (msg.value.createdBy.characterImage != null) {
             const image = await imageDownloader.download(msg.value.createdBy.characterImage);
             if (image != null) {
-                imgFolder.file(image.filename, image.blob);
-                avatar = `./img/${image.filename}`;
+                imgAvatarFolder.file(image.filename, image.blob);
+                avatar = `./img/avatar/${image.filename}`;
             }
         }
         messageProps.push({
             id: msg.value.messageId,
             text: msg.value.text,
-            textColor: msg.value.textColor ?? 'black',
+            textColor: msg.value.textColor ?? 'white',
             characterName: msg.value.createdBy.rolePlayPart,
             userName: msg.value.createdBy.participantNamePart,
             avatar,
@@ -443,7 +450,7 @@ export const generateAsRichLog = async (
     }
     jsFolder.file('htmPreact.js', htmPreact);
     jsFolder.file('renderToBody.js', richLogRenderJs);
-    jsFolder.file('messages.js', `const messages = ${JSON.stringify({ messages: messageProps })}`);
+    jsFolder.file('preactProps.js', `const preactProps = ${JSON.stringify({ messages: messageProps })}`);
     jsFolder.file(
         'source.txt',
         'htmPreact.js: https://unpkg.com/htm@3.1.0/preact/standalone.umd.js'
