@@ -1146,7 +1146,6 @@ export class RoomResolver {
         args: GetLogArgs;
         context: ResolverContext;
     }): Promise<{ result: typeof GetRoomLogResult; payload?: MessageUpdatePayload }> {
-        console.time('logCore');
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
             return {

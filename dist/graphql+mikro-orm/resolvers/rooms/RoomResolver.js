@@ -800,7 +800,6 @@ let RoomResolver = class RoomResolver {
         return this.getMessagesCore({ args, context });
     }
     async getLogCore({ args, context, }) {
-        console.time('logCore');
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
             return {
