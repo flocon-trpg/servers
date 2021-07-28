@@ -5,7 +5,7 @@ import { simpleId } from '../../utils/generators';
 import { replace } from '../../stateManagers/states/types';
 import { DrawerProps } from 'antd/lib/drawer';
 import InputFile from '../../components/InputFile';
-import { FilePath, FilesManagerDrawerType } from '../../utils/types';
+import { FilesManagerDrawerType } from '../../utils/types';
 import FilesManagerDrawer from '../../components/FilesManagerDrawer';
 import { Gutter } from 'antd/lib/grid/row';
 import NumberParameterInput from '../../components/NumberParameterInput';
@@ -52,6 +52,7 @@ import {
 } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
+import { FilePath } from '../../utils/filePath';
 
 const notFound = 'notFound';
 

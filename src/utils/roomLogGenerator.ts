@@ -1,4 +1,5 @@
 import {
+    FileSourceType,
     RoomMessages,
     RoomPrivateMessage,
     RoomPublicChannel,
@@ -13,11 +14,19 @@ import { messageContentMaxHeight, RoomMessage } from '../pageComponents/room/Roo
 import { isDeleted, toText } from './message';
 import { ParticipantState } from '@kizahasi/flocon-core';
 import { Color } from './color';
+import { FilePath } from './filePath';
+import axios from 'axios';
+import JSZip, { file } from 'jszip';
+import { Config } from '../config';
+import { analyzeUrl } from './analyzeUrl';
+import { simpleId } from './generators';
+import fileDownload from 'js-file-download';
+import { ExpiryMap } from './expiryMap';
 
 const privateMessage = 'privateMessage';
 const publicMessage = 'publicMessage';
 
-type CreatedBy = { rolePlayPart?: string; participantNamePart: string };
+type CreatedBy = { rolePlayPart?: string; participantNamePart: string; characterImage?: FilePath };
 
 type RoomMessage =
     | {
@@ -25,6 +34,7 @@ type RoomMessage =
           deleted: true;
           createdAt: number;
           value: {
+              messageId: string;
               text: null;
               channelName: string;
               createdBy: CreatedBy;
@@ -37,6 +47,7 @@ type RoomMessage =
           deleted: false;
           createdAt: number;
           value: {
+              messageId: string;
               text: string;
               channelName: string;
               createdBy: CreatedBy | null;
@@ -49,6 +60,7 @@ type RoomMessage =
           deleted: true;
           createdAt: number;
           value: {
+              messageId: string;
               text: null;
               channelName: string;
               createdBy: CreatedBy;
@@ -61,6 +73,7 @@ type RoomMessage =
           deleted: false;
           createdAt: number;
           value: {
+              messageId: string;
               text: string;
               channelName: string;
               createdBy: CreatedBy | null;
@@ -80,7 +93,7 @@ const createRoomMessageArray = (
         participants: ReadonlyMap<string, ParticipantState>;
         filter: RoomMessageFilter;
     } & PublicChannelNames
-) => {
+): RoomMessage[] => {
     const { messages, participants, filter } = props;
 
     const result: RoomMessage[] = [];
@@ -91,19 +104,21 @@ const createRoomMessageArray = (
         createdBy,
         characterName,
         customName,
+        characterImage,
     }: {
         createdBy: string;
         characterName?: string;
         customName?: string;
-    }): { rolePlayPart?: string; participantNamePart: string } => {
+        characterImage?: FilePath;
+    }): CreatedBy => {
         const participantNamePart = participants.get(createdBy)?.name ?? createdBy;
         if (customName != null) {
-            return { rolePlayPart: customName, participantNamePart };
+            return { rolePlayPart: customName, participantNamePart, characterImage };
         }
         if (characterName != null) {
-            return { rolePlayPart: characterName, participantNamePart };
+            return { rolePlayPart: characterName, participantNamePart, characterImage };
         }
-        return { participantNamePart };
+        return { participantNamePart, characterImage };
     };
 
     messages.privateMessages
@@ -122,10 +137,12 @@ const createRoomMessageArray = (
                     deleted: true,
                     createdAt: msg.createdAt,
                     value: {
+                        messageId: msg.messageId,
                         text: null,
                         createdBy: createCreatedBy({
                             createdBy: msg.createdBy,
                             characterName: msg.character?.name,
+                            characterImage: msg.character?.image ?? undefined,
                             customName: msg.customName ?? undefined,
                         }),
                         channelName,
@@ -140,6 +157,7 @@ const createRoomMessageArray = (
                 deleted: false,
                 createdAt: msg.createdAt,
                 value: {
+                    messageId: msg.messageId,
                     text: toText(msg) ?? '',
                     createdBy:
                         msg.createdBy == null
@@ -147,6 +165,7 @@ const createRoomMessageArray = (
                             : createCreatedBy({
                                   createdBy: msg.createdBy,
                                   characterName: msg.character?.name,
+                                  characterImage: msg.character?.image ?? undefined,
                                   customName: msg.customName ?? undefined,
                               }),
                     channelName,
@@ -174,10 +193,12 @@ const createRoomMessageArray = (
                     deleted: true,
                     createdAt: msg.createdAt,
                     value: {
+                        messageId: msg.messageId,
                         text: null,
                         createdBy: createCreatedBy({
                             createdBy: msg.createdBy,
                             characterName: msg.character?.name,
+                            characterImage: msg.character?.image ?? undefined,
                             customName: msg.customName ?? undefined,
                         }),
                         channelName,
@@ -192,6 +213,7 @@ const createRoomMessageArray = (
                 deleted: false,
                 createdAt: msg.createdAt,
                 value: {
+                    messageId: msg.messageId,
                     text: toText(msg) ?? '',
                     createdBy:
                         msg.createdBy == null
@@ -199,6 +221,7 @@ const createRoomMessageArray = (
                             : createCreatedBy({
                                   createdBy: msg.createdBy,
                                   characterName: msg.character?.name,
+                                  characterImage: msg.character?.image ?? undefined,
                                   customName: msg.customName ?? undefined,
                               }),
                     channelName,
@@ -211,13 +234,13 @@ const createRoomMessageArray = (
     return result;
 };
 
-export const generateAsStaticHtml = (
-    params: {
-        messages: RoomMessages;
-        participants: ReadonlyMap<string, ParticipantState>;
-        filter: RoomMessageFilter;
-    } & PublicChannelNames
-) => {
+type GenerateLogParams = {
+    messages: RoomMessages;
+    participants: ReadonlyMap<string, ParticipantState>;
+    filter: RoomMessageFilter;
+} & PublicChannelNames;
+
+export const generateAsStaticHtml = (params: GenerateLogParams) => {
     const elements = createRoomMessageArray(params)
         .sort((x, y) => x.createdAt - y.createdAt)
         .map(msg => {
@@ -277,4 +300,132 @@ ${
         </div>
     </body>
 </html>`;
+};
+
+type ImageResult = {
+    blob: Blob;
+    filename: string;
+};
+
+class ImageDownloader {
+    // keyはgetDownloadURL()する前のpath
+    // valueがnullの場合はnot foundなどを表し、二度とダウンロードを試みない
+    private readonly firebaseImages = new Map<string, ImageResult | null>();
+
+    // keyはdirectLink
+    // valueがnullの場合はnot foundなどを表し、二度とダウンロードを試みない
+    private readonly defaultImages = new Map<string, ImageResult | null>();
+
+    public constructor(
+        private readonly config: Config,
+        private readonly firebaseStorageUrlCache: ExpiryMap<string, string>
+    ) {}
+
+    public async download(filePath: FilePath): Promise<ImageResult | null> {
+        if (filePath.sourceType === FileSourceType.FirebaseStorage) {
+            const cache = this.firebaseImages.get(filePath.path);
+            if (cache !== undefined) {
+                return cache;
+            }
+        } else {
+            const cache = this.defaultImages.get(analyzeUrl(filePath.path).directLink);
+            if (cache !== undefined) {
+                return cache;
+            }
+        }
+
+        const imgUrl = await FilePath.getUrl(filePath, this.config, this.firebaseStorageUrlCache);
+        if (imgUrl == null) {
+            if (filePath.sourceType === FileSourceType.FirebaseStorage) {
+                this.firebaseImages.set(filePath.path, null);
+            } else {
+                throw new Error(thisShouldNotHappen);
+            }
+            // CONSIDER: 何らかの通知をしたほうがいいか？
+            return null;
+        }
+        const { directLink, fileName, fileExtension } = analyzeUrl(imgUrl);
+        const image = await axios.get(directLink, { responseType: 'blob' }).catch(() => null);
+        if (image == null) {
+            if (filePath.sourceType === FileSourceType.FirebaseStorage) {
+                this.firebaseImages.set(filePath.path, null);
+            } else {
+                this.defaultImages.set(directLink, null);
+            }
+            // CONSIDER: 何らかの通知をしたほうがいいか？
+            return null;
+        }
+        const result: ImageResult = {
+            // 同一ファイル名でも区別できるように、ランダムな文字列を付加している
+            filename:
+                fileExtension == null
+                    ? `${fileName}_${simpleId()}`
+                    : `${fileName}_${simpleId()}.${fileExtension}`,
+            blob: new Blob([image.data]),
+        };
+        if (filePath.sourceType === FileSourceType.FirebaseStorage) {
+            this.firebaseImages.set(filePath.path, result);
+        } else {
+            this.defaultImages.set(directLink, result);
+        }
+        return result;
+    }
+}
+
+// preactのコードとすり合わせて決めなければならない
+type RichLogMessageProps = {
+    id: string;
+    characterName: string | undefined;
+    userName: string;
+    textColor: string;
+    text: string;
+    avatar: string | undefined;
+};
+
+const thisShouldNotHappen = 'This should not happen';
+
+export const generateAsRichLog = async (
+    params: GenerateLogParams,
+    config: Config,
+    firebaseStorageUrlCache: ExpiryMap<string, string>
+): Promise<Blob> => {
+    const imageDownloader = new ImageDownloader(config, firebaseStorageUrlCache);
+    const zip = new JSZip();
+    const imgFolder = zip.folder('img');
+    if (imgFolder == null) {
+        throw new Error(thisShouldNotHappen);
+    }
+
+    const messageProps: RichLogMessageProps[] = [];
+    for (const msg of createRoomMessageArray(params).sort((x, y) => x.createdAt - y.createdAt)) {
+        if (msg.type === privateMessage) {
+            // TODO: 実装する
+            continue;
+        }
+        if (msg.deleted) {
+            continue;
+        }
+        if (msg.value.createdBy == null) {
+            // 単なるシステムメッセージは無視してcontinueしている
+            continue;
+        }
+        let avatar: string | undefined = undefined;
+        if (msg.value.createdBy.characterImage != null) {
+            const image = await imageDownloader.download(msg.value.createdBy.characterImage);
+            if (image != null) {
+                imgFolder.file(image.filename, image.blob);
+                avatar = `./img/${image.filename}`;
+            }
+        }
+        messageProps.push({
+            id: msg.value.messageId,
+            text: msg.value.text,
+            textColor: msg.value.textColor ?? 'black',
+            characterName: msg.value.createdBy.rolePlayPart,
+            userName: msg.value.createdBy.participantNamePart,
+            avatar,
+        });
+    }
+
+    return await zip.generateAsync({ type: 'blob' });
 };

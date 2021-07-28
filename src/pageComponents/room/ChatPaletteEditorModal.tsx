@@ -62,7 +62,7 @@ export const ChatPaletteEditorModal: React.FC = () => {
             width={modalWidth}
             visible
             okButtonProps={{ style: { display: 'none' } }}
-            cancelText='閉じる'
+            cancelText="閉じる"
             onOk={() => close()}
             onCancel={() => close()}
             title="チャットパレット"

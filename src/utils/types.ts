@@ -1,52 +1,5 @@
-import { FileSourceType } from '../generated/graphql';
-import * as Core from '@kizahasi/flocon-core';
 import { FilterValue } from 'antd/lib/table/interface';
-
-export type FilePath = {
-    path: string;
-    sourceType: FileSourceType;
-};
-
-export namespace FilePath {
-    export const toGraphQL = (source: FilePath | Core.FilePath): FilePath => {
-        let sourceType: FileSourceType;
-        switch (source.sourceType) {
-            case Core.Default:
-                sourceType = FileSourceType.Default;
-                break;
-            case Core.FirebaseStorage:
-                sourceType = FileSourceType.FirebaseStorage;
-                break;
-            default:
-                sourceType = source.sourceType;
-                break;
-        }
-        return {
-            path: source.path,
-            sourceType,
-        };
-    };
-
-    export const toOt = (source: FilePath | Core.FilePath): Core.FilePath => {
-        let sourceType: typeof Core.Default | typeof Core.FirebaseStorage;
-        switch (source.sourceType) {
-            case FileSourceType.Default:
-                sourceType = Core.Default;
-                break;
-            case FileSourceType.FirebaseStorage:
-                sourceType = Core.FirebaseStorage;
-                break;
-            default:
-                sourceType = source.sourceType;
-                break;
-        }
-        return {
-            $version: 1,
-            path: source.path,
-            sourceType,
-        };
-    };
-}
+import { FilePath } from './filePath';
 
 export const none = 'none';
 export const some = 'some';

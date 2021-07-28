@@ -2,8 +2,9 @@ import { FilePath } from '@kizahasi/flocon-core';
 import React from 'react';
 import { useDeepCompareEffectNoCheck } from 'use-deep-compare-effect';
 import ConfigContext from '../contexts/ConfigContext';
-import { FilePathFragment, FileSourceType } from '../generated/graphql';
-import { getStorageForce } from '../utils/firebaseHelpers';
+import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
+import { FilePathFragment } from '../generated/graphql';
+import { FilePath as FilePathModule } from '../utils/filePath';
 
 // PathArrayがnullish ⇔ 戻り値がnull
 // pathArray.length = 戻り値.length
@@ -12,6 +13,7 @@ export function useFirebaseStorageUrlArray(
 ): (string | null)[] | null {
     const config = React.useContext(ConfigContext);
     const [result, setResult] = React.useState<(string | null)[] | null>(null);
+    const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
 
     // deep equalityでチェックされるため、余計なプロパティを取り除いている
     const cleanPathArray = pathArray?.map(path => ({
@@ -26,15 +28,9 @@ export function useFirebaseStorageUrlArray(
         }
         let isDisposed = false;
         Promise.all(
-            cleanPathArray.map(async path => {
-                if (path.sourceType === FileSourceType.Default) {
-                    return path.path;
-                }
-                const url = await getStorageForce(config).ref(path.path).getDownloadURL();
-                if (typeof url !== 'string') {
-                    return null;
-                }
-                return url;
+            cleanPathArray.map(path => {
+                // firebaseStorageUrlCacheContextはDeepCompareしてほしくないしされる必要もないインスタンスであるため、depsに加えてはいけない。
+                return FilePathModule.getUrl(path, config, firebaseStorageUrlCacheContext);
             })
         )
             .then(all => {

@@ -2,11 +2,12 @@ import { Button } from 'antd';
 import * as React from 'react';
 import { FileSourceType } from '../generated/graphql';
 import { useFirebaseStorageUrl } from '../hooks/firebaseStorage';
-import { FilePath, some } from '../utils/types';
+import { some } from '../utils/types';
 import FirebaseStorageLink from './FirebaseStorageLink';
 import * as Core from '@kizahasi/flocon-core';
 import { FilterValue } from 'antd/lib/table/interface';
 import { FirebaseStorageFile } from '../modules/fileModule';
+import { FilePath } from '../utils/filePath';
 
 type ImageProps = {
     filePath?: FilePath | Core.FilePath;

@@ -24,10 +24,11 @@ import {
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useImagePieces } from '../../hooks/state/useImagePieces';
 import InputFile from '../../components/InputFile';
-import { FilePath, FilesManagerDrawerType } from '../../utils/types';
+import { FilesManagerDrawerType } from '../../utils/types';
 import FilesManagerDrawer from '../../components/FilesManagerDrawer';
 import BufferedInput from '../../components/BufferedInput';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
+import { FilePath } from '../../utils/filePath';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,

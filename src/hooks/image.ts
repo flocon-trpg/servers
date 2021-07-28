@@ -8,7 +8,7 @@
 import { FilePath } from '@kizahasi/flocon-core';
 import React from 'react';
 import { FilePathFragment } from '../generated/graphql';
-import { getDirectLink } from '../utils/getDirectLink';
+import { analyzeUrl } from '../utils/analyzeUrl';
 import { useFirebaseStorageUrl } from './firebaseStorage';
 
 type Size = {
@@ -68,7 +68,7 @@ export function useImage(src: string | null, size?: Size, crossOrigin?: string):
             img.addEventListener('load', onload);
             img.addEventListener('error', onerror);
             crossOrigin && (img.crossOrigin = crossOrigin);
-            img.src = getDirectLink(src).directLink;
+            img.src = analyzeUrl(src).directLink;
 
             return function cleanup() {
                 img.removeEventListener('load', onload);

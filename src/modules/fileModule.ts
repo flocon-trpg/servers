@@ -1,4 +1,5 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+import { ExpiryMap } from '../utils/expiryMap';
 
 export namespace FirebaseStorageFile {
     export type Reference = firebase.default.storage.Reference;

@@ -203,7 +203,7 @@ export const roomDrawerAndPopoverAndModalModule = createSlice({
                         ? state.boardDrawerType
                         : action.payload.boardDrawerType,
                 chatPaletteEditorModalType:
-                    action.payload.chatPaletteEditorModalType=== undefined
+                    action.payload.chatPaletteEditorModalType === undefined
                         ? state.chatPaletteEditorModalType
                         : action.payload.chatPaletteEditorModalType,
                 characterDrawerType:

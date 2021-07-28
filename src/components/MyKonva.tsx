@@ -2,7 +2,6 @@ import Konva from 'konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import React from 'react';
 import { success, useImageFromGraphQL } from '../hooks/image';
-import { FilePath } from '../utils/types';
 import * as ReactKonva from 'react-konva';
 import { usePrevious } from '../hooks/usePrevious';
 import { animated, useSpring, useTransition } from '@react-spring/konva';
@@ -19,6 +18,7 @@ import { NumberPieceValue } from '../utils/numberPieceValue';
 import { KonvaD6 } from './KonvaDice';
 import { State as DieValueState } from '@kizahasi/flocon-core/dist/types/internal/ot/room/character/dicePieceValue/dieValue/v1';
 import { DicePieceValue } from '../utils/dicePieceValue';
+import { FilePath } from '../utils/filePath';
 
 export namespace MyKonva {
     export type Vector2 = {
