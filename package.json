@@ -89,6 +89,7 @@
         "build:next": "next build",
         "export": "run-s build export:next",
         "export:next": "next export",
+        "gen": "ts-node --project tsconfig.node.json ./run-gen.ts",
         "start": "next start",
         "serve": "serve ./out",
         "test": "jest",

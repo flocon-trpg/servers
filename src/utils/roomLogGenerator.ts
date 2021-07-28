@@ -2,7 +2,6 @@ import {
     FileSourceType,
     RoomMessages,
     RoomPrivateMessage,
-    RoomPublicChannel,
     RoomPublicChannelFragment,
     RoomPublicMessage,
 } from '../generated/graphql';
@@ -16,12 +15,15 @@ import { ParticipantState } from '@kizahasi/flocon-core';
 import { Color } from './color';
 import { FilePath } from './filePath';
 import axios from 'axios';
-import JSZip, { file } from 'jszip';
+import JSZip from 'jszip';
 import { Config } from '../config';
 import { analyzeUrl } from './analyzeUrl';
 import { simpleId } from './generators';
-import fileDownload from 'js-file-download';
 import { ExpiryMap } from './expiryMap';
+import { htmPreact } from './richLogResource/htmPreact';
+import { logCss } from './richLogResource/logCss';
+import { richLogRenderJs } from '../generated/richLogRenderJs';
+import { logHtml } from './richLogResource/logHtml';
 
 const privateMessage = 'privateMessage';
 const publicMessage = 'publicMessage';
@@ -254,7 +256,7 @@ ${msg.value.createdBy.rolePlayPart == null ? '' : '<span> - </span>'}
 <span> </span>`;
 
             return `<div class="message" style="${
-                msg.value.textColor == null ? '' : `color: ${msg.value.textColor}`
+                msg.value.textColor == null ? '' : `color: ${escape(msg.value.textColor)}`
             }">
 ${left}
 <span> @ ${moment(new Date(msg.createdAt)).format('MM/DD HH:mm:ss')} </span>
@@ -344,7 +346,7 @@ class ImageDownloader {
             // CONSIDER: 何らかの通知をしたほうがいいか？
             return null;
         }
-        const { directLink, fileName, fileExtension } = analyzeUrl(imgUrl);
+        const { directLink, fileExtension } = analyzeUrl(imgUrl);
         const image = await axios.get(directLink, { responseType: 'blob' }).catch(() => null);
         if (image == null) {
             if (filePath.sourceType === FileSourceType.FirebaseStorage) {
@@ -356,11 +358,12 @@ class ImageDownloader {
             return null;
         }
         const result: ImageResult = {
-            // 同一ファイル名でも区別できるように、ランダムな文字列を付加している
+            // Firebase Storageのファイル名は長すぎる上に%などの文字が含まれており、imgのsrcに渡すと正常に動作しない、messages.jsのファイルサイズが大きくなるという2つの問題点があるため、ランダムな文字列に置き換えている。
+            // image1, image2... のように番号を順に割り振ったファイル名のほうがユーザーによるカスタマイズが行いやすいためこちらのほうが良いが、少し面倒なので現時点では却下している。
             filename:
                 fileExtension == null
-                    ? `${fileName}_${simpleId()}`
-                    : `${fileName}_${simpleId()}.${fileExtension}`,
+                    ? `${simpleId()}`
+                    : `${simpleId()}.${fileExtension}`,
             blob: new Blob([image.data]),
         };
         if (filePath.sourceType === FileSourceType.FirebaseStorage) {
@@ -391,6 +394,13 @@ export const generateAsRichLog = async (
 ): Promise<Blob> => {
     const imageDownloader = new ImageDownloader(config, firebaseStorageUrlCache);
     const zip = new JSZip();
+
+    const cssFolder = zip.folder('css');
+    if (cssFolder == null) {
+        throw new Error(thisShouldNotHappen);
+    }
+    cssFolder.file('main.css', logCss);
+
     const imgFolder = zip.folder('img');
     if (imgFolder == null) {
         throw new Error(thisShouldNotHappen);
@@ -426,6 +436,20 @@ export const generateAsRichLog = async (
             avatar,
         });
     }
+
+    const jsFolder = zip.folder('js');
+    if (jsFolder == null) {
+        throw new Error(thisShouldNotHappen);
+    }
+    jsFolder.file('htmPreact.js', htmPreact);
+    jsFolder.file('renderToBody.js', richLogRenderJs);
+    jsFolder.file('messages.js', `const messages = ${JSON.stringify({ messages: messageProps })}`);
+    jsFolder.file(
+        'source.txt',
+        'htmPreact.js: https://unpkg.com/htm@3.1.0/preact/standalone.umd.js'
+    );
+
+    zip.file('index.html', logHtml);
 
     return await zip.generateAsync({ type: 'blob' });
 };

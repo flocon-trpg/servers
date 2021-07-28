@@ -696,7 +696,7 @@ const GenerateRichLogModal: React.FC<GenerateRichLogModalProps> = ({
                 </div>
                 <div>ログをダウンロードします。よろしいですか？</div>
                 <div>
-                    キャラクターの画像も一緒にダウンロードするため、zipファイル生成までに時間がかかることがあります。
+                    キャラクターの画像も一緒にダウンロードするため、zipファイル生成までに数十秒程度の時間がかかることがあります。
                 </div>
             </div>
         </Modal>
