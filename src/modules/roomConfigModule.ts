@@ -11,6 +11,7 @@ import {
     participantPanel,
     RoomConfig,
     memoPanel,
+    chatPalettePanel,
 } from '../states/RoomConfig';
 import * as generators from '../utils/generators';
 import { ResizableDelta } from 'react-rnd';
@@ -21,6 +22,7 @@ import { reset, Reset } from '../utils/types';
 import { BoardConfig, defaultBoardConfig } from '../states/BoardConfig';
 import { StrIndex5, CompositeKey, recordToArray, compositeKeyToString } from '@kizahasi/util';
 import { MemoPanelConfig } from '../states/MemoPanelConfig';
+import { ChatPalettePanelConfig } from '../states/ChatPalettePanelConfig';
 
 export type SetOtherValuesAction = {
     roomId: string;
@@ -92,6 +94,24 @@ export type UpdateChannelVisibilityAction = {
     roomId: string;
     channelKey: string;
     newValue: boolean | undefined;
+};
+
+export type AddChatPalettePanelConfigAction = {
+    roomId: string;
+    panel: Omit<ChatPalettePanelConfig, 'zIndex'>;
+};
+
+export type UpdateChatPalettePanelAction = {
+    roomId: string;
+    panelId: string;
+    panel: Omit<Partial<ChatPalettePanelConfig>, 'selectedTextColor'> & {
+        selectedTextColor?: string | Reset;
+    };
+};
+
+export type RemoveChatPalettePanelAction = {
+    roomId: string;
+    panelId: string;
 };
 
 export type AddMemoPanelConfigAction = {
@@ -193,6 +213,12 @@ const bringPanelToFront = (state: RoomConfig | null, action: PanelAction): void 
         }
     }
     panels.push(state.panels.characterPanel);
+    for (const panelId in state.panels.chatPalettePanels) {
+        const panel = state.panels.chatPalettePanels[panelId];
+        if (panel != null) {
+            panels.push(panel);
+        }
+    }
     panels.push(state.panels.gameEffectPanel);
     for (const panelId in state.panels.memoPanels) {
         const panel = state.panels.memoPanels[panelId];
@@ -233,6 +259,14 @@ const bringPanelToFront = (state: RoomConfig | null, action: PanelAction): void 
         }
         case characterPanel: {
             state.panels.characterPanel.zIndex = panels.length;
+            return;
+        }
+        case chatPalettePanel: {
+            const targetPanel = state.panels.chatPalettePanels[action.target.panelId];
+            if (targetPanel == null) {
+                return;
+            }
+            targetPanel.zIndex = panels.length;
             return;
         }
         case gameEffectPanel: {
@@ -353,6 +387,15 @@ const roomConfigModule = createSlice({
                 }
                 case characterPanel: {
                     state.panels.characterPanel.isMinimized = action.payload.newValue;
+                    return;
+                }
+                case chatPalettePanel: {
+                    const targetPanel =
+                        state.panels.chatPalettePanels[action.payload.target.panelId];
+                    if (targetPanel == null) {
+                        return;
+                    }
+                    targetPanel.isMinimized = action.payload.newValue;
                     return;
                 }
                 case gameEffectPanel: {
@@ -539,6 +582,94 @@ const roomConfigModule = createSlice({
             resizePanel(targetPanel, action.payload.dir, action.payload.delta);
         },
 
+        addChatPalettePanelConfig: (
+            state: RoomConfig | null,
+            action: PayloadAction<AddChatPalettePanelConfigAction>
+        ) => {
+            if (state == null || state.roomId !== action.payload.roomId) {
+                return;
+            }
+            const panelId = generators.simpleId();
+            state.panels.chatPalettePanels[panelId] = { ...action.payload.panel, zIndex: 0 };
+            bringPanelToFront(state, {
+                roomId: action.payload.roomId,
+                target: { type: chatPalettePanel, panelId },
+            });
+        },
+        updateChatPalettePanel: (
+            state: RoomConfig | null,
+            action: PayloadAction<UpdateChatPalettePanelAction>
+        ) => {
+            if (state == null || state.roomId !== action.payload.roomId) {
+                return;
+            }
+            const targetPanel = state.panels.chatPalettePanels[action.payload.panelId];
+            if (targetPanel == null) {
+                return;
+            }
+            let selectedTextColor: string | undefined = targetPanel.selectedTextColor;
+            if (typeof action.payload.panel.selectedTextColor === 'string') {
+                selectedTextColor = action.payload.panel.selectedTextColor;
+            } else if (action.payload.panel.selectedTextColor?.type === reset) {
+                selectedTextColor = undefined;
+            }
+            state.panels.chatPalettePanels[action.payload.panelId] = {
+                ...targetPanel,
+                isMinimized: action.payload.panel.isMinimized ?? targetPanel.isMinimized,
+                x: action.payload.panel.x ?? targetPanel.x,
+                y: action.payload.panel.y ?? targetPanel.y,
+                width: action.payload.panel.width ?? targetPanel.width,
+                height: action.payload.panel.height ?? targetPanel.height,
+                zIndex: action.payload.panel.zIndex ?? targetPanel.zIndex,
+                selectedTextColor,
+                selectedPublicChannelKey:
+                    action.payload.panel.selectedPublicChannelKey ??
+                    targetPanel.selectedPublicChannelKey,
+                selectedCharacterStateId:
+                    action.payload.panel.selectedCharacterStateId ??
+                    targetPanel.selectedCharacterStateId,
+                customCharacterName:
+                    action.payload.panel.customCharacterName ?? targetPanel.customCharacterName,
+                selectedGameSystem:
+                    action.payload.panel.selectedGameSystem ?? targetPanel.selectedGameSystem,
+            };
+        },
+        moveChatPalettePanel: (
+            state: RoomConfig | null,
+            action: PayloadAction<MovePanelAction & { panelId: string }>
+        ) => {
+            if (state == null || state.roomId !== action.payload.roomId) {
+                return;
+            }
+            const targetPanel = state.panels.chatPalettePanels[action.payload.panelId];
+            if (targetPanel == null) {
+                return;
+            }
+            movePanel(targetPanel, action.payload);
+        },
+        resizeChatPalettePanel: (
+            state: RoomConfig | null,
+            action: PayloadAction<ResizePanelAction & { panelId: string }>
+        ) => {
+            if (state == null || state.roomId !== action.payload.roomId) {
+                return;
+            }
+            const targetPanel = state.panels.chatPalettePanels[action.payload.panelId];
+            if (targetPanel == null) {
+                return;
+            }
+            resizePanel(targetPanel, action.payload.dir, action.payload.delta);
+        },
+        removeChatPalettePanel: (
+            state: RoomConfig | null,
+            action: PayloadAction<RemoveChatPalettePanelAction>
+        ) => {
+            if (state == null) {
+                return;
+            }
+            delete state.panels.chatPalettePanels[action.payload.panelId];
+        },
+
         moveGameEffectPanel: (state: RoomConfig | null, action: PayloadAction<MovePanelAction>) => {
             if (state == null || state.roomId !== action.payload.roomId) {
                 return;
@@ -676,8 +807,6 @@ const roomConfigModule = createSlice({
                 zIndex: action.payload.panel.zIndex ?? targetPanel.zIndex,
                 tabs: action.payload.panel.tabs ?? targetPanel.tabs,
                 selectedTextColor,
-                selectedChannelType:
-                    action.payload.panel.selectedChannelType ?? targetPanel.selectedChannelType,
                 selectedPublicChannelKey:
                     action.payload.panel.selectedPublicChannelKey ??
                     targetPanel.selectedPublicChannelKey,

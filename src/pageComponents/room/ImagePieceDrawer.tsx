@@ -24,10 +24,11 @@ import {
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useImagePieces } from '../../hooks/state/useImagePieces';
 import InputFile from '../../components/InputFile';
-import { FilePath, FilesManagerDrawerType } from '../../utils/types';
+import { FilesManagerDrawerType } from '../../utils/types';
 import FilesManagerDrawer from '../../components/FilesManagerDrawer';
 import BufferedInput from '../../components/BufferedInput';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
+import { FilePath } from '../../utils/filePath';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -133,10 +134,8 @@ export const ImagePieceDrawer: React.FC = () => {
     const { uiState: state, updateUiState: setState } = useStateEditor<
         ImagePieceValueState | undefined
     >(stateEditorParams);
-    const [
-        filesManagerDrawerType,
-        setFilesManagerDrawerType,
-    ] = React.useState<FilesManagerDrawerType | null>(null);
+    const [filesManagerDrawerType, setFilesManagerDrawerType] =
+        React.useState<FilesManagerDrawerType | null>(null);
 
     if (myUserUid == null || state == null) {
         return null;

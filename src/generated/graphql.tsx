@@ -382,7 +382,6 @@ export type MutationPromoteToPlayerArgs = {
 
 export type MutationUpdateWritingMessageStatusArgs = {
     newStatus: WritingMessageStatusInputType;
-    publicChannelKey: Scalars['String'];
     roomId: Scalars['String'];
 };
 
@@ -781,7 +780,6 @@ export type WriteRoomSoundEffectResult = RoomSoundEffect | WriteRoomSoundEffectF
 
 export type WritingMessageStatus = {
     __typename?: 'WritingMessageStatus';
-    publicChannelKey: Scalars['String'];
     status: WritingMessageStatusType;
     updatedAt: Scalars['Float'];
     userUid: Scalars['String'];
@@ -1361,7 +1359,6 @@ export type MakeMessageNotSecretMutation = { __typename?: 'Mutation' } & {
 
 export type UpdateWritingMessageStatusMutationVariables = Exact<{
     roomId: Scalars['String'];
-    publicChannelKey: Scalars['String'];
     newStatus: WritingMessageStatusInputType;
 }>;
 
@@ -1411,7 +1408,7 @@ export type RoomEventSubscription = { __typename?: 'Subscription' } & {
             writingMessageStatus?: Maybe<
                 { __typename?: 'WritingMessageStatus' } & Pick<
                     WritingMessageStatus,
-                    'userUid' | 'status' | 'publicChannelKey'
+                    'userUid' | 'status'
                 >
             >;
         }
@@ -2212,7 +2209,8 @@ export function useChangeParticipantNameMutation(
 export type ChangeParticipantNameMutationHookResult = ReturnType<
     typeof useChangeParticipantNameMutation
 >;
-export type ChangeParticipantNameMutationResult = Apollo.MutationResult<ChangeParticipantNameMutation>;
+export type ChangeParticipantNameMutationResult =
+    Apollo.MutationResult<ChangeParticipantNameMutation>;
 export type ChangeParticipantNameMutationOptions = Apollo.BaseMutationOptions<
     ChangeParticipantNameMutation,
     ChangeParticipantNameMutationVariables
@@ -2857,7 +2855,8 @@ export function useWriteRoomSoundEffectMutation(
 export type WriteRoomSoundEffectMutationHookResult = ReturnType<
     typeof useWriteRoomSoundEffectMutation
 >;
-export type WriteRoomSoundEffectMutationResult = Apollo.MutationResult<WriteRoomSoundEffectMutation>;
+export type WriteRoomSoundEffectMutationResult =
+    Apollo.MutationResult<WriteRoomSoundEffectMutation>;
 export type WriteRoomSoundEffectMutationOptions = Apollo.BaseMutationOptions<
     WriteRoomSoundEffectMutation,
     WriteRoomSoundEffectMutationVariables
@@ -2998,7 +2997,8 @@ export function useMakeMessageNotSecretMutation(
 export type MakeMessageNotSecretMutationHookResult = ReturnType<
     typeof useMakeMessageNotSecretMutation
 >;
-export type MakeMessageNotSecretMutationResult = Apollo.MutationResult<MakeMessageNotSecretMutation>;
+export type MakeMessageNotSecretMutationResult =
+    Apollo.MutationResult<MakeMessageNotSecretMutation>;
 export type MakeMessageNotSecretMutationOptions = Apollo.BaseMutationOptions<
     MakeMessageNotSecretMutation,
     MakeMessageNotSecretMutationVariables
@@ -3006,14 +3006,9 @@ export type MakeMessageNotSecretMutationOptions = Apollo.BaseMutationOptions<
 export const UpdateWritingMessageStatusDocument = gql`
     mutation UpdateWritingMessageStatus(
         $roomId: String!
-        $publicChannelKey: String!
         $newStatus: WritingMessageStatusInputType!
     ) {
-        result: updateWritingMessageStatus(
-            roomId: $roomId
-            publicChannelKey: $publicChannelKey
-            newStatus: $newStatus
-        )
+        result: updateWritingMessageStatus(roomId: $roomId, newStatus: $newStatus)
     }
 `;
 export type UpdateWritingMessageStatusMutationFn = Apollo.MutationFunction<
@@ -3035,7 +3030,6 @@ export type UpdateWritingMessageStatusMutationFn = Apollo.MutationFunction<
  * const [updateWritingMessageStatusMutation, { data, loading, error }] = useUpdateWritingMessageStatusMutation({
  *   variables: {
  *      roomId: // value for 'roomId'
- *      publicChannelKey: // value for 'publicChannelKey'
  *      newStatus: // value for 'newStatus'
  *   },
  * });
@@ -3055,7 +3049,8 @@ export function useUpdateWritingMessageStatusMutation(
 export type UpdateWritingMessageStatusMutationHookResult = ReturnType<
     typeof useUpdateWritingMessageStatusMutation
 >;
-export type UpdateWritingMessageStatusMutationResult = Apollo.MutationResult<UpdateWritingMessageStatusMutation>;
+export type UpdateWritingMessageStatusMutationResult =
+    Apollo.MutationResult<UpdateWritingMessageStatusMutation>;
 export type UpdateWritingMessageStatusMutationOptions = Apollo.BaseMutationOptions<
     UpdateWritingMessageStatusMutation,
     UpdateWritingMessageStatusMutationVariables
@@ -3080,7 +3075,6 @@ export const RoomEventDocument = gql`
             writingMessageStatus {
                 userUid
                 status
-                publicChannelKey
             }
         }
     }

@@ -36,10 +36,8 @@ const PingPongCore: React.FC = () => {
     const [pingMutation, pingMutationResult] = usePingMutation();
     const pongSubscription = usePongSubscription();
     const [postValue, setPostValue] = React.useState(0);
-    const [
-        pongObservableResult,
-        setPongObservableResult,
-    ] = React.useState<PongObservableResultState>();
+    const [pongObservableResult, setPongObservableResult] =
+        React.useState<PongObservableResultState>();
 
     React.useEffect(() => {
         const subscription = apolloClient

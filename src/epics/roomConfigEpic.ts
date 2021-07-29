@@ -1,6 +1,6 @@
 import { AnyAction } from 'redux';
 import { Observable } from 'rxjs';
-import { ActionsObservable, StateObservable, combineEpics } from 'redux-observable';
+import { StateObservable, combineEpics } from 'redux-observable';
 import * as Rx from 'rxjs/operators';
 import { RootState } from '../store';
 import roomConfigModule from '../modules/roomConfigModule';
@@ -16,7 +16,7 @@ const isNotNullOrUndefined = <T>(source: T | null | undefined): source is T => {
 };
 
 const roomConfigEpicCore = (
-    action$: ActionsObservable<AnyAction>,
+    action$: Observable<AnyAction>,
     state$: StateObservable<RootState>
 ): Observable<AnyAction> => {
     return new Observable<AnyAction>(observer => {
@@ -35,6 +35,15 @@ const roomConfigEpicCore = (
                         roomConfigModule.actions.zoomBoard.match(action) ||
                         roomConfigModule.actions.resetBoard.match(action) ||
                         roomConfigModule.actions.updateBoardEditorPanel.match(action) ||
+                        roomConfigModule.actions.moveCharacterPanel.match(action) ||
+                        roomConfigModule.actions.resizeCharacterPanel.match(action) ||
+                        roomConfigModule.actions.addChatPalettePanelConfig.match(action) ||
+                        roomConfigModule.actions.moveChatPalettePanel.match(action) ||
+                        roomConfigModule.actions.resizeChatPalettePanel.match(action) ||
+                        roomConfigModule.actions.removeChatPalettePanel.match(action) ||
+                        roomConfigModule.actions.updateChatPalettePanel.match(action) ||
+                        roomConfigModule.actions.moveGameEffectPanel.match(action) ||
+                        roomConfigModule.actions.resizeGameEffectPanel.match(action) ||
                         roomConfigModule.actions.addMemoPanelConfig.match(action) ||
                         roomConfigModule.actions.moveMemoPanel.match(action) ||
                         roomConfigModule.actions.resizeMemoPanel.match(action) ||
@@ -45,10 +54,6 @@ const roomConfigEpicCore = (
                         roomConfigModule.actions.resizeMessagePanel.match(action) ||
                         roomConfigModule.actions.removeMessagePanel.match(action) ||
                         roomConfigModule.actions.updateMessagePanel.match(action) ||
-                        roomConfigModule.actions.moveCharacterPanel.match(action) ||
-                        roomConfigModule.actions.resizeCharacterPanel.match(action) ||
-                        roomConfigModule.actions.moveGameEffectPanel.match(action) ||
-                        roomConfigModule.actions.resizeGameEffectPanel.match(action) ||
                         roomConfigModule.actions.moveParticipantPanel.match(action) ||
                         roomConfigModule.actions.resizeParticipantPanel.match(action) ||
                         roomConfigModule.actions.movePieceValuePanel.match(action) ||
@@ -76,7 +81,7 @@ const roomConfigEpicCore = (
                 Rx.mergeAll(),
                 Rx.mergeAll()
             )
-            .subscribe(() => undefined, observer.error, observer.complete);
+            .subscribe({ error: observer.error, complete: observer.complete });
     });
 };
 

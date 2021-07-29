@@ -65,7 +65,7 @@ export namespace Notification {
 
 // 例えばRoomのルートに近い方でContext.ProviderでroomState.stateなどを渡してから下階層の各地でuseContextで取得する方法は、roomState.stateの一部が変わるだけでRoomほぼ全体が再レンダリングされるため、非常に重くなると思われる。そのため、Reduxを使うことで高速化を狙っている。
 // Room.State のオブジェクトは複雑であり、パフォーマンスの低下を招きそうなので immer を使いたくない(そもそもTypescriptの型チェックを通らないため、不具合も生じる可能性がある)ため、createSliceを避けて直接書いている。
-namespace roomModule {
+export namespace roomModule {
     export type State = {
         roomId?: string;
         roomState?: RoomState;
@@ -143,5 +143,3 @@ namespace roomModule {
         };
     }
 }
-
-export default roomModule;

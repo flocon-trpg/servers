@@ -14,10 +14,10 @@ import {
 } from '../generated/graphql';
 import { appConsole } from '../utils/appConsole';
 import { PrivateChannelSet, PrivateChannelSets } from '../utils/PrivateChannelSet';
-import { usePrevious } from './usePrevious';
 import { Notification } from '../modules/roomModule';
 import { useSelector } from '../store';
 import { useMyUserUid } from './useMyUserUid';
+import { usePrevious } from 'react-use';
 
 // 使い方:
 // 1. どこかでuseAllRoomMessagesを呼ぶ。冗長な通信を避けるため、useAllRoomMessagesを呼ぶ箇所はなるべく少なくする。

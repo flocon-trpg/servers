@@ -44,9 +44,8 @@ export function useBuffer<TValue, TComponent>({
     }, [setValueToComponentRef, value]);
 
     React.useEffect(() => {
-        const newSubscription = (bufferDuration == null
-            ? subject
-            : subject.pipe(debounceTime(bufferDuration))
+        const newSubscription = (
+            bufferDuration == null ? subject : subject.pipe(debounceTime(bufferDuration))
         ).subscribe(newValue => {
             setChangeParams(oldResult => {
                 return {

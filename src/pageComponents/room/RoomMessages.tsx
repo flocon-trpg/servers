@@ -32,7 +32,7 @@ import {
     pieceValueLog,
 } from '../../hooks/useRoomMessages';
 import { PrivateChannelSet, PrivateChannelSets } from '../../utils/PrivateChannelSet';
-import ChatInput from './ChatInput';
+import { ChatInput } from '../../components/ChatInput/Main';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
@@ -51,7 +51,6 @@ import BufferedInput from '../../components/BufferedInput';
 import QueryResultViewer from '../../components/QueryResultViewer';
 import { useMessageFilter } from '../../hooks/useMessageFilter';
 import { RoomMessage as RoomMessageNameSpace } from './RoomMessage';
-import { UseRoomMessageInputTextsResult } from '../../hooks/useRoomMessageInputTexts';
 import { useWritingMessageStatus } from '../../hooks/useWritingMessageStatus';
 import { isDeleted, toText } from '../../utils/message';
 import { Notification } from '../../modules/roomModule';
@@ -64,7 +63,6 @@ import { PublicChannelKey, recordToMap } from '@kizahasi/util';
 import _ from 'lodash';
 import { Color } from '../../utils/color';
 import userConfigModule from '../../modules/userConfigModule';
-import useUserConfig from '../../hooks/localStorage/useUserConfig';
 import { UserConfig } from '../../states/UserConfig';
 import * as Icons from '@ant-design/icons';
 import { InputModal } from '../../components/InputModal';
@@ -720,25 +718,14 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
     }, []);
     const messages = useFilteredAndMapRoomMessages({ filter, thenMap });
 
-    const writingUsers = _(PublicChannelKey.Without$System.publicChannelKeys)
-        .flatMap(key => {
-            const map = writingMessageStatusResult.get(key);
-            if (map == null) {
-                return [];
-            }
-            return [...map]
-                .filter(
-                    ([key, value]) =>
-                        key !== getUserUid(myAuth) &&
-                        value.current === WritingMessageStatusType.Writing
-                )
-                .map(([key]) => key);
-        })
-        .uniq()
+    const writingUsers = [...writingMessageStatusResult]
+        .filter(
+            ([key, value]) =>
+                key !== getUserUid(myAuth) && value.current === WritingMessageStatusType.Writing
+        )
+        .map(([key]) => key)
         .map(userUid => participantsMap?.get(userUid)?.name)
-        .compact()
-        .sort()
-        .value();
+        .sort();
     let writingStatus: JSX.Element | null = null;
     // TODO: background-colorが適当
     const writingStatusCss = css`
@@ -778,15 +765,16 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
 type Props = {
     height: number;
     panelId: string;
-    config: MessagePanelConfig;
-    useRoomMessageInputTextsResult: UseRoomMessageInputTextsResult;
 };
 
-const RoomMessages: React.FC<Props> = (props: Props) => {
-    const { height, panelId, config } = props;
+export const RoomMessages: React.FC<Props> = (props: Props) => {
+    const { height, panelId } = props;
+    const tabs = useSelector(
+        state => state.roomConfigModule?.panels.messagePanels?.[panelId]?.tabs
+    );
 
-    const contentHeight = Math.max(0, height - 310);
-    const tabsHeight = Math.max(0, height - 270);
+    const contentHeight = Math.max(0, height - 340);
+    const tabsHeight = Math.max(0, height - 300);
 
     const dispatch = useDispatch();
 
@@ -795,11 +783,11 @@ const RoomMessages: React.FC<Props> = (props: Props) => {
         createdAt: number;
     }>();
     const editingTabConfig = React.useMemo(() => {
-        return config.tabs.find(
+        return tabs?.find(
             x =>
                 x.createdAt === editingTabConfigKey?.createdAt && x.key === editingTabConfigKey?.key
         );
-    }, [config.tabs, editingTabConfigKey?.createdAt, editingTabConfigKey?.key]);
+    }, [tabs, editingTabConfigKey?.createdAt, editingTabConfigKey?.key]);
 
     const [isChannelNamesEditorVisible, setIsChannelNamesEditorVisible] = React.useState(false);
 
@@ -809,7 +797,7 @@ const RoomMessages: React.FC<Props> = (props: Props) => {
         state => state.userConfigModule?.roomMessagesFontSizeDelta
     );
 
-    if (roomId == null || allRoomMessagesResult == null) {
+    if (roomId == null || allRoomMessagesResult == null || tabs == null) {
         return null;
     }
 
@@ -839,7 +827,7 @@ const RoomMessages: React.FC<Props> = (props: Props) => {
     const tabPanels =
         contentHeight <= 0
             ? null
-            : config.tabs.map(tab => {
+            : tabs.map(tab => {
                   return (
                       <Tabs.TabPane
                           key={tab.key}
@@ -880,7 +868,7 @@ const RoomMessages: React.FC<Props> = (props: Props) => {
                                                                               roomId,
                                                                               panelId,
                                                                               panel: {
-                                                                                  tabs: config.tabs.filter(
+                                                                                  tabs: tabs.filter(
                                                                                       elem =>
                                                                                           elem.key !==
                                                                                               tab.key ||
@@ -937,7 +925,7 @@ const RoomMessages: React.FC<Props> = (props: Props) => {
                             roomId,
                             panelId,
                             panel: {
-                                tabs: config.tabs.map(oldValue =>
+                                tabs: tabs.map(oldValue =>
                                     oldValue.key === newValue.key &&
                                     oldValue.createdAt === newValue.createdAt
                                         ? newValue
@@ -1001,7 +989,7 @@ const RoomMessages: React.FC<Props> = (props: Props) => {
                                 roomId,
                                 panelId,
                                 panel: {
-                                    tabs: config.tabs.filter(tab => tab.key !== e),
+                                    tabs: tabs.filter(tab => tab.key !== e),
                                 },
                             })
                         );
@@ -1012,7 +1000,7 @@ const RoomMessages: React.FC<Props> = (props: Props) => {
                             roomId,
                             panelId,
                             panel: {
-                                tabs: [...config.tabs, TabConfig.createEmpty({})],
+                                tabs: [...tabs, TabConfig.createEmpty({})],
                             },
                         })
                     );
@@ -1025,10 +1013,16 @@ const RoomMessages: React.FC<Props> = (props: Props) => {
                 {...props}
                 style={{ flex: 'auto', margin: '0 4px' }}
                 roomId={roomId}
-                config={config}
+                onConfigUpdate={value =>
+                    dispatch(
+                        roomConfigModule.actions.updateMessagePanel({
+                            roomId,
+                            panelId,
+                            panel: value,
+                        })
+                    )
+                }
             />
         </div>
     );
 };
-
-export default RoomMessages;

@@ -42,7 +42,11 @@ const EditRoomDrawer: React.FC = () => {
                     close={{
                         textType: 'close',
                         onClick: () =>
-                            dispatch({ type: editRoomDrawerVisibility, newValue: false }),
+                            dispatch(
+                                roomDrawerAndPopoverAndModalModule.actions.set({
+                                    editRoomDrawerVisibility: false,
+                                })
+                            ),
                     }}
                 />
             }

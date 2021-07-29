@@ -2,6 +2,7 @@ import { Howl } from 'howler';
 import React from 'react';
 import { FilePathFragment } from '../generated/graphql';
 import { useSelector } from '../store';
+import { analyzeUrl } from '../utils/analyzeUrl';
 import { volumeCap } from '../utils/variables';
 import { useFirebaseStorageUrl } from './firebaseStorage';
 import { AllRoomMessagesResult, newEvent } from './useRoomMessages';
@@ -38,7 +39,7 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
         }
 
         const howl = new Howl({
-            src: [url],
+            src: [analyzeUrl(url).directLink],
             loop: false,
             volume: Math.min(value.volume * volumeConfigRef.current, volumeCap),
         });

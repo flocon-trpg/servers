@@ -37,6 +37,8 @@ import { enableMapSet } from 'immer';
 import { authToken } from '@kizahasi/util';
 import Head from 'next/head';
 import { useMonaco } from '@monaco-editor/react';
+import { ExpiryMap } from '../utils/expiryMap';
+import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
 
 enableMapSet();
 
@@ -176,6 +178,8 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         appConsole.log(`clientId: ${clientId}`);
     }, [clientId]);
 
+    const firebaseStorageUrlCache = useConstant(() => new ExpiryMap<string, string>());
+
     const monaco = useMonaco();
     React.useEffect(() => {
         if (monaco == null) {
@@ -219,7 +223,11 @@ declare var character: Character;
                 <ApolloProvider client={apolloClient}>
                     <Provider store={store}>
                         <MyAuthContext.Provider value={user}>
-                            <Component {...pageProps} />
+                            <FirebaseStorageUrlCacheContext.Provider
+                                value={firebaseStorageUrlCache}
+                            >
+                                <Component {...pageProps} />
+                            </FirebaseStorageUrlCacheContext.Provider>
                         </MyAuthContext.Provider>
                     </Provider>
                 </ApolloProvider>

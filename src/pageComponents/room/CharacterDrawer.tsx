@@ -5,7 +5,7 @@ import { simpleId } from '../../utils/generators';
 import { replace } from '../../stateManagers/states/types';
 import { DrawerProps } from 'antd/lib/drawer';
 import InputFile from '../../components/InputFile';
-import { FilePath, FilesManagerDrawerType } from '../../utils/types';
+import { FilesManagerDrawerType } from '../../utils/types';
 import FilesManagerDrawer from '../../components/FilesManagerDrawer';
 import { Gutter } from 'antd/lib/grid/row';
 import NumberParameterInput from '../../components/NumberParameterInput';
@@ -40,7 +40,6 @@ import {
     toCharacterUpOperation,
     UpOperation,
     pieceDiff,
-    testCommand,
 } from '@kizahasi/flocon-core';
 import { dualKeyRecordFind, strIndex20Array } from '@kizahasi/util';
 import { useSelector } from '../../store';
@@ -53,6 +52,7 @@ import {
 } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
+import { FilePath } from '../../utils/filePath';
 
 const notFound = 'notFound';
 
@@ -62,6 +62,7 @@ const drawerBaseProps: Partial<DrawerProps> = {
 
 const defaultCharacter: CharacterState = {
     $version: 1,
+    chatPalette: '',
     memo: '',
     name: '',
     isPrivate: false,
@@ -151,10 +152,8 @@ const CharacterDrawer: React.FC = () => {
         updateUiState: setCharacter,
         resetUiState: resetCharacterToCreate,
     } = useStateEditor(stateEditorParams);
-    const [
-        filesManagerDrawerType,
-        setFilesManagerDrawerType,
-    ] = React.useState<FilesManagerDrawerType | null>(null);
+    const [filesManagerDrawerType, setFilesManagerDrawerType] =
+        React.useState<FilesManagerDrawerType | null>(null);
 
     if (
         boolParamNames == null ||
@@ -881,6 +880,33 @@ const CharacterDrawer: React.FC = () => {
                                         updateCharacter({ privateVarToml: e.currentValue })
                                     }
                                 />
+                            </Col>
+                        </Row>
+                    </>
+                )}
+
+                {createdByMe && drawerType?.type === update && (
+                    <>
+                        <Typography.Title level={4}>チャットパレット</Typography.Title>
+
+                        <Row gutter={gutter} align="middle">
+                            <Col flex="auto" />
+                            <Col flex={0}></Col>
+                            <Col span={inputSpan}>
+                                <Button
+                                    onClick={() =>
+                                        dispatch(
+                                            roomDrawerAndPopoverAndModalModule.actions.set({
+                                                chatPaletteEditorModalType: {
+                                                    type: characterCommand,
+                                                    characterKey: drawerType.stateKey,
+                                                },
+                                            })
+                                        )
+                                    }
+                                >
+                                    編集
+                                </Button>
                             </Col>
                         </Row>
                     </>

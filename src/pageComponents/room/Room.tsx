@@ -6,13 +6,14 @@ import { useSelector } from '../../store';
 import roomConfigModule from '../../modules/roomConfigModule';
 import { useDispatch } from 'react-redux';
 import Board from './Board';
-import RoomMessages from './RoomMessages';
+import { RoomMessages } from './RoomMessages';
 import CharacterParameterNamesDrawer from './CharacterParameterNamesDrawer';
 import CharacterDrawer from './CharacterDrawer';
 import BoardDrawer from './BoardDrawer';
 import {
     activeBoardPanel,
     boardEditorPanel,
+    chatPalettePanel,
     memoPanel,
     messagePanel,
 } from '../../states/RoomConfig';
@@ -23,7 +24,6 @@ import LoadingResult from '../../components/Result/LoadingResult';
 import { usePlayBgm } from '../../hooks/usePlayBgm';
 import { usePlaySoundEffect } from '../../hooks/usePlaySoundEffect';
 import { useMessageNotification } from '../../hooks/useMessageNotification';
-import { useRoomMessageInputTexts } from '../../hooks/useRoomMessageInputTexts';
 import { RoomMenu } from './RoomMenu';
 import { recordToArray } from '@kizahasi/util';
 import { PieceValueList } from './PieceValueList';
@@ -34,11 +34,12 @@ import { BoardContextMenu, PieceTooltip, PopoverEditor } from './BoardPopover';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { ImagePieceDrawer } from './ImagePieceDrawer';
 import { CommandEditorModal } from './CommandEditorModal';
+import { ChatPalette } from './ChatPalettes';
+import { ChatPaletteEditorModal } from './ChatPaletteEditorModal';
 
 const RoomMessagePanels: React.FC<{ roomId: string }> = ({ roomId }: { roomId: string }) => {
     const dispatch = useDispatch();
     const messagePanels = useSelector(state => state.roomConfigModule?.panels.messagePanels);
-    const roomMessageInputTexts = useRoomMessageInputTexts({ roomId });
 
     return (
         <>
@@ -105,12 +106,7 @@ const RoomMessagePanels: React.FC<{ roomId: string }> = ({ roomId }: { roomId: s
                         minWidth={150}
                         zIndex={pair.value.zIndex}
                     >
-                        <RoomMessages
-                            panelId={pair.key}
-                            config={pair.value}
-                            height={pair.value.height}
-                            useRoomMessageInputTextsResult={roomMessageInputTexts}
-                        />
+                        <RoomMessages panelId={pair.key} height={pair.value.height} />
                     </DraggableCard>
                 );
             })}
@@ -131,6 +127,9 @@ const Room: React.FC = () => {
         state => state.roomConfigModule?.panels.boardEditorPanels
     );
     const characterPanel = useSelector(state => state.roomConfigModule?.panels.characterPanel);
+    const chatPalettePanelsConfig = useSelector(
+        state => state.roomConfigModule?.panels.chatPalettePanels
+    );
     const gameEffectPanel = useSelector(state => state.roomConfigModule?.panels.gameEffectPanel);
     const memoPanelsConfig = useSelector(state => state.roomConfigModule?.panels.memoPanels);
     const pieceValuePanel = useSelector(state => state.roomConfigModule?.panels.pieceValuePanel);
@@ -150,6 +149,7 @@ const Room: React.FC = () => {
         activeBoardPanelConfig == null ||
         boardEditorPanelsConfig == null ||
         characterPanel == null ||
+        chatPalettePanelsConfig == null ||
         gameEffectPanel == null ||
         memoPanelsConfig == null ||
         pieceValuePanel == null ||
@@ -230,6 +230,62 @@ const Room: React.FC = () => {
                     boardEditorPanelId={pair.key}
                     boardEditorPanel={pair.value}
                 />
+            </DraggableCard>
+        );
+    });
+
+    const chatPalettePanels = recordToArray(chatPalettePanelsConfig).map(pair => {
+        if (pair.value.isMinimized) {
+            return null;
+        }
+
+        return (
+            <DraggableCard
+                key={pair.key}
+                header="チャットパレット"
+                onDragStop={e =>
+                    dispatch(
+                        roomConfigModule.actions.moveChatPalettePanel({
+                            ...e,
+                            roomId,
+                            panelId: pair.key,
+                        })
+                    )
+                }
+                onResizeStop={(dir, delta) =>
+                    dispatch(
+                        roomConfigModule.actions.resizeChatPalettePanel({
+                            roomId,
+                            panelId: pair.key,
+                            dir,
+                            delta,
+                        })
+                    )
+                }
+                onMoveToFront={() =>
+                    dispatch(
+                        roomConfigModule.actions.bringPanelToFront({
+                            roomId,
+                            target: { type: chatPalettePanel, panelId: pair.key },
+                        })
+                    )
+                }
+                onClose={() =>
+                    dispatch(
+                        roomConfigModule.actions.removeChatPalettePanel({
+                            roomId,
+                            panelId: pair.key,
+                        })
+                    )
+                }
+                childrenContainerStyle={{ overflow: 'hidden' }}
+                position={pair.value}
+                size={pair.value}
+                minHeight={150}
+                minWidth={150}
+                zIndex={pair.value.zIndex}
+            >
+                <ChatPalette roomId={roomId} panelId={pair.key} />
             </DraggableCard>
         );
     });
@@ -402,6 +458,7 @@ const Room: React.FC = () => {
                             <CharacterList />
                         </DraggableCard>
                     )}
+                    {chatPalettePanels}
                     {gameEffectPanel.isMinimized ? null : (
                         <DraggableCard
                             header="SE, BGM"
@@ -558,6 +615,7 @@ const Room: React.FC = () => {
                 <CharacterParameterNamesDrawer />
                 <EditRoomDrawer />
 
+                <ChatPaletteEditorModal />
                 <CommandEditorModal />
             </AntdLayout.Content>
         </AntdLayout>

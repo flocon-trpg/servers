@@ -1,9 +1,7 @@
 import {
+    FileSourceType,
     RoomMessages,
-    RoomPrivateMessage,
-    RoomPublicChannel,
     RoomPublicChannelFragment,
-    RoomPublicMessage,
 } from '../generated/graphql';
 import { PrivateChannelSet } from './PrivateChannelSet';
 import { escape } from 'html-escaper';
@@ -13,11 +11,21 @@ import { messageContentMaxHeight, RoomMessage } from '../pageComponents/room/Roo
 import { isDeleted, toText } from './message';
 import { ParticipantState } from '@kizahasi/flocon-core';
 import { Color } from './color';
+import { FilePath } from './filePath';
+import axios from 'axios';
+import JSZip from 'jszip';
+import { Config } from '../config';
+import { analyzeUrl } from './analyzeUrl';
+import { simpleId } from './generators';
+import { ExpiryMap } from './expiryMap';
+import { logCss } from './richLogResource/logCss';
+import { logHtml } from './richLogResource/logHtml';
+import { RoomMessageFilter } from '../components/ChannelsFilter';
 
 const privateMessage = 'privateMessage';
 const publicMessage = 'publicMessage';
 
-type CreatedBy = { rolePlayPart?: string; participantNamePart: string };
+type CreatedBy = { rolePlayPart?: string; participantNamePart: string; characterImage?: FilePath };
 
 type RoomMessage =
     | {
@@ -25,6 +33,7 @@ type RoomMessage =
           deleted: true;
           createdAt: number;
           value: {
+              messageId: string;
               text: null;
               channelName: string;
               createdBy: CreatedBy;
@@ -37,6 +46,7 @@ type RoomMessage =
           deleted: false;
           createdAt: number;
           value: {
+              messageId: string;
               text: string;
               channelName: string;
               createdBy: CreatedBy | null;
@@ -49,6 +59,7 @@ type RoomMessage =
           deleted: true;
           createdAt: number;
           value: {
+              messageId: string;
               text: null;
               channelName: string;
               createdBy: CreatedBy;
@@ -61,6 +72,7 @@ type RoomMessage =
           deleted: false;
           createdAt: number;
           value: {
+              messageId: string;
               text: string;
               channelName: string;
               createdBy: CreatedBy | null;
@@ -69,10 +81,7 @@ type RoomMessage =
           };
       };
 
-type RoomMessageFilter = {
-    privateMessage: (value: RoomPrivateMessage) => boolean;
-    publicMessage: (value: RoomPublicMessage) => boolean;
-};
+
 
 const createRoomMessageArray = (
     props: {
@@ -80,7 +89,7 @@ const createRoomMessageArray = (
         participants: ReadonlyMap<string, ParticipantState>;
         filter: RoomMessageFilter;
     } & PublicChannelNames
-) => {
+): RoomMessage[] => {
     const { messages, participants, filter } = props;
 
     const result: RoomMessage[] = [];
@@ -91,19 +100,21 @@ const createRoomMessageArray = (
         createdBy,
         characterName,
         customName,
+        characterImage,
     }: {
         createdBy: string;
         characterName?: string;
         customName?: string;
-    }): { rolePlayPart?: string; participantNamePart: string } => {
+        characterImage?: FilePath;
+    }): CreatedBy => {
         const participantNamePart = participants.get(createdBy)?.name ?? createdBy;
         if (customName != null) {
-            return { rolePlayPart: customName, participantNamePart };
+            return { rolePlayPart: customName, participantNamePart, characterImage };
         }
         if (characterName != null) {
-            return { rolePlayPart: characterName, participantNamePart };
+            return { rolePlayPart: characterName, participantNamePart, characterImage };
         }
-        return { participantNamePart };
+        return { participantNamePart, characterImage };
     };
 
     messages.privateMessages
@@ -122,10 +133,12 @@ const createRoomMessageArray = (
                     deleted: true,
                     createdAt: msg.createdAt,
                     value: {
+                        messageId: msg.messageId,
                         text: null,
                         createdBy: createCreatedBy({
                             createdBy: msg.createdBy,
                             characterName: msg.character?.name,
+                            characterImage: msg.character?.image ?? undefined,
                             customName: msg.customName ?? undefined,
                         }),
                         channelName,
@@ -140,6 +153,7 @@ const createRoomMessageArray = (
                 deleted: false,
                 createdAt: msg.createdAt,
                 value: {
+                    messageId: msg.messageId,
                     text: toText(msg) ?? '',
                     createdBy:
                         msg.createdBy == null
@@ -147,6 +161,7 @@ const createRoomMessageArray = (
                             : createCreatedBy({
                                   createdBy: msg.createdBy,
                                   characterName: msg.character?.name,
+                                  characterImage: msg.character?.image ?? undefined,
                                   customName: msg.customName ?? undefined,
                               }),
                     channelName,
@@ -174,10 +189,12 @@ const createRoomMessageArray = (
                     deleted: true,
                     createdAt: msg.createdAt,
                     value: {
+                        messageId: msg.messageId,
                         text: null,
                         createdBy: createCreatedBy({
                             createdBy: msg.createdBy,
                             characterName: msg.character?.name,
+                            characterImage: msg.character?.image ?? undefined,
                             customName: msg.customName ?? undefined,
                         }),
                         channelName,
@@ -192,6 +209,7 @@ const createRoomMessageArray = (
                 deleted: false,
                 createdAt: msg.createdAt,
                 value: {
+                    messageId: msg.messageId,
                     text: toText(msg) ?? '',
                     createdBy:
                         msg.createdBy == null
@@ -199,6 +217,7 @@ const createRoomMessageArray = (
                             : createCreatedBy({
                                   createdBy: msg.createdBy,
                                   characterName: msg.character?.name,
+                                  characterImage: msg.character?.image ?? undefined,
                                   customName: msg.customName ?? undefined,
                               }),
                     channelName,
@@ -211,13 +230,13 @@ const createRoomMessageArray = (
     return result;
 };
 
-export const generateAsStaticHtml = (
-    params: {
-        messages: RoomMessages;
-        participants: ReadonlyMap<string, ParticipantState>;
-        filter: RoomMessageFilter;
-    } & PublicChannelNames
-) => {
+type GenerateLogParams = {
+    messages: RoomMessages;
+    participants: ReadonlyMap<string, ParticipantState>;
+    filter: RoomMessageFilter;
+} & PublicChannelNames;
+
+export const generateAsStaticHtml = (params: GenerateLogParams) => {
     const elements = createRoomMessageArray(params)
         .sort((x, y) => x.createdAt - y.createdAt)
         .map(msg => {
@@ -231,7 +250,7 @@ ${msg.value.createdBy.rolePlayPart == null ? '' : '<span> - </span>'}
 <span> </span>`;
 
             return `<div class="message" style="${
-                msg.value.textColor == null ? '' : `color: ${msg.value.textColor}`
+                msg.value.textColor == null ? '' : `color: ${escape(msg.value.textColor)}`
             }">
 ${left}
 <span> @ ${moment(new Date(msg.createdAt)).format('MM/DD HH:mm:ss')} </span>
@@ -277,4 +296,205 @@ ${
         </div>
     </body>
 </html>`;
+};
+
+type ImageResult = {
+    blob: Blob;
+    filename: string;
+};
+
+class ImageDownloader {
+    // keyはgetDownloadURL()する前のpath
+    // valueがnullの場合はnot foundなどを表し、二度とダウンロードを試みない
+    private readonly firebaseImages = new Map<string, ImageResult | null>();
+
+    // keyはdirectLink
+    // valueがnullの場合はnot foundなどを表し、二度とダウンロードを試みない
+    private readonly defaultImages = new Map<string, ImageResult | null>();
+
+    public constructor(
+        private readonly config: Config,
+        private readonly firebaseStorageUrlCache: ExpiryMap<string, string>
+    ) {}
+
+    public async download(filePath: FilePath): Promise<ImageResult | null> {
+        if (filePath.sourceType === FileSourceType.FirebaseStorage) {
+            const cache = this.firebaseImages.get(filePath.path);
+            if (cache !== undefined) {
+                return cache;
+            }
+        } else {
+            const cache = this.defaultImages.get(analyzeUrl(filePath.path).directLink);
+            if (cache !== undefined) {
+                return cache;
+            }
+        }
+
+        const imgUrl = await FilePath.getUrl(filePath, this.config, this.firebaseStorageUrlCache);
+        if (imgUrl == null) {
+            if (filePath.sourceType === FileSourceType.FirebaseStorage) {
+                this.firebaseImages.set(filePath.path, null);
+            } else {
+                throw new Error(thisShouldNotHappen);
+            }
+            // CONSIDER: 何らかの通知をしたほうがいいか？
+            return null;
+        }
+        const { directLink, fileExtension } = analyzeUrl(imgUrl);
+        const image = await axios.get(directLink, { responseType: 'blob' }).catch(() => null);
+        if (image == null) {
+            if (filePath.sourceType === FileSourceType.FirebaseStorage) {
+                this.firebaseImages.set(filePath.path, null);
+            } else {
+                this.defaultImages.set(directLink, null);
+            }
+            // CONSIDER: 何らかの通知をしたほうがいいか？
+            return null;
+        }
+        const result: ImageResult = {
+            // Firebase Storageのファイル名は長すぎる上に%などの文字が含まれており、imgのsrcに渡すと正常に動作しない、messages.jsのファイルサイズが大きくなるという2つの問題点があるため、ランダムな文字列に置き換えている。
+            // image1, image2... のように番号を順に割り振ったファイル名のほうがユーザーによるカスタマイズが行いやすいためこちらのほうが良いが、少し面倒なので現時点では却下している。
+            filename: fileExtension == null ? `${simpleId()}` : `${simpleId()}.${fileExtension}`,
+            blob: new Blob([image.data]),
+        };
+        if (filePath.sourceType === FileSourceType.FirebaseStorage) {
+            this.firebaseImages.set(filePath.path, result);
+        } else {
+            this.defaultImages.set(directLink, result);
+        }
+        return result;
+    }
+}
+
+class ArrayProgressCalculator {
+    private nextCount = 0;
+
+    // rangeMinとrangeMaxは0～100の範囲。
+    // 例えばrangeMin=2,rangeMax=96ならば、nextの戻り値は常に2以上であり、完了したときは96になる。
+    public constructor(
+        private arrayCount: number,
+        private rangeMin: number,
+        private rangeMax: number
+    ) {
+        if (this.rangeMin >= this.rangeMax) {
+            throw new Error('this.rangeMin >= this.rangeMax');
+        }
+    }
+
+    public next(): number {
+        if (this.arrayCount <= this.nextCount) {
+            return this.rangeMax;
+        }
+        this.nextCount++;
+        const progressAs0To100 = (100 * this.nextCount) / this.arrayCount;
+        const resultAsFloat =
+            (progressAs0To100 / 100) * (this.rangeMax - this.rangeMin) + this.rangeMin;
+        return Math.floor(resultAsFloat);
+    }
+}
+
+const thisShouldNotHappen = 'This should not happen';
+
+type RichLogProgress = {
+    percent: number;
+};
+
+export const generateAsRichLog = async (
+    params: GenerateLogParams,
+    config: Config,
+    firebaseStorageUrlCache: ExpiryMap<string, string>,
+    onProgressChange: (p: RichLogProgress) => void
+): Promise<Blob> => {
+    const imageDownloader = new ImageDownloader(config, firebaseStorageUrlCache);
+    const zip = new JSZip();
+
+    const cssFolder = zip.folder('css');
+    if (cssFolder == null) {
+        throw new Error(thisShouldNotHappen);
+    }
+    cssFolder.file('main.css', logCss);
+
+    const imgFolder = zip.folder('img');
+    if (imgFolder == null) {
+        throw new Error(thisShouldNotHappen);
+    }
+    onProgressChange({ percent: 1 });
+    const nonameImage = await axios
+        .get('/log/noname.png', { responseType: 'blob' })
+        .catch(() => null);
+    if (nonameImage != null) {
+        imgFolder.file('noname.png', nonameImage.data);
+    }
+    onProgressChange({ percent: 3 });
+    const diceImage = await axios.get('/log/dice.png', { responseType: 'blob' }).catch(() => null);
+    if (diceImage != null) {
+        imgFolder.file('dice.png', diceImage.data);
+    }
+    onProgressChange({ percent: 5 });
+
+    const imgAvatarFolder = imgFolder.folder('avatar');
+    if (imgAvatarFolder == null) {
+        throw new Error(thisShouldNotHappen);
+    }
+    const roomMessageArray = createRoomMessageArray(params).sort(
+        (x, y) => x.createdAt - y.createdAt
+    );
+    const arrayProgressCalculator = new ArrayProgressCalculator(roomMessageArray.length, 6, 93);
+    const messageDivs: string[] = [];
+    for (const msg of roomMessageArray) {
+        onProgressChange({ percent: arrayProgressCalculator.next() });
+        if (msg.deleted) {
+            continue;
+        }
+        if (msg.value.createdBy == null) {
+            // 単なるシステムメッセージは無視してcontinueしている
+            continue;
+        }
+        let avatar: string | undefined = undefined;
+        if (msg.value.createdBy.characterImage != null) {
+            const image = await imageDownloader.download(msg.value.createdBy.characterImage);
+            if (image != null) {
+                imgAvatarFolder.file(image.filename, image.blob);
+                avatar = `./img/avatar/${image.filename}`;
+            }
+        }
+        messageDivs.push(`<div class="flex flex-row message ${
+            msg.value.commandResult == null ? '' : 'is-command'
+        }">
+    <img class="avatar" src="${
+        msg.value.commandResult == null ? avatar ?? './img/noname.png' : './img/dice.png'
+    }">
+    <div class="flex flex-column">
+        <div class="flex-0 flex flex-row name" style="color: ${escape(
+            msg.value.textColor ?? 'white'
+        )}">
+            ${escape(msg.value.createdBy.rolePlayPart ?? msg.value.createdBy.participantNamePart)}
+        </div>
+        <div class="flex-1">
+            ${escape(msg.value.text)}
+            ${
+                msg.value.commandResult == null
+                    ? ''
+                    : `<br>
+            ${escape(msg.value.commandResult)}`
+            }
+        </div>
+    </div>
+</div>`);
+    }
+
+    onProgressChange({ percent: 94 });
+
+    zip.file('index.html', logHtml(messageDivs));
+
+    onProgressChange({ percent: 95 });
+
+    const result = await zip.generateAsync({
+        type: 'blob',
+        compression: 'DEFLATE',
+        compressionOptions: { level: 6 },
+    });
+
+    onProgressChange({ percent: 97 });
+    return result;
 };

@@ -6,7 +6,7 @@ import { replace } from '../../stateManagers/states/types';
 import InputFile from '../../components/InputFile';
 import { DrawerProps } from 'antd/lib/drawer';
 import FilesManagerDrawer from '../../components/FilesManagerDrawer';
-import { FilePath, FilesManagerDrawerType } from '../../utils/types';
+import { FilesManagerDrawerType } from '../../utils/types';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
 import { useOperate } from '../../hooks/useOperate';
@@ -22,6 +22,7 @@ import {
     update,
 } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
+import { FilePath } from '../../utils/filePath';
 
 const notFound = 'notFound';
 
@@ -95,10 +96,8 @@ const BoardDrawer: React.FC = () => {
         updateUiState: setBoard,
         resetUiState: resetBoardToCreate,
     } = useStateEditor(stateEditorParams);
-    const [
-        filesManagerDrawerType,
-        setFilesManagerDrawerType,
-    ] = React.useState<FilesManagerDrawerType | null>(null);
+    const [filesManagerDrawerType, setFilesManagerDrawerType] =
+        React.useState<FilesManagerDrawerType | null>(null);
 
     if (myUserUid == null || board == null) {
         return null;

@@ -91,7 +91,7 @@ export type ImagePieceDrawerType =
           stateKey: string;
       };
 
-export type CommandEditorModalType = {
+export type ChatPaletteOrCommandEditorModalType = {
     type: typeof characterCommand;
     characterKey: CompositeKey;
 };
@@ -164,7 +164,8 @@ export type State = {
     imagePieceDrawerType: ImagePieceDrawerType | null;
     numberPieceValueDrawerType: PieceValueDrawerType | null;
     editRoomDrawerVisibility: boolean;
-    commandEditorModalType: CommandEditorModalType | null;
+    chatPaletteEditorModalType: ChatPaletteOrCommandEditorModalType | null;
+    commandEditorModalType: ChatPaletteOrCommandEditorModalType | null;
 
     boardContextMenu: ContextMenuState | null;
     boardTooltip: BoardTooltipState | null;
@@ -179,6 +180,7 @@ const initState: State = {
     imagePieceDrawerType: null,
     numberPieceValueDrawerType: null,
     editRoomDrawerVisibility: false,
+    chatPaletteEditorModalType: null,
     commandEditorModalType: null,
 
     boardContextMenu: null,
@@ -200,6 +202,10 @@ export const roomDrawerAndPopoverAndModalModule = createSlice({
                     action.payload.boardDrawerType === undefined
                         ? state.boardDrawerType
                         : action.payload.boardDrawerType,
+                chatPaletteEditorModalType:
+                    action.payload.chatPaletteEditorModalType === undefined
+                        ? state.chatPaletteEditorModalType
+                        : action.payload.chatPaletteEditorModalType,
                 characterDrawerType:
                     action.payload.characterDrawerType === undefined
                         ? state.characterDrawerType

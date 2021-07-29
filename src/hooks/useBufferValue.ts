@@ -31,9 +31,8 @@ export function useBufferValue<T>({
     });
 
     React.useEffect(() => {
-        const newSubscription = (bufferDuration == null
-            ? subject
-            : subject.pipe(debounceTime(bufferDuration))
+        const newSubscription = (
+            bufferDuration == null ? subject : subject.pipe(debounceTime(bufferDuration))
         ).subscribe(newValue => {
             setResult(oldResult => {
                 return {

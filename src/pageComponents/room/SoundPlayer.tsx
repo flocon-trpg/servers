@@ -114,10 +114,8 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({
 }: BgmPlayerDrawerProps) => {
     const operate = useOperate();
 
-    const [
-        filesManagerDrawerType,
-        setFilesManagerDrawerType,
-    ] = React.useState<FilesManagerDrawerType | null>(null);
+    const [filesManagerDrawerType, setFilesManagerDrawerType] =
+        React.useState<FilesManagerDrawerType | null>(null);
 
     const [filesInput, setFilesInput] = React.useState<FilePathInput[]>([]);
     const [volumeInput, setVolumeInput] = React.useState<number>(defaultVolume);
@@ -263,10 +261,8 @@ const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({
     onClose,
 }: SePlayerDrawerProps) => {
     const roomId = useSelector(state => state.roomModule.roomId);
-    const [
-        filesManagerDrawerType,
-        setFilesManagerDrawerType,
-    ] = React.useState<FilesManagerDrawerType | null>(null);
+    const [filesManagerDrawerType, setFilesManagerDrawerType] =
+        React.useState<FilesManagerDrawerType | null>(null);
 
     const [writeRoomSoundEffect] = useWriteRoomSoundEffectMutation();
     const [fileInput, setFileInput] = React.useState<FilePathInput>();

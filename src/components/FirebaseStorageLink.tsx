@@ -1,5 +1,7 @@
 import React from 'react';
 import ConfigContext from '../contexts/ConfigContext';
+import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
+import { useReadonlyRef } from '../hooks/useReadonlyRef';
 import { fileName } from '../utils/filename';
 import { getStorageForce } from '../utils/firebaseHelpers';
 
@@ -8,6 +10,8 @@ type Props = {
 };
 
 const FirebaseStorageLink: React.FC<Props> = ({ reference }: Props) => {
+    const cache = React.useContext(FirebaseStorageUrlCacheContext);
+    const cacheRef = useReadonlyRef(cache);
     const [url, setUrl] = React.useState<string>();
     const [fullPath, setFullPath] = React.useState<string>(
         typeof reference === 'string' ? '' : reference.fullPath
@@ -24,11 +28,17 @@ const FirebaseStorageLink: React.FC<Props> = ({ reference }: Props) => {
             return reference;
         })();
         setFullPath(ref.fullPath);
+        const cachedUrl = cacheRef.current?.get(ref.fullPath);
+        if (cachedUrl != null) {
+            setUrl(cachedUrl);
+            return;
+        }
         ref.getDownloadURL().then(url => {
             if (unsubscribed) {
                 return;
             }
             if (typeof url === 'string') {
+                cacheRef.current?.set(ref.fullPath, url, 1000 * 60 * 10);
                 setUrl(url);
             }
         });
@@ -36,7 +46,7 @@ const FirebaseStorageLink: React.FC<Props> = ({ reference }: Props) => {
         return () => {
             unsubscribed = true;
         };
-    }, [reference, config]);
+    }, [reference, config, cacheRef]);
 
     if (url == null) {
         return <span>{fileName(fullPath)}</span>;

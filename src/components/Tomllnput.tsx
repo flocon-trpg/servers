@@ -10,7 +10,7 @@ type Props = Omit<BufferedTextAreaProps, 'spellCheck'>;
 
 export const TomlInput: React.FC<Props> = (props: Props) => {
     const { ...inputProps } = props;
-    const validator = (params: BottomElementParams): JSX.Element | null => {
+    const bottomElement = (params: BottomElementParams): JSX.Element | null => {
         if (params.isSkipping) {
             return <div>編集中…</div>;
         }
@@ -21,5 +21,5 @@ export const TomlInput: React.FC<Props> = (props: Props) => {
         return <div>OK</div>;
     };
 
-    return <BufferedTextArea {...inputProps} spellCheck={false} bottomElement={validator} />;
+    return <BufferedTextArea {...inputProps} spellCheck={false} bottomElement={bottomElement} />;
 };

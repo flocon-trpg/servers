@@ -8,6 +8,8 @@ import {
     RoomAsListItemFragment,
     useJoinRoomAsPlayerMutation,
     useJoinRoomAsSpectatorMutation,
+    useUpdateWritingMessageStatusMutation,
+    WritingMessageStatusInputType,
 } from '../../generated/graphql';
 import { Alert, Button, Card, Input, Result, Spin, notification as antdNotification } from 'antd';
 import Layout from '../../layouts/Layout';
@@ -28,11 +30,14 @@ import LoadingResult from '../../components/Result/LoadingResult';
 import NotSignInResult from '../../components/Result/NotSignInResult';
 import { usePublishRoomEventSubscription } from '../../hooks/usePublishRoomEventSubscription';
 import { useDispatch } from 'react-redux';
-import roomStateModule from '../../modules/roomModule';
+import { roomModule } from '../../modules/roomModule';
 import { useAllRoomMessages } from '../../hooks/useRoomMessages';
 import { useSelector } from '../../store';
 import useRoomConfig from '../../hooks/localStorage/useRoomConfig';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
+import { messageInputTextModule } from '../../modules/messageInputTextModule';
+import { useReadonlyRef } from '../../hooks/useReadonlyRef';
+import { usePrevious } from 'react-use';
 
 type JoinRoomFormProps = {
     roomState: RoomAsListItemFragment;
@@ -176,38 +181,45 @@ const RoomBehavior: React.FC<PropsWithChildren<{ roomId: string }>> = ({
     roomId,
     children,
 }: PropsWithChildren<{ roomId: string }>) => {
+    const roomIdRef = useReadonlyRef(roomId);
+
     useRoomConfig(roomId);
 
     const dispatch = useDispatch();
-    const { observable, data: roomEventSubscription, error } = usePublishRoomEventSubscription(
-        roomId
-    );
+    const [updateWritingMessageStatus] = useUpdateWritingMessageStatusMutation();
+
+    React.useEffect(() => {
+        dispatch(roomDrawerAndPopoverAndModalModule.actions.reset());
+        dispatch(messageInputTextModule.actions.reset());
+    }, [roomId, dispatch]);
+
+    const {
+        observable,
+        data: roomEventSubscription,
+        error,
+    } = usePublishRoomEventSubscription(roomId);
     const { state: roomState, refetch: refetchRoomState } = useRoomState(roomId, observable);
     const allRoomMessages = useAllRoomMessages({
         roomId,
         roomEventSubscription,
         beginFetch: roomState.type === 'joined',
     });
-    React.useEffect(() => {
-        dispatch(roomDrawerAndPopoverAndModalModule.actions.reset());
-    }, [roomId, dispatch]);
 
     React.useEffect(() => {
-        dispatch(roomStateModule.actions.reset());
-        dispatch(roomStateModule.actions.setRoom({ roomId }));
+        dispatch(roomModule.actions.reset());
+        dispatch(roomModule.actions.setRoom({ roomId }));
     }, [dispatch, roomId]);
     React.useEffect(() => {
-        dispatch(roomStateModule.actions.setRoom({ roomState }));
+        dispatch(roomModule.actions.setRoom({ roomState }));
     }, [dispatch, roomState]);
     React.useEffect(() => {
-        dispatch(roomStateModule.actions.setRoom({ roomEventSubscription }));
+        dispatch(roomModule.actions.setRoom({ roomEventSubscription }));
     }, [dispatch, roomEventSubscription]);
     React.useEffect(() => {
-        dispatch(roomStateModule.actions.setRoom({ allRoomMessagesResult: allRoomMessages }));
+        dispatch(roomModule.actions.setRoom({ allRoomMessagesResult: allRoomMessages }));
     }, [dispatch, allRoomMessages]);
 
     const newNotification = useSelector(state => state.roomModule.notifications.newValue);
-
     React.useEffect(() => {
         if (newNotification == null) {
             return;
@@ -218,6 +230,33 @@ const RoomBehavior: React.FC<PropsWithChildren<{ roomId: string }>> = ({
             placement: 'bottomRight',
         });
     }, [newNotification]);
+
+    const publicMessage = useSelector(state => state.messageInputTextModule.publicMessage);
+    const prevPublicMessage = usePrevious(publicMessage);
+    React.useEffect(() => {
+        const prevMessage = prevPublicMessage ?? '';
+        const currentMessage = publicMessage;
+        if (prevMessage === currentMessage) {
+            return;
+        }
+        let newStatus: WritingMessageStatusInputType;
+        if (prevMessage === '') {
+            if (currentMessage === '') {
+                newStatus = WritingMessageStatusInputType.KeepWriting;
+            } else {
+                newStatus = WritingMessageStatusInputType.StartWriting;
+            }
+        } else {
+            if (currentMessage === '') {
+                newStatus = WritingMessageStatusInputType.Cleared;
+            } else {
+                newStatus = WritingMessageStatusInputType.KeepWriting;
+            }
+        }
+        updateWritingMessageStatus({
+            variables: { roomId: roomIdRef.current, newStatus },
+        });
+    }, [publicMessage, prevPublicMessage, updateWritingMessageStatus, roomIdRef]);
 
     if (error != null) {
         return (

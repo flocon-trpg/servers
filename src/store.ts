@@ -6,9 +6,10 @@ import { createEpicMiddleware } from 'redux-observable';
 import roomConfigModule from './modules/roomConfigModule';
 import { rootEpic } from './epics/rootEpic';
 import userConfigModule from './modules/userConfigModule';
-import roomModule from './modules/roomModule';
 import { roomDrawerAndPopoverAndModalModule } from './modules/roomDrawerAndPopoverAndModalModule';
 import { fileModule } from './modules/fileModule';
+import { roomModule } from './modules/roomModule';
+import { messageInputTextModule } from './modules/messageInputTextModule';
 
 // rootReducer の準備
 const rootReducer = combineReducers({
@@ -17,6 +18,7 @@ const rootReducer = combineReducers({
     userConfigModule: userConfigModule.reducer,
     roomModule: roomModule.reducer,
     roomDrawerAndPopoverAndModalModule: roomDrawerAndPopoverAndModalModule.reducer,
+    messageInputTextModule: messageInputTextModule.reducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
