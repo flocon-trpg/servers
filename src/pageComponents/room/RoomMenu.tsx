@@ -1,4 +1,15 @@
-import { Checkbox, Divider, Input, Menu, Modal, Popover, Tooltip, Typography } from 'antd';
+import {
+    Button,
+    Checkbox,
+    Divider,
+    Input,
+    Menu,
+    Modal,
+    Popover,
+    Progress,
+    Tooltip,
+    Typography,
+} from 'antd';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import {
@@ -609,28 +620,33 @@ const GenerateSimpleLogModal: React.FC<GenerateSimpleLogModalProps> = ({
 type GenerateRichLogModalProps = {
     roomId: string;
     visible: boolean;
-    onOk: () => void;
     onCancel: () => void;
 };
 
 const GenerateRichLogModal: React.FC<GenerateRichLogModalProps> = ({
     roomId,
     visible,
-    onOk,
     onCancel,
-}: GenerateSimpleLogModalProps) => {
+}: GenerateRichLogModalProps) => {
     const config = React.useContext(ConfigContext);
     const configRef = useReadonlyRef(config);
     const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
     const firebaseStorageUrlCacheContextRef = useReadonlyRef(firebaseStorageUrlCacheContext);
 
     const publicChannelNames = usePublicChannelNames();
+    const publicChannelNamesRef = useReadonlyRef(publicChannelNames);
     const participants = useParticipants();
+    const participantsRef = useReadonlyRef(participants);
+
+    // undefinedならばダウンロード
+    const [progress, setProgress] = React.useState<number>();
+    const [errorMessage, setErrorMessage] = React.useState<string>();
+    React.useEffect(() => {
+        setProgress(undefined);
+        setErrorMessage(undefined);
+    }, [visible]);
 
     const [getLogQuery, getLogQueryResult] = useGetLogLazyQuery({ fetchPolicy: 'network-only' });
-
-    const participantsRef = useReadonlyRef(participants);
-    const publicChannelNamesRef = useReadonlyRef(publicChannelNames);
 
     React.useEffect(() => {
         const main = async () => {
@@ -650,22 +666,29 @@ const GenerateRichLogModal: React.FC<GenerateRichLogModalProps> = ({
                 return;
             }
 
-            fileDownload(
-                await generateAsRichLog(
-                    {
-                        ...publicChannelNamesRef.current,
-                        messages: data.result,
-                        participants: participantsRef.current,
-                        filter: {
-                            privateMessage: () => true,
-                            publicMessage: () => true,
-                        },
+            const zipBlob = await generateAsRichLog(
+                {
+                    ...publicChannelNamesRef.current,
+                    messages: data.result,
+                    participants: participantsRef.current,
+                    filter: {
+                        privateMessage: () => true,
+                        publicMessage: () => true,
                     },
-                    configRef.current,
-                    firebaseStorageUrlCacheContextRef.current
-                ),
-                `log_${moment(new Date()).format('YYYYMMDDHHmmss')}.zip`
-            );
+                },
+                configRef.current,
+                firebaseStorageUrlCacheContextRef.current,
+                p => setProgress(p.percent)
+            ).catch(err => {
+                setProgress(undefined);
+                setErrorMessage(err.message);
+                return null;
+            });
+            if (zipBlob == null) {
+                return;
+            }
+            setProgress(100);
+            fileDownload(zipBlob, `log_${moment(new Date()).format('YYYYMMDDHHmmss')}.zip`);
         };
         main();
     }, [
@@ -680,24 +703,54 @@ const GenerateRichLogModal: React.FC<GenerateRichLogModalProps> = ({
         return null;
     }
 
+    const isDownloading = progress != null && progress !== 100;
+
     return (
         <Modal
             visible={visible}
+            closable={false}
+            maskClosable={!isDownloading}
             title="ログのダウンロード"
-            onOk={() => {
-                getLogQuery({ variables: { roomId } });
-                onOk();
-            }}
+            okButtonProps={{ style: { display: 'none' } }}
+            cancelText="閉じる"
+            cancelButtonProps={{ disabled: isDownloading }}
             onCancel={() => onCancel()}
         >
             <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <div>
-                    ログには、秘話などの非公開情報も含めることが可能です。また、ログをダウンロードすると、システムメッセージによって全員に通知されます。
+                    <p>
+                        ログには、秘話などの非公開情報も含めることが可能です。また、ログをダウンロードすると、システムメッセージによって全員に通知されます。
+                    </p>
+                    <p>
+                        キャラクターの画像も一緒にダウンロードするため、zipファイル生成までに数十秒程度の時間がかかることがあります。
+                    </p>
+                    <p>ログを生成してよろしいですか？</p>
                 </div>
-                <div>ログをダウンロードします。よろしいですか？</div>
-                <div>
-                    キャラクターの画像も一緒にダウンロードするため、zipファイル生成までに数十秒程度の時間がかかることがあります。
-                </div>
+                <Button
+                    style={{ alignSelf: 'start', marginTop: 6 }}
+                    type="primary"
+                    disabled={isDownloading}
+                    onClick={() => {
+                        getLogQuery({ variables: { roomId } });
+                        setProgress(0);
+                        setErrorMessage(undefined);
+                    }}
+                >
+                    ログ生成を開始
+                </Button>
+                {progress != null && (
+                    <Progress
+                        percent={progress}
+                        status={
+                            progress === 100
+                                ? 'success'
+                                : errorMessage == null
+                                ? 'normal'
+                                : 'exception'
+                        }
+                    />
+                )}
+                {errorMessage != null && <div>{errorMessage}</div>}
             </div>
         </Modal>
     );
@@ -1344,7 +1397,6 @@ export const RoomMenu: React.FC = () => {
             />
             <GenerateRichLogModal
                 visible={isGenerateRichLogModalVisible}
-                onOk={() => setIsGenerateRichLogModalVisible(false)}
                 onCancel={() => setIsGenerateRichLogModalVisible(false)}
                 roomId={roomId}
             />

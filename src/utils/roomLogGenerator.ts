@@ -372,6 +372,33 @@ class ImageDownloader {
     }
 }
 
+class ArrayProgressCalculator {
+    private nextCount = 0;
+
+    // rangeMinとrangeMaxは0～100の範囲。
+    // 例えばrangeMin=2,rangeMax=96ならば、nextの戻り値は常に2以上であり、完了したときは96になる。
+    public constructor(
+        private arrayCount: number,
+        private rangeMin: number,
+        private rangeMax: number
+    ) {
+        if (this.rangeMin >= this.rangeMax) {
+            throw new Error('this.rangeMin >= this.rangeMax');
+        }
+    }
+
+    public next(): number {
+        if (this.arrayCount <= this.nextCount) {
+            return this.rangeMax;
+        }
+        this.nextCount++;
+        const progressAs0To100 = (100 * this.nextCount) / this.arrayCount;
+        const resultAsFloat =
+            (progressAs0To100 / 100) * (this.rangeMax - this.rangeMin) + this.rangeMin;
+        return Math.floor(resultAsFloat);
+    }
+}
+
 // preactのコードとすり合わせて決めなければならない
 type RichLogMessageProps = {
     id: string;
@@ -384,10 +411,15 @@ type RichLogMessageProps = {
 
 const thisShouldNotHappen = 'This should not happen';
 
+type RichLogProgress = {
+    percent: number;
+};
+
 export const generateAsRichLog = async (
     params: GenerateLogParams,
     config: Config,
-    firebaseStorageUrlCache: ExpiryMap<string, string>
+    firebaseStorageUrlCache: ExpiryMap<string, string>,
+    onProgressChange: (p: RichLogProgress) => void
 ): Promise<Blob> => {
     const imageDownloader = new ImageDownloader(config, firebaseStorageUrlCache);
     const zip = new JSZip();
@@ -402,19 +434,26 @@ export const generateAsRichLog = async (
     if (imgFolder == null) {
         throw new Error(thisShouldNotHappen);
     }
+    onProgressChange({ percent: 1 });
     const nonameImage = await axios
         .get('/log/noname.png', { responseType: 'blob' })
         .catch(() => null);
     if (nonameImage != null) {
         imgFolder.file('noname.png', nonameImage.data);
     }
+    onProgressChange({ percent: 3 });
 
     const imgAvatarFolder = imgFolder.folder('avatar');
     if (imgAvatarFolder == null) {
         throw new Error(thisShouldNotHappen);
     }
+    const roomMessageArray = createRoomMessageArray(params).sort(
+        (x, y) => x.createdAt - y.createdAt
+    );
+    const arrayProgressCalculator = new ArrayProgressCalculator(roomMessageArray.length, 4, 90);
     const messageProps: RichLogMessageProps[] = [];
-    for (const msg of createRoomMessageArray(params).sort((x, y) => x.createdAt - y.createdAt)) {
+    for (const msg of roomMessageArray) {
+        onProgressChange({ percent: arrayProgressCalculator.next() });
         if (msg.type === privateMessage) {
             // TODO: 実装する
             continue;
@@ -444,6 +483,8 @@ export const generateAsRichLog = async (
         });
     }
 
+    onProgressChange({ percent: 91 });
+
     const jsFolder = zip.folder('js');
     if (jsFolder == null) {
         throw new Error(thisShouldNotHappen);
@@ -461,9 +502,14 @@ export const generateAsRichLog = async (
 
     zip.file('index.html', logHtml);
 
-    return await zip.generateAsync({
+    onProgressChange({ percent: 95 });
+
+    const result = await zip.generateAsync({
         type: 'blob',
         compression: 'DEFLATE',
         compressionOptions: { level: 6 },
     });
+
+    onProgressChange({ percent: 97 });
+    return result;
 };
