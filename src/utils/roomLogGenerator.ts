@@ -443,10 +443,6 @@ export const generateAsRichLog = async (
     const messageDivs: string[] = [];
     for (const msg of roomMessageArray) {
         onProgressChange({ percent: arrayProgressCalculator.next() });
-        if (msg.type === privateMessage) {
-            // TODO: 実装する
-            continue;
-        }
         if (msg.deleted) {
             continue;
         }
