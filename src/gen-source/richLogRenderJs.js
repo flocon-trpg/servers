@@ -5,57 +5,57 @@ const { html, render, useState, createContext, useContext, useMemo } = htmPreact
 function renderToBody(rootProps) {
     const RootStatePairContext = createContext();
 
-    function toFontSize(fontSizeDelta) {
+    function fontSizeDeltaToClass(fontSizeDelta) {
         switch (fontSizeDelta) {
             case -3:
-                return 10;
             case -2:
-                return 11;
             case -1:
-                return 12;
             case 0:
-                return 14;
             case 1:
-                return 16;
             case 2:
-                return 19;
             case 3:
-                return 22;
+                return `font-size-${fontSizeDelta}`;
             default:
-                return 14;
+                return 'font-size-0';
         }
     }
 
     function Name(message) {
-        const [rootState] = useContext(RootStatePairContext);
         const { characterName, userName, textColor } = message;
+        const [rootState] = useContext(RootStatePairContext);
 
-        const fontSize = toFontSize(rootState.fontSizeDelta);
         const name = characterName ?? userName;
 
         return html`
-            <div class="name flex-0 flex flex-row" style=${{ color: textColor, fontSize }}>
+            <div class="name flex-0 flex flex-row ${fontSizeDeltaToClass(rootState.fontSizeDelta)}" style=${{ color: textColor }}>
                 ${name}
             </div>
         `;
     }
 
     function Body(message) {
-        const [rootState] = useContext(RootStatePairContext);
         const { text } = message;
+        const [rootState] = useContext(RootStatePairContext);
 
-        const fontSize = toFontSize(rootState.fontSizeDelta);
-        return html`<div class="flex-1" style=${{ fontSize }}>${text}</div> `;
+        return html`<div
+            class="flex-1 ${fontSizeDeltaToClass(rootState.fontSizeDelta)}"
+        >
+            ${text}
+        </div> `;
     }
 
     function Avatar(message) {
         const { avatar } = message;
+        const [rootState] = useContext(RootStatePairContext);
 
-        return html`<img class="avatar" src=${avatar ?? './img/noname.png'} />`;
+        return html`<img
+            class="avatar ${fontSizeDeltaToClass(rootState.fontSizeDelta)}"
+            src=${avatar ?? './img/noname.png'}
+        />`;
     }
 
     function Message(message) {
-        return html`<div class="flex flex-row">
+        return html`<div class="flex flex-row message">
             <${Avatar} ...${message} />
             <div class="flex flex-column">
                 <${Name} ...${message} />
