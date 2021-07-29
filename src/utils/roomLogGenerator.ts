@@ -446,12 +446,8 @@ export const generateAsRichLog = async (
         if (msg.deleted) {
             continue;
         }
-        if (msg.value.createdBy == null) {
-            // 単なるシステムメッセージは無視してcontinueしている
-            continue;
-        }
         let avatar: string | undefined = undefined;
-        if (msg.value.createdBy.characterImage != null) {
+        if (msg.value.createdBy?.characterImage != null) {
             const image = await imageDownloader.download(msg.value.createdBy.characterImage);
             if (image != null) {
                 imgAvatarFolder.file(image.filename, image.blob);
@@ -468,7 +464,7 @@ export const generateAsRichLog = async (
         <div class="flex-0 flex flex-row name" style="color: ${escape(
             msg.value.textColor ?? 'white'
         )}">
-            ${escape(msg.value.createdBy.rolePlayPart ?? msg.value.createdBy.participantNamePart)}
+            ${escape(msg.value.createdBy?.rolePlayPart ?? msg.value.createdBy?.participantNamePart ?? 'システムメッセージ')}
         </div>
         <div class="flex-1">
             ${escape(msg.value.text)}
