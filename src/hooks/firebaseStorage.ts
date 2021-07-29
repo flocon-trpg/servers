@@ -1,6 +1,6 @@
 import { FilePath } from '@kizahasi/flocon-core';
 import React from 'react';
-import { useDeepCompareEffectNoCheck } from 'use-deep-compare-effect';
+import { useDeepCompareEffect } from 'react-use';
 import ConfigContext from '../contexts/ConfigContext';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
 import { FilePathFragment } from '../generated/graphql';
@@ -21,7 +21,7 @@ export function useFirebaseStorageUrlArray(
         sourceType: path.sourceType,
     }));
 
-    useDeepCompareEffectNoCheck(() => {
+    useDeepCompareEffect(() => {
         if (cleanPathArray == null) {
             setResult(null);
             return;

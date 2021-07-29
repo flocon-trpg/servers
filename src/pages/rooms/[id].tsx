@@ -35,9 +35,9 @@ import { useAllRoomMessages } from '../../hooks/useRoomMessages';
 import { useSelector } from '../../store';
 import useRoomConfig from '../../hooks/localStorage/useRoomConfig';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
-import { usePrevious } from '../../hooks/usePrevious';
 import { messageInputTextModule } from '../../modules/messageInputTextModule';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
+import { usePrevious } from 'react-use';
 
 type JoinRoomFormProps = {
     roomState: RoomAsListItemFragment;

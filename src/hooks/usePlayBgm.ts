@@ -1,6 +1,5 @@
 import React from 'react';
 import { Howl } from 'howler';
-import { useDeepCompareEffectNoCheck } from 'use-deep-compare-effect';
 import { useFirebaseStorageUrlArray } from './firebaseStorage';
 import { volumeCap } from '../utils/variables';
 import { useSelector } from '../store';
@@ -8,6 +7,7 @@ import { defaultChannelVolume, defaultMasterVolume } from '../states/RoomConfig'
 import { BgmState } from '@kizahasi/flocon-core';
 import _ from 'lodash';
 import { analyzeUrl } from '../utils/analyzeUrl';
+import { useDeepCompareEffect } from 'react-use';
 
 type PlayBgmBehaviorCoreProps = {
     bgm: BgmState | null;
@@ -37,7 +37,7 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmBehaviorCoreProps): void {
     const urlArray = useFirebaseStorageUrlArray(bgm?.files);
     const howlRef = React.useRef<Howl>();
 
-    useDeepCompareEffectNoCheck(() => {
+    useDeepCompareEffect(() => {
         if (urlArray == null || volumeRef.current == null) {
             return;
         }

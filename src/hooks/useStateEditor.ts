@@ -1,6 +1,6 @@
 import React from 'react';
+import { usePrevious } from 'react-use';
 import { useReadonlyRef } from './useReadonlyRef';
-import { usePrevious } from './usePrevious';
 
 export const update = 'update';
 export const create = 'create';
