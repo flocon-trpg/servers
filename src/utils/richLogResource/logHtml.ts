@@ -1,4 +1,4 @@
-export const logHtml = `
+export const logHtml = (messageDivs: string[]) => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,12 +6,9 @@ export const logHtml = `
 <link rel="stylesheet" type="text/css" href="./css/main.css">
 </head>
 <body>
-<script src="./js/htmPreact.js"></script>
-<script src="./js/renderToBody.js"></script>
-<script src="./js/preactProps.js"></script>
-<script>
-renderToBody(preactProps);
-</script>
+<div class="container flex flex-column">
+${messageDivs.reduce((seed, elem) => (seed === '' ? elem : `${seed}\r\n${elem}`), '')}
+</div>
 </body>
 </html>
 `;

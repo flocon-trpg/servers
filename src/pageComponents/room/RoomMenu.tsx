@@ -904,10 +904,10 @@ export const RoomMenu: React.FC = () => {
                     </Menu.Item>
                     <Menu.Divider />
                     <Menu.Item onClick={() => setIsGenerateSimpleLogModalVisible(true)}>
-                        ログをダウンロード（クラシック版）
+                        ログをダウンロード（旧）
                     </Menu.Item>
                     <Menu.Item onClick={() => setIsGenerateRichLogModalVisible(true)}>
-                        ログをダウンロード（Javascript版）
+                        ログをダウンロード（新）
                     </Menu.Item>
                 </Menu.SubMenu>
                 <Menu.SubMenu title="ウィンドウ">

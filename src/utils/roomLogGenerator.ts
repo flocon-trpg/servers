@@ -20,9 +20,7 @@ import { Config } from '../config';
 import { analyzeUrl } from './analyzeUrl';
 import { simpleId } from './generators';
 import { ExpiryMap } from './expiryMap';
-import { htmPreact } from './richLogResource/htmPreact';
 import { logCss } from './richLogResource/logCss';
-import { richLogRenderJs } from '../generated/richLogRenderJs';
 import { logHtml } from './richLogResource/logHtml';
 
 const privateMessage = 'privateMessage';
@@ -399,16 +397,6 @@ class ArrayProgressCalculator {
     }
 }
 
-// preactのコードとすり合わせて決めなければならない
-type RichLogMessageProps = {
-    id: string;
-    characterName: string | undefined;
-    userName: string;
-    textColor: string;
-    text: string;
-    avatar: string | undefined;
-};
-
 const thisShouldNotHappen = 'This should not happen';
 
 type RichLogProgress = {
@@ -442,6 +430,11 @@ export const generateAsRichLog = async (
         imgFolder.file('noname.png', nonameImage.data);
     }
     onProgressChange({ percent: 3 });
+    const diceImage = await axios.get('/log/dice.png', { responseType: 'blob' }).catch(() => null);
+    if (diceImage != null) {
+        imgFolder.file('dice.png', diceImage.data);
+    }
+    onProgressChange({ percent: 5 });
 
     const imgAvatarFolder = imgFolder.folder('avatar');
     if (imgAvatarFolder == null) {
@@ -450,8 +443,8 @@ export const generateAsRichLog = async (
     const roomMessageArray = createRoomMessageArray(params).sort(
         (x, y) => x.createdAt - y.createdAt
     );
-    const arrayProgressCalculator = new ArrayProgressCalculator(roomMessageArray.length, 4, 90);
-    const messageProps: RichLogMessageProps[] = [];
+    const arrayProgressCalculator = new ArrayProgressCalculator(roomMessageArray.length, 6, 93);
+    const messageDivs: string[] = [];
     for (const msg of roomMessageArray) {
         onProgressChange({ percent: arrayProgressCalculator.next() });
         if (msg.type === privateMessage) {
@@ -473,34 +466,34 @@ export const generateAsRichLog = async (
                 avatar = `./img/avatar/${image.filename}`;
             }
         }
-        messageProps.push({
-            id: msg.value.messageId,
-            text: msg.value.text,
-            textColor: msg.value.textColor ?? 'white',
-            characterName: msg.value.createdBy.rolePlayPart,
-            userName: msg.value.createdBy.participantNamePart,
-            avatar,
-        });
+        messageDivs.push(`<div class="flex flex-row message ${
+            msg.value.commandResult == null ? '' : 'is-command'
+        }">
+    <img class="avatar" src="${
+        msg.value.commandResult == null ? avatar ?? './img/noname.png' : './img/dice.png'
+    }">
+    <div class="flex flex-column">
+        <div class="flex-0 flex flex-row name" style="color: ${escape(
+            msg.value.textColor ?? 'white'
+        )}">
+            ${escape(msg.value.createdBy.rolePlayPart ?? msg.value.createdBy.participantNamePart)}
+        </div>
+        <div class="flex-1">
+            ${escape(msg.value.text)}
+            ${
+                msg.value.commandResult == null
+                    ? ''
+                    : `<br>
+            ${escape(msg.value.commandResult)}`
+            }
+        </div>
+    </div>
+</div>`);
     }
 
-    onProgressChange({ percent: 91 });
+    onProgressChange({ percent: 94 });
 
-    const jsFolder = zip.folder('js');
-    if (jsFolder == null) {
-        throw new Error(thisShouldNotHappen);
-    }
-    jsFolder.file('htmPreact.js', htmPreact);
-    jsFolder.file('renderToBody.js', richLogRenderJs);
-    jsFolder.file(
-        'preactProps.js',
-        `const preactProps = ${JSON.stringify({ messages: messageProps })}`
-    );
-    jsFolder.file(
-        'source.txt',
-        'htmPreact.js: https://unpkg.com/browse/htm@3.1.0/preact/standalone.umd.js'
-    );
-
-    zip.file('index.html', logHtml);
+    zip.file('index.html', logHtml(messageDivs));
 
     onProgressChange({ percent: 95 });
 
