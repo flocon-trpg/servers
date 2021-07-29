@@ -1,22 +1,10 @@
-import {
-    Button,
-    Checkbox,
-    Divider,
-    Input,
-    Menu,
-    Modal,
-    Popover,
-    Progress,
-    Tooltip,
-    Typography,
-} from 'antd';
+import { Button, Input, Menu, Modal, Popover, Progress, Tooltip } from 'antd';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import {
     DeleteRoomFailureType,
     ParticipantRole,
     PromoteFailureType,
-    RoomPublicMessage,
     useChangeParticipantNameMutation,
     useDeleteRoomMutation,
     useGetLogLazyQuery,
@@ -40,7 +28,7 @@ import { generateAsRichLog, generateAsStaticHtml } from '../../utils/roomLogGene
 import moment from 'moment';
 import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import { useParticipants } from '../../hooks/state/useParticipants';
-import { $free, $system, recordToArray } from '@kizahasi/util';
+import { recordToArray } from '@kizahasi/util';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { defaultMemoPanelConfig } from '../../states/MemoPanelConfig';
 import FilesManagerDrawer from '../../components/FilesManagerDrawer';
@@ -49,9 +37,9 @@ import { useReadonlyRef } from '../../hooks/useReadonlyRef';
 import { useMe } from '../../hooks/useMe';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useSignOut } from '../../hooks/useSignOut';
-import { Config } from '../../config';
 import ConfigContext from '../../contexts/ConfigContext';
 import { FirebaseStorageUrlCacheContext } from '../../contexts/FirebaseStorageUrlCacheContext';
+import { ChannelsFilter, ChannelsFilterOptions } from '../../components/ChannelsFilter';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -311,60 +299,6 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
     );
 };
 
-type GenerateAsStaticHtmlOptions = {
-    includesPublicChannel1: boolean;
-    includesPublicChannel2: boolean;
-    includesPublicChannel3: boolean;
-    includesPublicChannel4: boolean;
-    includesPublicChannel5: boolean;
-    includesPublicChannel6: boolean;
-    includesPublicChannel7: boolean;
-    includesPublicChannel8: boolean;
-    includesPublicChannel9: boolean;
-    includesPublicChannel10: boolean;
-    includesFreeChannel: boolean;
-    includesPrivateChannels: boolean;
-    includesSystem: boolean;
-};
-
-namespace GenerateAsStaticHtmlOptions {
-    export const toFilter = (source: GenerateAsStaticHtmlOptions) => {
-        return {
-            publicMessage: (msg: RoomPublicMessage): boolean => {
-                switch (msg.channelKey) {
-                    case '1':
-                        return source.includesPublicChannel1;
-                    case '2':
-                        return source.includesPublicChannel2;
-                    case '3':
-                        return source.includesPublicChannel3;
-                    case '4':
-                        return source.includesPublicChannel4;
-                    case '5':
-                        return source.includesPublicChannel5;
-                    case '6':
-                        return source.includesPublicChannel6;
-                    case '7':
-                        return source.includesPublicChannel7;
-                    case '8':
-                        return source.includesPublicChannel8;
-                    case '9':
-                        return source.includesPublicChannel9;
-                    case '10':
-                        return source.includesPublicChannel10;
-                    case $system:
-                        return source.includesSystem;
-                    case $free:
-                        return source.includesFreeChannel;
-                    default:
-                        return true;
-                }
-            },
-            privateMessage: () => source.includesPrivateChannels,
-        };
-    };
-}
-
 type GenerateSimpleLogModalProps = {
     roomId: string;
     visible: boolean;
@@ -379,30 +313,15 @@ const GenerateSimpleLogModal: React.FC<GenerateSimpleLogModalProps> = ({
     onCancel,
 }: GenerateSimpleLogModalProps) => {
     const publicChannelNames = usePublicChannelNames();
+    const publicChannelNamesRef = useReadonlyRef(publicChannelNames);
     const participants = useParticipants();
-
-    const [generateAsStaticHtmlOptions, setGenerateAsStaticHtmlOptions] =
-        React.useState<GenerateAsStaticHtmlOptions>({
-            includesPublicChannel1: true,
-            includesPublicChannel2: true,
-            includesPublicChannel3: true,
-            includesPublicChannel4: true,
-            includesPublicChannel5: true,
-            includesPublicChannel6: true,
-            includesPublicChannel7: true,
-            includesPublicChannel8: true,
-            includesPublicChannel9: true,
-            includesPublicChannel10: true,
-            includesFreeChannel: true,
-            includesPrivateChannels: true,
-            includesSystem: true,
-        });
+    const participantsRef = useReadonlyRef(participants);
+    const [channelsFilterOptions, setChannelsFilterOptions] = React.useState(
+        ChannelsFilterOptions.defaultValue
+    );
+    const channelsFilterOptionsRef = useReadonlyRef(channelsFilterOptions);
 
     const [getLogQuery, getLogQueryResult] = useGetLogLazyQuery({ fetchPolicy: 'network-only' });
-
-    const participantsRef = useReadonlyRef(participants);
-    const publicChannelNamesRef = useReadonlyRef(publicChannelNames);
-    const generateAsStaticHtmlOptionsRef = useReadonlyRef(generateAsStaticHtmlOptions);
 
     React.useEffect(() => {
         const data = getLogQueryResult.data;
@@ -421,18 +340,11 @@ const GenerateSimpleLogModal: React.FC<GenerateSimpleLogModalProps> = ({
                 ...publicChannelNamesRef.current,
                 messages: data.result,
                 participants: participantsRef.current,
-                filter: GenerateAsStaticHtmlOptions.toFilter(
-                    generateAsStaticHtmlOptionsRef.current
-                ),
+                filter: ChannelsFilterOptions.toFilter(channelsFilterOptionsRef.current),
             }),
             `log_${moment(new Date()).format('YYYYMMDDHHmmss')}.html`
         );
-    }, [
-        getLogQueryResult.data,
-        participantsRef,
-        publicChannelNamesRef,
-        generateAsStaticHtmlOptionsRef,
-    ]);
+    }, [getLogQueryResult.data, participantsRef, publicChannelNamesRef, channelsFilterOptionsRef]);
 
     if (publicChannelNames == null) {
         return null;
@@ -449,169 +361,14 @@ const GenerateSimpleLogModal: React.FC<GenerateSimpleLogModalProps> = ({
             onCancel={() => onCancel()}
         >
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <div>
+                <div style={{ marginBottom: 8 }}>
                     ログには、秘話などの非公開情報も含めることが可能です。また、ログをダウンロードすると、システムメッセージによって全員に通知されます。
                 </div>
-                <div style={{ marginTop: 8 }}>特殊チャンネル</div>
-                <div>
-                    <Checkbox
-                        checked={generateAsStaticHtmlOptions.includesSystem}
-                        onChange={e =>
-                            setGenerateAsStaticHtmlOptions(state => ({
-                                ...state,
-                                includesSystem: e.target.checked,
-                            }))
-                        }
-                    >
-                        システムメッセージ
-                    </Checkbox>
-                    <br />
-                    <Checkbox
-                        checked={generateAsStaticHtmlOptions.includesFreeChannel}
-                        onChange={e =>
-                            setGenerateAsStaticHtmlOptions(state => ({
-                                ...state,
-                                includesFreeChannel: e.target.checked,
-                            }))
-                        }
-                    >
-                        雑談
-                    </Checkbox>
-                    <br />
-                    <Checkbox
-                        checked={generateAsStaticHtmlOptions.includesPrivateChannels}
-                        onChange={e =>
-                            setGenerateAsStaticHtmlOptions(state => ({
-                                ...state,
-                                includesPrivateChannels: e.target.checked,
-                            }))
-                        }
-                    >
-                        秘話
-                    </Checkbox>
-                </div>
-                <div style={{ marginTop: 4 }}>一般チャンネル</div>
-                <div>
-                    <Checkbox
-                        checked={generateAsStaticHtmlOptions.includesPublicChannel1}
-                        onChange={e =>
-                            setGenerateAsStaticHtmlOptions(state => ({
-                                ...state,
-                                includesPublicChannel1: e.target.checked,
-                            }))
-                        }
-                    >
-                        {publicChannelNames.publicChannel1Name}
-                    </Checkbox>
-                    <br />
-                    <Checkbox
-                        checked={generateAsStaticHtmlOptions.includesPublicChannel2}
-                        onChange={e =>
-                            setGenerateAsStaticHtmlOptions(state => ({
-                                ...state,
-                                includesPublicChannel2: e.target.checked,
-                            }))
-                        }
-                    >
-                        {publicChannelNames.publicChannel2Name}
-                    </Checkbox>
-                    <br />
-                    <Checkbox
-                        checked={generateAsStaticHtmlOptions.includesPublicChannel3}
-                        onChange={e =>
-                            setGenerateAsStaticHtmlOptions(state => ({
-                                ...state,
-                                includesPublicChannel3: e.target.checked,
-                            }))
-                        }
-                    >
-                        {publicChannelNames.publicChannel3Name}
-                    </Checkbox>
-                    <br />
-                    <Checkbox
-                        checked={generateAsStaticHtmlOptions.includesPublicChannel4}
-                        onChange={e =>
-                            setGenerateAsStaticHtmlOptions(state => ({
-                                ...state,
-                                includesPublicChannel4: e.target.checked,
-                            }))
-                        }
-                    >
-                        {publicChannelNames.publicChannel4Name}
-                    </Checkbox>
-                    <br />
-                    <Checkbox
-                        checked={generateAsStaticHtmlOptions.includesPublicChannel5}
-                        onChange={e =>
-                            setGenerateAsStaticHtmlOptions(state => ({
-                                ...state,
-                                includesPublicChannel5: e.target.checked,
-                            }))
-                        }
-                    >
-                        {publicChannelNames.publicChannel5Name}
-                    </Checkbox>
-                    <br />
-                    <Checkbox
-                        checked={generateAsStaticHtmlOptions.includesPublicChannel6}
-                        onChange={e =>
-                            setGenerateAsStaticHtmlOptions(state => ({
-                                ...state,
-                                includesPublicChannel6: e.target.checked,
-                            }))
-                        }
-                    >
-                        {publicChannelNames.publicChannel6Name}
-                    </Checkbox>
-                    <br />
-                    <Checkbox
-                        checked={generateAsStaticHtmlOptions.includesPublicChannel7}
-                        onChange={e =>
-                            setGenerateAsStaticHtmlOptions(state => ({
-                                ...state,
-                                includesPublicChannel7: e.target.checked,
-                            }))
-                        }
-                    >
-                        {publicChannelNames.publicChannel7Name}
-                    </Checkbox>
-                    <br />
-                    <Checkbox
-                        checked={generateAsStaticHtmlOptions.includesPublicChannel8}
-                        onChange={e =>
-                            setGenerateAsStaticHtmlOptions(state => ({
-                                ...state,
-                                includesPublicChannel8: e.target.checked,
-                            }))
-                        }
-                    >
-                        {publicChannelNames.publicChannel8Name}
-                    </Checkbox>
-                    <br />
-                    <Checkbox
-                        checked={generateAsStaticHtmlOptions.includesPublicChannel9}
-                        onChange={e =>
-                            setGenerateAsStaticHtmlOptions(state => ({
-                                ...state,
-                                includesPublicChannel9: e.target.checked,
-                            }))
-                        }
-                    >
-                        {publicChannelNames.publicChannel9Name}
-                    </Checkbox>
-                    <br />
-                    <Checkbox
-                        checked={generateAsStaticHtmlOptions.includesPublicChannel10}
-                        onChange={e =>
-                            setGenerateAsStaticHtmlOptions(state => ({
-                                ...state,
-                                includesPublicChannel10: e.target.checked,
-                            }))
-                        }
-                    >
-                        {publicChannelNames.publicChannel10Name}
-                    </Checkbox>
-                </div>
+                <ChannelsFilter
+                    value={channelsFilterOptions}
+                    onChange={setChannelsFilterOptions}
+                    disabled={false}
+                />
             </div>
         </Modal>
     );
@@ -637,6 +394,10 @@ const GenerateRichLogModal: React.FC<GenerateRichLogModalProps> = ({
     const publicChannelNamesRef = useReadonlyRef(publicChannelNames);
     const participants = useParticipants();
     const participantsRef = useReadonlyRef(participants);
+    const [channelsFilterOptions, setChannelsFilterOptions] = React.useState(
+        ChannelsFilterOptions.defaultValue
+    );
+    const channelsFilterOptionsRef = useReadonlyRef(channelsFilterOptions);
 
     // undefinedならばダウンロード
     const [progress, setProgress] = React.useState<number>();
@@ -671,10 +432,7 @@ const GenerateRichLogModal: React.FC<GenerateRichLogModalProps> = ({
                     ...publicChannelNamesRef.current,
                     messages: data.result,
                     participants: participantsRef.current,
-                    filter: {
-                        privateMessage: () => true,
-                        publicMessage: () => true,
-                    },
+                    filter: ChannelsFilterOptions.toFilter(channelsFilterOptionsRef.current),
                 },
                 configRef.current,
                 firebaseStorageUrlCacheContextRef.current,
@@ -697,6 +455,7 @@ const GenerateRichLogModal: React.FC<GenerateRichLogModalProps> = ({
         publicChannelNamesRef,
         configRef,
         firebaseStorageUrlCacheContextRef,
+        channelsFilterOptionsRef,
     ]);
 
     if (publicChannelNames == null) {
@@ -708,6 +467,7 @@ const GenerateRichLogModal: React.FC<GenerateRichLogModalProps> = ({
     return (
         <Modal
             visible={visible}
+            width={700}
             closable={false}
             maskClosable={!isDownloading}
             title="ログのダウンロード"
@@ -722,12 +482,16 @@ const GenerateRichLogModal: React.FC<GenerateRichLogModalProps> = ({
                         ログには、秘話などの非公開情報も含めることが可能です。また、ログをダウンロードすると、システムメッセージによって全員に通知されます。
                     </p>
                     <p>
-                        キャラクターの画像も一緒にダウンロードするため、zipファイル生成までに数十秒程度の時間がかかることがあります。
+                        キャラクターの画像もあわせてダウンロードするため、zipファイル生成までに数十秒程度の時間がかかることがあります。
                     </p>
-                    <p>ログを生成してよろしいですか？</p>
                 </div>
+                <ChannelsFilter
+                    value={channelsFilterOptions}
+                    onChange={setChannelsFilterOptions}
+                    disabled={isDownloading}
+                />
                 <Button
-                    style={{ alignSelf: 'start', marginTop: 6 }}
+                    style={{ alignSelf: 'start', marginTop: 8 }}
                     type="primary"
                     disabled={isDownloading}
                     onClick={() => {
@@ -749,6 +513,11 @@ const GenerateRichLogModal: React.FC<GenerateRichLogModalProps> = ({
                                 : 'exception'
                         }
                     />
+                )}
+                {progress === 100 && (
+                    <div>
+                        zipファイル生成が完了しました。間もなくzipファイルのダウンロードが開始されます。
+                    </div>
                 )}
                 {errorMessage != null && <div>{errorMessage}</div>}
             </div>

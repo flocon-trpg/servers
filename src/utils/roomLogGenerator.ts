@@ -1,9 +1,7 @@
 import {
     FileSourceType,
     RoomMessages,
-    RoomPrivateMessage,
     RoomPublicChannelFragment,
-    RoomPublicMessage,
 } from '../generated/graphql';
 import { PrivateChannelSet } from './PrivateChannelSet';
 import { escape } from 'html-escaper';
@@ -22,6 +20,7 @@ import { simpleId } from './generators';
 import { ExpiryMap } from './expiryMap';
 import { logCss } from './richLogResource/logCss';
 import { logHtml } from './richLogResource/logHtml';
+import { RoomMessageFilter } from '../components/ChannelsFilter';
 
 const privateMessage = 'privateMessage';
 const publicMessage = 'publicMessage';
@@ -82,10 +81,7 @@ type RoomMessage =
           };
       };
 
-type RoomMessageFilter = {
-    privateMessage: (value: RoomPrivateMessage) => boolean;
-    publicMessage: (value: RoomPublicMessage) => boolean;
-};
+
 
 const createRoomMessageArray = (
     props: {
