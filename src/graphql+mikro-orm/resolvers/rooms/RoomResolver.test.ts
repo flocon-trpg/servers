@@ -38,8 +38,8 @@ const createResolverContext = (orm: ORM, uid: string): ResolverContext => ({
             type: BaasType.Firebase,
             uid,
             firebase: {
-                sign_in_provider: 'DUMMY_SIGN_IN_PROVIDER' // 適当な値
-            }
+                sign_in_provider: 'DUMMY_SIGN_IN_PROVIDER', // 適当な値
+            },
         },
     },
     promiseQueue: new PromiseQueue({}),
@@ -47,7 +47,13 @@ const createResolverContext = (orm: ORM, uid: string): ResolverContext => ({
     createEm: () => orm.em.fork(),
 });
 
-const setupRoomAndUsersAndParticipants = ({ em, setupRoom }: { em: EM; setupRoom?: (room: $MikroORM.Room) => void }) => {
+const setupRoomAndUsersAndParticipants = ({
+    em,
+    setupRoom,
+}: {
+    em: EM;
+    setupRoom?: (room: $MikroORM.Room) => void;
+}) => {
     const roomName = 'ROOM_NAME';
     const creatorUserUid = 'CREATOR_ID';
     const creatorName = 'CREATOR_NAME';
@@ -80,7 +86,7 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }: { em: EM; setupRoom
                     role: 'Master',
                     name: creatorName,
                     imagePieceValues: {},
-                }
+                },
             },
             activeBoardKey: null,
             publicChannel1Name: 'メイン',
@@ -93,7 +99,7 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }: { em: EM; setupRoom
             publicChannel8Name: 'メイン8',
             publicChannel9Name: 'メイン9',
             publicChannel10Name: 'メイン10',
-        }
+        },
     });
     if (setupRoom != null) {
         setupRoom(room);
@@ -131,8 +137,7 @@ describe('operate then getRoom', () => {
             if (migrations && migrations.length > 0) {
                 await migrator.up();
             }
-        }
-        finally {
+        } finally {
             await psql.close();
         }
         const sqlite = await createSQLite(SQLite);
@@ -142,15 +147,16 @@ describe('operate then getRoom', () => {
             if (migrations && migrations.length > 0) {
                 await migrator.up();
             }
-        }
-        finally {
+        } finally {
             await sqlite.close();
         }
     }, timeout);
 
-
-    it('tests DB', async (): Promise<void> => {
-        // TODO: テスト実装
-    }, timeout);
+    it(
+        'tests DB',
+        async (): Promise<void> => {
+            // TODO: テスト実装
+        },
+        timeout
+    );
 });
-

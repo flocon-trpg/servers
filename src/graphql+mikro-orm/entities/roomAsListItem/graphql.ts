@@ -4,7 +4,7 @@ import { Field, ID, ObjectType } from 'type-graphql';
 export class RoomAsListItem {
     @Field(() => ID)
     public id!: string;
-    
+
     @Field()
     public name!: string;
 

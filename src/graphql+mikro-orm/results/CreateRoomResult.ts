@@ -28,5 +28,5 @@ export const CreateRoomResult = createUnionType({
             return CreateRoomFailureResult;
         }
         return undefined;
-    }
+    },
 });

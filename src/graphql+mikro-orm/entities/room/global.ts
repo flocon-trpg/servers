@@ -5,25 +5,48 @@ import { RequestedBy, server } from '../../Types';
 import { EM } from '../../../utils/types';
 import { Reference } from '@mikro-orm/core';
 import { Result } from '@kizahasi/result';
-import { composeDownOperation, decodeDbState, decodeDownOperation, DownOperation, exactDbState, parseUpOperation, State, stringifyState, toClientState, toDownOperation, TwoWayOperation, UpOperation, stringifyUpOperation, apply, diff, toUpOperation } from '@kizahasi/flocon-core';
+import {
+    composeDownOperation,
+    decodeDbState,
+    decodeDownOperation,
+    DownOperation,
+    exactDbState,
+    parseUpOperation,
+    State,
+    stringifyState,
+    toClientState,
+    toDownOperation,
+    TwoWayOperation,
+    UpOperation,
+    stringifyUpOperation,
+    apply,
+    diff,
+    toUpOperation,
+} from '@kizahasi/flocon-core';
 
-type IsSequentialResult<T> = {
-    type: 'DuplicateElement';
-} | {
-    type: 'EmptyArray';
-} | {
-    type: 'Sequential';
-    minIndex: number;
-    maxIndex: number;
-} | {
-    type: 'NotSequential';
-    minIndex: number;
-    maxIndex: number;
-    takeUntilSequential: { index: number; value: T }[];
-}
+type IsSequentialResult<T> =
+    | {
+          type: 'DuplicateElement';
+      }
+    | {
+          type: 'EmptyArray';
+      }
+    | {
+          type: 'Sequential';
+          minIndex: number;
+          maxIndex: number;
+      }
+    | {
+          type: 'NotSequential';
+          minIndex: number;
+          maxIndex: number;
+          takeUntilSequential: { index: number; value: T }[];
+      };
 
 const isSequential = <T>(array: T[], getIndex: (elem: T) => number): IsSequentialResult<T> => {
-    const sorted = array.map(value => ({ index: getIndex(value), value })).sort((x, y) => x.index - y.index);
+    const sorted = array
+        .map(value => ({ index: getIndex(value), value }))
+        .sort((x, y) => x.index - y.index);
     if (sorted.length === 0) {
         return { type: 'EmptyArray' };
     }
@@ -78,13 +101,20 @@ export namespace GlobalRoom {
                 roomId: string;
                 revisionRange: { from: number; expectedTo?: number };
             }) => {
-                const operationEntities = await em.find(RoomOp, { room: { id: roomId }, prevRevision: { $gte: revisionRange.from } });
+                const operationEntities = await em.find(RoomOp, {
+                    room: { id: roomId },
+                    prevRevision: { $gte: revisionRange.from },
+                });
                 const isSequentialResult = isSequential(operationEntities, o => o.prevRevision);
                 if (isSequentialResult.type === 'NotSequential') {
-                    return Result.error('Database error. There are missing operations. Multiple server apps edit same database simultaneously?');
+                    return Result.error(
+                        'Database error. There are missing operations. Multiple server apps edit same database simultaneously?'
+                    );
                 }
                 if (isSequentialResult.type === 'DuplicateElement') {
-                    return Result.error('Database error. There are duplicate operations. Multiple server apps edit same database simultaneously?');
+                    return Result.error(
+                        'Database error. There are duplicate operations. Multiple server apps edit same database simultaneously?'
+                    );
                 }
                 if (isSequentialResult.type === 'EmptyArray') {
                     return Result.ok(undefined);
@@ -93,13 +123,20 @@ export namespace GlobalRoom {
                     return Result.error('revision out of range(too small)');
                 }
                 if (revisionRange.expectedTo !== undefined) {
-                    if (isSequentialResult.maxIndex !== (revisionRange.expectedTo - 1)) {
-                        return Result.error('Database error. Revision of latest operation is not same as revision of state. Multiple server apps edit same database simultaneously?');
+                    if (isSequentialResult.maxIndex !== revisionRange.expectedTo - 1) {
+                        return Result.error(
+                            'Database error. Revision of latest operation is not same as revision of state. Multiple server apps edit same database simultaneously?'
+                        );
                     }
                 }
 
-                const sortedOperationEntities = operationEntities.sort((x, y) => x.prevRevision - y.prevRevision);
-                let operation: DownOperation | undefined = sortedOperationEntities.length === 0 ? undefined : downOperation(sortedOperationEntities[0]);
+                const sortedOperationEntities = operationEntities.sort(
+                    (x, y) => x.prevRevision - y.prevRevision
+                );
+                let operation: DownOperation | undefined =
+                    sortedOperationEntities.length === 0
+                        ? undefined
+                        : downOperation(sortedOperationEntities[0]);
 
                 let isFirst = false;
                 for (const model of sortedOperationEntities) {
@@ -125,7 +162,13 @@ export namespace GlobalRoom {
 
     export namespace Global {
         export namespace ToGraphQL {
-            export const state = ({ source, requestedBy }: { source: State; requestedBy: RequestedBy }): Omit<RoomGetState, 'revision' | 'createdBy'> => {
+            export const state = ({
+                source,
+                requestedBy,
+            }: {
+                source: State;
+                requestedBy: RequestedBy;
+            }): Omit<RoomGetState, 'revision' | 'createdBy'> => {
                 return {
                     stateJson: stringifyState(toClientState(requestedBy)(source)),
                 };
@@ -142,8 +185,12 @@ export namespace GlobalRoom {
             }): string => {
                 const prevClientState = toClientState(requestedBy)(prevState);
                 const nextClientState = toClientState(requestedBy)(nextState);
-                const diffOperation = diff({ prevState: prevClientState, nextState: nextClientState });
-                const upOperation = diffOperation == null ? undefined : toUpOperation(diffOperation);
+                const diffOperation = diff({
+                    prevState: prevClientState,
+                    nextState: nextClientState,
+                });
+                const upOperation =
+                    diffOperation == null ? undefined : toUpOperation(diffOperation);
                 return stringifyUpOperation(upOperation ?? { $version: 1 });
             };
         }

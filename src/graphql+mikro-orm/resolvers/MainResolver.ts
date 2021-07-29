@@ -1,4 +1,14 @@
-import { Arg, Ctx, Mutation, PubSub, PubSubEngine, Query, Resolver, Root, Subscription } from 'type-graphql';
+import {
+    Arg,
+    Ctx,
+    Mutation,
+    PubSub,
+    PubSubEngine,
+    Query,
+    Resolver,
+    Root,
+    Subscription,
+} from 'type-graphql';
 import { ResolverContext } from '../utils/Contexts';
 import { EntryToServerResultType } from '../../enums/EntryToServerResultType';
 import { checkSignIn, NotSignIn } from './utils/helpers';
@@ -20,7 +30,7 @@ import { BaasType } from '../../enums/BaasType';
 export type PongPayload = {
     value: number;
     createdBy?: string;
-}
+};
 
 @Resolver()
 export class MainResolver {
@@ -64,15 +74,18 @@ export class MainResolver {
     }
 
     @Mutation(() => EntryToServerResult)
-    public async entryToServer(@Arg('phrase', () => String, { nullable: true }) phrase: string | null | undefined, @Ctx() context: ResolverContext): Promise<EntryToServerResult> {
+    public async entryToServer(
+        @Arg('phrase', () => String, { nullable: true }) phrase: string | null | undefined,
+        @Ctx() context: ResolverContext
+    ): Promise<EntryToServerResult> {
         const queue = async () => {
             const em = context.createEm();
 
-            const globalEntryPhrase = loadServerConfigAsMain().globalEntryPhrase;
+            const globalEntryPhrase = (await loadServerConfigAsMain()).globalEntryPhrase;
             const decodedIdToken = checkSignIn(context);
             if (decodedIdToken === NotSignIn) {
                 return {
-                    type: EntryToServerResultType.NotSignIn
+                    type: EntryToServerResultType.NotSignIn,
                 };
             }
 
@@ -91,7 +104,10 @@ export class MainResolver {
                 user.isEntry = true;
                 await em.flush();
                 return {
-                    type: phrase == null ? EntryToServerResultType.Success : EntryToServerResultType.NoPhraseRequired,
+                    type:
+                        phrase == null
+                            ? EntryToServerResultType.Success
+                            : EntryToServerResultType.NoPhraseRequired,
                 };
             }
 
@@ -116,8 +132,15 @@ export class MainResolver {
     }
 
     @Mutation(() => Pong, { description: 'for test' })
-    public async ping(@Arg('value') value: number, @Ctx() context: ResolverContext, @PubSub() pubSub: PubSubEngine): Promise<Pong> {
-        const createdBy = context.decodedIdToken?.isError === false ? context.decodedIdToken.value.uid : undefined;
+    public async ping(
+        @Arg('value') value: number,
+        @Ctx() context: ResolverContext,
+        @PubSub() pubSub: PubSubEngine
+    ): Promise<Pong> {
+        const createdBy =
+            context.decodedIdToken?.isError === false
+                ? context.decodedIdToken.value.uid
+                : undefined;
         const payload: PongPayload = { value, createdBy };
         pubSub.publish(PONG, payload);
         return payload;

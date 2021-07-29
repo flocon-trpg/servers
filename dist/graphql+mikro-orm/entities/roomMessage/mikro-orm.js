@@ -58,7 +58,7 @@ RoomPubCh = __decorate([
 ], RoomPubCh);
 exports.RoomPubCh = RoomPubCh;
 let RoomPubMsg = class RoomPubMsg {
-    constructor({ initText, initTextSource }) {
+    constructor({ initText, initTextSource, }) {
         this.id = uuid_1.v4();
         this.version = 1;
         this.createdAt = new Date();
@@ -165,7 +165,7 @@ RoomPubMsg = __decorate([
 ], RoomPubMsg);
 exports.RoomPubMsg = RoomPubMsg;
 let RoomPrvMsg = class RoomPrvMsg {
-    constructor({ initText, initTextSource }) {
+    constructor({ initText, initTextSource, }) {
         this.id = uuid_1.v4();
         this.version = 1;
         this.createdAt = new Date();
@@ -365,7 +365,7 @@ NumberPieceValueLog = __decorate([
 ], NumberPieceValueLog);
 exports.NumberPieceValueLog = NumberPieceValueLog;
 let RoomSe = class RoomSe {
-    constructor({ filePath, fileSourceType, volume }) {
+    constructor({ filePath, fileSourceType, volume, }) {
         this.id = uuid_1.v4();
         this.createdAt = new Date();
         this.filePath = filePath;

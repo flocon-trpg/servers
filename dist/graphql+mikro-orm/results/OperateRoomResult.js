@@ -56,7 +56,12 @@ OperateRoomFailureResult = __decorate([
 exports.OperateRoomFailureResult = OperateRoomFailureResult;
 exports.OperateRoomResult = type_graphql_1.createUnionType({
     name: 'OperateRoomResult',
-    types: () => [OperateRoomSuccessResult, OperateRoomFailureResult, OperateRoomNonJoinedResult, OperateRoomIdResult],
+    types: () => [
+        OperateRoomSuccessResult,
+        OperateRoomFailureResult,
+        OperateRoomNonJoinedResult,
+        OperateRoomIdResult,
+    ],
     resolveType: value => {
         if ('operation' in value) {
             return OperateRoomSuccessResult;
@@ -71,5 +76,5 @@ exports.OperateRoomResult = type_graphql_1.createUnionType({
             return OperateRoomIdResult;
         }
         return undefined;
-    }
+    },
 });

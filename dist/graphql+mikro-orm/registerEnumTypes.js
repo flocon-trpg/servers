@@ -36,88 +36,88 @@ const registerEnumTypes = () => {
     }
     hasRegistered = true;
     type_graphql_1.registerEnumType(BaasType_1.BaasType, {
-        name: 'BaasType'
+        name: 'BaasType',
     });
     type_graphql_1.registerEnumType(ChangeParticipantNameFailureType_1.ChangeParticipantNameFailureType, {
-        name: 'ChangeParticipantNameFailureType'
+        name: 'ChangeParticipantNameFailureType',
     });
     type_graphql_1.registerEnumType(CreateRoomFailureType_1.CreateRoomFailureType, {
-        name: 'CreateRoomFailureType'
+        name: 'CreateRoomFailureType',
     });
     type_graphql_1.registerEnumType(DeleteMessageFailureType_1.DeleteMessageFailureType, {
-        name: 'DeleteMessageFailureType'
+        name: 'DeleteMessageFailureType',
     });
     type_graphql_1.registerEnumType(DeleteRoomFailureType_1.DeleteRoomFailureType, {
-        name: 'DeleteRoomFailureType'
+        name: 'DeleteRoomFailureType',
     });
     type_graphql_1.registerEnumType(EditMessageFailureType_1.EditMessageFailureType, {
-        name: 'EditMessageFailureType'
+        name: 'EditMessageFailureType',
     });
     type_graphql_1.registerEnumType(EntryToServerResultType_1.EntryToServerResultType, {
-        name: 'EntryToServerResultType'
+        name: 'EntryToServerResultType',
     });
     type_graphql_1.registerEnumType(FileSourceType_1.FileSourceType, {
-        name: 'FileSourceType'
+        name: 'FileSourceType',
     });
     type_graphql_1.registerEnumType(GetRoomConnectionFailureType_1.GetRoomConnectionFailureType, {
-        name: 'GetRoomConnectionFailureType'
+        name: 'GetRoomConnectionFailureType',
     });
     type_graphql_1.registerEnumType(GetRoomFailureType_1.GetRoomFailureType, {
-        name: 'GetRoomFailureType'
+        name: 'GetRoomFailureType',
     });
     type_graphql_1.registerEnumType(GetRoomLogFailureType_1.GetRoomLogFailureType, {
-        name: 'GetRoomLogFailureType'
+        name: 'GetRoomLogFailureType',
     });
     type_graphql_1.registerEnumType(GetRoomMessagesFailureType_1.GetRoomMessagesFailureType, {
-        name: 'GetRoomMessagesFailureType'
+        name: 'GetRoomMessagesFailureType',
     });
     type_graphql_1.registerEnumType(GetRoomsListFailureType_1.GetRoomsListFailureType, {
-        name: 'GetRoomsListFailureType'
+        name: 'GetRoomsListFailureType',
     });
     type_graphql_1.registerEnumType(JoinRoomFailureType_1.JoinRoomFailureType, {
-        name: 'JoinRoomFailureType'
+        name: 'JoinRoomFailureType',
     });
     type_graphql_1.registerEnumType(LeaveRoomFailureType_1.LeaveRoomFailureType, {
-        name: 'LeaveRoomFailureType'
+        name: 'LeaveRoomFailureType',
     });
     type_graphql_1.registerEnumType(MakeMessageNotSecretFailureType_1.MakeMessageNotSecretFailureType, {
-        name: 'MakeMessageNotSecretFailureType'
+        name: 'MakeMessageNotSecretFailureType',
     });
     type_graphql_1.registerEnumType(OperateRoomFailureType_1.OperateRoomFailureType, {
-        name: 'OperateRoomFailureType'
+        name: 'OperateRoomFailureType',
     });
     type_graphql_1.registerEnumType(ParticipantRole_1.ParticipantRole, {
-        name: 'ParticipantRole'
+        name: 'ParticipantRole',
     });
     type_graphql_1.registerEnumType(PieceValueLogType_1.PieceValueLogType, {
-        name: 'PieceValueLogType'
+        name: 'PieceValueLogType',
     });
     type_graphql_1.registerEnumType(PrereleaseType_1.PrereleaseType, {
-        name: 'PrereleaseType'
+        name: 'PrereleaseType',
     });
     type_graphql_1.registerEnumType(PromoteFailureType_1.PromoteFailureType, {
-        name: 'PromoteFailureType'
+        name: 'PromoteFailureType',
     });
     type_graphql_1.registerEnumType(RequiresPhraseFailureType_1.RequiresPhraseFailureType, {
-        name: 'RequiresPhraseFailureType'
+        name: 'RequiresPhraseFailureType',
     });
     type_graphql_1.registerEnumType(RoomParameterNameType_1.RoomParameterNameType, {
-        name: 'RoomParameterNameType'
+        name: 'RoomParameterNameType',
     });
     type_graphql_1.registerEnumType(WritePrivateRoomMessageFailureType_1.WritePrivateRoomMessageFailureType, {
-        name: 'WritePrivateRoomMessageFailureType'
+        name: 'WritePrivateRoomMessageFailureType',
     });
     type_graphql_1.registerEnumType(WritePublicRoomMessageFailureType_1.WritePublicRoomMessageFailureType, {
-        name: 'WritePublicRoomMessageFailureType'
+        name: 'WritePublicRoomMessageFailureType',
     });
     type_graphql_1.registerEnumType(WriteRoomSoundEffectFailureType_1.WriteRoomSoundEffectFailureType, {
-        name: 'WriteRoomSoundEffectFailureType'
+        name: 'WriteRoomSoundEffectFailureType',
     });
     type_graphql_1.registerEnumType(WritingMessageStatusInputType_1.WritingMessageStatusInputType, {
-        name: 'WritingMessageStatusInputType'
+        name: 'WritingMessageStatusInputType',
     });
     type_graphql_1.registerEnumType(WritingMessageStatusType_1.WritingMessageStatusType, {
-        name: 'WritingMessageStatusType'
+        name: 'WritingMessageStatusType',
     });
 };
 exports.default = registerEnumTypes;

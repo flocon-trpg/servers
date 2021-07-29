@@ -279,10 +279,6 @@ __decorate([
     type_graphql_1.Field(() => WritingMessageStatusInputType_1.WritingMessageStatusInputType),
     __metadata("design:type", String)
 ], UpdateWritingMessageStateArgs.prototype, "newStatus", void 0);
-__decorate([
-    type_graphql_1.Field(),
-    __metadata("design:type", String)
-], UpdateWritingMessageStateArgs.prototype, "publicChannelKey", void 0);
 UpdateWritingMessageStateArgs = __decorate([
     type_graphql_1.ArgsType()
 ], UpdateWritingMessageStateArgs);
@@ -323,7 +319,7 @@ exports.GetRoomConnectionsResult = type_graphql_1.createUnionType({
             case exports.GetRoomConnectionFailureResultType:
                 return GetRoomConnectionsFailureResult;
         }
-    }
+    },
 });
 let RoomConnectionEvent = class RoomConnectionEvent {
 };
@@ -357,10 +353,6 @@ __decorate([
     type_graphql_1.Field(),
     __metadata("design:type", Number)
 ], WritingMessageStatus.prototype, "updatedAt", void 0);
-__decorate([
-    type_graphql_1.Field(),
-    __metadata("design:type", String)
-], WritingMessageStatus.prototype, "publicChannelKey", void 0);
 WritingMessageStatus = __decorate([
     type_graphql_1.ObjectType()
 ], WritingMessageStatus);

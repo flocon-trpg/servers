@@ -43,5 +43,5 @@ exports.RequiresPhraseResult = type_graphql_1.createUnionType({
             return RequiresPhraseFailureResult;
         }
         return undefined;
-    }
+    },
 });

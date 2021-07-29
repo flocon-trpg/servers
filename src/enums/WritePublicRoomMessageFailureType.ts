@@ -4,5 +4,5 @@ export enum WritePublicRoomMessageFailureType {
     NotSignIn = 'NotSignIn',
     NotAuthorized = 'NotAuthorized',
     NotParticipant = 'NotParticipant',
-    NotAllowedChannelKey = 'NotAllowedChannelKey'
+    NotAllowedChannelKey = 'NotAllowedChannelKey',
 }

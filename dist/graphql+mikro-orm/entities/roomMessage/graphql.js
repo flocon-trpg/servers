@@ -29,7 +29,10 @@ __decorate([
     __metadata("design:type", String)
 ], CommandResult.prototype, "text", void 0);
 __decorate([
-    type_graphql_1.Field({ nullable: true, description: '成功判定のないコマンドの場合はnullish。成功判定のあるコマンドの場合はその結果。' }),
+    type_graphql_1.Field({
+        nullable: true,
+        description: '成功判定のないコマンドの場合はnullish。成功判定のあるコマンドの場合はその結果。',
+    }),
     __metadata("design:type", Boolean)
 ], CommandResult.prototype, "isSuccess", void 0);
 CommandResult = __decorate([
@@ -40,7 +43,9 @@ exports.RoomPublicChannelType = 'RoomPublicChannel';
 let RoomPublicChannel = class RoomPublicChannel {
 };
 __decorate([
-    type_graphql_1.Field({ description: `現在の仕様では、${util_1.$system}, ${util_1.$free}, '1', … , '10' の12個のみをサポートしている。このうち、${util_1.$system}はシステムメッセージ専用チャンネルであるため誰も書き込むことができない。'1', …, '10'はSpectatorが書き込むことはできないが、${util_1.$free}はSpectatorも書き込むことができる。` }),
+    type_graphql_1.Field({
+        description: `現在の仕様では、${util_1.$system}, ${util_1.$free}, '1', … , '10' の12個のみをサポートしている。このうち、${util_1.$system}はシステムメッセージ専用チャンネルであるため誰も書き込むことができない。'1', …, '10'はSpectatorが書き込むことはできないが、${util_1.$free}はSpectatorも書き込むことができる。`,
+    }),
     __metadata("design:type", String)
 ], RoomPublicChannel.prototype, "key", void 0);
 __decorate([
@@ -131,11 +136,17 @@ __decorate([
     __metadata("design:type", Boolean)
 ], RoomPublicMessage.prototype, "isSecret", void 0);
 __decorate([
-    type_graphql_1.Field({ nullable: true, description: `channelKeyが${util_1.$system}以外のときは、システムメッセージならばnullishで、そうでないならばnullishではない。${util_1.$system}のとき、原則として全てシステムメッセージであるため常にnullishになる。` }),
+    type_graphql_1.Field({
+        nullable: true,
+        description: `channelKeyが${util_1.$system}以外のときは、システムメッセージならばnullishで、そうでないならばnullishではない。${util_1.$system}のとき、原則として全てシステムメッセージであるため常にnullishになる。`,
+    }),
     __metadata("design:type", String)
 ], RoomPublicMessage.prototype, "createdBy", void 0);
 __decorate([
-    type_graphql_1.Field({ nullable: true, description: '発言がCharacterと紐付いているときはnon-nullish。PLとしての発言、もしくはcreatedByがnullishのときはnullish。' }),
+    type_graphql_1.Field({
+        nullable: true,
+        description: '発言がCharacterと紐付いているときはnon-nullish。PLとしての発言、もしくはcreatedByがnullishのときはnullish。',
+    }),
     __metadata("design:type", CharacterValueForMessage)
 ], RoomPublicMessage.prototype, "character", void 0);
 __decorate([
@@ -198,7 +209,10 @@ __decorate([
     __metadata("design:type", String)
 ], RoomPrivateMessage.prototype, "createdBy", void 0);
 __decorate([
-    type_graphql_1.Field({ nullable: true, description: '発言がCharacterと紐付いているときはnon-nullish。PLとしての発言、もしくはcreatedByがnullishのときはnullish。後からCharacterの値が更新されても、この値が更新されることはない。' }),
+    type_graphql_1.Field({
+        nullable: true,
+        description: '発言がCharacterと紐付いているときはnon-nullish。PLとしての発言、もしくはcreatedByがnullishのときはnullish。後からCharacterの値が更新されても、この値が更新されることはない。',
+    }),
     __metadata("design:type", CharacterValueForMessage)
 ], RoomPrivateMessage.prototype, "character", void 0);
 __decorate([
@@ -281,7 +295,13 @@ RoomSoundEffect = __decorate([
 exports.RoomSoundEffect = RoomSoundEffect;
 exports.RoomMessage = type_graphql_1.createUnionType({
     name: 'RoomMessage',
-    types: () => [RoomPublicMessage, RoomPrivateMessage, PieceValueLog, RoomPublicChannel, RoomSoundEffect],
+    types: () => [
+        RoomPublicMessage,
+        RoomPrivateMessage,
+        PieceValueLog,
+        RoomPublicChannel,
+        RoomSoundEffect,
+    ],
     resolveType: value => {
         switch (value.__tstype) {
             case exports.RoomPrivateMessageType:
@@ -295,7 +315,7 @@ exports.RoomMessage = type_graphql_1.createUnionType({
             case exports.RoomSoundEffectType:
                 return RoomSoundEffect;
         }
-    }
+    },
 });
 exports.RoomMessagesType = 'RoomMessages';
 let RoomMessages = class RoomMessages {
@@ -345,7 +365,7 @@ exports.GetRoomMessagesResult = type_graphql_1.createUnionType({
             case exports.GetRoomMessagesFailureResultType:
                 return GetRoomMessagesFailureResult;
         }
-    }
+    },
 });
 exports.GetRoomLogFailureResultType = 'GetRoomLogFailureResultType';
 let GetRoomLogFailureResult = class GetRoomLogFailureResult {
@@ -368,7 +388,7 @@ exports.GetRoomLogResult = type_graphql_1.createUnionType({
             case exports.GetRoomLogFailureResultType:
                 return GetRoomLogFailureResult;
         }
-    }
+    },
 });
 exports.WritePrivateRoomMessageFailureResultType = 'WritePrivateRoomMessageFailureResult';
 let WritePrivateRoomMessageFailureResult = class WritePrivateRoomMessageFailureResult {
@@ -391,7 +411,7 @@ exports.WritePrivateRoomMessageResult = type_graphql_1.createUnionType({
             case exports.WritePrivateRoomMessageFailureResultType:
                 return WritePrivateRoomMessageFailureResult;
         }
-    }
+    },
 });
 exports.WritePublicRoomMessageFailureResultType = 'WritePublicRoomMessageFailureResult';
 let WritePublicRoomMessageFailureResult = class WritePublicRoomMessageFailureResult {
@@ -414,7 +434,7 @@ exports.WritePublicRoomMessageResult = type_graphql_1.createUnionType({
             case exports.WritePublicRoomMessageFailureResultType:
                 return WritePublicRoomMessageFailureResult;
         }
-    }
+    },
 });
 exports.WriteRoomSoundEffectFailureResultType = 'WriteRoomSoundEffectFailureResult';
 let WriteRoomSoundEffectFailureResult = class WriteRoomSoundEffectFailureResult {
@@ -437,7 +457,7 @@ exports.WriteRoomSoundEffectResult = type_graphql_1.createUnionType({
             case exports.WriteRoomSoundEffectFailureResultType:
                 return WriteRoomSoundEffectFailureResult;
         }
-    }
+    },
 });
 let MakeMessageNotSecretResult = class MakeMessageNotSecretResult {
 };
@@ -564,7 +584,16 @@ RoomPrivateMessageUpdate = __decorate([
 exports.RoomPrivateMessageUpdate = RoomPrivateMessageUpdate;
 exports.RoomMessageEvent = type_graphql_1.createUnionType({
     name: 'RoomMessageEvent',
-    types: () => [RoomPublicMessage, RoomPrivateMessage, RoomPublicChannel, PieceValueLog, RoomSoundEffect, RoomPublicChannelUpdate, RoomPublicMessageUpdate, RoomPrivateMessageUpdate],
+    types: () => [
+        RoomPublicMessage,
+        RoomPrivateMessage,
+        RoomPublicChannel,
+        PieceValueLog,
+        RoomSoundEffect,
+        RoomPublicChannelUpdate,
+        RoomPublicMessageUpdate,
+        RoomPrivateMessageUpdate,
+    ],
     resolveType: value => {
         switch (value.__tstype) {
             case exports.RoomPublicMessageType:
@@ -584,5 +613,5 @@ exports.RoomMessageEvent = type_graphql_1.createUnionType({
             case exports.RoomPrivateMessageUpdateType:
                 return RoomPrivateMessageUpdate;
         }
-    }
+    },
 });

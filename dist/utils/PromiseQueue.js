@@ -40,8 +40,14 @@ class PromiseQueue {
                     return;
                 }
                 execute()
-                    .then(result => observer.next({ id, result: { type: exports.executed, value: result, isError: false } }))
-                    .catch(reason => observer.next({ id, result: { type: exports.executed, value: reason, isError: true } }))
+                    .then(result => observer.next({
+                    id,
+                    result: { type: exports.executed, value: result, isError: false },
+                }))
+                    .catch(reason => observer.next({
+                    id,
+                    result: { type: exports.executed, value: reason, isError: true },
+                }))
                     .finally(() => {
                     this._pendingPromises.delete(id);
                     observer.complete();
@@ -52,21 +58,24 @@ class PromiseQueue {
             }
             const timeoutValue = {
                 id,
-                result: { type: 'timeout' }
+                result: { type: 'timeout' },
             };
             return rawObservable.pipe(Rx.timeoutWith(timeout, rxjs_2.defer(() => {
                 this._pendingPromises.delete(id);
                 return rxjs_2.of(timeoutValue);
             })));
         }), Rx.concatAll(), Rx.publish(), Rx.refCount());
-        this._result.subscribe(() => undefined, reason => { throw reason; }, () => { throw new Error('PromiseQueue observable completed for an unknown reason.'); });
+        this._result.subscribe(() => undefined, reason => {
+            throw reason;
+        }, () => {
+            throw new Error('PromiseQueue observable completed for an unknown reason.');
+        });
     }
     nextCore(execute, timeout) {
         const id = uuid_1.v4();
         this._pendingPromises.add(id);
         const result = new Promise((resolver, reject) => {
-            this._result.pipe(Rx.first(x => x.id === id))
-                .subscribe(r => {
+            this._result.pipe(Rx.first(x => x.id === id)).subscribe(r => {
                 switch (r.result.type) {
                     case exports.executed:
                         if (r.result.isError) {

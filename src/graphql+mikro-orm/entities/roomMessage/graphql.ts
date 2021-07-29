@@ -47,7 +47,11 @@ export class CommandResult {
     @Field()
     public text!: string;
 
-    @Field({ nullable: true, description: '成功判定のないコマンドの場合はnullish。成功判定のあるコマンドの場合はその結果。' })
+    @Field({
+        nullable: true,
+        description:
+            '成功判定のないコマンドの場合はnullish。成功判定のあるコマンドの場合はその結果。',
+    })
     public isSuccess?: boolean;
 }
 
@@ -57,10 +61,10 @@ export const RoomPublicChannelType = 'RoomPublicChannel';
 export class RoomPublicChannel {
     public __tstype!: typeof RoomPublicChannelType;
 
-
-    @Field({ description: `現在の仕様では、${$system}, ${$free}, '1', … , '10' の12個のみをサポートしている。このうち、${$system}はシステムメッセージ専用チャンネルであるため誰も書き込むことができない。'1', …, '10'はSpectatorが書き込むことはできないが、${$free}はSpectatorも書き込むことができる。` })
+    @Field({
+        description: `現在の仕様では、${$system}, ${$free}, '1', … , '10' の12個のみをサポートしている。このうち、${$system}はシステムメッセージ専用チャンネルであるため誰も書き込むことができない。'1', …, '10'はSpectatorが書き込むことはできないが、${$free}はSpectatorも書き込むことができる。`,
+    })
     public key!: string;
-
 
     @Field({ nullable: true })
     public name?: string;
@@ -93,17 +97,14 @@ export class UpdatedText {
     public updatedAt!: number;
 }
 
-
 export const RoomPublicMessageType = 'RoomPublicMessage';
 
 @ObjectType()
 export class RoomPublicMessage {
     public __tstype!: typeof RoomPublicMessageType;
 
-
     @Field()
     public messageId!: string;
-
 
     @Field()
     public channelKey!: string;
@@ -112,7 +113,7 @@ export class RoomPublicMessage {
     public initText?: string;
 
     @Field({ nullable: true })
-    public initTextSource?: string
+    public initTextSource?: string;
 
     @Field({ nullable: true })
     public updatedText?: UpdatedText;
@@ -129,10 +130,17 @@ export class RoomPublicMessage {
     @Field()
     public isSecret!: boolean;
 
-    @Field({ nullable: true, description: `channelKeyが${$system}以外のときは、システムメッセージならばnullishで、そうでないならばnullishではない。${$system}のとき、原則として全てシステムメッセージであるため常にnullishになる。` })
+    @Field({
+        nullable: true,
+        description: `channelKeyが${$system}以外のときは、システムメッセージならばnullishで、そうでないならばnullishではない。${$system}のとき、原則として全てシステムメッセージであるため常にnullishになる。`,
+    })
     public createdBy?: string;
 
-    @Field({ nullable: true, description: '発言がCharacterと紐付いているときはnon-nullish。PLとしての発言、もしくはcreatedByがnullishのときはnullish。' })
+    @Field({
+        nullable: true,
+        description:
+            '発言がCharacterと紐付いているときはnon-nullish。PLとしての発言、もしくはcreatedByがnullishのときはnullish。',
+    })
     public character?: CharacterValueForMessage;
 
     @Field({ nullable: true })
@@ -151,20 +159,17 @@ export const RoomPrivateMessageType = 'RoomPrivateMessage';
 export class RoomPrivateMessage {
     public __tstype!: typeof RoomPrivateMessageType;
 
-
     @Field()
     public messageId!: string;
-
 
     @Field(() => [String])
     public visibleTo!: string[];
 
+    @Field({ nullable: true })
+    public initText?: string;
 
     @Field({ nullable: true })
-    public initText?: string
-
-    @Field({ nullable: true })
-    public initTextSource?: string
+    public initTextSource?: string;
 
     @Field({ nullable: true })
     public updatedText?: UpdatedText;
@@ -184,7 +189,11 @@ export class RoomPrivateMessage {
     @Field({ nullable: true })
     public createdBy?: string;
 
-    @Field({ nullable: true, description: '発言がCharacterと紐付いているときはnon-nullish。PLとしての発言、もしくはcreatedByがnullishのときはnullish。後からCharacterの値が更新されても、この値が更新されることはない。' })
+    @Field({
+        nullable: true,
+        description:
+            '発言がCharacterと紐付いているときはnon-nullish。PLとしての発言、もしくはcreatedByがnullishのときはnullish。後からCharacterの値が更新されても、この値が更新されることはない。',
+    })
     public character?: CharacterValueForMessage;
 
     @Field({ nullable: true })
@@ -231,10 +240,8 @@ export const RoomSoundEffectType = 'RoomSoundEffect';
 export class RoomSoundEffect {
     public __tstype!: typeof RoomSoundEffectType;
 
-
     @Field()
     public messageId!: string;
-
 
     @Field()
     public file!: FilePath;
@@ -251,7 +258,14 @@ export class RoomSoundEffect {
 
 export const RoomMessage = createUnionType({
     name: 'RoomMessage',
-    types: () => [RoomPublicMessage, RoomPrivateMessage, PieceValueLog, RoomPublicChannel, RoomSoundEffect] as const,
+    types: () =>
+        [
+            RoomPublicMessage,
+            RoomPrivateMessage,
+            PieceValueLog,
+            RoomPublicChannel,
+            RoomSoundEffect,
+        ] as const,
     resolveType: value => {
         switch (value.__tstype) {
             case RoomPrivateMessageType:
@@ -265,7 +279,7 @@ export const RoomMessage = createUnionType({
             case RoomSoundEffectType:
                 return RoomSoundEffect;
         }
-    }
+    },
 });
 
 export const RoomMessagesType = 'RoomMessages';
@@ -273,7 +287,6 @@ export const RoomMessagesType = 'RoomMessages';
 @ObjectType()
 export class RoomMessages {
     public __tstype!: typeof RoomMessagesType;
-
 
     @Field(() => [RoomPublicMessage])
     public publicMessages!: RoomPublicMessage[];
@@ -311,7 +324,7 @@ export const GetRoomMessagesResult = createUnionType({
             case GetRoomMessagesFailureResultType:
                 return GetRoomMessagesFailureResult;
         }
-    }
+    },
 });
 
 export const GetRoomLogFailureResultType = 'GetRoomLogFailureResultType';
@@ -334,7 +347,7 @@ export const GetRoomLogResult = createUnionType({
             case GetRoomLogFailureResultType:
                 return GetRoomLogFailureResult;
         }
-    }
+    },
 });
 
 export const WritePrivateRoomMessageFailureResultType = 'WritePrivateRoomMessageFailureResult';
@@ -357,7 +370,7 @@ export const WritePrivateRoomMessageResult = createUnionType({
             case WritePrivateRoomMessageFailureResultType:
                 return WritePrivateRoomMessageFailureResult;
         }
-    }
+    },
 });
 
 export const WritePublicRoomMessageFailureResultType = 'WritePublicRoomMessageFailureResult';
@@ -380,7 +393,7 @@ export const WritePublicRoomMessageResult = createUnionType({
             case WritePublicRoomMessageFailureResultType:
                 return WritePublicRoomMessageFailureResult;
         }
-    }
+    },
 });
 
 export const WriteRoomSoundEffectFailureResultType = 'WriteRoomSoundEffectFailureResult';
@@ -403,7 +416,7 @@ export const WriteRoomSoundEffectResult = createUnionType({
             case WriteRoomSoundEffectFailureResultType:
                 return WriteRoomSoundEffectFailureResult;
         }
-    }
+    },
 });
 
 @ObjectType()
@@ -430,10 +443,8 @@ export const RoomPublicChannelUpdateType = 'RoomPublicChannelUpdate';
 export class RoomPublicChannelUpdate {
     public __tstype!: typeof RoomPublicChannelUpdateType;
 
-
     @Field()
     public key!: string;
-
 
     @Field({ nullable: true })
     public name?: string;
@@ -445,7 +456,6 @@ export const RoomPublicMessageUpdateType = 'RoomPublicMessageUpdate';
 export class RoomPublicMessageUpdate {
     public __tstype!: typeof RoomPublicMessageUpdateType;
 
-
     @Field()
     public messageId!: string;
 
@@ -453,7 +463,7 @@ export class RoomPublicMessageUpdate {
     public initText?: string;
 
     @Field({ nullable: true })
-    public initTextSource?: string
+    public initTextSource?: string;
 
     @Field({ nullable: true })
     public updatedText?: UpdatedText;
@@ -479,16 +489,14 @@ export const RoomPrivateMessageUpdateType = 'RoomPrivateMessageUpdate';
 export class RoomPrivateMessageUpdate {
     public __tstype!: typeof RoomPrivateMessageUpdateType;
 
-
     @Field()
     public messageId!: string;
-
 
     @Field({ nullable: true })
     public initText?: string;
 
     @Field({ nullable: true })
-    public initTextSource?: string
+    public initTextSource?: string;
 
     @Field({ nullable: true })
     public updatedText?: UpdatedText;
@@ -509,7 +517,17 @@ export class RoomPrivateMessageUpdate {
 
 export const RoomMessageEvent = createUnionType({
     name: 'RoomMessageEvent',
-    types: () => [RoomPublicMessage, RoomPrivateMessage, RoomPublicChannel, PieceValueLog, RoomSoundEffect, RoomPublicChannelUpdate, RoomPublicMessageUpdate, RoomPrivateMessageUpdate] as const,
+    types: () =>
+        [
+            RoomPublicMessage,
+            RoomPrivateMessage,
+            RoomPublicChannel,
+            PieceValueLog,
+            RoomSoundEffect,
+            RoomPublicChannelUpdate,
+            RoomPublicMessageUpdate,
+            RoomPrivateMessageUpdate,
+        ] as const,
     resolveType: value => {
         switch (value.__tstype) {
             case RoomPublicMessageType:
@@ -529,5 +547,5 @@ export const RoomMessageEvent = createUnionType({
             case RoomPrivateMessageUpdateType:
                 return RoomPrivateMessageUpdate;
         }
-    }
+    },
 });

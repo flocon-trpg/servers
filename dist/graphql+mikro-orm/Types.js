@@ -5,7 +5,7 @@ exports.client = 'client';
 exports.server = 'server';
 var RequestedBy;
 (function (RequestedBy) {
-    RequestedBy.createdByMe = ({ requestedBy, userUid }) => {
+    RequestedBy.createdByMe = ({ requestedBy, userUid, }) => {
         if (requestedBy.type === exports.server) {
             return true;
         }

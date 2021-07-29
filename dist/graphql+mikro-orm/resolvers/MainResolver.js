@@ -60,11 +60,11 @@ let MainResolver = class MainResolver {
     async entryToServer(phrase, context) {
         const queue = async () => {
             const em = context.createEm();
-            const globalEntryPhrase = config_1.loadServerConfigAsMain().globalEntryPhrase;
+            const globalEntryPhrase = (await config_1.loadServerConfigAsMain()).globalEntryPhrase;
             const decodedIdToken = helpers_1.checkSignIn(context);
             if (decodedIdToken === helpers_1.NotSignIn) {
                 return {
-                    type: EntryToServerResultType_1.EntryToServerResultType.NotSignIn
+                    type: EntryToServerResultType_1.EntryToServerResultType.NotSignIn,
                 };
             }
             let user = await em.findOne(mikro_orm_1.User, { userUid: decodedIdToken.uid });
@@ -82,7 +82,9 @@ let MainResolver = class MainResolver {
                 user.isEntry = true;
                 await em.flush();
                 return {
-                    type: phrase == null ? EntryToServerResultType_1.EntryToServerResultType.Success : EntryToServerResultType_1.EntryToServerResultType.NoPhraseRequired,
+                    type: phrase == null
+                        ? EntryToServerResultType_1.EntryToServerResultType.Success
+                        : EntryToServerResultType_1.EntryToServerResultType.NoPhraseRequired,
                 };
             }
             if (phrase !== globalEntryPhrase) {
@@ -104,7 +106,9 @@ let MainResolver = class MainResolver {
     }
     async ping(value, context, pubSub) {
         var _a;
-        const createdBy = ((_a = context.decodedIdToken) === null || _a === void 0 ? void 0 : _a.isError) === false ? context.decodedIdToken.value.uid : undefined;
+        const createdBy = ((_a = context.decodedIdToken) === null || _a === void 0 ? void 0 : _a.isError) === false
+            ? context.decodedIdToken.value.uid
+            : undefined;
         const payload = { value, createdBy };
         pubSub.publish(Topics_1.PONG, payload);
         return payload;
@@ -127,14 +131,17 @@ __decorate([
 ], MainResolver.prototype, "getServerInfo", null);
 __decorate([
     type_graphql_1.Mutation(() => EntryToServerResult_1.EntryToServerResult),
-    __param(0, type_graphql_1.Arg('phrase', () => String, { nullable: true })), __param(1, type_graphql_1.Ctx()),
+    __param(0, type_graphql_1.Arg('phrase', () => String, { nullable: true })),
+    __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], MainResolver.prototype, "entryToServer", null);
 __decorate([
     type_graphql_1.Mutation(() => graphql_1.Pong, { description: 'for test' }),
-    __param(0, type_graphql_1.Arg('value')), __param(1, type_graphql_1.Ctx()), __param(2, type_graphql_1.PubSub()),
+    __param(0, type_graphql_1.Arg('value')),
+    __param(1, type_graphql_1.Ctx()),
+    __param(2, type_graphql_1.PubSub()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)

@@ -35,88 +35,88 @@ const registerEnumTypes = (): void => {
     }
     hasRegistered = true;
     registerEnumType(BaasType, {
-        name: 'BaasType'
+        name: 'BaasType',
     });
     registerEnumType(ChangeParticipantNameFailureType, {
-        name: 'ChangeParticipantNameFailureType'
+        name: 'ChangeParticipantNameFailureType',
     });
     registerEnumType(CreateRoomFailureType, {
-        name: 'CreateRoomFailureType'
+        name: 'CreateRoomFailureType',
     });
     registerEnumType(DeleteMessageFailureType, {
-        name: 'DeleteMessageFailureType'
+        name: 'DeleteMessageFailureType',
     });
     registerEnumType(DeleteRoomFailureType, {
-        name: 'DeleteRoomFailureType'
+        name: 'DeleteRoomFailureType',
     });
     registerEnumType(EditMessageFailureType, {
-        name: 'EditMessageFailureType'
+        name: 'EditMessageFailureType',
     });
     registerEnumType(EntryToServerResultType, {
-        name: 'EntryToServerResultType'
+        name: 'EntryToServerResultType',
     });
     registerEnumType(FileSourceType, {
-        name: 'FileSourceType'
+        name: 'FileSourceType',
     });
     registerEnumType(GetRoomConnectionFailureType, {
-        name: 'GetRoomConnectionFailureType'
+        name: 'GetRoomConnectionFailureType',
     });
     registerEnumType(GetRoomFailureType, {
-        name: 'GetRoomFailureType'
+        name: 'GetRoomFailureType',
     });
     registerEnumType(GetRoomLogFailureType, {
-        name: 'GetRoomLogFailureType'
+        name: 'GetRoomLogFailureType',
     });
     registerEnumType(GetRoomMessagesFailureType, {
-        name: 'GetRoomMessagesFailureType'
+        name: 'GetRoomMessagesFailureType',
     });
     registerEnumType(GetRoomsListFailureType, {
-        name: 'GetRoomsListFailureType'
+        name: 'GetRoomsListFailureType',
     });
     registerEnumType(JoinRoomFailureType, {
-        name: 'JoinRoomFailureType'
+        name: 'JoinRoomFailureType',
     });
     registerEnumType(LeaveRoomFailureType, {
-        name: 'LeaveRoomFailureType'
+        name: 'LeaveRoomFailureType',
     });
     registerEnumType(MakeMessageNotSecretFailureType, {
-        name: 'MakeMessageNotSecretFailureType'
+        name: 'MakeMessageNotSecretFailureType',
     });
     registerEnumType(OperateRoomFailureType, {
-        name: 'OperateRoomFailureType'
+        name: 'OperateRoomFailureType',
     });
     registerEnumType(ParticipantRole, {
-        name: 'ParticipantRole'
+        name: 'ParticipantRole',
     });
     registerEnumType(PieceValueLogType, {
-        name: 'PieceValueLogType'
+        name: 'PieceValueLogType',
     });
     registerEnumType(PrereleaseType, {
-        name: 'PrereleaseType'
+        name: 'PrereleaseType',
     });
     registerEnumType(PromoteFailureType, {
-        name: 'PromoteFailureType'
+        name: 'PromoteFailureType',
     });
     registerEnumType(RequiresPhraseFailureType, {
-        name: 'RequiresPhraseFailureType'
+        name: 'RequiresPhraseFailureType',
     });
     registerEnumType(RoomParameterNameType, {
-        name: 'RoomParameterNameType'
+        name: 'RoomParameterNameType',
     });
     registerEnumType(WritePrivateRoomMessageFailureType, {
-        name: 'WritePrivateRoomMessageFailureType'
+        name: 'WritePrivateRoomMessageFailureType',
     });
     registerEnumType(WritePublicRoomMessageFailureType, {
-        name: 'WritePublicRoomMessageFailureType'
+        name: 'WritePublicRoomMessageFailureType',
     });
     registerEnumType(WriteRoomSoundEffectFailureType, {
-        name: 'WriteRoomSoundEffectFailureType'
+        name: 'WriteRoomSoundEffectFailureType',
     });
     registerEnumType(WritingMessageStatusInputType, {
-        name: 'WritingMessageStatusInputType'
+        name: 'WritingMessageStatusInputType',
     });
     registerEnumType(WritingMessageStatusType, {
-        name: 'WritingMessageStatusType'
+        name: 'WritingMessageStatusType',
     });
 };
 

@@ -6,7 +6,9 @@ const core_1 = require("@mikro-orm/core");
 const result_1 = require("@kizahasi/result");
 const flocon_core_1 = require("@kizahasi/flocon-core");
 const isSequential = (array, getIndex) => {
-    const sorted = array.map(value => ({ index: getIndex(value), value })).sort((x, y) => x.index - y.index);
+    const sorted = array
+        .map(value => ({ index: getIndex(value), value }))
+        .sort((x, y) => x.index - y.index);
     if (sorted.length === 0) {
         return { type: 'EmptyArray' };
     }
@@ -53,7 +55,10 @@ var GlobalRoom;
                 return result;
             };
             ToGlobal.downOperationMany = async ({ em, roomId, revisionRange, }) => {
-                const operationEntities = await em.find(mikro_orm_1.RoomOp, { room: { id: roomId }, prevRevision: { $gte: revisionRange.from } });
+                const operationEntities = await em.find(mikro_orm_1.RoomOp, {
+                    room: { id: roomId },
+                    prevRevision: { $gte: revisionRange.from },
+                });
                 const isSequentialResult = isSequential(operationEntities, o => o.prevRevision);
                 if (isSequentialResult.type === 'NotSequential') {
                     return result_1.Result.error('Database error. There are missing operations. Multiple server apps edit same database simultaneously?');
@@ -68,12 +73,14 @@ var GlobalRoom;
                     return result_1.Result.error('revision out of range(too small)');
                 }
                 if (revisionRange.expectedTo !== undefined) {
-                    if (isSequentialResult.maxIndex !== (revisionRange.expectedTo - 1)) {
+                    if (isSequentialResult.maxIndex !== revisionRange.expectedTo - 1) {
                         return result_1.Result.error('Database error. Revision of latest operation is not same as revision of state. Multiple server apps edit same database simultaneously?');
                     }
                 }
                 const sortedOperationEntities = operationEntities.sort((x, y) => x.prevRevision - y.prevRevision);
-                let operation = sortedOperationEntities.length === 0 ? undefined : downOperation(sortedOperationEntities[0]);
+                let operation = sortedOperationEntities.length === 0
+                    ? undefined
+                    : downOperation(sortedOperationEntities[0]);
                 let isFirst = false;
                 for (const model of sortedOperationEntities) {
                     if (isFirst) {
@@ -99,7 +106,7 @@ var GlobalRoom;
     (function (Global) {
         let ToGraphQL;
         (function (ToGraphQL) {
-            ToGraphQL.state = ({ source, requestedBy }) => {
+            ToGraphQL.state = ({ source, requestedBy, }) => {
                 return {
                     stateJson: flocon_core_1.stringifyState(flocon_core_1.toClientState(requestedBy)(source)),
                 };
@@ -107,7 +114,10 @@ var GlobalRoom;
             ToGraphQL.operation = ({ prevState, nextState, requestedBy, }) => {
                 const prevClientState = flocon_core_1.toClientState(requestedBy)(prevState);
                 const nextClientState = flocon_core_1.toClientState(requestedBy)(nextState);
-                const diffOperation = flocon_core_1.diff({ prevState: prevClientState, nextState: nextClientState });
+                const diffOperation = flocon_core_1.diff({
+                    prevState: prevClientState,
+                    nextState: nextClientState,
+                });
                 const upOperation = diffOperation == null ? undefined : flocon_core_1.toUpOperation(diffOperation);
                 return flocon_core_1.stringifyUpOperation(upOperation !== null && upOperation !== void 0 ? upOperation : { $version: 1 });
             };

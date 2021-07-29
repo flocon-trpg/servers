@@ -48,15 +48,15 @@ const createResolverContext = (orm, uid) => ({
             type: BaasType_1.BaasType.Firebase,
             uid,
             firebase: {
-                sign_in_provider: 'DUMMY_SIGN_IN_PROVIDER'
-            }
+                sign_in_provider: 'DUMMY_SIGN_IN_PROVIDER',
+            },
         },
     },
     promiseQueue: new PromiseQueue_1.PromiseQueue({}),
     connectionManager: new main_1.InMemoryConnectionManager(),
     createEm: () => orm.em.fork(),
 });
-const setupRoomAndUsersAndParticipants = ({ em, setupRoom }) => {
+const setupRoomAndUsersAndParticipants = ({ em, setupRoom, }) => {
     const roomName = 'ROOM_NAME';
     const creatorUserUid = 'CREATOR_ID';
     const creatorName = 'CREATOR_NAME';
@@ -82,7 +82,7 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }) => {
                     role: 'Master',
                     name: creatorName,
                     imagePieceValues: {},
-                }
+                },
             },
             activeBoardKey: null,
             publicChannel1Name: 'メイン',
@@ -95,7 +95,7 @@ const setupRoomAndUsersAndParticipants = ({ em, setupRoom }) => {
             publicChannel8Name: 'メイン8',
             publicChannel9Name: 'メイン9',
             publicChannel10Name: 'メイン10',
-        }
+        },
     });
     if (setupRoom != null) {
         setupRoom(room);

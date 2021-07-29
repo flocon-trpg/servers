@@ -1,5 +1,21 @@
-import { DicePieceValueLog as DicePieceValueLogState, NumberPieceValueLog as NumberPieceValueLogState } from '@kizahasi/flocon-core';
-import { Collection, Entity, Enum, IdentifiedReference, JsonType, ManyToMany, ManyToOne, OneToMany, PrimaryKey, Property, Reference, Unique } from '@mikro-orm/core';
+import {
+    DicePieceValueLog as DicePieceValueLogState,
+    NumberPieceValueLog as NumberPieceValueLogState,
+} from '@kizahasi/flocon-core';
+import {
+    Collection,
+    Entity,
+    Enum,
+    IdentifiedReference,
+    JsonType,
+    ManyToMany,
+    ManyToOne,
+    OneToMany,
+    PrimaryKey,
+    Property,
+    Reference,
+    Unique,
+} from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { FileSourceType } from '../../../enums/FileSourceType';
 import { Room } from '../room/mikro-orm';
@@ -76,7 +92,13 @@ export class RoomPubCh {
 // RoomPublicMessage
 @Entity()
 export class RoomPubMsg {
-    public constructor({ initText, initTextSource }: { initText: string; initTextSource: string | undefined }) {
+    public constructor({
+        initText,
+        initTextSource,
+    }: {
+        initText: string;
+        initTextSource: string | undefined;
+    }) {
         this.initText = initText;
         this.initTextSource = initTextSource;
     }
@@ -174,7 +196,13 @@ export class RoomPubMsg {
 // RoomPrivateMessage
 @Entity()
 export class RoomPrvMsg {
-    public constructor({ initText, initTextSource }: { initText: string; initTextSource: string | undefined }) {
+    public constructor({
+        initText,
+        initTextSource,
+    }: {
+        initText: string;
+        initTextSource: string | undefined;
+    }) {
         this.initText = initText;
         this.initTextSource = initTextSource;
     }
@@ -367,7 +395,7 @@ export class RoomSe {
     public constructor({
         filePath,
         fileSourceType,
-        volume
+        volume,
     }: {
         filePath: string;
         fileSourceType: FileSourceType;

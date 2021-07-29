@@ -95,7 +95,7 @@ Room = __decorate([
 ], Room);
 exports.Room = Room;
 let RoomOp = class RoomOp {
-    constructor({ prevRevision, value, }) {
+    constructor({ prevRevision, value }) {
         this.id = uuid_1.v4();
         this.prevRevision = prevRevision;
         this.value = value;

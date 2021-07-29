@@ -1,4 +1,10 @@
-import { buildSchema as buildSchemaCore, BuildSchemaOptions, buildSchemaSync as buildSchemaSyncCore, PrintSchemaOptions, PubSubEngine } from 'type-graphql';
+import {
+    buildSchema as buildSchemaCore,
+    BuildSchemaOptions,
+    buildSchemaSync as buildSchemaSyncCore,
+    PrintSchemaOptions,
+    PubSubEngine,
+} from 'type-graphql';
 import path from 'path';
 import { GraphQLSchema } from 'graphql';
 import registerEnumTypes from './graphql+mikro-orm/registerEnumTypes';
@@ -9,7 +15,7 @@ import { PubSubOptions } from 'graphql-subscriptions';
 type Options = {
     emitSchemaFile: boolean;
     pubSub?: PubSubEngine | PubSubOptions;
-}
+};
 
 // EmitSchemaFileOptionsがtype-graphqlからexportされていないので再定義している。
 interface EmitSchemaFileOptions extends Partial<PrintSchemaOptions> {
@@ -21,10 +27,10 @@ const optionBase: BuildSchemaOptions = {
     resolvers,
 };
 
-const emitSchemaFileOptions: EmitSchemaFileOptions = ({
+const emitSchemaFileOptions: EmitSchemaFileOptions = {
     path: path.resolve(process.cwd(), '../graphql/generated/schema.gql'),
-    commentDescriptions: true
-});
+    commentDescriptions: true,
+};
 
 export const buildSchema = async (options: Options): Promise<GraphQLSchema> => {
     registerEnumTypes();

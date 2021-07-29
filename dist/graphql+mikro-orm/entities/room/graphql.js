@@ -15,7 +15,9 @@ const class_validator_1 = require("class-validator");
 let RoomGetState = class RoomGetState {
 };
 __decorate([
-    type_graphql_1.Field({ description: 'Current revision of Room. Whenever Room is updated, this value is incremented by 1. This value is required when you apply RoomOperation. / Roomの現在のリビジョン。Roomが更新されるたび、この値は1増加する。RoomOperationを適用する際に必要となる。' }),
+    type_graphql_1.Field({
+        description: 'Current revision of Room. Whenever Room is updated, this value is incremented by 1. This value is required when you apply RoomOperation. / Roomの現在のリビジョン。Roomが更新されるたび、この値は1増加する。RoomOperationを適用する際に必要となる。',
+    }),
     __metadata("design:type", Number)
 ], RoomGetState.prototype, "revision", void 0);
 __decorate([
@@ -52,7 +54,10 @@ __decorate([
     __metadata("design:type", Number)
 ], RoomOperation.prototype, "revisionTo", void 0);
 __decorate([
-    type_graphql_1.Field(() => OperatedBy, { nullable: true, description: 'operateRoomを呼んだ人物。promoteなどの結果の場合はnullishになる。' }),
+    type_graphql_1.Field(() => OperatedBy, {
+        nullable: true,
+        description: 'operateRoomを呼んだ人物。promoteなどの結果の場合はnullishになる。',
+    }),
     __metadata("design:type", OperatedBy)
 ], RoomOperation.prototype, "operatedBy", void 0);
 __decorate([
@@ -70,7 +75,9 @@ __decorate([
     __metadata("design:type", String)
 ], RoomOperationInput.prototype, "valueJson", void 0);
 __decorate([
-    type_graphql_1.Field({ description: 'クライアントを識別するID。適当なIDをクライアント側で生成して渡す。Operationごとに変える必要はない' }),
+    type_graphql_1.Field({
+        description: 'クライアントを識別するID。適当なIDをクライアント側で生成して渡す。Operationごとに変える必要はない',
+    }),
     class_validator_1.MaxLength(10),
     __metadata("design:type", String)
 ], RoomOperationInput.prototype, "clientId", void 0);

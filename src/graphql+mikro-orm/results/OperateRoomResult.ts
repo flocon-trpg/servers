@@ -29,7 +29,13 @@ export class OperateRoomFailureResult {
 
 export const OperateRoomResult = createUnionType({
     name: 'OperateRoomResult',
-    types: () => [OperateRoomSuccessResult, OperateRoomFailureResult, OperateRoomNonJoinedResult, OperateRoomIdResult] as const,
+    types: () =>
+        [
+            OperateRoomSuccessResult,
+            OperateRoomFailureResult,
+            OperateRoomNonJoinedResult,
+            OperateRoomIdResult,
+        ] as const,
     resolveType: value => {
         if ('operation' in value) {
             return OperateRoomSuccessResult;
@@ -44,5 +50,5 @@ export const OperateRoomResult = createUnionType({
             return OperateRoomIdResult;
         }
         return undefined;
-    }
+    },
 });

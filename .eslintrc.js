@@ -19,10 +19,6 @@ module.exports = {
     },
     plugins: ['@typescript-eslint'],
     rules: {
-        '@typescript-eslint/indent': ['error', 4, { SwitchCase: 1 }],
-        'linebreak-style': ['error', 'windows'],
-        quotes: ['error', 'single'],
-        semi: ['error', 'always'],
         '@typescript-eslint/member-delimiter-style': ['error'],
         '@typescript-eslint/explicit-module-boundary-types': 'off',
         '@typescript-eslint/no-namespace': 'off',

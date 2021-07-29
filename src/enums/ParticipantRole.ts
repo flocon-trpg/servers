@@ -7,7 +7,9 @@ export enum ParticipantRole {
 }
 
 export namespace ParticipantRole {
-    export const ofString = (source: typeof Master | typeof Player | typeof Spectator): ParticipantRole => {
+    export const ofString = (
+        source: typeof Master | typeof Player | typeof Spectator
+    ): ParticipantRole => {
         switch (source) {
             case Master:
                 return ParticipantRole.Master;
@@ -18,7 +20,9 @@ export namespace ParticipantRole {
         }
     };
 
-    export const ofNullishString = (source: typeof Master | typeof Player | typeof Spectator | null | undefined) => {
+    export const ofNullishString = (
+        source: typeof Master | typeof Player | typeof Spectator | null | undefined
+    ) => {
         switch (source) {
             case null:
             case undefined:

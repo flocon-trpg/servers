@@ -44,5 +44,5 @@ exports.GetRoomsListResult = type_graphql_1.createUnionType({
             return GetRoomsListFailureResult;
         }
         return undefined;
-    }
+    },
 });
