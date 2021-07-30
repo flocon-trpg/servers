@@ -51,16 +51,12 @@ body {
     flex-direction: column;
 }
 
-.flex-0 {
-    flex: 0 0 auto;
+.flex-none {
+    flex: none;
 }
 
 .flex-1 {
     flex: 1;
-}
-
-.align-items-center {
-    align-items: center;
 }
 
 .message {

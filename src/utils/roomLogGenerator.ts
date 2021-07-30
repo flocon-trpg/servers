@@ -461,7 +461,7 @@ export const generateAsRichLog = async (
         msg.value.commandResult == null ? avatar ?? './img/noname.png' : './img/dice.png'
     }">
     <div class="flex flex-column">
-        <div class="flex-0 flex flex-row name" style="color: ${escape(
+        <div class="flex-none flex flex-row name" style="color: ${escape(
             msg.value.textColor ?? 'white'
         )}">
             ${escape(msg.value.createdBy?.rolePlayPart ?? msg.value.createdBy?.participantNamePart ?? 'システムメッセージ')}
