@@ -38,6 +38,8 @@ import {
     create,
     roomDrawerAndPopoverAndModalModule,
 } from '../../modules/roomDrawerAndPopoverAndModalModule';
+import classNames from 'classnames';
+import { flex, flexRow, itemsCenter } from '../../utils/className';
 
 type DataSource = {
     key: string;
@@ -316,7 +318,7 @@ const CharacterList: React.FC = () => {
             key: 'name',
             // eslint-disable-next-line react/display-name
             render: (_: unknown, { character }: DataSource) => (
-                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                <div className={classNames(flex, flexRow, itemsCenter)}>
                     {character.state.image == null ? (
                         <Icon.UserOutlined />
                     ) : (

@@ -19,6 +19,8 @@ import roomConfigModule, {
 import { messageInputTextModule } from '../../modules/messageInputTextModule';
 import { Subject } from 'rxjs';
 import { useSelector } from '../../store';
+import classNames from 'classnames';
+import { flex, flexNone, flexRow, itemsCenter } from '../../utils/className';
 
 const titleStyle: React.CSSProperties = {
     flexBasis: '80px',
@@ -138,14 +140,7 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <div
-                style={{
-                    flex: '0 0 auto',
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                }}
-            >
+            <div className={classNames(flexNone, flex, flexRow, itemsCenter)}>
                 <div style={titleStyle}>キャラクター</div>
                 <Select
                     style={{ flex: 1, maxWidth: miniInputMaxWidth }}

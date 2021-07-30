@@ -1,6 +1,8 @@
 import React from 'react';
 import * as jdenticon from 'jdenticon';
 import { Popover, Tooltip } from 'antd';
+import classNames from 'classnames';
+import { flex, flexColumn } from '../utils/className';
 
 const userUid = 'userUid';
 
@@ -33,7 +35,7 @@ const Jdenticon: React.FC<Props> = ({ hashOrValue, size, tooltipMode }: Props) =
         <Popover
             trigger="hover"
             content={
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div className={classNames(flex, flexColumn)}>
                     <img src={src} width={70} height={70} />
                     <span>
                         {tooltipTitle}

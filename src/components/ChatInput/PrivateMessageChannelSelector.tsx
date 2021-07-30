@@ -15,6 +15,8 @@ import {
     UpdateChatPalettePanelAction,
     UpdateMessagePanelAction,
 } from '../../modules/roomConfigModule';
+import { cancelRnd, flex, flexNone, flexRow, itemsCenter } from '../../utils/className';
+import classNames from 'classnames';
 
 type PrivateMessageDrawerProps = {
     visible: boolean;
@@ -42,7 +44,7 @@ const PrivateMessageDrawer: React.FC<PrivateMessageDrawerProps> = ({
 
     return (
         <Drawer
-            className="cancel-rnd"
+            className={cancelRnd}
             width={600}
             title="秘話の送信先"
             visible={visible}
@@ -154,14 +156,7 @@ export const PrivateMessageChannelSelector: React.FC<Props> = ({
     );
 
     return (
-        <div
-            style={{
-                flex: '0 0 auto',
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-            }}
-        >
+        <div className={classNames(flexNone, flex, flexRow, itemsCenter)}>
             <PrivateMessageDrawer
                 visible={isDrawerVisible}
                 onClose={() => setIsDrawerVisible(false)}

@@ -1,5 +1,7 @@
 import React from 'react';
 import { Row, Col, Slider, InputNumber, Typography } from 'antd';
+import { flex, flexRow, itemsCenter } from '../utils/className';
+import classNames from 'classnames';
 
 // '0-1'の場合、Props.valueの値の範囲が0～1だとみなされる。VolumeBarではProps.valueの値を100倍した値が表示される。onChangeの引数には0～1の範囲に変換されてから渡される。
 // '0-100'の場合、Props.valueの値の範囲が0～100だとみなされる。VolumeBarはProps.valueの値をそのまま表示する。
@@ -18,7 +20,7 @@ const textStyle: React.CSSProperties = { flex: '100px', margin: '0 4px', width: 
 const VolumeBar: React.FC<Props> = ({ value, onChange, readonly, inputNumberType }: Props) => {
     const roundedValue = Math.round(inputNumberType === '0-1' ? value * 100 : value);
     return (
-        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+        <div className={classNames(flex, flexRow, itemsCenter)}>
             <Slider
                 disabled={readonly}
                 style={{ flex: 1, minWidth: 50 }}

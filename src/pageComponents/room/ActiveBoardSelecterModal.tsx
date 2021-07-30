@@ -5,6 +5,7 @@ import React from 'react';
 import { useMyBoards } from '../../hooks/state/useMyBoards';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useOperate } from '../../hooks/useOperate';
+import { cancelRnd } from '../../utils/className';
 
 type Props = {
     visible: boolean;
@@ -81,7 +82,7 @@ export const ActiveBoardSelectorModal: React.FC<Props> = ({ visible, onComplete 
 
     return (
         <Modal
-            className="cancel-rnd"
+            className={cancelRnd}
             visible={visible}
             title="ボードビュアーに表示させるボードの変更"
             onOk={onOk}

@@ -3,6 +3,8 @@ import { $free, $system } from '@kizahasi/util';
 import { Checkbox } from 'antd';
 import { RoomPrivateMessage, RoomPublicMessage } from '../generated/graphql';
 import { usePublicChannelNames } from '../hooks/state/usePublicChannelNames';
+import classNames from 'classnames';
+import { flex, flexColumn } from '../utils/className';
 
 export type ChannelsFilterOptions = {
     includesPublicChannel1: boolean;
@@ -96,7 +98,7 @@ export const ChannelsFilter: React.FC<Props> = ({ value, onChange, disabled }: P
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div className={classNames(flex, flexColumn)}>
             <div>特殊チャンネル</div>
             <div>
                 <Checkbox

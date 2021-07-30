@@ -19,6 +19,8 @@ import { StrIndex5 } from '@kizahasi/util';
 import { BgmState, FilePath, UpOperation } from '@kizahasi/flocon-core';
 import _ from 'lodash';
 import { FirebaseStorageFile } from '../../modules/fileModule';
+import { cancelRnd, flex, flexColumn, flexRow, itemsCenter } from '../../utils/className';
+import classNames from 'classnames';
 
 const defaultVolume = 0.5;
 
@@ -39,7 +41,7 @@ const VolumeBarForSoundPlayer: React.FC<VolumeBarForSoundPlayerProps> = ({
 }: VolumeBarForSoundPlayerProps) => {
     return (
         <Tooltip title="ボリューム補正の値は、自分だけでなく部屋にいる全員に反映されます">
-            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+            <div className={classNames(flex, flexRow, itemsCenter)}>
                 <Icon.SoundOutlined style={{ marginLeft: hasMarginLeft ? 16 : undefined }} />
                 <span>ボリューム補正</span>
                 <VolumeBar
@@ -74,7 +76,7 @@ const FilePathView: React.FC<FilePathViewProps> = ({
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+        <div className={classNames(flex, flexRow, itemsCenter)}>
             <div
                 style={{
                     flex: 1,
@@ -144,7 +146,7 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({
 
     return (
         <Drawer
-            className="cancel-rnd"
+            className={cancelRnd}
             title={`チャンネル${channelKey}`}
             width={400}
             closable
@@ -216,7 +218,7 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({
                     onClose={() => setFilesManagerDrawerType(null)}
                 />
             }
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div className={classNames(flex, flexColumn)}>
                 <VolumeBarForSoundPlayer
                     volumeBarValue={volumeInput}
                     onVolumeBarValueChange={i => setVolumeInput(i)}
@@ -279,7 +281,7 @@ const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({
 
     return (
         <Drawer
-            className="cancel-rnd"
+            className={cancelRnd}
             title="SE"
             width={400}
             closable
@@ -311,7 +313,7 @@ const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({
                     onClose={() => setFilesManagerDrawerType(null)}
                 />
             }
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div className={classNames(flex, flexColumn)}>
                 <VolumeBarForSoundPlayer
                     volumeBarValue={volumeInput}
                     onVolumeBarValueChange={i => setVolumeInput(i)}
@@ -371,14 +373,14 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
     });
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div className={classNames(flex, flexColumn)}>
             <BgmPlayerDrawer
                 channelKey={channelKey}
                 visible={isDrawerVisible}
                 onClose={() => setIsDrawerVisible(false)}
                 bgmState={bgmState}
             />
-            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+            <div className={classNames(flex, flexRow, itemsCenter)}>
                 <div style={MyStyle.Text.larger}>
                     {bgmState != null && (bgmState.files ?? []).length !== 0 ? (
                         /* 本当はPauseアイコンではなく停止アイコンを使いたいが、antdでは見つからなかったので暫定的にPauseアイコンを用いている */

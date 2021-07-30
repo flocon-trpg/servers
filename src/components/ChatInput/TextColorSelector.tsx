@@ -12,6 +12,7 @@ import {
     UpdateChatPalettePanelAction,
     UpdateMessagePanelAction,
 } from '../../modules/roomConfigModule';
+import { cancelRnd, flex, flexNone, flexRow, itemsCenter } from '../../utils/className';
 
 type Props = {
     config: ChatPalettePanelConfig | MessagePanelConfig;
@@ -27,20 +28,13 @@ export const TextColorSelector: React.FC<Props> = ({
     titleStyle,
 }: Props) => {
     return (
-        <div
-            style={{
-                flex: '0 0 auto',
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-            }}
-        >
+        <div className={classNames(flexNone, flex, flexRow, itemsCenter)}>
             <div style={titleStyle}>文字色</div>
             <Popover
                 trigger="click"
                 content={
                     <SketchPicker
-                        className={classNames('cancel-rnd')}
+                        className={cancelRnd}
                         css={css`
                             color: black;
                         `}

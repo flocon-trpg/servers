@@ -40,6 +40,8 @@ import { useSignOut } from '../../hooks/useSignOut';
 import ConfigContext from '../../contexts/ConfigContext';
 import { FirebaseStorageUrlCacheContext } from '../../contexts/FirebaseStorageUrlCacheContext';
 import { ChannelsFilter, ChannelsFilterOptions } from '../../components/ChannelsFilter';
+import classNames from 'classnames';
+import { flex, flexColumn, flexRow, itemsCenter } from '../../utils/className';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -360,7 +362,7 @@ const GenerateSimpleLogModal: React.FC<GenerateSimpleLogModalProps> = ({
             }}
             onCancel={() => onCancel()}
         >
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div className={classNames(flex, flexColumn)}>
                 <div style={{ marginBottom: 8 }}>
                     ログには、秘話などの非公開情報も含めることが可能です。また、ログをダウンロードすると、システムメッセージによって全員に通知されます。
                 </div>
@@ -476,7 +478,7 @@ const GenerateRichLogModal: React.FC<GenerateRichLogModalProps> = ({
             cancelButtonProps={{ disabled: isDownloading }}
             onCancel={() => onCancel()}
         >
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div className={classNames(flex, flexColumn)}>
                 <div>
                     <p>
                         ログには、秘話などの非公開情報も含めることが可能です。また、ログをダウンロードすると、システムメッセージによって全員に通知されます。
@@ -1083,9 +1085,7 @@ export const RoomMenu: React.FC = () => {
                 </Menu.Item>
                 <Menu.SubMenu
                     title={
-                        <div
-                            style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}
-                        >
+                        <div className={classNames(flex, flexRow, itemsCenter)}>
                             <Jdenticon
                                 hashOrValue={myUserUid}
                                 size={20}

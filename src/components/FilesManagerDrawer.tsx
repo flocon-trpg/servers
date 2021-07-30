@@ -34,6 +34,7 @@ import { useDispatch } from 'react-redux';
 import { fileModule } from '../modules/fileModule';
 import { $public, StorageType, unlisted } from '../utils/firebaseStorage';
 import { DeleteFirebaseStorageFileModal } from './DeleteFirebaseStorageFileModal';
+import { cancelRnd } from '../utils/className';
 
 type DataSource = FirebaseStorageFile.State;
 
@@ -575,7 +576,7 @@ const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => 
 
     return (
         <Drawer
-            className="cancel-rnd"
+            className={cancelRnd}
             closable
             visible={drawerType != null}
             onClose={() => onClose()}

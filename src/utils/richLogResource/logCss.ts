@@ -1,4 +1,4 @@
-import { Color } from "../color";
+import { Color } from '../color';
 
 export const logCss = `
 html {
