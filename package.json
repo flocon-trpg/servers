@@ -1,5 +1,5 @@
 {
-    "version": "0.14.1",
+    "version": "0.15.0",
     "license": "MIT",
     "main": "dist/cjs/index.js",
     "module": "dist/esm/index.js",
@@ -50,7 +50,7 @@
         "@kizahasi/flocon-script": "^0.5.3",
         "@kizahasi/ot-string": "^0.2.2",
         "@kizahasi/result": "^0.3.0",
-        "@kizahasi/util": "^0.2.3",
+        "@kizahasi/util": "^0.3.0",
         "@ltd/j-toml": "^1.12.2",
         "fp-ts": "^2.10.5",
         "io-ts": "^2.2.16",

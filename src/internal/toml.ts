@@ -9,7 +9,7 @@ import {
 } from '@ltd/j-toml';
 import { Result } from '@kizahasi/result';
 import { analyze, expr1 } from './expression';
-import { maybe } from '@kizahasi/util';
+import { maybe } from './ot/util/maybe';
 
 type TomlDateTime = TomlLocalDate | TomlLocalDateTime | TomlLocalTime | TomlOffsetDateTime;
 const dateTime = new t.Type<TomlDateTime>(

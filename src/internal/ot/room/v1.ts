@@ -28,14 +28,8 @@ import { DualStringKeyRecord, isIdRecord, record } from '../util/record';
 import { CompositeKey, compositeKey } from '../compositeKey/v1';
 import { Result } from '@kizahasi/result';
 import { ApplyError, PositiveInt, ComposeAndTransformError } from '@kizahasi/ot-string';
-import {
-    chooseRecord,
-    chooseDualKeyRecord,
-    isStrIndex20,
-    isStrIndex5,
-    Maybe,
-    maybe,
-} from '@kizahasi/util';
+import { chooseRecord, chooseDualKeyRecord, isStrIndex20, isStrIndex5 } from '@kizahasi/util';
+import { Maybe, maybe } from '../util/maybe';
 
 const replaceStringDownOperation = t.type({ oldValue: t.string });
 const replaceStringUpOperation = t.type({ newValue: t.string });
@@ -216,7 +210,7 @@ const boardsToClientState =
             serverState: source,
             isPrivate: (state, key) => {
                 if (
-                    RequestedBy.createdByMe({
+                    RequestedBy.isAuthorized({
                         requestedBy,
                         userUid: key.first,
                     })
@@ -251,13 +245,13 @@ export const toClientState =
             characters: DualKeyRecordOperation.toClientState<Character.State, Character.State>({
                 serverState: source.characters,
                 isPrivate: (state, key) =>
-                    !RequestedBy.createdByMe({
+                    !RequestedBy.isAuthorized({
                         requestedBy,
                         userUid: key.first,
                     }) && state.isPrivate,
                 toClientState: ({ state, key }) =>
                     Character.toClientState(
-                        RequestedBy.createdByMe({ requestedBy, userUid: key.first }),
+                        RequestedBy.isAuthorized({ requestedBy, userUid: key.first }),
                         requestedBy,
                         source.activeBoardKey ?? null
                     )(state),
@@ -1176,13 +1170,13 @@ export const serverTransform =
             toServerState: state => state,
             cancellationPolicy: {
                 cancelCreate: ({ key }) =>
-                    !RequestedBy.createdByMe({
+                    !RequestedBy.isAuthorized({
                         requestedBy,
                         userUid: key.first,
                     }),
                 cancelUpdate: ({ key }) => {
                     if (
-                        RequestedBy.createdByMe({
+                        RequestedBy.isAuthorized({
                             requestedBy,
                             userUid: key.first,
                         })
@@ -1195,7 +1189,7 @@ export const serverTransform =
                     return false;
                 },
                 cancelRemove: ({ key }) =>
-                    !RequestedBy.createdByMe({
+                    !RequestedBy.isAuthorized({
                         requestedBy,
                         userUid: key.first,
                     }),
@@ -1218,7 +1212,7 @@ export const serverTransform =
             nextState: currentState.characters,
             innerTransform: ({ first, second, prevState, nextState, key }) =>
                 Character.serverTransform(
-                    RequestedBy.createdByMe({
+                    RequestedBy.isAuthorized({
                         requestedBy,
                         userUid: key.first,
                     })
@@ -1231,12 +1225,12 @@ export const serverTransform =
             toServerState: state => state,
             cancellationPolicy: {
                 cancelCreate: ({ key }) =>
-                    !RequestedBy.createdByMe({ requestedBy, userUid: key.first }),
+                    !RequestedBy.isAuthorized({ requestedBy, userUid: key.first }),
                 cancelUpdate: ({ key, nextState }) =>
-                    !RequestedBy.createdByMe({ requestedBy, userUid: key.first }) &&
+                    !RequestedBy.isAuthorized({ requestedBy, userUid: key.first }) &&
                     nextState.isPrivate,
                 cancelRemove: ({ key, nextState }) =>
-                    !RequestedBy.createdByMe({ requestedBy, userUid: key.first }) &&
+                    !RequestedBy.isAuthorized({ requestedBy, userUid: key.first }) &&
                     nextState.isPrivate,
             },
         });
@@ -1423,7 +1417,7 @@ export const serverTransform =
         if (clientOperation.activeBoardKey != null) {
             if (
                 clientOperation.activeBoardKey.newValue == null ||
-                RequestedBy.createdByMe({
+                RequestedBy.isAuthorized({
                     requestedBy,
                     userUid: clientOperation.activeBoardKey.newValue.createdBy,
                 })

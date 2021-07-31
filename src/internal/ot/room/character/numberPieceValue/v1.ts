@@ -61,11 +61,11 @@ export type TwoWayOperation = {
 };
 
 export const toClientState =
-    (createdByMe: boolean, requestedBy: RequestedBy, activeBoardKey: CompositeKey | null) =>
+    (isAuthorized: boolean, requestedBy: RequestedBy, activeBoardKey: CompositeKey | null) =>
     (source: State): State => {
         return {
             ...source,
-            value: source.isValuePrivate && !createdByMe ? 0 : source.value,
+            value: source.isValuePrivate && !isAuthorized ? 0 : source.value,
             pieces: Piece.toClientStateMany(requestedBy, activeBoardKey)(source.pieces),
         };
     };
@@ -242,9 +242,9 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
 };
 
 export const serverTransform =
-    (createdByMe: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
+    (isAuthorized: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
-        if (!createdByMe) {
+        if (!isAuthorized) {
             // 自分以外はどのプロパティも編集できない。
             return Result.ok(undefined);
         }
@@ -269,9 +269,9 @@ export const serverTransform =
                 }),
             toServerState: state => state,
             cancellationPolicy: {
-                cancelCreate: () => !createdByMe,
-                cancelRemove: params => !createdByMe && params.nextState.isPrivate,
-                cancelUpdate: params => !createdByMe && params.nextState.isPrivate,
+                cancelCreate: () => !isAuthorized,
+                cancelRemove: params => !isAuthorized && params.nextState.isPrivate,
+                cancelUpdate: params => !isAuthorized && params.nextState.isPrivate,
             },
         });
         if (pieces.isError) {
@@ -288,7 +288,7 @@ export const serverTransform =
             second: clientOperation.isValuePrivate ?? undefined,
             prevState: prevState.isValuePrivate,
         });
-        // !createdByMe の場合は最初の方ですべて弾いているため、isValuePrivateのチェックをする必要はない。
+        // !isAuthorized の場合は最初の方ですべて弾いているため、isValuePrivateのチェックをする必要はない。
         twoWayOperation.value = ReplaceOperation.serverTransform({
             first: serverOperation?.value ?? undefined,
             second: clientOperation.value ?? undefined,

@@ -6,14 +6,14 @@ import {
     Diff,
     RequestedBy,
     Restore,
-    server,
+    admin,
     ServerTransform,
 } from '../../util/type';
 import * as ReplaceOperation from '../../util/replaceOperation';
 import { createOperation } from '../../util/createOperation';
 import { isIdRecord, record } from '../../util/record';
 import { Result } from '@kizahasi/result';
-import { chooseRecord, CompositeKey, maybe, Maybe } from '@kizahasi/util';
+import { chooseRecord, CompositeKey } from '@kizahasi/util';
 import * as ImagePieceValue from './imagePieceValue/v1';
 import {
     mapRecordOperationElement,
@@ -22,6 +22,7 @@ import {
 } from '../../util/recordOperationElement';
 import * as RecordOperation from '../../util/recordOperation';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
+import { Maybe, maybe } from '../../util/maybe';
 
 export const Player = 'Player';
 export const Spectator = 'Spectator';
@@ -78,7 +79,7 @@ export type TwoWayOperation = {
 export const toClientState =
     (requestedBy: RequestedBy, participantKey: string, activeBoardKey: CompositeKey | null) =>
     (source: State): State => {
-        const createdByMe = RequestedBy.createdByMe({ requestedBy, userUid: participantKey });
+        const isAuthorized = RequestedBy.isAuthorized({ requestedBy, userUid: participantKey });
         return {
             ...source,
             imagePieceValues: RecordOperation.toClientState<
@@ -86,7 +87,7 @@ export const toClientState =
                 ImagePieceValue.State
             >({
                 serverState: source.imagePieceValues ?? {},
-                isPrivate: state => state.isPrivate && !createdByMe,
+                isPrivate: state => state.isPrivate && !isAuthorized,
                 toClientState: ({ state }) =>
                     ImagePieceValue.toClientState(requestedBy, activeBoardKey)(state),
             }),
@@ -302,7 +303,7 @@ export const serverTransform =
         activeBoardSecondKey: string | null | undefined;
     }): ServerTransform<State, TwoWayOperation, UpOperation> =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
-        const createdByMe = RequestedBy.createdByMe({ requestedBy, userUid: participantKey });
+        const isAuthorized = RequestedBy.isAuthorized({ requestedBy, userUid: participantKey });
 
         const imagePieceValues = RecordOperation.serverTransform<
             ImagePieceValue.State,
@@ -316,7 +317,7 @@ export const serverTransform =
             prevState: prevState.imagePieceValues ?? {},
             nextState: currentState.imagePieceValues ?? {},
             innerTransform: ({ first, second, prevState, nextState }) =>
-                ImagePieceValue.serverTransform(createdByMe)({
+                ImagePieceValue.serverTransform(isAuthorized)({
                     prevState,
                     currentState: nextState,
                     serverOperation: first,
@@ -324,9 +325,9 @@ export const serverTransform =
                 }),
             toServerState: state => state,
             cancellationPolicy: {
-                cancelCreate: () => !createdByMe,
-                cancelUpdate: state => !createdByMe && state.nextState.isPrivate,
-                cancelRemove: state => !createdByMe && state.nextState.isPrivate,
+                cancelCreate: () => !isAuthorized,
+                cancelUpdate: state => !isAuthorized && state.nextState.isPrivate,
+                cancelRemove: state => !isAuthorized && state.nextState.isPrivate,
             },
         });
         if (imagePieceValues.isError) {
@@ -338,7 +339,7 @@ export const serverTransform =
             imagePieceValues: imagePieceValues.value,
         };
 
-        if (createdByMe) {
+        if (isAuthorized) {
             twoWayOperation.name = ReplaceOperation.serverTransform({
                 first: serverOperation?.name ?? undefined,
                 second: clientOperation.name ?? undefined,
@@ -346,7 +347,7 @@ export const serverTransform =
             });
         }
 
-        if (requestedBy.type === server) {
+        if (requestedBy.type === admin) {
             twoWayOperation.role = ReplaceOperation.serverTransform({
                 first: serverOperation?.role ?? undefined,
                 second: clientOperation.role ?? undefined,

@@ -40,11 +40,11 @@ type TwoWayOperation<T> = {
 };
 
 export const toClientState =
-    <T>(createdByMe: boolean, defaultValue: T) =>
+    <T>(isAuthorized: boolean, defaultValue: T) =>
     (source: State<T>): State<T> => {
         return {
             ...source,
-            value: source.isValuePrivate && !createdByMe ? defaultValue : source.value,
+            value: source.isValuePrivate && !isAuthorized ? defaultValue : source.value,
         };
     };
 
@@ -151,18 +151,18 @@ export const diff =
     };
 
 export const serverTransform =
-    <T>(createdByMe: boolean): ServerTransform<State<T>, TwoWayOperation<T>, UpOperation<T>> =>
+    <T>(isAuthorized: boolean): ServerTransform<State<T>, TwoWayOperation<T>, UpOperation<T>> =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
         const twoWayOperation: TwoWayOperation<T> = { $version: 1 };
 
-        if (createdByMe) {
+        if (isAuthorized) {
             twoWayOperation.isValuePrivate = ReplaceValueOperation.serverTransform({
                 first: serverOperation?.isValuePrivate,
                 second: clientOperation.isValuePrivate,
                 prevState: prevState.isValuePrivate,
             });
         }
-        if (createdByMe || !currentState.isValuePrivate) {
+        if (isAuthorized || !currentState.isValuePrivate) {
             twoWayOperation.value = ReplaceValueOperation.serverTransform({
                 first: serverOperation?.value,
                 second: clientOperation.value,

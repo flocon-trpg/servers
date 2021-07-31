@@ -13,7 +13,7 @@ import {
 import { createOperation } from '../../util/createOperation';
 import { isIdRecord } from '../../util/record';
 import { Result } from '@kizahasi/result';
-import { maybe } from '@kizahasi/util';
+import { maybe } from '../../util/maybe';
 
 const stringDownOperation = t.type({ oldValue: t.string });
 const stringUpOperation = t.type({ newValue: t.string });

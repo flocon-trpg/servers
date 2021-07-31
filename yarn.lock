@@ -766,6 +766,13 @@
     fp-ts "^2.10.5"
     io-ts "^2.2.16"
 
+"@kizahasi/util@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@kizahasi/util/-/util-0.3.0.tgz#64e307ecb734adf222f3a05d11db2e076b2d4707"
+  integrity sha512-wftuemptAzc8o6GDJ7zChCs+nIHEll9wt/FOfayZXCF4MKwTRqCPPc7hmXFejrDgZxSz62kmcTtsvKVgf2SDsQ==
+  dependencies:
+    "@kizahasi/result" "^0.3.0"
+
 "@ltd/j-toml@^1.12.2":
   version "1.12.2"
   resolved "https://registry.yarnpkg.com/@ltd/j-toml/-/j-toml-1.12.2.tgz#994c1792d07ca21421d4a75fef0dd0b60f7a1c8b"

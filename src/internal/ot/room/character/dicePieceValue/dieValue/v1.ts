@@ -57,11 +57,11 @@ export type TwoWayOperation = {
 };
 
 export const toClientState =
-    (createdByMe: boolean) =>
+    (isAuthorized: boolean) =>
     (source: State): State => {
         return {
             ...source,
-            value: source.isValuePrivate && !createdByMe ? null : source.value,
+            value: source.isValuePrivate && !isAuthorized ? null : source.value,
         };
     };
 
@@ -189,9 +189,9 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
 };
 
 export const serverTransform =
-    (createdByMe: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
+    (isAuthorized: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
-        if (!createdByMe) {
+        if (!isAuthorized) {
             // 自分以外はどのプロパティも編集できない。
             return Result.ok(undefined);
         }
@@ -210,7 +210,7 @@ export const serverTransform =
             second: clientOperation.isValuePrivate ?? undefined,
             prevState: prevState.isValuePrivate,
         });
-        // !createdByMe の場合は最初の方ですべて弾いているため、isValuePrivateのチェックをする必要はない。
+        // !isAuthorized の場合は最初の方ですべて弾いているため、isValuePrivateのチェックをする必要はない。
         twoWayOperation.value = ReplaceOperation.serverTransform({
             first: serverOperation?.value ?? undefined,
             second: clientOperation.value ?? undefined,
