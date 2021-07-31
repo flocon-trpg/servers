@@ -66,6 +66,9 @@ body {
 .message.is-command {
     background-color: #FFFFFF10;
 }
+.message .text {
+    white-space: pre-wrap;
+}
 
 .avatar {
     align-self: center;
