@@ -14,13 +14,13 @@ export const mapToRecord = <TValue>(source: Map<string, TValue>): Record<string,
 
 export const chooseRecord = <TSource, TResult>(
     source: Record<string, TSource | undefined>,
-    chooser: (element: TSource) => TResult | undefined
+    chooser: (element: TSource, key: string) => TResult | undefined
 ): Record<string, TResult> => {
     const result = new Map<string, TResult>();
     for (const key in source) {
         const element = source[key];
         if (element !== undefined) {
-            const newElement = chooser(element);
+            const newElement = chooser(element, key);
             if (newElement !== undefined) {
                 result.set(key, newElement);
             }
@@ -31,22 +31,24 @@ export const chooseRecord = <TSource, TResult>(
 
 export const chooseDualKeyRecord = <TSource, TResult>(
     source: Record<string, Record<string, TSource | undefined> | undefined>,
-    chooser: (element: TSource) => TResult | undefined
+    chooser: (element: TSource, key: DualKey<string, string>) => TResult | undefined
 ): Record<string, Record<string, TResult>> => {
-    return chooseRecord(source, inner =>
-        inner === undefined ? undefined : chooseRecord(inner, value => chooser(value))
+    return chooseRecord(source, (inner, key1) =>
+        inner === undefined
+            ? undefined
+            : chooseRecord(inner, (value, key2) => chooser(value, { first: key1, second: key2 }))
     );
 };
 
 export const mapRecord = <TSource, TResult>(
     source: Record<string, TSource | undefined>,
-    mapping: (element: TSource) => TResult
+    mapping: (element: TSource, key: string) => TResult
 ): Record<string, TResult> => {
     const result = new Map<string, TResult>();
     for (const key in source) {
         const element = source[key];
         if (element !== undefined) {
-            const newElement = mapping(element);
+            const newElement = mapping(element, key);
             result.set(key, newElement);
         }
     }
@@ -55,10 +57,12 @@ export const mapRecord = <TSource, TResult>(
 
 export const mapDualKeyRecord = <TSource, TResult>(
     source: Record<string, Record<string, TSource | undefined> | undefined>,
-    mapping: (element: TSource) => TResult
+    mapping: (element: TSource, key: DualKey<string, string>) => TResult
 ): Record<string, Record<string, TResult>> => {
-    return chooseRecord(source, inner =>
-        inner === undefined ? undefined : mapRecord(inner, value => mapping(value))
+    return chooseRecord(source, (inner, key1) =>
+        inner === undefined
+            ? undefined
+            : mapRecord(inner, (value, key2) => mapping(value, { first: key1, second: key2 }))
     );
 };
 
@@ -164,6 +168,9 @@ export const dualKeyRecordForEach = <T>(
     }
 };
 
+/**
+ * @deprecated Use x?.[key]
+ */
 export const dualKeyRecordFind = <T>(
     source: Record<string, Record<string, T | undefined> | undefined>,
     key: DualKey<string, string>
