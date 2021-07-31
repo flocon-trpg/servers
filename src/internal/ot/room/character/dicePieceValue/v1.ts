@@ -64,11 +64,11 @@ export type TwoWayOperation = {
 };
 
 export const toClientState =
-    (createdByMe: boolean, requestedBy: RequestedBy, activeBoardKey: CompositeKey | null) =>
+    (isAuthorized: boolean, requestedBy: RequestedBy, activeBoardKey: CompositeKey | null) =>
     (source: State): State => {
         return {
             ...source,
-            dice: chooseRecord(source.dice, state => DieValue.toClientState(createdByMe)(state)),
+            dice: chooseRecord(source.dice, state => DieValue.toClientState(isAuthorized)(state)),
             pieces: Piece.toClientStateMany(requestedBy, activeBoardKey)(source.pieces),
         };
     };
@@ -273,9 +273,9 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
 };
 
 export const serverTransform =
-    (createdByMe: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
+    (isAuthorized: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
-        if (!createdByMe) {
+        if (!isAuthorized) {
             // 自分以外はどのプロパティも編集できない。
             return Result.ok(undefined);
         }
@@ -292,7 +292,7 @@ export const serverTransform =
             first: serverOperation?.dice,
             second: clientOperation.dice,
             innerTransform: ({ prevState, nextState, first, second }) =>
-                DieValue.serverTransform(createdByMe)({
+                DieValue.serverTransform(isAuthorized)({
                     prevState,
                     currentState: nextState,
                     serverOperation: first,
@@ -301,9 +301,9 @@ export const serverTransform =
             toServerState: state => state,
             cancellationPolicy: {
                 cancelCreate: ({ key }) =>
-                    !createdByMe || dicePieceValueStrIndexes.every(x => x !== key),
-                cancelRemove: () => !createdByMe,
-                cancelUpdate: () => !createdByMe,
+                    !isAuthorized || dicePieceValueStrIndexes.every(x => x !== key),
+                cancelRemove: () => !isAuthorized,
+                cancelUpdate: () => !isAuthorized,
             },
         });
         if (dice.isError) {
@@ -330,9 +330,9 @@ export const serverTransform =
                 }),
             toServerState: state => state,
             cancellationPolicy: {
-                cancelCreate: () => !createdByMe,
-                cancelRemove: params => !createdByMe && params.nextState.isPrivate,
-                cancelUpdate: params => !createdByMe && params.nextState.isPrivate,
+                cancelCreate: () => !isAuthorized,
+                cancelRemove: params => !isAuthorized && params.nextState.isPrivate,
+                cancelUpdate: params => !isAuthorized && params.nextState.isPrivate,
             },
         });
         if (pieces.isError) {

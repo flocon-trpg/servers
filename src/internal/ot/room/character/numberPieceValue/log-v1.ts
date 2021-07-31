@@ -3,10 +3,8 @@ import { recordUpOperationElementFactory } from '../../../util/recordOperationEl
 import * as NumberPieceValue from './v1';
 import * as Piece from '../../../piece/v1';
 import { record } from '../../../util/record';
-
-export const updateType = 'update';
-export const createType = 'create';
-export const deleteType = 'delete';
+import { createType, deleteType, updateType } from '../../../piece/log-v1';
+import { maybe } from '../../../util/maybe';
 
 const update = t.intersection([
     t.type({
@@ -14,9 +12,9 @@ const update = t.intersection([
 
         type: t.literal(updateType),
         isValueChanged: t.boolean,
-        isValuePrivate: t.boolean,
     }),
     t.partial({
+        isValuePrivateChanged: t.type({ newValue: maybe(t.number) }),
         pieces: record(
             t.string,
             record(t.string, recordUpOperationElementFactory(Piece.state, Piece.upOperation))
@@ -24,40 +22,53 @@ const update = t.intersection([
     }),
 ]);
 
-export const main = t.union([
+export const type = t.union([
     t.type({
         $version: t.literal(1),
         type: t.literal(createType),
+        value: NumberPieceValue.state,
     }),
     t.type({
         $version: t.literal(1),
         type: t.literal(deleteType),
+        value: NumberPieceValue.state,
     }),
     update,
 ]);
 
-export const exactMain = t.union([
+export const exactType = t.union([
     t.strict({
         $version: t.literal(1),
         type: t.literal(createType),
+        value: NumberPieceValue.state,
     }),
     t.strict({
         $version: t.literal(1),
         type: t.literal(deleteType),
+        value: NumberPieceValue.state,
     }),
     t.exact(update),
 ]);
 
-export type Main = t.TypeOf<typeof main>;
+export type Type = t.TypeOf<typeof type>;
 
-export const ofOperation = (source: NumberPieceValue.TwoWayOperation): Main => {
+export const ofOperation = (
+    operation: NumberPieceValue.TwoWayOperation,
+    currentState: NumberPieceValue.State
+): Type => {
     return {
         $version: 1,
         type: updateType,
-        isValueChanged: source.value != null && source.value.oldValue !== source.value.newValue,
-        isValuePrivate:
-            source.isValuePrivate != null &&
-            source.isValuePrivate.oldValue !== source.isValuePrivate.newValue,
-        pieces: source.pieces,
+        isValueChanged:
+            operation.value != null && operation.value.oldValue !== operation.value.newValue,
+        isValuePrivateChanged:
+            operation.isValuePrivate == null ||
+            operation.isValuePrivate.oldValue === operation.isValuePrivate.newValue
+                ? undefined
+                : {
+                      newValue: operation.isValuePrivate.newValue ? undefined : currentState.value,
+                  },
+
+        pieces: operation.pieces,
     };
 };

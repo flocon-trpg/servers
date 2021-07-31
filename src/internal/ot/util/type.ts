@@ -54,30 +54,41 @@ export type ToClientOperationParams<TState, TOperation> = {
     diff: TOperation;
 };
 
+// 全てのStateに完全にアクセスできる。
+export const admin = 'admin';
+
+// userUidに基づき、一部のStateへのアクセスを制限する。
 export const client = 'client';
-export const server = 'server';
+
+// アクセス制限のあるStateを全て制限する。
+export const restrict = 'restrict';
 
 export type RequestedBy =
     | {
-          type: typeof server;
+          type: typeof admin;
       }
     | {
           type: typeof client;
           userUid: string;
+      }
+    | {
+          type: typeof restrict;
       };
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace RequestedBy {
-    // CONSIDER: 現状ではcreatedByMeという名前は直感的でない。実際はその値の全部もしくは一部に対するisSecretなどを無視して自由に編集できる権限があるかどうかを示す。
-    export const createdByMe = ({
+    export const isAuthorized = ({
         requestedBy,
         userUid,
     }: {
         requestedBy: RequestedBy;
         userUid: string;
     }): boolean => {
-        if (requestedBy.type === server) {
+        if (requestedBy.type === admin) {
             return true;
+        }
+        if (requestedBy.type === restrict) {
+            return false;
         }
         return requestedBy.userUid === userUid;
     };

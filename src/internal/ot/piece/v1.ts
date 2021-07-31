@@ -88,7 +88,7 @@ export const toClientStateMany =
             serverState: source,
             isPrivate: (state, key) => {
                 if (
-                    RequestedBy.createdByMe({
+                    RequestedBy.isAuthorized({
                         requestedBy,
                         userUid: key.first,
                     })

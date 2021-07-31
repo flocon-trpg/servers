@@ -12,7 +12,7 @@ import {
 import { createOperation } from '../../../util/createOperation';
 import { isIdRecord, record } from '../../../util/record';
 import { Result } from '@kizahasi/result';
-import { CompositeKey, Maybe, maybe } from '@kizahasi/util';
+import { CompositeKey } from '@kizahasi/util';
 import { FilePath, filePath } from '../../../filePath/v1';
 import * as TextOperation from '../../../util/textOperation';
 import * as Piece from '../../../piece/v1';
@@ -22,6 +22,7 @@ import {
 } from '../../../util/recordOperationElement';
 import * as DualKeyRecordOperation from '../../../util/dualKeyRecordOperation';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
+import { Maybe, maybe } from '../../../util/maybe';
 
 export const state = t.type({
     $version: t.literal(1),
@@ -289,7 +290,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
 };
 
 export const serverTransform =
-    (createdByMe: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
+    (isAuthorized: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
         const pieces = DualKeyRecordOperation.serverTransform<
             Piece.State,
@@ -311,9 +312,9 @@ export const serverTransform =
                 }),
             toServerState: state => state,
             cancellationPolicy: {
-                cancelCreate: () => !createdByMe,
-                cancelRemove: params => !createdByMe && params.nextState.isPrivate,
-                cancelUpdate: params => !createdByMe && params.nextState.isPrivate,
+                cancelCreate: () => !isAuthorized,
+                cancelRemove: params => !isAuthorized && params.nextState.isPrivate,
+                cancelUpdate: params => !isAuthorized && params.nextState.isPrivate,
             },
         });
         if (pieces.isError) {

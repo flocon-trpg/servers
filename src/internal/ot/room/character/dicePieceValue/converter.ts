@@ -1,17 +1,17 @@
 import * as DiePieceValueLog from './log-v1';
 
-export const decode = (source: unknown): DiePieceValueLog.Main => {
-    const result = DiePieceValueLog.exactMain.decode(source);
+export const decode = (source: unknown): DiePieceValueLog.Type => {
+    const result = DiePieceValueLog.exactType.decode(source);
     if (result._tag === 'Left') {
         throw new Error('decode failure');
     }
     return result.right;
 };
 
-export const parse = (source: string): DiePieceValueLog.Main => {
+export const parse = (source: string): DiePieceValueLog.Type => {
     return decode(JSON.parse(source));
 };
 
-export const exact = (source: DiePieceValueLog.Main): DiePieceValueLog.Main => {
-    return DiePieceValueLog.exactMain.encode(source);
+export const exact = (source: DiePieceValueLog.Type): DiePieceValueLog.Type => {
+    return DiePieceValueLog.exactType.encode(source);
 };

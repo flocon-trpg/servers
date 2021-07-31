@@ -173,11 +173,8 @@ export {
 } from './internal/ot/room/character/dicePieceValue/dieValue/v1';
 
 export {
-    ofOperation as toDicePieceValueLog,
-    Main as DicePieceValueLog,
-    updateType,
-    createType,
-    deleteType,
+    type as dicePieceValueLog,
+    Type as DicePieceValueLog,
 } from './internal/ot/room/character/dicePieceValue/log-v1';
 
 export {
@@ -205,8 +202,8 @@ export {
 } from './internal/ot/room/character/numberPieceValue/converter';
 
 export {
-    ofOperation as toNumberPieceValueLog,
-    Main as NumberPieceValueLog,
+    type as numberPieceValueLog,
+    Type as NumberPieceValueLog,
 } from './internal/ot/room/character/numberPieceValue/log-v1';
 
 export {
@@ -240,4 +237,8 @@ export {
     toUpOperation as toTextUpOperation,
 } from './internal/ot/util/textOperation';
 
-export { client, server, RequestedBy } from './internal/ot/util/type';
+export { client, admin, restrict, RequestedBy } from './internal/ot/util/type';
+
+export { updateType, createType, deleteType } from './internal/ot/piece/log-v1';
+
+export { createLogs } from './internal/ot/room/log-v1';

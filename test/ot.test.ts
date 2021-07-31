@@ -6,7 +6,7 @@ import {
     TwoWayOperation,
     client,
     RequestedBy,
-    server,
+    admin,
     replace,
     update,
     diff,
@@ -100,7 +100,7 @@ describe.each([Resources.minimumState, Resources.complexState])('tests id', stat
         clientOperation,
     });
 
-    tester({ testName: 'tests server', requestedBy: { type: server }, expected: undefined });
+    tester({ testName: 'tests server', requestedBy: { type: admin }, expected: undefined });
     tester({
         testName: 'tests Player',
         requestedBy: { type: client, userUid: Resources.Participant.Player1.userUid },
@@ -138,7 +138,7 @@ describe.each([Resources.minimumState, Resources.complexState])('tests name', st
         },
     };
 
-    tester({ testName: 'tests server', requestedBy: { type: server }, expected });
+    tester({ testName: 'tests server', requestedBy: { type: admin }, expected });
     tester({
         testName: 'tests Player',
         requestedBy: { type: client, userUid: Resources.Participant.Player1.userUid },
@@ -190,7 +190,7 @@ describe.each`
         },
     };
 
-    tester({ testName: 'tests server', requestedBy: { type: server }, expected });
+    tester({ testName: 'tests server', requestedBy: { type: admin }, expected });
     tester({
         testName: 'tests Player',
         requestedBy: { type: client, userUid: Resources.Participant.Player1.userUid },
@@ -264,7 +264,7 @@ describe.each`
           }
         : undefined;
 
-    tester({ testName: 'tests server', requestedBy: { type: server }, expected });
+    tester({ testName: 'tests server', requestedBy: { type: admin }, expected });
     tester({
         testName: 'tests Player',
         requestedBy: { type: client, userUid: Resources.Participant.Player1.userUid },
@@ -365,7 +365,7 @@ describe('tests creating DicePieceValue', () => {
         },
     };
 
-    tester({ testName: 'tests server', requestedBy: { type: server }, expected });
+    tester({ testName: 'tests server', requestedBy: { type: admin }, expected });
     tester({
         testName: 'tests Owner Player',
         requestedBy: { type: client, userUid: Resources.Participant.Player1.userUid },
@@ -425,7 +425,7 @@ describe('tests creating Character', () => {
         },
     };
 
-    tester({ testName: 'tests server', requestedBy: { type: server }, expected });
+    tester({ testName: 'tests server', requestedBy: { type: admin }, expected });
     tester({
         testName: 'tests Owner Player',
         requestedBy: { type: client, userUid: Resources.Participant.Player1.userUid },
@@ -503,7 +503,7 @@ describe.each([[true], [false]])(
             },
         };
 
-        tester({ testName: 'tests server', requestedBy: { type: server }, expected });
+        tester({ testName: 'tests server', requestedBy: { type: admin }, expected });
         tester({
             testName: 'tests Owner Player',
             requestedBy: { type: client, userUid: Resources.Participant.Player1.userUid },
@@ -580,7 +580,7 @@ describe.each([[true], [false]])(
             },
         };
 
-        tester({ testName: 'tests server', requestedBy: { type: server }, expected });
+        tester({ testName: 'tests server', requestedBy: { type: admin }, expected });
         tester({
             testName: 'tests Owner Player',
             requestedBy: { type: client, userUid: Resources.Participant.Player1.userUid },

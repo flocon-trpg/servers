@@ -34,7 +34,8 @@ import { createOperation } from '../../util/createOperation';
 import { isIdRecord, record, StringKeyRecord } from '../../util/record';
 import { Result } from '@kizahasi/result';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
-import { chooseDualKeyRecord, chooseRecord, CompositeKey, Maybe, maybe } from '@kizahasi/util';
+import { chooseDualKeyRecord, chooseRecord, CompositeKey } from '@kizahasi/util';
+import { Maybe, maybe } from '../../util/maybe';
 
 // privateCommandは無効化しているが、コードは大部分残している
 
@@ -196,40 +197,40 @@ const defaultStrParamState: StrParam.State = {
 };
 
 export const toClientState =
-    (createdByMe: boolean, requestedBy: RequestedBy, activeBoardKey: CompositeKey | null) =>
+    (isAuthorized: boolean, requestedBy: RequestedBy, activeBoardKey: CompositeKey | null) =>
     (source: State): State => {
         return {
             ...source,
-            chatPalette: createdByMe ? source.chatPalette : '',
-            privateCommand: createdByMe ? source.privateCommand : '',
-            privateVarToml: createdByMe ? source.privateVarToml : '',
+            chatPalette: isAuthorized ? source.chatPalette : '',
+            privateCommand: isAuthorized ? source.privateCommand : '',
+            privateVarToml: isAuthorized ? source.privateVarToml : '',
             boolParams: RecordOperation.toClientState({
                 serverState: source.boolParams,
                 isPrivate: () => false,
                 toClientState: ({ state }) =>
-                    SimpleValueParam.toClientState<Maybe<boolean>>(createdByMe, null)(state),
+                    SimpleValueParam.toClientState<Maybe<boolean>>(isAuthorized, null)(state),
             }),
             numParams: RecordOperation.toClientState({
                 serverState: source.numParams,
                 isPrivate: () => false,
                 toClientState: ({ state }) =>
-                    SimpleValueParam.toClientState<Maybe<number>>(createdByMe, null)(state),
+                    SimpleValueParam.toClientState<Maybe<number>>(isAuthorized, null)(state),
             }),
             numMaxParams: RecordOperation.toClientState({
                 serverState: source.numMaxParams,
                 isPrivate: () => false,
                 toClientState: ({ state }) =>
-                    SimpleValueParam.toClientState<Maybe<number>>(createdByMe, null)(state),
+                    SimpleValueParam.toClientState<Maybe<number>>(isAuthorized, null)(state),
             }),
             strParams: RecordOperation.toClientState({
                 serverState: source.strParams,
                 isPrivate: () => false,
-                toClientState: ({ state }) => StrParam.toClientState(createdByMe)(state),
+                toClientState: ({ state }) => StrParam.toClientState(isAuthorized)(state),
             }),
             pieces: Piece.toClientStateMany(requestedBy, activeBoardKey)(source.pieces),
             privateCommands: RecordOperation.toClientState<Command.State, Command.State>({
                 serverState: source.privateCommands,
-                isPrivate: () => !createdByMe,
+                isPrivate: () => !isAuthorized,
                 toClientState: ({ state }) => Command.toClientState(state),
             }),
             tachieLocations: DualKeyRecordOperation.toClientState<
@@ -247,7 +248,7 @@ export const toClientState =
                 serverState: source.dicePieceValues,
                 isPrivate: () => false,
                 toClientState: ({ state }) =>
-                    DicePieceValue.toClientState(createdByMe, requestedBy, activeBoardKey)(state),
+                    DicePieceValue.toClientState(isAuthorized, requestedBy, activeBoardKey)(state),
             }),
             numberPieceValues: RecordOperation.toClientState<
                 NumberPieceValue.State,
@@ -256,7 +257,11 @@ export const toClientState =
                 serverState: source.numberPieceValues,
                 isPrivate: () => false,
                 toClientState: ({ state }) =>
-                    NumberPieceValue.toClientState(createdByMe, requestedBy, activeBoardKey)(state),
+                    NumberPieceValue.toClientState(
+                        isAuthorized,
+                        requestedBy,
+                        activeBoardKey
+                    )(state),
             }),
         };
     };
@@ -1382,9 +1387,9 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
 };
 
 export const serverTransform =
-    (createdByMe: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
+    (isAuthorized: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
-        if (!createdByMe && currentState.isPrivate) {
+        if (!isAuthorized && currentState.isPrivate) {
             return Result.ok(undefined);
         }
 
@@ -1394,7 +1399,7 @@ export const serverTransform =
             first: serverOperation?.boolParams,
             second: clientOperation.boolParams,
             innerTransform: ({ prevState, nextState, first, second }) =>
-                SimpleValueParam.serverTransform<Maybe<boolean>>(createdByMe)({
+                SimpleValueParam.serverTransform<Maybe<boolean>>(isAuthorized)({
                     prevState,
                     currentState: nextState,
                     serverOperation: first,
@@ -1412,7 +1417,7 @@ export const serverTransform =
             first: serverOperation?.numParams,
             second: clientOperation.numParams,
             innerTransform: ({ prevState, nextState, first, second }) =>
-                SimpleValueParam.serverTransform<Maybe<number>>(createdByMe)({
+                SimpleValueParam.serverTransform<Maybe<number>>(isAuthorized)({
                     prevState,
                     currentState: nextState,
                     serverOperation: first,
@@ -1430,7 +1435,7 @@ export const serverTransform =
             first: serverOperation?.numMaxParams,
             second: clientOperation.numMaxParams,
             innerTransform: ({ prevState, nextState, first, second }) =>
-                SimpleValueParam.serverTransform<Maybe<number>>(createdByMe)({
+                SimpleValueParam.serverTransform<Maybe<number>>(isAuthorized)({
                     prevState,
                     currentState: nextState,
                     serverOperation: first,
@@ -1448,7 +1453,7 @@ export const serverTransform =
             first: serverOperation?.strParams,
             second: clientOperation.strParams,
             innerTransform: ({ prevState, nextState, first, second }) =>
-                StrParam.serverTransform(createdByMe)({
+                StrParam.serverTransform(isAuthorized)({
                     prevState,
                     currentState: nextState,
                     serverOperation: first,
@@ -1480,8 +1485,8 @@ export const serverTransform =
                 }),
             toServerState: state => state,
             cancellationPolicy: {
-                cancelRemove: params => !createdByMe && params.nextState.isPrivate,
-                cancelUpdate: params => !createdByMe && params.nextState.isPrivate,
+                cancelRemove: params => !isAuthorized && params.nextState.isPrivate,
+                cancelUpdate: params => !isAuthorized && params.nextState.isPrivate,
             },
         });
         if (pieces.isError) {
@@ -1508,9 +1513,9 @@ export const serverTransform =
                 }),
             toServerState: state => state,
             cancellationPolicy: {
-                cancelCreate: () => !createdByMe,
-                cancelRemove: () => !createdByMe,
-                cancelUpdate: () => !createdByMe,
+                cancelCreate: () => !isAuthorized,
+                cancelRemove: () => !isAuthorized,
+                cancelUpdate: () => !isAuthorized,
             },
         });
         if (privateCommands.isError) {
@@ -1554,7 +1559,7 @@ export const serverTransform =
             prevState: prevState.dicePieceValues,
             nextState: currentState.dicePieceValues,
             innerTransform: ({ first, second, prevState, nextState }) =>
-                DicePieceValue.serverTransform(createdByMe)({
+                DicePieceValue.serverTransform(isAuthorized)({
                     prevState,
                     currentState: nextState,
                     serverOperation: first,
@@ -1562,9 +1567,9 @@ export const serverTransform =
                 }),
             toServerState: state => state,
             cancellationPolicy: {
-                cancelCreate: () => !createdByMe,
-                cancelUpdate: () => !createdByMe,
-                cancelRemove: () => !createdByMe,
+                cancelCreate: () => !isAuthorized,
+                cancelUpdate: () => !isAuthorized,
+                cancelRemove: () => !isAuthorized,
             },
         });
         if (dicePieceValues.isError) {
@@ -1583,7 +1588,7 @@ export const serverTransform =
             prevState: prevState.numberPieceValues,
             nextState: currentState.numberPieceValues,
             innerTransform: ({ first, second, prevState, nextState }) =>
-                NumberPieceValue.serverTransform(createdByMe)({
+                NumberPieceValue.serverTransform(isAuthorized)({
                     prevState,
                     currentState: nextState,
                     serverOperation: first,
@@ -1591,9 +1596,9 @@ export const serverTransform =
                 }),
             toServerState: state => state,
             cancellationPolicy: {
-                cancelCreate: () => !createdByMe,
-                cancelUpdate: () => !createdByMe,
-                cancelRemove: () => !createdByMe,
+                cancelCreate: () => !isAuthorized,
+                cancelUpdate: () => !isAuthorized,
+                cancelRemove: () => !isAuthorized,
             },
         });
         if (numberPieceValues.isError) {
@@ -1642,7 +1647,7 @@ export const serverTransform =
             second: clientOperation.name,
             prevState: prevState.name,
         });
-        if (createdByMe) {
+        if (isAuthorized) {
             const transformedChatPalette = TextOperation.serverTransform({
                 first: serverOperation?.chatPalette,
                 second: clientOperation.chatPalette,
@@ -1663,7 +1668,7 @@ export const serverTransform =
             // }
             // twoWayOperation.privateCommand = transformedPrivateCommand.value.secondPrime;
         }
-        if (createdByMe) {
+        if (isAuthorized) {
             const transformed = TextOperation.serverTransform({
                 first: serverOperation?.privateVarToml,
                 second: clientOperation.privateVarToml,

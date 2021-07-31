@@ -313,7 +313,7 @@ export const toPrivateClientOperation = ({
     oldValue,
     newValue,
     diff,
-    createdByMe,
+    isAuthorized,
 }: {
     oldValue: {
         isValuePrivate: boolean;
@@ -324,15 +324,15 @@ export const toPrivateClientOperation = ({
         value: string;
     };
     diff: TwoWayOperation | undefined;
-    createdByMe: boolean;
+    isAuthorized: boolean;
 }): UpOperation | undefined => {
-    if (oldValue.isValuePrivate && !createdByMe) {
-        if (newValue.isValuePrivate && !createdByMe) {
+    if (oldValue.isValuePrivate && !isAuthorized) {
+        if (newValue.isValuePrivate && !isAuthorized) {
             return undefined;
         }
         return diffToUpOperation({ prev: '', next: newValue.value });
     }
-    if (newValue.isValuePrivate && !createdByMe) {
+    if (newValue.isValuePrivate && !isAuthorized) {
         return diffToUpOperation({ prev: oldValue.value, next: '' });
     }
     if (diff == null) {

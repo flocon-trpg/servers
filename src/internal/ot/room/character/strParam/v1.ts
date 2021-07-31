@@ -44,11 +44,11 @@ export type TwoWayOperation = {
 };
 
 export const toClientState =
-    (createdByMe: boolean) =>
+    (isAuthorized: boolean) =>
     (source: State): State => {
         return {
             ...source,
-            value: source.isValuePrivate && !createdByMe ? '' : source.value,
+            value: source.isValuePrivate && !isAuthorized ? '' : source.value,
         };
     };
 
@@ -172,18 +172,18 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
 };
 
 export const serverTransform =
-    (createdByMe: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
+    (isAuthorized: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
         const twoWayOperation: TwoWayOperation = { $version: 1 };
 
-        if (createdByMe) {
+        if (isAuthorized) {
             twoWayOperation.isValuePrivate = ReplaceOperation.serverTransform({
                 first: serverOperation?.isValuePrivate,
                 second: clientOperation.isValuePrivate,
                 prevState: prevState.isValuePrivate,
             });
         }
-        if (createdByMe || !currentState.isValuePrivate) {
+        if (isAuthorized || !currentState.isValuePrivate) {
             const transformed = TextOperation.serverTransform({
                 first: serverOperation?.value,
                 second: clientOperation.value,

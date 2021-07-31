@@ -10,22 +10,12 @@ import * as DieValue from './dieValue/v1';
 import { chooseRecord } from '@kizahasi/util';
 import { createOperation } from '../../../util/createOperation';
 import { record } from '../../../util/record';
-
-export const updateType = 'update';
-export const createType = 'create';
-export const deleteType = 'delete';
-
-const dieValueState = t.type({
-    $version: t.literal(1),
-    dieType: DieValue.dieType,
-    isValuePrivate: t.boolean,
-});
-
-type DieValueState = t.TypeOf<typeof dieValueState>;
+import { createType, deleteType, updateType } from '../../../piece/log-v1';
+import { maybe } from '../../../util/maybe';
 
 const dieValueUpOperation = createOperation(1, {
     dieType: t.type({ newValue: DieValue.dieType }),
-    isValuePrivate: t.type({ newValue: t.boolean }),
+    isValuePrivateChanged: t.type({ newValue: maybe(t.number) }),
     isValueChanged: t.boolean,
 });
 
@@ -38,7 +28,10 @@ const update = t.intersection([
         type: t.literal(updateType),
     }),
     t.partial({
-        dice: record(t.string, recordUpOperationElementFactory(dieValueState, dieValueUpOperation)),
+        dice: record(
+            t.string,
+            recordUpOperationElementFactory(DieValue.state, dieValueUpOperation)
+        ),
         pieces: record(
             t.string,
             record(t.string, recordUpOperationElementFactory(Piece.state, Piece.upOperation))
@@ -46,46 +39,66 @@ const update = t.intersection([
     }),
 ]);
 
-export const main = t.union([
+export const type = t.union([
     t.type({
         $version: t.literal(1),
         type: t.literal(createType),
+        value: DicePieceValue.state,
     }),
     t.type({
         $version: t.literal(1),
         type: t.literal(deleteType),
+        value: DicePieceValue.state,
     }),
     update,
 ]);
 
-export const exactMain = t.union([
+export const exactType = t.union([
     t.strict({
         $version: t.literal(1),
         type: t.literal(createType),
+        value: DicePieceValue.state,
     }),
     t.strict({
         $version: t.literal(1),
         type: t.literal(deleteType),
+        value: DicePieceValue.state,
     }),
     t.exact(update),
 ]);
 
-export type Main = t.TypeOf<typeof main>;
+export type Type = t.TypeOf<typeof type>;
 
-export const ofOperation = (source: DicePieceValue.TwoWayOperation): Main => {
+export const ofOperation = (
+    operation: DicePieceValue.TwoWayOperation,
+    currentState: DicePieceValue.State
+): Type => {
     return {
         $version: 1,
         type: updateType,
         dice:
-            source.dice == null
+            operation.dice == null
                 ? undefined
-                : chooseRecord(source.dice, element => {
+                : chooseRecord(operation.dice, (element, key) => {
                       switch (element.type) {
                           case updateKey: {
+                              const currentDiceState = currentState.dice[key];
+                              if (currentDiceState == null) {
+                                  throw new Error('this should not happen');
+                              }
                               const update: DieValueUpOperation = {
                                   $version: 1,
                                   dieType: element.update.dieType,
-                                  isValuePrivate: element.update.isValuePrivate,
+                                  isValuePrivateChanged:
+                                      element.update.isValuePrivate == null ||
+                                      element.update.isValuePrivate.oldValue ===
+                                          element.update.isValuePrivate.newValue
+                                          ? undefined
+                                          : {
+                                                newValue: element.update.isValuePrivate.newValue
+                                                    ? undefined
+                                                    : currentDiceState.value,
+                                            },
                                   isValueChanged: element.update.value != null,
                               };
                               return {
@@ -94,14 +107,10 @@ export const ofOperation = (source: DicePieceValue.TwoWayOperation): Main => {
                               } as const;
                           }
                           case replaceKey: {
-                              const newValue: DieValueState | undefined =
+                              const newValue: DieValue.State | undefined =
                                   element.replace.newValue == null
                                       ? undefined
-                                      : {
-                                            $version: 1,
-                                            dieType: element.replace.newValue.dieType,
-                                            isValuePrivate: element.replace.newValue.isValuePrivate,
-                                        };
+                                      : DieValue.toClientState(false)(element.replace.newValue);
                               return {
                                   type: replaceKey,
                                   replace: {
@@ -111,6 +120,6 @@ export const ofOperation = (source: DicePieceValue.TwoWayOperation): Main => {
                           }
                       }
                   }),
-        pieces: source.pieces,
+        pieces: operation.pieces,
     };
 };

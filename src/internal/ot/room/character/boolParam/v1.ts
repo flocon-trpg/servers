@@ -1,7 +1,7 @@
 import * as t from 'io-ts';
 import * as ReplaceOperation from '../../../util/replaceOperation';
 import { createOperation } from '../../../util/createOperation';
-import { maybe, Maybe } from '@kizahasi/util';
+import { Maybe, maybe } from '../../../util/maybe';
 
 export const state = t.type({
     $version: t.literal(1),
