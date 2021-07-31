@@ -544,14 +544,12 @@
   resolved "https://registry.yarnpkg.com/@kizahasi/result/-/result-0.3.0.tgz#289d0b8386af374387e7b19b4a6ff01ae9688001"
   integrity sha512-hS1wjM91tHgvu66vTkKX0x4Qbyqr45d+90Y2c1Nv2e5fR9KXukmls1jRv/aW/yZugMnNUbLMEvVbsCcpfJZQSw==
 
-"@kizahasi/util@^0.2.3":
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/@kizahasi/util/-/util-0.2.3.tgz#80839bc2aee44fcd44dc63e76e5f35db972ce90a"
-  integrity sha512-1A99nHefO07LHTFSBSauAQzrGC6DJJbHz7eRm5423C2fgB3FVgPdeMid3kDTVHq2ndT5ITdX9sM8JtDx85Ws2A==
+"@kizahasi/util@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@kizahasi/util/-/util-0.3.0.tgz#64e307ecb734adf222f3a05d11db2e076b2d4707"
+  integrity sha512-wftuemptAzc8o6GDJ7zChCs+nIHEll9wt/FOfayZXCF4MKwTRqCPPc7hmXFejrDgZxSz62kmcTtsvKVgf2SDsQ==
   dependencies:
     "@kizahasi/result" "^0.3.0"
-    fp-ts "^2.10.5"
-    io-ts "^2.2.16"
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
@@ -1533,11 +1531,6 @@ form-data@^3.0.0:
     combined-stream "^1.0.8"
     mime-types "^2.1.12"
 
-fp-ts@^2.10.5:
-  version "2.10.5"
-  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-2.10.5.tgz#7c77868fe8bd9b229743303c1bec505b959f631b"
-  integrity sha512-X2KfTIV0cxIk3d7/2Pvp/pxL/xr2MV1WooyEzKtTWYSc1+52VF4YzjBTXqeOlSiZsPCxIBpDGfT9Dyo7WEY0DQ==
-
 fs.realpath@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
@@ -1727,11 +1720,6 @@ inherits@2:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.4.tgz#0fa2c64f932917c3433a0ded55363aae37416b7c"
   integrity sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==
-
-io-ts@^2.2.16:
-  version "2.2.16"
-  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-2.2.16.tgz#597dffa03db1913fc318c9c6df6931cb4ed808b2"
-  integrity sha512-y5TTSa6VP6le0hhmIyN0dqEXkrZeJLeC5KApJq6VLci3UEKF80lZ+KuoUs02RhBxNWlrqSNxzfI7otLX1Euv8Q==
 
 is-ci@^3.0.0:
   version "3.0.0"
