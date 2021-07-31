@@ -15,31 +15,3 @@ export type ProtectedTransformParameters<TServerState, TFirstOperation, TSecondO
     prevState: TServerState;
     nextState: TServerState;
 };
-
-export const client = 'client';
-export const server = 'server';
-
-export type RequestedBy =
-    | {
-          type: typeof server;
-      }
-    | {
-          type: typeof client;
-          userUid: string;
-      };
-
-export namespace RequestedBy {
-    // CONSIDER: 現状ではcreatedByMeという名前は直感的でない。実際はその値の全部もしくは一部に対するisSecretなどを無視して自由に編集できる権限があるかどうかを示す。
-    export const createdByMe = ({
-        requestedBy,
-        userUid,
-    }: {
-        requestedBy: RequestedBy;
-        userUid: string;
-    }): boolean => {
-        if (requestedBy.type === server) {
-            return true;
-        }
-        return requestedBy.userUid === userUid;
-    };
-}

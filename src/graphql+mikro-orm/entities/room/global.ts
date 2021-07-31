@@ -1,7 +1,6 @@
 import * as t from 'io-ts';
 import { RoomGetState, RoomOperationInput } from './graphql';
 import { Room, RoomOp } from './mikro-orm';
-import { RequestedBy, server } from '../../Types';
 import { EM } from '../../../utils/types';
 import { Reference } from '@mikro-orm/core';
 import { Result } from '@kizahasi/result';
@@ -22,6 +21,7 @@ import {
     apply,
     diff,
     toUpOperation,
+    RequestedBy,
 } from '@kizahasi/flocon-core';
 
 type IsSequentialResult<T> =
