@@ -448,6 +448,10 @@ export const generateAsRichLog = async (
                 avatar = `./img/avatar/${image.filename}`;
             }
         }
+        const text = `${escape(msg.value.text)}${
+            msg.value.commandResult == null ? '' : `
+${escape(msg.value.commandResult)}`
+        }`;
         messageDivs.push(`<div class="flex flex-row message ${
             msg.value.commandResult == null ? '' : 'is-command'
         }">
@@ -464,15 +468,7 @@ export const generateAsRichLog = async (
                     'システムメッセージ'
             )}
         </div>
-        <div class="flex-1">
-            ${escape(msg.value.text)}
-            ${
-                msg.value.commandResult == null
-                    ? ''
-                    : `<br>
-            ${escape(msg.value.commandResult)}`
-            }
-        </div>
+        <div class="flex-1 text">${text}</div>
     </div>
 </div>`);
     }
