@@ -9,14 +9,14 @@ it('tests mapDualKeyRecord', () => {
         },
         key3: undefined,
     };
-    const actual = mapDualKeyRecord<number, string>(
+    const actual = mapDualKeyRecord<number, [string, string, string]>(
         source as Record<string, Record<string, number>>,
-        x => x.toString()
+        (value, key) => [value.toString(), key.first, key.second]
     );
     expect(actual).toEqual({
         key1: {},
         key2: {
-            key2_1: '1',
+            key2_1: ['1', 'key2', 'key2_1'],
         },
     });
 });
@@ -42,14 +42,14 @@ it('tests chooseDualKeyRecord', () => {
         },
         key3: undefined,
     };
-    const actual = chooseDualKeyRecord<number, string>(
+    const actual = chooseDualKeyRecord<number, [string, string, string]>(
         source as Record<string, Record<string, number>>,
-        x => (x === 0 ? undefined : x.toString())
+        (value, key) => (value === 0 ? undefined : [value.toString(), key.first, key.second])
     );
     expect(actual).toEqual({
         key1: {},
         key2: {
-            key2_1: '1',
+            key2_1: ['1', 'key2', 'key2_1'],
         },
     });
 });
