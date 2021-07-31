@@ -46,7 +46,7 @@ export const state = t.type({
     isPrivate: t.boolean,
     memo: t.string,
     name: t.string,
-    chatPalette: maybe(t.string), // 互換性を保つため、maybeにしている。nullishのときは '' とみなす
+    chatPalette: t.string,
     privateCommand: t.string,
     privateVarToml: t.string,
     tachieImage: maybe(filePath),
@@ -456,7 +456,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     }
 
     if (operation.chatPalette != null) {
-        const valueResult = TextOperation.apply(state.chatPalette ?? '', operation.chatPalette);
+        const valueResult = TextOperation.apply(state.chatPalette, operation.chatPalette);
         if (valueResult.isError) {
             return valueResult;
         }
@@ -665,7 +665,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
         result.name = operation.name.oldValue;
     }
     if (operation.chatPalette != null) {
-        const valueResult = TextOperation.applyBack(state.chatPalette ?? '', operation.chatPalette);
+        const valueResult = TextOperation.applyBack(state.chatPalette, operation.chatPalette);
         if (valueResult.isError) {
             return valueResult;
         }
@@ -1188,7 +1188,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     }
     if (downOperation.chatPalette !== undefined) {
         const restored = TextOperation.restore({
-            nextState: nextState.chatPalette ?? '',
+            nextState: nextState.chatPalette,
             downOperation: downOperation.chatPalette,
         });
         if (restored.isError) {
@@ -1362,10 +1362,10 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     if (prevState.name !== nextState.name) {
         result.name = { oldValue: prevState.name, newValue: nextState.name };
     }
-    if ((prevState.chatPalette ?? '') !== (nextState.chatPalette ?? '')) {
+    if (prevState.chatPalette !== nextState.chatPalette) {
         result.chatPalette = TextOperation.diff({
-            prev: prevState.chatPalette ?? '',
-            next: nextState.chatPalette ?? '',
+            prev: prevState.chatPalette,
+            next: nextState.chatPalette,
         });
     }
     if (prevState.privateCommand !== nextState.privateCommand) {
@@ -1651,7 +1651,7 @@ export const serverTransform =
             const transformedChatPalette = TextOperation.serverTransform({
                 first: serverOperation?.chatPalette,
                 second: clientOperation.chatPalette,
-                prevState: prevState.chatPalette ?? '',
+                prevState: prevState.chatPalette,
             });
             if (transformedChatPalette.isError) {
                 return transformedChatPalette;

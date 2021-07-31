@@ -37,8 +37,7 @@ export const state = t.type({
     name: t.string,
     role: maybe(participantRole),
 
-    // TODO: 互換性のため、maybeを付けている。互換性を壊しても良くなったときはmaybeを外す。
-    imagePieceValues: maybe(record(t.string, ImagePieceValue.state)),
+    imagePieceValues: record(t.string, ImagePieceValue.state),
 });
 
 export type State = t.TypeOf<typeof state>;
@@ -86,7 +85,7 @@ export const toClientState =
                 ImagePieceValue.State,
                 ImagePieceValue.State
             >({
-                serverState: source.imagePieceValues ?? {},
+                serverState: source.imagePieceValues,
                 isPrivate: state => state.isPrivate && !isAuthorized,
                 toClientState: ({ state }) =>
                     ImagePieceValue.toClientState(requestedBy, activeBoardKey)(state),
@@ -140,8 +139,8 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
         ImagePieceValue.UpOperation | ImagePieceValue.TwoWayOperation,
         string | ApplyError<PositiveInt> | ComposeAndTransformError
     >({
-        prevState: state.imagePieceValues ?? {},
-        operation: operation.imagePieceValues ?? {},
+        prevState: state.imagePieceValues,
+        operation: operation.imagePieceValues,
         innerApply: ({ prevState, operation: upOperation }) => {
             return ImagePieceValue.apply({
                 state: prevState,
@@ -171,8 +170,8 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
         ImagePieceValue.DownOperation,
         string | ApplyError<PositiveInt> | ComposeAndTransformError
     >({
-        nextState: state.imagePieceValues ?? {},
-        operation: operation.imagePieceValues ?? {},
+        nextState: state.imagePieceValues,
+        operation: operation.imagePieceValues,
         innerApplyBack: ({ state, operation }) => {
             return ImagePieceValue.applyBack({
                 state,
@@ -231,7 +230,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         ImagePieceValue.TwoWayOperation,
         string | ApplyError<PositiveInt> | ComposeAndTransformError
     >({
-        nextState: nextState.imagePieceValues ?? {},
+        nextState: nextState.imagePieceValues,
         downOperation: downOperation.imagePieceValues,
         innerDiff: params => ImagePieceValue.diff(params),
         innerRestore: params => ImagePieceValue.restore(params),
@@ -272,8 +271,8 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         ImagePieceValue.State,
         ImagePieceValue.TwoWayOperation
     >({
-        prevState: prevState.imagePieceValues ?? {},
-        nextState: nextState.imagePieceValues ?? {},
+        prevState: prevState.imagePieceValues,
+        nextState: nextState.imagePieceValues,
         innerDiff: params => ImagePieceValue.diff(params),
     });
     const result: TwoWayOperation = {
@@ -314,8 +313,8 @@ export const serverTransform =
         >({
             first: serverOperation?.imagePieceValues,
             second: clientOperation.imagePieceValues,
-            prevState: prevState.imagePieceValues ?? {},
-            nextState: currentState.imagePieceValues ?? {},
+            prevState: prevState.imagePieceValues,
+            nextState: currentState.imagePieceValues,
             innerTransform: ({ first, second, prevState, nextState }) =>
                 ImagePieceValue.serverTransform(isAuthorized)({
                     prevState,
