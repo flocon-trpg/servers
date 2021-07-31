@@ -12,6 +12,8 @@ import { useOperate } from '../../hooks/useOperate';
 import { privateCommandsDiff, update } from '@kizahasi/flocon-core';
 import { useDispatch } from 'react-redux';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
+import classNames from 'classnames';
+import { flex, flexRow } from '../../utils/className';
 
 type EditorProps = {
     script: string;
@@ -211,7 +213,7 @@ export const CommandEditorModal: React.FC = () => {
             onCancel={() => close()}
         >
             <div>
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                <div className={classNames(flex, flexRow)}>
                     <Select
                         value={selectedKey}
                         onSelect={x => setSelectedKeyState(x)}

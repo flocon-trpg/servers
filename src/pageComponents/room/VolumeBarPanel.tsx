@@ -1,9 +1,11 @@
+import classNames from 'classnames';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import VolumeBar from '../../components/VolumeBar';
 import roomConfigModule from '../../modules/roomConfigModule';
 import { defaultChannelVolume } from '../../states/RoomConfig';
 import { useSelector } from '../../store';
+import { flex, flexColumn, flexRow, itemsCenter } from '../../utils/className';
 
 type Props = {
     roomId: string;
@@ -22,7 +24,7 @@ const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
     const textWidth = 100;
 
     const toRow = (child: JSX.Element, text: string) => (
-        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+        <div className={classNames(flex, flexRow, itemsCenter)}>
             <div style={{ flex: `${textWidth}px` }}>{text}</div>
             <div style={{ flex: 1, margin: '0 16px' }}>{child}</div>
         </div>
@@ -131,7 +133,7 @@ const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
     );
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div className={classNames(flex, flexColumn)}>
             {toRow(masterVolumeBar, 'マスター音量')}
             {toRow(seVolumeBar, 'SE音量')}
             {toRow(channel1VolumeBar, 'BGMチャンネル1音量')}

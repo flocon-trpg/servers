@@ -3,6 +3,7 @@ import React from 'react';
 import { useBuffer } from '../hooks/useBuffer';
 import * as Icons from '@ant-design/icons';
 import { useReadonlyRef } from '../hooks/useReadonlyRef';
+import { flex, flexColumn } from '../utils/className';
 
 // Inputの制御は、Controlled（useStateなどを用いて値をInputにわたす）ではなくUncontrolled（DOMを直接操作）を採用している。
 // 現段階の状態ではControlledでも書けるが、collaborative editingを実現するためにはカーソルの自動移動も必要だと考えられ、この場合はおそらくDOM操作が必須になる。これを見越してUncontrolledで書いている。
@@ -97,7 +98,7 @@ export const BufferedTextArea: React.FC<Props> = (props: Props) => {
     // antdのInput.TextAreaだと、refで文字を直接編集する方法がわからなかったので代わりにtextareaを使っている。
     // Input.TextAreaでは単なるtextareaとしてレンダリングされるため、classNameを設定するだけでantdのInput.TextAreaを再現できると思われる。
     return (
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div className={classNames(flex, flexColumn)}>
             <textarea
                 {...inputProps}
                 className={classNames({ ['ant-input']: true, ['ant-input-sm']: size === 'small' })}

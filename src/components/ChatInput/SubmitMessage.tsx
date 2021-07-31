@@ -27,6 +27,8 @@ import { useDispatch } from 'react-redux';
 import { messageInputTextModule } from '../../modules/messageInputTextModule';
 import { Observable } from 'rxjs';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
+import classNames from 'classnames';
+import { flex, flexColumn, flexNone } from '../../utils/className';
 
 /* react-virtuosoはおそらくheightを指定しなければ正常に動作しないため、もしこれが可変だとheightの指定が無理とは言わないまでも面倒になる。そのため、70pxという適当な値で固定している */
 const height = 70;
@@ -340,7 +342,7 @@ export const SubmitMessage: React.FC<Props> = (props: Props) => {
         <UISelector
             keys={[publicChannel, privateChannel] as const}
             getName={key => (key === privateChannel ? '秘話' : '通常')}
-            style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column' }}
+            className={classNames(flexNone, flex, flexColumn)}
             render={key => (key === privateChannel ? privateMessageElement : publicMessageElement)}
             activeKey={props.selectedChannelType}
             onChange={x => props.onSelectedChannelTypeChange(x)}

@@ -7,6 +7,8 @@ import * as Icons from '@ant-design/icons';
 import { Button } from 'antd';
 import { update, replace } from '../stateManagers/states/types';
 import ToggleButton from './ToggleButton';
+import classNames from 'classnames';
+import { flex, flexRow, itemsCenter, justifyItemsCenter } from '../utils/className';
 
 type AddDieProps = {
     onAdd: (dieType: State['dieType']) => void;
@@ -14,7 +16,7 @@ type AddDieProps = {
 
 const AddDie: React.FC<AddDieProps> = ({ onAdd }: AddDieProps) => {
     return (
-        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+        <div className={classNames(flex, flexRow, itemsCenter)}>
             <Button size="small" icon={<Icons.PlusOutlined />} onClick={() => onAdd('D6')}>
                 6面
             </Button>
@@ -94,7 +96,7 @@ const InputD6Die: React.FC<InputD6Props> = ({
         size === 'small' ? CSS.Small.selectedImgButton : CSS.Middle.selectedImgButton;
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+        <div className={classNames(flex, flexRow, itemsCenter)}>
             <img
                 css={value == noValue ? selectedImgButton : imgButton}
                 src="/dice/0-6.png"
@@ -144,7 +146,7 @@ const InputD6Die: React.FC<InputD6Props> = ({
             />
             <div
                 css={imgButton}
-                style={{ display: 'flex', alignItems: 'center', justifyItems: 'center' }}
+                className={classNames(flex, itemsCenter, justifyItemsCenter)}
                 onClick={() => onValueChange(noDie)}
             >
                 <Icons.DeleteOutlined style={{ fontSize: size === 'small' ? 20 : 24 }} />

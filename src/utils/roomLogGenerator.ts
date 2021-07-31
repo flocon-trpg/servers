@@ -1,8 +1,4 @@
-import {
-    FileSourceType,
-    RoomMessages,
-    RoomPublicChannelFragment,
-} from '../generated/graphql';
+import { FileSourceType, RoomMessages, RoomPublicChannelFragment } from '../generated/graphql';
 import { PrivateChannelSet } from './PrivateChannelSet';
 import { escape } from 'html-escaper';
 import moment from 'moment';
@@ -80,8 +76,6 @@ type RoomMessage =
               textColor: string | null;
           };
       };
-
-
 
 const createRoomMessageArray = (
     props: {
@@ -461,10 +455,14 @@ export const generateAsRichLog = async (
         msg.value.commandResult == null ? avatar ?? './img/noname.png' : './img/dice.png'
     }">
     <div class="flex flex-column">
-        <div class="flex-0 flex flex-row name" style="color: ${escape(
+        <div class="flex-none flex flex-row name" style="color: ${escape(
             msg.value.textColor ?? 'white'
         )}">
-            ${escape(msg.value.createdBy?.rolePlayPart ?? msg.value.createdBy?.participantNamePart ?? 'システムメッセージ')}
+            ${escape(
+                msg.value.createdBy?.rolePlayPart ??
+                    msg.value.createdBy?.participantNamePart ??
+                    'システムメッセージ'
+            )}
         </div>
         <div class="flex-1">
             ${escape(msg.value.text)}

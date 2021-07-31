@@ -2,6 +2,7 @@ import React, { PropsWithChildren } from 'react';
 import { Rnd, Props as RndProps, Position, ResizableDelta } from 'react-rnd';
 import { ResizeDirection } from 're-resizable';
 import { CloseOutlined } from '@ant-design/icons';
+import { cancelRnd } from '../utils/className';
 
 // 上からheader、topElement、children、bottomElementの順で描画される。children以外はheightが固定されている。
 // それぞれの要素は、styleにheightやpaddingなどが自動的に設定されたdivに包まれる。このdivのstyleは、自動的に設定されていない値であれば、*ContainerStyleというプロパティに渡すことで好きな値をセットすることができる。
@@ -97,7 +98,7 @@ const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) => {
                     </div>
                 </div>
                 <div
-                    className="cancel-rnd"
+                    className={cancelRnd}
                     style={{
                         ...props.topElementContainerStyle,
                         backgroundColor,
@@ -108,7 +109,7 @@ const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) => {
                     {props.topElement}
                 </div>
                 <div
-                    className="cancel-rnd"
+                    className={cancelRnd}
                     style={{
                         ...props.childrenContainerStyle,
                         backgroundColor,
@@ -121,7 +122,7 @@ const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) => {
                     {props.children}
                 </div>
                 <div
-                    className="cancel-rnd"
+                    className={cancelRnd}
                     style={{
                         ...props.bottomElementContainerStyle,
                         backgroundColor,

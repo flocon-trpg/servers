@@ -17,6 +17,8 @@ import {
     webServerRequiresUpdate,
 } from '@kizahasi/util';
 import { useRouter } from 'next/router';
+import classNames from 'classnames';
+import { flex, flexColumn } from '../utils/className';
 
 const Index: React.FC = () => {
     const [drawerType, setDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
@@ -64,7 +66,7 @@ const Index: React.FC = () => {
         const checkResult = SemVer.check({ api: apiServerSemVer, web: VERSION });
 
         return (
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div className={classNames(flex, flexColumn)}>
                 {(checkResult === apiServerRequiresUpdate ||
                     checkResult === webServerRequiresUpdate) && (
                     <Alert

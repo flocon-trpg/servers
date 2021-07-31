@@ -67,6 +67,8 @@ import { UserConfig } from '../../states/UserConfig';
 import * as Icons from '@ant-design/icons';
 import { InputModal } from '../../components/InputModal';
 import { JumpToBottomVirtuoso } from '../../components/JumpToBottomVirtuoso';
+import { cancelRnd, flex, flexColumn, flexNone, flexRow, itemsCenter } from '../../utils/className';
+import classNames from 'classnames';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -128,7 +130,7 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
 
     return (
         <Drawer
-            className="cancel-rnd"
+            className={cancelRnd}
             visible={config != null}
             title="タブの編集"
             closable
@@ -354,7 +356,7 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
 
     return (
         <Drawer
-            className="cancel-rnd"
+            className={cancelRnd}
             visible={visible}
             title="チャンネル名の編集"
             closable
@@ -577,7 +579,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                     alignItems: 'center',
                 }}
             >
-                <div style={{ flex: '0 0 auto' }}>
+                <div className={classNames(flexNone)}>
                     {message.type === privateMessage ||
                         (message.type === publicMessage &&
                             RoomMessageNameSpace.userName(message, participantsMap ?? new Map()))}
@@ -747,7 +749,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div className={classNames(flex, flexColumn)}>
             <div style={{ padding: '0 4px' }}>
                 <JumpToBottomVirtuoso
                     items={messages}
@@ -941,7 +943,7 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                 visible={isChannelNamesEditorVisible}
                 onClose={() => setIsChannelNamesEditorVisible(false)}
             />
-            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+            <div className={classNames(flex, flexRow, itemsCenter)}>
                 <Button
                     style={{ margin: `4px ${marginX}px 4px ${marginX}px`, width: 170 }}
                     size="small"

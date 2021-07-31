@@ -11,6 +11,8 @@ import { UpOperation } from '@kizahasi/flocon-core';
 import { useDispatch } from 'react-redux';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { InputModal } from '../../components/InputModal';
+import classNames from 'classnames';
+import { flex, flexRow } from '../../utils/className';
 
 type VisibleParameterForm = {
     type: 'Bool' | 'Str' | 'Num';
@@ -283,7 +285,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                         {strIndex20Array.some(key => numParamNamesMap.has(key)) ? (
                             <div style={{ padding: 6 }} />
                         ) : null}
-                        <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        <div className={classNames(flex, flexRow)}>
                             <Select
                                 style={{ minWidth: 150 }}
                                 size="small"
@@ -335,7 +337,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                         {strIndex20Array.some(key => boolParamNamesMap.has(key)) ? (
                             <div style={{ padding: 6 }} />
                         ) : null}
-                        <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        <div className={classNames(flex, flexRow)}>
                             <Select
                                 style={{ minWidth: 150 }}
                                 size="small"

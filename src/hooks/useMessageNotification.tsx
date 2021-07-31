@@ -12,6 +12,8 @@ import { usePublicChannelNames } from './state/usePublicChannelNames';
 import { newEvent, privateMessage, publicMessage } from './useRoomMessages';
 import { useParticipants } from './state/useParticipants';
 import { useMyUserUid } from './useMyUserUid';
+import classNames from 'classnames';
+import { flex, flexRow } from '../utils/className';
 
 const argsBase: Omit<ArgsProps, 'message'> = {
     placement: 'bottomRight',
@@ -117,7 +119,7 @@ export function useMessageNotification(): void {
         notification.open({
             ...argsBase,
             message: (
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                <div className={classNames(flex, flexRow)}>
                     {RoomMessage.userName(message, participantsMapRef.current ?? new Map())}
                     <div style={{ margin: '0 4px' }}>-</div>
                     {RoomMessage.toChannelName(

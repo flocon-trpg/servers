@@ -8,6 +8,8 @@ import * as Core from '@kizahasi/flocon-core';
 import { FilterValue } from 'antd/lib/table/interface';
 import { FirebaseStorageFile } from '../modules/fileModule';
 import { FilePath } from '../utils/filePath';
+import classNames from 'classnames';
+import { flex, flexRow, itemsCenter } from '../utils/className';
 
 type ImageProps = {
     filePath?: FilePath | Core.FilePath;
@@ -71,7 +73,7 @@ const InputFile: React.FC<Props> = ({
     })();
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+        <div className={classNames(flex, flexRow, itemsCenter)}>
             {imageElement}
             {imageElement == null ? null : <div style={{ width: 4 }} />}
             {fileNameElement}

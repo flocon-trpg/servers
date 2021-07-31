@@ -8,6 +8,8 @@ import { DataNode } from 'rc-tree/lib/interface';
 import { simpleId } from '../../utils/generators';
 import BufferedInput from '../../components/BufferedInput';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
+import classNames from 'classnames';
+import { flex, flex1, flexColumn, flexRow } from '../../utils/className';
 
 /*
 DataNodeの仕様:
@@ -136,7 +138,7 @@ const Memo: React.FC<MemoProps> = ({ memoId, state }: MemoProps) => {
     }
 
     return (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div className={classNames(flex1, flex, flexColumn)}>
             <BufferedInput
                 bufferDuration="default"
                 value={state.name}
@@ -193,7 +195,7 @@ export const Memos: React.FC<Props> = ({ selectedMemoId, onSelectedMemoIdChange 
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <div style={{ display: 'flex', flexDirection: 'row' }}>
+            <div className={classNames(flex, flexRow)}>
                 <Button
                     onClick={() => {
                         const id = simpleId();

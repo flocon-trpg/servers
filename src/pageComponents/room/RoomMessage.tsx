@@ -28,6 +28,8 @@ import {
 } from '@kizahasi/flocon-core';
 import { $free, dualKeyRecordToDualKeyMap, recordToMap } from '@kizahasi/util';
 import { tripleKeyToString } from '../../utils/tripleKeyToString';
+import classNames from 'classnames';
+import { flex, flexRow, itemsCenter } from '../../utils/className';
 
 // 改行荒らし対策として、maxHeightを設けている。200pxという値は適当
 export const messageContentMaxHeight = 200;
@@ -334,7 +336,7 @@ export namespace RoomMessage {
         if (message.value.character == null) {
             if (message.value.customName == null) {
                 return (
-                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                    <div className={classNames(flex, flexRow, itemsCenter)}>
                         {jdenticon}
                         <Tooltip title={participantName ?? message.value.createdBy}>
                             {participantName ?? message.value.createdBy}
@@ -343,7 +345,7 @@ export namespace RoomMessage {
                 );
             }
             return (
-                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                <div className={classNames(flex, flexRow, itemsCenter)}>
                     {jdenticon}
                     <Tooltip title={participantName ?? message.value.createdBy}>
                         {message.value.customName}
@@ -352,7 +354,7 @@ export namespace RoomMessage {
             );
         }
         return (
-            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+            <div className={classNames(flex, flexRow, itemsCenter)}>
                 {jdenticon}
                 <Image filePath={message.value.character.image ?? undefined} />
                 <Tooltip title={participantName ?? message.value.createdBy}>

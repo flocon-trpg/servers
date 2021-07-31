@@ -9,6 +9,8 @@ import {
     UpdateChatPalettePanelAction,
     UpdateMessagePanelAction,
 } from '../../modules/roomConfigModule';
+import classNames from 'classnames';
+import { flex, flexNone, flexRow, itemsCenter } from '../../utils/className';
 
 type Props = {
     config: ChatPalettePanelConfig | MessagePanelConfig;
@@ -33,14 +35,7 @@ export const PublicMessageChannelSelector: React.FC<Props> = ({
     }
 
     return (
-        <div
-            style={{
-                flex: '0 0 auto',
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-            }}
-        >
+        <div className={classNames(flexNone, flex, flexRow, itemsCenter)}>
             <div style={titleStyle}>送信先</div>
             <Select
                 style={{ flex: 1, maxWidth: inputMaxWidth }}

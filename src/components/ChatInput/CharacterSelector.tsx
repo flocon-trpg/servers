@@ -5,6 +5,8 @@ import { MessagePanelConfig } from '../../states/MessagePanelConfig';
 import * as Icon from '@ant-design/icons';
 import { UpdateMessagePanelAction } from '../../modules/roomConfigModule';
 import { custom, getSelectedCharacterType, none, some } from './getSelectedCharacterType';
+import classNames from 'classnames';
+import { flex, flexRow, flexNone, itemsCenter } from '../../utils/className';
 
 type Props = {
     config: MessagePanelConfig;
@@ -39,14 +41,7 @@ export const CharacterSelector: React.FC<Props> = ({
     const selectedCharacterType = getSelectedCharacterType(config);
 
     return (
-        <div
-            style={{
-                flex: '0 0 auto',
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-            }}
-        >
+        <div className={classNames(flexNone, flex, flexRow, itemsCenter)}>
             <div style={titleStyle}>キャラクター</div>
             <Select
                 style={{ flex: 1, maxWidth: inputMaxWidth }}

@@ -10,6 +10,8 @@ import Link from 'next/link';
 import { Button, Col, Row, Space, Table, Tooltip } from 'antd';
 import { useRouter } from 'next/router';
 import QueryResultViewer from '../../components/QueryResultViewer';
+import classNames from 'classnames';
+import { flex, flexNone } from '../../utils/className';
 
 type Data = RoomAsListItemFragment;
 
@@ -47,8 +49,8 @@ const RoomsListComponent: React.FC<RoomsListComponentProps> = ({
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', padding: 10 }}>
-            <div style={{ flex: 0, display: 'flex' }}>
-                <div style={{ flex: 0 }}>
+            <div className={classNames(flex, flexNone)}>
+                <div className={classNames(flexNone)}>
                     <Button onClick={() => router.push('rooms/create')}>部屋を作成</Button>
                 </div>
                 <div style={{ flex: 'auto' }} />

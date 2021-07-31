@@ -39,3 +39,35 @@ html {
 .ant-tabs-content {
     height: 100%;
 }
+
+.flex {
+    display: flex;
+}
+
+.flex-row {
+    flex-direction: row;
+}
+
+.flex-column {
+    flex-direction: column;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.flex-none {
+    flex: none;
+}
+
+.flex-auto {
+    flex: auto;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.justify-items-center {
+    justify-items: center;
+}
