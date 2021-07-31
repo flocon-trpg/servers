@@ -31,7 +31,6 @@ export {
     strIndex100Array,
     isStrIndex100,
 } from './internal/indexes';
-export { maybe, Maybe } from './internal/io-ts';
 export { JsonObject } from './internal/jsonObject';
 export { groupJoin as groupJoinMap } from './internal/map';
 export { PublicChannelKey } from './internal/publicChannelKey';
