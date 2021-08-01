@@ -46,7 +46,6 @@ const isDefaultParam = (source: Record<string, unknown>) => {
 };
 
 /*
-
 # 行われること1
 値がない、もしくはすべての値がundefinedであるRecordをundefinedに変換する。
 これにより、例えば { a: {} } のようなDualKeyRecordを {} と等しいとみなすことができるようになる。
@@ -57,8 +56,6 @@ strParamなどのようなキャラクターのパラメーター値がデフォ
 
 # 行われること3
 nullをundefinedに変換する。
-
-
 */
 export const normalizeRoomState = (source: unknown): any => {
     switch (typeof source) {
