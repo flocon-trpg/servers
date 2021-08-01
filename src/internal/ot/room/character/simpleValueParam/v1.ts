@@ -147,7 +147,7 @@ export const diff =
         if (isIdRecord(resultType)) {
             return undefined;
         }
-        return { ...resultType };
+        return resultType;
     };
 
 export const serverTransform =

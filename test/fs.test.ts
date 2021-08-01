@@ -1,10 +1,11 @@
+import { Result } from '@kizahasi/result';
 import fc from 'fast-check';
 import { getArbitrary } from 'fast-check-io-ts';
 import * as Room from '../src/internal/ot/room/v1';
-import { toTestableObject } from './deleteEmptyObjects';
+import { normalizeRoomState } from './normalizeRoomState';
 
 // 組み合わせ量が多いため、デフォルト値(100)より多い値を設定している
-const numRuns = 1000;
+const numRuns = 500;
 
 it.concurrent('tests Room.apply', () => {
     fc.assert(
@@ -22,10 +23,10 @@ it.concurrent('tests Room.apply', () => {
                 fail('isError should not be true');
             }
             expect({
-                ...toTestableObject(actualNextState.value),
+                ...normalizeRoomState(actualNextState.value),
                 createdBy: undefined,
             }).toEqual({
-                ...toTestableObject(nextState),
+                ...normalizeRoomState(nextState),
                 createdBy: undefined,
             });
         }),
@@ -49,10 +50,10 @@ it.concurrent('tests Room.applyBack', () => {
                 fail('isError should not be true');
             }
             expect({
-                ...toTestableObject(actualPrevState.value),
+                ...normalizeRoomState(actualPrevState.value),
                 createdBy: undefined,
             }).toEqual({
-                ...toTestableObject(prevState),
+                ...normalizeRoomState(prevState),
                 createdBy: undefined,
             });
         }),
@@ -80,25 +81,27 @@ it.concurrent('tests Room.composeDownOperation', () => {
                     fail('isError should not be true');
                 }
                 const expectedTwoWayOperation = Room.diff({ prevState: state1, nextState: state3 });
-                if (actualDownOperation.value == null || expectedTwoWayOperation == null) {
-                    expect(actualDownOperation).toEqual(expectedTwoWayOperation);
-                    return;
-                }
-                const actualState = Room.applyBack({
-                    state: state3,
-                    operation: actualDownOperation.value,
-                });
-                const expectedState = Room.applyBack({
-                    state: state3,
-                    operation: Room.toDownOperation(expectedTwoWayOperation),
-                });
+                const actualState =
+                    actualDownOperation.value == null
+                        ? Result.ok(state3)
+                        : Room.applyBack({
+                              state: state3,
+                              operation: actualDownOperation.value,
+                          });
+                const expectedState =
+                    expectedTwoWayOperation == null
+                        ? Result.ok(state3)
+                        : Room.applyBack({
+                              state: state3,
+                              operation: Room.toDownOperation(expectedTwoWayOperation),
+                          });
                 if (actualState.isError || expectedState.isError) {
                     fail('isError should not be true');
                 }
                 expect({
-                    ...toTestableObject(actualState.value),
+                    ...normalizeRoomState(actualState.value),
                 }).toEqual({
-                    ...toTestableObject(expectedState.value),
+                    ...normalizeRoomState(expectedState.value),
                 });
             }
         ),

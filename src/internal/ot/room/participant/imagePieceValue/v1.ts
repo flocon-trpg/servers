@@ -102,6 +102,9 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     if (operation.image != null) {
         result.image = operation.image.newValue;
     }
+    if (operation.isPrivate != null) {
+        result.isPrivate = operation.isPrivate.newValue;
+    }
     if (operation.memo != null) {
         const valueResult = TextOperation.apply(state.memo, operation.memo);
         if (valueResult.isError) {
@@ -137,6 +140,9 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 
     if (operation.image != null) {
         result.image = operation.image.oldValue;
+    }
+    if (operation.isPrivate != null) {
+        result.isPrivate = operation.isPrivate.oldValue;
     }
     if (operation.memo != null) {
         const valueResult = TextOperation.applyBack(state.memo, operation.memo);
@@ -192,9 +198,10 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
 
     const valueProps: DownOperation = {
         $version: 1,
+        image: ReplaceOperation.composeDownOperation(first.image, second.image),
+        isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
         memo: memo.value,
         name: ReplaceOperation.composeDownOperation(first.name, second.name),
-        image: ReplaceOperation.composeDownOperation(first.image, second.image),
         pieces: pieces.value,
     };
     return Result.ok(valueProps);
@@ -239,6 +246,13 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
             newValue: nextState.image,
         };
     }
+    if (downOperation.isPrivate !== undefined) {
+        prevState.isPrivate = downOperation.isPrivate.oldValue ?? undefined;
+        twoWayOperation.isPrivate = {
+            oldValue: downOperation.isPrivate.oldValue ?? undefined,
+            newValue: nextState.isPrivate,
+        };
+    }
     if (downOperation.memo !== undefined) {
         const restored = TextOperation.restore({
             nextState: nextState.memo,
@@ -273,6 +287,9 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     };
     if (prevState.image !== nextState.image) {
         result.image = { oldValue: prevState.image, newValue: nextState.image };
+    }
+    if (prevState.isPrivate !== nextState.isPrivate) {
+        result.isPrivate = { oldValue: prevState.isPrivate, newValue: nextState.isPrivate };
     }
     if (prevState.memo !== nextState.memo) {
         result.memo = TextOperation.diff({
@@ -331,6 +348,11 @@ export const serverTransform =
             second: clientOperation.image,
             prevState: prevState.image,
         });
+        twoWayOperation.isPrivate = ReplaceOperation.serverTransform({
+            first: serverOperation?.isPrivate,
+            second: clientOperation.isPrivate,
+            prevState: prevState.isPrivate,
+        });
         const transformedMemo = TextOperation.serverTransform({
             first: serverOperation?.memo,
             second: clientOperation.memo,
@@ -357,6 +379,11 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     const image = ReplaceOperation.clientTransform({
         first: first.image,
         second: second.image,
+    });
+
+    const isPrivate = ReplaceOperation.clientTransform({
+        first: first.isPrivate,
+        second: second.isPrivate,
     });
 
     const memo = TextOperation.clientTransform({
@@ -389,6 +416,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     const firstPrime: UpOperation = {
         $version: 1,
         image: image.firstPrime,
+        isPrivate: isPrivate.firstPrime,
         memo: memo.value.firstPrime,
         name: name.firstPrime,
         pieces: pieces.value.firstPrime,
@@ -396,6 +424,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     const secondPrime: UpOperation = {
         $version: 1,
         image: image.secondPrime,
+        isPrivate: isPrivate.secondPrime,
         memo: memo.value.firstPrime,
         name: name.secondPrime,
         pieces: pieces.value.secondPrime,

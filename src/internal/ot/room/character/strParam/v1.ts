@@ -168,7 +168,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     if (isIdRecord(resultType)) {
         return undefined;
     }
-    return { ...resultType };
+    return resultType;
 };
 
 export const serverTransform =
