@@ -62,7 +62,6 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
         if (restored.value.twoWayOperation !== undefined) {
             twoWayOperation.set(key, restored.value.twoWayOperation);
         }
-        break;
     }
 
     return Result.ok({
@@ -104,7 +103,6 @@ export const apply = <TState, TUpOperation, TCustomError = string>({
             return newValue;
         }
         nextState.set(key, newValue.value);
-        break;
     }
 
     return Result.ok(mapToRecord(nextState));
@@ -143,7 +141,6 @@ export const applyBack = <TState, TDownOperation, TCustomError = string>({
             return oldValue;
         }
         prevState.set(key, oldValue.value);
-        break;
     }
 
     return Result.ok(mapToRecord(prevState));
