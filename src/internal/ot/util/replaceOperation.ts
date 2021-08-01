@@ -51,6 +51,12 @@ export const clientTransform = <T>({
     first,
     second,
 }: ClientTransformParameters<T>): ClientTransformResult<T> => {
+    if (first == null) {
+        return {
+            firstPrime: undefined,
+            secondPrime: second,
+        };
+    }
     return {
         firstPrime: first,
         secondPrime: undefined,
