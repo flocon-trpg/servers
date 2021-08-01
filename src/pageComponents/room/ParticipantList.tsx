@@ -6,7 +6,6 @@ import { useRoomConnections } from '../../hooks/useRoomConnections';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { ParticipantState } from '@kizahasi/flocon-core';
 import _ from 'lodash';
-import { useMe } from '../../hooks/useMe';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 
 type DataSource = {
