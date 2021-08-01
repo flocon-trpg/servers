@@ -449,7 +449,9 @@ export const generateAsRichLog = async (
             }
         }
         const text = `${escape(msg.value.text)}${
-            msg.value.commandResult == null ? '' : `
+            msg.value.commandResult == null
+                ? ''
+                : `
 ${escape(msg.value.commandResult)}`
         }`;
         messageDivs.push(`<div class="flex flex-row message ${
