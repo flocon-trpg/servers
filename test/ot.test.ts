@@ -9,7 +9,6 @@ import {
     admin,
     replace,
     update,
-    diff,
 } from '../src';
 import { Resources } from './resources';
 
@@ -593,8 +592,3 @@ describe.each([[true], [false]])(
         });
     }
 );
-
-it.each([Resources.minimumState, Resources.complexState])('tests diff of no change', state => {
-    const diffResult = diff({ prevState: state, nextState: state });
-    expect(diffResult).toBeUndefined();
-});
