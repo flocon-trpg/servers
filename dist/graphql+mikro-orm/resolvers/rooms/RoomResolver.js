@@ -64,7 +64,6 @@ const ChangeParticipantNameFailureType_1 = require("../../../enums/ChangePartici
 const DeleteRoomResult_1 = require("../../results/DeleteRoomResult");
 const DeleteRoomFailureType_1 = require("../../../enums/DeleteRoomFailureType");
 const global_2 = require("../../entities/room/global");
-const Types_1 = require("../../Types");
 const mikro_orm_1 = require("../../entities/roomMessage/mikro-orm");
 const object_args_input_1 = require("./object+args+input");
 const graphql_2 = require("../../entities/roomMessage/graphql");
@@ -136,7 +135,7 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
             [myUserUid]: participantOperation,
         },
     };
-    const transformed = flocon_core_1.serverTransform({ type: Types_1.server })({
+    const transformed = flocon_core_1.serverTransform({ type: flocon_core_1.admin })({
         prevState: roomState,
         currentState: roomState,
         clientOperation: roomUpOperation,
@@ -170,7 +169,7 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
             valueJson: global_2.GlobalRoom.Global.ToGraphQL.operation({
                 prevState: roomState,
                 nextState: nextRoomState,
-                requestedBy: { type: Types_1.client, userUid: deliverTo },
+                requestedBy: { type: flocon_core_1.client, userUid: deliverTo },
             }),
         };
     };
@@ -664,7 +663,7 @@ let RoomResolver = class RoomResolver {
             const roomState = global_2.GlobalRoom.MikroORM.ToGlobal.state(newRoom);
             const graphqlState = global_2.GlobalRoom.Global.ToGraphQL.state({
                 source: roomState,
-                requestedBy: { type: Types_1.client, userUid: decodedIdToken.uid },
+                requestedBy: { type: flocon_core_1.client, userUid: decodedIdToken.uid },
             });
             await em.flush();
             return {
@@ -1361,7 +1360,7 @@ let RoomResolver = class RoomResolver {
                 role: ParticipantRole_1.ParticipantRole.ofString(me.role),
                 room: Object.assign(Object.assign({}, global_2.GlobalRoom.Global.ToGraphQL.state({
                     source: roomState,
-                    requestedBy: { type: Types_1.client, userUid: decodedIdToken.uid },
+                    requestedBy: { type: flocon_core_1.client, userUid: decodedIdToken.uid },
                 })), { revision: room.revision, createdBy: room.createdBy }),
             });
         };
@@ -1449,7 +1448,6 @@ let RoomResolver = class RoomResolver {
             };
         }
         const queue = async () => {
-            var _a;
             const em = context.createEm();
             const entry = await helpers_1.checkEntry({
                 userUid: decodedIdToken.uid,
@@ -1505,7 +1503,7 @@ let RoomResolver = class RoomResolver {
                 prevState = restoredRoom.value.prevState;
                 twoWayOperation = restoredRoom.value.twoWayOperation;
             }
-            const transformed = flocon_core_1.serverTransform({ type: Types_1.client, userUid: decodedIdToken.uid })({
+            const transformed = flocon_core_1.serverTransform({ type: flocon_core_1.client, userUid: decodedIdToken.uid })({
                 prevState,
                 currentState: roomState,
                 clientOperation: clientOperation,
@@ -1519,121 +1517,36 @@ let RoomResolver = class RoomResolver {
             }
             const operation = transformed.value;
             const prevRevision = room.revision;
-            const dicePieceValueLogs = [];
-            const numberPieceValueLogs = [];
-            util_1.dualKeyRecordForEach((_a = operation.characters) !== null && _a !== void 0 ? _a : {}, (character, characterKey) => {
-                var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
-                if (character.type === flocon_core_1.replace) {
-                    util_1.recordForEach((_b = (_a = character.replace.oldValue) === null || _a === void 0 ? void 0 : _a.dicePieceValues) !== null && _b !== void 0 ? _b : {}, (dicePiece, dicePieceKey) => {
-                        dicePieceValueLogs.push(new mikro_orm_1.DicePieceValueLog({
-                            characterCreatedBy: characterKey.first,
-                            characterId: characterKey.second,
-                            stateId: dicePieceKey,
-                            value: {
-                                $version: 1,
-                                type: flocon_core_1.deleteType,
-                            },
-                            room,
-                        }));
-                    });
-                    util_1.recordForEach((_d = (_c = character.replace.newValue) === null || _c === void 0 ? void 0 : _c.dicePieceValues) !== null && _d !== void 0 ? _d : {}, (dicePiece, dicePieceKey) => {
-                        dicePieceValueLogs.push(new mikro_orm_1.DicePieceValueLog({
-                            characterCreatedBy: characterKey.first,
-                            characterId: characterKey.second,
-                            stateId: dicePieceKey,
-                            value: {
-                                $version: 1,
-                                type: flocon_core_1.createType,
-                            },
-                            room,
-                        }));
-                    });
-                    util_1.recordForEach((_f = (_e = character.replace.oldValue) === null || _e === void 0 ? void 0 : _e.numberPieceValues) !== null && _f !== void 0 ? _f : {}, (numberPiece, numberPieceKey) => {
-                        numberPieceValueLogs.push(new mikro_orm_1.NumberPieceValueLog({
-                            characterCreatedBy: characterKey.first,
-                            characterId: characterKey.second,
-                            stateId: numberPieceKey,
-                            value: {
-                                $version: 1,
-                                type: flocon_core_1.deleteType,
-                            },
-                            room,
-                        }));
-                    });
-                    util_1.recordForEach((_h = (_g = character.replace.newValue) === null || _g === void 0 ? void 0 : _g.numberPieceValues) !== null && _h !== void 0 ? _h : {}, (dicePiece, dicePieceKey) => {
-                        numberPieceValueLogs.push(new mikro_orm_1.NumberPieceValueLog({
-                            characterCreatedBy: characterKey.first,
-                            characterId: characterKey.second,
-                            stateId: dicePieceKey,
-                            value: {
-                                $version: 1,
-                                type: flocon_core_1.createType,
-                            },
-                            room,
-                        }));
-                    });
-                    return;
-                }
-                util_1.recordForEach((_j = character.update.dicePieceValues) !== null && _j !== void 0 ? _j : {}, (dicePiece, dicePieceKey) => {
-                    if (dicePiece.type === flocon_core_1.replace) {
-                        dicePieceValueLogs.push(new mikro_orm_1.DicePieceValueLog({
-                            characterCreatedBy: characterKey.first,
-                            characterId: characterKey.second,
-                            stateId: dicePieceKey,
-                            value: {
-                                $version: 1,
-                                type: dicePiece.replace.newValue == null
-                                    ? flocon_core_1.deleteType
-                                    : flocon_core_1.createType,
-                            },
-                            room,
-                        }));
-                        return;
-                    }
-                    dicePieceValueLogs.push(new mikro_orm_1.DicePieceValueLog({
-                        characterCreatedBy: characterKey.first,
-                        characterId: characterKey.second,
-                        stateId: dicePieceKey,
-                        value: flocon_core_1.toDicePieceValueLog(dicePiece.update),
-                        room,
-                    }));
-                });
-                util_1.recordForEach((_k = character.update.numberPieceValues) !== null && _k !== void 0 ? _k : {}, (numberPiece, numberPieceKey) => {
-                    if (numberPiece.type === flocon_core_1.replace) {
-                        numberPieceValueLogs.push(new mikro_orm_1.NumberPieceValueLog({
-                            characterCreatedBy: characterKey.first,
-                            characterId: characterKey.second,
-                            stateId: numberPieceKey,
-                            value: {
-                                $version: 1,
-                                type: numberPiece.replace.newValue == null
-                                    ? flocon_core_1.deleteType
-                                    : flocon_core_1.createType,
-                            },
-                            room,
-                        }));
-                        return;
-                    }
-                    numberPieceValueLogs.push(new mikro_orm_1.NumberPieceValueLog({
-                        characterCreatedBy: characterKey.first,
-                        characterId: characterKey.second,
-                        stateId: numberPieceKey,
-                        value: flocon_core_1.toNumberPieceValueLog(numberPiece.update),
-                        room,
-                    }));
-                });
-            });
-            for (const log of dicePieceValueLogs) {
-                em.persist(log);
-            }
-            for (const log of numberPieceValueLogs) {
-                em.persist(log);
-            }
             const nextRoomState = global_2.GlobalRoom.Global.applyToEntity({
                 em,
                 target: room,
                 prevState: roomState,
                 operation,
+            });
+            const logs = flocon_core_1.createLogs({ prevState: roomState, nextState: nextRoomState });
+            const dicePieceLogEntities = [];
+            logs === null || logs === void 0 ? void 0 : logs.dicePieceValueLogs.forEach(log => {
+                const entity = new mikro_orm_1.DicePieceValueLog({
+                    characterCreatedBy: log.characterKey.createdBy,
+                    characterId: log.characterKey.id,
+                    stateId: log.stateId,
+                    room,
+                    value: log.value,
+                });
+                dicePieceLogEntities.push(entity);
+                em.persist(entity);
+            });
+            const numberPieceLogEntities = [];
+            logs === null || logs === void 0 ? void 0 : logs.numberPieceValueLogs.forEach(log => {
+                const entity = new mikro_orm_1.NumberPieceValueLog({
+                    characterCreatedBy: log.characterKey.createdBy,
+                    characterId: log.characterKey.id,
+                    stateId: log.stateId,
+                    room,
+                    value: log.value,
+                });
+                numberPieceLogEntities.push(entity);
+                em.persist(entity);
             });
             await em.flush();
             const generateOperation = (deliverTo) => {
@@ -1647,7 +1560,7 @@ let RoomResolver = class RoomResolver {
                     valueJson: global_2.GlobalRoom.Global.ToGraphQL.operation({
                         prevState: roomState,
                         nextState: nextRoomState,
-                        requestedBy: { type: Types_1.client, userUid: deliverTo },
+                        requestedBy: { type: flocon_core_1.client, userUid: deliverTo },
                     }),
                 };
             };
@@ -1661,14 +1574,14 @@ let RoomResolver = class RoomResolver {
                 type: 'success',
                 roomOperationPayload,
                 messageUpdatePayload: [
-                    ...dicePieceValueLogs.map(log => ({
+                    ...dicePieceLogEntities.map(log => ({
                         type: 'messageUpdatePayload',
                         roomId: room.id,
                         createdBy: undefined,
                         visibleTo: undefined,
                         value: global_3.DicePieceValueLog.MikroORM.ToGraphQL.state(log),
                     })),
-                    ...numberPieceValueLogs.map(log => ({
+                    ...numberPieceLogEntities.map(log => ({
                         type: 'messageUpdatePayload',
                         roomId: room.id,
                         createdBy: undefined,

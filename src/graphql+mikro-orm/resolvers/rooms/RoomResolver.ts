@@ -51,7 +51,6 @@ import { ChangeParticipantNameFailureType } from '../../../enums/ChangeParticipa
 import { DeleteRoomResult } from '../../results/DeleteRoomResult';
 import { DeleteRoomFailureType } from '../../../enums/DeleteRoomFailureType';
 import { GlobalRoom } from '../../entities/room/global';
-import { client, server } from '../../Types';
 import { EM } from '../../../utils/types';
 import {
     RoomPrvMsg,
@@ -156,7 +155,6 @@ import {
     serverTransform,
     Spectator,
     State,
-    toNumberPieceValueLog,
     TwoWayOperation,
     restore,
     CharacterState,
@@ -166,8 +164,9 @@ import {
     ParticipantUpOperation,
     replace,
     ParticipantRole,
-    update,
-    toDicePieceValueLog,
+    createLogs,
+    admin,
+    client,
 } from '@kizahasi/flocon-core';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
 import { ParticipantRole as ParticipantRoleEnum } from '../../../enums/ParticipantRole';
@@ -314,7 +313,7 @@ const operateParticipantAndFlush = async ({
         },
     };
 
-    const transformed = serverTransform({ type: server })({
+    const transformed = serverTransform({ type: admin })({
         prevState: roomState,
         currentState: roomState,
         clientOperation: roomUpOperation,
@@ -2073,159 +2072,39 @@ export class RoomResolver {
             const operation = transformed.value;
             const prevRevision = room.revision;
 
-            const dicePieceValueLogs: DicePieceValueLog$MikroORM[] = [];
-            const numberPieceValueLogs: NumberPieceValueLog$MikroORM[] = [];
-            dualKeyRecordForEach(operation.characters ?? {}, (character, characterKey) => {
-                if (character.type === replace) {
-                    recordForEach(
-                        character.replace.oldValue?.dicePieceValues ?? {},
-                        (dicePiece, dicePieceKey) => {
-                            dicePieceValueLogs.push(
-                                new DicePieceValueLog$MikroORM({
-                                    characterCreatedBy: characterKey.first,
-                                    characterId: characterKey.second,
-                                    stateId: dicePieceKey,
-                                    value: {
-                                        $version: 1,
-                                        type: deleteType,
-                                    },
-                                    room,
-                                })
-                            );
-                        }
-                    );
-                    recordForEach(
-                        character.replace.newValue?.dicePieceValues ?? {},
-                        (dicePiece, dicePieceKey) => {
-                            dicePieceValueLogs.push(
-                                new DicePieceValueLog$MikroORM({
-                                    characterCreatedBy: characterKey.first,
-                                    characterId: characterKey.second,
-                                    stateId: dicePieceKey,
-                                    value: {
-                                        $version: 1,
-                                        type: createType,
-                                    },
-                                    room,
-                                })
-                            );
-                        }
-                    );
-
-                    recordForEach(
-                        character.replace.oldValue?.numberPieceValues ?? {},
-                        (numberPiece, numberPieceKey) => {
-                            numberPieceValueLogs.push(
-                                new NumberPieceValueLog$MikroORM({
-                                    characterCreatedBy: characterKey.first,
-                                    characterId: characterKey.second,
-                                    stateId: numberPieceKey,
-                                    value: {
-                                        $version: 1,
-                                        type: deleteType,
-                                    },
-                                    room,
-                                })
-                            );
-                        }
-                    );
-                    recordForEach(
-                        character.replace.newValue?.numberPieceValues ?? {},
-                        (dicePiece, dicePieceKey) => {
-                            numberPieceValueLogs.push(
-                                new NumberPieceValueLog$MikroORM({
-                                    characterCreatedBy: characterKey.first,
-                                    characterId: characterKey.second,
-                                    stateId: dicePieceKey,
-                                    value: {
-                                        $version: 1,
-                                        type: createType,
-                                    },
-                                    room,
-                                })
-                            );
-                        }
-                    );
-
-                    return;
-                }
-
-                recordForEach(character.update.dicePieceValues ?? {}, (dicePiece, dicePieceKey) => {
-                    if (dicePiece.type === replace) {
-                        dicePieceValueLogs.push(
-                            new DicePieceValueLog$MikroORM({
-                                characterCreatedBy: characterKey.first,
-                                characterId: characterKey.second,
-                                stateId: dicePieceKey,
-                                value: {
-                                    $version: 1,
-                                    type:
-                                        dicePiece.replace.newValue == null
-                                            ? deleteType
-                                            : createType,
-                                },
-                                room,
-                            })
-                        );
-                        return;
-                    }
-                    dicePieceValueLogs.push(
-                        new DicePieceValueLog$MikroORM({
-                            characterCreatedBy: characterKey.first,
-                            characterId: characterKey.second,
-                            stateId: dicePieceKey,
-                            value: toDicePieceValueLog(dicePiece.update),
-                            room,
-                        })
-                    );
-                });
-
-                recordForEach(
-                    character.update.numberPieceValues ?? {},
-                    (numberPiece, numberPieceKey) => {
-                        if (numberPiece.type === replace) {
-                            numberPieceValueLogs.push(
-                                new NumberPieceValueLog$MikroORM({
-                                    characterCreatedBy: characterKey.first,
-                                    characterId: characterKey.second,
-                                    stateId: numberPieceKey,
-                                    value: {
-                                        $version: 1,
-                                        type:
-                                            numberPiece.replace.newValue == null
-                                                ? deleteType
-                                                : createType,
-                                    },
-                                    room,
-                                })
-                            );
-                            return;
-                        }
-                        numberPieceValueLogs.push(
-                            new NumberPieceValueLog$MikroORM({
-                                characterCreatedBy: characterKey.first,
-                                characterId: characterKey.second,
-                                stateId: numberPieceKey,
-                                value: toNumberPieceValueLog(numberPiece.update),
-                                room,
-                            })
-                        );
-                    }
-                );
-            });
-            for (const log of dicePieceValueLogs) {
-                em.persist(log);
-            }
-            for (const log of numberPieceValueLogs) {
-                em.persist(log);
-            }
-
             const nextRoomState = GlobalRoom.Global.applyToEntity({
                 em,
                 target: room,
                 prevState: roomState,
                 operation,
             });
+
+            const logs = createLogs({ prevState: roomState, nextState: nextRoomState });
+            const dicePieceLogEntities: DicePieceValueLog$MikroORM[] = [];
+            logs?.dicePieceValueLogs.forEach(log => {
+                const entity = new DicePieceValueLog$MikroORM({
+                    characterCreatedBy: log.characterKey.createdBy,
+                    characterId: log.characterKey.id,
+                    stateId: log.stateId,
+                    room,
+                    value: log.value,
+                });
+                dicePieceLogEntities.push(entity);
+                em.persist(entity);
+            });
+            const numberPieceLogEntities: NumberPieceValueLog$MikroORM[] = [];
+            logs?.numberPieceValueLogs.forEach(log => {
+                const entity = new NumberPieceValueLog$MikroORM({
+                    characterCreatedBy: log.characterKey.createdBy,
+                    characterId: log.characterKey.id,
+                    stateId: log.stateId,
+                    room,
+                    value: log.value,
+                });
+                numberPieceLogEntities.push(entity);
+                em.persist(entity);
+            });
+
             await em.flush();
 
             const generateOperation = (deliverTo: string): RoomOperation => {
@@ -2253,7 +2132,7 @@ export class RoomResolver {
                 type: 'success',
                 roomOperationPayload,
                 messageUpdatePayload: [
-                    ...dicePieceValueLogs.map(
+                    ...dicePieceLogEntities.map(
                         log =>
                             ({
                                 type: 'messageUpdatePayload',
@@ -2263,7 +2142,7 @@ export class RoomResolver {
                                 value: DicePieceValueLogNameSpace.MikroORM.ToGraphQL.state(log),
                             } as const)
                     ),
-                    ...numberPieceValueLogs.map(
+                    ...numberPieceLogEntities.map(
                         log =>
                             ({
                                 type: 'messageUpdatePayload',
