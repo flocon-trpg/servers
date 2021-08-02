@@ -40,6 +40,8 @@ import {
 } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../utils/className';
+import { ColumnType } from 'antd/lib/table';
+import { SortOrder } from 'antd/lib/table/interface';
 
 type DataSource = {
     key: string;
@@ -61,15 +63,27 @@ const createBooleanParameterColumn = ({
 }: {
     key: StrIndex20;
     boolParamNames: ReadonlyMap<string, ParamNameState>;
-}) => {
+}): ColumnType<DataSource> | null => {
     const reactKey = `boolParameter${key}`;
     const name = boolParamNames.get(key);
     if (name == null) {
         return null;
     }
+    const booleanToNumber = (
+        value: boolean | null | undefined,
+        sortOrder: SortOrder | undefined
+    ) => {
+        if (value == null) {
+            return sortOrder === 'ascend' ? 2 : -2;
+        }
+        return value ? 1 : -1;
+    };
     return {
         title: name.name,
         key: reactKey,
+        sorter: (x, y, sortOrder) =>
+            booleanToNumber(x.character.state.boolParams[key]?.value, sortOrder) -
+            booleanToNumber(y.character.state.boolParams[key]?.value, sortOrder),
         // eslint-disable-next-line react/display-name
         render: (_: unknown, { character, operate }: DataSource) => {
             return (
@@ -108,7 +122,7 @@ const createNumParameterColumn = ({
 }: {
     key: StrIndex20;
     numParamNames: ReadonlyMap<string, ParamNameState>;
-}) => {
+}): ColumnType<DataSource> | null => {
     const reactKey = `numParameter${key}`;
     const name = numParamNames.get(key);
     if (name == null) {
@@ -117,6 +131,13 @@ const createNumParameterColumn = ({
     return {
         title: name.name,
         key: reactKey,
+        sorter: (x, y, sortOrder) => {
+            const defaultValue = sortOrder === 'ascend' ? Number.MAX_VALUE : Number.MIN_VALUE;
+            return (
+                (x.character.state.numParams[key]?.value ?? defaultValue) -
+                (y.character.state.numParams[key]?.value ?? defaultValue)
+            );
+        },
         // eslint-disable-next-line react/display-name
         render: (_: unknown, { character, operate }: DataSource) => {
             return (
@@ -156,7 +177,7 @@ const createStringParameterColumn = ({
 }: {
     key: StrIndex20;
     strParamNames: ReadonlyMap<string, ParamNameState>;
-}) => {
+}): ColumnType<DataSource> | null => {
     const reactKey = `strmParameter${key}`;
     const name = strParamNames.get(key);
     if (name == null) {
@@ -165,6 +186,12 @@ const createStringParameterColumn = ({
     return {
         title: name.name,
         key: reactKey,
+        sorter: (x, y) => {
+            // 現在の仕様では、StringParameterは他のパラメーターと異なりundefinedでも''と同じとみなされるため、それに合わせている。
+            const xValue = x.character.state.strParams[key]?.value ?? '';
+            const yValue = y.character.state.strParams[key]?.value ?? '';
+            return xValue.localeCompare(yValue);
+        },
         // eslint-disable-next-line react/display-name
         render: (_: unknown, { character, operate }: DataSource) => {
             return (
@@ -316,6 +343,7 @@ const CharacterList: React.FC = () => {
         {
             title: '名前',
             key: 'name',
+            sorter: (x, y) => x.character.state.name.localeCompare(y.character.state.name),
             // eslint-disable-next-line react/display-name
             render: (_: unknown, { character }: DataSource) => (
                 <div className={classNames(flex, flexRow, itemsCenter)}>

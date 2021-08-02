@@ -132,7 +132,7 @@ export namespace RoomMessage {
                         if (die.update.isValueChanged === true) {
                             changed.push(`ダイス${i}の値`);
                         }
-                        if (die.update.isValuePrivate != null) {
+                        if (die.update.isValuePrivateChanged != null) {
                             changed.push(`ダイス${i}の公開状態`);
                         }
                     });
@@ -226,7 +226,7 @@ export namespace RoomMessage {
 
                     const changed = [
                         value.isValueChanged ? '値' : null,
-                        value.isValuePrivate ? '公開状態' : null,
+                        value.isValuePrivateChanged ? '公開状態' : null,
                         pieces
                             .toArray()
                             .some(
