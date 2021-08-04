@@ -2,7 +2,7 @@ import * as t from 'io-ts';
 
 export const isIdRecord = (source: Record<string, unknown>): boolean => {
     for (const key in source) {
-        if (key === '$v') {
+        if (key === '$version') {
             continue;
         }
         const value = source[key];

@@ -25,7 +25,7 @@ import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-
 import { Maybe, maybe } from '../../../util/maybe';
 
 export const state = t.type({
-    $v: t.literal(1),
+    $version: t.literal(1),
     image: maybe(filePath),
     isPrivate: t.boolean,
     memo: t.string,
@@ -62,7 +62,7 @@ export const upOperation = createOperation(1, {
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
-    $v: 1;
+    $version: 1;
     image?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<FilePath>>;
     isPrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     memo?: TextOperation.TwoWayOperation;
@@ -197,7 +197,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     }
 
     const valueProps: DownOperation = {
-        $v: 1,
+        $version: 1,
         image: ReplaceOperation.composeDownOperation(first.image, second.image),
         isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
         memo: memo.value,
@@ -235,7 +235,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         pieces: pieces.value.prevState,
     };
     const twoWayOperation: TwoWayOperation = {
-        $v: 1,
+        $version: 1,
         pieces: pieces.value.twoWayOperation,
     };
 
@@ -282,7 +282,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         innerDiff: params => Piece.diff(params),
     });
     const result: TwoWayOperation = {
-        $v: 1,
+        $version: 1,
         pieces,
     };
     if (prevState.image !== nextState.image) {
@@ -339,7 +339,7 @@ export const serverTransform =
         }
 
         const twoWayOperation: TwoWayOperation = {
-            $v: 1,
+            $version: 1,
             pieces: pieces.value,
         };
 
@@ -414,7 +414,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     }
 
     const firstPrime: UpOperation = {
-        $v: 1,
+        $version: 1,
         image: image.firstPrime,
         isPrivate: isPrivate.firstPrime,
         memo: memo.value.firstPrime,
@@ -422,7 +422,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         pieces: pieces.value.firstPrime,
     };
     const secondPrime: UpOperation = {
-        $v: 1,
+        $version: 1,
         image: image.secondPrime,
         isPrivate: isPrivate.secondPrime,
         memo: memo.value.firstPrime,

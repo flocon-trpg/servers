@@ -8,7 +8,7 @@ import { maybe } from '../../../util/maybe';
 
 const update = t.intersection([
     t.type({
-        $v: t.literal(1),
+        $version: t.literal(1),
 
         type: t.literal(updateType),
         isValueChanged: t.boolean,
@@ -24,12 +24,12 @@ const update = t.intersection([
 
 export const type = t.union([
     t.type({
-        $v: t.literal(1),
+        $version: t.literal(1),
         type: t.literal(createType),
         value: NumberPieceValue.state,
     }),
     t.type({
-        $v: t.literal(1),
+        $version: t.literal(1),
         type: t.literal(deleteType),
         value: NumberPieceValue.state,
     }),
@@ -38,12 +38,12 @@ export const type = t.union([
 
 export const exactType = t.union([
     t.strict({
-        $v: t.literal(1),
+        $version: t.literal(1),
         type: t.literal(createType),
         value: NumberPieceValue.state,
     }),
     t.strict({
-        $v: t.literal(1),
+        $version: t.literal(1),
         type: t.literal(deleteType),
         value: NumberPieceValue.state,
     }),
@@ -57,7 +57,7 @@ export const ofOperation = (
     currentState: NumberPieceValue.State
 ): Type => {
     return {
-        $v: 1,
+        $version: 1,
         type: updateType,
         isValueChanged:
             operation.value != null && operation.value.oldValue !== operation.value.newValue,

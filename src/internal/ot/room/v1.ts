@@ -35,7 +35,7 @@ const replaceStringDownOperation = t.type({ oldValue: t.string });
 const replaceStringUpOperation = t.type({ newValue: t.string });
 
 export const dbState = t.type({
-    $v: t.literal(1),
+    $version: t.literal(1),
 
     activeBoardKey: maybe(compositeKey),
     bgms: record(t.string, Bgm.state), // keyはStrIndex5
@@ -161,7 +161,7 @@ export const upOperation = createOperation(1, {
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
-    $v: 1;
+    $version: 1;
 
     activeBoardKey?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<CompositeKey>>;
     bgms?: RecordOperation.RecordTwoWayOperation<Bgm.State, Bgm.TwoWayOperation>;
@@ -847,7 +847,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     }
 
     const valueProps: DownOperation = {
-        $v: 1,
+        $version: 1,
         activeBoardKey: ReplaceOperation.composeDownOperation(
             first.activeBoardKey,
             second.activeBoardKey
@@ -1015,7 +1015,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         participants: participants.value.prevState,
     };
     const twoWayOperation: TwoWayOperation = {
-        $v: 1,
+        $version: 1,
         bgms: bgms.value.twoWayOperation,
         boards: boards.value.twoWayOperation,
         boolParamNames: boolParamNames.value.twoWayOperation,
@@ -1099,7 +1099,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         innerDiff: params => Participant.diff(params),
     });
     const result: TwoWayOperation = {
-        $v: 1,
+        $version: 1,
         bgms,
         boards,
         boolParamNames,
@@ -1402,7 +1402,7 @@ export const serverTransform =
         }
 
         const twoWayOperation: TwoWayOperation = {
-            $v: 1,
+            $version: 1,
             bgms: bgms.value,
             boards: boards.value,
             boolParamNames: boolParamNames.value,
@@ -1624,7 +1624,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     });
 
     const firstPrime: UpOperation = {
-        $v: 1,
+        $version: 1,
         activeBoardKey: activeBoardKey.firstPrime,
         bgms: bgms.value.firstPrime,
         boards: boards.value.firstPrime,
@@ -1638,7 +1638,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     };
 
     const secondPrime: UpOperation = {
-        $v: 1,
+        $version: 1,
         activeBoardKey: activeBoardKey.secondPrime,
         bgms: bgms.value.secondPrime,
         boards: boards.value.secondPrime,

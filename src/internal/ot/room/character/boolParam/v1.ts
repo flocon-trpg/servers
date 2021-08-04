@@ -4,7 +4,7 @@ import { createOperation } from '../../../util/createOperation';
 import { Maybe, maybe } from '../../../util/maybe';
 
 export const state = t.type({
-    $v: t.literal(1),
+    $version: t.literal(1),
 
     isValuePrivate: t.boolean,
     value: maybe(t.boolean),
@@ -27,7 +27,7 @@ export const upOperation = createOperation(1, {
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
-    $v: 1;
+    $version: 1;
 
     isValuePrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     value?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<boolean>>;
