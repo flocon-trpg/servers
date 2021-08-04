@@ -227,7 +227,7 @@ const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({
                 <Menu.Item
                     icon={<Icons.CopyOutlined />}
                     onClick={() => {
-                        copy(`firebase:${reference.fullPath}`).then(() => {
+                        copy(reference.fullPath).then(() => {
                             notification.success({
                                 message: 'クリップボードにコピーしました。',
                                 placement: 'bottomRight',
