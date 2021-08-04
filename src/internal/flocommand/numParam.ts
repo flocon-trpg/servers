@@ -5,9 +5,10 @@ import {
     FNumber,
     FBoolean,
     ScriptError,
+    OnGettingParams,
+    OnSettingParams,
 } from '@kizahasi/flocon-script';
 import * as NumParam from '../ot/room/character/numParam/v1';
-import { OnGettingParams, OnSettingParams } from '@kizahasi/flocon-script/dist/types/scriptValue';
 
 const value = 'value';
 const isValueSecret = 'isValueSecret';
