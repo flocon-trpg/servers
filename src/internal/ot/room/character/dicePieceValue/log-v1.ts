@@ -23,7 +23,7 @@ type DieValueUpOperation = t.TypeOf<typeof dieValueUpOperation>;
 
 const update = t.intersection([
     t.type({
-        $v: t.literal(1),
+        $version: t.literal(1),
 
         type: t.literal(updateType),
     }),
@@ -41,12 +41,12 @@ const update = t.intersection([
 
 export const type = t.union([
     t.type({
-        $v: t.literal(1),
+        $version: t.literal(1),
         type: t.literal(createType),
         value: DicePieceValue.state,
     }),
     t.type({
-        $v: t.literal(1),
+        $version: t.literal(1),
         type: t.literal(deleteType),
         value: DicePieceValue.state,
     }),
@@ -55,12 +55,12 @@ export const type = t.union([
 
 export const exactType = t.union([
     t.strict({
-        $v: t.literal(1),
+        $version: t.literal(1),
         type: t.literal(createType),
         value: DicePieceValue.state,
     }),
     t.strict({
-        $v: t.literal(1),
+        $version: t.literal(1),
         type: t.literal(deleteType),
         value: DicePieceValue.state,
     }),
@@ -74,7 +74,7 @@ export const ofOperation = (
     currentState: DicePieceValue.State
 ): Type => {
     return {
-        $v: 1,
+        $version: 1,
         type: updateType,
         dice:
             operation.dice == null
@@ -87,7 +87,7 @@ export const ofOperation = (
                                   throw new Error('this should not happen');
                               }
                               const update: DieValueUpOperation = {
-                                  $v: 1,
+                                  $version: 1,
                                   dieType: element.update.dieType,
                                   isValuePrivateChanged:
                                       element.update.isValuePrivate == null ||

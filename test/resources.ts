@@ -29,7 +29,7 @@ export namespace Resources {
 
     export namespace Character {
         export const emptyState: CharacterState = {
-            $v: 1,
+            $version: 1,
             chatPalette: '',
             memo: '',
             name: '',
@@ -51,7 +51,7 @@ export namespace Resources {
     }
 
     export const minimumState: State = {
-        $v: 1,
+        $version: 1,
         activeBoardKey: null,
         createdBy: 'CREATED_BY',
         name: 'ROOM_NAME',
@@ -60,25 +60,25 @@ export namespace Resources {
         characters: {},
         participants: {
             [Participant.Player1.userUid]: {
-                $v: 1,
+                $version: 1,
                 name: Participant.Player1.name,
                 role: Player,
                 imagePieceValues: {},
             },
             [Participant.Player2.userUid]: {
-                $v: 1,
+                $version: 1,
                 name: Participant.Player2.name,
                 role: Player,
                 imagePieceValues: {},
             },
             [Participant.Spectator.userUid]: {
-                $v: 1,
+                $version: 1,
                 name: Participant.Spectator.name,
                 role: Spectator,
                 imagePieceValues: {},
             },
             [Participant.Null.userUid]: {
-                $v: 1,
+                $version: 1,
                 name: Participant.Null.name,
                 role: null,
                 imagePieceValues: {},
@@ -101,24 +101,24 @@ export namespace Resources {
     };
 
     export const complexState: State = {
-        $v: 1,
+        $version: 1,
         activeBoardKey: null,
         createdBy: 'CREATED_BY',
         name: 'ROOM_NAME',
         bgms: {
             '1': {
-                $v: 1,
+                $version: 1,
                 isPaused: false,
-                files: [{ $v: 1, path: 'BGM_FILE_PATH', sourceType: 'Default' }],
+                files: [{ $version: 1, path: 'BGM_FILE_PATH', sourceType: 'Default' }],
                 volume: 1,
             },
         },
         boards: {
             BOARD_CREATED_BY: {
                 BOARD_ID: {
-                    $v: 1,
+                    $version: 1,
                     backgroundImage: {
-                        $v: 1,
+                        $version: 1,
                         path: 'BOARD_IMAGE_PATH',
                         sourceType: 'Default',
                     },
@@ -136,9 +136,9 @@ export namespace Resources {
         characters: {
             CHARA_FIRST_KEY: {
                 CHARA_SECOND_KEY: {
-                    $v: 1,
+                    $version: 1,
                     image: {
-                        $v: 1,
+                        $version: 1,
                         path: 'CHARA_IMAGE_PATH',
                         sourceType: 'Default',
                     },
@@ -150,34 +150,34 @@ export namespace Resources {
                     privateCommands: {},
                     privateVarToml: '',
                     tachieImage: {
-                        $v: 1,
+                        $version: 1,
                         path: 'TACHIE_IMAGE_PATH',
                         sourceType: 'Default',
                     },
                     boolParams: {
                         '1': {
-                            $v: 1,
+                            $version: 1,
                             isValuePrivate: false,
                             value: false,
                         },
                     },
                     numParams: {
                         '1': {
-                            $v: 1,
+                            $version: 1,
                             isValuePrivate: false,
                             value: 10,
                         },
                     },
                     numMaxParams: {
                         '1': {
-                            $v: 1,
+                            $version: 1,
                             isValuePrivate: false,
                             value: 20,
                         },
                     },
                     strParams: {
                         '1': {
-                            $v: 1,
+                            $version: 1,
                             isValuePrivate: false,
                             value: 'STR_PARAM_VALUE',
                         },
@@ -185,7 +185,7 @@ export namespace Resources {
                     pieces: {
                         CHARA_PIECE_FIRST_KEY: {
                             CHARA_PIECE_SECOND_KEY: {
-                                $v: 1,
+                                $version: 1,
                                 cellH: 1,
                                 cellW: 2,
                                 cellX: 3,
@@ -202,7 +202,7 @@ export namespace Resources {
                     tachieLocations: {
                         TACHIE_LOCATION_FIRST_KEY: {
                             TACHIE_LOCATION_SECOND_KEY: {
-                                $v: 1,
+                                $version: 1,
                                 isPrivate: false,
                                 h: 5,
                                 w: 6,
@@ -213,10 +213,10 @@ export namespace Resources {
                     },
                     dicePieceValues: {
                         DICE_PIECE_KEY: {
-                            $v: 1,
+                            $version: 1,
                             dice: {
                                 '1': {
-                                    $v: 1,
+                                    $version: 1,
                                     dieType: 'D6',
                                     isValuePrivate: false,
                                     value: 3,
@@ -225,7 +225,7 @@ export namespace Resources {
                             pieces: {
                                 DICE_PIECE_FIRST_KEY: {
                                     DICE_PIECE_SECOND_KEY: {
-                                        $v: 1,
+                                        $version: 1,
                                         cellH: 1,
                                         cellW: 2,
                                         cellX: 3,
@@ -243,13 +243,13 @@ export namespace Resources {
                     },
                     numberPieceValues: {
                         NUM_PIECE_KEY: {
-                            $v: 1,
+                            $version: 1,
                             isValuePrivate: false,
                             value: 1,
                             pieces: {
                                 DICE_PIECE_FIRST_KEY: {
                                     DICE_PIECE_SECOND_KEY: {
-                                        $v: 1,
+                                        $version: 1,
                                         cellH: 1,
                                         cellW: 2,
                                         cellX: 3,
@@ -271,25 +271,25 @@ export namespace Resources {
         participants: minimumState.participants,
         boolParamNames: {
             '1': {
-                $v: 1,
+                $version: 1,
                 name: 'BOOL_PARAM_NAME',
             },
         },
         numParamNames: {
             '1': {
-                $v: 1,
+                $version: 1,
                 name: 'NUM_PARAM_NAME',
             },
         },
         strParamNames: {
             '1': {
-                $v: 1,
+                $version: 1,
                 name: 'STR_PARAM_NAME',
             },
         },
         memos: {
             MEMO_ID: {
-                $v: 1,
+                $version: 1,
                 name: 'MEMO_NAME',
                 dir: ['MEMO_DIR'],
                 text: 'MEMO_TEXT',

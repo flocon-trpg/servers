@@ -15,7 +15,7 @@ import { Result } from '@kizahasi/result';
 import * as ReplaceOperation from '../../../util/replaceOperation';
 
 export const state = t.type({
-    $v: t.literal(1),
+    $version: t.literal(1),
 
     name: t.string,
     value: t.string,
@@ -38,7 +38,7 @@ export const upOperation = createOperation(1, {
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
-    $v: 1;
+    $version: 1;
 
     name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
     value?: TextOperation.TwoWayOperation;
@@ -110,7 +110,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
         return value;
     }
     const valueProps: DownOperation = {
-        $v: 1,
+        $version: 1,
         name: ReplaceOperation.composeDownOperation(first.name, second.name),
         value: value.value,
     };
@@ -130,7 +130,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     }
 
     const prevState: State = { ...nextState };
-    const twoWayOperation: TwoWayOperation = { $v: 1 };
+    const twoWayOperation: TwoWayOperation = { $version: 1 };
 
     if (downOperation.name != null) {
         prevState.name = downOperation.name.oldValue;
@@ -156,7 +156,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const resultType: TwoWayOperation = { $v: 1 };
+    const resultType: TwoWayOperation = { $version: 1 };
 
     if (prevState.name !== nextState.name) {
         resultType.name = {
@@ -183,7 +183,7 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
     serverOperation,
 }) => {
     const twoWayOperation: TwoWayOperation = {
-        $v: 1,
+        $version: 1,
         name: ReplaceOperation.serverTransform({
             first: serverOperation?.name,
             second: clientOperation.name,
@@ -220,13 +220,13 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     }
 
     const firstPrime: UpOperation = {
-        $v: 1,
+        $version: 1,
         name: name.firstPrime,
         value: value.value.firstPrime,
     };
 
     const secondPrime: UpOperation = {
-        $v: 1,
+        $version: 1,
         name: name.secondPrime,
         value: value.value.secondPrime,
     };

@@ -6,7 +6,7 @@ import * as ReplaceOperation from '../../util/replaceOperation';
 import { Apply, ClientTransform, Compose, Diff, Restore, ServerTransform } from '../../util/type';
 
 export const state = t.type({
-    $v: t.literal(1),
+    $version: t.literal(1),
 
     name: t.string,
 });
@@ -26,7 +26,7 @@ export const upOperation = createOperation(1, {
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
-    $v: 1;
+    $version: 1;
 
     name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
 };
@@ -61,7 +61,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const valueProps: DownOperation = {
-        $v: 1,
+        $version: 1,
         name: ReplaceOperation.composeDownOperation(first.name, second.name),
     };
     return Result.ok(valueProps);
@@ -76,7 +76,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     }
 
     const prevState: State = { ...nextState };
-    const twoWayOperation: TwoWayOperation = { $v: 1 };
+    const twoWayOperation: TwoWayOperation = { $version: 1 };
 
     if (downOperation.name !== undefined) {
         prevState.name = downOperation.name.oldValue;
@@ -90,7 +90,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const resultType: TwoWayOperation = { $v: 1 };
+    const resultType: TwoWayOperation = { $version: 1 };
     if (prevState.name !== nextState.name) {
         resultType.name = {
             oldValue: prevState.name,
@@ -108,7 +108,7 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
     clientOperation,
     serverOperation,
 }) => {
-    const twoWayOperation: TwoWayOperation = { $v: 1 };
+    const twoWayOperation: TwoWayOperation = { $version: 1 };
 
     twoWayOperation.name = ReplaceOperation.serverTransform({
         first: serverOperation?.name,
@@ -130,12 +130,12 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     });
 
     const firstPrime: UpOperation = {
-        $v: 1,
+        $version: 1,
         name: name.firstPrime,
     };
 
     const secondPrime: UpOperation = {
-        $v: 1,
+        $version: 1,
         name: name.secondPrime,
     };
 

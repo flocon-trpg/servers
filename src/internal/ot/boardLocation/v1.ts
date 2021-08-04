@@ -11,7 +11,7 @@ const numberUpOperation = t.type({ newValue: t.number });
 const booleanUpOperation = t.type({ newValue: t.boolean });
 
 export const state = t.type({
-    $v: t.literal(1),
+    $version: t.literal(1),
     h: t.number,
     isPrivate: t.boolean,
     w: t.number,
@@ -42,7 +42,7 @@ export const upOperation = createOperation(1, {
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
-    $v: 1;
+    $version: 1;
 
     h?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     isPrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
@@ -107,7 +107,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const valueProps: DownOperation = {
-        $v: 1,
+        $version: 1,
         h: ReplaceOperation.composeDownOperation(first.h, second.h),
         isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
         w: ReplaceOperation.composeDownOperation(first.w, second.w),
@@ -125,7 +125,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         return Result.ok({ prevState: nextState, twoWayOperation: undefined });
     }
     const prevState = { ...nextState };
-    const twoWayOperation: TwoWayOperation = { $v: 1 };
+    const twoWayOperation: TwoWayOperation = { $version: 1 };
 
     if (downOperation.h !== undefined) {
         prevState.h = downOperation.h.oldValue;
@@ -155,7 +155,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const resultType: TwoWayOperation = { $v: 1 };
+    const resultType: TwoWayOperation = { $version: 1 };
     if (prevState.h !== nextState.h) {
         resultType.h = { oldValue: prevState.h, newValue: nextState.h };
     }
@@ -185,7 +185,7 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
     clientOperation,
     serverOperation,
 }) => {
-    const twoWayOperation: TwoWayOperation = { $v: 1 };
+    const twoWayOperation: TwoWayOperation = { $version: 1 };
 
     twoWayOperation.h = ReplaceOperation.serverTransform({
         first: serverOperation?.h,
@@ -243,7 +243,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     });
 
     const firstPrime: UpOperation = {
-        $v: 1,
+        $version: 1,
         h: h.firstPrime,
         isPrivate: isPrivate.firstPrime,
         w: w.firstPrime,
@@ -252,7 +252,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     };
 
     const secondPrime: UpOperation = {
-        $v: 1,
+        $version: 1,
         h: h.secondPrime,
         isPrivate: isPrivate.secondPrime,
         w: w.secondPrime,

@@ -1,13 +1,11 @@
+import { FType, FValue, ScriptError } from '@kizahasi/flocon-script';
 import {
-    FType,
-    FValue,
-    ScriptError,
+    AstInfo,
     beginCast,
     FObject,
     FRecord,
     FString,
-} from '@kizahasi/flocon-script';
-import { AstInfo } from '@kizahasi/flocon-script/dist/types/scriptValue';
+} from '@kizahasi/flocon-script/dist/types/scriptValue';
 import * as FilePath from '../ot/filePath/v1';
 
 export const toFFilePath = (source: FilePath.FilePath, astInfo: AstInfo | undefined): FObject => {
@@ -41,7 +39,7 @@ export const toFilePath = (
         );
     }
     return {
-        $v: 1,
+        $version: 1,
         path,
         sourceType,
     };
