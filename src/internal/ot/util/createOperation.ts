@@ -6,7 +6,7 @@ export const createOperation = <TVersion extends string | number, TProps extends
 ) =>
     t.intersection([
         t.type({
-            $version: t.literal(version),
+            $v: t.literal(version),
         }),
         t.partial(props),
     ]);

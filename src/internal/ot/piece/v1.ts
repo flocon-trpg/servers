@@ -21,7 +21,7 @@ const numberUpOperation = t.type({ newValue: t.number });
 const booleanUpOperation = t.type({ newValue: t.boolean });
 
 export const state = t.type({
-    $version: t.literal(1),
+    $v: t.literal(1),
     cellH: t.number,
     cellW: t.number,
     cellX: t.number,
@@ -67,7 +67,7 @@ export const upOperation = createOperation(1, {
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
-    $version: 1;
+    $v: 1;
 
     cellH?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     cellW?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
@@ -186,7 +186,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const valueProps: DownOperation = {
-        $version: 1,
+        $v: 1,
         cellH: ReplaceOperation.composeDownOperation(first.cellH, second.cellH),
         cellW: ReplaceOperation.composeDownOperation(first.cellW, second.cellW),
         cellX: ReplaceOperation.composeDownOperation(first.cellX, second.cellX),
@@ -212,7 +212,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     const prevState: State = {
         ...nextState,
     };
-    const twoWayOperation: TwoWayOperation = { $version: 1 };
+    const twoWayOperation: TwoWayOperation = { $v: 1 };
 
     if (downOperation.cellH !== undefined) {
         prevState.cellH = downOperation.cellH.oldValue;
@@ -277,7 +277,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const resultType: TwoWayOperation = { $version: 1 };
+    const resultType: TwoWayOperation = { $v: 1 };
     if (prevState.cellH !== nextState.cellH) {
         resultType.cellH = {
             oldValue: prevState.cellH,
@@ -337,7 +337,7 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
     clientOperation,
     serverOperation,
 }) => {
-    const twoWayOperation: TwoWayOperation = { $version: 1 };
+    const twoWayOperation: TwoWayOperation = { $v: 1 };
 
     twoWayOperation.cellH = ReplaceOperation.serverTransform({
         first: serverOperation?.cellH,
@@ -440,7 +440,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     });
 
     const firstPrime: UpOperation = {
-        $version: 1,
+        $v: 1,
         cellH: cellH.firstPrime,
         cellW: cellW.firstPrime,
         cellX: cellX.firstPrime,
@@ -454,7 +454,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     };
 
     const secondPrime: UpOperation = {
-        $version: 1,
+        $v: 1,
         cellH: cellH.secondPrime,
         cellW: cellW.secondPrime,
         cellX: cellX.secondPrime,

@@ -32,7 +32,7 @@ const participantRole = t.union([t.literal(Player), t.literal(Spectator), t.lite
 export type ParticipantRole = t.TypeOf<typeof participantRole>;
 
 export const state = t.type({
-    $version: t.literal(1),
+    $v: t.literal(1),
 
     name: t.string,
     role: maybe(participantRole),
@@ -65,7 +65,7 @@ export const upOperation = createOperation(1, {
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
-    $version: 1;
+    $v: 1;
 
     name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
     role?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<ParticipantRole>>;
@@ -202,7 +202,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
         return imagePieceValues;
     }
     const valueProps: DownOperation = {
-        $version: 1,
+        $v: 1,
         name: ReplaceOperation.composeDownOperation(
             first.name ?? undefined,
             second.name ?? undefined
@@ -244,7 +244,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         imagePieceValues: imagePieceValues.value.prevState,
     };
     const twoWayOperation: TwoWayOperation = {
-        $version: 1,
+        $v: 1,
         imagePieceValues: imagePieceValues.value.twoWayOperation,
     };
 
@@ -276,7 +276,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         innerDiff: params => ImagePieceValue.diff(params),
     });
     const result: TwoWayOperation = {
-        $version: 1,
+        $v: 1,
         imagePieceValues,
     };
     if (prevState.name !== nextState.name) {
@@ -334,7 +334,7 @@ export const serverTransform =
         }
 
         const twoWayOperation: TwoWayOperation = {
-            $version: 1,
+            $v: 1,
             imagePieceValues: imagePieceValues.value,
         };
 
@@ -393,14 +393,14 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     });
 
     const firstPrime: UpOperation = {
-        $version: 1,
+        $v: 1,
         imagePieceValues: imagePieceValues.value.firstPrime,
         name: name.firstPrime,
         role: role.firstPrime,
     };
 
     const secondPrime: UpOperation = {
-        $version: 1,
+        $v: 1,
         imagePieceValues: imagePieceValues.value.secondPrime,
         name: name.secondPrime,
         role: role.secondPrime,

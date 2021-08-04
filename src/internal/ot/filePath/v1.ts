@@ -6,7 +6,7 @@ export const FirebaseStorage = 'FirebaseStorage';
 export const sourceType = t.union([t.literal(Default), t.literal(FirebaseStorage)]);
 
 export const filePath = t.type({
-    $version: t.literal(1),
+    $v: t.literal(1),
 
     path: t.string,
     sourceType,

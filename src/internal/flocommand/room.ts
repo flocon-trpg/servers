@@ -8,8 +8,7 @@ import {
     SetCoreParams,
 } from '@kizahasi/flocon-script';
 import * as Room from '../ot/room/v1';
-import * as Character from '../ot/room/character/v1';
-import { CompositeKey, dualKeyRecordFind } from '@kizahasi/util';
+import { CompositeKey } from '@kizahasi/util';
 import { FCharacter } from './character';
 import cloneDeep from 'lodash.clonedeep';
 
@@ -29,14 +28,11 @@ export class FRoom extends FObject {
     }
 
     public findCharacter(key: CompositeKey): FCharacter | undefined {
-        const character = dualKeyRecordFind<Character.State>(this._room.characters, {
-            first: key.createdBy,
-            second: key.id,
-        });
+        const character = this._room.characters[key.createdBy]?.[key.id];
         if (character == null) {
             return undefined;
         }
-        return new FCharacter(character);
+        return new FCharacter(character, this.room);
     }
 
     override getCore({ key }: GetCoreParams): FValue {

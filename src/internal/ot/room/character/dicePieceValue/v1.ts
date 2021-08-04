@@ -27,7 +27,7 @@ import * as RecordOperation from '../../../util/recordOperation';
 export const dicePieceValueStrIndexes = ['1', '2', '3', '4'] as const;
 
 export const state = t.type({
-    $version: t.literal(1),
+    $v: t.literal(1),
     dice: record(t.string, DieValue.state),
     pieces: record(t.string, record(t.string, Piece.state)),
 });
@@ -58,7 +58,7 @@ export const upOperation = createOperation(1, {
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
-    $version: 1;
+    $v: 1;
     dice?: RecordTwoWayOperation<DieValue.State, DieValue.TwoWayOperation>;
     pieces?: DualKeyRecordTwoWayOperation<Piece.State, Piece.TwoWayOperation>;
 };
@@ -191,7 +191,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     }
 
     const valueProps: DownOperation = {
-        $version: 1,
+        $v: 1,
         dice: dice.value,
         pieces: pieces.value,
     };
@@ -242,7 +242,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         pieces: pieces.value.prevState,
     };
     const twoWayOperation: TwoWayOperation = {
-        $version: 1,
+        $v: 1,
         dice: dice.value.twoWayOperation,
         pieces: pieces.value.twoWayOperation,
     };
@@ -262,7 +262,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         innerDiff: params => Piece.diff(params),
     });
     const resultType: TwoWayOperation = {
-        $version: 1,
+        $v: 1,
         dice,
         pieces,
     };
@@ -340,7 +340,7 @@ export const serverTransform =
         }
 
         const twoWayOperation: TwoWayOperation = {
-            $version: 1,
+            $v: 1,
             dice: dice.value,
             pieces: pieces.value,
         };
@@ -382,13 +382,13 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     }
 
     const firstPrime: UpOperation = {
-        $version: 1,
+        $v: 1,
         dice: dice.value.firstPrime,
         pieces: pieces.value.firstPrime,
     };
 
     const secondPrime: UpOperation = {
-        $version: 1,
+        $v: 1,
         dice: dice.value.secondPrime,
         pieces: pieces.value.secondPrime,
     };

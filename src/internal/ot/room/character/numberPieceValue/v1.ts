@@ -23,7 +23,7 @@ import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-
 import { CompositeKey } from '@kizahasi/util';
 
 export const state = t.type({
-    $version: t.literal(1),
+    $v: t.literal(1),
     isValuePrivate: t.boolean,
     value: t.number,
     pieces: record(t.string, record(t.string, Piece.state)),
@@ -54,7 +54,7 @@ export const upOperation = createOperation(1, {
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
-    $version: 1;
+    $v: 1;
     isValuePrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     value?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     pieces?: DualKeyRecordTwoWayOperation<Piece.State, Piece.TwoWayOperation>;
@@ -152,7 +152,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     }
 
     const valueProps: DownOperation = {
-        $version: 1,
+        $v: 1,
         isValuePrivate: ReplaceOperation.composeDownOperation(
             first.isValuePrivate ?? undefined,
             second.isValuePrivate ?? undefined
@@ -191,7 +191,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 
     const prevState: State = { ...nextState, pieces: pieces.value.prevState };
     const twoWayOperation: TwoWayOperation = {
-        $version: 1,
+        $v: 1,
         pieces: pieces.value.twoWayOperation,
     };
 
@@ -220,7 +220,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         innerDiff: params => Piece.diff(params),
     });
     const resultType: TwoWayOperation = {
-        $version: 1,
+        $v: 1,
         pieces,
     };
     if (prevState.isValuePrivate !== nextState.isValuePrivate) {
@@ -279,7 +279,7 @@ export const serverTransform =
         }
 
         const twoWayOperation: TwoWayOperation = {
-            $version: 1,
+            $v: 1,
             pieces: pieces.value,
         };
 
@@ -328,14 +328,14 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     });
 
     const firstPrime: UpOperation = {
-        $version: 1,
+        $v: 1,
         pieces: pieces.value.firstPrime,
         isValuePrivate: isValuePrivate.firstPrime,
         value: value.firstPrime,
     };
 
     const secondPrime: UpOperation = {
-        $version: 1,
+        $v: 1,
         pieces: pieces.value.secondPrime,
         isValuePrivate: isValuePrivate.secondPrime,
         value: value.secondPrime,
