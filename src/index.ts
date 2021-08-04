@@ -4,6 +4,7 @@ export {
     createFValue,
     beginCast,
     toTypeName,
+    AstInfo,
     FArray,
     FBoolean,
     FFunction,
