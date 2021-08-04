@@ -14,7 +14,7 @@ import { isIdRecord } from '../../../util/record';
 import { Result } from '@kizahasi/result';
 
 export const state = t.type({
-    $version: t.literal(1),
+    $v: t.literal(1),
 
     isValuePrivate: t.boolean,
     value: t.string,
@@ -37,7 +37,7 @@ export const upOperation = createOperation(1, {
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
-    $version: 1;
+    $v: 1;
 
     isValuePrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     value?: TextOperation.TwoWayOperation;
@@ -104,7 +104,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
         return value;
     }
     const valueProps: DownOperation = {
-        $version: 1,
+        $v: 1,
         isValuePrivate: ReplaceOperation.composeDownOperation(
             first.isValuePrivate,
             second.isValuePrivate
@@ -127,7 +127,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     }
 
     const prevState: State = { ...nextState };
-    const twoWayOperation: TwoWayOperation = { $version: 1 };
+    const twoWayOperation: TwoWayOperation = { $v: 1 };
 
     if (downOperation.isValuePrivate !== undefined) {
         prevState.isValuePrivate = downOperation.isValuePrivate.oldValue;
@@ -152,7 +152,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const resultType: TwoWayOperation = { $version: 1 };
+    const resultType: TwoWayOperation = { $v: 1 };
     if (prevState.isValuePrivate !== nextState.isValuePrivate) {
         resultType.isValuePrivate = {
             oldValue: prevState.isValuePrivate,
@@ -174,7 +174,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
 export const serverTransform =
     (isAuthorized: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
-        const twoWayOperation: TwoWayOperation = { $version: 1 };
+        const twoWayOperation: TwoWayOperation = { $v: 1 };
 
         if (isAuthorized) {
             twoWayOperation.isValuePrivate = ReplaceOperation.serverTransform({
@@ -217,13 +217,13 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     }
 
     const firstPrime: UpOperation = {
-        $version: 1,
+        $v: 1,
         isValuePrivate: isValuePrivate.firstPrime,
         value: value.value.firstPrime,
     };
 
     const secondPrime: UpOperation = {
-        $version: 1,
+        $v: 1,
         isValuePrivate: isValuePrivate.secondPrime,
         value: value.value.secondPrime,
     };

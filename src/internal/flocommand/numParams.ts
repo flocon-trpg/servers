@@ -13,7 +13,7 @@ import * as Room from '../ot/room/v1';
 import { AstInfo } from '@kizahasi/flocon-script/dist/types/scriptValue';
 import { FNumParam } from './numParam';
 
-const createDefaultState = (): NumParam.State => ({ $version: 1, value: 0, isValuePrivate: false });
+const createDefaultState = (): NumParam.State => ({ $v: 1, value: 0, isValuePrivate: false });
 
 export class FNumParams extends FObject {
     public constructor(
