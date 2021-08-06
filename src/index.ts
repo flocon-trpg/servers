@@ -6,6 +6,7 @@ export {
     toTypeName,
     AstInfo,
     FArray,
+    FTypedArray,
     FBoolean,
     FFunction,
     FNumber,
