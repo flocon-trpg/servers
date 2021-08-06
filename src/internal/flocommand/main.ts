@@ -3,7 +3,6 @@ import { exec, ScriptError, test } from '@kizahasi/flocon-script';
 import { FRoom } from './room';
 import { CompositeKey, compositeKeyToString } from '@kizahasi/util';
 import { CustomResult, Result } from '@kizahasi/result';
-import { decodeState } from '../ot/room/converter';
 
 type CommandError = {
     message: string;
@@ -66,6 +65,5 @@ export const execCharacterCommand = ({
         throw e;
     }
     const result: Room.State = fRoom.room;
-    // 安全策をとって、io-tsを用いて正常なRoom.Stateであるかどうかを確認している
-    return Result.ok(decodeState(result));
+    return Result.ok(result);
 };

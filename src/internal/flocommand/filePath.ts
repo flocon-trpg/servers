@@ -21,12 +21,15 @@ export const toFFilePath = (source: FilePath.FilePath, astInfo: AstInfo | undefi
     return result;
 };
 
-export const toFilePath = (
+export const toFilePathOrUndefined = (
     source: FValue,
     astInfo: AstInfo | undefined
 ): FilePath.FilePath | undefined => {
-    if (source?.type !== FType.Object) {
+    if (source === undefined) {
         return undefined;
+    }
+    if (source?.type !== FType.Object) {
+        throw new ScriptError();
     }
     const path = beginCast(source.get({ property: new FString('path'), astInfo }))
         .addString()
@@ -45,4 +48,12 @@ export const toFilePath = (
         path,
         sourceType,
     };
+};
+
+export const toFilePath = (source: FValue, astInfo: AstInfo | undefined): FilePath.FilePath => {
+    const result = toFilePathOrUndefined(source, astInfo);
+    if (result === undefined) {
+        throw new ScriptError();
+    }
+    return result;
 };

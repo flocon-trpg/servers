@@ -9,14 +9,18 @@ import {
 } from '@kizahasi/flocon-script';
 import * as Character from '../ot/room/character/v1';
 import * as Room from '../ot/room/v1';
-import { toFFilePath, toFilePath } from './filePath';
+import { FBoolParams } from './boolParams';
+import { toFFilePath, toFilePathOrUndefined } from './filePath';
 import { FNumParams } from './numParams';
+import { FStrParams } from './strParams';
 
 const icon = 'icon';
 const name = 'name';
+const booleanParameters = 'booleanParameters';
 const numberParameters = 'numberParameters';
 const maxNumberParameters = 'maxNumberParameters';
 const portrait = 'portrait';
+const stringParameters = 'stringParameters';
 
 export class FCharacter extends FObject {
     public constructor(
@@ -28,6 +32,8 @@ export class FCharacter extends FObject {
 
     override getCore({ key, astInfo }: OnGettingParams): FValue {
         switch (key) {
+            case booleanParameters:
+                return new FBoolParams(this.character.boolParams, this.room);
             case icon:
                 return this.character.image == null
                     ? null
@@ -42,6 +48,8 @@ export class FCharacter extends FObject {
                 return this.character.tachieImage == null
                     ? null
                     : toFFilePath(this.character.tachieImage, astInfo);
+            case stringParameters:
+                return new FStrParams(this.character.strParams, this.room);
             default:
                 return undefined;
         }
@@ -51,7 +59,7 @@ export class FCharacter extends FObject {
         switch (key) {
             case icon: {
                 const $newValue = beginCast(newValue).addObject().cast(astInfo?.range);
-                this.character.image = toFilePath($newValue, astInfo);
+                this.character.image = toFilePathOrUndefined($newValue, astInfo);
                 return;
             }
             case name: {
@@ -59,13 +67,15 @@ export class FCharacter extends FObject {
                 this.character.name = $newValue;
                 return;
             }
+            case booleanParameters:
             case maxNumberParameters:
-            case numberParameters: {
+            case numberParameters:
+            case stringParameters: {
                 throw new ScriptError(`${key}は読み取り専用プロパティです。`);
             }
             case portrait: {
                 const $newValue = beginCast(newValue).addObject().cast(astInfo?.range);
-                this.character.tachieImage = toFilePath($newValue, astInfo);
+                this.character.tachieImage = toFilePathOrUndefined($newValue, astInfo);
                 return;
             }
             default:

@@ -9,15 +9,19 @@ import {
 } from '@kizahasi/flocon-script';
 import { recordToArray } from '@kizahasi/util';
 import * as Character from '../ot/room/character/v1';
-import * as NumParam from '../ot/room/character/numParam/v1';
+import * as StrParam from '../ot/room/character/strParam/v1';
 import * as Room from '../ot/room/v1';
-import { FNumParam } from './numParam';
+import { FStrParam } from './strParam';
 
-const createDefaultState = (): NumParam.State => ({ $version: 1, value: 0, isValuePrivate: false });
+const createDefaultState = (): StrParam.State => ({
+    $version: 1,
+    value: '',
+    isValuePrivate: false,
+});
 
-export class FNumParams extends FObject {
+export class FStrParams extends FObject {
     public constructor(
-        private readonly numParams: Character.State['numParams'],
+        private readonly strParams: Character.State['strParams'],
         private readonly room: Room.State
     ) {
         super();
@@ -30,39 +34,18 @@ export class FNumParams extends FObject {
     }
 
     private findByName(nameOrKeyValue: FValue, astInfo: AstInfo | undefined) {
-        const name = beginCast(nameOrKeyValue).addString().addNumber().cast(astInfo?.range);
+        const name = beginCast(nameOrKeyValue).addString().cast(astInfo?.range);
         const keys = this.findKeysByName(name);
         for (const key of keys) {
-            const found = this.numParams[key];
+            const found = this.strParams[key];
             if (found == null) {
                 const newValue = createDefaultState();
-                this.numParams[key] = newValue;
+                this.strParams[key] = newValue;
                 return newValue;
             }
             return found;
         }
         return undefined;
-    }
-
-    private incrOrDecrValue(
-        nameOrKeyValue: FValue,
-        diffValue: FValue,
-        isIncr: boolean,
-        astInfo: AstInfo | undefined
-    ) {
-        const diff = beginCast(diffValue).addNumber().cast(astInfo?.range);
-        const found = this.findByName(nameOrKeyValue, astInfo);
-        if (found == null) {
-            return;
-        }
-        if (found.value == null) {
-            return;
-        }
-        if (isIncr) {
-            found.value += diff;
-        } else {
-            found.value -= diff;
-        }
     }
 
     private setIsValuePrivate(
@@ -88,25 +71,7 @@ export class FNumParams extends FObject {
                         if (result == null) {
                             return undefined;
                         }
-                        return new FNumParam(result);
-                    },
-                    this,
-                    false
-                );
-            case 'incrementValue':
-                return new FFunction(
-                    ({ args }) => {
-                        this.incrOrDecrValue(args[0], args[1], true, astInfo);
-                        return undefined;
-                    },
-                    this,
-                    false
-                );
-            case 'decrementValue':
-                return new FFunction(
-                    ({ args }) => {
-                        this.incrOrDecrValue(args[0], args[1], false, astInfo);
-                        return undefined;
+                        return new FStrParam(result);
                     },
                     this,
                     false
@@ -114,7 +79,7 @@ export class FNumParams extends FObject {
             case 'setValue':
                 return new FFunction(
                     ({ args }) => {
-                        const newValue = beginCast(args[1]).addNumber().cast(astInfo?.range);
+                        const newValue = beginCast(args[1]).addString().cast(astInfo?.range);
                         const found = this.findByName(args[0], astInfo);
                         if (found == null) {
                             return;
@@ -134,6 +99,7 @@ export class FNumParams extends FObject {
                     this,
                     false
                 );
+
             default:
                 break;
         }
@@ -145,6 +111,6 @@ export class FNumParams extends FObject {
     }
 
     override toJObject(): unknown {
-        return this.numParams;
+        return this.strParams;
     }
 }
