@@ -11,6 +11,7 @@ import * as Room from '../ot/room/v1';
 import { CompositeKey } from '@kizahasi/util';
 import { FCharacter } from './character';
 import cloneDeep from 'lodash.clonedeep';
+import { FParamNames } from './paramNames';
 
 const name = 'name';
 
@@ -39,6 +40,12 @@ export class FRoom extends FObject {
         switch (key) {
             case name:
                 return new FString(this._room.name);
+            case 'booleanParameterNames':
+                return new FParamNames(this.room, 'Boolean');
+            case 'numberParameterNames':
+                return new FParamNames(this.room, 'Number');
+            case 'stringParameterNames':
+                return new FParamNames(this.room, 'String');
             default:
                 return undefined;
         }
@@ -52,7 +59,7 @@ export class FRoom extends FObject {
                 return;
             }
             default:
-                throw new ScriptError(`'${key}' is not supported.`, astInfo?.range);
+                throw new ScriptError(`${key}への値のセットは制限されています。`, astInfo?.range);
         }
     }
 
