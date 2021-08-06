@@ -2,7 +2,7 @@ import { AstInfo, FBoolean, FFunction, FType, FValue, GetCoreParams } from '../s
 import { Option } from '@kizahasi/option';
 import { ScriptError } from '..';
 
-class SArrayClass extends FFunction {
+class FArrayClass extends FFunction {
     public constructor() {
         super(
             () => {
@@ -25,7 +25,7 @@ class SArrayClass extends FFunction {
                 return Option.some(
                     new FFunction(
                         ({ args, isNew }) => {
-                            SArrayClass.prepareStaticMethod(isNew, astInfo);
+                            FArrayClass.prepareStaticMethod(isNew, astInfo);
                             const arg = args[0];
                             return new FBoolean(arg?.type === FType.Array);
                         },
@@ -40,4 +40,4 @@ class SArrayClass extends FFunction {
     }
 }
 
-export const arrayClass = new SArrayClass();
+export const arrayClass = new FArrayClass();

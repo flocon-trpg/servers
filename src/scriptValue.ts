@@ -125,12 +125,12 @@ class JObjectCaster<T = never> {
         return this.successfullyCastedValue.value;
     }
 
-    public addArray(): JObjectCaster<T | FValue[]> {
+    public addArray(): JObjectCaster<T | FArray> {
         if (this.source instanceof FArray) {
-            return new JObjectCaster<T | FValue[]>(
+            return new JObjectCaster<T | FArray>(
                 this.source,
                 { ...this.addedTypes, array: true },
-                Option.some(this.source.raw)
+                Option.some(this.source)
             );
         }
         return this;
@@ -402,14 +402,19 @@ export class FString implements FObjectBase {
     }
 }
 
+// unknownをジェネリック化して、FArray<T>のようにすることは困難。なぜならば、sandboxにおけるthisの指す値が配列であってもFArray<T>にキャストできないため。
 export class FArray implements FObjectBase {
-    public constructor(public readonly raw: FValue[]) {}
+    protected constructor(
+        private readonly source: unknown[],
+        private readonly convert: (value: unknown) => FValue,
+        private readonly convertBack: (value: FValue, astInfo: AstInfo | undefined) => unknown
+    ) {}
 
     private static prepareInstanceMethod(
         $this: FValue,
         isNew: boolean,
         astInfo: AstInfo | undefined
-    ): FArray {
+    ) {
         if (isNew) {
             throw ScriptError.notConstructorError(astInfo?.range);
         }
@@ -422,8 +427,20 @@ export class FArray implements FObjectBase {
         return $this;
     }
 
+    public static createCloned(source: FValue[]): FArray {
+        return new FArray(
+            source,
+            x => x as FValue,
+            x => x
+        );
+    }
+
     public get type(): typeof FType.Array {
         return FType.Array;
+    }
+
+    public iterate(): FValue[] {
+        return this.source.map(x => this.convert(x));
     }
 
     private static isValidIndex(index: string): boolean {
@@ -433,7 +450,11 @@ export class FArray implements FObjectBase {
     public get({ property, astInfo }: GetParams): FValue {
         const index = beginCast(property).addString().addNumber().cast(astInfo?.range).toString();
         if (FArray.isValidIndex(index)) {
-            return this.raw[index as unknown as number];
+            const found = this.source[index as unknown as number];
+            if (found === undefined) {
+                return undefined;
+            }
+            return this.convert(found);
         }
         const propertyName = index;
         switch (propertyName) {
@@ -444,38 +465,63 @@ export class FArray implements FObjectBase {
                         const predicate = beginCast(args[0]).addFunction().cast(astInfo?.range)(
                             false
                         );
-                        const raw = $$this.raw.filter((value, index, array) =>
-                            predicate([value, new FNumber(index), new FArray(array)])?.toJObject()
-                        );
-                        return new FArray(raw);
+                        const raw = $$this
+                            .iterate()
+                            .filter((value, index) =>
+                                predicate([value, new FNumber(index)])?.toJObject()
+                            );
+                        return FArray.createCloned(raw);
+                    },
+                    this,
+                    false
+                );
+            case 'push':
+                return new FFunction(
+                    ({ args, $this, isNew }) => {
+                        const $$this = FArray.prepareInstanceMethod($this, isNew, astInfo);
+                        const newValue = this.convertBack(args[0], astInfo);
+                        $$this.source.push(newValue);
+                        return undefined;
                     },
                     this,
                     false
                 );
         }
-        throw new ScriptError(`"${index}" is an invalid index`, astInfo?.range);
+        return undefined;
     }
 
     public set({ property, newValue, astInfo }: SetParams): void {
         const index = beginCast(property).addNumber().addString().toString();
         if (FArray.isValidIndex(index)) {
-            this.raw[index as unknown as number] = newValue;
+            this.source[index as unknown as number] = this.convertBack(newValue, astInfo);
             return;
         }
-        throw new ScriptError(`"${index}" is an invalid index`, astInfo?.range);
+        throw new ScriptError(`"${index}" is not supported`, astInfo?.range);
     }
 
     public toPrimitiveAsString(): string {
-        return this.raw.map(x => x?.toPrimitiveAsString()).toString();
+        return this.iterate()
+            .map(x => x?.toPrimitiveAsString())
+            .toString();
     }
 
     public toPrimitiveAsNumber(): number {
-        return +this.raw.map(x => x?.toPrimitiveAsNumber());
+        return +this.iterate().map(x => x?.toPrimitiveAsNumber());
     }
 
     // 正確な型が表現できないのでunknown[]としている
     public toJObject(): unknown[] {
-        return this.raw.map(x => (x == null ? x : x.toJObject()));
+        return this.iterate().map(x => (x == null ? x : x.toJObject()));
+    }
+}
+
+export class FTypedArray<T> extends FArray {
+    public constructor(
+        source: T[],
+        convert: (value: T) => FValue,
+        convertBack: (value: FValue, astInfo: AstInfo | undefined) => T
+    ) {
+        super(source, value => convert(value as T), convertBack);
     }
 }
 
@@ -669,7 +715,7 @@ export function createFValue(source: unknown): FValue {
         return source;
     }
     if (Array.isArray(source)) {
-        return new FArray(source.map(x => createFValue(x)));
+        return FArray.createCloned(source.map(x => createFValue(x)));
     }
     return createFRecord(source as Record<string, unknown>);
 }

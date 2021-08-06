@@ -19,7 +19,6 @@ import {
     eqeq,
     eqeqeq,
     isTruthy,
-    FArray,
     FBoolean,
     FFunction,
     FNumber,
@@ -28,6 +27,7 @@ import {
     FType,
     FValue,
     toTypeName,
+    FArray,
 } from './scriptValue';
 
 function ofFLiteral(literal: FLiteral): FBoolean | FNumber | FString | null {
@@ -107,7 +107,7 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                 }
                 result.push(ofFExpression(d, context));
             });
-            return new FArray(result);
+            return FArray.createCloned(result);
         }
         case 'ArrowFunctionExpression': {
             const f = ({ args, isNew }: { args: FValue[]; isNew: boolean }): FValue => {
