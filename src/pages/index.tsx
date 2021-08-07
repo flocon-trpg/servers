@@ -141,15 +141,27 @@ const Index: React.FC = () => {
                     {versionInfo}
                 </QueryResultViewer>
                 <div style={{ height: spacing }} />
+                <Typography.Title level={3}>解説サイト（仮）を作成しました</Typography.Title>
+                <div>
+                    将来の正式公開を見据えて、試験的に
+                    <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href="https://flocon-docusaurus.vercel.app/"
+                    >
+                        解説サイト（仮）
+                    </a>
+                    を作りました。新しい解説は今後解説サイトのほうに書いていこうと思います。下の記事も解説サイトに移行するかもしれません。
+                </div>
+                <div style={{ height: spacing }} />
                 <Typography.Title level={3}>ドキュメント、コラムなど</Typography.Title>
                 <ul>
                     <li>
-                        <Link href="/docs/auth">Floconにおけるユーザー認証の仕組み</Link> (New!
+                        <Link href="/docs/auth">Floconにおけるユーザー認証の仕組み</Link> (
                         2021/06/09)
                     </li>
                     <li>
-                        <Link href="/docs/storage">ファイルアップローダーの仕様</Link> (New!
-                        2021/06/09)
+                        <Link href="/docs/storage">ファイルアップローダーの仕様</Link> ( 2021/06/09)
                     </li>
                     <li>
                         <Link href="/docs/board">新しくなったボードの使い方</Link> (2021/05/29)
