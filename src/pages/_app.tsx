@@ -519,8 +519,6 @@ declare type Room = {
 };
 
 
-
-
 declare var room: Room;
 declare var character: Character;
         `;
