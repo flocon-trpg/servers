@@ -188,7 +188,7 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                 onSelectedChannelTypeChange={setSelectedChannelType}
                 config={config}
                 onConfigUpdate={onConfigUpdate}
-                selectedCharacterType={null}
+                selectedCharacterType="some"
                 autoSubmitter={subject}
             />
         </div>
