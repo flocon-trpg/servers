@@ -67,6 +67,7 @@
         "eslint-plugin-prettier": "^3.4.0",
         "eslint-plugin-react": "^7.24.0",
         "eslint-plugin-react-hooks": "^4.2.0",
+        "husky": "^7.0.1",
         "jest": "^27.0.6",
         "monaco-editor": "^0.26.1",
         "prettier": "^2.3.2",
@@ -94,7 +95,8 @@
         "test": "jest",
         "type-check": "tsc",
         "tc": "npm run type-check",
-        "prettier": "prettier --write \"src/**/*.ts\" \"src/**/*.tsx\""
+        "prettier": "prettier --write \"src/**/*.ts\" \"src/**/*.tsx\"",
+        "prepare": "husky install"
     },
     "license": "MIT"
 }

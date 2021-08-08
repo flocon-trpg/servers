@@ -16,7 +16,10 @@ export const ChatPaletteTomlInput: React.FC<Props> = (props: Props) => {
         }
         const result = isValidChatPalette(params.currentValue);
         if (result.isError) {
-            return <div>エラー</div>;
+            if (params.currentValue.trim() === '') {
+                return null;
+            }
+            return <div>文法エラー: {result.error}</div>;
         }
         return <div>OK</div>;
     };
