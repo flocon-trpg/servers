@@ -4,7 +4,6 @@ import { Select } from 'antd';
 import { useBufferValue } from '../../hooks/useBufferValue';
 import { useDispatch } from 'react-redux';
 import { useMyCharacters } from '../../hooks/state/useMyCharacters';
-import { ChatPalettePanelConfig } from '../../states/ChatPalettePanelConfig';
 import { GameSelector } from '../../components/ChatInput/GameSelector';
 import { TextColorSelector } from '../../components/ChatInput/TextColorSelector';
 import {
@@ -58,7 +57,10 @@ const ChatPaletteList: React.FC<ChatPaletteListProps> = ({
     }
 
     if (chatPaletteResult.isError) {
-        return <div style={baseStyle}>エラー</div>;
+        if (bufferedChatPaletteToml?.trim() === '') {
+            return <div style={baseStyle}>チャットパレットが空です。</div>;
+        }
+        return <div style={baseStyle}>文法エラー: {chatPaletteResult.error}</div>;
     }
 
     const options = chatPaletteResult.value.map((value, i) => (
