@@ -1,18 +1,15 @@
 import { Popover, Tooltip } from 'antd';
 import React from 'react';
 import {
-    FilePathFragment,
     PieceValueLogFragment,
     PieceValueLogType,
     RoomPrivateMessageFragment,
     RoomPublicMessageFragment,
 } from '../../generated/graphql';
-import { useFirebaseStorageUrl } from '../../hooks/firebaseStorage';
 import { pieceValueLog, privateMessage, publicMessage } from '../../hooks/useRoomMessages';
 import { PrivateChannelSet } from '../../utils/PrivateChannelSet';
 import { PublicChannelNames } from '../../utils/types';
-import * as Icon from '@ant-design/icons';
-import Jdenticon from '../../components/Jdenticon';
+import { Jdenticon } from '../../components/Jdenticon';
 import { isDeleted, toText } from '../../utils/message';
 import { NewTabLinkify } from '../../components/NewTabLinkify';
 import {
@@ -30,23 +27,13 @@ import { $free, dualKeyRecordToDualKeyMap, recordToMap } from '@kizahasi/util';
 import { tripleKeyToString } from '../../utils/tripleKeyToString';
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../utils/className';
+import { IconView } from '../../components/IconView';
+import { Notification } from '../../modules/roomModule';
 
 // 改行荒らし対策として、maxHeightを設けている。200pxという値は適当
 export const messageContentMaxHeight = 200;
 
 export namespace RoomMessage {
-    const Image: React.FC<{ filePath: FilePathFragment | undefined }> = ({
-        filePath,
-    }: {
-        filePath: FilePathFragment | undefined;
-    }) => {
-        const src = useFirebaseStorageUrl(filePath);
-        if (src == null) {
-            return <Icon.QuestionOutlined style={{ width: 16, height: 16 }} />;
-        }
-        return <img src={src} width={16} height={16} />;
-    };
-
     export type MessageState =
         | {
               type: typeof privateMessage;
@@ -309,6 +296,26 @@ export namespace RoomMessage {
         }
     };
 
+    type IconProps = {
+        message: MessageState | Notification.StateElement;
+        size: number;
+    };
+
+    export const Icon: React.FC<IconProps> = ({ message, size }: IconProps) => {
+        switch (message.type) {
+            case 'success':
+            case 'warning':
+            case 'info':
+            case 'error':
+            case pieceValueLog:
+                return <IconView image="Message" size={size} />;
+        }
+        if (message.value.createdBy == null) {
+            return <IconView image="Message" size={size} />;
+        }
+        return <IconView image={message.value.character?.image ?? 'Person'} size={size} />;
+    };
+
     export const userName = (
         message: MessageState,
         participants: ReadonlyMap<string, ParticipantState>
@@ -333,34 +340,23 @@ export namespace RoomMessage {
                 />
             );
 
-        if (message.value.character == null) {
-            if (message.value.customName == null) {
-                return (
-                    <div className={classNames(flex, flexRow, itemsCenter)}>
-                        {jdenticon}
-                        <Tooltip title={participantName ?? message.value.createdBy}>
-                            {participantName ?? message.value.createdBy}
-                        </Tooltip>
-                    </div>
-                );
-            }
-            return (
-                <div className={classNames(flex, flexRow, itemsCenter)}>
-                    {jdenticon}
-                    <Tooltip title={participantName ?? message.value.createdBy}>
-                        {message.value.customName}
-                    </Tooltip>
-                </div>
-            );
-        }
-        return (
+        // TODO: 二重Popoverは直感に反しそうなので変える。
+        const popoverContent = (
             <div className={classNames(flex, flexRow, itemsCenter)}>
                 {jdenticon}
-                <Image filePath={message.value.character.image ?? undefined} />
-                <Tooltip title={participantName ?? message.value.createdBy}>
-                    {message.value.character.name}
-                </Tooltip>
+                {participantName ?? message.value.createdBy}
             </div>
+        );
+
+        return (
+            <Popover trigger="hover" content={popoverContent}>
+                <div>
+                    {message.value.customName ??
+                        message.value.character?.name ??
+                        participantName ??
+                        message.value.createdBy}
+                </div>
+            </Popover>
         );
     };
 

@@ -15,7 +15,7 @@ type Props = {
     };
 };
 
-const Jdenticon: React.FC<Props> = ({ hashOrValue, size, tooltipMode }: Props) => {
+export const Jdenticon: React.FC<Props> = ({ hashOrValue, size, tooltipMode }: Props) => {
     const [src, setSrc] = React.useState<string>();
     React.useEffect(() => {
         setSrc(`data:image/svg+xml;utf8,${encodeURIComponent(jdenticon.toSvg(hashOrValue, size))}`);
@@ -53,5 +53,3 @@ const Jdenticon: React.FC<Props> = ({ hashOrValue, size, tooltipMode }: Props) =
         </Popover>
     );
 };
-
-export default Jdenticon;
