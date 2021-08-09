@@ -17,7 +17,7 @@ import { useSelector } from '../../store';
 import * as Icon from '@ant-design/icons';
 import { boardEditorPanel, chatPalettePanel } from '../../states/RoomConfig';
 import VolumeBarPanel from './VolumeBarPanel';
-import Jdenticon from '../../components/Jdenticon';
+import { Jdenticon } from '../../components/Jdenticon';
 import { roomModule, Notification } from '../../modules/roomModule';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import path from '../../utils/path';

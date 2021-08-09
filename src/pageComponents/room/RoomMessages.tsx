@@ -44,7 +44,7 @@ import {
 } from '../../generated/graphql';
 import * as Icon from '@ant-design/icons';
 import { getUserUid } from '../../hooks/useFirebaseUser';
-import { MessagePanelConfig, MessageFilter, TabConfig } from '../../states/MessagePanelConfig';
+import { MessageFilter, TabConfig } from '../../states/MessagePanelConfig';
 import { Gutter } from 'antd/lib/grid/row';
 import DrawerFooter from '../../layouts/DrawerFooter';
 import BufferedInput from '../../components/BufferedInput';
@@ -59,8 +59,7 @@ import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import { useOperate } from '../../hooks/useOperate';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { UpOperation } from '@kizahasi/flocon-core';
-import { PublicChannelKey, recordToMap } from '@kizahasi/util';
-import _ from 'lodash';
+import { recordToMap } from '@kizahasi/util';
 import { Color } from '../../utils/color';
 import userConfigModule from '../../modules/userConfigModule';
 import { UserConfig } from '../../states/UserConfig';
@@ -559,21 +558,34 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
             {deleteMenuItem}
         </>
     );
+    const iconSize = 30;
+    const iconMargin = 6;
     return (
         <div
             style={{
                 display: 'grid',
                 gridTemplateRows: `${headerHeight}px 1fr`,
-                gridTemplateColumns: '1fr 40px',
+                gridTemplateColumns: `${iconMargin * 2 + iconSize}px 1fr 40px`,
                 paddingBottom: 4,
                 paddingTop: 4,
             }}
         >
             <div
                 style={{
+                    gridRow: '1 / 3',
+                    gridColumn: '1 / 2',
+                    justifySelf: 'center',
+                    alignSelf: 'center',
+                    margin: iconMargin,
+                }}
+            >
+                <RoomMessageNameSpace.Icon message={message} size={iconSize} />
+            </div>
+            <div
+                style={{
                     fontSize,
                     gridRow: '1 / 2',
-                    gridColumn: '1 / 2',
+                    gridColumn: '2 / 3',
                     display: 'flex',
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -612,7 +624,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                         fontSize,
                         overflowWrap: 'break-word',
                         gridRow: '2 / 3',
-                        gridColumn: '1 / 2',
+                        gridColumn: '2 / 3',
                         minHeight: contentMinHeight,
                     }}
                     message={message}
@@ -623,7 +635,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                         fontSize,
                         overflowWrap: 'break-word',
                         gridRow: '2 / 3',
-                        gridColumn: '1 / 2',
+                        gridColumn: '2 / 3',
                         minHeight: contentMinHeight,
                     }}
                 >
@@ -633,7 +645,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
             <div
                 style={{
                     gridRow: '1 / 3',
-                    gridColumn: '2 / 3',
+                    gridColumn: '3 / 4',
                     justifySelf: 'center',
                     alignSelf: 'center',
                 }}

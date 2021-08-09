@@ -1,13 +1,11 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import MyAuthContext from '../../contexts/MyAuthContext';
-import { Table, Button, Input, Tooltip, Popover } from 'antd';
+import { Table, Button, Input, Tooltip } from 'antd';
 import { update } from '../../stateManagers/states/types';
-import { FilePathFragment } from '../../generated/graphql';
 import NumberParameterInput from '../../components/NumberParameterInput';
 import BooleanParameterInput from '../../components/BooleanParameterInput';
 import StringParameterInput from '../../components/StringParameterInput';
-import { useFirebaseStorageUrl } from '../../hooks/firebaseStorage';
 import * as Icon from '@ant-design/icons';
 import ToggleButton from '../../components/ToggleButton';
 import {
@@ -26,7 +24,6 @@ import {
 } from '../../hooks/state/useParamNames';
 import {
     CharacterState,
-    FilePath,
     ParamNameState,
     ParticipantState,
     UpOperation,
@@ -42,6 +39,7 @@ import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../utils/className';
 import { ColumnType } from 'antd/lib/table';
 import { SortOrder } from 'antd/lib/table/interface';
+import { IconView } from '../../components/IconView';
 
 type DataSource = {
     key: string;
@@ -224,20 +222,6 @@ const createStringParameterColumn = ({
     };
 };
 
-const Image: React.FC<{ filePath?: FilePathFragment | FilePath; iconSize: boolean }> = ({
-    filePath,
-    iconSize,
-}: {
-    filePath?: FilePathFragment | FilePath;
-    iconSize: boolean;
-}) => {
-    const src = useFirebaseStorageUrl(filePath);
-    if (src == null) {
-        return null;
-    }
-    return <img src={src} width={iconSize ? 20 : 150} height={iconSize ? 20 : 150} />;
-};
-
 const CharacterList: React.FC = () => {
     const myAuth = React.useContext(MyAuthContext);
     const dispatch = useDispatch();
@@ -350,22 +334,7 @@ const CharacterList: React.FC = () => {
                     {character.state.image == null ? (
                         <Icon.UserOutlined />
                     ) : (
-                        <Popover
-                            trigger="hover"
-                            content={
-                                <Image
-                                    filePath={character.state.image ?? undefined}
-                                    iconSize={false}
-                                />
-                            }
-                        >
-                            <div>
-                                <Image
-                                    filePath={character.state.image ?? undefined}
-                                    iconSize={true}
-                                />
-                            </div>
-                        </Popover>
+                        <IconView size={20} image={character.state.image} />
                     )}
                     <div style={{ width: 4 }} />
                     <Input

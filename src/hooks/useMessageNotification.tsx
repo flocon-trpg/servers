@@ -14,6 +14,7 @@ import { useParticipants } from './state/useParticipants';
 import { useMyUserUid } from './useMyUserUid';
 import classNames from 'classnames';
 import { flex, flexRow } from '../utils/className';
+import { useReadonlyRef } from './useReadonlyRef';
 
 const argsBase: Omit<ArgsProps, 'message'> = {
     placement: 'bottomRight',
@@ -21,8 +22,10 @@ const argsBase: Omit<ArgsProps, 'message'> = {
 
 export function useMessageNotification(): void {
     const publicChannelNames = usePublicChannelNames();
+    const publicChannelNameRef = useReadonlyRef(publicChannelNames);
     const allRoomMessagesResult = useSelector(state => state.roomModule.allRoomMessagesResult);
     const participantsMap = useParticipants();
+    const participantsMapRef = useReadonlyRef(participantsMap);
     const masterVolume = useSelector(state => state.roomConfigModule?.masterVolume);
     const seVolume = useSelector(state => state.roomConfigModule?.seVolume);
     const volumeRef = React.useRef(
@@ -50,20 +53,7 @@ export function useMessageNotification(): void {
     }, [messageNotificationFilter]);
 
     const messageFilter = useMessageFilter(messageNotificationFilterRef.current);
-    const messageFilterRef = React.useRef(messageFilter);
-    React.useEffect(() => {
-        messageFilterRef.current = messageFilter;
-    }, [messageFilter]);
-
-    const publicChannelNameRef = React.useRef(publicChannelNames);
-    React.useEffect(() => {
-        publicChannelNameRef.current = publicChannelNames;
-    }, [publicChannelNames]);
-
-    const participantsMapRef = React.useRef(participantsMap);
-    React.useEffect(() => {
-        participantsMapRef.current = participantsMap;
-    }, [participantsMap]);
+    const messageFilterRef = useReadonlyRef(messageFilter);
 
     React.useEffect(() => {
         if (myUserUidRef.current == null || allRoomMessagesResult?.type !== newEvent) {
@@ -131,5 +121,5 @@ export function useMessageNotification(): void {
             ),
             description: <RoomMessage.Content style={{}} message={message} />,
         });
-    }, [allRoomMessagesResult]);
+    }, [allRoomMessagesResult, messageFilterRef, participantsMapRef, publicChannelNameRef]);
 }
