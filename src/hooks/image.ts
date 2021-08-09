@@ -90,5 +90,5 @@ export function useImageFromGraphQL(
 ): State {
     const src = useFirebaseStorageUrl(filePath);
 
-    return useImage(src, undefined, crossOrigin);
+    return useImage(src.type === success ? src.value : null, undefined, crossOrigin);
 }

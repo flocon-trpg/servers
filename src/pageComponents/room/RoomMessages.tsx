@@ -558,7 +558,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
             {deleteMenuItem}
         </>
     );
-    const iconSize = 30;
+    const iconSize = 28;
     const iconMargin = 6;
     return (
         <div

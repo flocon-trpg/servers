@@ -1,7 +1,7 @@
 import { Button } from 'antd';
 import * as React from 'react';
 import { FileSourceType } from '../generated/graphql';
-import { useFirebaseStorageUrl } from '../hooks/firebaseStorage';
+import { success, useFirebaseStorageUrl } from '../hooks/firebaseStorage';
 import { some } from '../utils/types';
 import FirebaseStorageLink from './FirebaseStorageLink';
 import * as Core from '@kizahasi/flocon-core';
@@ -10,22 +10,7 @@ import { FirebaseStorageFile } from '../modules/fileModule';
 import { FilePath } from '../utils/filePath';
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../utils/className';
-
-type ImageProps = {
-    filePath?: FilePath | Core.FilePath;
-};
-
-const Image: React.FC<ImageProps> = ({ filePath }: ImageProps) => {
-    const src = useFirebaseStorageUrl(filePath);
-    if (src == null || filePath == null) {
-        return null;
-    }
-    return (
-        <a href={src} target="_blank" rel="noopener noreferrer">
-            <img src={src} width={30} height={30} />
-        </a>
-    );
-};
+import { ImageView } from './ImageView';
 
 type Props = {
     filePath?: FilePath | Core.FilePath;
@@ -54,7 +39,7 @@ const InputFile: React.FC<Props> = ({
         if (filePath == null || showImage !== true) {
             return null;
         }
-        return <Image filePath={filePath} />;
+        return <ImageView filePath={filePath} size={30} link />;
     })();
     const fileNameElement = (() => {
         if (filePath == null) {
