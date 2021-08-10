@@ -7,11 +7,11 @@ import {
 } from '@kizahasi/flocon-core';
 import { CompositeKey } from '@kizahasi/util';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { MyKonva } from '../components/MyKonva';
 import { DicePieceValueElement } from '../hooks/state/useDicePieceValues';
 import { ImagePieceValueElement } from '../hooks/state/useImagePieces';
 import { NumberPieceValueElement } from '../hooks/state/useNumberPieceValues';
 import { BoardConfig } from '../states/BoardConfig';
+import { Vector2 } from '../utils/types';
 
 export const create = 'create';
 export const update = 'update';
@@ -153,8 +153,8 @@ export type ContextMenuState = {
     imagePieceValuesOnCursor: ReadonlyArray<ImagePieceValueElement>;
 };
 // pageX, pageYではなくpagePositionでまとめられているのには、特に理由はない
-export type BoardTooltipState = { pagePosition: MyKonva.Vector2; mouseOverOn: MouseOverOn };
-export type BoardPopoverEditorState = { pagePosition: MyKonva.Vector2; dblClickOn: ClickOn };
+export type BoardTooltipState = { pagePosition: Vector2; mouseOverOn: MouseOverOn };
+export type BoardPopoverEditorState = { pagePosition: Vector2; dblClickOn: ClickOn };
 
 export type State = {
     characterParameterNamesDrawerVisibility: boolean;

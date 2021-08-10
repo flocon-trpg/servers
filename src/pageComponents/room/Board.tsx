@@ -9,7 +9,6 @@ import { BoardEditorPanelConfig } from '../../states/BoardEditorPanelConfig';
 import { KonvaEventObject } from 'konva/types/Node';
 import { update } from '../../stateManagers/states/types';
 import * as Icon from '@ant-design/icons';
-import { MyKonva } from '../../components/MyKonva';
 import { Message, publicMessage, useFilteredRoomMessages } from '../../hooks/useRoomMessages';
 import { useSelector } from '../../store';
 import { useOperate } from '../../hooks/useOperate';
@@ -34,7 +33,6 @@ import {
     BoardLocationUpOperation,
     BoardState,
     BoardLocationState,
-    ImagePieceValueUpOperation,
 } from '@kizahasi/flocon-core';
 import {
     $free,
@@ -57,13 +55,20 @@ import { useDicePieceValues } from '../../hooks/state/useDicePieceValues';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useImagePieces } from '../../hooks/state/useImagePieces';
 import { FilePath, FileSourceType } from '../../generated/graphql';
+import { ImagePiece } from '../../components/Konva/ImagePiece';
+import { DragEndResult, Vector2 } from '../../utils/types';
+import {
+    DiceOrNumberPiece,
+    dicePiece,
+    numberPiece,
+} from '../../components/Konva/DiceOrNumberPiece';
 
 const createPiecePostOperation = ({
     e,
     piece,
     board,
 }: {
-    e: MyKonva.DragEndResult;
+    e: DragEndResult;
     piece: PieceState;
     board: BoardState;
 }): PieceUpOperation => {
@@ -92,11 +97,7 @@ const createPiecePostOperation = ({
     return pieceOperation;
 };
 
-const createTachieLocationPostOperation = ({
-    e,
-}: {
-    e: MyKonva.DragEndResult;
-}): PieceUpOperation => {
+const createTachieLocationPostOperation = ({ e }: { e: DragEndResult }): PieceUpOperation => {
     const pieceOperation: BoardLocationUpOperation = { $version: 1 };
     if (e.newLocation != null) {
         pieceOperation.x = { newValue: e.newLocation.x };
@@ -166,7 +167,7 @@ type BoardCoreProps = {
     boardKey: CompositeKey;
     boardEditorPanelId: string | null; // nullならばactiveBoardPanelとして扱われる
     onClick?: (e: KonvaEventObject<MouseEvent>) => void;
-    onContextMenu?: (e: KonvaEventObject<PointerEvent>, stateOffset: MyKonva.Vector2) => void; // stateOffsetは、configなどのxy座標を基準にした位置。
+    onContextMenu?: (e: KonvaEventObject<PointerEvent>, stateOffset: Vector2) => void; // stateOffsetは、configなどのxy座標を基準にした位置。
     onTooltip?: (params: BoardTooltipState | null) => void;
     onPopupEditor?: (params: BoardPopoverEditorState | null) => void;
     canvasWidth: number;
@@ -317,7 +318,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     return null;
                 }
                 return (
-                    <MyKonva.Image
+                    <ImagePiece
                         {...Piece.getPosition({ ...board, state: pieceValue })}
                         key={compositeKeyToString(characterKey)}
                         filePath={character.image}
@@ -403,7 +404,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     return null;
                 }
                 return (
-                    <MyKonva.Image
+                    <ImagePiece
                         message={lastPublicMessage}
                         messageFilter={msg => {
                             return (
@@ -490,7 +491,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             }
             const piece = pieceValueElement.piece;
             return (
-                <MyKonva.Image
+                <ImagePiece
                     {...Piece.getPosition({ ...board, state: pieceValueElement.piece })}
                     opacity={1}
                     key={compositeKeyToString(pieceKey)}
@@ -575,14 +576,14 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 }
                 const [, pieceValue] = piece;
                 return (
-                    <MyKonva.DiceOrNumberPiece
+                    <DiceOrNumberPiece
                         {...Piece.getPosition({ ...board, state: pieceValue })}
                         key={tripleKeyToString(
                             element.characterKey.createdBy,
                             element.characterKey.id,
                             element.valueId
                         )}
-                        state={{ type: MyKonva.dicePiece, state: element.value }}
+                        state={{ type: dicePiece, state: element.value }}
                         createdByMe={element.characterKey.createdBy === myUserUid}
                         draggable
                         listening
@@ -668,14 +669,14 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 }
                 const [, pieceValue] = piece;
                 return (
-                    <MyKonva.DiceOrNumberPiece
+                    <DiceOrNumberPiece
                         {...Piece.getPosition({ ...board, state: pieceValue })}
                         key={tripleKeyToString(
                             element.characterKey.createdBy,
                             element.characterKey.id,
                             element.valueId
                         )}
-                        state={{ type: MyKonva.numberPiece, state: element.value }}
+                        state={{ type: numberPiece, state: element.value }}
                         createdByMe={element.characterKey.createdBy === myUserUid}
                         draggable
                         listening
@@ -889,7 +890,7 @@ const zoomButtonStyle: React.CSSProperties = {
     right: 20,
 };
 
-const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: Props) => {
+export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: Props) => {
     const dispatch = useDispatch();
     const roomId = useSelector(state => state.roomModule.roomId);
     const boards = useBoards();
@@ -1304,5 +1305,3 @@ const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: Props) 
         </div>
     );
 };
-
-export default Board;
