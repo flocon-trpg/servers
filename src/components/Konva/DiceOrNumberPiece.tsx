@@ -1,5 +1,3 @@
-import Konva from 'konva';
-import { KonvaEventObject } from 'konva/types/Node';
 import React from 'react';
 import * as ReactKonva from 'react-konva';
 import { animated, useSpring } from '@react-spring/konva';
@@ -13,8 +11,7 @@ import { KonvaD6 } from '../KonvaDice';
 import { State as DieValueState } from '@kizahasi/flocon-core/dist/types/internal/ot/room/character/dicePieceValue/dieValue/v1';
 import { DicePieceValue } from '../../utils/dicePieceValue';
 import { usePrevious } from 'react-use';
-import { DragEndResult, Size, Vector2 } from '../../utils/types';
-import { imageMinimalSize } from './resources';
+import { Size } from '../../utils/types';
 import { PieceGroup, PieceGroupProps } from './PieceGroup';
 
 export const numberPiece = 'numberPiece';
