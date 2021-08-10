@@ -166,12 +166,6 @@ const Index: React.FC = () => {
                     <li>
                         <Link href="/docs/board">新しくなったボードの使い方</Link> (2021/05/29)
                     </li>
-                    <li>
-                        <Link href="/docs/toml">変数、コマンド</Link>
-                    </li>
-                    <li>
-                        <Link href="/docs/dev-memo">制作メモ、更新履歴など</Link>
-                    </li>
                 </ul>
             </div>
         </Layout>
