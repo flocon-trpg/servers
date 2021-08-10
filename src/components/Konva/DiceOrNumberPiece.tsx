@@ -15,6 +15,7 @@ import { DicePieceValue } from '../../utils/dicePieceValue';
 import { usePrevious } from 'react-use';
 import { DragEndResult, Size, Vector2 } from '../../utils/types';
 import { imageMinimalSize } from './resources';
+import { PieceGroup, PieceGroupProps } from './PieceGroup';
 
 export const numberPiece = 'numberPiece';
 export const dicePiece = 'dicePiece';
@@ -324,141 +325,13 @@ const ValueContent: React.FC<ValueContentProps> = (props: ValueContentProps) => 
 type Props = {
     state: DiceOrNumberPieceState;
     createdByMe: boolean;
-    isSelected: boolean;
-    draggable: boolean;
-    listening: boolean;
-
-    onDragEnd?: (resize: DragEndResult) => void;
-    onClick?: () => void;
-    onDblClick?: (e: KonvaEventObject<MouseEvent>) => void;
-    onMouseEnter?: () => void;
-    onMouseLeave?: () => void;
-} & Vector2 &
-    Size;
+} & PieceGroupProps;
 
 // ImagePieceはCharacterなどと表示方法が近いので、ここでは実装していない
 export const DiceOrNumberPiece: React.FC<Props> = (props: Props) => {
-    /*
-        リサイズや移動の実装方法についてはこちらを参照
-        https://konvajs.org/docs/react/Transformer.html
-        */
-
-    const groupRef = React.useRef<Konva.Group | null>(null);
-    const transformerRef = React.useRef<Konva.Transformer | null>(null);
-
-    React.useEffect(() => {
-        if (!props.isSelected) {
-            return;
-        }
-        if (transformerRef.current == null) {
-            return;
-        }
-        transformerRef.current.nodes(groupRef.current == null ? [] : [groupRef.current]);
-        const layer = transformerRef.current.getLayer();
-        if (layer == null) {
-            return;
-        }
-        layer.batchDraw();
-    }); // deps=[props.isSelected]だと何故かうまくいかない(isSelectedは最初falseで、クリックなどの操作によって初めてtrueにならないとだめ？)のでdepsは空にしている
-
-    const onDragEnd = (e: KonvaEventObject<unknown>) => {
-        if (!props.draggable) {
-            return;
-        }
-        const x = e.target.x();
-        const y = e.target.y();
-        // セルにスナップする設定の場合、このようにxy座標をリセットしないと少しだけ動かしたときにprops.xとprops.yの値が変わらないため再レンダリングされない。そのため、スナップしない。
-        e.target.x(props.x);
-        e.target.y(props.y);
-        if (props.onDragEnd == null) {
-            return;
-        }
-        props.onDragEnd({
-            newLocation: {
-                x,
-                y,
-            },
-        });
-    };
-
     return (
-        <>
-            <ReactKonva.Group
-                listening={props.listening}
-                ref={groupRef}
-                x={props.x}
-                y={props.y}
-                width={props.w}
-                height={props.h}
-                draggable={props.draggable}
-                onClick={e => {
-                    e.cancelBubble = true;
-                    props.onClick == null ? undefined : props.onClick();
-                }}
-                onDblClick={e => {
-                    e.cancelBubble = true;
-                    props.onDblClick == null ? undefined : props.onDblClick(e);
-                }}
-                onDragEnd={e => onDragEnd(e)}
-                onTouchEnd={e => onDragEnd(e)}
-                onMouseEnter={() => {
-                    if (props.onMouseEnter == null) {
-                        return;
-                    }
-                    props.onMouseEnter();
-                }}
-                onMouseLeave={() => {
-                    if (props.onMouseLeave == null) {
-                        return;
-                    }
-                    props.onMouseLeave();
-                }}
-                onTransformEnd={() => {
-                    // transformer is changing scale of the node
-                    // and NOT its width or height
-                    // but in the store we have only width and height
-                    // to match the data better we will reset scale on transform end
-                    const node = groupRef.current;
-                    if (node == null) {
-                        return;
-                    }
-                    const scaleX = node.scaleX();
-                    const scaleY = node.scaleY();
-
-                    // we will reset it back
-                    node.scaleX(1);
-                    node.scaleY(1);
-                    if (props.onDragEnd == null) {
-                        return;
-                    }
-                    props.onDragEnd({
-                        newLocation: {
-                            x: node.x(),
-                            y: node.y(),
-                        },
-                        newSize: {
-                            // set minimal value
-                            w: Math.max(imageMinimalSize, node.width() * scaleX),
-                            h: Math.max(imageMinimalSize, node.height() * scaleY),
-                        },
-                    });
-                }}
-            >
-                <ValueContent {...props} />
-            </ReactKonva.Group>
-            {props.isSelected && (
-                <ReactKonva.Transformer
-                    ref={transformerRef}
-                    rotateEnabled={false}
-                    boundBoxFunc={(oldBox, newBox) => {
-                        // limit resize
-                        if (newBox.width < imageMinimalSize || newBox.height < imageMinimalSize) {
-                            return oldBox;
-                        }
-                        return newBox;
-                    }}
-                ></ReactKonva.Transformer>
-            )}
-        </>
+        <PieceGroup {...props}>
+            <ValueContent {...props} />
+        </PieceGroup>
     );
 };

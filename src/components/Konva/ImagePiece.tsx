@@ -1,5 +1,3 @@
-import Konva from 'konva';
-import { KonvaEventObject } from 'konva/types/Node';
 import React from 'react';
 import { success, useImageFromGraphQL } from '../../hooks/image';
 import * as ReactKonva from 'react-konva';
@@ -9,8 +7,7 @@ import { interval } from 'rxjs';
 import { isDeleted, toText as toTextCore } from '../../utils/message';
 import { FilePath as CoreFilePath } from '@kizahasi/flocon-core';
 import { FilePath } from '../../utils/filePath';
-import { DragEndResult, Size, Vector2 } from '../../utils/types';
-import { imageMinimalSize } from './resources';
+import { PieceGroup, PieceGroupProps } from './PieceGroup';
 
 type BalloonCoreProps = {
     text0?: string;
@@ -230,9 +227,6 @@ const Balloon: React.FC<BalloonProps> = ({
 
 type Props = {
     filePath: FilePath | CoreFilePath;
-    isSelected: boolean;
-    draggable: boolean;
-    listening: boolean;
     opacity?: number;
 
     // (messageFilter(message) ? message : undefined)の値をxとする。xが変わるたび、そのメッセージが💬として表示される。ただし、undefinedになったときは何も起こらない(💬が消えることもない)。
@@ -243,14 +237,7 @@ type Props = {
     // messageが常にundefinedならばこれもundefinedにしてよい。
     // re-renderのたびに実行されるため、軽量なおかつ副作用のない関数を用いることを強く推奨。
     messageFilter?: (message: RoomPublicMessageFragment) => boolean;
-
-    onDragEnd?: (resize: DragEndResult) => void;
-    onClick?: () => void;
-    onDblClick?: (e: KonvaEventObject<MouseEvent>) => void;
-    onMouseEnter?: () => void;
-    onMouseLeave?: () => void;
-} & Vector2 &
-    Size;
+} & PieceGroupProps;
 
 export const ImagePiece: React.FC<Props> = (props: Props) => {
     /*
@@ -276,111 +263,14 @@ export const ImagePiece: React.FC<Props> = (props: Props) => {
     }, [props.messageFilter]);
 
     const image = useImageFromGraphQL(props.filePath);
-    const groupRef = React.useRef<Konva.Group | null>(null);
-    const transformerRef = React.useRef<Konva.Transformer | null>(null);
-
-    React.useEffect(() => {
-        if (!props.isSelected) {
-            return;
-        }
-        if (transformerRef.current == null) {
-            return;
-        }
-        transformerRef.current.nodes(groupRef.current == null ? [] : [groupRef.current]);
-        const layer = transformerRef.current.getLayer();
-        if (layer == null) {
-            return;
-        }
-        layer.batchDraw();
-    }); // deps=[props.isSelected]だと何故かうまくいかない(isSelectedは最初falseで、クリックなどの操作によって初めてtrueにならないとだめ？)のでdepsは空にしている
 
     if (image.type !== success) {
         return null;
     }
 
-    const onDragEnd = (e: KonvaEventObject<unknown>) => {
-        if (!props.draggable) {
-            return;
-        }
-        const x = e.target.x();
-        const y = e.target.y();
-        // セルにスナップする設定の場合、このようにxy座標をリセットしないと少しだけ動かしたときにprops.xとprops.yの値が変わらないため再レンダリングされない。そのため、スナップしない。
-        e.target.x(props.x);
-        e.target.y(props.y);
-        if (props.onDragEnd == null) {
-            return;
-        }
-        props.onDragEnd({
-            newLocation: {
-                x,
-                y,
-            },
-        });
-    };
-
     return (
         <>
-            <ReactKonva.Group
-                listening={props.listening}
-                ref={groupRef}
-                x={props.x}
-                y={props.y}
-                width={props.w}
-                height={props.h}
-                draggable={props.draggable}
-                onClick={e => {
-                    e.cancelBubble = true;
-                    props.onClick == null ? undefined : props.onClick();
-                }}
-                onDblClick={e => {
-                    e.cancelBubble = true;
-                    props.onDblClick == null ? undefined : props.onDblClick(e);
-                }}
-                onDragEnd={e => onDragEnd(e)}
-                onTouchEnd={e => onDragEnd(e)}
-                onMouseEnter={() => {
-                    if (props.onMouseEnter == null) {
-                        return;
-                    }
-                    props.onMouseEnter();
-                }}
-                onMouseLeave={() => {
-                    if (props.onMouseLeave == null) {
-                        return;
-                    }
-                    props.onMouseLeave();
-                }}
-                onTransformEnd={() => {
-                    // transformer is changing scale of the node
-                    // and NOT its width or height
-                    // but in the store we have only width and height
-                    // to match the data better we will reset scale on transform end
-                    const node = groupRef.current;
-                    if (node == null) {
-                        return;
-                    }
-                    const scaleX = node.scaleX();
-                    const scaleY = node.scaleY();
-
-                    // we will reset it back
-                    node.scaleX(1);
-                    node.scaleY(1);
-                    if (props.onDragEnd == null) {
-                        return;
-                    }
-                    props.onDragEnd({
-                        newLocation: {
-                            x: node.x(),
-                            y: node.y(),
-                        },
-                        newSize: {
-                            // set minimal value
-                            w: Math.max(imageMinimalSize, node.width() * scaleX),
-                            h: Math.max(imageMinimalSize, node.height() * scaleY),
-                        },
-                    });
-                }}
-            >
+            <PieceGroup {...props}>
                 <animated.Image
                     {...opacitySpringProps}
                     x={0}
@@ -389,20 +279,7 @@ export const ImagePiece: React.FC<Props> = (props: Props) => {
                     height={props.h}
                     image={image.image}
                 />
-            </ReactKonva.Group>
-            {props.isSelected && (
-                <ReactKonva.Transformer
-                    ref={transformerRef}
-                    rotateEnabled={false}
-                    boundBoxFunc={(oldBox, newBox) => {
-                        // limit resize
-                        if (newBox.width < imageMinimalSize || newBox.height < imageMinimalSize) {
-                            return oldBox;
-                        }
-                        return newBox;
-                    }}
-                ></ReactKonva.Transformer>
-            )}
+            </PieceGroup>
             <Balloon
                 x={props.x}
                 y={props.y - balloonCoreTextHeight * 5}
