@@ -6,10 +6,6 @@ export type DualKey<T1, T2> = {
     readonly second: T2;
 };
 
-export const dualKeyToString = <T1, T2>(source: DualKey<T1, T2>): string => {
-    return `${source.first}@${source.second}`;
-};
-
 export const toJsonString = <T1, T2>(source: DualKey<T1, T2>): string => {
     return `{ first: ${source.first}, second: ${source.second} }`;
 };
