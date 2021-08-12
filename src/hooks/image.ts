@@ -18,7 +18,7 @@ type Size = {
 
 export const loading = 'loading';
 export const success = 'success';
-export const failed = 'failed';
+export const failure = 'failure';
 export const argNull = 'argNull';
 
 type LoadingState = {
@@ -31,7 +31,7 @@ type SuccessState = {
 };
 
 type FailedState = {
-    type: typeof failed;
+    type: typeof failure;
     errorMessage: string;
 };
 
@@ -61,7 +61,7 @@ export function useImage(src: string | null, size?: Size, crossOrigin?: string):
             }
 
             function onerror(ev: ErrorEvent) {
-                setState({ type: failed, errorMessage: ev.message });
+                setState({ type: failure, errorMessage: ev.message });
             }
 
             setState({ type: loading });

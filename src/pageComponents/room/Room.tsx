@@ -5,7 +5,6 @@ import CharacterList from './CharacterList';
 import { useSelector } from '../../store';
 import roomConfigModule from '../../modules/roomConfigModule';
 import { useDispatch } from 'react-redux';
-import Board from './Board';
 import { RoomMessages } from './RoomMessages';
 import CharacterParameterNamesDrawer from './CharacterParameterNamesDrawer';
 import CharacterDrawer from './CharacterDrawer';
@@ -36,6 +35,7 @@ import { ImagePieceDrawer } from './ImagePieceDrawer';
 import { CommandEditorModal } from './CommandEditorModal';
 import { ChatPalette } from './ChatPalettes';
 import { ChatPaletteEditorModal } from './ChatPaletteEditorModal';
+import { Board } from './Board';
 
 const RoomMessagePanels: React.FC<{ roomId: string }> = ({ roomId }: { roomId: string }) => {
     const dispatch = useDispatch();

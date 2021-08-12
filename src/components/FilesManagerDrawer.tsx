@@ -332,7 +332,6 @@ const FirebaseFilesList: React.FC<FirebaseFilesListProps> = ({
                     selectedRowKeys,
                     onChange: selected => {
                         setSelectedRowKeys(selected);
-                        console.info(selected);
                     },
                 }}
                 size="small"

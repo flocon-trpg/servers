@@ -15,12 +15,13 @@ import {
 import { chooseRecord } from '@kizahasi/util';
 
 export type ActiveBoardPanelConfig = {
-    boards: Record<string, BoardConfig>;
+    // ボードエディターとは異なり、オフセットやズーム設定は共通化しているほうが演出効果が狙えることがあるため、共通化している。
+    board: BoardConfig;
     isMinimized: boolean;
 } & DraggablePanelConfigBase;
 
-export type PartialActiveBoardPanelConfig = Omit<Partial<ActiveBoardPanelConfig>, 'boards'> & {
-    boards?: Record<string, PartialBoardConfig>;
+export type PartialActiveBoardPanelConfig = Omit<Partial<ActiveBoardPanelConfig>, 'board'> & {
+    board?: PartialBoardConfig;
 };
 
 export const castToPartialActiveBoardPanelConfig = (
@@ -32,7 +33,7 @@ export const castToPartialActiveBoardPanelConfig = (
 
     return {
         ...castToPartialDraggablePanelConfigBase(source),
-        boards: castToRecord(source.boards, castToPartialBoardConfig),
+        board: castToPartialBoardConfig(source.board),
         isMinimized: castToBoolean(source.isMinimized),
     };
 };
@@ -42,15 +43,14 @@ export const toCompleteActiveBoardPanelConfig = (
 ): ActiveBoardPanelConfig => {
     return {
         ...toCompleteDraggablePanelConfigBase(source),
-        boards: chooseRecord(source.boards ?? {}, toCompleteBoardConfig),
+        board: source.board == null ? defaultBoardConfig() : toCompleteBoardConfig(source.board),
         isMinimized: source.isMinimized ?? false,
     };
 };
 
 export const defaultActiveBoardPanelsConfig = (): ActiveBoardPanelConfig => {
     return {
-        ...defaultBoardConfig(),
-        boards: {},
+        board: defaultBoardConfig(),
         x: 0,
         y: 0,
         width: 400,

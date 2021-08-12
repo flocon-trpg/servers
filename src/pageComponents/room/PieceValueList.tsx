@@ -14,8 +14,8 @@ import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndP
 import { DicePieceValueElement, useDicePieceValues } from '../../hooks/state/useDicePieceValues';
 import { DicePieceValue } from '../../utils/dicePieceValue';
 import { NumberPieceValue } from '../../utils/numberPieceValue';
-import { tripleKeyToString } from '../../utils/tripleKeyToString';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
+import { keyNames } from '@kizahasi/util';
 
 type DataSource =
     | {
@@ -112,11 +112,7 @@ export const PieceValueList: React.FC = () => {
                             textOverflow: 'ellipsis',
                         }}
                     >
-                        {tripleKeyToString(
-                            dataSource.value.characterKey.createdBy,
-                            dataSource.value.characterKey.id,
-                            dataSource.value.valueId
-                        )}
+                        {keyNames(dataSource.value.characterKey, dataSource.value.valueId)}
                     </div>
                 );
             },
@@ -154,20 +150,12 @@ export const PieceValueList: React.FC = () => {
         ...dicePieceValues.map(value => ({
             type: 'dice' as const,
             value,
-            key: `${tripleKeyToString(
-                value.characterKey.createdBy,
-                value.characterKey.id,
-                value.valueId
-            )}@dice`,
+            key: keyNames(value.characterKey, value.valueId, 'dice'),
         })),
         ...numberPieceValues.map(value => ({
             type: 'number' as const,
             value,
-            key: `${tripleKeyToString(
-                value.characterKey.createdBy,
-                value.characterKey.id,
-                value.valueId
-            )}@number`,
+            key: keyNames(value.characterKey, value.valueId, 'number'),
         })),
     ];
     return (

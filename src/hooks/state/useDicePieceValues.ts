@@ -1,7 +1,8 @@
 import React from 'react';
-import { CompositeKey, recordForEach } from '@kizahasi/util';
+import { CompositeKey, keyNames, recordForEach } from '@kizahasi/util';
 import { DicePieceValueState } from '@kizahasi/flocon-core';
 import { useCharacters } from './useCharacters';
+import _ from 'lodash';
 
 export type DicePieceValueElement = {
     characterKey: CompositeKey;
@@ -25,6 +26,8 @@ export const useDicePieceValues = (): ReadonlyArray<DicePieceValueElement> | und
                 });
             });
         });
-        return result;
+        return _(result)
+            .sortBy(x => keyNames(x.characterKey, x.valueId))
+            .value();
     }, [characters]);
 };

@@ -28,7 +28,7 @@ import {
     ParticipantState,
     UpOperation,
 } from '@kizahasi/flocon-core';
-import { CompositeKey, compositeKeyToString, StrIndex20, strIndex20Array } from '@kizahasi/util';
+import { CompositeKey, keyNames, StrIndex20, strIndex20Array } from '@kizahasi/util';
 import _ from 'lodash';
 import { useDispatch } from 'react-redux';
 import {
@@ -246,7 +246,7 @@ const CharacterList: React.FC = () => {
     const charactersDataSource: DataSource[] = characters.toArray().map(([key, character]) => {
         const createdByMe = getUserUid(myAuth) === key.createdBy;
         return {
-            key: compositeKeyToString(key), // antdのtableのkeyとして必要
+            key: keyNames(key), // antdのtableのkeyとして必要
             character: {
                 stateKey: key,
                 state: character,

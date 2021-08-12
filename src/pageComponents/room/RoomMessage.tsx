@@ -23,8 +23,7 @@ import {
     parseNumberPieceValue,
     parseDicePieceValue,
 } from '@kizahasi/flocon-core';
-import { $free, dualKeyRecordToDualKeyMap, recordToMap } from '@kizahasi/util';
-import { tripleKeyToString } from '../../utils/tripleKeyToString';
+import { $free, dualKeyRecordToDualKeyMap, keyNames, recordToMap } from '@kizahasi/util';
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../utils/className';
 import { IconView } from '../../components/IconView';
@@ -57,7 +56,7 @@ export namespace RoomMessage {
         if (message.type === pieceValueLog) {
             switch (message.value.logType) {
                 case PieceValueLogType.Dice: {
-                    const key = tripleKeyToString(
+                    const key = keyNames(
                         message.value.characterCreatedBy,
                         message.value.characterId,
                         message.value.stateId
@@ -169,7 +168,7 @@ export namespace RoomMessage {
                     );
                 }
                 case PieceValueLogType.Number: {
-                    const key = tripleKeyToString(
+                    const key = keyNames(
                         message.value.characterCreatedBy,
                         message.value.characterId,
                         message.value.stateId

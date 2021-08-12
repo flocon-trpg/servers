@@ -2,9 +2,11 @@ import React from 'react';
 import Linkify from 'react-linkify';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-export const NewTabLinkify: React.FC<React.PropsWithChildren<{}>> = ({
+type Props = {};
+
+export const NewTabLinkify: React.FC<React.PropsWithChildren<Props>> = ({
     children,
-}: React.PropsWithChildren<{}>) => {
+}: React.PropsWithChildren<Props>) => {
     return (
         <Linkify
             componentDecorator={(href, text, key) => {

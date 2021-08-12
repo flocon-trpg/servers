@@ -1,7 +1,8 @@
 import React from 'react';
-import { CompositeKey, dualKeyRecordToDualKeyMap, recordForEach } from '@kizahasi/util';
+import { CompositeKey, dualKeyRecordToDualKeyMap, keyNames, recordForEach } from '@kizahasi/util';
 import { ImagePieceValueState, PieceState } from '@kizahasi/flocon-core';
 import { useParticipants } from './useParticipants';
+import _ from 'lodash';
 
 export type ImagePieceValueElement = {
     participantKey: string;
@@ -12,7 +13,7 @@ export type ImagePieceValueElement = {
     piece: PieceState | undefined;
 };
 
-export const useImagePieces = (
+export const useImagePieceValues = (
     boardKey?: CompositeKey
 ): ReadonlyArray<ImagePieceValueElement> | undefined => {
     const participants = useParticipants();
@@ -43,6 +44,8 @@ export const useImagePieces = (
                 });
             });
         });
-        return result;
+        return _(result)
+            .sortBy(x => keyNames(x.participantKey, x.valueId))
+            .value();
     }, [participants, boardKey?.createdBy, boardKey?.id]);
 };
