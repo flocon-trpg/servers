@@ -74,7 +74,9 @@ export const PieceTooltip: React.FC = () => {
         padding,
         backgroundColor,
         zIndex,
-        maxWidth: 200,
+        maxWidth: 400,
+        maxHeight: 600,
+        overflowY: 'scroll',
     };
     const hrStyle: React.CSSProperties = {
         transform: 'scaleY(0.5)',
