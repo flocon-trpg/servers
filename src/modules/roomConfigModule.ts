@@ -307,11 +307,11 @@ const editBoard = (
     action: (source: BoardConfig) => BoardConfig | void
 ): void => {
     if (boardEditorPanelId == null) {
-        const board =
-            state.panels.activeBoardPanel.boards[keyNames(boardKey)] ?? defaultBoardConfig();
-        const result = action(board);
-        state.panels.activeBoardPanel.boards[keyNames(boardKey)] =
-            result === undefined ? board : result;
+        const result = action(state.panels.activeBoardPanel.board);
+        if (result == null) {
+            return;
+        }
+        state.panels.activeBoardPanel.board = result;
     } else {
         const targetPanel = state.panels.boardEditorPanels[boardEditorPanelId];
         if (targetPanel == null) {

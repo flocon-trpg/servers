@@ -921,7 +921,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                 if (activeBoardPanelConfig == null) {
                     return null;
                 }
-                return activeBoardPanelConfig.boards[keyNames(boardKeyToShow)];
+                return activeBoardPanelConfig.board;
             }
             return panel.boardEditorPanel.boards[keyNames(boardKeyToShow)];
         })() ?? defaultBoardConfig();
