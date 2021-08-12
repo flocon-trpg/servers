@@ -11,7 +11,6 @@ export {
     DualKeyMap,
     ReadonlyDualKeyMap,
     DualKeyMapSource,
-    dualKeyToString,
     toJsonString as dualKeyToJsonString,
     groupJoin as groupJoinDualKeyMap,
     groupJoin3 as groupJoin3DualKeyMap,
@@ -32,6 +31,7 @@ export {
     isStrIndex100,
 } from './internal/indexes';
 export { JsonObject } from './internal/jsonObject';
+export { keyNames } from './internal/keyNames';
 export { groupJoin as groupJoinMap } from './internal/map';
 export { PublicChannelKey } from './internal/publicChannelKey';
 export {
@@ -48,7 +48,6 @@ export {
 export { groupJoin as groupJoinSet } from './internal/set';
 export {
     CompositeKey,
-    compositeKeyToString,
     stringToCompositeKey,
     toJsonString as stateMapToJsonString,
     equals as compositeKeyEquals,

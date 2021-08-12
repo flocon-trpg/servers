@@ -6,10 +6,6 @@ export type CompositeKey = {
     createdBy: string;
 };
 
-export const compositeKeyToString = (source: CompositeKey): string => {
-    return `${source.id}@${source.createdBy}`;
-};
-
 export const stringToCompositeKey = (source: string): CompositeKey | null => {
     const array = source.split('@');
     if (array.length !== 2) {
