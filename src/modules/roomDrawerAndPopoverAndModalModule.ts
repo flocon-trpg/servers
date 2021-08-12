@@ -8,7 +8,7 @@ import {
 import { CompositeKey } from '@kizahasi/util';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DicePieceValueElement } from '../hooks/state/useDicePieceValues';
-import { ImagePieceValueElement } from '../hooks/state/useImagePieces';
+import { ImagePieceValueElement } from '../hooks/state/useImagePieceValues';
 import { NumberPieceValueElement } from '../hooks/state/useNumberPieceValues';
 import { BoardConfig } from '../states/BoardConfig';
 import { Vector2 } from '../utils/types';

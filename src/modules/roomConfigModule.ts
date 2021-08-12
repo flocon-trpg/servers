@@ -20,7 +20,7 @@ import { BoardEditorPanelConfig } from '../states/BoardEditorPanelConfig';
 import { MessageFilter, MessagePanelConfig } from '../states/MessagePanelConfig';
 import { reset, Reset } from '../utils/types';
 import { BoardConfig, defaultBoardConfig } from '../states/BoardConfig';
-import { StrIndex5, CompositeKey, recordToArray, compositeKeyToString } from '@kizahasi/util';
+import { StrIndex5, CompositeKey, recordToArray, keyNames } from '@kizahasi/util';
 import { MemoPanelConfig } from '../states/MemoPanelConfig';
 import { ChatPalettePanelConfig } from '../states/ChatPalettePanelConfig';
 
@@ -308,19 +308,18 @@ const editBoard = (
 ): void => {
     if (boardEditorPanelId == null) {
         const board =
-            state.panels.activeBoardPanel.boards[compositeKeyToString(boardKey)] ??
-            defaultBoardConfig();
+            state.panels.activeBoardPanel.boards[keyNames(boardKey)] ?? defaultBoardConfig();
         const result = action(board);
-        state.panels.activeBoardPanel.boards[compositeKeyToString(boardKey)] =
+        state.panels.activeBoardPanel.boards[keyNames(boardKey)] =
             result === undefined ? board : result;
     } else {
         const targetPanel = state.panels.boardEditorPanels[boardEditorPanelId];
         if (targetPanel == null) {
             return;
         }
-        const board = targetPanel.boards[compositeKeyToString(boardKey)] ?? defaultBoardConfig();
+        const board = targetPanel.boards[keyNames(boardKey)] ?? defaultBoardConfig();
         action(board);
-        targetPanel.boards[compositeKeyToString(boardKey)] = board;
+        targetPanel.boards[keyNames(boardKey)] = board;
     }
 };
 

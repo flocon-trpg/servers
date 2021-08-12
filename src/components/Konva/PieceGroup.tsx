@@ -21,8 +21,8 @@ export type PieceGroupProps = {
 
 export const PieceGroup: React.FC<PropsWithChildren<PieceGroupProps>> = ({
     isSelected,
-    listening,
     draggable,
+    listening,
     onDragEnd: onDragEndProp,
     onClick,
     onDblClick,

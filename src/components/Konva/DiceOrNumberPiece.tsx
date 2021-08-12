@@ -131,6 +131,7 @@ const NumberPieceValueContent: React.FC<NumberPieceValueContentProps> = (
 type DicePieceValueContentProps = {
     createdByMe: boolean;
     state: DicePieceValueState;
+    opacity: number;
 } & Size;
 
 const DicePieceValueContent: React.FC<DicePieceValueContentProps> = ({
@@ -138,6 +139,7 @@ const DicePieceValueContent: React.FC<DicePieceValueContentProps> = ({
     state,
     w,
     h,
+    opacity,
 }: DicePieceValueContentProps) => {
     const largeDieWidth = (w * 2) / 3;
     const largeDieHeight = (h * 2) / 3;
@@ -254,7 +256,7 @@ const DicePieceValueContent: React.FC<DicePieceValueContentProps> = ({
     }
 
     const diceOpacity = (isValuePrivate: boolean) =>
-        isValuePrivate ? DicePieceValue.privateValueOpacity : 1;
+        (isValuePrivate ? DicePieceValue.privateValueOpacity : 1) * opacity;
 
     return (
         <ReactKonva.Group width={w} height={h}>
@@ -306,6 +308,7 @@ const DicePieceValueContent: React.FC<DicePieceValueContentProps> = ({
 type ValueContentProps = {
     createdByMe: boolean;
     state: DiceOrNumberPieceState;
+    opacity: number;
 } & Size;
 
 const ValueContent: React.FC<ValueContentProps> = (props: ValueContentProps) => {
@@ -322,6 +325,7 @@ const ValueContent: React.FC<ValueContentProps> = (props: ValueContentProps) => 
 type Props = {
     state: DiceOrNumberPieceState;
     createdByMe: boolean;
+    opacity: number;
 } & PieceGroupProps;
 
 // ImagePieceはCharacterなどと表示方法が近いので、ここでは実装していない

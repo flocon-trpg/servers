@@ -15,7 +15,6 @@ import {
     CharacterState,
     dicePieceValueStrIndexes,
 } from '@kizahasi/flocon-core';
-import { compositeKeyToString } from '@kizahasi/util';
 import { useDispatch } from 'react-redux';
 import { useSelector } from '../../store';
 import {
@@ -28,6 +27,7 @@ import { MyCharactersSelect } from '../../components/MyCharactersSelect';
 import { InputDie } from '../../components/InputDie';
 import { noValue } from '../../utils/dice';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
+import { keyNames } from '@kizahasi/util';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -58,7 +58,7 @@ const IdView: React.FC = () => {
             <Col flex={0}>ID</Col>
             <Col span={inputSpan}>
                 {drawerType.type === update
-                    ? compositeKeyToString({ createdBy: myUserUid, id: drawerType.stateKey })
+                    ? keyNames({ createdBy: myUserUid, id: drawerType.stateKey })
                     : '(なし)'}
             </Col>
         </Row>

@@ -227,7 +227,7 @@ const Balloon: React.FC<BalloonProps> = ({
 
 type Props = {
     filePath: FilePath | CoreFilePath;
-    opacity?: number;
+    opacity: number;
 
     // (messageFilter(message) ? message : undefined)の値をxとする。xが変わるたび、そのメッセージが💬として表示される。ただし、undefinedになったときは何も起こらない(💬が消えることもない)。
     // 💬を使いたくない場合は常にundefinedにすればよい。
@@ -245,39 +245,32 @@ export const ImagePiece: React.FC<Props> = (props: Props) => {
         https://konvajs.org/docs/react/Transformer.html
         */
 
+    const image = useImageFromGraphQL(props.filePath);
     const [opacitySpringProps, setOpacitySpringProps] = useSpring(
         () => ({
-            config: {
-                duration: 100,
-            },
             to: {
-                opacity: props.opacity ?? 1,
+                opacity: props.opacity,
             },
         }),
-        []
+        [props.opacity, props.filePath.path, props.filePath.sourceType]
     );
+    const imageElement = image.type === success ? image.image : undefined;
 
     const messageFilterRef = React.useRef(props.messageFilter ?? (() => true));
     React.useEffect(() => {
         messageFilterRef.current = props.messageFilter ?? (() => true);
     }, [props.messageFilter]);
 
-    const image = useImageFromGraphQL(props.filePath);
-
-    if (image.type !== success) {
-        return null;
-    }
-
     return (
         <>
             <PieceGroup {...props}>
                 <animated.Image
                     {...opacitySpringProps}
+                    image={imageElement}
                     x={0}
                     y={0}
                     width={props.w}
                     height={props.h}
-                    image={image.image}
                 />
             </PieceGroup>
             <Balloon

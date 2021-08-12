@@ -13,7 +13,6 @@ import {
     imagePieceValueDiff,
     toImagePieceValueUpOperation,
 } from '@kizahasi/flocon-core';
-import { compositeKeyToString } from '@kizahasi/util';
 import { useDispatch } from 'react-redux';
 import { useSelector } from '../../store';
 import {
@@ -22,13 +21,14 @@ import {
     update,
 } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
-import { useImagePieces } from '../../hooks/state/useImagePieces';
+import { useImagePieceValues } from '../../hooks/state/useImagePieceValues';
 import InputFile from '../../components/InputFile';
 import { FilesManagerDrawerType } from '../../utils/types';
 import FilesManagerDrawer from '../../components/FilesManagerDrawer';
 import BufferedInput from '../../components/BufferedInput';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
 import { FilePath } from '../../utils/filePath';
+import { keyNames } from '@kizahasi/util';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -62,7 +62,7 @@ const IdView: React.FC = () => {
             <Col flex={0}>ID</Col>
             <Col span={inputSpan}>
                 {drawerType.type === update
-                    ? compositeKeyToString({
+                    ? keyNames({
                           createdBy: drawerType.participantKey,
                           id: drawerType.stateKey,
                       })
@@ -79,7 +79,7 @@ export const ImagePieceDrawer: React.FC = () => {
     const dispatch = useDispatch();
     const operate = useOperate();
     const myUserUid = useMyUserUid();
-    const imagePieces = useImagePieces();
+    const imagePieces = useImagePieceValues();
     let stateEditorParams: StateEditorParams<ImagePieceValueState | undefined>;
     switch (drawerType?.type) {
         case create:

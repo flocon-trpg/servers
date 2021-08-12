@@ -13,11 +13,10 @@ import {
 } from '@kizahasi/flocon-core';
 import {
     CompositeKey,
-    compositeKeyToString,
     dualKeyRecordToDualKeyMap,
+    keyNames,
     ReadonlyStateMap,
     recordToArray,
-    recordToMap,
 } from '@kizahasi/util';
 import { Menu, Tooltip } from 'antd';
 import _ from 'lodash';
@@ -365,7 +364,7 @@ namespace ContextMenuModule {
                 {characterPiecesOnCursor.map(({ characterKey, character }) => (
                     // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が他にもあるため、キーを互いに異なるものにするように文字列を付加している。
                     <Menu.SubMenu
-                        key={compositeKeyToString(characterKey) + '@selected-piece'}
+                        key={keyNames(characterKey) + '@selected-piece'}
                         title={`${character.name} (コマ)`}
                     >
                         <Menu.Item
@@ -443,7 +442,7 @@ namespace ContextMenuModule {
                 {tachiesOnCursor.map(({ characterKey, character }) => (
                     // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が他にもあるため、キーを互いに異なるものにするように文字列を付加している。
                     <Menu.SubMenu
-                        key={compositeKeyToString(characterKey) + '@selected-tachie'}
+                        key={keyNames(characterKey) + '@selected-tachie'}
                         title={`${character.name} (立ち絵)`}
                     >
                         <Menu.Item
@@ -570,7 +569,7 @@ namespace ContextMenuModule {
                         );
                     }
                 );
-                const characterKey = compositeKeyToString(characterPair.key);
+                const characterKey = keyNames(characterPair.key);
                 return (
                     <Menu.ItemGroup key={characterKey} title={characterPair.value.name}>
                         {privateCommands}
@@ -926,10 +925,7 @@ namespace ContextMenuModule {
 
         const pieceMenus = [...characters.toArray()].map(([characterKey, character]) => {
             return (
-                <Menu.SubMenu
-                    key={compositeKeyToString(characterKey) + '@piece'}
-                    title={character.name}
-                >
+                <Menu.SubMenu key={keyNames(characterKey) + '@piece'} title={character.name}>
                     <Menu.SubMenu title="追加" disabled={pieceExists(character)}>
                         <Menu.Item
                             onClick={() => {
@@ -1031,10 +1027,7 @@ namespace ContextMenuModule {
 
         const tachieMenus = [...characters.toArray()].map(([characterKey, character]) => {
             return (
-                <Menu.SubMenu
-                    key={compositeKeyToString(characterKey) + '@tachie'}
-                    title={character.name}
-                >
+                <Menu.SubMenu key={keyNames(characterKey) + '@tachie'} title={character.name}>
                     <Menu.Item
                         disabled={tachieExists(character)}
                         onClick={() => {

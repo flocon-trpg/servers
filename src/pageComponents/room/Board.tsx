@@ -1,5 +1,5 @@
 import React from 'react';
-import { useImageFromGraphQL } from '../../hooks/image';
+import { failure, loading, success, useImageFromGraphQL } from '../../hooks/image';
 import * as ReactKonva from 'react-konva';
 import { Button, Dropdown, Menu } from 'antd';
 import * as Icons from '@ant-design/icons';
@@ -38,12 +38,11 @@ import {
     $free,
     CompositeKey,
     compositeKeyEquals,
-    compositeKeyToString,
     dualKeyRecordToDualKeyMap,
+    keyNames,
 } from '@kizahasi/util';
 import _ from 'lodash';
 import { useNumberPieceValues } from '../../hooks/state/useNumberPieceValues';
-import { tripleKeyToString } from '../../utils/tripleKeyToString';
 import {
     BoardTooltipState,
     create,
@@ -53,7 +52,7 @@ import {
 } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useDicePieceValues } from '../../hooks/state/useDicePieceValues';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
-import { useImagePieces } from '../../hooks/state/useImagePieces';
+import { useImagePieceValues } from '../../hooks/state/useImagePieceValues';
 import { FilePath, FileSourceType } from '../../generated/graphql';
 import { ImagePiece } from '../../components/Konva/ImagePiece';
 import { DragEndResult, Vector2 } from '../../utils/types';
@@ -62,6 +61,9 @@ import {
     dicePiece,
     numberPiece,
 } from '../../components/Konva/DiceOrNumberPiece';
+import { useTransition, animated } from '@react-spring/konva';
+import { useCharacterPieces } from '../../hooks/state/useCharacterPieces';
+import { useTachieLocations } from '../../hooks/state/useTachieLocations';
 
 const createPiecePostOperation = ({
     e,
@@ -191,7 +193,9 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const participants = useParticipants();
     const dicePieceValues = useDicePieceValues();
     const numberPieceValues = useNumberPieceValues();
-    const imagePieces = useImagePieces(boardKey);
+    const imagePieces = useImagePieceValues(boardKey);
+    const characterPieces = useCharacterPieces(boardKey);
+    const tacheLocations = useTachieLocations(boardKey);
 
     const onTooltipRef = useReadonlyRef(onTooltip);
     const onPopoverEditorRef = useReadonlyRef(onPopupEditor);
@@ -217,18 +221,26 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const [selectedPieceKey, setSelectedPieceKey] = React.useState<SelectedPieceKey>();
     const [isBackgroundDragging, setIsBackgroundDragging] = React.useState(false); // これがないと、pieceをドラッグでリサイズする際に背景が少し動いてしまう。
     const backgroundImage = useImageFromGraphQL(board.backgroundImage);
+    const backgroundImageResult =
+        backgroundImage.type === success ? backgroundImage.image : undefined;
     const dispatch = useDispatch();
     const operate = useOperate();
     const publicMessages = useFilteredRoomMessages({ filter: publicMessageFilter });
     const myUserUid = useMyUserUid();
 
-    if (
-        myUserUid == null ||
-        roomId == null ||
-        characters == null ||
-        participants == null ||
-        numberPieceValues == null
-    ) {
+    /*
+        TransitionにHTMLImageElementを含めないと、フェードアウトが発生しない模様（おそらくフェードアウト時には画像が捨てられているため）。そのため含めている。
+     */
+    const backgroundImageTransition = useTransition<
+        typeof backgroundImageResult,
+        { opacity: number; image: typeof backgroundImageResult }
+    >(backgroundImageResult, {
+        from: image => ({ opacity: 0, image }),
+        enter: image => ({ opacity: 1, image }),
+        leave: image => ({ opacity: 0, image }),
+    });
+
+    if (myUserUid == null || roomId == null || characters == null || participants == null) {
         return null;
     }
 
@@ -299,28 +311,17 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     })();
 
     const pieces = (() => {
-        const characterPieces = _(characters.toArray())
-            .map(([characterKey, character]) => {
-                const piece = dualKeyRecordToDualKeyMap<PieceState>(character.pieces)
-                    .toArray()
-                    .find(([boardKey$]) => {
-                        return (
-                            boardKey.createdBy === boardKey$.first &&
-                            boardKey.id === boardKey$.second
-                        );
-                    });
-                if (piece == null) {
-                    return null;
-                }
-                const [, pieceValue] = piece;
+        const characterPieceElements = (characterPieces ?? []).map(
+            ({ characterKey, character, piece }) => {
                 if (character.image == null) {
                     // TODO: 画像なしでコマを表示する
                     return null;
                 }
                 return (
                     <ImagePiece
-                        {...Piece.getPosition({ ...board, state: pieceValue })}
-                        key={compositeKeyToString(characterKey)}
+                        {...Piece.getPosition({ ...board, state: piece })}
+                        opacity={1}
+                        key={keyNames(characterKey)}
                         filePath={character.image}
                         draggable
                         listening
@@ -352,7 +353,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         onDragEnd={e => {
                             const pieceOperation = createPiecePostOperation({
                                 e,
-                                piece: pieceValue,
+                                piece,
                                 board,
                             });
                             const operation: UpOperation = {
@@ -380,31 +381,19 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         }}
                     />
                 );
-            })
-            .compact()
-            .value();
+            }
+        );
 
-        const tachieLocations = _(characters.toArray())
-            .map(([characterKey, character]) => {
-                const tachieLocation = _(
-                    dualKeyRecordToDualKeyMap<BoardLocationState>(
-                        character.tachieLocations
-                    ).toArray()
-                ).find(([boardKey$]) => {
-                    return (
-                        boardKey.createdBy === boardKey$.first && boardKey.id === boardKey$.second
-                    );
-                });
-                if (tachieLocation == null) {
-                    return null;
-                }
-                const [, pieceValue] = tachieLocation;
+        const tachieLocationElements = (tacheLocations ?? []).map(
+            ({ characterKey, character, tachieLocation }) => {
                 if (character.tachieImage == null) {
                     // TODO: 画像なしでコマを表示する
                     return null;
                 }
                 return (
                     <ImagePiece
+                        key={keyNames(characterKey)}
+                        opacity={0.75 /* TODO: opacityの値が適当 */}
                         message={lastPublicMessage}
                         messageFilter={msg => {
                             return (
@@ -413,12 +402,10 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                                 msg.channelKey !== $free
                             );
                         }}
-                        x={pieceValue.x}
-                        y={pieceValue.y}
-                        w={pieceValue.w}
-                        h={pieceValue.h}
-                        opacity={0.75 /* TODO: opacityの値が適当 */}
-                        key={compositeKeyToString(characterKey)}
+                        x={tachieLocation.x}
+                        y={tachieLocation.y}
+                        w={tachieLocation.w}
+                        h={tachieLocation.h}
                         filePath={character.tachieImage}
                         draggable
                         listening
@@ -472,11 +459,10 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         }}
                     />
                 );
-            })
-            .compact()
-            .value();
+            }
+        );
 
-        const imagePieceViews = (imagePieces ?? []).map(pieceValueElement => {
+        const imagePieceElements = (imagePieces ?? []).map(pieceValueElement => {
             const defaultImageFilePath: FilePath = {
                 // TODO: 適切な画像に変える
                 path: '/logo.png',
@@ -494,7 +480,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 <ImagePiece
                     {...Piece.getPosition({ ...board, state: pieceValueElement.piece })}
                     opacity={1}
-                    key={compositeKeyToString(pieceKey)}
+                    key={keyNames(pieceKey)}
                     filePath={pieceValueElement.value.image ?? defaultImageFilePath}
                     draggable
                     listening
@@ -578,11 +564,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 return (
                     <DiceOrNumberPiece
                         {...Piece.getPosition({ ...board, state: pieceValue })}
-                        key={tripleKeyToString(
-                            element.characterKey.createdBy,
-                            element.characterKey.id,
-                            element.valueId
-                        )}
+                        key={keyNames(element.characterKey, element.valueId)}
+                        opacity={1}
                         state={{ type: dicePiece, state: element.value }}
                         createdByMe={element.characterKey.createdBy === myUserUid}
                         draggable
@@ -671,11 +654,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 return (
                     <DiceOrNumberPiece
                         {...Piece.getPosition({ ...board, state: pieceValue })}
-                        key={tripleKeyToString(
-                            element.characterKey.createdBy,
-                            element.characterKey.id,
-                            element.valueId
-                        )}
+                        key={keyNames(element.characterKey, element.valueId)}
+                        opacity={1}
                         state={{ type: numberPiece, state: element.value }}
                         createdByMe={element.characterKey.createdBy === myUserUid}
                         draggable
@@ -749,24 +729,24 @@ const BoardCore: React.FC<BoardCoreProps> = ({
 
         return (
             <ReactKonva.Layer>
-                {tachieLocations}
-                {characterPieces}
-                {imagePieceViews}
+                {tachieLocationElements}
+                {characterPieceElements}
+                {imagePieceElements}
                 {dicePieces}
                 {numberPieces}
             </ReactKonva.Layer>
         );
     })();
 
-    const backgroundImageKonva =
-        backgroundImage.type === 'success' ? (
-            <ReactKonva.Image
-                image={backgroundImage.image}
-                scaleX={Math.max(board.backgroundImageZoom, 0)}
-                scaleY={Math.max(board.backgroundImageZoom, 0)}
-                onClick={e => e.evt.preventDefault()}
-            />
-        ) : null;
+    const backgroundImageKonva = backgroundImageTransition(({ opacity, image }) => (
+        <animated.Image
+            opacity={opacity}
+            image={image}
+            scaleX={Math.max(board.backgroundImageZoom, 0)}
+            scaleY={Math.max(board.backgroundImageZoom, 0)}
+            onClick={(e: any) => e.evt.preventDefault()}
+        />
+    ));
 
     const scale = Math.pow(2, boardConfig.zoom);
 
@@ -919,7 +899,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
         };
     })();
 
-    const imagePieces = useImagePieces(boardKeyToShow ?? undefined);
+    const imagePieces = useImagePieceValues(boardKeyToShow ?? undefined);
 
     if (
         me == null ||
@@ -941,9 +921,9 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                 if (activeBoardPanelConfig == null) {
                     return null;
                 }
-                return activeBoardPanelConfig.boards[compositeKeyToString(boardKeyToShow)];
+                return activeBoardPanelConfig.boards[keyNames(boardKeyToShow)];
             }
-            return panel.boardEditorPanel.boards[compositeKeyToString(boardKeyToShow)];
+            return panel.boardEditorPanel.boards[keyNames(boardKeyToShow)];
         })() ?? defaultBoardConfig();
 
     const boardEditorPanelId = panel.type === 'boardEditor' ? panel.boardEditorPanelId : null;
@@ -960,7 +940,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
         }
         if (board == null) {
             return (
-                <div>{`キーが ${compositeKeyToString(
+                <div>{`キーが ${keyNames(
                     boardKeyToShow
                 )} であるボードが見つかりませんでした。`}</div>
             );
@@ -1155,7 +1135,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                   }
                   return (
                       <Menu.Item
-                          key={compositeKeyToString(key)}
+                          key={keyNames(key)}
                           onClick={() =>
                               dispatch(
                                   roomConfigModule.actions.updateBoardEditorPanel({
