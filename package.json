@@ -34,18 +34,18 @@
         "url": "https://github.com/kizahasi/flocon-script"
     },
     "devDependencies": {
-        "@types/estree": "^0.0.49",
-        "@types/jest": "^26.0.24",
+        "@types/estree": "0.0.49",
+        "@types/jest": "26.0.24",
         "@typescript-eslint/eslint-plugin": "^4.28.2",
         "@typescript-eslint/parser": "^4.28.2",
-        "eslint": "^7.30.0",
-        "eslint-config-prettier": "^8.3.0",
+        "eslint": "7.30.0",
+        "eslint-config-prettier": "8.3.0",
         "jest": "^27.0.6",
-        "prettier": "^2.3.2",
-        "rimraf": "^3.0.2",
-        "ts-jest": "^27.0.3",
-        "typescript": "^4.3.5",
-        "husky": "^7.0.0"
+        "prettier": "2.3.2",
+        "rimraf": "3.0.2",
+        "ts-jest": "27.0.3",
+        "typescript": "4.3.5",
+        "husky": "7.0.1"
     },
     "dependencies": {
         "@kizahasi/option": "^0.1.3",
