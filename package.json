@@ -49,7 +49,7 @@
     },
     "dependencies": {
         "@kizahasi/option": "^0.1.3",
-        "@kizahasi/util": "^0.3.0",
+        "@kizahasi/util": "^0.4.0",
         "acorn": "^8.4.1"
     }
 }

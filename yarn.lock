@@ -544,10 +544,10 @@
   resolved "https://registry.yarnpkg.com/@kizahasi/result/-/result-0.3.0.tgz#289d0b8386af374387e7b19b4a6ff01ae9688001"
   integrity sha512-hS1wjM91tHgvu66vTkKX0x4Qbyqr45d+90Y2c1Nv2e5fR9KXukmls1jRv/aW/yZugMnNUbLMEvVbsCcpfJZQSw==
 
-"@kizahasi/util@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@kizahasi/util/-/util-0.3.0.tgz#64e307ecb734adf222f3a05d11db2e076b2d4707"
-  integrity sha512-wftuemptAzc8o6GDJ7zChCs+nIHEll9wt/FOfayZXCF4MKwTRqCPPc7hmXFejrDgZxSz62kmcTtsvKVgf2SDsQ==
+"@kizahasi/util@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@kizahasi/util/-/util-0.4.0.tgz#60918bc035a9885dae57bcea2513e326adc09344"
+  integrity sha512-lAu6w+Q9d6sX7+qzL35CobVHL6hnhzsbLqYHIhDE46v4K5Nzegfg4OjzVMHg2pU68JLOoTjsx6elnp05e+iYzA==
   dependencies:
     "@kizahasi/result" "^0.3.0"
 
