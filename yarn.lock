@@ -523,10 +523,10 @@
     "@types/yargs" "^16.0.0"
     chalk "^4.0.0"
 
-"@kizahasi/option@^0.1.3":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@kizahasi/option/-/option-0.1.3.tgz#7652a03eed1e3d69b984310759585202869ede20"
-  integrity sha512-hURh7Lz0zxgTPZlWiEj2Q/SC8ebZFXKMsiDaPDuyJlDI6QvdlEUp81DahKl5Njkq/CS5+d1bpreNj/uQk4vLOg==
+"@kizahasi/option@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@kizahasi/option/-/option-1.0.0.tgz#e335d217579cfb334ac9e593d5cb8f9be5309b9c"
+  integrity sha512-dtLMDRmai9lAWs4Z7Ar/zXihcrGlq3Zh2gf9PqbWOlpxxT2kCEUKLYVaAUMy6OptHtm7/3ykCbs3yJwmtg5jnA==
 
 "@kizahasi/result@^0.3.0":
   version "0.3.0"
