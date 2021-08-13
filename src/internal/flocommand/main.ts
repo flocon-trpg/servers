@@ -1,7 +1,7 @@
 import * as Room from '../ot/room/v1';
 import { exec, ScriptError, test } from '@kizahasi/flocon-script';
 import { FRoom } from './room';
-import { CompositeKey, compositeKeyToString } from '@kizahasi/util';
+import { CompositeKey, keyNames } from '@kizahasi/util';
 import { CustomResult, Result } from '@kizahasi/result';
 
 type CommandError = {
@@ -45,7 +45,7 @@ export const execCharacterCommand = ({
     const fRoom = new FRoom(room);
     const fCharacter = fRoom.findCharacter(characterKey);
     if (fCharacter == null) {
-        throw new Error(`character(${compositeKeyToString(characterKey)}) not found`);
+        throw new Error(`character(${keyNames(characterKey)}) not found`);
     }
     const globalThis = { room: fRoom, character: fCharacter };
     try {

@@ -764,6 +764,13 @@
   dependencies:
     "@kizahasi/result" "^0.3.0"
 
+"@kizahasi/util@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@kizahasi/util/-/util-0.4.0.tgz#60918bc035a9885dae57bcea2513e326adc09344"
+  integrity sha512-lAu6w+Q9d6sX7+qzL35CobVHL6hnhzsbLqYHIhDE46v4K5Nzegfg4OjzVMHg2pU68JLOoTjsx6elnp05e+iYzA==
+  dependencies:
+    "@kizahasi/result" "^0.3.0"
+
 "@ltd/j-toml@^1.12.2":
   version "1.12.2"
   resolved "https://registry.yarnpkg.com/@ltd/j-toml/-/j-toml-1.12.2.tgz#994c1792d07ca21421d4a75fef0dd0b60f7a1c8b"
