@@ -13,7 +13,7 @@
     "scripts": {
         "build": "yarn lint && yarn prettier && rimraf ./dist && tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json",
         "test": "jest",
-        "prepare": "yarn build",
+        "prepare": "yarn build && husky install",
         "lint": "eslint src test",
         "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \".github/**/*.yml\""
     },
@@ -44,7 +44,8 @@
         "prettier": "^2.3.2",
         "rimraf": "^3.0.2",
         "ts-jest": "^27.0.3",
-        "typescript": "^4.3.5"
+        "typescript": "^4.3.5",
+        "husky": "^7.0.0"
     },
     "dependencies": {
         "@kizahasi/option": "^0.1.3",
