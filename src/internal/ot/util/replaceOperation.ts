@@ -81,7 +81,7 @@ export const toPrivateClientOperation = <T>({
     isAuthorized: boolean;
 }): { newValue: T } | undefined => {
     if (oldValue.isValuePrivate && !isAuthorized) {
-        if (newValue.isValuePrivate && !isAuthorized) {
+        if (newValue.isValuePrivate) {
             return undefined;
         }
         return {

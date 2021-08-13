@@ -80,9 +80,7 @@ const toExpressionCore = (text: string): CustomResult<ExpressionCore[], Error> =
                     }
                     case '{': {
                         const nextChar: string | undefined = charArray[cursor + 1];
-                        if (tail != null) {
-                            head.push(tail);
-                        }
+                        head.push(tail);
                         if (nextChar === '{') {
                             cursor++;
                             tail = {

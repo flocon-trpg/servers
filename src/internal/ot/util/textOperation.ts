@@ -327,7 +327,7 @@ export const toPrivateClientOperation = ({
     isAuthorized: boolean;
 }): UpOperation | undefined => {
     if (oldValue.isValuePrivate && !isAuthorized) {
-        if (newValue.isValuePrivate && !isAuthorized) {
+        if (newValue.isValuePrivate) {
             return undefined;
         }
         return diffToUpOperation({ prev: '', next: newValue.value });
