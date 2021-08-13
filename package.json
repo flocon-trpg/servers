@@ -13,7 +13,7 @@
     "scripts": {
         "build": "yarn lint && yarn prettier && rimraf ./dist && tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json",
         "test": "jest",
-        "prepare": "yarn build",
+        "prepare": "yarn build && husky install",
         "lint": "eslint src test",
         "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \".github/**/*.yml\""
     },
@@ -42,6 +42,7 @@
         "eslint-config-prettier": "8.3.0",
         "fast-check": "2.17.0",
         "fast-check-io-ts": "0.5.0",
+        "husky": "^7.0.0",
         "jest": "^27.0.6",
         "prettier": "2.3.2",
         "rimraf": "3.0.2",
