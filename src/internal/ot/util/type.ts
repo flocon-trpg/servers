@@ -1,17 +1,17 @@
 import { ApplyError, PositiveInt, ComposeAndTransformError } from '@kizahasi/ot-string';
-import { CustomResult } from '@kizahasi/result';
+import { Result } from '@kizahasi/result';
 
 type Error = string | ApplyError<PositiveInt> | ComposeAndTransformError;
 
 export type Apply<TState, TOperation> = (params: {
     state: TState;
     operation: TOperation;
-}) => CustomResult<TState, Error>;
+}) => Result<TState, Error>;
 
 export type Compose<TOperation> = (params: {
     first: TOperation;
     second: TOperation;
-}) => CustomResult<TOperation | undefined, Error>;
+}) => Result<TOperation | undefined, Error>;
 
 export type Diff<TState, TOperation> = (params: {
     prevState: TState;
@@ -21,7 +21,7 @@ export type Diff<TState, TOperation> = (params: {
 export type Restore<TState, TDownOperation, TTwoWayOperation> = (params: {
     nextState: TState;
     downOperation: TDownOperation;
-}) => CustomResult<
+}) => Result<
     {
         prevState: TState;
         twoWayOperation: TTwoWayOperation | undefined;
@@ -34,15 +34,12 @@ export type ServerTransform<TServerState, TTwoWayOperation, TUpOperation> = (par
     currentState: TServerState;
     serverOperation: TTwoWayOperation | undefined;
     clientOperation: TUpOperation;
-}) => CustomResult<TTwoWayOperation | undefined, Error>;
+}) => Result<TTwoWayOperation | undefined, Error>;
 
 export type ClientTransform<TOperation> = (params: {
     first: TOperation;
     second: TOperation;
-}) => CustomResult<
-    { firstPrime: TOperation | undefined; secondPrime: TOperation | undefined },
-    Error
->;
+}) => Result<{ firstPrime: TOperation | undefined; secondPrime: TOperation | undefined }, Error>;
 
 // Ensure this:
 // - diff(prevState) = nextState

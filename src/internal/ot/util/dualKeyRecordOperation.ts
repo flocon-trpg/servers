@@ -1,4 +1,4 @@
-import { CustomResult, Result } from '@kizahasi/result';
+import { Result } from '@kizahasi/result';
 import {
     DualKey,
     DualKeyMap,
@@ -139,13 +139,13 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
         key: DualKey<string, string>;
         downOperation: TDownOperation;
         nextState: TState;
-    }) => CustomResult<RestoreResult<TState, TTwoWayOperation | undefined>, string | TCustomError>;
+    }) => Result<RestoreResult<TState, TTwoWayOperation | undefined>, string | TCustomError>;
     innerDiff: (params: {
         key: DualKey<string, string>;
         prevState: TState;
         nextState: TState;
     }) => TTwoWayOperation | undefined;
-}): CustomResult<
+}): Result<
     RestoreResult<
         DualStringKeyRecord<TState>,
         DualKeyRecordTwoWayOperation<TState, TTwoWayOperation>
@@ -255,8 +255,8 @@ export const apply = <TState, TOperation, TCustomError = string>({
         key: DualKey<string, string>;
         operation: TOperation;
         prevState: TState;
-    }) => CustomResult<TState, string | TCustomError>;
-}): CustomResult<DualStringKeyRecord<TState>, string | TCustomError> => {
+    }) => Result<TState, string | TCustomError>;
+}): Result<DualStringKeyRecord<TState>, string | TCustomError> => {
     if (operation == null) {
         return Result.ok(prevState);
     }
@@ -315,8 +315,8 @@ export const applyBack = <TState, TDownOperation, TCustomError = string>({
         key: DualKey<string, string>;
         operation: TDownOperation;
         state: TState;
-    }) => CustomResult<TState, string | TCustomError>;
-}): CustomResult<DualStringKeyRecord<TState>, string | TCustomError> => {
+    }) => Result<TState, string | TCustomError>;
+}): Result<DualStringKeyRecord<TState>, string | TCustomError> => {
     if (operation == null) {
         return Result.ok(nextState);
     }
@@ -377,13 +377,13 @@ export const composeDownOperation = <TState, TDownOperation, TCustomError = stri
         key: DualKey<string, string>;
         operation: TDownOperation;
         state: TState;
-    }) => CustomResult<TState, string | TCustomError>;
+    }) => Result<TState, string | TCustomError>;
     innerCompose: (params: {
         key: DualKey<string, string>;
         first: TDownOperation;
         second: TDownOperation;
-    }) => CustomResult<TDownOperation | undefined, string | TCustomError>;
-}): CustomResult<
+    }) => Result<TDownOperation | undefined, string | TCustomError>;
+}): Result<
     DualKeyRecordDownOperation<TState, TDownOperation> | undefined,
     string | TCustomError
 > => {
@@ -534,9 +534,9 @@ export const serverTransform = <
         params: ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> & {
             key: DualKey<string, string>;
         }
-    ) => CustomResult<TFirstOperation | undefined, string | TCustomError>;
+    ) => Result<TFirstOperation | undefined, string | TCustomError>;
     cancellationPolicy: CancellationPolicy<DualKey<string, string>, TServerState>;
-}): CustomResult<
+}): Result<
     DualKeyRecordTwoWayOperation<TServerState, TFirstOperation> | undefined,
     string | TCustomError
 > => {
@@ -683,7 +683,7 @@ export const serverTransform = <
 type InnerClientTransform<TFirstOperation, TSecondOperation, TError = string> = (params: {
     first: TFirstOperation;
     second: TSecondOperation;
-}) => CustomResult<
+}) => Result<
     {
         firstPrime: TFirstOperation | undefined;
         secondPrime: TSecondOperation | undefined;
@@ -706,7 +706,7 @@ const transformElement = <TState, TFirstOperation, TSecondOperation, TError = st
     second: RecordUpOperationElement<TState, TSecondOperation>;
     innerTransform: InnerClientTransform<TFirstOperation, TSecondOperation, TError>;
     innerDiff: Diff<TState, TFirstOperation>;
-}): CustomResult<
+}): Result<
     {
         firstPrime: RecordUpOperationElement<TState, TFirstOperation> | undefined;
         secondPrime: RecordUpOperationElement<TState, TSecondOperation> | undefined;
@@ -808,7 +808,7 @@ export const clientTransform = <TState, TOperation, TError = string>({
     second?: DualKeyRecordUpOperation<TState, TOperation>;
     innerTransform: InnerClientTransform<TOperation, TOperation, TError>;
     innerDiff: Diff<TState, TOperation>;
-}): CustomResult<
+}): Result<
     {
         firstPrime: DualKeyRecordUpOperation<TState, TOperation> | undefined;
         secondPrime: DualKeyRecordUpOperation<TState, TOperation> | undefined;

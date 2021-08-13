@@ -1,4 +1,4 @@
-import { CustomResult, Result } from '@kizahasi/result';
+import { Result } from '@kizahasi/result';
 
 export const plain = 'plain';
 export const expr1 = 'expr1';
@@ -45,7 +45,7 @@ type Error = {
     message: string;
 };
 
-const toExpressionCore = (text: string): CustomResult<ExpressionCore[], Error> => {
+const toExpressionCore = (text: string): Result<ExpressionCore[], Error> => {
     const bareKey = /[a-zA-Z0-9_-]/;
 
     const head: ExpressionCore[] = []; // plainが連続して続くことはない。

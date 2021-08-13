@@ -1,4 +1,4 @@
-import { CustomResult, Result } from '@kizahasi/result';
+import { Result } from '@kizahasi/result';
 import { both, groupJoinMap, left, mapToRecord, recordToMap, right } from '@kizahasi/util';
 import * as DualKeyRecordOperation from './dualKeyRecordOperation';
 import { StringKeyRecord } from './record';
@@ -25,8 +25,8 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
         downOperation: TDownOperation;
         nextState: TState;
         key: string;
-    }) => CustomResult<RestoreResult<TState, TTwoWayOperation> | undefined, string | TCustomError>;
-}): CustomResult<
+    }) => Result<RestoreResult<TState, TTwoWayOperation> | undefined, string | TCustomError>;
+}): Result<
     RestoreResult<StringKeyRecord<TState>, StringKeyRecord<TTwoWayOperation>>,
     string | TCustomError
 > => {
@@ -82,9 +82,9 @@ export const apply = <TState, TUpOperation, TCustomError = string>({
         operation: TUpOperation;
         prevState: TState;
         key: string;
-    }) => CustomResult<TState, string | TCustomError>;
+    }) => Result<TState, string | TCustomError>;
     defaultState: TState;
-}): CustomResult<StringKeyRecord<TState>, string | TCustomError> => {
+}): Result<StringKeyRecord<TState>, string | TCustomError> => {
     if (operation == null) {
         return Result.ok(unsafePrevState);
     }
@@ -120,9 +120,9 @@ export const applyBack = <TState, TDownOperation, TCustomError = string>({
         operation: TDownOperation;
         nextState: TState;
         key: string;
-    }) => CustomResult<TState, string | TCustomError>;
+    }) => Result<TState, string | TCustomError>;
     defaultState: TState;
-}): CustomResult<StringKeyRecord<TState>, string | TCustomError> => {
+}): Result<StringKeyRecord<TState>, string | TCustomError> => {
     if (operation == null) {
         return Result.ok(unsafeNextState);
     }
@@ -157,8 +157,8 @@ export const compose = <TOperation, TCustomError = string>({
         key: string;
         first: TOperation;
         second: TOperation;
-    }) => CustomResult<TOperation | undefined, string | TCustomError>;
-}): CustomResult<StringKeyRecord<TOperation> | undefined, string | TCustomError> => {
+    }) => Result<TOperation | undefined, string | TCustomError>;
+}): Result<StringKeyRecord<TOperation> | undefined, string | TCustomError> => {
     if (first == null) {
         return Result.ok(second);
     }
@@ -218,9 +218,9 @@ export const serverTransform = <
         params: ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> & {
             key: string;
         }
-    ) => CustomResult<TFirstOperation | undefined, string | TCustomError>;
+    ) => Result<TFirstOperation | undefined, string | TCustomError>;
     defaultState: TServerState;
-}): CustomResult<StringKeyRecord<TFirstOperation> | undefined, string | TCustomError> => {
+}): Result<StringKeyRecord<TFirstOperation> | undefined, string | TCustomError> => {
     if (unsafeSecond === undefined) {
         return Result.ok(undefined);
     }
@@ -256,10 +256,7 @@ export const serverTransform = <
 type InnerClientTransform<TOperation, TError = string> = (params: {
     first: TOperation;
     second: TOperation;
-}) => CustomResult<
-    { firstPrime: TOperation | undefined; secondPrime: TOperation | undefined },
-    TError
->;
+}) => Result<{ firstPrime: TOperation | undefined; secondPrime: TOperation | undefined }, TError>;
 
 export const clientTransform = <TOperation, TError = string>({
     first,
@@ -269,7 +266,7 @@ export const clientTransform = <TOperation, TError = string>({
     first?: StringKeyRecord<TOperation>;
     second?: StringKeyRecord<TOperation>;
     innerTransform: InnerClientTransform<TOperation, TError>;
-}): CustomResult<
+}): Result<
     {
         firstPrime: StringKeyRecord<TOperation> | undefined;
         secondPrime: StringKeyRecord<TOperation> | undefined;

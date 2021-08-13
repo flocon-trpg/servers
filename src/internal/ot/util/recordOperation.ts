@@ -1,4 +1,4 @@
-import { CustomResult, Result } from '@kizahasi/result';
+import { Result } from '@kizahasi/result';
 import * as t from 'io-ts';
 import * as DualKeyRecordOperation from './dualKeyRecordOperation';
 import { record, StringKeyRecord } from './record';
@@ -101,13 +101,13 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
         key: string;
         downOperation: TDownOperation;
         nextState: TState;
-    }) => CustomResult<RestoreResult<TState, TTwoWayOperation | undefined>, string | TCustomError>;
+    }) => Result<RestoreResult<TState, TTwoWayOperation | undefined>, string | TCustomError>;
     innerDiff: (params: {
         key: string;
         prevState: TState;
         nextState: TState;
     }) => TTwoWayOperation | undefined;
-}): CustomResult<
+}): Result<
     RestoreResult<StringKeyRecord<TState>, RecordTwoWayOperation<TState, TTwoWayOperation>>,
     string | TCustomError
 > => {
@@ -147,8 +147,8 @@ export const apply = <TState, TOperation, TCustomError = string>({
         key: string;
         operation: TOperation;
         prevState: TState;
-    }) => CustomResult<TState, string | TCustomError>;
-}): CustomResult<StringKeyRecord<TState>, string | TCustomError> => {
+    }) => Result<TState, string | TCustomError>;
+}): Result<StringKeyRecord<TState>, string | TCustomError> => {
     if (operation == null) {
         return Result.ok(prevState);
     }
@@ -175,8 +175,8 @@ export const applyBack = <TState, TDownOperation, TCustomError = string>({
         key: string;
         operation: TDownOperation;
         state: TState;
-    }) => CustomResult<TState, string | TCustomError>;
-}): CustomResult<StringKeyRecord<TState>, string | TCustomError> => {
+    }) => Result<TState, string | TCustomError>;
+}): Result<StringKeyRecord<TState>, string | TCustomError> => {
     if (operation == null) {
         return Result.ok(nextState);
     }
@@ -205,16 +205,13 @@ export const composeDownOperation = <TState, TDownOperation, TCustomError = stri
         key: string;
         operation: TDownOperation;
         state: TState;
-    }) => CustomResult<TState, string | TCustomError>;
+    }) => Result<TState, string | TCustomError>;
     innerCompose: (params: {
         key: string;
         first: TDownOperation;
         second: TDownOperation;
-    }) => CustomResult<TDownOperation | undefined, string | TCustomError>;
-}): CustomResult<
-    RecordDownOperation<TState, TDownOperation> | undefined,
-    string | TCustomError
-> => {
+    }) => Result<TDownOperation | undefined, string | TCustomError>;
+}): Result<RecordDownOperation<TState, TDownOperation> | undefined, string | TCustomError> => {
     if (first == null) {
         return Result.ok(second);
     }
@@ -260,9 +257,9 @@ export const serverTransform = <
         params: ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> & {
             key: string;
         }
-    ) => CustomResult<TFirstOperation | undefined, string | TCustomError>;
+    ) => Result<TFirstOperation | undefined, string | TCustomError>;
     cancellationPolicy: CancellationPolicy<string, TServerState>;
-}): CustomResult<
+}): Result<
     RecordTwoWayOperation<TServerState, TFirstOperation> | undefined,
     string | TCustomError
 > => {
@@ -303,7 +300,7 @@ export const serverTransform = <
 type InnerClientTransform<TFirstOperation, TSecondOperation, TError = string> = (params: {
     first: TFirstOperation;
     second: TSecondOperation;
-}) => CustomResult<
+}) => Result<
     {
         firstPrime: TFirstOperation | undefined;
         secondPrime: TSecondOperation | undefined;
@@ -321,7 +318,7 @@ export const clientTransform = <TState, TOperation, TError = string>({
     second?: RecordUpOperation<TState, TOperation>;
     innerTransform: InnerClientTransform<TOperation, TOperation, TError>;
     innerDiff: (params: { prevState: TState; nextState: TState }) => TOperation | undefined;
-}): CustomResult<
+}): Result<
     {
         firstPrime: RecordUpOperation<TState, TOperation> | undefined;
         secondPrime: RecordUpOperation<TState, TOperation> | undefined;
