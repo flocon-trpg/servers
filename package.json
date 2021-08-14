@@ -7,7 +7,7 @@
         "@kizahasi/flocon-core": "^0.15.5",
         "@kizahasi/ot-string": "^0.2.2",
         "@kizahasi/result": "^0.3.0",
-        "@kizahasi/util": "^0.3.0",
+        "@kizahasi/util": "^0.4.0",
         "@mikro-orm/core": "^4.5.7",
         "@mikro-orm/migrations": "^4.5.7",
         "@mikro-orm/postgresql": "^4.5.7",
