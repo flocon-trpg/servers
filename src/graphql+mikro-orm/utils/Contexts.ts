@@ -1,4 +1,4 @@
-import { CustomResult } from '@kizahasi/result';
+import { Result } from '@kizahasi/result';
 import { InMemoryConnectionManager } from '../../connection/main';
 import { BaasType } from '../../enums/BaasType';
 import { PromiseQueue } from '../../utils/PromiseQueue';
@@ -15,7 +15,7 @@ export type DecodedIdToken = {
 
 export type ResolverContext = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    decodedIdToken?: CustomResult<DecodedIdToken, any>;
+    decodedIdToken?: Result<DecodedIdToken, any>;
     promiseQueue: PromiseQueue;
     connectionManager: InMemoryConnectionManager;
     createEm: () => EM;

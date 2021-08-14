@@ -14,7 +14,7 @@ import { Extra, useServer } from 'graphql-ws/lib/use/ws';
 import { execute, subscribe } from 'graphql';
 import { checkMigrationsBeforeStart } from './migrate';
 import { InMemoryConnectionManager, pubSub } from './connection/main';
-import { CustomResult, Result } from '@kizahasi/result';
+import { Result } from '@kizahasi/result';
 import { authToken } from '@kizahasi/util';
 import { Context } from 'graphql-ws/lib/server';
 import { BaasType } from './enums/BaasType';
@@ -55,7 +55,7 @@ const main = async (params: { debug: boolean }): Promise<void> => {
 
     const getDecodedIdToken = async (
         idToken: string
-    ): Promise<CustomResult<admin.auth.DecodedIdToken & { type: BaasType.Firebase }, any>> => {
+    ): Promise<Result<admin.auth.DecodedIdToken & { type: BaasType.Firebase }, any>> => {
         const decodedIdToken = await admin
             .auth()
             .verifyIdToken(idToken)
@@ -73,7 +73,7 @@ const main = async (params: { debug: boolean }): Promise<void> => {
     const getDecodedIdTokenFromBearer = async (
         bearer: string | undefined
     ): Promise<
-        CustomResult<admin.auth.DecodedIdToken & { type: BaasType.Firebase }, any> | undefined
+        Result<admin.auth.DecodedIdToken & { type: BaasType.Firebase }, any> | undefined
     > => {
         // bearerのフォーマットはだいたいこんな感じ
         // 'Bearer aNGoGo3ngC.oepGJoGoeo34Ha.Oge03mvQgeo4H'

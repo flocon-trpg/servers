@@ -137,7 +137,7 @@ import { GetRoomConnectionFailureType } from '../../../enums/GetRoomConnectionFa
 import { WritingMessageStatusType } from '../../../enums/WritingMessageStatusType';
 import { WritingMessageStatusInputType } from '../../../enums/WritingMessageStatusInputType';
 import { FileSourceType, FileSourceTypeModule } from '../../../enums/FileSourceType';
-import { CustomResult, Result } from '@kizahasi/result';
+import { Result } from '@kizahasi/result';
 import {
     $free,
     $system,
@@ -1993,10 +1993,7 @@ export class RoomResolver {
         }
 
         const queue = async (): Promise<
-            CustomResult<
-                OperateCoreResult,
-                string | ApplyError<PositiveInt> | ComposeAndTransformError
-            >
+            Result<OperateCoreResult, string | ApplyError<PositiveInt> | ComposeAndTransformError>
         > => {
             const em = context.createEm();
             const entry = await checkEntry({
