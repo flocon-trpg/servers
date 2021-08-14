@@ -161,6 +161,7 @@ const Memo: React.FC<MemoProps> = ({ memoId, state }: MemoProps) => {
                 style={{ flex: 1, height: '100%', resize: 'none' }}
                 bufferDuration="default"
                 value={state.text}
+                disableResize
                 onChange={e => {
                     const diff2 = textDiff({ prev: e.previousValue, next: e.currentValue });
                     operate({
