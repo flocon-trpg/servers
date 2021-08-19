@@ -68,4 +68,18 @@ export class JsonObject {
         }
         throw new Error(`${keysToString(this.currentPath)} must be true or false.`);
     }
+
+    public valueAsNumber(): number {
+        if (typeof this.jsonObject === 'number') {
+            return this.jsonObject;
+        }
+        throw new Error(`${keysToString(this.currentPath)} must be number.`);
+    }
+
+    public valueAsNullableNumber(): number | null {
+        if (this.jsonObject === null || typeof this.jsonObject === 'number') {
+            return this.jsonObject;
+        }
+        throw new Error(`${keysToString(this.currentPath)} must be number or null.`);
+    }
 }
