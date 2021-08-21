@@ -1,4 +1,4 @@
-export { FirebaseConfig, createFirebaseConfig } from './internal/config';
+export { FirebaseConfig } from './internal/config';
 export { anonymous, authToken, $free, $system } from './internal/constants';
 export {
     KeyFactory,
@@ -30,7 +30,6 @@ export {
     strIndex100Array,
     isStrIndex100,
 } from './internal/indexes';
-export { JsonObject } from './internal/jsonObject';
 export { keyNames } from './internal/keyNames';
 export { groupJoin as groupJoinMap } from './internal/map';
 export { PublicChannelKey } from './internal/publicChannelKey';

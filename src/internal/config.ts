@@ -1,27 +1,14 @@
-import { JsonObject } from './jsonObject';
+import * as t from 'io-ts';
 
-export type FirebaseConfig = {
-    apiKey: string;
-    authDomain: string;
-    databaseURL: string;
-    projectId: string;
-    storageBucket: string;
-    messagingSenderId: string;
-    appId: string;
-    measurementId: string;
+export const firebaseConfig = {
+    apiKey: t.string,
+    authDomain: t.string,
+    databaseURL: t.string,
+    projectId: t.string,
+    storageBucket: t.string,
+    messagingSenderId: t.string,
+    appId: t.string,
+    measurementId: t.string,
 };
 
-export const createFirebaseConfig = (json: any): FirebaseConfig => {
-    const j = JsonObject.init(json);
-
-    return {
-        apiKey: j.get('apiKey').valueAsString(),
-        authDomain: j.get('authDomain').valueAsString(),
-        databaseURL: j.get('databaseURL').valueAsString(),
-        projectId: j.get('projectId').valueAsString(),
-        storageBucket: j.get('storageBucket').valueAsString(),
-        messagingSenderId: j.get('messagingSenderId').valueAsString(),
-        appId: j.get('appId').valueAsString(),
-        measurementId: j.get('measurementId').valueAsString(),
-    };
-};
+export type FirebaseConfig = t.Type<typeof firebaseConfig>;
