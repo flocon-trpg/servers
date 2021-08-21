@@ -22,7 +22,7 @@ import {
 } from '../../../util/recordOperationElement';
 import * as DualKeyRecordOperation from '../../../util/dualKeyRecordOperation';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
-import { Maybe, maybe } from '../../../util/maybe';
+import { Maybe, maybe } from '../../../../maybe';
 
 export const state = t.type({
     $version: t.literal(1),

@@ -29,7 +29,7 @@ import { CompositeKey, compositeKey } from '../compositeKey/v1';
 import { Result } from '@kizahasi/result';
 import { ApplyError, PositiveInt, ComposeAndTransformError } from '@kizahasi/ot-string';
 import { chooseRecord, chooseDualKeyRecord, isStrIndex20, isStrIndex5 } from '@kizahasi/util';
-import { Maybe, maybe } from '../util/maybe';
+import { Maybe, maybe } from '../../maybe';
 
 const replaceStringDownOperation = t.type({ oldValue: t.string });
 const replaceStringUpOperation = t.type({ newValue: t.string });

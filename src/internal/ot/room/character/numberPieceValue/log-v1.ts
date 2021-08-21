@@ -4,7 +4,7 @@ import * as NumberPieceValue from './v1';
 import * as Piece from '../../../piece/v1';
 import { record } from '../../../util/record';
 import { createType, deleteType, updateType } from '../../../piece/log-v1';
-import { maybe } from '../../../util/maybe';
+import { maybe } from '../../../../maybe';
 
 const update = t.intersection([
     t.type({

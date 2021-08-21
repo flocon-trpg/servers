@@ -21,6 +21,10 @@ export const privateCommandsDiff = ({
     });
 };
 
+export { firebaseConfig, FirebaseConfig } from './internal/firebaseConfig';
+
+export { maybe, Maybe } from './internal/maybe';
+
 export {
     isValidVarToml,
     parseToml,
