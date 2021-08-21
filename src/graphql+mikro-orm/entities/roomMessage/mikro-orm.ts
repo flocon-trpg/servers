@@ -7,6 +7,7 @@ import {
     Entity,
     Enum,
     IdentifiedReference,
+    Index,
     JsonType,
     ManyToMany,
     ManyToOne,
@@ -17,6 +18,7 @@ import {
     Unique,
 } from '@mikro-orm/core';
 import { v4 } from 'uuid';
+import { FilePermissionType } from '../../../enums/FilePermissionType';
 import { FileSourceType } from '../../../enums/FileSourceType';
 import { Room } from '../room/mikro-orm';
 import { User } from '../user/mikro-orm';

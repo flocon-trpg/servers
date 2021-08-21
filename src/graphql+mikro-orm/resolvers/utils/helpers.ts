@@ -6,6 +6,7 @@ import { GlobalRoom } from '../../entities/room/global';
 import { ParticipantState, State } from '@kizahasi/flocon-core';
 import { anonymous, recordToArray } from '@kizahasi/util';
 import { BaasType } from '../../../enums/BaasType';
+import { getSingletonEntity } from '../../entities/singleton/mikro-orm';
 
 const find = <T>(source: Record<string, T | undefined>, key: string): T | undefined => source[key];
 
@@ -37,17 +38,17 @@ export const getUserIfEntry = async ({
     em,
     userUid,
     baasType,
-    globalEntryPhrase,
 }: {
     em: EM;
     userUid: string;
     baasType: BaasType;
-    globalEntryPhrase: string | undefined;
 }): Promise<User | null> => {
+    const singletonEntity = await getSingletonEntity(em.fork());
     const user = await em.findOne(User, { userUid, baasType });
+    const requiresEntryPassword = singletonEntity.entryPasswordHash != null;
 
     if (user == null) {
-        if (globalEntryPhrase == null) {
+        if (!requiresEntryPassword) {
             const newUser = new User({ userUid, baasType });
             newUser.isEntry = true;
             em.persist(newUser);
@@ -60,7 +61,7 @@ export const getUserIfEntry = async ({
         return user;
     }
 
-    if (globalEntryPhrase == null) {
+    if (!requiresEntryPassword) {
         user.isEntry = true;
         return user;
     }
@@ -72,14 +73,12 @@ export const checkEntry = async ({
     em,
     userUid,
     baasType,
-    globalEntryPhrase,
 }: {
     em: EM;
     userUid: string;
     baasType: BaasType;
-    globalEntryPhrase: string | undefined;
 }): Promise<boolean> => {
-    return (await getUserIfEntry({ em, userUid, baasType, globalEntryPhrase })) != null;
+    return (await getUserIfEntry({ em, userUid, baasType })) != null;
 };
 
 class FindRoomAndMyParticipantResult {

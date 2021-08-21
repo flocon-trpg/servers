@@ -4,11 +4,10 @@ import path from 'path';
 import admin from 'firebase-admin';
 import { ExpressContext } from 'apollo-server-express/dist/ApolloServer';
 import { ResolverContext } from './graphql+mikro-orm/utils/Contexts';
-import registerEnumTypes from './graphql+mikro-orm/registerEnumTypes';
 import { buildSchema } from './buildSchema';
 import { PromiseQueue } from './utils/PromiseQueue';
-import { createPostgreSQL, createSQLite } from './mikro-orm';
-import { firebaseConfig, loadServerConfigAsMain, postgresql, sqlite } from './config';
+import { prepareORM } from './mikro-orm';
+import { firebaseConfig, loadServerConfigAsMain } from './config';
 import ws from 'ws';
 import { Extra, useServer } from 'graphql-ws/lib/use/ws';
 import { execute, subscribe } from 'graphql';
@@ -18,6 +17,36 @@ import { Result } from '@kizahasi/result';
 import { authToken } from '@kizahasi/util';
 import { Context } from 'graphql-ws/lib/server';
 import { BaasType } from './enums/BaasType';
+import { User } from './graphql+mikro-orm/entities/user/mikro-orm';
+import sanitize from 'sanitize-filename';
+import multer from 'multer';
+import sharp from 'sharp';
+import { File } from './graphql+mikro-orm/entities/file/mikro-orm';
+import { getUserIfEntry } from './graphql+mikro-orm/resolvers/utils/helpers';
+import { Reference } from '@mikro-orm/core';
+import { AppConsole } from './utils/appConsole';
+import { ensureDir } from 'fs-extra';
+import { v4 } from 'uuid';
+import { FilePermissionType } from './enums/FilePermissionType';
+import { EM } from './utils/types';
+import { getSingletonEntity } from './graphql+mikro-orm/entities/singleton/mikro-orm';
+
+const logEntryPasswordConfig = async (em: EM) => {
+    const entity = await getSingletonEntity(em.fork());
+    if (entity.entryPasswordHash == null) {
+        AppConsole.log({
+            icon: '🔓',
+            en: 'Entry password is disabled.',
+            ja: 'エントリーパスワードは無効化されています。',
+        });
+    } else {
+        AppConsole.log({
+            icon: '🔐',
+            en: 'Entry password is enabled.',
+            ja: 'エントリーパスワードは有効化されています。',
+        });
+    }
+};
 
 const main = async (params: { debug: boolean }): Promise<void> => {
     admin.initializeApp({
@@ -26,36 +55,16 @@ const main = async (params: { debug: boolean }): Promise<void> => {
 
     const connectionManager = new InMemoryConnectionManager();
 
-    registerEnumTypes();
-
     const schema = await buildSchema({ emitSchemaFile: false, pubSub });
     const serverConfig = await loadServerConfigAsMain();
     const dbType = serverConfig.database.__type;
-    const orm = await (async () => {
-        try {
-            switch (serverConfig.database.__type) {
-                case postgresql:
-                    return await createPostgreSQL({
-                        ...serverConfig.database.postgresql,
-                        debug: params.debug,
-                    });
-                case sqlite:
-                    return await createSQLite({
-                        ...serverConfig.database.sqlite,
-                        debug: params.debug,
-                    });
-            }
-        } catch (error) {
-            console.error('Could not connect to the database!');
-            throw error;
-        }
-    })();
-
+    const orm = await prepareORM(serverConfig.database, params.debug);
     await checkMigrationsBeforeStart(orm, dbType);
+    await logEntryPasswordConfig(orm.em);
 
     const getDecodedIdToken = async (
         idToken: string
-    ): Promise<Result<admin.auth.DecodedIdToken & { type: BaasType.Firebase }, any>> => {
+    ): Promise<Result<admin.auth.DecodedIdToken & { type: BaasType.Firebase }, unknown>> => {
         const decodedIdToken = await admin
             .auth()
             .verifyIdToken(idToken)
@@ -119,9 +128,210 @@ const main = async (params: { debug: boolean }): Promise<void> => {
 
     const app = express();
 
-    // 先に書くほど優先度が高いみたいなので、applyMiddlewareを先に書くと、/graphqlが上書きされない。
+    // 先に書くほど優先度が高いようなので、applyMiddlewareを先に書くと、/graphqlが上書きされない。
     apolloServer.applyMiddleware({ app });
-    app.use(express.static(path.join(process.cwd(), 'root'))); // expressにアップローダー機能をつけてroot配下に置く機能を実装するときに使う。ただ優先度は低い
+
+    if (serverConfig.accessControlAllowOrigin == null) {
+        AppConsole.log({
+            en: '"accessControlAllowOrigin" config was not found. "Access-Control-Allow-Origin" header will be empty.',
+            ja: '"accessControlAllowOrigin" のコンフィグが見つかりませんでした。"Access-Control-Allow-Origin" ヘッダーは空になります。',
+        });
+    } else {
+        AppConsole.log({
+            en: `"accessControlAllowOrigin" config was found. "Access-Control-Allow-Origin" header will be "${serverConfig.accessControlAllowOrigin}".`,
+            ja: `"accessControlAllowOrigin" のコンフィグが見つかりました。"Access-Control-Allow-Origin" ヘッダーは "${serverConfig.accessControlAllowOrigin}" になります。`,
+        });
+        const accessControlAllowOrigin = serverConfig.accessControlAllowOrigin;
+        app.use((req, res, next) => {
+            res.header('Access-Control-Allow-Origin', accessControlAllowOrigin);
+            res.header(
+                'Access-Control-Allow-Headers',
+                'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+            );
+            next();
+        });
+    }
+
+    if (serverConfig.uploader?.enabled === true) {
+        AppConsole.log({
+            en: `The uploader of API server is enabled.`,
+            ja: `APIサーバーのアップローダーが有効化されます。`,
+        });
+
+        const uploaderConfig = serverConfig.uploader;
+
+        await ensureDir(path.resolve(uploaderConfig.directory));
+        const storage = multer.diskStorage({
+            destination: function (req, file, cb) {
+                cb(null, path.resolve(uploaderConfig.directory));
+            },
+            filename: function (req, file, cb) {
+                cb(null, v4() + path.extname(file.originalname));
+            },
+        });
+
+        app.post('/uploader/upload/:permission', async (req, res, next) => {
+            let permissionParam: 'unlisted' | 'public';
+            switch (req.params.permission) {
+                case 'unlisted':
+                    permissionParam = 'unlisted';
+                    break;
+                case 'public':
+                    permissionParam = 'public';
+                    break;
+                default:
+                    res.sendStatus(404);
+                    return;
+            }
+
+            const decodedIdToken = await getDecodedIdTokenFromBearer(req.headers.authorization);
+            if (decodedIdToken == null || decodedIdToken.isError) {
+                res.status(403).send('Invalid Authorization header');
+                return;
+            }
+
+            const userUid = decodedIdToken.value.uid;
+            const em = orm.em.fork();
+            const user = await getUserIfEntry({
+                em,
+                userUid,
+                baasType: BaasType.Firebase,
+            });
+            if (user == null) {
+                res.status(403).send('Requires entry');
+                return;
+            }
+            const [files, filesCount] = await em.findAndCount(File, {
+                createdBy: { userUid: user.userUid },
+            });
+            const upload = multer({
+                storage,
+                limits: {
+                    fileSize: uploaderConfig.maxFileSize,
+                },
+                fileFilter: (req, file, cb) => {
+                    if (uploaderConfig.countQuota <= filesCount) {
+                        cb(null, false);
+                        res.status(400).send('File count quota exceeded');
+                        return;
+                    }
+                    const totalSize = files.reduce((seed, elem) => seed + elem.size, 0);
+                    if (uploaderConfig.sizeQuota <= totalSize) {
+                        cb(null, false);
+                        res.status(400).send('File size quota exceeded');
+                        return;
+                    }
+                    cb(null, true);
+                },
+            });
+
+            upload.single('file')(req, res, error => {
+                const main = async () => {
+                    if (error) {
+                        next(error);
+                        return;
+                    }
+                    const file = req.file;
+                    if (file == null) {
+                        res.status(200);
+                        return;
+                    }
+                    const thumbFileName = `${file.filename}.webp`;
+                    const thumbDir = path.join(path.dirname(file.path), 'thumbs');
+                    const thumbPath = path.join(thumbDir, thumbFileName);
+                    await ensureDir(thumbDir);
+                    const thumbnailSaved = await sharp(file.path)
+                        .resize(80)
+                        .webp()
+                        .toFile(thumbPath)
+                        .then(() => true)
+                        .catch(() => false);
+                    const permission =
+                        permissionParam === 'public'
+                            ? FilePermissionType.Entry
+                            : FilePermissionType.Private;
+                    const entity = new File({
+                        ...file,
+                        screenname: file.originalname,
+                        createdBy: Reference.create<User, 'userUid'>(user),
+                        thumbFilename: thumbnailSaved ? thumbFileName : undefined,
+                        filesize: file.size,
+                        deletePermission: permission,
+                        listPermission: permission,
+                        renamePermission: permission,
+                    });
+                    await em.persistAndFlush(entity);
+                    res.sendStatus(200);
+                    next();
+                };
+                main();
+            });
+        });
+    }
+
+    // サムネイルはすべてwebpだが、file_nameは元画像の名前を指定する必要がある。そのため例えば、/uploader/thumbs/image.png で得られるファイルはpngでなくwebpとなる。
+    app.get('/uploader/:type/:file_name', async (req, res, next) => {
+        let typeParam: 'files' | 'thumbs';
+        switch (req.params.type) {
+            case 'files':
+                typeParam = 'files';
+                break;
+            case 'thumbs':
+                typeParam = 'thumbs';
+                break;
+            default:
+                res.sendStatus(404);
+                return;
+        }
+
+        if (serverConfig.uploader?.enabled !== true) {
+            res.status(403).send('Flocon uploader is disabled by server config');
+            return;
+        }
+
+        const filename = sanitize(req.params.file_name);
+
+        const decodedIdToken = await getDecodedIdTokenFromBearer(req.headers.authorization);
+        if (decodedIdToken == null || decodedIdToken.isError) {
+            res.status(403).send('Invalid Authorization header');
+            return;
+        }
+
+        const em = orm.em.fork();
+        const user = await em.findOne(User, { userUid: decodedIdToken.value.uid });
+        if (user?.isEntry !== true) {
+            res.status(403).send('Requires entry');
+            return;
+        }
+
+        const fileEntity = await em.findOne(File, { filename });
+        if (fileEntity == null) {
+            res.sendStatus(404);
+            return;
+        }
+
+        let filepath: string;
+        if (typeParam === 'files') {
+            filepath = path.join(path.resolve(serverConfig.uploader.directory), filename);
+        } else {
+            if (fileEntity.thumbFilename == null) {
+                res.sendStatus(404);
+                next();
+                return;
+            }
+            filepath = path.join(
+                path.resolve(serverConfig.uploader.directory),
+                'thumb',
+                sanitize(fileEntity.thumbFilename)
+            );
+        }
+        // SVGを直接開くことによるXSSを防いでいる https://qiita.com/itizawa/items/e98ecd67910492d5c2af ただし、現状では必要ないかもしれない
+        res.header('Content-Security-Policy', "script-src 'unsafe-hashes'");
+        res.sendFile(filepath, () => {
+            res.end();
+            next();
+        });
+    });
 
     const PORT = process.env.PORT ?? 4000;
 

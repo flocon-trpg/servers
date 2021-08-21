@@ -29,7 +29,6 @@ import { serverTooBusyMessage } from '../utils/messages';
 import { RoomOperation, deleteRoomOperation } from '../../entities/room/graphql';
 import { OperateRoomFailureType } from '../../../enums/OperateRoomFailureType';
 import { LeaveRoomFailureType } from '../../../enums/LeaveRoomFailureType';
-import { loadServerConfigAsMain } from '../../../config';
 import { RequiresPhraseFailureType } from '../../../enums/RequiresPhraseFailureType';
 import {
     OperateRoomFailureResult,
@@ -91,7 +90,6 @@ import {
     GetRoomMessagesResult,
     MakeMessageNotSecretResult,
     PieceValueLog,
-    PieceValueLogType,
     RoomMessageEvent,
     RoomMessages,
     RoomMessagesType,
@@ -125,7 +123,7 @@ import {
 } from '../../entities/roomMessage/global';
 import { GetRoomLogFailureType } from '../../../enums/GetRoomLogFailureType';
 import { writeSystemMessage } from '../utils/roomMessage';
-import { JsonType, Reference } from '@mikro-orm/core';
+import { Reference } from '@mikro-orm/core';
 import { User } from '../../entities/user/mikro-orm';
 import { WritePrivateRoomMessageFailureType } from '../../../enums/WritePrivateRoomMessageFailureType';
 import { WriteRoomSoundEffectFailureType } from '../../../enums/WriteRoomSoundEffectFailureType';
@@ -136,20 +134,10 @@ import { ROOM_EVENT } from '../../utils/Topics';
 import { GetRoomConnectionFailureType } from '../../../enums/GetRoomConnectionFailureType';
 import { WritingMessageStatusType } from '../../../enums/WritingMessageStatusType';
 import { WritingMessageStatusInputType } from '../../../enums/WritingMessageStatusInputType';
-import { FileSourceType, FileSourceTypeModule } from '../../../enums/FileSourceType';
+import { FileSourceTypeModule } from '../../../enums/FileSourceType';
 import { Result } from '@kizahasi/result';
+import { $free, $system, dualKeyRecordFind } from '@kizahasi/util';
 import {
-    $free,
-    $system,
-    dualKeyRecordFind,
-    dualKeyRecordForEach,
-    PublicChannelKey,
-    recordForEach,
-    recordToArray,
-} from '@kizahasi/util';
-import {
-    createType,
-    deleteType,
     Master,
     Player,
     serverTransform,
@@ -369,12 +357,10 @@ const operateParticipantAndFlush = async ({
 const joinRoomCore = async ({
     args,
     context,
-    globalEntryPhrase,
     strategy,
 }: {
     args: JoinRoomArgs;
     context: ResolverContext;
-    globalEntryPhrase: string | undefined;
     // 新たにRoleを設定する場合はParticipantRoleを返す。Roleを変えない場合は'id'を返す。
     strategy: (params: {
         room: Room$MikroORM.Room;
@@ -400,7 +386,6 @@ const joinRoomCore = async ({
             userUid: decodedIdToken.uid,
             baasType: decodedIdToken.type,
             em,
-            globalEntryPhrase,
         });
         await em.flush();
         if (entryUser == null) {
@@ -480,12 +465,10 @@ const joinRoomCore = async ({
 const promoteMeCore = async ({
     roomId,
     context,
-    globalEntryPhrase,
     strategy,
 }: {
     roomId: string;
     context: ResolverContext;
-    globalEntryPhrase: string | undefined;
     strategy: (params: {
         room: Room$MikroORM.Room;
         me: ParticipantState;
@@ -509,7 +492,6 @@ const promoteMeCore = async ({
             userUid: decodedIdToken.uid,
             baasType: decodedIdToken.type,
             em,
-            globalEntryPhrase,
         });
         await em.flush();
         if (entryUser == null) {
@@ -798,10 +780,8 @@ const publishRoomEvent = async (pubSub: PubSubEngine, payload: RoomEventPayload)
 export class RoomResolver {
     public async getRoomsListCore({
         context,
-        globalEntryPhrase,
     }: {
         context: ResolverContext;
-        globalEntryPhrase: string | undefined;
     }): Promise<typeof GetRoomsListResult> {
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
@@ -814,7 +794,6 @@ export class RoomResolver {
                 em,
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
-                globalEntryPhrase,
             });
             await em.flush();
             if (!entry) {
@@ -844,18 +823,15 @@ export class RoomResolver {
     public async getRoomsList(@Ctx() context: ResolverContext): Promise<typeof GetRoomsListResult> {
         return this.getRoomsListCore({
             context,
-            globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase,
         });
     }
 
     public async requiresPhraseToJoinAsPlayerCore({
         roomId,
         context,
-        globalEntryPhrase,
     }: {
         roomId: string;
         context: ResolverContext;
-        globalEntryPhrase: string | undefined;
     }): Promise<typeof RequiresPhraseResult> {
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
@@ -868,7 +844,6 @@ export class RoomResolver {
                 em,
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
-                globalEntryPhrase,
             });
             await em.flush();
             if (!entry) {
@@ -903,18 +878,15 @@ export class RoomResolver {
         return this.requiresPhraseToJoinAsPlayerCore({
             roomId,
             context,
-            globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase,
         });
     }
 
     public async createRoomCore({
         input,
         context,
-        globalEntryPhrase,
     }: {
         input: CreateRoomInput;
         context: ResolverContext;
-        globalEntryPhrase: string | undefined;
     }): Promise<typeof CreateRoomResult> {
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
@@ -927,7 +899,6 @@ export class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase,
             });
             await em.flush();
             if (entryUser == null) {
@@ -1089,7 +1060,6 @@ export class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase,
             });
             await em.flush();
             if (!entry) {
@@ -1163,7 +1133,6 @@ export class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase,
             });
             await em.flush();
             if (!entry) {
@@ -1274,7 +1243,6 @@ export class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase,
             });
             await em.flush();
             if (!entry) {
@@ -1356,7 +1324,6 @@ export class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase,
             });
             await em.flush();
             if (entryUser == null) {
@@ -1474,18 +1441,15 @@ export class RoomResolver {
         return this.createRoomCore({
             input,
             context,
-            globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase,
         });
     }
 
     public async deleteRoomCore({
         args,
         context,
-        globalEntryPhrase,
     }: {
         args: DeleteRoomArgs;
         context: ResolverContext;
-        globalEntryPhrase: string | undefined;
     }): Promise<{ result: DeleteRoomResult; payload: RoomEventPayload | undefined }> {
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
@@ -1504,7 +1468,6 @@ export class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase,
             });
             await em.flush();
             if (!entry) {
@@ -1558,7 +1521,6 @@ export class RoomResolver {
         const { result, payload } = await this.deleteRoomCore({
             args,
             context,
-            globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase,
         });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
@@ -1569,16 +1531,13 @@ export class RoomResolver {
     public async joinRoomAsPlayerCore({
         args,
         context,
-        globalEntryPhrase,
     }: {
         args: JoinRoomArgs;
         context: ResolverContext;
-        globalEntryPhrase: string | undefined;
     }): Promise<{ result: typeof JoinRoomResult; payload: RoomEventPayload | undefined }> {
         return joinRoomCore({
             args,
             context,
-            globalEntryPhrase,
             strategy: ({ me, room }) => {
                 if (me != null) {
                     switch (me.role) {
@@ -1605,7 +1564,6 @@ export class RoomResolver {
         const { result, payload } = await this.joinRoomAsPlayerCore({
             args,
             context,
-            globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase,
         });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
@@ -1616,16 +1574,13 @@ export class RoomResolver {
     public async joinRoomAsSpectatorCore({
         args,
         context,
-        globalEntryPhrase,
     }: {
         args: JoinRoomArgs;
         context: ResolverContext;
-        globalEntryPhrase: string | undefined;
     }): Promise<{ result: typeof JoinRoomResult; payload: RoomEventPayload | undefined }> {
         return joinRoomCore({
             args,
             context,
-            globalEntryPhrase,
             strategy: ({ me, room }) => {
                 if (me != null) {
                     switch (me.role) {
@@ -1655,7 +1610,6 @@ export class RoomResolver {
         const { result, payload } = await this.joinRoomAsSpectatorCore({
             args,
             context,
-            globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase,
         });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
@@ -1666,16 +1620,13 @@ export class RoomResolver {
     public async promoteToPlayerCore({
         args,
         context,
-        globalEntryPhrase,
     }: {
         args: PromoteArgs;
         context: ResolverContext;
-        globalEntryPhrase: string | undefined;
     }): Promise<{ result: PromoteResult; payload: RoomEventPayload | undefined }> {
         return promoteMeCore({
             ...args,
             context,
-            globalEntryPhrase,
             strategy: ({ me, room }) => {
                 switch (me.role) {
                     case Master:
@@ -1707,7 +1658,6 @@ export class RoomResolver {
         const { result, payload } = await this.promoteToPlayerCore({
             args,
             context,
-            globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase,
         });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
@@ -1718,11 +1668,9 @@ export class RoomResolver {
     public async changeParticipantNameCore({
         args,
         context,
-        globalEntryPhrase,
     }: {
         args: ChangeParticipantNameArgs;
         context: ResolverContext;
-        globalEntryPhrase: string | undefined;
     }): Promise<{ result: ChangeParticipantNameResult; payload: RoomEventPayload | undefined }> {
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
@@ -1741,7 +1689,6 @@ export class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase,
             });
             await em.flush();
             if (entryUser == null) {
@@ -1811,7 +1758,6 @@ export class RoomResolver {
         const { result, payload } = await this.changeParticipantNameCore({
             args,
             context,
-            globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase,
         });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
@@ -1822,11 +1768,9 @@ export class RoomResolver {
     public async getRoomCore({
         args,
         context,
-        globalEntryPhrase,
     }: {
         args: GetRoomArgs;
         context: ResolverContext;
-        globalEntryPhrase: string | undefined;
     }): Promise<typeof GetRoomResult> {
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
@@ -1839,7 +1783,6 @@ export class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase,
             });
             await em.flush();
             if (!entry) {
@@ -1895,7 +1838,6 @@ export class RoomResolver {
         return this.getRoomCore({
             args,
             context,
-            globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase,
         });
     }
 
@@ -1978,11 +1920,9 @@ export class RoomResolver {
     public async operateCore({
         args,
         context,
-        globalEntryPhrase,
     }: {
         args: OperateArgs;
         context: ResolverContext;
-        globalEntryPhrase: string | undefined;
     }): Promise<OperateCoreResult> {
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
@@ -2000,7 +1940,6 @@ export class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase,
             });
             await em.flush();
             if (!entry) {
@@ -2176,7 +2115,6 @@ export class RoomResolver {
         const operateResult = await this.operateCore({
             args,
             context,
-            globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase,
         });
         if (operateResult.type === 'success') {
             await publishRoomEvent(pubSub, operateResult.roomOperationPayload);
@@ -2237,7 +2175,6 @@ export class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase,
             });
             await em.flush();
             if (entryUser == null) {
@@ -2397,7 +2334,6 @@ export class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase,
             });
             await em.flush();
             if (entryUser == null) {
@@ -2517,7 +2453,6 @@ export class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase,
             });
             await em.flush();
             if (!entry) {
@@ -2693,7 +2628,6 @@ export class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase,
             });
             await em.flush();
             if (!entry) {
@@ -2871,7 +2805,6 @@ export class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase: (await loadServerConfigAsMain()).globalEntryPhrase,
             });
             await em.flush();
             if (!entry) {

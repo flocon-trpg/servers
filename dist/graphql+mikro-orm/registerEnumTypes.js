@@ -29,6 +29,7 @@ const WritingMessageStatusInputType_1 = require("../enums/WritingMessageStatusIn
 const WritingMessageStatusType_1 = require("../enums/WritingMessageStatusType");
 const PieceValueLogType_1 = require("../enums/PieceValueLogType");
 const BaasType_1 = require("../enums/BaasType");
+const GetFileItemsFailureType_1 = require("../enums/GetFileItemsFailureType");
 let hasRegistered = false;
 const registerEnumTypes = () => {
     if (hasRegistered) {
@@ -58,6 +59,9 @@ const registerEnumTypes = () => {
     });
     type_graphql_1.registerEnumType(FileSourceType_1.FileSourceType, {
         name: 'FileSourceType',
+    });
+    type_graphql_1.registerEnumType(GetFileItemsFailureType_1.GetFileItemsFailureType, {
+        name: 'GetFileItemsFailureType',
     });
     type_graphql_1.registerEnumType(GetRoomConnectionFailureType_1.GetRoomConnectionFailureType, {
         name: 'GetRoomConnectionFailureType',

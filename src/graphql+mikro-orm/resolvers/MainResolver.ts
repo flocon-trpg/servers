@@ -17,7 +17,6 @@ import { serverTooBusyMessage } from './utils/messages';
 import { User } from '../entities/user/mikro-orm';
 import { Pong } from '../entities/pong/graphql';
 import { PONG } from '../utils/Topics';
-import { loadServerConfigAsMain } from '../../config';
 import { EntryToServerResult } from '../results/EntryToServerResult';
 import { ListAvailableGameSystemsResult } from '../results/ListAvailableGameSystemsResult';
 import { listAvailableGameSystems } from '../../messageAnalyzer/main';
@@ -26,6 +25,8 @@ import VERSION from '../../VERSION';
 import { PrereleaseType } from '../../enums/PrereleaseType';
 import { alpha, beta, rc } from '@kizahasi/util';
 import { BaasType } from '../../enums/BaasType';
+import { getSingletonEntity } from '../entities/singleton/mikro-orm';
+import bcrypt from 'bcrypt';
 
 export type PongPayload = {
     value: number;
@@ -75,13 +76,14 @@ export class MainResolver {
 
     @Mutation(() => EntryToServerResult)
     public async entryToServer(
+        // TODO: 現状ではphraseよりはpasswordという名前のほうが適切なのでリネームするほうが良い
         @Arg('phrase', () => String, { nullable: true }) phrase: string | null | undefined,
         @Ctx() context: ResolverContext
     ): Promise<EntryToServerResult> {
         const queue = async () => {
             const em = context.createEm();
 
-            const globalEntryPhrase = (await loadServerConfigAsMain()).globalEntryPhrase;
+            const singletonEntity = await getSingletonEntity(em.fork());
             const decodedIdToken = checkSignIn(context);
             if (decodedIdToken === NotSignIn) {
                 return {
@@ -100,7 +102,7 @@ export class MainResolver {
                     type: EntryToServerResultType.AlreadyEntried,
                 };
             }
-            if (globalEntryPhrase == null) {
+            if (singletonEntity.entryPasswordHash == null) {
                 user.isEntry = true;
                 await em.flush();
                 return {
@@ -111,7 +113,10 @@ export class MainResolver {
                 };
             }
 
-            if (phrase !== globalEntryPhrase) {
+            if (
+                phrase == null ||
+                (await bcrypt.compare(phrase, singletonEntity.entryPasswordHash)) !== true
+            ) {
                 return {
                     type: EntryToServerResultType.WrongPhrase,
                 };

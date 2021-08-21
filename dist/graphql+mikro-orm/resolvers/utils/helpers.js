@@ -5,6 +5,7 @@ const mikro_orm_1 = require("../../entities/user/mikro-orm");
 const mikro_orm_2 = require("../../entities/room/mikro-orm");
 const global_1 = require("../../entities/room/global");
 const util_1 = require("@kizahasi/util");
+const mikro_orm_3 = require("../../entities/singleton/mikro-orm");
 const find = (source, key) => source[key];
 exports.NotSignIn = 'NotSignIn';
 exports.AnonymousAccount = 'AnonymousAccount';
@@ -26,10 +27,12 @@ const checkSignInAndNotAnonymous = (context) => {
     return decodedIdToken;
 };
 exports.checkSignInAndNotAnonymous = checkSignInAndNotAnonymous;
-const getUserIfEntry = async ({ em, userUid, baasType, globalEntryPhrase, }) => {
+const getUserIfEntry = async ({ em, userUid, baasType, }) => {
+    const singletonEntity = await mikro_orm_3.getSingletonEntity(em.fork());
     const user = await em.findOne(mikro_orm_1.User, { userUid, baasType });
+    const requiresEntryPassword = singletonEntity.entryPasswordHash != null;
     if (user == null) {
-        if (globalEntryPhrase == null) {
+        if (!requiresEntryPassword) {
             const newUser = new mikro_orm_1.User({ userUid, baasType });
             newUser.isEntry = true;
             em.persist(newUser);
@@ -40,15 +43,15 @@ const getUserIfEntry = async ({ em, userUid, baasType, globalEntryPhrase, }) => 
     if (user.isEntry) {
         return user;
     }
-    if (globalEntryPhrase == null) {
+    if (!requiresEntryPassword) {
         user.isEntry = true;
         return user;
     }
     return null;
 };
 exports.getUserIfEntry = getUserIfEntry;
-const checkEntry = async ({ em, userUid, baasType, globalEntryPhrase, }) => {
-    return (await exports.getUserIfEntry({ em, userUid, baasType, globalEntryPhrase })) != null;
+const checkEntry = async ({ em, userUid, baasType, }) => {
+    return (await exports.getUserIfEntry({ em, userUid, baasType })) != null;
 };
 exports.checkEntry = checkEntry;
 class FindRoomAndMyParticipantResult {

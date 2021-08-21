@@ -8,6 +8,7 @@ import {
     Property,
 } from '@mikro-orm/core';
 import { BaasType } from '../../../enums/BaasType';
+import { File } from '../file/mikro-orm';
 import { RoomPrvMsg, RoomPubMsg, RoomSe } from '../roomMessage/mikro-orm';
 
 // ユーザーがアカウント登録した時点では作られず、初めてentryなどをしたときに作られる。
@@ -27,6 +28,9 @@ export class User {
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ index: true })
     public isEntry: boolean = false;
+
+    @OneToMany(() => File, x => x.createdBy, { orphanRemoval: true })
+    public files = new Collection<File>(this);
 
     @OneToMany(() => RoomPubMsg, x => x.createdBy, { orphanRemoval: true })
     public roomPubMsgs = new Collection<RoomPubMsg>(this);

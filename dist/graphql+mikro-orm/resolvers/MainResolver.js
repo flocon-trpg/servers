@@ -24,7 +24,6 @@ const messages_1 = require("./utils/messages");
 const mikro_orm_1 = require("../entities/user/mikro-orm");
 const graphql_1 = require("../entities/pong/graphql");
 const Topics_1 = require("../utils/Topics");
-const config_1 = require("../../config");
 const EntryToServerResult_1 = require("../results/EntryToServerResult");
 const ListAvailableGameSystemsResult_1 = require("../results/ListAvailableGameSystemsResult");
 const main_1 = require("../../messageAnalyzer/main");
@@ -33,6 +32,8 @@ const VERSION_1 = __importDefault(require("../../VERSION"));
 const PrereleaseType_1 = require("../../enums/PrereleaseType");
 const util_1 = require("@kizahasi/util");
 const BaasType_1 = require("../../enums/BaasType");
+const mikro_orm_2 = require("../entities/singleton/mikro-orm");
+const bcrypt_1 = __importDefault(require("bcrypt"));
 let MainResolver = class MainResolver {
     async listAvailableGameSystems() {
         return {
@@ -60,7 +61,7 @@ let MainResolver = class MainResolver {
     async entryToServer(phrase, context) {
         const queue = async () => {
             const em = context.createEm();
-            const globalEntryPhrase = (await config_1.loadServerConfigAsMain()).globalEntryPhrase;
+            const singletonEntity = await mikro_orm_2.getSingletonEntity(em.fork());
             const decodedIdToken = helpers_1.checkSignIn(context);
             if (decodedIdToken === helpers_1.NotSignIn) {
                 return {
@@ -78,7 +79,7 @@ let MainResolver = class MainResolver {
                     type: EntryToServerResultType_1.EntryToServerResultType.AlreadyEntried,
                 };
             }
-            if (globalEntryPhrase == null) {
+            if (singletonEntity.entryPasswordHash == null) {
                 user.isEntry = true;
                 await em.flush();
                 return {
@@ -87,7 +88,8 @@ let MainResolver = class MainResolver {
                         : EntryToServerResultType_1.EntryToServerResultType.NoPhraseRequired,
                 };
             }
-            if (phrase !== globalEntryPhrase) {
+            if (phrase == null ||
+                (await bcrypt_1.default.compare(phrase, singletonEntity.entryPasswordHash)) !== true) {
                 return {
                     type: EntryToServerResultType_1.EntryToServerResultType.WrongPhrase,
                 };

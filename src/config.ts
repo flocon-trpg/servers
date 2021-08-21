@@ -1,35 +1,14 @@
-import { createFirebaseConfig, FirebaseConfig, JsonObject } from '@kizahasi/util';
-import fs from 'fs';
+import { FirebaseConfig, firebaseConfig as firebaseConfigIo } from '@kizahasi/flocon-core';
+import { DatabaseConfig, postgresql, ServerConfig, serverConfigJson } from './configType';
 import {
     loadAsMain,
     loadMigrationCreate,
     loadMigrationDown,
     loadMigrationUp,
+    sqlite,
 } from './utils/commandLineArgs';
-
-export const postgresql = 'postgresql';
-export const sqlite = 'sqlite';
-
-type Database =
-    | {
-          __type: typeof postgresql;
-          postgresql: {
-              dbName: string;
-              clientUrl: string;
-          };
-      }
-    | {
-          __type: typeof sqlite;
-          sqlite: {
-              dbName: string;
-          };
-      };
-
-// なるべくJSONの構造と一致させている。JSONに存在しないプロパティは__を頭に付けている。
-type ServerConfig = {
-    globalEntryPhrase?: string;
-    database: Database;
-};
+import * as E from 'fp-ts/Either';
+import { formatValidationErrors } from './utils/io-ts-reporters';
 
 const loadFirebaseConfig = (): FirebaseConfig => {
     let env = process.env['FLOCON_FIREBASE_CONFIG'];
@@ -43,7 +22,11 @@ const loadFirebaseConfig = (): FirebaseConfig => {
     }
     const json = JSON.parse(env);
 
-    return createFirebaseConfig(json);
+    const decoded = E.mapLeft(formatValidationErrors)(firebaseConfigIo.decode(json));
+    if (decoded._tag === 'Left') {
+        throw new Error(decoded.left);
+    }
+    return decoded.right;
 };
 
 const loadServerConfig = ({
@@ -57,70 +40,62 @@ const loadServerConfig = ({
     }
     const json = JSON.parse(env);
 
-    const j = JsonObject.init(json);
+    const j = E.mapLeft(formatValidationErrors)(serverConfigJson.decode(json));
+    if (j._tag === 'Left') {
+        throw new Error(j.left);
+    }
+    const right = j.right;
 
-    const postgresqlJson = j.get('database').tryGet('postgresql');
-    const sqliteJson = j.get('database').tryGet('sqlite');
-
-    let database: Database;
+    let database: DatabaseConfig;
     switch (databaseArg) {
         case null:
             database = (() => {
-                if (sqliteJson != null) {
-                    if (postgresqlJson != null) {
+                if (right.database.sqlite != null) {
+                    if (right.database.postgresql != null) {
                         throw new Error(
                             'When server config has SQLite and PostgreSQL config, you must use --db parameter.'
                         );
                     }
                     return {
-                        __type: 'sqlite',
-                        sqlite: {
-                            dbName: sqliteJson.get('dbName').valueAsString(),
-                        },
+                        ...right.database.sqlite,
+                        __type: sqlite,
                     } as const;
                 }
-                if (postgresqlJson == null) {
+                if (right.database.postgresql == null) {
                     throw new Error('database/postgresql or database/sqlite is required.');
                 }
                 return {
+                    ...right.database.postgresql,
                     __type: postgresql,
-                    postgresql: {
-                        dbName: postgresqlJson.get('dbName').valueAsString(),
-                        clientUrl: postgresqlJson.get('clientUrl').valueAsString(),
-                    },
                 } as const;
             })();
             break;
         case sqlite: {
-            if (sqliteJson == null) {
+            if (right.database.sqlite == null) {
                 throw new Error('database/sqlite is required.');
             }
             database = {
+                ...right.database.sqlite,
                 __type: sqlite,
-                sqlite: {
-                    dbName: sqliteJson.get('dbName').valueAsString(),
-                },
             };
             break;
         }
         case postgresql: {
-            if (postgresqlJson == null) {
+            if (right.database.postgresql == null) {
                 throw new Error('database/postgresql is required.');
             }
             database = {
+                ...right.database.postgresql,
                 __type: postgresql,
-                postgresql: {
-                    dbName: postgresqlJson.get('dbName').valueAsString(),
-                    clientUrl: postgresqlJson.get('clientUrl').valueAsString(),
-                },
             };
             break;
         }
     }
 
     return {
-        globalEntryPhrase: j.tryGet('globalEntryPhrase')?.valueAsString() ?? undefined,
         database,
+        uploader: right.uploader,
+        accessControlAllowOrigin: right.accessControlAllowOrigin,
     };
 };
 

@@ -48,7 +48,6 @@ const messages_1 = require("../utils/messages");
 const graphql_1 = require("../../entities/room/graphql");
 const OperateRoomFailureType_1 = require("../../../enums/OperateRoomFailureType");
 const LeaveRoomFailureType_1 = require("../../../enums/LeaveRoomFailureType");
-const config_1 = require("../../../config");
 const RequiresPhraseFailureType_1 = require("../../../enums/RequiresPhraseFailureType");
 const OperateRoomResult_1 = require("../../results/OperateRoomResult");
 const JoinRoomResult_1 = require("../../results/JoinRoomResult");
@@ -185,7 +184,7 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
         },
     };
 };
-const joinRoomCore = async ({ args, context, globalEntryPhrase, strategy, }) => {
+const joinRoomCore = async ({ args, context, strategy, }) => {
     const decodedIdToken = helpers_1.checkSignIn(context);
     if (decodedIdToken === helpers_1.NotSignIn) {
         return { result: { failureType: JoinRoomFailureType_1.JoinRoomFailureType.NotSignIn }, payload: undefined };
@@ -196,7 +195,6 @@ const joinRoomCore = async ({ args, context, globalEntryPhrase, strategy, }) => 
             userUid: decodedIdToken.uid,
             baasType: decodedIdToken.type,
             em,
-            globalEntryPhrase,
         });
         await em.flush();
         if (entryUser == null) {
@@ -271,7 +269,7 @@ const joinRoomCore = async ({ args, context, globalEntryPhrase, strategy, }) => 
     }
     return result.value;
 };
-const promoteMeCore = async ({ roomId, context, globalEntryPhrase, strategy, }) => {
+const promoteMeCore = async ({ roomId, context, strategy, }) => {
     const decodedIdToken = helpers_1.checkSignIn(context);
     if (decodedIdToken === helpers_1.NotSignIn) {
         return { result: { failureType: PromoteFailureType_1.PromoteFailureType.NotSignIn }, payload: undefined };
@@ -283,7 +281,6 @@ const promoteMeCore = async ({ roomId, context, globalEntryPhrase, strategy, }) 
             userUid: decodedIdToken.uid,
             baasType: decodedIdToken.type,
             em,
-            globalEntryPhrase,
         });
         await em.flush();
         if (entryUser == null) {
@@ -525,7 +522,7 @@ const publishRoomEvent = async (pubSub, payload) => {
     await pubSub.publish(Topics_1.ROOM_EVENT, payload);
 };
 let RoomResolver = class RoomResolver {
-    async getRoomsListCore({ context, globalEntryPhrase, }) {
+    async getRoomsListCore({ context, }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
             return { failureType: GetRoomsListFailureType_1.GetRoomsListFailureType.NotSignIn };
@@ -536,7 +533,6 @@ let RoomResolver = class RoomResolver {
                 em,
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
-                globalEntryPhrase,
             });
             await em.flush();
             if (!entry) {
@@ -559,10 +555,9 @@ let RoomResolver = class RoomResolver {
     async getRoomsList(context) {
         return this.getRoomsListCore({
             context,
-            globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
         });
     }
-    async requiresPhraseToJoinAsPlayerCore({ roomId, context, globalEntryPhrase, }) {
+    async requiresPhraseToJoinAsPlayerCore({ roomId, context, }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
             return { failureType: RequiresPhraseFailureType_1.RequiresPhraseFailureType.NotSignIn };
@@ -573,7 +568,6 @@ let RoomResolver = class RoomResolver {
                 em,
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
-                globalEntryPhrase,
             });
             await em.flush();
             if (!entry) {
@@ -601,10 +595,9 @@ let RoomResolver = class RoomResolver {
         return this.requiresPhraseToJoinAsPlayerCore({
             roomId,
             context,
-            globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
         });
     }
-    async createRoomCore({ input, context, globalEntryPhrase, }) {
+    async createRoomCore({ input, context, }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
             return { failureType: CreateRoomFailureType_1.CreateRoomFailureType.NotSignIn };
@@ -615,7 +608,6 @@ let RoomResolver = class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase,
             });
             await em.flush();
             if (entryUser == null) {
@@ -756,7 +748,6 @@ let RoomResolver = class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
             });
             await em.flush();
             if (!entry) {
@@ -814,7 +805,6 @@ let RoomResolver = class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
             });
             await em.flush();
             if (!entry) {
@@ -907,7 +897,6 @@ let RoomResolver = class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
             });
             await em.flush();
             if (!entry) {
@@ -972,7 +961,6 @@ let RoomResolver = class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
             });
             await em.flush();
             if (entryUser == null) {
@@ -1075,10 +1063,9 @@ let RoomResolver = class RoomResolver {
         return this.createRoomCore({
             input,
             context,
-            globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
         });
     }
-    async deleteRoomCore({ args, context, globalEntryPhrase, }) {
+    async deleteRoomCore({ args, context, }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
             return {
@@ -1092,7 +1079,6 @@ let RoomResolver = class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase,
             });
             await em.flush();
             if (!entry) {
@@ -1136,18 +1122,16 @@ let RoomResolver = class RoomResolver {
         const { result, payload } = await this.deleteRoomCore({
             args,
             context,
-            globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
         });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
         }
         return result;
     }
-    async joinRoomAsPlayerCore({ args, context, globalEntryPhrase, }) {
+    async joinRoomAsPlayerCore({ args, context, }) {
         return joinRoomCore({
             args,
             context,
-            globalEntryPhrase,
             strategy: ({ me, room }) => {
                 if (me != null) {
                     switch (me.role) {
@@ -1168,18 +1152,16 @@ let RoomResolver = class RoomResolver {
         const { result, payload } = await this.joinRoomAsPlayerCore({
             args,
             context,
-            globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
         });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
         }
         return result;
     }
-    async joinRoomAsSpectatorCore({ args, context, globalEntryPhrase, }) {
+    async joinRoomAsSpectatorCore({ args, context, }) {
         return joinRoomCore({
             args,
             context,
-            globalEntryPhrase,
             strategy: ({ me, room }) => {
                 if (me != null) {
                     switch (me.role) {
@@ -1201,16 +1183,14 @@ let RoomResolver = class RoomResolver {
         const { result, payload } = await this.joinRoomAsSpectatorCore({
             args,
             context,
-            globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
         });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
         }
         return result;
     }
-    async promoteToPlayerCore({ args, context, globalEntryPhrase, }) {
-        return promoteMeCore(Object.assign(Object.assign({}, args), { context,
-            globalEntryPhrase, strategy: ({ me, room }) => {
+    async promoteToPlayerCore({ args, context, }) {
+        return promoteMeCore(Object.assign(Object.assign({}, args), { context, strategy: ({ me, room }) => {
                 switch (me.role) {
                     case flocon_core_1.Master:
                     case flocon_core_1.Player:
@@ -1232,14 +1212,13 @@ let RoomResolver = class RoomResolver {
         const { result, payload } = await this.promoteToPlayerCore({
             args,
             context,
-            globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
         });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
         }
         return result;
     }
-    async changeParticipantNameCore({ args, context, globalEntryPhrase, }) {
+    async changeParticipantNameCore({ args, context, }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
             return {
@@ -1253,7 +1232,6 @@ let RoomResolver = class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase,
             });
             await em.flush();
             if (entryUser == null) {
@@ -1313,14 +1291,13 @@ let RoomResolver = class RoomResolver {
         const { result, payload } = await this.changeParticipantNameCore({
             args,
             context,
-            globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
         });
         if (payload != null) {
             await publishRoomEvent(pubSub, payload);
         }
         return result;
     }
-    async getRoomCore({ args, context, globalEntryPhrase, }) {
+    async getRoomCore({ args, context, }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
             return { failureType: GetRoomFailureType_1.GetRoomFailureType.NotSignIn };
@@ -1331,7 +1308,6 @@ let RoomResolver = class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase,
             });
             await em.flush();
             if (!entry) {
@@ -1377,7 +1353,6 @@ let RoomResolver = class RoomResolver {
         return this.getRoomCore({
             args,
             context,
-            globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
         });
     }
     async leaveRoomCore({ id, context, }) {
@@ -1439,7 +1414,7 @@ let RoomResolver = class RoomResolver {
         }
         return result;
     }
-    async operateCore({ args, context, globalEntryPhrase, }) {
+    async operateCore({ args, context, }) {
         const decodedIdToken = helpers_1.checkSignIn(context);
         if (decodedIdToken === helpers_1.NotSignIn) {
             return {
@@ -1453,7 +1428,6 @@ let RoomResolver = class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase,
             });
             await em.flush();
             if (!entry) {
@@ -1608,7 +1582,6 @@ let RoomResolver = class RoomResolver {
         const operateResult = await this.operateCore({
             args,
             context,
-            globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
         });
         if (operateResult.type === 'success') {
             await publishRoomEvent(pubSub, operateResult.roomOperationPayload);
@@ -1649,7 +1622,6 @@ let RoomResolver = class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
             });
             await em.flush();
             if (entryUser == null) {
@@ -1780,7 +1752,6 @@ let RoomResolver = class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
             });
             await em.flush();
             if (entryUser == null) {
@@ -1874,7 +1845,6 @@ let RoomResolver = class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
             });
             await em.flush();
             if (!entry) {
@@ -2028,7 +1998,6 @@ let RoomResolver = class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
             });
             await em.flush();
             if (!entry) {
@@ -2181,7 +2150,6 @@ let RoomResolver = class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
                 em,
-                globalEntryPhrase: (await config_1.loadServerConfigAsMain()).globalEntryPhrase,
             });
             await em.flush();
             if (!entry) {

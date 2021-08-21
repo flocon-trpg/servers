@@ -1,4 +1,6 @@
 import { Connection, IDatabaseDriver, LoggerNamespace, MikroORM } from '@mikro-orm/core';
+import { DatabaseConfig, postgresql, sqlite } from './configType';
+import { File } from './graphql+mikro-orm/entities/file/mikro-orm';
 import { Room, RoomOp } from './graphql+mikro-orm/entities/room/mikro-orm';
 import {
     DicePieceValueLog,
@@ -9,7 +11,6 @@ import {
     RoomSe,
 } from './graphql+mikro-orm/entities/roomMessage/mikro-orm';
 import { User } from './graphql+mikro-orm/entities/user/mikro-orm';
-import { EM } from './utils/types';
 
 const entities = [
     Room,
@@ -21,6 +22,7 @@ const entities = [
     RoomPubCh,
     RoomSe,
     User,
+    File,
 ];
 
 type Debug = boolean | LoggerNamespace[];
@@ -65,4 +67,24 @@ export const createPostgreSQL = async ({
         forceUndefined: true,
         clientUrl,
     });
+};
+
+export const prepareORM = async (config: DatabaseConfig, debug: boolean) => {
+    try {
+        switch (config.__type) {
+            case postgresql:
+                return await createPostgreSQL({
+                    ...config,
+                    debug,
+                });
+            case sqlite:
+                return await createSQLite({
+                    ...config,
+                    debug,
+                });
+        }
+    } catch (error) {
+        console.error('Could not connect to the database!');
+        throw error;
+    }
 };

@@ -27,6 +27,7 @@ import { WritingMessageStatusInputType } from '../enums/WritingMessageStatusInpu
 import { WritingMessageStatusType } from '../enums/WritingMessageStatusType';
 import { PieceValueLogType } from '../enums/PieceValueLogType';
 import { BaasType } from '../enums/BaasType';
+import { GetFileItemsFailureType } from '../enums/GetFileItemsFailureType';
 
 let hasRegistered = false;
 const registerEnumTypes = (): void => {
@@ -57,6 +58,9 @@ const registerEnumTypes = (): void => {
     });
     registerEnumType(FileSourceType, {
         name: 'FileSourceType',
+    });
+    registerEnumType(GetFileItemsFailureType, {
+        name: 'GetFileItemsFailureType',
     });
     registerEnumType(GetRoomConnectionFailureType, {
         name: 'GetRoomConnectionFailureType',

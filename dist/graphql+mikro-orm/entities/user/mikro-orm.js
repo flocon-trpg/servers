@@ -12,10 +12,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const core_1 = require("@mikro-orm/core");
 const BaasType_1 = require("../../../enums/BaasType");
-const mikro_orm_1 = require("../roomMessage/mikro-orm");
+const mikro_orm_1 = require("../file/mikro-orm");
+const mikro_orm_2 = require("../roomMessage/mikro-orm");
 let User = class User {
     constructor({ userUid, baasType }) {
         this.isEntry = false;
+        this.files = new core_1.Collection(this);
         this.roomPubMsgs = new core_1.Collection(this);
         this.roomPrvMsgs = new core_1.Collection(this);
         this.roomSEs = new core_1.Collection(this);
@@ -37,19 +39,23 @@ __decorate([
     __metadata("design:type", Boolean)
 ], User.prototype, "isEntry", void 0);
 __decorate([
-    core_1.OneToMany(() => mikro_orm_1.RoomPubMsg, x => x.createdBy, { orphanRemoval: true }),
+    core_1.OneToMany(() => mikro_orm_1.File, x => x.createdBy, { orphanRemoval: true }),
+    __metadata("design:type", Object)
+], User.prototype, "files", void 0);
+__decorate([
+    core_1.OneToMany(() => mikro_orm_2.RoomPubMsg, x => x.createdBy, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], User.prototype, "roomPubMsgs", void 0);
 __decorate([
-    core_1.OneToMany(() => mikro_orm_1.RoomPrvMsg, x => x.createdBy, { orphanRemoval: true }),
+    core_1.OneToMany(() => mikro_orm_2.RoomPrvMsg, x => x.createdBy, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], User.prototype, "roomPrvMsgs", void 0);
 __decorate([
-    core_1.OneToMany(() => mikro_orm_1.RoomPrvMsg, x => x.createdBy, { orphanRemoval: true }),
+    core_1.OneToMany(() => mikro_orm_2.RoomPrvMsg, x => x.createdBy, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], User.prototype, "roomSEs", void 0);
 __decorate([
-    core_1.ManyToMany(() => mikro_orm_1.RoomPrvMsg, x => x.visibleTo, { owner: true }),
+    core_1.ManyToMany(() => mikro_orm_2.RoomPrvMsg, x => x.visibleTo, { owner: true }),
     __metadata("design:type", Object)
 ], User.prototype, "visibleRoomPrvMsgs", void 0);
 User = __decorate([
