@@ -71,3 +71,4 @@ export {
     dualKeyRecordToDualKeyMap,
     recordToMap,
 } from './internal/utils';
+export { maybe, Maybe } from './internal/io-ts';
