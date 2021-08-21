@@ -1,5 +1,5 @@
 {
-    "version": "0.7.0",
+    "version": "0.7.1",
     "license": "MIT",
     "main": "dist/cjs/index.js",
     "module": "dist/esm/index.js",
@@ -47,6 +47,7 @@
     },
     "dependencies": {
         "@kizahasi/option": "^1.0.0",
+        "fp-ts": "^2.11.1",
         "io-ts": "^2.2.16"
     }
 }

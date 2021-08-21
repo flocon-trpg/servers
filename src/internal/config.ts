@@ -1,6 +1,6 @@
 import * as t from 'io-ts';
 
-export const firebaseConfig = {
+export const firebaseConfig = t.type({
     apiKey: t.string,
     authDomain: t.string,
     databaseURL: t.string,
@@ -9,6 +9,6 @@ export const firebaseConfig = {
     messagingSenderId: t.string,
     appId: t.string,
     measurementId: t.string,
-};
+});
 
-export type FirebaseConfig = t.Type<typeof firebaseConfig>;
+export type FirebaseConfig = t.TypeOf<typeof firebaseConfig>;
