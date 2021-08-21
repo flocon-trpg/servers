@@ -53,7 +53,7 @@
         "@kizahasi/flocon-script": "^0.6.0",
         "@kizahasi/ot-string": "^0.2.3",
         "@kizahasi/result": "^1.0.0",
-        "@kizahasi/util": "^0.5.0",
+        "@kizahasi/util": "^0.8.0",
         "@ltd/j-toml": "^1.12.2",
         "fp-ts": "^2.10.5",
         "io-ts": "^2.2.16",
