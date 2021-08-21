@@ -12,6 +12,7 @@ export type Scalars = {
     Boolean: boolean;
     Int: number;
     Float: number;
+    Upload: any;
 };
 
 export type AvailableGameSystem = {
@@ -310,6 +311,7 @@ export type Mutation = {
     ping: Pong;
     promoteToPlayer: PromoteResult;
     updateWritingMessageStatus: Scalars['Boolean'];
+    upload: UploadResult;
     writePrivateMessage: WritePrivateRoomMessageResult;
     writePublicMessage: WritePublicRoomMessageResult;
     writeRoomSoundEffect: WriteRoomSoundEffectResult;
@@ -383,6 +385,10 @@ export type MutationPromoteToPlayerArgs = {
 export type MutationUpdateWritingMessageStatusArgs = {
     newStatus: WritingMessageStatusInputType;
     roomId: Scalars['String'];
+};
+
+export type MutationUploadArgs = {
+    file: Scalars['Upload'];
 };
 
 export type MutationWritePrivateMessageArgs = {
@@ -730,6 +736,21 @@ export type UpdatedText = {
     updatedAt: Scalars['Float'];
 };
 
+export type UploadResult = {
+    __typename?: 'UploadResult';
+    type: UploadResultType;
+};
+
+export enum UploadResultType {
+    CountQuotaExceeded = 'CountQuotaExceeded',
+    Disabled = 'Disabled',
+    FileExists = 'FileExists',
+    NotEntry = 'NotEntry',
+    NotSignIn = 'NotSignIn',
+    SizeQuotaExceeded = 'SizeQuotaExceeded',
+    Success = 'Success',
+}
+
 export type WritePrivateRoomMessageFailureResult = {
     __typename?: 'WritePrivateRoomMessageFailureResult';
     failureType: WritePrivateRoomMessageFailureType;
@@ -798,59 +819,91 @@ export enum WritingMessageStatusType {
     Writing = 'Writing',
 }
 
-export type CharacterValueForMessageFragment = { __typename?: 'CharacterValueForMessage' } & Pick<
-    CharacterValueForMessage,
-    'stateId' | 'isPrivate' | 'name'
-> & {
-        image?: Maybe<{ __typename?: 'FilePath' } & FilePathFragment>;
-        tachieImage?: Maybe<{ __typename?: 'FilePath' } & FilePathFragment>;
-    };
+export type CharacterValueForMessageFragment = {
+    __typename?: 'CharacterValueForMessage';
+    stateId: string;
+    isPrivate: boolean;
+    name: string;
+    image?: Maybe<{ __typename?: 'FilePath'; sourceType: FileSourceType; path: string }>;
+    tachieImage?: Maybe<{ __typename?: 'FilePath'; sourceType: FileSourceType; path: string }>;
+};
 
 type CreateRoomResult_CreateRoomFailureResult_Fragment = {
     __typename?: 'CreateRoomFailureResult';
-} & Pick<CreateRoomFailureResult, 'failureType'>;
+    failureType: CreateRoomFailureType;
+};
 
 type CreateRoomResult_CreateRoomSuccessResult_Fragment = {
     __typename?: 'CreateRoomSuccessResult';
-} & Pick<CreateRoomSuccessResult, 'id'> & {
-        room: { __typename?: 'RoomGetState' } & RoomGetStateFragment;
-    };
+    id: string;
+    room: { __typename?: 'RoomGetState'; revision: number; createdBy: string; stateJson: string };
+};
 
 export type CreateRoomResultFragment =
     | CreateRoomResult_CreateRoomFailureResult_Fragment
     | CreateRoomResult_CreateRoomSuccessResult_Fragment;
 
-export type FilePathFragment = { __typename?: 'FilePath' } & Pick<FilePath, 'sourceType' | 'path'>;
+export type FilePathFragment = {
+    __typename?: 'FilePath';
+    sourceType: FileSourceType;
+    path: string;
+};
 
-export type GetNonJoinedRoomResultFragment = { __typename?: 'GetNonJoinedRoomResult' } & {
-    roomAsListItem: { __typename?: 'RoomAsListItem' } & RoomAsListItemFragment;
+export type GetNonJoinedRoomResultFragment = {
+    __typename?: 'GetNonJoinedRoomResult';
+    roomAsListItem: {
+        __typename?: 'RoomAsListItem';
+        id: string;
+        name: string;
+        createdBy: string;
+        requiresPhraseToJoinAsPlayer: boolean;
+        requiresPhraseToJoinAsSpectator: boolean;
+    };
 };
 
 type GetRoomListResult_GetRoomsListFailureResult_Fragment = {
     __typename?: 'GetRoomsListFailureResult';
-} & Pick<GetRoomsListFailureResult, 'failureType'>;
+    failureType: GetRoomsListFailureType;
+};
 
 type GetRoomListResult_GetRoomsListSuccessResult_Fragment = {
     __typename?: 'GetRoomsListSuccessResult';
-} & { rooms: Array<{ __typename?: 'RoomAsListItem' } & RoomAsListItemFragment> };
+    rooms: Array<{
+        __typename?: 'RoomAsListItem';
+        id: string;
+        name: string;
+        createdBy: string;
+        requiresPhraseToJoinAsPlayer: boolean;
+        requiresPhraseToJoinAsSpectator: boolean;
+    }>;
+};
 
 export type GetRoomListResultFragment =
     | GetRoomListResult_GetRoomsListFailureResult_Fragment
     | GetRoomListResult_GetRoomsListSuccessResult_Fragment;
 
-type GetRoomResult_GetJoinedRoomResult_Fragment = { __typename?: 'GetJoinedRoomResult' } & Pick<
-    GetJoinedRoomResult,
-    'role'
-> & { room: { __typename?: 'RoomGetState' } & RoomGetStateFragment };
+type GetRoomResult_GetJoinedRoomResult_Fragment = {
+    __typename?: 'GetJoinedRoomResult';
+    role: ParticipantRole;
+    room: { __typename?: 'RoomGetState'; revision: number; createdBy: string; stateJson: string };
+};
 
 type GetRoomResult_GetNonJoinedRoomResult_Fragment = {
     __typename?: 'GetNonJoinedRoomResult';
-} & GetNonJoinedRoomResultFragment;
+    roomAsListItem: {
+        __typename?: 'RoomAsListItem';
+        id: string;
+        name: string;
+        createdBy: string;
+        requiresPhraseToJoinAsPlayer: boolean;
+        requiresPhraseToJoinAsSpectator: boolean;
+    };
+};
 
-type GetRoomResult_GetRoomFailureResult_Fragment = { __typename?: 'GetRoomFailureResult' } & Pick<
-    GetRoomFailureResult,
-    'failureType'
->;
+type GetRoomResult_GetRoomFailureResult_Fragment = {
+    __typename?: 'GetRoomFailureResult';
+    failureType: GetRoomFailureType;
+};
 
 export type GetRoomResultFragment =
     | GetRoomResult_GetJoinedRoomResult_Fragment
@@ -859,157 +912,275 @@ export type GetRoomResultFragment =
 
 type JoinRoomResult_JoinRoomFailureResult_Fragment = {
     __typename?: 'JoinRoomFailureResult';
-} & Pick<JoinRoomFailureResult, 'failureType'>;
+    failureType: JoinRoomFailureType;
+};
 
-type JoinRoomResult_JoinRoomSuccessResult_Fragment = { __typename?: 'JoinRoomSuccessResult' } & {
-    operation?: Maybe<{ __typename?: 'RoomOperation' } & RoomOperationFragment>;
+type JoinRoomResult_JoinRoomSuccessResult_Fragment = {
+    __typename?: 'JoinRoomSuccessResult';
+    operation?: Maybe<{
+        __typename?: 'RoomOperation';
+        revisionTo: number;
+        valueJson: string;
+        operatedBy?: Maybe<{ __typename?: 'OperatedBy'; userUid: string; clientId: string }>;
+    }>;
 };
 
 export type JoinRoomResultFragment =
     | JoinRoomResult_JoinRoomFailureResult_Fragment
     | JoinRoomResult_JoinRoomSuccessResult_Fragment;
 
-export type PieceValueLogFragment = { __typename?: 'PieceValueLog' } & Pick<
-    PieceValueLog,
-    | 'messageId'
-    | 'characterCreatedBy'
-    | 'characterId'
-    | 'stateId'
-    | 'createdAt'
-    | 'logType'
-    | 'valueJson'
->;
+export type PieceValueLogFragment = {
+    __typename?: 'PieceValueLog';
+    messageId: string;
+    characterCreatedBy: string;
+    characterId: string;
+    stateId: string;
+    createdAt: number;
+    logType: PieceValueLogType;
+    valueJson: string;
+};
 
-export type RoomAsListItemFragment = { __typename?: 'RoomAsListItem' } & Pick<
-    RoomAsListItem,
-    'id' | 'name' | 'createdBy' | 'requiresPhraseToJoinAsPlayer' | 'requiresPhraseToJoinAsSpectator'
->;
+export type RoomAsListItemFragment = {
+    __typename?: 'RoomAsListItem';
+    id: string;
+    name: string;
+    createdBy: string;
+    requiresPhraseToJoinAsPlayer: boolean;
+    requiresPhraseToJoinAsSpectator: boolean;
+};
 
-export type RoomGetStateFragment = { __typename?: 'RoomGetState' } & Pick<
-    RoomGetState,
-    'revision' | 'createdBy' | 'stateJson'
->;
+export type RoomGetStateFragment = {
+    __typename?: 'RoomGetState';
+    revision: number;
+    createdBy: string;
+    stateJson: string;
+};
 
-export type RoomOperationFragment = { __typename?: 'RoomOperation' } & Pick<
-    RoomOperation,
-    'revisionTo' | 'valueJson'
-> & {
-        operatedBy?: Maybe<
-            { __typename?: 'OperatedBy' } & Pick<OperatedBy, 'userUid' | 'clientId'>
-        >;
-    };
+export type RoomOperationFragment = {
+    __typename?: 'RoomOperation';
+    revisionTo: number;
+    valueJson: string;
+    operatedBy?: Maybe<{ __typename?: 'OperatedBy'; userUid: string; clientId: string }>;
+};
 
-export type RoomPublicChannelFragment = { __typename?: 'RoomPublicChannel' } & Pick<
-    RoomPublicChannel,
-    'key' | 'name'
->;
+export type RoomPublicChannelFragment = {
+    __typename?: 'RoomPublicChannel';
+    key: string;
+    name?: Maybe<string>;
+};
 
-export type RoomPublicMessageFragment = { __typename?: 'RoomPublicMessage' } & Pick<
-    RoomPublicMessage,
-    | 'messageId'
-    | 'channelKey'
-    | 'initText'
-    | 'initTextSource'
-    | 'textColor'
-    | 'altTextToSecret'
-    | 'isSecret'
-    | 'createdBy'
-    | 'customName'
-    | 'createdAt'
-    | 'updatedAt'
-> & {
-        updatedText?: Maybe<
-            { __typename?: 'UpdatedText' } & Pick<UpdatedText, 'currentText' | 'updatedAt'>
-        >;
-        commandResult?: Maybe<
-            { __typename?: 'CommandResult' } & Pick<CommandResult, 'text' | 'isSuccess'>
-        >;
-        character?: Maybe<
-            { __typename?: 'CharacterValueForMessage' } & CharacterValueForMessageFragment
-        >;
-    };
+export type RoomPublicMessageFragment = {
+    __typename?: 'RoomPublicMessage';
+    messageId: string;
+    channelKey: string;
+    initText?: Maybe<string>;
+    initTextSource?: Maybe<string>;
+    textColor?: Maybe<string>;
+    altTextToSecret?: Maybe<string>;
+    isSecret: boolean;
+    createdBy?: Maybe<string>;
+    customName?: Maybe<string>;
+    createdAt: number;
+    updatedAt?: Maybe<number>;
+    updatedText?: Maybe<{
+        __typename?: 'UpdatedText';
+        currentText?: Maybe<string>;
+        updatedAt: number;
+    }>;
+    commandResult?: Maybe<{
+        __typename?: 'CommandResult';
+        text: string;
+        isSuccess?: Maybe<boolean>;
+    }>;
+    character?: Maybe<{
+        __typename?: 'CharacterValueForMessage';
+        stateId: string;
+        isPrivate: boolean;
+        name: string;
+        image?: Maybe<{ __typename?: 'FilePath'; sourceType: FileSourceType; path: string }>;
+        tachieImage?: Maybe<{ __typename?: 'FilePath'; sourceType: FileSourceType; path: string }>;
+    }>;
+};
 
-export type RoomPrivateMessageFragment = { __typename?: 'RoomPrivateMessage' } & Pick<
-    RoomPrivateMessage,
-    | 'messageId'
-    | 'visibleTo'
-    | 'initText'
-    | 'initTextSource'
-    | 'textColor'
-    | 'altTextToSecret'
-    | 'isSecret'
-    | 'createdBy'
-    | 'customName'
-    | 'createdAt'
-    | 'updatedAt'
-> & {
-        updatedText?: Maybe<
-            { __typename?: 'UpdatedText' } & Pick<UpdatedText, 'currentText' | 'updatedAt'>
-        >;
-        commandResult?: Maybe<
-            { __typename?: 'CommandResult' } & Pick<CommandResult, 'text' | 'isSuccess'>
-        >;
-        character?: Maybe<
-            { __typename?: 'CharacterValueForMessage' } & CharacterValueForMessageFragment
-        >;
-    };
+export type RoomPrivateMessageFragment = {
+    __typename?: 'RoomPrivateMessage';
+    messageId: string;
+    visibleTo: Array<string>;
+    initText?: Maybe<string>;
+    initTextSource?: Maybe<string>;
+    textColor?: Maybe<string>;
+    altTextToSecret?: Maybe<string>;
+    isSecret: boolean;
+    createdBy?: Maybe<string>;
+    customName?: Maybe<string>;
+    createdAt: number;
+    updatedAt?: Maybe<number>;
+    updatedText?: Maybe<{
+        __typename?: 'UpdatedText';
+        currentText?: Maybe<string>;
+        updatedAt: number;
+    }>;
+    commandResult?: Maybe<{
+        __typename?: 'CommandResult';
+        text: string;
+        isSuccess?: Maybe<boolean>;
+    }>;
+    character?: Maybe<{
+        __typename?: 'CharacterValueForMessage';
+        stateId: string;
+        isPrivate: boolean;
+        name: string;
+        image?: Maybe<{ __typename?: 'FilePath'; sourceType: FileSourceType; path: string }>;
+        tachieImage?: Maybe<{ __typename?: 'FilePath'; sourceType: FileSourceType; path: string }>;
+    }>;
+};
 
-export type RoomSoundEffectFragment = { __typename?: 'RoomSoundEffect' } & Pick<
-    RoomSoundEffect,
-    'messageId' | 'createdBy' | 'createdAt' | 'volume'
-> & { file: { __typename?: 'FilePath' } & FilePathFragment };
+export type RoomSoundEffectFragment = {
+    __typename?: 'RoomSoundEffect';
+    messageId: string;
+    createdBy?: Maybe<string>;
+    createdAt: number;
+    volume: number;
+    file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
+};
 
 type RoomMessageEvent_PieceValueLog_Fragment = {
     __typename?: 'PieceValueLog';
-} & PieceValueLogFragment;
+    messageId: string;
+    characterCreatedBy: string;
+    characterId: string;
+    stateId: string;
+    createdAt: number;
+    logType: PieceValueLogType;
+    valueJson: string;
+};
 
 type RoomMessageEvent_RoomPrivateMessage_Fragment = {
     __typename?: 'RoomPrivateMessage';
-} & RoomPrivateMessageFragment;
+    messageId: string;
+    visibleTo: Array<string>;
+    initText?: Maybe<string>;
+    initTextSource?: Maybe<string>;
+    textColor?: Maybe<string>;
+    altTextToSecret?: Maybe<string>;
+    isSecret: boolean;
+    createdBy?: Maybe<string>;
+    customName?: Maybe<string>;
+    createdAt: number;
+    updatedAt?: Maybe<number>;
+    updatedText?: Maybe<{
+        __typename?: 'UpdatedText';
+        currentText?: Maybe<string>;
+        updatedAt: number;
+    }>;
+    commandResult?: Maybe<{
+        __typename?: 'CommandResult';
+        text: string;
+        isSuccess?: Maybe<boolean>;
+    }>;
+    character?: Maybe<{
+        __typename?: 'CharacterValueForMessage';
+        stateId: string;
+        isPrivate: boolean;
+        name: string;
+        image?: Maybe<{ __typename?: 'FilePath'; sourceType: FileSourceType; path: string }>;
+        tachieImage?: Maybe<{ __typename?: 'FilePath'; sourceType: FileSourceType; path: string }>;
+    }>;
+};
 
 type RoomMessageEvent_RoomPrivateMessageUpdate_Fragment = {
     __typename?: 'RoomPrivateMessageUpdate';
-} & Pick<
-    RoomPrivateMessageUpdate,
-    'messageId' | 'initText' | 'initTextSource' | 'altTextToSecret' | 'isSecret' | 'updatedAt'
-> & {
-        updatedText?: Maybe<
-            { __typename?: 'UpdatedText' } & Pick<UpdatedText, 'currentText' | 'updatedAt'>
-        >;
-        commandResult?: Maybe<
-            { __typename?: 'CommandResult' } & Pick<CommandResult, 'text' | 'isSuccess'>
-        >;
-    };
+    messageId: string;
+    initText?: Maybe<string>;
+    initTextSource?: Maybe<string>;
+    altTextToSecret?: Maybe<string>;
+    isSecret: boolean;
+    updatedAt?: Maybe<number>;
+    updatedText?: Maybe<{
+        __typename?: 'UpdatedText';
+        currentText?: Maybe<string>;
+        updatedAt: number;
+    }>;
+    commandResult?: Maybe<{
+        __typename?: 'CommandResult';
+        text: string;
+        isSuccess?: Maybe<boolean>;
+    }>;
+};
 
 type RoomMessageEvent_RoomPublicChannel_Fragment = {
     __typename?: 'RoomPublicChannel';
-} & RoomPublicChannelFragment;
+    key: string;
+    name?: Maybe<string>;
+};
 
 type RoomMessageEvent_RoomPublicChannelUpdate_Fragment = {
     __typename?: 'RoomPublicChannelUpdate';
-} & Pick<RoomPublicChannelUpdate, 'key' | 'name'>;
+    key: string;
+    name?: Maybe<string>;
+};
 
 type RoomMessageEvent_RoomPublicMessage_Fragment = {
     __typename?: 'RoomPublicMessage';
-} & RoomPublicMessageFragment;
+    messageId: string;
+    channelKey: string;
+    initText?: Maybe<string>;
+    initTextSource?: Maybe<string>;
+    textColor?: Maybe<string>;
+    altTextToSecret?: Maybe<string>;
+    isSecret: boolean;
+    createdBy?: Maybe<string>;
+    customName?: Maybe<string>;
+    createdAt: number;
+    updatedAt?: Maybe<number>;
+    updatedText?: Maybe<{
+        __typename?: 'UpdatedText';
+        currentText?: Maybe<string>;
+        updatedAt: number;
+    }>;
+    commandResult?: Maybe<{
+        __typename?: 'CommandResult';
+        text: string;
+        isSuccess?: Maybe<boolean>;
+    }>;
+    character?: Maybe<{
+        __typename?: 'CharacterValueForMessage';
+        stateId: string;
+        isPrivate: boolean;
+        name: string;
+        image?: Maybe<{ __typename?: 'FilePath'; sourceType: FileSourceType; path: string }>;
+        tachieImage?: Maybe<{ __typename?: 'FilePath'; sourceType: FileSourceType; path: string }>;
+    }>;
+};
 
 type RoomMessageEvent_RoomPublicMessageUpdate_Fragment = {
     __typename?: 'RoomPublicMessageUpdate';
-} & Pick<
-    RoomPublicMessageUpdate,
-    'messageId' | 'initText' | 'initTextSource' | 'altTextToSecret' | 'isSecret' | 'updatedAt'
-> & {
-        updatedText?: Maybe<
-            { __typename?: 'UpdatedText' } & Pick<UpdatedText, 'currentText' | 'updatedAt'>
-        >;
-        commandResult?: Maybe<
-            { __typename?: 'CommandResult' } & Pick<CommandResult, 'text' | 'isSuccess'>
-        >;
-    };
+    messageId: string;
+    initText?: Maybe<string>;
+    initTextSource?: Maybe<string>;
+    altTextToSecret?: Maybe<string>;
+    isSecret: boolean;
+    updatedAt?: Maybe<number>;
+    updatedText?: Maybe<{
+        __typename?: 'UpdatedText';
+        currentText?: Maybe<string>;
+        updatedAt: number;
+    }>;
+    commandResult?: Maybe<{
+        __typename?: 'CommandResult';
+        text: string;
+        isSuccess?: Maybe<boolean>;
+    }>;
+};
 
 type RoomMessageEvent_RoomSoundEffect_Fragment = {
     __typename?: 'RoomSoundEffect';
-} & RoomSoundEffectFragment;
+    messageId: string;
+    createdBy?: Maybe<string>;
+    createdAt: number;
+    volume: number;
+    file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
+};
 
 export type RoomMessageEventFragment =
     | RoomMessageEvent_PieceValueLog_Fragment
@@ -1021,121 +1192,346 @@ export type RoomMessageEventFragment =
     | RoomMessageEvent_RoomPublicMessageUpdate_Fragment
     | RoomMessageEvent_RoomSoundEffect_Fragment;
 
-export type SemVerFragment = { __typename?: 'SemVer' } & Pick<
-    SemVer,
-    'major' | 'minor' | 'patch'
-> & { prerelease?: Maybe<{ __typename?: 'Prerelease' } & Pick<Prerelease, 'type' | 'version'>> };
+export type SemVerFragment = {
+    __typename?: 'SemVer';
+    major: number;
+    minor: number;
+    patch: number;
+    prerelease?: Maybe<{ __typename?: 'Prerelease'; type: PrereleaseType; version: number }>;
+};
 
 export type GetRoomQueryVariables = Exact<{
     id: Scalars['String'];
 }>;
 
-export type GetRoomQuery = { __typename?: 'Query' } & {
+export type GetRoomQuery = {
+    __typename?: 'Query';
     result:
-        | ({ __typename?: 'GetJoinedRoomResult' } & Pick<GetJoinedRoomResult, 'role'> & {
-                  room: { __typename?: 'RoomGetState' } & RoomGetStateFragment;
-              })
-        | ({ __typename?: 'GetNonJoinedRoomResult' } & {
-              roomAsListItem: { __typename?: 'RoomAsListItem' } & RoomAsListItemFragment;
-          })
-        | ({ __typename?: 'GetRoomFailureResult' } & Pick<GetRoomFailureResult, 'failureType'>);
+        | {
+              __typename?: 'GetJoinedRoomResult';
+              role: ParticipantRole;
+              room: {
+                  __typename?: 'RoomGetState';
+                  revision: number;
+                  createdBy: string;
+                  stateJson: string;
+              };
+          }
+        | {
+              __typename?: 'GetNonJoinedRoomResult';
+              roomAsListItem: {
+                  __typename?: 'RoomAsListItem';
+                  id: string;
+                  name: string;
+                  createdBy: string;
+                  requiresPhraseToJoinAsPlayer: boolean;
+                  requiresPhraseToJoinAsSpectator: boolean;
+              };
+          }
+        | { __typename?: 'GetRoomFailureResult'; failureType: GetRoomFailureType };
 };
 
 export type GetRoomsListQueryVariables = Exact<{ [key: string]: never }>;
 
-export type GetRoomsListQuery = { __typename?: 'Query' } & {
+export type GetRoomsListQuery = {
+    __typename?: 'Query';
     result:
-        | ({ __typename?: 'GetRoomsListFailureResult' } & Pick<
-              GetRoomsListFailureResult,
-              'failureType'
-          >)
-        | ({ __typename?: 'GetRoomsListSuccessResult' } & {
-              rooms: Array<{ __typename?: 'RoomAsListItem' } & RoomAsListItemFragment>;
-          });
+        | { __typename?: 'GetRoomsListFailureResult'; failureType: GetRoomsListFailureType }
+        | {
+              __typename?: 'GetRoomsListSuccessResult';
+              rooms: Array<{
+                  __typename?: 'RoomAsListItem';
+                  id: string;
+                  name: string;
+                  createdBy: string;
+                  requiresPhraseToJoinAsPlayer: boolean;
+                  requiresPhraseToJoinAsSpectator: boolean;
+              }>;
+          };
 };
 
 export type GetMessagesQueryVariables = Exact<{
     roomId: Scalars['String'];
 }>;
 
-export type GetMessagesQuery = { __typename?: 'Query' } & {
+export type GetMessagesQuery = {
+    __typename?: 'Query';
     result:
-        | ({ __typename?: 'GetRoomMessagesFailureResult' } & Pick<
-              GetRoomMessagesFailureResult,
-              'failureType'
-          >)
-        | ({ __typename?: 'RoomMessages' } & {
-              publicMessages: Array<
-                  { __typename?: 'RoomPublicMessage' } & RoomPublicMessageFragment
-              >;
-              privateMessages: Array<
-                  { __typename?: 'RoomPrivateMessage' } & RoomPrivateMessageFragment
-              >;
-              pieceValueLogs: Array<{ __typename?: 'PieceValueLog' } & PieceValueLogFragment>;
-              publicChannels: Array<
-                  { __typename?: 'RoomPublicChannel' } & RoomPublicChannelFragment
-              >;
-              soundEffects: Array<{ __typename?: 'RoomSoundEffect' } & RoomSoundEffectFragment>;
-          });
+        | { __typename?: 'GetRoomMessagesFailureResult'; failureType: GetRoomMessagesFailureType }
+        | {
+              __typename?: 'RoomMessages';
+              publicMessages: Array<{
+                  __typename?: 'RoomPublicMessage';
+                  messageId: string;
+                  channelKey: string;
+                  initText?: Maybe<string>;
+                  initTextSource?: Maybe<string>;
+                  textColor?: Maybe<string>;
+                  altTextToSecret?: Maybe<string>;
+                  isSecret: boolean;
+                  createdBy?: Maybe<string>;
+                  customName?: Maybe<string>;
+                  createdAt: number;
+                  updatedAt?: Maybe<number>;
+                  updatedText?: Maybe<{
+                      __typename?: 'UpdatedText';
+                      currentText?: Maybe<string>;
+                      updatedAt: number;
+                  }>;
+                  commandResult?: Maybe<{
+                      __typename?: 'CommandResult';
+                      text: string;
+                      isSuccess?: Maybe<boolean>;
+                  }>;
+                  character?: Maybe<{
+                      __typename?: 'CharacterValueForMessage';
+                      stateId: string;
+                      isPrivate: boolean;
+                      name: string;
+                      image?: Maybe<{
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      }>;
+                      tachieImage?: Maybe<{
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      }>;
+                  }>;
+              }>;
+              privateMessages: Array<{
+                  __typename?: 'RoomPrivateMessage';
+                  messageId: string;
+                  visibleTo: Array<string>;
+                  initText?: Maybe<string>;
+                  initTextSource?: Maybe<string>;
+                  textColor?: Maybe<string>;
+                  altTextToSecret?: Maybe<string>;
+                  isSecret: boolean;
+                  createdBy?: Maybe<string>;
+                  customName?: Maybe<string>;
+                  createdAt: number;
+                  updatedAt?: Maybe<number>;
+                  updatedText?: Maybe<{
+                      __typename?: 'UpdatedText';
+                      currentText?: Maybe<string>;
+                      updatedAt: number;
+                  }>;
+                  commandResult?: Maybe<{
+                      __typename?: 'CommandResult';
+                      text: string;
+                      isSuccess?: Maybe<boolean>;
+                  }>;
+                  character?: Maybe<{
+                      __typename?: 'CharacterValueForMessage';
+                      stateId: string;
+                      isPrivate: boolean;
+                      name: string;
+                      image?: Maybe<{
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      }>;
+                      tachieImage?: Maybe<{
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      }>;
+                  }>;
+              }>;
+              pieceValueLogs: Array<{
+                  __typename?: 'PieceValueLog';
+                  messageId: string;
+                  characterCreatedBy: string;
+                  characterId: string;
+                  stateId: string;
+                  createdAt: number;
+                  logType: PieceValueLogType;
+                  valueJson: string;
+              }>;
+              publicChannels: Array<{
+                  __typename?: 'RoomPublicChannel';
+                  key: string;
+                  name?: Maybe<string>;
+              }>;
+              soundEffects: Array<{
+                  __typename?: 'RoomSoundEffect';
+                  messageId: string;
+                  createdBy?: Maybe<string>;
+                  createdAt: number;
+                  volume: number;
+                  file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
+              }>;
+          };
 };
 
 export type GetLogQueryVariables = Exact<{
     roomId: Scalars['String'];
 }>;
 
-export type GetLogQuery = { __typename?: 'Query' } & {
+export type GetLogQuery = {
+    __typename?: 'Query';
     result:
-        | ({ __typename?: 'GetRoomLogFailureResult' } & Pick<
-              GetRoomLogFailureResult,
-              'failureType'
-          >)
-        | ({ __typename?: 'RoomMessages' } & {
-              publicMessages: Array<
-                  { __typename?: 'RoomPublicMessage' } & RoomPublicMessageFragment
-              >;
-              privateMessages: Array<
-                  { __typename?: 'RoomPrivateMessage' } & RoomPrivateMessageFragment
-              >;
-              pieceValueLogs: Array<{ __typename?: 'PieceValueLog' } & PieceValueLogFragment>;
-              publicChannels: Array<
-                  { __typename?: 'RoomPublicChannel' } & RoomPublicChannelFragment
-              >;
-              soundEffects: Array<{ __typename?: 'RoomSoundEffect' } & RoomSoundEffectFragment>;
-          });
+        | { __typename?: 'GetRoomLogFailureResult'; failureType: GetRoomLogFailureType }
+        | {
+              __typename?: 'RoomMessages';
+              publicMessages: Array<{
+                  __typename?: 'RoomPublicMessage';
+                  messageId: string;
+                  channelKey: string;
+                  initText?: Maybe<string>;
+                  initTextSource?: Maybe<string>;
+                  textColor?: Maybe<string>;
+                  altTextToSecret?: Maybe<string>;
+                  isSecret: boolean;
+                  createdBy?: Maybe<string>;
+                  customName?: Maybe<string>;
+                  createdAt: number;
+                  updatedAt?: Maybe<number>;
+                  updatedText?: Maybe<{
+                      __typename?: 'UpdatedText';
+                      currentText?: Maybe<string>;
+                      updatedAt: number;
+                  }>;
+                  commandResult?: Maybe<{
+                      __typename?: 'CommandResult';
+                      text: string;
+                      isSuccess?: Maybe<boolean>;
+                  }>;
+                  character?: Maybe<{
+                      __typename?: 'CharacterValueForMessage';
+                      stateId: string;
+                      isPrivate: boolean;
+                      name: string;
+                      image?: Maybe<{
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      }>;
+                      tachieImage?: Maybe<{
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      }>;
+                  }>;
+              }>;
+              privateMessages: Array<{
+                  __typename?: 'RoomPrivateMessage';
+                  messageId: string;
+                  visibleTo: Array<string>;
+                  initText?: Maybe<string>;
+                  initTextSource?: Maybe<string>;
+                  textColor?: Maybe<string>;
+                  altTextToSecret?: Maybe<string>;
+                  isSecret: boolean;
+                  createdBy?: Maybe<string>;
+                  customName?: Maybe<string>;
+                  createdAt: number;
+                  updatedAt?: Maybe<number>;
+                  updatedText?: Maybe<{
+                      __typename?: 'UpdatedText';
+                      currentText?: Maybe<string>;
+                      updatedAt: number;
+                  }>;
+                  commandResult?: Maybe<{
+                      __typename?: 'CommandResult';
+                      text: string;
+                      isSuccess?: Maybe<boolean>;
+                  }>;
+                  character?: Maybe<{
+                      __typename?: 'CharacterValueForMessage';
+                      stateId: string;
+                      isPrivate: boolean;
+                      name: string;
+                      image?: Maybe<{
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      }>;
+                      tachieImage?: Maybe<{
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      }>;
+                  }>;
+              }>;
+              pieceValueLogs: Array<{
+                  __typename?: 'PieceValueLog';
+                  messageId: string;
+                  characterCreatedBy: string;
+                  characterId: string;
+                  stateId: string;
+                  createdAt: number;
+                  logType: PieceValueLogType;
+                  valueJson: string;
+              }>;
+              publicChannels: Array<{
+                  __typename?: 'RoomPublicChannel';
+                  key: string;
+                  name?: Maybe<string>;
+              }>;
+              soundEffects: Array<{
+                  __typename?: 'RoomSoundEffect';
+                  messageId: string;
+                  createdBy?: Maybe<string>;
+                  createdAt: number;
+                  volume: number;
+                  file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
+              }>;
+          };
 };
 
 export type GetRoomConnectionsQueryVariables = Exact<{
     roomId: Scalars['String'];
 }>;
 
-export type GetRoomConnectionsQuery = { __typename?: 'Query' } & {
+export type GetRoomConnectionsQuery = {
+    __typename?: 'Query';
     result:
-        | ({ __typename?: 'GetRoomConnectionsFailureResult' } & Pick<
-              GetRoomConnectionsFailureResult,
-              'failureType'
-          >)
-        | ({ __typename?: 'GetRoomConnectionsSuccessResult' } & Pick<
-              GetRoomConnectionsSuccessResult,
-              'fetchedAt' | 'connectedUserUids'
-          >);
+        | {
+              __typename?: 'GetRoomConnectionsFailureResult';
+              failureType: GetRoomConnectionFailureType;
+          }
+        | {
+              __typename?: 'GetRoomConnectionsSuccessResult';
+              fetchedAt: number;
+              connectedUserUids: Array<string>;
+          };
 };
 
 export type GetServerInfoQueryVariables = Exact<{ [key: string]: never }>;
 
-export type GetServerInfoQuery = { __typename?: 'Query' } & {
-    result: { __typename?: 'ServerInfo' } & { version: { __typename?: 'SemVer' } & SemVerFragment };
+export type GetServerInfoQuery = {
+    __typename?: 'Query';
+    result: {
+        __typename?: 'ServerInfo';
+        version: {
+            __typename?: 'SemVer';
+            major: number;
+            minor: number;
+            patch: number;
+            prerelease?: Maybe<{
+                __typename?: 'Prerelease';
+                type: PrereleaseType;
+                version: number;
+            }>;
+        };
+    };
 };
 
 export type ListAvailableGameSystemsQueryVariables = Exact<{ [key: string]: never }>;
 
-export type ListAvailableGameSystemsQuery = { __typename?: 'Query' } & {
-    result: { __typename?: 'ListAvailableGameSystemsResult' } & {
-        value: Array<
-            { __typename?: 'AvailableGameSystem' } & Pick<
-                AvailableGameSystem,
-                'id' | 'name' | 'sortKey'
-            >
-        >;
+export type ListAvailableGameSystemsQuery = {
+    __typename?: 'Query';
+    result: {
+        __typename?: 'ListAvailableGameSystemsResult';
+        value: Array<{
+            __typename?: 'AvailableGameSystem';
+            id: string;
+            name: string;
+            sortKey: string;
+        }>;
     };
 };
 
@@ -1143,16 +1539,11 @@ export type RequiresPhraseToJoinAsPlayerQueryVariables = Exact<{
     roomId: Scalars['String'];
 }>;
 
-export type RequiresPhraseToJoinAsPlayerQuery = { __typename?: 'Query' } & {
+export type RequiresPhraseToJoinAsPlayerQuery = {
+    __typename?: 'Query';
     result:
-        | ({ __typename?: 'RequiresPhraseFailureResult' } & Pick<
-              RequiresPhraseFailureResult,
-              'failureType'
-          >)
-        | ({ __typename?: 'RequiresPhraseSuccessResult' } & Pick<
-              RequiresPhraseSuccessResult,
-              'value'
-          >);
+        | { __typename?: 'RequiresPhraseFailureResult'; failureType: RequiresPhraseFailureType }
+        | { __typename?: 'RequiresPhraseSuccessResult'; value: boolean };
 };
 
 export type ChangeParticipantNameMutationVariables = Exact<{
@@ -1160,34 +1551,41 @@ export type ChangeParticipantNameMutationVariables = Exact<{
     newName: Scalars['String'];
 }>;
 
-export type ChangeParticipantNameMutation = { __typename?: 'Mutation' } & {
-    result: { __typename?: 'ChangeParticipantNameResult' } & Pick<
-        ChangeParticipantNameResult,
-        'failureType'
-    >;
+export type ChangeParticipantNameMutation = {
+    __typename?: 'Mutation';
+    result: {
+        __typename?: 'ChangeParticipantNameResult';
+        failureType?: Maybe<ChangeParticipantNameFailureType>;
+    };
 };
 
 export type CreateRoomMutationVariables = Exact<{
     input: CreateRoomInput;
 }>;
 
-export type CreateRoomMutation = { __typename?: 'Mutation' } & {
+export type CreateRoomMutation = {
+    __typename?: 'Mutation';
     result:
-        | ({ __typename?: 'CreateRoomFailureResult' } & Pick<
-              CreateRoomFailureResult,
-              'failureType'
-          >)
-        | ({
+        | { __typename?: 'CreateRoomFailureResult'; failureType: CreateRoomFailureType }
+        | {
               __typename?: 'CreateRoomSuccessResult';
-          } & CreateRoomResult_CreateRoomSuccessResult_Fragment);
+              id: string;
+              room: {
+                  __typename?: 'RoomGetState';
+                  revision: number;
+                  createdBy: string;
+                  stateJson: string;
+              };
+          };
 };
 
 export type DeleteRoomMutationVariables = Exact<{
     id: Scalars['String'];
 }>;
 
-export type DeleteRoomMutation = { __typename?: 'Mutation' } & {
-    result: { __typename?: 'DeleteRoomResult' } & Pick<DeleteRoomResult, 'failureType'>;
+export type DeleteRoomMutation = {
+    __typename?: 'Mutation';
+    result: { __typename?: 'DeleteRoomResult'; failureType?: Maybe<DeleteRoomFailureType> };
 };
 
 export type JoinRoomAsPlayerMutationVariables = Exact<{
@@ -1196,12 +1594,23 @@ export type JoinRoomAsPlayerMutationVariables = Exact<{
     phrase?: Maybe<Scalars['String']>;
 }>;
 
-export type JoinRoomAsPlayerMutation = { __typename?: 'Mutation' } & {
+export type JoinRoomAsPlayerMutation = {
+    __typename?: 'Mutation';
     result:
-        | ({ __typename?: 'JoinRoomFailureResult' } & JoinRoomResult_JoinRoomFailureResult_Fragment)
-        | ({
+        | { __typename?: 'JoinRoomFailureResult'; failureType: JoinRoomFailureType }
+        | {
               __typename?: 'JoinRoomSuccessResult';
-          } & JoinRoomResult_JoinRoomSuccessResult_Fragment);
+              operation?: Maybe<{
+                  __typename?: 'RoomOperation';
+                  revisionTo: number;
+                  valueJson: string;
+                  operatedBy?: Maybe<{
+                      __typename?: 'OperatedBy';
+                      userUid: string;
+                      clientId: string;
+                  }>;
+              }>;
+          };
 };
 
 export type JoinRoomAsSpectatorMutationVariables = Exact<{
@@ -1210,28 +1619,41 @@ export type JoinRoomAsSpectatorMutationVariables = Exact<{
     phrase?: Maybe<Scalars['String']>;
 }>;
 
-export type JoinRoomAsSpectatorMutation = { __typename?: 'Mutation' } & {
+export type JoinRoomAsSpectatorMutation = {
+    __typename?: 'Mutation';
     result:
-        | ({ __typename?: 'JoinRoomFailureResult' } & JoinRoomResult_JoinRoomFailureResult_Fragment)
-        | ({
+        | { __typename?: 'JoinRoomFailureResult'; failureType: JoinRoomFailureType }
+        | {
               __typename?: 'JoinRoomSuccessResult';
-          } & JoinRoomResult_JoinRoomSuccessResult_Fragment);
+              operation?: Maybe<{
+                  __typename?: 'RoomOperation';
+                  revisionTo: number;
+                  valueJson: string;
+                  operatedBy?: Maybe<{
+                      __typename?: 'OperatedBy';
+                      userUid: string;
+                      clientId: string;
+                  }>;
+              }>;
+          };
 };
 
 export type EntryToServerMutationVariables = Exact<{
     phrase: Scalars['String'];
 }>;
 
-export type EntryToServerMutation = { __typename?: 'Mutation' } & {
-    result: { __typename?: 'EntryToServerResult' } & Pick<EntryToServerResult, 'type'>;
+export type EntryToServerMutation = {
+    __typename?: 'Mutation';
+    result: { __typename?: 'EntryToServerResult'; type: EntryToServerResultType };
 };
 
 export type LeaveRoomMutationVariables = Exact<{
     id: Scalars['String'];
 }>;
 
-export type LeaveRoomMutation = { __typename?: 'Mutation' } & {
-    result: { __typename?: 'LeaveRoomResult' } & Pick<LeaveRoomResult, 'failureType'>;
+export type LeaveRoomMutation = {
+    __typename?: 'Mutation';
+    result: { __typename?: 'LeaveRoomResult'; failureType?: Maybe<LeaveRoomFailureType> };
 };
 
 export type OperateMutationVariables = Exact<{
@@ -1241,27 +1663,44 @@ export type OperateMutationVariables = Exact<{
     requestId: Scalars['String'];
 }>;
 
-export type OperateMutation = { __typename?: 'Mutation' } & {
+export type OperateMutation = {
+    __typename?: 'Mutation';
     result:
-        | ({ __typename?: 'OperateRoomFailureResult' } & Pick<
-              OperateRoomFailureResult,
-              'failureType'
-          >)
-        | ({ __typename?: 'OperateRoomIdResult' } & Pick<OperateRoomIdResult, 'requestId'>)
-        | ({ __typename?: 'OperateRoomNonJoinedResult' } & {
-              roomAsListItem: { __typename?: 'RoomAsListItem' } & RoomAsListItemFragment;
-          })
-        | ({ __typename?: 'OperateRoomSuccessResult' } & {
-              operation: { __typename?: 'RoomOperation' } & RoomOperationFragment;
-          });
+        | { __typename?: 'OperateRoomFailureResult'; failureType: OperateRoomFailureType }
+        | { __typename?: 'OperateRoomIdResult'; requestId: string }
+        | {
+              __typename?: 'OperateRoomNonJoinedResult';
+              roomAsListItem: {
+                  __typename?: 'RoomAsListItem';
+                  id: string;
+                  name: string;
+                  createdBy: string;
+                  requiresPhraseToJoinAsPlayer: boolean;
+                  requiresPhraseToJoinAsSpectator: boolean;
+              };
+          }
+        | {
+              __typename?: 'OperateRoomSuccessResult';
+              operation: {
+                  __typename?: 'RoomOperation';
+                  revisionTo: number;
+                  valueJson: string;
+                  operatedBy?: Maybe<{
+                      __typename?: 'OperatedBy';
+                      userUid: string;
+                      clientId: string;
+                  }>;
+              };
+          };
 };
 
 export type PingMutationVariables = Exact<{
     value: Scalars['Float'];
 }>;
 
-export type PingMutation = { __typename?: 'Mutation' } & {
-    result: { __typename?: 'Pong' } & Pick<Pong, 'createdBy' | 'value'>;
+export type PingMutation = {
+    __typename?: 'Mutation';
+    result: { __typename?: 'Pong'; createdBy?: Maybe<string>; value: number };
 };
 
 export type PromoteToPlayerMutationVariables = Exact<{
@@ -1269,8 +1708,18 @@ export type PromoteToPlayerMutationVariables = Exact<{
     phrase?: Maybe<Scalars['String']>;
 }>;
 
-export type PromoteToPlayerMutation = { __typename?: 'Mutation' } & {
-    result: { __typename?: 'PromoteResult' } & Pick<PromoteResult, 'failureType'>;
+export type PromoteToPlayerMutation = {
+    __typename?: 'Mutation';
+    result: { __typename?: 'PromoteResult'; failureType?: Maybe<PromoteFailureType> };
+};
+
+export type UploadMutationVariables = Exact<{
+    file: Scalars['Upload'];
+}>;
+
+export type UploadMutation = {
+    __typename?: 'Mutation';
+    result: { __typename?: 'UploadResult'; type: UploadResultType };
 };
 
 export type WritePublicMessageMutationVariables = Exact<{
@@ -1283,13 +1732,53 @@ export type WritePublicMessageMutationVariables = Exact<{
     gameType?: Maybe<Scalars['String']>;
 }>;
 
-export type WritePublicMessageMutation = { __typename?: 'Mutation' } & {
+export type WritePublicMessageMutation = {
+    __typename?: 'Mutation';
     result:
-        | ({ __typename?: 'RoomPublicMessage' } & RoomPublicMessageFragment)
-        | ({ __typename?: 'WritePublicRoomMessageFailureResult' } & Pick<
-              WritePublicRoomMessageFailureResult,
-              'failureType'
-          >);
+        | {
+              __typename?: 'RoomPublicMessage';
+              messageId: string;
+              channelKey: string;
+              initText?: Maybe<string>;
+              initTextSource?: Maybe<string>;
+              textColor?: Maybe<string>;
+              altTextToSecret?: Maybe<string>;
+              isSecret: boolean;
+              createdBy?: Maybe<string>;
+              customName?: Maybe<string>;
+              createdAt: number;
+              updatedAt?: Maybe<number>;
+              updatedText?: Maybe<{
+                  __typename?: 'UpdatedText';
+                  currentText?: Maybe<string>;
+                  updatedAt: number;
+              }>;
+              commandResult?: Maybe<{
+                  __typename?: 'CommandResult';
+                  text: string;
+                  isSuccess?: Maybe<boolean>;
+              }>;
+              character?: Maybe<{
+                  __typename?: 'CharacterValueForMessage';
+                  stateId: string;
+                  isPrivate: boolean;
+                  name: string;
+                  image?: Maybe<{
+                      __typename?: 'FilePath';
+                      sourceType: FileSourceType;
+                      path: string;
+                  }>;
+                  tachieImage?: Maybe<{
+                      __typename?: 'FilePath';
+                      sourceType: FileSourceType;
+                      path: string;
+                  }>;
+              }>;
+          }
+        | {
+              __typename?: 'WritePublicRoomMessageFailureResult';
+              failureType: WritePublicRoomMessageFailureType;
+          };
 };
 
 export type WritePrivateMessageMutationVariables = Exact<{
@@ -1302,13 +1791,53 @@ export type WritePrivateMessageMutationVariables = Exact<{
     gameType?: Maybe<Scalars['String']>;
 }>;
 
-export type WritePrivateMessageMutation = { __typename?: 'Mutation' } & {
+export type WritePrivateMessageMutation = {
+    __typename?: 'Mutation';
     result:
-        | ({ __typename?: 'RoomPrivateMessage' } & RoomPrivateMessageFragment)
-        | ({ __typename?: 'WritePrivateRoomMessageFailureResult' } & Pick<
-              WritePrivateRoomMessageFailureResult,
-              'failureType'
-          >);
+        | {
+              __typename?: 'RoomPrivateMessage';
+              messageId: string;
+              visibleTo: Array<string>;
+              initText?: Maybe<string>;
+              initTextSource?: Maybe<string>;
+              textColor?: Maybe<string>;
+              altTextToSecret?: Maybe<string>;
+              isSecret: boolean;
+              createdBy?: Maybe<string>;
+              customName?: Maybe<string>;
+              createdAt: number;
+              updatedAt?: Maybe<number>;
+              updatedText?: Maybe<{
+                  __typename?: 'UpdatedText';
+                  currentText?: Maybe<string>;
+                  updatedAt: number;
+              }>;
+              commandResult?: Maybe<{
+                  __typename?: 'CommandResult';
+                  text: string;
+                  isSuccess?: Maybe<boolean>;
+              }>;
+              character?: Maybe<{
+                  __typename?: 'CharacterValueForMessage';
+                  stateId: string;
+                  isPrivate: boolean;
+                  name: string;
+                  image?: Maybe<{
+                      __typename?: 'FilePath';
+                      sourceType: FileSourceType;
+                      path: string;
+                  }>;
+                  tachieImage?: Maybe<{
+                      __typename?: 'FilePath';
+                      sourceType: FileSourceType;
+                      path: string;
+                  }>;
+              }>;
+          }
+        | {
+              __typename?: 'WritePrivateRoomMessageFailureResult';
+              failureType: WritePrivateRoomMessageFailureType;
+          };
 };
 
 export type WriteRoomSoundEffectMutationVariables = Exact<{
@@ -1317,13 +1846,21 @@ export type WriteRoomSoundEffectMutationVariables = Exact<{
     volume: Scalars['Float'];
 }>;
 
-export type WriteRoomSoundEffectMutation = { __typename?: 'Mutation' } & {
+export type WriteRoomSoundEffectMutation = {
+    __typename?: 'Mutation';
     result:
-        | ({ __typename?: 'RoomSoundEffect' } & RoomSoundEffectFragment)
-        | ({ __typename?: 'WriteRoomSoundEffectFailureResult' } & Pick<
-              WriteRoomSoundEffectFailureResult,
-              'failureType'
-          >);
+        | {
+              __typename?: 'RoomSoundEffect';
+              messageId: string;
+              createdBy?: Maybe<string>;
+              createdAt: number;
+              volume: number;
+              file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
+          }
+        | {
+              __typename?: 'WriteRoomSoundEffectFailureResult';
+              failureType: WriteRoomSoundEffectFailureType;
+          };
 };
 
 export type EditMessageMutationVariables = Exact<{
@@ -1332,8 +1869,9 @@ export type EditMessageMutationVariables = Exact<{
     text: Scalars['String'];
 }>;
 
-export type EditMessageMutation = { __typename?: 'Mutation' } & {
-    result: { __typename?: 'EditMessageResult' } & Pick<EditMessageResult, 'failureType'>;
+export type EditMessageMutation = {
+    __typename?: 'Mutation';
+    result: { __typename?: 'EditMessageResult'; failureType?: Maybe<EditMessageFailureType> };
 };
 
 export type DeleteMessageMutationVariables = Exact<{
@@ -1341,8 +1879,9 @@ export type DeleteMessageMutationVariables = Exact<{
     messageId: Scalars['String'];
 }>;
 
-export type DeleteMessageMutation = { __typename?: 'Mutation' } & {
-    result: { __typename?: 'DeleteMessageResult' } & Pick<DeleteMessageResult, 'failureType'>;
+export type DeleteMessageMutation = {
+    __typename?: 'Mutation';
+    result: { __typename?: 'DeleteMessageResult'; failureType?: Maybe<DeleteMessageFailureType> };
 };
 
 export type MakeMessageNotSecretMutationVariables = Exact<{
@@ -1350,11 +1889,12 @@ export type MakeMessageNotSecretMutationVariables = Exact<{
     messageId: Scalars['String'];
 }>;
 
-export type MakeMessageNotSecretMutation = { __typename?: 'Mutation' } & {
-    result: { __typename?: 'MakeMessageNotSecretResult' } & Pick<
-        MakeMessageNotSecretResult,
-        'failureType'
-    >;
+export type MakeMessageNotSecretMutation = {
+    __typename?: 'Mutation';
+    result: {
+        __typename?: 'MakeMessageNotSecretResult';
+        failureType?: Maybe<MakeMessageNotSecretFailureType>;
+    };
 };
 
 export type UpdateWritingMessageStatusMutationVariables = Exact<{
@@ -1362,63 +1902,182 @@ export type UpdateWritingMessageStatusMutationVariables = Exact<{
     newStatus: WritingMessageStatusInputType;
 }>;
 
-export type UpdateWritingMessageStatusMutation = { __typename?: 'Mutation' } & {
-    result: Mutation['updateWritingMessageStatus'];
-};
+export type UpdateWritingMessageStatusMutation = { __typename?: 'Mutation'; result: boolean };
 
 export type RoomEventSubscriptionVariables = Exact<{
     id: Scalars['String'];
 }>;
 
-export type RoomEventSubscription = { __typename?: 'Subscription' } & {
-    roomEvent?: Maybe<
-        { __typename?: 'RoomEvent' } & {
-            roomOperation?: Maybe<{ __typename?: 'RoomOperation' } & RoomOperationFragment>;
-            deleteRoomOperation?: Maybe<
-                { __typename?: 'DeleteRoomOperation' } & Pick<DeleteRoomOperation, 'deletedBy'>
-            >;
-            roomMessageEvent?: Maybe<
-                | ({ __typename?: 'PieceValueLog' } & RoomMessageEvent_PieceValueLog_Fragment)
-                | ({
-                      __typename?: 'RoomPrivateMessage';
-                  } & RoomMessageEvent_RoomPrivateMessage_Fragment)
-                | ({
-                      __typename?: 'RoomPrivateMessageUpdate';
-                  } & RoomMessageEvent_RoomPrivateMessageUpdate_Fragment)
-                | ({
-                      __typename?: 'RoomPublicChannel';
-                  } & RoomMessageEvent_RoomPublicChannel_Fragment)
-                | ({
-                      __typename?: 'RoomPublicChannelUpdate';
-                  } & RoomMessageEvent_RoomPublicChannelUpdate_Fragment)
-                | ({
-                      __typename?: 'RoomPublicMessage';
-                  } & RoomMessageEvent_RoomPublicMessage_Fragment)
-                | ({
-                      __typename?: 'RoomPublicMessageUpdate';
-                  } & RoomMessageEvent_RoomPublicMessageUpdate_Fragment)
-                | ({ __typename?: 'RoomSoundEffect' } & RoomMessageEvent_RoomSoundEffect_Fragment)
-            >;
-            roomConnectionEvent?: Maybe<
-                { __typename?: 'RoomConnectionEvent' } & Pick<
-                    RoomConnectionEvent,
-                    'userUid' | 'isConnected' | 'updatedAt'
-                >
-            >;
-            writingMessageStatus?: Maybe<
-                { __typename?: 'WritingMessageStatus' } & Pick<
-                    WritingMessageStatus,
-                    'userUid' | 'status'
-                >
-            >;
-        }
-    >;
+export type RoomEventSubscription = {
+    __typename?: 'Subscription';
+    roomEvent?: Maybe<{
+        __typename?: 'RoomEvent';
+        roomOperation?: Maybe<{
+            __typename?: 'RoomOperation';
+            revisionTo: number;
+            valueJson: string;
+            operatedBy?: Maybe<{ __typename?: 'OperatedBy'; userUid: string; clientId: string }>;
+        }>;
+        deleteRoomOperation?: Maybe<{ __typename?: 'DeleteRoomOperation'; deletedBy: string }>;
+        roomMessageEvent?: Maybe<
+            | {
+                  __typename?: 'PieceValueLog';
+                  messageId: string;
+                  characterCreatedBy: string;
+                  characterId: string;
+                  stateId: string;
+                  createdAt: number;
+                  logType: PieceValueLogType;
+                  valueJson: string;
+              }
+            | {
+                  __typename?: 'RoomPrivateMessage';
+                  messageId: string;
+                  visibleTo: Array<string>;
+                  initText?: Maybe<string>;
+                  initTextSource?: Maybe<string>;
+                  textColor?: Maybe<string>;
+                  altTextToSecret?: Maybe<string>;
+                  isSecret: boolean;
+                  createdBy?: Maybe<string>;
+                  customName?: Maybe<string>;
+                  createdAt: number;
+                  updatedAt?: Maybe<number>;
+                  updatedText?: Maybe<{
+                      __typename?: 'UpdatedText';
+                      currentText?: Maybe<string>;
+                      updatedAt: number;
+                  }>;
+                  commandResult?: Maybe<{
+                      __typename?: 'CommandResult';
+                      text: string;
+                      isSuccess?: Maybe<boolean>;
+                  }>;
+                  character?: Maybe<{
+                      __typename?: 'CharacterValueForMessage';
+                      stateId: string;
+                      isPrivate: boolean;
+                      name: string;
+                      image?: Maybe<{
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      }>;
+                      tachieImage?: Maybe<{
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      }>;
+                  }>;
+              }
+            | {
+                  __typename?: 'RoomPrivateMessageUpdate';
+                  messageId: string;
+                  initText?: Maybe<string>;
+                  initTextSource?: Maybe<string>;
+                  altTextToSecret?: Maybe<string>;
+                  isSecret: boolean;
+                  updatedAt?: Maybe<number>;
+                  updatedText?: Maybe<{
+                      __typename?: 'UpdatedText';
+                      currentText?: Maybe<string>;
+                      updatedAt: number;
+                  }>;
+                  commandResult?: Maybe<{
+                      __typename?: 'CommandResult';
+                      text: string;
+                      isSuccess?: Maybe<boolean>;
+                  }>;
+              }
+            | { __typename?: 'RoomPublicChannel'; key: string; name?: Maybe<string> }
+            | { __typename?: 'RoomPublicChannelUpdate'; key: string; name?: Maybe<string> }
+            | {
+                  __typename?: 'RoomPublicMessage';
+                  messageId: string;
+                  channelKey: string;
+                  initText?: Maybe<string>;
+                  initTextSource?: Maybe<string>;
+                  textColor?: Maybe<string>;
+                  altTextToSecret?: Maybe<string>;
+                  isSecret: boolean;
+                  createdBy?: Maybe<string>;
+                  customName?: Maybe<string>;
+                  createdAt: number;
+                  updatedAt?: Maybe<number>;
+                  updatedText?: Maybe<{
+                      __typename?: 'UpdatedText';
+                      currentText?: Maybe<string>;
+                      updatedAt: number;
+                  }>;
+                  commandResult?: Maybe<{
+                      __typename?: 'CommandResult';
+                      text: string;
+                      isSuccess?: Maybe<boolean>;
+                  }>;
+                  character?: Maybe<{
+                      __typename?: 'CharacterValueForMessage';
+                      stateId: string;
+                      isPrivate: boolean;
+                      name: string;
+                      image?: Maybe<{
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      }>;
+                      tachieImage?: Maybe<{
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      }>;
+                  }>;
+              }
+            | {
+                  __typename?: 'RoomPublicMessageUpdate';
+                  messageId: string;
+                  initText?: Maybe<string>;
+                  initTextSource?: Maybe<string>;
+                  altTextToSecret?: Maybe<string>;
+                  isSecret: boolean;
+                  updatedAt?: Maybe<number>;
+                  updatedText?: Maybe<{
+                      __typename?: 'UpdatedText';
+                      currentText?: Maybe<string>;
+                      updatedAt: number;
+                  }>;
+                  commandResult?: Maybe<{
+                      __typename?: 'CommandResult';
+                      text: string;
+                      isSuccess?: Maybe<boolean>;
+                  }>;
+              }
+            | {
+                  __typename?: 'RoomSoundEffect';
+                  messageId: string;
+                  createdBy?: Maybe<string>;
+                  createdAt: number;
+                  volume: number;
+                  file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
+              }
+        >;
+        roomConnectionEvent?: Maybe<{
+            __typename?: 'RoomConnectionEvent';
+            userUid: string;
+            isConnected: boolean;
+            updatedAt: number;
+        }>;
+        writingMessageStatus?: Maybe<{
+            __typename?: 'WritingMessageStatus';
+            userUid: string;
+            status: WritingMessageStatusType;
+        }>;
+    }>;
 };
 
 export type PongSubscriptionVariables = Exact<{ [key: string]: never }>;
 
-export type PongSubscription = { __typename?: 'Subscription' } & {
-    pong: { __typename?: 'Pong' } & Pick<Pong, 'createdBy' | 'value'>;
+export type PongSubscription = {
+    __typename?: 'Subscription';
+    pong: { __typename?: 'Pong'; createdBy?: Maybe<string>; value: number };
 };
 
 export const RoomGetStateFragmentDoc = gql`
@@ -2650,6 +3309,44 @@ export type PromoteToPlayerMutationResult = Apollo.MutationResult<PromoteToPlaye
 export type PromoteToPlayerMutationOptions = Apollo.BaseMutationOptions<
     PromoteToPlayerMutation,
     PromoteToPlayerMutationVariables
+>;
+export const UploadDocument = gql`
+    mutation Upload($file: Upload!) {
+        result: upload(file: $file) {
+            type
+        }
+    }
+`;
+export type UploadMutationFn = Apollo.MutationFunction<UploadMutation, UploadMutationVariables>;
+
+/**
+ * __useUploadMutation__
+ *
+ * To run a mutation, you first call `useUploadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUploadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [uploadMutation, { data, loading, error }] = useUploadMutation({
+ *   variables: {
+ *      file: // value for 'file'
+ *   },
+ * });
+ */
+export function useUploadMutation(
+    baseOptions?: Apollo.MutationHookOptions<UploadMutation, UploadMutationVariables>
+) {
+    const options = { ...defaultOptions, ...baseOptions };
+    return Apollo.useMutation<UploadMutation, UploadMutationVariables>(UploadDocument, options);
+}
+export type UploadMutationHookResult = ReturnType<typeof useUploadMutation>;
+export type UploadMutationResult = Apollo.MutationResult<UploadMutation>;
+export type UploadMutationOptions = Apollo.BaseMutationOptions<
+    UploadMutation,
+    UploadMutationVariables
 >;
 export const WritePublicMessageDocument = gql`
     mutation WritePublicMessage(

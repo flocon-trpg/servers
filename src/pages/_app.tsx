@@ -15,6 +15,7 @@ import {
     Operation,
     split,
     Observable,
+    from,
 } from '@apollo/client';
 import 'firebase/auth';
 import 'firebase/storage';
@@ -28,7 +29,7 @@ import { appConsole } from '../utils/appConsole';
 import firebase from 'firebase/app';
 import { useFirebaseUser } from '../hooks/useFirebaseUser';
 import useUserConfig from '../hooks/localStorage/useUserConfig';
-import { Config, getConfig } from '../config';
+import { Config, getConfig, getHttpUri, getWsUri } from '../config';
 import { Client, ClientOptions, createClient } from 'graphql-ws';
 import { print, GraphQLError } from 'graphql';
 import { simpleId } from '../utils/generators';
@@ -39,6 +40,8 @@ import Head from 'next/head';
 import { useMonaco, loader } from '@monaco-editor/react';
 import { ExpiryMap } from '../utils/expiryMap';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
+import urljoin from 'url-join';
+import { onError } from '@apollo/client/link/error';
 
 enableMapSet();
 
@@ -110,10 +113,7 @@ const createApolloClient = (
     });
 
     // https://www.apollographql.com/docs/react/data/subscriptions/
-    let uri: string | undefined = config.web.api.url.http;
-    if (uri === undefined) {
-        uri = `${location.protocol}//${location.host}/graphql`;
-    }
+    const uri = urljoin(getHttpUri(config), 'graphql');
     appConsole.log(`GraphQL HTTP URL: ${uri}`);
     const httpLink = new HttpLink({
         uri,
@@ -123,10 +123,7 @@ const createApolloClient = (
         if (omitWebSocket === true) {
             return httpLink;
         }
-        let uri: string | undefined = config.web.api.url.ws;
-        if (uri === undefined) {
-            uri = `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/graphql`;
-        }
+        const uri = urljoin(getWsUri(config), 'graphql');
         appConsole.log(`GraphQL WebSocket URL: ${uri}`);
         const wsLink = new WebSocketLink({
             url: uri,
@@ -158,8 +155,21 @@ const createApolloClient = (
         );
     })();
 
+    const errorLink = onError(({ graphQLErrors, networkError }) => {
+        if (graphQLErrors) {
+            graphQLErrors.map(({ message, locations, path }) =>
+                console.log(
+                    `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+                )
+            );
+        }
+        if (networkError) {
+            console.log(`[Network error]: ${networkError}`);
+        }
+    });
+
     return new ApolloClient({
-        link,
+        link: from([errorLink, link]),
         cache: new InMemoryCache(),
     });
 };

@@ -1,8 +1,9 @@
-import { createFirebaseConfig, JsonObject } from '@kizahasi/util';
-import fs from 'fs';
+import { firebaseConfig } from '@kizahasi/flocon-core';
+import * as E from 'fp-ts/Either';
+import { webConfig } from './configType';
+import { formatValidationErrors } from './utils/io-ts-reporters';
 
 // 本来はjsonファイルを直接importすれば動くが、jsonファイルにミスがあるときに出るエラーメッセージをわかりやすくするため、jsonファイルをtsファイルに変換してそれをimportさせている。
-// jsonファイルを見てチェックするだけでは漏れが生じる可能性があるので、tsファイルに変換することでそれを排除している。
 
 // TODO: httpやwsが未指定のときは現在のURLから判断して自動的にURLを生成するが、このURLのうちhttp/httpsの部分やws/wssの部分だけ変えたいというケースに対応したほうがよさそうか？
 const loadConfig = () => {
@@ -14,7 +15,12 @@ const loadConfig = () => {
     }
 
     const firebaseJson = JSON.parse(firebaseFile.toString());
-    const firebaseConfig = createFirebaseConfig(firebaseJson);
+    const firebaseConfigObject = E.mapLeft(formatValidationErrors)(
+        firebaseConfig.decode(firebaseJson)
+    );
+    if (firebaseConfigObject._tag === 'Left') {
+        throw new Error(firebaseConfigObject.left);
+    }
 
     const webConfigFile = process.env['NEXT_PUBLIC_FLOCON_WEB_CONFIG'];
     if (webConfigFile == null) {
@@ -24,35 +30,14 @@ const loadConfig = () => {
     }
 
     const webConfigJson = JSON.parse(webConfigFile.toString());
-    const webJSONObject = JsonObject.init(webConfigJson);
-    const url = webJSONObject.tryGet('api')?.tryGet('url');
-    const storage = webJSONObject.get('firebase').get('storage');
+    const webConfigObject = E.mapLeft(formatValidationErrors)(webConfig.decode(webConfigJson));
+    if (webConfigObject._tag === 'Left') {
+        throw new Error(webConfigObject.left);
+    }
 
     return {
-        firebase: {
-            apiKey: firebaseConfig.apiKey,
-            appId: firebaseConfig.appId,
-            authDomain: firebaseConfig.authDomain,
-            databaseURL: firebaseConfig.databaseURL,
-            measurementId: firebaseConfig.measurementId,
-            messagingSenderId: firebaseConfig.messagingSenderId,
-            projectId: firebaseConfig.projectId,
-            storageBucket: firebaseConfig.storageBucket,
-        },
-        web: {
-            api: {
-                url: {
-                    http: url?.tryGet('http')?.valueAsNullableString() ?? undefined,
-                    ws: url?.tryGet('ws')?.valueAsNullableString() ?? undefined,
-                },
-            },
-            firebase: {
-                storage: {
-                    enablePublic: storage.get('enablePublic').valueAsBoolean(),
-                    enableUnlisted: storage.get('enableUnlisted').valueAsBoolean(),
-                },
-            },
-        },
+        firebase: firebaseConfigObject.right,
+        web: webConfigObject.right,
     };
 };
 
@@ -65,4 +50,20 @@ export const getConfig = (): Config => {
         config = loadConfig();
     }
     return config;
+};
+
+export const getHttpUri = (config: Config) => {
+    if (config.web.api?.url?.http == null) {
+        return `${location.protocol}//${location.host}`;
+    } else {
+        return config.web.api.url.http;
+    }
+};
+
+export const getWsUri = (config: Config) => {
+    if (config.web.api?.url?.ws == null) {
+        return `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}`;
+    } else {
+        return config.web.api.url.ws;
+    }
 };
