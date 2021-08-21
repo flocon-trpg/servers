@@ -22,7 +22,7 @@ import {
 } from '../../util/recordOperationElement';
 import * as RecordOperation from '../../util/recordOperation';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
-import { Maybe, maybe } from '../../util/maybe';
+import { Maybe, maybe } from '../../../maybe';
 
 export const Player = 'Player';
 export const Spectator = 'Spectator';

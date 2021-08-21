@@ -35,7 +35,7 @@ import { isIdRecord, record, StringKeyRecord } from '../../util/record';
 import { Result } from '@kizahasi/result';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
 import { chooseDualKeyRecord, chooseRecord, CompositeKey } from '@kizahasi/util';
-import { Maybe, maybe } from '../../util/maybe';
+import { Maybe, maybe } from '../../../maybe';
 
 // privateCommandは無効化しているが、コードは大部分残している
 

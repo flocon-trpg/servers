@@ -11,7 +11,7 @@ import { chooseRecord } from '@kizahasi/util';
 import { createOperation } from '../../../util/createOperation';
 import { record } from '../../../util/record';
 import { createType, deleteType, updateType } from '../../../piece/log-v1';
-import { maybe } from '../../../util/maybe';
+import { maybe } from '../../../../maybe';
 
 const dieValueUpOperation = createOperation(1, {
     dieType: t.type({ newValue: DieValue.dieType }),

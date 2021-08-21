@@ -1,15 +1,15 @@
 import * as Room from '../ot/room/v1';
 import { exec, ScriptError, test } from '@kizahasi/flocon-script';
 import { FRoom } from './room';
-import { CompositeKey, compositeKeyToString } from '@kizahasi/util';
-import { CustomResult, Result } from '@kizahasi/result';
+import { CompositeKey, keyNames } from '@kizahasi/util';
+import { Result } from '@kizahasi/result';
 
 type CommandError = {
     message: string;
     range?: readonly [number, number];
 };
 
-export const testCommand = (script: string): CustomResult<undefined, CommandError> => {
+export const testCommand = (script: string): Result<undefined, CommandError> => {
     try {
         test(script);
     } catch (e: unknown) {
@@ -35,7 +35,7 @@ type CharacterCommandParams = {
     characterKey: CompositeKey;
 };
 
-type CommandResult = CustomResult<Room.State, CommandError>;
+type CommandResult = Result<Room.State, CommandError>;
 
 export const execCharacterCommand = ({
     script,
@@ -45,7 +45,7 @@ export const execCharacterCommand = ({
     const fRoom = new FRoom(room);
     const fCharacter = fRoom.findCharacter(characterKey);
     if (fCharacter == null) {
-        throw new Error(`character(${compositeKeyToString(characterKey)}) not found`);
+        throw new Error(`character(${keyNames(characterKey)}) not found`);
     }
     const globalThis = { room: fRoom, character: fCharacter };
     try {

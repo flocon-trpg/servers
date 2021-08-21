@@ -1,4 +1,4 @@
-import { CustomResult, Result } from '@kizahasi/result';
+import { Result } from '@kizahasi/result';
 import * as t from 'io-ts';
 import * as TextOperationCore from '@kizahasi/ot-string';
 
@@ -82,7 +82,7 @@ export const applyBack = (state: string, action: DownOperation) => {
 export const composeUpOperation = (
     first: UpOperation | undefined,
     second: UpOperation | undefined
-): CustomResult<UpOperation | undefined, TextOperationCore.ComposeAndTransformError> => {
+): Result<UpOperation | undefined, TextOperationCore.ComposeAndTransformError> => {
     const first$ = first == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(first);
     const second$ = second == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(second);
     if (first$ == null) {
@@ -104,7 +104,7 @@ export const composeUpOperation = (
 export const composeDownOperation = (
     first: DownOperation | undefined,
     second: DownOperation | undefined
-): CustomResult<DownOperation | undefined, TextOperationCore.ComposeAndTransformError> => {
+): Result<DownOperation | undefined, TextOperationCore.ComposeAndTransformError> => {
     const first$ = first == null ? undefined : TextOperationCore.TextDownOperation.ofUnit(first);
     const second$ = second == null ? undefined : TextOperationCore.TextDownOperation.ofUnit(second);
     if (first$ == null) {
@@ -327,7 +327,7 @@ export const toPrivateClientOperation = ({
     isAuthorized: boolean;
 }): UpOperation | undefined => {
     if (oldValue.isValuePrivate && !isAuthorized) {
-        if (newValue.isValuePrivate && !isAuthorized) {
+        if (newValue.isValuePrivate) {
             return undefined;
         }
         return diffToUpOperation({ prev: '', next: newValue.value });
