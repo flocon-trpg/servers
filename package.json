@@ -47,6 +47,7 @@
     },
     "dependencies": {
         "@kizahasi/option": "^1.0.0",
+        "fp-ts": "^2.11.1",
         "io-ts": "^2.2.16"
     }
 }
