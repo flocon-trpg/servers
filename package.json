@@ -1,5 +1,5 @@
 {
-    "version": "0.6.0",
+    "version": "0.7.0",
     "license": "MIT",
     "main": "dist/cjs/index.js",
     "module": "dist/esm/index.js",
@@ -13,9 +13,9 @@
     "scripts": {
         "build": "yarn lint && yarn prettier && rimraf ./dist && tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json",
         "test": "jest",
-        "prepare": "yarn build",
+        "prepare": "yarn build && husky install",
         "lint": "eslint src test",
-        "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\""
+        "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \".github/**/*.yml\""
     },
     "prettier": {
         "printWidth": 100,
@@ -34,21 +34,22 @@
         "url": "https://github.com/kizahasi/flocon-script"
     },
     "devDependencies": {
-        "@types/estree": "^0.0.49",
-        "@types/jest": "^26.0.24",
-        "@typescript-eslint/eslint-plugin": "^4.28.2",
-        "@typescript-eslint/parser": "^4.28.2",
-        "eslint": "^7.30.0",
-        "eslint-config-prettier": "^8.3.0",
-        "jest": "^27.0.6",
-        "prettier": "^2.3.2",
-        "rimraf": "^3.0.2",
-        "ts-jest": "^27.0.3",
-        "typescript": "^4.3.5"
+        "@types/estree": "0.0.50",
+        "@types/jest": "27.0.1",
+        "@typescript-eslint/eslint-plugin": "4.29.1",
+        "@typescript-eslint/parser": "4.29.1",
+        "eslint": "7.32.0",
+        "eslint-config-prettier": "8.3.0",
+        "jest": "27.0.6",
+        "prettier": "2.3.2",
+        "rimraf": "3.0.2",
+        "ts-jest": "27.0.4",
+        "typescript": "4.3.5",
+        "husky": "7.0.1"
     },
     "dependencies": {
-        "@kizahasi/option": "^0.1.3",
-        "@kizahasi/util": "^0.3.0",
+        "@kizahasi/option": "^1.0.0",
+        "@kizahasi/util": "^0.8.0",
         "acorn": "^8.4.1"
     }
 }
