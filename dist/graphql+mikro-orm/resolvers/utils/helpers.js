@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.comparePassword = exports.ensureAuthorizedUser = exports.findRoomAndMyParticipant = exports.checkEntry = exports.getUserIfEntry = exports.checkSignInAndNotAnonymous = exports.checkSignIn = exports.AnonymousAccount = exports.NotSignIn = void 0;
+exports.comparePassword = exports.ensureAuthorizedUser = exports.ensureUserUid = exports.findRoomAndMyParticipant = exports.checkEntry = exports.getUserIfEntry = exports.checkSignInAndNotAnonymous = exports.checkSignIn = exports.AnonymousAccount = exports.NotSignIn = void 0;
 const mikro_orm_1 = require("../../entities/user/mikro-orm");
 const mikro_orm_2 = require("../../entities/room/mikro-orm");
 const global_1 = require("../../entities/room/global");
@@ -47,7 +47,7 @@ const getUserIfEntry = async ({ em, userUid, baasType, noFlush, }) => {
             else {
                 await em.persistAndFlush(newUser);
             }
-            return user;
+            return newUser;
         }
         return null;
     }
@@ -85,9 +85,17 @@ const findRoomAndMyParticipant = async ({ em, userUid, roomId, }) => {
     return new FindRoomAndMyParticipantResult(room, state, me);
 };
 exports.findRoomAndMyParticipant = findRoomAndMyParticipant;
+const ensureUserUid = (context) => {
+    const decodedIdToken = exports.checkSignIn(context);
+    if (decodedIdToken == exports.NotSignIn) {
+        throw new Error('authorizedUser was not found. "@Attribute()" might be missing.');
+    }
+    return decodedIdToken.uid;
+};
+exports.ensureUserUid = ensureUserUid;
 const ensureAuthorizedUser = (context) => {
     if (context.authorizedUser == null) {
-        throw new Error('authorizedUser was not found. "@Attribute" might be missing.');
+        throw new Error('authorizedUser was not found. "@Attribute(ENTRY or ADMIN)" might be missing.');
     }
     return context.authorizedUser;
 };

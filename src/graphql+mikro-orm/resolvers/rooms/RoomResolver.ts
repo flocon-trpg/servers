@@ -151,6 +151,7 @@ import {
 } from '@kizahasi/flocon-core';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
 import { ParticipantRole as ParticipantRoleEnum } from '../../../enums/ParticipantRole';
+import { ENTRY } from '../../../roles';
 
 const find = <T>(source: Record<string, T | undefined>, key: string): T | undefined => source[key];
 
@@ -736,7 +737,7 @@ const publishRoomEvent = async (pubSub: PubSubEngine, payload: RoomEventPayload)
 @Resolver()
 export class RoomResolver {
     @Query(() => GetRoomsListResult)
-    @Authorized()
+    @Authorized(ENTRY)
     public async getRoomsList(@Ctx() context: ResolverContext): Promise<typeof GetRoomsListResult> {
         const queue = async () => {
             const em = context.em;
@@ -759,7 +760,7 @@ export class RoomResolver {
     }
 
     @Query(() => RequiresPhraseResult)
-    @Authorized()
+    @Authorized(ENTRY)
     public async requiresPhraseToJoinAsPlayer(
         @Arg('roomId') roomId: string,
         @Ctx() context: ResolverContext
@@ -857,7 +858,7 @@ export class RoomResolver {
     }
 
     @Query(() => GetRoomMessagesResult)
-    @Authorized()
+    @Authorized(ENTRY)
     public async getMessages(
         @Args() args: GetMessagesArgs,
         @Ctx() context: ResolverContext
@@ -898,7 +899,7 @@ export class RoomResolver {
     }
 
     @Query(() => GetRoomLogResult)
-    @Authorized()
+    @Authorized(ENTRY)
     public async getLog(
         @Args() args: GetLogArgs,
         @Ctx() context: ResolverContext,
@@ -980,7 +981,7 @@ export class RoomResolver {
     }
 
     @Query(() => GetRoomConnectionsResult)
-    @Authorized()
+    @Authorized(ENTRY)
     public async getRoomConnections(
         @Arg('roomId') roomId: string,
         @Ctx() context: ResolverContext
@@ -1026,7 +1027,7 @@ export class RoomResolver {
     }
 
     @Mutation(() => CreateRoomResult)
-    @Authorized()
+    @Authorized(ENTRY)
     public async createRoom(
         @Arg('input') input: CreateRoomInput,
         @Ctx() context: ResolverContext
@@ -1096,7 +1097,7 @@ export class RoomResolver {
     }
 
     @Mutation(() => DeleteRoomResult)
-    @Authorized()
+    @Authorized(ENTRY)
     public async deleteRoom(
         @Args() args: DeleteRoomArgs,
         @Ctx() context: ResolverContext,
@@ -1148,7 +1149,7 @@ export class RoomResolver {
     }
 
     @Mutation(() => JoinRoomResult)
-    @Authorized()
+    @Authorized(ENTRY)
     public async joinRoomAsPlayer(
         @Args() args: JoinRoomArgs,
         @Ctx() context: ResolverContext,
@@ -1179,7 +1180,7 @@ export class RoomResolver {
     }
 
     @Mutation(() => JoinRoomResult)
-    @Authorized()
+    @Authorized(ENTRY)
     public async joinRoomAsSpectator(
         @Args() args: JoinRoomArgs,
         @Ctx() context: ResolverContext,
@@ -1213,7 +1214,7 @@ export class RoomResolver {
     }
 
     @Mutation(() => PromoteResult)
-    @Authorized()
+    @Authorized(ENTRY)
     public async promoteToPlayer(
         @Args() args: PromoteArgs,
         @Ctx() context: ResolverContext,
@@ -1249,7 +1250,7 @@ export class RoomResolver {
     }
 
     @Mutation(() => ChangeParticipantNameResult)
-    @Authorized()
+    @Authorized(ENTRY)
     public async changeParticipantName(
         @Args() args: ChangeParticipantNameArgs,
         @Ctx() context: ResolverContext,
@@ -1315,7 +1316,7 @@ export class RoomResolver {
     }
 
     @Query(() => GetRoomResult)
-    @Authorized()
+    @Authorized(ENTRY)
     public async getRoom(
         @Args() args: GetRoomArgs,
         @Ctx() context: ResolverContext
@@ -1364,7 +1365,7 @@ export class RoomResolver {
     }
 
     @Mutation(() => LeaveRoomResult)
-    @Authorized()
+    @Authorized(ENTRY)
     public async leaveRoom(
         @Arg('id') id: string,
         @Ctx() context: ResolverContext,
@@ -1593,7 +1594,7 @@ export class RoomResolver {
     }
 
     @Mutation(() => OperateRoomResult)
-    @Authorized()
+    @Authorized(ENTRY)
     public async operate(
         @Args() args: OperateArgs,
         @Ctx() context: ResolverContext,
@@ -1613,7 +1614,7 @@ export class RoomResolver {
     }
 
     @Mutation(() => WritePublicRoomMessageResult)
-    @Authorized()
+    @Authorized(ENTRY)
     public async writePublicMessage(
         @Args() args: WritePublicMessageArgs,
         @Ctx() context: ResolverContext,
@@ -1725,7 +1726,7 @@ export class RoomResolver {
     }
 
     @Mutation(() => WritePrivateRoomMessageResult)
-    @Authorized()
+    @Authorized(ENTRY)
     public async writePrivateMessage(
         @Args() args: WritePrivateMessageArgs,
         @Ctx() context: ResolverContext,
@@ -1857,7 +1858,7 @@ export class RoomResolver {
     }
 
     @Mutation(() => WriteRoomSoundEffectResult)
-    @Authorized()
+    @Authorized(ENTRY)
     public async writeRoomSoundEffect(
         @Args() args: WriteRoomSoundEffectArgs,
         @Ctx() context: ResolverContext,
@@ -1944,7 +1945,7 @@ export class RoomResolver {
     }
 
     @Mutation(() => MakeMessageNotSecretResult)
-    @Authorized()
+    @Authorized(ENTRY)
     public async makeMessageNotSecret(
         @Args() args: MessageIdArgs,
         @Ctx() context: ResolverContext,
@@ -2088,7 +2089,7 @@ export class RoomResolver {
     }
 
     @Mutation(() => DeleteMessageResult)
-    @Authorized()
+    @Authorized(ENTRY)
     public async deleteMessage(
         @Args() args: MessageIdArgs,
         @Ctx() context: ResolverContext,
@@ -2234,7 +2235,7 @@ export class RoomResolver {
     }
 
     @Mutation(() => EditMessageResult)
-    @Authorized()
+    @Authorized(ENTRY)
     public async editMessage(
         @Args() args: EditMessageArgs,
         @Ctx() context: ResolverContext,
@@ -2380,7 +2381,7 @@ export class RoomResolver {
     }
 
     @Mutation(() => Boolean)
-    @Authorized()
+    @Authorized(ENTRY)
     public async updateWritingMessageStatus(
         @Args() args: UpdateWritingMessageStateArgs,
         @Ctx() context: ResolverContext,

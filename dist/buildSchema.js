@@ -10,17 +10,23 @@ const registerEnumTypes_1 = __importDefault(require("./graphql+mikro-orm/registe
 const RoomResolver_1 = require("./graphql+mikro-orm/resolvers/rooms/RoomResolver");
 const MainResolver_1 = require("./graphql+mikro-orm/resolvers/MainResolver");
 const helpers_1 = require("./graphql+mikro-orm/resolvers/utils/helpers");
-const flocon_core_1 = require("@kizahasi/flocon-core");
 const config_1 = require("./config");
 const BaasType_1 = require("./enums/BaasType");
+const roles_1 = require("./roles");
 const authChecker = async ({ context }, roles) => {
+    let role = null;
+    if (roles.includes(roles_1.ADMIN)) {
+        role = roles_1.ADMIN;
+    }
+    else if (roles.includes(roles_1.ENTRY)) {
+        role = roles_1.ENTRY;
+    }
     const decodedIdToken = helpers_1.checkSignIn(context);
     if (decodedIdToken === helpers_1.NotSignIn) {
         return false;
     }
-    let role = null;
-    if (roles.includes(flocon_core_1.admin)) {
-        role = flocon_core_1.admin;
+    if (role == null) {
+        return true;
     }
     const serverConfig = await config_1.loadServerConfigAsMain();
     let adminUserUids;
@@ -33,7 +39,7 @@ const authChecker = async ({ context }, roles) => {
     else {
         adminUserUids = serverConfig.admin;
     }
-    if (role === flocon_core_1.admin) {
+    if (role === roles_1.ADMIN) {
         if (!adminUserUids.includes(decodedIdToken.uid)) {
             return false;
         }

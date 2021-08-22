@@ -62,7 +62,7 @@ export const getUserIfEntry = async ({
             } else {
                 await em.persistAndFlush(newUser);
             }
-            return user;
+            return newUser;
         }
         return null;
     }
@@ -123,9 +123,19 @@ export const findRoomAndMyParticipant = async ({
     return new FindRoomAndMyParticipantResult(room, state, me);
 };
 
+export const ensureUserUid = (context: ResolverContext): string => {
+    const decodedIdToken = checkSignIn(context);
+    if (decodedIdToken == NotSignIn) {
+        throw new Error('authorizedUser was not found. "@Attribute()" might be missing.');
+    }
+    return decodedIdToken.uid;
+};
+
 export const ensureAuthorizedUser = (context: ResolverContext): User => {
     if (context.authorizedUser == null) {
-        throw new Error('authorizedUser was not found. "@Attribute" might be missing.');
+        throw new Error(
+            'authorizedUser was not found. "@Attribute(ENTRY or ADMIN)" might be missing.'
+        );
     }
     return context.authorizedUser;
 };

@@ -11,7 +11,7 @@ import {
 } from 'type-graphql';
 import { ResolverContext } from '../utils/Contexts';
 import { EntryToServerResultType } from '../../enums/EntryToServerResultType';
-import { checkSignIn, comparePassword, NotSignIn } from './utils/helpers';
+import { checkEntry, checkSignIn, comparePassword, NotSignIn } from './utils/helpers';
 import { queueLimitReached } from '../../utils/PromiseQueue';
 import { serverTooBusyMessage } from './utils/messages';
 import { User } from '../entities/user/mikro-orm';
@@ -41,6 +41,20 @@ export class MainResolver {
         };
     }
 
+    @Query(() => Boolean)
+    public async isEntry(@Ctx() context: ResolverContext): Promise<boolean> {
+        const decodedIdToken = checkSignIn(context);
+        if (decodedIdToken === NotSignIn) {
+            return false;
+        }
+        return await checkEntry({
+            em: context.em,
+            userUid: decodedIdToken.uid,
+            baasType: BaasType.Firebase,
+        });
+    }
+
+    // CONSIDER: 内部情報に簡単にアクセスできるのはセキュリティリスクになりうる
     @Query(() => ServerInfo)
     public async getServerInfo(): Promise<ServerInfo> {
         const prerelease = (() => {
@@ -112,10 +126,7 @@ export class MainResolver {
                 };
             }
 
-            if (
-                phrase == null ||
-                (await comparePassword(phrase, serverConfig.entryPassword)) !== true
-            ) {
+            if (phrase == null || !(await comparePassword(phrase, serverConfig.entryPassword))) {
                 return {
                     type: EntryToServerResultType.WrongPhrase,
                 };

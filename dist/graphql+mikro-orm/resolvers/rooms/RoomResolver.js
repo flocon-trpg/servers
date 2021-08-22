@@ -88,6 +88,7 @@ const result_1 = require("@kizahasi/result");
 const util_1 = require("@kizahasi/util");
 const flocon_core_1 = require("@kizahasi/flocon-core");
 const ParticipantRole_1 = require("../../../enums/ParticipantRole");
+const roles_1 = require("../../../roles");
 const find = (source, key) => source[key];
 const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUserUids, create, update, }) => {
     const prevRevision = room.revision;
@@ -1964,7 +1965,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
 };
 __decorate([
     type_graphql_1.Query(() => GetRoomsListResult_1.GetRoomsListResult),
-    type_graphql_1.Authorized(),
+    type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -1972,7 +1973,7 @@ __decorate([
 ], RoomResolver.prototype, "getRoomsList", null);
 __decorate([
     type_graphql_1.Query(() => RequiresPhraseResult_1.RequiresPhraseResult),
-    type_graphql_1.Authorized(),
+    type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Arg('roomId')),
     __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
@@ -1981,7 +1982,7 @@ __decorate([
 ], RoomResolver.prototype, "requiresPhraseToJoinAsPlayer", null);
 __decorate([
     type_graphql_1.Query(() => graphql_2.GetRoomMessagesResult),
-    type_graphql_1.Authorized(),
+    type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
@@ -1990,7 +1991,7 @@ __decorate([
 ], RoomResolver.prototype, "getMessages", null);
 __decorate([
     type_graphql_1.Query(() => graphql_2.GetRoomLogResult),
-    type_graphql_1.Authorized(),
+    type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2000,7 +2001,7 @@ __decorate([
 ], RoomResolver.prototype, "getLog", null);
 __decorate([
     type_graphql_1.Query(() => object_args_input_1.GetRoomConnectionsResult),
-    type_graphql_1.Authorized(),
+    type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Arg('roomId')),
     __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
@@ -2009,7 +2010,7 @@ __decorate([
 ], RoomResolver.prototype, "getRoomConnections", null);
 __decorate([
     type_graphql_1.Mutation(() => CreateRoomResult_1.CreateRoomResult),
-    type_graphql_1.Authorized(),
+    type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Arg('input')),
     __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
@@ -2018,7 +2019,7 @@ __decorate([
 ], RoomResolver.prototype, "createRoom", null);
 __decorate([
     type_graphql_1.Mutation(() => DeleteRoomResult_1.DeleteRoomResult),
-    type_graphql_1.Authorized(),
+    type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2028,7 +2029,7 @@ __decorate([
 ], RoomResolver.prototype, "deleteRoom", null);
 __decorate([
     type_graphql_1.Mutation(() => JoinRoomResult_1.JoinRoomResult),
-    type_graphql_1.Authorized(),
+    type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2038,7 +2039,7 @@ __decorate([
 ], RoomResolver.prototype, "joinRoomAsPlayer", null);
 __decorate([
     type_graphql_1.Mutation(() => JoinRoomResult_1.JoinRoomResult),
-    type_graphql_1.Authorized(),
+    type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2048,7 +2049,7 @@ __decorate([
 ], RoomResolver.prototype, "joinRoomAsSpectator", null);
 __decorate([
     type_graphql_1.Mutation(() => PromoteMeResult_1.PromoteResult),
-    type_graphql_1.Authorized(),
+    type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2058,7 +2059,7 @@ __decorate([
 ], RoomResolver.prototype, "promoteToPlayer", null);
 __decorate([
     type_graphql_1.Mutation(() => ChangeParticipantNameResult_1.ChangeParticipantNameResult),
-    type_graphql_1.Authorized(),
+    type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2068,7 +2069,7 @@ __decorate([
 ], RoomResolver.prototype, "changeParticipantName", null);
 __decorate([
     type_graphql_1.Query(() => GetRoomResult_1.GetRoomResult),
-    type_graphql_1.Authorized(),
+    type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
@@ -2077,7 +2078,7 @@ __decorate([
 ], RoomResolver.prototype, "getRoom", null);
 __decorate([
     type_graphql_1.Mutation(() => LeaveRoomResult_1.LeaveRoomResult),
-    type_graphql_1.Authorized(),
+    type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Arg('id')),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2087,7 +2088,7 @@ __decorate([
 ], RoomResolver.prototype, "leaveRoom", null);
 __decorate([
     type_graphql_1.Mutation(() => OperateRoomResult_1.OperateRoomResult),
-    type_graphql_1.Authorized(),
+    type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2097,7 +2098,7 @@ __decorate([
 ], RoomResolver.prototype, "operate", null);
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.WritePublicRoomMessageResult),
-    type_graphql_1.Authorized(),
+    type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2107,7 +2108,7 @@ __decorate([
 ], RoomResolver.prototype, "writePublicMessage", null);
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.WritePrivateRoomMessageResult),
-    type_graphql_1.Authorized(),
+    type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2117,7 +2118,7 @@ __decorate([
 ], RoomResolver.prototype, "writePrivateMessage", null);
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.WriteRoomSoundEffectResult),
-    type_graphql_1.Authorized(),
+    type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2127,7 +2128,7 @@ __decorate([
 ], RoomResolver.prototype, "writeRoomSoundEffect", null);
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.MakeMessageNotSecretResult),
-    type_graphql_1.Authorized(),
+    type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2137,7 +2138,7 @@ __decorate([
 ], RoomResolver.prototype, "makeMessageNotSecret", null);
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.DeleteMessageResult),
-    type_graphql_1.Authorized(),
+    type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2147,7 +2148,7 @@ __decorate([
 ], RoomResolver.prototype, "deleteMessage", null);
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.EditMessageResult),
-    type_graphql_1.Authorized(),
+    type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2157,7 +2158,7 @@ __decorate([
 ], RoomResolver.prototype, "editMessage", null);
 __decorate([
     type_graphql_1.Mutation(() => Boolean),
-    type_graphql_1.Authorized(),
+    type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),

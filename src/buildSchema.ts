@@ -18,19 +18,25 @@ import {
     getUserIfEntry,
     NotSignIn,
 } from './graphql+mikro-orm/resolvers/utils/helpers';
-import { admin } from '@kizahasi/flocon-core';
 import { loadServerConfigAsMain } from './config';
 import { BaasType } from './enums/BaasType';
+import { ADMIN, ENTRY } from './roles';
 
 const authChecker: AuthChecker<ResolverContext> = async ({ context }, roles) => {
+    let role: typeof ADMIN | typeof ENTRY | null = null;
+    if (roles.includes(ADMIN)) {
+        role = ADMIN;
+    } else if (roles.includes(ENTRY)) {
+        role = ENTRY;
+    }
+
     const decodedIdToken = checkSignIn(context);
     if (decodedIdToken === NotSignIn) {
         return false;
     }
 
-    let role: typeof admin | null = null;
-    if (roles.includes(admin)) {
-        role = admin;
+    if (role == null) {
+        return true;
     }
 
     const serverConfig = await loadServerConfigAsMain();
@@ -43,7 +49,7 @@ const authChecker: AuthChecker<ResolverContext> = async ({ context }, roles) => 
         adminUserUids = serverConfig.admin;
     }
 
-    if (role === admin) {
+    if (role === ADMIN) {
         if (!adminUserUids.includes(decodedIdToken.uid)) {
             return false;
         }

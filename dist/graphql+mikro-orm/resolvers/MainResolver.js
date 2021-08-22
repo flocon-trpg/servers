@@ -39,6 +39,17 @@ let MainResolver = class MainResolver {
             value: main_1.listAvailableGameSystems(),
         };
     }
+    async isEntry(context) {
+        const decodedIdToken = helpers_1.checkSignIn(context);
+        if (decodedIdToken === helpers_1.NotSignIn) {
+            return false;
+        }
+        return await helpers_1.checkEntry({
+            em: context.em,
+            userUid: decodedIdToken.uid,
+            baasType: BaasType_1.BaasType.Firebase,
+        });
+    }
     async getServerInfo() {
         const prerelease = (() => {
             if (VERSION_1.default.prerelease == null) {
@@ -87,8 +98,7 @@ let MainResolver = class MainResolver {
                         : EntryToServerResultType_1.EntryToServerResultType.NoPhraseRequired,
                 };
             }
-            if (phrase == null ||
-                (await helpers_1.comparePassword(phrase, serverConfig.entryPassword)) !== true) {
+            if (phrase == null || !(await helpers_1.comparePassword(phrase, serverConfig.entryPassword))) {
                 return {
                     type: EntryToServerResultType_1.EntryToServerResultType.WrongPhrase,
                 };
@@ -124,6 +134,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], MainResolver.prototype, "listAvailableGameSystems", null);
+__decorate([
+    type_graphql_1.Query(() => Boolean),
+    __param(0, type_graphql_1.Ctx()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], MainResolver.prototype, "isEntry", null);
 __decorate([
     type_graphql_1.Query(() => graphql_2.ServerInfo),
     __metadata("design:type", Function),

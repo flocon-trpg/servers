@@ -1,4 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.admin = void 0;
-exports.admin = 'admin';
+exports.ENTRY = exports.ADMIN = void 0;
+exports.ADMIN = 'ADMIN';
+exports.ENTRY = 'ENTRY';

@@ -1,4 +1,7 @@
 // configでadminに指定されているユーザー。現状ではentryも必要としているが、これはまだ未確定。
-export const admin = 'admin';
+export const ADMIN = 'ADMIN';
 
-// @Authorizedに何も指定しなかった場合は。entryしているユーザー全員がアクセス可能となる。
+// entryしているユーザー。
+export const ENTRY = 'ENTRY';
+
+// @Authorizedに何も指定しなかった場合は、Firebase Authenticationでログインしているユーザー全員がアクセス可能となる。
