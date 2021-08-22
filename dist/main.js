@@ -94,7 +94,8 @@ const main = async (params) => {
             decodedIdToken: await getDecodedIdTokenFromBearer(context.req.headers.authorization),
             promiseQueue,
             connectionManager,
-            createEm: () => orm.em.fork(),
+            em: orm.em.fork(),
+            authorizedUser: null,
         };
     };
     const apolloServer = new apollo_server_express_1.ApolloServer({
@@ -293,7 +294,8 @@ const main = async (params) => {
                     decodedIdToken,
                     promiseQueue,
                     connectionManager,
-                    createEm: () => orm.em.fork(),
+                    em: orm.em.fork(),
+                    authorizedUser: null,
                 };
                 return result;
             },

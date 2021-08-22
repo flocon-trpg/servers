@@ -3,8 +3,6 @@ import { ParticipantRole } from '../enums/ParticipantRole';
 import { JoinRoomFailureType } from '../enums/JoinRoomFailureType';
 import { FileSourceType } from '../enums/FileSourceType';
 import { GetRoomFailureType } from '../enums/GetRoomFailureType';
-import { GetRoomsListFailureType } from '../enums/GetRoomsListFailureType';
-import { CreateRoomFailureType } from '../enums/CreateRoomFailureType';
 import { EntryToServerResultType } from '../enums/EntryToServerResultType';
 import { OperateRoomFailureType } from '../enums/OperateRoomFailureType';
 import { GetRoomMessagesFailureType } from '../enums/GetRoomMessagesFailureType';
@@ -28,6 +26,8 @@ import { WritingMessageStatusType } from '../enums/WritingMessageStatusType';
 import { PieceValueLogType } from '../enums/PieceValueLogType';
 import { BaasType } from '../enums/BaasType';
 import { GetFileItemsFailureType } from '../enums/GetFileItemsFailureType';
+import { CreateRoomFailureType } from '../enums/CreateRoomFailureType';
+import { GetRoomsListFailureType } from '../enums/GetRoomsListFailureType';
 
 let hasRegistered = false;
 const registerEnumTypes = (): void => {

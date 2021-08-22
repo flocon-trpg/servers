@@ -54,7 +54,8 @@ const createResolverContext = (orm, uid) => ({
     },
     promiseQueue: new PromiseQueue_1.PromiseQueue({}),
     connectionManager: new main_1.InMemoryConnectionManager(),
-    createEm: () => orm.em.fork(),
+    em: orm.em.fork(),
+    authorizedUser: null,
 });
 const setupRoomAndUsersAndParticipants = ({ em, setupRoom, }) => {
     const roomName = 'ROOM_NAME';

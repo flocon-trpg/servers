@@ -44,7 +44,8 @@ const createResolverContext = (orm: ORM, uid: string): ResolverContext => ({
     },
     promiseQueue: new PromiseQueue({}),
     connectionManager: new InMemoryConnectionManager(),
-    createEm: () => orm.em.fork(),
+    em: orm.em.fork(),
+    authorizedUser: null,
 });
 
 const setupRoomAndUsersAndParticipants = ({

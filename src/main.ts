@@ -113,7 +113,8 @@ const main = async (params: { debug: boolean }): Promise<void> => {
             decodedIdToken: await getDecodedIdTokenFromBearer(context.req.headers.authorization),
             promiseQueue,
             connectionManager,
-            createEm: () => orm.em.fork(),
+            em: orm.em.fork(),
+            authorizedUser: null,
         };
     };
 
@@ -356,7 +357,8 @@ const main = async (params: { debug: boolean }): Promise<void> => {
                         decodedIdToken,
                         promiseQueue,
                         connectionManager,
-                        createEm: () => orm.em.fork(),
+                        em: orm.em.fork(),
+                        authorizedUser: null,
                     };
                     return result;
                 },

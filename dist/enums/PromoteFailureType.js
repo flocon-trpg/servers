@@ -4,8 +4,6 @@ exports.PromoteFailureType = void 0;
 var PromoteFailureType;
 (function (PromoteFailureType) {
     PromoteFailureType["NotFound"] = "NotFound";
-    PromoteFailureType["NotEntry"] = "NotEntry";
-    PromoteFailureType["NotSignIn"] = "NotSignIn";
     PromoteFailureType["WrongPhrase"] = "WrongPhrase";
     PromoteFailureType["NoNeedToPromote"] = "NoNeedToPromote";
     PromoteFailureType["NotParticipant"] = "NotParticipant";

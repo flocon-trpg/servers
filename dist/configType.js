@@ -41,6 +41,7 @@ const uploader = t.type({
     directory: t.string,
 });
 exports.serverConfigJson = t.type({
+    admin: flocon_core_1.maybe(t.union([t.string, t.array(t.string)])),
     database: database,
     uploader: flocon_core_1.maybe(uploader),
     accessControlAllowOrigin: flocon_core_1.maybe(t.string),

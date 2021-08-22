@@ -60,7 +60,7 @@ let MainResolver = class MainResolver {
     }
     async entryToServer(phrase, context) {
         const queue = async () => {
-            const em = context.createEm();
+            const em = context.em;
             const singletonEntity = await mikro_orm_2.getSingletonEntity(em.fork());
             const decodedIdToken = helpers_1.checkSignIn(context);
             if (decodedIdToken === helpers_1.NotSignIn) {

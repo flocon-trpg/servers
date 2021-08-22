@@ -5,8 +5,6 @@ const ParticipantRole_1 = require("../enums/ParticipantRole");
 const JoinRoomFailureType_1 = require("../enums/JoinRoomFailureType");
 const FileSourceType_1 = require("../enums/FileSourceType");
 const GetRoomFailureType_1 = require("../enums/GetRoomFailureType");
-const GetRoomsListFailureType_1 = require("../enums/GetRoomsListFailureType");
-const CreateRoomFailureType_1 = require("../enums/CreateRoomFailureType");
 const EntryToServerResultType_1 = require("../enums/EntryToServerResultType");
 const OperateRoomFailureType_1 = require("../enums/OperateRoomFailureType");
 const GetRoomMessagesFailureType_1 = require("../enums/GetRoomMessagesFailureType");
@@ -30,6 +28,8 @@ const WritingMessageStatusType_1 = require("../enums/WritingMessageStatusType");
 const PieceValueLogType_1 = require("../enums/PieceValueLogType");
 const BaasType_1 = require("../enums/BaasType");
 const GetFileItemsFailureType_1 = require("../enums/GetFileItemsFailureType");
+const CreateRoomFailureType_1 = require("../enums/CreateRoomFailureType");
+const GetRoomsListFailureType_1 = require("../enums/GetRoomsListFailureType");
 let hasRegistered = false;
 const registerEnumTypes = () => {
     if (hasRegistered) {

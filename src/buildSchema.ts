@@ -13,13 +13,52 @@ import { RoomResolver } from './graphql+mikro-orm/resolvers/rooms/RoomResolver';
 import { MainResolver } from './graphql+mikro-orm/resolvers/MainResolver';
 import { PubSubOptions } from 'graphql-subscriptions';
 import { ResolverContext } from './graphql+mikro-orm/utils/Contexts';
+import {
+    checkSignIn,
+    getUserIfEntry,
+    NotSignIn,
+} from './graphql+mikro-orm/resolvers/utils/helpers';
+import { admin } from '@kizahasi/flocon-core';
+import { loadServerConfigAsMain } from './config';
+import { BaasType } from './enums/BaasType';
 
-export const customAuthChecker: AuthChecker<ResolverContext> = ({ context }, roles) => {
-    // here we can read the user from context
-    // and check his permission in the db against the `roles` argument
-    // that comes from the `@Authorized` decorator, eg. ["ADMIN", "MODERATOR"]
+const authChecker: AuthChecker<ResolverContext> = async ({ context }, roles) => {
+    const decodedIdToken = checkSignIn(context);
+    if (decodedIdToken === NotSignIn) {
+        return false;
+    }
 
-    return true; // or false if access is denied
+    let role: typeof admin | null = null;
+    if (roles.includes(admin)) {
+        role = admin;
+    }
+
+    const serverConfig = await loadServerConfigAsMain();
+    let adminUserUids: string[];
+    if (typeof serverConfig.admin === 'string') {
+        adminUserUids = [serverConfig.admin];
+    } else if (serverConfig.admin == null) {
+        adminUserUids = [];
+    } else {
+        adminUserUids = serverConfig.admin;
+    }
+
+    if (role === admin) {
+        if (!adminUserUids.includes(decodedIdToken.uid)) {
+            return false;
+        }
+    }
+
+    const user = await getUserIfEntry({
+        em: context.em,
+        userUid: decodedIdToken.uid,
+        baasType: BaasType.Firebase,
+    });
+    if (user == null) {
+        return false;
+    }
+    context.authorizedUser = user;
+    return true;
 };
 
 type Options = {
@@ -50,6 +89,7 @@ export const buildSchema = async (options: Options): Promise<GraphQLSchema> => {
     }
     return await buildSchemaCore({
         ...optionBase,
+        authChecker,
         emitSchemaFile,
         pubSub: options.pubSub,
     });
@@ -63,6 +103,8 @@ export const buildSchemaSync = (options: Options): GraphQLSchema => {
     }
     return buildSchemaSyncCore({
         ...optionBase,
+        authChecker,
         emitSchemaFile,
+        pubSub: options.pubSub,
     });
 };

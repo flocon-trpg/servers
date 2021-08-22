@@ -11,7 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetRoomsListResult = exports.GetRoomsListFailureResult = exports.GetRoomsListSuccessResult = void 0;
 const type_graphql_1 = require("type-graphql");
-const GetRoomsListFailureType_1 = require("../../enums/GetRoomsListFailureType");
+const GetRoomFailureType_1 = require("../../enums/GetRoomFailureType");
 const graphql_1 = require("../entities/roomAsListItem/graphql");
 let GetRoomsListSuccessResult = class GetRoomsListSuccessResult {
 };
@@ -26,7 +26,7 @@ exports.GetRoomsListSuccessResult = GetRoomsListSuccessResult;
 let GetRoomsListFailureResult = class GetRoomsListFailureResult {
 };
 __decorate([
-    type_graphql_1.Field(() => GetRoomsListFailureType_1.GetRoomsListFailureType),
+    type_graphql_1.Field(() => GetRoomFailureType_1.GetRoomFailureType),
     __metadata("design:type", String)
 ], GetRoomsListFailureResult.prototype, "failureType", void 0);
 GetRoomsListFailureResult = __decorate([

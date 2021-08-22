@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findRoomAndMyParticipant = exports.checkEntry = exports.getUserIfEntry = exports.checkSignInAndNotAnonymous = exports.checkSignIn = exports.AnonymousAccount = exports.NotSignIn = void 0;
+exports.ensureAuthorizedUser = exports.findRoomAndMyParticipant = exports.checkEntry = exports.getUserIfEntry = exports.checkSignInAndNotAnonymous = exports.checkSignIn = exports.AnonymousAccount = exports.NotSignIn = void 0;
 const mikro_orm_1 = require("../../entities/user/mikro-orm");
 const mikro_orm_2 = require("../../entities/room/mikro-orm");
 const global_1 = require("../../entities/room/global");
@@ -79,3 +79,10 @@ const findRoomAndMyParticipant = async ({ em, userUid, roomId, }) => {
     return new FindRoomAndMyParticipantResult(room, state, me);
 };
 exports.findRoomAndMyParticipant = findRoomAndMyParticipant;
+const ensureAuthorizedUser = (context) => {
+    if (context.authorizedUser == null) {
+        throw new Error('authorizedUser was not found. "@Attribute" might be missing.');
+    }
+    return context.authorizedUser;
+};
+exports.ensureAuthorizedUser = ensureAuthorizedUser;

@@ -81,7 +81,7 @@ export class MainResolver {
         @Ctx() context: ResolverContext
     ): Promise<EntryToServerResult> {
         const queue = async () => {
-            const em = context.createEm();
+            const em = context.em;
 
             const singletonEntity = await getSingletonEntity(em.fork());
             const decodedIdToken = checkSignIn(context);

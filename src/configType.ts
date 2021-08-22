@@ -49,6 +49,7 @@ const uploader = t.type({
 export type UploaderConfig = t.TypeOf<typeof uploader>;
 
 export const serverConfigJson = t.type({
+    admin: maybe(t.union([t.string, t.array(t.string)])),
     database: database,
     uploader: maybe(uploader),
 

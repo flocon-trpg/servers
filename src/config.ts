@@ -93,6 +93,7 @@ const loadServerConfig = ({
     }
 
     return {
+        admin: right.admin,
         database,
         uploader: right.uploader,
         accessControlAllowOrigin: right.accessControlAllowOrigin,

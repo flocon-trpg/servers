@@ -1,4 +1,3 @@
 export enum GetRoomsListFailureType {
-    NotSignIn = 'NotSignIn',
-    NotEntry = 'NotEntry',
+    UnknownError = 'UnknownError',
 }
