@@ -1,7 +1,7 @@
 import { Alert, Button, Card, Form, Input, Spin, Switch } from 'antd';
 import { useRouter } from 'next/router';
 import React from 'react';
-import Layout from '../../layouts/Layout';
+import Layout, { loginAndEntry } from '../../layouts/Layout';
 import {
     CreateRoomFailureType,
     CreateRoomInput,
@@ -22,7 +22,6 @@ const CreateRoomCore: React.FC = () => {
     const router = useRouter();
     const [createRoom, createRoomResult] = useCreateRoomMutation();
     const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
-    const [showEntryForm, setShowEntryForm] = React.useState<boolean>(false);
     const [isJoinAsPlayerPhraseEnabled, setIsJoinAsPlayerPhraseEnabled] =
         React.useState<boolean>(false);
     const [isJoinAsSpectatorPhraseEnabled, setIsJoinAsSpectatorPhraseEnabled] =
@@ -112,7 +111,7 @@ const CreateRoomCore: React.FC = () => {
     );
 
     return (
-        <Layout requiresLogin showEntryForm={showEntryForm} onEntry={() => setShowEntryForm(false)}>
+        <Layout requires={loginAndEntry}>
             <Center>
                 <Card title="部屋の新規作成">{form}</Card>
             </Center>

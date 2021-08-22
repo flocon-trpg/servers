@@ -1,6 +1,6 @@
 import React from 'react';
 import { RoomAsListItemFragment, useGetRoomsListQuery } from '../../generated/graphql';
-import Layout from '../../layouts/Layout';
+import Layout, { loginAndEntry } from '../../layouts/Layout';
 import Link from 'next/link';
 import { Button, Table } from 'antd';
 import { useRouter } from 'next/router';
@@ -70,8 +70,6 @@ const RoomCore: React.FC = () => {
             break;
     }
 
-    const showEntryForm = false;
-
     const roomsData = (() => {
         switch (rooms.data?.result.__typename) {
             case 'GetRoomsListSuccessResult':
@@ -82,10 +80,12 @@ const RoomCore: React.FC = () => {
     })();
 
     return (
-        <Layout showEntryForm={showEntryForm} onEntry={() => rooms.refetch()} requiresLogin={true}>
-            <QueryResultViewer loading={rooms.loading} error={rooms.error} compact={false}>
-                {roomsData == null ? null : <RoomsListComponent rooms={roomsData ?? []} />}
-            </QueryResultViewer>
+        <Layout requires={loginAndEntry} onEntry={() => rooms.refetch()}>
+            {() => (
+                <QueryResultViewer loading={rooms.loading} error={rooms.error} compact={false}>
+                    {roomsData == null ? null : <RoomsListComponent rooms={roomsData ?? []} />}
+                </QueryResultViewer>
+            )}
         </Layout>
     );
 };

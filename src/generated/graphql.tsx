@@ -484,6 +484,7 @@ export type Query = {
     getRoomConnections: GetRoomConnectionsResult;
     getRoomsList: GetRoomsListResult;
     getServerInfo: ServerInfo;
+    isEntry: Scalars['Boolean'];
     listAvailableGameSystems: ListAvailableGameSystemsResult;
     requiresPhraseToJoinAsPlayer: RequiresPhraseResult;
 };
@@ -1459,6 +1460,10 @@ export type GetServerInfoQuery = {
         };
     };
 };
+
+export type IsEntryQueryVariables = Exact<{ [key: string]: never }>;
+
+export type IsEntryQuery = { __typename?: 'Query'; result: boolean };
 
 export type ListAvailableGameSystemsQueryVariables = Exact<{ [key: string]: never }>;
 
@@ -2630,6 +2635,42 @@ export type GetServerInfoQueryResult = Apollo.QueryResult<
     GetServerInfoQuery,
     GetServerInfoQueryVariables
 >;
+export const IsEntryDocument = gql`
+    query IsEntry {
+        result: isEntry
+    }
+`;
+
+/**
+ * __useIsEntryQuery__
+ *
+ * To run a query within a React component, call `useIsEntryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIsEntryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIsEntryQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useIsEntryQuery(
+    baseOptions?: Apollo.QueryHookOptions<IsEntryQuery, IsEntryQueryVariables>
+) {
+    const options = { ...defaultOptions, ...baseOptions };
+    return Apollo.useQuery<IsEntryQuery, IsEntryQueryVariables>(IsEntryDocument, options);
+}
+export function useIsEntryLazyQuery(
+    baseOptions?: Apollo.LazyQueryHookOptions<IsEntryQuery, IsEntryQueryVariables>
+) {
+    const options = { ...defaultOptions, ...baseOptions };
+    return Apollo.useLazyQuery<IsEntryQuery, IsEntryQueryVariables>(IsEntryDocument, options);
+}
+export type IsEntryQueryHookResult = ReturnType<typeof useIsEntryQuery>;
+export type IsEntryLazyQueryHookResult = ReturnType<typeof useIsEntryLazyQuery>;
+export type IsEntryQueryResult = Apollo.QueryResult<IsEntryQuery, IsEntryQueryVariables>;
 export const ListAvailableGameSystemsDocument = gql`
     query ListAvailableGameSystems {
         result: listAvailableGameSystems {

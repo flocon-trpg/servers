@@ -88,7 +88,7 @@ const Index: React.FC = () => {
 
     const spacing = 24;
     return (
-        <Layout requiresLogin={false} showEntryForm={false}>
+        <Layout>
             <div style={{ padding: 32 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', width: 300 }}>
                     <Button
