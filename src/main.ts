@@ -352,12 +352,13 @@ const main = async (params: { debug: boolean }): Promise<void> => {
                 subscribe,
                 context: async ctx => {
                     const decodedIdToken = await getDecodedIdTokenFromContext(ctx);
-                    return {
+                    const result: ResolverContext = {
                         decodedIdToken,
                         promiseQueue,
                         connectionManager,
                         createEm: () => orm.em.fork(),
-                    } as ResolverContext;
+                    };
+                    return result;
                 },
                 onSubscribe: async (ctx, message) => {
                     if (message.payload.operationName?.toLowerCase() !== 'roomevent') {

@@ -382,13 +382,12 @@ const joinRoomCore = async ({
         payload: RoomEventPayload | undefined;
     }> => {
         const em = context.createEm();
-        const entryUser = await getUserIfEntry({
+        const entry = await checkEntry({
             userUid: decodedIdToken.uid,
             baasType: decodedIdToken.type,
             em,
         });
-        await em.flush();
-        if (entryUser == null) {
+        if (!entry) {
             return {
                 result: {
                     failureType: JoinRoomFailureType.NotEntry,
@@ -488,13 +487,12 @@ const promoteMeCore = async ({
         payload: RoomEventPayload | undefined;
     }> => {
         const em = context.createEm();
-        const entryUser = await getUserIfEntry({
+        const entry = await checkEntry({
             userUid: decodedIdToken.uid,
             baasType: decodedIdToken.type,
             em,
         });
-        await em.flush();
-        if (entryUser == null) {
+        if (!entry) {
             return {
                 result: {
                     failureType: PromoteFailureType.NotEntry,
@@ -795,7 +793,6 @@ export class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
             });
-            await em.flush();
             if (!entry) {
                 return {
                     failureType: GetRoomsListFailureType.NotEntry,
@@ -845,7 +842,6 @@ export class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
             });
-            await em.flush();
             if (!entry) {
                 return {
                     failureType: RequiresPhraseFailureType.NotEntry,
@@ -900,7 +896,6 @@ export class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (entryUser == null) {
                 return {
                     failureType: CreateRoomFailureType.NotEntry,
@@ -1061,7 +1056,6 @@ export class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (!entry) {
                 return Result.ok({
                     __tstype: GetRoomMessagesFailureResultType,
@@ -1134,7 +1128,6 @@ export class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (!entry) {
                 return Result.ok({
                     result: {
@@ -1244,7 +1237,6 @@ export class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (!entry) {
                 return Result.ok({
                     __tstype: GetRoomConnectionFailureResultType,
@@ -1325,7 +1317,6 @@ export class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (entryUser == null) {
                 return Result.ok({
                     result: {
@@ -1469,7 +1460,6 @@ export class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (!entry) {
                 return {
                     result: { failureType: DeleteRoomFailureType.NotEntry },
@@ -1690,7 +1680,6 @@ export class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (entryUser == null) {
                 return {
                     result: {
@@ -1784,7 +1773,6 @@ export class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (!entry) {
                 return Result.ok({
                     failureType: GetRoomFailureType.NotEntry,
@@ -1941,7 +1929,6 @@ export class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (!entry) {
                 return Result.ok({
                     type: 'failure',
@@ -2176,7 +2163,6 @@ export class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (entryUser == null) {
                 return Result.ok({
                     result: {
@@ -2335,7 +2321,6 @@ export class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (entryUser == null) {
                 return Result.ok({
                     result: {
@@ -2454,7 +2439,6 @@ export class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (!entry) {
                 return Result.ok({
                     result: {
@@ -2629,7 +2613,6 @@ export class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (!entry) {
                 return Result.ok({
                     result: {
@@ -2806,7 +2789,6 @@ export class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (!entry) {
                 return Result.ok({
                     result: {

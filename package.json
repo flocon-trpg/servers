@@ -4,7 +4,7 @@
         "@graphql-codegen/typescript": "^2.0.0",
         "@graphql-codegen/typescript-operations": "^2.0.1",
         "@graphql-codegen/typescript-react-apollo": "^3.0.0",
-        "@kizahasi/flocon-core": "^0.16.0",
+        "@kizahasi/flocon-core": "^0.17.0",
         "@kizahasi/ot-string": "^0.2.3",
         "@kizahasi/result": "^1.0.0",
         "@kizahasi/util": "^0.8.0",

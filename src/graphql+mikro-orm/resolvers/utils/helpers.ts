@@ -38,10 +38,12 @@ export const getUserIfEntry = async ({
     em,
     userUid,
     baasType,
+    noFlush,
 }: {
     em: EM;
     userUid: string;
     baasType: BaasType;
+    noFlush?: boolean;
 }): Promise<User | null> => {
     const singletonEntity = await getSingletonEntity(em.fork());
     const user = await em.findOne(User, { userUid, baasType });
@@ -51,7 +53,11 @@ export const getUserIfEntry = async ({
         if (!requiresEntryPassword) {
             const newUser = new User({ userUid, baasType });
             newUser.isEntry = true;
-            em.persist(newUser);
+            if (noFlush === true) {
+                em.persist(newUser);
+            } else {
+                await em.persistAndFlush(newUser);
+            }
             return user;
         }
         return null;
@@ -73,12 +79,14 @@ export const checkEntry = async ({
     em,
     userUid,
     baasType,
+    noFlush,
 }: {
     em: EM;
     userUid: string;
     baasType: BaasType;
+    noFlush?: boolean;
 }): Promise<boolean> => {
-    return (await getUserIfEntry({ em, userUid, baasType })) != null;
+    return (await getUserIfEntry({ em, userUid, baasType, noFlush })) != null;
 };
 
 class FindRoomAndMyParticipantResult {

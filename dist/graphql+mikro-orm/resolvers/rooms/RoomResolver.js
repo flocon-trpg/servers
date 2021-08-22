@@ -191,13 +191,12 @@ const joinRoomCore = async ({ args, context, strategy, }) => {
     }
     const queue = async () => {
         const em = context.createEm();
-        const entryUser = await helpers_1.getUserIfEntry({
+        const entry = await helpers_1.checkEntry({
             userUid: decodedIdToken.uid,
             baasType: decodedIdToken.type,
             em,
         });
-        await em.flush();
-        if (entryUser == null) {
+        if (!entry) {
             return {
                 result: {
                     failureType: JoinRoomFailureType_1.JoinRoomFailureType.NotEntry,
@@ -277,13 +276,12 @@ const promoteMeCore = async ({ roomId, context, strategy, }) => {
     const queue = async () => {
         var _a;
         const em = context.createEm();
-        const entryUser = await helpers_1.getUserIfEntry({
+        const entry = await helpers_1.checkEntry({
             userUid: decodedIdToken.uid,
             baasType: decodedIdToken.type,
             em,
         });
-        await em.flush();
-        if (entryUser == null) {
+        if (!entry) {
             return {
                 result: {
                     failureType: PromoteFailureType_1.PromoteFailureType.NotEntry,
@@ -534,7 +532,6 @@ let RoomResolver = class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
             });
-            await em.flush();
             if (!entry) {
                 return {
                     failureType: GetRoomsListFailureType_1.GetRoomsListFailureType.NotEntry,
@@ -569,7 +566,6 @@ let RoomResolver = class RoomResolver {
                 userUid: decodedIdToken.uid,
                 baasType: decodedIdToken.type,
             });
-            await em.flush();
             if (!entry) {
                 return {
                     failureType: RequiresPhraseFailureType_1.RequiresPhraseFailureType.NotEntry,
@@ -609,7 +605,6 @@ let RoomResolver = class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (entryUser == null) {
                 return {
                     failureType: CreateRoomFailureType_1.CreateRoomFailureType.NotEntry,
@@ -749,7 +744,6 @@ let RoomResolver = class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
                     __tstype: graphql_2.GetRoomMessagesFailureResultType,
@@ -806,7 +800,6 @@ let RoomResolver = class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
                     result: {
@@ -898,7 +891,6 @@ let RoomResolver = class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
                     __tstype: object_args_input_1.GetRoomConnectionFailureResultType,
@@ -962,7 +954,6 @@ let RoomResolver = class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (entryUser == null) {
                 return result_1.Result.ok({
                     result: {
@@ -1080,7 +1071,6 @@ let RoomResolver = class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (!entry) {
                 return {
                     result: { failureType: DeleteRoomFailureType_1.DeleteRoomFailureType.NotEntry },
@@ -1233,7 +1223,6 @@ let RoomResolver = class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (entryUser == null) {
                 return {
                     result: {
@@ -1309,7 +1298,6 @@ let RoomResolver = class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
                     failureType: GetRoomFailureType_1.GetRoomFailureType.NotEntry,
@@ -1429,7 +1417,6 @@ let RoomResolver = class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
                     type: 'failure',
@@ -1623,7 +1610,6 @@ let RoomResolver = class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (entryUser == null) {
                 return result_1.Result.ok({
                     result: {
@@ -1753,7 +1739,6 @@ let RoomResolver = class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (entryUser == null) {
                 return result_1.Result.ok({
                     result: {
@@ -1846,7 +1831,6 @@ let RoomResolver = class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
                     result: {
@@ -1999,7 +1983,6 @@ let RoomResolver = class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
                     result: {
@@ -2151,7 +2134,6 @@ let RoomResolver = class RoomResolver {
                 baasType: decodedIdToken.type,
                 em,
             });
-            await em.flush();
             if (!entry) {
                 return result_1.Result.ok({
                     result: {

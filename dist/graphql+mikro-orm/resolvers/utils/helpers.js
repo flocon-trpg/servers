@@ -27,7 +27,7 @@ const checkSignInAndNotAnonymous = (context) => {
     return decodedIdToken;
 };
 exports.checkSignInAndNotAnonymous = checkSignInAndNotAnonymous;
-const getUserIfEntry = async ({ em, userUid, baasType, }) => {
+const getUserIfEntry = async ({ em, userUid, baasType, noFlush, }) => {
     const singletonEntity = await mikro_orm_3.getSingletonEntity(em.fork());
     const user = await em.findOne(mikro_orm_1.User, { userUid, baasType });
     const requiresEntryPassword = singletonEntity.entryPasswordHash != null;
@@ -35,7 +35,12 @@ const getUserIfEntry = async ({ em, userUid, baasType, }) => {
         if (!requiresEntryPassword) {
             const newUser = new mikro_orm_1.User({ userUid, baasType });
             newUser.isEntry = true;
-            em.persist(newUser);
+            if (noFlush === true) {
+                em.persist(newUser);
+            }
+            else {
+                await em.persistAndFlush(newUser);
+            }
             return user;
         }
         return null;
@@ -50,8 +55,8 @@ const getUserIfEntry = async ({ em, userUid, baasType, }) => {
     return null;
 };
 exports.getUserIfEntry = getUserIfEntry;
-const checkEntry = async ({ em, userUid, baasType, }) => {
-    return (await exports.getUserIfEntry({ em, userUid, baasType })) != null;
+const checkEntry = async ({ em, userUid, baasType, noFlush, }) => {
+    return (await exports.getUserIfEntry({ em, userUid, baasType, noFlush })) != null;
 };
 exports.checkEntry = checkEntry;
 class FindRoomAndMyParticipantResult {

@@ -289,12 +289,13 @@ const main = async (params) => {
             subscribe: graphql_1.subscribe,
             context: async (ctx) => {
                 const decodedIdToken = await getDecodedIdTokenFromContext(ctx);
-                return {
+                const result = {
                     decodedIdToken,
                     promiseQueue,
                     connectionManager,
                     createEm: () => orm.em.fork(),
                 };
+                return result;
             },
             onSubscribe: async (ctx, message) => {
                 var _a, _b;
