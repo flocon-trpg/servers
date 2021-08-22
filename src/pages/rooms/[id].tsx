@@ -27,7 +27,6 @@ import {
 } from '../../hooks/useRoomState';
 import Center from '../../components/Center';
 import LoadingResult from '../../components/Result/LoadingResult';
-import NotSignInResult from '../../components/Result/NotSignInResult';
 import { usePublishRoomEventSubscription } from '../../hooks/usePublishRoomEventSubscription';
 import { useDispatch } from 'react-redux';
 import { roomModule } from '../../modules/roomModule';
@@ -61,6 +60,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
         result: FetchResult<JoinRoomAsPlayerMutation, Record<string, any>, Record<string, any>>
     ) => {
         if (result.data == null) {
+            setErrorMessage('Not authorized');
             return;
         }
         switch (result.data.result.__typename) {
@@ -77,16 +77,6 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                     }
                     case JoinRoomFailureType.NotFound: {
                         setErrorMessage('Not found. Deleted?');
-                        return;
-                    }
-                    case JoinRoomFailureType.NotSignIn: {
-                        setErrorMessage('Need to sign in');
-                        return;
-                    }
-                    case JoinRoomFailureType.NotEntry: {
-                        // entryできた後、管理者がentryを無効化した後にここに来る可能性がある。
-                        // ただ、レアケースなことに加えてここからEntryFormを出す処理が面倒なので、ブラウザの更新により再度entryすることを促すだけにしている。
-                        setErrorMessage('Not entry anymore. Please reload the browser.');
                         return;
                     }
                 }
@@ -305,14 +295,6 @@ const RoomBehavior: React.FC<PropsWithChildren<{ roomId: string }>> = ({
             );
         case getRoomFailure: {
             switch (roomState.getRoomFailureType) {
-                case GetRoomFailureType.NotEntry:
-                    return (
-                        <Layout
-                            requiresLogin
-                            showEntryForm={true}
-                            onEntry={() => refetchRoomState()}
-                        />
-                    );
                 case GetRoomFailureType.NotFound:
                     return (
                         <Layout requiresLogin showEntryForm={false}>
@@ -321,12 +303,6 @@ const RoomBehavior: React.FC<PropsWithChildren<{ roomId: string }>> = ({
                                 title="該当する部屋が見つかりませんでした。"
                                 subTitle="部屋が存在しているか、適切な権限があるかどうか確認してください。"
                             />
-                        </Layout>
-                    );
-                case GetRoomFailureType.NotSignIn:
-                    return (
-                        <Layout requiresLogin showEntryForm={false}>
-                            <NotSignInResult />
                         </Layout>
                     );
             }
@@ -347,7 +323,7 @@ const RoomBehavior: React.FC<PropsWithChildren<{ roomId: string }>> = ({
                     <Result
                         status="error"
                         title="mutationに失敗しました。"
-                        subTitle="ブラウザを更新してください。"
+                        subTitle="ログイン、エントリーしていることと、ネットワークに問題がないことを確認してください。"
                     />
                 </Layout>
             );

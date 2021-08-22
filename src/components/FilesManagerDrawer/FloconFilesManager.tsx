@@ -1,12 +1,9 @@
 import * as React from 'react';
 import { Upload } from 'antd';
-import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { accept } from './helper';
 import MyAuthContext from '../../contexts/MyAuthContext';
-import { useUploadMutation } from '../../generated/graphql';
 import { useAsync } from 'react-use';
 import ConfigContext from '../../contexts/ConfigContext';
-import { createHttpLink } from '@apollo/client';
 import { getHttpUri } from '../../config';
 import urljoin from 'url-join';
 import axios from 'axios';

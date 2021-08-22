@@ -12,7 +12,6 @@ export type Scalars = {
     Boolean: boolean;
     Int: number;
     Float: number;
-    Upload: any;
 };
 
 export type AvailableGameSystem = {
@@ -23,10 +22,8 @@ export type AvailableGameSystem = {
 };
 
 export enum ChangeParticipantNameFailureType {
-    NotEntry = 'NotEntry',
     NotFound = 'NotFound',
     NotParticipant = 'NotParticipant',
-    NotSignIn = 'NotSignIn',
 }
 
 export type ChangeParticipantNameResult = {
@@ -55,8 +52,7 @@ export type CreateRoomFailureResult = {
 };
 
 export enum CreateRoomFailureType {
-    NotEntry = 'NotEntry',
-    NotSignIn = 'NotSignIn',
+    UnknownError = 'UnknownError',
 }
 
 export type CreateRoomInput = {
@@ -77,9 +73,7 @@ export type CreateRoomSuccessResult = {
 export enum DeleteMessageFailureType {
     MessageDeleted = 'MessageDeleted',
     MessageNotFound = 'MessageNotFound',
-    NotEntry = 'NotEntry',
     NotParticipant = 'NotParticipant',
-    NotSignIn = 'NotSignIn',
     NotYourMessage = 'NotYourMessage',
     RoomNotFound = 'RoomNotFound',
 }
@@ -91,9 +85,7 @@ export type DeleteMessageResult = {
 
 export enum DeleteRoomFailureType {
     NotCreatedByYou = 'NotCreatedByYou',
-    NotEntry = 'NotEntry',
     NotFound = 'NotFound',
-    NotSignIn = 'NotSignIn',
 }
 
 export type DeleteRoomOperation = {
@@ -109,9 +101,7 @@ export type DeleteRoomResult = {
 export enum EditMessageFailureType {
     MessageDeleted = 'MessageDeleted',
     MessageNotFound = 'MessageNotFound',
-    NotEntry = 'NotEntry',
     NotParticipant = 'NotParticipant',
-    NotSignIn = 'NotSignIn',
     NotYourMessage = 'NotYourMessage',
     RoomNotFound = 'RoomNotFound',
 }
@@ -162,9 +152,7 @@ export type GetNonJoinedRoomResult = {
 };
 
 export enum GetRoomConnectionFailureType {
-    NotEntry = 'NotEntry',
     NotParticipant = 'NotParticipant',
-    NotSignIn = 'NotSignIn',
     RoomNotFound = 'RoomNotFound',
 }
 
@@ -189,9 +177,7 @@ export type GetRoomFailureResult = {
 };
 
 export enum GetRoomFailureType {
-    NotEntry = 'NotEntry',
     NotFound = 'NotFound',
-    NotSignIn = 'NotSignIn',
 }
 
 export type GetRoomLogFailureResult = {
@@ -201,9 +187,7 @@ export type GetRoomLogFailureResult = {
 
 export enum GetRoomLogFailureType {
     NotAuthorized = 'NotAuthorized',
-    NotEntry = 'NotEntry',
     NotParticipant = 'NotParticipant',
-    NotSignIn = 'NotSignIn',
     RoomNotFound = 'RoomNotFound',
     UnknownError = 'UnknownError',
 }
@@ -216,9 +200,7 @@ export type GetRoomMessagesFailureResult = {
 };
 
 export enum GetRoomMessagesFailureType {
-    NotEntry = 'NotEntry',
     NotParticipant = 'NotParticipant',
-    NotSignIn = 'NotSignIn',
     RoomNotFound = 'RoomNotFound',
 }
 
@@ -228,13 +210,8 @@ export type GetRoomResult = GetJoinedRoomResult | GetNonJoinedRoomResult | GetRo
 
 export type GetRoomsListFailureResult = {
     __typename?: 'GetRoomsListFailureResult';
-    failureType: GetRoomsListFailureType;
+    failureType: GetRoomFailureType;
 };
-
-export enum GetRoomsListFailureType {
-    NotEntry = 'NotEntry',
-    NotSignIn = 'NotSignIn',
-}
 
 export type GetRoomsListResult = GetRoomsListFailureResult | GetRoomsListSuccessResult;
 
@@ -250,9 +227,7 @@ export type JoinRoomFailureResult = {
 
 export enum JoinRoomFailureType {
     AlreadyParticipant = 'AlreadyParticipant',
-    NotEntry = 'NotEntry',
     NotFound = 'NotFound',
-    NotSignIn = 'NotSignIn',
     TransformError = 'TransformError',
     WrongPhrase = 'WrongPhrase',
 }
@@ -265,9 +240,8 @@ export type JoinRoomSuccessResult = {
 };
 
 export enum LeaveRoomFailureType {
-    NotEntry = 'NotEntry',
     NotFound = 'NotFound',
-    NotSignIn = 'NotSignIn',
+    NotParticipant = 'NotParticipant',
 }
 
 export type LeaveRoomResult = {
@@ -282,10 +256,8 @@ export type ListAvailableGameSystemsResult = {
 
 export enum MakeMessageNotSecretFailureType {
     MessageNotFound = 'MessageNotFound',
-    NotEntry = 'NotEntry',
     NotParticipant = 'NotParticipant',
     NotSecret = 'NotSecret',
-    NotSignIn = 'NotSignIn',
     NotYourMessage = 'NotYourMessage',
     RoomNotFound = 'RoomNotFound',
 }
@@ -311,7 +283,6 @@ export type Mutation = {
     ping: Pong;
     promoteToPlayer: PromoteResult;
     updateWritingMessageStatus: Scalars['Boolean'];
-    upload: UploadResult;
     writePrivateMessage: WritePrivateRoomMessageResult;
     writePublicMessage: WritePublicRoomMessageResult;
     writeRoomSoundEffect: WriteRoomSoundEffectResult;
@@ -387,10 +358,6 @@ export type MutationUpdateWritingMessageStatusArgs = {
     roomId: Scalars['String'];
 };
 
-export type MutationUploadArgs = {
-    file: Scalars['Upload'];
-};
-
 export type MutationWritePrivateMessageArgs = {
     characterStateId?: Maybe<Scalars['String']>;
     customName?: Maybe<Scalars['String']>;
@@ -424,10 +391,8 @@ export type OperateRoomFailureResult = {
 
 export enum OperateRoomFailureType {
     InvalidId = 'InvalidId',
-    NotEntry = 'NotEntry',
     NotFound = 'NotFound',
-    NotParticipated = 'NotParticipated',
-    NotSignIn = 'NotSignIn',
+    NotParticipant = 'NotParticipant',
 }
 
 export type OperateRoomIdResult = {
@@ -501,10 +466,8 @@ export enum PrereleaseType {
 
 export enum PromoteFailureType {
     NoNeedToPromote = 'NoNeedToPromote',
-    NotEntry = 'NotEntry',
     NotFound = 'NotFound',
     NotParticipant = 'NotParticipant',
-    NotSignIn = 'NotSignIn',
     WrongPhrase = 'WrongPhrase',
 }
 
@@ -551,9 +514,7 @@ export type RequiresPhraseFailureResult = {
 };
 
 export enum RequiresPhraseFailureType {
-    NotEntry = 'NotEntry',
     NotFound = 'NotFound',
-    NotSignIn = 'NotSignIn',
 }
 
 export type RequiresPhraseResult = RequiresPhraseFailureResult | RequiresPhraseSuccessResult;
@@ -736,30 +697,13 @@ export type UpdatedText = {
     updatedAt: Scalars['Float'];
 };
 
-export type UploadResult = {
-    __typename?: 'UploadResult';
-    type: UploadResultType;
-};
-
-export enum UploadResultType {
-    CountQuotaExceeded = 'CountQuotaExceeded',
-    Disabled = 'Disabled',
-    FileExists = 'FileExists',
-    NotEntry = 'NotEntry',
-    NotSignIn = 'NotSignIn',
-    SizeQuotaExceeded = 'SizeQuotaExceeded',
-    Success = 'Success',
-}
-
 export type WritePrivateRoomMessageFailureResult = {
     __typename?: 'WritePrivateRoomMessageFailureResult';
     failureType: WritePrivateRoomMessageFailureType;
 };
 
 export enum WritePrivateRoomMessageFailureType {
-    NotEntry = 'NotEntry',
     NotParticipant = 'NotParticipant',
-    NotSignIn = 'NotSignIn',
     RoomNotFound = 'RoomNotFound',
     VisibleToIsInvalid = 'VisibleToIsInvalid',
 }
@@ -776,9 +720,7 @@ export type WritePublicRoomMessageFailureResult = {
 export enum WritePublicRoomMessageFailureType {
     NotAllowedChannelKey = 'NotAllowedChannelKey',
     NotAuthorized = 'NotAuthorized',
-    NotEntry = 'NotEntry',
     NotParticipant = 'NotParticipant',
-    NotSignIn = 'NotSignIn',
     RoomNotFound = 'RoomNotFound',
 }
 
@@ -791,9 +733,7 @@ export type WriteRoomSoundEffectFailureResult = {
 
 export enum WriteRoomSoundEffectFailureType {
     NotAuthorized = 'NotAuthorized',
-    NotEntry = 'NotEntry',
     NotParticipant = 'NotParticipant',
-    NotSignIn = 'NotSignIn',
     RoomNotFound = 'RoomNotFound',
 }
 
@@ -863,7 +803,7 @@ export type GetNonJoinedRoomResultFragment = {
 
 type GetRoomListResult_GetRoomsListFailureResult_Fragment = {
     __typename?: 'GetRoomsListFailureResult';
-    failureType: GetRoomsListFailureType;
+    failureType: GetRoomFailureType;
 };
 
 type GetRoomListResult_GetRoomsListSuccessResult_Fragment = {
@@ -1236,7 +1176,7 @@ export type GetRoomsListQueryVariables = Exact<{ [key: string]: never }>;
 export type GetRoomsListQuery = {
     __typename?: 'Query';
     result:
-        | { __typename?: 'GetRoomsListFailureResult'; failureType: GetRoomsListFailureType }
+        | { __typename?: 'GetRoomsListFailureResult'; failureType: GetRoomFailureType }
         | {
               __typename?: 'GetRoomsListSuccessResult';
               rooms: Array<{
@@ -1711,15 +1651,6 @@ export type PromoteToPlayerMutationVariables = Exact<{
 export type PromoteToPlayerMutation = {
     __typename?: 'Mutation';
     result: { __typename?: 'PromoteResult'; failureType?: Maybe<PromoteFailureType> };
-};
-
-export type UploadMutationVariables = Exact<{
-    file: Scalars['Upload'];
-}>;
-
-export type UploadMutation = {
-    __typename?: 'Mutation';
-    result: { __typename?: 'UploadResult'; type: UploadResultType };
 };
 
 export type WritePublicMessageMutationVariables = Exact<{
@@ -3309,44 +3240,6 @@ export type PromoteToPlayerMutationResult = Apollo.MutationResult<PromoteToPlaye
 export type PromoteToPlayerMutationOptions = Apollo.BaseMutationOptions<
     PromoteToPlayerMutation,
     PromoteToPlayerMutationVariables
->;
-export const UploadDocument = gql`
-    mutation Upload($file: Upload!) {
-        result: upload(file: $file) {
-            type
-        }
-    }
-`;
-export type UploadMutationFn = Apollo.MutationFunction<UploadMutation, UploadMutationVariables>;
-
-/**
- * __useUploadMutation__
- *
- * To run a mutation, you first call `useUploadMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUploadMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [uploadMutation, { data, loading, error }] = useUploadMutation({
- *   variables: {
- *      file: // value for 'file'
- *   },
- * });
- */
-export function useUploadMutation(
-    baseOptions?: Apollo.MutationHookOptions<UploadMutation, UploadMutationVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<UploadMutation, UploadMutationVariables>(UploadDocument, options);
-}
-export type UploadMutationHookResult = ReturnType<typeof useUploadMutation>;
-export type UploadMutationResult = Apollo.MutationResult<UploadMutation>;
-export type UploadMutationOptions = Apollo.BaseMutationOptions<
-    UploadMutation,
-    UploadMutationVariables
 >;
 export const WritePublicMessageDocument = gql`
     mutation WritePublicMessage(

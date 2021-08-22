@@ -65,17 +65,9 @@ const CreateRoomCore: React.FC = () => {
                             return;
                         }
                         case 'CreateRoomFailureResult': {
-                            switch (r.data?.result.failureType) {
-                                case CreateRoomFailureType.NotEntry:
-                                    setIsSubmitting(false);
-                                    setShowEntryForm(true);
-                                    return;
-                                default:
-                                    // TODO: エラーメッセージを出す
-                                    setIsSubmitting(false);
-                                    return;
-                            }
-                            break;
+                            // 現状、ここには来ない
+                            setIsSubmitting(false);
+                            return;
                         }
                     }
                     setIsSubmitting(false);

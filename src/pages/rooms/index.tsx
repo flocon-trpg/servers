@@ -1,13 +1,8 @@
 import React from 'react';
-import {
-    GetRoomsListFailureType,
-    RoomAsListItemFragment,
-    useGetRoomsListQuery,
-} from '../../generated/graphql';
+import { RoomAsListItemFragment, useGetRoomsListQuery } from '../../generated/graphql';
 import Layout from '../../layouts/Layout';
-import moment from 'moment';
 import Link from 'next/link';
-import { Button, Col, Row, Space, Table, Tooltip } from 'antd';
+import { Button, Table } from 'antd';
 import { useRouter } from 'next/router';
 import QueryResultViewer from '../../components/QueryResultViewer';
 import classNames from 'classnames';
@@ -75,20 +70,7 @@ const RoomCore: React.FC = () => {
             break;
     }
 
-    const showEntryForm = (() => {
-        switch (rooms.data?.result.__typename) {
-            case 'GetRoomsListFailureResult':
-                switch (rooms.data.result.failureType) {
-                    case GetRoomsListFailureType.NotEntry:
-                        return true;
-                    default:
-                        return false;
-                }
-                break;
-            default:
-                return false;
-        }
-    })();
+    const showEntryForm = false;
 
     const roomsData = (() => {
         switch (rooms.data?.result.__typename) {
