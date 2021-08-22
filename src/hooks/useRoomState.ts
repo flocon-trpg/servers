@@ -22,6 +22,7 @@ import { useClientId } from './useClientId';
 import { useDispatch } from 'react-redux';
 import { roomModule, Notification } from '../modules/roomModule';
 import { State, UpOperation } from '@kizahasi/flocon-core';
+import { ApolloClientHasAuthorizationHeaderContext } from '../contexts/ApolloClientHasAuthorizationHeaderContext';
 
 const sampleTime = 3000;
 
@@ -97,6 +98,9 @@ export const useRoomState = (
     roomEventSubscription: Observable<RoomEventSubscription> | null
 ): RoomStateResult => {
     const myAuth = React.useContext(MyAuthContext);
+    const apolloClientHasAuthorizationHeader = React.useContext(
+        ApolloClientHasAuthorizationHeaderContext
+    );
     const clientId = useClientId();
     const apolloClient = useApolloClient();
     const [operateMutation] = useOperateMutation();
@@ -122,6 +126,10 @@ export const useRoomState = (
         }
         if (userUid == null) {
             return; // This should not happen
+        }
+        if (!apolloClientHasAuthorizationHeader) {
+            // queryの実行で失敗することが確定しているため、実行を中止している
+            return;
         }
 
         let roomStateManager: StateManager<State, UpOperation> | null = null;
