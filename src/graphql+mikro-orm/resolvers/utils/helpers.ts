@@ -45,7 +45,7 @@ export const getUserIfEntry = async ({
     baasType: BaasType;
     noFlush?: boolean;
 }): Promise<User | null> => {
-    const singletonEntity = await getSingletonEntity(em.fork());
+    const singletonEntity = await getSingletonEntity(em);
     const user = await em.findOne(User, { userUid, baasType });
     const requiresEntryPassword = singletonEntity.entryPasswordHash != null;
 

@@ -15,7 +15,7 @@ export type DecodedIdToken = {
 
 export type ResolverContext = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    decodedIdToken?: Result<DecodedIdToken, any>;
+    decodedIdToken?: Result<DecodedIdToken, unknown>;
     promiseQueue: PromiseQueue;
     connectionManager: InMemoryConnectionManager;
     createEm: () => EM;

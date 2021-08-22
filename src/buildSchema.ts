@@ -1,4 +1,5 @@
 import {
+    AuthChecker,
     buildSchema as buildSchemaCore,
     BuildSchemaOptions,
     buildSchemaSync as buildSchemaSyncCore,
@@ -11,6 +12,15 @@ import registerEnumTypes from './graphql+mikro-orm/registerEnumTypes';
 import { RoomResolver } from './graphql+mikro-orm/resolvers/rooms/RoomResolver';
 import { MainResolver } from './graphql+mikro-orm/resolvers/MainResolver';
 import { PubSubOptions } from 'graphql-subscriptions';
+import { ResolverContext } from './graphql+mikro-orm/utils/Contexts';
+
+export const customAuthChecker: AuthChecker<ResolverContext> = ({ context }, roles) => {
+    // here we can read the user from context
+    // and check his permission in the db against the `roles` argument
+    // that comes from the `@Authorized` decorator, eg. ["ADMIN", "MODERATOR"]
+
+    return true; // or false if access is denied
+};
 
 type Options = {
     emitSchemaFile: boolean;

@@ -82,7 +82,7 @@ const main = async (params: { debug: boolean }): Promise<void> => {
     const getDecodedIdTokenFromBearer = async (
         bearer: string | undefined
     ): Promise<
-        Result<admin.auth.DecodedIdToken & { type: BaasType.Firebase }, any> | undefined
+        Result<admin.auth.DecodedIdToken & { type: BaasType.Firebase }, unknown> | undefined
     > => {
         // bearerのフォーマットはだいたいこんな感じ
         // 'Bearer aNGoGo3ngC.oepGJoGoeo34Ha.Oge03mvQgeo4H'

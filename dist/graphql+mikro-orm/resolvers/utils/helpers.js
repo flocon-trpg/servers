@@ -28,7 +28,7 @@ const checkSignInAndNotAnonymous = (context) => {
 };
 exports.checkSignInAndNotAnonymous = checkSignInAndNotAnonymous;
 const getUserIfEntry = async ({ em, userUid, baasType, noFlush, }) => {
-    const singletonEntity = await mikro_orm_3.getSingletonEntity(em.fork());
+    const singletonEntity = await mikro_orm_3.getSingletonEntity(em);
     const user = await em.findOne(mikro_orm_1.User, { userUid, baasType });
     const requiresEntryPassword = singletonEntity.entryPasswordHash != null;
     if (user == null) {
