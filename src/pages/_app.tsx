@@ -42,6 +42,7 @@ import { ExpiryMap } from '../utils/expiryMap';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
 import urljoin from 'url-join';
 import { onError } from '@apollo/client/link/error';
+import { useAsync } from 'react-use';
 
 enableMapSet();
 
@@ -90,24 +91,16 @@ class WebSocketLink extends ApolloLink {
 }
 
 // サーバーでWebSocket（GraphQL subscriptionsで使っている）を呼び出そうとすると"Error: Unable to find native implementation, or alternative implementation for WebSocket!"というエラーが出るので、サーバー側で呼び出されるときはomitWebSocket===trueにすることでそれを回避できる。
-const createApolloClient = (
-    config: Config,
-    signedInAs?: firebase.User,
-    omitWebSocket?: boolean
-) => {
+const createApolloClient = (config: Config, userIdToken: string, omitWebSocket?: boolean) => {
     // headerについては https://hasura.io/blog/authentication-and-authorization-using-hasura-and-firebase/ を参考にした
 
     // https://www.apollographql.com/docs/react/networking/authentication/#header
     const authLink = setContext(async (_, { headers }) => {
-        const token = await signedInAs?.getIdToken();
-        if (token === undefined) {
-            return headers;
-        }
         // return the headers to the context so httpLink can read them
         return {
             headers: {
                 ...headers,
-                authorization: `Bearer ${token}`,
+                authorization: `Bearer ${userIdToken}`,
             },
         };
     });
@@ -128,12 +121,8 @@ const createApolloClient = (
         const wsLink = new WebSocketLink({
             url: uri,
             connectionParams: async () => {
-                const token = await signedInAs?.getIdToken();
-                if (token == null) {
-                    return {};
-                }
                 return {
-                    [authToken]: token,
+                    [authToken]: userIdToken,
                 };
             },
         });
@@ -159,12 +148,14 @@ const createApolloClient = (
         if (graphQLErrors) {
             graphQLErrors.map(({ message, locations, path }) =>
                 console.log(
-                    `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+                    `[GraphQL error]: Message: ${message}, Location: %O, Path: %O`,
+                    locations,
+                    path
                 )
             );
         }
         if (networkError) {
-            console.log(`[Network error]: ${networkError}`);
+            console.log(`[Network error]: %O`, networkError);
         }
     });
 
@@ -176,10 +167,12 @@ const createApolloClient = (
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     const user = useFirebaseUser();
-    const [apolloClient, setApolloClient] = React.useState<ApolloClient<NormalizedCacheObject>>();
-    React.useEffect(() => {
-        const client = createApolloClient(config, typeof user === 'string' ? undefined : user);
-        setApolloClient(client);
+    const apolloClient = useAsync(async () => {
+        if (typeof user === 'string') {
+            return null;
+        }
+        const idToken = await user.getIdToken();
+        return createApolloClient(config, idToken);
     }, [user]);
     useUserConfig(typeof user === 'string' ? null : user.uid, store.dispatch);
 
@@ -535,7 +528,7 @@ declare var character: Character;
         monaco.languages.typescript.typescriptDefaults.addExtraLib(libSource);
     }, [monaco]);
 
-    if (apolloClient == null) {
+    if (apolloClient.value == null) {
         return <div style={{ padding: 5 }}>{'しばらくお待ち下さい… / Please wait…'}</div>;
     }
     return (
@@ -544,7 +537,7 @@ declare var character: Character;
                 <link rel="shortcut icon" href="/logo.png" />
             </Head>
             <ClientIdContext.Provider value={clientId}>
-                <ApolloProvider client={apolloClient}>
+                <ApolloProvider client={apolloClient.value}>
                     <Provider store={store}>
                         <MyAuthContext.Provider value={user}>
                             <FirebaseStorageUrlCacheContext.Provider
