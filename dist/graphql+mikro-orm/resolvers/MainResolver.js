@@ -32,8 +32,7 @@ const VERSION_1 = __importDefault(require("../../VERSION"));
 const PrereleaseType_1 = require("../../enums/PrereleaseType");
 const util_1 = require("@kizahasi/util");
 const BaasType_1 = require("../../enums/BaasType");
-const mikro_orm_2 = require("../entities/singleton/mikro-orm");
-const bcrypt_1 = __importDefault(require("bcrypt"));
+const config_1 = require("../../config");
 let MainResolver = class MainResolver {
     async listAvailableGameSystems() {
         return {
@@ -61,7 +60,7 @@ let MainResolver = class MainResolver {
     async entryToServer(phrase, context) {
         const queue = async () => {
             const em = context.em;
-            const singletonEntity = await mikro_orm_2.getSingletonEntity(em.fork());
+            const serverConfig = await config_1.loadServerConfigAsMain();
             const decodedIdToken = helpers_1.checkSignIn(context);
             if (decodedIdToken === helpers_1.NotSignIn) {
                 return {
@@ -79,7 +78,7 @@ let MainResolver = class MainResolver {
                     type: EntryToServerResultType_1.EntryToServerResultType.AlreadyEntried,
                 };
             }
-            if (singletonEntity.entryPasswordHash == null) {
+            if (serverConfig.entryPassword == null) {
                 user.isEntry = true;
                 await em.flush();
                 return {
@@ -89,7 +88,7 @@ let MainResolver = class MainResolver {
                 };
             }
             if (phrase == null ||
-                (await bcrypt_1.default.compare(phrase, singletonEntity.entryPasswordHash)) !== true) {
+                (await helpers_1.comparePassword(phrase, serverConfig.entryPassword)) !== true) {
                 return {
                     type: EntryToServerResultType_1.EntryToServerResultType.WrongPhrase,
                 };

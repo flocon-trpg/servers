@@ -11,7 +11,7 @@ import {
 } from 'type-graphql';
 import { ResolverContext } from '../utils/Contexts';
 import { EntryToServerResultType } from '../../enums/EntryToServerResultType';
-import { checkSignIn, NotSignIn } from './utils/helpers';
+import { checkSignIn, comparePassword, NotSignIn } from './utils/helpers';
 import { queueLimitReached } from '../../utils/PromiseQueue';
 import { serverTooBusyMessage } from './utils/messages';
 import { User } from '../entities/user/mikro-orm';
@@ -25,8 +25,7 @@ import VERSION from '../../VERSION';
 import { PrereleaseType } from '../../enums/PrereleaseType';
 import { alpha, beta, rc } from '@kizahasi/util';
 import { BaasType } from '../../enums/BaasType';
-import { getSingletonEntity } from '../entities/singleton/mikro-orm';
-import bcrypt from 'bcrypt';
+import { loadServerConfigAsMain } from '../../config';
 
 export type PongPayload = {
     value: number;
@@ -83,7 +82,7 @@ export class MainResolver {
         const queue = async () => {
             const em = context.em;
 
-            const singletonEntity = await getSingletonEntity(em.fork());
+            const serverConfig = await loadServerConfigAsMain();
             const decodedIdToken = checkSignIn(context);
             if (decodedIdToken === NotSignIn) {
                 return {
@@ -102,7 +101,7 @@ export class MainResolver {
                     type: EntryToServerResultType.AlreadyEntried,
                 };
             }
-            if (singletonEntity.entryPasswordHash == null) {
+            if (serverConfig.entryPassword == null) {
                 user.isEntry = true;
                 await em.flush();
                 return {
@@ -115,7 +114,7 @@ export class MainResolver {
 
             if (
                 phrase == null ||
-                (await bcrypt.compare(phrase, singletonEntity.entryPasswordHash)) !== true
+                (await comparePassword(phrase, serverConfig.entryPassword)) !== true
             ) {
                 return {
                     type: EntryToServerResultType.WrongPhrase,

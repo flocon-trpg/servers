@@ -28,12 +28,10 @@ import { AppConsole } from './utils/appConsole';
 import { ensureDir } from 'fs-extra';
 import { v4 } from 'uuid';
 import { FilePermissionType } from './enums/FilePermissionType';
-import { EM } from './utils/types';
-import { getSingletonEntity } from './graphql+mikro-orm/entities/singleton/mikro-orm';
+import { ServerConfig } from './configType';
 
-const logEntryPasswordConfig = async (em: EM) => {
-    const entity = await getSingletonEntity(em.fork());
-    if (entity.entryPasswordHash == null) {
+const logEntryPasswordConfig = (serverConfig: ServerConfig) => {
+    if (serverConfig.entryPassword == null) {
         AppConsole.log({
             icon: '🔓',
             en: 'Entry password is disabled.',
@@ -60,7 +58,7 @@ const main = async (params: { debug: boolean }): Promise<void> => {
     const dbType = serverConfig.database.__type;
     const orm = await prepareORM(serverConfig.database, params.debug);
     await checkMigrationsBeforeStart(orm, dbType);
-    await logEntryPasswordConfig(orm.em);
+    logEntryPasswordConfig(serverConfig);
 
     const getDecodedIdToken = async (
         idToken: string

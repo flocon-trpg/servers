@@ -30,10 +30,8 @@ const appConsole_1 = require("./utils/appConsole");
 const fs_extra_1 = require("fs-extra");
 const uuid_1 = require("uuid");
 const FilePermissionType_1 = require("./enums/FilePermissionType");
-const mikro_orm_4 = require("./graphql+mikro-orm/entities/singleton/mikro-orm");
-const logEntryPasswordConfig = async (em) => {
-    const entity = await mikro_orm_4.getSingletonEntity(em.fork());
-    if (entity.entryPasswordHash == null) {
+const logEntryPasswordConfig = (serverConfig) => {
+    if (serverConfig.entryPassword == null) {
         appConsole_1.AppConsole.log({
             icon: '🔓',
             en: 'Entry password is disabled.',
@@ -59,7 +57,7 @@ const main = async (params) => {
     const dbType = serverConfig.database.__type;
     const orm = await mikro_orm_1.prepareORM(serverConfig.database, params.debug);
     await migrate_1.checkMigrationsBeforeStart(orm, dbType);
-    await logEntryPasswordConfig(orm.em);
+    logEntryPasswordConfig(serverConfig);
     const getDecodedIdToken = async (idToken) => {
         const decodedIdToken = await firebase_admin_1.default
             .auth()

@@ -85,6 +85,7 @@ const loadServerConfig = ({ databaseArg, }) => {
     return {
         admin: right.admin,
         database,
+        entryPassword: right.entryPassword,
         uploader: right.uploader,
         accessControlAllowOrigin: right.accessControlAllowOrigin,
     };

@@ -6,7 +6,11 @@ import { GlobalRoom } from '../../entities/room/global';
 import { ParticipantState, State } from '@kizahasi/flocon-core';
 import { anonymous, recordToArray } from '@kizahasi/util';
 import { BaasType } from '../../../enums/BaasType';
-import { getSingletonEntity } from '../../entities/singleton/mikro-orm';
+import { loadServerConfigAsMain } from '../../../config';
+import { EntryPasswordConfig, plain } from '../../../configType';
+import { timingSafeEqual } from 'crypto';
+import safeCompare from 'safe-compare';
+import bcrypt from 'bcrypt';
 
 const find = <T>(source: Record<string, T | undefined>, key: string): T | undefined => source[key];
 
@@ -45,9 +49,9 @@ export const getUserIfEntry = async ({
     baasType: BaasType;
     noFlush?: boolean;
 }): Promise<User | null> => {
-    const singletonEntity = await getSingletonEntity(em);
+    const serverConfig = await loadServerConfigAsMain();
     const user = await em.findOne(User, { userUid, baasType });
-    const requiresEntryPassword = singletonEntity.entryPasswordHash != null;
+    const requiresEntryPassword = serverConfig.entryPassword != null;
 
     if (user == null) {
         if (!requiresEntryPassword) {
@@ -124,4 +128,14 @@ export const ensureAuthorizedUser = (context: ResolverContext): User => {
         throw new Error('authorizedUser was not found. "@Attribute" might be missing.');
     }
     return context.authorizedUser;
+};
+
+export const comparePassword = async (
+    plainPassword: string,
+    config: EntryPasswordConfig
+): Promise<boolean> => {
+    if (config.type === plain) {
+        return safeCompare(plainPassword, config.value);
+    }
+    return await bcrypt.compare(plainPassword, config.value);
 };

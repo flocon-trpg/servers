@@ -3,6 +3,8 @@ import * as t from 'io-ts';
 
 export const postgresql = 'postgresql';
 export const sqlite = 'sqlite';
+export const plain = 'plain';
+export const bcrypt = 'bcrypt';
 
 const database = t.type({
     postgresql: maybe(
@@ -29,6 +31,13 @@ export type DatabaseConfig =
           dbName: string;
       };
 
+const entryPassword = t.type({
+    type: t.union([t.literal(plain), t.literal(bcrypt)]),
+    value: t.string,
+});
+
+export type EntryPasswordConfig = t.TypeOf<typeof entryPassword>;
+
 const uploader = t.type({
     // false（もしくはuploader == null）ならばFloconアップローダーを無効にする。
     enabled: t.boolean,
@@ -51,6 +60,7 @@ export type UploaderConfig = t.TypeOf<typeof uploader>;
 export const serverConfigJson = t.type({
     admin: maybe(t.union([t.string, t.array(t.string)])),
     database: database,
+    entryPassword: maybe(entryPassword),
     uploader: maybe(uploader),
 
     // この文字が Access-Control-Allow-Origin と等しくなる。uploaderが有効でapi_serverとweb_serverが同一ドメインでない場合、これを設定しないとアップロードができない。現状、uploaderが有効なときにのみ使われる。キー名を 'Access-Control-Allow-Origin' ではなくcamelCaseにしているのは、「JSONに書いたヘッダーがすべて反映される」という勘違いを防ぐため。
