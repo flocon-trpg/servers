@@ -49,16 +49,18 @@ export class File {
         this.size = size;
     }
 
+    // multerによってランダムに生成されたファイル名。ストレージに保存されるファイル名と一致する。
     @PrimaryKey()
     public filename: string;
+
+    // ユーザーに表示するファイル名。変更（リネーム）可能。
+    @Property()
+    @Index()
+    public screenname: string;
 
     @Property({ type: Date, nullable: true, onCreate: () => new Date() })
     @Index()
     public createdAt?: Date;
-
-    @Property()
-    @Index()
-    public screenname: string;
 
     @Property()
     public encoding: string;

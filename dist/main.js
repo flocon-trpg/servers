@@ -28,8 +28,8 @@ const helpers_1 = require("./graphql+mikro-orm/resolvers/utils/helpers");
 const core_1 = require("@mikro-orm/core");
 const appConsole_1 = require("./utils/appConsole");
 const fs_extra_1 = require("fs-extra");
-const uuid_1 = require("uuid");
 const FilePermissionType_1 = require("./enums/FilePermissionType");
+const easyFlake_1 = require("./utils/easyFlake");
 const logEntryPasswordConfig = (serverConfig) => {
     if (serverConfig.entryPassword == null) {
         appConsole_1.AppConsole.log({
@@ -134,7 +134,7 @@ const main = async (params) => {
                 cb(null, path_1.default.resolve(uploaderConfig.directory));
             },
             filename: function (req, file, cb) {
-                cb(null, uuid_1.v4() + path_1.default.extname(file.originalname));
+                cb(null, easyFlake_1.easyFlake() + path_1.default.extname(file.originalname));
             },
         });
         app.post('/uploader/upload/:permission', async (req, res, next) => {

@@ -33,15 +33,15 @@ __decorate([
     __metadata("design:type", String)
 ], File.prototype, "filename", void 0);
 __decorate([
-    core_1.Property({ type: Date, nullable: true, onCreate: () => new Date() }),
-    core_1.Index(),
-    __metadata("design:type", Date)
-], File.prototype, "createdAt", void 0);
-__decorate([
     core_1.Property(),
     core_1.Index(),
     __metadata("design:type", String)
 ], File.prototype, "screenname", void 0);
+__decorate([
+    core_1.Property({ type: Date, nullable: true, onCreate: () => new Date() }),
+    core_1.Index(),
+    __metadata("design:type", Date)
+], File.prototype, "createdAt", void 0);
 __decorate([
     core_1.Property(),
     __metadata("design:type", String)

@@ -12,10 +12,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteRoom = exports.RoomOp = exports.Room = void 0;
 const core_1 = require("@mikro-orm/core");
 const uuid_1 = require("uuid");
+const easyFlake_1 = require("../../../utils/easyFlake");
 const mikro_orm_1 = require("../roomMessage/mikro-orm");
 let Room = class Room {
     constructor({ createdBy, name, value, }) {
-        this.id = uuid_1.v4();
+        this.id = easyFlake_1.easyFlake();
         this.version = 1;
         this.revision = 0;
         this.roomOperations = new core_1.Collection(this);

@@ -11,6 +11,7 @@ import {
     Unique,
 } from '@mikro-orm/core';
 import { v4 } from 'uuid';
+import { easyFlake } from '../../../utils/easyFlake';
 import { EM } from '../../../utils/types';
 import {
     DicePieceValueLog as DicePieceValueLogEntity,
@@ -39,7 +40,7 @@ export class Room {
     }
 
     @PrimaryKey()
-    public id: string = v4();
+    public id: string = easyFlake();
 
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ version: true, index: true })

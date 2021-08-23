@@ -29,6 +29,7 @@ import { ensureDir } from 'fs-extra';
 import { v4 } from 'uuid';
 import { FilePermissionType } from './enums/FilePermissionType';
 import { ServerConfig } from './configType';
+import { easyFlake } from './utils/easyFlake';
 
 const logEntryPasswordConfig = (serverConfig: ServerConfig) => {
     if (serverConfig.entryPassword == null) {
@@ -165,7 +166,7 @@ const main = async (params: { debug: boolean }): Promise<void> => {
                 cb(null, path.resolve(uploaderConfig.directory));
             },
             filename: function (req, file, cb) {
-                cb(null, v4() + path.extname(file.originalname));
+                cb(null, easyFlake() + path.extname(file.originalname));
             },
         });
 

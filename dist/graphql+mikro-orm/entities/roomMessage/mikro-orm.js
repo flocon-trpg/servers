@@ -13,6 +13,7 @@ exports.RoomSe = exports.NumberPieceValueLog = exports.DicePieceValueLog = expor
 const core_1 = require("@mikro-orm/core");
 const uuid_1 = require("uuid");
 const FileSourceType_1 = require("../../../enums/FileSourceType");
+const easyFlake_1 = require("../../../utils/easyFlake");
 const mikro_orm_1 = require("../room/mikro-orm");
 const mikro_orm_2 = require("../user/mikro-orm");
 let RoomPubCh = class RoomPubCh {
@@ -59,7 +60,7 @@ RoomPubCh = __decorate([
 exports.RoomPubCh = RoomPubCh;
 let RoomPubMsg = class RoomPubMsg {
     constructor({ initText, initTextSource, }) {
-        this.id = uuid_1.v4();
+        this.id = easyFlake_1.easyFlake();
         this.version = 1;
         this.createdAt = new Date();
         this.isSecret = false;
@@ -166,7 +167,7 @@ RoomPubMsg = __decorate([
 exports.RoomPubMsg = RoomPubMsg;
 let RoomPrvMsg = class RoomPrvMsg {
     constructor({ initText, initTextSource, }) {
-        this.id = uuid_1.v4();
+        this.id = easyFlake_1.easyFlake();
         this.version = 1;
         this.createdAt = new Date();
         this.isSecret = false;
@@ -278,7 +279,7 @@ RoomPrvMsg = __decorate([
 exports.RoomPrvMsg = RoomPrvMsg;
 let DicePieceValueLog = class DicePieceValueLog {
     constructor({ characterCreatedBy, characterId, room, stateId, value, }) {
-        this.id = uuid_1.v4();
+        this.id = easyFlake_1.easyFlake();
         this.createdAt = new Date();
         this.characterCreatedBy = characterCreatedBy;
         this.characterId = characterId;
@@ -322,7 +323,7 @@ DicePieceValueLog = __decorate([
 exports.DicePieceValueLog = DicePieceValueLog;
 let NumberPieceValueLog = class NumberPieceValueLog {
     constructor({ characterCreatedBy, characterId, room, stateId, value, }) {
-        this.id = uuid_1.v4();
+        this.id = easyFlake_1.easyFlake();
         this.createdAt = new Date();
         this.characterCreatedBy = characterCreatedBy;
         this.characterId = characterId;
@@ -366,7 +367,7 @@ NumberPieceValueLog = __decorate([
 exports.NumberPieceValueLog = NumberPieceValueLog;
 let RoomSe = class RoomSe {
     constructor({ filePath, fileSourceType, volume, }) {
-        this.id = uuid_1.v4();
+        this.id = easyFlake_1.easyFlake();
         this.createdAt = new Date();
         this.filePath = filePath;
         this.fileSourceType = fileSourceType;
