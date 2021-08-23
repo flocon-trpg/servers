@@ -60,35 +60,46 @@ class PromiseQueue {
                 id,
                 result: { type: 'timeout' },
             };
-            return rawObservable.pipe(Rx.timeoutWith(timeout, rxjs_2.defer(() => {
-                this._pendingPromises.delete(id);
-                return rxjs_2.of(timeoutValue);
-            })));
-        }), Rx.concatAll(), Rx.publish(), Rx.refCount());
-        this._result.subscribe(() => undefined, reason => {
-            throw reason;
-        }, () => {
-            throw new Error('PromiseQueue observable completed for an unknown reason.');
+            return rawObservable.pipe(Rx.timeout({
+                each: timeout,
+                with: () => rxjs_2.defer(() => {
+                    this._pendingPromises.delete(id);
+                    return rxjs_2.of(timeoutValue);
+                }),
+            }));
+        }), Rx.concatAll(), Rx.share());
+        this._result.subscribe({
+            next: () => undefined,
+            error: reason => {
+                throw reason;
+            },
+            complete: () => {
+                throw new Error('PromiseQueue observable completed for an unknown reason.');
+            },
         });
     }
     nextCore(execute, timeout) {
         const id = uuid_1.v4();
         this._pendingPromises.add(id);
         const result = new Promise((resolver, reject) => {
-            this._result.pipe(Rx.first(x => x.id === id)).subscribe(r => {
-                switch (r.result.type) {
-                    case exports.executed:
-                        if (r.result.isError) {
-                            reject(r.result.value);
+            this._result.pipe(Rx.first(x => x.id === id)).subscribe({
+                next: r => {
+                    switch (r.result.type) {
+                        case exports.executed:
+                            if (r.result.isError) {
+                                reject(r.result.value);
+                                return;
+                            }
+                            resolver({ type: exports.executed, value: r.result.value });
                             return;
-                        }
-                        resolver({ type: exports.executed, value: r.result.value });
-                        return;
-                    case 'timeout':
-                        resolver({ type: 'timeout' });
-                        return;
-                }
-            }, () => reject('PromiseQueue observable has thrown an error for an unknown reason.'), () => reject('PromiseQueue observable has completed for an unknown reason.'));
+                        case 'timeout':
+                            resolver({ type: 'timeout' });
+                            return;
+                    }
+                },
+                error: () => reject('PromiseQueue observable has thrown an error for an unknown reason.'),
+                complete: () => reject('PromiseQueue observable has completed for an unknown reason.'),
+            });
         });
         this._promises.next({ id, execute, timeout });
         return result;
