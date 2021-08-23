@@ -42,7 +42,7 @@ const helpers_1 = require("../utils/helpers");
 const JoinRoomFailureType_1 = require("../../../enums/JoinRoomFailureType");
 const Room$MikroORM = __importStar(require("../../entities/room/mikro-orm"));
 const global_1 = require("../../entities/roomAsListItem/global");
-const PromiseQueue_1 = require("../../../utils/PromiseQueue");
+const promiseQueue_1 = require("../../../utils/promiseQueue");
 const messages_1 = require("../utils/messages");
 const graphql_1 = require("../../entities/room/graphql");
 const OperateRoomFailureType_1 = require("../../../enums/OperateRoomFailureType");
@@ -247,7 +247,7 @@ const joinRoomCore = async ({ args, context, strategy, }) => {
         }
     };
     const result = await context.promiseQueue.next(queue);
-    if (result.type === PromiseQueue_1.queueLimitReached) {
+    if (result.type === promiseQueue_1.queueLimitReached) {
         throw messages_1.serverTooBusyMessage;
     }
     return result.value;
@@ -325,7 +325,7 @@ const promoteMeCore = async ({ roomId, context, strategy, }) => {
         }
     };
     const result = await context.promiseQueue.next(queue);
-    if (result.type === PromiseQueue_1.queueLimitReached) {
+    if (result.type === promiseQueue_1.queueLimitReached) {
         throw messages_1.serverTooBusyMessage;
     }
     return result.value;
@@ -498,7 +498,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             };
         };
         const result = await context.promiseQueue.next(queue);
-        if (result.type === PromiseQueue_1.queueLimitReached) {
+        if (result.type === promiseQueue_1.queueLimitReached) {
             throw messages_1.serverTooBusyMessage;
         }
         return result.value;
@@ -517,7 +517,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             };
         };
         const result = await context.promiseQueue.next(queue);
-        if (result.type === PromiseQueue_1.queueLimitReached) {
+        if (result.type === promiseQueue_1.queueLimitReached) {
             throw messages_1.serverTooBusyMessage;
         }
         return result.value;
@@ -613,7 +613,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             return result_1.Result.ok(messages);
         };
         const result = await context.promiseQueue.next(queue);
-        if (result.type === PromiseQueue_1.queueLimitReached) {
+        if (result.type === promiseQueue_1.queueLimitReached) {
             throw messages_1.serverTooBusyMessage;
         }
         if (result.value.isError) {
@@ -678,7 +678,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             });
         };
         const coreResult = await context.promiseQueue.next(queue);
-        if (coreResult.type === PromiseQueue_1.queueLimitReached) {
+        if (coreResult.type === promiseQueue_1.queueLimitReached) {
             throw messages_1.serverTooBusyMessage;
         }
         if (coreResult.value.isError) {
@@ -720,7 +720,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             });
         };
         const coreResult = await context.promiseQueue.next(queue);
-        if (coreResult.type === PromiseQueue_1.queueLimitReached) {
+        if (coreResult.type === promiseQueue_1.queueLimitReached) {
             throw messages_1.serverTooBusyMessage;
         }
         if (coreResult.value.isError) {
@@ -781,7 +781,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             };
         };
         const result = await context.promiseQueue.next(queue);
-        if (result.type === PromiseQueue_1.queueLimitReached) {
+        if (result.type === promiseQueue_1.queueLimitReached) {
             throw messages_1.serverTooBusyMessage;
         }
         return result.value;
@@ -816,7 +816,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             };
         };
         const result = await context.promiseQueue.next(queue);
-        if (result.type === PromiseQueue_1.queueLimitReached) {
+        if (result.type === promiseQueue_1.queueLimitReached) {
             throw messages_1.serverTooBusyMessage;
         }
         if (result.value.payload != null) {
@@ -940,7 +940,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             };
         };
         const result = await context.promiseQueue.next(queue);
-        if (result.type === PromiseQueue_1.queueLimitReached) {
+        if (result.type === promiseQueue_1.queueLimitReached) {
             throw messages_1.serverTooBusyMessage;
         }
         if (result.value.payload != null) {
@@ -978,7 +978,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             });
         };
         const result = await context.promiseQueue.next(queue);
-        if (result.type === PromiseQueue_1.queueLimitReached) {
+        if (result.type === promiseQueue_1.queueLimitReached) {
             throw messages_1.serverTooBusyMessage;
         }
         if (result.value.isError) {
@@ -1024,7 +1024,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             });
         };
         const result = await context.promiseQueue.next(queue);
-        if (result.type === PromiseQueue_1.queueLimitReached) {
+        if (result.type === promiseQueue_1.queueLimitReached) {
             throw messages_1.serverTooBusyMessage;
         }
         if (result.value.isError) {
@@ -1173,7 +1173,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             return result_1.Result.ok(result);
         };
         const result = await context.promiseQueue.next(queue);
-        if (result.type === PromiseQueue_1.queueLimitReached) {
+        if (result.type === promiseQueue_1.queueLimitReached) {
             throw messages_1.serverTooBusyMessage;
         }
         if (result.value.isError) {
@@ -1277,7 +1277,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             return result_1.Result.ok({ result, payload });
         };
         const result = await context.promiseQueue.next(queue);
-        if (result.type === PromiseQueue_1.queueLimitReached) {
+        if (result.type === promiseQueue_1.queueLimitReached) {
             throw messages_1.serverTooBusyMessage;
         }
         if (result.value.isError) {
@@ -1382,7 +1382,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             return result_1.Result.ok({ result, payload });
         };
         const result = await context.promiseQueue.next(queue);
-        if (result.type === PromiseQueue_1.queueLimitReached) {
+        if (result.type === promiseQueue_1.queueLimitReached) {
             throw messages_1.serverTooBusyMessage;
         }
         if (result.value.isError) {
@@ -1449,7 +1449,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             return result_1.Result.ok({ result, payload });
         };
         const result = await context.promiseQueue.next(queue);
-        if (result.type === PromiseQueue_1.queueLimitReached) {
+        if (result.type === promiseQueue_1.queueLimitReached) {
             throw messages_1.serverTooBusyMessage;
         }
         if (result.value.isError) {
@@ -1578,7 +1578,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             });
         };
         const result = await context.promiseQueue.next(queue);
-        if (result.type === PromiseQueue_1.queueLimitReached) {
+        if (result.type === promiseQueue_1.queueLimitReached) {
             throw messages_1.serverTooBusyMessage;
         }
         if (result.value.isError) {
@@ -1706,7 +1706,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             });
         };
         const result = await context.promiseQueue.next(queue);
-        if (result.type === PromiseQueue_1.queueLimitReached) {
+        if (result.type === promiseQueue_1.queueLimitReached) {
             throw messages_1.serverTooBusyMessage;
         }
         if (result.value.isError) {
@@ -1837,7 +1837,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             });
         };
         const result = await context.promiseQueue.next(queue);
-        if (result.type === PromiseQueue_1.queueLimitReached) {
+        if (result.type === promiseQueue_1.queueLimitReached) {
             throw messages_1.serverTooBusyMessage;
         }
         if (result.value.isError) {

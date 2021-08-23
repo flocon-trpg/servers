@@ -5,7 +5,7 @@ import admin from 'firebase-admin';
 import { ExpressContext } from 'apollo-server-express/dist/ApolloServer';
 import { ResolverContext } from './graphql+mikro-orm/utils/Contexts';
 import { buildSchema } from './buildSchema';
-import { PromiseQueue } from './utils/PromiseQueue';
+import { PromiseQueue } from './utils/promiseQueue';
 import { prepareORM } from './mikro-orm';
 import { firebaseConfig, loadServerConfigAsMain } from './config';
 import ws from 'ws';

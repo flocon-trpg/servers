@@ -17,7 +17,7 @@ import { ensureAuthorizedUser, findRoomAndMyParticipant } from '../utils/helpers
 import { JoinRoomFailureType } from '../../../enums/JoinRoomFailureType';
 import * as Room$MikroORM from '../../entities/room/mikro-orm';
 import { stateToGraphQL as stateToGraphql$RoomAsListItem } from '../../entities/roomAsListItem/global';
-import { queueLimitReached } from '../../../utils/PromiseQueue';
+import { queueLimitReached } from '../../../utils/promiseQueue';
 import { serverTooBusyMessage } from '../utils/messages';
 import { RoomOperation, deleteRoomOperation } from '../../entities/room/graphql';
 import { OperateRoomFailureType } from '../../../enums/OperateRoomFailureType';

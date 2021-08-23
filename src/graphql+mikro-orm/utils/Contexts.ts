@@ -1,7 +1,7 @@
 import { Result } from '@kizahasi/result';
 import { InMemoryConnectionManager } from '../../connection/main';
 import { BaasType } from '../../enums/BaasType';
-import { PromiseQueue } from '../../utils/PromiseQueue';
+import { PromiseQueue } from '../../utils/promiseQueue';
 import { EM } from '../../utils/types';
 import { User } from '../entities/user/mikro-orm';
 

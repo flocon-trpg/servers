@@ -8,7 +8,7 @@ const express_1 = __importDefault(require("express"));
 const path_1 = __importDefault(require("path"));
 const firebase_admin_1 = __importDefault(require("firebase-admin"));
 const buildSchema_1 = require("./buildSchema");
-const PromiseQueue_1 = require("./utils/PromiseQueue");
+const promiseQueue_1 = require("./utils/promiseQueue");
 const mikro_orm_1 = require("./mikro-orm");
 const config_1 = require("./config");
 const ws_1 = __importDefault(require("ws"));
@@ -86,7 +86,7 @@ const main = async (params) => {
         }
         return authTokenValue == null ? undefined : await getDecodedIdToken(authTokenValue);
     };
-    const promiseQueue = new PromiseQueue_1.PromiseQueue({ queueLimit: 50 });
+    const promiseQueue = new promiseQueue_1.PromiseQueue({ queueLimit: 50 });
     const context = async (context) => {
         return {
             decodedIdToken: await getDecodedIdTokenFromBearer(context.req.headers.authorization),

@@ -3,7 +3,7 @@ import { createPostgreSQL, createSQLite } from '../../../mikro-orm';
 import { EM, ORM } from '../../../utils/types';
 import { User as User$MikroORM } from '../../entities/user/mikro-orm';
 import { ResolverContext } from '../../utils/Contexts';
-import { PromiseQueue } from '../../../utils/PromiseQueue';
+import { PromiseQueue } from '../../../utils/promiseQueue';
 import { InMemoryConnectionManager } from '../../../connection/main';
 import { UpOperation } from '@kizahasi/flocon-core';
 import { BaasType } from '../../../enums/BaasType';

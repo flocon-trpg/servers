@@ -28,7 +28,7 @@ type RawResult = {
           };
 };
 
-type Result<T> =
+export type PromiseQueueResult<T> =
     | {
           type: typeof executed;
           value: T;
@@ -38,21 +38,21 @@ type Result<T> =
       };
 
 type ResultWithTimeout<T> =
-    | Result<T>
+    | PromiseQueueResult<T>
     | {
           type: typeof timeout;
       };
 
 export class PromiseQueue {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    readonly _promises = new Subject<{
+    private readonly _promises = new Subject<{
         id: string;
         execute: () => Promise<any>;
         timeout: number | null | undefined;
     }>();
     // _resultはerrorやcompleteが流されない仕様にしている。もしerrorが流されてきたら、コンストラクタ内でsubscribeしているところで例外がthrowされる。
-    readonly _result: Observable<RawResult>;
-    readonly _pendingPromises = new Set<string>(); // 値は_coreのid
+    private readonly _result: Observable<RawResult>;
+    private readonly _pendingPromises = new Set<string>(); // 値は_coreのid
 
     public constructor({ queueLimit }: { queueLimit?: number | null }) {
         this._result = this._promises.pipe(
@@ -156,7 +156,7 @@ export class PromiseQueue {
         return this.nextCore(execute, timeout);
     }
 
-    public async next<T>(execute: () => Promise<T>): Promise<Result<T>> {
+    public async next<T>(execute: () => Promise<T>): Promise<PromiseQueueResult<T>> {
         const result = await this.nextCore(execute, undefined);
         if (result.type === timeout) {
             throw new Error('not expected timeout. ObjectId collision?');

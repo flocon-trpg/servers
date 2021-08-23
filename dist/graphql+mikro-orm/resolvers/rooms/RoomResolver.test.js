@@ -22,7 +22,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const $MikroORM = __importStar(require("../../entities/room/mikro-orm"));
 const mikro_orm_1 = require("../../../mikro-orm");
 const mikro_orm_2 = require("../../entities/user/mikro-orm");
-const PromiseQueue_1 = require("../../../utils/PromiseQueue");
+const promiseQueue_1 = require("../../../utils/promiseQueue");
 const main_1 = require("../../../connection/main");
 const BaasType_1 = require("../../../enums/BaasType");
 const timeout = 20000;
@@ -52,7 +52,7 @@ const createResolverContext = (orm, uid) => ({
             },
         },
     },
-    promiseQueue: new PromiseQueue_1.PromiseQueue({}),
+    promiseQueue: new promiseQueue_1.PromiseQueue({}),
     connectionManager: new main_1.InMemoryConnectionManager(),
     em: orm.em.fork(),
     authorizedUser: null,

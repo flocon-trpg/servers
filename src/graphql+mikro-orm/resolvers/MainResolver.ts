@@ -12,7 +12,7 @@ import {
 import { ResolverContext } from '../utils/Contexts';
 import { EntryToServerResultType } from '../../enums/EntryToServerResultType';
 import { checkEntry, checkSignIn, comparePassword, NotSignIn } from './utils/helpers';
-import { queueLimitReached } from '../../utils/PromiseQueue';
+import { queueLimitReached } from '../../utils/promiseQueue';
 import { serverTooBusyMessage } from './utils/messages';
 import { User } from '../entities/user/mikro-orm';
 import { Pong } from '../entities/pong/graphql';

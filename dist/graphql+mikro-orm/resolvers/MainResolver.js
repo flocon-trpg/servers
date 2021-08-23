@@ -19,7 +19,7 @@ exports.MainResolver = void 0;
 const type_graphql_1 = require("type-graphql");
 const EntryToServerResultType_1 = require("../../enums/EntryToServerResultType");
 const helpers_1 = require("./utils/helpers");
-const PromiseQueue_1 = require("../../utils/PromiseQueue");
+const promiseQueue_1 = require("../../utils/promiseQueue");
 const messages_1 = require("./utils/messages");
 const mikro_orm_1 = require("../entities/user/mikro-orm");
 const graphql_1 = require("../entities/pong/graphql");
@@ -110,7 +110,7 @@ let MainResolver = class MainResolver {
             };
         };
         const result = await context.promiseQueue.next(queue);
-        if (result.type === PromiseQueue_1.queueLimitReached) {
+        if (result.type === promiseQueue_1.queueLimitReached) {
             throw messages_1.serverTooBusyMessage;
         }
         return result.value;
