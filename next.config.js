@@ -4,7 +4,7 @@ const defaultConfig = {
     reactStrictMode: true,
     env: {
         customKey: 'test',
-    }
+    },
 };
 
 // https://www.npmjs.com/package/@next/bundle-analyzer

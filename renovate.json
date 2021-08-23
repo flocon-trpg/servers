@@ -1,7 +1,3 @@
 {
-  "extends": [
-    "config:base",
-    ":preserveSemverRanges",
-    "schedule:weekends"
-  ]
+    "extends": ["config:base", ":preserveSemverRanges", "schedule:weekends"]
 }

@@ -84,7 +84,6 @@
         "singleQuote": true,
         "trailingComma": "es5",
         "tabWidth": 4,
-        "endOfLine": "crlf",
         "arrowParens": "avoid"
     },
     "scripts": {
@@ -100,8 +99,9 @@
         "test": "jest",
         "type-check": "tsc",
         "tc": "npm run type-check",
-        "prettier": "prettier --write \"src/**/*.ts\" \"src/**/*.tsx\"",
-        "prepare": "husky install"
+        "prepare": "husky install",
+        "prettier": "npm run prettier:base -- --write",
+        "prettier:base": "prettier \"**/*.{ts,config.js,eslintrc.js,json,yml,md}\""
     },
     "license": "MIT"
 }
