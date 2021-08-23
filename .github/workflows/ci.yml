@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
     main:
-        name: Build, lint, and test on Node ${{ matrix.node }} and ${{ matrix.os }}
+        name: Build and test on Node ${{ matrix.node }} and ${{ matrix.os }}
 
         runs-on: ${{ matrix.os }}
         strategy:
@@ -23,9 +23,6 @@ jobs:
 
             - name: Install
               run: npm install
-
-            - name: Lint
-              run: npm run lint
 
             - name: Build
               run: npm run build
