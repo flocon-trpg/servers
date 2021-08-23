@@ -95,7 +95,7 @@
         "watch:node": "nodemon --config nodemon.node.json",
         "prepare": "husky install",
         "prettier": "npm run prettier:base -- --write",
-        "prettier:base": "prettier \"**/*.{ts,js,json,yml,md}\""
+        "prettier:base": "prettier \"**/*.{ts,config.js,eslintrc.js,json,yml,md}\""
     },
     "license": "MIT"
 }
