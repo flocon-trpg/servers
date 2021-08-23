@@ -22,7 +22,7 @@ jobs:
                   node-version: ${{ matrix.node }}
 
             - name: Install
-              run: npm install
+              run: npm ci
 
             - name: Test
               run: npm run test -- --ci --coverage --maxWorkers=2
@@ -53,7 +53,7 @@ jobs:
                   node-version: ${{ matrix.node }}
 
             - name: Install
-              run: npm install
+              run: npm ci
 
             - name: Prettier(check)
               run: npm run prettier:base -- --check
