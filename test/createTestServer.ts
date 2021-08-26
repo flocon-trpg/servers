@@ -21,26 +21,6 @@ const PostgreSQL = {
 
 const SQLite = { dbName: './test.sqlite3', debug: true };
 
-const preparePostgreSQL = async () => {
-    const psql = await createPostgreSQL(PostgreSQL);
-    const migrator = psql.getMigrator();
-    const migrations = await migrator.getPendingMigrations();
-    if (migrations && migrations.length > 0) {
-        await migrator.up();
-    }
-    return psql;
-};
-
-const prepareSQLite = async () => {
-    const sqlite = await createSQLite(SQLite);
-    const migrator = sqlite.getMigrator();
-    const migrations = await migrator.getPendingMigrations();
-    if (migrations && migrations.length > 0) {
-        await migrator.up();
-    }
-    return sqlite;
-};
-
 export const createTestServer = async (orm: 'SQLite' | 'PostgreSQL') => {
     const promiseQueue = new PromiseQueue({ queueLimit: 2 });
     const connectionManager = new InMemoryConnectionManager();
@@ -49,7 +29,7 @@ export const createTestServer = async (orm: 'SQLite' | 'PostgreSQL') => {
     let databaseConfig: DatabaseConfig;
     switch (orm) {
         case 'PostgreSQL':
-            em = (await preparePostgreSQL()).em;
+            em = (await createPostgreSQL(PostgreSQL)).em;
             databaseConfig = {
                 __type: postgresql,
                 clientUrl: postgresClientUrl,
@@ -57,7 +37,7 @@ export const createTestServer = async (orm: 'SQLite' | 'PostgreSQL') => {
             };
             break;
         case 'SQLite':
-            em = (await prepareSQLite()).em;
+            em = (await createSQLite(SQLite)).em;
             databaseConfig = {
                 __type: sqlite,
                 dbName: './test.sqlite3',

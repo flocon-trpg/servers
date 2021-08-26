@@ -42,6 +42,31 @@ jobs:
             - name: Type-check
               run: npm run type-check
 
+            - name: Migration-up SQLite
+              run: npm run migration-up -- --db sqlite
+              env:
+                  FLOCON_API_CONFIG: >
+                      {
+                          "database": {
+                              "sqlite": {
+                                  "dbName": "./test.sqlite3"
+                              }
+                          }
+                      }
+
+            - name: Migration-up PostgreSQL
+              run: npm run migration-up -- --db postgresql
+              env:
+                  FLOCON_API_CONFIG: >
+                      {
+                          "database": {
+                              "postgresql": {
+                                  "dbName": "test",
+                                  "clientUrl": "postgresql://postgres:postgres@postgres:5432"
+                              }
+                          }
+                      }
+
             # does not execute `npm run build` because it already has js files
 
             - name: Test
