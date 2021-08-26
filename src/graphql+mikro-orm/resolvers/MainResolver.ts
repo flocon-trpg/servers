@@ -25,7 +25,6 @@ import VERSION from '../../VERSION';
 import { PrereleaseType } from '../../enums/PrereleaseType';
 import { alpha, beta, rc } from '@kizahasi/util';
 import { BaasType } from '../../enums/BaasType';
-import { loadServerConfigAsMain } from '../../config';
 
 export type PongPayload = {
     value: number;

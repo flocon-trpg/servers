@@ -10,6 +10,7 @@ import { createServer } from '../src/createServer';
 import { Result } from '@kizahasi/result';
 import { Resources } from './resources';
 
+// github actionsではlocalhost:5432ではなくpostgres:5432のようにしないとデータベースが見つからない
 const postgresClientUrl = 'postgresql://postgres:postgres@postgres:5432';
 
 const PostgreSQL = {

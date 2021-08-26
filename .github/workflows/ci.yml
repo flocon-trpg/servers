@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
     main:
-        name: Build and test on ${{ matrix.container }}
+        name: Type-check and test on ${{ matrix.container }}
 
         strategy:
             matrix:
@@ -35,6 +35,7 @@ jobs:
             - name: Update to npm@7
               run: npm install -g npm@7
 
+            # npm ci はエラーが出るので使っていない
             - name: Install
               run: npm install
 
@@ -68,6 +69,7 @@ jobs:
             - name: Update to npm@7
               run: npm install -g npm@7
 
+            # npm ci はエラーが出るので使っていない
             - name: Install
               run: npm install
 
