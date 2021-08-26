@@ -6,9 +6,7 @@ import { GlobalRoom } from '../../entities/room/global';
 import { ParticipantState, State } from '@kizahasi/flocon-core';
 import { anonymous, recordToArray } from '@kizahasi/util';
 import { BaasType } from '../../../enums/BaasType';
-import { loadServerConfigAsMain } from '../../../config';
-import { EntryPasswordConfig, plain } from '../../../configType';
-import { timingSafeEqual } from 'crypto';
+import { EntryPasswordConfig, plain, ServerConfig } from '../../../configType';
 import safeCompare from 'safe-compare';
 import bcrypt from 'bcrypt';
 
@@ -42,14 +40,15 @@ export const getUserIfEntry = async ({
     em,
     userUid,
     baasType,
+    serverConfig,
     noFlush,
 }: {
     em: EM;
     userUid: string;
     baasType: BaasType;
+    serverConfig: ServerConfig;
     noFlush?: boolean;
 }): Promise<User | null> => {
-    const serverConfig = await loadServerConfigAsMain();
     const user = await em.findOne(User, { userUid, baasType });
     const requiresEntryPassword = serverConfig.entryPassword != null;
 
@@ -83,14 +82,16 @@ export const checkEntry = async ({
     em,
     userUid,
     baasType,
+    serverConfig,
     noFlush,
 }: {
     em: EM;
     userUid: string;
     baasType: BaasType;
+    serverConfig: ServerConfig;
     noFlush?: boolean;
 }): Promise<boolean> => {
-    return (await getUserIfEntry({ em, userUid, baasType, noFlush })) != null;
+    return (await getUserIfEntry({ em, userUid, baasType, serverConfig, noFlush })) != null;
 };
 
 class FindRoomAndMyParticipantResult {

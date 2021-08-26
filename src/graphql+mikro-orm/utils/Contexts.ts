@@ -1,4 +1,5 @@
 import { Result } from '@kizahasi/result';
+import { ServerConfig } from '../../configType';
 import { InMemoryConnectionManager } from '../../connection/main';
 import { BaasType } from '../../enums/BaasType';
 import { PromiseQueue } from '../../utils/promiseQueue';
@@ -18,6 +19,7 @@ export type ResolverContext = {
     readonly decodedIdToken?: Result<Readonly<DecodedIdToken>, unknown>;
     readonly promiseQueue: PromiseQueue;
     readonly connectionManager: InMemoryConnectionManager;
+    readonly serverConfig: Readonly<ServerConfig>;
 
     // 原則としてfork済みなので、forkする必要はない。
     // @Authorizedの処理で用いたEMと同じインスタンス。理由は、authorizedUserをManyToOneなどでセットする際に、もしEMが異なっているとエラーが出るかもしれないと思ったから（未検証）。

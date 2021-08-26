@@ -8,7 +8,6 @@ const mikro_orm_1 = require("../../entities/user/mikro-orm");
 const mikro_orm_2 = require("../../entities/room/mikro-orm");
 const global_1 = require("../../entities/room/global");
 const util_1 = require("@kizahasi/util");
-const config_1 = require("../../../config");
 const configType_1 = require("../../../configType");
 const safe_compare_1 = __importDefault(require("safe-compare"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
@@ -33,8 +32,7 @@ const checkSignInAndNotAnonymous = (context) => {
     return decodedIdToken;
 };
 exports.checkSignInAndNotAnonymous = checkSignInAndNotAnonymous;
-const getUserIfEntry = async ({ em, userUid, baasType, noFlush, }) => {
-    const serverConfig = await config_1.loadServerConfigAsMain();
+const getUserIfEntry = async ({ em, userUid, baasType, serverConfig, noFlush, }) => {
     const user = await em.findOne(mikro_orm_1.User, { userUid, baasType });
     const requiresEntryPassword = serverConfig.entryPassword != null;
     if (user == null) {
@@ -61,8 +59,8 @@ const getUserIfEntry = async ({ em, userUid, baasType, noFlush, }) => {
     return null;
 };
 exports.getUserIfEntry = getUserIfEntry;
-const checkEntry = async ({ em, userUid, baasType, noFlush, }) => {
-    return (await exports.getUserIfEntry({ em, userUid, baasType, noFlush })) != null;
+const checkEntry = async ({ em, userUid, baasType, serverConfig, noFlush, }) => {
+    return (await exports.getUserIfEntry({ em, userUid, baasType, serverConfig, noFlush })) != null;
 };
 exports.checkEntry = checkEntry;
 class FindRoomAndMyParticipantResult {

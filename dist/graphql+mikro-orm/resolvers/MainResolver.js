@@ -32,7 +32,6 @@ const VERSION_1 = __importDefault(require("../../VERSION"));
 const PrereleaseType_1 = require("../../enums/PrereleaseType");
 const util_1 = require("@kizahasi/util");
 const BaasType_1 = require("../../enums/BaasType");
-const config_1 = require("../../config");
 let MainResolver = class MainResolver {
     async listAvailableGameSystems() {
         return {
@@ -48,6 +47,7 @@ let MainResolver = class MainResolver {
             em: context.em,
             userUid: decodedIdToken.uid,
             baasType: BaasType_1.BaasType.Firebase,
+            serverConfig: context.serverConfig,
         });
     }
     async getServerInfo() {
@@ -71,7 +71,7 @@ let MainResolver = class MainResolver {
     async entryToServer(phrase, context) {
         const queue = async () => {
             const em = context.em;
-            const serverConfig = await config_1.loadServerConfigAsMain();
+            const serverConfig = context.serverConfig;
             const decodedIdToken = helpers_1.checkSignIn(context);
             if (decodedIdToken === helpers_1.NotSignIn) {
                 return {

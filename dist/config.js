@@ -19,13 +19,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loadServerConfigAsMigrationDown = exports.loadServerConfigAsMigrationUp = exports.loadServerConfigAsMigrationCreate = exports.loadServerConfigAsMain = exports.firebaseConfig = void 0;
+exports.loadServerConfigAsMigrationDown = exports.loadServerConfigAsMigrationUp = exports.loadServerConfigAsMigrationCreate = exports.loadServerConfigAsMain = exports.loadFirebaseConfig = void 0;
 const flocon_core_1 = require("@kizahasi/flocon-core");
 const configType_1 = require("./configType");
 const commandLineArgs_1 = require("./utils/commandLineArgs");
 const E = __importStar(require("fp-ts/Either"));
 const io_ts_reporters_1 = require("./utils/io-ts-reporters");
-const loadFirebaseConfig = () => {
+const loadFirebaseConfigCore = () => {
     let env = process.env['FLOCON_FIREBASE_CONFIG'];
     if (env == null) {
         env = process.env['NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG'];
@@ -90,7 +90,14 @@ const loadServerConfig = ({ databaseArg, }) => {
         accessControlAllowOrigin: right.accessControlAllowOrigin,
     };
 };
-exports.firebaseConfig = loadFirebaseConfig();
+let firebaseConfig;
+const loadFirebaseConfig = () => {
+    if (firebaseConfig == null) {
+        firebaseConfig = loadFirebaseConfigCore();
+    }
+    return firebaseConfig;
+};
+exports.loadFirebaseConfig = loadFirebaseConfig;
 let serverConfigAsMainCache = null;
 const loadServerConfigAsMain = async () => {
     var _a;

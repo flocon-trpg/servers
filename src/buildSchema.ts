@@ -18,54 +18,57 @@ import {
     getUserIfEntry,
     NotSignIn,
 } from './graphql+mikro-orm/resolvers/utils/helpers';
-import { loadServerConfigAsMain } from './config';
 import { BaasType } from './enums/BaasType';
 import { ADMIN, ENTRY } from './roles';
+import { ServerConfig } from './configType';
 
-const authChecker: AuthChecker<ResolverContext> = async ({ context }, roles) => {
-    let role: typeof ADMIN | typeof ENTRY | null = null;
-    if (roles.includes(ADMIN)) {
-        role = ADMIN;
-    } else if (roles.includes(ENTRY)) {
-        role = ENTRY;
-    }
+const authChecker =
+    (serverConfig: ServerConfig): AuthChecker<ResolverContext> =>
+    async ({ context }, roles) => {
+        let role: typeof ADMIN | typeof ENTRY | null = null;
+        if (roles.includes(ADMIN)) {
+            role = ADMIN;
+        } else if (roles.includes(ENTRY)) {
+            role = ENTRY;
+        }
 
-    const decodedIdToken = checkSignIn(context);
-    if (decodedIdToken === NotSignIn) {
-        return false;
-    }
-
-    if (role == null) {
-        return true;
-    }
-
-    const serverConfig = await loadServerConfigAsMain();
-    let adminUserUids: string[];
-    if (typeof serverConfig.admin === 'string') {
-        adminUserUids = [serverConfig.admin];
-    } else if (serverConfig.admin == null) {
-        adminUserUids = [];
-    } else {
-        adminUserUids = serverConfig.admin;
-    }
-
-    if (role === ADMIN) {
-        if (!adminUserUids.includes(decodedIdToken.uid)) {
+        const decodedIdToken = checkSignIn(context);
+        if (decodedIdToken === NotSignIn) {
             return false;
         }
-    }
 
-    const user = await getUserIfEntry({
-        em: context.em,
-        userUid: decodedIdToken.uid,
-        baasType: BaasType.Firebase,
-    });
-    if (user == null) {
-        return false;
-    }
-    context.authorizedUser = user;
-    return true;
-};
+        if (role == null) {
+            return true;
+        }
+
+        const adminConfig = serverConfig.admin;
+        let adminUserUids: string[];
+        if (typeof adminConfig === 'string') {
+            adminUserUids = [adminConfig];
+        } else if (adminConfig == null) {
+            adminUserUids = [];
+        } else {
+            adminUserUids = adminConfig;
+        }
+
+        if (role === ADMIN) {
+            if (!adminUserUids.includes(decodedIdToken.uid)) {
+                return false;
+            }
+        }
+
+        const user = await getUserIfEntry({
+            em: context.em,
+            userUid: decodedIdToken.uid,
+            baasType: BaasType.Firebase,
+            serverConfig,
+        });
+        if (user == null) {
+            return false;
+        }
+        context.authorizedUser = user;
+        return true;
+    };
 
 type Options = {
     emitSchemaFile: boolean;
@@ -87,30 +90,34 @@ const emitSchemaFileOptions: EmitSchemaFileOptions = {
     commentDescriptions: true,
 };
 
-export const buildSchema = async (options: Options): Promise<GraphQLSchema> => {
-    registerEnumTypes();
-    let emitSchemaFile: EmitSchemaFileOptions | undefined = undefined;
-    if (options.emitSchemaFile) {
-        emitSchemaFile = emitSchemaFileOptions;
-    }
-    return await buildSchemaCore({
-        ...optionBase,
-        authChecker,
-        emitSchemaFile,
-        pubSub: options.pubSub,
-    });
-};
+export const buildSchema =
+    (serverConfig: ServerConfig) =>
+    async (options: Options): Promise<GraphQLSchema> => {
+        registerEnumTypes();
+        let emitSchemaFile: EmitSchemaFileOptions | undefined = undefined;
+        if (options.emitSchemaFile) {
+            emitSchemaFile = emitSchemaFileOptions;
+        }
+        return await buildSchemaCore({
+            ...optionBase,
+            authChecker: authChecker(serverConfig),
+            emitSchemaFile,
+            pubSub: options.pubSub,
+        });
+    };
 
-export const buildSchemaSync = (options: Options): GraphQLSchema => {
-    registerEnumTypes();
-    let emitSchemaFile: EmitSchemaFileOptions | undefined = undefined;
-    if (options.emitSchemaFile) {
-        emitSchemaFile = emitSchemaFileOptions;
-    }
-    return buildSchemaSyncCore({
-        ...optionBase,
-        authChecker,
-        emitSchemaFile,
-        pubSub: options.pubSub,
-    });
-};
+export const buildSchemaSync =
+    (serverConfig: ServerConfig) =>
+    (options: Options): GraphQLSchema => {
+        registerEnumTypes();
+        let emitSchemaFile: EmitSchemaFileOptions | undefined = undefined;
+        if (options.emitSchemaFile) {
+            emitSchemaFile = emitSchemaFileOptions;
+        }
+        return buildSchemaSyncCore({
+            ...optionBase,
+            authChecker: authChecker(serverConfig),
+            emitSchemaFile,
+            pubSub: options.pubSub,
+        });
+    };

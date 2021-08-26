@@ -5,4 +5,4 @@ import registerEnumTypes from './src/graphql+mikro-orm/registerEnumTypes';
 console.log('building GraphQL schema...');
 
 registerEnumTypes();
-buildSchemaSync({ emitSchemaFile: true });
+buildSchemaSync(null)({ emitSchemaFile: true });

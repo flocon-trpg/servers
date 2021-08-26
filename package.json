@@ -1,9 +1,5 @@
 {
     "dependencies": {
-        "@graphql-codegen/cli": "^2.0.1",
-        "@graphql-codegen/typescript": "^2.0.0",
-        "@graphql-codegen/typescript-operations": "^2.0.1",
-        "@graphql-codegen/typescript-react-apollo": "^3.0.0",
         "@kizahasi/flocon-core": "^0.17.0",
         "@kizahasi/ot-string": "^0.2.3",
         "@kizahasi/result": "^1.0.0",
@@ -14,6 +10,7 @@
         "@mikro-orm/sqlite": "^4.5.7",
         "@types/bcrypt": "^5.0.0",
         "@types/color": "^3.0.2",
+        "@types/express": "^4.17.13",
         "@types/fs-extra": "^9.0.12",
         "@types/lodash": "^4.14.172",
         "@types/multer": "^1.4.7",
@@ -30,6 +27,7 @@
         "class-transformer": "^0.4.0",
         "class-validator": "^0.13.1",
         "color": "^4.0.1",
+        "express": "^4.17.1",
         "firebase-admin": "^9.11.0",
         "fs-extra": "^9.1.0",
         "graphql": "^15.5.1",
@@ -53,6 +51,11 @@
         "yargs": "^17.1.1"
     },
     "devDependencies": {
+        "@apollo/client": "^3.4.8",
+        "@graphql-codegen/cli": "^2.1.1",
+        "@graphql-codegen/typescript": "^2.1.1",
+        "@graphql-codegen/typescript-operations": "^2.1.1",
+        "@graphql-codegen/typescript-react-apollo": "^3.1.1",
         "@types/jest": "^26.0.24",
         "@typescript-eslint/eslint-plugin": "^4.29.1",
         "@typescript-eslint/parser": "^4.29.1",
@@ -60,8 +63,11 @@
         "eslint-config-prettier": "^8.2.0",
         "eslint-plugin-prettier": "^3.4.0",
         "husky": "^7.0.1",
+        "isomorphic-fetch": "^3.0.0",
+        "isomorphic-ws": "^4.0.1",
         "jest": "^27.0.6",
         "prettier": "^2.3.2",
+        "react": "^17.0.2",
         "rimraf": "^3.0.2",
         "ts-jest": "^27.0.4"
     },
@@ -78,8 +84,8 @@
     },
     "scripts": {
         "dev": "node dist/index.js",
-        "build": "tsc",
-        "build-release": "rimraf ./dist && tsc",
+        "build": "tsc -p tsconfig.build.json",
+        "build-release": "rimraf ./dist && npm run build",
         "gen": "run-s gen:schema gen:codegen",
         "gen:codegen": "graphql-codegen --config codegen.yml",
         "gen:schema": "ts-node run-buildSchemaSync.ts",
@@ -89,6 +95,7 @@
         "migration-up": "ts-node run-migrationUp.ts",
         "migration-down": "ts-node run-migrationDown.ts",
         "test": "jest",
+        "type-check": "tsc -p tsconfig.type-check.json",
         "watch": "run-p watch:*",
         "watch:codegen": "graphql-codegen --config codegen.yml --watch",
         "watch:schema": "nodemon --config nodemon.buildSchema.json",

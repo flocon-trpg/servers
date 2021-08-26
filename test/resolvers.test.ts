@@ -1,21 +1,19 @@
-import * as $MikroORM from '../../entities/room/mikro-orm';
-import { createPostgreSQL, createSQLite } from '../../../mikro-orm';
-import { EM, ORM } from '../../../utils/types';
-import { User as User$MikroORM } from '../../entities/user/mikro-orm';
-import { ResolverContext } from '../../utils/Contexts';
-import { PromiseQueue } from '../../../utils/promiseQueue';
-import { InMemoryConnectionManager } from '../../../connection/main';
+import * as $MikroORM from '../src/graphql+mikro-orm/entities/room/mikro-orm';
+import { EM } from '../src/utils/types';
+import { User as User$MikroORM } from '../src/graphql+mikro-orm/entities/user/mikro-orm';
 import { UpOperation } from '@kizahasi/flocon-core';
-import { BaasType } from '../../../enums/BaasType';
+import { BaasType } from '../src/enums/BaasType';
+import { createApolloClient } from './createApolloClient';
+import { createTestServer } from './createTestServer';
+import { Resources } from './resources';
+import {
+    EntryToServerMutation,
+    EntryToServerMutationVariables,
+    EntryToServerDocument,
+} from './graphql';
+import { EntryToServerResultType } from '../src/enums/EntryToServerResultType';
 
 const timeout = 20000;
-
-const PostgreSQL = {
-    dbName: 'test',
-    clientUrl: 'postgresql://test:test@localhost:5432',
-};
-
-const SQLite = { dbName: './test.sqlite3' };
 
 const clientId = (i?: number) => `CLIENT_ID${i ?? ''}`;
 
@@ -30,23 +28,6 @@ const resetDatabase = async (em: EM): Promise<void> => {
     }
     await em.flush();
 };
-
-const createResolverContext = (orm: ORM, uid: string): ResolverContext => ({
-    decodedIdToken: {
-        isError: false,
-        value: {
-            type: BaasType.Firebase,
-            uid,
-            firebase: {
-                sign_in_provider: 'DUMMY_SIGN_IN_PROVIDER', // 適当な値
-            },
-        },
-    },
-    promiseQueue: new PromiseQueue({}),
-    connectionManager: new InMemoryConnectionManager(),
-    em: orm.em.fork(),
-    authorizedUser: null,
-});
 
 const setupRoomAndUsersAndParticipants = ({
     em,
@@ -127,37 +108,24 @@ const setupRoomAndUsersAndParticipants = ({
     };
 };
 
-// describeを使うことで、テストが並列ではなく上から順に走る模様。
+it.each(['SQLite', 'PostgreSQL'] as const)(
+    'integration test',
+    async dbType => {
+        const httpUri = 'http://localhost:4000/graphql';
+        const wsUri = 'ws://localhost:4000/graphql';
+        const apolloClient = createApolloClient(httpUri, wsUri, Resources.User.roomCreator);
+        const server = await createTestServer(dbType);
 
-describe('operate then getRoom', () => {
-    beforeAll(async () => {
-        const psql = await createPostgreSQL(PostgreSQL);
-        try {
-            const migrator = psql.getMigrator();
-            const migrations = await migrator.getPendingMigrations();
-            if (migrations && migrations.length > 0) {
-                await migrator.up();
-            }
-        } finally {
-            await psql.close();
-        }
-        const sqlite = await createSQLite(SQLite);
-        try {
-            const migrator = sqlite.getMigrator();
-            const migrations = await migrator.getPendingMigrations();
-            if (migrations && migrations.length > 0) {
-                await migrator.up();
-            }
-        } finally {
-            await sqlite.close();
-        }
-    }, timeout);
+        const result = await apolloClient.mutate<
+            EntryToServerMutation,
+            EntryToServerMutationVariables
+        >({
+            mutation: EntryToServerDocument,
+            variables: { phrase: Resources.entryPassword },
+        });
+        expect(result.data?.result.type).toBe(EntryToServerResultType.Success);
 
-    it(
-        'tests DB',
-        async (): Promise<void> => {
-            // TODO: テスト実装
-        },
-        timeout
-    );
-});
+        server.close();
+    },
+    timeout
+);

@@ -10,7 +10,7 @@ import {
 import * as E from 'fp-ts/Either';
 import { formatValidationErrors } from './utils/io-ts-reporters';
 
-const loadFirebaseConfig = (): FirebaseConfig => {
+const loadFirebaseConfigCore = (): FirebaseConfig => {
     let env = process.env['FLOCON_FIREBASE_CONFIG'];
     if (env == null) {
         env = process.env['NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG'];
@@ -101,7 +101,14 @@ const loadServerConfig = ({
     };
 };
 
-export const firebaseConfig = loadFirebaseConfig();
+let firebaseConfig: FirebaseConfig | undefined;
+
+export const loadFirebaseConfig = (): FirebaseConfig => {
+    if (firebaseConfig == null) {
+        firebaseConfig = loadFirebaseConfigCore();
+    }
+    return firebaseConfig;
+};
 
 let serverConfigAsMainCache: ServerConfig | null = null;
 export const loadServerConfigAsMain = async (): Promise<ServerConfig> => {

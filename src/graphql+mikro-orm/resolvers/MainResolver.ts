@@ -51,6 +51,7 @@ export class MainResolver {
             em: context.em,
             userUid: decodedIdToken.uid,
             baasType: BaasType.Firebase,
+            serverConfig: context.serverConfig,
         });
     }
 
@@ -96,7 +97,7 @@ export class MainResolver {
         const queue = async () => {
             const em = context.em;
 
-            const serverConfig = await loadServerConfigAsMain();
+            const serverConfig = context.serverConfig;
             const decodedIdToken = checkSignIn(context);
             if (decodedIdToken === NotSignIn) {
                 return {

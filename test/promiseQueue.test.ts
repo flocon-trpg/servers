@@ -1,4 +1,4 @@
-import { executed, PromiseQueue, PromiseQueueResult } from './promiseQueue';
+import { executed, PromiseQueue, PromiseQueueResult } from '../src/utils/promiseQueue';
 
 const delay = (delayBy: number) => {
     return new Promise<void>(next => {

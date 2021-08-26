@@ -1,0 +1,274 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createServer = void 0;
+const apollo_server_express_1 = require("apollo-server-express");
+const express_1 = __importDefault(require("express"));
+const path_1 = __importDefault(require("path"));
+const ws_1 = __importDefault(require("ws"));
+const ws_2 = require("graphql-ws/lib/use/ws");
+const graphql_1 = require("graphql");
+const BaasType_1 = require("./enums/BaasType");
+const mikro_orm_1 = require("./graphql+mikro-orm/entities/user/mikro-orm");
+const sanitize_filename_1 = __importDefault(require("sanitize-filename"));
+const multer_1 = __importDefault(require("multer"));
+const sharp_1 = __importDefault(require("sharp"));
+const mikro_orm_2 = require("./graphql+mikro-orm/entities/file/mikro-orm");
+const helpers_1 = require("./graphql+mikro-orm/resolvers/utils/helpers");
+const core_1 = require("@mikro-orm/core");
+const appConsole_1 = require("./utils/appConsole");
+const fs_extra_1 = require("fs-extra");
+const FilePermissionType_1 = require("./enums/FilePermissionType");
+const easyFlake_1 = require("./utils/easyFlake");
+const createServer = async ({ serverConfig, promiseQueue, connectionManager, em, schema, debug, getDecodedIdTokenFromExpressRequest, getDecodedIdTokenFromWsContext, port, }) => {
+    var _a;
+    const context = async (context) => {
+        return {
+            decodedIdToken: await getDecodedIdTokenFromExpressRequest(context.req),
+            serverConfig,
+            promiseQueue,
+            connectionManager,
+            em,
+            authorizedUser: null,
+        };
+    };
+    const apolloServer = new apollo_server_express_1.ApolloServer({
+        schema,
+        context,
+        debug,
+    });
+    await apolloServer.start();
+    const app = express_1.default();
+    apolloServer.applyMiddleware({ app });
+    if (serverConfig.accessControlAllowOrigin == null) {
+        appConsole_1.AppConsole.log({
+            en: '"accessControlAllowOrigin" config was not found. "Access-Control-Allow-Origin" header will be empty.',
+            ja: '"accessControlAllowOrigin" のコンフィグが見つかりませんでした。"Access-Control-Allow-Origin" ヘッダーは空になります。',
+        });
+    }
+    else {
+        appConsole_1.AppConsole.log({
+            en: `"accessControlAllowOrigin" config was found. "Access-Control-Allow-Origin" header will be "${serverConfig.accessControlAllowOrigin}".`,
+            ja: `"accessControlAllowOrigin" のコンフィグが見つかりました。"Access-Control-Allow-Origin" ヘッダーは "${serverConfig.accessControlAllowOrigin}" になります。`,
+        });
+        const accessControlAllowOrigin = serverConfig.accessControlAllowOrigin;
+        app.use((req, res, next) => {
+            res.header('Access-Control-Allow-Origin', accessControlAllowOrigin);
+            res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+            next();
+        });
+    }
+    if (((_a = serverConfig.uploader) === null || _a === void 0 ? void 0 : _a.enabled) === true) {
+        appConsole_1.AppConsole.log({
+            en: `The uploader of API server is enabled.`,
+            ja: `APIサーバーのアップローダーが有効化されます。`,
+        });
+        const uploaderConfig = serverConfig.uploader;
+        await fs_extra_1.ensureDir(path_1.default.resolve(uploaderConfig.directory));
+        const storage = multer_1.default.diskStorage({
+            destination: function (req, file, cb) {
+                cb(null, path_1.default.resolve(uploaderConfig.directory));
+            },
+            filename: function (req, file, cb) {
+                cb(null, easyFlake_1.easyFlake() + path_1.default.extname(file.originalname));
+            },
+        });
+        app.post('/uploader/upload/:permission', async (req, res, next) => {
+            let permissionParam;
+            switch (req.params.permission) {
+                case 'unlisted':
+                    permissionParam = 'unlisted';
+                    break;
+                case 'public':
+                    permissionParam = 'public';
+                    break;
+                default:
+                    res.sendStatus(404);
+                    return;
+            }
+            const decodedIdToken = await getDecodedIdTokenFromExpressRequest(req);
+            if (decodedIdToken == null || decodedIdToken.isError) {
+                res.status(403).send('Invalid Authorization header');
+                return;
+            }
+            const userUid = decodedIdToken.value.uid;
+            const forkedEm = em.fork();
+            const user = await helpers_1.getUserIfEntry({
+                em: forkedEm,
+                userUid,
+                baasType: BaasType_1.BaasType.Firebase,
+                serverConfig,
+            });
+            if (user == null) {
+                res.status(403).send('Requires entry');
+                return;
+            }
+            const [files, filesCount] = await forkedEm.findAndCount(mikro_orm_2.File, {
+                createdBy: { userUid: user.userUid },
+            });
+            const upload = multer_1.default({
+                storage,
+                limits: {
+                    fileSize: uploaderConfig.maxFileSize,
+                },
+                fileFilter: (req, file, cb) => {
+                    if (uploaderConfig.countQuota <= filesCount) {
+                        cb(null, false);
+                        res.status(400).send('File count quota exceeded');
+                        return;
+                    }
+                    const totalSize = files.reduce((seed, elem) => seed + elem.size, 0);
+                    if (uploaderConfig.sizeQuota <= totalSize) {
+                        cb(null, false);
+                        res.status(400).send('File size quota exceeded');
+                        return;
+                    }
+                    cb(null, true);
+                },
+            });
+            upload.single('file')(req, res, error => {
+                const main = async () => {
+                    if (error) {
+                        next(error);
+                        return;
+                    }
+                    const file = req.file;
+                    if (file == null) {
+                        res.status(200);
+                        return;
+                    }
+                    const thumbFileName = `${file.filename}.webp`;
+                    const thumbDir = path_1.default.join(path_1.default.dirname(file.path), 'thumbs');
+                    const thumbPath = path_1.default.join(thumbDir, thumbFileName);
+                    await fs_extra_1.ensureDir(thumbDir);
+                    const thumbnailSaved = await sharp_1.default(file.path)
+                        .resize(80)
+                        .webp()
+                        .toFile(thumbPath)
+                        .then(() => true)
+                        .catch(() => false);
+                    const permission = permissionParam === 'public'
+                        ? FilePermissionType_1.FilePermissionType.Entry
+                        : FilePermissionType_1.FilePermissionType.Private;
+                    const entity = new mikro_orm_2.File(Object.assign(Object.assign({}, file), { screenname: file.originalname, createdBy: core_1.Reference.create(user), thumbFilename: thumbnailSaved ? thumbFileName : undefined, filesize: file.size, deletePermission: permission, listPermission: permission, renamePermission: permission }));
+                    await forkedEm.persistAndFlush(entity);
+                    res.sendStatus(200);
+                    next();
+                };
+                main();
+            });
+        });
+    }
+    app.get('/uploader/:type/:file_name', async (req, res, next) => {
+        var _a;
+        let typeParam;
+        switch (req.params.type) {
+            case 'files':
+                typeParam = 'files';
+                break;
+            case 'thumbs':
+                typeParam = 'thumbs';
+                break;
+            default:
+                res.sendStatus(404);
+                return;
+        }
+        if (((_a = serverConfig.uploader) === null || _a === void 0 ? void 0 : _a.enabled) !== true) {
+            res.status(403).send('Flocon uploader is disabled by server config');
+            return;
+        }
+        const filename = sanitize_filename_1.default(req.params.file_name);
+        const decodedIdToken = await getDecodedIdTokenFromExpressRequest(req);
+        if (decodedIdToken == null || decodedIdToken.isError) {
+            res.status(403).send('Invalid Authorization header');
+            return;
+        }
+        const forkedEm = em.fork();
+        const user = await forkedEm.findOne(mikro_orm_1.User, { userUid: decodedIdToken.value.uid });
+        if ((user === null || user === void 0 ? void 0 : user.isEntry) !== true) {
+            res.status(403).send('Requires entry');
+            return;
+        }
+        const fileEntity = await forkedEm.findOne(mikro_orm_2.File, { filename });
+        if (fileEntity == null) {
+            res.sendStatus(404);
+            return;
+        }
+        let filepath;
+        if (typeParam === 'files') {
+            filepath = path_1.default.join(path_1.default.resolve(serverConfig.uploader.directory), filename);
+        }
+        else {
+            if (fileEntity.thumbFilename == null) {
+                res.sendStatus(404);
+                next();
+                return;
+            }
+            filepath = path_1.default.join(path_1.default.resolve(serverConfig.uploader.directory), 'thumb', sanitize_filename_1.default(fileEntity.thumbFilename));
+        }
+        res.header('Content-Security-Policy', "script-src 'unsafe-hashes'");
+        res.sendFile(filepath, () => {
+            res.end();
+            next();
+        });
+    });
+    const server = app.listen(port, () => {
+        const subscriptionsPath = '/graphql';
+        const wsServer = new ws_1.default.Server({
+            server,
+            path: subscriptionsPath,
+        });
+        ws_2.useServer({
+            schema,
+            execute: graphql_1.execute,
+            subscribe: graphql_1.subscribe,
+            context: async (ctx) => {
+                const decodedIdToken = await getDecodedIdTokenFromWsContext(ctx);
+                const result = {
+                    decodedIdToken,
+                    serverConfig,
+                    promiseQueue,
+                    connectionManager,
+                    em: em.fork(),
+                    authorizedUser: null,
+                };
+                return result;
+            },
+            onSubscribe: async (ctx, message) => {
+                var _a, _b;
+                if (((_a = message.payload.operationName) === null || _a === void 0 ? void 0 : _a.toLowerCase()) !== 'roomevent') {
+                    return;
+                }
+                const decodedIdToken = await getDecodedIdTokenFromWsContext(ctx);
+                if ((decodedIdToken === null || decodedIdToken === void 0 ? void 0 : decodedIdToken.isError) !== false) {
+                    return;
+                }
+                const roomId = (_b = message.payload.variables) === null || _b === void 0 ? void 0 : _b.id;
+                if (typeof roomId === 'string') {
+                    connectionManager.onConnectToRoom({
+                        connectionId: message.id,
+                        userUid: decodedIdToken.value.uid,
+                        roomId,
+                    });
+                }
+                else {
+                    console.warn('(typeof RoomEvent.id) should be string');
+                }
+            },
+            onComplete: async (ctx, message) => {
+                connectionManager.onLeaveRoom({ connectionId: message.id });
+            },
+            onClose: ctx => {
+                for (const key in ctx.subscriptions) {
+                    connectionManager.onLeaveRoom({ connectionId: key });
+                }
+            },
+        }, wsServer);
+        console.log(`🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`);
+        console.log(`🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`);
+    });
+    return server;
+};
+exports.createServer = createServer;
