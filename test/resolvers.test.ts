@@ -10,6 +10,9 @@ import {
     EntryToServerMutation,
     EntryToServerMutationVariables,
     EntryToServerDocument,
+    CreateRoomMutation,
+    CreateRoomMutationVariables,
+    CreateRoomDocument,
 } from './graphql';
 import { EntryToServerResultType } from '../src/enums/EntryToServerResultType';
 
@@ -113,18 +116,39 @@ it.each(['SQLite', 'PostgreSQL'] as const)(
     async dbType => {
         const httpUri = 'http://localhost:4000/graphql';
         const wsUri = 'ws://localhost:4000/graphql';
-        const apolloClient = createApolloClient(httpUri, wsUri, Resources.User.roomCreator);
+        const roomCreatorClient = createApolloClient(httpUri, wsUri, Resources.User.roomCreator);
         const server = await createTestServer(dbType);
 
-        const result = await apolloClient.mutate<
-            EntryToServerMutation,
-            EntryToServerMutationVariables
-        >({
-            mutation: EntryToServerDocument,
-            variables: { phrase: Resources.entryPassword },
-        });
-        expect(result.data?.result.type).toBe(EntryToServerResultType.Success);
+        {
+            const result = await roomCreatorClient.mutate<
+                EntryToServerMutation,
+                EntryToServerMutationVariables
+            >({
+                mutation: EntryToServerDocument,
+                variables: { phrase: Resources.entryPassword },
+            });
+            expect(result.data?.result.type).toBe(EntryToServerResultType.Success);
+        }
 
+        {
+            const result = await roomCreatorClient.mutate<
+                CreateRoomMutation,
+                CreateRoomMutationVariables
+            >({
+                mutation: CreateRoomDocument,
+                variables: {
+                    input: {
+                        roomName: Resources.Room.name,
+                        participantName: Resources.Participant.roomCreator,
+                        joinAsPlayerPhrase: Resources.Room.playerPassword,
+                        joinAsSpectatorPhrase: Resources.Room.spectatorPassword,
+                    },
+                },
+            });
+            expect(result.data?.result.__typename).toBe('CreateRoomSuccessResult');
+        }
+
+        // これがないとport 4000が開放されないので2個目以降のテストが失敗してしまう
         server.close();
     },
     timeout
