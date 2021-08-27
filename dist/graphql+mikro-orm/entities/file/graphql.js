@@ -15,7 +15,7 @@ let FileItem = class FileItem {
 };
 __decorate([
     type_graphql_1.Field(() => type_graphql_1.ID, {
-        description: 'サーバーで管理されているファイル名。axiosなどでファイルを取得する際はこれを用いる。',
+        description: 'サーバーで管理されているファイル名。axiosなどでファイルを取得する際はこれを用いる。ソートするとアップロードした時系列順になる。',
     }),
     __metadata("design:type", String)
 ], FileItem.prototype, "filename", void 0);

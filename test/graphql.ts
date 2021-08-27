@@ -98,6 +98,16 @@ export type DeleteRoomResult = {
     failureType?: Maybe<DeleteRoomFailureType>;
 };
 
+export type EditFileTagActionInput = {
+    add: Array<Scalars['String']>;
+    filename: Scalars['String'];
+    remove: Array<Scalars['String']>;
+};
+
+export type EditFileTagsInput = {
+    actions: Array<EditFileTagActionInput>;
+};
+
 export enum EditMessageFailureType {
     MessageDeleted = 'MessageDeleted',
     MessageNotFound = 'MessageNotFound',
@@ -124,6 +134,13 @@ export enum EntryToServerResultType {
     WrongPhrase = 'WrongPhrase',
 }
 
+export type FileItem = {
+    __typename?: 'FileItem';
+    createdBy: Scalars['String'];
+    filename: Scalars['ID'];
+    screenname: Scalars['String'];
+};
+
 export type FilePath = {
     __typename?: 'FilePath';
     path: Scalars['String'];
@@ -139,6 +156,12 @@ export enum FileSourceType {
     Default = 'Default',
     FirebaseStorage = 'FirebaseStorage',
 }
+
+export type FileTag = {
+    __typename?: 'FileTag';
+    id: Scalars['String'];
+    name: Scalars['String'];
+};
 
 export type GetJoinedRoomResult = {
     __typename?: 'GetJoinedRoomResult';
@@ -254,6 +277,15 @@ export type ListAvailableGameSystemsResult = {
     value: Array<AvailableGameSystem>;
 };
 
+export type ListFilesInput = {
+    fileTagIds: Array<Scalars['String']>;
+};
+
+export type ListFilesResult = {
+    __typename?: 'ListFilesResult';
+    files: Array<FileItem>;
+};
+
 export enum MakeMessageNotSecretFailureType {
     MessageNotFound = 'MessageNotFound',
     NotParticipant = 'NotParticipant',
@@ -270,9 +302,12 @@ export type MakeMessageNotSecretResult = {
 export type Mutation = {
     __typename?: 'Mutation';
     changeParticipantName: ChangeParticipantNameResult;
+    createFileTag?: Maybe<FileTag>;
     createRoom: CreateRoomResult;
+    deleteFileTag: Scalars['Boolean'];
     deleteMessage: DeleteMessageResult;
     deleteRoom: DeleteRoomResult;
+    editFileTags: Scalars['Boolean'];
     editMessage: EditMessageResult;
     entryToServer: EntryToServerResult;
     joinRoomAsPlayer: JoinRoomResult;
@@ -293,8 +328,16 @@ export type MutationChangeParticipantNameArgs = {
     roomId: Scalars['String'];
 };
 
+export type MutationCreateFileTagArgs = {
+    tagName: Scalars['String'];
+};
+
 export type MutationCreateRoomArgs = {
     input: CreateRoomInput;
+};
+
+export type MutationDeleteFileTagArgs = {
+    tagId: Scalars['String'];
 };
 
 export type MutationDeleteMessageArgs = {
@@ -304,6 +347,10 @@ export type MutationDeleteMessageArgs = {
 
 export type MutationDeleteRoomArgs = {
     id: Scalars['String'];
+};
+
+export type MutationEditFileTagsArgs = {
+    input: EditFileTagsInput;
 };
 
 export type MutationEditMessageArgs = {
@@ -486,6 +533,7 @@ export type Query = {
     getServerInfo: ServerInfo;
     isEntry: Scalars['Boolean'];
     listAvailableGameSystems: ListAvailableGameSystemsResult;
+    listFiles: ListFilesResult;
     requiresPhraseToJoinAsPlayer: RequiresPhraseResult;
 };
 
@@ -503,6 +551,10 @@ export type QueryGetRoomArgs = {
 
 export type QueryGetRoomConnectionsArgs = {
     roomId: Scalars['String'];
+};
+
+export type QueryListFilesArgs = {
+    input: ListFilesInput;
 };
 
 export type QueryRequiresPhraseToJoinAsPlayerArgs = {
@@ -784,11 +836,20 @@ export type CreateRoomResultFragment =
     | CreateRoomResult_CreateRoomFailureResult_Fragment
     | CreateRoomResult_CreateRoomSuccessResult_Fragment;
 
+export type FileItemFragment = {
+    __typename?: 'FileItem';
+    filename: string;
+    screenname: string;
+    createdBy: string;
+};
+
 export type FilePathFragment = {
     __typename?: 'FilePath';
     sourceType: FileSourceType;
     path: string;
 };
+
+export type FileTagFragment = { __typename?: 'FileTag'; id: string; name: string };
 
 export type GetNonJoinedRoomResultFragment = {
     __typename?: 'GetNonJoinedRoomResult';
@@ -1480,6 +1541,23 @@ export type ListAvailableGameSystemsQuery = {
     };
 };
 
+export type ListFilesQueryVariables = Exact<{
+    input: ListFilesInput;
+}>;
+
+export type ListFilesQuery = {
+    __typename?: 'Query';
+    result: {
+        __typename?: 'ListFilesResult';
+        files: Array<{
+            __typename?: 'FileItem';
+            filename: string;
+            screenname: string;
+            createdBy: string;
+        }>;
+    };
+};
+
 export type RequiresPhraseToJoinAsPlayerQueryVariables = Exact<{
     roomId: Scalars['String'];
 }>;
@@ -1489,6 +1567,15 @@ export type RequiresPhraseToJoinAsPlayerQuery = {
     result:
         | { __typename?: 'RequiresPhraseFailureResult'; failureType: RequiresPhraseFailureType }
         | { __typename?: 'RequiresPhraseSuccessResult'; value: boolean };
+};
+
+export type CreateFileTagMutationVariables = Exact<{
+    tagName: Scalars['String'];
+}>;
+
+export type CreateFileTagMutation = {
+    __typename?: 'Mutation';
+    result?: Maybe<{ __typename?: 'FileTag'; id: string; name: string }>;
 };
 
 export type ChangeParticipantNameMutationVariables = Exact<{
@@ -1524,6 +1611,12 @@ export type CreateRoomMutation = {
           };
 };
 
+export type DeleteFileTagMutationVariables = Exact<{
+    tagId: Scalars['String'];
+}>;
+
+export type DeleteFileTagMutation = { __typename?: 'Mutation'; result: boolean };
+
 export type DeleteRoomMutationVariables = Exact<{
     id: Scalars['String'];
 }>;
@@ -1532,6 +1625,12 @@ export type DeleteRoomMutation = {
     __typename?: 'Mutation';
     result: { __typename?: 'DeleteRoomResult'; failureType?: Maybe<DeleteRoomFailureType> };
 };
+
+export type EditFileTagsMutationVariables = Exact<{
+    input: EditFileTagsInput;
+}>;
+
+export type EditFileTagsMutation = { __typename?: 'Mutation'; result: boolean };
 
 export type JoinRoomAsPlayerMutationVariables = Exact<{
     id: Scalars['String'];
@@ -2036,6 +2135,19 @@ export const CreateRoomResultFragmentDoc = gql`
         }
     }
     ${RoomGetStateFragmentDoc}
+`;
+export const FileItemFragmentDoc = gql`
+    fragment FileItem on FileItem {
+        filename
+        screenname
+        createdBy
+    }
+`;
+export const FileTagFragmentDoc = gql`
+    fragment FileTag on FileTag {
+        id
+        name
+    }
 `;
 export const RoomAsListItemFragmentDoc = gql`
     fragment RoomAsListItem on RoomAsListItem {
@@ -2732,6 +2844,48 @@ export type ListAvailableGameSystemsQueryResult = Apollo.QueryResult<
     ListAvailableGameSystemsQuery,
     ListAvailableGameSystemsQueryVariables
 >;
+export const ListFilesDocument = gql`
+    query ListFiles($input: ListFilesInput!) {
+        result: listFiles(input: $input) {
+            files {
+                ...FileItem
+            }
+        }
+    }
+    ${FileItemFragmentDoc}
+`;
+
+/**
+ * __useListFilesQuery__
+ *
+ * To run a query within a React component, call `useListFilesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useListFilesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useListFilesQuery({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useListFilesQuery(
+    baseOptions: Apollo.QueryHookOptions<ListFilesQuery, ListFilesQueryVariables>
+) {
+    const options = { ...defaultOptions, ...baseOptions };
+    return Apollo.useQuery<ListFilesQuery, ListFilesQueryVariables>(ListFilesDocument, options);
+}
+export function useListFilesLazyQuery(
+    baseOptions?: Apollo.LazyQueryHookOptions<ListFilesQuery, ListFilesQueryVariables>
+) {
+    const options = { ...defaultOptions, ...baseOptions };
+    return Apollo.useLazyQuery<ListFilesQuery, ListFilesQueryVariables>(ListFilesDocument, options);
+}
+export type ListFilesQueryHookResult = ReturnType<typeof useListFilesQuery>;
+export type ListFilesLazyQueryHookResult = ReturnType<typeof useListFilesLazyQuery>;
+export type ListFilesQueryResult = Apollo.QueryResult<ListFilesQuery, ListFilesQueryVariables>;
 export const RequiresPhraseToJoinAsPlayerDocument = gql`
     query RequiresPhraseToJoinAsPlayer($roomId: String!) {
         result: requiresPhraseToJoinAsPlayer(roomId: $roomId) {
@@ -2794,6 +2948,51 @@ export type RequiresPhraseToJoinAsPlayerLazyQueryHookResult = ReturnType<
 export type RequiresPhraseToJoinAsPlayerQueryResult = Apollo.QueryResult<
     RequiresPhraseToJoinAsPlayerQuery,
     RequiresPhraseToJoinAsPlayerQueryVariables
+>;
+export const CreateFileTagDocument = gql`
+    mutation CreateFileTag($tagName: String!) {
+        result: createFileTag(tagName: $tagName) {
+            ...FileTag
+        }
+    }
+    ${FileTagFragmentDoc}
+`;
+export type CreateFileTagMutationFn = Apollo.MutationFunction<
+    CreateFileTagMutation,
+    CreateFileTagMutationVariables
+>;
+
+/**
+ * __useCreateFileTagMutation__
+ *
+ * To run a mutation, you first call `useCreateFileTagMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateFileTagMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createFileTagMutation, { data, loading, error }] = useCreateFileTagMutation({
+ *   variables: {
+ *      tagName: // value for 'tagName'
+ *   },
+ * });
+ */
+export function useCreateFileTagMutation(
+    baseOptions?: Apollo.MutationHookOptions<CreateFileTagMutation, CreateFileTagMutationVariables>
+) {
+    const options = { ...defaultOptions, ...baseOptions };
+    return Apollo.useMutation<CreateFileTagMutation, CreateFileTagMutationVariables>(
+        CreateFileTagDocument,
+        options
+    );
+}
+export type CreateFileTagMutationHookResult = ReturnType<typeof useCreateFileTagMutation>;
+export type CreateFileTagMutationResult = Apollo.MutationResult<CreateFileTagMutation>;
+export type CreateFileTagMutationOptions = Apollo.BaseMutationOptions<
+    CreateFileTagMutation,
+    CreateFileTagMutationVariables
 >;
 export const ChangeParticipantNameDocument = gql`
     mutation ChangeParticipantName($roomId: String!, $newName: String!) {
@@ -2896,6 +3095,48 @@ export type CreateRoomMutationOptions = Apollo.BaseMutationOptions<
     CreateRoomMutation,
     CreateRoomMutationVariables
 >;
+export const DeleteFileTagDocument = gql`
+    mutation DeleteFileTag($tagId: String!) {
+        result: deleteFileTag(tagId: $tagId)
+    }
+`;
+export type DeleteFileTagMutationFn = Apollo.MutationFunction<
+    DeleteFileTagMutation,
+    DeleteFileTagMutationVariables
+>;
+
+/**
+ * __useDeleteFileTagMutation__
+ *
+ * To run a mutation, you first call `useDeleteFileTagMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteFileTagMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteFileTagMutation, { data, loading, error }] = useDeleteFileTagMutation({
+ *   variables: {
+ *      tagId: // value for 'tagId'
+ *   },
+ * });
+ */
+export function useDeleteFileTagMutation(
+    baseOptions?: Apollo.MutationHookOptions<DeleteFileTagMutation, DeleteFileTagMutationVariables>
+) {
+    const options = { ...defaultOptions, ...baseOptions };
+    return Apollo.useMutation<DeleteFileTagMutation, DeleteFileTagMutationVariables>(
+        DeleteFileTagDocument,
+        options
+    );
+}
+export type DeleteFileTagMutationHookResult = ReturnType<typeof useDeleteFileTagMutation>;
+export type DeleteFileTagMutationResult = Apollo.MutationResult<DeleteFileTagMutation>;
+export type DeleteFileTagMutationOptions = Apollo.BaseMutationOptions<
+    DeleteFileTagMutation,
+    DeleteFileTagMutationVariables
+>;
 export const DeleteRoomDocument = gql`
     mutation DeleteRoom($id: String!) {
         result: deleteRoom(id: $id) {
@@ -2939,6 +3180,48 @@ export type DeleteRoomMutationResult = Apollo.MutationResult<DeleteRoomMutation>
 export type DeleteRoomMutationOptions = Apollo.BaseMutationOptions<
     DeleteRoomMutation,
     DeleteRoomMutationVariables
+>;
+export const EditFileTagsDocument = gql`
+    mutation EditFileTags($input: EditFileTagsInput!) {
+        result: editFileTags(input: $input)
+    }
+`;
+export type EditFileTagsMutationFn = Apollo.MutationFunction<
+    EditFileTagsMutation,
+    EditFileTagsMutationVariables
+>;
+
+/**
+ * __useEditFileTagsMutation__
+ *
+ * To run a mutation, you first call `useEditFileTagsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditFileTagsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [editFileTagsMutation, { data, loading, error }] = useEditFileTagsMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useEditFileTagsMutation(
+    baseOptions?: Apollo.MutationHookOptions<EditFileTagsMutation, EditFileTagsMutationVariables>
+) {
+    const options = { ...defaultOptions, ...baseOptions };
+    return Apollo.useMutation<EditFileTagsMutation, EditFileTagsMutationVariables>(
+        EditFileTagsDocument,
+        options
+    );
+}
+export type EditFileTagsMutationHookResult = ReturnType<typeof useEditFileTagsMutation>;
+export type EditFileTagsMutationResult = Apollo.MutationResult<EditFileTagsMutation>;
+export type EditFileTagsMutationOptions = Apollo.BaseMutationOptions<
+    EditFileTagsMutation,
+    EditFileTagsMutationVariables
 >;
 export const JoinRoomAsPlayerDocument = gql`
     mutation JoinRoomAsPlayer($id: String!, $name: String!, $phrase: String) {

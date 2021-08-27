@@ -5,6 +5,7 @@ import {
     ManyToOne,
     PrimaryKey,
     Property,
+    Unique,
 } from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { ParticipantRoleType } from '../../../enums/ParticipantRoleType';
@@ -14,6 +15,7 @@ import { User } from '../user/mikro-orm';
 // JSONにおいてParticipantのnameとroleはnullable（xというParticipantがいるとして、xが作者であるcharacterなどは存在するが、xがentityとして見つからなかったときに起こる）なので、entityでnullableをfalseにする意味もないと判断したためtrueにしている
 
 @Entity()
+@Unique({ properties: ['room', 'user'] })
 export class Participant {
     @PrimaryKey()
     public id: string = v4();

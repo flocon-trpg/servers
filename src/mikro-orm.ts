@@ -1,6 +1,7 @@
 import { Connection, IDatabaseDriver, LoggerNamespace, MikroORM } from '@mikro-orm/core';
 import { DatabaseConfig, postgresql, sqlite } from './configType';
 import { File } from './graphql+mikro-orm/entities/file/mikro-orm';
+import { FileTag } from './graphql+mikro-orm/entities/fileTag/mikro-orm';
 import { Participant } from './graphql+mikro-orm/entities/participant/mikro-orm';
 import { Room, RoomOp } from './graphql+mikro-orm/entities/room/mikro-orm';
 import {
@@ -25,6 +26,7 @@ const entities = [
     User,
     Participant,
     File,
+    FileTag,
 ];
 
 type Debug = boolean | LoggerNamespace[];

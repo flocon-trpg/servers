@@ -9,39 +9,36 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Participant = void 0;
+exports.FileTag = void 0;
 const core_1 = require("@mikro-orm/core");
 const uuid_1 = require("uuid");
-const ParticipantRoleType_1 = require("../../../enums/ParticipantRoleType");
-const mikro_orm_1 = require("../room/mikro-orm");
+const mikro_orm_1 = require("../file/mikro-orm");
 const mikro_orm_2 = require("../user/mikro-orm");
-let Participant = class Participant {
-    constructor() {
+let FileTag = class FileTag {
+    constructor({ name }) {
         this.id = uuid_1.v4();
+        this.files = new core_1.Collection(this);
+        this.name = name;
     }
 };
 __decorate([
     core_1.PrimaryKey(),
     __metadata("design:type", String)
-], Participant.prototype, "id", void 0);
+], FileTag.prototype, "id", void 0);
 __decorate([
-    core_1.Enum({ items: () => ParticipantRoleType_1.ParticipantRoleType, index: true, nullable: true }),
+    core_1.Property(),
     __metadata("design:type", String)
-], Participant.prototype, "role", void 0);
-__decorate([
-    core_1.Property({ nullable: true }),
-    __metadata("design:type", String)
-], Participant.prototype, "name", void 0);
-__decorate([
-    core_1.ManyToOne(() => mikro_orm_1.Room),
-    __metadata("design:type", Object)
-], Participant.prototype, "room", void 0);
+], FileTag.prototype, "name", void 0);
 __decorate([
     core_1.ManyToOne(() => mikro_orm_2.User),
     __metadata("design:type", Object)
-], Participant.prototype, "user", void 0);
-Participant = __decorate([
+], FileTag.prototype, "user", void 0);
+__decorate([
+    core_1.ManyToMany(() => mikro_orm_1.File, x => x.fileTags),
+    __metadata("design:type", Object)
+], FileTag.prototype, "files", void 0);
+FileTag = __decorate([
     core_1.Entity(),
-    core_1.Unique({ properties: ['room', 'user'] })
-], Participant);
-exports.Participant = Participant;
+    __metadata("design:paramtypes", [Object])
+], FileTag);
+exports.FileTag = FileTag;

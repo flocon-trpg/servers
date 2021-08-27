@@ -32,11 +32,93 @@ const VERSION_1 = __importDefault(require("../../VERSION"));
 const PrereleaseType_1 = require("../../enums/PrereleaseType");
 const util_1 = require("@kizahasi/util");
 const BaasType_1 = require("../../enums/BaasType");
+const ListFilesResult_1 = require("../results/ListFilesResult");
+const roles_1 = require("../../roles");
+const object_args_input_1 = require("./object+args+input");
+const mikro_orm_2 = require("../entities/file/mikro-orm");
+const core_1 = require("@mikro-orm/core");
+const mikro_orm_3 = require("../entities/fileTag/mikro-orm");
 let MainResolver = class MainResolver {
     async listAvailableGameSystems() {
         return {
             value: main_1.listAvailableGameSystems(),
         };
+    }
+    async listFiles(input, context) {
+        const user = helpers_1.ensureAuthorizedUser(context);
+        const files = await context.em.find(mikro_orm_2.File, { createdBy: { userUid: user.userUid } }, { orderBy: { screenname: core_1.QueryOrder.ASC } });
+        return {
+            files: files.map(file => (Object.assign(Object.assign({}, file), { createdBy: file.createdBy.userUid }))),
+        };
+    }
+    async editFileTags(input, context) {
+        const user = helpers_1.ensureAuthorizedUser(context);
+        const map = new util_1.DualKeyMap();
+        input.actions.forEach(action => {
+            action.add.forEach(a => {
+                const value = map.get({ first: action.filename, second: a });
+                map.set({ first: action.filename, second: a }, (value !== null && value !== void 0 ? value : 0) + 1);
+            });
+            action.remove.forEach(r => {
+                const value = map.get({ first: action.filename, second: r });
+                map.set({ first: action.filename, second: r }, (value !== null && value !== void 0 ? value : 0) - 1);
+            });
+        });
+        for (const [filename, actions] of map.toMap()) {
+            let fileEntity = null;
+            for (const [fileTagId, action] of actions) {
+                if (action === 0 || !util_1.isStrIndex10(fileTagId)) {
+                    continue;
+                }
+                if (fileEntity == null) {
+                    fileEntity = await context.em.findOne(mikro_orm_2.File, {
+                        filename,
+                        createdBy: { userUid: user.userUid },
+                    });
+                }
+                if (fileEntity == null) {
+                    break;
+                }
+                const fileTag = await context.em.findOne(mikro_orm_3.FileTag, { id: fileTagId });
+                if (fileTag == null) {
+                    continue;
+                }
+                if (0 < action) {
+                    fileEntity.fileTags.add(fileTag);
+                }
+                else {
+                    fileEntity.fileTags.remove(fileTag);
+                }
+            }
+        }
+        await context.em.flush();
+        return true;
+    }
+    async createFileTag(context, tagName) {
+        const maxTagsCount = 10;
+        const user = helpers_1.ensureAuthorizedUser(context);
+        const tagsCount = await context.em.count(mikro_orm_3.FileTag, { user });
+        if (maxTagsCount <= tagsCount) {
+            return null;
+        }
+        const newFileTag = new mikro_orm_3.FileTag({ name: tagName });
+        newFileTag.name = tagName;
+        newFileTag.user = core_1.Reference.create(user);
+        return {
+            id: newFileTag.id,
+            name: newFileTag.name,
+        };
+    }
+    async deleteFileTag(context, tagId) {
+        const user = helpers_1.ensureAuthorizedUser(context);
+        const fileTagToDelete = await context.em.findOne(mikro_orm_3.FileTag, { user, id: tagId });
+        if (fileTagToDelete == null) {
+            return false;
+        }
+        fileTagToDelete.files.removeAll();
+        context.em.remove(fileTagToDelete);
+        await context.em.flush();
+        return true;
     }
     async isEntry(context) {
         const decodedIdToken = helpers_1.checkSignIn(context);
@@ -134,6 +216,42 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], MainResolver.prototype, "listAvailableGameSystems", null);
+__decorate([
+    type_graphql_1.Query(() => ListFilesResult_1.ListFilesResult),
+    type_graphql_1.Authorized(roles_1.ENTRY),
+    __param(0, type_graphql_1.Arg('input')),
+    __param(1, type_graphql_1.Ctx()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [object_args_input_1.ListFilesInput, Object]),
+    __metadata("design:returntype", Promise)
+], MainResolver.prototype, "listFiles", null);
+__decorate([
+    type_graphql_1.Mutation(() => Boolean),
+    type_graphql_1.Authorized(roles_1.ENTRY),
+    __param(0, type_graphql_1.Arg('input')),
+    __param(1, type_graphql_1.Ctx()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [object_args_input_1.EditFileTagsInput, Object]),
+    __metadata("design:returntype", Promise)
+], MainResolver.prototype, "editFileTags", null);
+__decorate([
+    type_graphql_1.Mutation(() => object_args_input_1.FileTag, { nullable: true }),
+    type_graphql_1.Authorized(roles_1.ENTRY),
+    __param(0, type_graphql_1.Ctx()),
+    __param(1, type_graphql_1.Arg('tagName')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], MainResolver.prototype, "createFileTag", null);
+__decorate([
+    type_graphql_1.Mutation(() => Boolean),
+    type_graphql_1.Authorized(roles_1.ENTRY),
+    __param(0, type_graphql_1.Ctx()),
+    __param(1, type_graphql_1.Arg('tagId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], MainResolver.prototype, "deleteFileTag", null);
 __decorate([
     type_graphql_1.Query(() => Boolean),
     __param(0, type_graphql_1.Ctx()),

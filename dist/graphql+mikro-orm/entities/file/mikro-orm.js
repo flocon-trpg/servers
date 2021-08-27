@@ -12,9 +12,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.File = void 0;
 const core_1 = require("@mikro-orm/core");
 const FilePermissionType_1 = require("../../../enums/FilePermissionType");
-const mikro_orm_1 = require("../user/mikro-orm");
+const mikro_orm_1 = require("../fileTag/mikro-orm");
+const mikro_orm_2 = require("../user/mikro-orm");
 let File = class File {
     constructor({ createdBy, deletePermission, encoding, filename, filesize, listPermission, thumbFilename, mimetype, renamePermission, screenname, size, }) {
+        this.fileTags = new core_1.Collection(this);
         this.createdBy = createdBy;
         this.deletePermission = deletePermission;
         this.encoding = encoding;
@@ -81,9 +83,13 @@ __decorate([
     __metadata("design:type", String)
 ], File.prototype, "deletePermission", void 0);
 __decorate([
-    core_1.ManyToOne(() => mikro_orm_1.User),
+    core_1.ManyToOne(() => mikro_orm_2.User),
     __metadata("design:type", Object)
 ], File.prototype, "createdBy", void 0);
+__decorate([
+    core_1.ManyToMany(() => mikro_orm_1.FileTag, x => x.files, { owner: true }),
+    __metadata("design:type", Object)
+], File.prototype, "fileTags", void 0);
 File = __decorate([
     core_1.Entity(),
     __metadata("design:paramtypes", [Object])

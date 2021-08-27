@@ -9,6 +9,7 @@ import {
 } from '@mikro-orm/core';
 import { BaasType } from '../../../enums/BaasType';
 import { File } from '../file/mikro-orm';
+import { FileTag } from '../fileTag/mikro-orm';
 import { Participant } from '../participant/mikro-orm';
 import { RoomPrvMsg, RoomPubMsg, RoomSe } from '../roomMessage/mikro-orm';
 
@@ -35,6 +36,9 @@ export class User {
 
     @OneToMany(() => File, x => x.createdBy, { orphanRemoval: true })
     public files = new Collection<File>(this);
+
+    @OneToMany(() => FileTag, x => x.user, { orphanRemoval: true })
+    public fileTags = new Collection<FileTag>(this);
 
     @OneToMany(() => RoomPubMsg, x => x.createdBy, { orphanRemoval: true })
     public roomPubMsgs = new Collection<RoomPubMsg>(this);

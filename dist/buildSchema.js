@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.buildSchemaSync = exports.buildSchema = void 0;
+exports.buildSchemaSync = exports.buildSchema = exports.noAuthCheck = void 0;
 const type_graphql_1 = require("type-graphql");
 const path_1 = __importDefault(require("path"));
 const registerEnumTypes_1 = __importDefault(require("./graphql+mikro-orm/registerEnumTypes"));
@@ -12,7 +12,11 @@ const MainResolver_1 = require("./graphql+mikro-orm/resolvers/MainResolver");
 const helpers_1 = require("./graphql+mikro-orm/resolvers/utils/helpers");
 const BaasType_1 = require("./enums/BaasType");
 const roles_1 = require("./roles");
+exports.noAuthCheck = 'noAuthCheck';
 const authChecker = (serverConfig) => async ({ context }, roles) => {
+    if (serverConfig === exports.noAuthCheck) {
+        throw new Error('authChecker is disbled');
+    }
     let role = null;
     if (roles.includes(roles_1.ADMIN)) {
         role = roles_1.ADMIN;

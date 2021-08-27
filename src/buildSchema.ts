@@ -22,9 +22,15 @@ import { BaasType } from './enums/BaasType';
 import { ADMIN, ENTRY } from './roles';
 import { ServerConfig } from './configType';
 
+export const noAuthCheck = 'noAuthCheck';
+
 const authChecker =
-    (serverConfig: ServerConfig): AuthChecker<ResolverContext> =>
+    (serverConfig: ServerConfig | typeof noAuthCheck): AuthChecker<ResolverContext> =>
     async ({ context }, roles) => {
+        if (serverConfig === noAuthCheck) {
+            throw new Error('authChecker is disbled');
+        }
+
         let role: typeof ADMIN | typeof ENTRY | null = null;
         if (roles.includes(ADMIN)) {
             role = ADMIN;
@@ -91,7 +97,7 @@ const emitSchemaFileOptions: EmitSchemaFileOptions = {
 };
 
 export const buildSchema =
-    (serverConfig: ServerConfig) =>
+    (serverConfig: ServerConfig | typeof noAuthCheck) =>
     async (options: Options): Promise<GraphQLSchema> => {
         registerEnumTypes();
         let emitSchemaFile: EmitSchemaFileOptions | undefined = undefined;
@@ -107,7 +113,7 @@ export const buildSchema =
     };
 
 export const buildSchemaSync =
-    (serverConfig: ServerConfig) =>
+    (serverConfig: ServerConfig | typeof noAuthCheck) =>
     (options: Options): GraphQLSchema => {
         registerEnumTypes();
         let emitSchemaFile: EmitSchemaFileOptions | undefined = undefined;

@@ -1,12 +1,15 @@
 import {
+    Collection,
     Entity,
     IdentifiedReference,
     Index,
+    ManyToMany,
     ManyToOne,
     PrimaryKey,
     Property,
 } from '@mikro-orm/core';
 import { FilePermissionType } from '../../../enums/FilePermissionType';
+import { FileTag } from '../fileTag/mikro-orm';
 import { User } from '../user/mikro-orm';
 
 @Entity()
@@ -97,4 +100,7 @@ export class File {
 
     @ManyToOne(() => User)
     public createdBy!: IdentifiedReference<User, 'userUid'>;
+
+    @ManyToMany(() => FileTag, x => x.files, { owner: true })
+    public fileTags = new Collection<FileTag>(this);
 }

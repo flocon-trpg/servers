@@ -1,6 +1,6 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20210828163758 extends Migration {
+export class Migration20210829141000 extends Migration {
     async up(): Promise<void> {
         this.addSql(
             'create table "user" ("user_uid" varchar(255) not null, "baas_type" text check ("baas_type" in (\'Firebase\')) not null, "is_entry" bool not null);'
@@ -21,6 +21,18 @@ export class Migration20210828163758 extends Migration {
         this.addSql('create index "file_list_permission_index" on "file" ("list_permission");');
         this.addSql('create index "file_rename_permission_index" on "file" ("rename_permission");');
         this.addSql('create index "file_delete_permission_index" on "file" ("delete_permission");');
+
+        this.addSql(
+            'create table "file_tag" ("id" varchar(255) not null, "name" varchar(255) not null, "user_user_uid" varchar(255) not null);'
+        );
+        this.addSql('alter table "file_tag" add constraint "file_tag_pkey" primary key ("id");');
+
+        this.addSql(
+            'create table "file_file_tags" ("file_filename" varchar(255) not null, "file_tag_id" varchar(255) not null);'
+        );
+        this.addSql(
+            'alter table "file_file_tags" add constraint "file_file_tags_pkey" primary key ("file_filename", "file_tag_id");'
+        );
 
         this.addSql(
             'create table "room" ("id" varchar(255) not null, "version" int4 not null default 1, "updated_at" timestamptz(0) null, "join_as_player_phrase" varchar(255) null, "join_as_spectator_phrase" varchar(255) null, "created_by" varchar(255) not null, "name" varchar(255) not null, "value" jsonb not null, "revision" int4 not null);'
@@ -142,6 +154,17 @@ export class Migration20210828163758 extends Migration {
         );
 
         this.addSql(
+            'alter table "file_tag" add constraint "file_tag_user_user_uid_foreign" foreign key ("user_user_uid") references "user" ("user_uid") on update cascade;'
+        );
+
+        this.addSql(
+            'alter table "file_file_tags" add constraint "file_file_tags_file_filename_foreign" foreign key ("file_filename") references "file" ("filename") on update cascade on delete cascade;'
+        );
+        this.addSql(
+            'alter table "file_file_tags" add constraint "file_file_tags_file_tag_id_foreign" foreign key ("file_tag_id") references "file_tag" ("id") on update cascade on delete cascade;'
+        );
+
+        this.addSql(
             'alter table "room_op" add constraint "room_op_room_id_foreign" foreign key ("room_id") references "room" ("id") on update cascade;'
         );
 
@@ -198,6 +221,10 @@ export class Migration20210828163758 extends Migration {
 
         this.addSql(
             'alter table "room_pub_ch" add constraint "room_pub_ch_room_id_key_unique" unique ("room_id", "key");'
+        );
+
+        this.addSql(
+            'alter table "participant" add constraint "participant_room_id_user_user_uid_unique" unique ("room_id", "user_user_uid");'
         );
     }
 }
