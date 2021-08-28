@@ -5,7 +5,7 @@ import * as Room from '../src/internal/ot/room/v1';
 import { normalizeRoomState } from './normalizeRoomState';
 
 // 組み合わせ量が多いため、デフォルト値(100)より多い値を設定している
-const numRuns = 500;
+const numRuns = 1000;
 
 const expectRoomStateToEqual = (actual: Room.State, expected: Room.State) => {
     expect({

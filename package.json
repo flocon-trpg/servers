@@ -1,5 +1,5 @@
 {
-    "version": "0.17.0",
+    "version": "0.18.0-beta.1",
     "license": "MIT",
     "main": "dist/cjs/index.js",
     "module": "dist/esm/index.js",
@@ -11,11 +11,12 @@
         "node": ">=14"
     },
     "scripts": {
-        "build": "yarn lint && yarn prettier && rimraf ./dist && tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json",
+        "build": "rimraf ./dist && tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json",
         "test": "jest",
-        "prepare": "yarn build && husky install",
+        "prepare": "husky install",
         "lint": "eslint src test",
-        "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \".github/**/*.yml\""
+        "prettier": "yarn prettier:base --write",
+        "prettier:base": "prettier \"**/*.{ts,js,json,yml,md}\""
     },
     "prettier": {
         "printWidth": 100,
@@ -23,7 +24,6 @@
         "singleQuote": true,
         "trailingComma": "es5",
         "tabWidth": 4,
-        "endOfLine": "crlf",
         "arrowParens": "avoid"
     },
     "name": "@kizahasi/flocon-core",
@@ -36,18 +36,18 @@
     "devDependencies": {
         "@types/jest": "27.0.1",
         "@types/lodash.clonedeep": "4.5.6",
-        "@typescript-eslint/eslint-plugin": "4.29.1",
-        "@typescript-eslint/parser": "4.29.1",
+        "@typescript-eslint/eslint-plugin": "4.29.3",
+        "@typescript-eslint/parser": "4.29.3",
         "eslint": "7.32.0",
         "eslint-config-prettier": "8.3.0",
         "fast-check": "2.17.0",
         "fast-check-io-ts": "0.5.0",
-        "husky": "7.0.1",
-        "jest": "27.0.6",
+        "husky": "7.0.2",
+        "jest": "27.1.0",
         "prettier": "2.3.2",
         "rimraf": "3.0.2",
-        "ts-jest": "27.0.4",
-        "typescript": "4.3.5"
+        "ts-jest": "27.0.5",
+        "typescript": "4.4.2"
     },
     "dependencies": {
         "@kizahasi/flocon-script": "^0.7.0",

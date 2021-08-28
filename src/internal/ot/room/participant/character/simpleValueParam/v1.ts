@@ -5,35 +5,35 @@ import {
     Diff,
     Restore,
     ServerTransform,
-} from '../../../util/type';
-import * as ReplaceValueOperation from '../../../util/replaceOperation';
-import { isIdRecord } from '../../../util/record';
-import * as ReplaceOperation from '../../../util/replaceOperation';
+} from '../../../../util/type';
+import * as ReplaceValueOperation from '../../../../util/replaceOperation';
+import { isIdRecord } from '../../../../util/record';
+import * as ReplaceOperation from '../../../../util/replaceOperation';
 import { Result } from '@kizahasi/result';
 
 type State<T> = {
-    $version: 1;
+    $v: 1;
 
     isValuePrivate: boolean;
     value: T;
 };
 
 type DownOperation<T> = {
-    $version: 1;
+    $v: 1;
 
     isValuePrivate?: { oldValue: boolean };
     value?: { oldValue: T };
 };
 
 type UpOperation<T> = {
-    $version: 1;
+    $v: 1;
 
     isValuePrivate?: { newValue: boolean };
     value?: { newValue: T };
 };
 
 type TwoWayOperation<T> = {
-    $version: 1;
+    $v: 1;
 
     isValuePrivate?: { oldValue: boolean; newValue: boolean };
     value?: { oldValue: T; newValue: T };
@@ -86,7 +86,7 @@ export const composeDownOperation =
     <T>(): Compose<DownOperation<T>> =>
     ({ first, second }) => {
         const valueProps: DownOperation<T> = {
-            $version: 1,
+            $v: 1,
             isValuePrivate: ReplaceValueOperation.composeDownOperation(
                 first.isValuePrivate,
                 second.isValuePrivate
@@ -108,7 +108,7 @@ export const restore =
         }
 
         const prevState: State<T> = { ...nextState };
-        const twoWayOperation: TwoWayOperation<T> = { $version: 1 };
+        const twoWayOperation: TwoWayOperation<T> = { $v: 1 };
 
         if (downOperation.isValuePrivate !== undefined) {
             prevState.isValuePrivate = downOperation.isValuePrivate.oldValue;
@@ -131,7 +131,7 @@ export const restore =
 export const diff =
     <T>(): Diff<State<T>, TwoWayOperation<T>> =>
     ({ prevState, nextState }) => {
-        const resultType: TwoWayOperation<T> = { $version: 1 };
+        const resultType: TwoWayOperation<T> = { $v: 1 };
         if (prevState.isValuePrivate !== nextState.isValuePrivate) {
             resultType.isValuePrivate = {
                 oldValue: prevState.isValuePrivate,
@@ -153,7 +153,7 @@ export const diff =
 export const serverTransform =
     <T>(isAuthorized: boolean): ServerTransform<State<T>, TwoWayOperation<T>, UpOperation<T>> =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
-        const twoWayOperation: TwoWayOperation<T> = { $version: 1 };
+        const twoWayOperation: TwoWayOperation<T> = { $v: 1 };
 
         if (isAuthorized) {
             twoWayOperation.isValuePrivate = ReplaceValueOperation.serverTransform({
@@ -191,13 +191,13 @@ export const clientTransform =
         });
 
         const firstPrime: UpOperation<T> = {
-            $version: 1,
+            $v: 1,
             isValuePrivate: isValuePrivate.firstPrime,
             value: value.firstPrime,
         };
 
         const secondPrime: UpOperation<T> = {
-            $version: 1,
+            $v: 1,
             isValuePrivate: isValuePrivate.secondPrime,
             value: value.secondPrime,
         };

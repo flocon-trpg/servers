@@ -44,7 +44,7 @@ export const toFilePathOrUndefined = (
         );
     }
     return {
-        $version: 1,
+        $v: 1,
         path,
         sourceType,
     };

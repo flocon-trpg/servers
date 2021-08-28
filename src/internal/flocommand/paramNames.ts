@@ -50,7 +50,7 @@ export class FParamNames extends FObject {
             return found;
         }
         const result: ParamName.State = {
-            $version: 1,
+            $v: 1,
             name: '',
         };
         this.getParamNames()[keyAsString] = result;

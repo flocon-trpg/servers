@@ -3,15 +3,15 @@ import {
     recordUpOperationElementFactory,
     replace as replaceKey,
     update as updateKey,
-} from '../../../util/recordOperationElement';
+} from '../../../../util/recordOperationElement';
 import * as DicePieceValue from './v1';
-import * as Piece from '../../../piece/v1';
+import * as Piece from '../../../../piece/v1';
 import * as DieValue from './dieValue/v1';
 import { chooseRecord } from '@kizahasi/util';
-import { createOperation } from '../../../util/createOperation';
-import { record } from '../../../util/record';
-import { createType, deleteType, updateType } from '../../../piece/log-v1';
-import { maybe } from '../../../../maybe';
+import { createOperation } from '../../../../util/createOperation';
+import { record } from '../../../../util/record';
+import { createType, deleteType, updateType } from '../../../../piece/log-v1';
+import { maybe } from '../../../../../maybe';
 
 const dieValueUpOperation = createOperation(1, {
     dieType: t.type({ newValue: DieValue.dieType }),
@@ -23,7 +23,7 @@ type DieValueUpOperation = t.TypeOf<typeof dieValueUpOperation>;
 
 const update = t.intersection([
     t.type({
-        $version: t.literal(1),
+        $v: t.literal(1),
 
         type: t.literal(updateType),
     }),
@@ -41,12 +41,12 @@ const update = t.intersection([
 
 export const type = t.union([
     t.type({
-        $version: t.literal(1),
+        $v: t.literal(1),
         type: t.literal(createType),
         value: DicePieceValue.state,
     }),
     t.type({
-        $version: t.literal(1),
+        $v: t.literal(1),
         type: t.literal(deleteType),
         value: DicePieceValue.state,
     }),
@@ -55,12 +55,12 @@ export const type = t.union([
 
 export const exactType = t.union([
     t.strict({
-        $version: t.literal(1),
+        $v: t.literal(1),
         type: t.literal(createType),
         value: DicePieceValue.state,
     }),
     t.strict({
-        $version: t.literal(1),
+        $v: t.literal(1),
         type: t.literal(deleteType),
         value: DicePieceValue.state,
     }),
@@ -74,7 +74,7 @@ export const ofOperation = (
     currentState: DicePieceValue.State
 ): Type => {
     return {
-        $version: 1,
+        $v: 1,
         type: updateType,
         dice:
             operation.dice == null
@@ -87,7 +87,7 @@ export const ofOperation = (
                                   throw new Error('this should not happen');
                               }
                               const update: DieValueUpOperation = {
-                                  $version: 1,
+                                  $v: 1,
                                   dieType: element.update.dieType,
                                   isValuePrivateChanged:
                                       element.update.isValuePrivate == null ||

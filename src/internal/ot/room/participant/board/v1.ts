@@ -1,6 +1,6 @@
 import * as t from 'io-ts';
-import { filePath } from '../../filePath/v1';
-import * as ReplaceOperation from '../../util/replaceOperation';
+import { filePath } from '../../../filePath/v1';
+import * as ReplaceOperation from '../../../util/replaceOperation';
 import {
     Apply,
     ClientTransform,
@@ -9,11 +9,11 @@ import {
     RequestedBy,
     Restore,
     ServerTransform,
-} from '../../util/type';
-import { createOperation } from '../../util/createOperation';
-import { isIdRecord } from '../../util/record';
+} from '../../../util/type';
+import { createOperation } from '../../../util/createOperation';
+import { isIdRecord } from '../../../util/record';
 import { Result } from '@kizahasi/result';
-import { maybe } from '../../../maybe';
+import { maybe } from '../../../../maybe';
 
 const stringDownOperation = t.type({ oldValue: t.string });
 const stringUpOperation = t.type({ newValue: t.string });
@@ -21,7 +21,7 @@ const numberDownOperation = t.type({ oldValue: t.number });
 const numberUpOperation = t.type({ newValue: t.number });
 
 export const state = t.type({
-    $version: t.literal(1),
+    $v: t.literal(1),
 
     backgroundImage: maybe(filePath),
     backgroundImageZoom: t.number,
@@ -65,7 +65,7 @@ export const upOperation = createOperation(1, {
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
-    $version: 1;
+    $v: 1;
 
     backgroundImage?: ReplaceOperation.ReplaceValueTwoWayOperation<
         t.TypeOf<typeof filePath> | null | undefined
@@ -163,7 +163,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const valueProps: DownOperation = {
-        $version: 1,
+        $v: 1,
 
         backgroundImage: ReplaceOperation.composeDownOperation(
             first.backgroundImage,
@@ -202,7 +202,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         ...nextState,
     };
     const twoWayOperation: TwoWayOperation = {
-        $version: 1,
+        $v: 1,
     };
 
     if (downOperation.backgroundImage !== undefined) {
@@ -273,7 +273,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const resultType: TwoWayOperation = { $version: 1 };
+    const resultType: TwoWayOperation = { $v: 1 };
     if (prevState.backgroundImage !== nextState.backgroundImage) {
         resultType.backgroundImage = {
             oldValue: prevState.backgroundImage,
@@ -337,7 +337,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
 export const serverTransform =
     (requestedBy: RequestedBy): ServerTransform<State, TwoWayOperation, UpOperation> =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
-        const twoWayOperation: TwoWayOperation = { $version: 1 };
+        const twoWayOperation: TwoWayOperation = { $v: 1 };
 
         twoWayOperation.backgroundImage = ReplaceOperation.serverTransform({
             first: serverOperation?.backgroundImage,
@@ -431,7 +431,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     });
 
     const firstPrime: UpOperation = {
-        $version: 1,
+        $v: 1,
         backgroundImage: backgroundImage.firstPrime,
         backgroundImageZoom: backgroundImageZoom.firstPrime,
         cellColumnCount: cellColumnCount.firstPrime,
@@ -444,7 +444,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     };
 
     const secondPrime: UpOperation = {
-        $version: 1,
+        $v: 1,
         backgroundImage: backgroundImage.secondPrime,
         backgroundImageZoom: backgroundImageZoom.secondPrime,
         cellColumnCount: cellColumnCount.secondPrime,

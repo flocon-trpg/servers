@@ -1,5 +1,5 @@
 import * as t from 'io-ts';
-import * as ReplaceOperation from '../../../../util/replaceOperation';
+import * as ReplaceOperation from '../../../../../util/replaceOperation';
 import {
     Apply,
     ClientTransform,
@@ -7,9 +7,9 @@ import {
     Diff,
     Restore,
     ServerTransform,
-} from '../../../../util/type';
-import { createOperation } from '../../../../util/createOperation';
-import { isIdRecord } from '../../../../util/record';
+} from '../../../../../util/type';
+import { createOperation } from '../../../../../util/createOperation';
+import { isIdRecord } from '../../../../../util/record';
 import { Result } from '@kizahasi/result';
 
 // 今の所D6しか対応していない。D4は将来のために予約されている。
@@ -22,7 +22,7 @@ const numberOrNull = t.union([t.number, t.null]);
 type NumberOrNull = t.TypeOf<typeof numberOrNull>;
 
 export const state = t.type({
-    $version: t.literal(1),
+    $v: t.literal(1),
     dieType,
     isValuePrivate: t.boolean,
     // null になるのは、次の2つのいずれかもしくは両方のケース。
@@ -50,7 +50,7 @@ export const upOperation = createOperation(1, {
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
-    $version: 1;
+    $v: 1;
     dieType?: ReplaceOperation.ReplaceValueTwoWayOperation<DieType>;
     isValuePrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     value?: ReplaceOperation.ReplaceValueTwoWayOperation<NumberOrNull>;
@@ -105,7 +105,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const valueProps: DownOperation = {
-        $version: 1,
+        $v: 1,
         dieType: ReplaceOperation.composeDownOperation(
             first.dieType ?? undefined,
             second.dieType ?? undefined
@@ -132,7 +132,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 
     const prevState: State = { ...nextState };
     const twoWayOperation: TwoWayOperation = {
-        $version: 1,
+        $v: 1,
     };
 
     if (downOperation.dieType != null) {
@@ -162,7 +162,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
     const resultType: TwoWayOperation = {
-        $version: 1,
+        $v: 1,
     };
     if (prevState.dieType !== nextState.dieType) {
         resultType.dieType = {
@@ -197,7 +197,7 @@ export const serverTransform =
         }
 
         const twoWayOperation: TwoWayOperation = {
-            $version: 1,
+            $v: 1,
         };
 
         twoWayOperation.dieType = ReplaceOperation.serverTransform({
@@ -241,14 +241,14 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     });
 
     const firstPrime: UpOperation = {
-        $version: 1,
+        $v: 1,
         dieType: dieType.firstPrime,
         isValuePrivate: isValuePrivate.firstPrime,
         value: value.firstPrime,
     };
 
     const secondPrime: UpOperation = {
-        $version: 1,
+        $v: 1,
         dieType: dieType.secondPrime,
         isValuePrivate: isValuePrivate.secondPrime,
         value: value.secondPrime,

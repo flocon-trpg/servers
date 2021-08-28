@@ -1,4 +1,4 @@
-import * as Command from './internal/ot/room/character/command/v1';
+import * as Command from './internal/ot/room/participant/character/command/v1';
 import * as RecordOperation from './internal/ot/util/recordOperation';
 
 export const privateCommandsDiff = ({
@@ -99,6 +99,7 @@ export {
     Spectator,
     ParticipantRole,
     State as ParticipantState,
+    DbState as ParticipantDbState,
     UpOperation as ParticipantUpOperation,
     DownOperation as ParticipantDownOperation,
 } from './internal/ot/room/participant/v1';
@@ -119,7 +120,7 @@ export {
     apply as applyBoard,
     diff as boardDiff,
     toUpOperation as toBoardUpOperation,
-} from './internal/ot/room/board/v1';
+} from './internal/ot/room/participant/board/v1';
 
 export {
     State as CharacterState,
@@ -128,19 +129,19 @@ export {
     apply as applyCharacter,
     diff as characterDiff,
     toUpOperation as toCharacterUpOperation,
-} from './internal/ot/room/character/v1';
+} from './internal/ot/room/participant/character/v1';
 
 export {
     State as BoolParamState,
     UpOperation as BoolParamUpOperation,
     DownOperation as BoolParamCharacterDownOperation,
-} from './internal/ot/room/character/boolParam/v1';
+} from './internal/ot/room/participant/character/boolParam/v1';
 
 export {
     State as NumParamState,
     UpOperation as NumParamUpOperation,
     DownOperation as NumParamCharacterDownOperation,
-} from './internal/ot/room/character/numParam/v1';
+} from './internal/ot/room/participant/character/numParam/v1';
 
 export {
     State as StrParamState,
@@ -149,7 +150,7 @@ export {
     apply as applyStrParamCharacter,
     diff as strParamcharacterDiff,
     toUpOperation as toCharacterStrParamUpOperation,
-} from './internal/ot/room/character/strParam/v1';
+} from './internal/ot/room/participant/character/strParam/v1';
 
 export {
     State as DicePieceValueState,
@@ -159,13 +160,13 @@ export {
     diff as dicePieceValueDiff,
     toUpOperation as toDicePieceValueUpOperation,
     dicePieceValueStrIndexes,
-} from './internal/ot/room/character/dicePieceValue/v1';
+} from './internal/ot/room/participant/character/dicePieceValue/v1';
 
 export {
     decode as decodeDicePieceValue,
     parse as parseDicePieceValue,
     exact as exactDicePieceValue,
-} from './internal/ot/room/character/dicePieceValue/converter';
+} from './internal/ot/room/participant/character/dicePieceValue/converter';
 
 export {
     State as DieValueState,
@@ -174,12 +175,12 @@ export {
     apply as applyDieValue,
     diff as dieValueDiff,
     toUpOperation as toDieValueUpOperation,
-} from './internal/ot/room/character/dicePieceValue/dieValue/v1';
+} from './internal/ot/room/participant/character/dicePieceValue/dieValue/v1';
 
 export {
     type as dicePieceValueLog,
     Type as DicePieceValueLog,
-} from './internal/ot/room/character/dicePieceValue/log-v1';
+} from './internal/ot/room/participant/character/dicePieceValue/log-v1';
 
 export {
     State as ImagePieceValueState,
@@ -197,18 +198,18 @@ export {
     apply as applyNumberPieceValue,
     diff as numberPieceValueDiff,
     toUpOperation as toNumberPieceValueUpOperation,
-} from './internal/ot/room/character/numberPieceValue/v1';
+} from './internal/ot/room/participant/character/numberPieceValue/v1';
 
 export {
     decode as decodeNumberPieceValue,
     parse as parseNumberPieceValue,
     exact as exactNumberPieceValue,
-} from './internal/ot/room/character/numberPieceValue/converter';
+} from './internal/ot/room/participant/character/numberPieceValue/converter';
 
 export {
     type as numberPieceValueLog,
     Type as NumberPieceValueLog,
-} from './internal/ot/room/character/numberPieceValue/log-v1';
+} from './internal/ot/room/participant/character/numberPieceValue/log-v1';
 
 export {
     State as MemoState,

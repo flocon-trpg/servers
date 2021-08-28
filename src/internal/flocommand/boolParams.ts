@@ -8,13 +8,13 @@ import {
     ScriptError,
 } from '@kizahasi/flocon-script';
 import { recordToArray } from '@kizahasi/util';
-import * as Character from '../ot/room/character/v1';
-import * as BoolParam from '../ot/room/character/boolParam/v1';
+import * as Character from '../ot/room/participant/character/v1';
+import * as BoolParam from '../ot/room/participant/character/boolParam/v1';
 import * as Room from '../ot/room/v1';
 import { FBoolParam } from './boolParam';
 
 const createDefaultState = (): BoolParam.State => ({
-    $version: 1,
+    $v: 1,
     value: false,
     isValuePrivate: false,
 });

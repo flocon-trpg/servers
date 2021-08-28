@@ -8,7 +8,7 @@ import {
     OnSettingParams,
     FString,
 } from '@kizahasi/flocon-script';
-import * as StrParam from '../ot/room/character/strParam/v1';
+import * as StrParam from '../ot/room/participant/character/strParam/v1';
 
 const value = 'value';
 const isValueSecret = 'isValueSecret';

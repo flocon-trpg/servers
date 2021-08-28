@@ -29,7 +29,7 @@ export class FRoom extends FObject {
     }
 
     public findCharacter(key: CompositeKey): FCharacter | undefined {
-        const character = this._room.characters[key.createdBy]?.[key.id];
+        const character = this._room.participants[key.createdBy]?.characters?.[key.id];
         if (character == null) {
             return undefined;
         }

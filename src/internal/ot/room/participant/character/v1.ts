@@ -3,19 +3,19 @@ import {
     mapRecordOperationElement,
     recordDownOperationElementFactory,
     recordUpOperationElementFactory,
-} from '../../util/recordOperationElement';
-import { FilePath, filePath } from '../../filePath/v1';
-import * as TextOperation from '../../util/textOperation';
-import * as Piece from '../../piece/v1';
-import * as BoardLocation from '../../boardLocation/v1';
+} from '../../../util/recordOperationElement';
+import { FilePath, filePath } from '../../../filePath/v1';
+import * as TextOperation from '../../../util/textOperation';
+import * as Piece from '../../../piece/v1';
+import * as BoardLocation from '../../../boardLocation/v1';
 import * as DicePieceValue from './dicePieceValue/v1';
 import * as NumberPieceValue from './numberPieceValue/v1';
-import * as ReplaceOperation from '../../util/replaceOperation';
-import * as DualKeyRecordOperation from '../../util/dualKeyRecordOperation';
-import * as RecordOperation from '../../util/recordOperation';
-import * as ParamRecordOperation from '../../util/paramRecordOperation';
-import { RecordTwoWayOperation } from '../../util/recordOperation';
-import { DualKeyRecordTwoWayOperation } from '../../util/dualKeyRecordOperation';
+import * as ReplaceOperation from '../../../util/replaceOperation';
+import * as DualKeyRecordOperation from '../../../util/dualKeyRecordOperation';
+import * as RecordOperation from '../../../util/recordOperation';
+import * as ParamRecordOperation from '../../../util/paramRecordOperation';
+import { RecordTwoWayOperation } from '../../../util/recordOperation';
+import { DualKeyRecordTwoWayOperation } from '../../../util/dualKeyRecordOperation';
 import {
     Apply,
     ClientTransform,
@@ -24,23 +24,23 @@ import {
     RequestedBy,
     Restore,
     ServerTransform,
-} from '../../util/type';
+} from '../../../util/type';
 import * as BoolParam from './boolParam/v1';
 import * as Command from './command/v1';
 import * as NumParam from './numParam/v1';
 import * as StrParam from './strParam/v1';
 import * as SimpleValueParam from './simpleValueParam/v1';
-import { createOperation } from '../../util/createOperation';
-import { isIdRecord, record, StringKeyRecord } from '../../util/record';
+import { createOperation } from '../../../util/createOperation';
+import { isIdRecord, record, StringKeyRecord } from '../../../util/record';
 import { Result } from '@kizahasi/result';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
 import { chooseDualKeyRecord, chooseRecord, CompositeKey } from '@kizahasi/util';
-import { Maybe, maybe } from '../../../maybe';
+import { Maybe, maybe } from '../../../../maybe';
 
 // privateCommandは無効化しているが、コードは大部分残している
 
 export const state = t.type({
-    $version: t.literal(1),
+    $v: t.literal(1),
 
     image: maybe(filePath),
     isPrivate: t.boolean,
@@ -147,7 +147,7 @@ export const upOperation = createOperation(1, {
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
-    $version: 1;
+    $v: 1;
 
     image?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<FilePath>>;
     isPrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
@@ -179,19 +179,19 @@ export type TwoWayOperation = {
 };
 
 const defaultBoolParamState: BoolParam.State = {
-    $version: 1,
+    $v: 1,
     isValuePrivate: false,
     value: null,
 };
 
 const defaultNumParamState: NumParam.State = {
-    $version: 1,
+    $v: 1,
     isValuePrivate: false,
     value: null,
 };
 
 const defaultStrParamState: StrParam.State = {
-    $version: 1,
+    $v: 1,
     isValuePrivate: false,
     value: '',
 };
@@ -980,7 +980,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     }
 
     const valueProps: DownOperation = {
-        $version: 1,
+        $v: 1,
 
         isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
         memo: memo.value,
@@ -1135,7 +1135,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         numberPieceValues: numberPieceValues.value.prevState,
     };
     const twoWayOperation: TwoWayOperation = {
-        $version: 1,
+        $v: 1,
         boolParams: boolParams.value.twoWayOperation,
         numParams: numParams.value.twoWayOperation,
         numMaxParams: numMaxParams.value.twoWayOperation,
@@ -1230,12 +1230,12 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         innerDiff: ({ prevState, nextState }) =>
             SimpleValueParam.diff<Maybe<boolean>>()({
                 prevState: prevState ?? {
-                    $version: 1,
+                    $v: 1,
                     isValuePrivate: false,
                     value: null,
                 },
                 nextState: nextState ?? {
-                    $version: 1,
+                    $v: 1,
                     isValuePrivate: false,
                     value: null,
                 },
@@ -1247,12 +1247,12 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         innerDiff: ({ prevState, nextState }) =>
             SimpleValueParam.diff<Maybe<number>>()({
                 prevState: prevState ?? {
-                    $version: 1,
+                    $v: 1,
                     isValuePrivate: false,
                     value: null,
                 },
                 nextState: nextState ?? {
-                    $version: 1,
+                    $v: 1,
                     isValuePrivate: false,
                     value: null,
                 },
@@ -1264,12 +1264,12 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         innerDiff: ({ prevState, nextState }) =>
             SimpleValueParam.diff<Maybe<number>>()({
                 prevState: prevState ?? {
-                    $version: 1,
+                    $v: 1,
                     isValuePrivate: false,
                     value: null,
                 },
                 nextState: nextState ?? {
-                    $version: 1,
+                    $v: 1,
                     isValuePrivate: false,
                     value: null,
                 },
@@ -1281,12 +1281,12 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         innerDiff: ({ prevState, nextState }) =>
             StrParam.diff({
                 prevState: prevState ?? {
-                    $version: 1,
+                    $v: 1,
                     isValuePrivate: false,
                     value: '',
                 },
                 nextState: nextState ?? {
-                    $version: 1,
+                    $v: 1,
                     isValuePrivate: false,
                     value: '',
                 },
@@ -1327,7 +1327,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         innerDiff: params => NumberPieceValue.diff(params),
     });
     const result: TwoWayOperation = {
-        $version: 1,
+        $v: 1,
         boolParams,
         numParams,
         numMaxParams,
@@ -1606,7 +1606,7 @@ export const serverTransform =
         }
 
         const twoWayOperation: TwoWayOperation = {
-            $version: 1,
+            $v: 1,
             boolParams: boolParams.value,
             numParams: numParams.value,
             numMaxParams: numMaxParams.value,
@@ -1865,7 +1865,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     }
 
     const firstPrime: UpOperation = {
-        $version: 1,
+        $v: 1,
         boolParams: boolParams.value.firstPrime,
         dicePieceValues: dicePieceValues.value.firstPrime,
         numberPieceValues: numberPieceValues.value.firstPrime,
@@ -1886,7 +1886,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         tachieImage: tachieImage.firstPrime,
     };
     const secondPrime: UpOperation = {
-        $version: 1,
+        $v: 1,
         boolParams: boolParams.value.secondPrime,
         dicePieceValues: dicePieceValues.value.secondPrime,
         numberPieceValues: numberPieceValues.value.secondPrime,

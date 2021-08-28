@@ -7,7 +7,7 @@ import {
     OnGettingParams,
     OnSettingParams,
 } from '@kizahasi/flocon-script';
-import * as BoolParam from '../ot/room/character/boolParam/v1';
+import * as BoolParam from '../ot/room/participant/character/boolParam/v1';
 
 const value = 'value';
 const isValueSecret = 'isValueSecret';
