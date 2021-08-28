@@ -425,7 +425,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         $v: 1,
         image: image.secondPrime,
         isPrivate: isPrivate.secondPrime,
-        memo: memo.value.firstPrime,
+        memo: memo.value.secondPrime,
         name: name.secondPrime,
         pieces: pieces.value.secondPrime,
     };
