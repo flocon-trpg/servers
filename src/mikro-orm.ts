@@ -1,6 +1,7 @@
 import { Connection, IDatabaseDriver, LoggerNamespace, MikroORM } from '@mikro-orm/core';
 import { DatabaseConfig, postgresql, sqlite } from './configType';
 import { File } from './graphql+mikro-orm/entities/file/mikro-orm';
+import { Participant } from './graphql+mikro-orm/entities/participant/mikro-orm';
 import { Room, RoomOp } from './graphql+mikro-orm/entities/room/mikro-orm';
 import {
     DicePieceValueLog,
@@ -22,6 +23,7 @@ const entities = [
     RoomPubCh,
     RoomSe,
     User,
+    Participant,
     File,
 ];
 

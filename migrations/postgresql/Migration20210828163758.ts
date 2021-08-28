@@ -1,6 +1,6 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20210826153611 extends Migration {
+export class Migration20210828163758 extends Migration {
     async up(): Promise<void> {
         this.addSql(
             'create table "user" ("user_uid" varchar(255) not null, "baas_type" text check ("baas_type" in (\'Firebase\')) not null, "is_entry" bool not null);'
@@ -130,6 +130,14 @@ export class Migration20210826153611 extends Migration {
         this.addSql('alter table "room_se" add constraint "room_se_pkey" primary key ("id");');
 
         this.addSql(
+            'create table "participant" ("id" varchar(255) not null, "role" text check ("role" in (\'Master\', \'Player\', \'Spectator\')) null, "name" varchar(255) null, "room_id" varchar(255) not null, "user_user_uid" varchar(255) not null);'
+        );
+        this.addSql(
+            'alter table "participant" add constraint "participant_pkey" primary key ("id");'
+        );
+        this.addSql('create index "participant_role_index" on "participant" ("role");');
+
+        this.addSql(
             'alter table "file" add constraint "file_created_by_user_uid_foreign" foreign key ("created_by_user_uid") references "user" ("user_uid") on update cascade;'
         );
 
@@ -175,6 +183,13 @@ export class Migration20210826153611 extends Migration {
         );
         this.addSql(
             'alter table "room_se" add constraint "room_se_room_id_foreign" foreign key ("room_id") references "room" ("id") on update cascade;'
+        );
+
+        this.addSql(
+            'alter table "participant" add constraint "participant_room_id_foreign" foreign key ("room_id") references "room" ("id") on update cascade;'
+        );
+        this.addSql(
+            'alter table "participant" add constraint "participant_user_user_uid_foreign" foreign key ("user_user_uid") references "user" ("user_uid") on update cascade;'
         );
 
         this.addSql(
