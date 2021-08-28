@@ -1077,6 +1077,7 @@ export class RoomResolver {
                 (newParticipant.role = ParticipantRoleType.Master);
             em.persist(newParticipant);
             newRoom.participants.add(newParticipant);
+            authorizedUser.participants.add(newParticipant);
 
             // このRoomのroomOperatedを購読しているユーザーはいないので、roomOperatedは実行する必要がない。
             newRoom.joinAsPlayerPhrase = input.joinAsPlayerPhrase;

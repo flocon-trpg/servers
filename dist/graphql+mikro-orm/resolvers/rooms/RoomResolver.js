@@ -772,6 +772,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
                 (newParticipant.role = ParticipantRoleType_1.ParticipantRoleType.Master);
             em.persist(newParticipant);
             newRoom.participants.add(newParticipant);
+            authorizedUser.participants.add(newParticipant);
             newRoom.joinAsPlayerPhrase = input.joinAsPlayerPhrase;
             newRoom.joinAsSpectatorPhrase = input.joinAsSpectatorPhrase;
             const revision = newRoom.revision;
