@@ -16,6 +16,7 @@ import { GetRoomFailureType } from '../../../enums/GetRoomFailureType';
 import { ensureAuthorizedUser, findRoomAndMyParticipant } from '../utils/helpers';
 import { JoinRoomFailureType } from '../../../enums/JoinRoomFailureType';
 import * as Room$MikroORM from '../../entities/room/mikro-orm';
+import * as Participant$MikroORM from '../../entities/participant/mikro-orm';
 import { stateToGraphQL as stateToGraphql$RoomAsListItem } from '../../entities/roomAsListItem/global';
 import { queueLimitReached } from '../../../utils/promiseQueue';
 import { serverTooBusyMessage } from '../utils/messages';
@@ -152,6 +153,7 @@ import {
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
 import { ParticipantRole as ParticipantRoleEnum } from '../../../enums/ParticipantRole';
 import { ENTRY } from '../../../roles';
+import { ParticipantRoleType } from '../../../enums/ParticipantRoleType';
 
 const find = <T>(source: Record<string, T | undefined>, key: string): T | undefined => source[key];
 
@@ -249,7 +251,7 @@ const operateParticipantAndFlush = async ({
     };
 }): Promise<{ result: typeof JoinRoomResult; payload: RoomEventPayload | undefined }> => {
     const prevRevision = room.revision;
-    const roomState = GlobalRoom.MikroORM.ToGlobal.state(room);
+    const roomState = await GlobalRoom.MikroORM.ToGlobal.state(room, em);
     const me = find(roomState.participants, myUserUid);
     let participantOperation:
         | RecordUpOperationElement<ParticipantState, ParticipantUpOperation>
@@ -260,9 +262,11 @@ const operateParticipantAndFlush = async ({
                 type: replace,
                 replace: {
                     newValue: {
-                        $version: 1,
+                        $v: 1,
                         name: create.name,
                         role: create.role,
+                        boards: {},
+                        characters: {},
                         imagePieceValues: {},
                     },
                 },
@@ -273,7 +277,7 @@ const operateParticipantAndFlush = async ({
             participantOperation = {
                 type: 'update',
                 update: {
-                    $version: 1,
+                    $v: 1,
                     role: update.role,
                     name: update.name,
                 },
@@ -289,7 +293,7 @@ const operateParticipantAndFlush = async ({
     }
 
     const roomUpOperation: UpOperation = {
-        $version: 1,
+        $v: 1,
         participants: {
             [myUserUid]: participantOperation,
         },
@@ -315,7 +319,7 @@ const operateParticipantAndFlush = async ({
         };
     }
 
-    const nextRoomState = GlobalRoom.Global.applyToEntity({
+    const nextRoomState = await GlobalRoom.Global.applyToEntity({
         em,
         target: room,
         prevState: roomState,
@@ -1035,16 +1039,17 @@ export class RoomResolver {
         const queue = async (): Promise<typeof CreateRoomResult> => {
             const em = context.em;
             const authorizedUser = ensureAuthorizedUser(context);
+
             const newRoom = new Room$MikroORM.Room({
                 name: input.roomName,
                 createdBy: authorizedUser.userUid,
                 value: {
-                    $version: 1,
+                    $v: 1,
                     participants: {
                         [authorizedUser.userUid]: {
-                            $version: 1,
-                            role: Master,
-                            name: input.participantName,
+                            $v: 1,
+                            boards: {},
+                            characters: {},
                             imagePieceValues: {},
                         },
                     },
@@ -1060,20 +1065,26 @@ export class RoomResolver {
                     publicChannel9Name: 'メイン9',
                     publicChannel10Name: 'メイン10',
                     bgms: {},
-                    boards: {},
                     boolParamNames: {},
-                    characters: {},
                     numParamNames: {},
                     strParamNames: {},
                     memos: {},
                 },
             });
+
+            const newParticipant = new Participant$MikroORM.Participant();
+            (newParticipant.name = input.participantName),
+                (newParticipant.role = ParticipantRoleType.Master);
+            em.persist(newParticipant);
+            newRoom.participants.add(newParticipant);
+
             // このRoomのroomOperatedを購読しているユーザーはいないので、roomOperatedは実行する必要がない。
             newRoom.joinAsPlayerPhrase = input.joinAsPlayerPhrase;
             newRoom.joinAsSpectatorPhrase = input.joinAsSpectatorPhrase;
             const revision = newRoom.revision;
             em.persist(newRoom);
-            const roomState = GlobalRoom.MikroORM.ToGlobal.state(newRoom);
+
+            const roomState = await GlobalRoom.MikroORM.ToGlobal.state(newRoom, em);
             const graphqlState = GlobalRoom.Global.ToGraphQL.state({
                 source: roomState,
                 requestedBy: { type: client, userUid: authorizedUser.userUid },
@@ -1341,7 +1352,7 @@ export class RoomResolver {
                 });
             }
 
-            const roomState = GlobalRoom.MikroORM.ToGlobal.state(room);
+            const roomState = await GlobalRoom.MikroORM.ToGlobal.state(room, em);
             return Result.ok({
                 role: ParticipantRoleEnum.ofString(me.role),
                 room: {
@@ -1495,7 +1506,7 @@ export class RoomResolver {
             const operation = transformed.value;
             const prevRevision = room.revision;
 
-            const nextRoomState = GlobalRoom.Global.applyToEntity({
+            const nextRoomState = await GlobalRoom.Global.applyToEntity({
                 em,
                 target: room,
                 prevState: roomState,
@@ -1660,7 +1671,10 @@ export class RoomResolver {
 
             let chara: CharacterState | undefined = undefined;
             if (args.characterStateId != null) {
-                chara = roomState.characters[authorizedUser.userUid]?.[args.characterStateId];
+                chara =
+                    roomState.participants[authorizedUser.userUid]?.characters?.[
+                        args.characterStateId
+                    ];
             }
             const entityResult = await analyzeTextAndSetToEntity({
                 type: 'RoomPubMsg',
@@ -1775,7 +1789,10 @@ export class RoomResolver {
 
             let chara: CharacterState | undefined = undefined;
             if (args.characterStateId != null) {
-                chara = roomState.characters[authorizedUser.userUid]?.[args.characterStateId];
+                chara =
+                    roomState.participants[authorizedUser.userUid]?.characters?.[
+                        args.characterStateId
+                    ];
             }
             const entityResult = await analyzeTextAndSetToEntity({
                 type: 'RoomPrvMsg',

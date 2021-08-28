@@ -41,6 +41,7 @@ const GetRoomFailureType_1 = require("../../../enums/GetRoomFailureType");
 const helpers_1 = require("../utils/helpers");
 const JoinRoomFailureType_1 = require("../../../enums/JoinRoomFailureType");
 const Room$MikroORM = __importStar(require("../../entities/room/mikro-orm"));
+const Participant$MikroORM = __importStar(require("../../entities/participant/mikro-orm"));
 const global_1 = require("../../entities/roomAsListItem/global");
 const promiseQueue_1 = require("../../../utils/promiseQueue");
 const messages_1 = require("../utils/messages");
@@ -89,10 +90,11 @@ const util_1 = require("@kizahasi/util");
 const flocon_core_1 = require("@kizahasi/flocon-core");
 const ParticipantRole_1 = require("../../../enums/ParticipantRole");
 const roles_1 = require("../../../roles");
+const ParticipantRoleType_1 = require("../../../enums/ParticipantRoleType");
 const find = (source, key) => source[key];
 const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUserUids, create, update, }) => {
     const prevRevision = room.revision;
-    const roomState = global_2.GlobalRoom.MikroORM.ToGlobal.state(room);
+    const roomState = await global_2.GlobalRoom.MikroORM.ToGlobal.state(room, em);
     const me = find(roomState.participants, myUserUid);
     let participantOperation = undefined;
     if (me == null) {
@@ -101,9 +103,11 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
                 type: flocon_core_1.replace,
                 replace: {
                     newValue: {
-                        $version: 1,
+                        $v: 1,
                         name: create.name,
                         role: create.role,
+                        boards: {},
+                        characters: {},
                         imagePieceValues: {},
                     },
                 },
@@ -115,7 +119,7 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
             participantOperation = {
                 type: 'update',
                 update: {
-                    $version: 1,
+                    $v: 1,
                     role: update.role,
                     name: update.name,
                 },
@@ -129,7 +133,7 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
         };
     }
     const roomUpOperation = {
-        $version: 1,
+        $v: 1,
         participants: {
             [myUserUid]: participantOperation,
         },
@@ -153,7 +157,7 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
             payload: undefined,
         };
     }
-    const nextRoomState = global_2.GlobalRoom.Global.applyToEntity({
+    const nextRoomState = await global_2.GlobalRoom.Global.applyToEntity({
         em,
         target: room,
         prevState: roomState,
@@ -736,12 +740,12 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
                 name: input.roomName,
                 createdBy: authorizedUser.userUid,
                 value: {
-                    $version: 1,
+                    $v: 1,
                     participants: {
                         [authorizedUser.userUid]: {
-                            $version: 1,
-                            role: flocon_core_1.Master,
-                            name: input.participantName,
+                            $v: 1,
+                            boards: {},
+                            characters: {},
                             imagePieceValues: {},
                         },
                     },
@@ -757,19 +761,22 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
                     publicChannel9Name: 'メイン9',
                     publicChannel10Name: 'メイン10',
                     bgms: {},
-                    boards: {},
                     boolParamNames: {},
-                    characters: {},
                     numParamNames: {},
                     strParamNames: {},
                     memos: {},
                 },
             });
+            const newParticipant = new Participant$MikroORM.Participant();
+            (newParticipant.name = input.participantName),
+                (newParticipant.role = ParticipantRoleType_1.ParticipantRoleType.Master);
+            em.persist(newParticipant);
+            newRoom.participants.add(newParticipant);
             newRoom.joinAsPlayerPhrase = input.joinAsPlayerPhrase;
             newRoom.joinAsSpectatorPhrase = input.joinAsSpectatorPhrase;
             const revision = newRoom.revision;
             em.persist(newRoom);
-            const roomState = global_2.GlobalRoom.MikroORM.ToGlobal.state(newRoom);
+            const roomState = await global_2.GlobalRoom.MikroORM.ToGlobal.state(newRoom, em);
             const graphqlState = global_2.GlobalRoom.Global.ToGraphQL.state({
                 source: roomState,
                 requestedBy: { type: flocon_core_1.client, userUid: authorizedUser.userUid },
@@ -968,7 +975,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
                     roomAsListItem: global_1.stateToGraphQL({ roomEntity: room }),
                 });
             }
-            const roomState = global_2.GlobalRoom.MikroORM.ToGlobal.state(room);
+            const roomState = await global_2.GlobalRoom.MikroORM.ToGlobal.state(room, em);
             return result_1.Result.ok({
                 role: ParticipantRole_1.ParticipantRole.ofString(me.role),
                 room: Object.assign(Object.assign({}, global_2.GlobalRoom.Global.ToGraphQL.state({
@@ -1094,7 +1101,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             }
             const operation = transformed.value;
             const prevRevision = room.revision;
-            const nextRoomState = global_2.GlobalRoom.Global.applyToEntity({
+            const nextRoomState = await global_2.GlobalRoom.Global.applyToEntity({
                 em,
                 target: room,
                 prevState: roomState,
@@ -1197,7 +1204,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
     async writePublicMessage(args, context, pubSub) {
         const channelKey = args.channelKey;
         const queue = async () => {
-            var _a, _b, _c, _d, _e;
+            var _a, _b, _c, _d, _e, _f;
             const em = context.em;
             const authorizedUser = helpers_1.ensureAuthorizedUser(context);
             const findResult = await helpers_1.findRoomAndMyParticipant({
@@ -1233,7 +1240,8 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             }
             let chara = undefined;
             if (args.characterStateId != null) {
-                chara = (_a = roomState.characters[authorizedUser.userUid]) === null || _a === void 0 ? void 0 : _a[args.characterStateId];
+                chara =
+                    (_b = (_a = roomState.participants[authorizedUser.userUid]) === null || _a === void 0 ? void 0 : _a.characters) === null || _b === void 0 ? void 0 : _b[args.characterStateId];
             }
             const entityResult = await analyzeTextAndSetToEntity({
                 type: 'RoomPubMsg',
@@ -1259,10 +1267,10 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
                 entity.charaStateId = args.characterStateId;
                 entity.charaName = chara.name;
                 entity.charaIsPrivate = chara.isPrivate;
-                entity.charaImagePath = (_b = chara.image) === null || _b === void 0 ? void 0 : _b.path;
-                entity.charaImageSourceType = FileSourceType_1.FileSourceTypeModule.ofNullishString((_c = chara.image) === null || _c === void 0 ? void 0 : _c.sourceType);
-                entity.charaTachieImagePath = (_d = chara.tachieImage) === null || _d === void 0 ? void 0 : _d.path;
-                entity.charaTachieImageSourceType = FileSourceType_1.FileSourceTypeModule.ofNullishString((_e = chara.tachieImage) === null || _e === void 0 ? void 0 : _e.sourceType);
+                entity.charaImagePath = (_c = chara.image) === null || _c === void 0 ? void 0 : _c.path;
+                entity.charaImageSourceType = FileSourceType_1.FileSourceTypeModule.ofNullishString((_d = chara.image) === null || _d === void 0 ? void 0 : _d.sourceType);
+                entity.charaTachieImagePath = (_e = chara.tachieImage) === null || _e === void 0 ? void 0 : _e.path;
+                entity.charaTachieImageSourceType = FileSourceType_1.FileSourceTypeModule.ofNullishString((_f = chara.tachieImage) === null || _f === void 0 ? void 0 : _f.sourceType);
             }
             entity.roomPubCh = core_1.Reference.create(ch);
             await em.persistAndFlush(entity);
@@ -1293,7 +1301,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             throw new Error('visibleTo.length is too large');
         }
         const queue = async () => {
-            var _a, _b, _c, _d, _e;
+            var _a, _b, _c, _d, _e, _f;
             const em = context.em;
             const authorizedUser = helpers_1.ensureAuthorizedUser(context);
             const findResult = await helpers_1.findRoomAndMyParticipant({
@@ -1323,7 +1331,8 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             await authorizedUser.visibleRoomPrvMsgs.init({ where: { room: { id: room.id } } });
             let chara = undefined;
             if (args.characterStateId != null) {
-                chara = (_a = roomState.characters[authorizedUser.userUid]) === null || _a === void 0 ? void 0 : _a[args.characterStateId];
+                chara =
+                    (_b = (_a = roomState.participants[authorizedUser.userUid]) === null || _a === void 0 ? void 0 : _a.characters) === null || _b === void 0 ? void 0 : _b[args.characterStateId];
             }
             const entityResult = await analyzeTextAndSetToEntity({
                 type: 'RoomPrvMsg',
@@ -1355,10 +1364,10 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
                 entity.charaStateId = args.characterStateId;
                 entity.charaName = chara.name;
                 entity.charaIsPrivate = chara.isPrivate;
-                entity.charaImagePath = (_b = chara.image) === null || _b === void 0 ? void 0 : _b.path;
-                entity.charaImageSourceType = FileSourceType_1.FileSourceTypeModule.ofNullishString((_c = chara.tachieImage) === null || _c === void 0 ? void 0 : _c.sourceType);
-                entity.charaTachieImagePath = (_d = chara.tachieImage) === null || _d === void 0 ? void 0 : _d.path;
-                entity.charaTachieImageSourceType = FileSourceType_1.FileSourceTypeModule.ofNullishString((_e = chara.tachieImage) === null || _e === void 0 ? void 0 : _e.sourceType);
+                entity.charaImagePath = (_c = chara.image) === null || _c === void 0 ? void 0 : _c.path;
+                entity.charaImageSourceType = FileSourceType_1.FileSourceTypeModule.ofNullishString((_d = chara.tachieImage) === null || _d === void 0 ? void 0 : _d.sourceType);
+                entity.charaTachieImagePath = (_e = chara.tachieImage) === null || _e === void 0 ? void 0 : _e.path;
+                entity.charaTachieImageSourceType = FileSourceType_1.FileSourceTypeModule.ofNullishString((_f = chara.tachieImage) === null || _f === void 0 ? void 0 : _f.sourceType);
             }
             entity.room = core_1.Reference.create(room);
             await em.persistAndFlush(entity);

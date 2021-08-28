@@ -13,12 +13,14 @@ exports.deleteRoom = exports.RoomOp = exports.Room = void 0;
 const core_1 = require("@mikro-orm/core");
 const uuid_1 = require("uuid");
 const easyFlake_1 = require("../../../utils/easyFlake");
-const mikro_orm_1 = require("../roomMessage/mikro-orm");
+const mikro_orm_1 = require("../participant/mikro-orm");
+const mikro_orm_2 = require("../roomMessage/mikro-orm");
 let Room = class Room {
     constructor({ createdBy, name, value, }) {
         this.id = easyFlake_1.easyFlake();
         this.version = 1;
         this.revision = 0;
+        this.participants = new core_1.Collection(this);
         this.roomOperations = new core_1.Collection(this);
         this.roomChatChs = new core_1.Collection(this);
         this.roomPrvMsgs = new core_1.Collection(this);
@@ -67,27 +69,31 @@ __decorate([
     __metadata("design:type", Number)
 ], Room.prototype, "revision", void 0);
 __decorate([
+    core_1.OneToMany(() => mikro_orm_1.Participant, x => x.room, { orphanRemoval: true }),
+    __metadata("design:type", Object)
+], Room.prototype, "participants", void 0);
+__decorate([
     core_1.OneToMany(() => RoomOp, x => x.room, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], Room.prototype, "roomOperations", void 0);
 __decorate([
-    core_1.OneToMany(() => mikro_orm_1.RoomPubCh, x => x.room, { orphanRemoval: true }),
+    core_1.OneToMany(() => mikro_orm_2.RoomPubCh, x => x.room, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], Room.prototype, "roomChatChs", void 0);
 __decorate([
-    core_1.OneToMany(() => mikro_orm_1.RoomPrvMsg, x => x.room, { orphanRemoval: true }),
+    core_1.OneToMany(() => mikro_orm_2.RoomPrvMsg, x => x.room, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], Room.prototype, "roomPrvMsgs", void 0);
 __decorate([
-    core_1.OneToMany(() => mikro_orm_1.DicePieceValueLog, x => x.room, { orphanRemoval: true }),
+    core_1.OneToMany(() => mikro_orm_2.DicePieceValueLog, x => x.room, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], Room.prototype, "dicePieceValueLogs", void 0);
 __decorate([
-    core_1.OneToMany(() => mikro_orm_1.NumberPieceValueLog, x => x.room, { orphanRemoval: true }),
+    core_1.OneToMany(() => mikro_orm_2.NumberPieceValueLog, x => x.room, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], Room.prototype, "numberPieceValueLogs", void 0);
 __decorate([
-    core_1.OneToMany(() => mikro_orm_1.RoomSe, x => x.room, { orphanRemoval: true }),
+    core_1.OneToMany(() => mikro_orm_2.RoomSe, x => x.room, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], Room.prototype, "roomSes", void 0);
 Room = __decorate([

@@ -13,6 +13,7 @@ import {
 import { v4 } from 'uuid';
 import { easyFlake } from '../../../utils/easyFlake';
 import { EM } from '../../../utils/types';
+import { Participant } from '../participant/mikro-orm';
 import {
     DicePieceValueLog as DicePieceValueLogEntity,
     NumberPieceValueLog as NumberPieceValueLogEntity,
@@ -68,6 +69,9 @@ export class Room {
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property()
     public revision: number = 0;
+
+    @OneToMany(() => Participant, x => x.room, { orphanRemoval: true })
+    public participants = new Collection<Participant>(this);
 
     @OneToMany(() => RoomOp, x => x.room, { orphanRemoval: true })
     public roomOperations = new Collection<RoomOp>(this);

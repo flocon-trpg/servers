@@ -1,4 +1,3 @@
-import * as t from 'io-ts';
 import { RoomGetState, RoomOperationInput } from './graphql';
 import { Room, RoomOp } from './mikro-orm';
 import { EM } from '../../../utils/types';
@@ -22,7 +21,14 @@ import {
     diff,
     toUpOperation,
     RequestedBy,
+    ParticipantState,
+    update,
 } from '@kizahasi/flocon-core';
+import { Participant } from '../participant/mikro-orm';
+import { recordForEachAsync } from '@kizahasi/util';
+import { User } from '../user/mikro-orm';
+import { reduceEachTrailingCommentRange } from 'typescript';
+import { nullableStringToParticipantRoleType } from '../../../enums/ParticipantRoleType';
 
 type IsSequentialResult<T> =
     | {
@@ -82,9 +88,29 @@ const isSequential = <T>(array: T[], getIndex: (elem: T) => number): IsSequentia
 export namespace GlobalRoom {
     export namespace MikroORM {
         export namespace ToGlobal {
-            export const state = (entity: Room): State => {
-                const result = decodeDbState(entity.value);
-                return { ...result, createdBy: entity.createdBy, name: entity.name };
+            export const state = async (roomEntity: Room, em: EM): Promise<State> => {
+                const result = decodeDbState(roomEntity.value);
+                const participants: Record<string, ParticipantState> = {};
+                await recordForEachAsync(
+                    result.participants,
+                    async (participant, participantKey) => {
+                        const participantEntity = await em.findOne(Participant, {
+                            room: { id: roomEntity.id },
+                            user: { userUid: participantKey },
+                        });
+                        participants[participantKey] = {
+                            ...participant,
+                            name: participantEntity?.name,
+                            role: participantEntity?.role,
+                        };
+                    }
+                );
+                return {
+                    ...result,
+                    createdBy: roomEntity.createdBy,
+                    name: roomEntity.name,
+                    participants,
+                };
             };
 
             const downOperation = (entity: RoomOp) => {
@@ -191,12 +217,44 @@ export namespace GlobalRoom {
                 });
                 const upOperation =
                     diffOperation == null ? undefined : toUpOperation(diffOperation);
-                return stringifyUpOperation(upOperation ?? { $version: 1 });
+                return stringifyUpOperation(upOperation ?? { $v: 1 });
             };
         }
 
-        // prevStateとtargetのJSONは等しい
-        export const applyToEntity = ({
+        class EnsureParticipantEntity {
+            private participantEntity: Participant | null = null;
+
+            public constructor(
+                private readonly em: EM,
+                private readonly room: Room,
+                private readonly participantKey: string
+            ) {}
+
+            public async get(): Promise<Participant> {
+                if (this.participantEntity == null) {
+                    this.participantEntity = await this.em.findOne(Participant, {
+                        room: { id: this.room.id },
+                        user: { userUid: this.participantKey },
+                    });
+                    if (this.participantEntity == null) {
+                        const user = await this.em.findOne(User, { userUid: this.participantKey });
+                        if (user == null) {
+                            throw new Error(
+                                `Tried to apply a Participant entity, but User was not found. roomId: ${this.room.id}, participantKey:${this.participantKey}`
+                            );
+                        }
+                        this.participantEntity = new Participant();
+                        this.room.participants.add(this.participantEntity);
+                        user.participants.add(this.participantEntity);
+                        this.em.persist(this.participantEntity);
+                    }
+                }
+                return this.participantEntity;
+            }
+        }
+
+        // prevStateにおけるDbStateの部分とtargetのJSONは等しい
+        export const applyToEntity = async ({
             em,
             target,
             prevState,
@@ -214,10 +272,41 @@ export namespace GlobalRoom {
             if (nextState.isError) {
                 throw nextState.error;
             }
+
             target.name = nextState.value.name;
             target.value = exactDbState(nextState.value);
             const prevRevision = target.revision;
             target.revision += 1;
+
+            await recordForEachAsync(
+                operation.participants ?? {},
+                async (participant, participantKey) => {
+                    const ensureEntity = new EnsureParticipantEntity(em, target, participantKey);
+                    if (participant.type === update) {
+                        if (participant.update.name != null) {
+                            (await ensureEntity.get()).name =
+                                participant.update.name.newValue ?? undefined;
+                        }
+                        if (participant.update.role != null) {
+                            (await ensureEntity.get()).role =
+                                nullableStringToParticipantRoleType(
+                                    participant.update.role.newValue
+                                ) ?? undefined;
+                        }
+                        return;
+                    }
+                    if (participant.replace.newValue == null) {
+                        em.remove(await ensureEntity.get());
+                        return;
+                    }
+                    const newParticipant = await ensureEntity.get();
+                    newParticipant.name = participant.replace.newValue.name ?? undefined;
+                    newParticipant.role =
+                        nullableStringToParticipantRoleType(participant.replace.newValue.role) ??
+                        undefined;
+                }
+            );
+
             const op = new RoomOp({
                 prevRevision,
                 value: toDownOperation(operation),

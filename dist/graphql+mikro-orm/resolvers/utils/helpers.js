@@ -78,7 +78,7 @@ const findRoomAndMyParticipant = async ({ em, userUid, roomId, }) => {
     if (room == null) {
         return null;
     }
-    const state = global_1.GlobalRoom.MikroORM.ToGlobal.state(room);
+    const state = await global_1.GlobalRoom.MikroORM.ToGlobal.state(room, em);
     const me = find(state.participants, userUid);
     return new FindRoomAndMyParticipantResult(room, state, me);
 };
