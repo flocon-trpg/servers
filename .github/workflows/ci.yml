@@ -74,7 +74,7 @@ jobs:
 
     # fails in windows because it uses crlf
     prettier:
-        name: Check prettier on Node ${{ matrix.node }} and ${{ matrix.os }}
+        name: Check install and prettier on Node ${{ matrix.node }} and ${{ matrix.os }}
 
         runs-on: ${{ matrix.os }}
         strategy:
@@ -100,3 +100,29 @@ jobs:
 
             - name: Prettier(check)
               run: npm run prettier:base -- --check
+
+    install:
+        name: Check install --production=${{matrix.param}} on on Node ${{ matrix.node }} and ${{ matrix.os }}
+
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                node: ['14.x']
+                os: [ubuntu-latest, windows-latest, macos-latest]
+                param: ['false', 'true']
+
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v2
+
+            - name: Use Node ${{ matrix.node }}
+              uses: actions/setup-node@v2
+              with:
+                  node-version: ${{ matrix.node }}
+
+            - name: Update to npm@7
+              run: npm install -g npm@7
+
+            # npm ci はエラーが出るので使っていない
+            - name: Install
+              run: npm install --production=${{matrix.param}}
