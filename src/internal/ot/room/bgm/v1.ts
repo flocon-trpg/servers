@@ -7,7 +7,7 @@ import { isIdRecord } from '../../util/record';
 import { Result } from '@kizahasi/result';
 
 export const state = t.type({
-    $version: t.literal(1),
+    $v: t.literal(1),
 
     isPaused: t.boolean,
     files: t.array(filePath),
@@ -33,7 +33,7 @@ export const upOperation = createOperation(1, {
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
-    $version: 1;
+    $v: 1;
 
     isPaused?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     files?: ReplaceOperation.ReplaceValueTwoWayOperation<t.TypeOf<typeof filePath>[]>;
@@ -80,7 +80,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const valueProps: DownOperation = {
-        $version: 1,
+        $v: 1,
         isPaused: ReplaceOperation.composeDownOperation(first.isPaused, second.isPaused),
         files: ReplaceOperation.composeDownOperation(first.files, second.files),
         volume: ReplaceOperation.composeDownOperation(first.volume, second.volume),
@@ -97,7 +97,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     }
 
     const prevState: State = { ...nextState };
-    const twoWayOperation: TwoWayOperation = { $version: 1 };
+    const twoWayOperation: TwoWayOperation = { $v: 1 };
 
     if (downOperation.isPaused !== undefined) {
         prevState.isPaused = downOperation.isPaused.oldValue;
@@ -128,7 +128,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const resultType: TwoWayOperation = { $version: 1 };
+    const resultType: TwoWayOperation = { $v: 1 };
     if (prevState.isPaused !== nextState.isPaused) {
         resultType.isPaused = {
             oldValue: prevState.isPaused,
@@ -158,7 +158,7 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
     clientOperation,
     serverOperation,
 }) => {
-    const twoWayOperation: TwoWayOperation = { $version: 1 };
+    const twoWayOperation: TwoWayOperation = { $v: 1 };
 
     twoWayOperation.isPaused = ReplaceOperation.serverTransform({
         first: serverOperation?.isPaused,
@@ -198,14 +198,14 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     });
 
     const firstPrime: UpOperation = {
-        $version: 1,
+        $v: 1,
         isPaused: isPaused.firstPrime,
         files: files.firstPrime,
         volume: volume.firstPrime,
     };
 
     const secondPrime: UpOperation = {
-        $version: 1,
+        $v: 1,
         isPaused: isPaused.secondPrime,
         files: files.secondPrime,
         volume: volume.secondPrime,

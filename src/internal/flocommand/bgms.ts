@@ -36,7 +36,7 @@ export class FBgms extends FObject {
             return found;
         }
         const newBgm: Bgm.State = {
-            $version: 1,
+            $v: 1,
             files: [],
             isPaused: true,
             volume: 0.5,

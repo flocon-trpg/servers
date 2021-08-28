@@ -14,7 +14,7 @@ import * as Room from '../ot/room/v1';
 import { FBoolParam } from './boolParam';
 
 const createDefaultState = (): BoolParam.State => ({
-    $version: 1,
+    $v: 1,
     value: false,
     isValuePrivate: false,
 });

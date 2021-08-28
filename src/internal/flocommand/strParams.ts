@@ -14,7 +14,7 @@ import * as Room from '../ot/room/v1';
 import { FStrParam } from './strParam';
 
 const createDefaultState = (): StrParam.State => ({
-    $version: 1,
+    $v: 1,
     value: '',
     isValuePrivate: false,
 });

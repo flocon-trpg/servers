@@ -40,7 +40,7 @@ const participantRole = t.union([t.literal(Player), t.literal(Spectator), t.lite
 export type ParticipantRole = t.TypeOf<typeof participantRole>;
 
 export const dbState = t.type({
-    $version: t.literal(1),
+    $v: t.literal(1),
 
     boards: record(t.string, Board.state),
     characters: record(t.string, Character.state),
@@ -94,7 +94,7 @@ export const upOperation = createOperation(1, {
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
-    $version: 1;
+    $v: 1;
 
     name?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<string>>;
     role?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<ParticipantRole>>;
@@ -402,7 +402,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     }
 
     const valueProps: DownOperation = {
-        $version: 1,
+        $v: 1,
         name: ReplaceOperation.composeDownOperation(
             first.name ?? undefined,
             second.name ?? undefined
@@ -478,7 +478,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         imagePieceValues: imagePieceValues.value.prevState,
     };
     const twoWayOperation: TwoWayOperation = {
-        $version: 1,
+        $v: 1,
         boards: boards.value.twoWayOperation,
         characters: characters.value.twoWayOperation,
         imagePieceValues: imagePieceValues.value.twoWayOperation,
@@ -522,7 +522,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         innerDiff: params => ImagePieceValue.diff(params),
     });
     const result: TwoWayOperation = {
-        $version: 1,
+        $v: 1,
         boards,
         characters,
         imagePieceValues,
@@ -671,7 +671,7 @@ export const serverTransform =
         }
 
         const twoWayOperation: TwoWayOperation = {
-            $version: 1,
+            $v: 1,
             boards: boards.value,
             characters: characters.value,
             imagePieceValues: imagePieceValues.value,
@@ -773,7 +773,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     });
 
     const firstPrime: UpOperation = {
-        $version: 1,
+        $v: 1,
         boards: boards.value.firstPrime,
         characters: characters.value.firstPrime,
         imagePieceValues: imagePieceValues.value.firstPrime,
@@ -782,7 +782,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     };
 
     const secondPrime: UpOperation = {
-        $version: 1,
+        $v: 1,
         boards: boards.value.secondPrime,
         characters: characters.value.secondPrime,
         imagePieceValues: imagePieceValues.value.secondPrime,

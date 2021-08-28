@@ -13,7 +13,7 @@ const isEmpty = (source: Record<string, unknown>): boolean => {
 const isDefaultSimpleParam = (source: Record<string, unknown>) => {
     if (
         _.isEqual(source, {
-            $version: 1,
+            $v: 1,
             isValuePrivate: false,
             value: null,
         })
@@ -21,7 +21,7 @@ const isDefaultSimpleParam = (source: Record<string, unknown>) => {
         return true;
     }
     return _.isEqual(source, {
-        $version: 1,
+        $v: 1,
         isValuePrivate: false,
         value: undefined,
     });
@@ -29,7 +29,7 @@ const isDefaultSimpleParam = (source: Record<string, unknown>) => {
 
 const isDefaultStrParam = (source: Record<string, unknown>) => {
     return _.isEqual(source, {
-        $version: 1,
+        $v: 1,
         isValuePrivate: false,
         value: '',
     });
