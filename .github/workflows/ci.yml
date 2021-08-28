@@ -102,7 +102,7 @@ jobs:
               run: npm run prettier:base -- --check
 
     install:
-        name: Check install --production=${{matrix.param}} on on Node ${{ matrix.node }} and ${{ matrix.os }}
+        name: Check install --production=${{matrix.param}} and build on on Node ${{ matrix.node }} and ${{ matrix.os }}
 
         runs-on: ${{ matrix.os }}
         strategy:
@@ -126,3 +126,6 @@ jobs:
             # npm ci はエラーが出るので使っていない
             - name: Install
               run: npm install --production=${{matrix.param}}
+
+            - name: Build (as type checking)
+              run: npm run build
