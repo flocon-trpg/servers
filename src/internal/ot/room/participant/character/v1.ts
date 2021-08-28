@@ -3,19 +3,19 @@ import {
     mapRecordOperationElement,
     recordDownOperationElementFactory,
     recordUpOperationElementFactory,
-} from '../../util/recordOperationElement';
-import { FilePath, filePath } from '../../filePath/v1';
-import * as TextOperation from '../../util/textOperation';
-import * as Piece from '../../piece/v1';
-import * as BoardLocation from '../../boardLocation/v1';
+} from '../../../util/recordOperationElement';
+import { FilePath, filePath } from '../../../filePath/v1';
+import * as TextOperation from '../../../util/textOperation';
+import * as Piece from '../../../piece/v1';
+import * as BoardLocation from '../../../boardLocation/v1';
 import * as DicePieceValue from './dicePieceValue/v1';
 import * as NumberPieceValue from './numberPieceValue/v1';
-import * as ReplaceOperation from '../../util/replaceOperation';
-import * as DualKeyRecordOperation from '../../util/dualKeyRecordOperation';
-import * as RecordOperation from '../../util/recordOperation';
-import * as ParamRecordOperation from '../../util/paramRecordOperation';
-import { RecordTwoWayOperation } from '../../util/recordOperation';
-import { DualKeyRecordTwoWayOperation } from '../../util/dualKeyRecordOperation';
+import * as ReplaceOperation from '../../../util/replaceOperation';
+import * as DualKeyRecordOperation from '../../../util/dualKeyRecordOperation';
+import * as RecordOperation from '../../../util/recordOperation';
+import * as ParamRecordOperation from '../../../util/paramRecordOperation';
+import { RecordTwoWayOperation } from '../../../util/recordOperation';
+import { DualKeyRecordTwoWayOperation } from '../../../util/dualKeyRecordOperation';
 import {
     Apply,
     ClientTransform,
@@ -24,18 +24,18 @@ import {
     RequestedBy,
     Restore,
     ServerTransform,
-} from '../../util/type';
+} from '../../../util/type';
 import * as BoolParam from './boolParam/v1';
 import * as Command from './command/v1';
 import * as NumParam from './numParam/v1';
 import * as StrParam from './strParam/v1';
 import * as SimpleValueParam from './simpleValueParam/v1';
-import { createOperation } from '../../util/createOperation';
-import { isIdRecord, record, StringKeyRecord } from '../../util/record';
+import { createOperation } from '../../../util/createOperation';
+import { isIdRecord, record, StringKeyRecord } from '../../../util/record';
 import { Result } from '@kizahasi/result';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
 import { chooseDualKeyRecord, chooseRecord, CompositeKey } from '@kizahasi/util';
-import { Maybe, maybe } from '../../../maybe';
+import { Maybe, maybe } from '../../../../maybe';
 
 // privateCommandは無効化しているが、コードは大部分残している
 

@@ -56,31 +56,37 @@ export namespace Resources {
         createdBy: 'CREATED_BY',
         name: 'ROOM_NAME',
         bgms: {},
-        boards: {},
-        characters: {},
         participants: {
             [Participant.Player1.userUid]: {
                 $version: 1,
                 name: Participant.Player1.name,
                 role: Player,
+                boards: {},
+                characters: {},
                 imagePieceValues: {},
             },
             [Participant.Player2.userUid]: {
                 $version: 1,
                 name: Participant.Player2.name,
                 role: Player,
+                boards: {},
+                characters: {},
                 imagePieceValues: {},
             },
             [Participant.Spectator.userUid]: {
                 $version: 1,
                 name: Participant.Spectator.name,
                 role: Spectator,
+                boards: {},
+                characters: {},
                 imagePieceValues: {},
             },
             [Participant.Null.userUid]: {
                 $version: 1,
                 name: Participant.Null.name,
                 role: null,
+                boards: {},
+                characters: {},
                 imagePieceValues: {},
             },
         },
@@ -113,162 +119,174 @@ export namespace Resources {
                 volume: 1,
             },
         },
-        boards: {
-            BOARD_CREATED_BY: {
-                BOARD_ID: {
-                    $version: 1,
-                    backgroundImage: {
+        participants: {
+            ...minimumState.participants,
+            [Participant.Player1.userUid]: {
+                $version: 1,
+                name: Participant.Player1.name,
+                role: 'Player',
+                boards: {
+                    BOARD_ID: {
                         $version: 1,
-                        path: 'BOARD_IMAGE_PATH',
-                        sourceType: 'Default',
+                        backgroundImage: {
+                            $version: 1,
+                            path: 'BOARD_IMAGE_PATH',
+                            sourceType: 'Default',
+                        },
+                        backgroundImageZoom: 1,
+                        cellColumnCount: 10,
+                        cellHeight: 10,
+                        cellOffsetX: 10,
+                        cellOffsetY: 10,
+                        cellRowCount: 10,
+                        cellWidth: 10,
+                        name: 'BOARD_NAME',
                     },
-                    backgroundImageZoom: 1,
-                    cellColumnCount: 10,
-                    cellHeight: 10,
-                    cellOffsetX: 10,
-                    cellOffsetY: 10,
-                    cellRowCount: 10,
-                    cellWidth: 10,
-                    name: 'BOARD_NAME',
                 },
+                characters: {},
+                imagePieceValues: {},
             },
-        },
-        characters: {
-            CHARA_FIRST_KEY: {
-                CHARA_SECOND_KEY: {
-                    $version: 1,
-                    image: {
+            [Participant.Player2.userUid]: {
+                $version: 1,
+                name: Participant.Player2.name,
+                role: 'Player',
+                boards: {},
+                characters: {
+                    CHARACTER_ID: {
                         $version: 1,
-                        path: 'CHARA_IMAGE_PATH',
-                        sourceType: 'Default',
-                    },
-                    isPrivate: false,
-                    chatPalette: '',
-                    memo: 'CHARA_MEMO',
-                    name: 'CHARA_NAME',
-                    privateCommand: 'CHARA_PRIVATE_COMMAND',
-                    privateCommands: {},
-                    privateVarToml: '',
-                    tachieImage: {
-                        $version: 1,
-                        path: 'TACHIE_IMAGE_PATH',
-                        sourceType: 'Default',
-                    },
-                    boolParams: {
-                        '1': {
+                        image: {
                             $version: 1,
-                            isValuePrivate: false,
-                            value: false,
+                            path: 'CHARA_IMAGE_PATH',
+                            sourceType: 'Default',
                         },
-                    },
-                    numParams: {
-                        '1': {
+                        isPrivate: false,
+                        chatPalette: '',
+                        memo: 'CHARA_MEMO',
+                        name: 'CHARA_NAME',
+                        privateCommand: 'CHARA_PRIVATE_COMMAND',
+                        privateCommands: {},
+                        privateVarToml: '',
+                        tachieImage: {
                             $version: 1,
-                            isValuePrivate: false,
-                            value: 10,
+                            path: 'TACHIE_IMAGE_PATH',
+                            sourceType: 'Default',
                         },
-                    },
-                    numMaxParams: {
-                        '1': {
-                            $version: 1,
-                            isValuePrivate: false,
-                            value: 20,
-                        },
-                    },
-                    strParams: {
-                        '1': {
-                            $version: 1,
-                            isValuePrivate: false,
-                            value: 'STR_PARAM_VALUE',
-                        },
-                    },
-                    pieces: {
-                        CHARA_PIECE_FIRST_KEY: {
-                            CHARA_PIECE_SECOND_KEY: {
+                        boolParams: {
+                            '1': {
                                 $version: 1,
-                                cellH: 1,
-                                cellW: 2,
-                                cellX: 3,
-                                cellY: 4,
-                                isCellMode: false,
-                                isPrivate: false,
-                                h: 5,
-                                w: 6,
-                                x: 7,
-                                y: 8,
+                                isValuePrivate: false,
+                                value: false,
                             },
                         },
-                    },
-                    tachieLocations: {
-                        TACHIE_LOCATION_FIRST_KEY: {
-                            TACHIE_LOCATION_SECOND_KEY: {
+                        numParams: {
+                            '1': {
                                 $version: 1,
-                                isPrivate: false,
-                                h: 5,
-                                w: 6,
-                                x: 7,
-                                y: 8,
+                                isValuePrivate: false,
+                                value: 10,
                             },
                         },
-                    },
-                    dicePieceValues: {
-                        DICE_PIECE_KEY: {
-                            $version: 1,
-                            dice: {
-                                '1': {
+                        numMaxParams: {
+                            '1': {
+                                $version: 1,
+                                isValuePrivate: false,
+                                value: 20,
+                            },
+                        },
+                        strParams: {
+                            '1': {
+                                $version: 1,
+                                isValuePrivate: false,
+                                value: 'STR_PARAM_VALUE',
+                            },
+                        },
+                        pieces: {
+                            CHARA_PIECE_FIRST_KEY: {
+                                CHARA_PIECE_SECOND_KEY: {
                                     $version: 1,
-                                    dieType: 'D6',
-                                    isValuePrivate: false,
-                                    value: 3,
+                                    cellH: 1,
+                                    cellW: 2,
+                                    cellX: 3,
+                                    cellY: 4,
+                                    isCellMode: false,
+                                    isPrivate: false,
+                                    h: 5,
+                                    w: 6,
+                                    x: 7,
+                                    y: 8,
                                 },
                             },
-                            pieces: {
-                                DICE_PIECE_FIRST_KEY: {
-                                    DICE_PIECE_SECOND_KEY: {
+                        },
+                        tachieLocations: {
+                            TACHIE_LOCATION_FIRST_KEY: {
+                                TACHIE_LOCATION_SECOND_KEY: {
+                                    $version: 1,
+                                    isPrivate: false,
+                                    h: 5,
+                                    w: 6,
+                                    x: 7,
+                                    y: 8,
+                                },
+                            },
+                        },
+                        dicePieceValues: {
+                            DICE_PIECE_KEY: {
+                                $version: 1,
+                                dice: {
+                                    '1': {
                                         $version: 1,
-                                        cellH: 1,
-                                        cellW: 2,
-                                        cellX: 3,
-                                        cellY: 4,
-                                        isCellMode: false,
-                                        isPrivate: false,
-                                        h: 5,
-                                        w: 6,
-                                        x: 7,
-                                        y: 8,
+                                        dieType: 'D6',
+                                        isValuePrivate: false,
+                                        value: 3,
+                                    },
+                                },
+                                pieces: {
+                                    DICE_PIECE_FIRST_KEY: {
+                                        DICE_PIECE_SECOND_KEY: {
+                                            $version: 1,
+                                            cellH: 1,
+                                            cellW: 2,
+                                            cellX: 3,
+                                            cellY: 4,
+                                            isCellMode: false,
+                                            isPrivate: false,
+                                            h: 5,
+                                            w: 6,
+                                            x: 7,
+                                            y: 8,
+                                        },
                                     },
                                 },
                             },
                         },
-                    },
-                    numberPieceValues: {
-                        NUM_PIECE_KEY: {
-                            $version: 1,
-                            isValuePrivate: false,
-                            value: 1,
-                            pieces: {
-                                DICE_PIECE_FIRST_KEY: {
-                                    DICE_PIECE_SECOND_KEY: {
-                                        $version: 1,
-                                        cellH: 1,
-                                        cellW: 2,
-                                        cellX: 3,
-                                        cellY: 4,
-                                        isCellMode: false,
-                                        isPrivate: false,
-                                        h: 5,
-                                        w: 6,
-                                        x: 7,
-                                        y: 8,
+                        numberPieceValues: {
+                            NUM_PIECE_KEY: {
+                                $version: 1,
+                                isValuePrivate: false,
+                                value: 1,
+                                pieces: {
+                                    DICE_PIECE_FIRST_KEY: {
+                                        DICE_PIECE_SECOND_KEY: {
+                                            $version: 1,
+                                            cellH: 1,
+                                            cellW: 2,
+                                            cellX: 3,
+                                            cellY: 4,
+                                            isCellMode: false,
+                                            isPrivate: false,
+                                            h: 5,
+                                            w: 6,
+                                            x: 7,
+                                            y: 8,
+                                        },
                                     },
                                 },
                             },
                         },
                     },
                 },
+                imagePieceValues: {},
             },
         },
-        participants: minimumState.participants,
         boolParamNames: {
             '1': {
                 $version: 1,

@@ -1,10 +1,10 @@
 import * as t from 'io-ts';
-import { recordUpOperationElementFactory } from '../../../util/recordOperationElement';
+import { recordUpOperationElementFactory } from '../../../../util/recordOperationElement';
 import * as NumberPieceValue from './v1';
-import * as Piece from '../../../piece/v1';
-import { record } from '../../../util/record';
-import { createType, deleteType, updateType } from '../../../piece/log-v1';
-import { maybe } from '../../../../maybe';
+import * as Piece from '../../../../piece/v1';
+import { record } from '../../../../util/record';
+import { createType, deleteType, updateType } from '../../../../piece/log-v1';
+import { maybe } from '../../../../../maybe';
 
 const update = t.intersection([
     t.type({

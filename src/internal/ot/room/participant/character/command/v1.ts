@@ -1,5 +1,5 @@
 import * as t from 'io-ts';
-import * as TextOperation from '../../../util/textOperation';
+import * as TextOperation from '../../../../util/textOperation';
 import {
     Apply,
     ClientTransform,
@@ -8,11 +8,11 @@ import {
     Restore,
     ServerTransform,
     ToClientOperationParams,
-} from '../../../util/type';
-import { createOperation } from '../../../util/createOperation';
-import { isIdRecord } from '../../../util/record';
+} from '../../../../util/type';
+import { createOperation } from '../../../../util/createOperation';
+import { isIdRecord } from '../../../../util/record';
 import { Result } from '@kizahasi/result';
-import * as ReplaceOperation from '../../../util/replaceOperation';
+import * as ReplaceOperation from '../../../../util/replaceOperation';
 
 export const state = t.type({
     $version: t.literal(1),

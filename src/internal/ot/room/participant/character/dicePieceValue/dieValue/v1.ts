@@ -1,5 +1,5 @@
 import * as t from 'io-ts';
-import * as ReplaceOperation from '../../../../util/replaceOperation';
+import * as ReplaceOperation from '../../../../../util/replaceOperation';
 import {
     Apply,
     ClientTransform,
@@ -7,9 +7,9 @@ import {
     Diff,
     Restore,
     ServerTransform,
-} from '../../../../util/type';
-import { createOperation } from '../../../../util/createOperation';
-import { isIdRecord } from '../../../../util/record';
+} from '../../../../../util/type';
+import { createOperation } from '../../../../../util/createOperation';
+import { isIdRecord } from '../../../../../util/record';
 import { Result } from '@kizahasi/result';
 
 // 今の所D6しか対応していない。D4は将来のために予約されている。

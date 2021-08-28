@@ -1,14 +1,14 @@
-import * as Character from './character/v1';
+import * as Character from './participant/character/v1';
 import * as Room from './v1';
 import * as DualKeyRecordOperation from '../util/dualKeyRecordOperation';
 import { RecordTwoWayOperationElement, replace } from '../util/recordOperationElement';
 import { restrict } from '../util/type';
 import { CompositeKey } from '../compositeKey/v1';
-import { recordForEach, dualKeyRecordForEach, dualKeyRecordFind } from '@kizahasi/util';
-import * as DicePieceValue from './character/dicePieceValue/v1';
-import * as DicePieceValueLog from './character/dicePieceValue/log-v1';
-import * as NumberPieceValue from './character/numberPieceValue/v1';
-import * as NumberPieceValueLog from './character/numberPieceValue/log-v1';
+import { recordForEach, dualKeyRecordForEach } from '@kizahasi/util';
+import * as DicePieceValue from './participant/character/dicePieceValue/v1';
+import * as DicePieceValueLog from './participant/character/dicePieceValue/log-v1';
+import * as NumberPieceValue from './participant/character/numberPieceValue/v1';
+import * as NumberPieceValueLog from './participant/character/numberPieceValue/log-v1';
 import { createType, deleteType } from '../piece/log-v1';
 
 type DicePieceValueLogType = {
@@ -23,6 +23,14 @@ type NumberPieceValueLogType = {
     value: NumberPieceValueLog.Type;
 };
 
+const charactersAsDualKeyRecord = (room: Room.State) => {
+    const result: Record<string, Record<string, Character.State | undefined>> = {};
+    recordForEach(room.participants, (participant, participantKey) => {
+        result[participantKey] = participant.characters;
+    });
+    return result;
+};
+
 export const createLogs = ({
     prevState,
     nextState,
@@ -31,8 +39,8 @@ export const createLogs = ({
     nextState: Room.State;
 }) => {
     const charactersDiff = DualKeyRecordOperation.diff<Character.State, Character.TwoWayOperation>({
-        prevState: prevState.characters,
-        nextState: nextState.characters,
+        prevState: charactersAsDualKeyRecord(prevState),
+        nextState: charactersAsDualKeyRecord(nextState),
         innerDiff: params => Character.diff(params),
     });
     if (charactersDiff == null) {
@@ -116,10 +124,8 @@ export const createLogs = ({
                 return;
             }
 
-            const nextCharacter = dualKeyRecordFind<Character.State>(
-                nextState.characters,
-                characterDualKey
-            );
+            const nextCharacter =
+                nextState.participants[characterDualKey.first]?.characters[characterDualKey.second];
             if (nextCharacter == null) {
                 throw new Error('this should not happen. Character.diff has some bugs?');
             }

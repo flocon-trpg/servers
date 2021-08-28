@@ -8,8 +8,8 @@ import {
     ScriptError,
 } from '@kizahasi/flocon-script';
 import { recordToArray } from '@kizahasi/util';
-import * as Character from '../ot/room/character/v1';
-import * as NumParam from '../ot/room/character/numParam/v1';
+import * as Character from '../ot/room/participant/character/v1';
+import * as NumParam from '../ot/room/participant/character/numParam/v1';
 import * as Room from '../ot/room/v1';
 import { FNumParam } from './numParam';
 

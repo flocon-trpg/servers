@@ -1,6 +1,6 @@
 import * as t from 'io-ts';
-import { filePath } from '../../filePath/v1';
-import * as ReplaceOperation from '../../util/replaceOperation';
+import { filePath } from '../../../filePath/v1';
+import * as ReplaceOperation from '../../../util/replaceOperation';
 import {
     Apply,
     ClientTransform,
@@ -9,11 +9,11 @@ import {
     RequestedBy,
     Restore,
     ServerTransform,
-} from '../../util/type';
-import { createOperation } from '../../util/createOperation';
-import { isIdRecord } from '../../util/record';
+} from '../../../util/type';
+import { createOperation } from '../../../util/createOperation';
+import { isIdRecord } from '../../../util/record';
 import { Result } from '@kizahasi/result';
-import { maybe } from '../../../maybe';
+import { maybe } from '../../../../maybe';
 
 const stringDownOperation = t.type({ oldValue: t.string });
 const stringUpOperation = t.type({ newValue: t.string });

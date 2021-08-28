@@ -2,8 +2,7 @@ import { execCharacterCommand, State } from '../src';
 import { Resources } from './resources';
 
 describe('characterCommand', () => {
-    const firstCharacterKey = 'CHARA_CREATED_BY';
-    const secondCharacterKey = 'CHARA_ID';
+    const characterKey = 'CHARA_ID';
 
     it('tests room.name', () => {
         const prevRoomName = 'NAME_0';
@@ -12,11 +11,18 @@ describe('characterCommand', () => {
         const room: State = {
             ...Resources.minimumState,
             name: prevRoomName,
-            characters: {
-                [firstCharacterKey]: {
-                    [secondCharacterKey]: {
-                        ...Resources.Character.emptyState,
+            participants: {
+                [Resources.Participant.Player1.userUid]: {
+                    $version: 1,
+                    name: Resources.Participant.Player1.name,
+                    role: 'Player',
+                    boards: {},
+                    characters: {
+                        [characterKey]: {
+                            ...Resources.Character.emptyState,
+                        },
                     },
+                    imagePieceValues: {},
                 },
             },
         };
@@ -24,7 +30,7 @@ describe('characterCommand', () => {
         const actual = execCharacterCommand({
             script: `room.name = '${nextRoomName}'`,
             room,
-            characterKey: { createdBy: firstCharacterKey, id: secondCharacterKey },
+            characterKey: { createdBy: Resources.Participant.Player1.userUid, id: characterKey },
         });
         if (actual.isError) {
             fail(actual.error);
@@ -42,12 +48,19 @@ describe('characterCommand', () => {
 
         const room: State = {
             ...Resources.minimumState,
-            characters: {
-                [firstCharacterKey]: {
-                    [secondCharacterKey]: {
-                        ...Resources.Character.emptyState,
-                        name: prevCharacterName,
+            participants: {
+                [Resources.Participant.Player1.userUid]: {
+                    $version: 1,
+                    name: Resources.Participant.Player1.name,
+                    role: 'Player',
+                    boards: {},
+                    characters: {
+                        [characterKey]: {
+                            ...Resources.Character.emptyState,
+                            name: prevCharacterName,
+                        },
                     },
+                    imagePieceValues: {},
                 },
             },
         };
@@ -55,7 +68,7 @@ describe('characterCommand', () => {
         const actual = execCharacterCommand({
             script: `character.name = '${nextCharacterName}'`,
             room,
-            characterKey: { createdBy: firstCharacterKey, id: secondCharacterKey },
+            characterKey: { createdBy: Resources.Participant.Player1.userUid, id: characterKey },
         });
         if (actual.isError) {
             fail(actual.error);
@@ -63,12 +76,19 @@ describe('characterCommand', () => {
         expect(actual.value).not.toBe(room);
         expect(actual.value).toEqual({
             ...room,
-            characters: {
-                [firstCharacterKey]: {
-                    [secondCharacterKey]: {
-                        ...Resources.Character.emptyState,
-                        name: nextCharacterName,
+            participants: {
+                [Resources.Participant.Player1.userUid]: {
+                    $version: 1,
+                    name: Resources.Participant.Player1.name,
+                    role: 'Player',
+                    boards: {},
+                    characters: {
+                        [characterKey]: {
+                            ...Resources.Character.emptyState,
+                            name: nextCharacterName,
+                        },
                     },
+                    imagePieceValues: {},
                 },
             },
         });

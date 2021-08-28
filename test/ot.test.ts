@@ -72,7 +72,7 @@ namespace Test {
                         clientOperation,
                     });
                     if (actualOperation.isError) {
-                        fail('expected not to be an error');
+                        throw actualOperation.error;
                     }
                     expect(actualOperation.value).toEqual(expected);
                 });
@@ -277,36 +277,50 @@ describe('tests creating DicePieceValue', () => {
 
     const state: State = {
         ...Resources.minimumState,
-        characters: {
+        participants: {
+            ...Resources.minimumState.participants,
             [Resources.Participant.Player1.userUid]: {
-                [characterKey]: Resources.Character.emptyState,
+                $version: 1,
+                name: 'PARTICIPANT_NAME',
+                role: 'Player',
+                boards: {},
+                characters: {
+                    [characterKey]: Resources.Character.emptyState,
+                },
+                imagePieceValues: {},
             },
         },
     };
 
     const clientOperation: UpOperation = {
         $version: 1,
-        characters: {
+        participants: {
             [Resources.Participant.Player1.userUid]: {
-                [characterKey]: {
-                    type: update,
-                    update: {
-                        $version: 1,
-                        dicePieceValues: {
-                            [dicePieceValueKey]: {
-                                type: replace,
-                                replace: {
-                                    newValue: {
-                                        $version: 1,
-                                        dice: {
-                                            '1': {
+                type: update,
+                update: {
+                    $version: 1,
+                    characters: {
+                        [characterKey]: {
+                            type: update,
+                            update: {
+                                $version: 1,
+                                dicePieceValues: {
+                                    [dicePieceValueKey]: {
+                                        type: replace,
+                                        replace: {
+                                            newValue: {
                                                 $version: 1,
-                                                dieType: 'D6',
-                                                value: 1,
-                                                isValuePrivate: false,
+                                                dice: {
+                                                    '1': {
+                                                        $version: 1,
+                                                        dieType: 'D6',
+                                                        value: 1,
+                                                        isValuePrivate: false,
+                                                    },
+                                                },
+                                                pieces: {},
                                             },
                                         },
-                                        pieces: {},
                                     },
                                 },
                             },
@@ -333,27 +347,33 @@ describe('tests creating DicePieceValue', () => {
 
     const expected: TwoWayOperation = {
         $version: 1,
-        characters: {
+        participants: {
             [Resources.Participant.Player1.userUid]: {
-                [characterKey]: {
-                    type: update,
-                    update: {
-                        $version: 1,
-                        dicePieceValues: {
-                            [dicePieceValueKey]: {
-                                type: replace,
-                                replace: {
-                                    newValue: {
-                                        $version: 1,
-                                        dice: {
-                                            '1': {
+                type: update,
+                update: {
+                    $version: 1,
+                    characters: {
+                        [characterKey]: {
+                            type: update,
+                            update: {
+                                $version: 1,
+                                dicePieceValues: {
+                                    [dicePieceValueKey]: {
+                                        type: replace,
+                                        replace: {
+                                            newValue: {
                                                 $version: 1,
-                                                dieType: 'D6',
-                                                value: 1,
-                                                isValuePrivate: false,
+                                                dice: {
+                                                    '1': {
+                                                        $version: 1,
+                                                        dieType: 'D6',
+                                                        value: 1,
+                                                        isValuePrivate: false,
+                                                    },
+                                                },
+                                                pieces: {},
                                             },
                                         },
-                                        pieces: {},
                                     },
                                 },
                             },
@@ -384,12 +404,18 @@ describe('tests creating Character', () => {
 
     const clientOperation: UpOperation = {
         $version: 1,
-        characters: {
+        participants: {
             [Resources.Participant.Player1.userUid]: {
-                [characterKey]: {
-                    type: replace,
-                    replace: {
-                        newValue: Resources.Character.emptyState,
+                type: update,
+                update: {
+                    $version: 1,
+                    characters: {
+                        [characterKey]: {
+                            type: replace,
+                            replace: {
+                                newValue: Resources.Character.emptyState,
+                            },
+                        },
                     },
                 },
             },
@@ -412,12 +438,18 @@ describe('tests creating Character', () => {
 
     const expected: TwoWayOperation = {
         $version: 1,
-        characters: {
+        participants: {
             [Resources.Participant.Player1.userUid]: {
-                [characterKey]: {
-                    type: replace,
-                    replace: {
-                        newValue: Resources.Character.emptyState,
+                type: update,
+                update: {
+                    $version: 1,
+                    characters: {
+                        [characterKey]: {
+                            type: replace,
+                            replace: {
+                                newValue: Resources.Character.emptyState,
+                            },
+                        },
                     },
                 },
             },
@@ -445,25 +477,39 @@ describe.each([[true], [false]])(
 
         const state: State = {
             ...Resources.minimumState,
-            characters: {
+            participants: {
+                ...Resources.minimumState.participants,
                 [Resources.Participant.Player1.userUid]: {
-                    [characterKey]: {
-                        ...Resources.Character.emptyState,
-                        isPrivate,
+                    $version: 1,
+                    name: 'PARTICIPANT_NAME',
+                    role: 'Player',
+                    boards: {},
+                    characters: {
+                        [characterKey]: {
+                            ...Resources.Character.emptyState,
+                            isPrivate,
+                        },
                     },
+                    imagePieceValues: {},
                 },
             },
         };
 
         const clientOperation: UpOperation = {
             $version: 1,
-            characters: {
+            participants: {
                 [Resources.Participant.Player1.userUid]: {
-                    [characterKey]: {
-                        type: update,
-                        update: {
-                            $version: 1,
-                            name: { newValue: newName },
+                    type: update,
+                    update: {
+                        $version: 1,
+                        characters: {
+                            [characterKey]: {
+                                type: update,
+                                update: {
+                                    $version: 1,
+                                    name: { newValue: newName },
+                                },
+                            },
                         },
                     },
                 },
@@ -486,15 +532,21 @@ describe.each([[true], [false]])(
 
         const expected: TwoWayOperation = {
             $version: 1,
-            characters: {
+            participants: {
                 [Resources.Participant.Player1.userUid]: {
-                    [characterKey]: {
-                        type: update,
-                        update: {
-                            $version: 1,
-                            name: {
-                                oldValue: Resources.Character.emptyState.name,
-                                newValue: newName,
+                    type: update,
+                    update: {
+                        $version: 1,
+                        characters: {
+                            [characterKey]: {
+                                type: update,
+                                update: {
+                                    $version: 1,
+                                    name: {
+                                        oldValue: Resources.Character.emptyState.name,
+                                        newValue: newName,
+                                    },
+                                },
                             },
                         },
                     },
@@ -523,24 +575,38 @@ describe.each([[true], [false]])(
 
         const state: State = {
             ...Resources.minimumState,
-            characters: {
+            participants: {
+                ...Resources.minimumState.participants,
                 [Resources.Participant.Player1.userUid]: {
-                    [characterKey]: {
-                        ...Resources.Character.emptyState,
-                        isPrivate,
+                    $version: 1,
+                    name: Resources.Participant.Player1.name,
+                    role: 'Player',
+                    boards: {},
+                    characters: {
+                        [characterKey]: {
+                            ...Resources.Character.emptyState,
+                            isPrivate,
+                        },
                     },
+                    imagePieceValues: {},
                 },
             },
         };
 
         const clientOperation: UpOperation = {
             $version: 1,
-            characters: {
+            participants: {
                 [Resources.Participant.Player1.userUid]: {
-                    [characterKey]: {
-                        type: replace,
-                        replace: {
-                            newValue: undefined,
+                    type: update,
+                    update: {
+                        $version: 1,
+                        characters: {
+                            [characterKey]: {
+                                type: replace,
+                                replace: {
+                                    newValue: undefined,
+                                },
+                            },
                         },
                     },
                 },
@@ -563,16 +629,22 @@ describe.each([[true], [false]])(
 
         const expected: TwoWayOperation = {
             $version: 1,
-            characters: {
+            participants: {
                 [Resources.Participant.Player1.userUid]: {
-                    [characterKey]: {
-                        type: replace,
-                        replace: {
-                            oldValue: {
-                                ...Resources.Character.emptyState,
-                                isPrivate,
+                    type: update,
+                    update: {
+                        $version: 1,
+                        characters: {
+                            [characterKey]: {
+                                type: replace,
+                                replace: {
+                                    oldValue: {
+                                        ...Resources.Character.emptyState,
+                                        isPrivate,
+                                    },
+                                    newValue: undefined,
+                                },
                             },
-                            newValue: undefined,
                         },
                     },
                 },

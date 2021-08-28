@@ -3,15 +3,15 @@ import {
     recordUpOperationElementFactory,
     replace as replaceKey,
     update as updateKey,
-} from '../../../util/recordOperationElement';
+} from '../../../../util/recordOperationElement';
 import * as DicePieceValue from './v1';
-import * as Piece from '../../../piece/v1';
+import * as Piece from '../../../../piece/v1';
 import * as DieValue from './dieValue/v1';
 import { chooseRecord } from '@kizahasi/util';
-import { createOperation } from '../../../util/createOperation';
-import { record } from '../../../util/record';
-import { createType, deleteType, updateType } from '../../../piece/log-v1';
-import { maybe } from '../../../../maybe';
+import { createOperation } from '../../../../util/createOperation';
+import { record } from '../../../../util/record';
+import { createType, deleteType, updateType } from '../../../../piece/log-v1';
+import { maybe } from '../../../../../maybe';
 
 const dieValueUpOperation = createOperation(1, {
     dieType: t.type({ newValue: DieValue.dieType }),
