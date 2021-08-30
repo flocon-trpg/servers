@@ -25,6 +25,8 @@ export { firebaseConfig, FirebaseConfig } from './internal/firebaseConfig';
 
 export { maybe, Maybe } from './internal/maybe';
 
+export { Cache, createNodeCache, createRedisCache } from './internal/cache/main';
+
 export {
     isValidVarToml,
     parseToml,
