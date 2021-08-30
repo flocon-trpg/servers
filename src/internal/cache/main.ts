@@ -35,7 +35,7 @@ export type Cache = {
     incrby(key: Key, increment: number): Promise<number>;
     decrby(key: Key, decrement: number): Promise<number>;
     del(key: Key): Promise<boolean>;
-    keys(key: Key): Promise<string[]>;
+    keys(): Promise<string[]>;
 };
 
 class NodeCache implements Cache {
