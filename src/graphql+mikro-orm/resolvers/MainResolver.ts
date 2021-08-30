@@ -279,7 +279,7 @@ export class MainResolver {
                 ? context.decodedIdToken.value.uid
                 : undefined;
         const payload: PongPayload = { value, createdBy };
-        pubSub.publish(PONG, payload);
+        await pubSub.publish(PONG, payload);
         return payload;
     }
 

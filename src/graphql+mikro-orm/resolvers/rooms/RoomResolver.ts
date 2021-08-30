@@ -1014,7 +1014,9 @@ export class RoomResolver {
 
             return Result.ok({
                 __tstype: GetRoomConnectionSuccessResultType,
-                connectedUserUids: [...context.connectionManager.listRoomConnections({ roomId })]
+                connectedUserUids: [
+                    ...(await context.connectionManager.listRoomConnections({ roomId })),
+                ]
                     .filter(([key, value]) => value > 0)
                     .map(([key]) => key),
                 fetchedAt: new Date().getTime(),
@@ -2419,7 +2421,7 @@ export class RoomResolver {
                 break;
         }
 
-        const returns = context.connectionManager.onWritingMessageStatusUpdate({
+        const returns = await context.connectionManager.onWritingMessageStatusUpdate({
             roomId: args.roomId,
             userUid: authorizedUserUid,
             status,

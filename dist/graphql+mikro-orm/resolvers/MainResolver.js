@@ -203,7 +203,7 @@ let MainResolver = class MainResolver {
             ? context.decodedIdToken.value.uid
             : undefined;
         const payload = { value, createdBy };
-        pubSub.publish(Topics_1.PONG, payload);
+        await pubSub.publish(Topics_1.PONG, payload);
         return payload;
     }
     pong(payload) {

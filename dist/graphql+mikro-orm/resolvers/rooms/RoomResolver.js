@@ -717,7 +717,9 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             }
             return result_1.Result.ok({
                 __tstype: object_args_input_1.GetRoomConnectionSuccessResultType,
-                connectedUserUids: [...context.connectionManager.listRoomConnections({ roomId })]
+                connectedUserUids: [
+                    ...(await context.connectionManager.listRoomConnections({ roomId })),
+                ]
                     .filter(([key, value]) => value > 0)
                     .map(([key]) => key),
                 fetchedAt: new Date().getTime(),
@@ -1872,7 +1874,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
                 status = WritingMessageStatusType_1.WritingMessageStatusType.Writing;
                 break;
         }
-        const returns = context.connectionManager.onWritingMessageStatusUpdate({
+        const returns = await context.connectionManager.onWritingMessageStatusUpdate({
             roomId: args.roomId,
             userUid: authorizedUserUid,
             status,
