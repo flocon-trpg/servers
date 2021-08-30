@@ -8,6 +8,15 @@ const stringToNumber = (source: string) => {
     return parseFloat(source);
 };
 
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseInt#a_stricter_parse_function
+const filterInt = (value: string) => {
+    if (/^[-+]?\d+$/.test(value)) {
+        return Number(value);
+    } else {
+        return null;
+    }
+};
+
 type NodeCacheConfig = {
     checkperiod?: number;
     stdTTL?: number;
@@ -61,16 +70,30 @@ class NodeCache implements Cache {
         return this.cache.set(key, value);
     }
 
+    // redisの値はすべてstringであり、INCRは整数のみに実行可能（小数には実行不可）なので、それをなるべく再現している
     public async incrby(key: Key, increment: number) {
+        if (!Number.isInteger(increment)) {
+            throw new Error('not an integer');
+        }
+
         const value = this.cache.get(key);
         if (value == null) {
             this.cache.set(key, increment);
             return increment;
         }
-        if (typeof value !== 'number') {
-            throw new Error('not number');
+
+        let valueAsInt: number | null = null;
+        if (typeof value === 'string') {
+            valueAsInt = filterInt(value);
+        } else if (typeof value === 'number') {
+            if (Number.isInteger(value)) {
+                valueAsInt = value;
+            }
         }
-        const newValue = value + increment;
+        if (valueAsInt == null) {
+            throw new Error('not an integer');
+        }
+        const newValue = valueAsInt + increment;
         this.cache.set(key, newValue);
         return newValue;
     }
