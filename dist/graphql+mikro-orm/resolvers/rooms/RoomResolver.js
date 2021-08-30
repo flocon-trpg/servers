@@ -699,7 +699,10 @@ let RoomResolver = class RoomResolver {
         for (const msg of await room.roomPrvMsgs.loadItems()) {
             const createdBy = (_b = msg.createdBy) === null || _b === void 0 ? void 0 : _b.userUid;
             if (mode === 'default' && msg.isSecret && createdBy !== decodedIdToken.uid) {
-                continue;
+                const visibleTo = await msg.visibleTo.loadItems();
+                if (visibleTo.every(v => v.userUid !== decodedIdToken.uid)) {
+                    continue;
+                }
             }
             const graphQLValue = await createRoomPrivateMessage({
                 msg,
