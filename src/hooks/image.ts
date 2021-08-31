@@ -7,9 +7,13 @@
 
 import { FilePath } from '@kizahasi/flocon-core';
 import React from 'react';
+import { useAsync } from 'react-use';
+import ConfigContext from '../contexts/ConfigContext';
+import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { FilePathFragment } from '../generated/graphql';
 import { analyzeUrl } from '../utils/analyzeUrl';
-import { useFirebaseStorageUrl } from './firebaseStorage';
+import { getFloconUploaderFile } from '../utils/getFloconUploaderFile';
+import { useUrlFromGraphQL } from './url';
 
 type Size = {
     w: number;
@@ -51,8 +55,10 @@ export function useImage(src: string | null, size?: Size, crossOrigin?: string):
                 return;
             }
             const img = document.createElement('img');
-            if (size != null) {
+            if (size?.w != null) {
                 img.width = size.w;
+            }
+            if (size?.h != null) {
                 img.height = size.h;
             }
 
@@ -76,19 +82,39 @@ export function useImage(src: string | null, size?: Size, crossOrigin?: string):
                 setState(null);
             };
         },
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
         [src, crossOrigin, size?.w, size?.h]
     );
 
     return state ?? { type: loading };
 }
 
+// 現在の仕様では、内蔵アップローダーのダウンロードにはAuthorizationヘッダーが必要なため、axiosなどでなければダウンロードできない。そのため、URL.createObjectURLを経由して渡している。
+export function useImageFromFloconUploader(filename: string | null, size?: Size): State {
+    const config = React.useContext(ConfigContext);
+    const idToken = React.useContext(FirebaseAuthenticationIdTokenContext);
+    const axiosResponse = useAsync(async () => {
+        if (filename == null || idToken == null) {
+            return null;
+        }
+        return await getFloconUploaderFile({ filename, config, idToken });
+    }, [filename, config, idToken]);
+    const url = React.useMemo(() => {
+        if (axiosResponse.value?.data == null) {
+            return null;
+        }
+        const blob = new Blob([axiosResponse.value.data]);
+        return URL.createObjectURL(blob);
+    }, [axiosResponse.value?.data]);
+    const useImageResult = useImage(url, size);
+    const loadingState = React.useMemo<LoadingState>(() => ({ type: loading }), []);
+    return axiosResponse.loading ? loadingState : useImageResult;
+}
+
 export function useImageFromGraphQL(
     filePath: FilePathFragment | FilePath | null | undefined,
     crossOrigin?: string
 ): State {
-    const src = useFirebaseStorageUrl(filePath);
+    const src = useUrlFromGraphQL(filePath);
 
     return useImage(src.type === success ? src.value : null, undefined, crossOrigin);
 }

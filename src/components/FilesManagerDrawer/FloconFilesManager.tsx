@@ -7,12 +7,20 @@ import ConfigContext from '../../contexts/ConfigContext';
 import { getHttpUri } from '../../config';
 import urljoin from 'url-join';
 import axios from 'axios';
+import { ColumnGroupType, ColumnType } from 'antd/lib/table/interface';
+import { FileItemFragment } from '../../generated/graphql';
+import { FloconUploaderFileLink } from '../FloconUploaderFileLink';
 
-type FirebaseUploaderProps = {
+type DataSource = FileItemFragment;
+
+type Column = ColumnGroupType<DataSource> | ColumnType<DataSource>;
+
+type UploaderProps = {
+    unlistedMode: boolean;
     onUploaded: () => void;
 };
 
-const Uploader: React.FC<FirebaseUploaderProps> = ({ onUploaded }: FirebaseUploaderProps) => {
+const Uploader: React.FC<UploaderProps> = ({ unlistedMode, onUploaded }: UploaderProps) => {
     const myAuth = React.useContext(MyAuthContext);
     const config = React.useContext(ConfigContext);
 
@@ -47,7 +55,12 @@ const Uploader: React.FC<FirebaseUploaderProps> = ({ onUploaded }: FirebaseUploa
                     };
                     const result = await axios
                         .post(
-                            urljoin(getHttpUri(config), 'uploader', 'upload', 'public'),
+                            urljoin(
+                                getHttpUri(config),
+                                'uploader',
+                                'upload',
+                                unlistedMode ? 'unlisted' : 'public'
+                            ),
                             formData,
                             axiosConfig
                         )
@@ -78,10 +91,20 @@ const Uploader: React.FC<FirebaseUploaderProps> = ({ onUploaded }: FirebaseUploa
     );
 };
 
+const screennameColumn: Column = {
+    title: 'ファイル名',
+    sorter: (x, y) => x.screenname.localeCompare(y.screenname),
+    sortDirections: ['ascend', 'descend'],
+    // eslint-disable-next-line react/display-name
+    render: (_, record: DataSource) => {
+        return <FloconUploaderFileLink key={record.filename} state={record} />;
+    },
+};
+
 export const FloconFilesManager: React.FC = () => {
     return (
         <div>
-            <Uploader onUploaded={() => undefined} />
+            <Uploader onUploaded={() => undefined} unlistedMode />
         </div>
     );
 };

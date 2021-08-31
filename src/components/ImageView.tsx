@@ -1,6 +1,6 @@
 import React from 'react';
 import { FilePath } from '@kizahasi/flocon-core';
-import { error, loading, success, useFirebaseStorageUrl } from '../hooks/firebaseStorage';
+import { error, loading, success, useUrlFromGraphQL } from '../hooks/url';
 import { FilePathFragment } from '../generated/graphql';
 import * as Icons from '@ant-design/icons';
 import { LazyAndPreloadImage } from './LazyAndPreloadImage';
@@ -18,7 +18,7 @@ export const ImageView: React.FC<Props> = ({
 }: Props) => {
     const size: number = sizeProp === 'Popover' ? 150 : sizeProp;
     const filePath = typeof filePathProp === 'string' ? undefined : filePathProp;
-    const src = useFirebaseStorageUrl(filePath);
+    const src = useUrlFromGraphQL(filePath);
     const loadingIcon = <Icons.LoadingOutlined style={{ fontSize: size }} />;
     switch (src.type) {
         case success:

@@ -7,9 +7,7 @@ import 'firebase/storage';
 
 import React from 'react';
 import { AppProps } from 'next/app';
-import {
-    ApolloProvider,
-} from '@apollo/client';
+import { ApolloProvider } from '@apollo/client';
 import 'firebase/auth';
 import 'firebase/storage';
 import { Provider } from 'react-redux';
@@ -30,7 +28,7 @@ import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCa
 import urljoin from 'url-join';
 import { useAsync } from 'react-use';
 import { monacoLibSource } from '../utils/libSource';
-import { ApolloClientHasAuthorizationHeaderContext } from '../contexts/ApolloClientHasAuthorizationHeaderContext';
+import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { createApolloClient } from '../utils/createApolloClient';
 
 enableMapSet();
@@ -93,11 +91,11 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
                             <FirebaseStorageUrlCacheContext.Provider
                                 value={firebaseStorageUrlCache}
                             >
-                                <ApolloClientHasAuthorizationHeaderContext.Provider
-                                    value={apolloClientAndIdToken.value.idToken != null}
+                                <FirebaseAuthenticationIdTokenContext.Provider
+                                    value={apolloClientAndIdToken.value.idToken}
                                 >
                                     <Component {...pageProps} />
-                                </ApolloClientHasAuthorizationHeaderContext.Provider>
+                                </FirebaseAuthenticationIdTokenContext.Provider>
                             </FirebaseStorageUrlCacheContext.Provider>
                         </MyAuthContext.Provider>
                     </Provider>

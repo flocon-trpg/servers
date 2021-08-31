@@ -37,15 +37,15 @@ const Path = {
     },
 };
 
-type FirebaseUploaderProps = {
+type UploaderProps = {
     onUploaded: () => void;
     storageType: StorageType;
 };
 
-const FirebaseUploader: React.FC<FirebaseUploaderProps> = ({
+const Uploader: React.FC<UploaderProps> = ({
     onUploaded,
     storageType,
-}: FirebaseUploaderProps) => {
+}: UploaderProps) => {
     const myUserUid = useMyUserUid();
     const config = React.useContext(ConfigContext);
 
@@ -452,7 +452,7 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
             return (
                 <Tabs.TabPane tab="unlisted" key="storage1">
                     <div>
-                        <FirebaseUploader
+                        <Uploader
                             storageType={unlisted}
                             onUploaded={() => {
                                 dispatch(fileModule.actions.reloadFirebaseStorageUnlistedFiles());
@@ -475,7 +475,7 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
             return (
                 <Tabs.TabPane tab="public" key="storage2">
                     <div>
-                        <FirebaseUploader
+                        <Uploader
                             storageType={$public}
                             onUploaded={() => {
                                 dispatch(fileModule.actions.reloadFirebaseStoragePublicFiles());

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Howl } from 'howler';
-import { done, useFirebaseStorageUrlArray } from './firebaseStorage';
+import { done, useUrlArrayFromGraphQL } from './url';
 import { volumeCap } from '../utils/variables';
 import { useSelector } from '../store';
 import { defaultChannelVolume, defaultMasterVolume } from '../states/RoomConfig';
@@ -34,7 +34,7 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmBehaviorCoreProps): void {
         isPausedRef.current = bgm?.isPaused;
     }, [bgm?.isPaused]);
 
-    const urlArray = useFirebaseStorageUrlArray(bgm?.files);
+    const urlArray = useUrlArrayFromGraphQL(bgm?.files);
     const howlRef = React.useRef<Howl>();
 
     useDeepCompareEffect(() => {

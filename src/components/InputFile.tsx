@@ -1,7 +1,7 @@
 import { Button } from 'antd';
 import * as React from 'react';
 import { FileSourceType } from '../generated/graphql';
-import { success, useFirebaseStorageUrl } from '../hooks/firebaseStorage';
+import { success, useUrlFromGraphQL } from '../hooks/url';
 import { some } from '../utils/types';
 import FirebaseStorageLink from './FirebaseStorageLink';
 import * as Core from '@kizahasi/flocon-core';
