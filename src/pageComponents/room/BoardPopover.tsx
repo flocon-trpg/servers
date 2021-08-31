@@ -28,7 +28,6 @@ import { FileSourceType, useWriteRoomSoundEffectMutation } from '../../generated
 import { useBoards } from '../../hooks/state/useBoards';
 import { useCharacters } from '../../hooks/state/useCharacters';
 import { DicePieceValueElement } from '../../hooks/state/useDicePieceValues';
-import { useMe } from '../../hooks/useMe';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useOperate } from '../../hooks/useOperate';
 import {
@@ -65,7 +64,7 @@ export const PieceTooltip: React.FC = () => {
     }
 
     const left = boardTooltipState.pagePosition.x - 30;
-    const top = boardTooltipState.pagePosition.y + 1;
+    const top = boardTooltipState.pagePosition.y - 3;
 
     const style: React.CSSProperties = {
         position: 'absolute',
@@ -88,12 +87,23 @@ export const PieceTooltip: React.FC = () => {
     switch (boardTooltipState.mouseOverOn.type) {
         case character:
         case tachie:
+        case imagePieceValue: {
+            let name: string;
+            let memo: string;
+            if (boardTooltipState.mouseOverOn.type === imagePieceValue) {
+                name = boardTooltipState.mouseOverOn.element.value.name;
+                memo = boardTooltipState.mouseOverOn.element.value.memo;
+            } else {
+                name = boardTooltipState.mouseOverOn.character.name;
+                memo = boardTooltipState.mouseOverOn.character.memo;
+            }
+            if (name === '' && memo === '') {
+                return null;
+            }
             return (
                 <div style={style}>
-                    <div>{boardTooltipState.mouseOverOn.character.name}</div>
-                    {boardTooltipState.mouseOverOn.character.memo.trim() !== '' && (
-                        <hr style={hrStyle} />
-                    )}
+                    <div>{name}</div>
+                    {memo.trim() !== '' && <hr style={hrStyle} />}
                     <NewTabLinkify>
                         <span
                             style={{
@@ -101,30 +111,12 @@ export const PieceTooltip: React.FC = () => {
                                     'pre-wrap' /* これがないと、stringに存在する改行が無視されてしまう */,
                             }}
                         >
-                            {boardTooltipState.mouseOverOn.character.memo}
+                            {memo}
                         </span>
                     </NewTabLinkify>
                 </div>
             );
-        case imagePieceValue:
-            return (
-                <div style={style}>
-                    <div>{boardTooltipState.mouseOverOn.element.value.name}</div>
-                    {boardTooltipState.mouseOverOn.element.value.memo.trim() !== '' && (
-                        <hr style={hrStyle} />
-                    )}
-                    <NewTabLinkify>
-                        <span
-                            style={{
-                                whiteSpace:
-                                    'pre-wrap' /* これがないと、stringに存在する改行が無視されてしまう */,
-                            }}
-                        >
-                            {boardTooltipState.mouseOverOn.element.value.memo}
-                        </span>
-                    </NewTabLinkify>
-                </div>
-            );
+        }
         default:
             return null;
     }
@@ -294,7 +286,7 @@ export const PopoverEditor: React.FC = () => {
     }
 
     const left = popoverEditor.pagePosition.x - 30;
-    const top = popoverEditor.pagePosition.y + 1;
+    const top = popoverEditor.pagePosition.y - 3;
 
     let children: JSX.Element | null;
     switch (popoverEditor.dblClickOn.type) {
