@@ -13,13 +13,17 @@ import { Resources } from './resources';
 // github actionsではlocalhost:5432ではなくpostgres:5432のようにしないとデータベースが見つからない
 const postgresClientUrl = 'postgresql://postgres:postgres@postgres:5432';
 
-const PostgreSQL = {
+const PostgreSQLConfig = {
     dbName: 'test',
     clientUrl: postgresClientUrl,
     debug: true,
 };
 
-const SQLite = { dbName: './test.sqlite3', debug: true };
+let sqliteIndex = 0;
+const createSQLiteConfig = () => {
+    sqliteIndex++;
+    return { dbName: `./test${sqliteIndex}.sqlite3`, debug: true };
+};
 
 export const createTestServer = async (
     orm: 'SQLite' | 'PostgreSQL',
@@ -32,7 +36,7 @@ export const createTestServer = async (
     let databaseConfig: DatabaseConfig;
     switch (orm) {
         case 'PostgreSQL':
-            em = (await createPostgreSQL(PostgreSQL)).em;
+            em = (await createPostgreSQL(PostgreSQLConfig)).em;
             databaseConfig = {
                 __type: postgresql,
                 clientUrl: postgresClientUrl,
@@ -40,7 +44,7 @@ export const createTestServer = async (
             };
             break;
         case 'SQLite':
-            em = (await createSQLite(SQLite)).em;
+            em = (await createSQLite(createSQLiteConfig())).em;
             databaseConfig = {
                 __type: sqlite,
                 dbName: './test.sqlite3',

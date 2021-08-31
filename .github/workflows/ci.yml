@@ -42,14 +42,26 @@ jobs:
             - name: Type-check
               run: npm run type-check
 
-            - name: Migration-up SQLite
+            - name: Migration-up SQLite(1)
               run: npm run migration-up -- --db sqlite
               env:
                   FLOCON_API_CONFIG: >
                       {
                           "database": {
                               "sqlite": {
-                                  "dbName": "./test.sqlite3"
+                                  "dbName": "./test1.sqlite3"
+                              }
+                          }
+                      }
+
+            - name: Migration-up SQLite(2)
+              run: npm run migration-up -- --db sqlite
+              env:
+                  FLOCON_API_CONFIG: >
+                      {
+                          "database": {
+                              "sqlite": {
+                                  "dbName": "./test2.sqlite3"
                               }
                           }
                       }

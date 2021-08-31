@@ -96,7 +96,6 @@ namespace Assert {
 it.each([
     ['SQLite', undefined],
     ['SQLite', plainEntryPassword],
-    ['PostgreSQL', undefined],
     ['PostgreSQL', plainEntryPassword],
 ] as const)(
     'integration test',
