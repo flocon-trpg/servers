@@ -743,20 +743,11 @@ const createRoomPublicMessage = ({
 
 const createRoomPrivateMessage = async ({
     msg,
-    myUserUid,
-    visibleTo: visibleToCore,
-    visibleToMe: visibleToMeCore,
+    visibleTo,
 }: {
     msg: RoomPrvMsg;
-    myUserUid: string;
-    visibleTo?: string[];
-    visibleToMe?: boolean;
-}): Promise<RoomPrivateMessage | null> => {
-    const visibleTo = visibleToCore ?? (await msg.visibleTo.loadItems()).map(user => user.userUid);
-    const visibleToMe = visibleToMeCore ?? visibleTo.find(userUid => userUid === myUserUid);
-    if (!visibleToMe) {
-        return null;
-    }
+    visibleTo: string[];
+}): Promise<RoomPrivateMessage> => {
     return {
         __tstype: RoomPrivateMessageType,
         messageId: msg.id,
@@ -1021,19 +1012,21 @@ export class RoomResolver {
         const privateMessages: RoomPrivateMessage[] = [];
         for (const msg of await room.roomPrvMsgs.loadItems()) {
             const createdBy = msg.createdBy?.userUid;
-            if (mode === 'default' && msg.isSecret && createdBy !== decodedIdToken.uid) {
-                const visibleTo = await msg.visibleTo.loadItems();
+            if (mode === 'default') {
+                if (msg.isSecret && createdBy !== decodedIdToken.uid) {
+                    continue;
+                }
+            }
+            const visibleTo = await msg.visibleTo.loadItems();
+            if (mode === 'default') {
                 if (visibleTo.every(v => v.userUid !== decodedIdToken.uid)) {
                     continue;
                 }
             }
             const graphQLValue = await createRoomPrivateMessage({
                 msg,
-                myUserUid: decodedIdToken.uid,
+                visibleTo: visibleTo.map(user => user.userUid),
             });
-            if (graphQLValue == null) {
-                continue;
-            }
             privateMessages.push(graphQLValue);
         }
 
@@ -2337,13 +2330,8 @@ export class RoomResolver {
             const visibleToArray = [...visibleTo].sort();
             const result = await createRoomPrivateMessage({
                 msg: entity,
-                myUserUid: entryUser.userUid,
                 visibleTo: visibleToArray,
-                visibleToMe: true,
             });
-            if (result == null) {
-                throw new Error('This should not happen');
-            }
 
             const payload: MessageUpdatePayload = {
                 type: 'messageUpdatePayload',
