@@ -21,7 +21,10 @@ const PostgreSQL = {
 
 const SQLite = { dbName: './test.sqlite3', debug: true };
 
-export const createTestServer = async (orm: 'SQLite' | 'PostgreSQL') => {
+export const createTestServer = async (
+    orm: 'SQLite' | 'PostgreSQL',
+    entryPasswordConfig: ServerConfig['entryPassword']
+) => {
     const promiseQueue = new PromiseQueue({ queueLimit: 2 });
     const connectionManager = new InMemoryConnectionManager();
 
@@ -49,7 +52,7 @@ export const createTestServer = async (orm: 'SQLite' | 'PostgreSQL') => {
         accessControlAllowOrigin: '*',
         admin: adminConfig,
         database: databaseConfig,
-        entryPassword: { type: plain, value: Resources.entryPassword },
+        entryPassword: entryPasswordConfig,
         uploader: undefined,
     };
 

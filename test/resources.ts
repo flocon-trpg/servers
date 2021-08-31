@@ -10,10 +10,17 @@ export namespace Resources {
     }
 
     export namespace User {
-        export const roomCreator = 'ROOM_CREATOR_USER';
+        export const master = 'ROOM_MASTER_USER';
+        export const player1 = 'ROOM_PLAYER1_USER';
+        export const player2 = 'ROOM_PLAYER2_USER';
+        export const spectator = 'ROOM_SPECTATOR_USER';
+        export const notJoin = 'NOT_JOIN_USER';
     }
 
-    export namespace Participant {
-        export const roomCreator = 'ROOM_CREATOR_PARTICIPANT';
+    export namespace ParticipantName {
+        export const master = 'ROOM_MASTER_NAME';
+        export const player1 = 'ROOM_PLAYER1_NAME';
+        export const player2 = 'ROOM_PLAYER2_NAME';
+        export const spectator = 'ROOM_SPECTATOR_NAME';
     }
 }
