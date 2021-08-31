@@ -469,9 +469,13 @@ ${escape(msg.value.commandResult)}`
                     'システムメッセージ'
             )}
             </div>
-            <div>${' '}</div>
+            <div style="width: 6px"></div>
             <div style="color: gray">
-                ${escape(msg.value.channelName)}
+                ${escape(
+                    msg.type === privateMessage
+                        ? `秘話: ${msg.value.channelName}`
+                        : msg.value.channelName
+                )}
             </div>
         </div>
         <div class="flex-1 text">${text}</div>
