@@ -450,13 +450,8 @@ const createRoomPublicMessage = ({ msg, channelKey, }) => {
         updatedAt: msg.textUpdatedAt,
     };
 };
-const createRoomPrivateMessage = async ({ msg, myUserUid, visibleTo: visibleToCore, visibleToMe: visibleToMeCore, }) => {
+const createRoomPrivateMessage = async ({ msg, visibleTo, }) => {
     var _a, _b, _c, _d, _e;
-    const visibleTo = visibleToCore !== null && visibleToCore !== void 0 ? visibleToCore : (await msg.visibleTo.loadItems()).map(user => user.userUid);
-    const visibleToMe = visibleToMeCore !== null && visibleToMeCore !== void 0 ? visibleToMeCore : visibleTo.find(userUid => userUid === myUserUid);
-    if (!visibleToMe) {
-        return null;
-    }
     return {
         __tstype: graphql_2.RoomPrivateMessageType,
         messageId: msg.id,
@@ -547,16 +542,21 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
         const privateMessages = [];
         for (const msg of await room.roomPrvMsgs.loadItems()) {
             const createdBy = (_b = msg.createdBy) === null || _b === void 0 ? void 0 : _b.userUid;
-            if (mode === 'default' && msg.isSecret && createdBy !== userUid) {
-                continue;
+            if (mode === 'default') {
+                if (msg.isSecret && createdBy !== userUid) {
+                    continue;
+                }
+            }
+            const visibleTo = await msg.visibleTo.loadItems();
+            if (mode === 'default') {
+                if (visibleTo.every(v => v.userUid !== userUid)) {
+                    continue;
+                }
             }
             const graphQLValue = await createRoomPrivateMessage({
                 msg,
-                myUserUid: userUid,
+                visibleTo: visibleTo.map(user => user.userUid),
             });
-            if (graphQLValue == null) {
-                continue;
-            }
             privateMessages.push(graphQLValue);
         }
         const pieceValueLogs = [];
@@ -1377,13 +1377,8 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             const visibleToArray = [...visibleTo].sort();
             const result = await createRoomPrivateMessage({
                 msg: entity,
-                myUserUid: authorizedUser.userUid,
                 visibleTo: visibleToArray,
-                visibleToMe: true,
             });
-            if (result == null) {
-                throw new Error('This should not happen');
-            }
             const payload = {
                 type: 'messageUpdatePayload',
                 roomId: args.roomId,
