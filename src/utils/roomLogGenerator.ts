@@ -461,14 +461,18 @@ ${escape(msg.value.commandResult)}`
         msg.value.commandResult == null ? avatar ?? './img/noname.png' : './img/dice.png'
     }">
     <div class="flex flex-column">
-        <div class="flex-none flex flex-row name" style="color: ${escape(
-            msg.value.textColor ?? 'white'
-        )}">
+        <div class="flex-none flex flex-row">
+            <div class="name" style="color: ${escape(msg.value.textColor ?? 'white')}">
             ${escape(
                 msg.value.createdBy?.rolePlayPart ??
                     msg.value.createdBy?.participantNamePart ??
                     'システムメッセージ'
             )}
+            </div>
+            <div>${' '}</div>
+            <div style="color: gray">
+                ${escape(msg.value.channelName)}
+            </div>
         </div>
         <div class="flex-1 text">${text}</div>
     </div>
