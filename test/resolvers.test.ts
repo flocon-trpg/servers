@@ -147,42 +147,10 @@ it.each([
         const wsUri = 'ws://localhost:4000/graphql';
 
         const roomMasterClient = createApolloClient(httpUri, wsUri, Resources.User.master);
-        const roomMasterClientSubscription = new TestRoomEventSubscription(
-            roomMasterClient.subscribe<RoomEventSubscription, RoomEventSubscriptionVariables>({
-                query: RoomEventDocument,
-            })
-        );
         const roomPlayer1Client = createApolloClient(httpUri, wsUri, Resources.User.player1);
-        const roomPlayer1ClientSubscription = new TestRoomEventSubscription(
-            roomPlayer1Client.subscribe<RoomEventSubscription, RoomEventSubscriptionVariables>({
-                query: RoomEventDocument,
-            })
-        );
         const roomPlayer2Client = createApolloClient(httpUri, wsUri, Resources.User.player2);
-        const roomPlayer2ClientSubscription = new TestRoomEventSubscription(
-            roomPlayer2Client.subscribe<RoomEventSubscription, RoomEventSubscriptionVariables>({
-                query: RoomEventDocument,
-            })
-        );
         const roomSpectatorClient = createApolloClient(httpUri, wsUri, Resources.User.spectator);
-        const roomSpectatorClientSubscription = new TestRoomEventSubscription(
-            roomSpectatorClient.subscribe<RoomEventSubscription, RoomEventSubscriptionVariables>({
-                query: RoomEventDocument,
-            })
-        );
         const notJoinUserClient = createApolloClient(httpUri, wsUri, Resources.User.notJoin);
-        const notJoinUserClientSubscription = new TestRoomEventSubscription(
-            notJoinUserClient.subscribe<RoomEventSubscription, RoomEventSubscriptionVariables>({
-                query: RoomEventDocument,
-            })
-        );
-        const allSubscriptions = new CompositeTestRoomEventSubscription([
-            roomMasterClientSubscription,
-            roomPlayer1ClientSubscription,
-            roomPlayer2ClientSubscription,
-            roomSpectatorClientSubscription,
-            notJoinUserClientSubscription,
-        ]);
 
         const server = await createTestServer(dbType, entryPasswordConfig);
         const entryPassword = entryPasswordConfig == null ? undefined : Resources.entryPassword;
@@ -204,8 +172,6 @@ it.each([
             await entryToServerMutation(roomPlayer2Client);
             await entryToServerMutation(roomSpectatorClient);
             await entryToServerMutation(notJoinUserClient);
-
-            allSubscriptions.clear();
         }
 
         let roomId: string;
@@ -227,9 +193,56 @@ it.each([
             });
             const actualData = Assert.CreateRoomMutation.toBeSuccess(actual);
             roomId = actualData.id;
-
-            allSubscriptions.clear();
         }
+
+        // because we got roomId, we can do subscriptions
+        const roomMasterClientSubscription = new TestRoomEventSubscription(
+            roomMasterClient.subscribe<RoomEventSubscription, RoomEventSubscriptionVariables>({
+                query: RoomEventDocument,
+                variables: {
+                    id: roomId,
+                },
+            })
+        );
+        const roomPlayer1ClientSubscription = new TestRoomEventSubscription(
+            roomPlayer1Client.subscribe<RoomEventSubscription, RoomEventSubscriptionVariables>({
+                query: RoomEventDocument,
+                variables: {
+                    id: roomId,
+                },
+            })
+        );
+        const roomPlayer2ClientSubscription = new TestRoomEventSubscription(
+            roomPlayer2Client.subscribe<RoomEventSubscription, RoomEventSubscriptionVariables>({
+                query: RoomEventDocument,
+                variables: {
+                    id: roomId,
+                },
+            })
+        );
+        const roomSpectatorClientSubscription = new TestRoomEventSubscription(
+            roomSpectatorClient.subscribe<RoomEventSubscription, RoomEventSubscriptionVariables>({
+                query: RoomEventDocument,
+                variables: {
+                    id: roomId,
+                },
+            })
+        );
+        const notJoinUserClientSubscription = new TestRoomEventSubscription(
+            notJoinUserClient.subscribe<RoomEventSubscription, RoomEventSubscriptionVariables>({
+                query: RoomEventDocument,
+                variables: {
+                    id: roomId,
+                },
+            })
+        );
+        const allSubscriptions = new CompositeTestRoomEventSubscription([
+            roomMasterClientSubscription,
+            roomPlayer1ClientSubscription,
+            roomPlayer2ClientSubscription,
+            roomSpectatorClientSubscription,
+            notJoinUserClientSubscription,
+        ]);
 
         // query getRoomsList
         {
