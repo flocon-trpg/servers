@@ -289,7 +289,7 @@ it.each([
 
             // # testing
             // - joining as a player with a corrent password should be success
-            // - master should get a connected event
+            // - master should get a operation event (a participant was added)
             Assert.JoinRoomMutation.toBeSuccess(
                 await joinRoomAsPlayerMutation(roomPlayer1Client, {
                     id: roomId,
@@ -297,16 +297,13 @@ it.each([
                     phrase: Resources.Room.playerPassword,
                 })
             );
-            roomMasterClientSubscription.toBeExactlyOneRoomConnectionEvent({
-                event: 'connect',
-                userUid: Resources.User.player1,
-            });
+            roomMasterClientSubscription.toBeExactlyOneRoomOperationEvent();
             allSubscriptions.except(roomMasterClientSubscription).toBeEmpty();
             allSubscriptions.clear();
 
             // # testing
             // - joining as a player with no password should be failed
-            // - no connection event should be observed
+            // - no event should be observed
             Assert.JoinRoomMutation.toBeFailure(
                 await joinRoomAsPlayerMutation(roomPlayer2Client, {
                     id: roomId,
@@ -318,7 +315,7 @@ it.each([
 
             // # testing
             // - joining as a player with a incorrent password should be failed
-            // - no connection event should be observed
+            // - no event should be observed
             Assert.JoinRoomMutation.toBeFailure(
                 await joinRoomAsPlayerMutation(roomPlayer2Client, {
                     id: roomId,
@@ -330,7 +327,7 @@ it.each([
 
             // # testing
             // - joining as a player with a corrent password should be success
-            // - master and player1 should get a connected event
+            // - master and player1 should get a operation event
             Assert.JoinRoomMutation.toBeSuccess(
                 await joinRoomAsPlayerMutation(roomPlayer2Client, {
                     id: roomId,
@@ -338,14 +335,8 @@ it.each([
                     phrase: Resources.Room.playerPassword,
                 })
             );
-            roomMasterClientSubscription.toBeExactlyOneRoomConnectionEvent({
-                event: 'connect',
-                userUid: Resources.User.player2,
-            });
-            roomPlayer1ClientSubscription.toBeExactlyOneRoomConnectionEvent({
-                event: 'connect',
-                userUid: Resources.User.player2,
-            });
+            roomMasterClientSubscription.toBeExactlyOneRoomOperationEvent();
+            roomPlayer1ClientSubscription.toBeExactlyOneRoomOperationEvent();
             allSubscriptions
                 .except(roomMasterClientSubscription, roomPlayer1ClientSubscription)
                 .toBeEmpty();
