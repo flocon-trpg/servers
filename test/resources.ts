@@ -23,4 +23,8 @@ export namespace Resources {
         export const player2 = 'ROOM_PLAYER2_NAME';
         export const spectator = 'ROOM_SPECTATOR_NAME';
     }
+
+    export namespace ClientId {
+        export const player1 = 'ROOM_PLAYER1_CLIENT_ID';
+    }
 }

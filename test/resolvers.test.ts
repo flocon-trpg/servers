@@ -20,6 +20,17 @@ import {
     JoinRoomAsSpectatorMutation,
     JoinRoomAsSpectatorMutationVariables,
     JoinRoomAsSpectatorDocument,
+    RoomEventSubscription,
+    RoomEventSubscriptionVariables,
+    RoomEventDocument,
+    OperateMutation,
+    OperateMutationVariables,
+    GetRoomQuery,
+    GetRoomQueryVariables,
+    GetRoomDocument,
+    WritePrivateMessageMutationVariables,
+    WritePrivateMessageDocument,
+    WritePrivateMessageMutation,
 } from './graphql';
 import { EntryToServerResultType } from '../src/enums/EntryToServerResultType';
 import { ServerConfig } from '../src/configType';
@@ -29,6 +40,8 @@ import {
     FetchResult,
     NormalizedCacheObject,
 } from '@apollo/client';
+import { CompositeTestRoomEventSubscription, TestRoomEventSubscription } from './subscription';
+import { UpOperation } from '@kizahasi/flocon-core';
 
 const timeout = 20000;
 
@@ -70,6 +83,16 @@ namespace Assert {
         };
     }
 
+    export namespace GetRoomQuery {
+        export const toBeSuccess = (source: ApolloQueryResult<GetRoomQuery>) => {
+            if (source.data?.result.__typename !== 'GetJoinedRoomResult') {
+                expect(source.data?.result.__typename).toBe('GetJoinedRoomResult');
+                throw new Error('Guard');
+            }
+            return source.data.result;
+        };
+    }
+
     export namespace JoinRoomMutation {
         export const toBeSuccess = (
             source: FetchResult<JoinRoomAsPlayerMutation | JoinRoomAsSpectatorMutation>
@@ -91,6 +114,26 @@ namespace Assert {
             return source.data.result;
         };
     }
+
+    export namespace OperateMutation {
+        export const toBeSuccess = (source: FetchResult<OperateMutation>) => {
+            if (source.data?.result.__typename !== 'OperateRoomSuccessResult') {
+                expect(source.data?.result.__typename).toBe('OperateRoomSuccessResult');
+                throw new Error('Guard');
+            }
+            return source.data.result;
+        };
+    }
+
+    export namespace WritePrivateMessageMutation {
+        export const toBeSuccess = (source: FetchResult<WritePrivateMessageMutation>) => {
+            if (source.data?.result.__typename !== 'RoomPrivateMessage') {
+                expect(source.data?.result.__typename).toBe('RoomPrivateMessage');
+                throw new Error('Guard');
+            }
+            return source.data.result;
+        };
+    }
 }
 
 it.each([
@@ -102,11 +145,45 @@ it.each([
     async (dbType, entryPasswordConfig) => {
         const httpUri = 'http://localhost:4000/graphql';
         const wsUri = 'ws://localhost:4000/graphql';
+
         const roomMasterClient = createApolloClient(httpUri, wsUri, Resources.User.master);
+        const roomMasterClientSubscription = new TestRoomEventSubscription(
+            roomMasterClient.subscribe<RoomEventSubscription, RoomEventSubscriptionVariables>({
+                query: RoomEventDocument,
+            })
+        );
         const roomPlayer1Client = createApolloClient(httpUri, wsUri, Resources.User.player1);
+        const roomPlayer1ClientSubscription = new TestRoomEventSubscription(
+            roomPlayer1Client.subscribe<RoomEventSubscription, RoomEventSubscriptionVariables>({
+                query: RoomEventDocument,
+            })
+        );
         const roomPlayer2Client = createApolloClient(httpUri, wsUri, Resources.User.player2);
+        const roomPlayer2ClientSubscription = new TestRoomEventSubscription(
+            roomPlayer2Client.subscribe<RoomEventSubscription, RoomEventSubscriptionVariables>({
+                query: RoomEventDocument,
+            })
+        );
         const roomSpectatorClient = createApolloClient(httpUri, wsUri, Resources.User.spectator);
+        const roomSpectatorClientSubscription = new TestRoomEventSubscription(
+            roomSpectatorClient.subscribe<RoomEventSubscription, RoomEventSubscriptionVariables>({
+                query: RoomEventDocument,
+            })
+        );
         const notJoinUserClient = createApolloClient(httpUri, wsUri, Resources.User.notJoin);
+        const notJoinUserClientSubscription = new TestRoomEventSubscription(
+            notJoinUserClient.subscribe<RoomEventSubscription, RoomEventSubscriptionVariables>({
+                query: RoomEventDocument,
+            })
+        );
+        const allSubscriptions = new CompositeTestRoomEventSubscription([
+            roomMasterClientSubscription,
+            roomPlayer1ClientSubscription,
+            roomPlayer2ClientSubscription,
+            roomSpectatorClientSubscription,
+            notJoinUserClientSubscription,
+        ]);
+
         const server = await createTestServer(dbType, entryPasswordConfig);
         const entryPassword = entryPasswordConfig == null ? undefined : Resources.entryPassword;
 
@@ -127,6 +204,8 @@ it.each([
             await entryToServerMutation(roomPlayer2Client);
             await entryToServerMutation(roomSpectatorClient);
             await entryToServerMutation(notJoinUserClient);
+
+            allSubscriptions.clear();
         }
 
         let roomId: string;
@@ -148,6 +227,8 @@ it.each([
             });
             const actualData = Assert.CreateRoomMutation.toBeSuccess(actual);
             roomId = actualData.id;
+
+            allSubscriptions.clear();
         }
 
         // query getRoomsList
@@ -158,20 +239,27 @@ it.each([
                 });
             };
 
+            // # testing
+            // - master can get the room
             const roomMasterResult = Assert.GetRoomsListQuery.toBeSuccess(
                 await getRoomsListQuery(roomMasterClient)
             );
             expect(roomMasterResult.rooms.length).toBe(1);
             expect(roomMasterResult.rooms[0].id).toBe(roomId);
 
+            // # testing
+            // - another user can get the room
             const anotherUserResult = Assert.GetRoomsListQuery.toBeSuccess(
                 await getRoomsListQuery(roomPlayer1Client)
             );
             expect(anotherUserResult.rooms.length).toBe(1);
             expect(anotherUserResult.rooms[0].id).toBe(roomId);
+
+            allSubscriptions.clear();
         }
 
         // mutation joinRoomAsPlayer
+        // これによりplayer1とplayer2がjoin
         {
             const joinRoomAsPlayerMutation = async (
                 client: ApolloClientType,
@@ -186,6 +274,9 @@ it.each([
                 });
             };
 
+            // # testing
+            // - joining as a player with a corrent password should be success
+            // - master should get a connected event
             Assert.JoinRoomMutation.toBeSuccess(
                 await joinRoomAsPlayerMutation(roomPlayer1Client, {
                     id: roomId,
@@ -193,7 +284,16 @@ it.each([
                     phrase: Resources.Room.playerPassword,
                 })
             );
+            roomMasterClientSubscription.toBeExactlyOneRoomConnectionEvent({
+                event: 'connect',
+                userUid: Resources.User.player1,
+            });
+            allSubscriptions.except(roomMasterClientSubscription).toBeEmpty();
+            allSubscriptions.clear();
 
+            // # testing
+            // - joining as a player with no password should be failed
+            // - no connection event should be observed
             Assert.JoinRoomMutation.toBeFailure(
                 await joinRoomAsPlayerMutation(roomPlayer2Client, {
                     id: roomId,
@@ -201,7 +301,11 @@ it.each([
                     phrase: undefined,
                 })
             );
+            allSubscriptions.toBeEmpty();
 
+            // # testing
+            // - joining as a player with a incorrent password should be failed
+            // - no connection event should be observed
             Assert.JoinRoomMutation.toBeFailure(
                 await joinRoomAsPlayerMutation(roomPlayer2Client, {
                     id: roomId,
@@ -209,7 +313,11 @@ it.each([
                     phrase: Resources.Room.spectatorPassword,
                 })
             );
+            allSubscriptions.toBeEmpty();
 
+            // # testing
+            // - joining as a player with a corrent password should be success
+            // - master and player1 should get a connected event
             Assert.JoinRoomMutation.toBeSuccess(
                 await joinRoomAsPlayerMutation(roomPlayer2Client, {
                     id: roomId,
@@ -217,9 +325,22 @@ it.each([
                     phrase: Resources.Room.playerPassword,
                 })
             );
+            roomMasterClientSubscription.toBeExactlyOneRoomConnectionEvent({
+                event: 'connect',
+                userUid: Resources.User.player2,
+            });
+            roomPlayer1ClientSubscription.toBeExactlyOneRoomConnectionEvent({
+                event: 'connect',
+                userUid: Resources.User.player2,
+            });
+            allSubscriptions
+                .except(roomMasterClientSubscription, roomPlayer1ClientSubscription)
+                .toBeEmpty();
+            allSubscriptions.clear();
         }
 
         // mutation joinRoomAsSpectator
+        // これによりspectatorがjoin
         {
             const joinRoomAsSpectatorMutation = async (
                 client: ApolloClientType,
@@ -257,6 +378,105 @@ it.each([
                     phrase: Resources.Room.spectatorPassword,
                 })
             );
+        }
+
+        let initRoomRevision;
+        {
+            const getRoomQuery = async (
+                client: ApolloClientType,
+                variables: GetRoomQueryVariables
+            ) => {
+                return await client.query<GetRoomQuery, GetRoomQueryVariables>({
+                    query: GetRoomDocument,
+                    variables,
+                });
+            };
+
+            initRoomRevision = Assert.GetRoomQuery.toBeSuccess(
+                await getRoomQuery(roomPlayer1Client, {
+                    id: roomId,
+                })
+            ).room.revision;
+        }
+
+        {
+            const operateMutation = async (
+                client: ApolloClientType,
+                variables: OperateMutationVariables
+            ) => {
+                return await client.mutate<OperateMutation, OperateMutationVariables>({
+                    mutation: JoinRoomAsSpectatorDocument,
+                    variables,
+                });
+            };
+
+            const newRoomName = 'NEW_ROOM_NAME';
+            const requestId = 'PLAYER1_REQUEST_ID';
+
+            const operation: UpOperation = {
+                $v: 1,
+                name: {
+                    newValue: newRoomName,
+                },
+            };
+            const operationResult = Assert.OperateMutation.toBeSuccess(
+                await operateMutation(roomPlayer1Client, {
+                    id: roomId,
+                    requestId,
+                    revisionFrom: initRoomRevision,
+                    operation: {
+                        clientId: Resources.ClientId.player1,
+                        valueJson: JSON.stringify(operation),
+                    },
+                })
+            );
+            expect(operationResult.operation.revisionTo).toBe(initRoomRevision + 1);
+            const masterSubscriptionResult =
+                roomMasterClientSubscription.toBeExactlyOneRoomOperationEvent();
+            expect(masterSubscriptionResult).toEqual(operationResult.operation);
+            const player2SubscriptionResult =
+                roomPlayer2ClientSubscription.toBeExactlyOneRoomOperationEvent();
+            expect(player2SubscriptionResult).toEqual(operationResult.operation);
+            const spectatorSubscriptionResult =
+                roomSpectatorClientSubscription.toBeExactlyOneRoomOperationEvent();
+            expect(spectatorSubscriptionResult).toEqual(operationResult.operation);
+            notJoinUserClientSubscription.toBeEmpty();
+            allSubscriptions.clear();
+        }
+
+        {
+            const writePrivateMessageMutation = async (
+                client: ApolloClientType,
+                variables: WritePrivateMessageMutationVariables
+            ) => {
+                return await client.mutate<
+                    WritePrivateMessageMutation,
+                    WritePrivateMessageMutationVariables
+                >({
+                    mutation: WritePrivateMessageDocument,
+                    variables,
+                });
+            };
+
+            const text = 'TEXT';
+            const visibleTo = [Resources.User.player1, Resources.User.player2];
+
+            const privateMessage = Assert.WritePrivateMessageMutation.toBeSuccess(
+                await writePrivateMessageMutation(roomPlayer1Client, {
+                    roomId,
+                    text,
+                    visibleTo,
+                })
+            );
+            roomMasterClientSubscription.toBeEmpty();
+            const player2SubscriptionResult =
+                roomPlayer2ClientSubscription.toBeExactlyOneRoomPrivateMessageEvent();
+            expect(player2SubscriptionResult).toEqual(privateMessage);
+            const spectatorSubscriptionResult =
+                roomSpectatorClientSubscription.toBeExactlyOneRoomPrivateMessageEvent();
+            expect(spectatorSubscriptionResult).toEqual(privateMessage);
+            notJoinUserClientSubscription.toBeEmpty();
+            allSubscriptions.clear();
         }
 
         // これがないとport 4000が開放されないので2個目以降のテストが失敗してしまう

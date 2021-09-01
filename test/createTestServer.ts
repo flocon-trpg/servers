@@ -1,5 +1,5 @@
 import { createPostgreSQL, createSQLite } from '../src/mikro-orm';
-import { EM } from '../src/utils/types';
+import { EM, ORM } from '../src/utils/types';
 import { PromiseQueue } from '../src/utils/promiseQueue';
 import { InMemoryConnectionManager } from '../src/connection/main';
 import { BaasType } from '../src/enums/BaasType';
@@ -32,11 +32,11 @@ export const createTestServer = async (
     const promiseQueue = new PromiseQueue({ queueLimit: 2 });
     const connectionManager = new InMemoryConnectionManager();
 
-    let em: EM;
+    let $orm: ORM;
     let databaseConfig: DatabaseConfig;
     switch (orm) {
         case 'PostgreSQL':
-            em = (await createPostgreSQL(PostgreSQLConfig)).em;
+            $orm = await createPostgreSQL(PostgreSQLConfig);
             databaseConfig = {
                 __type: postgresql,
                 clientUrl: postgresClientUrl,
@@ -44,7 +44,7 @@ export const createTestServer = async (
             };
             break;
         case 'SQLite':
-            em = (await createSQLite(createSQLiteConfig())).em;
+            $orm = await createSQLite(createSQLiteConfig());
             databaseConfig = {
                 __type: sqlite,
                 dbName: './test.sqlite3',
@@ -65,11 +65,11 @@ export const createTestServer = async (
         pubSub: new PubSub(),
     });
 
-    return await createServer({
+    const result = await createServer({
         serverConfig,
         promiseQueue,
         connectionManager,
-        em,
+        em: $orm.em,
         schema,
         debug: true,
         getDecodedIdTokenFromWsContext: async context => {
@@ -102,4 +102,14 @@ export const createTestServer = async (
         },
         port: 4000,
     });
+
+    // テスト終了時のための後処理
+    result.on('close', () => {
+        const main = async () => {
+            await $orm.close();
+        };
+        main();
+    });
+
+    return result;
 };
