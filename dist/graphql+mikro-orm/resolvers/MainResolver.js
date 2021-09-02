@@ -85,9 +85,11 @@ let MainResolver = class MainResolver {
                 }
                 if (0 < action) {
                     fileEntity.fileTags.add(fileTag);
+                    fileTag.files.add(fileEntity);
                 }
                 else {
                     fileEntity.fileTags.remove(fileTag);
+                    fileTag.files.remove(fileEntity);
                 }
             }
         }
