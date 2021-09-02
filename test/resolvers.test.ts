@@ -31,6 +31,7 @@ import {
     WritePrivateMessageMutationVariables,
     WritePrivateMessageDocument,
     WritePrivateMessageMutation,
+    OperateDocument,
 } from './graphql';
 import { EntryToServerResultType } from '../src/enums/EntryToServerResultType';
 import { ServerConfig } from '../src/configType';
@@ -417,7 +418,7 @@ it.each([
                 variables: OperateMutationVariables
             ) => {
                 return await client.mutate<OperateMutation, OperateMutationVariables>({
-                    mutation: JoinRoomAsSpectatorDocument,
+                    mutation: OperateDocument,
                     variables,
                 });
             };
