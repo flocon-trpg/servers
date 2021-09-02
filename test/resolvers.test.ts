@@ -32,6 +32,12 @@ import {
     WritePrivateMessageDocument,
     WritePrivateMessageMutation,
     OperateDocument,
+    LeaveRoomMutationVariables,
+    LeaveRoomDocument,
+    LeaveRoomMutation,
+    GetMessagesQuery,
+    GetMessagesQueryVariables,
+    GetMessagesDocument,
 } from './graphql';
 import { EntryToServerResultType } from '../src/enums/EntryToServerResultType';
 import { ServerConfig } from '../src/configType';
@@ -42,7 +48,7 @@ import {
     NormalizedCacheObject,
 } from '@apollo/client';
 import { CompositeTestRoomEventSubscription, TestRoomEventSubscription } from './subscription';
-import { UpOperation } from '@kizahasi/flocon-core';
+import { UpOperation, parseState } from '@kizahasi/flocon-core';
 
 const timeout = 20000;
 
@@ -68,6 +74,16 @@ namespace Assert {
         export const toBeSuccess = (source: FetchResult<CreateRoomMutation>) => {
             if (source.data?.result.__typename !== 'CreateRoomSuccessResult') {
                 expect(source.data?.result.__typename).toBe('CreateRoomSuccessResult');
+                throw new Error('Guard');
+            }
+            return source.data.result;
+        };
+    }
+
+    export namespace GetMessagesQuery {
+        export const toBeSuccess = (source: ApolloQueryResult<GetMessagesQuery>) => {
+            if (source.data?.result.__typename !== 'RoomMessages') {
+                expect(source.data?.result.__typename).toBe('RoomMessages');
                 throw new Error('Guard');
             }
             return source.data.result;
@@ -116,6 +132,12 @@ namespace Assert {
         };
     }
 
+    export namespace LeaveRoomMutation {
+        export const toBeSuccess = (source: FetchResult<LeaveRoomMutation>) => {
+            expect(source.data?.result.failureType ?? undefined).toBeUndefined();
+        };
+    }
+
     export namespace OperateMutation {
         export const toBeSuccess = (source: FetchResult<OperateMutation>) => {
             if (source.data?.result.__typename !== 'OperateRoomSuccessResult') {
@@ -135,6 +157,97 @@ namespace Assert {
             return source.data.result;
         };
     }
+}
+
+namespace GraphQL {
+    export const entryToServerMutation = async (client: ApolloClientType) => {
+        return await client.mutate<EntryToServerMutation, EntryToServerMutationVariables>({
+            mutation: EntryToServerDocument,
+            variables: { phrase: Resources.entryPassword },
+        });
+    };
+
+    export const getRoomQuery = async (
+        client: ApolloClientType,
+        variables: GetRoomQueryVariables
+    ) => {
+        return await client.query<GetRoomQuery, GetRoomQueryVariables>({
+            query: GetRoomDocument,
+            variables,
+        });
+    };
+
+    export const getRoomsListQuery = async (client: ApolloClientType) => {
+        return await client.query<GetRoomsListQuery, GetRoomsListQueryVariables>({
+            query: GetRoomsListDocument,
+        });
+    };
+
+    export const getMessagesQuery = async (
+        client: ApolloClientType,
+        variables: GetMessagesQueryVariables
+    ) => {
+        return await client.query<GetMessagesQuery, GetMessagesQueryVariables>({
+            query: GetMessagesDocument,
+            variables,
+        });
+    };
+
+    export const joinRoomAsPlayerMutation = async (
+        client: ApolloClientType,
+        variables: JoinRoomAsPlayerMutationVariables
+    ) => {
+        return await client.mutate<JoinRoomAsPlayerMutation, JoinRoomAsPlayerMutationVariables>({
+            mutation: JoinRoomAsPlayerDocument,
+            variables,
+        });
+    };
+
+    export const joinRoomAsSpectatorMutation = async (
+        client: ApolloClientType,
+        variables: JoinRoomAsSpectatorMutationVariables
+    ) => {
+        return await client.mutate<
+            JoinRoomAsSpectatorMutation,
+            JoinRoomAsSpectatorMutationVariables
+        >({
+            mutation: JoinRoomAsSpectatorDocument,
+            variables,
+        });
+    };
+
+    export const leaveRoomMutation = async (
+        client: ApolloClientType,
+        variables: LeaveRoomMutationVariables
+    ) => {
+        return await client.mutate<LeaveRoomMutation, LeaveRoomMutationVariables>({
+            mutation: LeaveRoomDocument,
+            variables,
+        });
+    };
+
+    export const operateMutation = async (
+        client: ApolloClientType,
+        variables: OperateMutationVariables
+    ) => {
+        return await client.mutate<OperateMutation, OperateMutationVariables>({
+            mutation: OperateDocument,
+            variables,
+        });
+    };
+
+    export const writePrivateMessageMutation = async (
+        client: ApolloClientType,
+        variables: WritePrivateMessageMutationVariables
+    ) => {
+        return await client.mutate<
+            WritePrivateMessageMutation,
+            WritePrivateMessageMutationVariables
+        >({
+            mutation: WritePrivateMessageDocument,
+            variables,
+        });
+    };
 }
 
 it.each([
@@ -158,21 +271,14 @@ it.each([
 
         // mutation entryToServer if entryPassword != null
         if (entryPassword != null) {
-            const entryToServerMutation = async (client: ApolloClientType) => {
-                return await client.mutate<EntryToServerMutation, EntryToServerMutationVariables>({
-                    mutation: EntryToServerDocument,
-                    variables: { phrase: Resources.entryPassword },
-                });
-            };
-
-            const result = await entryToServerMutation(roomMasterClient);
+            const result = await GraphQL.entryToServerMutation(roomMasterClient);
             expect(result.data?.result.type).toBe(EntryToServerResultType.Success);
 
             // roomMaster以外のテストは成功するとみなし省略している
-            await entryToServerMutation(roomPlayer1Client);
-            await entryToServerMutation(roomPlayer2Client);
-            await entryToServerMutation(roomSpectatorClient);
-            await entryToServerMutation(notJoinUserClient);
+            await GraphQL.entryToServerMutation(roomPlayer1Client);
+            await GraphQL.entryToServerMutation(roomPlayer2Client);
+            await GraphQL.entryToServerMutation(roomSpectatorClient);
+            await GraphQL.entryToServerMutation(notJoinUserClient);
         }
 
         let roomId: string;
@@ -247,16 +353,10 @@ it.each([
 
         // query getRoomsList
         {
-            const getRoomsListQuery = async (client: ApolloClientType) => {
-                return await client.query<GetRoomsListQuery, GetRoomsListQueryVariables>({
-                    query: GetRoomsListDocument,
-                });
-            };
-
             // # testing
             // - master can get the room
             const roomMasterResult = Assert.GetRoomsListQuery.toBeSuccess(
-                await getRoomsListQuery(roomMasterClient)
+                await GraphQL.getRoomsListQuery(roomMasterClient)
             );
             expect(roomMasterResult.rooms.length).toBe(1);
             expect(roomMasterResult.rooms[0].id).toBe(roomId);
@@ -264,7 +364,7 @@ it.each([
             // # testing
             // - another user can get the room
             const anotherUserResult = Assert.GetRoomsListQuery.toBeSuccess(
-                await getRoomsListQuery(roomPlayer1Client)
+                await GraphQL.getRoomsListQuery(roomPlayer1Client)
             );
             expect(anotherUserResult.rooms.length).toBe(1);
             expect(anotherUserResult.rooms[0].id).toBe(roomId);
@@ -275,24 +375,11 @@ it.each([
         // mutation joinRoomAsPlayer
         // これによりplayer1とplayer2がjoin
         {
-            const joinRoomAsPlayerMutation = async (
-                client: ApolloClientType,
-                variables: JoinRoomAsPlayerMutationVariables
-            ) => {
-                return await client.mutate<
-                    JoinRoomAsPlayerMutation,
-                    JoinRoomAsPlayerMutationVariables
-                >({
-                    mutation: JoinRoomAsPlayerDocument,
-                    variables,
-                });
-            };
-
             // # testing
             // - joining as a player with a corrent password should be success
             // - master should get a operation event (a participant was added)
             Assert.JoinRoomMutation.toBeSuccess(
-                await joinRoomAsPlayerMutation(roomPlayer1Client, {
+                await GraphQL.joinRoomAsPlayerMutation(roomPlayer1Client, {
                     id: roomId,
                     name: Resources.User.player1,
                     phrase: Resources.Room.playerPassword,
@@ -309,7 +396,7 @@ it.each([
             // - joining as a player with no password should be failed
             // - no event should be observed
             Assert.JoinRoomMutation.toBeFailure(
-                await joinRoomAsPlayerMutation(roomPlayer2Client, {
+                await GraphQL.joinRoomAsPlayerMutation(roomPlayer2Client, {
                     id: roomId,
                     name: Resources.User.player2,
                     phrase: undefined,
@@ -321,7 +408,7 @@ it.each([
             // - joining as a player with a incorrent password should be failed
             // - no event should be observed
             Assert.JoinRoomMutation.toBeFailure(
-                await joinRoomAsPlayerMutation(roomPlayer2Client, {
+                await GraphQL.joinRoomAsPlayerMutation(roomPlayer2Client, {
                     id: roomId,
                     name: Resources.User.player2,
                     phrase: Resources.Room.spectatorPassword,
@@ -333,7 +420,7 @@ it.each([
             // - joining as a player with a corrent password should be success
             // - master and player1 should get a operation event
             Assert.JoinRoomMutation.toBeSuccess(
-                await joinRoomAsPlayerMutation(roomPlayer2Client, {
+                await GraphQL.joinRoomAsPlayerMutation(roomPlayer2Client, {
                     id: roomId,
                     name: Resources.User.player2,
                     phrase: Resources.Room.playerPassword,
@@ -355,21 +442,8 @@ it.each([
         // mutation joinRoomAsSpectator
         // これによりspectatorがjoin
         {
-            const joinRoomAsSpectatorMutation = async (
-                client: ApolloClientType,
-                variables: JoinRoomAsSpectatorMutationVariables
-            ) => {
-                return await client.mutate<
-                    JoinRoomAsSpectatorMutation,
-                    JoinRoomAsSpectatorMutationVariables
-                >({
-                    mutation: JoinRoomAsSpectatorDocument,
-                    variables,
-                });
-            };
-
             Assert.JoinRoomMutation.toBeFailure(
-                await joinRoomAsSpectatorMutation(roomSpectatorClient, {
+                await GraphQL.joinRoomAsSpectatorMutation(roomSpectatorClient, {
                     id: roomId,
                     name: Resources.User.spectator,
                     phrase: undefined,
@@ -377,7 +451,7 @@ it.each([
             );
 
             Assert.JoinRoomMutation.toBeFailure(
-                await joinRoomAsSpectatorMutation(roomSpectatorClient, {
+                await GraphQL.joinRoomAsSpectatorMutation(roomSpectatorClient, {
                     id: roomId,
                     name: Resources.User.spectator,
                     phrase: Resources.Room.playerPassword,
@@ -385,7 +459,7 @@ it.each([
             );
 
             Assert.JoinRoomMutation.toBeSuccess(
-                await joinRoomAsSpectatorMutation(roomSpectatorClient, {
+                await GraphQL.joinRoomAsSpectatorMutation(roomSpectatorClient, {
                     id: roomId,
                     name: Resources.User.spectator,
                     phrase: Resources.Room.spectatorPassword,
@@ -397,18 +471,8 @@ it.each([
 
         let initRoomRevision;
         {
-            const getRoomQuery = async (
-                client: ApolloClientType,
-                variables: GetRoomQueryVariables
-            ) => {
-                return await client.query<GetRoomQuery, GetRoomQueryVariables>({
-                    query: GetRoomDocument,
-                    variables,
-                });
-            };
-
             initRoomRevision = Assert.GetRoomQuery.toBeSuccess(
-                await getRoomQuery(roomPlayer1Client, {
+                await GraphQL.getRoomQuery(roomPlayer1Client, {
                     id: roomId,
                 })
             ).room.revision;
@@ -416,18 +480,8 @@ it.each([
             allSubscriptions.clear();
         }
 
+        const newRoomName = 'NEW_ROOM_NAME';
         {
-            const operateMutation = async (
-                client: ApolloClientType,
-                variables: OperateMutationVariables
-            ) => {
-                return await client.mutate<OperateMutation, OperateMutationVariables>({
-                    mutation: OperateDocument,
-                    variables,
-                });
-            };
-
-            const newRoomName = 'NEW_ROOM_NAME';
             const requestId = 'P1_REQID'; // @MaxLength(10)であるため10文字以下にしている
 
             const operation: UpOperation = {
@@ -437,7 +491,7 @@ it.each([
                 },
             };
             const operationResult = Assert.OperateMutation.toBeSuccess(
-                await operateMutation(roomPlayer1Client, {
+                await GraphQL.operateMutation(roomPlayer1Client, {
                     id: roomId,
                     requestId,
                     revisionFrom: initRoomRevision,
@@ -462,24 +516,11 @@ it.each([
         }
 
         {
-            const writePrivateMessageMutation = async (
-                client: ApolloClientType,
-                variables: WritePrivateMessageMutationVariables
-            ) => {
-                return await client.mutate<
-                    WritePrivateMessageMutation,
-                    WritePrivateMessageMutationVariables
-                >({
-                    mutation: WritePrivateMessageDocument,
-                    variables,
-                });
-            };
-
             const text = 'TEXT';
             const visibleTo = [Resources.User.player1, Resources.User.player2];
 
             const privateMessage = Assert.WritePrivateMessageMutation.toBeSuccess(
-                await writePrivateMessageMutation(roomPlayer1Client, {
+                await GraphQL.writePrivateMessageMutation(roomPlayer1Client, {
                     roomId,
                     text,
                     visibleTo,
@@ -491,6 +532,47 @@ it.each([
             expect(player2SubscriptionResult).toEqual(privateMessage);
             roomSpectatorClientSubscription.toBeEmpty();
             notJoinUserClientSubscription.toBeEmpty();
+            allSubscriptions.clear();
+        }
+
+        // DBに保存できているかどうかを確認するため、再度getRoomを実行
+        {
+            const room = Assert.GetRoomQuery.toBeSuccess(
+                await GraphQL.getRoomQuery(roomPlayer1Client, {
+                    id: roomId,
+                })
+            );
+
+            expect(parseState(room.room.stateJson).name).toBe(newRoomName);
+        }
+
+        // 秘話などをDBに保存できているかどうかを確認するため、getMessagesを実行
+        {
+            const player1Messages = Assert.GetMessagesQuery.toBeSuccess(
+                await GraphQL.getMessagesQuery(roomPlayer1Client, {
+                    roomId,
+                })
+            );
+            const player2Messages = Assert.GetMessagesQuery.toBeSuccess(
+                await GraphQL.getMessagesQuery(roomPlayer2Client, {
+                    roomId,
+                })
+            );
+
+            expect(player1Messages.privateMessages.length).toBe(1);
+            expect(player1Messages.privateMessages).toEqual(player2Messages.privateMessages);
+        }
+
+        // mutation leaveRoom
+        // これによりplayer2がleave
+        {
+            Assert.LeaveRoomMutation.toBeSuccess(
+                await GraphQL.leaveRoomMutation(roomPlayer1Client, {
+                    id: roomId,
+                })
+            );
+
+            // TODO: subscriptionのテストコードを書く
             allSubscriptions.clear();
         }
 
