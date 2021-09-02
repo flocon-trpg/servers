@@ -391,6 +391,8 @@ it.each([
                     phrase: Resources.Room.spectatorPassword,
                 })
             );
+
+            allSubscriptions.clear();
         }
 
         let initRoomRevision;
@@ -410,6 +412,8 @@ it.each([
                     id: roomId,
                 })
             ).room.revision;
+
+            allSubscriptions.clear();
         }
 
         {
