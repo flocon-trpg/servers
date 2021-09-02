@@ -298,7 +298,7 @@ it.each([
                 })
             );
             roomMasterClientSubscription.toBeExactlyOneRoomOperationEvent();
-            roomPlayer1ClientSubscription.toBeEmptyish();
+            roomPlayer1ClientSubscription.toBeEmpty();
             allSubscriptions
                 .except(roomMasterClientSubscription, roomPlayer1ClientSubscription)
                 .toBeEmpty();
@@ -340,7 +340,7 @@ it.each([
             );
             roomMasterClientSubscription.toBeExactlyOneRoomOperationEvent();
             roomPlayer1ClientSubscription.toBeExactlyOneRoomOperationEvent();
-            roomPlayer2ClientSubscription.toBeEmptyish();
+            roomPlayer2ClientSubscription.toBeEmpty();
             allSubscriptions
                 .except(
                     roomMasterClientSubscription,

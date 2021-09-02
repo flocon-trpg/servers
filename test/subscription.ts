@@ -20,10 +20,6 @@ export class TestRoomEventSubscription {
     }
 
     public toBeEmpty() {
-        expect(this.values).toEqual([]);
-    }
-
-    public toBeEmptyish() {
         expect(this.values.every(x => x.data?.roomEvent == null)).toBe(true);
     }
 

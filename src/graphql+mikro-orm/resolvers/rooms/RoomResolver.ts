@@ -2430,7 +2430,11 @@ export class RoomResolver {
     }
 
     // graphql-wsでRoomOperatedのConnectionを検知しているので、もしこれのメソッドやArgsがリネームもしくは削除されるときはそちらも変える。
-    @Subscription(() => RoomEvent, { topics: ROOM_EVENT })
+    // CONSIDER: return undefined; とすると、{ roomEvent: null } というオブジェクトが全員に通知される。そのため、それを見るとイベントの内容を予想できてしまう可能性がある。例えば1セッションしか行われていない場合、秘話が送られた可能性が高い、など。この問題はおそらくfilterプロパティで解決できるかもしれない。
+    @Subscription(() => RoomEvent, {
+        topics: ROOM_EVENT,
+        nullable: true,
+    })
     public roomEvent(
         @Root() payload: RoomEventPayload | null | undefined,
         @Arg('id') id: string,
@@ -2517,9 +2521,6 @@ export class RoomResolver {
 
         // userUidが同じでも例えば異なるタブで同じRoomを開いているケースがある。そのため、Mutationを行ったuserUidにだけSubscriptionを送信しないことで通信量を節約、ということはできない。
 
-        if (id !== payload.roomId) {
-            return undefined;
-        }
         if (payload.type === 'deleteRoomPayload') {
             // Roomが削除されたことは非公開にする必要はないので、このように全員に通知して構わない。
             return {
