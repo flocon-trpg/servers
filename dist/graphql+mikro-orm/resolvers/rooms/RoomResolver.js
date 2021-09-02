@@ -2174,7 +2174,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "updateWritingMessageStatus", null);
 __decorate([
-    type_graphql_1.Subscription(() => object_args_input_1.RoomEvent, { topics: Topics_1.ROOM_EVENT, nullable: true }),
+    type_graphql_1.Subscription(() => object_args_input_1.RoomEvent, { topics: Topics_1.ROOM_EVENT }),
     __param(0, type_graphql_1.Root()),
     __param(1, type_graphql_1.Arg('id')),
     __param(2, type_graphql_1.Ctx()),

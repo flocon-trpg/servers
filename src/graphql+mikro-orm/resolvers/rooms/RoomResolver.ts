@@ -2430,7 +2430,7 @@ export class RoomResolver {
     }
 
     // graphql-wsでRoomOperatedのConnectionを検知しているので、もしこれのメソッドやArgsがリネームもしくは削除されるときはそちらも変える。
-    @Subscription(() => RoomEvent, { topics: ROOM_EVENT, nullable: true })
+    @Subscription(() => RoomEvent, { topics: ROOM_EVENT })
     public roomEvent(
         @Root() payload: RoomEventPayload | null | undefined,
         @Arg('id') id: string,
