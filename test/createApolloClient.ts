@@ -82,7 +82,7 @@ export const createApolloClient = (
         );
     })();
 
-    const errorLink = onError(({ graphQLErrors, networkError }) => {
+    const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
         if (graphQLErrors) {
             graphQLErrors.map(({ message, locations, path }) =>
                 console.error(
@@ -95,6 +95,11 @@ export const createApolloClient = (
         if (networkError) {
             console.error(`[Network error]: %O`, networkError);
         }
+        console.error(
+            'operation name: %s, variable: %o',
+            operation.operationName,
+            operation.variables
+        );
     });
 
     return new ApolloClient({
