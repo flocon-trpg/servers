@@ -489,9 +489,7 @@ it.each([
             const player2SubscriptionResult =
                 roomPlayer2ClientSubscription.toBeExactlyOneRoomPrivateMessageEvent();
             expect(player2SubscriptionResult).toEqual(privateMessage);
-            const spectatorSubscriptionResult =
-                roomSpectatorClientSubscription.toBeExactlyOneRoomPrivateMessageEvent();
-            expect(spectatorSubscriptionResult).toEqual(privateMessage);
+            roomSpectatorClientSubscription.toBeEmpty();
             notJoinUserClientSubscription.toBeEmpty();
             allSubscriptions.clear();
         }
