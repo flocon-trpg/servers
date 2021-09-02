@@ -424,7 +424,7 @@ it.each([
             };
 
             const newRoomName = 'NEW_ROOM_NAME';
-            const requestId = 'PLAYER1_REQUEST_ID';
+            const requestId = 'P1_REQID'; // @MaxLength(10)であるため10文字以下にしている
 
             const operation: UpOperation = {
                 $v: 1,
