@@ -163,6 +163,7 @@ namespace GraphQL {
     export const entryToServerMutation = async (client: ApolloClientType) => {
         return await client.mutate<EntryToServerMutation, EntryToServerMutationVariables>({
             mutation: EntryToServerDocument,
+            fetchPolicy: 'network-only',
             variables: { phrase: Resources.entryPassword },
         });
     };
@@ -173,6 +174,7 @@ namespace GraphQL {
     ) => {
         return await client.query<GetRoomQuery, GetRoomQueryVariables>({
             query: GetRoomDocument,
+            fetchPolicy: 'network-only',
             variables,
         });
     };
@@ -180,6 +182,7 @@ namespace GraphQL {
     export const getRoomsListQuery = async (client: ApolloClientType) => {
         return await client.query<GetRoomsListQuery, GetRoomsListQueryVariables>({
             query: GetRoomsListDocument,
+            fetchPolicy: 'network-only',
         });
     };
 
@@ -189,6 +192,7 @@ namespace GraphQL {
     ) => {
         return await client.query<GetMessagesQuery, GetMessagesQueryVariables>({
             query: GetMessagesDocument,
+            fetchPolicy: 'network-only',
             variables,
         });
     };
@@ -199,6 +203,7 @@ namespace GraphQL {
     ) => {
         return await client.mutate<JoinRoomAsPlayerMutation, JoinRoomAsPlayerMutationVariables>({
             mutation: JoinRoomAsPlayerDocument,
+            fetchPolicy: 'network-only',
             variables,
         });
     };
@@ -212,6 +217,7 @@ namespace GraphQL {
             JoinRoomAsSpectatorMutationVariables
         >({
             mutation: JoinRoomAsSpectatorDocument,
+            fetchPolicy: 'network-only',
             variables,
         });
     };
@@ -222,6 +228,7 @@ namespace GraphQL {
     ) => {
         return await client.mutate<LeaveRoomMutation, LeaveRoomMutationVariables>({
             mutation: LeaveRoomDocument,
+            fetchPolicy: 'network-only',
             variables,
         });
     };
@@ -232,6 +239,7 @@ namespace GraphQL {
     ) => {
         return await client.mutate<OperateMutation, OperateMutationVariables>({
             mutation: OperateDocument,
+            fetchPolicy: 'network-only',
             variables,
         });
     };
@@ -245,6 +253,7 @@ namespace GraphQL {
             WritePrivateMessageMutationVariables
         >({
             mutation: WritePrivateMessageDocument,
+            fetchPolicy: 'network-only',
             variables,
         });
     };
@@ -503,7 +512,7 @@ it.each([
                     },
                 })
             );
-            console.log('operate query result: %o', operationResult);
+            console.log('operate mutation result: %o', operationResult);
             expect(operationResult.operation.revisionTo).toBe(initRoomRevision + 1);
             const masterSubscriptionResult =
                 roomMasterClientSubscription.toBeExactlyOneRoomOperationEvent();
