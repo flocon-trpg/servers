@@ -1361,6 +1361,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
                     });
                 }
                 entity.visibleTo.add(user);
+                user.visibleRoomPrvMsgs.add(entity);
             }
             entity.customName = args.customName;
             if (chara != null) {

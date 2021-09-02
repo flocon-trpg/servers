@@ -1818,6 +1818,7 @@ export class RoomResolver {
                     });
                 }
                 entity.visibleTo.add(user);
+                user.visibleRoomPrvMsgs.add(entity);
             }
             entity.customName = args.customName;
 
