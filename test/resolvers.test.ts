@@ -358,6 +358,7 @@ it.each([
             const roomMasterResult = Assert.GetRoomsListQuery.toBeSuccess(
                 await GraphQL.getRoomsListQuery(roomMasterClient)
             );
+            console.log('getRoomsList query result: %o', roomMasterResult);
             expect(roomMasterResult.rooms.length).toBe(1);
             expect(roomMasterResult.rooms[0].id).toBe(roomId);
 
@@ -426,6 +427,7 @@ it.each([
                     phrase: Resources.Room.playerPassword,
                 })
             );
+
             roomMasterClientSubscription.toBeExactlyOneRoomOperationEvent();
             roomPlayer1ClientSubscription.toBeExactlyOneRoomOperationEvent();
             roomPlayer2ClientSubscription.toBeEmpty();
@@ -501,6 +503,7 @@ it.each([
                     },
                 })
             );
+            console.log('operate query result: %o', operationResult);
             expect(operationResult.operation.revisionTo).toBe(initRoomRevision + 1);
             const masterSubscriptionResult =
                 roomMasterClientSubscription.toBeExactlyOneRoomOperationEvent();
@@ -542,6 +545,7 @@ it.each([
                     id: roomId,
                 })
             );
+            console.log('getRoom query result: %o', room);
 
             expect(parseState(room.room.stateJson).name).toBe(newRoomName);
         }
@@ -553,6 +557,7 @@ it.each([
                     roomId,
                 })
             );
+            console.log('getMessages query result: %o', player1Messages);
             const player2Messages = Assert.GetMessagesQuery.toBeSuccess(
                 await GraphQL.getMessagesQuery(roomPlayer2Client, {
                     roomId,
