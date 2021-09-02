@@ -23,6 +23,10 @@ export class TestRoomEventSubscription {
         expect(this.values).toEqual([]);
     }
 
+    public toBeEmptyish() {
+        expect(this.values.every(x => x.data?.roomEvent == null)).toBe(true);
+    }
+
     public toBeExactlyOneRoomConnectionEvent({
         event,
         userUid,
