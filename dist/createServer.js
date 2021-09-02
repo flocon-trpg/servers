@@ -30,7 +30,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
             serverConfig,
             promiseQueue,
             connectionManager,
-            em,
+            em: em.fork(),
             authorizedUser: null,
         };
     };

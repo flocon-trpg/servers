@@ -56,7 +56,7 @@ export const createServer = async ({
             serverConfig,
             promiseQueue,
             connectionManager,
-            em,
+            em: em.fork(),
             authorizedUser: null,
         };
     };
