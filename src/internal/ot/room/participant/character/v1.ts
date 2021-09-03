@@ -36,8 +36,13 @@ import { Result } from '@kizahasi/result';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
 import { chooseDualKeyRecord, chooseRecord, CompositeKey } from '@kizahasi/util';
 import { Maybe, maybe } from '../../../../maybe';
+import { isBoardVisible } from '../../../util/isBoardVisible';
 
 // privateCommandは無効化しているが、コードは大部分残している
+
+// boolParams, numParams, numMaxParams, strParams: keyはstrIndex20などの固定キーを想定。
+// privateCommands, dicePieceValues, numberPieceValues: キーはランダムな文字列。キャラクターに紐付いた値であり、なおかつキャラクターの作成者しか値を作成できない。
+// pieces, tachieLocations: 誰でも作成できる値。第一キーはuserUid、第二キーはランダムな文字列。
 
 export const state = t.type({
     $v: t.literal(1),
@@ -238,7 +243,12 @@ export const toClientState =
                 BoardLocation.State
             >({
                 serverState: source.tachieLocations,
-                isPrivate: () => false,
+                isPrivate: state =>
+                    !isBoardVisible({
+                        requestedBy,
+                        activeBoardKey,
+                        boardKey: state.boardKey,
+                    }),
                 toClientState: ({ state }) => BoardLocation.toClientState(state),
             }),
             dicePieceValues: RecordOperation.toClientState<
@@ -1387,7 +1397,11 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
 };
 
 export const serverTransform =
-    (isAuthorized: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
+    (
+        isAuthorized: boolean,
+        requestedBy: RequestedBy,
+        activeBoardKey: CompositeKey | null
+    ): ServerTransform<State, TwoWayOperation, UpOperation> =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
         if (!isAuthorized && currentState.isPrivate) {
             return Result.ok(undefined);
@@ -1485,8 +1499,33 @@ export const serverTransform =
                 }),
             toServerState: state => state,
             cancellationPolicy: {
-                cancelRemove: params => !isAuthorized && params.nextState.isPrivate,
-                cancelUpdate: params => !isAuthorized && params.nextState.isPrivate,
+                cancelCreate: ({ key, newState }) =>
+                    !isBoardVisible({ requestedBy, activeBoardKey, boardKey: newState.boardKey }) ||
+                    !RequestedBy.isAuthorized({ requestedBy, userUid: key.first }),
+                cancelRemove: params => {
+                    if (
+                        !isBoardVisible({
+                            requestedBy,
+                            activeBoardKey,
+                            boardKey: params.state.boardKey,
+                        })
+                    ) {
+                        return true;
+                    }
+                    return !isAuthorized && params.state.isPrivate;
+                },
+                cancelUpdate: params => {
+                    if (
+                        !isBoardVisible({
+                            requestedBy,
+                            activeBoardKey,
+                            boardKey: params.prevState.boardKey,
+                        })
+                    ) {
+                        return true;
+                    }
+                    return !isAuthorized && params.nextState.isPrivate;
+                },
             },
         });
         if (pieces.isError) {
@@ -1541,7 +1580,35 @@ export const serverTransform =
                     clientOperation: second,
                 }),
             toServerState: state => state,
-            cancellationPolicy: {},
+            cancellationPolicy: {
+                cancelCreate: ({ key, newState }) =>
+                    !isBoardVisible({ requestedBy, activeBoardKey, boardKey: newState.boardKey }) ||
+                    !RequestedBy.isAuthorized({ requestedBy, userUid: key.first }),
+                cancelRemove: params => {
+                    if (
+                        !isBoardVisible({
+                            requestedBy,
+                            activeBoardKey,
+                            boardKey: params.state.boardKey,
+                        })
+                    ) {
+                        return true;
+                    }
+                    return !isAuthorized && params.state.isPrivate;
+                },
+                cancelUpdate: params => {
+                    if (
+                        !isBoardVisible({
+                            requestedBy,
+                            activeBoardKey,
+                            boardKey: params.prevState.boardKey,
+                        })
+                    ) {
+                        return true;
+                    }
+                    return !isAuthorized && params.nextState.isPrivate;
+                },
+            },
         });
         if (tachieLocations.isError) {
             return tachieLocations;

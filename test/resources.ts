@@ -1,6 +1,8 @@
 import { State, Player, Spectator, CharacterState } from '../src';
 
 export namespace Resources {
+    const boardId = 'BOARD_ID';
+
     export namespace Participant {
         export namespace Spectator {
             export const userUid = 'SPECTATOR';
@@ -126,7 +128,7 @@ export namespace Resources {
                 name: Participant.Player1.name,
                 role: 'Player',
                 boards: {
-                    BOARD_ID: {
+                    [boardId]: {
                         $v: 1,
                         backgroundImage: {
                             $v: 1,
@@ -203,6 +205,10 @@ export namespace Resources {
                             CHARA_PIECE_FIRST_KEY: {
                                 CHARA_PIECE_SECOND_KEY: {
                                     $v: 1,
+                                    boardKey: {
+                                        createdBy: Participant.Player1.userUid,
+                                        id: boardId,
+                                    },
                                     cellH: 1,
                                     cellW: 2,
                                     cellX: 3,
@@ -220,6 +226,10 @@ export namespace Resources {
                             TACHIE_LOCATION_FIRST_KEY: {
                                 TACHIE_LOCATION_SECOND_KEY: {
                                     $v: 1,
+                                    boardKey: {
+                                        createdBy: Participant.Player1.userUid,
+                                        id: boardId,
+                                    },
                                     isPrivate: false,
                                     h: 5,
                                     w: 6,
@@ -243,6 +253,10 @@ export namespace Resources {
                                     DICE_PIECE_FIRST_KEY: {
                                         DICE_PIECE_SECOND_KEY: {
                                             $v: 1,
+                                            boardKey: {
+                                                createdBy: Participant.Player1.userUid,
+                                                id: boardId,
+                                            },
                                             cellH: 1,
                                             cellW: 2,
                                             cellX: 3,
@@ -267,6 +281,10 @@ export namespace Resources {
                                     DICE_PIECE_FIRST_KEY: {
                                         DICE_PIECE_SECOND_KEY: {
                                             $v: 1,
+                                            boardKey: {
+                                                createdBy: Participant.Player1.userUid,
+                                                id: boardId,
+                                            },
                                             cellH: 1,
                                             cellW: 2,
                                             cellX: 3,

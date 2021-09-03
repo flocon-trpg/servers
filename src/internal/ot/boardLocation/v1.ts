@@ -1,5 +1,6 @@
 import { Result } from '@kizahasi/result';
 import * as t from 'io-ts';
+import { compositeKey } from '../compositeKey/v1';
 import { createOperation } from '../util/createOperation';
 import { isIdRecord } from '../util/record';
 import * as ReplaceOperation from '../util/replaceOperation';
@@ -10,8 +11,11 @@ const booleanDownOperation = t.type({ oldValue: t.boolean });
 const numberUpOperation = t.type({ newValue: t.number });
 const booleanUpOperation = t.type({ newValue: t.boolean });
 
+// boardKey変更機能は今の所UIに存在しないので定義していない
+
 export const state = t.type({
     $v: t.literal(1),
+    boardKey: compositeKey,
     h: t.number,
     isPrivate: t.boolean,
     w: t.number,

@@ -330,7 +330,7 @@ export const serverTransform =
             toServerState: state => state,
             cancellationPolicy: {
                 cancelCreate: () => !isAuthorized,
-                cancelRemove: params => !isAuthorized && params.nextState.isPrivate,
+                cancelRemove: params => !isAuthorized && params.state.isPrivate,
                 cancelUpdate: params => !isAuthorized && params.nextState.isPrivate,
             },
         });

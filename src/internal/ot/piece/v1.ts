@@ -14,14 +14,19 @@ import {
     Restore,
     ServerTransform,
 } from '../util/type';
+import { compositeKey } from '../compositeKey/v1';
+import { isBoardVisible } from '../util/isBoardVisible';
 
 const numberDownOperation = t.type({ oldValue: t.number });
 const booleanDownOperation = t.type({ oldValue: t.boolean });
 const numberUpOperation = t.type({ newValue: t.number });
 const booleanUpOperation = t.type({ newValue: t.boolean });
 
+// boardKey変更機能は今の所UIに存在しないので定義していない
+
 export const state = t.type({
     $v: t.literal(1),
+    boardKey: compositeKey,
     cellH: t.number,
     cellW: t.number,
     cellX: t.number,
@@ -86,19 +91,12 @@ export const toClientStateMany =
     (source: DualStringKeyRecord<State>): DualStringKeyRecord<State> => {
         return DualKeyRecordOperation.toClientState<State, State>({
             serverState: source,
-            isPrivate: (state, key) => {
-                if (
-                    RequestedBy.isAuthorized({
-                        requestedBy,
-                        userUid: key.first,
-                    })
-                ) {
-                    return false;
-                }
-                if (key.second !== activeBoardKey?.id) {
-                    return true;
-                }
-                return false;
+            isPrivate: state => {
+                return !isBoardVisible({
+                    activeBoardKey,
+                    boardKey: state.boardKey,
+                    requestedBy,
+                });
             },
             toClientState: ({ state }) => state,
         });
