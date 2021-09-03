@@ -1052,7 +1052,7 @@ export const serverTransform =
                 Participant.serverTransform({
                     requestedBy,
                     participantKey: key,
-                    activeBoardSecondKey: currentActiveBoardKey?.id,
+                    activeBoardKey: currentActiveBoardKey ?? null,
                 })({
                     prevState,
                     currentState: nextState,

@@ -31,6 +31,7 @@ import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-
 import { Maybe, maybe } from '../../../maybe';
 import * as Board from './board/v1';
 import * as Character from './character/v1';
+import { isBoardVisible } from '../../util/isBoardVisible';
 
 export const Player = 'Player';
 export const Spectator = 'Spectator';
@@ -116,18 +117,11 @@ export const toClientState =
             boards: RecordOperation.toClientState<Board.State, Board.State>({
                 serverState: source.boards,
                 isPrivate: (state, key) => {
-                    if (
-                        RequestedBy.isAuthorized({
-                            requestedBy,
-                            userUid: participantKey,
-                        })
-                    ) {
-                        return false;
-                    }
-                    if (key !== activeBoardKey?.id) {
-                        return true;
-                    }
-                    return false;
+                    return !isBoardVisible({
+                        requestedBy,
+                        boardKey: { createdBy: participantKey, id: key },
+                        activeBoardKey,
+                    });
                 },
                 toClientState: ({ state }) => Board.toClientState(state),
             }),
@@ -543,11 +537,11 @@ export const serverTransform =
     ({
         requestedBy,
         participantKey,
-        activeBoardSecondKey,
+        activeBoardKey,
     }: {
         requestedBy: RequestedBy;
         participantKey: string;
-        activeBoardSecondKey: string | null | undefined;
+        activeBoardKey: CompositeKey | null;
     }): ServerTransform<State, TwoWayOperation, UpOperation> =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
         const isAuthorized = RequestedBy.isAuthorized({ requestedBy, userUid: participantKey });
@@ -578,18 +572,11 @@ export const serverTransform =
                         userUid: participantKey,
                     }),
                 cancelUpdate: ({ key }) => {
-                    if (
-                        RequestedBy.isAuthorized({
-                            requestedBy,
-                            userUid: participantKey,
-                        })
-                    ) {
-                        return false;
-                    }
-                    if (key !== activeBoardSecondKey) {
-                        return true;
-                    }
-                    return false;
+                    return !isBoardVisible({
+                        boardKey: { createdBy: participantKey, id: key },
+                        activeBoardKey,
+                        requestedBy,
+                    });
                 },
                 cancelRemove: () =>
                     !RequestedBy.isAuthorized({
@@ -618,7 +605,9 @@ export const serverTransform =
                     RequestedBy.isAuthorized({
                         requestedBy,
                         userUid: participantKey,
-                    })
+                    }),
+                    requestedBy,
+                    activeBoardKey
                 )({
                     prevState,
                     currentState: nextState,
@@ -632,7 +621,7 @@ export const serverTransform =
                 cancelUpdate: ({ nextState }) =>
                     !RequestedBy.isAuthorized({ requestedBy, userUid: participantKey }) &&
                     nextState.isPrivate,
-                cancelRemove: ({ nextState }) =>
+                cancelRemove: ({ state: nextState }) =>
                     !RequestedBy.isAuthorized({ requestedBy, userUid: participantKey }) &&
                     nextState.isPrivate,
             },
@@ -663,7 +652,7 @@ export const serverTransform =
             cancellationPolicy: {
                 cancelCreate: () => !isAuthorized,
                 cancelUpdate: state => !isAuthorized && state.nextState.isPrivate,
-                cancelRemove: state => !isAuthorized && state.nextState.isPrivate,
+                cancelRemove: state => !isAuthorized && state.state.isPrivate,
             },
         });
         if (imagePieceValues.isError) {

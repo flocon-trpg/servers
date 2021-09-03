@@ -84,7 +84,7 @@ export type CancellationPolicy<TKey, TServerState> = {
     // 「ユーザーがprivateだと思っていたらその後すぐ変更があってprivateになった」というケースがあるので、trueでもエラーは返さず処理が続行される。
     // 関数ではなくundefinedを渡した場合、常にfalseを返す関数が渡されたときと同等の処理が行われる。
 
-    cancelRemove?: (params: { key: TKey; nextState: TServerState }) => boolean;
+    cancelRemove?: (params: { key: TKey; state: TServerState }) => boolean;
 
     // cancelUpdateなしでもinnerTransformのほうで同等のことはできるが、プロテクト忘れを防ぎやくするために設けている。
     cancelUpdate?: (params: {
@@ -93,7 +93,7 @@ export type CancellationPolicy<TKey, TServerState> = {
         nextState: TServerState;
     }) => boolean;
 
-    cancelCreate?: (params: { key: TKey }) => boolean;
+    cancelCreate?: (params: { key: TKey; newState: TServerState }) => boolean;
 };
 
 // Make sure this:
@@ -577,7 +577,7 @@ export const serverTransform = <
                         if (
                             cancellationPolicy.cancelRemove({
                                 key,
-                                nextState: innerNextState,
+                                state: innerNextState,
                             })
                         ) {
                             break;
@@ -607,8 +607,9 @@ export const serverTransform = <
                     break;
                 }
 
+                const newValue = toServerState(operation.replace.newValue, key);
                 if (cancellationPolicy.cancelCreate) {
-                    if (cancellationPolicy.cancelCreate({ key })) {
+                    if (cancellationPolicy.cancelCreate({ key, newState: newValue })) {
                         break;
                     }
                 }
@@ -617,7 +618,7 @@ export const serverTransform = <
                     type: replace,
                     replace: {
                         oldValue: undefined,
-                        newValue: toServerState(operation.replace.newValue, key),
+                        newValue,
                     },
                 });
                 break;
