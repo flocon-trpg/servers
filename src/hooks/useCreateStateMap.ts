@@ -36,10 +36,6 @@ export const useCreateStateMap = <TSource, TValue>(
     const resultRef = useLatest(result);
 
     React.useEffect(() => {
-        if (resultRef.current == null) {
-            setResult(undefined);
-            return;
-        }
         const newStateMap = createStateMap<TValue>();
         recordForEach(source, (recordValue, key1) => {
             const inner = convertRef.current(recordValue);
@@ -50,7 +46,7 @@ export const useCreateStateMap = <TSource, TValue>(
                 newStateMap.set({ createdBy: key1, id: key2 }, value);
             });
         });
-        if (equals(resultRef.current, newStateMap)) {
+        if (resultRef.current != null && equals(resultRef.current, newStateMap)) {
             return;
         }
         setResult(newStateMap);
