@@ -35,7 +35,7 @@ export class PrivateChannelSet {
                 result.push(userUid);
                 return;
             }
-            result.push(participant.name);
+            result.push(participant.name ?? `不明なユーザー(${userUid})`);
         });
         result.sort();
         return result;

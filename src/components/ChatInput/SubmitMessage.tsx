@@ -69,7 +69,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
                     return [id, found] as const;
                 })
                 .compact()
-                .sort(([, x], [, y]) => x.name.localeCompare(y.name))
+                .sort(([, x], [, y]) => (x.name ?? '').localeCompare(y.name ?? ''))
                 .value(),
         [participantIdsOfSendTo, participants]
     );

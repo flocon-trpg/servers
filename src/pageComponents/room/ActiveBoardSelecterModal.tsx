@@ -58,7 +58,7 @@ export const ActiveBoardSelectorModal: React.FC<Props> = ({ visible, onComplete 
         }
         if (selectedBoardKey.delete) {
             operate({
-                $version: 1,
+                $v: 1,
                 activeBoardKey: {
                     newValue: undefined,
                 },
@@ -68,7 +68,7 @@ export const ActiveBoardSelectorModal: React.FC<Props> = ({ visible, onComplete 
             return;
         }
         operate({
-            $version: 1,
+            $v: 1,
             activeBoardKey: {
                 newValue: {
                     createdBy: myUserUid,

@@ -53,6 +53,8 @@ import {
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
 import { FilePath } from '../../utils/filePath';
+import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
+import { characterReplaceOperation } from '../../utils/characterReplaceOperation';
 
 const notFound = 'notFound';
 
@@ -61,7 +63,7 @@ const drawerBaseProps: Partial<DrawerProps> = {
 };
 
 const defaultCharacter: CharacterState = {
-    $version: 1,
+    $v: 1,
     chatPalette: '',
     memo: '',
     name: '',
@@ -79,20 +81,6 @@ const defaultCharacter: CharacterState = {
     pieces: {},
     dicePieceValues: {},
     numberPieceValues: {},
-};
-
-const defaultPieceLocation: PieceState = {
-    $version: 1,
-    x: 0,
-    y: 0,
-    w: 50,
-    h: 50,
-    cellX: 0,
-    cellY: 0,
-    cellW: 1,
-    cellH: 1,
-    isCellMode: true,
-    isPrivate: true,
 };
 
 const gutter: [Gutter, Gutter] = [16, 16];
@@ -131,18 +119,12 @@ const CharacterDrawer: React.FC = () => {
                     if (diffOperation == null) {
                         return;
                     }
-                    const operation: UpOperation = {
-                        $version: 1,
-                        characters: {
-                            [drawerType.stateKey.createdBy]: {
-                                [drawerType.stateKey.id]: {
-                                    type: update,
-                                    update: toCharacterUpOperation(diffOperation),
-                                },
-                            },
-                        },
-                    };
-                    operate(operation);
+                    operate(
+                        characterUpdateOperation(
+                            drawerType.stateKey,
+                            toCharacterUpOperation(diffOperation)
+                        )
+                    );
                 },
             };
             break;
@@ -210,18 +192,12 @@ const CharacterDrawer: React.FC = () => {
                 if (diffOperation == null) {
                     return;
                 }
-                const operation: UpOperation = {
-                    $version: 1,
-                    characters: {
-                        [drawerType.stateKey.createdBy]: {
-                            [drawerType.stateKey.id]: {
-                                type: update,
-                                update: toCharacterUpOperation(diffOperation),
-                            },
-                        },
-                    },
-                };
-                operate(operation);
+                operate(
+                    characterUpdateOperation(
+                        drawerType.stateKey,
+                        toCharacterUpOperation(diffOperation)
+                    )
+                );
                 return;
             }
         }
@@ -237,18 +213,7 @@ const CharacterDrawer: React.FC = () => {
                 return;
             }
             case update: {
-                const roomOperation: UpOperation = {
-                    $version: 1,
-                    characters: {
-                        [drawerType.stateKey.createdBy]: {
-                            [drawerType.stateKey.id]: {
-                                type: update,
-                                update: operation,
-                            },
-                        },
-                    },
-                };
-                operate(roomOperation);
+                operate(characterUpdateOperation(drawerType.stateKey, operation));
                 return;
             }
         }
@@ -265,28 +230,19 @@ const CharacterDrawer: React.FC = () => {
         if (diffOperation == null) {
             return;
         }
-        const operation: UpOperation = {
-            $version: 1,
-            characters: {
-                [drawerType.stateKey.createdBy]: {
-                    [drawerType.stateKey.createdBy]: {
-                        type: update,
-                        update: {
-                            $version: 1,
-                            pieces: {
-                                [drawerType.boardKey.createdBy]: {
-                                    [drawerType.boardKey.id]: {
-                                        type: update,
-                                        update: diffOperation,
-                                    },
-                                },
-                            },
+        operate(
+            characterUpdateOperation(drawerType.stateKey, {
+                $v: 1,
+                pieces: {
+                    [drawerType.boardKey.createdBy]: {
+                        [drawerType.boardKey.id]: {
+                            type: update,
+                            update: diffOperation,
                         },
                     },
                 },
-            },
-        };
-        operate(operation);
+            })
+        );
     };
 
     const updateTachieLocation = (partialState: Partial<BoardLocationState>) => {
@@ -300,48 +256,26 @@ const CharacterDrawer: React.FC = () => {
         if (diffOperation == null) {
             return;
         }
-        const operation: UpOperation = {
-            $version: 1,
-            characters: {
-                [drawerType.stateKey.createdBy]: {
-                    [drawerType.stateKey.id]: {
-                        type: update,
-                        update: {
-                            $version: 1,
-                            tachieLocations: {
-                                [drawerType.boardKey.createdBy]: {
-                                    [drawerType.boardKey.id]: {
-                                        type: update,
-                                        update: diffOperation,
-                                    },
-                                },
-                            },
+        operate(
+            characterUpdateOperation(drawerType.stateKey, {
+                $v: 1,
+                tachieLocations: {
+                    [drawerType.boardKey.createdBy]: {
+                        [drawerType.boardKey.id]: {
+                            type: update,
+                            update: diffOperation,
                         },
                     },
                 },
-            },
-        };
-        operate(operation);
+            })
+        );
     };
 
     let onOkClick: (() => void) | undefined = undefined;
     if (drawerType?.type === create) {
         onOkClick = () => {
             const id = simpleId();
-            const operation: UpOperation = {
-                $version: 1,
-                characters: {
-                    [myUserUid]: {
-                        [id]: {
-                            type: replace,
-                            replace: {
-                                newValue: character,
-                            },
-                        },
-                    },
-                },
-            };
-            operate(operation);
+            operate(characterReplaceOperation({ createdBy: myUserUid, id }, character));
             resetCharacterToCreate();
             dispatch(roomDrawerAndPopoverAndModalModule.actions.set({ characterDrawerType: null }));
         };
@@ -350,20 +284,7 @@ const CharacterDrawer: React.FC = () => {
     let onDestroy: (() => void) | undefined = undefined;
     if (drawerType?.type === update) {
         onDestroy = () => {
-            const operation: UpOperation = {
-                $version: 1,
-                characters: {
-                    [drawerType.stateKey.createdBy]: {
-                        [drawerType.stateKey.id]: {
-                            type: replace,
-                            replace: {
-                                newValue: undefined,
-                            },
-                        },
-                    },
-                },
-            };
-            operate(operation);
+            operate(characterReplaceOperation(drawerType.stateKey, undefined));
             dispatch(roomDrawerAndPopoverAndModalModule.actions.set({ characterDrawerType: null }));
         };
     }
@@ -645,23 +566,15 @@ const CharacterDrawer: React.FC = () => {
                                         size="small"
                                         onClick={() => {
                                             const id = simpleId();
-                                            const operation: UpOperation = {
-                                                $version: 1,
-                                                characters: {
-                                                    [myUserUid]: {
-                                                        [id]: {
-                                                            type: replace,
-                                                            replace: {
-                                                                newValue: {
-                                                                    ...character,
-                                                                    name: `${character.name} (複製)`,
-                                                                },
-                                                            },
-                                                        },
-                                                    },
-                                                },
-                                            };
-                                            operate(operation);
+                                            operate(
+                                                characterReplaceOperation(
+                                                    { createdBy: myUserUid, id },
+                                                    {
+                                                        ...character,
+                                                        name: `${character.name} (複製)`,
+                                                    }
+                                                )
+                                            );
                                         }}
                                     >
                                         このキャラクターを複製

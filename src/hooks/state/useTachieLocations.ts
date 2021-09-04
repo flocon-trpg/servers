@@ -1,5 +1,5 @@
 import React from 'react';
-import { CompositeKey, dualKeyRecordToDualKeyMap } from '@kizahasi/util';
+import { CompositeKey, compositeKeyEquals, dualKeyRecordToDualKeyMap } from '@kizahasi/util';
 import { BoardLocationState } from '@kizahasi/flocon-core';
 import { useCharacters } from './useCharacters';
 import _ from 'lodash';
@@ -17,19 +17,27 @@ export const useTachieLocations = (boardKey: CompositeKey) => {
                     dualKeyRecordToDualKeyMap<BoardLocationState>(
                         character.tachieLocations
                     ).toArray()
-                ).find(([boardKey$]) => {
-                    return (
-                        boardKey.createdBy === boardKey$.first && boardKey.id === boardKey$.second
+                ).find(([, tachieLocation]) => {
+                    return compositeKeyEquals(
+                        // hooksのdepsでエラーが出るのを防ぐため、boardKeyオブジェクトを再生成している
+                        { createdBy: boardKey.createdBy, id: boardKey.id },
+                        tachieLocation.boardKey
                     );
                 });
                 if (tachieLocation == null) {
                     return null;
                 }
-                if (tachieLocation == null) {
-                    return null;
-                }
-                const [, tachieLocationValue] = tachieLocation;
-                return { characterKey, character, tachieLocation: tachieLocationValue };
+                const [tachieLocationKeyAsDualKey, tachieLocationValue] = tachieLocation;
+                const tachieLocationKey: CompositeKey = {
+                    createdBy: tachieLocationKeyAsDualKey.first,
+                    id: tachieLocationKeyAsDualKey.second,
+                };
+                return {
+                    characterKey,
+                    character,
+                    tachieLocationKey,
+                    tachieLocation: tachieLocationValue,
+                };
             })
             .compact()
             .value();

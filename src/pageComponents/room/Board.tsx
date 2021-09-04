@@ -1,5 +1,5 @@
 import React from 'react';
-import { failure, loading, success, useImageFromGraphQL } from '../../hooks/image';
+import { success, useImageFromGraphQL } from '../../hooks/image';
 import * as ReactKonva from 'react-konva';
 import { Button, Dropdown, Menu } from 'antd';
 import * as Icons from '@ant-design/icons';
@@ -64,6 +64,7 @@ import {
 import { useTransition, animated } from '@react-spring/konva';
 import { useCharacterPieces } from '../../hooks/state/useCharacterPieces';
 import { useTachieLocations } from '../../hooks/state/useTachieLocations';
+import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 
 const createPiecePostOperation = ({
     e,
@@ -74,7 +75,7 @@ const createPiecePostOperation = ({
     piece: PieceState;
     board: BoardState;
 }): PieceUpOperation => {
-    const pieceOperation: PieceUpOperation = { $version: 1 };
+    const pieceOperation: PieceUpOperation = { $v: 1 };
     if (piece.isCellMode) {
         if (e.newLocation != null) {
             const position = Piece.getCellPosition({ ...e.newLocation, board });
@@ -100,7 +101,7 @@ const createPiecePostOperation = ({
 };
 
 const createTachieLocationPostOperation = ({ e }: { e: DragEndResult }): PieceUpOperation => {
-    const pieceOperation: BoardLocationUpOperation = { $version: 1 };
+    const pieceOperation: BoardLocationUpOperation = { $v: 1 };
     if (e.newLocation != null) {
         pieceOperation.x = { newValue: e.newLocation.x };
         pieceOperation.y = { newValue: e.newLocation.y };
@@ -312,7 +313,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
 
     const pieces = (() => {
         const characterPieceElements = (characterPieces ?? []).map(
-            ({ characterKey, character, piece }) => {
+            ({ characterKey, character, piece, pieceKey }) => {
                 if (character.image == null) {
                     // TODO: 画像なしでコマを表示する
                     return null;
@@ -356,28 +357,19 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                                 piece,
                                 board,
                             });
-                            const operation: UpOperation = {
-                                $version: 1,
-                                characters: {
-                                    [characterKey.createdBy]: {
-                                        [characterKey.id]: {
-                                            type: update,
-                                            update: {
-                                                $version: 1,
-                                                pieces: {
-                                                    [boardKey.createdBy]: {
-                                                        [boardKey.id]: {
-                                                            type: update,
-                                                            update: pieceOperation,
-                                                        },
-                                                    },
-                                                },
+                            operate(
+                                characterUpdateOperation(characterKey, {
+                                    $v: 1,
+                                    pieces: {
+                                        [pieceKey.createdBy]: {
+                                            [pieceKey.id]: {
+                                                type: update,
+                                                update: pieceOperation,
                                             },
                                         },
                                     },
-                                },
-                            };
-                            operate(operation);
+                                })
+                            );
                         }}
                     />
                 );
@@ -385,7 +377,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
         );
 
         const tachieLocationElements = (tacheLocations ?? []).map(
-            ({ characterKey, character, tachieLocation }) => {
+            ({ characterKey, character, tachieLocationKey, tachieLocation }) => {
                 if (character.tachieImage == null) {
                     // TODO: 画像なしでコマを表示する
                     return null;
@@ -434,28 +426,19 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             const tachieLocationOperation = createTachieLocationPostOperation({
                                 e,
                             });
-                            const operation: UpOperation = {
-                                $version: 1,
-                                characters: {
-                                    [characterKey.createdBy]: {
-                                        [characterKey.id]: {
-                                            type: update,
-                                            update: {
-                                                $version: 1,
-                                                tachieLocations: {
-                                                    [boardKey.createdBy]: {
-                                                        [boardKey.id]: {
-                                                            type: update,
-                                                            update: tachieLocationOperation,
-                                                        },
-                                                    },
-                                                },
+                            operate(
+                                characterUpdateOperation(characterKey, {
+                                    $v: 1,
+                                    tachieLocations: {
+                                        [tachieLocationKey.createdBy]: {
+                                            [tachieLocationKey.id]: {
+                                                type: update,
+                                                update: tachieLocationOperation,
                                             },
                                         },
                                     },
-                                },
-                            };
-                            operate(operation);
+                                })
+                            );
                         }}
                     />
                 );
@@ -515,20 +498,20 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             board,
                         });
                         const operation: UpOperation = {
-                            $version: 1,
+                            $v: 1,
                             participants: {
                                 [pieceValueElement.participantKey]: {
                                     type: update,
                                     update: {
-                                        $version: 1,
+                                        $v: 1,
                                         imagePieceValues: {
                                             [pieceValueElement.valueId]: {
                                                 type: update,
                                                 update: {
-                                                    $version: 1,
+                                                    $v: 1,
                                                     pieces: {
-                                                        [boardKey.createdBy]: {
-                                                            [boardKey.id]: {
+                                                        [pieceKey.createdBy]: {
+                                                            [pieceKey.id]: {
                                                                 type: update,
                                                                 update: pieceOperation,
                                                             },
@@ -551,16 +534,13 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             .map(element => {
                 const piece = dualKeyRecordToDualKeyMap<PieceState>(element.value.pieces)
                     .toArray()
-                    .find(([boardKey$]) => {
-                        return (
-                            boardKey.createdBy === boardKey$.first &&
-                            boardKey.id === boardKey$.second
-                        );
+                    .find(([, piece]) => {
+                        return compositeKeyEquals(boardKey, piece.boardKey);
                     });
                 if (piece == null) {
                     return null;
                 }
-                const [, pieceValue] = piece;
+                const [pieceKey, pieceValue] = piece;
                 return (
                     <DiceOrNumberPiece
                         {...Piece.getPosition({ ...board, state: pieceValue })}
@@ -600,36 +580,27 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                                 piece: pieceValue,
                                 board,
                             });
-                            const operation: UpOperation = {
-                                $version: 1,
-                                characters: {
-                                    [element.characterKey.createdBy]: {
-                                        [element.characterKey.id]: {
+                            operate(
+                                characterUpdateOperation(element.characterKey, {
+                                    $v: 1,
+                                    dicePieceValues: {
+                                        [element.valueId]: {
                                             type: update,
                                             update: {
-                                                $version: 1,
-                                                dicePieceValues: {
-                                                    [element.valueId]: {
-                                                        type: update,
-                                                        update: {
-                                                            $version: 1,
-                                                            pieces: {
-                                                                [boardKey.createdBy]: {
-                                                                    [boardKey.id]: {
-                                                                        type: update,
-                                                                        update: pieceOperation,
-                                                                    },
-                                                                },
-                                                            },
+                                                $v: 1,
+                                                pieces: {
+                                                    [pieceKey.first]: {
+                                                        [pieceKey.second]: {
+                                                            type: update,
+                                                            update: pieceOperation,
                                                         },
                                                     },
                                                 },
                                             },
                                         },
                                     },
-                                },
-                            };
-                            operate(operation);
+                                })
+                            );
                         }}
                     />
                 );
@@ -641,16 +612,13 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             .map(element => {
                 const piece = dualKeyRecordToDualKeyMap<PieceState>(element.value.pieces)
                     .toArray()
-                    .find(([boardKey$]) => {
-                        return (
-                            boardKey.createdBy === boardKey$.first &&
-                            boardKey.id === boardKey$.second
-                        );
+                    .find(([, piece]) => {
+                        return compositeKeyEquals(boardKey, piece.boardKey);
                     });
                 if (piece == null) {
                     return null;
                 }
-                const [, pieceValue] = piece;
+                const [pieceKey, pieceValue] = piece;
                 return (
                     <DiceOrNumberPiece
                         {...Piece.getPosition({ ...board, state: pieceValue })}
@@ -690,36 +658,27 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                                 piece: pieceValue,
                                 board,
                             });
-                            const operation: UpOperation = {
-                                $version: 1,
-                                characters: {
-                                    [element.characterKey.createdBy]: {
-                                        [element.characterKey.id]: {
+                            operate(
+                                characterUpdateOperation(element.characterKey, {
+                                    $v: 1,
+                                    numberPieceValues: {
+                                        [element.valueId]: {
                                             type: update,
                                             update: {
-                                                $version: 1,
-                                                numberPieceValues: {
-                                                    [element.valueId]: {
-                                                        type: update,
-                                                        update: {
-                                                            $version: 1,
-                                                            pieces: {
-                                                                [boardKey.createdBy]: {
-                                                                    [boardKey.id]: {
-                                                                        type: update,
-                                                                        update: pieceOperation,
-                                                                    },
-                                                                },
-                                                            },
+                                                $v: 1,
+                                                pieces: {
+                                                    [pieceKey.first]: {
+                                                        [pieceKey.second]: {
+                                                            type: update,
+                                                            update: pieceOperation,
                                                         },
                                                     },
                                                 },
                                             },
                                         },
                                     },
-                                },
-                            };
-                            operate(operation);
+                                })
+                            );
                         }}
                     />
                 );
@@ -988,10 +947,12 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                             character.pieces
                                         )
                                             .toArray()
-                                            .find(([boardKey, piece]) => {
+                                            .find(([, piece]) => {
                                                 if (
-                                                    boardKey.first !== boardKeyToShow.createdBy ||
-                                                    boardKey.second !== boardKeyToShow.id
+                                                    !compositeKeyEquals(
+                                                        boardKeyToShow,
+                                                        piece.boardKey
+                                                    )
                                                 ) {
                                                     return false;
                                                 }
@@ -1014,10 +975,12 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                             character.tachieLocations
                                         )
                                             .toArray()
-                                            .find(([boardKey, tachie]) => {
+                                            .find(([, tachie]) => {
                                                 if (
-                                                    boardKey.first !== boardKeyToShow.createdBy ||
-                                                    boardKey.second !== boardKeyToShow.id
+                                                    !compositeKeyEquals(
+                                                        boardKeyToShow,
+                                                        tachie.boardKey
+                                                    )
                                                 ) {
                                                     return false;
                                                 }
@@ -1055,10 +1018,12 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                             element.value.pieces
                                         )
                                             .toArray()
-                                            .find(([boardKey, piece]) => {
+                                            .find(([, piece]) => {
                                                 if (
-                                                    boardKey.first !== boardKeyToShow.createdBy ||
-                                                    boardKey.second !== boardKeyToShow.id
+                                                    !compositeKeyEquals(
+                                                        boardKeyToShow,
+                                                        piece.boardKey
+                                                    )
                                                 ) {
                                                     return false;
                                                 }
@@ -1089,10 +1054,12 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                             element.value.pieces
                                         )
                                             .toArray()
-                                            .find(([boardKey, piece]) => {
+                                            .find(([, piece]) => {
                                                 if (
-                                                    boardKey.first !== boardKeyToShow.createdBy ||
-                                                    boardKey.second !== boardKeyToShow.id
+                                                    !compositeKeyEquals(
+                                                        boardKeyToShow,
+                                                        piece.boardKey
+                                                    )
                                                 ) {
                                                     return false;
                                                 }

@@ -53,13 +53,11 @@ export type PieceValueDrawerType =
     | {
           // pieceとともに作成するケース
           type: typeof create;
-          boardKey: CompositeKey;
           piece: PieceState;
       }
     | {
           // pieceは作成しないケース
           type: typeof create;
-          boardKey: null;
           piece: null;
       }
     | {
@@ -74,13 +72,11 @@ export type ImagePieceDrawerType =
     | {
           // pieceとともに作成するケース
           type: typeof create;
-          boardKey: CompositeKey;
           piece: PieceState;
       }
     | {
           // pieceは作成しないケース
           type: typeof create;
-          boardKey: null;
           piece: null;
       }
     | {

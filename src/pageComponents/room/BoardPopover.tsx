@@ -47,6 +47,7 @@ import { noValue } from '../../utils/dice';
 import { DicePieceValue } from '../../utils/dicePieceValue';
 import { NumberPieceValue } from '../../utils/numberPieceValue';
 import { Piece } from '../../utils/piece';
+import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 
 /* absolute positionで表示するときにBoardの子として表示させると、Boardウィンドウから要素がはみ出ることができないため、ウィンドウ右端に近いところで要素を表示させるときに不便なことがある。そのため、ページ全体の子として持たせるようにしている。 */
 
@@ -175,88 +176,71 @@ namespace PopupEditorBase {
                                 size="small"
                                 state={die ?? null}
                                 onChange={e => {
-                                    operate({
-                                        $version: 1,
-                                        characters: {
-                                            [element.characterKey.createdBy]: {
-                                                [element.characterKey.id]: {
+                                    operate(
+                                        characterUpdateOperation(element.characterKey, {
+                                            $v: 1,
+                                            dicePieceValues: {
+                                                [element.valueId]: {
                                                     type: update,
                                                     update: {
-                                                        $version: 1,
-                                                        dicePieceValues: {
-                                                            [element.valueId]: {
-                                                                type: update,
-                                                                update: {
-                                                                    $version: 1,
-                                                                    dice: {
-                                                                        [key]:
-                                                                            e.type === replace
-                                                                                ? {
-                                                                                      type: replace,
-                                                                                      replace: {
-                                                                                          newValue:
-                                                                                              e.newValue ==
-                                                                                              null
-                                                                                                  ? undefined
-                                                                                                  : {
-                                                                                                        $version: 1,
-                                                                                                        dieType:
-                                                                                                            e
-                                                                                                                .newValue
-                                                                                                                .dieType,
-                                                                                                        isValuePrivate:
-                                                                                                            false,
-                                                                                                        value: null,
-                                                                                                    },
-                                                                                      },
-                                                                                  }
-                                                                                : {
-                                                                                      type: update,
-                                                                                      update: {
-                                                                                          $version: 1,
-                                                                                          value: {
-                                                                                              newValue:
-                                                                                                  e.newValue ===
-                                                                                                  noValue
-                                                                                                      ? null
-                                                                                                      : e.newValue,
-                                                                                          },
-                                                                                      },
-                                                                                  },
-                                                                    },
-                                                                },
-                                                            },
+                                                        $v: 1,
+                                                        dice: {
+                                                            [key]:
+                                                                e.type === replace
+                                                                    ? {
+                                                                          type: replace,
+                                                                          replace: {
+                                                                              newValue:
+                                                                                  e.newValue == null
+                                                                                      ? undefined
+                                                                                      : {
+                                                                                            $v: 1,
+                                                                                            dieType:
+                                                                                                e
+                                                                                                    .newValue
+                                                                                                    .dieType,
+                                                                                            isValuePrivate:
+                                                                                                false,
+                                                                                            value: null,
+                                                                                        },
+                                                                          },
+                                                                      }
+                                                                    : {
+                                                                          type: update,
+                                                                          update: {
+                                                                              $v: 1,
+                                                                              value: {
+                                                                                  newValue:
+                                                                                      e.newValue ===
+                                                                                      noValue
+                                                                                          ? null
+                                                                                          : e.newValue,
+                                                                              },
+                                                                          },
+                                                                      },
                                                         },
                                                     },
                                                 },
                                             },
-                                        },
-                                    });
+                                        })
+                                    );
                                 }}
                                 onIsValuePrivateChange={e => {
-                                    operate({
-                                        $version: 1,
-                                        characters: {
-                                            [element.characterKey.createdBy]: {
-                                                [element.characterKey.id]: {
+                                    operate(
+                                        characterUpdateOperation(element.characterKey, {
+                                            $v: 1,
+                                            dicePieceValues: {
+                                                [element.valueId]: {
                                                     type: update,
                                                     update: {
-                                                        $version: 1,
-                                                        dicePieceValues: {
-                                                            [element.valueId]: {
+                                                        $v: 1,
+                                                        dice: {
+                                                            [key]: {
                                                                 type: update,
                                                                 update: {
-                                                                    $version: 1,
-                                                                    dice: {
-                                                                        [key]: {
-                                                                            type: update,
-                                                                            update: {
-                                                                                $version: 1,
-                                                                                isValuePrivate: {
-                                                                                    newValue: e,
-                                                                                },
-                                                                            },
-                                                                        },
+                                                                    $v: 1,
+                                                                    isValuePrivate: {
+                                                                        newValue: e,
                                                                     },
                                                                 },
                                                             },
@@ -264,8 +248,8 @@ namespace PopupEditorBase {
                                                     },
                                                 },
                                             },
-                                        },
-                                    });
+                                        })
+                                    );
                                 }}
                             />
                         </div>
@@ -379,28 +363,19 @@ namespace ContextMenuModule {
                         </Menu.Item>
                         <Menu.Item
                             onClick={() => {
-                                const operation: UpOperation = {
-                                    $version: 1,
-                                    characters: {
-                                        [characterKey.createdBy]: {
-                                            [characterKey.id]: {
-                                                type: update,
-                                                update: {
-                                                    $version: 1,
-                                                    pieces: {
-                                                        [boardKey.createdBy]: {
-                                                            [boardKey.id]: {
-                                                                type: replace,
-                                                                replace: { newValue: undefined },
-                                                            },
-                                                        },
-                                                    },
+                                operate(
+                                    characterUpdateOperation(characterKey, {
+                                        $v: 1,
+                                        pieces: {
+                                            [boardKey.createdBy]: {
+                                                [boardKey.id]: {
+                                                    type: replace,
+                                                    replace: { newValue: undefined },
                                                 },
                                             },
                                         },
-                                    },
-                                };
-                                operate(operation);
+                                    })
+                                );
                                 onContextMenuClear();
                             }}
                         >
@@ -457,28 +432,19 @@ namespace ContextMenuModule {
                         </Menu.Item>
                         <Menu.Item
                             onClick={() => {
-                                const operation: UpOperation = {
-                                    $version: 1,
-                                    characters: {
-                                        [characterKey.createdBy]: {
-                                            [characterKey.id]: {
-                                                type: update,
-                                                update: {
-                                                    $version: 1,
-                                                    tachieLocations: {
-                                                        [boardKey.createdBy]: {
-                                                            [boardKey.id]: {
-                                                                type: replace,
-                                                                replace: { newValue: undefined },
-                                                            },
-                                                        },
-                                                    },
+                                operate(
+                                    characterUpdateOperation(characterKey, {
+                                        $v: 1,
+                                        tachieLocations: {
+                                            [boardKey.createdBy]: {
+                                                [boardKey.id]: {
+                                                    type: replace,
+                                                    replace: { newValue: undefined },
                                                 },
                                             },
                                         },
-                                    },
-                                };
-                                operate(operation);
+                                    })
+                                );
                                 onContextMenuClear();
                             }}
                         >
@@ -645,26 +611,17 @@ namespace ContextMenuModule {
                             )}
                             <Menu.Item
                                 onClick={() => {
-                                    const operation: UpOperation = {
-                                        $version: 1,
-                                        characters: {
-                                            [characterKey.createdBy]: {
-                                                [characterKey.id]: {
-                                                    type: update,
-                                                    update: {
-                                                        $version: 1,
-                                                        dicePieceValues: {
-                                                            [dicePieceValueKey]: {
-                                                                type: replace,
-                                                                replace: { newValue: undefined },
-                                                            },
-                                                        },
-                                                    },
+                                    operate(
+                                        characterUpdateOperation(characterKey, {
+                                            $v: 1,
+                                            dicePieceValues: {
+                                                [dicePieceValueKey]: {
+                                                    type: replace,
+                                                    replace: { newValue: undefined },
                                                 },
                                             },
-                                        },
-                                    };
-                                    operate(operation);
+                                        })
+                                    );
                                     onContextMenuClear();
                                 }}
                             >
@@ -732,26 +689,17 @@ namespace ContextMenuModule {
                             )}
                             <Menu.Item
                                 onClick={() => {
-                                    const operation: UpOperation = {
-                                        $version: 1,
-                                        characters: {
-                                            [characterKey.createdBy]: {
-                                                [characterKey.id]: {
-                                                    type: update,
-                                                    update: {
-                                                        $version: 1,
-                                                        numberPieceValues: {
-                                                            [numberPieceValueKey]: {
-                                                                type: replace,
-                                                                replace: { newValue: undefined },
-                                                            },
-                                                        },
-                                                    },
+                                    operate(
+                                        characterUpdateOperation(characterKey, {
+                                            $v: 1,
+                                            numberPieceValues: {
+                                                [numberPieceValueKey]: {
+                                                    type: replace,
+                                                    replace: { newValue: undefined },
                                                 },
                                             },
-                                        },
-                                    };
-                                    operate(operation);
+                                        })
+                                    );
                                     onContextMenuClear();
                                 }}
                             >
@@ -807,12 +755,12 @@ namespace ContextMenuModule {
                         <Menu.Item
                             onClick={() => {
                                 const operation: UpOperation = {
-                                    $version: 1,
+                                    $v: 1,
                                     participants: {
                                         [participantKey]: {
                                             type: update,
                                             update: {
-                                                $version: 1,
+                                                $v: 1,
                                                 imagePieceValues: {
                                                     [valueId]: {
                                                         type: replace,
@@ -881,7 +829,8 @@ namespace ContextMenuModule {
         const cellPosition = Piece.getCellPosition({ x, y, board });
         // TODO: x,y,w,h の値が適当
         const pieceLocationWhichIsCellMode: PieceState = {
-            $version: 1,
+            $v: 1,
+            boardKey,
             x: 0,
             y: 0,
             w: 50,
@@ -895,7 +844,8 @@ namespace ContextMenuModule {
         };
 
         const pieceLocationWhichIsNotCellMode: PieceState = {
-            $version: 1,
+            $v: 1,
+            boardKey,
             x,
             y,
             w: 50,
@@ -909,7 +859,8 @@ namespace ContextMenuModule {
         };
 
         const tachieLocationWhichIsNotCellMode: BoardLocationState = {
-            $version: 1,
+            $v: 1,
+            boardKey,
             x,
             y,
             w: 100,
@@ -923,30 +874,21 @@ namespace ContextMenuModule {
                     <Menu.SubMenu title="追加" disabled={pieceExists(character)}>
                         <Menu.Item
                             onClick={() => {
-                                operate({
-                                    $version: 1,
-                                    characters: {
-                                        [characterKey.createdBy]: {
-                                            [characterKey.id]: {
-                                                type: update,
-                                                update: {
-                                                    $version: 1,
-                                                    pieces: {
-                                                        [boardKey.createdBy]: {
-                                                            [boardKey.id]: {
-                                                                type: replace,
-                                                                replace: {
-                                                                    newValue:
-                                                                        pieceLocationWhichIsCellMode,
-                                                                },
-                                                            },
-                                                        },
+                                operate(
+                                    characterUpdateOperation(characterKey, {
+                                        $v: 1,
+                                        pieces: {
+                                            [boardKey.createdBy]: {
+                                                [boardKey.id]: {
+                                                    type: replace,
+                                                    replace: {
+                                                        newValue: pieceLocationWhichIsCellMode,
                                                     },
                                                 },
                                             },
                                         },
-                                    },
-                                });
+                                    })
+                                );
                                 onContextMenuClear();
                             }}
                         >
@@ -954,30 +896,21 @@ namespace ContextMenuModule {
                         </Menu.Item>
                         <Menu.Item
                             onClick={() => {
-                                operate({
-                                    $version: 1,
-                                    characters: {
-                                        [characterKey.createdBy]: {
-                                            [characterKey.id]: {
-                                                type: update,
-                                                update: {
-                                                    $version: 1,
-                                                    pieces: {
-                                                        [boardKey.createdBy]: {
-                                                            [boardKey.id]: {
-                                                                type: replace,
-                                                                replace: {
-                                                                    newValue:
-                                                                        pieceLocationWhichIsNotCellMode,
-                                                                },
-                                                            },
-                                                        },
+                                operate(
+                                    characterUpdateOperation(characterKey, {
+                                        $v: 1,
+                                        pieces: {
+                                            [boardKey.createdBy]: {
+                                                [boardKey.id]: {
+                                                    type: replace,
+                                                    replace: {
+                                                        newValue: pieceLocationWhichIsNotCellMode,
                                                     },
                                                 },
                                             },
                                         },
-                                    },
-                                });
+                                    })
+                                );
                                 onContextMenuClear();
                             }}
                         >
@@ -987,29 +920,21 @@ namespace ContextMenuModule {
                     <Menu.Item
                         disabled={!pieceExists(character)}
                         onClick={() => {
-                            operate({
-                                $version: 1,
-                                characters: {
-                                    [characterKey.createdBy]: {
-                                        [characterKey.id]: {
-                                            type: update,
-                                            update: {
-                                                $version: 1,
-                                                pieces: {
-                                                    [boardKey.createdBy]: {
-                                                        [boardKey.id]: {
-                                                            type: replace,
-                                                            replace: {
-                                                                newValue: undefined,
-                                                            },
-                                                        },
-                                                    },
+                            operate(
+                                characterUpdateOperation(characterKey, {
+                                    $v: 1,
+                                    pieces: {
+                                        [boardKey.createdBy]: {
+                                            [boardKey.id]: {
+                                                type: replace,
+                                                replace: {
+                                                    newValue: undefined,
                                                 },
                                             },
                                         },
                                     },
-                                },
-                            });
+                                })
+                            );
                             onContextMenuClear();
                         }}
                     >
@@ -1025,30 +950,21 @@ namespace ContextMenuModule {
                     <Menu.Item
                         disabled={tachieExists(character)}
                         onClick={() => {
-                            operate({
-                                $version: 1,
-                                characters: {
-                                    [characterKey.createdBy]: {
-                                        [characterKey.id]: {
-                                            type: update,
-                                            update: {
-                                                $version: 1,
-                                                tachieLocations: {
-                                                    [boardKey.createdBy]: {
-                                                        [boardKey.id]: {
-                                                            type: replace,
-                                                            replace: {
-                                                                newValue:
-                                                                    tachieLocationWhichIsNotCellMode,
-                                                            },
-                                                        },
-                                                    },
+                            operate(
+                                characterUpdateOperation(characterKey, {
+                                    $v: 1,
+                                    tachieLocations: {
+                                        [boardKey.createdBy]: {
+                                            [boardKey.id]: {
+                                                type: replace,
+                                                replace: {
+                                                    newValue: tachieLocationWhichIsNotCellMode,
                                                 },
                                             },
                                         },
                                     },
-                                },
-                            });
+                                })
+                            );
                             onContextMenuClear();
                         }}
                     >
@@ -1057,29 +973,21 @@ namespace ContextMenuModule {
                     <Menu.Item
                         disabled={!tachieExists(character)}
                         onClick={() => {
-                            operate({
-                                $version: 1,
-                                characters: {
-                                    [characterKey.createdBy]: {
-                                        [characterKey.id]: {
-                                            type: update,
-                                            update: {
-                                                $version: 1,
-                                                tachieLocations: {
-                                                    [boardKey.createdBy]: {
-                                                        [boardKey.id]: {
-                                                            type: replace,
-                                                            replace: {
-                                                                newValue: undefined,
-                                                            },
-                                                        },
-                                                    },
+                            operate(
+                                characterUpdateOperation(characterKey, {
+                                    $v: 1,
+                                    tachieLocations: {
+                                        [boardKey.createdBy]: {
+                                            [boardKey.id]: {
+                                                type: replace,
+                                                replace: {
+                                                    newValue: undefined,
                                                 },
                                             },
                                         },
                                     },
-                                },
-                            });
+                                })
+                            );
                             onContextMenuClear();
                         }}
                     >
@@ -1100,7 +1008,6 @@ namespace ContextMenuModule {
                                 roomDrawerAndPopoverAndModalModule.actions.set({
                                     dicePieceValueDrawerType: {
                                         type: create,
-                                        boardKey,
                                         piece: pieceLocationWhichIsCellMode,
                                     },
                                 })
@@ -1116,7 +1023,6 @@ namespace ContextMenuModule {
                                 roomDrawerAndPopoverAndModalModule.actions.set({
                                     dicePieceValueDrawerType: {
                                         type: create,
-                                        boardKey,
                                         piece: pieceLocationWhichIsNotCellMode,
                                     },
                                 })
@@ -1134,7 +1040,6 @@ namespace ContextMenuModule {
                                 roomDrawerAndPopoverAndModalModule.actions.set({
                                     numberPieceValueDrawerType: {
                                         type: create,
-                                        boardKey,
                                         piece: pieceLocationWhichIsCellMode,
                                     },
                                 })
@@ -1150,7 +1055,6 @@ namespace ContextMenuModule {
                                 roomDrawerAndPopoverAndModalModule.actions.set({
                                     numberPieceValueDrawerType: {
                                         type: create,
-                                        boardKey,
                                         piece: pieceLocationWhichIsNotCellMode,
                                     },
                                 })
@@ -1168,7 +1072,6 @@ namespace ContextMenuModule {
                                 roomDrawerAndPopoverAndModalModule.actions.set({
                                     imagePieceDrawerType: {
                                         type: create,
-                                        boardKey,
                                         piece: pieceLocationWhichIsCellMode,
                                     },
                                 })
@@ -1184,7 +1087,6 @@ namespace ContextMenuModule {
                                 roomDrawerAndPopoverAndModalModule.actions.set({
                                     imagePieceDrawerType: {
                                         type: create,
-                                        boardKey,
                                         piece: pieceLocationWhichIsNotCellMode,
                                     },
                                 })

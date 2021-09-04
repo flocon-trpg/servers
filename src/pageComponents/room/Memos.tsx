@@ -144,12 +144,12 @@ const Memo: React.FC<MemoProps> = ({ memoId, state }: MemoProps) => {
                 value={state.name}
                 onChange={e =>
                     operate({
-                        $version: 1,
+                        $v: 1,
                         memos: {
                             [memoId]: {
                                 type: update,
                                 update: {
-                                    $version: 1,
+                                    $v: 1,
                                     name: { newValue: e.currentValue },
                                 },
                             },
@@ -165,12 +165,12 @@ const Memo: React.FC<MemoProps> = ({ memoId, state }: MemoProps) => {
                 onChange={e => {
                     const diff2 = textDiff({ prev: e.previousValue, next: e.currentValue });
                     operate({
-                        $version: 1,
+                        $v: 1,
                         memos: {
                             [memoId]: {
                                 type: update,
                                 update: {
-                                    $version: 1,
+                                    $v: 1,
                                     text:
                                         diff2 === undefined ? undefined : toTextUpOperation(diff2),
                                 },
@@ -201,13 +201,13 @@ export const Memos: React.FC<Props> = ({ selectedMemoId, onSelectedMemoIdChange 
                     onClick={() => {
                         const id = simpleId();
                         operate({
-                            $version: 1,
+                            $v: 1,
                             memos: {
                                 [id]: {
                                     type: replace,
                                     replace: {
                                         newValue: {
-                                            $version: 1,
+                                            $v: 1,
                                             text: '',
                                             textType: 'Plain',
                                             name: 'New memo',
@@ -232,7 +232,7 @@ export const Memos: React.FC<Props> = ({ selectedMemoId, onSelectedMemoIdChange 
                             title: '現在開いているメモを削除してよろしいですか？',
                             onOk: () => {
                                 operate({
-                                    $version: 1,
+                                    $v: 1,
                                     memos: {
                                         [selectedMemoId]: {
                                             type: replace,

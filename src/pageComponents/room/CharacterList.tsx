@@ -40,6 +40,7 @@ import { flex, flexRow, itemsCenter } from '../../utils/className';
 import { ColumnType } from 'antd/lib/table';
 import { SortOrder } from 'antd/lib/table/interface';
 import { IconView } from '../../components/IconView';
+import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 
 type DataSource = {
     key: string;
@@ -94,18 +95,9 @@ const createBooleanParameterColumn = ({
                         parameter={character.state.boolParams[key]}
                         createdByMe={character.createdByMe ?? false}
                         onOperate={characterOperation => {
-                            const operation: UpOperation = {
-                                $version: 1,
-                                characters: {
-                                    [character.stateKey.createdBy]: {
-                                        [character.stateKey.id]: {
-                                            type: update,
-                                            update: characterOperation,
-                                        },
-                                    },
-                                },
-                            };
-                            operate(operation);
+                            operate(
+                                characterUpdateOperation(character.stateKey, characterOperation)
+                            );
                         }}
                     />
                 </>
@@ -149,18 +141,9 @@ const createNumParameterColumn = ({
                         numberMaxParameter={character.state.numMaxParams[key]}
                         createdByMe={character.createdByMe ?? false}
                         onOperate={characterOperation => {
-                            const operation: UpOperation = {
-                                $version: 1,
-                                characters: {
-                                    [character.stateKey.createdBy]: {
-                                        [character.stateKey.id]: {
-                                            type: update,
-                                            update: characterOperation,
-                                        },
-                                    },
-                                },
-                            };
-                            operate(operation);
+                            operate(
+                                characterUpdateOperation(character.stateKey, characterOperation)
+                            );
                         }}
                     />
                 </>
@@ -202,18 +185,9 @@ const createStringParameterColumn = ({
                         parameter={character.state.strParams[key]}
                         createdByMe={character.createdByMe ?? false}
                         onOperate={characterOperation => {
-                            const operation: UpOperation = {
-                                $version: 1,
-                                characters: {
-                                    [character.stateKey.createdBy]: {
-                                        [character.stateKey.id]: {
-                                            type: update,
-                                            update: characterOperation,
-                                        },
-                                    },
-                                },
-                            };
-                            operate(operation);
+                            operate(
+                                characterUpdateOperation(character.stateKey, characterOperation)
+                            );
                         }}
                     />
                 </>
@@ -305,21 +279,12 @@ const CharacterList: React.FC = () => {
                             : characterIsNotPrivate({ isCreate: false })
                     }
                     onChange={newValue => {
-                        const operation: UpOperation = {
-                            $version: 1,
-                            characters: {
-                                [character.stateKey.createdBy]: {
-                                    [character.stateKey.id]: {
-                                        type: update,
-                                        update: {
-                                            $version: 1,
-                                            isPrivate: { newValue: !newValue },
-                                        },
-                                    },
-                                },
-                            },
-                        };
-                        operate(operation);
+                        operate(
+                            characterUpdateOperation(character.stateKey, {
+                                $v: 1,
+                                isPrivate: { newValue: !newValue },
+                            })
+                        );
                     }}
                 />
             ),
@@ -342,21 +307,12 @@ const CharacterList: React.FC = () => {
                         value={character.state.name}
                         size="small"
                         onChange={newValue => {
-                            const operation: UpOperation = {
-                                $version: 1,
-                                characters: {
-                                    [character.stateKey.createdBy]: {
-                                        [character.stateKey.id]: {
-                                            type: update,
-                                            update: {
-                                                $version: 1,
-                                                name: { newValue: newValue.target.value },
-                                            },
-                                        },
-                                    },
-                                },
-                            };
-                            operate(operation);
+                            operate(
+                                characterUpdateOperation(character.stateKey, {
+                                    $v: 1,
+                                    name: { newValue: newValue.target.value },
+                                })
+                            );
                         }}
                     />
                 </div>

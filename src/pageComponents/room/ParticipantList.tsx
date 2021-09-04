@@ -54,7 +54,7 @@ const ParticipantList: React.FC = () => {
                 <Jdenticon
                     hashOrValue={participant.userUid}
                     size={24}
-                    tooltipMode={{ type: 'userUid', userName: participant.state.name }}
+                    tooltipMode={{ type: 'userUid', userName: participant.state.name ?? undefined }}
                 />
             ),
         },

@@ -334,7 +334,7 @@ export namespace RoomMessage {
                     size={16}
                     tooltipMode={{
                         type: 'userUid',
-                        userName: participants.get(message.value.createdBy)?.name,
+                        userName: participants.get(message.value.createdBy)?.name ?? undefined,
                     }}
                 />
             );

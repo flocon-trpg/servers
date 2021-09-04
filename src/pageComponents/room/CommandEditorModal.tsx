@@ -14,6 +14,7 @@ import { useDispatch } from 'react-redux';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import classNames from 'classnames';
 import { flex, flexRow } from '../../utils/className';
+import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 
 type EditorProps = {
     script: string;
@@ -65,7 +66,7 @@ const Editor: React.FC<EditorProps> = ({ script, onChange }: EditorProps) => {
 };
 
 type CommandState = {
-    $version: 1;
+    $v: 1;
     name: string;
     value: string;
 };
@@ -189,23 +190,15 @@ export const CommandEditorModal: React.FC = () => {
                 if (character == null) {
                     return;
                 }
-                operate({
-                    $version: 1,
-                    characters: {
-                        [commandEditorModalType.characterKey.createdBy]: {
-                            [commandEditorModalType.characterKey.id]: {
-                                type: update,
-                                update: {
-                                    $version: 1,
-                                    privateCommands: privateCommandsDiff({
-                                        prevState: character.privateCommands,
-                                        nextState: mapToRecord(privateCommands),
-                                    }),
-                                },
-                            },
-                        },
-                    },
-                });
+                operate(
+                    characterUpdateOperation(commandEditorModalType.characterKey, {
+                        $v: 1,
+                        privateCommands: privateCommandsDiff({
+                            prevState: character.privateCommands,
+                            nextState: mapToRecord(privateCommands),
+                        }),
+                    })
+                );
                 dispatch(
                     roomDrawerAndPopoverAndModalModule.actions.set({ commandEditorModalType: null })
                 );
@@ -244,7 +237,7 @@ export const CommandEditorModal: React.FC = () => {
                                     return privateCommands;
                                 }
                                 privateCommands.set(id, {
-                                    $version: 1,
+                                    $v: 1,
                                     name: '新規作成コマンド',
                                     value: '',
                                 });

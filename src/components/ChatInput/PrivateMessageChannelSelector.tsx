@@ -1,20 +1,12 @@
 import React from 'react';
-import { Select, Button, Drawer, Row, Col, Checkbox, Alert } from 'antd';
-import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
-import { ChatPalettePanelConfig } from '../../states/ChatPalettePanelConfig';
-import { MessagePanelConfig } from '../../states/MessagePanelConfig';
-import { isStrIndex10, recordToArray } from '@kizahasi/util';
-import * as Icon from '@ant-design/icons';
+import { Button, Drawer, Row, Col, Checkbox, Alert } from 'antd';
+import { recordToArray } from '@kizahasi/util';
 import _ from 'lodash';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { useSelector } from '../../store';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import DrawerFooter from '../../layouts/DrawerFooter';
 import { Gutter } from 'antd/lib/grid/row';
-import {
-    UpdateChatPalettePanelAction,
-    UpdateMessagePanelAction,
-} from '../../modules/roomConfigModule';
 import { cancelRnd, flex, flexNone, flexRow, itemsCenter } from '../../utils/className';
 import classNames from 'classnames';
 
@@ -69,7 +61,7 @@ const PrivateMessageDrawer: React.FC<PrivateMessageDrawerProps> = ({
                                 ? '(自分以外の入室者がいません)'
                                 : recordToArray(participants)
                                       .filter(pair => myUserUid !== pair.key)
-                                      .sort((x, y) => x.value.name.localeCompare(y.value.name))
+                                      .sort((x, y) => (x.value.name ?? '').localeCompare(y.value.name ?? ''))
                                       .map(pair => {
                                           return (
                                               <React.Fragment key={pair.key}>
@@ -139,7 +131,7 @@ export const PrivateMessageChannelSelector: React.FC<Props> = ({
                     return [id, found] as const;
                 })
                 .compact()
-                .sort(([, x], [, y]) => x.name.localeCompare(y.name))
+                .sort(([, x], [, y]) => (x.name ?? '').localeCompare(y.name ?? ''))
                 .value(),
         [participantIdsOfSendTo, participants]
     );

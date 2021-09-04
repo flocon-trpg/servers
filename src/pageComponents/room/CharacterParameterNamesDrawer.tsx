@@ -93,12 +93,12 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                 return;
                             }
                             const operation: UpOperation = {
-                                $version: 1,
+                                $v: 1,
                                 numParamNames: {
                                     [key]: {
                                         type: update,
                                         update: {
-                                            $version: 1,
+                                            $v: 1,
                                             name: { newValue: e.currentValue },
                                         },
                                     },
@@ -111,7 +111,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                         size="small"
                         onClick={() => {
                             const operation: UpOperation = {
-                                $version: 1,
+                                $v: 1,
                                 numParamNames: {
                                     [key]: {
                                         type: replace,
@@ -153,12 +153,12 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                 return;
                             }
                             const operation: UpOperation = {
-                                $version: 1,
+                                $v: 1,
                                 boolParamNames: {
                                     [key]: {
                                         type: update,
                                         update: {
-                                            $version: 1,
+                                            $v: 1,
                                             name: { newValue: e.currentValue },
                                         },
                                     },
@@ -171,7 +171,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                         size="small"
                         onClick={() => {
                             const operation: UpOperation = {
-                                $version: 1,
+                                $v: 1,
                                 boolParamNames: {
                                     [key]: {
                                         type: replace,
@@ -213,12 +213,12 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                 return;
                             }
                             const operation: UpOperation = {
-                                $version: 1,
+                                $v: 1,
                                 strParamNames: {
                                     [key]: {
                                         type: update,
                                         update: {
-                                            $version: 1,
+                                            $v: 1,
                                             name: { newValue: e.currentValue },
                                         },
                                     },
@@ -231,7 +231,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                         size="small"
                         onClick={() => {
                             const operation: UpOperation = {
-                                $version: 1,
+                                $v: 1,
                                 strParamNames: {
                                     [key]: {
                                         type: replace,
@@ -451,13 +451,13 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                         switch (visibleParameterForm.type) {
                             case 'Bool':
                                 operation = {
-                                    $version: 1,
+                                    $v: 1,
                                     boolParamNames: {
                                         [visibleParameterForm.key]: {
                                             type: replace,
                                             replace: {
                                                 newValue: {
-                                                    $version: 1,
+                                                    $v: 1,
                                                     name: value,
                                                 },
                                             },
@@ -467,13 +467,13 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                 break;
                             case 'Num':
                                 operation = {
-                                    $version: 1,
+                                    $v: 1,
                                     numParamNames: {
                                         [visibleParameterForm.key]: {
                                             type: replace,
                                             replace: {
                                                 newValue: {
-                                                    $version: 1,
+                                                    $v: 1,
                                                     name: value,
                                                 },
                                             },
@@ -483,13 +483,13 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                 break;
                             case 'Str':
                                 operation = {
-                                    $version: 1,
+                                    $v: 1,
                                     strParamNames: {
                                         [visibleParameterForm.key]: {
                                             type: replace,
                                             replace: {
                                                 newValue: {
-                                                    $version: 1,
+                                                    $v: 1,
                                                     name: value,
                                                 },
                                             },

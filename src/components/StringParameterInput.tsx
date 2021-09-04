@@ -51,10 +51,10 @@ const StringParameterInput: React.FC<Props> = ({
                 }
                 const diff2 = textDiff({ prev: e.previousValue, next: e.currentValue });
                 const operation: CharacterUpOperation = {
-                    $version: 1,
+                    $v: 1,
                     strParams: {
                         [parameterKey]: {
-                            $version: 1,
+                            $v: 1,
                             value: diff2 === undefined ? undefined : toTextUpOperation(diff2),
                         },
                     },
@@ -97,10 +97,10 @@ const StringParameterInput: React.FC<Props> = ({
             size="small"
             onChange={e => {
                 const operation: CharacterUpOperation = {
-                    $version: 1,
+                    $v: 1,
                     strParams: {
                         [parameterKey]: {
-                            $version: 1,
+                            $v: 1,
                             isValuePrivate: { newValue: !e },
                         },
                     },
