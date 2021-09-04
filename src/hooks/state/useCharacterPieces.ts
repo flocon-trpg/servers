@@ -8,37 +8,32 @@ import {
 import { PieceState } from '@kizahasi/flocon-core';
 import { useCharacters } from './useCharacters';
 import _ from 'lodash';
+import { useCompositeKeyMemo } from '../useCompositeKeyMemo';
 
 export const useCharacterPieces = (boardKey: CompositeKey) => {
     const characters = useCharacters();
+    const boardKeyMemo = useCompositeKeyMemo(boardKey);
 
     return React.useMemo(() => {
         if (characters == null) {
             return undefined;
         }
         return _(characters.toArray())
-            .map(([characterKey, character]) => {
-                const piece = dualKeyRecordToDualKeyMap<PieceState>(character.pieces)
+            .flatMap(([characterKey, character]) => {
+                return dualKeyRecordToDualKeyMap<PieceState>(character.pieces)
                     .toArray()
-                    .find(([, piece]) => {
-                        return compositeKeyEquals(
-                            // hooksのdepsでエラーが出るのを防ぐため、boardKeyオブジェクトを再生成している
-                            { createdBy: boardKey.createdBy, id: boardKey.id },
-                            piece.boardKey
-                        );
+                    .filter(([, piece]) => {
+                        return compositeKeyEquals(boardKeyMemo, piece.boardKey);
+                    })
+                    .map(([pieceKeyAsDualKey, pieceValue]) => {
+                        const pieceKey: CompositeKey = {
+                            createdBy: pieceKeyAsDualKey.first,
+                            id: pieceKeyAsDualKey.second,
+                        };
+                        return { characterKey, character, pieceKey, piece: pieceValue };
                     });
-                if (piece == null) {
-                    return null;
-                }
-                const [pieceKeyAsDualKey, pieceValue] = piece;
-                const pieceKey: CompositeKey = {
-                    createdBy: pieceKeyAsDualKey.first,
-                    id: pieceKeyAsDualKey.second,
-                };
-                return { characterKey, character, pieceKey, piece: pieceValue };
             })
-            .compact()
             .sortBy(x => keyNames(x.characterKey, x.pieceKey))
             .value();
-    }, [boardKey.createdBy, boardKey.id, characters]);
+    }, [boardKeyMemo, characters]);
 };
