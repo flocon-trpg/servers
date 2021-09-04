@@ -35,9 +35,8 @@ jobs:
             - name: Update to npm@7
               run: npm install -g npm@7
 
-            # npm ci はエラーが出るので使っていない
             - name: Install
-              run: npm install
+              run: npm ci
 
             - name: Type-check
               run: npm run type-check
@@ -106,9 +105,8 @@ jobs:
             - name: Update to npm@7
               run: npm install -g npm@7
 
-            # npm ci はエラーが出るので使っていない
             - name: Install
-              run: npm install
+              run: npm ci
 
             - name: Prettier(check)
               run: npm run prettier:base -- --check
@@ -135,9 +133,8 @@ jobs:
             - name: Update to npm@7
               run: npm install -g npm@7
 
-            # npm ci はエラーが出るので使っていない
             - name: Install
-              run: npm install --production=${{matrix.param}}
+              run: npm ci --production=${{matrix.param}}
 
             - name: Build (as type checking)
               run: npm run build
