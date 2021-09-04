@@ -7,7 +7,7 @@
         "@kizahasi/result": "^1.0.0",
         "@kizahasi/util": "^0.8.0",
         "@monaco-editor/react": "^4.2.2",
-        "@next/bundle-analyzer": "^10.2.3",
+        "@next/bundle-analyzer": "^11.0.0",
         "@react-spring/konva": "^9.2.4",
         "@reduxjs/toolkit": "^1.6.1",
         "@types/howler": "^2.2.3",
