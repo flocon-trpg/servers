@@ -8,8 +8,8 @@ const GetRoomFailureType_1 = require("../enums/GetRoomFailureType");
 const EntryToServerResultType_1 = require("../enums/EntryToServerResultType");
 const OperateRoomFailureType_1 = require("../enums/OperateRoomFailureType");
 const GetRoomMessagesFailureType_1 = require("../enums/GetRoomMessagesFailureType");
-const WritePublicRoomMessageFailureType_1 = require("../enums/WritePublicRoomMessageFailureType");
-const WritePrivateRoomMessageFailureType_1 = require("../enums/WritePrivateRoomMessageFailureType");
+const WriteRoomPublicMessageFailureType_1 = require("../enums/WriteRoomPublicMessageFailureType");
+const WriteRoomPrivateMessageFailureType_1 = require("../enums/WriteRoomPrivateMessageFailureType");
 const LeaveRoomFailureType_1 = require("../enums/LeaveRoomFailureType");
 const RoomParameterNameType_1 = require("../enums/RoomParameterNameType");
 const WriteRoomSoundEffectFailureType_1 = require("../enums/WriteRoomSoundEffectFailureType");
@@ -108,11 +108,11 @@ const registerEnumTypes = () => {
     type_graphql_1.registerEnumType(RoomParameterNameType_1.RoomParameterNameType, {
         name: 'RoomParameterNameType',
     });
-    type_graphql_1.registerEnumType(WritePrivateRoomMessageFailureType_1.WritePrivateRoomMessageFailureType, {
-        name: 'WritePrivateRoomMessageFailureType',
+    type_graphql_1.registerEnumType(WriteRoomPrivateMessageFailureType_1.WriteRoomPrivateMessageFailureType, {
+        name: 'WriteRoomPrivateMessageFailureType',
     });
-    type_graphql_1.registerEnumType(WritePublicRoomMessageFailureType_1.WritePublicRoomMessageFailureType, {
-        name: 'WritePublicRoomMessageFailureType',
+    type_graphql_1.registerEnumType(WriteRoomPublicMessageFailureType_1.WriteRoomPublicMessageFailureType, {
+        name: 'WriteRoomPublicMessageFailureType',
     });
     type_graphql_1.registerEnumType(WriteRoomSoundEffectFailureType_1.WriteRoomSoundEffectFailureType, {
         name: 'WriteRoomSoundEffectFailureType',

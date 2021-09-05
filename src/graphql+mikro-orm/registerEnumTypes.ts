@@ -6,8 +6,8 @@ import { GetRoomFailureType } from '../enums/GetRoomFailureType';
 import { EntryToServerResultType } from '../enums/EntryToServerResultType';
 import { OperateRoomFailureType } from '../enums/OperateRoomFailureType';
 import { GetRoomMessagesFailureType } from '../enums/GetRoomMessagesFailureType';
-import { WritePublicRoomMessageFailureType } from '../enums/WritePublicRoomMessageFailureType';
-import { WritePrivateRoomMessageFailureType } from '../enums/WritePrivateRoomMessageFailureType';
+import { WriteRoomPublicMessageFailureType } from '../enums/WriteRoomPublicMessageFailureType';
+import { WriteRoomPrivateMessageFailureType } from '../enums/WriteRoomPrivateMessageFailureType';
 import { LeaveRoomFailureType } from '../enums/LeaveRoomFailureType';
 import { RoomParameterNameType } from '../enums/RoomParameterNameType';
 import { WriteRoomSoundEffectFailureType } from '../enums/WriteRoomSoundEffectFailureType';
@@ -107,11 +107,11 @@ const registerEnumTypes = (): void => {
     registerEnumType(RoomParameterNameType, {
         name: 'RoomParameterNameType',
     });
-    registerEnumType(WritePrivateRoomMessageFailureType, {
-        name: 'WritePrivateRoomMessageFailureType',
+    registerEnumType(WriteRoomPrivateMessageFailureType, {
+        name: 'WriteRoomPrivateMessageFailureType',
     });
-    registerEnumType(WritePublicRoomMessageFailureType, {
-        name: 'WritePublicRoomMessageFailureType',
+    registerEnumType(WriteRoomPublicMessageFailureType, {
+        name: 'WriteRoomPublicMessageFailureType',
     });
     registerEnumType(WriteRoomSoundEffectFailureType, {
         name: 'WriteRoomSoundEffectFailureType',

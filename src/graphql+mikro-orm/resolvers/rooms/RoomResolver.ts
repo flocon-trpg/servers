@@ -100,14 +100,14 @@ import {
     RoomSoundEffect,
     RoomSoundEffectType,
     UpdatedText,
-    WritePrivateRoomMessageFailureResultType,
-    WritePrivateRoomMessageResult,
-    WritePublicRoomMessageFailureResultType,
-    WritePublicRoomMessageResult,
+    WriteRoomPrivateMessageFailureResultType,
+    WriteRoomPrivateMessageResult,
+    WriteRoomPublicMessageFailureResultType,
+    WriteRoomPublicMessageResult,
     WriteRoomSoundEffectFailureResultType,
     WriteRoomSoundEffectResult,
 } from '../../entities/roomMessage/graphql';
-import { WritePublicRoomMessageFailureType } from '../../../enums/WritePublicRoomMessageFailureType';
+import { WriteRoomPublicMessageFailureType } from '../../../enums/WriteRoomPublicMessageFailureType';
 import { analyze, Context } from '../../../messageAnalyzer/main';
 import Color from 'color';
 import { GetRoomMessagesFailureType } from '../../../enums/GetRoomMessagesFailureType';
@@ -119,7 +119,7 @@ import { GetRoomLogFailureType } from '../../../enums/GetRoomLogFailureType';
 import { writeSystemMessage } from '../utils/roomMessage';
 import { Reference } from '@mikro-orm/core';
 import { User } from '../../entities/user/mikro-orm';
-import { WritePrivateRoomMessageFailureType } from '../../../enums/WritePrivateRoomMessageFailureType';
+import { WriteRoomPrivateMessageFailureType } from '../../../enums/WriteRoomPrivateMessageFailureType';
 import { WriteRoomSoundEffectFailureType } from '../../../enums/WriteRoomSoundEffectFailureType';
 import { MakeMessageNotSecretFailureType } from '../../../enums/MakeMessageNotSecretFailureType';
 import { DeleteMessageFailureType } from '../../../enums/DeleteMessageFailureType';
@@ -554,15 +554,15 @@ const checkChannelKey = (channelKey: string, isSpectator: boolean) => {
         case '9':
         case '10':
             if (isSpectator) {
-                return WritePublicRoomMessageFailureType.NotAuthorized;
+                return WriteRoomPublicMessageFailureType.NotAuthorized;
             }
             return null;
         case $free:
             return null;
         case $system:
-            return WritePublicRoomMessageFailureType.NotAuthorized;
+            return WriteRoomPublicMessageFailureType.NotAuthorized;
         default:
-            return WritePublicRoomMessageFailureType.NotAllowedChannelKey;
+            return WriteRoomPublicMessageFailureType.NotAllowedChannelKey;
     }
 };
 
@@ -1623,16 +1623,16 @@ export class RoomResolver {
         return operateResult.result;
     }
 
-    @Mutation(() => WritePublicRoomMessageResult)
+    @Mutation(() => WriteRoomPublicMessageResult)
     @Authorized(ENTRY)
     public async writePublicMessage(
         @Args() args: WritePublicMessageArgs,
         @Ctx() context: ResolverContext,
         @PubSub() pubSub: PubSubEngine
-    ): Promise<typeof WritePublicRoomMessageResult> {
+    ): Promise<typeof WriteRoomPublicMessageResult> {
         const channelKey = args.channelKey;
         const queue = async (): Promise<
-            Result<{ result: typeof WritePublicRoomMessageResult; payload?: MessageUpdatePayload }>
+            Result<{ result: typeof WriteRoomPublicMessageResult; payload?: MessageUpdatePayload }>
         > => {
             const em = context.em;
             const authorizedUser = ensureAuthorizedUser(context);
@@ -1644,8 +1644,8 @@ export class RoomResolver {
             if (findResult == null) {
                 return Result.ok({
                     result: {
-                        __tstype: WritePublicRoomMessageFailureResultType,
-                        failureType: WritePublicRoomMessageFailureType.RoomNotFound,
+                        __tstype: WriteRoomPublicMessageFailureResultType,
+                        failureType: WriteRoomPublicMessageFailureType.RoomNotFound,
                     },
                 });
             }
@@ -1653,8 +1653,8 @@ export class RoomResolver {
             if (me === undefined) {
                 return Result.ok({
                     result: {
-                        __tstype: WritePublicRoomMessageFailureResultType,
-                        failureType: WritePublicRoomMessageFailureType.NotParticipant,
+                        __tstype: WriteRoomPublicMessageFailureResultType,
+                        failureType: WriteRoomPublicMessageFailureType.NotParticipant,
                     },
                 });
             }
@@ -1662,8 +1662,8 @@ export class RoomResolver {
             if (channelKeyFailureType != null) {
                 return Result.ok({
                     result: {
-                        __tstype: WritePublicRoomMessageFailureResultType,
-                        failureType: WritePublicRoomMessageFailureType.NotAuthorized,
+                        __tstype: WriteRoomPublicMessageFailureResultType,
+                        failureType: WriteRoomPublicMessageFailureType.NotAuthorized,
                     },
                 });
             }
@@ -1738,13 +1738,13 @@ export class RoomResolver {
         return result.value.value.result;
     }
 
-    @Mutation(() => WritePrivateRoomMessageResult)
+    @Mutation(() => WriteRoomPrivateMessageResult)
     @Authorized(ENTRY)
     public async writePrivateMessage(
         @Args() args: WritePrivateMessageArgs,
         @Ctx() context: ResolverContext,
         @PubSub() pubSub: PubSubEngine
-    ): Promise<typeof WritePrivateRoomMessageResult> {
+    ): Promise<typeof WriteRoomPrivateMessageResult> {
         // **** args guard ****
 
         if (args.visibleTo.length >= 1000) {
@@ -1754,7 +1754,7 @@ export class RoomResolver {
         // **** main ****
 
         const queue = async (): Promise<
-            Result<{ result: typeof WritePrivateRoomMessageResult; payload?: MessageUpdatePayload }>
+            Result<{ result: typeof WriteRoomPrivateMessageResult; payload?: MessageUpdatePayload }>
         > => {
             const em = context.em;
             const authorizedUser = ensureAuthorizedUser(context);
@@ -1766,8 +1766,8 @@ export class RoomResolver {
             if (findResult == null) {
                 return Result.ok({
                     result: {
-                        __tstype: WritePrivateRoomMessageFailureResultType,
-                        failureType: WritePrivateRoomMessageFailureType.RoomNotFound,
+                        __tstype: WriteRoomPrivateMessageFailureResultType,
+                        failureType: WriteRoomPrivateMessageFailureType.RoomNotFound,
                     },
                 });
             }
@@ -1775,8 +1775,8 @@ export class RoomResolver {
             if (me === undefined) {
                 return Result.ok({
                     result: {
-                        __tstype: WritePrivateRoomMessageFailureResultType,
-                        failureType: WritePrivateRoomMessageFailureType.NotParticipant,
+                        __tstype: WriteRoomPrivateMessageFailureResultType,
+                        failureType: WriteRoomPrivateMessageFailureType.NotParticipant,
                     },
                 });
             }
@@ -1812,8 +1812,8 @@ export class RoomResolver {
                 if (user == null) {
                     return Result.ok({
                         result: {
-                            __tstype: WritePrivateRoomMessageFailureResultType,
-                            failureType: WritePrivateRoomMessageFailureType.VisibleToIsInvalid,
+                            __tstype: WriteRoomPrivateMessageFailureResultType,
+                            failureType: WriteRoomPrivateMessageFailureType.VisibleToIsInvalid,
                         },
                     });
                 }

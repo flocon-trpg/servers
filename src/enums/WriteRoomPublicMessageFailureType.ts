@@ -1,4 +1,4 @@
-export enum WritePublicRoomMessageFailureType {
+export enum WriteRoomPublicMessageFailureType {
     RoomNotFound = 'RoomNotFound',
     NotAuthorized = 'NotAuthorized',
     NotParticipant = 'NotParticipant',

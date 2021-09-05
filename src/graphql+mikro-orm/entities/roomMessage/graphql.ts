@@ -6,8 +6,8 @@ import { GetRoomLogFailureType } from '../../../enums/GetRoomLogFailureType';
 import { GetRoomMessagesFailureType } from '../../../enums/GetRoomMessagesFailureType';
 import { MakeMessageNotSecretFailureType } from '../../../enums/MakeMessageNotSecretFailureType';
 import { PieceValueLogType as PieceValueLogTypeEnum } from '../../../enums/PieceValueLogType';
-import { WritePrivateRoomMessageFailureType } from '../../../enums/WritePrivateRoomMessageFailureType';
-import { WritePublicRoomMessageFailureType } from '../../../enums/WritePublicRoomMessageFailureType';
+import { WriteRoomPrivateMessageFailureType } from '../../../enums/WriteRoomPrivateMessageFailureType';
+import { WriteRoomPublicMessageFailureType } from '../../../enums/WriteRoomPublicMessageFailureType';
 import { WriteRoomSoundEffectFailureType } from '../../../enums/WriteRoomSoundEffectFailureType';
 import { FilePath } from '../filePath/graphql';
 
@@ -350,48 +350,48 @@ export const GetRoomLogResult = createUnionType({
     },
 });
 
-export const WritePrivateRoomMessageFailureResultType = 'WritePrivateRoomMessageFailureResult';
+export const WriteRoomPrivateMessageFailureResultType = 'WriteRoomPrivateMessageFailureResult';
 
 @ObjectType()
-export class WritePrivateRoomMessageFailureResult {
-    public __tstype!: typeof WritePrivateRoomMessageFailureResultType;
+export class WriteRoomPrivateMessageFailureResult {
+    public __tstype!: typeof WriteRoomPrivateMessageFailureResultType;
 
-    @Field(() => WritePrivateRoomMessageFailureType)
-    public failureType!: WritePrivateRoomMessageFailureType;
+    @Field(() => WriteRoomPrivateMessageFailureType)
+    public failureType!: WriteRoomPrivateMessageFailureType;
 }
 
-export const WritePrivateRoomMessageResult = createUnionType({
-    name: 'WritePrivateRoomMessageResult',
-    types: () => [RoomPrivateMessage, WritePrivateRoomMessageFailureResult] as const,
+export const WriteRoomPrivateMessageResult = createUnionType({
+    name: 'WriteRoomPrivateMessageResult',
+    types: () => [RoomPrivateMessage, WriteRoomPrivateMessageFailureResult] as const,
     resolveType: value => {
         switch (value.__tstype) {
             case RoomPrivateMessageType:
                 return RoomPrivateMessage;
-            case WritePrivateRoomMessageFailureResultType:
-                return WritePrivateRoomMessageFailureResult;
+            case WriteRoomPrivateMessageFailureResultType:
+                return WriteRoomPrivateMessageFailureResult;
         }
     },
 });
 
-export const WritePublicRoomMessageFailureResultType = 'WritePublicRoomMessageFailureResult';
+export const WriteRoomPublicMessageFailureResultType = 'WriteRoomPublicMessageFailureResult';
 
 @ObjectType()
-export class WritePublicRoomMessageFailureResult {
-    public __tstype!: typeof WritePublicRoomMessageFailureResultType;
+export class WriteRoomPublicMessageFailureResult {
+    public __tstype!: typeof WriteRoomPublicMessageFailureResultType;
 
-    @Field(() => WritePublicRoomMessageFailureType)
-    public failureType!: WritePublicRoomMessageFailureType;
+    @Field(() => WriteRoomPublicMessageFailureType)
+    public failureType!: WriteRoomPublicMessageFailureType;
 }
 
-export const WritePublicRoomMessageResult = createUnionType({
-    name: 'WritePublicRoomMessageResult',
-    types: () => [RoomPublicMessage, WritePublicRoomMessageFailureResult] as const,
+export const WriteRoomPublicMessageResult = createUnionType({
+    name: 'WriteRoomPublicMessageResult',
+    types: () => [RoomPublicMessage, WriteRoomPublicMessageFailureResult] as const,
     resolveType: value => {
         switch (value.__tstype) {
             case RoomPublicMessageType:
                 return RoomPublicMessage;
-            case WritePublicRoomMessageFailureResultType:
-                return WritePublicRoomMessageFailureResult;
+            case WriteRoomPublicMessageFailureResultType:
+                return WriteRoomPublicMessageFailureResult;
         }
     },
 });

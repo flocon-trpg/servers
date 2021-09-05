@@ -318,8 +318,8 @@ export type Mutation = {
     ping: Pong;
     promoteToPlayer: PromoteResult;
     updateWritingMessageStatus: Scalars['Boolean'];
-    writePrivateMessage: WritePrivateRoomMessageResult;
-    writePublicMessage: WritePublicRoomMessageResult;
+    writePrivateMessage: WriteRoomPrivateMessageResult;
+    writePublicMessage: WriteRoomPublicMessageResult;
     writeRoomSoundEffect: WriteRoomSoundEffectResult;
 };
 
@@ -750,34 +750,34 @@ export type UpdatedText = {
     updatedAt: Scalars['Float'];
 };
 
-export type WritePrivateRoomMessageFailureResult = {
-    __typename?: 'WritePrivateRoomMessageFailureResult';
-    failureType: WritePrivateRoomMessageFailureType;
+export type WriteRoomPrivateMessageFailureResult = {
+    __typename?: 'WriteRoomPrivateMessageFailureResult';
+    failureType: WriteRoomPrivateMessageFailureType;
 };
 
-export enum WritePrivateRoomMessageFailureType {
+export enum WriteRoomPrivateMessageFailureType {
     NotParticipant = 'NotParticipant',
     RoomNotFound = 'RoomNotFound',
     VisibleToIsInvalid = 'VisibleToIsInvalid',
 }
 
-export type WritePrivateRoomMessageResult =
+export type WriteRoomPrivateMessageResult =
     | RoomPrivateMessage
-    | WritePrivateRoomMessageFailureResult;
+    | WriteRoomPrivateMessageFailureResult;
 
-export type WritePublicRoomMessageFailureResult = {
-    __typename?: 'WritePublicRoomMessageFailureResult';
-    failureType: WritePublicRoomMessageFailureType;
+export type WriteRoomPublicMessageFailureResult = {
+    __typename?: 'WriteRoomPublicMessageFailureResult';
+    failureType: WriteRoomPublicMessageFailureType;
 };
 
-export enum WritePublicRoomMessageFailureType {
+export enum WriteRoomPublicMessageFailureType {
     NotAllowedChannelKey = 'NotAllowedChannelKey',
     NotAuthorized = 'NotAuthorized',
     NotParticipant = 'NotParticipant',
     RoomNotFound = 'RoomNotFound',
 }
 
-export type WritePublicRoomMessageResult = RoomPublicMessage | WritePublicRoomMessageFailureResult;
+export type WriteRoomPublicMessageResult = RoomPublicMessage | WriteRoomPublicMessageFailureResult;
 
 export type WriteRoomSoundEffectFailureResult = {
     __typename?: 'WriteRoomSoundEffectFailureResult';
@@ -1811,8 +1811,8 @@ export type WritePublicMessageMutation = {
               }>;
           }
         | {
-              __typename?: 'WritePublicRoomMessageFailureResult';
-              failureType: WritePublicRoomMessageFailureType;
+              __typename?: 'WriteRoomPublicMessageFailureResult';
+              failureType: WriteRoomPublicMessageFailureType;
           };
 };
 
@@ -1870,8 +1870,8 @@ export type WritePrivateMessageMutation = {
               }>;
           }
         | {
-              __typename?: 'WritePrivateRoomMessageFailureResult';
-              failureType: WritePrivateRoomMessageFailureType;
+              __typename?: 'WriteRoomPrivateMessageFailureResult';
+              failureType: WriteRoomPrivateMessageFailureType;
           };
 };
 
@@ -3587,7 +3587,7 @@ export const WritePublicMessageDocument = gql`
             ... on RoomPublicMessage {
                 ...RoomPublicMessage
             }
-            ... on WritePublicRoomMessageFailureResult {
+            ... on WriteRoomPublicMessageFailureResult {
                 failureType
             }
         }
@@ -3662,7 +3662,7 @@ export const WritePrivateMessageDocument = gql`
             ... on RoomPrivateMessage {
                 ...RoomPrivateMessage
             }
-            ... on WritePrivateRoomMessageFailureResult {
+            ... on WriteRoomPrivateMessageFailureResult {
                 failureType
             }
         }

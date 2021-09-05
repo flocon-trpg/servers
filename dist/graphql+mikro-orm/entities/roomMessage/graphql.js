@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RoomMessageEvent = exports.RoomPrivateMessageUpdate = exports.RoomPrivateMessageUpdateType = exports.RoomPublicMessageUpdate = exports.RoomPublicMessageUpdateType = exports.RoomPublicChannelUpdate = exports.RoomPublicChannelUpdateType = exports.EditMessageResult = exports.DeleteMessageResult = exports.MakeMessageNotSecretResult = exports.WriteRoomSoundEffectResult = exports.WriteRoomSoundEffectFailureResult = exports.WriteRoomSoundEffectFailureResultType = exports.WritePublicRoomMessageResult = exports.WritePublicRoomMessageFailureResult = exports.WritePublicRoomMessageFailureResultType = exports.WritePrivateRoomMessageResult = exports.WritePrivateRoomMessageFailureResult = exports.WritePrivateRoomMessageFailureResultType = exports.GetRoomLogResult = exports.GetRoomLogFailureResult = exports.GetRoomLogFailureResultType = exports.GetRoomMessagesResult = exports.GetRoomMessagesFailureResult = exports.GetRoomMessagesFailureResultType = exports.RoomMessages = exports.RoomMessagesType = exports.RoomMessage = exports.RoomSoundEffect = exports.RoomSoundEffectType = exports.PieceValueLog = exports.PieceValueLogType = exports.RoomPrivateMessage = exports.RoomPrivateMessageType = exports.RoomPublicMessage = exports.RoomPublicMessageType = exports.UpdatedText = exports.CharacterValueForMessage = exports.RoomPublicChannel = exports.RoomPublicChannelType = exports.CommandResult = void 0;
+exports.RoomMessageEvent = exports.RoomPrivateMessageUpdate = exports.RoomPrivateMessageUpdateType = exports.RoomPublicMessageUpdate = exports.RoomPublicMessageUpdateType = exports.RoomPublicChannelUpdate = exports.RoomPublicChannelUpdateType = exports.EditMessageResult = exports.DeleteMessageResult = exports.MakeMessageNotSecretResult = exports.WriteRoomSoundEffectResult = exports.WriteRoomSoundEffectFailureResult = exports.WriteRoomSoundEffectFailureResultType = exports.WriteRoomPublicMessageResult = exports.WriteRoomPublicMessageFailureResult = exports.WriteRoomPublicMessageFailureResultType = exports.WriteRoomPrivateMessageResult = exports.WriteRoomPrivateMessageFailureResult = exports.WriteRoomPrivateMessageFailureResultType = exports.GetRoomLogResult = exports.GetRoomLogFailureResult = exports.GetRoomLogFailureResultType = exports.GetRoomMessagesResult = exports.GetRoomMessagesFailureResult = exports.GetRoomMessagesFailureResultType = exports.RoomMessages = exports.RoomMessagesType = exports.RoomMessage = exports.RoomSoundEffect = exports.RoomSoundEffectType = exports.PieceValueLog = exports.PieceValueLogType = exports.RoomPrivateMessage = exports.RoomPrivateMessageType = exports.RoomPublicMessage = exports.RoomPublicMessageType = exports.UpdatedText = exports.CharacterValueForMessage = exports.RoomPublicChannel = exports.RoomPublicChannelType = exports.CommandResult = void 0;
 const util_1 = require("@kizahasi/util");
 const type_graphql_1 = require("type-graphql");
 const DeleteMessageFailureType_1 = require("../../../enums/DeleteMessageFailureType");
@@ -18,8 +18,8 @@ const GetRoomLogFailureType_1 = require("../../../enums/GetRoomLogFailureType");
 const GetRoomMessagesFailureType_1 = require("../../../enums/GetRoomMessagesFailureType");
 const MakeMessageNotSecretFailureType_1 = require("../../../enums/MakeMessageNotSecretFailureType");
 const PieceValueLogType_1 = require("../../../enums/PieceValueLogType");
-const WritePrivateRoomMessageFailureType_1 = require("../../../enums/WritePrivateRoomMessageFailureType");
-const WritePublicRoomMessageFailureType_1 = require("../../../enums/WritePublicRoomMessageFailureType");
+const WriteRoomPrivateMessageFailureType_1 = require("../../../enums/WriteRoomPrivateMessageFailureType");
+const WriteRoomPublicMessageFailureType_1 = require("../../../enums/WriteRoomPublicMessageFailureType");
 const WriteRoomSoundEffectFailureType_1 = require("../../../enums/WriteRoomSoundEffectFailureType");
 const graphql_1 = require("../filePath/graphql");
 let CommandResult = class CommandResult {
@@ -390,49 +390,49 @@ exports.GetRoomLogResult = type_graphql_1.createUnionType({
         }
     },
 });
-exports.WritePrivateRoomMessageFailureResultType = 'WritePrivateRoomMessageFailureResult';
-let WritePrivateRoomMessageFailureResult = class WritePrivateRoomMessageFailureResult {
+exports.WriteRoomPrivateMessageFailureResultType = 'WriteRoomPrivateMessageFailureResult';
+let WriteRoomPrivateMessageFailureResult = class WriteRoomPrivateMessageFailureResult {
 };
 __decorate([
-    type_graphql_1.Field(() => WritePrivateRoomMessageFailureType_1.WritePrivateRoomMessageFailureType),
+    type_graphql_1.Field(() => WriteRoomPrivateMessageFailureType_1.WriteRoomPrivateMessageFailureType),
     __metadata("design:type", String)
-], WritePrivateRoomMessageFailureResult.prototype, "failureType", void 0);
-WritePrivateRoomMessageFailureResult = __decorate([
+], WriteRoomPrivateMessageFailureResult.prototype, "failureType", void 0);
+WriteRoomPrivateMessageFailureResult = __decorate([
     type_graphql_1.ObjectType()
-], WritePrivateRoomMessageFailureResult);
-exports.WritePrivateRoomMessageFailureResult = WritePrivateRoomMessageFailureResult;
-exports.WritePrivateRoomMessageResult = type_graphql_1.createUnionType({
-    name: 'WritePrivateRoomMessageResult',
-    types: () => [RoomPrivateMessage, WritePrivateRoomMessageFailureResult],
+], WriteRoomPrivateMessageFailureResult);
+exports.WriteRoomPrivateMessageFailureResult = WriteRoomPrivateMessageFailureResult;
+exports.WriteRoomPrivateMessageResult = type_graphql_1.createUnionType({
+    name: 'WriteRoomPrivateMessageResult',
+    types: () => [RoomPrivateMessage, WriteRoomPrivateMessageFailureResult],
     resolveType: value => {
         switch (value.__tstype) {
             case exports.RoomPrivateMessageType:
                 return RoomPrivateMessage;
-            case exports.WritePrivateRoomMessageFailureResultType:
-                return WritePrivateRoomMessageFailureResult;
+            case exports.WriteRoomPrivateMessageFailureResultType:
+                return WriteRoomPrivateMessageFailureResult;
         }
     },
 });
-exports.WritePublicRoomMessageFailureResultType = 'WritePublicRoomMessageFailureResult';
-let WritePublicRoomMessageFailureResult = class WritePublicRoomMessageFailureResult {
+exports.WriteRoomPublicMessageFailureResultType = 'WriteRoomPublicMessageFailureResult';
+let WriteRoomPublicMessageFailureResult = class WriteRoomPublicMessageFailureResult {
 };
 __decorate([
-    type_graphql_1.Field(() => WritePublicRoomMessageFailureType_1.WritePublicRoomMessageFailureType),
+    type_graphql_1.Field(() => WriteRoomPublicMessageFailureType_1.WriteRoomPublicMessageFailureType),
     __metadata("design:type", String)
-], WritePublicRoomMessageFailureResult.prototype, "failureType", void 0);
-WritePublicRoomMessageFailureResult = __decorate([
+], WriteRoomPublicMessageFailureResult.prototype, "failureType", void 0);
+WriteRoomPublicMessageFailureResult = __decorate([
     type_graphql_1.ObjectType()
-], WritePublicRoomMessageFailureResult);
-exports.WritePublicRoomMessageFailureResult = WritePublicRoomMessageFailureResult;
-exports.WritePublicRoomMessageResult = type_graphql_1.createUnionType({
-    name: 'WritePublicRoomMessageResult',
-    types: () => [RoomPublicMessage, WritePublicRoomMessageFailureResult],
+], WriteRoomPublicMessageFailureResult);
+exports.WriteRoomPublicMessageFailureResult = WriteRoomPublicMessageFailureResult;
+exports.WriteRoomPublicMessageResult = type_graphql_1.createUnionType({
+    name: 'WriteRoomPublicMessageResult',
+    types: () => [RoomPublicMessage, WriteRoomPublicMessageFailureResult],
     resolveType: value => {
         switch (value.__tstype) {
             case exports.RoomPublicMessageType:
                 return RoomPublicMessage;
-            case exports.WritePublicRoomMessageFailureResultType:
-                return WritePublicRoomMessageFailureResult;
+            case exports.WriteRoomPublicMessageFailureResultType:
+                return WriteRoomPublicMessageFailureResult;
         }
     },
 });

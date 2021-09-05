@@ -66,7 +66,7 @@ const global_2 = require("../../entities/room/global");
 const mikro_orm_1 = require("../../entities/roomMessage/mikro-orm");
 const object_args_input_1 = require("./object+args+input");
 const graphql_2 = require("../../entities/roomMessage/graphql");
-const WritePublicRoomMessageFailureType_1 = require("../../../enums/WritePublicRoomMessageFailureType");
+const WriteRoomPublicMessageFailureType_1 = require("../../../enums/WriteRoomPublicMessageFailureType");
 const main_1 = require("../../../messageAnalyzer/main");
 const color_1 = __importDefault(require("color"));
 const GetRoomMessagesFailureType_1 = require("../../../enums/GetRoomMessagesFailureType");
@@ -75,7 +75,7 @@ const GetRoomLogFailureType_1 = require("../../../enums/GetRoomLogFailureType");
 const roomMessage_1 = require("../utils/roomMessage");
 const core_1 = require("@mikro-orm/core");
 const mikro_orm_2 = require("../../entities/user/mikro-orm");
-const WritePrivateRoomMessageFailureType_1 = require("../../../enums/WritePrivateRoomMessageFailureType");
+const WriteRoomPrivateMessageFailureType_1 = require("../../../enums/WriteRoomPrivateMessageFailureType");
 const WriteRoomSoundEffectFailureType_1 = require("../../../enums/WriteRoomSoundEffectFailureType");
 const MakeMessageNotSecretFailureType_1 = require("../../../enums/MakeMessageNotSecretFailureType");
 const DeleteMessageFailureType_1 = require("../../../enums/DeleteMessageFailureType");
@@ -347,15 +347,15 @@ const checkChannelKey = (channelKey, isSpectator) => {
         case '9':
         case '10':
             if (isSpectator) {
-                return WritePublicRoomMessageFailureType_1.WritePublicRoomMessageFailureType.NotAuthorized;
+                return WriteRoomPublicMessageFailureType_1.WriteRoomPublicMessageFailureType.NotAuthorized;
             }
             return null;
         case util_1.$free:
             return null;
         case util_1.$system:
-            return WritePublicRoomMessageFailureType_1.WritePublicRoomMessageFailureType.NotAuthorized;
+            return WriteRoomPublicMessageFailureType_1.WriteRoomPublicMessageFailureType.NotAuthorized;
         default:
-            return WritePublicRoomMessageFailureType_1.WritePublicRoomMessageFailureType.NotAllowedChannelKey;
+            return WriteRoomPublicMessageFailureType_1.WriteRoomPublicMessageFailureType.NotAllowedChannelKey;
     }
 };
 const analyzeTextAndSetToEntity = async (params) => {
@@ -1218,8 +1218,8 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             if (findResult == null) {
                 return result_1.Result.ok({
                     result: {
-                        __tstype: graphql_2.WritePublicRoomMessageFailureResultType,
-                        failureType: WritePublicRoomMessageFailureType_1.WritePublicRoomMessageFailureType.RoomNotFound,
+                        __tstype: graphql_2.WriteRoomPublicMessageFailureResultType,
+                        failureType: WriteRoomPublicMessageFailureType_1.WriteRoomPublicMessageFailureType.RoomNotFound,
                     },
                 });
             }
@@ -1227,8 +1227,8 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             if (me === undefined) {
                 return result_1.Result.ok({
                     result: {
-                        __tstype: graphql_2.WritePublicRoomMessageFailureResultType,
-                        failureType: WritePublicRoomMessageFailureType_1.WritePublicRoomMessageFailureType.NotParticipant,
+                        __tstype: graphql_2.WriteRoomPublicMessageFailureResultType,
+                        failureType: WriteRoomPublicMessageFailureType_1.WriteRoomPublicMessageFailureType.NotParticipant,
                     },
                 });
             }
@@ -1236,8 +1236,8 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             if (channelKeyFailureType != null) {
                 return result_1.Result.ok({
                     result: {
-                        __tstype: graphql_2.WritePublicRoomMessageFailureResultType,
-                        failureType: WritePublicRoomMessageFailureType_1.WritePublicRoomMessageFailureType.NotAuthorized,
+                        __tstype: graphql_2.WriteRoomPublicMessageFailureResultType,
+                        failureType: WriteRoomPublicMessageFailureType_1.WriteRoomPublicMessageFailureType.NotAuthorized,
                     },
                 });
             }
@@ -1315,8 +1315,8 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             if (findResult == null) {
                 return result_1.Result.ok({
                     result: {
-                        __tstype: graphql_2.WritePrivateRoomMessageFailureResultType,
-                        failureType: WritePrivateRoomMessageFailureType_1.WritePrivateRoomMessageFailureType.RoomNotFound,
+                        __tstype: graphql_2.WriteRoomPrivateMessageFailureResultType,
+                        failureType: WriteRoomPrivateMessageFailureType_1.WriteRoomPrivateMessageFailureType.RoomNotFound,
                     },
                 });
             }
@@ -1324,8 +1324,8 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             if (me === undefined) {
                 return result_1.Result.ok({
                     result: {
-                        __tstype: graphql_2.WritePrivateRoomMessageFailureResultType,
-                        failureType: WritePrivateRoomMessageFailureType_1.WritePrivateRoomMessageFailureType.NotParticipant,
+                        __tstype: graphql_2.WriteRoomPrivateMessageFailureResultType,
+                        failureType: WriteRoomPrivateMessageFailureType_1.WriteRoomPrivateMessageFailureType.NotParticipant,
                     },
                 });
             }
@@ -1355,8 +1355,8 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
                 if (user == null) {
                     return result_1.Result.ok({
                         result: {
-                            __tstype: graphql_2.WritePrivateRoomMessageFailureResultType,
-                            failureType: WritePrivateRoomMessageFailureType_1.WritePrivateRoomMessageFailureType.VisibleToIsInvalid,
+                            __tstype: graphql_2.WriteRoomPrivateMessageFailureResultType,
+                            failureType: WriteRoomPrivateMessageFailureType_1.WriteRoomPrivateMessageFailureType.VisibleToIsInvalid,
                         },
                     });
                 }
@@ -2102,7 +2102,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "operate", null);
 __decorate([
-    type_graphql_1.Mutation(() => graphql_2.WritePublicRoomMessageResult),
+    type_graphql_1.Mutation(() => graphql_2.WriteRoomPublicMessageResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
@@ -2112,7 +2112,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "writePublicMessage", null);
 __decorate([
-    type_graphql_1.Mutation(() => graphql_2.WritePrivateRoomMessageResult),
+    type_graphql_1.Mutation(() => graphql_2.WriteRoomPrivateMessageResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
