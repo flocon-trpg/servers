@@ -41,7 +41,6 @@ import {
     dualKeyRecordToDualKeyMap,
     keyNames,
 } from '@kizahasi/util';
-import _ from 'lodash';
 import {
     BoardTooltipState,
     create,
@@ -929,13 +928,14 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                 offsetY: e.evt.offsetY,
                                 pageX: e.evt.pageX,
                                 pageY: e.evt.pageY,
-                                characterPiecesOnCursor: _(characters.toArray())
-                                    .map(([characterKey, character]) => {
-                                        const found = dualKeyRecordToDualKeyMap<PieceState>(
+                                characterPiecesOnCursor: characters
+                                    .toArray()
+                                    .flatMap(([characterKey, character]) => {
+                                        return dualKeyRecordToDualKeyMap<PieceState>(
                                             character.pieces
                                         )
                                             .toArray()
-                                            .find(([pieceKey, piece]) => {
+                                            .filter(([, piece]) => {
                                                 if (
                                                     !compositeKeyEquals(
                                                         boardKeyToShow,
@@ -949,29 +949,27 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                                     state: piece,
                                                     cursorPosition: stateOffset,
                                                 });
+                                            })
+                                            .map(([pieceKey, piece]) => {
+                                                return {
+                                                    characterKey,
+                                                    character,
+                                                    pieceKey: {
+                                                        createdBy: pieceKey.first,
+                                                        id: pieceKey.second,
+                                                    },
+                                                    piece,
+                                                };
                                             });
-                                        if (found === undefined) {
-                                            return null;
-                                        }
-                                        return {
-                                            characterKey,
-                                            character,
-                                            pieceKey: {
-                                                createdBy: found[0].first,
-                                                id: found[0].second,
-                                            },
-                                            piece: found[1],
-                                        };
-                                    })
-                                    .compact()
-                                    .value(),
-                                tachiesOnCursor: _(characters.toArray())
-                                    .map(([characterKey, character]) => {
-                                        const found = dualKeyRecordToDualKeyMap<BoardLocationState>(
+                                    }),
+                                tachiesOnCursor: characters
+                                    .toArray()
+                                    .flatMap(([characterKey, character]) => {
+                                        return dualKeyRecordToDualKeyMap<BoardLocationState>(
                                             character.tachieLocations
                                         )
                                             .toArray()
-                                            .find(([, tachie]) => {
+                                            .filter(([, tachie]) => {
                                                 if (
                                                     !compositeKeyEquals(
                                                         boardKeyToShow,
@@ -984,22 +982,19 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                                     state: tachie,
                                                     cursorPosition: stateOffset,
                                                 });
+                                            })
+                                            .map(([tachieLocationKey, tachieLocation]) => {
+                                                return {
+                                                    characterKey,
+                                                    character,
+                                                    tachieLocationKey: {
+                                                        createdBy: tachieLocationKey.first,
+                                                        id: tachieLocationKey.second,
+                                                    },
+                                                    tachieLocation,
+                                                };
                                             });
-                                        if (found === undefined) {
-                                            return null;
-                                        }
-                                        return {
-                                            characterKey,
-                                            character,
-                                            tachieLocationKey: {
-                                                createdBy: found[0].first,
-                                                id: found[0].second,
-                                            },
-                                            tachieLocation: found[1],
-                                        };
-                                    })
-                                    .compact()
-                                    .value(),
+                                    }),
                                 imagePieceValuesOnCursor: (imagePieces ?? [])
                                     .filter(pieceValueElement => {
                                         if (pieceValueElement.piece == null) {
