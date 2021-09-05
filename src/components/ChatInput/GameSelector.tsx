@@ -4,7 +4,7 @@ import * as Icon from '@ant-design/icons';
 import { Select } from 'antd';
 import { ChatPalettePanelConfig } from '../../states/ChatPalettePanelConfig';
 import { MessagePanelConfig } from '../../states/MessagePanelConfig';
-import { useListAvailableGameSystemsQuery } from '../../generated/graphql';
+import { useGetAvailableGameSystemsQuery } from '../../generated/graphql';
 import { useDispatch } from 'react-redux';
 import { apolloError } from '../../hooks/useRoomMessages';
 import { roomModule } from '../../modules/roomModule';
@@ -32,7 +32,7 @@ export const GameSelector: React.FC<Props> = ({
 }: Props) => {
     const dispatch = useDispatch();
 
-    const availableGameSystems = useListAvailableGameSystemsQuery();
+    const availableGameSystems = useGetAvailableGameSystemsQuery();
     React.useEffect(() => {
         if (availableGameSystems.error == null) {
             return;
