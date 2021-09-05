@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ListAvailableGameSystemsResult = exports.AvailableGameSystem = void 0;
+exports.GetAvailableGameSystemsResult = exports.AvailableGameSystem = void 0;
 const type_graphql_1 = require("type-graphql");
 let AvailableGameSystem = class AvailableGameSystem {
 };
@@ -29,13 +29,13 @@ AvailableGameSystem = __decorate([
     type_graphql_1.ObjectType()
 ], AvailableGameSystem);
 exports.AvailableGameSystem = AvailableGameSystem;
-let ListAvailableGameSystemsResult = class ListAvailableGameSystemsResult {
+let GetAvailableGameSystemsResult = class GetAvailableGameSystemsResult {
 };
 __decorate([
     type_graphql_1.Field(() => [AvailableGameSystem]),
     __metadata("design:type", Array)
-], ListAvailableGameSystemsResult.prototype, "value", void 0);
-ListAvailableGameSystemsResult = __decorate([
+], GetAvailableGameSystemsResult.prototype, "value", void 0);
+GetAvailableGameSystemsResult = __decorate([
     type_graphql_1.ObjectType()
-], ListAvailableGameSystemsResult);
-exports.ListAvailableGameSystemsResult = ListAvailableGameSystemsResult;
+], GetAvailableGameSystemsResult);
+exports.GetAvailableGameSystemsResult = GetAvailableGameSystemsResult;

@@ -25,16 +25,16 @@ import { User } from '../entities/user/mikro-orm';
 import { Pong } from '../entities/pong/graphql';
 import { PONG } from '../utils/Topics';
 import { EntryToServerResult } from '../results/EntryToServerResult';
-import { ListAvailableGameSystemsResult } from '../results/ListAvailableGameSystemsResult';
-import { listAvailableGameSystems } from '../../messageAnalyzer/main';
+import { GetAvailableGameSystemsResult } from '../results/GetAvailableGameSystemsResult';
+import { listAvailableGameSystems as getAvailableGameSystems } from '../../messageAnalyzer/main';
 import { ServerInfo } from '../entities/serverInfo/graphql';
 import VERSION from '../../VERSION';
 import { PrereleaseType } from '../../enums/PrereleaseType';
 import { alpha, beta, DualKeyMap, isStrIndex10, rc } from '@kizahasi/util';
 import { BaasType } from '../../enums/BaasType';
-import { ListFilesResult } from '../results/ListFilesResult';
+import { GetFilesResult } from '../results/GetFilesResult';
 import { ENTRY } from '../../roles';
-import { EditFileTagsInput, FileTag as FileTagGraphQL, ListFilesInput } from './object+args+input';
+import { EditFileTagsInput, FileTag as FileTagGraphQL, GetFilesInput } from './object+args+input';
 import { File } from '../entities/file/mikro-orm';
 import { QueryOrder, Reference } from '@mikro-orm/core';
 import { FileTag as FileTagEntity } from '../entities/fileTag/mikro-orm';
@@ -46,19 +46,19 @@ export type PongPayload = {
 
 @Resolver()
 export class MainResolver {
-    @Query(() => ListAvailableGameSystemsResult)
-    public async listAvailableGameSystems(): Promise<ListAvailableGameSystemsResult> {
+    @Query(() => GetAvailableGameSystemsResult)
+    public async getAvailableGameSystems(): Promise<GetAvailableGameSystemsResult> {
         return {
-            value: listAvailableGameSystems(),
+            value: getAvailableGameSystems(),
         };
     }
 
-    @Query(() => ListFilesResult)
+    @Query(() => GetFilesResult)
     @Authorized(ENTRY)
-    public async listFiles(
-        @Arg('input') input: ListFilesInput,
+    public async getFiles(
+        @Arg('input') input: GetFilesInput,
         @Ctx() context: ResolverContext
-    ): Promise<ListFilesResult> {
+    ): Promise<GetFilesResult> {
         const user = ensureAuthorizedUser(context);
         // TODO: tagによるfilter
         const files = await context.em.find(

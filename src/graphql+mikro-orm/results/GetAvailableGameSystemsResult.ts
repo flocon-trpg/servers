@@ -13,7 +13,7 @@ export class AvailableGameSystem {
 }
 
 @ObjectType()
-export class ListAvailableGameSystemsResult {
+export class GetAvailableGameSystemsResult {
     @Field(() => [AvailableGameSystem])
     public value!: AvailableGameSystem[];
 }

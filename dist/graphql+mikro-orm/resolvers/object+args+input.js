@@ -9,20 +9,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.FileTag = exports.EditFileTagsInput = exports.EditFileTagActionInput = exports.ListFilesInput = void 0;
+exports.FileTag = exports.EditFileTagsInput = exports.EditFileTagActionInput = exports.GetFilesInput = void 0;
 const type_graphql_1 = require("type-graphql");
-let ListFilesInput = class ListFilesInput {
+let GetFilesInput = class GetFilesInput {
 };
 __decorate([
     type_graphql_1.Field(() => [String], {
         description: 'FileTagのidを指定することで、指定したタグが付いているファイルのみを抽出して表示する。例えばidがx,yの3つのタグが付いているファイルは、[]や[x]や[x,y]と指定した場合にマッチするが、[x,y,z]と指定された場合は除外される。',
     }),
     __metadata("design:type", Array)
-], ListFilesInput.prototype, "fileTagIds", void 0);
-ListFilesInput = __decorate([
+], GetFilesInput.prototype, "fileTagIds", void 0);
+GetFilesInput = __decorate([
     type_graphql_1.InputType()
-], ListFilesInput);
-exports.ListFilesInput = ListFilesInput;
+], GetFilesInput);
+exports.GetFilesInput = GetFilesInput;
 let EditFileTagActionInput = class EditFileTagActionInput {
 };
 __decorate([

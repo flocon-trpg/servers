@@ -25,26 +25,26 @@ const mikro_orm_1 = require("../entities/user/mikro-orm");
 const graphql_1 = require("../entities/pong/graphql");
 const Topics_1 = require("../utils/Topics");
 const EntryToServerResult_1 = require("../results/EntryToServerResult");
-const ListAvailableGameSystemsResult_1 = require("../results/ListAvailableGameSystemsResult");
+const GetAvailableGameSystemsResult_1 = require("../results/GetAvailableGameSystemsResult");
 const main_1 = require("../../messageAnalyzer/main");
 const graphql_2 = require("../entities/serverInfo/graphql");
 const VERSION_1 = __importDefault(require("../../VERSION"));
 const PrereleaseType_1 = require("../../enums/PrereleaseType");
 const util_1 = require("@kizahasi/util");
 const BaasType_1 = require("../../enums/BaasType");
-const ListFilesResult_1 = require("../results/ListFilesResult");
+const GetFilesResult_1 = require("../results/GetFilesResult");
 const roles_1 = require("../../roles");
 const object_args_input_1 = require("./object+args+input");
 const mikro_orm_2 = require("../entities/file/mikro-orm");
 const core_1 = require("@mikro-orm/core");
 const mikro_orm_3 = require("../entities/fileTag/mikro-orm");
 let MainResolver = class MainResolver {
-    async listAvailableGameSystems() {
+    async getAvailableGameSystems() {
         return {
             value: main_1.listAvailableGameSystems(),
         };
     }
-    async listFiles(input, context) {
+    async getFiles(input, context) {
         const user = helpers_1.ensureAuthorizedUser(context);
         const files = await context.em.find(mikro_orm_2.File, { createdBy: { userUid: user.userUid } }, { orderBy: { screenname: core_1.QueryOrder.ASC } });
         return {
@@ -213,20 +213,20 @@ let MainResolver = class MainResolver {
     }
 };
 __decorate([
-    type_graphql_1.Query(() => ListAvailableGameSystemsResult_1.ListAvailableGameSystemsResult),
+    type_graphql_1.Query(() => GetAvailableGameSystemsResult_1.GetAvailableGameSystemsResult),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
-], MainResolver.prototype, "listAvailableGameSystems", null);
+], MainResolver.prototype, "getAvailableGameSystems", null);
 __decorate([
-    type_graphql_1.Query(() => ListFilesResult_1.ListFilesResult),
+    type_graphql_1.Query(() => GetFilesResult_1.GetFilesResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
     __param(0, type_graphql_1.Arg('input')),
     __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [object_args_input_1.ListFilesInput, Object]),
+    __metadata("design:paramtypes", [object_args_input_1.GetFilesInput, Object]),
     __metadata("design:returntype", Promise)
-], MainResolver.prototype, "listFiles", null);
+], MainResolver.prototype, "getFiles", null);
 __decorate([
     type_graphql_1.Mutation(() => Boolean),
     type_graphql_1.Authorized(roles_1.ENTRY),

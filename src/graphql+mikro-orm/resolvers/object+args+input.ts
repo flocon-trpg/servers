@@ -1,7 +1,7 @@
 import { Field, InputType, ObjectType } from 'type-graphql';
 
 @InputType()
-export class ListFilesInput {
+export class GetFilesInput {
     @Field(() => [String], {
         description:
             'FileTagのidを指定することで、指定したタグが付いているファイルのみを抽出して表示する。例えばidがx,yの3つのタグが付いているファイルは、[]や[x]や[x,y]と指定した場合にマッチするが、[x,y,z]と指定された場合は除外される。',

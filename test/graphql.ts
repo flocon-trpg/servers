@@ -163,6 +163,20 @@ export type FileTag = {
     name: Scalars['String'];
 };
 
+export type GetAvailableGameSystemsResult = {
+    __typename?: 'GetAvailableGameSystemsResult';
+    value: Array<AvailableGameSystem>;
+};
+
+export type GetFilesInput = {
+    fileTagIds: Array<Scalars['String']>;
+};
+
+export type GetFilesResult = {
+    __typename?: 'GetFilesResult';
+    files: Array<FileItem>;
+};
+
 export type GetJoinedRoomResult = {
     __typename?: 'GetJoinedRoomResult';
     role: ParticipantRole;
@@ -270,20 +284,6 @@ export enum LeaveRoomFailureType {
 export type LeaveRoomResult = {
     __typename?: 'LeaveRoomResult';
     failureType?: Maybe<LeaveRoomFailureType>;
-};
-
-export type ListAvailableGameSystemsResult = {
-    __typename?: 'ListAvailableGameSystemsResult';
-    value: Array<AvailableGameSystem>;
-};
-
-export type ListFilesInput = {
-    fileTagIds: Array<Scalars['String']>;
-};
-
-export type ListFilesResult = {
-    __typename?: 'ListFilesResult';
-    files: Array<FileItem>;
 };
 
 export enum MakeMessageNotSecretFailureType {
@@ -525,6 +525,8 @@ export type PromoteResult = {
 
 export type Query = {
     __typename?: 'Query';
+    getAvailableGameSystems: GetAvailableGameSystemsResult;
+    getFiles: GetFilesResult;
     getLog: GetRoomLogResult;
     getMessages: GetRoomMessagesResult;
     getRoom: GetRoomResult;
@@ -532,9 +534,11 @@ export type Query = {
     getRoomsList: GetRoomsListResult;
     getServerInfo: ServerInfo;
     isEntry: Scalars['Boolean'];
-    listAvailableGameSystems: ListAvailableGameSystemsResult;
-    listFiles: ListFilesResult;
     requiresPhraseToJoinAsPlayer: RequiresPhraseResult;
+};
+
+export type QueryGetFilesArgs = {
+    input: GetFilesInput;
 };
 
 export type QueryGetLogArgs = {
@@ -551,10 +555,6 @@ export type QueryGetRoomArgs = {
 
 export type QueryGetRoomConnectionsArgs = {
     roomId: Scalars['String'];
-};
-
-export type QueryListFilesArgs = {
-    input: ListFilesInput;
 };
 
 export type QueryRequiresPhraseToJoinAsPlayerArgs = {
@@ -1202,6 +1202,38 @@ export type SemVerFragment = {
     prerelease?: Maybe<{ __typename?: 'Prerelease'; type: PrereleaseType; version: number }>;
 };
 
+export type GetAvailableGameSystemsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetAvailableGameSystemsQuery = {
+    __typename?: 'Query';
+    result: {
+        __typename?: 'GetAvailableGameSystemsResult';
+        value: Array<{
+            __typename?: 'AvailableGameSystem';
+            id: string;
+            name: string;
+            sortKey: string;
+        }>;
+    };
+};
+
+export type GetFilesQueryVariables = Exact<{
+    input: GetFilesInput;
+}>;
+
+export type GetFilesQuery = {
+    __typename?: 'Query';
+    result: {
+        __typename?: 'GetFilesResult';
+        files: Array<{
+            __typename?: 'FileItem';
+            filename: string;
+            screenname: string;
+            createdBy: string;
+        }>;
+    };
+};
+
 export type GetRoomQueryVariables = Exact<{
     id: Scalars['String'];
 }>;
@@ -1525,38 +1557,6 @@ export type GetServerInfoQuery = {
 export type IsEntryQueryVariables = Exact<{ [key: string]: never }>;
 
 export type IsEntryQuery = { __typename?: 'Query'; result: boolean };
-
-export type ListAvailableGameSystemsQueryVariables = Exact<{ [key: string]: never }>;
-
-export type ListAvailableGameSystemsQuery = {
-    __typename?: 'Query';
-    result: {
-        __typename?: 'ListAvailableGameSystemsResult';
-        value: Array<{
-            __typename?: 'AvailableGameSystem';
-            id: string;
-            name: string;
-            sortKey: string;
-        }>;
-    };
-};
-
-export type ListFilesQueryVariables = Exact<{
-    input: ListFilesInput;
-}>;
-
-export type ListFilesQuery = {
-    __typename?: 'Query';
-    result: {
-        __typename?: 'ListFilesResult';
-        files: Array<{
-            __typename?: 'FileItem';
-            filename: string;
-            screenname: string;
-            createdBy: string;
-        }>;
-    };
-};
 
 export type RequiresPhraseToJoinAsPlayerQueryVariables = Exact<{
     roomId: Scalars['String'];
@@ -2394,6 +2394,109 @@ export const SemVerFragmentDoc = gql`
         }
     }
 `;
+export const GetAvailableGameSystemsDocument = gql`
+    query GetAvailableGameSystems {
+        result: getAvailableGameSystems {
+            value {
+                id
+                name
+                sortKey
+            }
+        }
+    }
+`;
+
+/**
+ * __useGetAvailableGameSystemsQuery__
+ *
+ * To run a query within a React component, call `useGetAvailableGameSystemsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAvailableGameSystemsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAvailableGameSystemsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetAvailableGameSystemsQuery(
+    baseOptions?: Apollo.QueryHookOptions<
+        GetAvailableGameSystemsQuery,
+        GetAvailableGameSystemsQueryVariables
+    >
+) {
+    const options = { ...defaultOptions, ...baseOptions };
+    return Apollo.useQuery<GetAvailableGameSystemsQuery, GetAvailableGameSystemsQueryVariables>(
+        GetAvailableGameSystemsDocument,
+        options
+    );
+}
+export function useGetAvailableGameSystemsLazyQuery(
+    baseOptions?: Apollo.LazyQueryHookOptions<
+        GetAvailableGameSystemsQuery,
+        GetAvailableGameSystemsQueryVariables
+    >
+) {
+    const options = { ...defaultOptions, ...baseOptions };
+    return Apollo.useLazyQuery<GetAvailableGameSystemsQuery, GetAvailableGameSystemsQueryVariables>(
+        GetAvailableGameSystemsDocument,
+        options
+    );
+}
+export type GetAvailableGameSystemsQueryHookResult = ReturnType<
+    typeof useGetAvailableGameSystemsQuery
+>;
+export type GetAvailableGameSystemsLazyQueryHookResult = ReturnType<
+    typeof useGetAvailableGameSystemsLazyQuery
+>;
+export type GetAvailableGameSystemsQueryResult = Apollo.QueryResult<
+    GetAvailableGameSystemsQuery,
+    GetAvailableGameSystemsQueryVariables
+>;
+export const GetFilesDocument = gql`
+    query GetFiles($input: GetFilesInput!) {
+        result: getFiles(input: $input) {
+            files {
+                ...FileItem
+            }
+        }
+    }
+    ${FileItemFragmentDoc}
+`;
+
+/**
+ * __useGetFilesQuery__
+ *
+ * To run a query within a React component, call `useGetFilesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetFilesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetFilesQuery({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useGetFilesQuery(
+    baseOptions: Apollo.QueryHookOptions<GetFilesQuery, GetFilesQueryVariables>
+) {
+    const options = { ...defaultOptions, ...baseOptions };
+    return Apollo.useQuery<GetFilesQuery, GetFilesQueryVariables>(GetFilesDocument, options);
+}
+export function useGetFilesLazyQuery(
+    baseOptions?: Apollo.LazyQueryHookOptions<GetFilesQuery, GetFilesQueryVariables>
+) {
+    const options = { ...defaultOptions, ...baseOptions };
+    return Apollo.useLazyQuery<GetFilesQuery, GetFilesQueryVariables>(GetFilesDocument, options);
+}
+export type GetFilesQueryHookResult = ReturnType<typeof useGetFilesQuery>;
+export type GetFilesLazyQueryHookResult = ReturnType<typeof useGetFilesLazyQuery>;
+export type GetFilesQueryResult = Apollo.QueryResult<GetFilesQuery, GetFilesQueryVariables>;
 export const GetRoomDocument = gql`
     query GetRoom($id: String!) {
         result: getRoom(id: $id) {
@@ -2783,109 +2886,6 @@ export function useIsEntryLazyQuery(
 export type IsEntryQueryHookResult = ReturnType<typeof useIsEntryQuery>;
 export type IsEntryLazyQueryHookResult = ReturnType<typeof useIsEntryLazyQuery>;
 export type IsEntryQueryResult = Apollo.QueryResult<IsEntryQuery, IsEntryQueryVariables>;
-export const ListAvailableGameSystemsDocument = gql`
-    query ListAvailableGameSystems {
-        result: listAvailableGameSystems {
-            value {
-                id
-                name
-                sortKey
-            }
-        }
-    }
-`;
-
-/**
- * __useListAvailableGameSystemsQuery__
- *
- * To run a query within a React component, call `useListAvailableGameSystemsQuery` and pass it any options that fit your needs.
- * When your component renders, `useListAvailableGameSystemsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useListAvailableGameSystemsQuery({
- *   variables: {
- *   },
- * });
- */
-export function useListAvailableGameSystemsQuery(
-    baseOptions?: Apollo.QueryHookOptions<
-        ListAvailableGameSystemsQuery,
-        ListAvailableGameSystemsQueryVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useQuery<ListAvailableGameSystemsQuery, ListAvailableGameSystemsQueryVariables>(
-        ListAvailableGameSystemsDocument,
-        options
-    );
-}
-export function useListAvailableGameSystemsLazyQuery(
-    baseOptions?: Apollo.LazyQueryHookOptions<
-        ListAvailableGameSystemsQuery,
-        ListAvailableGameSystemsQueryVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useLazyQuery<
-        ListAvailableGameSystemsQuery,
-        ListAvailableGameSystemsQueryVariables
-    >(ListAvailableGameSystemsDocument, options);
-}
-export type ListAvailableGameSystemsQueryHookResult = ReturnType<
-    typeof useListAvailableGameSystemsQuery
->;
-export type ListAvailableGameSystemsLazyQueryHookResult = ReturnType<
-    typeof useListAvailableGameSystemsLazyQuery
->;
-export type ListAvailableGameSystemsQueryResult = Apollo.QueryResult<
-    ListAvailableGameSystemsQuery,
-    ListAvailableGameSystemsQueryVariables
->;
-export const ListFilesDocument = gql`
-    query ListFiles($input: ListFilesInput!) {
-        result: listFiles(input: $input) {
-            files {
-                ...FileItem
-            }
-        }
-    }
-    ${FileItemFragmentDoc}
-`;
-
-/**
- * __useListFilesQuery__
- *
- * To run a query within a React component, call `useListFilesQuery` and pass it any options that fit your needs.
- * When your component renders, `useListFilesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useListFilesQuery({
- *   variables: {
- *      input: // value for 'input'
- *   },
- * });
- */
-export function useListFilesQuery(
-    baseOptions: Apollo.QueryHookOptions<ListFilesQuery, ListFilesQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useQuery<ListFilesQuery, ListFilesQueryVariables>(ListFilesDocument, options);
-}
-export function useListFilesLazyQuery(
-    baseOptions?: Apollo.LazyQueryHookOptions<ListFilesQuery, ListFilesQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useLazyQuery<ListFilesQuery, ListFilesQueryVariables>(ListFilesDocument, options);
-}
-export type ListFilesQueryHookResult = ReturnType<typeof useListFilesQuery>;
-export type ListFilesLazyQueryHookResult = ReturnType<typeof useListFilesLazyQuery>;
-export type ListFilesQueryResult = Apollo.QueryResult<ListFilesQuery, ListFilesQueryVariables>;
 export const RequiresPhraseToJoinAsPlayerDocument = gql`
     query RequiresPhraseToJoinAsPlayer($roomId: String!) {
         result: requiresPhraseToJoinAsPlayer(roomId: $roomId) {

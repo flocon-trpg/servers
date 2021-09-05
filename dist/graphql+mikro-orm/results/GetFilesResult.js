@@ -9,16 +9,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ListFilesResult = void 0;
+exports.GetFilesResult = void 0;
 const type_graphql_1 = require("type-graphql");
 const graphql_1 = require("../entities/file/graphql");
-let ListFilesResult = class ListFilesResult {
+let GetFilesResult = class GetFilesResult {
 };
 __decorate([
     type_graphql_1.Field(() => [graphql_1.FileItem]),
     __metadata("design:type", Array)
-], ListFilesResult.prototype, "files", void 0);
-ListFilesResult = __decorate([
+], GetFilesResult.prototype, "files", void 0);
+GetFilesResult = __decorate([
     type_graphql_1.ObjectType()
-], ListFilesResult);
-exports.ListFilesResult = ListFilesResult;
+], GetFilesResult);
+exports.GetFilesResult = GetFilesResult;
