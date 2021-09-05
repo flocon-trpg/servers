@@ -124,14 +124,17 @@ type SelectedPieceKey =
     | {
           type: typeof character;
           characterKey: CompositeKey;
+          pieceKey: CompositeKey;
       }
     | {
           type: typeof tachie;
           characterKey: CompositeKey;
+          tachieLocationKey: CompositeKey;
       }
     | {
           type: typeof dicePieceValue | typeof numberPieceValue;
           stateId: string;
+          pieceKey: CompositeKey;
       }
     | {
           type: typeof imagePiece;
@@ -322,17 +325,18 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     <ImagePiece
                         {...Piece.getPosition({ ...board, state: piece })}
                         opacity={1}
-                        key={keyNames(characterKey)}
+                        key={keyNames(characterKey, pieceKey)}
                         filePath={character.image}
                         draggable
                         listening
                         isSelected={
                             selectedPieceKey?.type === 'character' &&
-                            compositeKeyEquals(selectedPieceKey.characterKey, characterKey)
+                            compositeKeyEquals(selectedPieceKey.characterKey, characterKey) &&
+                            compositeKeyEquals(selectedPieceKey.pieceKey, pieceKey)
                         }
                         onClick={() => {
                             unsetPopoverEditor();
-                            setSelectedPieceKey({ type: 'character', characterKey });
+                            setSelectedPieceKey({ type: 'character', characterKey, pieceKey });
                         }}
                         onDblClick={e => {
                             if (onPopoverEditorRef.current == null) {
@@ -384,7 +388,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 }
                 return (
                     <ImagePiece
-                        key={keyNames(characterKey)}
+                        key={keyNames(characterKey, tachieLocationKey)}
                         opacity={0.75 /* TODO: opacityの値が適当 */}
                         message={lastPublicMessage}
                         messageFilter={msg => {
@@ -403,11 +407,19 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         listening
                         isSelected={
                             selectedPieceKey?.type === 'tachie' &&
-                            compositeKeyEquals(selectedPieceKey.characterKey, characterKey)
+                            compositeKeyEquals(selectedPieceKey.characterKey, characterKey) &&
+                            compositeKeyEquals(
+                                selectedPieceKey.tachieLocationKey,
+                                tachieLocationKey
+                            )
                         }
                         onClick={() => {
                             unsetPopoverEditor();
-                            setSelectedPieceKey({ type: 'tachie', characterKey });
+                            setSelectedPieceKey({
+                                type: 'tachie',
+                                characterKey,
+                                tachieLocationKey,
+                            });
                         }}
                         onDblClick={e => {
                             if (onPopoverEditorRef.current == null) {
@@ -528,7 +540,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             return (
                 <DiceOrNumberPiece
                     {...Piece.getPosition({ ...board, state: piece })}
-                    key={keyNames(element.characterKey, element.valueId)}
+                    key={keyNames(element.characterKey, element.valueId, pieceKey)}
                     opacity={1}
                     state={{ type: dicePiece, state: element.value }}
                     createdByMe={element.characterKey.createdBy === myUserUid}
@@ -536,13 +548,15 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     listening
                     isSelected={
                         selectedPieceKey?.type === 'dicePieceValue' &&
-                        selectedPieceKey.stateId === element.valueId
+                        selectedPieceKey.stateId === element.valueId &&
+                        compositeKeyEquals(selectedPieceKey.pieceKey, pieceKey)
                     }
                     onClick={() => {
                         unsetPopoverEditor();
                         setSelectedPieceKey({
                             type: 'dicePieceValue',
                             stateId: element.valueId,
+                            pieceKey,
                         });
                     }}
                     onDblClick={e => {
@@ -595,7 +609,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 return (
                     <DiceOrNumberPiece
                         {...Piece.getPosition({ ...board, state: piece })}
-                        key={keyNames(element.characterKey, element.valueId)}
+                        key={keyNames(element.characterKey, element.valueId, pieceKey)}
                         opacity={1}
                         state={{ type: numberPiece, state: element.value }}
                         createdByMe={element.characterKey.createdBy === myUserUid}
@@ -603,13 +617,15 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         listening
                         isSelected={
                             selectedPieceKey?.type === 'numberPieceValue' &&
-                            selectedPieceKey.stateId === element.valueId
+                            selectedPieceKey.stateId === element.valueId &&
+                            compositeKeyEquals(selectedPieceKey.pieceKey, pieceKey)
                         }
                         onClick={() => {
                             unsetPopoverEditor();
                             setSelectedPieceKey({
                                 type: 'numberPieceValue',
                                 stateId: element.valueId,
+                                pieceKey,
                             });
                         }}
                         onDblClick={e => {
@@ -919,7 +935,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                             character.pieces
                                         )
                                             .toArray()
-                                            .find(([, piece]) => {
+                                            .find(([pieceKey, piece]) => {
                                                 if (
                                                     !compositeKeyEquals(
                                                         boardKeyToShow,
@@ -937,7 +953,15 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                         if (found === undefined) {
                                             return null;
                                         }
-                                        return { characterKey, character, piece: found[1] };
+                                        return {
+                                            characterKey,
+                                            character,
+                                            pieceKey: {
+                                                createdBy: found[0].first,
+                                                id: found[0].second,
+                                            },
+                                            piece: found[1],
+                                        };
                                     })
                                     .compact()
                                     .value(),
@@ -967,6 +991,10 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                         return {
                                             characterKey,
                                             character,
+                                            tachieLocationKey: {
+                                                createdBy: found[0].first,
+                                                id: found[0].second,
+                                            },
                                             tachieLocation: found[1],
                                         };
                                     })

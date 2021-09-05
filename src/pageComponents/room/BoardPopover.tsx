@@ -48,6 +48,7 @@ import { DicePieceValue } from '../../utils/dicePieceValue';
 import { NumberPieceValue } from '../../utils/numberPieceValue';
 import { Piece } from '../../utils/piece';
 import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
+import { simpleId } from '../../utils/generators';
 
 /* absolute positionで表示するときにBoardの子として表示させると、Boardウィンドウから要素がはみ出ることができないため、ウィンドウ右端に近いところで要素を表示させるときに不便なことがある。そのため、ページ全体の子として持たせるようにしている。 */
 
@@ -339,7 +340,7 @@ namespace ContextMenuModule {
         }
         return (
             <>
-                {characterPiecesOnCursor.map(({ characterKey, character }) => (
+                {characterPiecesOnCursor.map(({ characterKey, character,pieceKey }) => (
                     // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が他にもあるため、キーを互いに異なるものにするように文字列を付加している。
                     <Menu.SubMenu
                         key={keyNames(characterKey) + '@selected-piece'}
@@ -367,8 +368,8 @@ namespace ContextMenuModule {
                                     characterUpdateOperation(characterKey, {
                                         $v: 1,
                                         pieces: {
-                                            [boardKey.createdBy]: {
-                                                [boardKey.id]: {
+                                            [pieceKey.createdBy]: {
+                                                [pieceKey.id]: {
                                                     type: replace,
                                                     replace: { newValue: undefined },
                                                 },
@@ -408,7 +409,7 @@ namespace ContextMenuModule {
         }
         return (
             <>
-                {tachiesOnCursor.map(({ characterKey, character }) => (
+                {tachiesOnCursor.map(({ characterKey, character, tachieLocationKey }) => (
                     // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が他にもあるため、キーを互いに異なるものにするように文字列を付加している。
                     <Menu.SubMenu
                         key={keyNames(characterKey) + '@selected-tachie'}
@@ -436,8 +437,8 @@ namespace ContextMenuModule {
                                     characterUpdateOperation(characterKey, {
                                         $v: 1,
                                         tachieLocations: {
-                                            [boardKey.createdBy]: {
-                                                [boardKey.id]: {
+                                            [tachieLocationKey.createdBy]: {
+                                                [tachieLocationKey.id]: {
                                                     type: replace,
                                                     replace: { newValue: undefined },
                                                 },
@@ -787,41 +788,24 @@ namespace ContextMenuModule {
     type BasicMenuProps = {
         contextMenuState: ContextMenuState;
         onContextMenuClear: () => void;
-        boardKey: CompositeKey;
-        boardConfig: BoardConfig;
         dispatch: ReturnType<typeof useDispatch>;
         operate: ReturnType<typeof useOperate>;
         characters: ReadonlyStateMap<CharacterState>;
         board: BoardState;
+        myUserUid: string;
     };
 
     const basicMenu = ({
         contextMenuState,
         onContextMenuClear,
-        boardKey,
-        boardConfig,
         operate,
         dispatch,
         characters,
         board,
+        myUserUid,
     }: BasicMenuProps): JSX.Element | null => {
-        const pieceExists = (character: CharacterState) =>
-            dualKeyRecordToDualKeyMap(character.pieces)
-                .toArray()
-                .some(
-                    ([pieceBoardKey]) =>
-                        boardKey.id === pieceBoardKey.second &&
-                        boardKey.createdBy === pieceBoardKey.first
-                );
-        const tachieExists = (character: CharacterState) =>
-            dualKeyRecordToDualKeyMap(character.tachieLocations)
-                .toArray()
-                .some(
-                    ([pieceBoardKey]) =>
-                        boardKey.id === pieceBoardKey.second &&
-                        boardKey.createdBy === pieceBoardKey.first
-                );
-
+        const boardKey = contextMenuState.boardKey;
+        const boardConfig = contextMenuState.boardConfig;
         const { x, y } = toBoardPosition({
             konvaOffset: { x: contextMenuState.offsetX, y: contextMenuState.offsetY },
             boardConfig,
@@ -871,64 +855,17 @@ namespace ContextMenuModule {
         const pieceMenus = [...characters.toArray()].map(([characterKey, character]) => {
             return (
                 <Menu.SubMenu key={keyNames(characterKey) + '@piece'} title={character.name}>
-                    <Menu.SubMenu title="追加" disabled={pieceExists(character)}>
-                        <Menu.Item
-                            onClick={() => {
-                                operate(
-                                    characterUpdateOperation(characterKey, {
-                                        $v: 1,
-                                        pieces: {
-                                            [boardKey.createdBy]: {
-                                                [boardKey.id]: {
-                                                    type: replace,
-                                                    replace: {
-                                                        newValue: pieceLocationWhichIsCellMode,
-                                                    },
-                                                },
-                                            },
-                                        },
-                                    })
-                                );
-                                onContextMenuClear();
-                            }}
-                        >
-                            セルにスナップする
-                        </Menu.Item>
-                        <Menu.Item
-                            onClick={() => {
-                                operate(
-                                    characterUpdateOperation(characterKey, {
-                                        $v: 1,
-                                        pieces: {
-                                            [boardKey.createdBy]: {
-                                                [boardKey.id]: {
-                                                    type: replace,
-                                                    replace: {
-                                                        newValue: pieceLocationWhichIsNotCellMode,
-                                                    },
-                                                },
-                                            },
-                                        },
-                                    })
-                                );
-                                onContextMenuClear();
-                            }}
-                        >
-                            セルにスナップしない
-                        </Menu.Item>
-                    </Menu.SubMenu>
                     <Menu.Item
-                        disabled={!pieceExists(character)}
                         onClick={() => {
                             operate(
                                 characterUpdateOperation(characterKey, {
                                     $v: 1,
                                     pieces: {
-                                        [boardKey.createdBy]: {
-                                            [boardKey.id]: {
+                                        [myUserUid]: {
+                                            [simpleId()]: {
                                                 type: replace,
                                                 replace: {
-                                                    newValue: undefined,
+                                                    newValue: pieceLocationWhichIsCellMode,
                                                 },
                                             },
                                         },
@@ -938,7 +875,29 @@ namespace ContextMenuModule {
                             onContextMenuClear();
                         }}
                     >
-                        削除
+                        セルにスナップする
+                    </Menu.Item>
+                    <Menu.Item
+                        onClick={() => {
+                            operate(
+                                characterUpdateOperation(characterKey, {
+                                    $v: 1,
+                                    pieces: {
+                                        [myUserUid]: {
+                                            [simpleId()]: {
+                                                type: replace,
+                                                replace: {
+                                                    newValue: pieceLocationWhichIsNotCellMode,
+                                                },
+                                            },
+                                        },
+                                    },
+                                })
+                            );
+                            onContextMenuClear();
+                        }}
+                    >
+                        セルにスナップしない
                     </Menu.Item>
                 </Menu.SubMenu>
             );
@@ -946,61 +905,36 @@ namespace ContextMenuModule {
 
         const tachieMenus = [...characters.toArray()].map(([characterKey, character]) => {
             return (
-                <Menu.SubMenu key={keyNames(characterKey) + '@tachie'} title={character.name}>
-                    <Menu.Item
-                        disabled={tachieExists(character)}
-                        onClick={() => {
-                            operate(
-                                characterUpdateOperation(characterKey, {
-                                    $v: 1,
-                                    tachieLocations: {
-                                        [boardKey.createdBy]: {
-                                            [boardKey.id]: {
-                                                type: replace,
-                                                replace: {
-                                                    newValue: tachieLocationWhichIsNotCellMode,
-                                                },
+                <Menu.Item
+                    key={keyNames(characterKey) + '@tachie'}
+                    onClick={() => {
+                        operate(
+                            characterUpdateOperation(characterKey, {
+                                $v: 1,
+                                tachieLocations: {
+                                    [myUserUid]: {
+                                        [simpleId()]: {
+                                            type: replace,
+                                            replace: {
+                                                newValue: tachieLocationWhichIsNotCellMode,
                                             },
                                         },
                                     },
-                                })
-                            );
-                            onContextMenuClear();
-                        }}
-                    >
-                        追加
-                    </Menu.Item>
-                    <Menu.Item
-                        disabled={!tachieExists(character)}
-                        onClick={() => {
-                            operate(
-                                characterUpdateOperation(characterKey, {
-                                    $v: 1,
-                                    tachieLocations: {
-                                        [boardKey.createdBy]: {
-                                            [boardKey.id]: {
-                                                type: replace,
-                                                replace: {
-                                                    newValue: undefined,
-                                                },
-                                            },
-                                        },
-                                    },
-                                })
-                            );
-                            onContextMenuClear();
-                        }}
-                    >
-                        削除
-                    </Menu.Item>
-                </Menu.SubMenu>
+                                },
+                            })
+                        );
+                        onContextMenuClear();
+                    }}
+                >
+                    {character.name}
+                </Menu.Item>
             );
         });
 
         return (
             <>
-                <Menu.SubMenu title="キャラクターコマ">{pieceMenus}</Menu.SubMenu>
-                <Menu.SubMenu title="キャラクター立ち絵">{tachieMenus}</Menu.SubMenu>
+                <Menu.SubMenu title="キャラクターコマを追加">{pieceMenus}</Menu.SubMenu>
+                <Menu.SubMenu title="キャラクター立ち絵を追加">{tachieMenus}</Menu.SubMenu>
                 <Menu.SubMenu title="ダイスコマを追加">
                     <Menu.Item
                         onClick={() => {
@@ -1208,12 +1142,11 @@ namespace ContextMenuModule {
                         : basicMenu({
                               contextMenuState,
                               onContextMenuClear,
-                              boardKey,
                               dispatch,
                               operate,
-                              boardConfig: contextMenuState.boardConfig,
                               characters,
                               board,
+                              myUserUid,
                           })}
                 </Menu>
             </div>
