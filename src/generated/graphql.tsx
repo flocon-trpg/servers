@@ -316,8 +316,8 @@ export type Mutation = {
   ping: Pong;
   promoteToPlayer: PromoteResult;
   updateWritingMessageStatus: Scalars['Boolean'];
-  writePrivateMessage: WritePrivateRoomMessageResult;
-  writePublicMessage: WritePublicRoomMessageResult;
+  writePrivateMessage: WriteRoomPrivateMessageResult;
+  writePublicMessage: WriteRoomPublicMessageResult;
   writeRoomSoundEffect: WriteRoomSoundEffectResult;
 };
 
@@ -763,32 +763,32 @@ export type UpdatedText = {
   updatedAt: Scalars['Float'];
 };
 
-export type WritePrivateRoomMessageFailureResult = {
-  __typename?: 'WritePrivateRoomMessageFailureResult';
-  failureType: WritePrivateRoomMessageFailureType;
+export type WriteRoomPrivateMessageFailureResult = {
+  __typename?: 'WriteRoomPrivateMessageFailureResult';
+  failureType: WriteRoomPrivateMessageFailureType;
 };
 
-export enum WritePrivateRoomMessageFailureType {
+export enum WriteRoomPrivateMessageFailureType {
   NotParticipant = 'NotParticipant',
   RoomNotFound = 'RoomNotFound',
   VisibleToIsInvalid = 'VisibleToIsInvalid'
 }
 
-export type WritePrivateRoomMessageResult = RoomPrivateMessage | WritePrivateRoomMessageFailureResult;
+export type WriteRoomPrivateMessageResult = RoomPrivateMessage | WriteRoomPrivateMessageFailureResult;
 
-export type WritePublicRoomMessageFailureResult = {
-  __typename?: 'WritePublicRoomMessageFailureResult';
-  failureType: WritePublicRoomMessageFailureType;
+export type WriteRoomPublicMessageFailureResult = {
+  __typename?: 'WriteRoomPublicMessageFailureResult';
+  failureType: WriteRoomPublicMessageFailureType;
 };
 
-export enum WritePublicRoomMessageFailureType {
+export enum WriteRoomPublicMessageFailureType {
   NotAllowedChannelKey = 'NotAllowedChannelKey',
   NotAuthorized = 'NotAuthorized',
   NotParticipant = 'NotParticipant',
   RoomNotFound = 'RoomNotFound'
 }
 
-export type WritePublicRoomMessageResult = RoomPublicMessage | WritePublicRoomMessageFailureResult;
+export type WriteRoomPublicMessageResult = RoomPublicMessage | WriteRoomPublicMessageFailureResult;
 
 export type WriteRoomSoundEffectFailureResult = {
   __typename?: 'WriteRoomSoundEffectFailureResult';
@@ -1068,7 +1068,7 @@ export type WritePublicMessageMutationVariables = Exact<{
 }>;
 
 
-export type WritePublicMessageMutation = { __typename?: 'Mutation', result: { __typename?: 'RoomPublicMessage', messageId: string, channelKey: string, initText?: Maybe<string>, initTextSource?: Maybe<string>, textColor?: Maybe<string>, altTextToSecret?: Maybe<string>, isSecret: boolean, createdBy?: Maybe<string>, customName?: Maybe<string>, createdAt: number, updatedAt?: Maybe<number>, updatedText?: Maybe<{ __typename?: 'UpdatedText', currentText?: Maybe<string>, updatedAt: number }>, commandResult?: Maybe<{ __typename?: 'CommandResult', text: string, isSuccess?: Maybe<boolean> }>, character?: Maybe<{ __typename?: 'CharacterValueForMessage', stateId: string, isPrivate: boolean, name: string, image?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }>, tachieImage?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }> }> } | { __typename?: 'WritePublicRoomMessageFailureResult', failureType: WritePublicRoomMessageFailureType } };
+export type WritePublicMessageMutation = { __typename?: 'Mutation', result: { __typename?: 'RoomPublicMessage', messageId: string, channelKey: string, initText?: Maybe<string>, initTextSource?: Maybe<string>, textColor?: Maybe<string>, altTextToSecret?: Maybe<string>, isSecret: boolean, createdBy?: Maybe<string>, customName?: Maybe<string>, createdAt: number, updatedAt?: Maybe<number>, updatedText?: Maybe<{ __typename?: 'UpdatedText', currentText?: Maybe<string>, updatedAt: number }>, commandResult?: Maybe<{ __typename?: 'CommandResult', text: string, isSuccess?: Maybe<boolean> }>, character?: Maybe<{ __typename?: 'CharacterValueForMessage', stateId: string, isPrivate: boolean, name: string, image?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }>, tachieImage?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }> }> } | { __typename?: 'WriteRoomPublicMessageFailureResult', failureType: WriteRoomPublicMessageFailureType } };
 
 export type WritePrivateMessageMutationVariables = Exact<{
   roomId: Scalars['String'];
@@ -1081,7 +1081,7 @@ export type WritePrivateMessageMutationVariables = Exact<{
 }>;
 
 
-export type WritePrivateMessageMutation = { __typename?: 'Mutation', result: { __typename?: 'RoomPrivateMessage', messageId: string, visibleTo: Array<string>, initText?: Maybe<string>, initTextSource?: Maybe<string>, textColor?: Maybe<string>, altTextToSecret?: Maybe<string>, isSecret: boolean, createdBy?: Maybe<string>, customName?: Maybe<string>, createdAt: number, updatedAt?: Maybe<number>, updatedText?: Maybe<{ __typename?: 'UpdatedText', currentText?: Maybe<string>, updatedAt: number }>, commandResult?: Maybe<{ __typename?: 'CommandResult', text: string, isSuccess?: Maybe<boolean> }>, character?: Maybe<{ __typename?: 'CharacterValueForMessage', stateId: string, isPrivate: boolean, name: string, image?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }>, tachieImage?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }> }> } | { __typename?: 'WritePrivateRoomMessageFailureResult', failureType: WritePrivateRoomMessageFailureType } };
+export type WritePrivateMessageMutation = { __typename?: 'Mutation', result: { __typename?: 'RoomPrivateMessage', messageId: string, visibleTo: Array<string>, initText?: Maybe<string>, initTextSource?: Maybe<string>, textColor?: Maybe<string>, altTextToSecret?: Maybe<string>, isSecret: boolean, createdBy?: Maybe<string>, customName?: Maybe<string>, createdAt: number, updatedAt?: Maybe<number>, updatedText?: Maybe<{ __typename?: 'UpdatedText', currentText?: Maybe<string>, updatedAt: number }>, commandResult?: Maybe<{ __typename?: 'CommandResult', text: string, isSuccess?: Maybe<boolean> }>, character?: Maybe<{ __typename?: 'CharacterValueForMessage', stateId: string, isPrivate: boolean, name: string, image?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }>, tachieImage?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }> }> } | { __typename?: 'WriteRoomPrivateMessageFailureResult', failureType: WriteRoomPrivateMessageFailureType } };
 
 export type WriteRoomSoundEffectMutationVariables = Exact<{
   roomId: Scalars['String'];
@@ -2311,7 +2311,7 @@ export const WritePublicMessageDocument = gql`
     ... on RoomPublicMessage {
       ...RoomPublicMessage
     }
-    ... on WritePublicRoomMessageFailureResult {
+    ... on WriteRoomPublicMessageFailureResult {
       failureType
     }
   }
@@ -2363,7 +2363,7 @@ export const WritePrivateMessageDocument = gql`
     ... on RoomPrivateMessage {
       ...RoomPrivateMessage
     }
-    ... on WritePrivateRoomMessageFailureResult {
+    ... on WriteRoomPrivateMessageFailureResult {
       failureType
     }
   }
