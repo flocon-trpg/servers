@@ -38,10 +38,10 @@ const BooleanParameterInput: React.FC<Props> = ({
             checked={parameter?.value ?? false}
             onChange={e => {
                 const operation: CharacterUpOperation = {
-                    $version: 1,
+                    $v: 1,
                     boolParams: {
                         [parameterKey]: {
-                            $version: 1,
+                            $v: 1,
                             value: { newValue: e.target.checked },
                         },
                     },
@@ -63,10 +63,10 @@ const BooleanParameterInput: React.FC<Props> = ({
                         disabled={disabled}
                         onClick={() => {
                             const operation: CharacterUpOperation = {
-                                $version: 1,
+                                $v: 1,
                                 boolParams: {
                                     [parameterKey]: {
-                                        $version: 1,
+                                        $v: 1,
                                         value: { newValue: false },
                                     },
                                 },
@@ -86,10 +86,10 @@ const BooleanParameterInput: React.FC<Props> = ({
                     disabled={disabled}
                     onClick={() => {
                         const operation: CharacterUpOperation = {
-                            $version: 1,
+                            $v: 1,
                             boolParams: {
                                 [parameterKey]: {
-                                    $version: 1,
+                                    $v: 1,
                                     value: { newValue: undefined },
                                 },
                             },
@@ -137,10 +137,10 @@ const BooleanParameterInput: React.FC<Props> = ({
             size="small"
             onChange={e => {
                 const operation: CharacterUpOperation = {
-                    $version: 1,
+                    $v: 1,
                     boolParams: {
                         [parameterKey]: {
-                            $version: 1,
+                            $v: 1,
                             isValuePrivate: { newValue: !e },
                         },
                     },

@@ -53,13 +53,11 @@ export type PieceValueDrawerType =
     | {
           // pieceとともに作成するケース
           type: typeof create;
-          boardKey: CompositeKey;
           piece: PieceState;
       }
     | {
           // pieceは作成しないケース
           type: typeof create;
-          boardKey: null;
           piece: null;
       }
     | {
@@ -74,13 +72,11 @@ export type ImagePieceDrawerType =
     | {
           // pieceとともに作成するケース
           type: typeof create;
-          boardKey: CompositeKey;
           piece: PieceState;
       }
     | {
           // pieceは作成しないケース
           type: typeof create;
-          boardKey: null;
           piece: null;
       }
     | {
@@ -121,6 +117,7 @@ export type MouseOverOn =
       }
     | ClickOn;
 
+// ダイスコマ、数値コマ、画像コマは1つのBoardに0個～∞個存在させることも可能だが、1つのBoardにつきちょうど1個という仕様にしている。そのため、dicePieceValuesOnCursorなどにはpieceKeyプロパティがない。
 export type ContextMenuState = {
     boardKey: CompositeKey;
     boardConfig: BoardConfig;
@@ -131,11 +128,13 @@ export type ContextMenuState = {
     characterPiecesOnCursor: ReadonlyArray<{
         characterKey: CompositeKey;
         character: CharacterState;
+        pieceKey: CompositeKey;
         piece: PieceState;
     }>;
     tachiesOnCursor: ReadonlyArray<{
         characterKey: CompositeKey;
         character: CharacterState;
+        tachieLocationKey: CompositeKey;
         tachieLocation: BoardLocationState;
     }>;
     dicePieceValuesOnCursor: ReadonlyArray<{

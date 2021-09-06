@@ -61,7 +61,7 @@ const EditRoomDrawer: React.FC = () => {
                             value={name}
                             onChange={e => {
                                 const operation: UpOperation = {
-                                    $version: 1,
+                                    $v: 1,
                                     name: { newValue: e.target.value },
                                 };
                                 operate(operation);

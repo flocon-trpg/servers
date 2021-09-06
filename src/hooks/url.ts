@@ -12,7 +12,7 @@ export const loading = 'loading';
 export const nullishArg = 'nullishArg';
 export const error = 'error';
 
-type FirebaseStorageUrlArrayResult =
+type UrlArrayResult =
     | {
           // useFirebaseStorageUrlArrayは一部が成功して残りが失敗というケースがあるため、successではなくdoneという名前にしている。
           type: typeof done;
@@ -28,11 +28,11 @@ type FirebaseStorageUrlArrayResult =
 
 // PathArrayがnullish ⇔ 戻り値がnullishArg
 // pathArray.length = 戻り値.length
-export function useFirebaseStorageUrlArray(
+export function useUrlArrayFromGraphQL(
     pathArray: ReadonlyArray<FilePathFragment | FilePath> | null | undefined
-): FirebaseStorageUrlArrayResult {
+): UrlArrayResult {
     const config = React.useContext(ConfigContext);
-    const [result, setResult] = React.useState<FirebaseStorageUrlArrayResult>({ type: loading });
+    const [result, setResult] = React.useState<UrlArrayResult>({ type: loading });
     const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
 
     // deep equalityでチェックされるため、余計なプロパティを取り除いている
@@ -73,7 +73,7 @@ export function useFirebaseStorageUrlArray(
     return result;
 }
 
-type FirebaseStorageUrlResult =
+type UrlResult =
     | {
           type: typeof success;
           value: string;
@@ -82,11 +82,9 @@ type FirebaseStorageUrlResult =
           type: typeof loading | typeof error | typeof nullishArg;
       };
 
-export function useFirebaseStorageUrl(
-    path: FilePathFragment | FilePath | null | undefined
-): FirebaseStorageUrlResult {
+export function useUrlFromGraphQL(path: FilePathFragment | FilePath | null | undefined): UrlResult {
     const pathArray = React.useMemo(() => (path == null ? null : [path]), [path]);
-    const resultArray = useFirebaseStorageUrlArray(pathArray);
+    const resultArray = useUrlArrayFromGraphQL(pathArray);
     if (resultArray.type !== done) {
         return resultArray;
     }

@@ -12,7 +12,7 @@ import {
     WritingMessageStatusInputType,
 } from '../../generated/graphql';
 import { Alert, Button, Card, Input, Result, Spin, notification as antdNotification } from 'antd';
-import Layout from '../../layouts/Layout';
+import Layout, { loginAndEntry, success } from '../../layouts/Layout';
 import { FetchResult } from '@apollo/client';
 import MyAuthContext from '../../contexts/MyAuthContext';
 import {
@@ -27,7 +27,6 @@ import {
 } from '../../hooks/useRoomState';
 import Center from '../../components/Center';
 import LoadingResult from '../../components/Result/LoadingResult';
-import NotSignInResult from '../../components/Result/NotSignInResult';
 import { usePublishRoomEventSubscription } from '../../hooks/usePublishRoomEventSubscription';
 import { useDispatch } from 'react-redux';
 import { roomModule } from '../../modules/roomModule';
@@ -61,6 +60,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
         result: FetchResult<JoinRoomAsPlayerMutation, Record<string, any>, Record<string, any>>
     ) => {
         if (result.data == null) {
+            setErrorMessage('Not authorized');
             return;
         }
         switch (result.data.result.__typename) {
@@ -77,16 +77,6 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                     }
                     case JoinRoomFailureType.NotFound: {
                         setErrorMessage('Not found. Deleted?');
-                        return;
-                    }
-                    case JoinRoomFailureType.NotSignIn: {
-                        setErrorMessage('Need to sign in');
-                        return;
-                    }
-                    case JoinRoomFailureType.NotEntry: {
-                        // entryできた後、管理者がentryを無効化した後にここに来る可能性がある。
-                        // ただ、レアケースなことに加えてここからEntryFormを出す処理が面倒なので、ブラウザの更新により再度entryすることを促すだけにしている。
-                        setErrorMessage('Not entry anymore. Please reload the browser.');
                         return;
                     }
                 }
@@ -177,10 +167,13 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
     );
 };
 
-const RoomBehavior: React.FC<PropsWithChildren<{ roomId: string }>> = ({
+const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
     roomId,
     children,
-}: PropsWithChildren<{ roomId: string }>) => {
+}: {
+    roomId: string;
+    children: JSX.Element;
+}) => {
     const roomIdRef = useReadonlyRef(roomId);
 
     useRoomConfig(roomId);
@@ -260,13 +253,11 @@ const RoomBehavior: React.FC<PropsWithChildren<{ roomId: string }>> = ({
 
     if (error != null) {
         return (
-            <Layout requiresLogin showEntryForm={false}>
-                <Result
-                    status="error"
-                    title={`Apollo subscription エラー: ${error.message}`}
-                    subTitle="ブラウザを更新してください。"
-                />
-            </Layout>
+            <Result
+                status="error"
+                title={`Apollo subscription エラー: ${error.message}`}
+                subTitle="ブラウザを更新してください。"
+            />
         );
     }
 
@@ -275,112 +266,78 @@ const RoomBehavior: React.FC<PropsWithChildren<{ roomId: string }>> = ({
             if (roomState.operate == null) {
                 // TODO: Buttonなどを用いたreloadに対応させる。
                 return (
-                    <Layout requiresLogin showEntryForm={false}>
-                        <Result
-                            status="error"
-                            title="サーバーから応答を受け取ることができませんでした。"
-                            subTitle="ブラウザを更新してください。"
-                        />
-                    </Layout>
+                    <Result
+                        status="error"
+                        title="サーバーから応答を受け取ることができませんでした。"
+                        subTitle="ブラウザを更新してください。"
+                    />
                 );
             }
-            return (
-                <Layout requiresLogin showEntryForm={false} hideHeader>
-                    {children}
-                </Layout>
-            );
+            return children;
         }
         case nonJoined:
             return (
-                <Layout requiresLogin showEntryForm={false}>
-                    <Center>
-                        <Card title="入室">
-                            <JoinRoomForm
-                                roomState={roomState.nonJoinedRoom}
-                                onJoin={() => refetchRoomState()}
-                            />
-                        </Card>
-                    </Center>
-                </Layout>
+                <Center>
+                    <Card title="入室">
+                        <JoinRoomForm
+                            roomState={roomState.nonJoinedRoom}
+                            onJoin={() => refetchRoomState()}
+                        />
+                    </Card>
+                </Center>
             );
         case getRoomFailure: {
             switch (roomState.getRoomFailureType) {
-                case GetRoomFailureType.NotEntry:
-                    return (
-                        <Layout
-                            requiresLogin
-                            showEntryForm={true}
-                            onEntry={() => refetchRoomState()}
-                        />
-                    );
                 case GetRoomFailureType.NotFound:
                     return (
-                        <Layout requiresLogin showEntryForm={false}>
-                            <Result
-                                status="404"
-                                title="該当する部屋が見つかりませんでした。"
-                                subTitle="部屋が存在しているか、適切な権限があるかどうか確認してください。"
-                            />
-                        </Layout>
-                    );
-                case GetRoomFailureType.NotSignIn:
-                    return (
-                        <Layout requiresLogin showEntryForm={false}>
-                            <NotSignInResult />
-                        </Layout>
+                        <Result
+                            status="404"
+                            title="該当する部屋が見つかりませんでした。"
+                            subTitle="部屋が存在しているか、適切な権限があるかどうか確認してください。"
+                        />
                     );
             }
             break;
         }
         case loading:
-            return (
-                <Layout requiresLogin showEntryForm={false}>
-                    <LoadingResult />
-                </Layout>
-            );
+            return <LoadingResult />;
         case myAuthIsUnavailable:
-            return <Layout requiresLogin showEntryForm={false} />;
+            return null;
         case mutationFailure:
             // TODO: mutationFailureが細分化されたら、こちらも細分化する。
             return (
-                <Layout requiresLogin showEntryForm={false}>
-                    <Result
-                        status="error"
-                        title="mutationに失敗しました。"
-                        subTitle="ブラウザを更新してください。"
-                    />
-                </Layout>
+                <Result
+                    status="error"
+                    title="mutationに失敗しました。"
+                    subTitle="ログイン、エントリーしていることと、ネットワークに問題がないことを確認してください。"
+                />
             );
         case deleted:
-            return (
-                <Layout requiresLogin={false} showEntryForm={false}>
-                    <Result status="warning" title="この部屋は削除されました。" />
-                </Layout>
-            );
+            return <Result status="warning" title="この部屋は削除されました。" />;
     }
 };
 
-const RoomCore: React.FC<{ children?: ReactNode }> = ({ children }: { children?: ReactNode }) => {
+const RoomCore: React.FC<{ children: JSX.Element }> = ({ children }: { children: JSX.Element }) => {
     const router = useRouter();
     const id = router.query.id;
 
     if (Array.isArray(id) || id == null) {
         return (
-            <Layout requiresLogin showEntryForm={false}>
+            <Layout requires={loginAndEntry}>
                 <Result status="error" title="パラメーターが不正です。" />
             </Layout>
         );
     }
 
-    return <RoomBehavior roomId={id}>{children}</RoomBehavior>;
+    return (
+        <Layout requires={loginAndEntry} hideHeader={success}>
+            <RoomBehavior roomId={id}>{children}</RoomBehavior>
+        </Layout>
+    );
 };
 
 const Room: React.FC = () => {
-    return (
-        <RoomCore>
-            <RoomComponent />
-        </RoomCore>
-    );
+    return <RoomCore>{<RoomComponent />}</RoomCore>;
 };
 
 export default Room;

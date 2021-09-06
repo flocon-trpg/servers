@@ -1,13 +1,8 @@
 import React from 'react';
-import {
-    GetRoomsListFailureType,
-    RoomAsListItemFragment,
-    useGetRoomsListQuery,
-} from '../../generated/graphql';
-import Layout from '../../layouts/Layout';
-import moment from 'moment';
+import { RoomAsListItemFragment, useGetRoomsListQuery } from '../../generated/graphql';
+import Layout, { loginAndEntry } from '../../layouts/Layout';
 import Link from 'next/link';
-import { Button, Col, Row, Space, Table, Tooltip } from 'antd';
+import { Button, Table } from 'antd';
 import { useRouter } from 'next/router';
 import QueryResultViewer from '../../components/QueryResultViewer';
 import classNames from 'classnames';
@@ -75,21 +70,6 @@ const RoomCore: React.FC = () => {
             break;
     }
 
-    const showEntryForm = (() => {
-        switch (rooms.data?.result.__typename) {
-            case 'GetRoomsListFailureResult':
-                switch (rooms.data.result.failureType) {
-                    case GetRoomsListFailureType.NotEntry:
-                        return true;
-                    default:
-                        return false;
-                }
-                break;
-            default:
-                return false;
-        }
-    })();
-
     const roomsData = (() => {
         switch (rooms.data?.result.__typename) {
             case 'GetRoomsListSuccessResult':
@@ -100,10 +80,12 @@ const RoomCore: React.FC = () => {
     })();
 
     return (
-        <Layout showEntryForm={showEntryForm} onEntry={() => rooms.refetch()} requiresLogin={true}>
-            <QueryResultViewer loading={rooms.loading} error={rooms.error} compact={false}>
-                {roomsData == null ? null : <RoomsListComponent rooms={roomsData ?? []} />}
-            </QueryResultViewer>
+        <Layout requires={loginAndEntry} onEntry={() => rooms.refetch()}>
+            {() => (
+                <QueryResultViewer loading={rooms.loading} error={rooms.error} compact={false}>
+                    {roomsData == null ? null : <RoomsListComponent rooms={roomsData ?? []} />}
+                </QueryResultViewer>
+            )}
         </Layout>
     );
 };

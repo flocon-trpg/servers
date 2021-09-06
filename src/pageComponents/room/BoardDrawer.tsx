@@ -1,8 +1,7 @@
-import { Col, Drawer, Input, InputNumber, Row } from 'antd';
+import { Col, Drawer, InputNumber, Row } from 'antd';
 import React from 'react';
 import DrawerFooter from '../../layouts/DrawerFooter';
 import { simpleId } from '../../utils/generators';
-import { replace } from '../../stateManagers/states/types';
 import InputFile from '../../components/InputFile';
 import { DrawerProps } from 'antd/lib/drawer';
 import FilesManagerDrawer from '../../components/FilesManagerDrawer';
@@ -13,8 +12,7 @@ import { useOperate } from '../../hooks/useOperate';
 import { useSelector } from '../../store';
 import BufferedInput from '../../components/BufferedInput';
 import { useBoards } from '../../hooks/state/useBoards';
-import { useMe } from '../../hooks/useMe';
-import { boardDiff, BoardState, UpOperation, toBoardUpOperation } from '@kizahasi/flocon-core';
+import { boardDiff, BoardState, toBoardUpOperation } from '@kizahasi/flocon-core';
 import { useDispatch } from 'react-redux';
 import {
     create,
@@ -23,6 +21,8 @@ import {
 } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { FilePath } from '../../utils/filePath';
+import { boardUpdateOperation } from '../../utils/boardUpdateOperation';
+import { boardReplaceOperation } from '../../utils/boardReplaceOperation';
 
 const notFound = 'notFound';
 
@@ -31,7 +31,7 @@ const drawerBaseProps: Partial<DrawerProps> = {
 };
 
 const defaultBoard: BoardState = {
-    $version: 1,
+    $v: 1,
     name: '',
     cellColumnCount: 0,
     cellRowCount: 0,
@@ -75,18 +75,9 @@ const BoardDrawer: React.FC = () => {
                     if (diffOperation == null) {
                         return;
                     }
-                    const operation: UpOperation = {
-                        $version: 1,
-                        boards: {
-                            [drawerType.stateKey.createdBy]: {
-                                [drawerType.stateKey.id]: {
-                                    type: update,
-                                    update: toBoardUpOperation(diffOperation),
-                                },
-                            },
-                        },
-                    };
-                    operate(operation);
+                    operate(
+                        boardUpdateOperation(drawerType.stateKey, toBoardUpOperation(diffOperation))
+                    );
                 },
             };
             break;
@@ -116,18 +107,9 @@ const BoardDrawer: React.FC = () => {
                 if (diffOperation == null) {
                     return;
                 }
-                const operation: UpOperation = {
-                    $version: 1,
-                    boards: {
-                        [drawerType.stateKey.createdBy]: {
-                            [drawerType.stateKey.id]: {
-                                type: update,
-                                update: toBoardUpOperation(diffOperation),
-                            },
-                        },
-                    },
-                };
-                operate(operation);
+                operate(
+                    boardUpdateOperation(drawerType.stateKey, toBoardUpOperation(diffOperation))
+                );
                 return;
             }
         }
@@ -137,20 +119,7 @@ const BoardDrawer: React.FC = () => {
     if (drawerType?.type === create) {
         onOkClick = () => {
             const id = simpleId();
-            const operation: UpOperation = {
-                $version: 1,
-                boards: {
-                    [myUserUid]: {
-                        [id]: {
-                            type: replace,
-                            replace: {
-                                newValue: board,
-                            },
-                        },
-                    },
-                },
-            };
-            operate(operation);
+            operate(boardReplaceOperation({ createdBy: myUserUid, id }, board));
             setBoard(defaultBoard);
             resetBoardToCreate();
             dispatch(roomDrawerAndPopoverAndModalModule.actions.set({ boardDrawerType: null }));
@@ -160,20 +129,7 @@ const BoardDrawer: React.FC = () => {
     let onDestroy: (() => void) | undefined = undefined;
     if (drawerType?.type === update) {
         onDestroy = () => {
-            const operation: UpOperation = {
-                $version: 1,
-                boards: {
-                    [drawerType.stateKey.createdBy]: {
-                        [drawerType.stateKey.id]: {
-                            type: replace,
-                            replace: {
-                                newValue: undefined,
-                            },
-                        },
-                    },
-                },
-            };
-            operate(operation);
+            operate(boardReplaceOperation(drawerType.stateKey, undefined));
             dispatch(roomDrawerAndPopoverAndModalModule.actions.set({ boardDrawerType: null }));
         };
     }

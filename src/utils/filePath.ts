@@ -43,14 +43,14 @@ export namespace FilePath {
                 break;
         }
         return {
-            $version: 1,
+            $v: 1,
             path: source.path,
             sourceType,
         };
     };
 
     export const getUrl = async (
-        path: FilePath | Omit<Core.FilePath, '$version'>,
+        path: FilePath | Omit<Core.FilePath, '$v'>,
         config: Config,
         cache: ExpiryMap<string, string> | null
     ): Promise<string | null> => {

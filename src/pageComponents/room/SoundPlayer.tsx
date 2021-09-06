@@ -160,16 +160,16 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({
                         onClick: () => {
                             if (bgmState == null) {
                                 const operation: UpOperation = {
-                                    $version: 1,
+                                    $v: 1,
                                     bgms: {
                                         [channelKey]: {
                                             type: replace,
                                             replace: {
                                                 newValue: {
-                                                    $version: 1,
+                                                    $v: 1,
                                                     files: filesInput.map(x => ({
                                                         ...x,
-                                                        $version: 1,
+                                                        $v: 1,
                                                     })),
                                                     volume: volumeInput,
                                                     isPaused: !isNotPausedInput,
@@ -183,16 +183,16 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({
                                 return;
                             }
                             const operation: UpOperation = {
-                                $version: 1,
+                                $v: 1,
                                 bgms: {
                                     [channelKey]: {
                                         type: update,
                                         update: {
-                                            $version: 1,
+                                            $v: 1,
                                             files: {
                                                 newValue: filesInput.map(x => ({
                                                     ...x,
-                                                    $version: 1,
+                                                    $v: 1,
                                                 })),
                                             },
                                             volume: {
@@ -408,12 +408,12 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                                     return;
                                 }
                                 const operation: UpOperation = {
-                                    $version: 1,
+                                    $v: 1,
                                     bgms: {
                                         [channelKey]: {
                                             type: update,
                                             update: {
-                                                $version: 1,
+                                                $v: 1,
                                                 volume: { newValue: volumeInput },
                                             },
                                         },
@@ -453,12 +453,12 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                             return;
                         }
                         const operation: UpOperation = {
-                            $version: 1,
+                            $v: 1,
                             bgms: {
                                 [channelKey]: {
                                     type: update,
                                     update: {
-                                        $version: 1,
+                                        $v: 1,
                                         isPaused: {
                                             newValue: !bgmState.isPaused,
                                         },
@@ -476,7 +476,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                     disabled={(bgmState?.files ?? []).length === 0}
                     onClick={() => {
                         const operation: UpOperation = {
-                            $version: 1,
+                            $v: 1,
                             bgms: {
                                 [channelKey]: {
                                     type: replace,

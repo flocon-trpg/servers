@@ -13,6 +13,7 @@ import {
 import { useDispatch } from 'react-redux';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { ChatPaletteTomlInput } from '../../components/ChatPaletteTomlInput';
+import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 
 export const ChatPaletteEditorModal: React.FC = () => {
     const modalWidth = 10000;
@@ -36,18 +37,12 @@ export const ChatPaletteEditorModal: React.FC = () => {
         if (diffOperation == null) {
             return;
         }
-        const operation: UpOperation = {
-            $version: 1,
-            characters: {
-                [chatPaletteEditorModalType.characterKey.createdBy]: {
-                    [chatPaletteEditorModalType.characterKey.id]: {
-                        type: update,
-                        update: toCharacterUpOperation(diffOperation),
-                    },
-                },
-            },
-        };
-        operate(operation);
+        operate(
+            characterUpdateOperation(
+                chatPaletteEditorModalType.characterKey,
+                toCharacterUpOperation(diffOperation)
+            )
+        );
         return;
     };
 

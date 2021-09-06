@@ -1,5 +1,5 @@
 import React from 'react';
-import { failure, loading, success, useImageFromGraphQL } from '../../hooks/image';
+import { success, useImageFromGraphQL } from '../../hooks/image';
 import * as ReactKonva from 'react-konva';
 import { Button, Dropdown, Menu } from 'antd';
 import * as Icons from '@ant-design/icons';
@@ -41,8 +41,6 @@ import {
     dualKeyRecordToDualKeyMap,
     keyNames,
 } from '@kizahasi/util';
-import _ from 'lodash';
-import { useNumberPieceValues } from '../../hooks/state/useNumberPieceValues';
 import {
     BoardTooltipState,
     create,
@@ -50,9 +48,7 @@ import {
     BoardPopoverEditorState,
     roomDrawerAndPopoverAndModalModule,
 } from '../../modules/roomDrawerAndPopoverAndModalModule';
-import { useDicePieceValues } from '../../hooks/state/useDicePieceValues';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
-import { useImagePieceValues } from '../../hooks/state/useImagePieceValues';
 import { FilePath, FileSourceType } from '../../generated/graphql';
 import { ImagePiece } from '../../components/Konva/ImagePiece';
 import { DragEndResult, Vector2 } from '../../utils/types';
@@ -64,6 +60,10 @@ import {
 import { useTransition, animated } from '@react-spring/konva';
 import { useCharacterPieces } from '../../hooks/state/useCharacterPieces';
 import { useTachieLocations } from '../../hooks/state/useTachieLocations';
+import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
+import { useDicePieces } from '../../hooks/state/useDicePieces';
+import { useNumberPieces } from '../../hooks/state/useNumberPieces';
+import { useImagePieces } from '../../hooks/state/useImagePieces';
 
 const createPiecePostOperation = ({
     e,
@@ -74,7 +74,7 @@ const createPiecePostOperation = ({
     piece: PieceState;
     board: BoardState;
 }): PieceUpOperation => {
-    const pieceOperation: PieceUpOperation = { $version: 1 };
+    const pieceOperation: PieceUpOperation = { $v: 1 };
     if (piece.isCellMode) {
         if (e.newLocation != null) {
             const position = Piece.getCellPosition({ ...e.newLocation, board });
@@ -100,7 +100,7 @@ const createPiecePostOperation = ({
 };
 
 const createTachieLocationPostOperation = ({ e }: { e: DragEndResult }): PieceUpOperation => {
-    const pieceOperation: BoardLocationUpOperation = { $version: 1 };
+    const pieceOperation: BoardLocationUpOperation = { $v: 1 };
     if (e.newLocation != null) {
         pieceOperation.x = { newValue: e.newLocation.x };
         pieceOperation.y = { newValue: e.newLocation.y };
@@ -123,14 +123,17 @@ type SelectedPieceKey =
     | {
           type: typeof character;
           characterKey: CompositeKey;
+          pieceKey: CompositeKey;
       }
     | {
           type: typeof tachie;
           characterKey: CompositeKey;
+          tachieLocationKey: CompositeKey;
       }
     | {
           type: typeof dicePieceValue | typeof numberPieceValue;
           stateId: string;
+          pieceKey: CompositeKey;
       }
     | {
           type: typeof imagePiece;
@@ -191,9 +194,9 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const roomId = useSelector(state => state.roomModule.roomId);
     const characters = useCharacters();
     const participants = useParticipants();
-    const dicePieceValues = useDicePieceValues();
-    const numberPieceValues = useNumberPieceValues();
-    const imagePieces = useImagePieceValues(boardKey);
+    const dicePieces = useDicePieces(boardKey);
+    const numberPieces = useNumberPieces(boardKey);
+    const imagePieces = useImagePieces(boardKey);
     const characterPieces = useCharacterPieces(boardKey);
     const tacheLocations = useTachieLocations(boardKey);
 
@@ -312,7 +315,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
 
     const pieces = (() => {
         const characterPieceElements = (characterPieces ?? []).map(
-            ({ characterKey, character, piece }) => {
+            ({ characterKey, character, piece, pieceKey }) => {
                 if (character.image == null) {
                     // TODO: 画像なしでコマを表示する
                     return null;
@@ -321,17 +324,18 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     <ImagePiece
                         {...Piece.getPosition({ ...board, state: piece })}
                         opacity={1}
-                        key={keyNames(characterKey)}
+                        key={keyNames(characterKey, pieceKey)}
                         filePath={character.image}
                         draggable
                         listening
                         isSelected={
                             selectedPieceKey?.type === 'character' &&
-                            compositeKeyEquals(selectedPieceKey.characterKey, characterKey)
+                            compositeKeyEquals(selectedPieceKey.characterKey, characterKey) &&
+                            compositeKeyEquals(selectedPieceKey.pieceKey, pieceKey)
                         }
                         onClick={() => {
                             unsetPopoverEditor();
-                            setSelectedPieceKey({ type: 'character', characterKey });
+                            setSelectedPieceKey({ type: 'character', characterKey, pieceKey });
                         }}
                         onDblClick={e => {
                             if (onPopoverEditorRef.current == null) {
@@ -356,28 +360,19 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                                 piece,
                                 board,
                             });
-                            const operation: UpOperation = {
-                                $version: 1,
-                                characters: {
-                                    [characterKey.createdBy]: {
-                                        [characterKey.id]: {
-                                            type: update,
-                                            update: {
-                                                $version: 1,
-                                                pieces: {
-                                                    [boardKey.createdBy]: {
-                                                        [boardKey.id]: {
-                                                            type: update,
-                                                            update: pieceOperation,
-                                                        },
-                                                    },
-                                                },
+                            operate(
+                                characterUpdateOperation(characterKey, {
+                                    $v: 1,
+                                    pieces: {
+                                        [pieceKey.createdBy]: {
+                                            [pieceKey.id]: {
+                                                type: update,
+                                                update: pieceOperation,
                                             },
                                         },
                                     },
-                                },
-                            };
-                            operate(operation);
+                                })
+                            );
                         }}
                     />
                 );
@@ -385,14 +380,14 @@ const BoardCore: React.FC<BoardCoreProps> = ({
         );
 
         const tachieLocationElements = (tacheLocations ?? []).map(
-            ({ characterKey, character, tachieLocation }) => {
+            ({ characterKey, character, tachieLocationKey, tachieLocation }) => {
                 if (character.tachieImage == null) {
                     // TODO: 画像なしでコマを表示する
                     return null;
                 }
                 return (
                     <ImagePiece
-                        key={keyNames(characterKey)}
+                        key={keyNames(characterKey, tachieLocationKey)}
                         opacity={0.75 /* TODO: opacityの値が適当 */}
                         message={lastPublicMessage}
                         messageFilter={msg => {
@@ -411,11 +406,19 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         listening
                         isSelected={
                             selectedPieceKey?.type === 'tachie' &&
-                            compositeKeyEquals(selectedPieceKey.characterKey, characterKey)
+                            compositeKeyEquals(selectedPieceKey.characterKey, characterKey) &&
+                            compositeKeyEquals(
+                                selectedPieceKey.tachieLocationKey,
+                                tachieLocationKey
+                            )
                         }
                         onClick={() => {
                             unsetPopoverEditor();
-                            setSelectedPieceKey({ type: 'tachie', characterKey });
+                            setSelectedPieceKey({
+                                type: 'tachie',
+                                characterKey,
+                                tachieLocationKey,
+                            });
                         }}
                         onDblClick={e => {
                             if (onPopoverEditorRef.current == null) {
@@ -434,19 +437,89 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             const tachieLocationOperation = createTachieLocationPostOperation({
                                 e,
                             });
+                            operate(
+                                characterUpdateOperation(characterKey, {
+                                    $v: 1,
+                                    tachieLocations: {
+                                        [tachieLocationKey.createdBy]: {
+                                            [tachieLocationKey.id]: {
+                                                type: update,
+                                                update: tachieLocationOperation,
+                                            },
+                                        },
+                                    },
+                                })
+                            );
+                        }}
+                    />
+                );
+            }
+        );
+
+        const imagePieceElements = (imagePieces ?? []).map(
+            ({ value: element, pieceKey, piece }) => {
+                const defaultImageFilePath: FilePath = {
+                    // TODO: 適切な画像に変える
+                    path: '/logo.png',
+                    sourceType: FileSourceType.Default,
+                };
+                return (
+                    <ImagePiece
+                        {...Piece.getPosition({ ...board, state: piece })}
+                        opacity={1}
+                        key={keyNames(pieceKey)}
+                        filePath={element.value.image ?? defaultImageFilePath}
+                        draggable
+                        listening
+                        isSelected={
+                            selectedPieceKey?.type === 'imagePiece' &&
+                            compositeKeyEquals(selectedPieceKey.pieceKey, pieceKey)
+                        }
+                        onClick={() => {
+                            unsetPopoverEditor();
+                            setSelectedPieceKey({ type: 'imagePiece', pieceKey });
+                        }}
+                        onDblClick={e => {
+                            if (onPopoverEditorRef.current == null) {
+                                return;
+                            }
+                            onPopoverEditorRef.current({
+                                pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
+                                dblClickOn: { type: 'imagePieceValue', element },
+                            });
+                        }}
+                        onMouseEnter={() =>
+                            (mouseOverOnRef.current = {
+                                type: 'imagePieceValue',
+                                element,
+                            })
+                        }
+                        onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
+                        onDragEnd={e => {
+                            const pieceOperation = createPiecePostOperation({
+                                e,
+                                piece,
+                                board,
+                            });
                             const operation: UpOperation = {
-                                $version: 1,
-                                characters: {
-                                    [characterKey.createdBy]: {
-                                        [characterKey.id]: {
-                                            type: update,
-                                            update: {
-                                                $version: 1,
-                                                tachieLocations: {
-                                                    [boardKey.createdBy]: {
-                                                        [boardKey.id]: {
-                                                            type: update,
-                                                            update: tachieLocationOperation,
+                                $v: 1,
+                                participants: {
+                                    [element.participantKey]: {
+                                        type: update,
+                                        update: {
+                                            $v: 1,
+                                            imagePieceValues: {
+                                                [element.valueId]: {
+                                                    type: update,
+                                                    update: {
+                                                        $v: 1,
+                                                        pieces: {
+                                                            [pieceKey.createdBy]: {
+                                                                [pieceKey.id]: {
+                                                                    type: update,
+                                                                    update: pieceOperation,
+                                                                },
+                                                            },
                                                         },
                                                     },
                                                 },
@@ -462,35 +535,28 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             }
         );
 
-        const imagePieceElements = (imagePieces ?? []).map(pieceValueElement => {
-            const defaultImageFilePath: FilePath = {
-                // TODO: 適切な画像に変える
-                path: '/logo.png',
-                sourceType: FileSourceType.Default,
-            };
-            const pieceKey: CompositeKey = {
-                createdBy: pieceValueElement.participantKey,
-                id: pieceValueElement.valueId,
-            };
-            if (pieceValueElement.piece == null) {
-                return null;
-            }
-            const piece = pieceValueElement.piece;
+        const dicePieceElements = (dicePieces ?? []).map(({ value: element, pieceKey, piece }) => {
             return (
-                <ImagePiece
-                    {...Piece.getPosition({ ...board, state: pieceValueElement.piece })}
+                <DiceOrNumberPiece
+                    {...Piece.getPosition({ ...board, state: piece })}
+                    key={keyNames(element.characterKey, element.valueId, pieceKey)}
                     opacity={1}
-                    key={keyNames(pieceKey)}
-                    filePath={pieceValueElement.value.image ?? defaultImageFilePath}
+                    state={{ type: dicePiece, state: element.value }}
+                    createdByMe={element.characterKey.createdBy === myUserUid}
                     draggable
                     listening
                     isSelected={
-                        selectedPieceKey?.type === 'imagePiece' &&
+                        selectedPieceKey?.type === 'dicePieceValue' &&
+                        selectedPieceKey.stateId === element.valueId &&
                         compositeKeyEquals(selectedPieceKey.pieceKey, pieceKey)
                     }
                     onClick={() => {
                         unsetPopoverEditor();
-                        setSelectedPieceKey({ type: 'imagePiece', pieceKey });
+                        setSelectedPieceKey({
+                            type: 'dicePieceValue',
+                            stateId: element.valueId,
+                            pieceKey,
+                        });
                     }}
                     onDblClick={e => {
                         if (onPopoverEditorRef.current == null) {
@@ -498,14 +564,11 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         }
                         onPopoverEditorRef.current({
                             pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
-                            dblClickOn: { type: 'imagePieceValue', element: pieceValueElement },
+                            dblClickOn: { type: 'dicePieceValue', element },
                         });
                     }}
                     onMouseEnter={() =>
-                        (mouseOverOnRef.current = {
-                            type: 'imagePieceValue',
-                            element: pieceValueElement,
-                        })
+                        (mouseOverOnRef.current = { type: 'dicePieceValue', element })
                     }
                     onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
                     onDragEnd={e => {
@@ -514,147 +577,38 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             piece,
                             board,
                         });
-                        const operation: UpOperation = {
-                            $version: 1,
-                            participants: {
-                                [pieceValueElement.participantKey]: {
-                                    type: update,
-                                    update: {
-                                        $version: 1,
-                                        imagePieceValues: {
-                                            [pieceValueElement.valueId]: {
-                                                type: update,
-                                                update: {
-                                                    $version: 1,
-                                                    pieces: {
-                                                        [boardKey.createdBy]: {
-                                                            [boardKey.id]: {
-                                                                type: update,
-                                                                update: pieceOperation,
-                                                            },
-                                                        },
+                        operate(
+                            characterUpdateOperation(element.characterKey, {
+                                $v: 1,
+                                dicePieceValues: {
+                                    [element.valueId]: {
+                                        type: update,
+                                        update: {
+                                            $v: 1,
+                                            pieces: {
+                                                [pieceKey.createdBy]: {
+                                                    [pieceKey.id]: {
+                                                        type: update,
+                                                        update: pieceOperation,
                                                     },
                                                 },
                                             },
                                         },
                                     },
                                 },
-                            },
-                        };
-                        operate(operation);
+                            })
+                        );
                     }}
                 />
             );
         });
 
-        const dicePieces = _(dicePieceValues)
-            .map(element => {
-                const piece = dualKeyRecordToDualKeyMap<PieceState>(element.value.pieces)
-                    .toArray()
-                    .find(([boardKey$]) => {
-                        return (
-                            boardKey.createdBy === boardKey$.first &&
-                            boardKey.id === boardKey$.second
-                        );
-                    });
-                if (piece == null) {
-                    return null;
-                }
-                const [, pieceValue] = piece;
+        const numberPieceElements = (numberPieces ?? []).map(
+            ({ value: element, piece, pieceKey }) => {
                 return (
                     <DiceOrNumberPiece
-                        {...Piece.getPosition({ ...board, state: pieceValue })}
-                        key={keyNames(element.characterKey, element.valueId)}
-                        opacity={1}
-                        state={{ type: dicePiece, state: element.value }}
-                        createdByMe={element.characterKey.createdBy === myUserUid}
-                        draggable
-                        listening
-                        isSelected={
-                            selectedPieceKey?.type === 'dicePieceValue' &&
-                            selectedPieceKey.stateId === element.valueId
-                        }
-                        onClick={() => {
-                            unsetPopoverEditor();
-                            setSelectedPieceKey({
-                                type: 'dicePieceValue',
-                                stateId: element.valueId,
-                            });
-                        }}
-                        onDblClick={e => {
-                            if (onPopoverEditorRef.current == null) {
-                                return;
-                            }
-                            onPopoverEditorRef.current({
-                                pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
-                                dblClickOn: { type: 'dicePieceValue', element },
-                            });
-                        }}
-                        onMouseEnter={() =>
-                            (mouseOverOnRef.current = { type: 'dicePieceValue', element })
-                        }
-                        onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
-                        onDragEnd={e => {
-                            const pieceOperation = createPiecePostOperation({
-                                e,
-                                piece: pieceValue,
-                                board,
-                            });
-                            const operation: UpOperation = {
-                                $version: 1,
-                                characters: {
-                                    [element.characterKey.createdBy]: {
-                                        [element.characterKey.id]: {
-                                            type: update,
-                                            update: {
-                                                $version: 1,
-                                                dicePieceValues: {
-                                                    [element.valueId]: {
-                                                        type: update,
-                                                        update: {
-                                                            $version: 1,
-                                                            pieces: {
-                                                                [boardKey.createdBy]: {
-                                                                    [boardKey.id]: {
-                                                                        type: update,
-                                                                        update: pieceOperation,
-                                                                    },
-                                                                },
-                                                            },
-                                                        },
-                                                    },
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            };
-                            operate(operation);
-                        }}
-                    />
-                );
-            })
-            .compact()
-            .value();
-
-        const numberPieces = _(numberPieceValues)
-            .map(element => {
-                const piece = dualKeyRecordToDualKeyMap<PieceState>(element.value.pieces)
-                    .toArray()
-                    .find(([boardKey$]) => {
-                        return (
-                            boardKey.createdBy === boardKey$.first &&
-                            boardKey.id === boardKey$.second
-                        );
-                    });
-                if (piece == null) {
-                    return null;
-                }
-                const [, pieceValue] = piece;
-                return (
-                    <DiceOrNumberPiece
-                        {...Piece.getPosition({ ...board, state: pieceValue })}
-                        key={keyNames(element.characterKey, element.valueId)}
+                        {...Piece.getPosition({ ...board, state: piece })}
+                        key={keyNames(element.characterKey, element.valueId, pieceKey)}
                         opacity={1}
                         state={{ type: numberPiece, state: element.value }}
                         createdByMe={element.characterKey.createdBy === myUserUid}
@@ -662,13 +616,15 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         listening
                         isSelected={
                             selectedPieceKey?.type === 'numberPieceValue' &&
-                            selectedPieceKey.stateId === element.valueId
+                            selectedPieceKey.stateId === element.valueId &&
+                            compositeKeyEquals(selectedPieceKey.pieceKey, pieceKey)
                         }
                         onClick={() => {
                             unsetPopoverEditor();
                             setSelectedPieceKey({
                                 type: 'numberPieceValue',
                                 stateId: element.valueId,
+                                pieceKey,
                             });
                         }}
                         onDblClick={e => {
@@ -687,53 +643,43 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         onDragEnd={e => {
                             const pieceOperation = createPiecePostOperation({
                                 e,
-                                piece: pieceValue,
+                                piece,
                                 board,
                             });
-                            const operation: UpOperation = {
-                                $version: 1,
-                                characters: {
-                                    [element.characterKey.createdBy]: {
-                                        [element.characterKey.id]: {
+                            operate(
+                                characterUpdateOperation(element.characterKey, {
+                                    $v: 1,
+                                    numberPieceValues: {
+                                        [element.valueId]: {
                                             type: update,
                                             update: {
-                                                $version: 1,
-                                                numberPieceValues: {
-                                                    [element.valueId]: {
-                                                        type: update,
-                                                        update: {
-                                                            $version: 1,
-                                                            pieces: {
-                                                                [boardKey.createdBy]: {
-                                                                    [boardKey.id]: {
-                                                                        type: update,
-                                                                        update: pieceOperation,
-                                                                    },
-                                                                },
-                                                            },
+                                                $v: 1,
+                                                pieces: {
+                                                    [pieceKey.createdBy]: {
+                                                        [pieceKey.id]: {
+                                                            type: update,
+                                                            update: pieceOperation,
                                                         },
                                                     },
                                                 },
                                             },
                                         },
                                     },
-                                },
-                            };
-                            operate(operation);
+                                })
+                            );
                         }}
                     />
                 );
-            })
-            .compact()
-            .value();
+            }
+        );
 
         return (
             <ReactKonva.Layer>
                 {tachieLocationElements}
                 {characterPieceElements}
                 {imagePieceElements}
-                {dicePieces}
-                {numberPieces}
+                {dicePieceElements}
+                {numberPieceElements}
             </ReactKonva.Layer>
         );
     })();
@@ -875,8 +821,6 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
     const roomId = useSelector(state => state.roomModule.roomId);
     const boards = useBoards();
     const characters = useCharacters();
-    const dicePieceValues = useDicePieceValues();
-    const numberPieceValues = useNumberPieceValues();
     const myUserUid = useMyUserUid();
     const me = useMe();
     const activeBoardKey = useSelector(state => state.roomModule.roomState?.state?.activeBoardKey);
@@ -899,7 +843,9 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
         };
     })();
 
-    const imagePieces = useImagePieceValues(boardKeyToShow ?? undefined);
+    const dicePieceValues = useDicePieces(boardKeyToShow ?? false);
+    const numberPieceValues = useNumberPieces(boardKeyToShow ?? false);
+    const imagePieces = useImagePieces(boardKeyToShow ?? false);
 
     if (
         me == null ||
@@ -982,16 +928,19 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                 offsetY: e.evt.offsetY,
                                 pageX: e.evt.pageX,
                                 pageY: e.evt.pageY,
-                                characterPiecesOnCursor: _(characters.toArray())
-                                    .map(([characterKey, character]) => {
-                                        const found = dualKeyRecordToDualKeyMap<PieceState>(
+                                characterPiecesOnCursor: characters
+                                    .toArray()
+                                    .flatMap(([characterKey, character]) => {
+                                        return dualKeyRecordToDualKeyMap<PieceState>(
                                             character.pieces
                                         )
                                             .toArray()
-                                            .find(([boardKey, piece]) => {
+                                            .filter(([, piece]) => {
                                                 if (
-                                                    boardKey.first !== boardKeyToShow.createdBy ||
-                                                    boardKey.second !== boardKeyToShow.id
+                                                    !compositeKeyEquals(
+                                                        boardKeyToShow,
+                                                        piece.boardKey
+                                                    )
                                                 ) {
                                                     return false;
                                                 }
@@ -1000,24 +949,32 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                                     state: piece,
                                                     cursorPosition: stateOffset,
                                                 });
+                                            })
+                                            .map(([pieceKey, piece]) => {
+                                                return {
+                                                    characterKey,
+                                                    character,
+                                                    pieceKey: {
+                                                        createdBy: pieceKey.first,
+                                                        id: pieceKey.second,
+                                                    },
+                                                    piece,
+                                                };
                                             });
-                                        if (found === undefined) {
-                                            return null;
-                                        }
-                                        return { characterKey, character, piece: found[1] };
-                                    })
-                                    .compact()
-                                    .value(),
-                                tachiesOnCursor: _(characters.toArray())
-                                    .map(([characterKey, character]) => {
-                                        const found = dualKeyRecordToDualKeyMap<BoardLocationState>(
+                                    }),
+                                tachiesOnCursor: characters
+                                    .toArray()
+                                    .flatMap(([characterKey, character]) => {
+                                        return dualKeyRecordToDualKeyMap<BoardLocationState>(
                                             character.tachieLocations
                                         )
                                             .toArray()
-                                            .find(([boardKey, tachie]) => {
+                                            .filter(([, tachie]) => {
                                                 if (
-                                                    boardKey.first !== boardKeyToShow.createdBy ||
-                                                    boardKey.second !== boardKeyToShow.id
+                                                    !compositeKeyEquals(
+                                                        boardKeyToShow,
+                                                        tachie.boardKey
+                                                    )
                                                 ) {
                                                     return false;
                                                 }
@@ -1025,20 +982,21 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                                     state: tachie,
                                                     cursorPosition: stateOffset,
                                                 });
+                                            })
+                                            .map(([tachieLocationKey, tachieLocation]) => {
+                                                return {
+                                                    characterKey,
+                                                    character,
+                                                    tachieLocationKey: {
+                                                        createdBy: tachieLocationKey.first,
+                                                        id: tachieLocationKey.second,
+                                                    },
+                                                    tachieLocation,
+                                                };
                                             });
-                                        if (found === undefined) {
-                                            return null;
-                                        }
-                                        return {
-                                            characterKey,
-                                            character,
-                                            tachieLocation: found[1],
-                                        };
-                                    })
-                                    .compact()
-                                    .value(),
-                                imagePieceValuesOnCursor: (imagePieces ?? []).filter(
-                                    pieceValueElement => {
+                                    }),
+                                imagePieceValuesOnCursor: (imagePieces ?? [])
+                                    .filter(pieceValueElement => {
                                         if (pieceValueElement.piece == null) {
                                             return false;
                                         }
@@ -1047,76 +1005,48 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                             state: pieceValueElement.piece,
                                             cursorPosition: stateOffset,
                                         });
-                                    }
-                                ),
-                                dicePieceValuesOnCursor: _(dicePieceValues)
-                                    .map(element => {
-                                        const found = dualKeyRecordToDualKeyMap<PieceState>(
-                                            element.value.pieces
-                                        )
-                                            .toArray()
-                                            .find(([boardKey, piece]) => {
-                                                if (
-                                                    boardKey.first !== boardKeyToShow.createdBy ||
-                                                    boardKey.second !== boardKeyToShow.id
-                                                ) {
-                                                    return false;
-                                                }
-                                                return Piece.isCursorOnIcon({
-                                                    ...board,
-                                                    state: piece,
-                                                    cursorPosition: stateOffset,
-                                                });
-                                            });
-                                        if (found === undefined) {
-                                            return null;
-                                        }
-                                        return {
-                                            dicePieceValueKey: element.valueId,
-                                            dicePieceValue: element.value,
-                                            piece: found[1],
-                                            characterKey: {
-                                                createdBy: element.characterKey.createdBy,
-                                                id: element.characterKey.id,
-                                            },
-                                        };
                                     })
-                                    .compact()
-                                    .value(),
-                                numberPieceValuesOnCursor: _(numberPieceValues)
-                                    .map(element => {
-                                        const found = dualKeyRecordToDualKeyMap<PieceState>(
-                                            element.value.pieces
-                                        )
-                                            .toArray()
-                                            .find(([boardKey, piece]) => {
-                                                if (
-                                                    boardKey.first !== boardKeyToShow.createdBy ||
-                                                    boardKey.second !== boardKeyToShow.id
-                                                ) {
-                                                    return false;
-                                                }
-                                                return Piece.isCursorOnIcon({
-                                                    ...board,
-                                                    state: piece,
-                                                    cursorPosition: stateOffset,
-                                                });
-                                            });
-                                        if (found === undefined) {
-                                            return null;
+                                    .map(x => x.value),
+                                dicePieceValuesOnCursor: (dicePieceValues ?? [])
+                                    .filter(pieceValueElement => {
+                                        if (pieceValueElement.piece == null) {
+                                            return false;
                                         }
-                                        return {
-                                            numberPieceValueKey: element.valueId,
-                                            numberPieceValue: element.value,
-                                            piece: found[1],
-                                            characterKey: {
-                                                createdBy: element.characterKey.createdBy,
-                                                id: element.characterKey.id,
-                                            },
-                                        };
+                                        return Piece.isCursorOnIcon({
+                                            ...board,
+                                            state: pieceValueElement.piece,
+                                            cursorPosition: stateOffset,
+                                        });
                                     })
-                                    .compact()
-                                    .value(),
+                                    .map(({ value: element, piece }) => ({
+                                        dicePieceValueKey: element.valueId,
+                                        dicePieceValue: element.value,
+                                        piece,
+                                        characterKey: {
+                                            createdBy: element.characterKey.createdBy,
+                                            id: element.characterKey.id,
+                                        },
+                                    })),
+                                numberPieceValuesOnCursor: (numberPieceValues ?? [])
+                                    .filter(pieceValueElement => {
+                                        if (pieceValueElement.piece == null) {
+                                            return false;
+                                        }
+                                        return Piece.isCursorOnIcon({
+                                            ...board,
+                                            state: pieceValueElement.piece,
+                                            cursorPosition: stateOffset,
+                                        });
+                                    })
+                                    .map(({ value: element, piece }) => ({
+                                        numberPieceValueKey: element.valueId,
+                                        numberPieceValue: element.value,
+                                        piece,
+                                        characterKey: {
+                                            createdBy: element.characterKey.createdBy,
+                                            id: element.characterKey.id,
+                                        },
+                                    })),
                             },
                         })
                     );

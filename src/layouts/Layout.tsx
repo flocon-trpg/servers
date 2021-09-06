@@ -14,7 +14,15 @@ import {
     Alert,
     Result,
 } from 'antd';
-import { EntryToServerResultType, useEntryToServerMutation } from '../generated/graphql';
+import {
+    EntryToServerResultType,
+    IsEntryDocument,
+    IsEntryQuery,
+    IsEntryQueryVariables,
+    useEntryToServerMutation,
+    useIsEntryLazyQuery,
+    useIsEntryQuery,
+} from '../generated/graphql';
 import Center from '../components/Center';
 import Link from 'next/link';
 import NotSignInResult from '../components/Result/NotSignInResult';
@@ -22,6 +30,7 @@ import { authNotFound, loading, notSignIn } from '../hooks/useFirebaseUser';
 import LoadingResult from '../components/Result/LoadingResult';
 import * as Icon from '@ant-design/icons';
 import { useSignOut } from '../hooks/useSignOut';
+import { useApolloClient } from '@apollo/client';
 const { Header, Content } = AntdLayout;
 
 type EntryFormComponentProps = {
@@ -91,28 +100,63 @@ const EntryFormComponent: React.FC<EntryFormComponentProps> = (props: EntryFormC
     );
 };
 
-type Props = {
-    requiresLogin: boolean;
+export const login = 'login';
+export const loginAndEntry = 'loginAndEntry';
+export const always = 'always';
+export const success = 'success';
 
-    // EntryFormを表示させたいときにtrueを渡す。Entryの有無や必要性はここではチェックされない。
-    showEntryForm: boolean;
+type Props = {
+    requires?: typeof login | typeof loginAndEntry;
 
     // EntryFormでのentryが成功したときに呼び出される。
     onEntry?: () => void;
 
-    hideHeader?: boolean;
+    hideHeader?: typeof always | typeof success;
 };
 
 const Layout: React.FC<PropsWithChildren<Props>> = ({
     children,
-    showEntryForm,
     onEntry,
-    requiresLogin,
-    hideHeader,
+    requires,
+    hideHeader: hideHeaderProp,
 }: PropsWithChildren<Props>) => {
     const router = useRouter();
     const myAuth = React.useContext(MyAuthContext);
+    const myUserUid = typeof myAuth === 'string' ? null : myAuth.uid;
+    const apolloClient = useApolloClient();
     const signOut = useSignOut();
+    const [isEntry, setIsEntry] = React.useState<'notRequired' | 'loading' | boolean>(
+        'notRequired'
+    );
+    const requiresEntry = requires === loginAndEntry;
+    React.useEffect(() => {
+        if (requiresEntry && myUserUid != null) {
+            let unsubscribed = false;
+            setIsEntry('loading');
+            apolloClient
+                .query<IsEntryQuery, IsEntryQueryVariables>({
+                    query: IsEntryDocument,
+                    fetchPolicy: 'network-only',
+                })
+                .then(queryResult => {
+                    if (unsubscribed) {
+                        return;
+                    }
+                    setIsEntry(queryResult.data.result);
+                });
+            return () => {
+                unsubscribed = true;
+            };
+        }
+        setIsEntry('notRequired');
+    }, [requiresEntry, myUserUid, apolloClient]);
+
+    const getChildren = (): React.ReactNode => {
+        if (typeof children === 'function') {
+            return children();
+        }
+        return children;
+    };
 
     if (myAuth === authNotFound) {
         return (
@@ -120,24 +164,52 @@ const Layout: React.FC<PropsWithChildren<Props>> = ({
         );
     }
 
+    let showChildren = false;
     const content = (() => {
+        if (requires == null) {
+            showChildren = true;
+            return getChildren();
+        }
         if (myAuth === loading) {
             return <LoadingResult title="Firebase Authentication による認証を行っています…" />;
         }
-        if (requiresLogin && myAuth === notSignIn) {
+        if (myAuth === notSignIn) {
             return <NotSignInResult />;
         }
-        if (showEntryForm) {
-            return (
-                <Center>
-                    <Card title="サーバーのパスフレーズ入力">
-                        <EntryFormComponent onEntry={onEntry} />
-                    </Card>
-                </Center>
-            );
+        switch (isEntry) {
+            case 'loading':
+                return <LoadingResult title="エントリーの有無を確認しています…" />;
+            case false:
+                return (
+                    <Center>
+                        <Card title="エントリーパスワードの入力">
+                            <EntryFormComponent
+                                onEntry={() => {
+                                    setIsEntry(true);
+                                    if (onEntry != null) {
+                                        onEntry();
+                                    }
+                                }}
+                            />
+                        </Card>
+                    </Center>
+                );
         }
-        return children;
+        showChildren = true;
+        return getChildren();
     })();
+
+    let hideHeader: boolean;
+    switch (hideHeaderProp) {
+        case always:
+            hideHeader = true;
+            break;
+        case success:
+            hideHeader = showChildren;
+            break;
+        default:
+            hideHeader = false;
+    }
 
     return (
         <AntdLayout style={{ height: '100vh' }}>

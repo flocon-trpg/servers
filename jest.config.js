@@ -6,7 +6,7 @@ module.exports = {
     // https://zenn.dev/garypippi/articles/c79cb002e001681a73cd
     globals: {
         'ts-jest': {
-            tsconfig: './tsconfig.jest.json'
-        }
-    }
+            tsconfig: './tsconfig.jest.json',
+        },
+    },
 };

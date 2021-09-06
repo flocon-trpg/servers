@@ -35,7 +35,7 @@ const drawerBaseProps: Partial<DrawerProps> = {
 };
 
 const defaultImagePieceValue: ImagePieceValueState = {
-    $version: 1,
+    $v: 1,
     image: undefined,
     isPrivate: false,
     memo: '',
@@ -109,12 +109,12 @@ export const ImagePieceDrawer: React.FC = () => {
                         return;
                     }
                     const operation: UpOperation = {
-                        $version: 1,
+                        $v: 1,
                         participants: {
                             [drawerType.participantKey]: {
                                 type: update,
                                 update: {
-                                    $version: 1,
+                                    $v: 1,
                                     imagePieceValues: {
                                         [drawerType.stateKey]: {
                                             type: update,
@@ -147,12 +147,12 @@ export const ImagePieceDrawer: React.FC = () => {
         onCreate = () => {
             const id = simpleId();
             const operation: UpOperation = {
-                $version: 1,
+                $v: 1,
                 participants: {
                     [myUserUid]: {
                         type: update,
                         update: {
-                            $version: 1,
+                            $v: 1,
                             imagePieceValues: {
                                 [id]: {
                                     type: replace,
@@ -160,11 +160,11 @@ export const ImagePieceDrawer: React.FC = () => {
                                         newValue: {
                                             ...state,
                                             pieces:
-                                                drawerType.boardKey == null
+                                                drawerType.piece?.boardKey == null
                                                     ? {}
                                                     : {
-                                                          [drawerType.boardKey.createdBy]: {
-                                                              [drawerType.boardKey.id]:
+                                                          [drawerType.piece.boardKey.createdBy]: {
+                                                              [drawerType.piece.boardKey.id]:
                                                                   drawerType.piece,
                                                           },
                                                       },

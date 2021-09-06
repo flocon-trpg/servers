@@ -302,7 +302,7 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
                         participantsMap.size <= 1 &&
                         [...participantsMap]
                             .filter(([userUid]) => getUserUid(myAuth) !== userUid)
-                            .sort(([, x], [, y]) => x.name.localeCompare(y.name))
+                            .sort(([, x], [, y]) => (x.name ?? '').localeCompare(y.name ?? ''))
                             .map(([userUid, participant]) => {
                                 return (
                                     <>
@@ -385,7 +385,7 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
                                         return;
                                     }
                                     const operation: UpOperation = {
-                                        $version: 1,
+                                        $v: 1,
                                     };
                                     operation[key] = { newValue: e.currentValue };
                                     operate(operation);

@@ -25,13 +25,14 @@ import {
 import { MyCharactersSelect } from '../../components/MyCharactersSelect';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { keyNames } from '@kizahasi/util';
+import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
 };
 
 const defaultNumberPieceValue: NumberPieceValueState = {
-    $version: 1,
+    $v: 1,
     value: 0,
     isValuePrivate: false,
     pieces: {},
@@ -103,26 +104,17 @@ export const NumberPieceValueDrawer: React.FC = () => {
                     if (diff == null) {
                         return;
                     }
-                    const operation: UpOperation = {
-                        $version: 1,
-                        characters: {
-                            [drawerType.characterKey.createdBy]: {
-                                [drawerType.characterKey.id]: {
+                    operate(
+                        characterUpdateOperation(drawerType.characterKey, {
+                            $v: 1,
+                            numberPieceValues: {
+                                [drawerType.stateKey]: {
                                     type: update,
-                                    update: {
-                                        $version: 1,
-                                        numberPieceValues: {
-                                            [drawerType.stateKey]: {
-                                                type: update,
-                                                update: toNumberPieceValueUpOperation(diff),
-                                            },
-                                        },
-                                    },
+                                    update: toNumberPieceValueUpOperation(diff),
                                 },
                             },
-                        },
-                    };
-                    operate(operation);
+                        })
+                    );
                 },
             };
             break;
@@ -142,39 +134,33 @@ export const NumberPieceValueDrawer: React.FC = () => {
             }
 
             const id = simpleId();
-            const operation: UpOperation = {
-                $version: 1,
-                characters: {
-                    [myUserUid]: {
-                        [activeCharacter.key]: {
-                            type: update,
-                            update: {
-                                $version: 1,
-                                numberPieceValues: {
-                                    [id]: {
-                                        type: replace,
-                                        replace: {
-                                            newValue: {
-                                                ...state,
-                                                pieces:
-                                                    drawerType.boardKey == null
-                                                        ? {}
-                                                        : {
-                                                              [drawerType.boardKey.createdBy]: {
-                                                                  [drawerType.boardKey.id]:
-                                                                      drawerType.piece,
-                                                              },
-                                                          },
-                                            },
-                                        },
+            operate(
+                characterUpdateOperation(
+                    { createdBy: myUserUid, id: activeCharacter.key },
+                    {
+                        $v: 1,
+                        numberPieceValues: {
+                            [id]: {
+                                type: replace,
+                                replace: {
+                                    newValue: {
+                                        ...state,
+                                        pieces:
+                                            drawerType.piece?.boardKey == null
+                                                ? {}
+                                                : {
+                                                      [drawerType.piece.boardKey.createdBy]: {
+                                                          [drawerType.piece.boardKey.id]:
+                                                              drawerType.piece,
+                                                      },
+                                                  },
                                     },
                                 },
                             },
                         },
-                    },
-                },
-            };
-            operate(operation);
+                    }
+                )
+            );
             dispatch(
                 roomDrawerAndPopoverAndModalModule.actions.set({ numberPieceValueDrawerType: null })
             );

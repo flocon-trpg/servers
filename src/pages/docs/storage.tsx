@@ -18,7 +18,7 @@ const $css = css`
 
 const Index: React.FC = () => {
     return (
-        <Layout requiresLogin={false} showEntryForm={false}>
+        <Layout>
             <div css={$css}>
                 <Typography.Title level={2}>ファイルアップローダーについて</Typography.Title>
 

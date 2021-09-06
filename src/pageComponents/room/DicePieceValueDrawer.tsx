@@ -1,4 +1,4 @@
-import { Button, Checkbox, Col, Drawer, InputNumber, Row, Typography } from 'antd';
+import { Col, Drawer, Row } from 'antd';
 import React from 'react';
 import DrawerFooter from '../../layouts/DrawerFooter';
 import { simpleId } from '../../utils/generators';
@@ -8,7 +8,6 @@ import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
 import { useOperate } from '../../hooks/useOperate';
 import {
-    UpOperation,
     toDicePieceValueUpOperation,
     dicePieceValueDiff,
     DicePieceValueState,
@@ -28,13 +27,14 @@ import { InputDie } from '../../components/InputDie';
 import { noValue } from '../../utils/dice';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { keyNames } from '@kizahasi/util';
+import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
 };
 
 const defaultDicePieceValue: DicePieceValueState = {
-    $version: 1,
+    $v: 1,
     dice: {},
     pieces: {},
 };
@@ -105,26 +105,17 @@ export const DicePieceValueDrawer: React.FC = () => {
                     if (diff == null) {
                         return;
                     }
-                    const operation: UpOperation = {
-                        $version: 1,
-                        characters: {
-                            [drawerType.characterKey.createdBy]: {
-                                [drawerType.characterKey.id]: {
+                    operate(
+                        characterUpdateOperation(drawerType.characterKey, {
+                            $v: 1,
+                            dicePieceValues: {
+                                [drawerType.stateKey]: {
                                     type: update,
-                                    update: {
-                                        $version: 1,
-                                        dicePieceValues: {
-                                            [drawerType.stateKey]: {
-                                                type: update,
-                                                update: toDicePieceValueUpOperation(diff),
-                                            },
-                                        },
-                                    },
+                                    update: toDicePieceValueUpOperation(diff),
                                 },
                             },
-                        },
-                    };
-                    operate(operation);
+                        })
+                    );
                 },
             };
             break;
@@ -144,39 +135,33 @@ export const DicePieceValueDrawer: React.FC = () => {
             }
 
             const id = simpleId();
-            const operation: UpOperation = {
-                $version: 1,
-                characters: {
-                    [myUserUid]: {
-                        [activeCharacter.key]: {
-                            type: update,
-                            update: {
-                                $version: 1,
-                                dicePieceValues: {
-                                    [id]: {
-                                        type: replace,
-                                        replace: {
-                                            newValue: {
-                                                ...state,
-                                                pieces:
-                                                    drawerType.boardKey == null
-                                                        ? {}
-                                                        : {
-                                                              [drawerType.boardKey.createdBy]: {
-                                                                  [drawerType.boardKey.id]:
-                                                                      drawerType.piece,
-                                                              },
-                                                          },
-                                            },
-                                        },
+            operate(
+                characterUpdateOperation(
+                    { createdBy: myUserUid, id: activeCharacter.key },
+                    {
+                        $v: 1,
+                        dicePieceValues: {
+                            [id]: {
+                                type: replace,
+                                replace: {
+                                    newValue: {
+                                        ...state,
+                                        pieces:
+                                            drawerType?.piece?.boardKey == null
+                                                ? {}
+                                                : {
+                                                      [drawerType.piece.boardKey.createdBy]: {
+                                                          [drawerType.piece.boardKey.id]:
+                                                              drawerType.piece,
+                                                      },
+                                                  },
                                     },
                                 },
                             },
                         },
-                    },
-                },
-            };
-            operate(operation);
+                    }
+                )
+            );
             dispatch(
                 roomDrawerAndPopoverAndModalModule.actions.set({ dicePieceValueDrawerType: null })
             );
@@ -252,7 +237,7 @@ export const DicePieceValueDrawer: React.FC = () => {
                                                         e.newValue == null
                                                             ? undefined
                                                             : {
-                                                                  $version: 1,
+                                                                  $v: 1,
                                                                   dieType: e.newValue.dieType,
                                                                   isValuePrivate: false,
                                                                   value: null,

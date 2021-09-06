@@ -2,7 +2,6 @@ import React from 'react';
 import { Table, Button, Tooltip } from 'antd';
 import { update } from '../../stateManagers/states/types';
 import * as Icon from '@ant-design/icons';
-import { useOperate } from '../../hooks/useOperate';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import _ from 'lodash';
 import {

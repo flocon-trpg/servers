@@ -4,221 +4,239 @@ export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
-const defaultOptions = {};
+const defaultOptions =  {}
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-    ID: string;
-    String: string;
-    Boolean: boolean;
-    Int: number;
-    Float: number;
+  ID: string;
+  String: string;
+  Boolean: boolean;
+  Int: number;
+  Float: number;
 };
 
 export type AvailableGameSystem = {
-    __typename?: 'AvailableGameSystem';
-    id: Scalars['String'];
-    name: Scalars['String'];
-    sortKey: Scalars['String'];
+  __typename?: 'AvailableGameSystem';
+  id: Scalars['String'];
+  name: Scalars['String'];
+  sortKey: Scalars['String'];
 };
 
 export enum ChangeParticipantNameFailureType {
-    NotEntry = 'NotEntry',
-    NotFound = 'NotFound',
-    NotParticipant = 'NotParticipant',
-    NotSignIn = 'NotSignIn',
+  NotFound = 'NotFound',
+  NotParticipant = 'NotParticipant'
 }
 
 export type ChangeParticipantNameResult = {
-    __typename?: 'ChangeParticipantNameResult';
-    failureType?: Maybe<ChangeParticipantNameFailureType>;
+  __typename?: 'ChangeParticipantNameResult';
+  failureType?: Maybe<ChangeParticipantNameFailureType>;
 };
 
 export type CharacterValueForMessage = {
-    __typename?: 'CharacterValueForMessage';
-    image?: Maybe<FilePath>;
-    isPrivate: Scalars['Boolean'];
-    name: Scalars['String'];
-    stateId: Scalars['String'];
-    tachieImage?: Maybe<FilePath>;
+  __typename?: 'CharacterValueForMessage';
+  image?: Maybe<FilePath>;
+  isPrivate: Scalars['Boolean'];
+  name: Scalars['String'];
+  stateId: Scalars['String'];
+  tachieImage?: Maybe<FilePath>;
 };
 
 export type CommandResult = {
-    __typename?: 'CommandResult';
-    isSuccess?: Maybe<Scalars['Boolean']>;
-    text: Scalars['String'];
+  __typename?: 'CommandResult';
+  isSuccess?: Maybe<Scalars['Boolean']>;
+  text: Scalars['String'];
 };
 
 export type CreateRoomFailureResult = {
-    __typename?: 'CreateRoomFailureResult';
-    failureType: CreateRoomFailureType;
+  __typename?: 'CreateRoomFailureResult';
+  failureType: CreateRoomFailureType;
 };
 
 export enum CreateRoomFailureType {
-    NotEntry = 'NotEntry',
-    NotSignIn = 'NotSignIn',
+  UnknownError = 'UnknownError'
 }
 
 export type CreateRoomInput = {
-    joinAsPlayerPhrase?: Maybe<Scalars['String']>;
-    joinAsSpectatorPhrase?: Maybe<Scalars['String']>;
-    participantName: Scalars['String'];
-    roomName: Scalars['String'];
+  joinAsPlayerPhrase?: Maybe<Scalars['String']>;
+  joinAsSpectatorPhrase?: Maybe<Scalars['String']>;
+  participantName: Scalars['String'];
+  roomName: Scalars['String'];
 };
 
 export type CreateRoomResult = CreateRoomFailureResult | CreateRoomSuccessResult;
 
 export type CreateRoomSuccessResult = {
-    __typename?: 'CreateRoomSuccessResult';
-    id: Scalars['String'];
-    room: RoomGetState;
+  __typename?: 'CreateRoomSuccessResult';
+  id: Scalars['String'];
+  room: RoomGetState;
 };
 
 export enum DeleteMessageFailureType {
-    MessageDeleted = 'MessageDeleted',
-    MessageNotFound = 'MessageNotFound',
-    NotEntry = 'NotEntry',
-    NotParticipant = 'NotParticipant',
-    NotSignIn = 'NotSignIn',
-    NotYourMessage = 'NotYourMessage',
-    RoomNotFound = 'RoomNotFound',
+  MessageDeleted = 'MessageDeleted',
+  MessageNotFound = 'MessageNotFound',
+  NotParticipant = 'NotParticipant',
+  NotYourMessage = 'NotYourMessage',
+  RoomNotFound = 'RoomNotFound'
 }
 
 export type DeleteMessageResult = {
-    __typename?: 'DeleteMessageResult';
-    failureType?: Maybe<DeleteMessageFailureType>;
+  __typename?: 'DeleteMessageResult';
+  failureType?: Maybe<DeleteMessageFailureType>;
 };
 
 export enum DeleteRoomFailureType {
-    NotCreatedByYou = 'NotCreatedByYou',
-    NotEntry = 'NotEntry',
-    NotFound = 'NotFound',
-    NotSignIn = 'NotSignIn',
+  NotCreatedByYou = 'NotCreatedByYou',
+  NotFound = 'NotFound'
 }
 
 export type DeleteRoomOperation = {
-    __typename?: 'DeleteRoomOperation';
-    deletedBy: Scalars['String'];
+  __typename?: 'DeleteRoomOperation';
+  deletedBy: Scalars['String'];
 };
 
 export type DeleteRoomResult = {
-    __typename?: 'DeleteRoomResult';
-    failureType?: Maybe<DeleteRoomFailureType>;
+  __typename?: 'DeleteRoomResult';
+  failureType?: Maybe<DeleteRoomFailureType>;
+};
+
+export type EditFileTagActionInput = {
+  add: Array<Scalars['String']>;
+  filename: Scalars['String'];
+  remove: Array<Scalars['String']>;
+};
+
+export type EditFileTagsInput = {
+  actions: Array<EditFileTagActionInput>;
 };
 
 export enum EditMessageFailureType {
-    MessageDeleted = 'MessageDeleted',
-    MessageNotFound = 'MessageNotFound',
-    NotEntry = 'NotEntry',
-    NotParticipant = 'NotParticipant',
-    NotSignIn = 'NotSignIn',
-    NotYourMessage = 'NotYourMessage',
-    RoomNotFound = 'RoomNotFound',
+  MessageDeleted = 'MessageDeleted',
+  MessageNotFound = 'MessageNotFound',
+  NotParticipant = 'NotParticipant',
+  NotYourMessage = 'NotYourMessage',
+  RoomNotFound = 'RoomNotFound'
 }
 
 export type EditMessageResult = {
-    __typename?: 'EditMessageResult';
-    failureType?: Maybe<EditMessageFailureType>;
+  __typename?: 'EditMessageResult';
+  failureType?: Maybe<EditMessageFailureType>;
 };
 
 export type EntryToServerResult = {
-    __typename?: 'EntryToServerResult';
-    type: EntryToServerResultType;
+  __typename?: 'EntryToServerResult';
+  type: EntryToServerResultType;
 };
 
 export enum EntryToServerResultType {
-    AlreadyEntried = 'AlreadyEntried',
-    NoPhraseRequired = 'NoPhraseRequired',
-    NotSignIn = 'NotSignIn',
-    Success = 'Success',
-    WrongPhrase = 'WrongPhrase',
+  AlreadyEntried = 'AlreadyEntried',
+  NoPhraseRequired = 'NoPhraseRequired',
+  NotSignIn = 'NotSignIn',
+  Success = 'Success',
+  WrongPhrase = 'WrongPhrase'
 }
 
+export type FileItem = {
+  __typename?: 'FileItem';
+  createdBy: Scalars['String'];
+  filename: Scalars['ID'];
+  screenname: Scalars['String'];
+};
+
 export type FilePath = {
-    __typename?: 'FilePath';
-    path: Scalars['String'];
-    sourceType: FileSourceType;
+  __typename?: 'FilePath';
+  path: Scalars['String'];
+  sourceType: FileSourceType;
 };
 
 export type FilePathInput = {
-    path: Scalars['String'];
-    sourceType: FileSourceType;
+  path: Scalars['String'];
+  sourceType: FileSourceType;
 };
 
 export enum FileSourceType {
-    Default = 'Default',
-    FirebaseStorage = 'FirebaseStorage',
+  Default = 'Default',
+  FirebaseStorage = 'FirebaseStorage'
 }
 
+export type FileTag = {
+  __typename?: 'FileTag';
+  id: Scalars['String'];
+  name: Scalars['String'];
+};
+
+export type GetAvailableGameSystemsResult = {
+  __typename?: 'GetAvailableGameSystemsResult';
+  value: Array<AvailableGameSystem>;
+};
+
+export type GetFilesInput = {
+  fileTagIds: Array<Scalars['String']>;
+};
+
+export type GetFilesResult = {
+  __typename?: 'GetFilesResult';
+  files: Array<FileItem>;
+};
+
 export type GetJoinedRoomResult = {
-    __typename?: 'GetJoinedRoomResult';
-    role: ParticipantRole;
-    room: RoomGetState;
+  __typename?: 'GetJoinedRoomResult';
+  role: ParticipantRole;
+  room: RoomGetState;
 };
 
 export type GetNonJoinedRoomResult = {
-    __typename?: 'GetNonJoinedRoomResult';
-    roomAsListItem: RoomAsListItem;
+  __typename?: 'GetNonJoinedRoomResult';
+  roomAsListItem: RoomAsListItem;
 };
 
 export enum GetRoomConnectionFailureType {
-    NotEntry = 'NotEntry',
-    NotParticipant = 'NotParticipant',
-    NotSignIn = 'NotSignIn',
-    RoomNotFound = 'RoomNotFound',
+  NotParticipant = 'NotParticipant',
+  RoomNotFound = 'RoomNotFound'
 }
 
 export type GetRoomConnectionsFailureResult = {
-    __typename?: 'GetRoomConnectionsFailureResult';
-    failureType: GetRoomConnectionFailureType;
+  __typename?: 'GetRoomConnectionsFailureResult';
+  failureType: GetRoomConnectionFailureType;
 };
 
-export type GetRoomConnectionsResult =
-    | GetRoomConnectionsFailureResult
-    | GetRoomConnectionsSuccessResult;
+export type GetRoomConnectionsResult = GetRoomConnectionsFailureResult | GetRoomConnectionsSuccessResult;
 
 export type GetRoomConnectionsSuccessResult = {
-    __typename?: 'GetRoomConnectionsSuccessResult';
-    connectedUserUids: Array<Scalars['String']>;
-    fetchedAt: Scalars['Float'];
+  __typename?: 'GetRoomConnectionsSuccessResult';
+  connectedUserUids: Array<Scalars['String']>;
+  fetchedAt: Scalars['Float'];
 };
 
 export type GetRoomFailureResult = {
-    __typename?: 'GetRoomFailureResult';
-    failureType: GetRoomFailureType;
+  __typename?: 'GetRoomFailureResult';
+  failureType: GetRoomFailureType;
 };
 
 export enum GetRoomFailureType {
-    NotEntry = 'NotEntry',
-    NotFound = 'NotFound',
-    NotSignIn = 'NotSignIn',
+  NotFound = 'NotFound'
 }
 
 export type GetRoomLogFailureResult = {
-    __typename?: 'GetRoomLogFailureResult';
-    failureType: GetRoomLogFailureType;
+  __typename?: 'GetRoomLogFailureResult';
+  failureType: GetRoomLogFailureType;
 };
 
 export enum GetRoomLogFailureType {
-    NotAuthorized = 'NotAuthorized',
-    NotEntry = 'NotEntry',
-    NotParticipant = 'NotParticipant',
-    NotSignIn = 'NotSignIn',
-    RoomNotFound = 'RoomNotFound',
-    UnknownError = 'UnknownError',
+  NotAuthorized = 'NotAuthorized',
+  NotParticipant = 'NotParticipant',
+  RoomNotFound = 'RoomNotFound',
+  UnknownError = 'UnknownError'
 }
 
 export type GetRoomLogResult = GetRoomLogFailureResult | RoomMessages;
 
 export type GetRoomMessagesFailureResult = {
-    __typename?: 'GetRoomMessagesFailureResult';
-    failureType: GetRoomMessagesFailureType;
+  __typename?: 'GetRoomMessagesFailureResult';
+  failureType: GetRoomMessagesFailureType;
 };
 
 export enum GetRoomMessagesFailureType {
-    NotEntry = 'NotEntry',
-    NotParticipant = 'NotParticipant',
-    NotSignIn = 'NotSignIn',
-    RoomNotFound = 'RoomNotFound',
+  NotParticipant = 'NotParticipant',
+  RoomNotFound = 'RoomNotFound'
 }
 
 export type GetRoomMessagesResult = GetRoomMessagesFailureResult | RoomMessages;
@@ -226,1489 +244,1264 @@ export type GetRoomMessagesResult = GetRoomMessagesFailureResult | RoomMessages;
 export type GetRoomResult = GetJoinedRoomResult | GetNonJoinedRoomResult | GetRoomFailureResult;
 
 export type GetRoomsListFailureResult = {
-    __typename?: 'GetRoomsListFailureResult';
-    failureType: GetRoomsListFailureType;
+  __typename?: 'GetRoomsListFailureResult';
+  failureType: GetRoomFailureType;
 };
-
-export enum GetRoomsListFailureType {
-    NotEntry = 'NotEntry',
-    NotSignIn = 'NotSignIn',
-}
 
 export type GetRoomsListResult = GetRoomsListFailureResult | GetRoomsListSuccessResult;
 
 export type GetRoomsListSuccessResult = {
-    __typename?: 'GetRoomsListSuccessResult';
-    rooms: Array<RoomAsListItem>;
+  __typename?: 'GetRoomsListSuccessResult';
+  rooms: Array<RoomAsListItem>;
 };
 
 export type JoinRoomFailureResult = {
-    __typename?: 'JoinRoomFailureResult';
-    failureType: JoinRoomFailureType;
+  __typename?: 'JoinRoomFailureResult';
+  failureType: JoinRoomFailureType;
 };
 
 export enum JoinRoomFailureType {
-    AlreadyParticipant = 'AlreadyParticipant',
-    NotEntry = 'NotEntry',
-    NotFound = 'NotFound',
-    NotSignIn = 'NotSignIn',
-    TransformError = 'TransformError',
-    WrongPhrase = 'WrongPhrase',
+  AlreadyParticipant = 'AlreadyParticipant',
+  NotFound = 'NotFound',
+  TransformError = 'TransformError',
+  WrongPhrase = 'WrongPhrase'
 }
 
 export type JoinRoomResult = JoinRoomFailureResult | JoinRoomSuccessResult;
 
 export type JoinRoomSuccessResult = {
-    __typename?: 'JoinRoomSuccessResult';
-    operation?: Maybe<RoomOperation>;
+  __typename?: 'JoinRoomSuccessResult';
+  operation?: Maybe<RoomOperation>;
 };
 
 export enum LeaveRoomFailureType {
-    NotEntry = 'NotEntry',
-    NotFound = 'NotFound',
-    NotSignIn = 'NotSignIn',
+  NotFound = 'NotFound',
+  NotParticipant = 'NotParticipant'
 }
 
 export type LeaveRoomResult = {
-    __typename?: 'LeaveRoomResult';
-    failureType?: Maybe<LeaveRoomFailureType>;
-};
-
-export type ListAvailableGameSystemsResult = {
-    __typename?: 'ListAvailableGameSystemsResult';
-    value: Array<AvailableGameSystem>;
+  __typename?: 'LeaveRoomResult';
+  failureType?: Maybe<LeaveRoomFailureType>;
 };
 
 export enum MakeMessageNotSecretFailureType {
-    MessageNotFound = 'MessageNotFound',
-    NotEntry = 'NotEntry',
-    NotParticipant = 'NotParticipant',
-    NotSecret = 'NotSecret',
-    NotSignIn = 'NotSignIn',
-    NotYourMessage = 'NotYourMessage',
-    RoomNotFound = 'RoomNotFound',
+  MessageNotFound = 'MessageNotFound',
+  NotParticipant = 'NotParticipant',
+  NotSecret = 'NotSecret',
+  NotYourMessage = 'NotYourMessage',
+  RoomNotFound = 'RoomNotFound'
 }
 
 export type MakeMessageNotSecretResult = {
-    __typename?: 'MakeMessageNotSecretResult';
-    failureType?: Maybe<MakeMessageNotSecretFailureType>;
+  __typename?: 'MakeMessageNotSecretResult';
+  failureType?: Maybe<MakeMessageNotSecretFailureType>;
 };
 
 export type Mutation = {
-    __typename?: 'Mutation';
-    changeParticipantName: ChangeParticipantNameResult;
-    createRoom: CreateRoomResult;
-    deleteMessage: DeleteMessageResult;
-    deleteRoom: DeleteRoomResult;
-    editMessage: EditMessageResult;
-    entryToServer: EntryToServerResult;
-    joinRoomAsPlayer: JoinRoomResult;
-    joinRoomAsSpectator: JoinRoomResult;
-    leaveRoom: LeaveRoomResult;
-    makeMessageNotSecret: MakeMessageNotSecretResult;
-    operate: OperateRoomResult;
-    ping: Pong;
-    promoteToPlayer: PromoteResult;
-    updateWritingMessageStatus: Scalars['Boolean'];
-    writePrivateMessage: WritePrivateRoomMessageResult;
-    writePublicMessage: WritePublicRoomMessageResult;
-    writeRoomSoundEffect: WriteRoomSoundEffectResult;
+  __typename?: 'Mutation';
+  changeParticipantName: ChangeParticipantNameResult;
+  createFileTag?: Maybe<FileTag>;
+  createRoom: CreateRoomResult;
+  deleteFileTag: Scalars['Boolean'];
+  deleteMessage: DeleteMessageResult;
+  deleteRoom: DeleteRoomResult;
+  editFileTags: Scalars['Boolean'];
+  editMessage: EditMessageResult;
+  entryToServer: EntryToServerResult;
+  joinRoomAsPlayer: JoinRoomResult;
+  joinRoomAsSpectator: JoinRoomResult;
+  leaveRoom: LeaveRoomResult;
+  makeMessageNotSecret: MakeMessageNotSecretResult;
+  operate: OperateRoomResult;
+  ping: Pong;
+  promoteToPlayer: PromoteResult;
+  updateWritingMessageStatus: Scalars['Boolean'];
+  writePrivateMessage: WriteRoomPrivateMessageResult;
+  writePublicMessage: WriteRoomPublicMessageResult;
+  writeRoomSoundEffect: WriteRoomSoundEffectResult;
 };
+
 
 export type MutationChangeParticipantNameArgs = {
-    newName: Scalars['String'];
-    roomId: Scalars['String'];
+  newName: Scalars['String'];
+  roomId: Scalars['String'];
 };
+
+
+export type MutationCreateFileTagArgs = {
+  tagName: Scalars['String'];
+};
+
 
 export type MutationCreateRoomArgs = {
-    input: CreateRoomInput;
+  input: CreateRoomInput;
 };
+
+
+export type MutationDeleteFileTagArgs = {
+  tagId: Scalars['String'];
+};
+
 
 export type MutationDeleteMessageArgs = {
-    messageId: Scalars['String'];
-    roomId: Scalars['String'];
+  messageId: Scalars['String'];
+  roomId: Scalars['String'];
 };
+
 
 export type MutationDeleteRoomArgs = {
-    id: Scalars['String'];
+  id: Scalars['String'];
 };
+
+
+export type MutationEditFileTagsArgs = {
+  input: EditFileTagsInput;
+};
+
 
 export type MutationEditMessageArgs = {
-    messageId: Scalars['String'];
-    roomId: Scalars['String'];
-    text: Scalars['String'];
+  messageId: Scalars['String'];
+  roomId: Scalars['String'];
+  text: Scalars['String'];
 };
+
 
 export type MutationEntryToServerArgs = {
-    phrase?: Maybe<Scalars['String']>;
+  phrase?: Maybe<Scalars['String']>;
 };
+
 
 export type MutationJoinRoomAsPlayerArgs = {
-    id: Scalars['String'];
-    name: Scalars['String'];
-    phrase?: Maybe<Scalars['String']>;
+  id: Scalars['String'];
+  name: Scalars['String'];
+  phrase?: Maybe<Scalars['String']>;
 };
+
 
 export type MutationJoinRoomAsSpectatorArgs = {
-    id: Scalars['String'];
-    name: Scalars['String'];
-    phrase?: Maybe<Scalars['String']>;
+  id: Scalars['String'];
+  name: Scalars['String'];
+  phrase?: Maybe<Scalars['String']>;
 };
+
 
 export type MutationLeaveRoomArgs = {
-    id: Scalars['String'];
+  id: Scalars['String'];
 };
+
 
 export type MutationMakeMessageNotSecretArgs = {
-    messageId: Scalars['String'];
-    roomId: Scalars['String'];
+  messageId: Scalars['String'];
+  roomId: Scalars['String'];
 };
+
 
 export type MutationOperateArgs = {
-    id: Scalars['String'];
-    operation: RoomOperationInput;
-    prevRevision: Scalars['Int'];
-    requestId: Scalars['String'];
+  id: Scalars['String'];
+  operation: RoomOperationInput;
+  prevRevision: Scalars['Int'];
+  requestId: Scalars['String'];
 };
+
 
 export type MutationPingArgs = {
-    value: Scalars['Float'];
+  value: Scalars['Float'];
 };
+
 
 export type MutationPromoteToPlayerArgs = {
-    phrase?: Maybe<Scalars['String']>;
-    roomId: Scalars['String'];
+  phrase?: Maybe<Scalars['String']>;
+  roomId: Scalars['String'];
 };
+
 
 export type MutationUpdateWritingMessageStatusArgs = {
-    newStatus: WritingMessageStatusInputType;
-    roomId: Scalars['String'];
+  newStatus: WritingMessageStatusInputType;
+  roomId: Scalars['String'];
 };
+
 
 export type MutationWritePrivateMessageArgs = {
-    characterStateId?: Maybe<Scalars['String']>;
-    customName?: Maybe<Scalars['String']>;
-    gameType?: Maybe<Scalars['String']>;
-    roomId: Scalars['String'];
-    text: Scalars['String'];
-    textColor?: Maybe<Scalars['String']>;
-    visibleTo: Array<Scalars['String']>;
+  characterStateId?: Maybe<Scalars['String']>;
+  customName?: Maybe<Scalars['String']>;
+  gameType?: Maybe<Scalars['String']>;
+  roomId: Scalars['String'];
+  text: Scalars['String'];
+  textColor?: Maybe<Scalars['String']>;
+  visibleTo: Array<Scalars['String']>;
 };
+
 
 export type MutationWritePublicMessageArgs = {
-    channelKey: Scalars['String'];
-    characterStateId?: Maybe<Scalars['String']>;
-    customName?: Maybe<Scalars['String']>;
-    gameType?: Maybe<Scalars['String']>;
-    roomId: Scalars['String'];
-    text: Scalars['String'];
-    textColor?: Maybe<Scalars['String']>;
+  channelKey: Scalars['String'];
+  characterStateId?: Maybe<Scalars['String']>;
+  customName?: Maybe<Scalars['String']>;
+  gameType?: Maybe<Scalars['String']>;
+  roomId: Scalars['String'];
+  text: Scalars['String'];
+  textColor?: Maybe<Scalars['String']>;
 };
 
+
 export type MutationWriteRoomSoundEffectArgs = {
-    file: FilePathInput;
-    roomId: Scalars['String'];
-    volume: Scalars['Float'];
+  file: FilePathInput;
+  roomId: Scalars['String'];
+  volume: Scalars['Float'];
 };
 
 export type OperateRoomFailureResult = {
-    __typename?: 'OperateRoomFailureResult';
-    failureType: OperateRoomFailureType;
+  __typename?: 'OperateRoomFailureResult';
+  failureType: OperateRoomFailureType;
 };
 
 export enum OperateRoomFailureType {
-    InvalidId = 'InvalidId',
-    NotEntry = 'NotEntry',
-    NotFound = 'NotFound',
-    NotParticipated = 'NotParticipated',
-    NotSignIn = 'NotSignIn',
+  InvalidId = 'InvalidId',
+  NotFound = 'NotFound',
+  NotParticipant = 'NotParticipant'
 }
 
 export type OperateRoomIdResult = {
-    __typename?: 'OperateRoomIdResult';
-    requestId: Scalars['String'];
+  __typename?: 'OperateRoomIdResult';
+  requestId: Scalars['String'];
 };
 
 export type OperateRoomNonJoinedResult = {
-    __typename?: 'OperateRoomNonJoinedResult';
-    roomAsListItem: RoomAsListItem;
+  __typename?: 'OperateRoomNonJoinedResult';
+  roomAsListItem: RoomAsListItem;
 };
 
-export type OperateRoomResult =
-    | OperateRoomFailureResult
-    | OperateRoomIdResult
-    | OperateRoomNonJoinedResult
-    | OperateRoomSuccessResult;
+export type OperateRoomResult = OperateRoomFailureResult | OperateRoomIdResult | OperateRoomNonJoinedResult | OperateRoomSuccessResult;
 
 export type OperateRoomSuccessResult = {
-    __typename?: 'OperateRoomSuccessResult';
-    operation: RoomOperation;
+  __typename?: 'OperateRoomSuccessResult';
+  operation: RoomOperation;
 };
 
 export type OperatedBy = {
-    __typename?: 'OperatedBy';
-    clientId: Scalars['String'];
-    userUid: Scalars['String'];
+  __typename?: 'OperatedBy';
+  clientId: Scalars['String'];
+  userUid: Scalars['String'];
 };
 
 export enum ParticipantRole {
-    Master = 'Master',
-    Player = 'Player',
-    Spectator = 'Spectator',
-    OfNullishString = 'ofNullishString',
-    OfString = 'ofString',
+  Master = 'Master',
+  Player = 'Player',
+  Spectator = 'Spectator',
+  OfNullishString = 'ofNullishString',
+  OfString = 'ofString'
 }
 
 export type PieceValueLog = {
-    __typename?: 'PieceValueLog';
-    characterCreatedBy: Scalars['String'];
-    characterId: Scalars['String'];
-    createdAt: Scalars['Float'];
-    logType: PieceValueLogType;
-    messageId: Scalars['String'];
-    stateId: Scalars['String'];
-    valueJson: Scalars['String'];
+  __typename?: 'PieceValueLog';
+  characterCreatedBy: Scalars['String'];
+  characterId: Scalars['String'];
+  createdAt: Scalars['Float'];
+  logType: PieceValueLogType;
+  messageId: Scalars['String'];
+  stateId: Scalars['String'];
+  valueJson: Scalars['String'];
 };
 
 export enum PieceValueLogType {
-    Dice = 'Dice',
-    Number = 'Number',
+  Dice = 'Dice',
+  Number = 'Number'
 }
 
 export type Pong = {
-    __typename?: 'Pong';
-    createdBy?: Maybe<Scalars['String']>;
-    value: Scalars['Float'];
+  __typename?: 'Pong';
+  createdBy?: Maybe<Scalars['String']>;
+  value: Scalars['Float'];
 };
 
 export type Prerelease = {
-    __typename?: 'Prerelease';
-    type: PrereleaseType;
-    version: Scalars['Float'];
+  __typename?: 'Prerelease';
+  type: PrereleaseType;
+  version: Scalars['Float'];
 };
 
 export enum PrereleaseType {
-    Alpha = 'Alpha',
-    Beta = 'Beta',
-    Rc = 'Rc',
+  Alpha = 'Alpha',
+  Beta = 'Beta',
+  Rc = 'Rc'
 }
 
 export enum PromoteFailureType {
-    NoNeedToPromote = 'NoNeedToPromote',
-    NotEntry = 'NotEntry',
-    NotFound = 'NotFound',
-    NotParticipant = 'NotParticipant',
-    NotSignIn = 'NotSignIn',
-    WrongPhrase = 'WrongPhrase',
+  NoNeedToPromote = 'NoNeedToPromote',
+  NotFound = 'NotFound',
+  NotParticipant = 'NotParticipant',
+  WrongPhrase = 'WrongPhrase'
 }
 
 export type PromoteResult = {
-    __typename?: 'PromoteResult';
-    failureType?: Maybe<PromoteFailureType>;
+  __typename?: 'PromoteResult';
+  failureType?: Maybe<PromoteFailureType>;
 };
 
 export type Query = {
-    __typename?: 'Query';
-    getLog: GetRoomLogResult;
-    getMessages: GetRoomMessagesResult;
-    getRoom: GetRoomResult;
-    getRoomConnections: GetRoomConnectionsResult;
-    getRoomsList: GetRoomsListResult;
-    getServerInfo: ServerInfo;
-    listAvailableGameSystems: ListAvailableGameSystemsResult;
-    requiresPhraseToJoinAsPlayer: RequiresPhraseResult;
+  __typename?: 'Query';
+  getAvailableGameSystems: GetAvailableGameSystemsResult;
+  getFiles: GetFilesResult;
+  getLog: GetRoomLogResult;
+  getMessages: GetRoomMessagesResult;
+  getRoom: GetRoomResult;
+  getRoomConnections: GetRoomConnectionsResult;
+  getRoomsList: GetRoomsListResult;
+  getServerInfo: ServerInfo;
+  isEntry: Scalars['Boolean'];
+  requiresPhraseToJoinAsPlayer: RequiresPhraseResult;
 };
+
+
+export type QueryGetFilesArgs = {
+  input: GetFilesInput;
+};
+
 
 export type QueryGetLogArgs = {
-    roomId: Scalars['String'];
+  roomId: Scalars['String'];
 };
+
 
 export type QueryGetMessagesArgs = {
-    roomId: Scalars['String'];
+  roomId: Scalars['String'];
 };
+
 
 export type QueryGetRoomArgs = {
-    id: Scalars['String'];
+  id: Scalars['String'];
 };
+
 
 export type QueryGetRoomConnectionsArgs = {
-    roomId: Scalars['String'];
+  roomId: Scalars['String'];
 };
 
+
 export type QueryRequiresPhraseToJoinAsPlayerArgs = {
-    roomId: Scalars['String'];
+  roomId: Scalars['String'];
 };
 
 export type RequiresPhraseFailureResult = {
-    __typename?: 'RequiresPhraseFailureResult';
-    failureType: RequiresPhraseFailureType;
+  __typename?: 'RequiresPhraseFailureResult';
+  failureType: RequiresPhraseFailureType;
 };
 
 export enum RequiresPhraseFailureType {
-    NotEntry = 'NotEntry',
-    NotFound = 'NotFound',
-    NotSignIn = 'NotSignIn',
+  NotFound = 'NotFound'
 }
 
 export type RequiresPhraseResult = RequiresPhraseFailureResult | RequiresPhraseSuccessResult;
 
 export type RequiresPhraseSuccessResult = {
-    __typename?: 'RequiresPhraseSuccessResult';
-    value: Scalars['Boolean'];
+  __typename?: 'RequiresPhraseSuccessResult';
+  value: Scalars['Boolean'];
 };
 
 export type RoomAsListItem = {
-    __typename?: 'RoomAsListItem';
-    createdBy: Scalars['String'];
-    id: Scalars['ID'];
-    name: Scalars['String'];
-    requiresPhraseToJoinAsPlayer: Scalars['Boolean'];
-    requiresPhraseToJoinAsSpectator: Scalars['Boolean'];
+  __typename?: 'RoomAsListItem';
+  createdBy: Scalars['String'];
+  id: Scalars['ID'];
+  name: Scalars['String'];
+  requiresPhraseToJoinAsPlayer: Scalars['Boolean'];
+  requiresPhraseToJoinAsSpectator: Scalars['Boolean'];
 };
 
 export type RoomConnectionEvent = {
-    __typename?: 'RoomConnectionEvent';
-    isConnected: Scalars['Boolean'];
-    updatedAt: Scalars['Float'];
-    userUid: Scalars['String'];
+  __typename?: 'RoomConnectionEvent';
+  isConnected: Scalars['Boolean'];
+  updatedAt: Scalars['Float'];
+  userUid: Scalars['String'];
 };
 
 export type RoomEvent = {
-    __typename?: 'RoomEvent';
-    deleteRoomOperation?: Maybe<DeleteRoomOperation>;
-    roomConnectionEvent?: Maybe<RoomConnectionEvent>;
-    roomMessageEvent?: Maybe<RoomMessageEvent>;
-    roomOperation?: Maybe<RoomOperation>;
-    writingMessageStatus?: Maybe<WritingMessageStatus>;
+  __typename?: 'RoomEvent';
+  deleteRoomOperation?: Maybe<DeleteRoomOperation>;
+  roomConnectionEvent?: Maybe<RoomConnectionEvent>;
+  roomMessageEvent?: Maybe<RoomMessageEvent>;
+  roomOperation?: Maybe<RoomOperation>;
+  writingMessageStatus?: Maybe<WritingMessageStatus>;
 };
 
 export type RoomGetState = {
-    __typename?: 'RoomGetState';
-    createdBy: Scalars['String'];
-    revision: Scalars['Float'];
-    stateJson: Scalars['String'];
+  __typename?: 'RoomGetState';
+  createdBy: Scalars['String'];
+  revision: Scalars['Float'];
+  stateJson: Scalars['String'];
 };
 
-export type RoomMessageEvent =
-    | PieceValueLog
-    | RoomPrivateMessage
-    | RoomPrivateMessageUpdate
-    | RoomPublicChannel
-    | RoomPublicChannelUpdate
-    | RoomPublicMessage
-    | RoomPublicMessageUpdate
-    | RoomSoundEffect;
+export type RoomMessageEvent = PieceValueLog | RoomPrivateMessage | RoomPrivateMessageUpdate | RoomPublicChannel | RoomPublicChannelUpdate | RoomPublicMessage | RoomPublicMessageUpdate | RoomSoundEffect;
 
 export type RoomMessages = {
-    __typename?: 'RoomMessages';
-    pieceValueLogs: Array<PieceValueLog>;
-    privateMessages: Array<RoomPrivateMessage>;
-    publicChannels: Array<RoomPublicChannel>;
-    publicMessages: Array<RoomPublicMessage>;
-    soundEffects: Array<RoomSoundEffect>;
+  __typename?: 'RoomMessages';
+  pieceValueLogs: Array<PieceValueLog>;
+  privateMessages: Array<RoomPrivateMessage>;
+  publicChannels: Array<RoomPublicChannel>;
+  publicMessages: Array<RoomPublicMessage>;
+  soundEffects: Array<RoomSoundEffect>;
 };
 
 export type RoomOperation = {
-    __typename?: 'RoomOperation';
-    operatedBy?: Maybe<OperatedBy>;
-    revisionTo: Scalars['Float'];
-    valueJson: Scalars['String'];
+  __typename?: 'RoomOperation';
+  operatedBy?: Maybe<OperatedBy>;
+  revisionTo: Scalars['Float'];
+  valueJson: Scalars['String'];
 };
 
 export type RoomOperationInput = {
-    clientId: Scalars['String'];
-    valueJson: Scalars['String'];
+  clientId: Scalars['String'];
+  valueJson: Scalars['String'];
 };
 
 export type RoomPrivateMessage = {
-    __typename?: 'RoomPrivateMessage';
-    altTextToSecret?: Maybe<Scalars['String']>;
-    character?: Maybe<CharacterValueForMessage>;
-    commandResult?: Maybe<CommandResult>;
-    createdAt: Scalars['Float'];
-    createdBy?: Maybe<Scalars['String']>;
-    customName?: Maybe<Scalars['String']>;
-    initText?: Maybe<Scalars['String']>;
-    initTextSource?: Maybe<Scalars['String']>;
-    isSecret: Scalars['Boolean'];
-    messageId: Scalars['String'];
-    textColor?: Maybe<Scalars['String']>;
-    updatedAt?: Maybe<Scalars['Float']>;
-    updatedText?: Maybe<UpdatedText>;
-    visibleTo: Array<Scalars['String']>;
+  __typename?: 'RoomPrivateMessage';
+  altTextToSecret?: Maybe<Scalars['String']>;
+  character?: Maybe<CharacterValueForMessage>;
+  commandResult?: Maybe<CommandResult>;
+  createdAt: Scalars['Float'];
+  createdBy?: Maybe<Scalars['String']>;
+  customName?: Maybe<Scalars['String']>;
+  initText?: Maybe<Scalars['String']>;
+  initTextSource?: Maybe<Scalars['String']>;
+  isSecret: Scalars['Boolean'];
+  messageId: Scalars['String'];
+  textColor?: Maybe<Scalars['String']>;
+  updatedAt?: Maybe<Scalars['Float']>;
+  updatedText?: Maybe<UpdatedText>;
+  visibleTo: Array<Scalars['String']>;
 };
 
 export type RoomPrivateMessageUpdate = {
-    __typename?: 'RoomPrivateMessageUpdate';
-    altTextToSecret?: Maybe<Scalars['String']>;
-    commandResult?: Maybe<CommandResult>;
-    initText?: Maybe<Scalars['String']>;
-    initTextSource?: Maybe<Scalars['String']>;
-    isSecret: Scalars['Boolean'];
-    messageId: Scalars['String'];
-    updatedAt?: Maybe<Scalars['Float']>;
-    updatedText?: Maybe<UpdatedText>;
+  __typename?: 'RoomPrivateMessageUpdate';
+  altTextToSecret?: Maybe<Scalars['String']>;
+  commandResult?: Maybe<CommandResult>;
+  initText?: Maybe<Scalars['String']>;
+  initTextSource?: Maybe<Scalars['String']>;
+  isSecret: Scalars['Boolean'];
+  messageId: Scalars['String'];
+  updatedAt?: Maybe<Scalars['Float']>;
+  updatedText?: Maybe<UpdatedText>;
 };
 
 export type RoomPublicChannel = {
-    __typename?: 'RoomPublicChannel';
-    key: Scalars['String'];
-    name?: Maybe<Scalars['String']>;
+  __typename?: 'RoomPublicChannel';
+  key: Scalars['String'];
+  name?: Maybe<Scalars['String']>;
 };
 
 export type RoomPublicChannelUpdate = {
-    __typename?: 'RoomPublicChannelUpdate';
-    key: Scalars['String'];
-    name?: Maybe<Scalars['String']>;
+  __typename?: 'RoomPublicChannelUpdate';
+  key: Scalars['String'];
+  name?: Maybe<Scalars['String']>;
 };
 
 export type RoomPublicMessage = {
-    __typename?: 'RoomPublicMessage';
-    altTextToSecret?: Maybe<Scalars['String']>;
-    channelKey: Scalars['String'];
-    character?: Maybe<CharacterValueForMessage>;
-    commandResult?: Maybe<CommandResult>;
-    createdAt: Scalars['Float'];
-    createdBy?: Maybe<Scalars['String']>;
-    customName?: Maybe<Scalars['String']>;
-    initText?: Maybe<Scalars['String']>;
-    initTextSource?: Maybe<Scalars['String']>;
-    isSecret: Scalars['Boolean'];
-    messageId: Scalars['String'];
-    textColor?: Maybe<Scalars['String']>;
-    updatedAt?: Maybe<Scalars['Float']>;
-    updatedText?: Maybe<UpdatedText>;
+  __typename?: 'RoomPublicMessage';
+  altTextToSecret?: Maybe<Scalars['String']>;
+  channelKey: Scalars['String'];
+  character?: Maybe<CharacterValueForMessage>;
+  commandResult?: Maybe<CommandResult>;
+  createdAt: Scalars['Float'];
+  createdBy?: Maybe<Scalars['String']>;
+  customName?: Maybe<Scalars['String']>;
+  initText?: Maybe<Scalars['String']>;
+  initTextSource?: Maybe<Scalars['String']>;
+  isSecret: Scalars['Boolean'];
+  messageId: Scalars['String'];
+  textColor?: Maybe<Scalars['String']>;
+  updatedAt?: Maybe<Scalars['Float']>;
+  updatedText?: Maybe<UpdatedText>;
 };
 
 export type RoomPublicMessageUpdate = {
-    __typename?: 'RoomPublicMessageUpdate';
-    altTextToSecret?: Maybe<Scalars['String']>;
-    commandResult?: Maybe<CommandResult>;
-    initText?: Maybe<Scalars['String']>;
-    initTextSource?: Maybe<Scalars['String']>;
-    isSecret: Scalars['Boolean'];
-    messageId: Scalars['String'];
-    updatedAt?: Maybe<Scalars['Float']>;
-    updatedText?: Maybe<UpdatedText>;
+  __typename?: 'RoomPublicMessageUpdate';
+  altTextToSecret?: Maybe<Scalars['String']>;
+  commandResult?: Maybe<CommandResult>;
+  initText?: Maybe<Scalars['String']>;
+  initTextSource?: Maybe<Scalars['String']>;
+  isSecret: Scalars['Boolean'];
+  messageId: Scalars['String'];
+  updatedAt?: Maybe<Scalars['Float']>;
+  updatedText?: Maybe<UpdatedText>;
 };
 
 export type RoomSoundEffect = {
-    __typename?: 'RoomSoundEffect';
-    createdAt: Scalars['Float'];
-    createdBy?: Maybe<Scalars['String']>;
-    file: FilePath;
-    messageId: Scalars['String'];
-    volume: Scalars['Float'];
+  __typename?: 'RoomSoundEffect';
+  createdAt: Scalars['Float'];
+  createdBy?: Maybe<Scalars['String']>;
+  file: FilePath;
+  messageId: Scalars['String'];
+  volume: Scalars['Float'];
 };
 
 export type SemVer = {
-    __typename?: 'SemVer';
-    major: Scalars['Float'];
-    minor: Scalars['Float'];
-    patch: Scalars['Float'];
-    prerelease?: Maybe<Prerelease>;
+  __typename?: 'SemVer';
+  major: Scalars['Float'];
+  minor: Scalars['Float'];
+  patch: Scalars['Float'];
+  prerelease?: Maybe<Prerelease>;
 };
 
 export type ServerInfo = {
-    __typename?: 'ServerInfo';
-    version: SemVer;
+  __typename?: 'ServerInfo';
+  version: SemVer;
 };
 
 export type Subscription = {
-    __typename?: 'Subscription';
-    pong: Pong;
-    roomEvent?: Maybe<RoomEvent>;
+  __typename?: 'Subscription';
+  pong: Pong;
+  roomEvent?: Maybe<RoomEvent>;
 };
 
+
 export type SubscriptionRoomEventArgs = {
-    id: Scalars['String'];
+  id: Scalars['String'];
 };
 
 export type UpdatedText = {
-    __typename?: 'UpdatedText';
-    currentText?: Maybe<Scalars['String']>;
-    updatedAt: Scalars['Float'];
+  __typename?: 'UpdatedText';
+  currentText?: Maybe<Scalars['String']>;
+  updatedAt: Scalars['Float'];
 };
 
-export type WritePrivateRoomMessageFailureResult = {
-    __typename?: 'WritePrivateRoomMessageFailureResult';
-    failureType: WritePrivateRoomMessageFailureType;
+export type WriteRoomPrivateMessageFailureResult = {
+  __typename?: 'WriteRoomPrivateMessageFailureResult';
+  failureType: WriteRoomPrivateMessageFailureType;
 };
 
-export enum WritePrivateRoomMessageFailureType {
-    NotEntry = 'NotEntry',
-    NotParticipant = 'NotParticipant',
-    NotSignIn = 'NotSignIn',
-    RoomNotFound = 'RoomNotFound',
-    VisibleToIsInvalid = 'VisibleToIsInvalid',
+export enum WriteRoomPrivateMessageFailureType {
+  NotParticipant = 'NotParticipant',
+  RoomNotFound = 'RoomNotFound',
+  VisibleToIsInvalid = 'VisibleToIsInvalid'
 }
 
-export type WritePrivateRoomMessageResult =
-    | RoomPrivateMessage
-    | WritePrivateRoomMessageFailureResult;
+export type WriteRoomPrivateMessageResult = RoomPrivateMessage | WriteRoomPrivateMessageFailureResult;
 
-export type WritePublicRoomMessageFailureResult = {
-    __typename?: 'WritePublicRoomMessageFailureResult';
-    failureType: WritePublicRoomMessageFailureType;
+export type WriteRoomPublicMessageFailureResult = {
+  __typename?: 'WriteRoomPublicMessageFailureResult';
+  failureType: WriteRoomPublicMessageFailureType;
 };
 
-export enum WritePublicRoomMessageFailureType {
-    NotAllowedChannelKey = 'NotAllowedChannelKey',
-    NotAuthorized = 'NotAuthorized',
-    NotEntry = 'NotEntry',
-    NotParticipant = 'NotParticipant',
-    NotSignIn = 'NotSignIn',
-    RoomNotFound = 'RoomNotFound',
+export enum WriteRoomPublicMessageFailureType {
+  NotAllowedChannelKey = 'NotAllowedChannelKey',
+  NotAuthorized = 'NotAuthorized',
+  NotParticipant = 'NotParticipant',
+  RoomNotFound = 'RoomNotFound'
 }
 
-export type WritePublicRoomMessageResult = RoomPublicMessage | WritePublicRoomMessageFailureResult;
+export type WriteRoomPublicMessageResult = RoomPublicMessage | WriteRoomPublicMessageFailureResult;
 
 export type WriteRoomSoundEffectFailureResult = {
-    __typename?: 'WriteRoomSoundEffectFailureResult';
-    failureType: WriteRoomSoundEffectFailureType;
+  __typename?: 'WriteRoomSoundEffectFailureResult';
+  failureType: WriteRoomSoundEffectFailureType;
 };
 
 export enum WriteRoomSoundEffectFailureType {
-    NotAuthorized = 'NotAuthorized',
-    NotEntry = 'NotEntry',
-    NotParticipant = 'NotParticipant',
-    NotSignIn = 'NotSignIn',
-    RoomNotFound = 'RoomNotFound',
+  NotAuthorized = 'NotAuthorized',
+  NotParticipant = 'NotParticipant',
+  RoomNotFound = 'RoomNotFound'
 }
 
 export type WriteRoomSoundEffectResult = RoomSoundEffect | WriteRoomSoundEffectFailureResult;
 
 export type WritingMessageStatus = {
-    __typename?: 'WritingMessageStatus';
-    status: WritingMessageStatusType;
-    updatedAt: Scalars['Float'];
-    userUid: Scalars['String'];
+  __typename?: 'WritingMessageStatus';
+  status: WritingMessageStatusType;
+  updatedAt: Scalars['Float'];
+  userUid: Scalars['String'];
 };
 
 export enum WritingMessageStatusInputType {
-    Cleared = 'Cleared',
-    KeepWriting = 'KeepWriting',
-    StartWriting = 'StartWriting',
+  Cleared = 'Cleared',
+  KeepWriting = 'KeepWriting',
+  StartWriting = 'StartWriting'
 }
 
 export enum WritingMessageStatusType {
-    Cleared = 'Cleared',
-    Disconnected = 'Disconnected',
-    Submit = 'Submit',
-    Writing = 'Writing',
+  Cleared = 'Cleared',
+  Disconnected = 'Disconnected',
+  Submit = 'Submit',
+  Writing = 'Writing'
 }
 
-export type CharacterValueForMessageFragment = { __typename?: 'CharacterValueForMessage' } & Pick<
-    CharacterValueForMessage,
-    'stateId' | 'isPrivate' | 'name'
-> & {
-        image?: Maybe<{ __typename?: 'FilePath' } & FilePathFragment>;
-        tachieImage?: Maybe<{ __typename?: 'FilePath' } & FilePathFragment>;
-    };
+export type CharacterValueForMessageFragment = { __typename?: 'CharacterValueForMessage', stateId: string, isPrivate: boolean, name: string, image?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }>, tachieImage?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }> };
 
-type CreateRoomResult_CreateRoomFailureResult_Fragment = {
-    __typename?: 'CreateRoomFailureResult';
-} & Pick<CreateRoomFailureResult, 'failureType'>;
+type CreateRoomResult_CreateRoomFailureResult_Fragment = { __typename?: 'CreateRoomFailureResult', failureType: CreateRoomFailureType };
 
-type CreateRoomResult_CreateRoomSuccessResult_Fragment = {
-    __typename?: 'CreateRoomSuccessResult';
-} & Pick<CreateRoomSuccessResult, 'id'> & {
-        room: { __typename?: 'RoomGetState' } & RoomGetStateFragment;
-    };
+type CreateRoomResult_CreateRoomSuccessResult_Fragment = { __typename?: 'CreateRoomSuccessResult', id: string, room: { __typename?: 'RoomGetState', revision: number, createdBy: string, stateJson: string } };
 
-export type CreateRoomResultFragment =
-    | CreateRoomResult_CreateRoomFailureResult_Fragment
-    | CreateRoomResult_CreateRoomSuccessResult_Fragment;
+export type CreateRoomResultFragment = CreateRoomResult_CreateRoomFailureResult_Fragment | CreateRoomResult_CreateRoomSuccessResult_Fragment;
 
-export type FilePathFragment = { __typename?: 'FilePath' } & Pick<FilePath, 'sourceType' | 'path'>;
+export type FileItemFragment = { __typename?: 'FileItem', filename: string, screenname: string, createdBy: string };
 
-export type GetNonJoinedRoomResultFragment = { __typename?: 'GetNonJoinedRoomResult' } & {
-    roomAsListItem: { __typename?: 'RoomAsListItem' } & RoomAsListItemFragment;
-};
+export type FilePathFragment = { __typename?: 'FilePath', sourceType: FileSourceType, path: string };
 
-type GetRoomListResult_GetRoomsListFailureResult_Fragment = {
-    __typename?: 'GetRoomsListFailureResult';
-} & Pick<GetRoomsListFailureResult, 'failureType'>;
+export type FileTagFragment = { __typename?: 'FileTag', id: string, name: string };
 
-type GetRoomListResult_GetRoomsListSuccessResult_Fragment = {
-    __typename?: 'GetRoomsListSuccessResult';
-} & { rooms: Array<{ __typename?: 'RoomAsListItem' } & RoomAsListItemFragment> };
+export type GetNonJoinedRoomResultFragment = { __typename?: 'GetNonJoinedRoomResult', roomAsListItem: { __typename?: 'RoomAsListItem', id: string, name: string, createdBy: string, requiresPhraseToJoinAsPlayer: boolean, requiresPhraseToJoinAsSpectator: boolean } };
 
-export type GetRoomListResultFragment =
-    | GetRoomListResult_GetRoomsListFailureResult_Fragment
-    | GetRoomListResult_GetRoomsListSuccessResult_Fragment;
+type GetRoomListResult_GetRoomsListFailureResult_Fragment = { __typename?: 'GetRoomsListFailureResult', failureType: GetRoomFailureType };
 
-type GetRoomResult_GetJoinedRoomResult_Fragment = { __typename?: 'GetJoinedRoomResult' } & Pick<
-    GetJoinedRoomResult,
-    'role'
-> & { room: { __typename?: 'RoomGetState' } & RoomGetStateFragment };
+type GetRoomListResult_GetRoomsListSuccessResult_Fragment = { __typename?: 'GetRoomsListSuccessResult', rooms: Array<{ __typename?: 'RoomAsListItem', id: string, name: string, createdBy: string, requiresPhraseToJoinAsPlayer: boolean, requiresPhraseToJoinAsSpectator: boolean }> };
 
-type GetRoomResult_GetNonJoinedRoomResult_Fragment = {
-    __typename?: 'GetNonJoinedRoomResult';
-} & GetNonJoinedRoomResultFragment;
+export type GetRoomListResultFragment = GetRoomListResult_GetRoomsListFailureResult_Fragment | GetRoomListResult_GetRoomsListSuccessResult_Fragment;
 
-type GetRoomResult_GetRoomFailureResult_Fragment = { __typename?: 'GetRoomFailureResult' } & Pick<
-    GetRoomFailureResult,
-    'failureType'
->;
+type GetRoomResult_GetJoinedRoomResult_Fragment = { __typename?: 'GetJoinedRoomResult', role: ParticipantRole, room: { __typename?: 'RoomGetState', revision: number, createdBy: string, stateJson: string } };
 
-export type GetRoomResultFragment =
-    | GetRoomResult_GetJoinedRoomResult_Fragment
-    | GetRoomResult_GetNonJoinedRoomResult_Fragment
-    | GetRoomResult_GetRoomFailureResult_Fragment;
+type GetRoomResult_GetNonJoinedRoomResult_Fragment = { __typename?: 'GetNonJoinedRoomResult', roomAsListItem: { __typename?: 'RoomAsListItem', id: string, name: string, createdBy: string, requiresPhraseToJoinAsPlayer: boolean, requiresPhraseToJoinAsSpectator: boolean } };
 
-type JoinRoomResult_JoinRoomFailureResult_Fragment = {
-    __typename?: 'JoinRoomFailureResult';
-} & Pick<JoinRoomFailureResult, 'failureType'>;
+type GetRoomResult_GetRoomFailureResult_Fragment = { __typename?: 'GetRoomFailureResult', failureType: GetRoomFailureType };
 
-type JoinRoomResult_JoinRoomSuccessResult_Fragment = { __typename?: 'JoinRoomSuccessResult' } & {
-    operation?: Maybe<{ __typename?: 'RoomOperation' } & RoomOperationFragment>;
-};
+export type GetRoomResultFragment = GetRoomResult_GetJoinedRoomResult_Fragment | GetRoomResult_GetNonJoinedRoomResult_Fragment | GetRoomResult_GetRoomFailureResult_Fragment;
 
-export type JoinRoomResultFragment =
-    | JoinRoomResult_JoinRoomFailureResult_Fragment
-    | JoinRoomResult_JoinRoomSuccessResult_Fragment;
+type JoinRoomResult_JoinRoomFailureResult_Fragment = { __typename?: 'JoinRoomFailureResult', failureType: JoinRoomFailureType };
 
-export type PieceValueLogFragment = { __typename?: 'PieceValueLog' } & Pick<
-    PieceValueLog,
-    | 'messageId'
-    | 'characterCreatedBy'
-    | 'characterId'
-    | 'stateId'
-    | 'createdAt'
-    | 'logType'
-    | 'valueJson'
->;
+type JoinRoomResult_JoinRoomSuccessResult_Fragment = { __typename?: 'JoinRoomSuccessResult', operation?: Maybe<{ __typename?: 'RoomOperation', revisionTo: number, valueJson: string, operatedBy?: Maybe<{ __typename?: 'OperatedBy', userUid: string, clientId: string }> }> };
 
-export type RoomAsListItemFragment = { __typename?: 'RoomAsListItem' } & Pick<
-    RoomAsListItem,
-    'id' | 'name' | 'createdBy' | 'requiresPhraseToJoinAsPlayer' | 'requiresPhraseToJoinAsSpectator'
->;
+export type JoinRoomResultFragment = JoinRoomResult_JoinRoomFailureResult_Fragment | JoinRoomResult_JoinRoomSuccessResult_Fragment;
 
-export type RoomGetStateFragment = { __typename?: 'RoomGetState' } & Pick<
-    RoomGetState,
-    'revision' | 'createdBy' | 'stateJson'
->;
+export type PieceValueLogFragment = { __typename?: 'PieceValueLog', messageId: string, characterCreatedBy: string, characterId: string, stateId: string, createdAt: number, logType: PieceValueLogType, valueJson: string };
 
-export type RoomOperationFragment = { __typename?: 'RoomOperation' } & Pick<
-    RoomOperation,
-    'revisionTo' | 'valueJson'
-> & {
-        operatedBy?: Maybe<
-            { __typename?: 'OperatedBy' } & Pick<OperatedBy, 'userUid' | 'clientId'>
-        >;
-    };
+export type RoomAsListItemFragment = { __typename?: 'RoomAsListItem', id: string, name: string, createdBy: string, requiresPhraseToJoinAsPlayer: boolean, requiresPhraseToJoinAsSpectator: boolean };
 
-export type RoomPublicChannelFragment = { __typename?: 'RoomPublicChannel' } & Pick<
-    RoomPublicChannel,
-    'key' | 'name'
->;
+export type RoomGetStateFragment = { __typename?: 'RoomGetState', revision: number, createdBy: string, stateJson: string };
 
-export type RoomPublicMessageFragment = { __typename?: 'RoomPublicMessage' } & Pick<
-    RoomPublicMessage,
-    | 'messageId'
-    | 'channelKey'
-    | 'initText'
-    | 'initTextSource'
-    | 'textColor'
-    | 'altTextToSecret'
-    | 'isSecret'
-    | 'createdBy'
-    | 'customName'
-    | 'createdAt'
-    | 'updatedAt'
-> & {
-        updatedText?: Maybe<
-            { __typename?: 'UpdatedText' } & Pick<UpdatedText, 'currentText' | 'updatedAt'>
-        >;
-        commandResult?: Maybe<
-            { __typename?: 'CommandResult' } & Pick<CommandResult, 'text' | 'isSuccess'>
-        >;
-        character?: Maybe<
-            { __typename?: 'CharacterValueForMessage' } & CharacterValueForMessageFragment
-        >;
-    };
+export type RoomOperationFragment = { __typename?: 'RoomOperation', revisionTo: number, valueJson: string, operatedBy?: Maybe<{ __typename?: 'OperatedBy', userUid: string, clientId: string }> };
 
-export type RoomPrivateMessageFragment = { __typename?: 'RoomPrivateMessage' } & Pick<
-    RoomPrivateMessage,
-    | 'messageId'
-    | 'visibleTo'
-    | 'initText'
-    | 'initTextSource'
-    | 'textColor'
-    | 'altTextToSecret'
-    | 'isSecret'
-    | 'createdBy'
-    | 'customName'
-    | 'createdAt'
-    | 'updatedAt'
-> & {
-        updatedText?: Maybe<
-            { __typename?: 'UpdatedText' } & Pick<UpdatedText, 'currentText' | 'updatedAt'>
-        >;
-        commandResult?: Maybe<
-            { __typename?: 'CommandResult' } & Pick<CommandResult, 'text' | 'isSuccess'>
-        >;
-        character?: Maybe<
-            { __typename?: 'CharacterValueForMessage' } & CharacterValueForMessageFragment
-        >;
-    };
+export type RoomPublicChannelFragment = { __typename?: 'RoomPublicChannel', key: string, name?: Maybe<string> };
 
-export type RoomSoundEffectFragment = { __typename?: 'RoomSoundEffect' } & Pick<
-    RoomSoundEffect,
-    'messageId' | 'createdBy' | 'createdAt' | 'volume'
-> & { file: { __typename?: 'FilePath' } & FilePathFragment };
+export type RoomPublicMessageFragment = { __typename?: 'RoomPublicMessage', messageId: string, channelKey: string, initText?: Maybe<string>, initTextSource?: Maybe<string>, textColor?: Maybe<string>, altTextToSecret?: Maybe<string>, isSecret: boolean, createdBy?: Maybe<string>, customName?: Maybe<string>, createdAt: number, updatedAt?: Maybe<number>, updatedText?: Maybe<{ __typename?: 'UpdatedText', currentText?: Maybe<string>, updatedAt: number }>, commandResult?: Maybe<{ __typename?: 'CommandResult', text: string, isSuccess?: Maybe<boolean> }>, character?: Maybe<{ __typename?: 'CharacterValueForMessage', stateId: string, isPrivate: boolean, name: string, image?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }>, tachieImage?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }> }> };
 
-type RoomMessageEvent_PieceValueLog_Fragment = {
-    __typename?: 'PieceValueLog';
-} & PieceValueLogFragment;
+export type RoomPrivateMessageFragment = { __typename?: 'RoomPrivateMessage', messageId: string, visibleTo: Array<string>, initText?: Maybe<string>, initTextSource?: Maybe<string>, textColor?: Maybe<string>, altTextToSecret?: Maybe<string>, isSecret: boolean, createdBy?: Maybe<string>, customName?: Maybe<string>, createdAt: number, updatedAt?: Maybe<number>, updatedText?: Maybe<{ __typename?: 'UpdatedText', currentText?: Maybe<string>, updatedAt: number }>, commandResult?: Maybe<{ __typename?: 'CommandResult', text: string, isSuccess?: Maybe<boolean> }>, character?: Maybe<{ __typename?: 'CharacterValueForMessage', stateId: string, isPrivate: boolean, name: string, image?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }>, tachieImage?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }> }> };
 
-type RoomMessageEvent_RoomPrivateMessage_Fragment = {
-    __typename?: 'RoomPrivateMessage';
-} & RoomPrivateMessageFragment;
+export type RoomSoundEffectFragment = { __typename?: 'RoomSoundEffect', messageId: string, createdBy?: Maybe<string>, createdAt: number, volume: number, file: { __typename?: 'FilePath', sourceType: FileSourceType, path: string } };
 
-type RoomMessageEvent_RoomPrivateMessageUpdate_Fragment = {
-    __typename?: 'RoomPrivateMessageUpdate';
-} & Pick<
-    RoomPrivateMessageUpdate,
-    'messageId' | 'initText' | 'initTextSource' | 'altTextToSecret' | 'isSecret' | 'updatedAt'
-> & {
-        updatedText?: Maybe<
-            { __typename?: 'UpdatedText' } & Pick<UpdatedText, 'currentText' | 'updatedAt'>
-        >;
-        commandResult?: Maybe<
-            { __typename?: 'CommandResult' } & Pick<CommandResult, 'text' | 'isSuccess'>
-        >;
-    };
+type RoomMessageEvent_PieceValueLog_Fragment = { __typename?: 'PieceValueLog', messageId: string, characterCreatedBy: string, characterId: string, stateId: string, createdAt: number, logType: PieceValueLogType, valueJson: string };
 
-type RoomMessageEvent_RoomPublicChannel_Fragment = {
-    __typename?: 'RoomPublicChannel';
-} & RoomPublicChannelFragment;
+type RoomMessageEvent_RoomPrivateMessage_Fragment = { __typename?: 'RoomPrivateMessage', messageId: string, visibleTo: Array<string>, initText?: Maybe<string>, initTextSource?: Maybe<string>, textColor?: Maybe<string>, altTextToSecret?: Maybe<string>, isSecret: boolean, createdBy?: Maybe<string>, customName?: Maybe<string>, createdAt: number, updatedAt?: Maybe<number>, updatedText?: Maybe<{ __typename?: 'UpdatedText', currentText?: Maybe<string>, updatedAt: number }>, commandResult?: Maybe<{ __typename?: 'CommandResult', text: string, isSuccess?: Maybe<boolean> }>, character?: Maybe<{ __typename?: 'CharacterValueForMessage', stateId: string, isPrivate: boolean, name: string, image?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }>, tachieImage?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }> }> };
 
-type RoomMessageEvent_RoomPublicChannelUpdate_Fragment = {
-    __typename?: 'RoomPublicChannelUpdate';
-} & Pick<RoomPublicChannelUpdate, 'key' | 'name'>;
+type RoomMessageEvent_RoomPrivateMessageUpdate_Fragment = { __typename?: 'RoomPrivateMessageUpdate', messageId: string, initText?: Maybe<string>, initTextSource?: Maybe<string>, altTextToSecret?: Maybe<string>, isSecret: boolean, updatedAt?: Maybe<number>, updatedText?: Maybe<{ __typename?: 'UpdatedText', currentText?: Maybe<string>, updatedAt: number }>, commandResult?: Maybe<{ __typename?: 'CommandResult', text: string, isSuccess?: Maybe<boolean> }> };
 
-type RoomMessageEvent_RoomPublicMessage_Fragment = {
-    __typename?: 'RoomPublicMessage';
-} & RoomPublicMessageFragment;
+type RoomMessageEvent_RoomPublicChannel_Fragment = { __typename?: 'RoomPublicChannel', key: string, name?: Maybe<string> };
 
-type RoomMessageEvent_RoomPublicMessageUpdate_Fragment = {
-    __typename?: 'RoomPublicMessageUpdate';
-} & Pick<
-    RoomPublicMessageUpdate,
-    'messageId' | 'initText' | 'initTextSource' | 'altTextToSecret' | 'isSecret' | 'updatedAt'
-> & {
-        updatedText?: Maybe<
-            { __typename?: 'UpdatedText' } & Pick<UpdatedText, 'currentText' | 'updatedAt'>
-        >;
-        commandResult?: Maybe<
-            { __typename?: 'CommandResult' } & Pick<CommandResult, 'text' | 'isSuccess'>
-        >;
-    };
+type RoomMessageEvent_RoomPublicChannelUpdate_Fragment = { __typename?: 'RoomPublicChannelUpdate', key: string, name?: Maybe<string> };
 
-type RoomMessageEvent_RoomSoundEffect_Fragment = {
-    __typename?: 'RoomSoundEffect';
-} & RoomSoundEffectFragment;
+type RoomMessageEvent_RoomPublicMessage_Fragment = { __typename?: 'RoomPublicMessage', messageId: string, channelKey: string, initText?: Maybe<string>, initTextSource?: Maybe<string>, textColor?: Maybe<string>, altTextToSecret?: Maybe<string>, isSecret: boolean, createdBy?: Maybe<string>, customName?: Maybe<string>, createdAt: number, updatedAt?: Maybe<number>, updatedText?: Maybe<{ __typename?: 'UpdatedText', currentText?: Maybe<string>, updatedAt: number }>, commandResult?: Maybe<{ __typename?: 'CommandResult', text: string, isSuccess?: Maybe<boolean> }>, character?: Maybe<{ __typename?: 'CharacterValueForMessage', stateId: string, isPrivate: boolean, name: string, image?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }>, tachieImage?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }> }> };
 
-export type RoomMessageEventFragment =
-    | RoomMessageEvent_PieceValueLog_Fragment
-    | RoomMessageEvent_RoomPrivateMessage_Fragment
-    | RoomMessageEvent_RoomPrivateMessageUpdate_Fragment
-    | RoomMessageEvent_RoomPublicChannel_Fragment
-    | RoomMessageEvent_RoomPublicChannelUpdate_Fragment
-    | RoomMessageEvent_RoomPublicMessage_Fragment
-    | RoomMessageEvent_RoomPublicMessageUpdate_Fragment
-    | RoomMessageEvent_RoomSoundEffect_Fragment;
+type RoomMessageEvent_RoomPublicMessageUpdate_Fragment = { __typename?: 'RoomPublicMessageUpdate', messageId: string, initText?: Maybe<string>, initTextSource?: Maybe<string>, altTextToSecret?: Maybe<string>, isSecret: boolean, updatedAt?: Maybe<number>, updatedText?: Maybe<{ __typename?: 'UpdatedText', currentText?: Maybe<string>, updatedAt: number }>, commandResult?: Maybe<{ __typename?: 'CommandResult', text: string, isSuccess?: Maybe<boolean> }> };
 
-export type SemVerFragment = { __typename?: 'SemVer' } & Pick<
-    SemVer,
-    'major' | 'minor' | 'patch'
-> & { prerelease?: Maybe<{ __typename?: 'Prerelease' } & Pick<Prerelease, 'type' | 'version'>> };
+type RoomMessageEvent_RoomSoundEffect_Fragment = { __typename?: 'RoomSoundEffect', messageId: string, createdBy?: Maybe<string>, createdAt: number, volume: number, file: { __typename?: 'FilePath', sourceType: FileSourceType, path: string } };
+
+export type RoomMessageEventFragment = RoomMessageEvent_PieceValueLog_Fragment | RoomMessageEvent_RoomPrivateMessage_Fragment | RoomMessageEvent_RoomPrivateMessageUpdate_Fragment | RoomMessageEvent_RoomPublicChannel_Fragment | RoomMessageEvent_RoomPublicChannelUpdate_Fragment | RoomMessageEvent_RoomPublicMessage_Fragment | RoomMessageEvent_RoomPublicMessageUpdate_Fragment | RoomMessageEvent_RoomSoundEffect_Fragment;
+
+export type SemVerFragment = { __typename?: 'SemVer', major: number, minor: number, patch: number, prerelease?: Maybe<{ __typename?: 'Prerelease', type: PrereleaseType, version: number }> };
+
+export type GetAvailableGameSystemsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAvailableGameSystemsQuery = { __typename?: 'Query', result: { __typename?: 'GetAvailableGameSystemsResult', value: Array<{ __typename?: 'AvailableGameSystem', id: string, name: string, sortKey: string }> } };
+
+export type GetFilesQueryVariables = Exact<{
+  input: GetFilesInput;
+}>;
+
+
+export type GetFilesQuery = { __typename?: 'Query', result: { __typename?: 'GetFilesResult', files: Array<{ __typename?: 'FileItem', filename: string, screenname: string, createdBy: string }> } };
 
 export type GetRoomQueryVariables = Exact<{
-    id: Scalars['String'];
+  id: Scalars['String'];
 }>;
 
-export type GetRoomQuery = { __typename?: 'Query' } & {
-    result:
-        | ({ __typename?: 'GetJoinedRoomResult' } & Pick<GetJoinedRoomResult, 'role'> & {
-                  room: { __typename?: 'RoomGetState' } & RoomGetStateFragment;
-              })
-        | ({ __typename?: 'GetNonJoinedRoomResult' } & {
-              roomAsListItem: { __typename?: 'RoomAsListItem' } & RoomAsListItemFragment;
-          })
-        | ({ __typename?: 'GetRoomFailureResult' } & Pick<GetRoomFailureResult, 'failureType'>);
-};
 
-export type GetRoomsListQueryVariables = Exact<{ [key: string]: never }>;
+export type GetRoomQuery = { __typename?: 'Query', result: { __typename?: 'GetJoinedRoomResult', role: ParticipantRole, room: { __typename?: 'RoomGetState', revision: number, createdBy: string, stateJson: string } } | { __typename?: 'GetNonJoinedRoomResult', roomAsListItem: { __typename?: 'RoomAsListItem', id: string, name: string, createdBy: string, requiresPhraseToJoinAsPlayer: boolean, requiresPhraseToJoinAsSpectator: boolean } } | { __typename?: 'GetRoomFailureResult', failureType: GetRoomFailureType } };
 
-export type GetRoomsListQuery = { __typename?: 'Query' } & {
-    result:
-        | ({ __typename?: 'GetRoomsListFailureResult' } & Pick<
-              GetRoomsListFailureResult,
-              'failureType'
-          >)
-        | ({ __typename?: 'GetRoomsListSuccessResult' } & {
-              rooms: Array<{ __typename?: 'RoomAsListItem' } & RoomAsListItemFragment>;
-          });
-};
+export type GetRoomsListQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetRoomsListQuery = { __typename?: 'Query', result: { __typename?: 'GetRoomsListFailureResult', failureType: GetRoomFailureType } | { __typename?: 'GetRoomsListSuccessResult', rooms: Array<{ __typename?: 'RoomAsListItem', id: string, name: string, createdBy: string, requiresPhraseToJoinAsPlayer: boolean, requiresPhraseToJoinAsSpectator: boolean }> } };
 
 export type GetMessagesQueryVariables = Exact<{
-    roomId: Scalars['String'];
+  roomId: Scalars['String'];
 }>;
 
-export type GetMessagesQuery = { __typename?: 'Query' } & {
-    result:
-        | ({ __typename?: 'GetRoomMessagesFailureResult' } & Pick<
-              GetRoomMessagesFailureResult,
-              'failureType'
-          >)
-        | ({ __typename?: 'RoomMessages' } & {
-              publicMessages: Array<
-                  { __typename?: 'RoomPublicMessage' } & RoomPublicMessageFragment
-              >;
-              privateMessages: Array<
-                  { __typename?: 'RoomPrivateMessage' } & RoomPrivateMessageFragment
-              >;
-              pieceValueLogs: Array<{ __typename?: 'PieceValueLog' } & PieceValueLogFragment>;
-              publicChannels: Array<
-                  { __typename?: 'RoomPublicChannel' } & RoomPublicChannelFragment
-              >;
-              soundEffects: Array<{ __typename?: 'RoomSoundEffect' } & RoomSoundEffectFragment>;
-          });
-};
+
+export type GetMessagesQuery = { __typename?: 'Query', result: { __typename?: 'GetRoomMessagesFailureResult', failureType: GetRoomMessagesFailureType } | { __typename?: 'RoomMessages', publicMessages: Array<{ __typename?: 'RoomPublicMessage', messageId: string, channelKey: string, initText?: Maybe<string>, initTextSource?: Maybe<string>, textColor?: Maybe<string>, altTextToSecret?: Maybe<string>, isSecret: boolean, createdBy?: Maybe<string>, customName?: Maybe<string>, createdAt: number, updatedAt?: Maybe<number>, updatedText?: Maybe<{ __typename?: 'UpdatedText', currentText?: Maybe<string>, updatedAt: number }>, commandResult?: Maybe<{ __typename?: 'CommandResult', text: string, isSuccess?: Maybe<boolean> }>, character?: Maybe<{ __typename?: 'CharacterValueForMessage', stateId: string, isPrivate: boolean, name: string, image?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }>, tachieImage?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }> }> }>, privateMessages: Array<{ __typename?: 'RoomPrivateMessage', messageId: string, visibleTo: Array<string>, initText?: Maybe<string>, initTextSource?: Maybe<string>, textColor?: Maybe<string>, altTextToSecret?: Maybe<string>, isSecret: boolean, createdBy?: Maybe<string>, customName?: Maybe<string>, createdAt: number, updatedAt?: Maybe<number>, updatedText?: Maybe<{ __typename?: 'UpdatedText', currentText?: Maybe<string>, updatedAt: number }>, commandResult?: Maybe<{ __typename?: 'CommandResult', text: string, isSuccess?: Maybe<boolean> }>, character?: Maybe<{ __typename?: 'CharacterValueForMessage', stateId: string, isPrivate: boolean, name: string, image?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }>, tachieImage?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }> }> }>, pieceValueLogs: Array<{ __typename?: 'PieceValueLog', messageId: string, characterCreatedBy: string, characterId: string, stateId: string, createdAt: number, logType: PieceValueLogType, valueJson: string }>, publicChannels: Array<{ __typename?: 'RoomPublicChannel', key: string, name?: Maybe<string> }>, soundEffects: Array<{ __typename?: 'RoomSoundEffect', messageId: string, createdBy?: Maybe<string>, createdAt: number, volume: number, file: { __typename?: 'FilePath', sourceType: FileSourceType, path: string } }> } };
 
 export type GetLogQueryVariables = Exact<{
-    roomId: Scalars['String'];
+  roomId: Scalars['String'];
 }>;
 
-export type GetLogQuery = { __typename?: 'Query' } & {
-    result:
-        | ({ __typename?: 'GetRoomLogFailureResult' } & Pick<
-              GetRoomLogFailureResult,
-              'failureType'
-          >)
-        | ({ __typename?: 'RoomMessages' } & {
-              publicMessages: Array<
-                  { __typename?: 'RoomPublicMessage' } & RoomPublicMessageFragment
-              >;
-              privateMessages: Array<
-                  { __typename?: 'RoomPrivateMessage' } & RoomPrivateMessageFragment
-              >;
-              pieceValueLogs: Array<{ __typename?: 'PieceValueLog' } & PieceValueLogFragment>;
-              publicChannels: Array<
-                  { __typename?: 'RoomPublicChannel' } & RoomPublicChannelFragment
-              >;
-              soundEffects: Array<{ __typename?: 'RoomSoundEffect' } & RoomSoundEffectFragment>;
-          });
-};
+
+export type GetLogQuery = { __typename?: 'Query', result: { __typename?: 'GetRoomLogFailureResult', failureType: GetRoomLogFailureType } | { __typename?: 'RoomMessages', publicMessages: Array<{ __typename?: 'RoomPublicMessage', messageId: string, channelKey: string, initText?: Maybe<string>, initTextSource?: Maybe<string>, textColor?: Maybe<string>, altTextToSecret?: Maybe<string>, isSecret: boolean, createdBy?: Maybe<string>, customName?: Maybe<string>, createdAt: number, updatedAt?: Maybe<number>, updatedText?: Maybe<{ __typename?: 'UpdatedText', currentText?: Maybe<string>, updatedAt: number }>, commandResult?: Maybe<{ __typename?: 'CommandResult', text: string, isSuccess?: Maybe<boolean> }>, character?: Maybe<{ __typename?: 'CharacterValueForMessage', stateId: string, isPrivate: boolean, name: string, image?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }>, tachieImage?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }> }> }>, privateMessages: Array<{ __typename?: 'RoomPrivateMessage', messageId: string, visibleTo: Array<string>, initText?: Maybe<string>, initTextSource?: Maybe<string>, textColor?: Maybe<string>, altTextToSecret?: Maybe<string>, isSecret: boolean, createdBy?: Maybe<string>, customName?: Maybe<string>, createdAt: number, updatedAt?: Maybe<number>, updatedText?: Maybe<{ __typename?: 'UpdatedText', currentText?: Maybe<string>, updatedAt: number }>, commandResult?: Maybe<{ __typename?: 'CommandResult', text: string, isSuccess?: Maybe<boolean> }>, character?: Maybe<{ __typename?: 'CharacterValueForMessage', stateId: string, isPrivate: boolean, name: string, image?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }>, tachieImage?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }> }> }>, pieceValueLogs: Array<{ __typename?: 'PieceValueLog', messageId: string, characterCreatedBy: string, characterId: string, stateId: string, createdAt: number, logType: PieceValueLogType, valueJson: string }>, publicChannels: Array<{ __typename?: 'RoomPublicChannel', key: string, name?: Maybe<string> }>, soundEffects: Array<{ __typename?: 'RoomSoundEffect', messageId: string, createdBy?: Maybe<string>, createdAt: number, volume: number, file: { __typename?: 'FilePath', sourceType: FileSourceType, path: string } }> } };
 
 export type GetRoomConnectionsQueryVariables = Exact<{
-    roomId: Scalars['String'];
+  roomId: Scalars['String'];
 }>;
 
-export type GetRoomConnectionsQuery = { __typename?: 'Query' } & {
-    result:
-        | ({ __typename?: 'GetRoomConnectionsFailureResult' } & Pick<
-              GetRoomConnectionsFailureResult,
-              'failureType'
-          >)
-        | ({ __typename?: 'GetRoomConnectionsSuccessResult' } & Pick<
-              GetRoomConnectionsSuccessResult,
-              'fetchedAt' | 'connectedUserUids'
-          >);
-};
 
-export type GetServerInfoQueryVariables = Exact<{ [key: string]: never }>;
+export type GetRoomConnectionsQuery = { __typename?: 'Query', result: { __typename?: 'GetRoomConnectionsFailureResult', failureType: GetRoomConnectionFailureType } | { __typename?: 'GetRoomConnectionsSuccessResult', fetchedAt: number, connectedUserUids: Array<string> } };
 
-export type GetServerInfoQuery = { __typename?: 'Query' } & {
-    result: { __typename?: 'ServerInfo' } & { version: { __typename?: 'SemVer' } & SemVerFragment };
-};
+export type GetServerInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
-export type ListAvailableGameSystemsQueryVariables = Exact<{ [key: string]: never }>;
 
-export type ListAvailableGameSystemsQuery = { __typename?: 'Query' } & {
-    result: { __typename?: 'ListAvailableGameSystemsResult' } & {
-        value: Array<
-            { __typename?: 'AvailableGameSystem' } & Pick<
-                AvailableGameSystem,
-                'id' | 'name' | 'sortKey'
-            >
-        >;
-    };
-};
+export type GetServerInfoQuery = { __typename?: 'Query', result: { __typename?: 'ServerInfo', version: { __typename?: 'SemVer', major: number, minor: number, patch: number, prerelease?: Maybe<{ __typename?: 'Prerelease', type: PrereleaseType, version: number }> } } };
+
+export type IsEntryQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type IsEntryQuery = { __typename?: 'Query', result: boolean };
 
 export type RequiresPhraseToJoinAsPlayerQueryVariables = Exact<{
-    roomId: Scalars['String'];
+  roomId: Scalars['String'];
 }>;
 
-export type RequiresPhraseToJoinAsPlayerQuery = { __typename?: 'Query' } & {
-    result:
-        | ({ __typename?: 'RequiresPhraseFailureResult' } & Pick<
-              RequiresPhraseFailureResult,
-              'failureType'
-          >)
-        | ({ __typename?: 'RequiresPhraseSuccessResult' } & Pick<
-              RequiresPhraseSuccessResult,
-              'value'
-          >);
-};
+
+export type RequiresPhraseToJoinAsPlayerQuery = { __typename?: 'Query', result: { __typename?: 'RequiresPhraseFailureResult', failureType: RequiresPhraseFailureType } | { __typename?: 'RequiresPhraseSuccessResult', value: boolean } };
+
+export type CreateFileTagMutationVariables = Exact<{
+  tagName: Scalars['String'];
+}>;
+
+
+export type CreateFileTagMutation = { __typename?: 'Mutation', result?: Maybe<{ __typename?: 'FileTag', id: string, name: string }> };
 
 export type ChangeParticipantNameMutationVariables = Exact<{
-    roomId: Scalars['String'];
-    newName: Scalars['String'];
+  roomId: Scalars['String'];
+  newName: Scalars['String'];
 }>;
 
-export type ChangeParticipantNameMutation = { __typename?: 'Mutation' } & {
-    result: { __typename?: 'ChangeParticipantNameResult' } & Pick<
-        ChangeParticipantNameResult,
-        'failureType'
-    >;
-};
+
+export type ChangeParticipantNameMutation = { __typename?: 'Mutation', result: { __typename?: 'ChangeParticipantNameResult', failureType?: Maybe<ChangeParticipantNameFailureType> } };
 
 export type CreateRoomMutationVariables = Exact<{
-    input: CreateRoomInput;
+  input: CreateRoomInput;
 }>;
 
-export type CreateRoomMutation = { __typename?: 'Mutation' } & {
-    result:
-        | ({ __typename?: 'CreateRoomFailureResult' } & Pick<
-              CreateRoomFailureResult,
-              'failureType'
-          >)
-        | ({
-              __typename?: 'CreateRoomSuccessResult';
-          } & CreateRoomResult_CreateRoomSuccessResult_Fragment);
-};
+
+export type CreateRoomMutation = { __typename?: 'Mutation', result: { __typename?: 'CreateRoomFailureResult', failureType: CreateRoomFailureType } | { __typename?: 'CreateRoomSuccessResult', id: string, room: { __typename?: 'RoomGetState', revision: number, createdBy: string, stateJson: string } } };
+
+export type DeleteFileTagMutationVariables = Exact<{
+  tagId: Scalars['String'];
+}>;
+
+
+export type DeleteFileTagMutation = { __typename?: 'Mutation', result: boolean };
 
 export type DeleteRoomMutationVariables = Exact<{
-    id: Scalars['String'];
+  id: Scalars['String'];
 }>;
 
-export type DeleteRoomMutation = { __typename?: 'Mutation' } & {
-    result: { __typename?: 'DeleteRoomResult' } & Pick<DeleteRoomResult, 'failureType'>;
-};
+
+export type DeleteRoomMutation = { __typename?: 'Mutation', result: { __typename?: 'DeleteRoomResult', failureType?: Maybe<DeleteRoomFailureType> } };
+
+export type EditFileTagsMutationVariables = Exact<{
+  input: EditFileTagsInput;
+}>;
+
+
+export type EditFileTagsMutation = { __typename?: 'Mutation', result: boolean };
 
 export type JoinRoomAsPlayerMutationVariables = Exact<{
-    id: Scalars['String'];
-    name: Scalars['String'];
-    phrase?: Maybe<Scalars['String']>;
+  id: Scalars['String'];
+  name: Scalars['String'];
+  phrase?: Maybe<Scalars['String']>;
 }>;
 
-export type JoinRoomAsPlayerMutation = { __typename?: 'Mutation' } & {
-    result:
-        | ({ __typename?: 'JoinRoomFailureResult' } & JoinRoomResult_JoinRoomFailureResult_Fragment)
-        | ({
-              __typename?: 'JoinRoomSuccessResult';
-          } & JoinRoomResult_JoinRoomSuccessResult_Fragment);
-};
+
+export type JoinRoomAsPlayerMutation = { __typename?: 'Mutation', result: { __typename?: 'JoinRoomFailureResult', failureType: JoinRoomFailureType } | { __typename?: 'JoinRoomSuccessResult', operation?: Maybe<{ __typename?: 'RoomOperation', revisionTo: number, valueJson: string, operatedBy?: Maybe<{ __typename?: 'OperatedBy', userUid: string, clientId: string }> }> } };
 
 export type JoinRoomAsSpectatorMutationVariables = Exact<{
-    id: Scalars['String'];
-    name: Scalars['String'];
-    phrase?: Maybe<Scalars['String']>;
+  id: Scalars['String'];
+  name: Scalars['String'];
+  phrase?: Maybe<Scalars['String']>;
 }>;
 
-export type JoinRoomAsSpectatorMutation = { __typename?: 'Mutation' } & {
-    result:
-        | ({ __typename?: 'JoinRoomFailureResult' } & JoinRoomResult_JoinRoomFailureResult_Fragment)
-        | ({
-              __typename?: 'JoinRoomSuccessResult';
-          } & JoinRoomResult_JoinRoomSuccessResult_Fragment);
-};
+
+export type JoinRoomAsSpectatorMutation = { __typename?: 'Mutation', result: { __typename?: 'JoinRoomFailureResult', failureType: JoinRoomFailureType } | { __typename?: 'JoinRoomSuccessResult', operation?: Maybe<{ __typename?: 'RoomOperation', revisionTo: number, valueJson: string, operatedBy?: Maybe<{ __typename?: 'OperatedBy', userUid: string, clientId: string }> }> } };
 
 export type EntryToServerMutationVariables = Exact<{
-    phrase: Scalars['String'];
+  phrase: Scalars['String'];
 }>;
 
-export type EntryToServerMutation = { __typename?: 'Mutation' } & {
-    result: { __typename?: 'EntryToServerResult' } & Pick<EntryToServerResult, 'type'>;
-};
+
+export type EntryToServerMutation = { __typename?: 'Mutation', result: { __typename?: 'EntryToServerResult', type: EntryToServerResultType } };
 
 export type LeaveRoomMutationVariables = Exact<{
-    id: Scalars['String'];
+  id: Scalars['String'];
 }>;
 
-export type LeaveRoomMutation = { __typename?: 'Mutation' } & {
-    result: { __typename?: 'LeaveRoomResult' } & Pick<LeaveRoomResult, 'failureType'>;
-};
+
+export type LeaveRoomMutation = { __typename?: 'Mutation', result: { __typename?: 'LeaveRoomResult', failureType?: Maybe<LeaveRoomFailureType> } };
 
 export type OperateMutationVariables = Exact<{
-    id: Scalars['String'];
-    revisionFrom: Scalars['Int'];
-    operation: RoomOperationInput;
-    requestId: Scalars['String'];
+  id: Scalars['String'];
+  revisionFrom: Scalars['Int'];
+  operation: RoomOperationInput;
+  requestId: Scalars['String'];
 }>;
 
-export type OperateMutation = { __typename?: 'Mutation' } & {
-    result:
-        | ({ __typename?: 'OperateRoomFailureResult' } & Pick<
-              OperateRoomFailureResult,
-              'failureType'
-          >)
-        | ({ __typename?: 'OperateRoomIdResult' } & Pick<OperateRoomIdResult, 'requestId'>)
-        | ({ __typename?: 'OperateRoomNonJoinedResult' } & {
-              roomAsListItem: { __typename?: 'RoomAsListItem' } & RoomAsListItemFragment;
-          })
-        | ({ __typename?: 'OperateRoomSuccessResult' } & {
-              operation: { __typename?: 'RoomOperation' } & RoomOperationFragment;
-          });
-};
+
+export type OperateMutation = { __typename?: 'Mutation', result: { __typename?: 'OperateRoomFailureResult', failureType: OperateRoomFailureType } | { __typename?: 'OperateRoomIdResult', requestId: string } | { __typename?: 'OperateRoomNonJoinedResult', roomAsListItem: { __typename?: 'RoomAsListItem', id: string, name: string, createdBy: string, requiresPhraseToJoinAsPlayer: boolean, requiresPhraseToJoinAsSpectator: boolean } } | { __typename?: 'OperateRoomSuccessResult', operation: { __typename?: 'RoomOperation', revisionTo: number, valueJson: string, operatedBy?: Maybe<{ __typename?: 'OperatedBy', userUid: string, clientId: string }> } } };
 
 export type PingMutationVariables = Exact<{
-    value: Scalars['Float'];
+  value: Scalars['Float'];
 }>;
 
-export type PingMutation = { __typename?: 'Mutation' } & {
-    result: { __typename?: 'Pong' } & Pick<Pong, 'createdBy' | 'value'>;
-};
+
+export type PingMutation = { __typename?: 'Mutation', result: { __typename?: 'Pong', createdBy?: Maybe<string>, value: number } };
 
 export type PromoteToPlayerMutationVariables = Exact<{
-    roomId: Scalars['String'];
-    phrase?: Maybe<Scalars['String']>;
+  roomId: Scalars['String'];
+  phrase?: Maybe<Scalars['String']>;
 }>;
 
-export type PromoteToPlayerMutation = { __typename?: 'Mutation' } & {
-    result: { __typename?: 'PromoteResult' } & Pick<PromoteResult, 'failureType'>;
-};
+
+export type PromoteToPlayerMutation = { __typename?: 'Mutation', result: { __typename?: 'PromoteResult', failureType?: Maybe<PromoteFailureType> } };
 
 export type WritePublicMessageMutationVariables = Exact<{
-    roomId: Scalars['String'];
-    text: Scalars['String'];
-    textColor?: Maybe<Scalars['String']>;
-    channelKey: Scalars['String'];
-    characterStateId?: Maybe<Scalars['String']>;
-    customName?: Maybe<Scalars['String']>;
-    gameType?: Maybe<Scalars['String']>;
+  roomId: Scalars['String'];
+  text: Scalars['String'];
+  textColor?: Maybe<Scalars['String']>;
+  channelKey: Scalars['String'];
+  characterStateId?: Maybe<Scalars['String']>;
+  customName?: Maybe<Scalars['String']>;
+  gameType?: Maybe<Scalars['String']>;
 }>;
 
-export type WritePublicMessageMutation = { __typename?: 'Mutation' } & {
-    result:
-        | ({ __typename?: 'RoomPublicMessage' } & RoomPublicMessageFragment)
-        | ({ __typename?: 'WritePublicRoomMessageFailureResult' } & Pick<
-              WritePublicRoomMessageFailureResult,
-              'failureType'
-          >);
-};
+
+export type WritePublicMessageMutation = { __typename?: 'Mutation', result: { __typename?: 'RoomPublicMessage', messageId: string, channelKey: string, initText?: Maybe<string>, initTextSource?: Maybe<string>, textColor?: Maybe<string>, altTextToSecret?: Maybe<string>, isSecret: boolean, createdBy?: Maybe<string>, customName?: Maybe<string>, createdAt: number, updatedAt?: Maybe<number>, updatedText?: Maybe<{ __typename?: 'UpdatedText', currentText?: Maybe<string>, updatedAt: number }>, commandResult?: Maybe<{ __typename?: 'CommandResult', text: string, isSuccess?: Maybe<boolean> }>, character?: Maybe<{ __typename?: 'CharacterValueForMessage', stateId: string, isPrivate: boolean, name: string, image?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }>, tachieImage?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }> }> } | { __typename?: 'WriteRoomPublicMessageFailureResult', failureType: WriteRoomPublicMessageFailureType } };
 
 export type WritePrivateMessageMutationVariables = Exact<{
-    roomId: Scalars['String'];
-    visibleTo: Array<Scalars['String']> | Scalars['String'];
-    text: Scalars['String'];
-    textColor?: Maybe<Scalars['String']>;
-    characterStateId?: Maybe<Scalars['String']>;
-    customName?: Maybe<Scalars['String']>;
-    gameType?: Maybe<Scalars['String']>;
+  roomId: Scalars['String'];
+  visibleTo: Array<Scalars['String']> | Scalars['String'];
+  text: Scalars['String'];
+  textColor?: Maybe<Scalars['String']>;
+  characterStateId?: Maybe<Scalars['String']>;
+  customName?: Maybe<Scalars['String']>;
+  gameType?: Maybe<Scalars['String']>;
 }>;
 
-export type WritePrivateMessageMutation = { __typename?: 'Mutation' } & {
-    result:
-        | ({ __typename?: 'RoomPrivateMessage' } & RoomPrivateMessageFragment)
-        | ({ __typename?: 'WritePrivateRoomMessageFailureResult' } & Pick<
-              WritePrivateRoomMessageFailureResult,
-              'failureType'
-          >);
-};
+
+export type WritePrivateMessageMutation = { __typename?: 'Mutation', result: { __typename?: 'RoomPrivateMessage', messageId: string, visibleTo: Array<string>, initText?: Maybe<string>, initTextSource?: Maybe<string>, textColor?: Maybe<string>, altTextToSecret?: Maybe<string>, isSecret: boolean, createdBy?: Maybe<string>, customName?: Maybe<string>, createdAt: number, updatedAt?: Maybe<number>, updatedText?: Maybe<{ __typename?: 'UpdatedText', currentText?: Maybe<string>, updatedAt: number }>, commandResult?: Maybe<{ __typename?: 'CommandResult', text: string, isSuccess?: Maybe<boolean> }>, character?: Maybe<{ __typename?: 'CharacterValueForMessage', stateId: string, isPrivate: boolean, name: string, image?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }>, tachieImage?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }> }> } | { __typename?: 'WriteRoomPrivateMessageFailureResult', failureType: WriteRoomPrivateMessageFailureType } };
 
 export type WriteRoomSoundEffectMutationVariables = Exact<{
-    roomId: Scalars['String'];
-    file: FilePathInput;
-    volume: Scalars['Float'];
+  roomId: Scalars['String'];
+  file: FilePathInput;
+  volume: Scalars['Float'];
 }>;
 
-export type WriteRoomSoundEffectMutation = { __typename?: 'Mutation' } & {
-    result:
-        | ({ __typename?: 'RoomSoundEffect' } & RoomSoundEffectFragment)
-        | ({ __typename?: 'WriteRoomSoundEffectFailureResult' } & Pick<
-              WriteRoomSoundEffectFailureResult,
-              'failureType'
-          >);
-};
+
+export type WriteRoomSoundEffectMutation = { __typename?: 'Mutation', result: { __typename?: 'RoomSoundEffect', messageId: string, createdBy?: Maybe<string>, createdAt: number, volume: number, file: { __typename?: 'FilePath', sourceType: FileSourceType, path: string } } | { __typename?: 'WriteRoomSoundEffectFailureResult', failureType: WriteRoomSoundEffectFailureType } };
 
 export type EditMessageMutationVariables = Exact<{
-    roomId: Scalars['String'];
-    messageId: Scalars['String'];
-    text: Scalars['String'];
+  roomId: Scalars['String'];
+  messageId: Scalars['String'];
+  text: Scalars['String'];
 }>;
 
-export type EditMessageMutation = { __typename?: 'Mutation' } & {
-    result: { __typename?: 'EditMessageResult' } & Pick<EditMessageResult, 'failureType'>;
-};
+
+export type EditMessageMutation = { __typename?: 'Mutation', result: { __typename?: 'EditMessageResult', failureType?: Maybe<EditMessageFailureType> } };
 
 export type DeleteMessageMutationVariables = Exact<{
-    roomId: Scalars['String'];
-    messageId: Scalars['String'];
+  roomId: Scalars['String'];
+  messageId: Scalars['String'];
 }>;
 
-export type DeleteMessageMutation = { __typename?: 'Mutation' } & {
-    result: { __typename?: 'DeleteMessageResult' } & Pick<DeleteMessageResult, 'failureType'>;
-};
+
+export type DeleteMessageMutation = { __typename?: 'Mutation', result: { __typename?: 'DeleteMessageResult', failureType?: Maybe<DeleteMessageFailureType> } };
 
 export type MakeMessageNotSecretMutationVariables = Exact<{
-    roomId: Scalars['String'];
-    messageId: Scalars['String'];
+  roomId: Scalars['String'];
+  messageId: Scalars['String'];
 }>;
 
-export type MakeMessageNotSecretMutation = { __typename?: 'Mutation' } & {
-    result: { __typename?: 'MakeMessageNotSecretResult' } & Pick<
-        MakeMessageNotSecretResult,
-        'failureType'
-    >;
-};
+
+export type MakeMessageNotSecretMutation = { __typename?: 'Mutation', result: { __typename?: 'MakeMessageNotSecretResult', failureType?: Maybe<MakeMessageNotSecretFailureType> } };
 
 export type UpdateWritingMessageStatusMutationVariables = Exact<{
-    roomId: Scalars['String'];
-    newStatus: WritingMessageStatusInputType;
+  roomId: Scalars['String'];
+  newStatus: WritingMessageStatusInputType;
 }>;
 
-export type UpdateWritingMessageStatusMutation = { __typename?: 'Mutation' } & {
-    result: Mutation['updateWritingMessageStatus'];
-};
+
+export type UpdateWritingMessageStatusMutation = { __typename?: 'Mutation', result: boolean };
 
 export type RoomEventSubscriptionVariables = Exact<{
-    id: Scalars['String'];
+  id: Scalars['String'];
 }>;
 
-export type RoomEventSubscription = { __typename?: 'Subscription' } & {
-    roomEvent?: Maybe<
-        { __typename?: 'RoomEvent' } & {
-            roomOperation?: Maybe<{ __typename?: 'RoomOperation' } & RoomOperationFragment>;
-            deleteRoomOperation?: Maybe<
-                { __typename?: 'DeleteRoomOperation' } & Pick<DeleteRoomOperation, 'deletedBy'>
-            >;
-            roomMessageEvent?: Maybe<
-                | ({ __typename?: 'PieceValueLog' } & RoomMessageEvent_PieceValueLog_Fragment)
-                | ({
-                      __typename?: 'RoomPrivateMessage';
-                  } & RoomMessageEvent_RoomPrivateMessage_Fragment)
-                | ({
-                      __typename?: 'RoomPrivateMessageUpdate';
-                  } & RoomMessageEvent_RoomPrivateMessageUpdate_Fragment)
-                | ({
-                      __typename?: 'RoomPublicChannel';
-                  } & RoomMessageEvent_RoomPublicChannel_Fragment)
-                | ({
-                      __typename?: 'RoomPublicChannelUpdate';
-                  } & RoomMessageEvent_RoomPublicChannelUpdate_Fragment)
-                | ({
-                      __typename?: 'RoomPublicMessage';
-                  } & RoomMessageEvent_RoomPublicMessage_Fragment)
-                | ({
-                      __typename?: 'RoomPublicMessageUpdate';
-                  } & RoomMessageEvent_RoomPublicMessageUpdate_Fragment)
-                | ({ __typename?: 'RoomSoundEffect' } & RoomMessageEvent_RoomSoundEffect_Fragment)
-            >;
-            roomConnectionEvent?: Maybe<
-                { __typename?: 'RoomConnectionEvent' } & Pick<
-                    RoomConnectionEvent,
-                    'userUid' | 'isConnected' | 'updatedAt'
-                >
-            >;
-            writingMessageStatus?: Maybe<
-                { __typename?: 'WritingMessageStatus' } & Pick<
-                    WritingMessageStatus,
-                    'userUid' | 'status'
-                >
-            >;
-        }
-    >;
-};
 
-export type PongSubscriptionVariables = Exact<{ [key: string]: never }>;
+export type RoomEventSubscription = { __typename?: 'Subscription', roomEvent?: Maybe<{ __typename?: 'RoomEvent', roomOperation?: Maybe<{ __typename?: 'RoomOperation', revisionTo: number, valueJson: string, operatedBy?: Maybe<{ __typename?: 'OperatedBy', userUid: string, clientId: string }> }>, deleteRoomOperation?: Maybe<{ __typename?: 'DeleteRoomOperation', deletedBy: string }>, roomMessageEvent?: Maybe<{ __typename?: 'PieceValueLog', messageId: string, characterCreatedBy: string, characterId: string, stateId: string, createdAt: number, logType: PieceValueLogType, valueJson: string } | { __typename?: 'RoomPrivateMessage', messageId: string, visibleTo: Array<string>, initText?: Maybe<string>, initTextSource?: Maybe<string>, textColor?: Maybe<string>, altTextToSecret?: Maybe<string>, isSecret: boolean, createdBy?: Maybe<string>, customName?: Maybe<string>, createdAt: number, updatedAt?: Maybe<number>, updatedText?: Maybe<{ __typename?: 'UpdatedText', currentText?: Maybe<string>, updatedAt: number }>, commandResult?: Maybe<{ __typename?: 'CommandResult', text: string, isSuccess?: Maybe<boolean> }>, character?: Maybe<{ __typename?: 'CharacterValueForMessage', stateId: string, isPrivate: boolean, name: string, image?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }>, tachieImage?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }> }> } | { __typename?: 'RoomPrivateMessageUpdate', messageId: string, initText?: Maybe<string>, initTextSource?: Maybe<string>, altTextToSecret?: Maybe<string>, isSecret: boolean, updatedAt?: Maybe<number>, updatedText?: Maybe<{ __typename?: 'UpdatedText', currentText?: Maybe<string>, updatedAt: number }>, commandResult?: Maybe<{ __typename?: 'CommandResult', text: string, isSuccess?: Maybe<boolean> }> } | { __typename?: 'RoomPublicChannel', key: string, name?: Maybe<string> } | { __typename?: 'RoomPublicChannelUpdate', key: string, name?: Maybe<string> } | { __typename?: 'RoomPublicMessage', messageId: string, channelKey: string, initText?: Maybe<string>, initTextSource?: Maybe<string>, textColor?: Maybe<string>, altTextToSecret?: Maybe<string>, isSecret: boolean, createdBy?: Maybe<string>, customName?: Maybe<string>, createdAt: number, updatedAt?: Maybe<number>, updatedText?: Maybe<{ __typename?: 'UpdatedText', currentText?: Maybe<string>, updatedAt: number }>, commandResult?: Maybe<{ __typename?: 'CommandResult', text: string, isSuccess?: Maybe<boolean> }>, character?: Maybe<{ __typename?: 'CharacterValueForMessage', stateId: string, isPrivate: boolean, name: string, image?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }>, tachieImage?: Maybe<{ __typename?: 'FilePath', sourceType: FileSourceType, path: string }> }> } | { __typename?: 'RoomPublicMessageUpdate', messageId: string, initText?: Maybe<string>, initTextSource?: Maybe<string>, altTextToSecret?: Maybe<string>, isSecret: boolean, updatedAt?: Maybe<number>, updatedText?: Maybe<{ __typename?: 'UpdatedText', currentText?: Maybe<string>, updatedAt: number }>, commandResult?: Maybe<{ __typename?: 'CommandResult', text: string, isSuccess?: Maybe<boolean> }> } | { __typename?: 'RoomSoundEffect', messageId: string, createdBy?: Maybe<string>, createdAt: number, volume: number, file: { __typename?: 'FilePath', sourceType: FileSourceType, path: string } }>, roomConnectionEvent?: Maybe<{ __typename?: 'RoomConnectionEvent', userUid: string, isConnected: boolean, updatedAt: number }>, writingMessageStatus?: Maybe<{ __typename?: 'WritingMessageStatus', userUid: string, status: WritingMessageStatusType }> }> };
 
-export type PongSubscription = { __typename?: 'Subscription' } & {
-    pong: { __typename?: 'Pong' } & Pick<Pong, 'createdBy' | 'value'>;
-};
+export type PongSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PongSubscription = { __typename?: 'Subscription', pong: { __typename?: 'Pong', createdBy?: Maybe<string>, value: number } };
 
 export const RoomGetStateFragmentDoc = gql`
     fragment RoomGetState on RoomGetState {
-        revision
-        createdBy
-        stateJson
-    }
-`;
+  revision
+  createdBy
+  stateJson
+}
+    `;
 export const CreateRoomResultFragmentDoc = gql`
     fragment CreateRoomResult on CreateRoomResult {
-        ... on CreateRoomSuccessResult {
-            id
-            room {
-                ...RoomGetState
-            }
-        }
-        ... on CreateRoomFailureResult {
-            failureType
-        }
+  ... on CreateRoomSuccessResult {
+    id
+    room {
+      ...RoomGetState
     }
-    ${RoomGetStateFragmentDoc}
-`;
+  }
+  ... on CreateRoomFailureResult {
+    failureType
+  }
+}
+    ${RoomGetStateFragmentDoc}`;
+export const FileItemFragmentDoc = gql`
+    fragment FileItem on FileItem {
+  filename
+  screenname
+  createdBy
+}
+    `;
+export const FileTagFragmentDoc = gql`
+    fragment FileTag on FileTag {
+  id
+  name
+}
+    `;
 export const RoomAsListItemFragmentDoc = gql`
     fragment RoomAsListItem on RoomAsListItem {
-        id
-        name
-        createdBy
-        requiresPhraseToJoinAsPlayer
-        requiresPhraseToJoinAsSpectator
-    }
-`;
+  id
+  name
+  createdBy
+  requiresPhraseToJoinAsPlayer
+  requiresPhraseToJoinAsSpectator
+}
+    `;
 export const GetRoomListResultFragmentDoc = gql`
     fragment GetRoomListResult on GetRoomsListResult {
-        ... on GetRoomsListSuccessResult {
-            rooms {
-                ...RoomAsListItem
-            }
-        }
-        ... on GetRoomsListFailureResult {
-            failureType
-        }
+  ... on GetRoomsListSuccessResult {
+    rooms {
+      ...RoomAsListItem
     }
-    ${RoomAsListItemFragmentDoc}
-`;
+  }
+  ... on GetRoomsListFailureResult {
+    failureType
+  }
+}
+    ${RoomAsListItemFragmentDoc}`;
 export const GetNonJoinedRoomResultFragmentDoc = gql`
     fragment GetNonJoinedRoomResult on GetNonJoinedRoomResult {
-        roomAsListItem {
-            ...RoomAsListItem
-        }
-    }
-    ${RoomAsListItemFragmentDoc}
-`;
+  roomAsListItem {
+    ...RoomAsListItem
+  }
+}
+    ${RoomAsListItemFragmentDoc}`;
 export const GetRoomResultFragmentDoc = gql`
     fragment GetRoomResult on GetRoomResult {
-        ... on GetJoinedRoomResult {
-            role
-            room {
-                ...RoomGetState
-            }
-        }
-        ... on GetNonJoinedRoomResult {
-            ...GetNonJoinedRoomResult
-        }
-        ... on GetRoomFailureResult {
-            failureType
-        }
+  ... on GetJoinedRoomResult {
+    role
+    room {
+      ...RoomGetState
     }
+  }
+  ... on GetNonJoinedRoomResult {
+    ...GetNonJoinedRoomResult
+  }
+  ... on GetRoomFailureResult {
+    failureType
+  }
+}
     ${RoomGetStateFragmentDoc}
-    ${GetNonJoinedRoomResultFragmentDoc}
-`;
+${GetNonJoinedRoomResultFragmentDoc}`;
 export const RoomOperationFragmentDoc = gql`
     fragment RoomOperation on RoomOperation {
-        revisionTo
-        operatedBy {
-            userUid
-            clientId
-        }
-        valueJson
-    }
-`;
+  revisionTo
+  operatedBy {
+    userUid
+    clientId
+  }
+  valueJson
+}
+    `;
 export const JoinRoomResultFragmentDoc = gql`
     fragment JoinRoomResult on JoinRoomResult {
-        ... on JoinRoomSuccessResult {
-            operation {
-                ...RoomOperation
-            }
-        }
-        ... on JoinRoomFailureResult {
-            failureType
-        }
+  ... on JoinRoomSuccessResult {
+    operation {
+      ...RoomOperation
     }
-    ${RoomOperationFragmentDoc}
-`;
+  }
+  ... on JoinRoomFailureResult {
+    failureType
+  }
+}
+    ${RoomOperationFragmentDoc}`;
 export const FilePathFragmentDoc = gql`
     fragment FilePath on FilePath {
-        sourceType
-        path
-    }
-`;
+  sourceType
+  path
+}
+    `;
 export const RoomSoundEffectFragmentDoc = gql`
     fragment RoomSoundEffect on RoomSoundEffect {
-        messageId
-        file {
-            ...FilePath
-        }
-        createdBy
-        createdAt
-        volume
-    }
-    ${FilePathFragmentDoc}
-`;
+  messageId
+  file {
+    ...FilePath
+  }
+  createdBy
+  createdAt
+  volume
+}
+    ${FilePathFragmentDoc}`;
 export const CharacterValueForMessageFragmentDoc = gql`
     fragment CharacterValueForMessage on CharacterValueForMessage {
-        stateId
-        isPrivate
-        name
-        image {
-            ...FilePath
-        }
-        tachieImage {
-            ...FilePath
-        }
-    }
-    ${FilePathFragmentDoc}
-`;
+  stateId
+  isPrivate
+  name
+  image {
+    ...FilePath
+  }
+  tachieImage {
+    ...FilePath
+  }
+}
+    ${FilePathFragmentDoc}`;
 export const RoomPublicMessageFragmentDoc = gql`
     fragment RoomPublicMessage on RoomPublicMessage {
-        messageId
-        channelKey
-        initText
-        initTextSource
-        updatedText {
-            currentText
-            updatedAt
-        }
-        textColor
-        commandResult {
-            text
-            isSuccess
-        }
-        altTextToSecret
-        isSecret
-        createdBy
-        character {
-            ...CharacterValueForMessage
-        }
-        customName
-        createdAt
-        updatedAt
-    }
-    ${CharacterValueForMessageFragmentDoc}
-`;
+  messageId
+  channelKey
+  initText
+  initTextSource
+  updatedText {
+    currentText
+    updatedAt
+  }
+  textColor
+  commandResult {
+    text
+    isSuccess
+  }
+  altTextToSecret
+  isSecret
+  createdBy
+  character {
+    ...CharacterValueForMessage
+  }
+  customName
+  createdAt
+  updatedAt
+}
+    ${CharacterValueForMessageFragmentDoc}`;
 export const RoomPublicChannelFragmentDoc = gql`
     fragment RoomPublicChannel on RoomPublicChannel {
-        key
-        name
-    }
-`;
+  key
+  name
+}
+    `;
 export const RoomPrivateMessageFragmentDoc = gql`
     fragment RoomPrivateMessage on RoomPrivateMessage {
-        messageId
-        visibleTo
-        initText
-        initTextSource
-        updatedText {
-            currentText
-            updatedAt
-        }
-        textColor
-        commandResult {
-            text
-            isSuccess
-        }
-        altTextToSecret
-        isSecret
-        createdBy
-        character {
-            ...CharacterValueForMessage
-        }
-        customName
-        createdAt
-        updatedAt
-    }
-    ${CharacterValueForMessageFragmentDoc}
-`;
+  messageId
+  visibleTo
+  initText
+  initTextSource
+  updatedText {
+    currentText
+    updatedAt
+  }
+  textColor
+  commandResult {
+    text
+    isSuccess
+  }
+  altTextToSecret
+  isSecret
+  createdBy
+  character {
+    ...CharacterValueForMessage
+  }
+  customName
+  createdAt
+  updatedAt
+}
+    ${CharacterValueForMessageFragmentDoc}`;
 export const PieceValueLogFragmentDoc = gql`
     fragment PieceValueLog on PieceValueLog {
-        messageId
-        characterCreatedBy
-        characterId
-        stateId
-        createdAt
-        logType
-        valueJson
-    }
-`;
+  messageId
+  characterCreatedBy
+  characterId
+  stateId
+  createdAt
+  logType
+  valueJson
+}
+    `;
 export const RoomMessageEventFragmentDoc = gql`
     fragment RoomMessageEvent on RoomMessageEvent {
-        ... on RoomSoundEffect {
-            ...RoomSoundEffect
-        }
-        ... on RoomPublicMessage {
-            ...RoomPublicMessage
-        }
-        ... on RoomPublicChannel {
-            ...RoomPublicChannel
-        }
-        ... on RoomPrivateMessage {
-            ...RoomPrivateMessage
-        }
-        ... on PieceValueLog {
-            ...PieceValueLog
-        }
-        ... on RoomPublicChannelUpdate {
-            key
-            name
-        }
-        ... on RoomPublicMessageUpdate {
-            messageId
-            initText
-            initTextSource
-            updatedText {
-                currentText
-                updatedAt
-            }
-            commandResult {
-                text
-                isSuccess
-            }
-            altTextToSecret
-            isSecret
-            updatedAt
-        }
-        ... on RoomPrivateMessageUpdate {
-            messageId
-            initText
-            initTextSource
-            updatedText {
-                currentText
-                updatedAt
-            }
-            commandResult {
-                text
-                isSuccess
-            }
-            altTextToSecret
-            isSecret
-            updatedAt
-        }
+  ... on RoomSoundEffect {
+    ...RoomSoundEffect
+  }
+  ... on RoomPublicMessage {
+    ...RoomPublicMessage
+  }
+  ... on RoomPublicChannel {
+    ...RoomPublicChannel
+  }
+  ... on RoomPrivateMessage {
+    ...RoomPrivateMessage
+  }
+  ... on PieceValueLog {
+    ...PieceValueLog
+  }
+  ... on RoomPublicChannelUpdate {
+    key
+    name
+  }
+  ... on RoomPublicMessageUpdate {
+    messageId
+    initText
+    initTextSource
+    updatedText {
+      currentText
+      updatedAt
     }
+    commandResult {
+      text
+      isSuccess
+    }
+    altTextToSecret
+    isSecret
+    updatedAt
+  }
+  ... on RoomPrivateMessageUpdate {
+    messageId
+    initText
+    initTextSource
+    updatedText {
+      currentText
+      updatedAt
+    }
+    commandResult {
+      text
+      isSuccess
+    }
+    altTextToSecret
+    isSecret
+    updatedAt
+  }
+}
     ${RoomSoundEffectFragmentDoc}
-    ${RoomPublicMessageFragmentDoc}
-    ${RoomPublicChannelFragmentDoc}
-    ${RoomPrivateMessageFragmentDoc}
-    ${PieceValueLogFragmentDoc}
-`;
+${RoomPublicMessageFragmentDoc}
+${RoomPublicChannelFragmentDoc}
+${RoomPrivateMessageFragmentDoc}
+${PieceValueLogFragmentDoc}`;
 export const SemVerFragmentDoc = gql`
     fragment SemVer on SemVer {
-        major
-        minor
-        patch
-        prerelease {
-            type
-            version
-        }
+  major
+  minor
+  patch
+  prerelease {
+    type
+    version
+  }
+}
+    `;
+export const GetAvailableGameSystemsDocument = gql`
+    query GetAvailableGameSystems {
+  result: getAvailableGameSystems {
+    value {
+      id
+      name
+      sortKey
     }
-`;
+  }
+}
+    `;
+
+/**
+ * __useGetAvailableGameSystemsQuery__
+ *
+ * To run a query within a React component, call `useGetAvailableGameSystemsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAvailableGameSystemsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAvailableGameSystemsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetAvailableGameSystemsQuery(baseOptions?: Apollo.QueryHookOptions<GetAvailableGameSystemsQuery, GetAvailableGameSystemsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAvailableGameSystemsQuery, GetAvailableGameSystemsQueryVariables>(GetAvailableGameSystemsDocument, options);
+      }
+export function useGetAvailableGameSystemsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAvailableGameSystemsQuery, GetAvailableGameSystemsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAvailableGameSystemsQuery, GetAvailableGameSystemsQueryVariables>(GetAvailableGameSystemsDocument, options);
+        }
+export type GetAvailableGameSystemsQueryHookResult = ReturnType<typeof useGetAvailableGameSystemsQuery>;
+export type GetAvailableGameSystemsLazyQueryHookResult = ReturnType<typeof useGetAvailableGameSystemsLazyQuery>;
+export type GetAvailableGameSystemsQueryResult = Apollo.QueryResult<GetAvailableGameSystemsQuery, GetAvailableGameSystemsQueryVariables>;
+export const GetFilesDocument = gql`
+    query GetFiles($input: GetFilesInput!) {
+  result: getFiles(input: $input) {
+    files {
+      ...FileItem
+    }
+  }
+}
+    ${FileItemFragmentDoc}`;
+
+/**
+ * __useGetFilesQuery__
+ *
+ * To run a query within a React component, call `useGetFilesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetFilesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetFilesQuery({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useGetFilesQuery(baseOptions: Apollo.QueryHookOptions<GetFilesQuery, GetFilesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetFilesQuery, GetFilesQueryVariables>(GetFilesDocument, options);
+      }
+export function useGetFilesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetFilesQuery, GetFilesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetFilesQuery, GetFilesQueryVariables>(GetFilesDocument, options);
+        }
+export type GetFilesQueryHookResult = ReturnType<typeof useGetFilesQuery>;
+export type GetFilesLazyQueryHookResult = ReturnType<typeof useGetFilesLazyQuery>;
+export type GetFilesQueryResult = Apollo.QueryResult<GetFilesQuery, GetFilesQueryVariables>;
 export const GetRoomDocument = gql`
     query GetRoom($id: String!) {
-        result: getRoom(id: $id) {
-            ... on GetJoinedRoomResult {
-                role
-                room {
-                    ...RoomGetState
-                }
-            }
-            ... on GetNonJoinedRoomResult {
-                roomAsListItem {
-                    ...RoomAsListItem
-                }
-            }
-            ... on GetRoomFailureResult {
-                failureType
-            }
-        }
+  result: getRoom(id: $id) {
+    ... on GetJoinedRoomResult {
+      role
+      room {
+        ...RoomGetState
+      }
     }
+    ... on GetNonJoinedRoomResult {
+      roomAsListItem {
+        ...RoomAsListItem
+      }
+    }
+    ... on GetRoomFailureResult {
+      failureType
+    }
+  }
+}
     ${RoomGetStateFragmentDoc}
-    ${RoomAsListItemFragmentDoc}
-`;
+${RoomAsListItemFragmentDoc}`;
 
 /**
  * __useGetRoomQuery__
@@ -1726,36 +1519,31 @@ export const GetRoomDocument = gql`
  *   },
  * });
  */
-export function useGetRoomQuery(
-    baseOptions: Apollo.QueryHookOptions<GetRoomQuery, GetRoomQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useQuery<GetRoomQuery, GetRoomQueryVariables>(GetRoomDocument, options);
-}
-export function useGetRoomLazyQuery(
-    baseOptions?: Apollo.LazyQueryHookOptions<GetRoomQuery, GetRoomQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useLazyQuery<GetRoomQuery, GetRoomQueryVariables>(GetRoomDocument, options);
-}
+export function useGetRoomQuery(baseOptions: Apollo.QueryHookOptions<GetRoomQuery, GetRoomQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetRoomQuery, GetRoomQueryVariables>(GetRoomDocument, options);
+      }
+export function useGetRoomLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetRoomQuery, GetRoomQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetRoomQuery, GetRoomQueryVariables>(GetRoomDocument, options);
+        }
 export type GetRoomQueryHookResult = ReturnType<typeof useGetRoomQuery>;
 export type GetRoomLazyQueryHookResult = ReturnType<typeof useGetRoomLazyQuery>;
 export type GetRoomQueryResult = Apollo.QueryResult<GetRoomQuery, GetRoomQueryVariables>;
 export const GetRoomsListDocument = gql`
     query GetRoomsList {
-        result: getRoomsList {
-            ... on GetRoomsListSuccessResult {
-                rooms {
-                    ...RoomAsListItem
-                }
-            }
-            ... on GetRoomsListFailureResult {
-                failureType
-            }
-        }
+  result: getRoomsList {
+    ... on GetRoomsListSuccessResult {
+      rooms {
+        ...RoomAsListItem
+      }
     }
-    ${RoomAsListItemFragmentDoc}
-`;
+    ... on GetRoomsListFailureResult {
+      failureType
+    }
+  }
+}
+    ${RoomAsListItemFragmentDoc}`;
 
 /**
  * __useGetRoomsListQuery__
@@ -1772,61 +1560,47 @@ export const GetRoomsListDocument = gql`
  *   },
  * });
  */
-export function useGetRoomsListQuery(
-    baseOptions?: Apollo.QueryHookOptions<GetRoomsListQuery, GetRoomsListQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useQuery<GetRoomsListQuery, GetRoomsListQueryVariables>(
-        GetRoomsListDocument,
-        options
-    );
-}
-export function useGetRoomsListLazyQuery(
-    baseOptions?: Apollo.LazyQueryHookOptions<GetRoomsListQuery, GetRoomsListQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useLazyQuery<GetRoomsListQuery, GetRoomsListQueryVariables>(
-        GetRoomsListDocument,
-        options
-    );
-}
+export function useGetRoomsListQuery(baseOptions?: Apollo.QueryHookOptions<GetRoomsListQuery, GetRoomsListQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetRoomsListQuery, GetRoomsListQueryVariables>(GetRoomsListDocument, options);
+      }
+export function useGetRoomsListLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetRoomsListQuery, GetRoomsListQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetRoomsListQuery, GetRoomsListQueryVariables>(GetRoomsListDocument, options);
+        }
 export type GetRoomsListQueryHookResult = ReturnType<typeof useGetRoomsListQuery>;
 export type GetRoomsListLazyQueryHookResult = ReturnType<typeof useGetRoomsListLazyQuery>;
-export type GetRoomsListQueryResult = Apollo.QueryResult<
-    GetRoomsListQuery,
-    GetRoomsListQueryVariables
->;
+export type GetRoomsListQueryResult = Apollo.QueryResult<GetRoomsListQuery, GetRoomsListQueryVariables>;
 export const GetMessagesDocument = gql`
     query GetMessages($roomId: String!) {
-        result: getMessages(roomId: $roomId) {
-            ... on RoomMessages {
-                publicMessages {
-                    ...RoomPublicMessage
-                }
-                privateMessages {
-                    ...RoomPrivateMessage
-                }
-                pieceValueLogs {
-                    ...PieceValueLog
-                }
-                publicChannels {
-                    ...RoomPublicChannel
-                }
-                soundEffects {
-                    ...RoomSoundEffect
-                }
-            }
-            ... on GetRoomMessagesFailureResult {
-                failureType
-            }
-        }
+  result: getMessages(roomId: $roomId) {
+    ... on RoomMessages {
+      publicMessages {
+        ...RoomPublicMessage
+      }
+      privateMessages {
+        ...RoomPrivateMessage
+      }
+      pieceValueLogs {
+        ...PieceValueLog
+      }
+      publicChannels {
+        ...RoomPublicChannel
+      }
+      soundEffects {
+        ...RoomSoundEffect
+      }
     }
+    ... on GetRoomMessagesFailureResult {
+      failureType
+    }
+  }
+}
     ${RoomPublicMessageFragmentDoc}
-    ${RoomPrivateMessageFragmentDoc}
-    ${PieceValueLogFragmentDoc}
-    ${RoomPublicChannelFragmentDoc}
-    ${RoomSoundEffectFragmentDoc}
-`;
+${RoomPrivateMessageFragmentDoc}
+${PieceValueLogFragmentDoc}
+${RoomPublicChannelFragmentDoc}
+${RoomSoundEffectFragmentDoc}`;
 
 /**
  * __useGetMessagesQuery__
@@ -1844,61 +1618,47 @@ export const GetMessagesDocument = gql`
  *   },
  * });
  */
-export function useGetMessagesQuery(
-    baseOptions: Apollo.QueryHookOptions<GetMessagesQuery, GetMessagesQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useQuery<GetMessagesQuery, GetMessagesQueryVariables>(
-        GetMessagesDocument,
-        options
-    );
-}
-export function useGetMessagesLazyQuery(
-    baseOptions?: Apollo.LazyQueryHookOptions<GetMessagesQuery, GetMessagesQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useLazyQuery<GetMessagesQuery, GetMessagesQueryVariables>(
-        GetMessagesDocument,
-        options
-    );
-}
+export function useGetMessagesQuery(baseOptions: Apollo.QueryHookOptions<GetMessagesQuery, GetMessagesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetMessagesQuery, GetMessagesQueryVariables>(GetMessagesDocument, options);
+      }
+export function useGetMessagesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetMessagesQuery, GetMessagesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetMessagesQuery, GetMessagesQueryVariables>(GetMessagesDocument, options);
+        }
 export type GetMessagesQueryHookResult = ReturnType<typeof useGetMessagesQuery>;
 export type GetMessagesLazyQueryHookResult = ReturnType<typeof useGetMessagesLazyQuery>;
-export type GetMessagesQueryResult = Apollo.QueryResult<
-    GetMessagesQuery,
-    GetMessagesQueryVariables
->;
+export type GetMessagesQueryResult = Apollo.QueryResult<GetMessagesQuery, GetMessagesQueryVariables>;
 export const GetLogDocument = gql`
     query GetLog($roomId: String!) {
-        result: getLog(roomId: $roomId) {
-            ... on RoomMessages {
-                publicMessages {
-                    ...RoomPublicMessage
-                }
-                privateMessages {
-                    ...RoomPrivateMessage
-                }
-                pieceValueLogs {
-                    ...PieceValueLog
-                }
-                publicChannels {
-                    ...RoomPublicChannel
-                }
-                soundEffects {
-                    ...RoomSoundEffect
-                }
-            }
-            ... on GetRoomLogFailureResult {
-                failureType
-            }
-        }
+  result: getLog(roomId: $roomId) {
+    ... on RoomMessages {
+      publicMessages {
+        ...RoomPublicMessage
+      }
+      privateMessages {
+        ...RoomPrivateMessage
+      }
+      pieceValueLogs {
+        ...PieceValueLog
+      }
+      publicChannels {
+        ...RoomPublicChannel
+      }
+      soundEffects {
+        ...RoomSoundEffect
+      }
     }
+    ... on GetRoomLogFailureResult {
+      failureType
+    }
+  }
+}
     ${RoomPublicMessageFragmentDoc}
-    ${RoomPrivateMessageFragmentDoc}
-    ${PieceValueLogFragmentDoc}
-    ${RoomPublicChannelFragmentDoc}
-    ${RoomSoundEffectFragmentDoc}
-`;
+${RoomPrivateMessageFragmentDoc}
+${PieceValueLogFragmentDoc}
+${RoomPublicChannelFragmentDoc}
+${RoomSoundEffectFragmentDoc}`;
 
 /**
  * __useGetLogQuery__
@@ -1916,34 +1676,30 @@ export const GetLogDocument = gql`
  *   },
  * });
  */
-export function useGetLogQuery(
-    baseOptions: Apollo.QueryHookOptions<GetLogQuery, GetLogQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useQuery<GetLogQuery, GetLogQueryVariables>(GetLogDocument, options);
-}
-export function useGetLogLazyQuery(
-    baseOptions?: Apollo.LazyQueryHookOptions<GetLogQuery, GetLogQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useLazyQuery<GetLogQuery, GetLogQueryVariables>(GetLogDocument, options);
-}
+export function useGetLogQuery(baseOptions: Apollo.QueryHookOptions<GetLogQuery, GetLogQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetLogQuery, GetLogQueryVariables>(GetLogDocument, options);
+      }
+export function useGetLogLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetLogQuery, GetLogQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetLogQuery, GetLogQueryVariables>(GetLogDocument, options);
+        }
 export type GetLogQueryHookResult = ReturnType<typeof useGetLogQuery>;
 export type GetLogLazyQueryHookResult = ReturnType<typeof useGetLogLazyQuery>;
 export type GetLogQueryResult = Apollo.QueryResult<GetLogQuery, GetLogQueryVariables>;
 export const GetRoomConnectionsDocument = gql`
     query GetRoomConnections($roomId: String!) {
-        result: getRoomConnections(roomId: $roomId) {
-            ... on GetRoomConnectionsSuccessResult {
-                fetchedAt
-                connectedUserUids
-            }
-            ... on GetRoomConnectionsFailureResult {
-                failureType
-            }
-        }
+  result: getRoomConnections(roomId: $roomId) {
+    ... on GetRoomConnectionsSuccessResult {
+      fetchedAt
+      connectedUserUids
     }
-`;
+    ... on GetRoomConnectionsFailureResult {
+      failureType
+    }
+  }
+}
+    `;
 
 /**
  * __useGetRoomConnectionsQuery__
@@ -1961,45 +1717,26 @@ export const GetRoomConnectionsDocument = gql`
  *   },
  * });
  */
-export function useGetRoomConnectionsQuery(
-    baseOptions: Apollo.QueryHookOptions<GetRoomConnectionsQuery, GetRoomConnectionsQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useQuery<GetRoomConnectionsQuery, GetRoomConnectionsQueryVariables>(
-        GetRoomConnectionsDocument,
-        options
-    );
-}
-export function useGetRoomConnectionsLazyQuery(
-    baseOptions?: Apollo.LazyQueryHookOptions<
-        GetRoomConnectionsQuery,
-        GetRoomConnectionsQueryVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useLazyQuery<GetRoomConnectionsQuery, GetRoomConnectionsQueryVariables>(
-        GetRoomConnectionsDocument,
-        options
-    );
-}
+export function useGetRoomConnectionsQuery(baseOptions: Apollo.QueryHookOptions<GetRoomConnectionsQuery, GetRoomConnectionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetRoomConnectionsQuery, GetRoomConnectionsQueryVariables>(GetRoomConnectionsDocument, options);
+      }
+export function useGetRoomConnectionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetRoomConnectionsQuery, GetRoomConnectionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetRoomConnectionsQuery, GetRoomConnectionsQueryVariables>(GetRoomConnectionsDocument, options);
+        }
 export type GetRoomConnectionsQueryHookResult = ReturnType<typeof useGetRoomConnectionsQuery>;
-export type GetRoomConnectionsLazyQueryHookResult = ReturnType<
-    typeof useGetRoomConnectionsLazyQuery
->;
-export type GetRoomConnectionsQueryResult = Apollo.QueryResult<
-    GetRoomConnectionsQuery,
-    GetRoomConnectionsQueryVariables
->;
+export type GetRoomConnectionsLazyQueryHookResult = ReturnType<typeof useGetRoomConnectionsLazyQuery>;
+export type GetRoomConnectionsQueryResult = Apollo.QueryResult<GetRoomConnectionsQuery, GetRoomConnectionsQueryVariables>;
 export const GetServerInfoDocument = gql`
     query GetServerInfo {
-        result: getServerInfo {
-            version {
-                ...SemVer
-            }
-        }
+  result: getServerInfo {
+    version {
+      ...SemVer
     }
-    ${SemVerFragmentDoc}
-`;
+  }
+}
+    ${SemVerFragmentDoc}`;
 
 /**
  * __useGetServerInfoQuery__
@@ -2016,103 +1753,61 @@ export const GetServerInfoDocument = gql`
  *   },
  * });
  */
-export function useGetServerInfoQuery(
-    baseOptions?: Apollo.QueryHookOptions<GetServerInfoQuery, GetServerInfoQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useQuery<GetServerInfoQuery, GetServerInfoQueryVariables>(
-        GetServerInfoDocument,
-        options
-    );
-}
-export function useGetServerInfoLazyQuery(
-    baseOptions?: Apollo.LazyQueryHookOptions<GetServerInfoQuery, GetServerInfoQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useLazyQuery<GetServerInfoQuery, GetServerInfoQueryVariables>(
-        GetServerInfoDocument,
-        options
-    );
-}
+export function useGetServerInfoQuery(baseOptions?: Apollo.QueryHookOptions<GetServerInfoQuery, GetServerInfoQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetServerInfoQuery, GetServerInfoQueryVariables>(GetServerInfoDocument, options);
+      }
+export function useGetServerInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetServerInfoQuery, GetServerInfoQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetServerInfoQuery, GetServerInfoQueryVariables>(GetServerInfoDocument, options);
+        }
 export type GetServerInfoQueryHookResult = ReturnType<typeof useGetServerInfoQuery>;
 export type GetServerInfoLazyQueryHookResult = ReturnType<typeof useGetServerInfoLazyQuery>;
-export type GetServerInfoQueryResult = Apollo.QueryResult<
-    GetServerInfoQuery,
-    GetServerInfoQueryVariables
->;
-export const ListAvailableGameSystemsDocument = gql`
-    query ListAvailableGameSystems {
-        result: listAvailableGameSystems {
-            value {
-                id
-                name
-                sortKey
-            }
-        }
-    }
-`;
+export type GetServerInfoQueryResult = Apollo.QueryResult<GetServerInfoQuery, GetServerInfoQueryVariables>;
+export const IsEntryDocument = gql`
+    query IsEntry {
+  result: isEntry
+}
+    `;
 
 /**
- * __useListAvailableGameSystemsQuery__
+ * __useIsEntryQuery__
  *
- * To run a query within a React component, call `useListAvailableGameSystemsQuery` and pass it any options that fit your needs.
- * When your component renders, `useListAvailableGameSystemsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useIsEntryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIsEntryQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useListAvailableGameSystemsQuery({
+ * const { data, loading, error } = useIsEntryQuery({
  *   variables: {
  *   },
  * });
  */
-export function useListAvailableGameSystemsQuery(
-    baseOptions?: Apollo.QueryHookOptions<
-        ListAvailableGameSystemsQuery,
-        ListAvailableGameSystemsQueryVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useQuery<ListAvailableGameSystemsQuery, ListAvailableGameSystemsQueryVariables>(
-        ListAvailableGameSystemsDocument,
-        options
-    );
-}
-export function useListAvailableGameSystemsLazyQuery(
-    baseOptions?: Apollo.LazyQueryHookOptions<
-        ListAvailableGameSystemsQuery,
-        ListAvailableGameSystemsQueryVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useLazyQuery<
-        ListAvailableGameSystemsQuery,
-        ListAvailableGameSystemsQueryVariables
-    >(ListAvailableGameSystemsDocument, options);
-}
-export type ListAvailableGameSystemsQueryHookResult = ReturnType<
-    typeof useListAvailableGameSystemsQuery
->;
-export type ListAvailableGameSystemsLazyQueryHookResult = ReturnType<
-    typeof useListAvailableGameSystemsLazyQuery
->;
-export type ListAvailableGameSystemsQueryResult = Apollo.QueryResult<
-    ListAvailableGameSystemsQuery,
-    ListAvailableGameSystemsQueryVariables
->;
+export function useIsEntryQuery(baseOptions?: Apollo.QueryHookOptions<IsEntryQuery, IsEntryQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<IsEntryQuery, IsEntryQueryVariables>(IsEntryDocument, options);
+      }
+export function useIsEntryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IsEntryQuery, IsEntryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<IsEntryQuery, IsEntryQueryVariables>(IsEntryDocument, options);
+        }
+export type IsEntryQueryHookResult = ReturnType<typeof useIsEntryQuery>;
+export type IsEntryLazyQueryHookResult = ReturnType<typeof useIsEntryLazyQuery>;
+export type IsEntryQueryResult = Apollo.QueryResult<IsEntryQuery, IsEntryQueryVariables>;
 export const RequiresPhraseToJoinAsPlayerDocument = gql`
     query RequiresPhraseToJoinAsPlayer($roomId: String!) {
-        result: requiresPhraseToJoinAsPlayer(roomId: $roomId) {
-            ... on RequiresPhraseSuccessResult {
-                value
-            }
-            ... on RequiresPhraseFailureResult {
-                failureType
-            }
-        }
+  result: requiresPhraseToJoinAsPlayer(roomId: $roomId) {
+    ... on RequiresPhraseSuccessResult {
+      value
     }
-`;
+    ... on RequiresPhraseFailureResult {
+      failureType
+    }
+  }
+}
+    `;
 
 /**
  * __useRequiresPhraseToJoinAsPlayerQuery__
@@ -2130,51 +1825,58 @@ export const RequiresPhraseToJoinAsPlayerDocument = gql`
  *   },
  * });
  */
-export function useRequiresPhraseToJoinAsPlayerQuery(
-    baseOptions: Apollo.QueryHookOptions<
-        RequiresPhraseToJoinAsPlayerQuery,
-        RequiresPhraseToJoinAsPlayerQueryVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useQuery<
-        RequiresPhraseToJoinAsPlayerQuery,
-        RequiresPhraseToJoinAsPlayerQueryVariables
-    >(RequiresPhraseToJoinAsPlayerDocument, options);
+export function useRequiresPhraseToJoinAsPlayerQuery(baseOptions: Apollo.QueryHookOptions<RequiresPhraseToJoinAsPlayerQuery, RequiresPhraseToJoinAsPlayerQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<RequiresPhraseToJoinAsPlayerQuery, RequiresPhraseToJoinAsPlayerQueryVariables>(RequiresPhraseToJoinAsPlayerDocument, options);
+      }
+export function useRequiresPhraseToJoinAsPlayerLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RequiresPhraseToJoinAsPlayerQuery, RequiresPhraseToJoinAsPlayerQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<RequiresPhraseToJoinAsPlayerQuery, RequiresPhraseToJoinAsPlayerQueryVariables>(RequiresPhraseToJoinAsPlayerDocument, options);
+        }
+export type RequiresPhraseToJoinAsPlayerQueryHookResult = ReturnType<typeof useRequiresPhraseToJoinAsPlayerQuery>;
+export type RequiresPhraseToJoinAsPlayerLazyQueryHookResult = ReturnType<typeof useRequiresPhraseToJoinAsPlayerLazyQuery>;
+export type RequiresPhraseToJoinAsPlayerQueryResult = Apollo.QueryResult<RequiresPhraseToJoinAsPlayerQuery, RequiresPhraseToJoinAsPlayerQueryVariables>;
+export const CreateFileTagDocument = gql`
+    mutation CreateFileTag($tagName: String!) {
+  result: createFileTag(tagName: $tagName) {
+    ...FileTag
+  }
 }
-export function useRequiresPhraseToJoinAsPlayerLazyQuery(
-    baseOptions?: Apollo.LazyQueryHookOptions<
-        RequiresPhraseToJoinAsPlayerQuery,
-        RequiresPhraseToJoinAsPlayerQueryVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useLazyQuery<
-        RequiresPhraseToJoinAsPlayerQuery,
-        RequiresPhraseToJoinAsPlayerQueryVariables
-    >(RequiresPhraseToJoinAsPlayerDocument, options);
-}
-export type RequiresPhraseToJoinAsPlayerQueryHookResult = ReturnType<
-    typeof useRequiresPhraseToJoinAsPlayerQuery
->;
-export type RequiresPhraseToJoinAsPlayerLazyQueryHookResult = ReturnType<
-    typeof useRequiresPhraseToJoinAsPlayerLazyQuery
->;
-export type RequiresPhraseToJoinAsPlayerQueryResult = Apollo.QueryResult<
-    RequiresPhraseToJoinAsPlayerQuery,
-    RequiresPhraseToJoinAsPlayerQueryVariables
->;
+    ${FileTagFragmentDoc}`;
+export type CreateFileTagMutationFn = Apollo.MutationFunction<CreateFileTagMutation, CreateFileTagMutationVariables>;
+
+/**
+ * __useCreateFileTagMutation__
+ *
+ * To run a mutation, you first call `useCreateFileTagMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateFileTagMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createFileTagMutation, { data, loading, error }] = useCreateFileTagMutation({
+ *   variables: {
+ *      tagName: // value for 'tagName'
+ *   },
+ * });
+ */
+export function useCreateFileTagMutation(baseOptions?: Apollo.MutationHookOptions<CreateFileTagMutation, CreateFileTagMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateFileTagMutation, CreateFileTagMutationVariables>(CreateFileTagDocument, options);
+      }
+export type CreateFileTagMutationHookResult = ReturnType<typeof useCreateFileTagMutation>;
+export type CreateFileTagMutationResult = Apollo.MutationResult<CreateFileTagMutation>;
+export type CreateFileTagMutationOptions = Apollo.BaseMutationOptions<CreateFileTagMutation, CreateFileTagMutationVariables>;
 export const ChangeParticipantNameDocument = gql`
     mutation ChangeParticipantName($roomId: String!, $newName: String!) {
-        result: changeParticipantName(roomId: $roomId, newName: $newName) {
-            failureType
-        }
-    }
-`;
-export type ChangeParticipantNameMutationFn = Apollo.MutationFunction<
-    ChangeParticipantNameMutation,
-    ChangeParticipantNameMutationVariables
->;
+  result: changeParticipantName(roomId: $roomId, newName: $newName) {
+    failureType
+  }
+}
+    `;
+export type ChangeParticipantNameMutationFn = Apollo.MutationFunction<ChangeParticipantNameMutation, ChangeParticipantNameMutationVariables>;
 
 /**
  * __useChangeParticipantNameMutation__
@@ -2194,44 +1896,26 @@ export type ChangeParticipantNameMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function useChangeParticipantNameMutation(
-    baseOptions?: Apollo.MutationHookOptions<
-        ChangeParticipantNameMutation,
-        ChangeParticipantNameMutationVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<
-        ChangeParticipantNameMutation,
-        ChangeParticipantNameMutationVariables
-    >(ChangeParticipantNameDocument, options);
-}
-export type ChangeParticipantNameMutationHookResult = ReturnType<
-    typeof useChangeParticipantNameMutation
->;
-export type ChangeParticipantNameMutationResult =
-    Apollo.MutationResult<ChangeParticipantNameMutation>;
-export type ChangeParticipantNameMutationOptions = Apollo.BaseMutationOptions<
-    ChangeParticipantNameMutation,
-    ChangeParticipantNameMutationVariables
->;
+export function useChangeParticipantNameMutation(baseOptions?: Apollo.MutationHookOptions<ChangeParticipantNameMutation, ChangeParticipantNameMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ChangeParticipantNameMutation, ChangeParticipantNameMutationVariables>(ChangeParticipantNameDocument, options);
+      }
+export type ChangeParticipantNameMutationHookResult = ReturnType<typeof useChangeParticipantNameMutation>;
+export type ChangeParticipantNameMutationResult = Apollo.MutationResult<ChangeParticipantNameMutation>;
+export type ChangeParticipantNameMutationOptions = Apollo.BaseMutationOptions<ChangeParticipantNameMutation, ChangeParticipantNameMutationVariables>;
 export const CreateRoomDocument = gql`
     mutation CreateRoom($input: CreateRoomInput!) {
-        result: createRoom(input: $input) {
-            ... on CreateRoomSuccessResult {
-                ...CreateRoomResult
-            }
-            ... on CreateRoomFailureResult {
-                failureType
-            }
-        }
+  result: createRoom(input: $input) {
+    ... on CreateRoomSuccessResult {
+      ...CreateRoomResult
     }
-    ${CreateRoomResultFragmentDoc}
-`;
-export type CreateRoomMutationFn = Apollo.MutationFunction<
-    CreateRoomMutation,
-    CreateRoomMutationVariables
->;
+    ... on CreateRoomFailureResult {
+      failureType
+    }
+  }
+}
+    ${CreateRoomResultFragmentDoc}`;
+export type CreateRoomMutationFn = Apollo.MutationFunction<CreateRoomMutation, CreateRoomMutationVariables>;
 
 /**
  * __useCreateRoomMutation__
@@ -2250,32 +1934,52 @@ export type CreateRoomMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function useCreateRoomMutation(
-    baseOptions?: Apollo.MutationHookOptions<CreateRoomMutation, CreateRoomMutationVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<CreateRoomMutation, CreateRoomMutationVariables>(
-        CreateRoomDocument,
-        options
-    );
-}
+export function useCreateRoomMutation(baseOptions?: Apollo.MutationHookOptions<CreateRoomMutation, CreateRoomMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateRoomMutation, CreateRoomMutationVariables>(CreateRoomDocument, options);
+      }
 export type CreateRoomMutationHookResult = ReturnType<typeof useCreateRoomMutation>;
 export type CreateRoomMutationResult = Apollo.MutationResult<CreateRoomMutation>;
-export type CreateRoomMutationOptions = Apollo.BaseMutationOptions<
-    CreateRoomMutation,
-    CreateRoomMutationVariables
->;
+export type CreateRoomMutationOptions = Apollo.BaseMutationOptions<CreateRoomMutation, CreateRoomMutationVariables>;
+export const DeleteFileTagDocument = gql`
+    mutation DeleteFileTag($tagId: String!) {
+  result: deleteFileTag(tagId: $tagId)
+}
+    `;
+export type DeleteFileTagMutationFn = Apollo.MutationFunction<DeleteFileTagMutation, DeleteFileTagMutationVariables>;
+
+/**
+ * __useDeleteFileTagMutation__
+ *
+ * To run a mutation, you first call `useDeleteFileTagMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteFileTagMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteFileTagMutation, { data, loading, error }] = useDeleteFileTagMutation({
+ *   variables: {
+ *      tagId: // value for 'tagId'
+ *   },
+ * });
+ */
+export function useDeleteFileTagMutation(baseOptions?: Apollo.MutationHookOptions<DeleteFileTagMutation, DeleteFileTagMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteFileTagMutation, DeleteFileTagMutationVariables>(DeleteFileTagDocument, options);
+      }
+export type DeleteFileTagMutationHookResult = ReturnType<typeof useDeleteFileTagMutation>;
+export type DeleteFileTagMutationResult = Apollo.MutationResult<DeleteFileTagMutation>;
+export type DeleteFileTagMutationOptions = Apollo.BaseMutationOptions<DeleteFileTagMutation, DeleteFileTagMutationVariables>;
 export const DeleteRoomDocument = gql`
     mutation DeleteRoom($id: String!) {
-        result: deleteRoom(id: $id) {
-            failureType
-        }
-    }
-`;
-export type DeleteRoomMutationFn = Apollo.MutationFunction<
-    DeleteRoomMutation,
-    DeleteRoomMutationVariables
->;
+  result: deleteRoom(id: $id) {
+    failureType
+  }
+}
+    `;
+export type DeleteRoomMutationFn = Apollo.MutationFunction<DeleteRoomMutation, DeleteRoomMutationVariables>;
 
 /**
  * __useDeleteRoomMutation__
@@ -2294,33 +1998,52 @@ export type DeleteRoomMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function useDeleteRoomMutation(
-    baseOptions?: Apollo.MutationHookOptions<DeleteRoomMutation, DeleteRoomMutationVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<DeleteRoomMutation, DeleteRoomMutationVariables>(
-        DeleteRoomDocument,
-        options
-    );
-}
+export function useDeleteRoomMutation(baseOptions?: Apollo.MutationHookOptions<DeleteRoomMutation, DeleteRoomMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteRoomMutation, DeleteRoomMutationVariables>(DeleteRoomDocument, options);
+      }
 export type DeleteRoomMutationHookResult = ReturnType<typeof useDeleteRoomMutation>;
 export type DeleteRoomMutationResult = Apollo.MutationResult<DeleteRoomMutation>;
-export type DeleteRoomMutationOptions = Apollo.BaseMutationOptions<
-    DeleteRoomMutation,
-    DeleteRoomMutationVariables
->;
+export type DeleteRoomMutationOptions = Apollo.BaseMutationOptions<DeleteRoomMutation, DeleteRoomMutationVariables>;
+export const EditFileTagsDocument = gql`
+    mutation EditFileTags($input: EditFileTagsInput!) {
+  result: editFileTags(input: $input)
+}
+    `;
+export type EditFileTagsMutationFn = Apollo.MutationFunction<EditFileTagsMutation, EditFileTagsMutationVariables>;
+
+/**
+ * __useEditFileTagsMutation__
+ *
+ * To run a mutation, you first call `useEditFileTagsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditFileTagsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [editFileTagsMutation, { data, loading, error }] = useEditFileTagsMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useEditFileTagsMutation(baseOptions?: Apollo.MutationHookOptions<EditFileTagsMutation, EditFileTagsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EditFileTagsMutation, EditFileTagsMutationVariables>(EditFileTagsDocument, options);
+      }
+export type EditFileTagsMutationHookResult = ReturnType<typeof useEditFileTagsMutation>;
+export type EditFileTagsMutationResult = Apollo.MutationResult<EditFileTagsMutation>;
+export type EditFileTagsMutationOptions = Apollo.BaseMutationOptions<EditFileTagsMutation, EditFileTagsMutationVariables>;
 export const JoinRoomAsPlayerDocument = gql`
     mutation JoinRoomAsPlayer($id: String!, $name: String!, $phrase: String) {
-        result: joinRoomAsPlayer(id: $id, name: $name, phrase: $phrase) {
-            ...JoinRoomResult
-        }
-    }
-    ${JoinRoomResultFragmentDoc}
-`;
-export type JoinRoomAsPlayerMutationFn = Apollo.MutationFunction<
-    JoinRoomAsPlayerMutation,
-    JoinRoomAsPlayerMutationVariables
->;
+  result: joinRoomAsPlayer(id: $id, name: $name, phrase: $phrase) {
+    ...JoinRoomResult
+  }
+}
+    ${JoinRoomResultFragmentDoc}`;
+export type JoinRoomAsPlayerMutationFn = Apollo.MutationFunction<JoinRoomAsPlayerMutation, JoinRoomAsPlayerMutationVariables>;
 
 /**
  * __useJoinRoomAsPlayerMutation__
@@ -2341,36 +2064,21 @@ export type JoinRoomAsPlayerMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function useJoinRoomAsPlayerMutation(
-    baseOptions?: Apollo.MutationHookOptions<
-        JoinRoomAsPlayerMutation,
-        JoinRoomAsPlayerMutationVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<JoinRoomAsPlayerMutation, JoinRoomAsPlayerMutationVariables>(
-        JoinRoomAsPlayerDocument,
-        options
-    );
-}
+export function useJoinRoomAsPlayerMutation(baseOptions?: Apollo.MutationHookOptions<JoinRoomAsPlayerMutation, JoinRoomAsPlayerMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<JoinRoomAsPlayerMutation, JoinRoomAsPlayerMutationVariables>(JoinRoomAsPlayerDocument, options);
+      }
 export type JoinRoomAsPlayerMutationHookResult = ReturnType<typeof useJoinRoomAsPlayerMutation>;
 export type JoinRoomAsPlayerMutationResult = Apollo.MutationResult<JoinRoomAsPlayerMutation>;
-export type JoinRoomAsPlayerMutationOptions = Apollo.BaseMutationOptions<
-    JoinRoomAsPlayerMutation,
-    JoinRoomAsPlayerMutationVariables
->;
+export type JoinRoomAsPlayerMutationOptions = Apollo.BaseMutationOptions<JoinRoomAsPlayerMutation, JoinRoomAsPlayerMutationVariables>;
 export const JoinRoomAsSpectatorDocument = gql`
     mutation JoinRoomAsSpectator($id: String!, $name: String!, $phrase: String) {
-        result: joinRoomAsSpectator(id: $id, name: $name, phrase: $phrase) {
-            ...JoinRoomResult
-        }
-    }
-    ${JoinRoomResultFragmentDoc}
-`;
-export type JoinRoomAsSpectatorMutationFn = Apollo.MutationFunction<
-    JoinRoomAsSpectatorMutation,
-    JoinRoomAsSpectatorMutationVariables
->;
+  result: joinRoomAsSpectator(id: $id, name: $name, phrase: $phrase) {
+    ...JoinRoomResult
+  }
+}
+    ${JoinRoomResultFragmentDoc}`;
+export type JoinRoomAsSpectatorMutationFn = Apollo.MutationFunction<JoinRoomAsSpectatorMutation, JoinRoomAsSpectatorMutationVariables>;
 
 /**
  * __useJoinRoomAsSpectatorMutation__
@@ -2391,37 +2099,21 @@ export type JoinRoomAsSpectatorMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function useJoinRoomAsSpectatorMutation(
-    baseOptions?: Apollo.MutationHookOptions<
-        JoinRoomAsSpectatorMutation,
-        JoinRoomAsSpectatorMutationVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<JoinRoomAsSpectatorMutation, JoinRoomAsSpectatorMutationVariables>(
-        JoinRoomAsSpectatorDocument,
-        options
-    );
-}
-export type JoinRoomAsSpectatorMutationHookResult = ReturnType<
-    typeof useJoinRoomAsSpectatorMutation
->;
+export function useJoinRoomAsSpectatorMutation(baseOptions?: Apollo.MutationHookOptions<JoinRoomAsSpectatorMutation, JoinRoomAsSpectatorMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<JoinRoomAsSpectatorMutation, JoinRoomAsSpectatorMutationVariables>(JoinRoomAsSpectatorDocument, options);
+      }
+export type JoinRoomAsSpectatorMutationHookResult = ReturnType<typeof useJoinRoomAsSpectatorMutation>;
 export type JoinRoomAsSpectatorMutationResult = Apollo.MutationResult<JoinRoomAsSpectatorMutation>;
-export type JoinRoomAsSpectatorMutationOptions = Apollo.BaseMutationOptions<
-    JoinRoomAsSpectatorMutation,
-    JoinRoomAsSpectatorMutationVariables
->;
+export type JoinRoomAsSpectatorMutationOptions = Apollo.BaseMutationOptions<JoinRoomAsSpectatorMutation, JoinRoomAsSpectatorMutationVariables>;
 export const EntryToServerDocument = gql`
     mutation EntryToServer($phrase: String!) {
-        result: entryToServer(phrase: $phrase) {
-            type
-        }
-    }
-`;
-export type EntryToServerMutationFn = Apollo.MutationFunction<
-    EntryToServerMutation,
-    EntryToServerMutationVariables
->;
+  result: entryToServer(phrase: $phrase) {
+    type
+  }
+}
+    `;
+export type EntryToServerMutationFn = Apollo.MutationFunction<EntryToServerMutation, EntryToServerMutationVariables>;
 
 /**
  * __useEntryToServerMutation__
@@ -2440,32 +2132,21 @@ export type EntryToServerMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function useEntryToServerMutation(
-    baseOptions?: Apollo.MutationHookOptions<EntryToServerMutation, EntryToServerMutationVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<EntryToServerMutation, EntryToServerMutationVariables>(
-        EntryToServerDocument,
-        options
-    );
-}
+export function useEntryToServerMutation(baseOptions?: Apollo.MutationHookOptions<EntryToServerMutation, EntryToServerMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EntryToServerMutation, EntryToServerMutationVariables>(EntryToServerDocument, options);
+      }
 export type EntryToServerMutationHookResult = ReturnType<typeof useEntryToServerMutation>;
 export type EntryToServerMutationResult = Apollo.MutationResult<EntryToServerMutation>;
-export type EntryToServerMutationOptions = Apollo.BaseMutationOptions<
-    EntryToServerMutation,
-    EntryToServerMutationVariables
->;
+export type EntryToServerMutationOptions = Apollo.BaseMutationOptions<EntryToServerMutation, EntryToServerMutationVariables>;
 export const LeaveRoomDocument = gql`
     mutation LeaveRoom($id: String!) {
-        result: leaveRoom(id: $id) {
-            failureType
-        }
-    }
-`;
-export type LeaveRoomMutationFn = Apollo.MutationFunction<
-    LeaveRoomMutation,
-    LeaveRoomMutationVariables
->;
+  result: leaveRoom(id: $id) {
+    failureType
+  }
+}
+    `;
+export type LeaveRoomMutationFn = Apollo.MutationFunction<LeaveRoomMutation, LeaveRoomMutationVariables>;
 
 /**
  * __useLeaveRoomMutation__
@@ -2484,55 +2165,41 @@ export type LeaveRoomMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function useLeaveRoomMutation(
-    baseOptions?: Apollo.MutationHookOptions<LeaveRoomMutation, LeaveRoomMutationVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<LeaveRoomMutation, LeaveRoomMutationVariables>(
-        LeaveRoomDocument,
-        options
-    );
-}
+export function useLeaveRoomMutation(baseOptions?: Apollo.MutationHookOptions<LeaveRoomMutation, LeaveRoomMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LeaveRoomMutation, LeaveRoomMutationVariables>(LeaveRoomDocument, options);
+      }
 export type LeaveRoomMutationHookResult = ReturnType<typeof useLeaveRoomMutation>;
 export type LeaveRoomMutationResult = Apollo.MutationResult<LeaveRoomMutation>;
-export type LeaveRoomMutationOptions = Apollo.BaseMutationOptions<
-    LeaveRoomMutation,
-    LeaveRoomMutationVariables
->;
+export type LeaveRoomMutationOptions = Apollo.BaseMutationOptions<LeaveRoomMutation, LeaveRoomMutationVariables>;
 export const OperateDocument = gql`
-    mutation Operate(
-        $id: String!
-        $revisionFrom: Int!
-        $operation: RoomOperationInput!
-        $requestId: String!
-    ) {
-        result: operate(
-            id: $id
-            prevRevision: $revisionFrom
-            operation: $operation
-            requestId: $requestId
-        ) {
-            ... on OperateRoomSuccessResult {
-                operation {
-                    ...RoomOperation
-                }
-            }
-            ... on OperateRoomIdResult {
-                requestId
-            }
-            ... on OperateRoomFailureResult {
-                failureType
-            }
-            ... on OperateRoomNonJoinedResult {
-                roomAsListItem {
-                    ...RoomAsListItem
-                }
-            }
-        }
+    mutation Operate($id: String!, $revisionFrom: Int!, $operation: RoomOperationInput!, $requestId: String!) {
+  result: operate(
+    id: $id
+    prevRevision: $revisionFrom
+    operation: $operation
+    requestId: $requestId
+  ) {
+    ... on OperateRoomSuccessResult {
+      operation {
+        ...RoomOperation
+      }
     }
+    ... on OperateRoomIdResult {
+      requestId
+    }
+    ... on OperateRoomFailureResult {
+      failureType
+    }
+    ... on OperateRoomNonJoinedResult {
+      roomAsListItem {
+        ...RoomAsListItem
+      }
+    }
+  }
+}
     ${RoomOperationFragmentDoc}
-    ${RoomAsListItemFragmentDoc}
-`;
+${RoomAsListItemFragmentDoc}`;
 export type OperateMutationFn = Apollo.MutationFunction<OperateMutation, OperateMutationVariables>;
 
 /**
@@ -2555,26 +2222,21 @@ export type OperateMutationFn = Apollo.MutationFunction<OperateMutation, Operate
  *   },
  * });
  */
-export function useOperateMutation(
-    baseOptions?: Apollo.MutationHookOptions<OperateMutation, OperateMutationVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<OperateMutation, OperateMutationVariables>(OperateDocument, options);
-}
+export function useOperateMutation(baseOptions?: Apollo.MutationHookOptions<OperateMutation, OperateMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<OperateMutation, OperateMutationVariables>(OperateDocument, options);
+      }
 export type OperateMutationHookResult = ReturnType<typeof useOperateMutation>;
 export type OperateMutationResult = Apollo.MutationResult<OperateMutation>;
-export type OperateMutationOptions = Apollo.BaseMutationOptions<
-    OperateMutation,
-    OperateMutationVariables
->;
+export type OperateMutationOptions = Apollo.BaseMutationOptions<OperateMutation, OperateMutationVariables>;
 export const PingDocument = gql`
     mutation Ping($value: Float!) {
-        result: ping(value: $value) {
-            createdBy
-            value
-        }
-    }
-`;
+  result: ping(value: $value) {
+    createdBy
+    value
+  }
+}
+    `;
 export type PingMutationFn = Apollo.MutationFunction<PingMutation, PingMutationVariables>;
 
 /**
@@ -2594,26 +2256,21 @@ export type PingMutationFn = Apollo.MutationFunction<PingMutation, PingMutationV
  *   },
  * });
  */
-export function usePingMutation(
-    baseOptions?: Apollo.MutationHookOptions<PingMutation, PingMutationVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<PingMutation, PingMutationVariables>(PingDocument, options);
-}
+export function usePingMutation(baseOptions?: Apollo.MutationHookOptions<PingMutation, PingMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<PingMutation, PingMutationVariables>(PingDocument, options);
+      }
 export type PingMutationHookResult = ReturnType<typeof usePingMutation>;
 export type PingMutationResult = Apollo.MutationResult<PingMutation>;
 export type PingMutationOptions = Apollo.BaseMutationOptions<PingMutation, PingMutationVariables>;
 export const PromoteToPlayerDocument = gql`
     mutation PromoteToPlayer($roomId: String!, $phrase: String) {
-        result: promoteToPlayer(roomId: $roomId, phrase: $phrase) {
-            failureType
-        }
-    }
-`;
-export type PromoteToPlayerMutationFn = Apollo.MutationFunction<
-    PromoteToPlayerMutation,
-    PromoteToPlayerMutationVariables
->;
+  result: promoteToPlayer(roomId: $roomId, phrase: $phrase) {
+    failureType
+  }
+}
+    `;
+export type PromoteToPlayerMutationFn = Apollo.MutationFunction<PromoteToPlayerMutation, PromoteToPlayerMutationVariables>;
 
 /**
  * __usePromoteToPlayerMutation__
@@ -2633,57 +2290,34 @@ export type PromoteToPlayerMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function usePromoteToPlayerMutation(
-    baseOptions?: Apollo.MutationHookOptions<
-        PromoteToPlayerMutation,
-        PromoteToPlayerMutationVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<PromoteToPlayerMutation, PromoteToPlayerMutationVariables>(
-        PromoteToPlayerDocument,
-        options
-    );
-}
+export function usePromoteToPlayerMutation(baseOptions?: Apollo.MutationHookOptions<PromoteToPlayerMutation, PromoteToPlayerMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<PromoteToPlayerMutation, PromoteToPlayerMutationVariables>(PromoteToPlayerDocument, options);
+      }
 export type PromoteToPlayerMutationHookResult = ReturnType<typeof usePromoteToPlayerMutation>;
 export type PromoteToPlayerMutationResult = Apollo.MutationResult<PromoteToPlayerMutation>;
-export type PromoteToPlayerMutationOptions = Apollo.BaseMutationOptions<
-    PromoteToPlayerMutation,
-    PromoteToPlayerMutationVariables
->;
+export type PromoteToPlayerMutationOptions = Apollo.BaseMutationOptions<PromoteToPlayerMutation, PromoteToPlayerMutationVariables>;
 export const WritePublicMessageDocument = gql`
-    mutation WritePublicMessage(
-        $roomId: String!
-        $text: String!
-        $textColor: String
-        $channelKey: String!
-        $characterStateId: String
-        $customName: String
-        $gameType: String
-    ) {
-        result: writePublicMessage(
-            roomId: $roomId
-            text: $text
-            textColor: $textColor
-            channelKey: $channelKey
-            characterStateId: $characterStateId
-            customName: $customName
-            gameType: $gameType
-        ) {
-            ... on RoomPublicMessage {
-                ...RoomPublicMessage
-            }
-            ... on WritePublicRoomMessageFailureResult {
-                failureType
-            }
-        }
+    mutation WritePublicMessage($roomId: String!, $text: String!, $textColor: String, $channelKey: String!, $characterStateId: String, $customName: String, $gameType: String) {
+  result: writePublicMessage(
+    roomId: $roomId
+    text: $text
+    textColor: $textColor
+    channelKey: $channelKey
+    characterStateId: $characterStateId
+    customName: $customName
+    gameType: $gameType
+  ) {
+    ... on RoomPublicMessage {
+      ...RoomPublicMessage
     }
-    ${RoomPublicMessageFragmentDoc}
-`;
-export type WritePublicMessageMutationFn = Apollo.MutationFunction<
-    WritePublicMessageMutation,
-    WritePublicMessageMutationVariables
->;
+    ... on WriteRoomPublicMessageFailureResult {
+      failureType
+    }
+  }
+}
+    ${RoomPublicMessageFragmentDoc}`;
+export type WritePublicMessageMutationFn = Apollo.MutationFunction<WritePublicMessageMutation, WritePublicMessageMutationVariables>;
 
 /**
  * __useWritePublicMessageMutation__
@@ -2708,57 +2342,34 @@ export type WritePublicMessageMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function useWritePublicMessageMutation(
-    baseOptions?: Apollo.MutationHookOptions<
-        WritePublicMessageMutation,
-        WritePublicMessageMutationVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<WritePublicMessageMutation, WritePublicMessageMutationVariables>(
-        WritePublicMessageDocument,
-        options
-    );
-}
+export function useWritePublicMessageMutation(baseOptions?: Apollo.MutationHookOptions<WritePublicMessageMutation, WritePublicMessageMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<WritePublicMessageMutation, WritePublicMessageMutationVariables>(WritePublicMessageDocument, options);
+      }
 export type WritePublicMessageMutationHookResult = ReturnType<typeof useWritePublicMessageMutation>;
 export type WritePublicMessageMutationResult = Apollo.MutationResult<WritePublicMessageMutation>;
-export type WritePublicMessageMutationOptions = Apollo.BaseMutationOptions<
-    WritePublicMessageMutation,
-    WritePublicMessageMutationVariables
->;
+export type WritePublicMessageMutationOptions = Apollo.BaseMutationOptions<WritePublicMessageMutation, WritePublicMessageMutationVariables>;
 export const WritePrivateMessageDocument = gql`
-    mutation WritePrivateMessage(
-        $roomId: String!
-        $visibleTo: [String!]!
-        $text: String!
-        $textColor: String
-        $characterStateId: String
-        $customName: String
-        $gameType: String
-    ) {
-        result: writePrivateMessage(
-            roomId: $roomId
-            visibleTo: $visibleTo
-            text: $text
-            textColor: $textColor
-            characterStateId: $characterStateId
-            customName: $customName
-            gameType: $gameType
-        ) {
-            ... on RoomPrivateMessage {
-                ...RoomPrivateMessage
-            }
-            ... on WritePrivateRoomMessageFailureResult {
-                failureType
-            }
-        }
+    mutation WritePrivateMessage($roomId: String!, $visibleTo: [String!]!, $text: String!, $textColor: String, $characterStateId: String, $customName: String, $gameType: String) {
+  result: writePrivateMessage(
+    roomId: $roomId
+    visibleTo: $visibleTo
+    text: $text
+    textColor: $textColor
+    characterStateId: $characterStateId
+    customName: $customName
+    gameType: $gameType
+  ) {
+    ... on RoomPrivateMessage {
+      ...RoomPrivateMessage
     }
-    ${RoomPrivateMessageFragmentDoc}
-`;
-export type WritePrivateMessageMutationFn = Apollo.MutationFunction<
-    WritePrivateMessageMutation,
-    WritePrivateMessageMutationVariables
->;
+    ... on WriteRoomPrivateMessageFailureResult {
+      failureType
+    }
+  }
+}
+    ${RoomPrivateMessageFragmentDoc}`;
+export type WritePrivateMessageMutationFn = Apollo.MutationFunction<WritePrivateMessageMutation, WritePrivateMessageMutationVariables>;
 
 /**
  * __useWritePrivateMessageMutation__
@@ -2783,43 +2394,26 @@ export type WritePrivateMessageMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function useWritePrivateMessageMutation(
-    baseOptions?: Apollo.MutationHookOptions<
-        WritePrivateMessageMutation,
-        WritePrivateMessageMutationVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<WritePrivateMessageMutation, WritePrivateMessageMutationVariables>(
-        WritePrivateMessageDocument,
-        options
-    );
-}
-export type WritePrivateMessageMutationHookResult = ReturnType<
-    typeof useWritePrivateMessageMutation
->;
+export function useWritePrivateMessageMutation(baseOptions?: Apollo.MutationHookOptions<WritePrivateMessageMutation, WritePrivateMessageMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<WritePrivateMessageMutation, WritePrivateMessageMutationVariables>(WritePrivateMessageDocument, options);
+      }
+export type WritePrivateMessageMutationHookResult = ReturnType<typeof useWritePrivateMessageMutation>;
 export type WritePrivateMessageMutationResult = Apollo.MutationResult<WritePrivateMessageMutation>;
-export type WritePrivateMessageMutationOptions = Apollo.BaseMutationOptions<
-    WritePrivateMessageMutation,
-    WritePrivateMessageMutationVariables
->;
+export type WritePrivateMessageMutationOptions = Apollo.BaseMutationOptions<WritePrivateMessageMutation, WritePrivateMessageMutationVariables>;
 export const WriteRoomSoundEffectDocument = gql`
     mutation WriteRoomSoundEffect($roomId: String!, $file: FilePathInput!, $volume: Float!) {
-        result: writeRoomSoundEffect(roomId: $roomId, file: $file, volume: $volume) {
-            ... on RoomSoundEffect {
-                ...RoomSoundEffect
-            }
-            ... on WriteRoomSoundEffectFailureResult {
-                failureType
-            }
-        }
+  result: writeRoomSoundEffect(roomId: $roomId, file: $file, volume: $volume) {
+    ... on RoomSoundEffect {
+      ...RoomSoundEffect
     }
-    ${RoomSoundEffectFragmentDoc}
-`;
-export type WriteRoomSoundEffectMutationFn = Apollo.MutationFunction<
-    WriteRoomSoundEffectMutation,
-    WriteRoomSoundEffectMutationVariables
->;
+    ... on WriteRoomSoundEffectFailureResult {
+      failureType
+    }
+  }
+}
+    ${RoomSoundEffectFragmentDoc}`;
+export type WriteRoomSoundEffectMutationFn = Apollo.MutationFunction<WriteRoomSoundEffectMutation, WriteRoomSoundEffectMutationVariables>;
 
 /**
  * __useWriteRoomSoundEffectMutation__
@@ -2840,38 +2434,21 @@ export type WriteRoomSoundEffectMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function useWriteRoomSoundEffectMutation(
-    baseOptions?: Apollo.MutationHookOptions<
-        WriteRoomSoundEffectMutation,
-        WriteRoomSoundEffectMutationVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<WriteRoomSoundEffectMutation, WriteRoomSoundEffectMutationVariables>(
-        WriteRoomSoundEffectDocument,
-        options
-    );
-}
-export type WriteRoomSoundEffectMutationHookResult = ReturnType<
-    typeof useWriteRoomSoundEffectMutation
->;
-export type WriteRoomSoundEffectMutationResult =
-    Apollo.MutationResult<WriteRoomSoundEffectMutation>;
-export type WriteRoomSoundEffectMutationOptions = Apollo.BaseMutationOptions<
-    WriteRoomSoundEffectMutation,
-    WriteRoomSoundEffectMutationVariables
->;
+export function useWriteRoomSoundEffectMutation(baseOptions?: Apollo.MutationHookOptions<WriteRoomSoundEffectMutation, WriteRoomSoundEffectMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<WriteRoomSoundEffectMutation, WriteRoomSoundEffectMutationVariables>(WriteRoomSoundEffectDocument, options);
+      }
+export type WriteRoomSoundEffectMutationHookResult = ReturnType<typeof useWriteRoomSoundEffectMutation>;
+export type WriteRoomSoundEffectMutationResult = Apollo.MutationResult<WriteRoomSoundEffectMutation>;
+export type WriteRoomSoundEffectMutationOptions = Apollo.BaseMutationOptions<WriteRoomSoundEffectMutation, WriteRoomSoundEffectMutationVariables>;
 export const EditMessageDocument = gql`
     mutation EditMessage($roomId: String!, $messageId: String!, $text: String!) {
-        result: editMessage(roomId: $roomId, messageId: $messageId, text: $text) {
-            failureType
-        }
-    }
-`;
-export type EditMessageMutationFn = Apollo.MutationFunction<
-    EditMessageMutation,
-    EditMessageMutationVariables
->;
+  result: editMessage(roomId: $roomId, messageId: $messageId, text: $text) {
+    failureType
+  }
+}
+    `;
+export type EditMessageMutationFn = Apollo.MutationFunction<EditMessageMutation, EditMessageMutationVariables>;
 
 /**
  * __useEditMessageMutation__
@@ -2892,32 +2469,21 @@ export type EditMessageMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function useEditMessageMutation(
-    baseOptions?: Apollo.MutationHookOptions<EditMessageMutation, EditMessageMutationVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<EditMessageMutation, EditMessageMutationVariables>(
-        EditMessageDocument,
-        options
-    );
-}
+export function useEditMessageMutation(baseOptions?: Apollo.MutationHookOptions<EditMessageMutation, EditMessageMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EditMessageMutation, EditMessageMutationVariables>(EditMessageDocument, options);
+      }
 export type EditMessageMutationHookResult = ReturnType<typeof useEditMessageMutation>;
 export type EditMessageMutationResult = Apollo.MutationResult<EditMessageMutation>;
-export type EditMessageMutationOptions = Apollo.BaseMutationOptions<
-    EditMessageMutation,
-    EditMessageMutationVariables
->;
+export type EditMessageMutationOptions = Apollo.BaseMutationOptions<EditMessageMutation, EditMessageMutationVariables>;
 export const DeleteMessageDocument = gql`
     mutation DeleteMessage($roomId: String!, $messageId: String!) {
-        result: deleteMessage(roomId: $roomId, messageId: $messageId) {
-            failureType
-        }
-    }
-`;
-export type DeleteMessageMutationFn = Apollo.MutationFunction<
-    DeleteMessageMutation,
-    DeleteMessageMutationVariables
->;
+  result: deleteMessage(roomId: $roomId, messageId: $messageId) {
+    failureType
+  }
+}
+    `;
+export type DeleteMessageMutationFn = Apollo.MutationFunction<DeleteMessageMutation, DeleteMessageMutationVariables>;
 
 /**
  * __useDeleteMessageMutation__
@@ -2937,32 +2503,21 @@ export type DeleteMessageMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function useDeleteMessageMutation(
-    baseOptions?: Apollo.MutationHookOptions<DeleteMessageMutation, DeleteMessageMutationVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<DeleteMessageMutation, DeleteMessageMutationVariables>(
-        DeleteMessageDocument,
-        options
-    );
-}
+export function useDeleteMessageMutation(baseOptions?: Apollo.MutationHookOptions<DeleteMessageMutation, DeleteMessageMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteMessageMutation, DeleteMessageMutationVariables>(DeleteMessageDocument, options);
+      }
 export type DeleteMessageMutationHookResult = ReturnType<typeof useDeleteMessageMutation>;
 export type DeleteMessageMutationResult = Apollo.MutationResult<DeleteMessageMutation>;
-export type DeleteMessageMutationOptions = Apollo.BaseMutationOptions<
-    DeleteMessageMutation,
-    DeleteMessageMutationVariables
->;
+export type DeleteMessageMutationOptions = Apollo.BaseMutationOptions<DeleteMessageMutation, DeleteMessageMutationVariables>;
 export const MakeMessageNotSecretDocument = gql`
     mutation MakeMessageNotSecret($roomId: String!, $messageId: String!) {
-        result: makeMessageNotSecret(roomId: $roomId, messageId: $messageId) {
-            failureType
-        }
-    }
-`;
-export type MakeMessageNotSecretMutationFn = Apollo.MutationFunction<
-    MakeMessageNotSecretMutation,
-    MakeMessageNotSecretMutationVariables
->;
+  result: makeMessageNotSecret(roomId: $roomId, messageId: $messageId) {
+    failureType
+  }
+}
+    `;
+export type MakeMessageNotSecretMutationFn = Apollo.MutationFunction<MakeMessageNotSecretMutation, MakeMessageNotSecretMutationVariables>;
 
 /**
  * __useMakeMessageNotSecretMutation__
@@ -2982,39 +2537,19 @@ export type MakeMessageNotSecretMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function useMakeMessageNotSecretMutation(
-    baseOptions?: Apollo.MutationHookOptions<
-        MakeMessageNotSecretMutation,
-        MakeMessageNotSecretMutationVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<MakeMessageNotSecretMutation, MakeMessageNotSecretMutationVariables>(
-        MakeMessageNotSecretDocument,
-        options
-    );
-}
-export type MakeMessageNotSecretMutationHookResult = ReturnType<
-    typeof useMakeMessageNotSecretMutation
->;
-export type MakeMessageNotSecretMutationResult =
-    Apollo.MutationResult<MakeMessageNotSecretMutation>;
-export type MakeMessageNotSecretMutationOptions = Apollo.BaseMutationOptions<
-    MakeMessageNotSecretMutation,
-    MakeMessageNotSecretMutationVariables
->;
+export function useMakeMessageNotSecretMutation(baseOptions?: Apollo.MutationHookOptions<MakeMessageNotSecretMutation, MakeMessageNotSecretMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<MakeMessageNotSecretMutation, MakeMessageNotSecretMutationVariables>(MakeMessageNotSecretDocument, options);
+      }
+export type MakeMessageNotSecretMutationHookResult = ReturnType<typeof useMakeMessageNotSecretMutation>;
+export type MakeMessageNotSecretMutationResult = Apollo.MutationResult<MakeMessageNotSecretMutation>;
+export type MakeMessageNotSecretMutationOptions = Apollo.BaseMutationOptions<MakeMessageNotSecretMutation, MakeMessageNotSecretMutationVariables>;
 export const UpdateWritingMessageStatusDocument = gql`
-    mutation UpdateWritingMessageStatus(
-        $roomId: String!
-        $newStatus: WritingMessageStatusInputType!
-    ) {
-        result: updateWritingMessageStatus(roomId: $roomId, newStatus: $newStatus)
-    }
-`;
-export type UpdateWritingMessageStatusMutationFn = Apollo.MutationFunction<
-    UpdateWritingMessageStatusMutation,
-    UpdateWritingMessageStatusMutationVariables
->;
+    mutation UpdateWritingMessageStatus($roomId: String!, $newStatus: WritingMessageStatusInputType!) {
+  result: updateWritingMessageStatus(roomId: $roomId, newStatus: $newStatus)
+}
+    `;
+export type UpdateWritingMessageStatusMutationFn = Apollo.MutationFunction<UpdateWritingMessageStatusMutation, UpdateWritingMessageStatusMutationVariables>;
 
 /**
  * __useUpdateWritingMessageStatusMutation__
@@ -3034,53 +2569,38 @@ export type UpdateWritingMessageStatusMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function useUpdateWritingMessageStatusMutation(
-    baseOptions?: Apollo.MutationHookOptions<
-        UpdateWritingMessageStatusMutation,
-        UpdateWritingMessageStatusMutationVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<
-        UpdateWritingMessageStatusMutation,
-        UpdateWritingMessageStatusMutationVariables
-    >(UpdateWritingMessageStatusDocument, options);
-}
-export type UpdateWritingMessageStatusMutationHookResult = ReturnType<
-    typeof useUpdateWritingMessageStatusMutation
->;
-export type UpdateWritingMessageStatusMutationResult =
-    Apollo.MutationResult<UpdateWritingMessageStatusMutation>;
-export type UpdateWritingMessageStatusMutationOptions = Apollo.BaseMutationOptions<
-    UpdateWritingMessageStatusMutation,
-    UpdateWritingMessageStatusMutationVariables
->;
+export function useUpdateWritingMessageStatusMutation(baseOptions?: Apollo.MutationHookOptions<UpdateWritingMessageStatusMutation, UpdateWritingMessageStatusMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateWritingMessageStatusMutation, UpdateWritingMessageStatusMutationVariables>(UpdateWritingMessageStatusDocument, options);
+      }
+export type UpdateWritingMessageStatusMutationHookResult = ReturnType<typeof useUpdateWritingMessageStatusMutation>;
+export type UpdateWritingMessageStatusMutationResult = Apollo.MutationResult<UpdateWritingMessageStatusMutation>;
+export type UpdateWritingMessageStatusMutationOptions = Apollo.BaseMutationOptions<UpdateWritingMessageStatusMutation, UpdateWritingMessageStatusMutationVariables>;
 export const RoomEventDocument = gql`
     subscription RoomEvent($id: String!) {
-        roomEvent(id: $id) {
-            roomOperation {
-                ...RoomOperation
-            }
-            deleteRoomOperation {
-                deletedBy
-            }
-            roomMessageEvent {
-                ...RoomMessageEvent
-            }
-            roomConnectionEvent {
-                userUid
-                isConnected
-                updatedAt
-            }
-            writingMessageStatus {
-                userUid
-                status
-            }
-        }
+  roomEvent(id: $id) {
+    roomOperation {
+      ...RoomOperation
     }
+    deleteRoomOperation {
+      deletedBy
+    }
+    roomMessageEvent {
+      ...RoomMessageEvent
+    }
+    roomConnectionEvent {
+      userUid
+      isConnected
+      updatedAt
+    }
+    writingMessageStatus {
+      userUid
+      status
+    }
+  }
+}
     ${RoomOperationFragmentDoc}
-    ${RoomMessageEventFragmentDoc}
-`;
+${RoomMessageEventFragmentDoc}`;
 
 /**
  * __useRoomEventSubscription__
@@ -3098,28 +2618,20 @@ export const RoomEventDocument = gql`
  *   },
  * });
  */
-export function useRoomEventSubscription(
-    baseOptions: Apollo.SubscriptionHookOptions<
-        RoomEventSubscription,
-        RoomEventSubscriptionVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useSubscription<RoomEventSubscription, RoomEventSubscriptionVariables>(
-        RoomEventDocument,
-        options
-    );
-}
+export function useRoomEventSubscription(baseOptions: Apollo.SubscriptionHookOptions<RoomEventSubscription, RoomEventSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<RoomEventSubscription, RoomEventSubscriptionVariables>(RoomEventDocument, options);
+      }
 export type RoomEventSubscriptionHookResult = ReturnType<typeof useRoomEventSubscription>;
 export type RoomEventSubscriptionResult = Apollo.SubscriptionResult<RoomEventSubscription>;
 export const PongDocument = gql`
     subscription Pong {
-        pong {
-            createdBy
-            value
-        }
-    }
-`;
+  pong {
+    createdBy
+    value
+  }
+}
+    `;
 
 /**
  * __usePongSubscription__
@@ -3136,14 +2648,9 @@ export const PongDocument = gql`
  *   },
  * });
  */
-export function usePongSubscription(
-    baseOptions?: Apollo.SubscriptionHookOptions<PongSubscription, PongSubscriptionVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useSubscription<PongSubscription, PongSubscriptionVariables>(
-        PongDocument,
-        options
-    );
-}
+export function usePongSubscription(baseOptions?: Apollo.SubscriptionHookOptions<PongSubscription, PongSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<PongSubscription, PongSubscriptionVariables>(PongDocument, options);
+      }
 export type PongSubscriptionHookResult = ReturnType<typeof usePongSubscription>;
 export type PongSubscriptionResult = Apollo.SubscriptionResult<PongSubscription>;

@@ -1,37 +1,36 @@
 import React from 'react';
-import { CompositeKey, dualKeyRecordToDualKeyMap } from '@kizahasi/util';
+import { CompositeKey, compositeKeyEquals, dualKeyRecordToDualKeyMap } from '@kizahasi/util';
 import { BoardLocationState } from '@kizahasi/flocon-core';
 import { useCharacters } from './useCharacters';
 import _ from 'lodash';
+import { useCompositeKeyMemo } from '../useCompositeKeyMemo';
 
 export const useTachieLocations = (boardKey: CompositeKey) => {
     const characters = useCharacters();
+    const boardKeyMemo = useCompositeKeyMemo(boardKey);
 
     return React.useMemo(() => {
         if (characters == null) {
             return undefined;
         }
-        return _(characters.toArray())
-            .map(([characterKey, character]) => {
-                const tachieLocation = _(
-                    dualKeyRecordToDualKeyMap<BoardLocationState>(
-                        character.tachieLocations
-                    ).toArray()
-                ).find(([boardKey$]) => {
-                    return (
-                        boardKey.createdBy === boardKey$.first && boardKey.id === boardKey$.second
-                    );
+        return characters.toArray().flatMap(([characterKey, character]) => {
+            return dualKeyRecordToDualKeyMap<BoardLocationState>(character.tachieLocations)
+                .toArray()
+                .filter(([, tachieLocation]) => {
+                    return compositeKeyEquals(boardKeyMemo, tachieLocation.boardKey);
+                })
+                .flatMap(([tachieLocationKeyAsDualKey, tachieLocationValue]) => {
+                    const tachieLocationKey: CompositeKey = {
+                        createdBy: tachieLocationKeyAsDualKey.first,
+                        id: tachieLocationKeyAsDualKey.second,
+                    };
+                    return {
+                        characterKey,
+                        character,
+                        tachieLocationKey,
+                        tachieLocation: tachieLocationValue,
+                    };
                 });
-                if (tachieLocation == null) {
-                    return null;
-                }
-                if (tachieLocation == null) {
-                    return null;
-                }
-                const [, tachieLocationValue] = tachieLocation;
-                return { characterKey, character, tachieLocation: tachieLocationValue };
-            })
-            .compact()
-            .value();
-    }, [boardKey.createdBy, boardKey.id, characters]);
+        });
+    }, [boardKeyMemo, characters]);
 };
