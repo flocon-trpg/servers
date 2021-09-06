@@ -1,10 +1,16 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findRoomAndMyParticipant = exports.checkEntry = exports.getUserIfEntry = exports.checkSignInAndNotAnonymous = exports.checkSignIn = exports.AnonymousAccount = exports.NotSignIn = void 0;
+exports.comparePassword = exports.ensureAuthorizedUser = exports.ensureUserUid = exports.findRoomAndMyParticipant = exports.checkEntry = exports.getUserIfEntry = exports.checkSignInAndNotAnonymous = exports.checkSignIn = exports.AnonymousAccount = exports.NotSignIn = void 0;
 const mikro_orm_1 = require("../../entities/user/mikro-orm");
 const mikro_orm_2 = require("../../entities/room/mikro-orm");
 const global_1 = require("../../entities/room/global");
 const util_1 = require("@kizahasi/util");
+const configType_1 = require("../../../configType");
+const safe_compare_1 = __importDefault(require("safe-compare"));
+const bcrypt_1 = __importDefault(require("bcrypt"));
 const find = (source, key) => source[key];
 exports.NotSignIn = 'NotSignIn';
 exports.AnonymousAccount = 'AnonymousAccount';
@@ -26,29 +32,35 @@ const checkSignInAndNotAnonymous = (context) => {
     return decodedIdToken;
 };
 exports.checkSignInAndNotAnonymous = checkSignInAndNotAnonymous;
-const getUserIfEntry = async ({ em, userUid, baasType, globalEntryPhrase, }) => {
+const getUserIfEntry = async ({ em, userUid, baasType, serverConfig, noFlush, }) => {
     const user = await em.findOne(mikro_orm_1.User, { userUid, baasType });
+    const requiresEntryPassword = serverConfig.entryPassword != null;
     if (user == null) {
-        if (globalEntryPhrase == null) {
+        if (!requiresEntryPassword) {
             const newUser = new mikro_orm_1.User({ userUid, baasType });
             newUser.isEntry = true;
-            em.persist(newUser);
-            return user;
+            if (noFlush === true) {
+                em.persist(newUser);
+            }
+            else {
+                await em.persistAndFlush(newUser);
+            }
+            return newUser;
         }
         return null;
     }
     if (user.isEntry) {
         return user;
     }
-    if (globalEntryPhrase == null) {
+    if (!requiresEntryPassword) {
         user.isEntry = true;
         return user;
     }
     return null;
 };
 exports.getUserIfEntry = getUserIfEntry;
-const checkEntry = async ({ em, userUid, baasType, globalEntryPhrase, }) => {
-    return (await exports.getUserIfEntry({ em, userUid, baasType, globalEntryPhrase })) != null;
+const checkEntry = async ({ em, userUid, baasType, serverConfig, noFlush, }) => {
+    return (await exports.getUserIfEntry({ em, userUid, baasType, serverConfig, noFlush })) != null;
 };
 exports.checkEntry = checkEntry;
 class FindRoomAndMyParticipantResult {
@@ -66,8 +78,30 @@ const findRoomAndMyParticipant = async ({ em, userUid, roomId, }) => {
     if (room == null) {
         return null;
     }
-    const state = global_1.GlobalRoom.MikroORM.ToGlobal.state(room);
+    const state = await global_1.GlobalRoom.MikroORM.ToGlobal.state(room, em);
     const me = find(state.participants, userUid);
     return new FindRoomAndMyParticipantResult(room, state, me);
 };
 exports.findRoomAndMyParticipant = findRoomAndMyParticipant;
+const ensureUserUid = (context) => {
+    const decodedIdToken = exports.checkSignIn(context);
+    if (decodedIdToken == exports.NotSignIn) {
+        throw new Error('authorizedUser was not found. "@Attribute()" might be missing.');
+    }
+    return decodedIdToken.uid;
+};
+exports.ensureUserUid = ensureUserUid;
+const ensureAuthorizedUser = (context) => {
+    if (context.authorizedUser == null) {
+        throw new Error('authorizedUser was not found. "@Attribute(ENTRY or ADMIN)" might be missing.');
+    }
+    return context.authorizedUser;
+};
+exports.ensureAuthorizedUser = ensureAuthorizedUser;
+const comparePassword = async (plainPassword, config) => {
+    if (config.type === configType_1.plain) {
+        return safe_compare_1.default(plainPassword, config.value);
+    }
+    return await bcrypt_1.default.compare(plainPassword, config.value);
+};
+exports.comparePassword = comparePassword;

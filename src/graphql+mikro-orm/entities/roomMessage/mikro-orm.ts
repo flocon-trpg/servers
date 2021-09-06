@@ -18,6 +18,7 @@ import {
 } from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { FileSourceType } from '../../../enums/FileSourceType';
+import { easyFlake } from '../../../utils/easyFlake';
 import { Room } from '../room/mikro-orm';
 import { User } from '../user/mikro-orm';
 
@@ -104,7 +105,7 @@ export class RoomPubMsg {
     }
 
     @PrimaryKey()
-    public id: string = v4();
+    public id: string = easyFlake();
 
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ version: true, index: true })
@@ -208,7 +209,7 @@ export class RoomPrvMsg {
     }
 
     @PrimaryKey()
-    public id: string = v4();
+    public id: string = easyFlake();
 
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ version: true, index: true })
@@ -324,7 +325,7 @@ export class DicePieceValueLog {
     }
 
     @PrimaryKey()
-    public id: string = v4();
+    public id: string = easyFlake();
 
     @Property({ index: true })
     public characterCreatedBy: string;
@@ -368,7 +369,7 @@ export class NumberPieceValueLog {
     }
 
     @PrimaryKey()
-    public id: string = v4();
+    public id: string = easyFlake();
 
     @Property({ index: true })
     public characterCreatedBy: string;
@@ -407,7 +408,7 @@ export class RoomSe {
     }
 
     @PrimaryKey()
-    public id: string = v4();
+    public id: string = easyFlake();
 
     @Property({ type: Date, onCreate: () => new Date() })
     public createdAt: Date = new Date();

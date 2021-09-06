@@ -1,9 +1,13 @@
 import { migrate } from './src/migrate';
 import { loadMigrationCreate } from './src/utils/commandLineArgs';
 
-const commandLineArgs = loadMigrationCreate();
+const main = async () => {
+    const commandLineArgs = await loadMigrationCreate();
 
-migrate(commandLineArgs.init ? 'create-initial' : 'create').catch(err => {
-    console.log(err);
-    console.log('❌ migration failed. / マイグレーションに失敗しました。');
-});
+    migrate(commandLineArgs.init ? 'create-initial' : 'create').catch(err => {
+        console.log(err);
+        console.log('❌ migration failed. / マイグレーションに失敗しました。');
+    });
+};
+
+main();

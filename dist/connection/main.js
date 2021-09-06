@@ -1,28 +1,25 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InMemoryConnectionManager = exports.pubSub = void 0;
+const flocon_core_1 = require("@kizahasi/flocon-core");
 const graphql_subscriptions_1 = require("graphql-subscriptions");
-const node_cache_1 = __importDefault(require("node-cache"));
 const WritingMessageStatusType_1 = require("../enums/WritingMessageStatusType");
 const Topics_1 = require("../graphql+mikro-orm/utils/Topics");
 exports.pubSub = new graphql_subscriptions_1.PubSub();
 class ConnectionIdDatabase {
     constructor() {
-        this.userUidDatabase = new node_cache_1.default({ stdTTL: 60 * 60 * 48 });
-        this.roomIdDatabase = new node_cache_1.default({ stdTTL: 60 * 60 * 48 });
+        this.userUidDatabase = flocon_core_1.createNodeCache({ stdTTL: 60 * 60 * 48 });
+        this.roomIdDatabase = flocon_core_1.createNodeCache({ stdTTL: 60 * 60 * 48 });
     }
-    set({ roomId, connectionId, userUid, }) {
-        this.userUidDatabase.set(connectionId, userUid);
-        this.roomIdDatabase.set(connectionId, roomId);
+    async set({ roomId, connectionId, userUid, }) {
+        await this.userUidDatabase.set(connectionId, userUid);
+        await this.roomIdDatabase.set(connectionId, roomId);
     }
-    del({ connectionId, }) {
-        const userUid = this.userUidDatabase.get(connectionId);
-        this.userUidDatabase.del(connectionId);
-        const roomId = this.roomIdDatabase.get(connectionId);
-        this.userUidDatabase.del(connectionId);
+    async del({ connectionId, }) {
+        const userUid = await this.userUidDatabase.getAsString(connectionId);
+        await this.userUidDatabase.del(connectionId);
+        const roomId = await this.roomIdDatabase.getAsString(connectionId);
+        await this.userUidDatabase.del(connectionId);
         if (typeof userUid === 'string' && typeof roomId === 'string') {
             return { userUid, roomId };
         }
@@ -31,66 +28,59 @@ class ConnectionIdDatabase {
 }
 class ConnectionCountDatabase {
     constructor() {
-        this.database = new node_cache_1.default();
+        this.database = flocon_core_1.createNodeCache({});
     }
-    incr({ roomId, userUid }) {
+    async incr({ roomId, userUid }) {
         const key = `${roomId}@${userUid}`;
-        const value = this.database.get(key);
-        const newValue = typeof value === 'number' ? value + 1 : 1;
-        this.database.set(key, newValue);
-        return newValue;
+        return await this.database.incrby(key, 1);
     }
-    decr({ roomId, userUid }) {
+    async decr({ roomId, userUid, }) {
         const key = `${roomId}@${userUid}`;
-        const value = this.database.get(key);
-        if (typeof value !== 'number' || value <= 0) {
-            this.database.del(key);
-            return null;
-        }
-        const newValue = value - 1;
+        const newValue = await this.database.decrby(key, 1);
         if (newValue <= 0) {
-            this.database.del(key);
-            return 0;
+            await this.database.del(key);
+            return newValue === 0 ? 0 : null;
         }
-        this.database.set(key, newValue);
         return newValue;
     }
-    list({ roomId }) {
+    async list({ roomId }) {
         const result = new Map();
-        this.database.keys().forEach(key => {
+        const keys = await this.database.keys();
+        for (const key of keys) {
             const split = key.split('@');
             if (split.length !== 2) {
-                return;
+                continue;
             }
             const roomIdKey = split[0];
             const userUid = split[1];
             if (roomIdKey !== roomId) {
-                return;
+                continue;
             }
-            const value = this.database.get(key);
-            if (typeof value !== 'number') {
-                return;
+            const value = await this.database.getAsNumber(key);
+            if (value == null) {
+                continue;
             }
             result.set(userUid, value);
-        });
+        }
         return result;
     }
 }
 class WritingMessageStatusDatabase {
     constructor() {
-        this.database = new node_cache_1.default({ stdTTL: 600, maxKeys: 10000, checkperiod: 299 });
+        this.database = flocon_core_1.createNodeCache({ stdTTL: 600, maxKeys: 10000, checkperiod: 299 });
     }
-    set({ roomId, status, userUid, }) {
+    async set({ roomId, status, userUid, }) {
         const key = `${roomId}@${userUid}`;
-        const oldValue = this.database.get(key);
+        const oldValue = await this.database.getAsString(key);
         if (oldValue === status && status !== WritingMessageStatusType_1.WritingMessageStatusType.Writing) {
             return null;
         }
-        this.database.set(key, status);
+        await this.database.set(key, status);
         return status;
     }
-    onDisconnect({ userUid, roomId }) {
-        return this.database.keys().forEach(key => {
+    async onDisconnect({ userUid, roomId, }) {
+        const keys = await this.database.keys();
+        for (const key of keys) {
             const split = key.split('@');
             if (split.length !== 2) {
                 return undefined;
@@ -103,8 +93,8 @@ class WritingMessageStatusDatabase {
             if (userUidKey !== userUid) {
                 return undefined;
             }
-            this.database.del(key);
-        });
+            await this.database.del(key);
+        }
     }
 }
 class InMemoryConnectionManager {
@@ -113,9 +103,9 @@ class InMemoryConnectionManager {
         this.connectionCountDatabase = new ConnectionCountDatabase();
         this.writingMessageStatusDatabase = new WritingMessageStatusDatabase();
     }
-    onConnectToRoom({ connectionId, userUid, roomId, }) {
-        this.connectionIdDatabase.set({ roomId, connectionId, userUid });
-        const newValue = this.connectionCountDatabase.incr({ roomId, userUid });
+    async onConnectToRoom({ connectionId, userUid, roomId, }) {
+        await this.connectionIdDatabase.set({ roomId, connectionId, userUid });
+        const newValue = await this.connectionCountDatabase.incr({ roomId, userUid });
         if (newValue !== 1) {
             return;
         }
@@ -126,14 +116,14 @@ class InMemoryConnectionManager {
             isConnected: true,
             updatedAt: new Date().getTime(),
         };
-        exports.pubSub.publish(Topics_1.ROOM_EVENT, payload);
+        await exports.pubSub.publish(Topics_1.ROOM_EVENT, payload);
     }
-    onLeaveRoom({ connectionId }) {
-        const deleted = this.connectionIdDatabase.del({ connectionId });
+    async onLeaveRoom({ connectionId }) {
+        const deleted = await this.connectionIdDatabase.del({ connectionId });
         if (deleted == null) {
             return;
         }
-        const newConnectionCount = this.connectionCountDatabase.decr(deleted);
+        const newConnectionCount = await this.connectionCountDatabase.decr(deleted);
         if (newConnectionCount !== 0) {
             return;
         }
@@ -144,8 +134,8 @@ class InMemoryConnectionManager {
             isConnected: false,
             updatedAt: new Date().getTime(),
         };
-        exports.pubSub.publish(Topics_1.ROOM_EVENT, payload1);
-        this.writingMessageStatusDatabase.onDisconnect(deleted);
+        await exports.pubSub.publish(Topics_1.ROOM_EVENT, payload1);
+        await this.writingMessageStatusDatabase.onDisconnect(deleted);
         const payload2 = {
             type: 'writingMessageStatusUpdatePayload',
             roomId: deleted.roomId,
@@ -153,12 +143,12 @@ class InMemoryConnectionManager {
             status: WritingMessageStatusType_1.WritingMessageStatusType.Disconnected,
             updatedAt: new Date().getTime(),
         };
-        exports.pubSub.publish(Topics_1.ROOM_EVENT, payload2);
+        await exports.pubSub.publish(Topics_1.ROOM_EVENT, payload2);
     }
     onWritingMessageStatusUpdate(params) {
         return this.writingMessageStatusDatabase.set(params);
     }
-    listRoomConnections({ roomId }) {
+    listRoomConnections({ roomId, }) {
         return this.connectionCountDatabase.list({ roomId });
     }
 }

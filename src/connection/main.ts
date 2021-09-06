@@ -1,6 +1,7 @@
+/*eslint require-await: "error"*/
+
+import { createNodeCache } from '@kizahasi/flocon-core';
 import { PubSub } from 'graphql-subscriptions';
-import _ from 'lodash';
-import NodeCache from 'node-cache';
 import { WritingMessageStatusType } from '../enums/WritingMessageStatusType';
 import { RoomEventPayload } from '../graphql+mikro-orm/resolvers/rooms/RoomResolver';
 import { ROOM_EVENT } from '../graphql+mikro-orm/utils/Topics';
@@ -8,10 +9,10 @@ import { ROOM_EVENT } from '../graphql+mikro-orm/utils/Topics';
 export const pubSub = new PubSub();
 
 class ConnectionIdDatabase {
-    private userUidDatabase = new NodeCache({ stdTTL: 60 * 60 * 48 });
-    private roomIdDatabase = new NodeCache({ stdTTL: 60 * 60 * 48 });
+    private userUidDatabase = createNodeCache({ stdTTL: 60 * 60 * 48 });
+    private roomIdDatabase = createNodeCache({ stdTTL: 60 * 60 * 48 });
 
-    public set({
+    public async set({
         roomId,
         connectionId,
         userUid,
@@ -19,20 +20,20 @@ class ConnectionIdDatabase {
         roomId: string;
         connectionId: string;
         userUid: string;
-    }): void {
-        this.userUidDatabase.set(connectionId, userUid);
-        this.roomIdDatabase.set(connectionId, roomId);
+    }): Promise<void> {
+        await this.userUidDatabase.set(connectionId, userUid);
+        await this.roomIdDatabase.set(connectionId, roomId);
     }
 
-    public del({
+    public async del({
         connectionId,
     }: {
         connectionId: string;
-    }): { roomId: string; userUid: string } | null {
-        const userUid = this.userUidDatabase.get(connectionId);
-        this.userUidDatabase.del(connectionId);
-        const roomId = this.roomIdDatabase.get(connectionId);
-        this.userUidDatabase.del(connectionId);
+    }): Promise<{ roomId: string; userUid: string } | null> {
+        const userUid = await this.userUidDatabase.getAsString(connectionId);
+        await this.userUidDatabase.del(connectionId);
+        const roomId = await this.roomIdDatabase.getAsString(connectionId);
+        await this.userUidDatabase.del(connectionId);
         if (typeof userUid === 'string' && typeof roomId === 'string') {
             return { userUid, roomId };
         }
@@ -41,60 +42,58 @@ class ConnectionIdDatabase {
 }
 
 class ConnectionCountDatabase {
-    private database = new NodeCache();
+    private database = createNodeCache({});
 
-    public incr({ roomId, userUid }: { roomId: string; userUid: string }): number {
+    public async incr({ roomId, userUid }: { roomId: string; userUid: string }): Promise<number> {
         const key = `${roomId}@${userUid}`;
-        const value = this.database.get(key);
-        const newValue = typeof value === 'number' ? value + 1 : 1;
-        this.database.set(key, newValue);
-        return newValue;
+        return await this.database.incrby(key, 1);
     }
 
-    public decr({ roomId, userUid }: { roomId: string; userUid: string }): number | null {
+    public async decr({
+        roomId,
+        userUid,
+    }: {
+        roomId: string;
+        userUid: string;
+    }): Promise<number | null> {
         const key = `${roomId}@${userUid}`;
-        const value = this.database.get(key);
-        if (typeof value !== 'number' || value <= 0) {
-            this.database.del(key);
-            return null;
-        }
-        const newValue = value - 1;
+        const newValue = await this.database.decrby(key, 1);
         if (newValue <= 0) {
-            this.database.del(key);
-            return 0;
+            await this.database.del(key);
+            return newValue === 0 ? 0 : null;
         }
-        this.database.set(key, newValue);
         return newValue;
     }
 
-    public list({ roomId }: { roomId: string }): ReadonlyMap<string, number> {
+    public async list({ roomId }: { roomId: string }): Promise<ReadonlyMap<string, number>> {
         const result = new Map<string, number>();
-        this.database.keys().forEach(key => {
+        const keys = await this.database.keys();
+        for (const key of keys) {
             const split = key.split('@');
             if (split.length !== 2) {
-                return;
+                continue;
             }
             const roomIdKey = split[0];
             const userUid = split[1];
             if (roomIdKey !== roomId) {
-                return;
+                continue;
             }
-            const value = this.database.get(key);
-            if (typeof value !== 'number') {
-                return;
+            const value = await this.database.getAsNumber(key);
+            if (value == null) {
+                continue;
             }
             result.set(userUid, value);
-        });
+        }
         return result;
     }
 }
 
 // 値が前と同じ時はSubscriptionで送信するのをある程度防ぐためのクラス
 class WritingMessageStatusDatabase {
-    private database = new NodeCache({ stdTTL: 600, maxKeys: 10000, checkperiod: 299 });
+    private database = createNodeCache({ stdTTL: 600, maxKeys: 10000, checkperiod: 299 });
 
     // 戻り値がnullの場合、subscriptionで送信する必要はない
-    public set({
+    public async set({
         roomId,
         status,
         userUid,
@@ -102,18 +101,25 @@ class WritingMessageStatusDatabase {
         roomId: string;
         userUid: string;
         status: WritingMessageStatusType;
-    }): WritingMessageStatusType | null {
+    }): Promise<WritingMessageStatusType | null> {
         const key = `${roomId}@${userUid}`;
-        const oldValue = this.database.get(key);
+        const oldValue = await this.database.getAsString(key);
         if (oldValue === status && status !== WritingMessageStatusType.Writing) {
             return null;
         }
-        this.database.set(key, status);
+        await this.database.set(key, status);
         return status;
     }
 
-    public onDisconnect({ userUid, roomId }: { userUid: string; roomId: string }): void {
-        return this.database.keys().forEach(key => {
+    public async onDisconnect({
+        userUid,
+        roomId,
+    }: {
+        userUid: string;
+        roomId: string;
+    }): Promise<void> {
+        const keys = await this.database.keys();
+        for (const key of keys) {
             const split = key.split('@');
             if (split.length !== 2) {
                 return undefined;
@@ -126,8 +132,8 @@ class WritingMessageStatusDatabase {
             if (userUidKey !== userUid) {
                 return undefined;
             }
-            this.database.del(key);
-        });
+            await this.database.del(key);
+        }
     }
 }
 
@@ -136,7 +142,7 @@ export class InMemoryConnectionManager {
     private connectionCountDatabase = new ConnectionCountDatabase();
     private writingMessageStatusDatabase = new WritingMessageStatusDatabase();
 
-    public onConnectToRoom({
+    public async onConnectToRoom({
         connectionId,
         userUid,
         roomId,
@@ -145,8 +151,8 @@ export class InMemoryConnectionManager {
         userUid: string;
         roomId: string;
     }) {
-        this.connectionIdDatabase.set({ roomId, connectionId, userUid });
-        const newValue = this.connectionCountDatabase.incr({ roomId, userUid });
+        await this.connectionIdDatabase.set({ roomId, connectionId, userUid });
+        const newValue = await this.connectionCountDatabase.incr({ roomId, userUid });
         if (newValue !== 1) {
             return;
         }
@@ -157,15 +163,15 @@ export class InMemoryConnectionManager {
             isConnected: true,
             updatedAt: new Date().getTime(),
         };
-        pubSub.publish(ROOM_EVENT, payload);
+        await pubSub.publish(ROOM_EVENT, payload);
     }
 
-    public onLeaveRoom({ connectionId }: { connectionId: string }) {
-        const deleted = this.connectionIdDatabase.del({ connectionId });
+    public async onLeaveRoom({ connectionId }: { connectionId: string }) {
+        const deleted = await this.connectionIdDatabase.del({ connectionId });
         if (deleted == null) {
             return;
         }
-        const newConnectionCount = this.connectionCountDatabase.decr(deleted);
+        const newConnectionCount = await this.connectionCountDatabase.decr(deleted);
         if (newConnectionCount !== 0) {
             return;
         }
@@ -177,9 +183,9 @@ export class InMemoryConnectionManager {
             isConnected: false,
             updatedAt: new Date().getTime(),
         };
-        pubSub.publish(ROOM_EVENT, payload1);
+        await pubSub.publish(ROOM_EVENT, payload1);
 
-        this.writingMessageStatusDatabase.onDisconnect(deleted);
+        await this.writingMessageStatusDatabase.onDisconnect(deleted);
         const payload2: RoomEventPayload = {
             type: 'writingMessageStatusUpdatePayload',
             roomId: deleted.roomId,
@@ -187,7 +193,7 @@ export class InMemoryConnectionManager {
             status: WritingMessageStatusType.Disconnected,
             updatedAt: new Date().getTime(),
         };
-        pubSub.publish(ROOM_EVENT, payload2);
+        await pubSub.publish(ROOM_EVENT, payload2);
     }
 
     public onWritingMessageStatusUpdate(params: {
@@ -198,7 +204,11 @@ export class InMemoryConnectionManager {
         return this.writingMessageStatusDatabase.set(params);
     }
 
-    public listRoomConnections({ roomId }: { roomId: string }): ReadonlyMap<string, number> {
+    public listRoomConnections({
+        roomId,
+    }: {
+        roomId: string;
+    }): Promise<ReadonlyMap<string, number>> {
         return this.connectionCountDatabase.list({ roomId });
     }
 }

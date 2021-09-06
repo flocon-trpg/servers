@@ -1,7 +1,5 @@
-export enum WritePrivateRoomMessageFailureType {
+export enum WriteRoomPrivateMessageFailureType {
     RoomNotFound = 'RoomNotFound',
     VisibleToIsInvalid = 'VisibleToIsInvalid',
-    NotEntry = 'NotEntry',
-    NotSignIn = 'NotSignIn',
     NotParticipant = 'NotParticipant',
 }

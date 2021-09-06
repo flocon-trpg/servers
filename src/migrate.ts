@@ -6,6 +6,7 @@ import {
     loadServerConfigAsMigrationUp,
 } from './config';
 import { createPostgreSQL, createSQLite } from './mikro-orm';
+import { AppConsole } from './utils/appConsole';
 
 const check = 'check';
 const create = 'create';
@@ -27,17 +28,21 @@ const prettify = (dbType: DBType) => {
     }
 };
 
-const migrationCheckErrorMessage = (dbType: DBType) =>
-    `❗ Pending migrations were found. You need to execute "migration-up" command to run the server. It is recommended to backup the DB before executing the command if the DB has some data you don't want to lose. DB is ${prettify(
+const migrationCheckErrorMessage = (dbType: DBType): AppConsole.Message => ({
+    icon: '❗',
+    en: `Pending migrations were found. You need to execute "migration-up" command to run the server. It is recommended to backup the DB before executing the command if the DB has some data you don't want to lose. DB is ${prettify(
         dbType
-    )}. / 適用すべきマイグレーションが見つかりました。サーバーを稼働させるには"migration-up"コマンドを実行する必要があります。もし失いたくないデータがDBにある場合、そのコマンドを実行する前にDBをバックアップしておくことを推奨します。DBは${prettify(
+    )}`,
+    ja: `適用すべきマイグレーションが見つかりました。サーバーを稼働させるには"migration-up"コマンドを実行する必要があります。もし失いたくないデータがDBにある場合、そのコマンドを実行する前にDBをバックアップしておくことを推奨します。DBは${prettify(
         dbType
-    )}です。`;
+    )}です。`,
+});
 
-const migrationCheckOkMessage = (dbType: DBType) =>
-    `✔️ No pending migrations were found. DB is ${prettify(
-        dbType
-    )}. / 適用すべきマイグレーションはありません。DBは${prettify(dbType)}です。`;
+const migrationCheckOkMessage = (dbType: DBType): AppConsole.Message => ({
+    icon: '✔️',
+    en: `No pending migrations were found. DB is ${prettify(dbType)}`,
+    ja: `適用すべきマイグレーションはありません。DBは${prettify(dbType)}です。`,
+});
 
 const hasMigrations = async (orm: MikroORM<IDatabaseDriver<Connection>>) => {
     const migrator = orm.getMigrator();
@@ -53,7 +58,7 @@ export const checkMigrationsBeforeStart = async (
         await orm.close();
         throw migrationCheckErrorMessage(dbType);
     }
-    console.log(migrationCheckOkMessage(dbType));
+    AppConsole.log(migrationCheckOkMessage(dbType));
 };
 
 export const migrate = async (
@@ -77,12 +82,12 @@ export const migrate = async (
     // TODO: 他のDBにも対応させる
     switch (serverConfig.database.__type) {
         case sqlite:
-            orm = await createSQLite({ ...serverConfig.database.sqlite, debug: type !== check });
+            orm = await createSQLite({ ...serverConfig.database, debug: type !== check });
             dbType = sqlite;
             break;
         case postgresql:
             orm = await createPostgreSQL({
-                ...serverConfig.database.postgresql,
+                ...serverConfig.database,
                 debug: type !== check,
             });
             dbType = postgresql;
@@ -91,11 +96,10 @@ export const migrate = async (
 
     switch (type) {
         case create: {
-            console.log(
-                `Migration-create is started. DB is ${prettify(
-                    dbType
-                )}. / マイグレーションの作成を開始します。DBは${prettify(dbType)}です。`
-            );
+            AppConsole.log({
+                en: `Migration-create is started. DB is ${prettify(dbType)}.`,
+                ja: `マイグレーションの作成を開始します。DBは${prettify(dbType)}です。`,
+            });
             try {
                 const migrator = orm.getMigrator();
                 await migrator.createMigration();
@@ -103,19 +107,18 @@ export const migrate = async (
                 // これがないとターミナルなどで実行したときに自動で終わらない。
                 await orm.close(true);
             }
-            console.log(
-                `😊 Migration-create has been successfully finished. DB is ${prettify(
-                    dbType
-                )}. / マイグレーションの作成が正常に完了しました。DBは${prettify(dbType)}です。`
-            );
+            AppConsole.log({
+                icon: '😊',
+                en: `Migration-create has been successfully finished. DB is ${prettify(dbType)}.`,
+                ja: `マイグレーションの作成が正常に完了しました。DBは${prettify(dbType)}です。`,
+            });
             return;
         }
         case createInitial: {
-            console.log(
-                `Migration-create-init is started. DB is ${prettify(
-                    dbType
-                )}. / マイグレーションの新規作成を開始します。DBは${prettify(dbType)}です。`
-            );
+            AppConsole.log({
+                en: `Migration-create-init is started. DB is ${prettify(dbType)}.`,
+                ja: `マイグレーションの新規作成を開始します。DBは${prettify(dbType)}です。`,
+            });
             try {
                 const migrator = orm.getMigrator();
                 await migrator.createInitialMigration();
@@ -123,57 +126,60 @@ export const migrate = async (
                 // これがないとターミナルなどで実行したときに自動で終わらない。
                 await orm.close(true);
             }
-            console.log(
-                `😊 Migration-create-init has been successfully finished. DB is ${prettify(
+            AppConsole.log({
+                icon: '😊',
+                en: `Migration-create-init has been successfully finished. DB is ${prettify(
                     dbType
-                )}. / マイグレーションの新規作成が正常に完了しました。DBは${prettify(dbType)}です。`
-            );
+                )}.`,
+                ja: `マイグレーションの新規作成が正常に完了しました。DBは${prettify(dbType)}です。`,
+            });
             return;
         }
         case up: {
-            console.log(
-                `Migration-up is started. DB is ${prettify(
-                    dbType
-                )}. / マイグレーションのupを開始します。DBは${prettify(dbType)}です。`
-            );
+            AppConsole.log({
+                en: `Migration-up is started. DB is ${prettify(dbType)}`,
+                ja: `マイグレーションのupを開始します。DBは${prettify(dbType)}です。`,
+            });
             try {
                 const migrator = orm.getMigrator();
                 const migrations = await migrator.getPendingMigrations();
                 if (migrations && migrations.length > 0) {
-                    console.log(
-                        'Pending migrations were found. Migrating... / 適用すべきマイグレーションが見つかりました。マイグレーションを行います…'
-                    );
+                    AppConsole.log({
+                        en: 'Pending migrations were found. Migrating...',
+                        ja: '適用すべきマイグレーションが見つかりました。マイグレーションを行います…',
+                    });
                     await migrator.up();
                 } else {
-                    console.log(
-                        '✔️ No migration found. / 適用すべきマイグレーションはありません。'
-                    );
+                    AppConsole.log({
+                        icon: '✔️',
+                        en: 'No migration found.',
+                        ja: '適用すべきマイグレーションはありません。',
+                    });
                 }
             } finally {
                 // これがないとターミナルなどで実行したときに自動で終わらない。
                 await orm.close(true);
             }
-            console.log(
-                `😊 Migration-up has been successfully finished. DB is ${prettify(
-                    dbType
-                )}. / マイグレーションのupが正常に完了しました。DBは${prettify(dbType)}です。`
-            );
+            AppConsole.log({
+                icon: '😊',
+                en: `Migration-up has been successfully finished. DB is ${prettify(dbType)}.`,
+                ja: `マイグレーションのupが正常に完了しました。DBは${prettify(dbType)}です。`,
+            });
             return;
         }
         case down: {
-            console.log(
-                `Migration-down is started. DB is ${prettify(
-                    dbType
-                )}. / マイグレーションのdownを開始します。DBは${prettify(dbType)}です。`
-            );
+            AppConsole.log({
+                en: `Migration-down is started. DB is ${prettify(dbType)}.`,
+                ja: `マイグレーションのdownを開始します。DBは${prettify(dbType)}です。`,
+            });
 
             const config = await loadServerConfigAsMigrationDown();
             if (!Number.isInteger(config.count)) {
-                console.log('❌ "--count" must be integer');
+                AppConsole.log({ icon: '❌', en: '"--count" must be integer' });
                 return;
             }
             if (config.count < 0) {
-                console.log('❌ "--count" must not be negative');
+                AppConsole.log({ icon: '❌', en: '"--count" must not be negative' });
                 return;
             }
 
@@ -181,25 +187,25 @@ export const migrate = async (
                 const migrator = orm.getMigrator();
                 for (const _ of new Array(config.count).fill('')) {
                     await migrator.down();
-                    console.log('A migration-down is finished.');
+                    AppConsole.log({ en: 'A migration-down is finished.' });
                 }
             } finally {
                 // これがないとターミナルなどで実行したときに自動で終わらない。
                 await orm.close(true);
             }
-            console.log(
-                `😊 Migration-down has been successfully finished. DB is ${prettify(
-                    dbType
-                )}. / マイグレーションのdownが正常に完了しました。DBは${prettify(dbType)}です。`
-            );
+            AppConsole.log({
+                icon: '😊',
+                en: `Migration-down has been successfully finished. DB is ${prettify(dbType)}.`,
+                ja: `マイグレーションのdownが正常に完了しました。DBは${prettify(dbType)}です。`,
+            });
             return;
         }
         case check: {
             try {
                 if (await hasMigrations(orm)) {
-                    console.log(migrationCheckErrorMessage(dbType));
+                    AppConsole.log(migrationCheckErrorMessage(dbType));
                 } else {
-                    console.log(migrationCheckOkMessage(dbType));
+                    AppConsole.log(migrationCheckOkMessage(dbType));
                 }
             } finally {
                 // これがないとターミナルなどで実行したときに自動で終わらない。

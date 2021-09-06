@@ -4,8 +4,6 @@ exports.MakeMessageNotSecretFailureType = void 0;
 var MakeMessageNotSecretFailureType;
 (function (MakeMessageNotSecretFailureType) {
     MakeMessageNotSecretFailureType["RoomNotFound"] = "RoomNotFound";
-    MakeMessageNotSecretFailureType["NotEntry"] = "NotEntry";
-    MakeMessageNotSecretFailureType["NotSignIn"] = "NotSignIn";
     MakeMessageNotSecretFailureType["NotParticipant"] = "NotParticipant";
     MakeMessageNotSecretFailureType["MessageNotFound"] = "MessageNotFound";
     MakeMessageNotSecretFailureType["NotSecret"] = "NotSecret";

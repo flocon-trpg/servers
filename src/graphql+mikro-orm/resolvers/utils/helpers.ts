@@ -6,6 +6,9 @@ import { GlobalRoom } from '../../entities/room/global';
 import { ParticipantState, State } from '@kizahasi/flocon-core';
 import { anonymous, recordToArray } from '@kizahasi/util';
 import { BaasType } from '../../../enums/BaasType';
+import { EntryPasswordConfig, plain, ServerConfig } from '../../../configType';
+import safeCompare from 'safe-compare';
+import bcrypt from 'bcrypt';
 
 const find = <T>(source: Record<string, T | undefined>, key: string): T | undefined => source[key];
 
@@ -37,21 +40,28 @@ export const getUserIfEntry = async ({
     em,
     userUid,
     baasType,
-    globalEntryPhrase,
+    serverConfig,
+    noFlush,
 }: {
     em: EM;
     userUid: string;
     baasType: BaasType;
-    globalEntryPhrase: string | undefined;
+    serverConfig: ServerConfig;
+    noFlush?: boolean;
 }): Promise<User | null> => {
     const user = await em.findOne(User, { userUid, baasType });
+    const requiresEntryPassword = serverConfig.entryPassword != null;
 
     if (user == null) {
-        if (globalEntryPhrase == null) {
+        if (!requiresEntryPassword) {
             const newUser = new User({ userUid, baasType });
             newUser.isEntry = true;
-            em.persist(newUser);
-            return user;
+            if (noFlush === true) {
+                em.persist(newUser);
+            } else {
+                await em.persistAndFlush(newUser);
+            }
+            return newUser;
         }
         return null;
     }
@@ -60,7 +70,7 @@ export const getUserIfEntry = async ({
         return user;
     }
 
-    if (globalEntryPhrase == null) {
+    if (!requiresEntryPassword) {
         user.isEntry = true;
         return user;
     }
@@ -72,14 +82,16 @@ export const checkEntry = async ({
     em,
     userUid,
     baasType,
-    globalEntryPhrase,
+    serverConfig,
+    noFlush,
 }: {
     em: EM;
     userUid: string;
     baasType: BaasType;
-    globalEntryPhrase: string | undefined;
+    serverConfig: ServerConfig;
+    noFlush?: boolean;
 }): Promise<boolean> => {
-    return (await getUserIfEntry({ em, userUid, baasType, globalEntryPhrase })) != null;
+    return (await getUserIfEntry({ em, userUid, baasType, serverConfig, noFlush })) != null;
 };
 
 class FindRoomAndMyParticipantResult {
@@ -107,7 +119,34 @@ export const findRoomAndMyParticipant = async ({
     if (room == null) {
         return null;
     }
-    const state = GlobalRoom.MikroORM.ToGlobal.state(room);
+    const state = await GlobalRoom.MikroORM.ToGlobal.state(room, em);
     const me = find(state.participants, userUid);
     return new FindRoomAndMyParticipantResult(room, state, me);
+};
+
+export const ensureUserUid = (context: ResolverContext): string => {
+    const decodedIdToken = checkSignIn(context);
+    if (decodedIdToken == NotSignIn) {
+        throw new Error('authorizedUser was not found. "@Attribute()" might be missing.');
+    }
+    return decodedIdToken.uid;
+};
+
+export const ensureAuthorizedUser = (context: ResolverContext): User => {
+    if (context.authorizedUser == null) {
+        throw new Error(
+            'authorizedUser was not found. "@Attribute(ENTRY or ADMIN)" might be missing.'
+        );
+    }
+    return context.authorizedUser;
+};
+
+export const comparePassword = async (
+    plainPassword: string,
+    config: EntryPasswordConfig
+): Promise<boolean> => {
+    if (config.type === plain) {
+        return safeCompare(plainPassword, config.value);
+    }
+    return await bcrypt.compare(plainPassword, config.value);
 };

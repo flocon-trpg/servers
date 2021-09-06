@@ -11,7 +11,9 @@ import {
     Unique,
 } from '@mikro-orm/core';
 import { v4 } from 'uuid';
+import { easyFlake } from '../../../utils/easyFlake';
 import { EM } from '../../../utils/types';
+import { Participant } from '../participant/mikro-orm';
 import {
     DicePieceValueLog as DicePieceValueLogEntity,
     NumberPieceValueLog as NumberPieceValueLogEntity,
@@ -39,11 +41,14 @@ export class Room {
     }
 
     @PrimaryKey()
-    public id: string = v4();
+    public id: string = easyFlake();
 
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property({ version: true, index: true })
     public version: number = 1;
+
+    @Property({ type: Date, nullable: true, onCreate: () => new Date(), index: true })
+    public createdAt?: Date;
 
     @Property({ type: Date, nullable: true, onUpdate: () => new Date(), index: true })
     public updatedAt?: Date;
@@ -67,6 +72,9 @@ export class Room {
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @Property()
     public revision: number = 0;
+
+    @OneToMany(() => Participant, x => x.room, { orphanRemoval: true })
+    public participants = new Collection<Participant>(this);
 
     @OneToMany(() => RoomOp, x => x.room, { orphanRemoval: true })
     public roomOperations = new Collection<RoomOp>(this);

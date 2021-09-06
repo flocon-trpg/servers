@@ -9,33 +9,27 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ListAvailableGameSystemsResult = exports.AvailableGameSystem = void 0;
+exports.FileItem = void 0;
 const type_graphql_1 = require("type-graphql");
-let AvailableGameSystem = class AvailableGameSystem {
+let FileItem = class FileItem {
 };
 __decorate([
-    type_graphql_1.Field(),
+    type_graphql_1.Field(() => type_graphql_1.ID, {
+        description: 'サーバーで管理されているファイル名。axiosなどでファイルを取得する際はこれを用いる。ソートするとアップロードした時系列順になる。',
+    }),
     __metadata("design:type", String)
-], AvailableGameSystem.prototype, "id", void 0);
+], FileItem.prototype, "filename", void 0);
 __decorate([
-    type_graphql_1.Field(),
+    type_graphql_1.Field({ description: 'ユーザーが名付けたファイル名。' }),
     __metadata("design:type", String)
-], AvailableGameSystem.prototype, "sortKey", void 0);
+], FileItem.prototype, "screenname", void 0);
 __decorate([
-    type_graphql_1.Field(),
+    type_graphql_1.Field({
+        description: 'ファイルをアップロードしたユーザー。Firebase AuthenticationのUserUidで表現される。',
+    }),
     __metadata("design:type", String)
-], AvailableGameSystem.prototype, "name", void 0);
-AvailableGameSystem = __decorate([
+], FileItem.prototype, "createdBy", void 0);
+FileItem = __decorate([
     type_graphql_1.ObjectType()
-], AvailableGameSystem);
-exports.AvailableGameSystem = AvailableGameSystem;
-let ListAvailableGameSystemsResult = class ListAvailableGameSystemsResult {
-};
-__decorate([
-    type_graphql_1.Field(() => [AvailableGameSystem]),
-    __metadata("design:type", Array)
-], ListAvailableGameSystemsResult.prototype, "value", void 0);
-ListAvailableGameSystemsResult = __decorate([
-    type_graphql_1.ObjectType()
-], ListAvailableGameSystemsResult);
-exports.ListAvailableGameSystemsResult = ListAvailableGameSystemsResult;
+], FileItem);
+exports.FileItem = FileItem;

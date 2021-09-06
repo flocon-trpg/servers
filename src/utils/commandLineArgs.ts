@@ -21,7 +21,6 @@ type Main = {
     db?: DbType;
     debug: boolean;
 };
-
 const getMain = async (): Promise<Main> => {
     const options = await yargs(process.argv.slice(2))
         .options({
@@ -59,7 +58,6 @@ export const loadAsMain = async (): Promise<Main> => {
 type MigrationUp = {
     db: DbType;
 };
-
 const getMigrationUp = async (): Promise<MigrationUp> => {
     const options = await yargs(process.argv.slice(2)).options({
         db: {
@@ -97,7 +95,6 @@ type MigrationDown = {
     db: DbType;
     count: number;
 };
-
 const getMigrationDown = async (): Promise<MigrationDown> => {
     const options = await yargs(process.argv.slice(2)).options({
         db: {
@@ -150,7 +147,6 @@ type MigrationCreate = {
     db: DbType;
     init: boolean;
 };
-
 const getMigrationCreate = async (): Promise<MigrationCreate> => {
     const options = await yargs(process.argv.slice(2)).options({
         db: {

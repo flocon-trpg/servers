@@ -4,8 +4,6 @@ exports.GetRoomLogFailureType = void 0;
 var GetRoomLogFailureType;
 (function (GetRoomLogFailureType) {
     GetRoomLogFailureType["RoomNotFound"] = "RoomNotFound";
-    GetRoomLogFailureType["NotEntry"] = "NotEntry";
-    GetRoomLogFailureType["NotSignIn"] = "NotSignIn";
     GetRoomLogFailureType["NotParticipant"] = "NotParticipant";
     GetRoomLogFailureType["NotAuthorized"] = "NotAuthorized";
     GetRoomLogFailureType["UnknownError"] = "UnknownError";

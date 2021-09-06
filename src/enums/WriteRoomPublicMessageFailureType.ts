@@ -1,7 +1,5 @@
-export enum WritePublicRoomMessageFailureType {
+export enum WriteRoomPublicMessageFailureType {
     RoomNotFound = 'RoomNotFound',
-    NotEntry = 'NotEntry',
-    NotSignIn = 'NotSignIn',
     NotAuthorized = 'NotAuthorized',
     NotParticipant = 'NotParticipant',
     NotAllowedChannelKey = 'NotAllowedChannelKey',

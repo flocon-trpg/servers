@@ -2,7 +2,6 @@ import { Observable, Subject } from 'rxjs';
 import * as Rx from 'rxjs/operators';
 import { defer, of } from 'rxjs';
 import { v4 } from 'uuid';
-import { EM } from './types';
 
 // promise-queueはtimeoutがなく、またqueueLimitReachedを判定するにはエラーメッセージから求める必要がある。promise-queue-plusが求めているものに近いが、こちらもエラーメッセージからqueueLimitReachedやtimeoutを求める必要があるのと、d.tsファイルが見当たらなかった。そのため自作した。
 // ただ、MongoDBを使うのをやめたため、もしかしたら必要ないかもしれない。
@@ -28,7 +27,7 @@ type RawResult = {
           };
 };
 
-type Result<T> =
+export type PromiseQueueResult<T> =
     | {
           type: typeof executed;
           value: T;
@@ -38,21 +37,21 @@ type Result<T> =
       };
 
 type ResultWithTimeout<T> =
-    | Result<T>
+    | PromiseQueueResult<T>
     | {
           type: typeof timeout;
       };
 
 export class PromiseQueue {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    readonly _promises = new Subject<{
+    private readonly _promises = new Subject<{
         id: string;
         execute: () => Promise<any>;
         timeout: number | null | undefined;
     }>();
     // _resultはerrorやcompleteが流されない仕様にしている。もしerrorが流されてきたら、コンストラクタ内でsubscribeしているところで例外がthrowされる。
-    readonly _result: Observable<RawResult>;
-    readonly _pendingPromises = new Set<string>(); // 値は_coreのid
+    private readonly _result: Observable<RawResult>;
+    private readonly _pendingPromises = new Set<string>(); // 値は_coreのid
 
     public constructor({ queueLimit }: { queueLimit?: number | null }) {
         this._result = this._promises.pipe(
@@ -91,28 +90,28 @@ export class PromiseQueue {
                     result: { type: 'timeout' },
                 };
                 return rawObservable.pipe(
-                    Rx.timeoutWith(
-                        timeout,
-                        defer(() => {
-                            this._pendingPromises.delete(id);
-                            return of(timeoutValue);
-                        })
-                    )
+                    Rx.timeout({
+                        each: timeout,
+                        with: () =>
+                            defer(() => {
+                                this._pendingPromises.delete(id);
+                                return of(timeoutValue);
+                            }),
+                    })
                 );
             }),
             Rx.concatAll(),
-            Rx.publish(),
-            Rx.refCount()
-        ); // この場合はどちらかというと.refCount()ではなくConnectableObservableを使うのが適切（インスタンス全体を確実にunsubscribeするようなことも可能になる）だと思われるが、少し怠けている。
-        this._result.subscribe(
-            () => undefined,
-            reason => {
+            Rx.share()
+        );
+        this._result.subscribe({
+            next: () => undefined,
+            error: reason => {
                 throw reason;
             },
-            () => {
+            complete: () => {
                 throw new Error('PromiseQueue observable completed for an unknown reason.');
-            }
-        );
+            },
+        });
     }
 
     private nextCore<T>(
@@ -122,8 +121,8 @@ export class PromiseQueue {
         const id = v4();
         this._pendingPromises.add(id);
         const result = new Promise<ResultWithTimeout<T>>((resolver, reject) => {
-            this._result.pipe(Rx.first(x => x.id === id)).subscribe(
-                r => {
+            this._result.pipe(Rx.first(x => x.id === id)).subscribe({
+                next: r => {
                     switch (r.result.type) {
                         case executed:
                             if (r.result.isError) {
@@ -140,9 +139,11 @@ export class PromiseQueue {
                 // これら2つのrejectは保険。もし何らかの理由で_resultにerrorかcompleteが流されていた場合、これらのrejectがないと永遠にresultのPromiseが終わらなくなってしまう。
                 // _resultにcompleteはおそらく流されないが、何らかの理由でerrorが流されることはあるかもしれない。そのとき、コンストラクタ内での_result.subscribeでエラーがthrowされるが、これがcatchされて握りつぶされてしまったケースに備えている。
                 // publish=>refCountの仕様についての補足: Observableがpublish=>refCountされていて、常にそれをsubscribeしている場合、nextは当然キャッシュされないが、errorやcompleteはキャッシュされる。
-                () => reject('PromiseQueue observable has thrown an error for an unknown reason.'),
-                () => reject('PromiseQueue observable has completed for an unknown reason.')
-            );
+                error: () =>
+                    reject('PromiseQueue observable has thrown an error for an unknown reason.'),
+                complete: () =>
+                    reject('PromiseQueue observable has completed for an unknown reason.'),
+            });
         });
         this._promises.next({ id, execute, timeout });
         return result;
@@ -156,7 +157,7 @@ export class PromiseQueue {
         return this.nextCore(execute, timeout);
     }
 
-    public async next<T>(execute: () => Promise<T>): Promise<Result<T>> {
+    public async next<T>(execute: () => Promise<T>): Promise<PromiseQueueResult<T>> {
         const result = await this.nextCore(execute, undefined);
         if (result.type === timeout) {
             throw new Error('not expected timeout. ObjectId collision?');

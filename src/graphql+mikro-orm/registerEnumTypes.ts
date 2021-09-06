@@ -3,13 +3,11 @@ import { ParticipantRole } from '../enums/ParticipantRole';
 import { JoinRoomFailureType } from '../enums/JoinRoomFailureType';
 import { FileSourceType } from '../enums/FileSourceType';
 import { GetRoomFailureType } from '../enums/GetRoomFailureType';
-import { GetRoomsListFailureType } from '../enums/GetRoomsListFailureType';
-import { CreateRoomFailureType } from '../enums/CreateRoomFailureType';
 import { EntryToServerResultType } from '../enums/EntryToServerResultType';
 import { OperateRoomFailureType } from '../enums/OperateRoomFailureType';
 import { GetRoomMessagesFailureType } from '../enums/GetRoomMessagesFailureType';
-import { WritePublicRoomMessageFailureType } from '../enums/WritePublicRoomMessageFailureType';
-import { WritePrivateRoomMessageFailureType } from '../enums/WritePrivateRoomMessageFailureType';
+import { WriteRoomPublicMessageFailureType } from '../enums/WriteRoomPublicMessageFailureType';
+import { WriteRoomPrivateMessageFailureType } from '../enums/WriteRoomPrivateMessageFailureType';
 import { LeaveRoomFailureType } from '../enums/LeaveRoomFailureType';
 import { RoomParameterNameType } from '../enums/RoomParameterNameType';
 import { WriteRoomSoundEffectFailureType } from '../enums/WriteRoomSoundEffectFailureType';
@@ -27,6 +25,9 @@ import { WritingMessageStatusInputType } from '../enums/WritingMessageStatusInpu
 import { WritingMessageStatusType } from '../enums/WritingMessageStatusType';
 import { PieceValueLogType } from '../enums/PieceValueLogType';
 import { BaasType } from '../enums/BaasType';
+import { GetFileItemsFailureType } from '../enums/GetFileItemsFailureType';
+import { CreateRoomFailureType } from '../enums/CreateRoomFailureType';
+import { GetRoomsListFailureType } from '../enums/GetRoomsListFailureType';
 
 let hasRegistered = false;
 const registerEnumTypes = (): void => {
@@ -57,6 +58,9 @@ const registerEnumTypes = (): void => {
     });
     registerEnumType(FileSourceType, {
         name: 'FileSourceType',
+    });
+    registerEnumType(GetFileItemsFailureType, {
+        name: 'GetFileItemsFailureType',
     });
     registerEnumType(GetRoomConnectionFailureType, {
         name: 'GetRoomConnectionFailureType',
@@ -103,11 +107,11 @@ const registerEnumTypes = (): void => {
     registerEnumType(RoomParameterNameType, {
         name: 'RoomParameterNameType',
     });
-    registerEnumType(WritePrivateRoomMessageFailureType, {
-        name: 'WritePrivateRoomMessageFailureType',
+    registerEnumType(WriteRoomPrivateMessageFailureType, {
+        name: 'WriteRoomPrivateMessageFailureType',
     });
-    registerEnumType(WritePublicRoomMessageFailureType, {
-        name: 'WritePublicRoomMessageFailureType',
+    registerEnumType(WriteRoomPublicMessageFailureType, {
+        name: 'WriteRoomPublicMessageFailureType',
     });
     registerEnumType(WriteRoomSoundEffectFailureType, {
         name: 'WriteRoomSoundEffectFailureType',
