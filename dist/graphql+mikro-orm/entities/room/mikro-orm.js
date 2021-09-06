@@ -41,6 +41,10 @@ __decorate([
     __metadata("design:type", Number)
 ], Room.prototype, "version", void 0);
 __decorate([
+    core_1.Property({ type: Date, nullable: true, onCreate: () => new Date(), index: true }),
+    __metadata("design:type", Date)
+], Room.prototype, "createdAt", void 0);
+__decorate([
     core_1.Property({ type: Date, nullable: true, onUpdate: () => new Date(), index: true }),
     __metadata("design:type", Date)
 ], Room.prototype, "updatedAt", void 0);

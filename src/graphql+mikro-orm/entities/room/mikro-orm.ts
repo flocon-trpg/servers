@@ -47,6 +47,9 @@ export class Room {
     @Property({ version: true, index: true })
     public version: number = 1;
 
+    @Property({ type: Date, nullable: true, onCreate: () => new Date(), index: true })
+    public createdAt?: Date;
+
     @Property({ type: Date, nullable: true, onUpdate: () => new Date(), index: true })
     public updatedAt?: Date;
 
