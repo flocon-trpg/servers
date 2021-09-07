@@ -155,6 +155,7 @@ export type FilePathInput = {
 export enum FileSourceType {
     Default = 'Default',
     FirebaseStorage = 'FirebaseStorage',
+    Uploader = 'Uploader',
 }
 
 export type FileTag = {
