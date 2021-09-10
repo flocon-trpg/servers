@@ -38,6 +38,10 @@ import {
     GetMessagesQuery,
     GetMessagesQueryVariables,
     GetMessagesDocument,
+    DeleteRoomMutation,
+    DeleteRoomMutationVariables,
+    DeleteRoomDocument,
+    DeleteRoomFailureType,
 } from './graphql';
 import { EntryToServerResultType } from '../src/enums/EntryToServerResultType';
 import { ServerConfig } from '../src/configType';
@@ -77,6 +81,16 @@ namespace Assert {
                 throw new Error('Guard');
             }
             return source.data.result;
+        };
+    }
+
+    export namespace DeleteRoomMutation {
+        export const toBeSuccess = (source: FetchResult<DeleteRoomMutation>) => {
+            expect(source.data?.result.failureType ?? undefined).not.toBeUndefined();
+        };
+
+        export const toBeNotCreatedByYou = (source: FetchResult<DeleteRoomMutation>) => {
+            expect(source.data?.result.failureType).toBe(DeleteRoomFailureType.NotCreatedByYou);
         };
     }
 
@@ -160,6 +174,17 @@ namespace Assert {
 }
 
 namespace GraphQL {
+    export const deleteRoomMutation = async (
+        client: ApolloClientType,
+        variables: DeleteRoomMutationVariables
+    ) => {
+        return await client.mutate<DeleteRoomMutation, DeleteRoomMutationVariables>({
+            mutation: DeleteRoomDocument,
+            fetchPolicy: 'network-only',
+            variables,
+        });
+    };
+
     export const entryToServerMutation = async (client: ApolloClientType) => {
         return await client.mutate<EntryToServerMutation, EntryToServerMutationVariables>({
             mutation: EntryToServerDocument,
@@ -480,6 +505,7 @@ it.each([
             allSubscriptions.clear();
         }
 
+        // operateのテストに必要なため、現在のroomのrevisionを取得
         let initRoomRevision;
         {
             initRoomRevision = Assert.GetRoomQuery.toBeSuccess(
@@ -491,6 +517,7 @@ it.each([
             allSubscriptions.clear();
         }
 
+        // operateのテスト
         const newRoomName = 'NEW_ROOM_NAME';
         {
             const requestId = 'P1_REQID'; // @MaxLength(10)であるため10文字以下にしている
@@ -527,6 +554,7 @@ it.each([
             allSubscriptions.clear();
         }
 
+        // 秘話の投稿テスト
         {
             const text = 'TEXT';
             const visibleTo = [Resources.User.player1, Resources.User.player2];
@@ -582,6 +610,28 @@ it.each([
         {
             Assert.LeaveRoomMutation.toBeSuccess(
                 await GraphQL.leaveRoomMutation(roomPlayer1Client, {
+                    id: roomId,
+                })
+            );
+
+            // TODO: subscriptionのテストコードを書く
+            allSubscriptions.clear();
+        }
+
+        {
+            Assert.DeleteRoomMutation.toBeNotCreatedByYou(
+                await GraphQL.deleteRoomMutation(roomPlayer1Client, {
+                    id: roomId,
+                })
+            );
+
+            allSubscriptions.toBeEmpty();
+            allSubscriptions.clear();
+        }
+
+        {
+            Assert.DeleteRoomMutation.toBeSuccess(
+                await GraphQL.deleteRoomMutation(roomMasterClient, {
                     id: roomId,
                 })
             );
