@@ -86,7 +86,7 @@ namespace Assert {
 
     export namespace DeleteRoomMutation {
         export const toBeSuccess = (source: FetchResult<DeleteRoomMutation>) => {
-            expect(source.data?.result.failureType ?? undefined).not.toBeUndefined();
+            expect(source.data?.result.failureType ?? undefined).toBeUndefined();
         };
 
         export const toBeNotCreatedByYou = (source: FetchResult<DeleteRoomMutation>) => {
