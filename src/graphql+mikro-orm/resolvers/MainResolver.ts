@@ -70,8 +70,30 @@ export class MainResolver {
             files: files.map(file => ({
                 ...file,
                 createdBy: file.createdBy.userUid,
+                createdAt: file.createdAt?.getTime(),
             })),
         };
+    }
+
+    @Mutation(() => [String])
+    @Authorized(ENTRY)
+    public async deleteFiles(
+        @Arg('filenames', () => [String]) filenames: string[],
+        @Ctx() context: ResolverContext
+    ): Promise<string[]> {
+        const result: string[] = [];
+        const user = ensureAuthorizedUser(context);
+        for (const filename in filenames) {
+            const file = await context.em.findOne(File, { createdBy: user, filename });
+            if (file != null) {
+                result.push(file.filename);
+                user.files.remove(file);
+                file.fileTags.removeAll();
+                context.em.remove(file);
+            }
+        }
+        await context.em.flush();
+        return result;
     }
 
     @Mutation(() => Boolean)

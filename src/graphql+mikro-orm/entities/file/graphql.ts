@@ -11,6 +11,9 @@ export class FileItem {
     @Field({ description: 'ユーザーが名付けたファイル名。' })
     public screenname!: string;
 
+    @Field({ nullable: true })
+    public createdAt?: number;
+
     @Field({
         description:
             'ファイルをアップロードしたユーザー。Firebase AuthenticationのUserUidで表現される。',

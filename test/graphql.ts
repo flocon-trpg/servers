@@ -136,6 +136,7 @@ export enum EntryToServerResultType {
 
 export type FileItem = {
     __typename?: 'FileItem';
+    createdAt?: Maybe<Scalars['Float']>;
     createdBy: Scalars['String'];
     filename: Scalars['ID'];
     screenname: Scalars['String'];
@@ -306,6 +307,7 @@ export type Mutation = {
     createFileTag?: Maybe<FileTag>;
     createRoom: CreateRoomResult;
     deleteFileTag: Scalars['Boolean'];
+    deleteFiles: Array<Scalars['String']>;
     deleteMessage: DeleteMessageResult;
     deleteRoom: DeleteRoomResult;
     editFileTags: Scalars['Boolean'];
@@ -339,6 +341,10 @@ export type MutationCreateRoomArgs = {
 
 export type MutationDeleteFileTagArgs = {
     tagId: Scalars['String'];
+};
+
+export type MutationDeleteFilesArgs = {
+    filenames: Array<Scalars['String']>;
 };
 
 export type MutationDeleteMessageArgs = {
@@ -842,6 +848,7 @@ export type FileItemFragment = {
     filename: string;
     screenname: string;
     createdBy: string;
+    createdAt?: Maybe<number>;
 };
 
 export type FilePathFragment = {
@@ -1231,6 +1238,7 @@ export type GetFilesQuery = {
             filename: string;
             screenname: string;
             createdBy: string;
+            createdAt?: Maybe<number>;
         }>;
     };
 };
@@ -1611,6 +1619,12 @@ export type CreateRoomMutation = {
               };
           };
 };
+
+export type DeleteFilesMutationVariables = Exact<{
+    filenames: Array<Scalars['String']> | Scalars['String'];
+}>;
+
+export type DeleteFilesMutation = { __typename?: 'Mutation'; result: Array<string> };
 
 export type DeleteFileTagMutationVariables = Exact<{
     tagId: Scalars['String'];
@@ -2142,6 +2156,7 @@ export const FileItemFragmentDoc = gql`
         filename
         screenname
         createdBy
+        createdAt
     }
 `;
 export const FileTagFragmentDoc = gql`
@@ -3095,6 +3110,48 @@ export type CreateRoomMutationResult = Apollo.MutationResult<CreateRoomMutation>
 export type CreateRoomMutationOptions = Apollo.BaseMutationOptions<
     CreateRoomMutation,
     CreateRoomMutationVariables
+>;
+export const DeleteFilesDocument = gql`
+    mutation DeleteFiles($filenames: [String!]!) {
+        result: deleteFiles(filenames: $filenames)
+    }
+`;
+export type DeleteFilesMutationFn = Apollo.MutationFunction<
+    DeleteFilesMutation,
+    DeleteFilesMutationVariables
+>;
+
+/**
+ * __useDeleteFilesMutation__
+ *
+ * To run a mutation, you first call `useDeleteFilesMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteFilesMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteFilesMutation, { data, loading, error }] = useDeleteFilesMutation({
+ *   variables: {
+ *      filenames: // value for 'filenames'
+ *   },
+ * });
+ */
+export function useDeleteFilesMutation(
+    baseOptions?: Apollo.MutationHookOptions<DeleteFilesMutation, DeleteFilesMutationVariables>
+) {
+    const options = { ...defaultOptions, ...baseOptions };
+    return Apollo.useMutation<DeleteFilesMutation, DeleteFilesMutationVariables>(
+        DeleteFilesDocument,
+        options
+    );
+}
+export type DeleteFilesMutationHookResult = ReturnType<typeof useDeleteFilesMutation>;
+export type DeleteFilesMutationResult = Apollo.MutationResult<DeleteFilesMutation>;
+export type DeleteFilesMutationOptions = Apollo.BaseMutationOptions<
+    DeleteFilesMutation,
+    DeleteFilesMutationVariables
 >;
 export const DeleteFileTagDocument = gql`
     mutation DeleteFileTag($tagId: String!) {

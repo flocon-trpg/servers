@@ -24,6 +24,10 @@ __decorate([
     __metadata("design:type", String)
 ], FileItem.prototype, "screenname", void 0);
 __decorate([
+    type_graphql_1.Field({ nullable: true }),
+    __metadata("design:type", Number)
+], FileItem.prototype, "createdAt", void 0);
+__decorate([
     type_graphql_1.Field({
         description: 'ファイルをアップロードしたユーザー。Firebase AuthenticationのUserUidで表現される。',
     }),
