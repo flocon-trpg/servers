@@ -135,6 +135,7 @@ let MainResolver = class MainResolver {
         if (fileTagToDelete == null) {
             return false;
         }
+        fileTagToDelete.files.getItems().forEach(x => context.em.remove(x));
         fileTagToDelete.files.removeAll();
         context.em.remove(fileTagToDelete);
         await context.em.flush();
