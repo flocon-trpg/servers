@@ -640,6 +640,25 @@ it.each([
             allSubscriptions.clear();
         }
 
+        // query getRoomsList
+        {
+            // # testing
+            // - master cannot get any room
+            const roomMasterResult = Assert.GetRoomsListQuery.toBeSuccess(
+                await GraphQL.getRoomsListQuery(roomMasterClient)
+            );
+            expect(roomMasterResult.rooms).toEqual([]);
+
+            // # testing
+            // - another user cannot get any room
+            const anotherUserResult = Assert.GetRoomsListQuery.toBeSuccess(
+                await GraphQL.getRoomsListQuery(roomPlayer1Client)
+            );
+            expect(anotherUserResult.rooms).toEqual([]);
+
+            allSubscriptions.clear();
+        }
+
         // これがないとport 4000が開放されないので2個目以降のテストが失敗してしまう
         server.close();
     },
