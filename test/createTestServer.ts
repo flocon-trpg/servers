@@ -57,7 +57,13 @@ export const createTestServer = async (
         admin: adminConfig,
         database: databaseConfig,
         entryPassword: entryPasswordConfig,
-        uploader: undefined,
+        uploader: {
+            enabled: true,
+            maxFileSize: 1000 * 1000,
+            sizeQuota: 100 * 1000 * 1000,
+            countQuota: 10,
+            directory: './uploader',
+        },
     };
 
     const schema = await buildSchema(serverConfig)({

@@ -63,7 +63,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
     if (((_a = serverConfig.uploader) === null || _a === void 0 ? void 0 : _a.enabled) === true) {
         appConsole_1.AppConsole.log({
             en: `The uploader of API server is enabled.`,
-            ja: `APIサーバーのアップローダーが有効化されます。`,
+            ja: `APIサーバーのアップローダーは有効化されています。`,
         });
         const uploaderConfig = serverConfig.uploader;
         await fs_extra_1.ensureDir(path_1.default.resolve(uploaderConfig.directory));
@@ -159,6 +159,12 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
                 };
                 main();
             });
+        });
+    }
+    else {
+        appConsole_1.AppConsole.log({
+            en: `The uploader of API server is disabled.`,
+            ja: `APIサーバーのアップローダーは無効化されています。`,
         });
     }
     app.get('/uploader/:type/:file_name', async (req, res, next) => {

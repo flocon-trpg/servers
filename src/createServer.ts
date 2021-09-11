@@ -99,7 +99,7 @@ export const createServer = async ({
     if (serverConfig.uploader?.enabled === true) {
         AppConsole.log({
             en: `The uploader of API server is enabled.`,
-            ja: `APIサーバーのアップローダーが有効化されます。`,
+            ja: `APIサーバーのアップローダーは有効化されています。`,
         });
 
         const uploaderConfig = serverConfig.uploader;
@@ -211,6 +211,11 @@ export const createServer = async ({
                 };
                 main();
             });
+        });
+    } else {
+        AppConsole.log({
+            en: `The uploader of API server is disabled.`,
+            ja: `APIサーバーのアップローダーは無効化されています。`,
         });
     }
 
