@@ -53,6 +53,10 @@ import {
 } from '@apollo/client';
 import { CompositeTestRoomEventSubscription, TestRoomEventSubscription } from './subscription';
 import { UpOperation, parseState } from '@kizahasi/flocon-core';
+import axios from 'axios';
+import FormData from 'form-data';
+import urljoin from 'url-join';
+import { readFileSync, writeFileSync } from 'fs';
 
 const timeout = 20000;
 
@@ -291,14 +295,35 @@ it.each([
 ] as const)(
     'integration test',
     async (dbType, entryPasswordConfig) => {
-        const httpUri = 'http://localhost:4000/graphql';
-        const wsUri = 'ws://localhost:4000/graphql';
+        const httpUri = 'http://localhost:4000';
+        const httpGraphQLUri = 'http://localhost:4000/graphql';
+        const wsGraphQLUri = 'ws://localhost:4000/graphql';
 
-        const roomMasterClient = createApolloClient(httpUri, wsUri, Resources.User.master);
-        const roomPlayer1Client = createApolloClient(httpUri, wsUri, Resources.User.player1);
-        const roomPlayer2Client = createApolloClient(httpUri, wsUri, Resources.User.player2);
-        const roomSpectatorClient = createApolloClient(httpUri, wsUri, Resources.User.spectator);
-        const notJoinUserClient = createApolloClient(httpUri, wsUri, Resources.User.notJoin);
+        const roomMasterClient = createApolloClient(
+            httpGraphQLUri,
+            wsGraphQLUri,
+            Resources.User.master
+        );
+        const roomPlayer1Client = createApolloClient(
+            httpGraphQLUri,
+            wsGraphQLUri,
+            Resources.User.player1
+        );
+        const roomPlayer2Client = createApolloClient(
+            httpGraphQLUri,
+            wsGraphQLUri,
+            Resources.User.player2
+        );
+        const roomSpectatorClient = createApolloClient(
+            httpGraphQLUri,
+            wsGraphQLUri,
+            Resources.User.spectator
+        );
+        const notJoinUserClient = createApolloClient(
+            httpGraphQLUri,
+            wsGraphQLUri,
+            Resources.User.notJoin
+        );
 
         const server = await createTestServer(dbType, entryPasswordConfig);
         const entryPassword = entryPasswordConfig == null ? undefined : Resources.entryPassword;
@@ -657,6 +682,24 @@ it.each([
             expect(anotherUserResult.rooms).toEqual([]);
 
             allSubscriptions.clear();
+        }
+
+        {
+            const image = await axios.get('https://picsum.photos/200/300.jpg');
+            writeFileSync('./test-image.jpg', Buffer.from(image.data), 'binary');
+            const formData = new FormData();
+            formData.append('file', readFileSync('./test-image.jpg'), 'test-image.jpg');
+            const axiosConfig = {
+                headers: {
+                    Authorization: `Bearer ${Resources.User.player1}`,
+                    'Content-Type': 'multipart/form-data',
+                },
+            };
+            const postResult = await axios
+                .post(urljoin(httpUri, 'uploader', 'upload', 'unlisted'), formData, axiosConfig)
+                .then(() => true)
+                .catch(err => err);
+            expect(postResult).toBe(true);
         }
 
         // これがないとport 4000が開放されないので2個目以降のテストが失敗してしまう
