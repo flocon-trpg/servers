@@ -136,7 +136,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
             }
             const file = req.file;
             if (file == null) {
-                res.sendStatus(200);
+                res.sendStatus(400);
                 return;
             }
             const thumbFileName = `${file.filename}.webp`;
