@@ -691,7 +691,7 @@ it.each([
             formData.append('file', readFileSync('./test-image.jpg'), 'test-image.jpg');
             const axiosConfig = {
                 headers: {
-                    Authorization: `Bearer ${Resources.User.player1}`,
+                    [Resources.testAuthorizationHeader]: `Bearer ${Resources.User.player1}`,
                     'Content-Type': 'multipart/form-data',
                 },
             };
