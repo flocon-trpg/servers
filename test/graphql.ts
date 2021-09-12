@@ -140,6 +140,7 @@ export type FileItem = {
     createdBy: Scalars['String'];
     filename: Scalars['ID'];
     screenname: Scalars['String'];
+    thumbFilename?: Maybe<Scalars['String']>;
 };
 
 export type FilePath = {
@@ -846,6 +847,7 @@ export type CreateRoomResultFragment =
 export type FileItemFragment = {
     __typename?: 'FileItem';
     filename: string;
+    thumbFilename?: Maybe<string>;
     screenname: string;
     createdBy: string;
     createdAt?: Maybe<number>;
@@ -1236,6 +1238,7 @@ export type GetFilesQuery = {
         files: Array<{
             __typename?: 'FileItem';
             filename: string;
+            thumbFilename?: Maybe<string>;
             screenname: string;
             createdBy: string;
             createdAt?: Maybe<number>;
@@ -2154,6 +2157,7 @@ export const CreateRoomResultFragmentDoc = gql`
 export const FileItemFragmentDoc = gql`
     fragment FileItem on FileItem {
         filename
+        thumbFilename
         screenname
         createdBy
         createdAt

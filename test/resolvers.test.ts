@@ -720,12 +720,17 @@ it.each([
         }
 
         let filename: string;
+        let thumbFilename: string | null | undefined;
         {
             const filesResult = Assert.GetFilesQuery.toBeSuccess(
                 await GraphQL.getFiles(roomPlayer1Client, { input: { fileTagIds: [] } })
             );
             expect(filesResult.length).toBe(1);
             filename = filesResult[0].filename;
+            thumbFilename = filesResult[0].thumbFilename;
+            if (thumbFilename == null) {
+                throw new Error('thumbFilename should not be nullish');
+            }
         }
 
         {
@@ -743,11 +748,19 @@ it.each([
         ] as const;
         for (const [fileType, id] of cases) {
             const axiosResult = await axios
-                .get(urljoin(httpUri, 'uploader', fileType, filename), {
-                    headers: {
-                        [Resources.testAuthorizationHeader]: id,
-                    },
-                })
+                .get(
+                    urljoin(
+                        httpUri,
+                        'uploader',
+                        fileType,
+                        fileType === 'files' ? filename : thumbFilename
+                    ),
+                    {
+                        headers: {
+                            [Resources.testAuthorizationHeader]: id,
+                        },
+                    }
+                )
                 .then(() => true)
                 .catch(err => err);
             expect(axiosResult).toBe(true);

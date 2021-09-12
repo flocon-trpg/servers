@@ -163,7 +163,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
             ja: `APIサーバーのアップローダーは無効化されています。`,
         });
     }
-    app.get('/uploader/:type/:file_name', async (req, res, next) => {
+    app.get('/uploader/:type/:file_name', async (req, res) => {
         var _a;
         let typeParam;
         switch (req.params.type) {
@@ -193,27 +193,26 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
             res.status(403).send('Requires entry');
             return;
         }
-        const fileEntity = await forkedEm.findOne(mikro_orm_2.File, { filename });
-        if (fileEntity == null) {
-            res.sendStatus(404);
-            return;
-        }
         let filepath;
         if (typeParam === 'files') {
+            const fileCount = await forkedEm.count(mikro_orm_2.File, { filename });
+            if (fileCount === 0) {
+                res.sendStatus(404);
+                return;
+            }
             filepath = path_1.default.join(path_1.default.resolve(serverConfig.uploader.directory), filename);
         }
         else {
-            if (fileEntity.thumbFilename == null) {
+            const fileCount = await forkedEm.count(mikro_orm_2.File, { thumbFilename: filename });
+            if (fileCount === 0) {
                 res.sendStatus(404);
-                next();
                 return;
             }
-            filepath = path_1.default.join(path_1.default.resolve(serverConfig.uploader.directory), 'thumb', sanitize_filename_1.default(fileEntity.thumbFilename));
+            filepath = path_1.default.join(path_1.default.resolve(serverConfig.uploader.directory), 'thumb', sanitize_filename_1.default(filename));
         }
         res.header('Content-Security-Policy', "script-src 'unsafe-hashes'");
         res.sendFile(filepath, () => {
             res.end();
-            next();
         });
     });
     const server = app.listen(port, () => {

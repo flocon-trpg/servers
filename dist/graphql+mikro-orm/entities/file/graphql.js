@@ -20,6 +20,13 @@ __decorate([
     __metadata("design:type", String)
 ], FileItem.prototype, "filename", void 0);
 __decorate([
+    type_graphql_1.Field({
+        nullable: true,
+        description: 'サムネイル画像のファイル名。axiosなどを用いてファイルを取得する。',
+    }),
+    __metadata("design:type", String)
+], FileItem.prototype, "thumbFilename", void 0);
+__decorate([
     type_graphql_1.Field({ description: 'ユーザーが名付けたファイル名。' }),
     __metadata("design:type", String)
 ], FileItem.prototype, "screenname", void 0);

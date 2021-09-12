@@ -219,8 +219,7 @@ export const createServer = async ({
         });
     }
 
-    // サムネイルはすべてwebpだが、file_nameは元画像の名前を指定する必要がある。そのため例えば、/uploader/thumbs/image.png で得られるファイルはpngでなくwebpとなる。
-    app.get('/uploader/:type/:file_name', async (req, res, next) => {
+    app.get('/uploader/:type/:file_name', async (req, res) => {
         let typeParam: 'files' | 'thumbs';
         switch (req.params.type) {
             case 'files':
@@ -254,32 +253,31 @@ export const createServer = async ({
             return;
         }
 
-        const fileEntity = await forkedEm.findOne(File, { filename });
-        if (fileEntity == null) {
-            res.sendStatus(404);
-            return;
-        }
-
         let filepath: string;
         if (typeParam === 'files') {
+            const fileCount = await forkedEm.count(File, { filename });
+            if (fileCount === 0) {
+                res.sendStatus(404);
+                return;
+            }
             filepath = path.join(path.resolve(serverConfig.uploader.directory), filename);
         } else {
-            if (fileEntity.thumbFilename == null) {
+            const fileCount = await forkedEm.count(File, { thumbFilename: filename });
+            if (fileCount === 0) {
                 res.sendStatus(404);
-                next();
                 return;
             }
             filepath = path.join(
                 path.resolve(serverConfig.uploader.directory),
                 'thumb',
-                sanitize(fileEntity.thumbFilename)
+                sanitize(filename)
             );
         }
+
         // SVGを直接開くことによるXSSを防いでいる https://qiita.com/itizawa/items/e98ecd67910492d5c2af ただし、現状では必要ないかもしれない
         res.header('Content-Security-Policy', "script-src 'unsafe-hashes'");
         res.sendFile(filepath, () => {
             res.end();
-            next();
         });
     });
 
