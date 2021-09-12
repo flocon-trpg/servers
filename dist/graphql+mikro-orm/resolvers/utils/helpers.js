@@ -54,6 +54,9 @@ const getUserIfEntry = async ({ em, userUid, baasType, serverConfig, noFlush, })
     }
     if (!requiresEntryPassword) {
         user.isEntry = true;
+        if (noFlush !== true) {
+            await em.flush();
+        }
         return user;
     }
     return null;
