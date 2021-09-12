@@ -42,6 +42,9 @@ import {
     DeleteRoomMutationVariables,
     DeleteRoomDocument,
     DeleteRoomFailureType,
+    GetFilesQuery,
+    GetFilesQueryVariables,
+    GetFilesDocument,
 } from './graphql';
 import { EntryToServerResultType } from '../src/enums/EntryToServerResultType';
 import { ServerConfig } from '../src/configType';
@@ -95,6 +98,12 @@ namespace Assert {
 
         export const toBeNotCreatedByYou = (source: FetchResult<DeleteRoomMutation>) => {
             expect(source.data?.result.failureType).toBe(DeleteRoomFailureType.NotCreatedByYou);
+        };
+    }
+
+    export namespace GetFilesQuery {
+        export const toBeSuccess = (source: ApolloQueryResult<GetFilesQuery>) => {
+            return source.data.result.files;
         };
     }
 
@@ -194,6 +203,14 @@ namespace GraphQL {
             mutation: EntryToServerDocument,
             fetchPolicy: 'network-only',
             variables: { phrase: Resources.entryPassword },
+        });
+    };
+
+    export const getFiles = async (client: ApolloClientType, variables: GetFilesQueryVariables) => {
+        return await client.query<GetFilesQuery, GetFilesQueryVariables>({
+            query: GetFilesDocument,
+            fetchPolicy: 'network-only',
+            variables,
         });
     };
 
@@ -700,6 +717,40 @@ it.each([
                 .then(() => true)
                 .catch(err => err);
             expect(postResult).toBe(true);
+        }
+
+        let filename: string;
+        {
+            const filesResult = Assert.GetFilesQuery.toBeSuccess(
+                await GraphQL.getFiles(roomPlayer1Client, { input: { fileTagIds: [] } })
+            );
+            expect(filesResult.length).toBe(1);
+            filename = filesResult[0].filename;
+        }
+
+        {
+            const filesResult = Assert.GetFilesQuery.toBeSuccess(
+                await GraphQL.getFiles(roomPlayer2Client, { input: { fileTagIds: [] } })
+            );
+            expect(filesResult).toEqual([]);
+        }
+
+        const cases = [
+            ['files', Resources.User.player1],
+            ['files', Resources.User.player2],
+            ['thumbs', Resources.User.player1],
+            ['thumbs', Resources.User.player2],
+        ] as const;
+        for (const [fileType, id] of cases) {
+            const axiosResult = await axios
+                .get(urljoin(httpUri, 'uploader', fileType, filename), {
+                    headers: {
+                        [Resources.testAuthorizationHeader]: id,
+                    },
+                })
+                .then(() => true)
+                .catch(err => err);
+            expect(axiosResult).toBe(true);
         }
 
         // これがないとport 4000が開放されないので2個目以降のテストが失敗してしまう
