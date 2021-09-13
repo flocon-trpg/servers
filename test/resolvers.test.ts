@@ -496,7 +496,7 @@ it.each([
                 await GraphQL.getRoomsListQuery(roomMasterClient)
             );
             console.log('getRoomsList query result: %o', roomMasterResult);
-            expect(roomMasterResult.rooms.length).toBe(1);
+            expect(roomMasterResult.rooms).toHaveLength(1);
             expect(roomMasterResult.rooms[0].id).toBe(roomId);
 
             // # testing
@@ -504,7 +504,7 @@ it.each([
             const anotherUserResult = Assert.GetRoomsListQuery.toBeSuccess(
                 await GraphQL.getRoomsListQuery(roomPlayer1Client)
             );
-            expect(anotherUserResult.rooms.length).toBe(1);
+            expect(anotherUserResult.rooms).toHaveLength(1);
             expect(anotherUserResult.rooms[0].id).toBe(roomId);
 
             allSubscriptions.clear();
@@ -704,7 +704,7 @@ it.each([
                 })
             );
 
-            expect(player1Messages.privateMessages.length).toBe(1);
+            expect(player1Messages.privateMessages).toHaveLength(1);
             expect(player1Messages.privateMessages).toEqual(player2Messages.privateMessages);
         }
 
@@ -791,7 +791,7 @@ it.each([
                 await GraphQL.getFilesQuery(roomPlayer1Client, { input: { fileTagIds: [] } })
             );
             console.log('GetFilesQuery result: %o', filesResult);
-            expect(filesResult.length).toBe(1);
+            expect(filesResult).toHaveLength(1);
             filename = filesResult[0].filename;
             thumbFilename = filesResult[0].thumbFilename;
             if (thumbFilename == null) {
@@ -856,7 +856,7 @@ it.each([
                     input: { fileTagIds: [fileTagId] },
                 })
             );
-            expect(filesResult.length).toBe(1);
+            expect(filesResult).toHaveLength(1);
         }
 
         {
