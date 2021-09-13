@@ -63,7 +63,16 @@ export class MainResolver {
         // TODO: tagによるfilter
         const files = await context.em.find(
             File,
-            { createdBy: { userUid: user.userUid } },
+            {
+                $and: [
+                    {
+                        fileTags: {
+                            id: input.fileTagIds.length === 0 ? undefined : input.fileTagIds[0],
+                        },
+                    },
+                    { createdBy: { userUid: user.userUid } },
+                ],
+            },
             { orderBy: { screenname: QueryOrder.ASC } }
         );
         return {
@@ -117,7 +126,7 @@ export class MainResolver {
         for (const [filename, actions] of map.toMap()) {
             let fileEntity: File | null = null;
             for (const [fileTagId, action] of actions) {
-                if (action === 0 || !isStrIndex10(fileTagId)) {
+                if (action === 0) {
                     continue;
                 }
                 if (fileEntity == null) {
@@ -162,6 +171,7 @@ export class MainResolver {
         const newFileTag = new FileTagEntity({ name: tagName });
         newFileTag.name = tagName;
         newFileTag.user = Reference.create<User, 'userUid'>(user);
+        await context.em.persistAndFlush(newFileTag);
         return {
             id: newFileTag.id,
             name: newFileTag.name,

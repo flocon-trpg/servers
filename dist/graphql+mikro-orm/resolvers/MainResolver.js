@@ -46,7 +46,16 @@ let MainResolver = class MainResolver {
     }
     async getFiles(input, context) {
         const user = helpers_1.ensureAuthorizedUser(context);
-        const files = await context.em.find(mikro_orm_2.File, { createdBy: { userUid: user.userUid } }, { orderBy: { screenname: core_1.QueryOrder.ASC } });
+        const files = await context.em.find(mikro_orm_2.File, {
+            $and: [
+                {
+                    fileTags: {
+                        id: input.fileTagIds.length === 0 ? undefined : input.fileTagIds[0],
+                    },
+                },
+                { createdBy: { userUid: user.userUid } },
+            ],
+        }, { orderBy: { screenname: core_1.QueryOrder.ASC } });
         return {
             files: files.map(file => {
                 var _a;
@@ -85,7 +94,7 @@ let MainResolver = class MainResolver {
         for (const [filename, actions] of map.toMap()) {
             let fileEntity = null;
             for (const [fileTagId, action] of actions) {
-                if (action === 0 || !util_1.isStrIndex10(fileTagId)) {
+                if (action === 0) {
                     continue;
                 }
                 if (fileEntity == null) {
@@ -124,6 +133,7 @@ let MainResolver = class MainResolver {
         const newFileTag = new mikro_orm_3.FileTag({ name: tagName });
         newFileTag.name = tagName;
         newFileTag.user = core_1.Reference.create(user);
+        await context.em.persistAndFlush(newFileTag);
         return {
             id: newFileTag.id,
             name: newFileTag.name,
