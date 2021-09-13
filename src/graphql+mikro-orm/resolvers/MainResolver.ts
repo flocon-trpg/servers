@@ -60,18 +60,18 @@ export class MainResolver {
         @Ctx() context: ResolverContext
     ): Promise<GetFilesResult> {
         const user = ensureAuthorizedUser(context);
-        // TODO: tagによるfilter
+        const fileTagsFilter = input.fileTagIds.map(
+            id =>
+                ({
+                    fileTags: {
+                        id,
+                    },
+                } as const)
+        );
         const files = await context.em.find(
             File,
             {
-                $and: [
-                    {
-                        fileTags: {
-                            id: input.fileTagIds.length === 0 ? undefined : input.fileTagIds[0],
-                        },
-                    },
-                    { createdBy: { userUid: user.userUid } },
-                ],
+                $and: [...fileTagsFilter, { createdBy: { userUid: user.userUid } }],
             },
             { orderBy: { screenname: QueryOrder.ASC } }
         );

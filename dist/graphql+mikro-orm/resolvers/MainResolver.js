@@ -46,15 +46,13 @@ let MainResolver = class MainResolver {
     }
     async getFiles(input, context) {
         const user = helpers_1.ensureAuthorizedUser(context);
+        const fileTagsFilter = input.fileTagIds.map(id => ({
+            fileTags: {
+                id,
+            },
+        }));
         const files = await context.em.find(mikro_orm_2.File, {
-            $and: [
-                {
-                    fileTags: {
-                        id: input.fileTagIds.length === 0 ? undefined : input.fileTagIds[0],
-                    },
-                },
-                { createdBy: { userUid: user.userUid } },
-            ],
+            $and: [...fileTagsFilter, { createdBy: { userUid: user.userUid } }],
         }, { orderBy: { screenname: core_1.QueryOrder.ASC } });
         return {
             files: files.map(file => {
