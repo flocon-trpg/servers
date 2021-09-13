@@ -120,6 +120,12 @@ namespace Assert {
         };
     }
 
+    export namespace EditFileTagsMutation {
+        export const toBeSuccess = (source: FetchResult<EditFileTagsMutation>) => {
+            expect(source.data?.result).toBe(true);
+        };
+    }
+
     export namespace GetFilesQuery {
         export const toBeSuccess = (source: ApolloQueryResult<GetFilesQuery>) => {
             return source.data.result.files;
@@ -834,6 +840,33 @@ it.each([
             );
             expect(fileTagResult.name).toBe(fileTagName);
             fileTagId = fileTagResult.id;
+        }
+
+        {
+            Assert.EditFileTagsMutation.toBeSuccess(
+                await GraphQL.editFileTagsMutation(roomPlayer1Client, {
+                    input: { actions: [{ filename, add: [fileTagId], remove: [] }] },
+                })
+            );
+        }
+
+        {
+            const filesResult = Assert.GetFilesQuery.toBeSuccess(
+                await GraphQL.getFilesQuery(roomPlayer1Client, {
+                    input: { fileTagIds: [fileTagId] },
+                })
+            );
+            expect(filesResult.length).toBe(1);
+        }
+
+        {
+            const nonExistFileTagId = fileTagId + fileTagId;
+            const filesResult = Assert.GetFilesQuery.toBeSuccess(
+                await GraphQL.getFilesQuery(roomPlayer1Client, {
+                    input: { fileTagIds: [nonExistFileTagId] },
+                })
+            );
+            expect(filesResult).toEqual([]);
         }
 
         // これがないとport 4000が開放されないので2個目以降のテストが失敗してしまう
