@@ -45,6 +45,15 @@ import {
     GetFilesQuery,
     GetFilesQueryVariables,
     GetFilesDocument,
+    EditFileTagsMutation,
+    EditFileTagsMutationVariables,
+    EditFileTagsDocument,
+    CreateFileTagMutationVariables,
+    CreateFileTagMutation,
+    CreateFileTagDocument,
+    DeleteFileTagMutationVariables,
+    DeleteFileTagDocument,
+    DeleteFileTagMutation,
 } from './graphql';
 import { EntryToServerResultType } from '../src/enums/EntryToServerResultType';
 import { ServerConfig } from '../src/configType';
@@ -81,6 +90,16 @@ const plainEntryPassword: ServerConfig['entryPassword'] = {
 type ApolloClientType = ApolloClient<NormalizedCacheObject>;
 
 namespace Assert {
+    export namespace CreateFileTagMutation {
+        export const toBeSuccess = (source: FetchResult<CreateFileTagMutation>) => {
+            if (source.data?.result == null) {
+                expect(source.data?.result ?? undefined).not.toBeUndefined();
+                throw new Error('Guard');
+            }
+            return source.data.result;
+        };
+    }
+
     export namespace CreateRoomMutation {
         export const toBeSuccess = (source: FetchResult<CreateRoomMutation>) => {
             if (source.data?.result.__typename !== 'CreateRoomSuccessResult') {
@@ -187,12 +206,45 @@ namespace Assert {
 }
 
 namespace GraphQL {
+    export const createFileTagMutation = async (
+        client: ApolloClientType,
+        variables: CreateFileTagMutationVariables
+    ) => {
+        return await client.mutate<CreateFileTagMutation, CreateFileTagMutationVariables>({
+            mutation: CreateFileTagDocument,
+            fetchPolicy: 'network-only',
+            variables,
+        });
+    };
+
+    export const deleteFileTagsMutation = async (
+        client: ApolloClientType,
+        variables: DeleteFileTagMutationVariables
+    ) => {
+        return await client.mutate<DeleteFileTagMutation, DeleteFileTagMutationVariables>({
+            mutation: DeleteFileTagDocument,
+            fetchPolicy: 'network-only',
+            variables,
+        });
+    };
+
     export const deleteRoomMutation = async (
         client: ApolloClientType,
         variables: DeleteRoomMutationVariables
     ) => {
         return await client.mutate<DeleteRoomMutation, DeleteRoomMutationVariables>({
             mutation: DeleteRoomDocument,
+            fetchPolicy: 'network-only',
+            variables,
+        });
+    };
+
+    export const editFileTagsMutation = async (
+        client: ApolloClientType,
+        variables: EditFileTagsMutationVariables
+    ) => {
+        return await client.mutate<EditFileTagsMutation, EditFileTagsMutationVariables>({
+            mutation: EditFileTagsDocument,
             fetchPolicy: 'network-only',
             variables,
         });
@@ -206,7 +258,10 @@ namespace GraphQL {
         });
     };
 
-    export const getFiles = async (client: ApolloClientType, variables: GetFilesQueryVariables) => {
+    export const getFilesQuery = async (
+        client: ApolloClientType,
+        variables: GetFilesQueryVariables
+    ) => {
         return await client.query<GetFilesQuery, GetFilesQueryVariables>({
             query: GetFilesDocument,
             fetchPolicy: 'network-only',
@@ -727,7 +782,7 @@ it.each([
         let thumbFilename: string | null | undefined;
         {
             const filesResult = Assert.GetFilesQuery.toBeSuccess(
-                await GraphQL.getFiles(roomPlayer1Client, { input: { fileTagIds: [] } })
+                await GraphQL.getFilesQuery(roomPlayer1Client, { input: { fileTagIds: [] } })
             );
             console.log('GetFilesQuery result: %o', filesResult);
             expect(filesResult.length).toBe(1);
@@ -740,7 +795,7 @@ it.each([
 
         {
             const filesResult = Assert.GetFilesQuery.toBeSuccess(
-                await GraphQL.getFiles(roomPlayer2Client, { input: { fileTagIds: [] } })
+                await GraphQL.getFilesQuery(roomPlayer2Client, { input: { fileTagIds: [] } })
             );
             expect(filesResult).toEqual([]);
         }
@@ -769,6 +824,16 @@ it.each([
                 .then(() => true)
                 .catch(err => err);
             expect(axiosResult).toBe(true);
+        }
+
+        let fileTagId: string;
+        {
+            const fileTagName = 'FILE_TAG_NAME';
+            const fileTagResult = Assert.CreateFileTagMutation.toBeSuccess(
+                await GraphQL.createFileTagMutation(roomPlayer1Client, { tagName: fileTagName })
+            );
+            expect(fileTagResult.name).toBe(fileTagName);
+            fileTagId = fileTagResult.id;
         }
 
         // これがないとport 4000が開放されないので2個目以降のテストが失敗してしまう
