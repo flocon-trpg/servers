@@ -4,8 +4,20 @@ import { getArbitrary } from 'fast-check-io-ts';
 import * as Room from '../src/internal/ot/room/v1';
 import { normalizeRoomState } from './normalizeRoomState';
 
-// 組み合わせ量が多いため、デフォルト値(100)より多い値を設定している
-const numRuns = 1000;
+const TEST_NUM_RUNS = process.env.TEST_NUM_RUNS;
+let numRuns: number;
+if (TEST_NUM_RUNS == null) {
+    // 組み合わせ量が多いため、デフォルト値(100)より多い値を設定している
+    // ただしこれでも足りないため、多数のテストを行う場合はTEST_NUM_RUNSを用いる
+    numRuns = 300;
+} else {
+    numRuns = parseInt(TEST_NUM_RUNS);
+    if (isNaN(numRuns)) {
+        throw new Error('TEST_NUM_RUNS must be empty or integer');
+    }
+}
+
+console.log(`numRuns: ${numRuns}`);
 
 const expectRoomStateToEqual = (actual: Room.State, expected: Room.State) => {
     expect({

@@ -33,6 +33,30 @@ jobs:
             - name: Test
               run: yarn test --ci --coverage --maxWorkers=2
 
+    large-test:
+        name: Large test on Node ${{ matrix.node }} and ${{ matrix.os }}
+
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                node: ['16.x']
+                os: [ubuntu-latest]
+
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v2
+
+            - name: Use Node ${{ matrix.node }}
+              uses: actions/setup-node@v2
+              with:
+                  node-version: ${{ matrix.node }}
+
+            - name: Install
+              run: yarn
+
+            - name: Test
+              run: TEST_NUM_RUNS=5000 yarn test --ci --coverage --maxWorkers=2
+
     # fails in windows because it uses crlf
     prettier:
         name: Check prettier on Node ${{ matrix.node }} and ${{ matrix.os }}
