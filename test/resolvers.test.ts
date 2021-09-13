@@ -54,6 +54,9 @@ import {
     DeleteFileTagMutationVariables,
     DeleteFileTagDocument,
     DeleteFileTagMutation,
+    DeleteFilesMutation,
+    DeleteFilesMutationVariables,
+    DeleteFilesDocument,
 } from './graphql';
 import { EntryToServerResultType } from '../src/enums/EntryToServerResultType';
 import { ServerConfig } from '../src/configType';
@@ -218,6 +221,17 @@ namespace GraphQL {
     ) => {
         return await client.mutate<CreateFileTagMutation, CreateFileTagMutationVariables>({
             mutation: CreateFileTagDocument,
+            fetchPolicy: 'network-only',
+            variables,
+        });
+    };
+
+    export const deleteFilesMutation = async (
+        client: ApolloClientType,
+        variables: DeleteFilesMutationVariables
+    ) => {
+        return await client.mutate<DeleteFilesMutation, DeleteFilesMutationVariables>({
+            mutation: DeleteFilesDocument,
             fetchPolicy: 'network-only',
             variables,
         });
@@ -864,6 +878,22 @@ it.each([
             const filesResult = Assert.GetFilesQuery.toBeSuccess(
                 await GraphQL.getFilesQuery(roomPlayer1Client, {
                     input: { fileTagIds: [nonExistFileTagId] },
+                })
+            );
+            expect(filesResult).toEqual([]);
+        }
+
+        {
+            const actual = await GraphQL.deleteFilesMutation(roomPlayer1Client, {
+                filenames: [filename],
+            });
+            expect(actual.data?.result).toEqual([filename]);
+        }
+
+        {
+            const filesResult = Assert.GetFilesQuery.toBeSuccess(
+                await GraphQL.getFilesQuery(roomPlayer1Client, {
+                    input: { fileTagIds: [] },
                 })
             );
             expect(filesResult).toEqual([]);
