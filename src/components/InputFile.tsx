@@ -1,16 +1,15 @@
 import { Button } from 'antd';
 import * as React from 'react';
 import { FileSourceType } from '../generated/graphql';
-import { success, useUrlFromGraphQL } from '../hooks/url';
 import { some } from '../utils/types';
 import FirebaseStorageLink from './FirebaseStorageLink';
 import * as Core from '@kizahasi/flocon-core';
 import { FilterValue } from 'antd/lib/table/interface';
-import { FirebaseStorageFile } from '../modules/fileModule';
 import { FilePath } from '../utils/filePath';
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../utils/className';
 import { ImageView } from './ImageView';
+import { image } from '../utils/fileType';
 
 type Props = {
     filePath?: FilePath | Core.FilePath;
@@ -68,7 +67,7 @@ const InputFile: React.FC<Props> = ({
                     openFilesManager({
                         openFileType: some,
                         onOpen,
-                        defaultFilteredValue: [FirebaseStorageFile.image],
+                        defaultFilteredValue: [image],
                     });
                 }}
             >

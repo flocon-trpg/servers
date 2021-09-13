@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Checkbox, Divider, Drawer, Tag, Tooltip, Typography } from 'antd';
+import { Button, Checkbox, Divider, Drawer,  Tooltip, Typography } from 'antd';
 import {
     FilePathInput,
     FileSourceType,
@@ -18,9 +18,9 @@ import { useOperate } from '../../hooks/useOperate';
 import { StrIndex5 } from '@kizahasi/util';
 import { BgmState, FilePath, UpOperation } from '@kizahasi/flocon-core';
 import _ from 'lodash';
-import { FirebaseStorageFile } from '../../modules/fileModule';
 import { cancelRnd, flex, flexColumn, flexRow, itemsCenter } from '../../utils/className';
 import classNames from 'classnames';
+import { sound } from '../../utils/fileType';
 
 const defaultVolume = 0.5;
 
@@ -239,7 +239,7 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({
                     onClick={() =>
                         setFilesManagerDrawerType({
                             openFileType: some,
-                            defaultFilteredValue: [FirebaseStorageFile.sound],
+                            defaultFilteredValue: [sound],
                             onOpen: file => {
                                 setFilesInput(oldValue => [...oldValue, file]);
                             },
@@ -337,7 +337,7 @@ const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({
                         onClick={() =>
                             setFilesManagerDrawerType({
                                 openFileType: some,
-                                defaultFilteredValue: [FirebaseStorageFile.sound],
+                                defaultFilteredValue: [sound],
                                 onOpen: file => {
                                     setFileInput(file);
                                 },

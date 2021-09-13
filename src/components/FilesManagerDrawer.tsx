@@ -42,7 +42,10 @@ const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => 
                     />
                 </Tabs.TabPane>
                 <Tabs.TabPane tab="API Server" key="2">
-                    <FloconFilesManager />
+                    <FloconFilesManager 
+                        onFlieOpen={onFileOpen}
+                        defaultFilteredValue={drawerType?.defaultFilteredValue}
+                    />
                 </Tabs.TabPane>
                 {drawerType?.openFileType === some && (
                     <Tabs.TabPane tab="URL" key="2">

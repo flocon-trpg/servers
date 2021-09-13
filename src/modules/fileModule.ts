@@ -1,15 +1,8 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+import { FileType } from '../utils/fileType';
 
 export namespace FirebaseStorageFile {
     export type Reference = firebase.default.storage.Reference;
-
-    export const image = 'image';
-
-    export const sound = 'sound';
-
-    export const others = 'others';
-
-    export type FileType = typeof image | typeof sound | typeof others;
 
     export type State = {
         reference: Reference;
