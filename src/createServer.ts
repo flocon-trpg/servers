@@ -186,14 +186,17 @@ export const createServer = async ({
                 }
                 const thumbFileName = `${file.filename}.webp`;
                 const thumbDir = path.join(path.dirname(file.path), 'thumbs');
-                const thumbPath = path.join(thumbDir, thumbFileName);
                 await ensureDir(thumbDir);
+                const thumbPath = path.join(thumbDir, thumbFileName);
                 const thumbnailSaved = await sharp(file.path)
                     .resize(80)
                     .webp()
                     .toFile(thumbPath)
                     .then(() => true)
-                    .catch(() => false);
+                    .catch(err => {
+                        console.info(err);
+                        return false;
+                    });
                 const permission =
                     permissionParam === 'public'
                         ? FilePermissionType.Entry

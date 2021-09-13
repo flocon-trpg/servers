@@ -141,14 +141,17 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
             }
             const thumbFileName = `${file.filename}.webp`;
             const thumbDir = path_1.default.join(path_1.default.dirname(file.path), 'thumbs');
-            const thumbPath = path_1.default.join(thumbDir, thumbFileName);
             await fs_extra_1.ensureDir(thumbDir);
+            const thumbPath = path_1.default.join(thumbDir, thumbFileName);
             const thumbnailSaved = await sharp_1.default(file.path)
                 .resize(80)
                 .webp()
                 .toFile(thumbPath)
                 .then(() => true)
-                .catch(() => false);
+                .catch(err => {
+                console.info(err);
+                return false;
+            });
             const permission = permissionParam === 'public'
                 ? FilePermissionType_1.FilePermissionType.Entry
                 : FilePermissionType_1.FilePermissionType.Private;

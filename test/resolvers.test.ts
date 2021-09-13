@@ -702,10 +702,14 @@ it.each([
         }
 
         {
-            const image = await axios.get('https://picsum.photos/200/300.jpg');
-            writeFileSync('./test-image.jpg', Buffer.from(image.data), 'binary');
             const formData = new FormData();
-            formData.append('file', readFileSync('./test-image.jpg'), 'test-image.jpg');
+            formData.append(
+                'file',
+                readFileSync('./test/pexels-public-domain-pictures-68147.jpg'),
+                {
+                    filename: 'test-image.jpg',
+                }
+            );
             const axiosConfig = {
                 headers: {
                     ...formData.getHeaders(),
@@ -725,6 +729,7 @@ it.each([
             const filesResult = Assert.GetFilesQuery.toBeSuccess(
                 await GraphQL.getFiles(roomPlayer1Client, { input: { fileTagIds: [] } })
             );
+            console.log('GetFilesQuery result: %o', filesResult);
             expect(filesResult.length).toBe(1);
             filename = filesResult[0].filename;
             thumbFilename = filesResult[0].thumbFilename;
