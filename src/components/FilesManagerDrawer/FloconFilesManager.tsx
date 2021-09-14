@@ -1,8 +1,6 @@
 import * as React from 'react';
 import { Button, Dropdown, Menu, notification, Table, Upload } from 'antd';
 import { accept } from './helper';
-import MyAuthContext from '../../contexts/MyAuthContext';
-import { useAsync } from 'react-use';
 import ConfigContext from '../../contexts/ConfigContext';
 import { getHttpUri } from '../../config';
 import urljoin from 'url-join';
@@ -21,7 +19,7 @@ import moment from 'moment';
 import copy from 'clipboard-copy';
 import * as Icons from '@ant-design/icons';
 import { DeleteFloconStorageFileModal } from '../DeleteFloconStorageFileModal';
-import { useIdToken } from '../../hooks/useIdToken';
+import { FirebaseAuthenticationIdTokenContext } from '../../contexts/FirebaseAuthenticationIdTokenContext';
 
 type DataSource = FileItemFragment;
 
@@ -34,7 +32,7 @@ type UploaderProps = {
 
 const Uploader: React.FC<UploaderProps> = ({ unlistedMode, onUploaded }: UploaderProps) => {
     const config = React.useContext(ConfigContext);
-    const idToken = useIdToken();
+    const idToken = React.useContext(FirebaseAuthenticationIdTokenContext);
 
     if (idToken== null) {
         return null;
