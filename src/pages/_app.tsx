@@ -2,14 +2,9 @@ import 'firebaseui/dist/firebaseui.css';
 import '../css/antd.css';
 import '../css/main.scss';
 
-import 'firebase/auth';
-import 'firebase/storage';
-
 import React from 'react';
 import { AppProps } from 'next/app';
 import { ApolloProvider } from '@apollo/client';
-import 'firebase/auth';
-import 'firebase/storage';
 import { Provider } from 'react-redux';
 import useConstant from 'use-constant';
 import { authNotFound, FirebaseUserState, loading, MyAuthContext, notSignIn } from '../contexts/MyAuthContext';
