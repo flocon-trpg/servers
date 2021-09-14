@@ -50,6 +50,7 @@ const main = async (params) => {
             .then(result_1.Result.ok)
             .catch(result_1.Result.error);
         if (decodedIdToken.isError) {
+            console.log('verifyIdToken failed: %o, %s', decodedIdToken.error, idToken);
             return decodedIdToken;
         }
         return result_1.Result.ok(Object.assign(Object.assign({}, decodedIdToken.value), { type: BaasType_1.BaasType.Firebase }));
