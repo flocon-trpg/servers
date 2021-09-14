@@ -1,6 +1,6 @@
 import React from 'react';
 import { FilePath } from '@kizahasi/flocon-core';
-import { error, loading, success, useUrlFromGraphQL } from '../hooks/url';
+import { error, loading, success, useSrcFromGraphQL } from '../hooks/src';
 import { FilePathFragment } from '../generated/graphql';
 import * as Icons from '@ant-design/icons';
 import { LazyAndPreloadImage } from './LazyAndPreloadImage';
@@ -18,11 +18,12 @@ export const ImageView: React.FC<Props> = ({
 }: Props) => {
     const size: number = sizeProp === 'Popover' ? 150 : sizeProp;
     const filePath = typeof filePathProp === 'string' ? undefined : filePathProp;
-    const src = useUrlFromGraphQL(filePath);
+    const src = useSrcFromGraphQL(filePath);
     const loadingIcon = <Icons.LoadingOutlined style={{ fontSize: size }} />;
     switch (src.type) {
         case success:
             // CONSIDER: 画像のURLを取得中のときだけでなく、画像を読込中のときもLoadingとして表示しないと少し混乱しそう
+            // TODO: Uploaderのときは新しいタブで開くのではなくダウンロードする
             if (link) {
                 <a href={src.value} target="_blank" rel="noopener noreferrer">
                     <LazyAndPreloadImage

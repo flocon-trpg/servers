@@ -42,6 +42,7 @@ import { FirebaseStorageUrlCacheContext } from '../../contexts/FirebaseStorageUr
 import { ChannelsFilter, ChannelsFilterOptions } from '../../components/ChannelsFilter';
 import classNames from 'classnames';
 import { flex, flexColumn, flexRow, itemsCenter } from '../../utils/className';
+import { FirebaseAuthenticationIdTokenContext } from '../../contexts/FirebaseAuthenticationIdTokenContext';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -391,6 +392,7 @@ const GenerateRichLogModal: React.FC<GenerateRichLogModalProps> = ({
     const configRef = useReadonlyRef(config);
     const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
     const firebaseStorageUrlCacheContextRef = useReadonlyRef(firebaseStorageUrlCacheContext);
+    const idToken = React.useContext(FirebaseAuthenticationIdTokenContext);
 
     const publicChannelNames = usePublicChannelNames();
     const publicChannelNamesRef = useReadonlyRef(publicChannelNames);
@@ -413,6 +415,9 @@ const GenerateRichLogModal: React.FC<GenerateRichLogModalProps> = ({
 
     React.useEffect(() => {
         const main = async () => {
+            if (idToken == null) {
+                return;
+            }
             const data = getLogQueryResult.data;
             if (data == null) {
                 return;
@@ -429,17 +434,18 @@ const GenerateRichLogModal: React.FC<GenerateRichLogModalProps> = ({
                 return;
             }
 
-            const zipBlob = await generateAsRichLog(
-                {
+            const zipBlob = await generateAsRichLog({
+                params: {
                     ...publicChannelNamesRef.current,
                     messages: data.result,
                     participants: participantsRef.current,
                     filter: ChannelsFilterOptions.toFilter(channelsFilterOptionsRef.current),
                 },
-                configRef.current,
-                firebaseStorageUrlCacheContextRef.current,
-                p => setProgress(p.percent)
-            ).catch(err => {
+                config: configRef.current,
+                idToken,
+                firebaseStorageUrlCache: firebaseStorageUrlCacheContextRef.current,
+                onProgressChange: p => setProgress(p.percent),
+            }).catch(err => {
                 setProgress(undefined);
                 setErrorMessage(err.message);
                 return null;
@@ -458,6 +464,7 @@ const GenerateRichLogModal: React.FC<GenerateRichLogModalProps> = ({
         configRef,
         firebaseStorageUrlCacheContextRef,
         channelsFilterOptionsRef,
+        idToken,
     ]);
 
     if (publicChannelNames == null) {

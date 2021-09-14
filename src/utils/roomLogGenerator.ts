@@ -5,7 +5,7 @@ import moment from 'moment';
 import { PublicChannelNames } from './types';
 import { messageContentMaxHeight, RoomMessage } from '../pageComponents/room/RoomMessage';
 import { isDeleted, toText } from './message';
-import { ParticipantState } from '@kizahasi/flocon-core';
+import { Default, FirebaseStorage, ParticipantState, Uploader } from '@kizahasi/flocon-core';
 import { Color } from './color';
 import { FilePath } from './filePath';
 import axios from 'axios';
@@ -306,35 +306,78 @@ class ImageDownloader {
     // valueがnullの場合はnot foundなどを表し、二度とダウンロードを試みない
     private readonly defaultImages = new Map<string, ImageResult | null>();
 
+    // keyはdirectLink
+    // valueがnullの場合はnot foundなどを表し、二度とダウンロードを試みない
+    private readonly uploaderImages = new Map<string, ImageResult | null>();
+
     public constructor(
         private readonly config: Config,
         private readonly firebaseStorageUrlCache: ExpiryMap<string, string>
     ) {}
 
-    public async download(filePath: FilePath): Promise<ImageResult | null> {
-        if (filePath.sourceType === FileSourceType.FirebaseStorage) {
-            const cache = this.firebaseImages.get(filePath.path);
-            if (cache !== undefined) {
-                return cache;
+    private findCache(filePath: FilePath) {
+        switch (filePath.sourceType) {
+            case FileSourceType.Default: {
+                return this.defaultImages.get(analyzeUrl(filePath.path).directLink);
             }
-        } else {
-            const cache = this.defaultImages.get(analyzeUrl(filePath.path).directLink);
-            if (cache !== undefined) {
-                return cache;
+            case FileSourceType.FirebaseStorage: {
+                return this.firebaseImages.get(filePath.path);
+            }
+            case FileSourceType.Uploader: {
+                return this.uploaderImages.get(filePath.path);
             }
         }
+    }
 
-        const imgUrl = await FilePath.getUrl(filePath, this.config, this.firebaseStorageUrlCache);
-        if (imgUrl == null) {
-            if (filePath.sourceType === FileSourceType.FirebaseStorage) {
-                this.firebaseImages.set(filePath.path, null);
-            } else {
-                throw new Error(thisShouldNotHappen);
-            }
-            // CONSIDER: 何らかの通知をしたほうがいいか？
-            return null;
+    private analyzeUrl(url: string) {
+        const { directLink, fileExtension } = analyzeUrl(url);
+        return {
+            directLink,
+            // Firebase Storageのファイル名は長すぎる上に%などの文字が含まれており、imgのsrcに渡すと正常に動作しない、messages.jsのファイルサイズが大きくなるという2つの問題点があるため、ランダムな文字列に置き換えている。
+            // image1, image2... のように番号を順に割り振ったファイル名のほうがユーザーによるカスタマイズが行いやすいためこちらのほうが良いが、少し面倒なので現時点では却下している。
+            filename: fileExtension == null ? `${simpleId()}` : `${simpleId()}.${fileExtension}`,
+        };
+    }
+
+    public async download(filePath: FilePath, idToken: string): Promise<ImageResult | null> {
+        const cache = this.findCache(filePath);
+        if (cache !== undefined) {
+            return cache;
         }
-        const { directLink, fileExtension } = analyzeUrl(imgUrl);
+        const srcResult = await FilePath.getSrc(
+            filePath,
+            this.config,
+            idToken,
+            this.firebaseStorageUrlCache
+        );
+        switch (srcResult.type) {
+            case Default:
+                break;
+            case FirebaseStorage:
+                if (srcResult.src == null) {
+                    this.firebaseImages.set(filePath.path, null);
+                    // CONSIDER: 何らかの通知をしたほうがいいか？
+                    return null;
+                }
+                break;
+            case Uploader: {
+                if (srcResult.src == null) {
+                    this.uploaderImages.set(filePath.path, null);
+                    // CONSIDER: 何らかの通知をしたほうがいいか？
+                    return null;
+                }
+                break;
+            }
+        }
+        if (srcResult.type === Uploader) {
+            const result: ImageResult = {
+                filename: this.analyzeUrl(srcResult.src).filename,
+                blob: srcResult.blob,
+            };
+            this.uploaderImages.set(filePath.path, result);
+            return result;
+        }
+        const { directLink, filename } = this.analyzeUrl(srcResult.src);
         const image = await axios.get(directLink, { responseType: 'blob' }).catch(() => null);
         if (image == null) {
             if (filePath.sourceType === FileSourceType.FirebaseStorage) {
@@ -346,9 +389,7 @@ class ImageDownloader {
             return null;
         }
         const result: ImageResult = {
-            // Firebase Storageのファイル名は長すぎる上に%などの文字が含まれており、imgのsrcに渡すと正常に動作しない、messages.jsのファイルサイズが大きくなるという2つの問題点があるため、ランダムな文字列に置き換えている。
-            // image1, image2... のように番号を順に割り振ったファイル名のほうがユーザーによるカスタマイズが行いやすいためこちらのほうが良いが、少し面倒なので現時点では却下している。
-            filename: fileExtension == null ? `${simpleId()}` : `${simpleId()}.${fileExtension}`,
+            filename,
             blob: new Blob([image.data]),
         };
         if (filePath.sourceType === FileSourceType.FirebaseStorage) {
@@ -393,12 +434,19 @@ type RichLogProgress = {
     percent: number;
 };
 
-export const generateAsRichLog = async (
-    params: GenerateLogParams,
-    config: Config,
-    firebaseStorageUrlCache: ExpiryMap<string, string>,
-    onProgressChange: (p: RichLogProgress) => void
-): Promise<Blob> => {
+export const generateAsRichLog = async ({
+    params,
+    config,
+    idToken,
+    firebaseStorageUrlCache,
+    onProgressChange,
+}: {
+    params: GenerateLogParams;
+    config: Config;
+    idToken: string;
+    firebaseStorageUrlCache: ExpiryMap<string, string>;
+    onProgressChange: (p: RichLogProgress) => void;
+}): Promise<Blob> => {
     const imageDownloader = new ImageDownloader(config, firebaseStorageUrlCache);
     const zip = new JSZip();
 
@@ -442,7 +490,10 @@ export const generateAsRichLog = async (
         }
         let avatar: string | undefined = undefined;
         if (msg.value.createdBy?.characterImage != null) {
-            const image = await imageDownloader.download(msg.value.createdBy.characterImage);
+            const image = await imageDownloader.download(
+                msg.value.createdBy.characterImage,
+                idToken
+            );
             if (image != null) {
                 imgAvatarFolder.file(image.filename, image.blob);
                 avatar = `./img/avatar/${image.filename}`;

@@ -2,6 +2,7 @@ import { FilePath } from '@kizahasi/flocon-core';
 import React from 'react';
 import { useDeepCompareEffect } from 'react-use';
 import ConfigContext from '../contexts/ConfigContext';
+import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
 import { FilePathFragment } from '../generated/graphql';
 import { FilePath as FilePathModule } from '../utils/filePath';
@@ -12,7 +13,7 @@ export const loading = 'loading';
 export const nullishArg = 'nullishArg';
 export const error = 'error';
 
-type UrlArrayResult =
+type SrcArrayResult =
     | {
           // useFirebaseStorageUrlArrayは一部が成功して残りが失敗というケースがあるため、successではなくdoneという名前にしている。
           type: typeof done;
@@ -28,12 +29,13 @@ type UrlArrayResult =
 
 // PathArrayがnullish ⇔ 戻り値がnullishArg
 // pathArray.length = 戻り値.length
-export function useUrlArrayFromGraphQL(
+export function useSrcArrayFromGraphQL(
     pathArray: ReadonlyArray<FilePathFragment | FilePath> | null | undefined
-): UrlArrayResult {
+): SrcArrayResult {
     const config = React.useContext(ConfigContext);
-    const [result, setResult] = React.useState<UrlArrayResult>({ type: loading });
+    const [result, setResult] = React.useState<SrcArrayResult>({ type: loading });
     const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
+    const idToken = React.useContext(FirebaseAuthenticationIdTokenContext);
 
     // deep equalityでチェックされるため、余計なプロパティを取り除いている
     const cleanPathArray = pathArray?.map(path => ({
@@ -42,6 +44,10 @@ export function useUrlArrayFromGraphQL(
     }));
 
     useDeepCompareEffect(() => {
+        if (idToken == null) {
+            setResult({ type: loading });
+            return;
+        }
         if (cleanPathArray == null) {
             setResult({ type: nullishArg });
             return;
@@ -51,14 +57,14 @@ export function useUrlArrayFromGraphQL(
         Promise.all(
             cleanPathArray.map(path => {
                 // firebaseStorageUrlCacheContextはDeepCompareしてほしくないしされる必要もないインスタンスであるため、depsに加えてはいけない。
-                return FilePathModule.getUrl(path, config, firebaseStorageUrlCacheContext);
+                return FilePathModule.getSrc(path, config, idToken, firebaseStorageUrlCacheContext);
             })
         )
             .then(all => {
                 if (isDisposed) {
                     return;
                 }
-                setResult({ type: done, value: all });
+                setResult({ type: done, value: all.map(x => x.src ?? null) });
             })
             .catch(e => {
                 console.log('error', e);
@@ -68,12 +74,12 @@ export function useUrlArrayFromGraphQL(
         return () => {
             isDisposed = true;
         };
-    }, [cleanPathArray]);
+    }, [cleanPathArray, idToken]);
 
     return result;
 }
 
-type UrlResult =
+type SrcResult =
     | {
           type: typeof success;
           value: string;
@@ -82,9 +88,9 @@ type UrlResult =
           type: typeof loading | typeof error | typeof nullishArg;
       };
 
-export function useUrlFromGraphQL(path: FilePathFragment | FilePath | null | undefined): UrlResult {
+export function useSrcFromGraphQL(path: FilePathFragment | FilePath | null | undefined): SrcResult {
     const pathArray = React.useMemo(() => (path == null ? null : [path]), [path]);
-    const resultArray = useUrlArrayFromGraphQL(pathArray);
+    const resultArray = useSrcArrayFromGraphQL(pathArray);
     if (resultArray.type !== done) {
         return resultArray;
     }

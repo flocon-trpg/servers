@@ -4,7 +4,7 @@ import { FilePathFragment } from '../generated/graphql';
 import { useSelector } from '../store';
 import { analyzeUrl } from '../utils/analyzeUrl';
 import { volumeCap } from '../utils/variables';
-import { success, useUrlFromGraphQL } from './url';
+import { success, useSrcFromGraphQL } from './src';
 import { AllRoomMessagesResult, newEvent } from './useRoomMessages';
 
 // 長過ぎる曲をSEにしようとした場合、何もしないと部屋に再入室しない限りその曲を止めることができない。それを防ぐため、最大15秒までしか流れないようにしている。15秒という長さは適当。
@@ -30,7 +30,7 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
         volumeConfigRef.current = volumeConfig;
     }, [volumeConfig]);
 
-    const url = useUrlFromGraphQL(value?.filePath);
+    const url = useSrcFromGraphQL(value?.filePath);
     const howlsRef = React.useRef<Map<string, { howl: Howl; volume: number }>>(new Map());
 
     React.useEffect(() => {

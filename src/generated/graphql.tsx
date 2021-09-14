@@ -136,9 +136,11 @@ export enum EntryToServerResultType {
 
 export type FileItem = {
   __typename?: 'FileItem';
+  createdAt?: Maybe<Scalars['Float']>;
   createdBy: Scalars['String'];
   filename: Scalars['ID'];
   screenname: Scalars['String'];
+  thumbFilename?: Maybe<Scalars['String']>;
 };
 
 export type FilePath = {
@@ -154,7 +156,8 @@ export type FilePathInput = {
 
 export enum FileSourceType {
   Default = 'Default',
-  FirebaseStorage = 'FirebaseStorage'
+  FirebaseStorage = 'FirebaseStorage',
+  Uploader = 'Uploader'
 }
 
 export type FileTag = {
@@ -303,6 +306,7 @@ export type Mutation = {
   createFileTag?: Maybe<FileTag>;
   createRoom: CreateRoomResult;
   deleteFileTag: Scalars['Boolean'];
+  deleteFiles: Array<Scalars['String']>;
   deleteMessage: DeleteMessageResult;
   deleteRoom: DeleteRoomResult;
   editFileTags: Scalars['Boolean'];
@@ -340,6 +344,11 @@ export type MutationCreateRoomArgs = {
 
 export type MutationDeleteFileTagArgs = {
   tagId: Scalars['String'];
+};
+
+
+export type MutationDeleteFilesArgs = {
+  filenames: Array<Scalars['String']>;
 };
 
 
@@ -831,7 +840,7 @@ type CreateRoomResult_CreateRoomSuccessResult_Fragment = { __typename?: 'CreateR
 
 export type CreateRoomResultFragment = CreateRoomResult_CreateRoomFailureResult_Fragment | CreateRoomResult_CreateRoomSuccessResult_Fragment;
 
-export type FileItemFragment = { __typename?: 'FileItem', filename: string, screenname: string, createdBy: string };
+export type FileItemFragment = { __typename?: 'FileItem', filename: string, thumbFilename?: Maybe<string>, screenname: string, createdBy: string, createdAt?: Maybe<number> };
 
 export type FilePathFragment = { __typename?: 'FilePath', sourceType: FileSourceType, path: string };
 
@@ -905,7 +914,7 @@ export type GetFilesQueryVariables = Exact<{
 }>;
 
 
-export type GetFilesQuery = { __typename?: 'Query', result: { __typename?: 'GetFilesResult', files: Array<{ __typename?: 'FileItem', filename: string, screenname: string, createdBy: string }> } };
+export type GetFilesQuery = { __typename?: 'Query', result: { __typename?: 'GetFilesResult', files: Array<{ __typename?: 'FileItem', filename: string, thumbFilename?: Maybe<string>, screenname: string, createdBy: string, createdAt?: Maybe<number> }> } };
 
 export type GetRoomQueryVariables = Exact<{
   id: Scalars['String'];
@@ -978,6 +987,13 @@ export type CreateRoomMutationVariables = Exact<{
 
 
 export type CreateRoomMutation = { __typename?: 'Mutation', result: { __typename?: 'CreateRoomFailureResult', failureType: CreateRoomFailureType } | { __typename?: 'CreateRoomSuccessResult', id: string, room: { __typename?: 'RoomGetState', revision: number, createdBy: string, stateJson: string } } };
+
+export type DeleteFilesMutationVariables = Exact<{
+  filenames: Array<Scalars['String']> | Scalars['String'];
+}>;
+
+
+export type DeleteFilesMutation = { __typename?: 'Mutation', result: Array<string> };
 
 export type DeleteFileTagMutationVariables = Exact<{
   tagId: Scalars['String'];
@@ -1160,8 +1176,10 @@ export const CreateRoomResultFragmentDoc = gql`
 export const FileItemFragmentDoc = gql`
     fragment FileItem on FileItem {
   filename
+  thumbFilename
   screenname
   createdBy
+  createdAt
 }
     `;
 export const FileTagFragmentDoc = gql`
@@ -1941,6 +1959,37 @@ export function useCreateRoomMutation(baseOptions?: Apollo.MutationHookOptions<C
 export type CreateRoomMutationHookResult = ReturnType<typeof useCreateRoomMutation>;
 export type CreateRoomMutationResult = Apollo.MutationResult<CreateRoomMutation>;
 export type CreateRoomMutationOptions = Apollo.BaseMutationOptions<CreateRoomMutation, CreateRoomMutationVariables>;
+export const DeleteFilesDocument = gql`
+    mutation DeleteFiles($filenames: [String!]!) {
+  result: deleteFiles(filenames: $filenames)
+}
+    `;
+export type DeleteFilesMutationFn = Apollo.MutationFunction<DeleteFilesMutation, DeleteFilesMutationVariables>;
+
+/**
+ * __useDeleteFilesMutation__
+ *
+ * To run a mutation, you first call `useDeleteFilesMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteFilesMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteFilesMutation, { data, loading, error }] = useDeleteFilesMutation({
+ *   variables: {
+ *      filenames: // value for 'filenames'
+ *   },
+ * });
+ */
+export function useDeleteFilesMutation(baseOptions?: Apollo.MutationHookOptions<DeleteFilesMutation, DeleteFilesMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteFilesMutation, DeleteFilesMutationVariables>(DeleteFilesDocument, options);
+      }
+export type DeleteFilesMutationHookResult = ReturnType<typeof useDeleteFilesMutation>;
+export type DeleteFilesMutationResult = Apollo.MutationResult<DeleteFilesMutation>;
+export type DeleteFilesMutationOptions = Apollo.BaseMutationOptions<DeleteFilesMutation, DeleteFilesMutationVariables>;
 export const DeleteFileTagDocument = gql`
     mutation DeleteFileTag($tagId: String!) {
   result: deleteFileTag(tagId: $tagId)

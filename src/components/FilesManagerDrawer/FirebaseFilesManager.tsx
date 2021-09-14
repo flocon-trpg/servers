@@ -8,7 +8,6 @@ import FirebaseStorageLink from '../FirebaseStorageLink';
 import ConfigContext from '../../contexts/ConfigContext';
 import copy from 'clipboard-copy';
 import { fileName } from '../../utils/filename';
-import { extname } from '../../utils/extname';
 import { InformationIcon } from '../InformationIcon';
 import { FilterValue } from 'antd/lib/table/interface';
 import moment from 'moment';
@@ -20,6 +19,7 @@ import { fileModule } from '../../modules/fileModule';
 import { $public, StorageType, unlisted } from '../../utils/firebaseStorage';
 import { DeleteFirebaseStorageFileModal } from '../DeleteFirebaseStorageFileModal';
 import { accept } from './helper';
+import { FileType, guessFileType, image, others, sound } from '../../utils/fileType';
 
 type DataSource = FirebaseStorageFile.State;
 
@@ -127,18 +127,18 @@ const fileTypeColumn = (defaultFilteredValue: FilterValue | null | undefined): C
     ),
     key: 'fileType',
     filters: [
-        { text: '画像', value: FirebaseStorageFile.image },
-        { text: '音声', value: FirebaseStorageFile.sound },
-        { text: 'その他', value: FirebaseStorageFile.others },
+        { text: '画像', value: image },
+        { text: '音声', value: sound },
+        { text: 'その他', value: others },
     ],
     onFilter: (value, record) => value === record.fileType,
     defaultFilteredValue,
     sorter: (x, y) => {
-        const toNumber = (fileType: FirebaseStorageFile.FileType): number => {
+        const toNumber = (fileType: FileType): number => {
             switch (fileType) {
-                case FirebaseStorageFile.image:
+                case image:
                     return 1;
-                case FirebaseStorageFile.sound:
+                case sound:
                     return 2;
                 default:
                     return 3;
@@ -151,9 +151,9 @@ const fileTypeColumn = (defaultFilteredValue: FilterValue | null | undefined): C
     // eslint-disable-next-line react/display-name
     render: (_, record: DataSource) => {
         switch (record.fileType) {
-            case FirebaseStorageFile.image:
+            case image:
                 return '画像';
-            case FirebaseStorageFile.sound:
+            case sound:
                 return '音声';
             default:
                 return 'その他';
@@ -334,28 +334,7 @@ const referencesToDataSource = (
     const promises = files.map(async file => {
         const metadata = await file.getMetadata();
         const name = fileName(file.fullPath);
-        let fileType: FirebaseStorageFile.FileType;
-        switch (extname(name)?.toLowerCase()) {
-            case 'jpg':
-            case 'jpeg':
-            case 'png':
-            case 'gif':
-            case 'bmp':
-            case 'webp':
-                fileType = FirebaseStorageFile.image;
-                break;
-            case 'mp3':
-            case 'ogg':
-            case 'oga':
-            case 'wav':
-            case 'aac':
-            case 'weba':
-                fileType = FirebaseStorageFile.sound;
-                break;
-            default:
-                fileType = FirebaseStorageFile.others;
-                break;
-        }
+        const fileType = guessFileType(name);
         return {
             reference: file,
             fullPath: file.fullPath,

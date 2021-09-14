@@ -26,29 +26,33 @@ import { useMonaco, loader } from '@monaco-editor/react';
 import { ExpiryMap } from '../utils/expiryMap';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
 import urljoin from 'url-join';
-import { useAsync } from 'react-use';
 import { monacoLibSource } from '../utils/libSource';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { createApolloClient } from '../utils/createApolloClient';
+import { useIdToken } from '../hooks/useIdToken';
 
 enableMapSet();
 
 const config = getConfig();
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
-    const user = useFirebaseUser();
-    const apolloClientAndIdToken = useAsync(async () => {
-        const httpUri = urljoin(getHttpUri(config), 'graphql');
-        const wsUri = urljoin(getWsUri(config), 'graphql');
-        appConsole.log(`GraphQL WebSocket URL: ${wsUri}`);
+    const httpUri = urljoin(getHttpUri(config), 'graphql');
+    const wsUri = urljoin(getWsUri(config), 'graphql');
+    React.useEffect(() => {
         appConsole.log(`GraphQL HTTP URL: ${httpUri}`);
-        if (typeof user === 'string') {
-            return { apolloClient: createApolloClient(httpUri, wsUri, null), idToken: null };
-        }
-        const idToken = await user.getIdToken();
-        return { apolloClient: createApolloClient(httpUri, wsUri, idToken), idToken };
-    }, [user]);
+    }, [httpUri]);
+    React.useEffect(() => {
+        appConsole.log(`GraphQL WebSocket URL: ${wsUri}`);
+    }, [wsUri]);
+
+    const user = useFirebaseUser();
     useUserConfig(typeof user === 'string' ? null : user.uid, store.dispatch);
+
+    const idToken = useIdToken();
+    const [apolloClient, setApolloClient] = React.useState<ReturnType<typeof createApolloClient>>();
+    React.useEffect(() => {
+        setApolloClient(createApolloClient(httpUri, wsUri, idToken ?? null));
+    }, [httpUri, wsUri, idToken]);
 
     const clientId = useConstant(() => simpleId());
     React.useEffect(() => {
@@ -76,7 +80,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         monaco.languages.typescript.typescriptDefaults.addExtraLib(monacoLibSource);
     }, [monaco]);
 
-    if (apolloClientAndIdToken.value == null) {
+    if (idToken == null || apolloClient == null) {
         return <div style={{ padding: 5 }}>{'しばらくお待ち下さい… / Please wait…'}</div>;
     }
     return (
@@ -85,15 +89,13 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
                 <link rel="shortcut icon" href="/logo.png" />
             </Head>
             <ClientIdContext.Provider value={clientId}>
-                <ApolloProvider client={apolloClientAndIdToken.value.apolloClient}>
+                <ApolloProvider client={apolloClient}>
                     <Provider store={store}>
                         <MyAuthContext.Provider value={user}>
                             <FirebaseStorageUrlCacheContext.Provider
                                 value={firebaseStorageUrlCache}
                             >
-                                <FirebaseAuthenticationIdTokenContext.Provider
-                                    value={apolloClientAndIdToken.value.idToken}
-                                >
+                                <FirebaseAuthenticationIdTokenContext.Provider value={idToken}>
                                     <Component {...pageProps} />
                                 </FirebaseAuthenticationIdTokenContext.Provider>
                             </FirebaseStorageUrlCacheContext.Provider>

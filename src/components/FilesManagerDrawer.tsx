@@ -41,8 +41,11 @@ const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => 
                         defaultFilteredValue={drawerType?.defaultFilteredValue}
                     />
                 </Tabs.TabPane>
-                <Tabs.TabPane tab="API Server" key="2">
-                    <FloconFilesManager />
+                <Tabs.TabPane tab="API Server（未完成）" key="2" disabled>
+                    <FloconFilesManager 
+                        onFlieOpen={onFileOpen}
+                        defaultFilteredValue={drawerType?.defaultFilteredValue}
+                    />
                 </Tabs.TabPane>
                 {drawerType?.openFileType === some && (
                     <Tabs.TabPane tab="URL" key="2">
