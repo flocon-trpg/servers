@@ -12,7 +12,13 @@ import 'firebase/auth';
 import 'firebase/storage';
 import { Provider } from 'react-redux';
 import useConstant from 'use-constant';
-import { authNotFound, FirebaseUserState, loading, MyAuthContext, notSignIn } from '../contexts/MyAuthContext';
+import {
+    authNotFound,
+    FirebaseUserState,
+    loading,
+    MyAuthContext,
+    notSignIn,
+} from '../contexts/MyAuthContext';
 import store from '../store';
 import { appConsole } from '../utils/appConsole';
 import { getConfig, getHttpUri, getWsUri } from '../config';
@@ -39,7 +45,7 @@ const config = getConfig();
 
 // getIdTokenを複数箇所で呼び出すとidTokenの新旧が混在する可能性がある（要調査）ので、念のため_appのみで呼び出すようにしている
 const useIdToken = () => {
-   const user = useFirebaseUser();
+    const user = useFirebaseUser();
     const [result, setResult] = React.useState<string>();
     React.useEffect(() => {
         console.log('user is updated: %o', user);
@@ -55,7 +61,7 @@ const useIdToken = () => {
         });
     }, [user]);
     return result;
-}
+};
 
 // localForageを用いてRoomConfigを読み込み、ReduxのStateと紐付ける。
 // Userが変わるたびに、useUserConfigが更新される必要がある。_app.tsxなどどこか一箇所でuseUserConfigを呼び出すだけでよい。
@@ -87,11 +93,13 @@ const useFirebaseUser = (): FirebaseUserState => {
     const auth = getAuth(config);
     const [user, setUser] = React.useState<FirebaseUserState>(loading);
     React.useEffect(() => {
+        console.log('auth updated: %o', auth);
         if (auth == null) {
             setUser(authNotFound);
             return;
         }
         const unsubscribe = auth.onIdTokenChanged(user => {
+            console.log('onIdTokenChaned: %o', user);
             setUser(user == null ? notSignIn : user);
         });
         return () => {
