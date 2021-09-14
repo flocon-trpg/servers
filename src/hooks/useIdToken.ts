@@ -12,6 +12,8 @@ export const useIdToken = () => {
         }
         user.getIdToken().then(idToken => {
             console.log('idToken is updated');
+            // ユーザーが変わったとき、新しいidTokenを入手するまでは前のidTokenを保持するようにしている。
+            // こうすることで、一時的にidTokenがundefinedになるせいでApolloClientが一時的にidTokenなしモードに切り替わることを防ぐ狙いがある。
             setResult(idToken);
         });
     }, [user]);
