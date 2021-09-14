@@ -21,6 +21,7 @@ import moment from 'moment';
 import copy from 'clipboard-copy';
 import * as Icons from '@ant-design/icons';
 import { DeleteFloconStorageFileModal } from '../DeleteFloconStorageFileModal';
+import { useIdToken } from '../../hooks/useIdToken';
 
 type DataSource = FileItemFragment;
 
@@ -32,17 +33,10 @@ type UploaderProps = {
 };
 
 const Uploader: React.FC<UploaderProps> = ({ unlistedMode, onUploaded }: UploaderProps) => {
-    const myAuth = React.useContext(MyAuthContext);
     const config = React.useContext(ConfigContext);
+    const idToken = useIdToken();
 
-    const idToken = useAsync(async () => {
-        if (typeof myAuth === 'string') {
-            return null;
-        }
-        return await myAuth.getIdToken();
-    }, [myAuth]);
-
-    if (idToken.value == null) {
+    if (idToken== null) {
         return null;
     }
 
@@ -60,7 +54,7 @@ const Uploader: React.FC<UploaderProps> = ({ unlistedMode, onUploaded }: Uploade
                     formData.append('file', options.file, options.file.name);
                     const axiosConfig = {
                         headers: {
-                            Authorization: `Bearer ${idToken.value}`,
+                            Authorization: `Bearer ${idToken}`,
                             'Content-Type': 'multipart/form-data',
                         },
                     };
