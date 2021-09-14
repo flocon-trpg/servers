@@ -20,7 +20,6 @@ import { $public, StorageType, unlisted } from '../../utils/firebaseStorage';
 import { DeleteFirebaseStorageFileModal } from '../DeleteFirebaseStorageFileModal';
 import { accept } from './helper';
 import { FileType, guessFileType, image, others, sound } from '../../utils/fileType';
-import { ref, uploadBytes, listAll, getMetadata } from 'firebase/storage';
 
 type DataSource = FirebaseStorageFile.State;
 
@@ -77,15 +76,15 @@ const Uploader: React.FC<UploaderProps> = ({
                     if (webConfig.firebase?.storage?.enableUnlisted !== true) {
                         return null;
                     }
-                    return ref(
-                        getStorageForce(config),
+                    return getStorageForce(config).ref(
                         Path.unlisted.file(myUserUid, options.file.name)
                     );
                 })();
                 if (storageRef == null) {
                     return;
                 }
-                uploadBytes(storageRef, options.file)
+                storageRef
+                    .put(options.file)
                     .then(() => {
                         if (options.onSuccess != null) {
                             options.onSuccess({}, new XMLHttpRequest());
@@ -333,7 +332,7 @@ const referencesToDataSource = (
     files: ReadonlyArray<FirebaseStorageFile.Reference>
 ): Promise<DataSource[]> => {
     const promises = files.map(async file => {
-        const metadata = await getMetadata(file);
+        const metadata = await file.getMetadata();
         const name = fileName(file.fullPath);
         const fileType = guessFileType(name);
         return {
@@ -372,8 +371,7 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
             if (config.web.firebase?.storage?.enablePublic !== true) {
                 return;
             }
-            const storageRef = ref(getStorageForce(config));
-            const $public = await listAll(storageRef);
+            const $public = await getStorageForce(config).ref(Path.public.list).listAll();
             const newState = await referencesToDataSource($public.items);
             if (unsubscribed) {
                 return;
@@ -395,8 +393,9 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
             if (config.web.firebase?.storage?.enableUnlisted !== true) {
                 return;
             }
-            const storageRef = ref(getStorageForce(config), Path.unlisted.list(myUserUid));
-            const unlisted = await listAll(storageRef)
+            const unlisted = await getStorageForce(config)
+                .ref(Path.unlisted.list(myUserUid))
+                .listAll();
             const newState = await referencesToDataSource(unlisted.items);
             if (unsubscribed) {
                 return;

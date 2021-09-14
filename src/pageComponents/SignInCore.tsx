@@ -7,7 +7,6 @@ import firebase from 'firebase/app';
 import * as firebaseui from 'firebaseui';
 import { getAuth } from '../utils/firebaseHelpers';
 import ConfigContext from '../contexts/ConfigContext';
-import { EmailAuthProvider } from 'firebase/auth';
 
 const SignInCore: React.FC = () => {
     const config = React.useContext(ConfigContext);
@@ -35,7 +34,7 @@ const SignInCore: React.FC = () => {
                 },
             },
             signInSuccessUrl: '/',
-            signInOptions: [EmailAuthProvider.PROVIDER_ID],
+            signInOptions: [firebase.auth.EmailAuthProvider.PROVIDER_ID],
             // TODO: Terms of service url
             //tosUrl: '<your-tos-url>',
             // TODO: Privacy policy url.

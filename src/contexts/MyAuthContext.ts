@@ -1,10 +1,14 @@
 import React from 'react';
-import { User } from 'firebase/auth';
+import firebase from 'firebase/app';
 
 export const loading = 'loading';
 export const notSignIn = 'notSignIn';
 export const authNotFound = 'authNotFound';
-export type FirebaseUserState = User | typeof loading | typeof notSignIn | typeof authNotFound;
+export type FirebaseUserState =
+    | firebase.User
+    | typeof loading
+    | typeof notSignIn
+    | typeof authNotFound;
 
 export const getUserUid = (source: FirebaseUserState): string | undefined => {
     if (typeof source === 'string') {

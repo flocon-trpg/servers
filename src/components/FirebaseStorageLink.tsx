@@ -1,4 +1,3 @@
-import { StorageReference, ref, getDownloadURL } from 'firebase/storage';
 import React from 'react';
 import ConfigContext from '../contexts/ConfigContext';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
@@ -7,7 +6,7 @@ import { fileName } from '../utils/filename';
 import { getStorageForce } from '../utils/firebaseHelpers';
 
 type Props = {
-    reference: StorageReference | string;
+    reference: firebase.default.storage.Reference | string;
 };
 
 const FirebaseStorageLink: React.FC<Props> = ({ reference }: Props) => {
@@ -22,24 +21,24 @@ const FirebaseStorageLink: React.FC<Props> = ({ reference }: Props) => {
     React.useEffect(() => {
         let unsubscribed = false;
 
-        const storageRef = (() => {
+        const ref = (() => {
             if (typeof reference === 'string') {
-                return ref(getStorageForce(config),reference);
+                return getStorageForce(config).ref(reference);
             }
             return reference;
         })();
-        setFullPath(storageRef.fullPath);
-        const cachedUrl = cacheRef.current?.get(storageRef.fullPath);
+        setFullPath(ref.fullPath);
+        const cachedUrl = cacheRef.current?.get(ref.fullPath);
         if (cachedUrl != null) {
             setUrl(cachedUrl);
             return;
         }
-        getDownloadURL(storageRef).then(url => {
+        ref.getDownloadURL().then(url => {
             if (unsubscribed) {
                 return;
             }
             if (typeof url === 'string') {
-                cacheRef.current?.set(storageRef.fullPath, url, 1000 * 60 * 10);
+                cacheRef.current?.set(ref.fullPath, url, 1000 * 60 * 10);
                 setUrl(url);
             }
         });

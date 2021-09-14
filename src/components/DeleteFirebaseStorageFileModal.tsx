@@ -2,7 +2,6 @@ import { Modal } from 'antd';
 import { useDispatch } from 'react-redux';
 import { fileModule, FirebaseStorageFile } from '../modules/fileModule';
 import { $public, StorageType, unlisted } from '../utils/firebaseStorage';
-import { deleteObject } from 'firebase/storage';
 
 export const DeleteFirebaseStorageFileModal = (
     storageType: StorageType,
@@ -16,7 +15,7 @@ export const DeleteFirebaseStorageFileModal = (
             : `${referenceArray.length}個のファイル`;
     const deleteFiles = async () => {
         for (const r of referenceArray) {
-            await deleteObject(r);
+            await r.delete();
         }
         switch (storageType) {
             case $public:

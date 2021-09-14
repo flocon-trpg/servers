@@ -1,12 +1,8 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
-import { StorageReference } from 'firebase/storage';
 import { FileType } from '../utils/fileType';
 
 export namespace FirebaseStorageFile {
-    /**
-     * @deprecated just use StorageReference instead
-     */
-    export type Reference = StorageReference;
+    export type Reference = firebase.default.storage.Reference;
 
     export type State = {
         reference: Reference;
