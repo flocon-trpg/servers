@@ -92,11 +92,16 @@ export class MainResolver {
     ): Promise<string[]> {
         const result: string[] = [];
         const user = ensureAuthorizedUser(context);
-        for (const filename in filenames) {
-            const file = await context.em.findOne(File, { createdBy: user, filename });
+        for (const filename of filenames) {
+            const file = await context.em.findOne(File, {
+                createdBy: user,
+                filename,
+            });
             if (file != null) {
                 result.push(file.filename);
+                await user.files.init();
                 user.files.remove(file);
+                await file.fileTags.init();
                 file.fileTags.removeAll();
                 context.em.remove(file);
             }

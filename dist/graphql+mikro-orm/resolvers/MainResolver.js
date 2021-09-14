@@ -64,11 +64,16 @@ let MainResolver = class MainResolver {
     async deleteFiles(filenames, context) {
         const result = [];
         const user = helpers_1.ensureAuthorizedUser(context);
-        for (const filename in filenames) {
-            const file = await context.em.findOne(mikro_orm_2.File, { createdBy: user, filename });
+        for (const filename of filenames) {
+            const file = await context.em.findOne(mikro_orm_2.File, {
+                createdBy: user,
+                filename,
+            });
             if (file != null) {
                 result.push(file.filename);
+                await user.files.init();
                 user.files.remove(file);
+                await file.fileTags.init();
                 file.fileTags.removeAll();
                 context.em.remove(file);
             }
