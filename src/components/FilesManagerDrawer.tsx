@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { Button, Drawer, Input, Result, Tabs } from 'antd';
 import { FilePathFragment, FileSourceType } from '../generated/graphql';
-import MyAuthContext from '../contexts/MyAuthContext';
 import DrawerFooter from '../layouts/DrawerFooter';
 import { FilesManagerDrawerType, some } from '../utils/types';
 import { cancelRnd } from '../utils/className';
 import { FirebaseFilesManager } from './FilesManagerDrawer/FirebaseFilesManager';
 import { FloconFilesManager } from './FilesManagerDrawer/FloconFilesManager';
+import { MyAuthContext } from '../contexts/MyAuthContext';
 
 type Props = {
     drawerType: FilesManagerDrawerType | null;

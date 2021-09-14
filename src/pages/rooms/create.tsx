@@ -8,7 +8,7 @@ import {
     useCreateRoomMutation,
 } from '../../generated/graphql';
 import Center from '../../components/Center';
-import MyAuthContext from '../../contexts/MyAuthContext';
+import { MyAuthContext } from '../../contexts/MyAuthContext';
 
 const labelCol = 10;
 const wrapperCol = 24 - labelCol;

@@ -19,7 +19,6 @@ import { boardEditorPanel, chatPalettePanel } from '../../states/RoomConfig';
 import VolumeBarPanel from './VolumeBarPanel';
 import { Jdenticon } from '../../components/Jdenticon';
 import { roomModule, Notification } from '../../modules/roomModule';
-import MyAuthContext from '../../contexts/MyAuthContext';
 import path from '../../utils/path';
 import { useRouter } from 'next/router';
 import { defaultMessagePanelConfig } from '../../states/MessagePanelConfig';
@@ -43,6 +42,7 @@ import { ChannelsFilter, ChannelsFilterOptions } from '../../components/Channels
 import classNames from 'classnames';
 import { flex, flexColumn, flexRow, itemsCenter } from '../../utils/className';
 import { FirebaseAuthenticationIdTokenContext } from '../../contexts/FirebaseAuthenticationIdTokenContext';
+import { MyAuthContext } from '../../contexts/MyAuthContext';
 
 type BecomePlayerModalProps = {
     roomId: string;

@@ -14,7 +14,6 @@ import {
 import { Alert, Button, Card, Input, Result, Spin, notification as antdNotification } from 'antd';
 import Layout, { loginAndEntry, success } from '../../layouts/Layout';
 import { FetchResult } from '@apollo/client';
-import MyAuthContext from '../../contexts/MyAuthContext';
 import {
     deleted,
     getRoomFailure,
@@ -32,11 +31,13 @@ import { useDispatch } from 'react-redux';
 import { roomModule } from '../../modules/roomModule';
 import { useAllRoomMessages } from '../../hooks/useRoomMessages';
 import { useSelector } from '../../store';
-import useRoomConfig from '../../hooks/localStorage/useRoomConfig';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { messageInputTextModule } from '../../modules/messageInputTextModule';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
 import { usePrevious } from 'react-use';
+import roomConfigModule from '../../modules/roomConfigModule';
+import { getRoomConfig } from '../../utils/localStorage/roomConfig';
+import { MyAuthContext } from '../../contexts/MyAuthContext';
 
 type JoinRoomFormProps = {
     roomState: RoomAsListItemFragment;
@@ -165,6 +166,32 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
             </div>
         </Spin>
     );
+};
+
+// localForageを用いてRoomConfigを読み込み、ReduxのStateと紐付ける。
+// Roomが変わるたびに、useRoomConfigが更新される必要がある。RoomのComponentのどこか一箇所でuseRoomConfigを呼び出すだけでよい。
+const useRoomConfig = (roomId: string): boolean => {
+    const [result, setResult] = React.useState<boolean>(false);
+    const dispatch = useDispatch();
+
+    React.useEffect(() => {
+        let unmounted = false;
+        const main = async () => {
+            dispatch(roomConfigModule.actions.setRoomConfig(null));
+            const roomConfig = await getRoomConfig(roomId);
+            if (unmounted) {
+                return;
+            }
+            dispatch(roomConfigModule.actions.setRoomConfig(roomConfig));
+            setResult(true);
+        };
+        main();
+        return () => {
+            unmounted = true;
+        };
+    }, [roomId, dispatch]);
+
+    return result;
 };
 
 const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({

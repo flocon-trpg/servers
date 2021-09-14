@@ -1,6 +1,5 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
-import MyAuthContext from '../../contexts/MyAuthContext';
 import { Table, Button, Input, Tooltip } from 'antd';
 import { update } from '../../stateManagers/states/types';
 import NumberParameterInput from '../../components/NumberParameterInput';
@@ -13,7 +12,6 @@ import {
     characterIsNotPrivate,
     characterIsNotPrivateAndNotCreatedByMe,
 } from '../../resource/text/main';
-import { getUserUid } from '../../hooks/useFirebaseUser';
 import { useOperate } from '../../hooks/useOperate';
 import { useCharacters } from '../../hooks/state/useCharacters';
 import { useParticipants } from '../../hooks/state/useParticipants';
@@ -41,6 +39,7 @@ import { ColumnType } from 'antd/lib/table';
 import { SortOrder } from 'antd/lib/table/interface';
 import { IconView } from '../../components/IconView';
 import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
+import { getUserUid, MyAuthContext } from '../../contexts/MyAuthContext';
 
 type DataSource = {
     key: string;

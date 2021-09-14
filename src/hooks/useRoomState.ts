@@ -15,14 +15,13 @@ import * as Rx from 'rxjs/operators';
 import { ApolloError, FetchResult, useApolloClient } from '@apollo/client';
 import { StateManager } from '../stateManagers/StateManager';
 import { create as createStateManager } from '../stateManagers/main';
-import MyAuthContext from '../contexts/MyAuthContext';
 import { Room } from '../stateManagers/states/room';
-import { authNotFound, notSignIn } from './useFirebaseUser';
 import { useClientId } from './useClientId';
 import { useDispatch } from 'react-redux';
 import { roomModule, Notification } from '../modules/roomModule';
 import { State, UpOperation } from '@kizahasi/flocon-core';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
+import { authNotFound, MyAuthContext, notSignIn } from '../contexts/MyAuthContext';
 
 const sampleTime = 3000;
 
