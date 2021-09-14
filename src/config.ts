@@ -3,7 +3,7 @@ import * as E from 'fp-ts/Either';
 import { webConfig } from './configType';
 import { formatValidationErrors } from './utils/io-ts-reporters';
 
-// 本来はjsonファイルを直接importすれば動くが、jsonファイルにミスがあるときに出るエラーメッセージをわかりやすくするため、jsonファイルをtsファイルに変換してそれをimportさせている。
+// jsonファイルを直接importしても動くが、jsonファイルにミスがあるときに出るエラーメッセージをわかりやすくするため、io-ts&io-ts-reportersを用いて変換している。
 
 // TODO: httpやwsが未指定のときは現在のURLから判断して自動的にURLを生成するが、このURLのうちhttp/httpsの部分やws/wssの部分だけ変えたいというケースに対応したほうがよさそうか？
 const loadConfig = () => {

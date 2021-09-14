@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useFirebaseUser } from './useFirebaseUser';
 
+// getIdTokenを複数箇所で呼び出すとidTokenの新旧が混在する？みたいなので、_appのみで呼び出すようにする
 export const useIdToken = () => {
     const user = useFirebaseUser();
     const [result, setResult] = React.useState<string>();
@@ -12,6 +13,8 @@ export const useIdToken = () => {
         }
         user.getIdToken().then(idToken => {
             console.log('idToken is updated');
+            // ユーザーが変わったとき、新しいidTokenを入手するまでは前のidTokenを保持するようにしている。
+            // こうすることで、一時的にidTokenがundefinedになるせいでApolloClientが一時的にidTokenなしモードに切り替わることを防ぐ狙いがある。
             setResult(idToken);
         });
     }, [user]);
