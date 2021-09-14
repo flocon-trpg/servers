@@ -63,7 +63,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
     if (((_a = serverConfig.uploader) === null || _a === void 0 ? void 0 : _a.enabled) === true) {
         appConsole_1.AppConsole.log({
             en: `The uploader of API server is enabled.`,
-            ja: `APIサーバーのアップローダーが有効化されます。`,
+            ja: `APIサーバーのアップローダーは有効化されています。`,
         });
         const uploaderConfig = serverConfig.uploader;
         await fs_extra_1.ensureDir(path_1.default.resolve(uploaderConfig.directory));
@@ -76,25 +76,13 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
             },
         });
         app.post('/uploader/upload/:permission', async (req, res, next) => {
-            let permissionParam;
-            switch (req.params.permission) {
-                case 'unlisted':
-                    permissionParam = 'unlisted';
-                    break;
-                case 'public':
-                    permissionParam = 'public';
-                    break;
-                default:
-                    res.sendStatus(404);
-                    return;
-            }
             const decodedIdToken = await getDecodedIdTokenFromExpressRequest(req);
             if (decodedIdToken == null || decodedIdToken.isError) {
                 res.status(403).send('Invalid Authorization header');
                 return;
             }
-            const userUid = decodedIdToken.value.uid;
             const forkedEm = em.fork();
+            const userUid = decodedIdToken.value.uid;
             const user = await helpers_1.getUserIfEntry({
                 em: forkedEm,
                 userUid,
@@ -105,6 +93,8 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
                 res.status(403).send('Requires entry');
                 return;
             }
+            res.locals.user = user;
+            res.locals.forkedEm = forkedEm;
             const [files, filesCount] = await forkedEm.findAndCount(mikro_orm_2.File, {
                 createdBy: { userUid: user.userUid },
             });
@@ -128,40 +118,55 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
                     cb(null, true);
                 },
             });
-            upload.single('file')(req, res, error => {
-                const main = async () => {
-                    if (error) {
-                        next(error);
-                        return;
-                    }
-                    const file = req.file;
-                    if (file == null) {
-                        res.status(200);
-                        return;
-                    }
-                    const thumbFileName = `${file.filename}.webp`;
-                    const thumbDir = path_1.default.join(path_1.default.dirname(file.path), 'thumbs');
-                    const thumbPath = path_1.default.join(thumbDir, thumbFileName);
-                    await fs_extra_1.ensureDir(thumbDir);
-                    const thumbnailSaved = await sharp_1.default(file.path)
-                        .resize(80)
-                        .webp()
-                        .toFile(thumbPath)
-                        .then(() => true)
-                        .catch(() => false);
-                    const permission = permissionParam === 'public'
-                        ? FilePermissionType_1.FilePermissionType.Entry
-                        : FilePermissionType_1.FilePermissionType.Private;
-                    const entity = new mikro_orm_2.File(Object.assign(Object.assign({}, file), { screenname: file.originalname, createdBy: core_1.Reference.create(user), thumbFilename: thumbnailSaved ? thumbFileName : undefined, filesize: file.size, deletePermission: permission, listPermission: permission, renamePermission: permission }));
-                    await forkedEm.persistAndFlush(entity);
-                    res.sendStatus(200);
-                    next();
-                };
-                main();
+            upload.single('file')(req, res, next);
+        }, async (req, res) => {
+            const forkedEm = res.locals.forkedEm;
+            const user = res.locals.user;
+            let permissionParam;
+            switch (req.params.permission) {
+                case 'unlisted':
+                    permissionParam = 'unlisted';
+                    break;
+                case 'public':
+                    permissionParam = 'public';
+                    break;
+                default:
+                    res.sendStatus(404);
+                    return;
+            }
+            const file = req.file;
+            if (file == null) {
+                res.sendStatus(400);
+                return;
+            }
+            const thumbFileName = `${file.filename}.webp`;
+            const thumbDir = path_1.default.join(path_1.default.dirname(file.path), 'thumbs');
+            await fs_extra_1.ensureDir(thumbDir);
+            const thumbPath = path_1.default.join(thumbDir, thumbFileName);
+            const thumbnailSaved = await sharp_1.default(file.path)
+                .resize(80)
+                .webp()
+                .toFile(thumbPath)
+                .then(() => true)
+                .catch(err => {
+                console.info(err);
+                return false;
             });
+            const permission = permissionParam === 'public'
+                ? FilePermissionType_1.FilePermissionType.Entry
+                : FilePermissionType_1.FilePermissionType.Private;
+            const entity = new mikro_orm_2.File(Object.assign(Object.assign({}, file), { screenname: file.originalname, createdBy: core_1.Reference.create(user), thumbFilename: thumbnailSaved ? thumbFileName : undefined, filesize: file.size, deletePermission: permission, listPermission: permission, renamePermission: permission }));
+            await forkedEm.persistAndFlush(entity);
+            res.sendStatus(200);
         });
     }
-    app.get('/uploader/:type/:file_name', async (req, res, next) => {
+    else {
+        appConsole_1.AppConsole.log({
+            en: `The uploader of API server is disabled.`,
+            ja: `APIサーバーのアップローダーは無効化されています。`,
+        });
+    }
+    app.get('/uploader/:type/:file_name', async (req, res) => {
         var _a;
         let typeParam;
         switch (req.params.type) {
@@ -191,27 +196,26 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
             res.status(403).send('Requires entry');
             return;
         }
-        const fileEntity = await forkedEm.findOne(mikro_orm_2.File, { filename });
-        if (fileEntity == null) {
-            res.sendStatus(404);
-            return;
-        }
         let filepath;
         if (typeParam === 'files') {
+            const fileCount = await forkedEm.count(mikro_orm_2.File, { filename });
+            if (fileCount === 0) {
+                res.sendStatus(404);
+                return;
+            }
             filepath = path_1.default.join(path_1.default.resolve(serverConfig.uploader.directory), filename);
         }
         else {
-            if (fileEntity.thumbFilename == null) {
+            const fileCount = await forkedEm.count(mikro_orm_2.File, { thumbFilename: filename });
+            if (fileCount === 0) {
                 res.sendStatus(404);
-                next();
                 return;
             }
-            filepath = path_1.default.join(path_1.default.resolve(serverConfig.uploader.directory), 'thumb', sanitize_filename_1.default(fileEntity.thumbFilename));
+            filepath = path_1.default.join(path_1.default.resolve(serverConfig.uploader.directory), 'thumb', sanitize_filename_1.default(filename));
         }
         res.header('Content-Security-Policy', "script-src 'unsafe-hashes'");
         res.sendFile(filepath, () => {
             res.end();
-            next();
         });
     });
     const server = app.listen(port, () => {

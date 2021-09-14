@@ -99,7 +99,7 @@ export const createServer = async ({
     if (serverConfig.uploader?.enabled === true) {
         AppConsole.log({
             en: `The uploader of API server is enabled.`,
-            ja: `APIサーバーのアップローダーが有効化されます。`,
+            ja: `APIサーバーのアップローダーは有効化されています。`,
         });
 
         const uploaderConfig = serverConfig.uploader;
@@ -114,108 +114,115 @@ export const createServer = async ({
             },
         });
 
-        app.post('/uploader/upload/:permission', async (req, res, next) => {
-            let permissionParam: 'unlisted' | 'public';
-            switch (req.params.permission) {
-                case 'unlisted':
-                    permissionParam = 'unlisted';
-                    break;
-                case 'public':
-                    permissionParam = 'public';
-                    break;
-                default:
-                    res.sendStatus(404);
+        app.post(
+            '/uploader/upload/:permission',
+            async (req, res, next) => {
+                const decodedIdToken = await getDecodedIdTokenFromExpressRequest(req);
+                if (decodedIdToken == null || decodedIdToken.isError) {
+                    res.status(403).send('Invalid Authorization header');
                     return;
-            }
+                }
 
-            const decodedIdToken = await getDecodedIdTokenFromExpressRequest(req);
-            if (decodedIdToken == null || decodedIdToken.isError) {
-                res.status(403).send('Invalid Authorization header');
-                return;
-            }
+                const forkedEm = em.fork();
+                const userUid = decodedIdToken.value.uid;
+                const user = await getUserIfEntry({
+                    em: forkedEm,
+                    userUid,
+                    baasType: BaasType.Firebase,
+                    serverConfig,
+                });
+                if (user == null) {
+                    res.status(403).send('Requires entry');
+                    return;
+                }
+                res.locals.user = user;
+                res.locals.forkedEm = forkedEm;
+                const [files, filesCount] = await forkedEm.findAndCount(File, {
+                    createdBy: { userUid: user.userUid },
+                });
+                const upload = multer({
+                    storage,
+                    limits: {
+                        fileSize: uploaderConfig.maxFileSize,
+                    },
+                    fileFilter: (req, file, cb) => {
+                        if (uploaderConfig.countQuota <= filesCount) {
+                            cb(null, false);
+                            res.status(400).send('File count quota exceeded');
+                            return;
+                        }
+                        const totalSize = files.reduce((seed, elem) => seed + elem.size, 0);
+                        if (uploaderConfig.sizeQuota <= totalSize) {
+                            cb(null, false);
+                            res.status(400).send('File size quota exceeded');
+                            return;
+                        }
+                        cb(null, true);
+                    },
+                });
 
-            const userUid = decodedIdToken.value.uid;
-            const forkedEm = em.fork();
-            const user = await getUserIfEntry({
-                em: forkedEm,
-                userUid,
-                baasType: BaasType.Firebase,
-                serverConfig,
-            });
-            if (user == null) {
-                res.status(403).send('Requires entry');
-                return;
-            }
-            const [files, filesCount] = await forkedEm.findAndCount(File, {
-                createdBy: { userUid: user.userUid },
-            });
-            const upload = multer({
-                storage,
-                limits: {
-                    fileSize: uploaderConfig.maxFileSize,
-                },
-                fileFilter: (req, file, cb) => {
-                    if (uploaderConfig.countQuota <= filesCount) {
-                        cb(null, false);
-                        res.status(400).send('File count quota exceeded');
-                        return;
-                    }
-                    const totalSize = files.reduce((seed, elem) => seed + elem.size, 0);
-                    if (uploaderConfig.sizeQuota <= totalSize) {
-                        cb(null, false);
-                        res.status(400).send('File size quota exceeded');
-                        return;
-                    }
-                    cb(null, true);
-                },
-            });
+                upload.single('file')(req, res, next);
+            },
+            async (req, res) => {
+                const forkedEm: EM = res.locals.forkedEm;
+                const user: User = res.locals.user;
 
-            upload.single('file')(req, res, error => {
-                const main = async () => {
-                    if (error) {
-                        next(error);
+                let permissionParam: 'unlisted' | 'public';
+                switch (req.params.permission) {
+                    case 'unlisted':
+                        permissionParam = 'unlisted';
+                        break;
+                    case 'public':
+                        permissionParam = 'public';
+                        break;
+                    default:
+                        res.sendStatus(404);
                         return;
-                    }
-                    const file = req.file;
-                    if (file == null) {
-                        res.status(200);
-                        return;
-                    }
-                    const thumbFileName = `${file.filename}.webp`;
-                    const thumbDir = path.join(path.dirname(file.path), 'thumbs');
-                    const thumbPath = path.join(thumbDir, thumbFileName);
-                    await ensureDir(thumbDir);
-                    const thumbnailSaved = await sharp(file.path)
-                        .resize(80)
-                        .webp()
-                        .toFile(thumbPath)
-                        .then(() => true)
-                        .catch(() => false);
-                    const permission =
-                        permissionParam === 'public'
-                            ? FilePermissionType.Entry
-                            : FilePermissionType.Private;
-                    const entity = new File({
-                        ...file,
-                        screenname: file.originalname,
-                        createdBy: Reference.create<User, 'userUid'>(user),
-                        thumbFilename: thumbnailSaved ? thumbFileName : undefined,
-                        filesize: file.size,
-                        deletePermission: permission,
-                        listPermission: permission,
-                        renamePermission: permission,
+                }
+                const file = req.file;
+                if (file == null) {
+                    res.sendStatus(400);
+                    return;
+                }
+                const thumbFileName = `${file.filename}.webp`;
+                const thumbDir = path.join(path.dirname(file.path), 'thumbs');
+                await ensureDir(thumbDir);
+                const thumbPath = path.join(thumbDir, thumbFileName);
+                const thumbnailSaved = await sharp(file.path)
+                    .resize(80)
+                    .webp()
+                    .toFile(thumbPath)
+                    .then(() => true)
+                    .catch(err => {
+                        console.info(err);
+                        return false;
                     });
-                    await forkedEm.persistAndFlush(entity);
-                    res.sendStatus(200);
-                    next();
-                };
-                main();
-            });
+                const permission =
+                    permissionParam === 'public'
+                        ? FilePermissionType.Entry
+                        : FilePermissionType.Private;
+                const entity = new File({
+                    ...file,
+                    screenname: file.originalname,
+                    createdBy: Reference.create<User, 'userUid'>(user),
+                    thumbFilename: thumbnailSaved ? thumbFileName : undefined,
+                    filesize: file.size,
+                    deletePermission: permission,
+                    listPermission: permission,
+                    renamePermission: permission,
+                });
+                await forkedEm.persistAndFlush(entity);
+                res.sendStatus(200);
+            }
+        );
+    } else {
+        AppConsole.log({
+            en: `The uploader of API server is disabled.`,
+            ja: `APIサーバーのアップローダーは無効化されています。`,
         });
     }
 
-    // サムネイルはすべてwebpだが、file_nameは元画像の名前を指定する必要がある。そのため例えば、/uploader/thumbs/image.png で得られるファイルはpngでなくwebpとなる。
-    app.get('/uploader/:type/:file_name', async (req, res, next) => {
+    app.get('/uploader/:type/:file_name', async (req, res) => {
         let typeParam: 'files' | 'thumbs';
         switch (req.params.type) {
             case 'files':
@@ -249,32 +256,31 @@ export const createServer = async ({
             return;
         }
 
-        const fileEntity = await forkedEm.findOne(File, { filename });
-        if (fileEntity == null) {
-            res.sendStatus(404);
-            return;
-        }
-
         let filepath: string;
         if (typeParam === 'files') {
+            const fileCount = await forkedEm.count(File, { filename });
+            if (fileCount === 0) {
+                res.sendStatus(404);
+                return;
+            }
             filepath = path.join(path.resolve(serverConfig.uploader.directory), filename);
         } else {
-            if (fileEntity.thumbFilename == null) {
+            const fileCount = await forkedEm.count(File, { thumbFilename: filename });
+            if (fileCount === 0) {
                 res.sendStatus(404);
-                next();
                 return;
             }
             filepath = path.join(
                 path.resolve(serverConfig.uploader.directory),
                 'thumb',
-                sanitize(fileEntity.thumbFilename)
+                sanitize(filename)
             );
         }
+
         // SVGを直接開くことによるXSSを防いでいる https://qiita.com/itizawa/items/e98ecd67910492d5c2af ただし、現状では必要ないかもしれない
         res.header('Content-Security-Policy', "script-src 'unsafe-hashes'");
         res.sendFile(filepath, () => {
             res.end();
-            next();
         });
     });
 

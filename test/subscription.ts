@@ -30,29 +30,29 @@ export class TestRoomEventSubscription {
         event: 'connect' | 'disconnect';
         userUid: string;
     }) {
-        expect(this.values.length).toBe(1);
+        expect(this.values).toHaveLength(1);
         const roomConnectionEvents = _(this.values)
             .map(x => x.data?.roomEvent?.roomConnectionEvent)
             .compact()
             .value();
-        expect(roomConnectionEvents.length).toBe(1);
+        expect(roomConnectionEvents).toHaveLength(1);
         const actualEvent = roomConnectionEvents[0];
         expect(actualEvent.isConnected ? 'connect' : 'disconnect').toBe(event);
         expect(actualEvent.userUid).toBe(userUid);
     }
 
     public toBeExactlyOneRoomOperationEvent() {
-        expect(this.values.length).toBe(1);
+        expect(this.values).toHaveLength(1);
         const roomOperationEvents = _(this.values)
             .map(x => x.data?.roomEvent?.roomOperation)
             .compact()
             .value();
-        expect(roomOperationEvents.length).toBe(1);
+        expect(roomOperationEvents).toHaveLength(1);
         return roomOperationEvents[0];
     }
 
     public toBeExactlyOneRoomPrivateMessageEvent() {
-        expect(this.values.length).toBe(1);
+        expect(this.values).toHaveLength(1);
         const roomPrivateMessages = _(this.values)
             .map(x => {
                 const roomMessageEvent = x.data?.roomEvent?.roomMessageEvent;
@@ -63,12 +63,12 @@ export class TestRoomEventSubscription {
             })
             .compact()
             .value();
-        expect(roomPrivateMessages.length).toBe(1);
+        expect(roomPrivateMessages).toHaveLength(1);
         return roomPrivateMessages[0];
     }
 
     public toBeExactlyOnePieceValueLogEvent() {
-        expect(this.values.length).toBe(1);
+        expect(this.values).toHaveLength(1);
         const pieceValueLogs = _(this.values)
             .map(x => {
                 const roomMessageEvent = x.data?.roomEvent?.roomMessageEvent;
@@ -79,7 +79,7 @@ export class TestRoomEventSubscription {
             })
             .compact()
             .value();
-        expect(pieceValueLogs.length).toBe(1);
+        expect(pieceValueLogs).toHaveLength(1);
         return pieceValueLogs[0];
     }
 }

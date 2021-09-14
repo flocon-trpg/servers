@@ -24,6 +24,7 @@ const FilePathModule = __importStar(require("@kizahasi/flocon-core"));
 var FileSourceType;
 (function (FileSourceType) {
     FileSourceType["Default"] = "Default";
+    FileSourceType["Uploader"] = "Uploader";
     FileSourceType["FirebaseStorage"] = "FirebaseStorage";
 })(FileSourceType = exports.FileSourceType || (exports.FileSourceType = {}));
 var FileSourceTypeModule;
@@ -34,6 +35,8 @@ var FileSourceTypeModule;
                 return FileSourceType.Default;
             case FilePathModule.FirebaseStorage:
                 return FileSourceType.FirebaseStorage;
+            case FilePathModule.Uploader:
+                return FileSourceType.Uploader;
         }
     };
     FileSourceTypeModule.ofNullishString = (source) => {

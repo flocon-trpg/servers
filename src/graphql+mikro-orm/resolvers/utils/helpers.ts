@@ -72,6 +72,9 @@ export const getUserIfEntry = async ({
 
     if (!requiresEntryPassword) {
         user.isEntry = true;
+        if (noFlush !== true) {
+            await em.flush();
+        }
         return user;
     }
 

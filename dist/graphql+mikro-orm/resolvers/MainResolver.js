@@ -46,10 +46,40 @@ let MainResolver = class MainResolver {
     }
     async getFiles(input, context) {
         const user = helpers_1.ensureAuthorizedUser(context);
-        const files = await context.em.find(mikro_orm_2.File, { createdBy: { userUid: user.userUid } }, { orderBy: { screenname: core_1.QueryOrder.ASC } });
+        const fileTagsFilter = input.fileTagIds.map(id => ({
+            fileTags: {
+                id,
+            },
+        }));
+        const files = await context.em.find(mikro_orm_2.File, {
+            $and: [...fileTagsFilter, { createdBy: { userUid: user.userUid } }],
+        }, { orderBy: { screenname: core_1.QueryOrder.ASC } });
         return {
-            files: files.map(file => (Object.assign(Object.assign({}, file), { createdBy: file.createdBy.userUid }))),
+            files: files.map(file => {
+                var _a;
+                return (Object.assign(Object.assign({}, file), { createdBy: file.createdBy.userUid, createdAt: (_a = file.createdAt) === null || _a === void 0 ? void 0 : _a.getTime() }));
+            }),
         };
+    }
+    async deleteFiles(filenames, context) {
+        const result = [];
+        const user = helpers_1.ensureAuthorizedUser(context);
+        for (const filename of filenames) {
+            const file = await context.em.findOne(mikro_orm_2.File, {
+                createdBy: user,
+                filename,
+            });
+            if (file != null) {
+                result.push(file.filename);
+                await user.files.init();
+                user.files.remove(file);
+                await file.fileTags.init();
+                file.fileTags.removeAll();
+                context.em.remove(file);
+            }
+        }
+        await context.em.flush();
+        return result;
     }
     async editFileTags(input, context) {
         const user = helpers_1.ensureAuthorizedUser(context);
@@ -67,7 +97,7 @@ let MainResolver = class MainResolver {
         for (const [filename, actions] of map.toMap()) {
             let fileEntity = null;
             for (const [fileTagId, action] of actions) {
-                if (action === 0 || !util_1.isStrIndex10(fileTagId)) {
+                if (action === 0) {
                     continue;
                 }
                 if (fileEntity == null) {
@@ -106,6 +136,7 @@ let MainResolver = class MainResolver {
         const newFileTag = new mikro_orm_3.FileTag({ name: tagName });
         newFileTag.name = tagName;
         newFileTag.user = core_1.Reference.create(user);
+        await context.em.persistAndFlush(newFileTag);
         return {
             id: newFileTag.id,
             name: newFileTag.name,
@@ -117,6 +148,7 @@ let MainResolver = class MainResolver {
         if (fileTagToDelete == null) {
             return false;
         }
+        fileTagToDelete.files.getItems().forEach(x => context.em.remove(x));
         fileTagToDelete.files.removeAll();
         context.em.remove(fileTagToDelete);
         await context.em.flush();
@@ -227,6 +259,15 @@ __decorate([
     __metadata("design:paramtypes", [object_args_input_1.GetFilesInput, Object]),
     __metadata("design:returntype", Promise)
 ], MainResolver.prototype, "getFiles", null);
+__decorate([
+    type_graphql_1.Mutation(() => [String]),
+    type_graphql_1.Authorized(roles_1.ENTRY),
+    __param(0, type_graphql_1.Arg('filenames', () => [String])),
+    __param(1, type_graphql_1.Ctx()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array, Object]),
+    __metadata("design:returntype", Promise)
+], MainResolver.prototype, "deleteFiles", null);
 __decorate([
     type_graphql_1.Mutation(() => Boolean),
     type_graphql_1.Authorized(roles_1.ENTRY),

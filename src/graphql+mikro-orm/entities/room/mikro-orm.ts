@@ -119,19 +119,36 @@ export class RoomOp {
 // このメソッドではflushは行われない。flushのし忘れに注意。
 export const deleteRoom = async (em: EM, room: Room): Promise<void> => {
     await room.roomOperations.init();
+    room.roomOperations.getItems().forEach(x => em.remove(x));
     room.roomOperations.removeAll();
 
     for (const roomChatCh of await room.roomChatChs.loadItems()) {
         await roomChatCh.roomPubMsgs.init();
+        roomChatCh.roomPubMsgs.getItems().forEach(x => em.remove(x));
         roomChatCh.roomPubMsgs.removeAll();
     }
+    room.roomChatChs.getItems().forEach(x => em.remove(x));
     room.roomChatChs.removeAll();
 
     await room.roomPrvMsgs.init();
+    room.roomPrvMsgs.getItems().forEach(x => em.remove(x));
     room.roomPrvMsgs.removeAll();
 
     await room.roomSes.init();
+    room.roomSes.getItems().forEach(x => em.remove(x));
     room.roomSes.removeAll();
+
+    await room.participants.init();
+    room.participants.getItems().forEach(x => em.remove(x));
+    room.participants.removeAll();
+
+    await room.dicePieceValueLogs.init();
+    room.dicePieceValueLogs.getItems().forEach(x => em.remove(x));
+    room.dicePieceValueLogs.removeAll();
+
+    await room.numberPieceValueLogs.init();
+    room.numberPieceValueLogs.getItems().forEach(x => em.remove(x));
+    room.numberPieceValueLogs.removeAll();
 
     em.remove(room);
 };

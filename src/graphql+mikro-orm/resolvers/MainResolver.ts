@@ -60,18 +60,54 @@ export class MainResolver {
         @Ctx() context: ResolverContext
     ): Promise<GetFilesResult> {
         const user = ensureAuthorizedUser(context);
-        // TODO: tagによるfilter
+        const fileTagsFilter = input.fileTagIds.map(
+            id =>
+                ({
+                    fileTags: {
+                        id,
+                    },
+                } as const)
+        );
         const files = await context.em.find(
             File,
-            { createdBy: { userUid: user.userUid } },
+            {
+                $and: [...fileTagsFilter, { createdBy: { userUid: user.userUid } }],
+            },
             { orderBy: { screenname: QueryOrder.ASC } }
         );
         return {
             files: files.map(file => ({
                 ...file,
                 createdBy: file.createdBy.userUid,
+                createdAt: file.createdAt?.getTime(),
             })),
         };
+    }
+
+    @Mutation(() => [String])
+    @Authorized(ENTRY)
+    public async deleteFiles(
+        @Arg('filenames', () => [String]) filenames: string[],
+        @Ctx() context: ResolverContext
+    ): Promise<string[]> {
+        const result: string[] = [];
+        const user = ensureAuthorizedUser(context);
+        for (const filename of filenames) {
+            const file = await context.em.findOne(File, {
+                createdBy: user,
+                filename,
+            });
+            if (file != null) {
+                result.push(file.filename);
+                await user.files.init();
+                user.files.remove(file);
+                await file.fileTags.init();
+                file.fileTags.removeAll();
+                context.em.remove(file);
+            }
+        }
+        await context.em.flush();
+        return result;
     }
 
     @Mutation(() => Boolean)
@@ -95,7 +131,7 @@ export class MainResolver {
         for (const [filename, actions] of map.toMap()) {
             let fileEntity: File | null = null;
             for (const [fileTagId, action] of actions) {
-                if (action === 0 || !isStrIndex10(fileTagId)) {
+                if (action === 0) {
                     continue;
                 }
                 if (fileEntity == null) {
@@ -140,6 +176,7 @@ export class MainResolver {
         const newFileTag = new FileTagEntity({ name: tagName });
         newFileTag.name = tagName;
         newFileTag.user = Reference.create<User, 'userUid'>(user);
+        await context.em.persistAndFlush(newFileTag);
         return {
             id: newFileTag.id,
             name: newFileTag.name,
@@ -158,6 +195,7 @@ export class MainResolver {
         if (fileTagToDelete == null) {
             return false;
         }
+        fileTagToDelete.files.getItems().forEach(x => context.em.remove(x));
         fileTagToDelete.files.removeAll();
         context.em.remove(fileTagToDelete);
         await context.em.flush();

@@ -8,8 +8,17 @@ export class FileItem {
     })
     public filename!: string;
 
+    @Field({
+        nullable: true,
+        description: 'サムネイル画像のファイル名。axiosなどを用いてファイルを取得する。',
+    })
+    public thumbFilename?: string;
+
     @Field({ description: 'ユーザーが名付けたファイル名。' })
     public screenname!: string;
+
+    @Field({ nullable: true })
+    public createdAt?: number;
 
     @Field({
         description:

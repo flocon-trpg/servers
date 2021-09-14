@@ -38,6 +38,25 @@ import {
     GetMessagesQuery,
     GetMessagesQueryVariables,
     GetMessagesDocument,
+    DeleteRoomMutation,
+    DeleteRoomMutationVariables,
+    DeleteRoomDocument,
+    DeleteRoomFailureType,
+    GetFilesQuery,
+    GetFilesQueryVariables,
+    GetFilesDocument,
+    EditFileTagsMutation,
+    EditFileTagsMutationVariables,
+    EditFileTagsDocument,
+    CreateFileTagMutationVariables,
+    CreateFileTagMutation,
+    CreateFileTagDocument,
+    DeleteFileTagMutationVariables,
+    DeleteFileTagDocument,
+    DeleteFileTagMutation,
+    DeleteFilesMutation,
+    DeleteFilesMutationVariables,
+    DeleteFilesDocument,
 } from './graphql';
 import { EntryToServerResultType } from '../src/enums/EntryToServerResultType';
 import { ServerConfig } from '../src/configType';
@@ -49,6 +68,10 @@ import {
 } from '@apollo/client';
 import { CompositeTestRoomEventSubscription, TestRoomEventSubscription } from './subscription';
 import { UpOperation, parseState } from '@kizahasi/flocon-core';
+import axios from 'axios';
+import FormData from 'form-data';
+import urljoin from 'url-join';
+import { readFileSync, writeFileSync } from 'fs';
 
 const timeout = 20000;
 
@@ -70,6 +93,16 @@ const plainEntryPassword: ServerConfig['entryPassword'] = {
 type ApolloClientType = ApolloClient<NormalizedCacheObject>;
 
 namespace Assert {
+    export namespace CreateFileTagMutation {
+        export const toBeSuccess = (source: FetchResult<CreateFileTagMutation>) => {
+            if (source.data?.result == null) {
+                expect(source.data?.result ?? undefined).not.toBeUndefined();
+                throw new Error('Guard');
+            }
+            return source.data.result;
+        };
+    }
+
     export namespace CreateRoomMutation {
         export const toBeSuccess = (source: FetchResult<CreateRoomMutation>) => {
             if (source.data?.result.__typename !== 'CreateRoomSuccessResult') {
@@ -77,6 +110,28 @@ namespace Assert {
                 throw new Error('Guard');
             }
             return source.data.result;
+        };
+    }
+
+    export namespace DeleteRoomMutation {
+        export const toBeSuccess = (source: FetchResult<DeleteRoomMutation>) => {
+            expect(source.data?.result.failureType ?? undefined).toBeUndefined();
+        };
+
+        export const toBeNotCreatedByYou = (source: FetchResult<DeleteRoomMutation>) => {
+            expect(source.data?.result.failureType).toBe(DeleteRoomFailureType.NotCreatedByYou);
+        };
+    }
+
+    export namespace EditFileTagsMutation {
+        export const toBeSuccess = (source: FetchResult<EditFileTagsMutation>) => {
+            expect(source.data?.result).toBe(true);
+        };
+    }
+
+    export namespace GetFilesQuery {
+        export const toBeSuccess = (source: ApolloQueryResult<GetFilesQuery>) => {
+            return source.data.result.files;
         };
     }
 
@@ -160,11 +215,77 @@ namespace Assert {
 }
 
 namespace GraphQL {
+    export const createFileTagMutation = async (
+        client: ApolloClientType,
+        variables: CreateFileTagMutationVariables
+    ) => {
+        return await client.mutate<CreateFileTagMutation, CreateFileTagMutationVariables>({
+            mutation: CreateFileTagDocument,
+            fetchPolicy: 'network-only',
+            variables,
+        });
+    };
+
+    export const deleteFilesMutation = async (
+        client: ApolloClientType,
+        variables: DeleteFilesMutationVariables
+    ) => {
+        return await client.mutate<DeleteFilesMutation, DeleteFilesMutationVariables>({
+            mutation: DeleteFilesDocument,
+            fetchPolicy: 'network-only',
+            variables,
+        });
+    };
+
+    export const deleteFileTagsMutation = async (
+        client: ApolloClientType,
+        variables: DeleteFileTagMutationVariables
+    ) => {
+        return await client.mutate<DeleteFileTagMutation, DeleteFileTagMutationVariables>({
+            mutation: DeleteFileTagDocument,
+            fetchPolicy: 'network-only',
+            variables,
+        });
+    };
+
+    export const deleteRoomMutation = async (
+        client: ApolloClientType,
+        variables: DeleteRoomMutationVariables
+    ) => {
+        return await client.mutate<DeleteRoomMutation, DeleteRoomMutationVariables>({
+            mutation: DeleteRoomDocument,
+            fetchPolicy: 'network-only',
+            variables,
+        });
+    };
+
+    export const editFileTagsMutation = async (
+        client: ApolloClientType,
+        variables: EditFileTagsMutationVariables
+    ) => {
+        return await client.mutate<EditFileTagsMutation, EditFileTagsMutationVariables>({
+            mutation: EditFileTagsDocument,
+            fetchPolicy: 'network-only',
+            variables,
+        });
+    };
+
     export const entryToServerMutation = async (client: ApolloClientType) => {
         return await client.mutate<EntryToServerMutation, EntryToServerMutationVariables>({
             mutation: EntryToServerDocument,
             fetchPolicy: 'network-only',
             variables: { phrase: Resources.entryPassword },
+        });
+    };
+
+    export const getFilesQuery = async (
+        client: ApolloClientType,
+        variables: GetFilesQueryVariables
+    ) => {
+        return await client.query<GetFilesQuery, GetFilesQueryVariables>({
+            query: GetFilesDocument,
+            fetchPolicy: 'network-only',
+            variables,
         });
     };
 
@@ -266,14 +387,35 @@ it.each([
 ] as const)(
     'integration test',
     async (dbType, entryPasswordConfig) => {
-        const httpUri = 'http://localhost:4000/graphql';
-        const wsUri = 'ws://localhost:4000/graphql';
+        const httpUri = 'http://localhost:4000';
+        const httpGraphQLUri = 'http://localhost:4000/graphql';
+        const wsGraphQLUri = 'ws://localhost:4000/graphql';
 
-        const roomMasterClient = createApolloClient(httpUri, wsUri, Resources.User.master);
-        const roomPlayer1Client = createApolloClient(httpUri, wsUri, Resources.User.player1);
-        const roomPlayer2Client = createApolloClient(httpUri, wsUri, Resources.User.player2);
-        const roomSpectatorClient = createApolloClient(httpUri, wsUri, Resources.User.spectator);
-        const notJoinUserClient = createApolloClient(httpUri, wsUri, Resources.User.notJoin);
+        const roomMasterClient = createApolloClient(
+            httpGraphQLUri,
+            wsGraphQLUri,
+            Resources.User.master
+        );
+        const roomPlayer1Client = createApolloClient(
+            httpGraphQLUri,
+            wsGraphQLUri,
+            Resources.User.player1
+        );
+        const roomPlayer2Client = createApolloClient(
+            httpGraphQLUri,
+            wsGraphQLUri,
+            Resources.User.player2
+        );
+        const roomSpectatorClient = createApolloClient(
+            httpGraphQLUri,
+            wsGraphQLUri,
+            Resources.User.spectator
+        );
+        const notJoinUserClient = createApolloClient(
+            httpGraphQLUri,
+            wsGraphQLUri,
+            Resources.User.notJoin
+        );
 
         const server = await createTestServer(dbType, entryPasswordConfig);
         const entryPassword = entryPasswordConfig == null ? undefined : Resources.entryPassword;
@@ -368,7 +510,7 @@ it.each([
                 await GraphQL.getRoomsListQuery(roomMasterClient)
             );
             console.log('getRoomsList query result: %o', roomMasterResult);
-            expect(roomMasterResult.rooms.length).toBe(1);
+            expect(roomMasterResult.rooms).toHaveLength(1);
             expect(roomMasterResult.rooms[0].id).toBe(roomId);
 
             // # testing
@@ -376,7 +518,7 @@ it.each([
             const anotherUserResult = Assert.GetRoomsListQuery.toBeSuccess(
                 await GraphQL.getRoomsListQuery(roomPlayer1Client)
             );
-            expect(anotherUserResult.rooms.length).toBe(1);
+            expect(anotherUserResult.rooms).toHaveLength(1);
             expect(anotherUserResult.rooms[0].id).toBe(roomId);
 
             allSubscriptions.clear();
@@ -480,6 +622,7 @@ it.each([
             allSubscriptions.clear();
         }
 
+        // operateのテストに必要なため、現在のroomのrevisionを取得
         let initRoomRevision;
         {
             initRoomRevision = Assert.GetRoomQuery.toBeSuccess(
@@ -491,6 +634,7 @@ it.each([
             allSubscriptions.clear();
         }
 
+        // operateのテスト
         const newRoomName = 'NEW_ROOM_NAME';
         {
             const requestId = 'P1_REQID'; // @MaxLength(10)であるため10文字以下にしている
@@ -527,6 +671,7 @@ it.each([
             allSubscriptions.clear();
         }
 
+        // 秘話の投稿テスト
         {
             const text = 'TEXT';
             const visibleTo = [Resources.User.player1, Resources.User.player2];
@@ -573,7 +718,7 @@ it.each([
                 })
             );
 
-            expect(player1Messages.privateMessages.length).toBe(1);
+            expect(player1Messages.privateMessages).toHaveLength(1);
             expect(player1Messages.privateMessages).toEqual(player2Messages.privateMessages);
         }
 
@@ -588,6 +733,170 @@ it.each([
 
             // TODO: subscriptionのテストコードを書く
             allSubscriptions.clear();
+        }
+
+        {
+            Assert.DeleteRoomMutation.toBeNotCreatedByYou(
+                await GraphQL.deleteRoomMutation(roomPlayer1Client, {
+                    id: roomId,
+                })
+            );
+
+            allSubscriptions.toBeEmpty();
+            allSubscriptions.clear();
+        }
+
+        {
+            Assert.DeleteRoomMutation.toBeSuccess(
+                await GraphQL.deleteRoomMutation(roomMasterClient, {
+                    id: roomId,
+                })
+            );
+
+            // TODO: subscriptionのテストコードを書く
+            allSubscriptions.clear();
+        }
+
+        // query getRoomsList
+        {
+            // # testing
+            // - master cannot get any room
+            const roomMasterResult = Assert.GetRoomsListQuery.toBeSuccess(
+                await GraphQL.getRoomsListQuery(roomMasterClient)
+            );
+            expect(roomMasterResult.rooms).toEqual([]);
+
+            // # testing
+            // - another user cannot get any room
+            const anotherUserResult = Assert.GetRoomsListQuery.toBeSuccess(
+                await GraphQL.getRoomsListQuery(roomPlayer1Client)
+            );
+            expect(anotherUserResult.rooms).toEqual([]);
+
+            allSubscriptions.clear();
+        }
+
+        {
+            const formData = new FormData();
+            formData.append(
+                'file',
+                readFileSync('./test/pexels-public-domain-pictures-68147.jpg'),
+                {
+                    filename: 'test-image.jpg',
+                }
+            );
+            const axiosConfig = {
+                headers: {
+                    ...formData.getHeaders(),
+                    [Resources.testAuthorizationHeader]: Resources.User.player1,
+                },
+            };
+            const postResult = await axios
+                .post(urljoin(httpUri, 'uploader', 'upload', 'unlisted'), formData, axiosConfig)
+                .then(() => true)
+                .catch(err => err);
+            expect(postResult).toBe(true);
+        }
+
+        let filename: string;
+        let thumbFilename: string | null | undefined;
+        {
+            const filesResult = Assert.GetFilesQuery.toBeSuccess(
+                await GraphQL.getFilesQuery(roomPlayer1Client, { input: { fileTagIds: [] } })
+            );
+            console.log('GetFilesQuery result: %o', filesResult);
+            expect(filesResult).toHaveLength(1);
+            filename = filesResult[0].filename;
+            thumbFilename = filesResult[0].thumbFilename;
+            if (thumbFilename == null) {
+                throw new Error('thumbFilename should not be nullish');
+            }
+        }
+
+        {
+            const filesResult = Assert.GetFilesQuery.toBeSuccess(
+                await GraphQL.getFilesQuery(roomPlayer2Client, { input: { fileTagIds: [] } })
+            );
+            expect(filesResult).toEqual([]);
+        }
+
+        const cases = [
+            ['files', Resources.User.player1],
+            ['files', Resources.User.player2],
+            ['thumbs', Resources.User.player1],
+            ['thumbs', Resources.User.player2],
+        ] as const;
+        for (const [fileType, id] of cases) {
+            const axiosResult = await axios
+                .get(
+                    urljoin(
+                        httpUri,
+                        'uploader',
+                        fileType,
+                        fileType === 'files' ? filename : thumbFilename
+                    ),
+                    {
+                        headers: {
+                            [Resources.testAuthorizationHeader]: id,
+                        },
+                    }
+                )
+                .then(() => true)
+                .catch(err => err);
+            expect(axiosResult).toBe(true);
+        }
+
+        let fileTagId: string;
+        {
+            const fileTagName = 'FILE_TAG_NAME';
+            const fileTagResult = Assert.CreateFileTagMutation.toBeSuccess(
+                await GraphQL.createFileTagMutation(roomPlayer1Client, { tagName: fileTagName })
+            );
+            expect(fileTagResult.name).toBe(fileTagName);
+            fileTagId = fileTagResult.id;
+        }
+
+        {
+            Assert.EditFileTagsMutation.toBeSuccess(
+                await GraphQL.editFileTagsMutation(roomPlayer1Client, {
+                    input: { actions: [{ filename, add: [fileTagId], remove: [] }] },
+                })
+            );
+        }
+
+        {
+            const filesResult = Assert.GetFilesQuery.toBeSuccess(
+                await GraphQL.getFilesQuery(roomPlayer1Client, {
+                    input: { fileTagIds: [fileTagId] },
+                })
+            );
+            expect(filesResult).toHaveLength(1);
+        }
+
+        {
+            const nonExistFileTagId = fileTagId + fileTagId;
+            const filesResult = Assert.GetFilesQuery.toBeSuccess(
+                await GraphQL.getFilesQuery(roomPlayer1Client, {
+                    input: { fileTagIds: [nonExistFileTagId] },
+                })
+            );
+            expect(filesResult).toEqual([]);
+        }
+
+        {
+            const actual = await GraphQL.deleteFilesMutation(roomPlayer1Client, {
+                filenames: [filename],
+            });
+            expect(actual.data?.result).toEqual([filename]);
+        }
+
+        {
+            const filesResult = Assert.GetFilesQuery.toBeSuccess(
+                await GraphQL.getFilesQuery(roomPlayer1Client, {
+                    input: { fileTagIds: [] },
+                })
+            );
+            expect(filesResult).toEqual([]);
         }
 
         // これがないとport 4000が開放されないので2個目以降のテストが失敗してしまう

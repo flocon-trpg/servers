@@ -1,0 +1,32 @@
+name: Check install
+
+on: [pull_request]
+
+jobs:
+    install:
+        name: Check install --production=${{matrix.param}} and build on on Node ${{ matrix.node }} and ${{ matrix.os }}
+
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                node: ['14.x']
+                os: [ubuntu-latest, windows-latest] # TODO: add macos-latest
+                param: ['false', 'true']
+
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v2
+
+            - name: Use Node ${{ matrix.node }}
+              uses: actions/setup-node@v2
+              with:
+                  node-version: ${{ matrix.node }}
+
+            - name: Update to npm@7
+              run: npm install -g npm@7
+
+            - name: Install
+              run: npm install --production=${{matrix.param}}
+
+            - name: Build (as type checking)
+              run: npm run build
