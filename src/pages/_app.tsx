@@ -155,7 +155,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         monaco.languages.typescript.typescriptDefaults.addExtraLib(monacoLibSource);
     }, [monaco]);
 
-    if (idToken == null || apolloClient == null) {
+    if (apolloClient == null) {
         return <div style={{ padding: 5 }}>{'しばらくお待ち下さい… / Please wait…'}</div>;
     }
     return (
@@ -170,7 +170,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
                             <FirebaseStorageUrlCacheContext.Provider
                                 value={firebaseStorageUrlCache}
                             >
-                                <FirebaseAuthenticationIdTokenContext.Provider value={idToken}>
+                                <FirebaseAuthenticationIdTokenContext.Provider value={idToken ?? null}>
                                     <Component {...pageProps} />
                                 </FirebaseAuthenticationIdTokenContext.Provider>
                             </FirebaseStorageUrlCacheContext.Provider>

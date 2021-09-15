@@ -97,7 +97,7 @@ export const useRoomState = (
     roomEventSubscription: Observable<RoomEventSubscription> | null
 ): RoomStateResult => {
     const myAuth = React.useContext(MyAuthContext);
-    const idToken = React.useContext(FirebaseAuthenticationIdTokenContext);
+    const hasIdToken = React.useContext(FirebaseAuthenticationIdTokenContext) != null;
     const clientId = useClientId();
     const apolloClient = useApolloClient();
     const [operateMutation] = useOperateMutation();
@@ -124,7 +124,7 @@ export const useRoomState = (
         if (userUid == null) {
             return; // This should not happen
         }
-        if (idToken == null) {
+        if (!hasIdToken) {
             // queryの実行で失敗することが確定しているため、実行を中止している
             return;
         }
@@ -415,6 +415,7 @@ export const useRoomState = (
         dispatch,
         clientId,
         roomEventSubscription,
+        hasIdToken,
     ]);
 
     return { refetch, state };
