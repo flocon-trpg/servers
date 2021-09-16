@@ -53,6 +53,7 @@ const main = async (params: { debug: boolean }): Promise<void> => {
             .then(Result.ok)
             .catch(Result.error);
         if (decodedIdToken.isError) {
+            console.log('verifyIdToken failed: %o, %s', decodedIdToken.error, idToken);
             return decodedIdToken;
         }
         return Result.ok({

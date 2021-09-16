@@ -306,6 +306,7 @@ export const createServer = async ({
                         serverConfig,
                         promiseQueue,
                         connectionManager,
+                        // subscriptionsのcontextは、websocketの接続が確立されるたびに作成される。そのため、接続IDが同じならば、（ここでfork()を読んでいるにも関わらず）同じemが使い回されることになるので注意。Subscriptionのコード内でデータベースにアクセスするならば、メソッド内に毎回forkするコードを書いておくほうが無難かもしれない。
                         em: em.fork(),
                         authorizedUser: null,
                     };
