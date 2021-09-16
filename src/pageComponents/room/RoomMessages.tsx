@@ -439,7 +439,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
     if (typeof myAuth === 'string' || roomMessage == null) {
         createdByMe = null;
     } else {
-        createdByMe = myAuth.uid === roomMessage.createdBy;
+        createdByMe = myAuth.value.uid === roomMessage.createdBy;
     }
 
     const createdAt =

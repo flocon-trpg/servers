@@ -313,7 +313,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
         );
     })();
 
-    const pieces = (() => {
+    let pieces: JSX.Element;
+    {
         const characterPieceElements = (characterPieces ?? []).map(
             ({ characterKey, character, piece, pieceKey }) => {
                 if (character.image == null) {
@@ -673,7 +674,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             }
         );
 
-        return (
+        pieces = (
             <ReactKonva.Layer>
                 {tachieLocationElements}
                 {characterPieceElements}
@@ -682,7 +683,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 {numberPieceElements}
             </ReactKonva.Layer>
         );
-    })();
+    }
 
     const backgroundImageKonva = backgroundImageTransition(({ opacity, image }) => (
         <animated.Image

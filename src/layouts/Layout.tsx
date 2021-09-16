@@ -119,7 +119,7 @@ const Layout: React.FC<PropsWithChildren<Props>> = ({
 }: PropsWithChildren<Props>) => {
     const router = useRouter();
     const myAuth = React.useContext(MyAuthContext);
-    const myUserUid = typeof myAuth === 'string' ? null : myAuth.uid;
+    const myUserUid = typeof myAuth === 'string' ? null : myAuth.value.uid;
     const apolloClient = useApolloClient();
     const signOut = useSignOut();
     const [isEntry, setIsEntry] = React.useState<'notRequired' | 'loading' | boolean>(
@@ -230,7 +230,7 @@ const Layout: React.FC<PropsWithChildren<Props>> = ({
                                 {typeof myAuth === 'string' ? null : <Icon.UserOutlined />}
                                 {typeof myAuth === 'string' ? null : (
                                     <div style={{ color: 'white' }}>
-                                        {myAuth.displayName} - {myAuth.uid}
+                                        {myAuth.value.displayName} - {myAuth.value.uid}
                                     </div>
                                 )}
                                 {typeof myAuth === 'string' ? (
