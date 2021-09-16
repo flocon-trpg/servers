@@ -50,13 +50,13 @@ type IdTokenState = string | { type: typeof loading | typeof notSignIn | typeof 
 const useIdToken = (user: FirebaseUserState): IdTokenState => {
     const [result, setResult] = React.useState<IdTokenState>({ type: loading });
     React.useEffect(() => {
-        console.log('user is updated: %o', user);
+        console.log('[バグ調査ログ] user is updated: %o', user);
         if (typeof user === 'string') {
             setResult({ type: user });
             return;
         }
         user.getIdToken().then(idToken => {
-            console.log('idToken is updated');
+            console.log('[バグ調査ログ] idToken is updated');
             // ユーザーが変わったとき、新しいidTokenを入手するまでは前のidTokenを保持するようにしている。
             // こうすることで、一時的にidTokenがundefinedになるせいでApolloClientが一時的にidTokenなしモードに切り替わることを防ぐ狙いがある。
             setResult(idToken);
@@ -95,13 +95,13 @@ const useFirebaseUser = (): FirebaseUserState => {
     const auth = getAuth(config);
     const [user, setUser] = React.useState<FirebaseUserState>(loading);
     React.useEffect(() => {
-        console.log('auth updated: %o', auth);
+        console.log('[バグ調査ログ] auth updated: %o', auth);
         if (auth == null) {
             setUser(authNotFound);
             return;
         }
         const unsubscribe = auth.onIdTokenChanged(user => {
-            console.log('onIdTokenChaned: %o', user);
+            console.log('[バグ調査ログ] onIdTokenChaned: %o', user);
             setUser(prevUser => {
                 console.log('[バグ調査ログ] prevUser === user', prevUser === user);
                 return user == null ? notSignIn : user;
