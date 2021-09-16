@@ -33,7 +33,6 @@ import {
 } from '../../hooks/useRoomMessages';
 import { PrivateChannelSet, PrivateChannelSets } from '../../utils/PrivateChannelSet';
 import { ChatInput } from '../../components/ChatInput/Main';
-import MyAuthContext from '../../contexts/MyAuthContext';
 import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
 import {
@@ -43,7 +42,6 @@ import {
     WritingMessageStatusType,
 } from '../../generated/graphql';
 import * as Icon from '@ant-design/icons';
-import { getUserUid } from '../../hooks/useFirebaseUser';
 import { MessageFilter, TabConfig } from '../../states/MessagePanelConfig';
 import { Gutter } from 'antd/lib/grid/row';
 import DrawerFooter from '../../layouts/DrawerFooter';
@@ -68,6 +66,7 @@ import { InputModal } from '../../components/InputModal';
 import { JumpToBottomVirtuoso } from '../../components/JumpToBottomVirtuoso';
 import { cancelRnd, flex, flexColumn, flexNone, flexRow, itemsCenter } from '../../utils/className';
 import classNames from 'classnames';
+import { getUserUid, MyAuthContext } from '../../contexts/MyAuthContext';
 
 const headerHeight = 20;
 const contentMinHeight = 22;

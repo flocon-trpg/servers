@@ -14,7 +14,6 @@ import {
 import { Alert, Button, Card, Input, Result, Spin, notification as antdNotification } from 'antd';
 import Layout, { loginAndEntry, success } from '../../layouts/Layout';
 import { FetchResult } from '@apollo/client';
-import MyAuthContext from '../../contexts/MyAuthContext';
 import {
     deleted,
     getRoomFailure,
@@ -32,11 +31,14 @@ import { useDispatch } from 'react-redux';
 import { roomModule } from '../../modules/roomModule';
 import { useAllRoomMessages } from '../../hooks/useRoomMessages';
 import { useSelector } from '../../store';
-import useRoomConfig from '../../hooks/localStorage/useRoomConfig';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { messageInputTextModule } from '../../modules/messageInputTextModule';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
 import { usePrevious } from 'react-use';
+import roomConfigModule from '../../modules/roomConfigModule';
+import { getRoomConfig } from '../../utils/localStorage/roomConfig';
+import { MyAuthContext } from '../../contexts/MyAuthContext';
+import { bufferTime, Subject } from 'rxjs';
 
 type JoinRoomFormProps = {
     roomState: RoomAsListItemFragment;
@@ -167,6 +169,56 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
     );
 };
 
+type Ref<T> = { value: T };
+
+function useBufferedWritingMessageStatusInputType() {
+    const timeSpan = 1500;
+    const subjectRef = React.useRef(new Subject<WritingMessageStatusInputType>());
+    // WritingMessageStatusInputTypeの値が変わらないときでもuseEffectをトリガーさせたいので、WritingMessageStatusInputTypeではなくRef<WritingMessageStatusInputType>を使っている
+    const [result, setResult] = React.useState<Ref<WritingMessageStatusInputType>>();
+    const onNext = React.useCallback((item: WritingMessageStatusInputType) => {
+        subjectRef.current.next(item);
+    }, []);
+    React.useEffect(() => {
+        subjectRef.current.pipe(bufferTime(timeSpan)).subscribe({
+            next: items => {
+                const lastElement = items[items.length - 1];
+                if (lastElement === undefined) {
+                    return;
+                }
+                setResult({ value: lastElement });
+            },
+        });
+    }, []);
+    return [result, onNext] as const;
+}
+
+// localForageを用いてRoomConfigを読み込み、ReduxのStateと紐付ける。
+// Roomが変わるたびに、useRoomConfigが更新される必要がある。RoomのComponentのどこか一箇所でuseRoomConfigを呼び出すだけでよい。
+const useRoomConfig = (roomId: string): boolean => {
+    const [result, setResult] = React.useState<boolean>(false);
+    const dispatch = useDispatch();
+
+    React.useEffect(() => {
+        let unmounted = false;
+        const main = async () => {
+            dispatch(roomConfigModule.actions.setRoomConfig(null));
+            const roomConfig = await getRoomConfig(roomId);
+            if (unmounted) {
+                return;
+            }
+            dispatch(roomConfigModule.actions.setRoomConfig(roomConfig));
+            setResult(true);
+        };
+        main();
+        return () => {
+            unmounted = true;
+        };
+    }, [roomId, dispatch]);
+
+    return result;
+};
+
 const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
     roomId,
     children,
@@ -224,6 +276,20 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
         });
     }, [newNotification]);
 
+    const [writingMessageStatusInputType, onWritingMessageStatusInputTypeChange] =
+        useBufferedWritingMessageStatusInputType();
+    React.useEffect(() => {
+        if (writingMessageStatusInputType == null) {
+            return;
+        }
+        updateWritingMessageStatus({
+            variables: {
+                roomId: roomIdRef.current,
+                newStatus: writingMessageStatusInputType.value,
+            },
+        });
+    }, [roomIdRef, updateWritingMessageStatus, writingMessageStatusInputType]);
+
     const publicMessage = useSelector(state => state.messageInputTextModule.publicMessage);
     const prevPublicMessage = usePrevious(publicMessage);
     React.useEffect(() => {
@@ -246,10 +312,8 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
                 newStatus = WritingMessageStatusInputType.KeepWriting;
             }
         }
-        updateWritingMessageStatus({
-            variables: { roomId: roomIdRef.current, newStatus },
-        });
-    }, [publicMessage, prevPublicMessage, updateWritingMessageStatus, roomIdRef]);
+        onWritingMessageStatusInputTypeChange(newStatus);
+    }, [publicMessage, prevPublicMessage, onWritingMessageStatusInputTypeChange]);
 
     if (error != null) {
         return (

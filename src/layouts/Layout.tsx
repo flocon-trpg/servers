@@ -1,5 +1,4 @@
 import React, { PropsWithChildren } from 'react';
-import MyAuthContext from '../contexts/MyAuthContext';
 import { useRouter } from 'next/router';
 import {
     Button,
@@ -20,17 +19,15 @@ import {
     IsEntryQuery,
     IsEntryQueryVariables,
     useEntryToServerMutation,
-    useIsEntryLazyQuery,
-    useIsEntryQuery,
 } from '../generated/graphql';
 import Center from '../components/Center';
 import Link from 'next/link';
 import NotSignInResult from '../components/Result/NotSignInResult';
-import { authNotFound, loading, notSignIn } from '../hooks/useFirebaseUser';
 import LoadingResult from '../components/Result/LoadingResult';
 import * as Icon from '@ant-design/icons';
 import { useSignOut } from '../hooks/useSignOut';
 import { useApolloClient } from '@apollo/client';
+import { authNotFound, loading, MyAuthContext, notSignIn } from '../contexts/MyAuthContext';
 const { Header, Content } = AntdLayout;
 
 type EntryFormComponentProps = {

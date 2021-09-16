@@ -12,11 +12,15 @@ import 'firebase/auth';
 import 'firebase/storage';
 import { Provider } from 'react-redux';
 import useConstant from 'use-constant';
-import MyAuthContext from '../contexts/MyAuthContext';
+import {
+    authNotFound,
+    FirebaseUserState,
+    loading,
+    MyAuthContext,
+    notSignIn,
+} from '../contexts/MyAuthContext';
 import store from '../store';
 import { appConsole } from '../utils/appConsole';
-import { useFirebaseUser } from '../hooks/useFirebaseUser';
-import useUserConfig from '../hooks/localStorage/useUserConfig';
 import { getConfig, getHttpUri, getWsUri } from '../config';
 import { simpleId } from '../utils/generators';
 import ClientIdContext from '../contexts/ClientIdContext';
@@ -29,11 +33,82 @@ import urljoin from 'url-join';
 import { monacoLibSource } from '../utils/libSource';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { createApolloClient } from '../utils/createApolloClient';
-import { useIdToken } from '../hooks/useIdToken';
+import { Dispatch } from '@reduxjs/toolkit';
+import { getUserConfig } from '../utils/localStorage/userConfig';
+import userConfigModule from '../modules/userConfigModule';
+import { getAuth } from '../utils/firebaseHelpers';
+import ConfigContext from '../contexts/ConfigContext';
 
 enableMapSet();
 
 const config = getConfig();
+
+// getIdTokenを複数箇所で呼び出すとidTokenの新旧が混在する可能性がある（要調査）ので、念のため_appのみで呼び出すようにしている
+const useIdToken = () => {
+    const user = useFirebaseUser();
+    const [result, setResult] = React.useState<string>();
+    React.useEffect(() => {
+        console.log('user is updated: %o', user);
+        if (typeof user === 'string') {
+            setResult(undefined);
+            return;
+        }
+        user.getIdToken().then(idToken => {
+            console.log('idToken is updated');
+            // ユーザーが変わったとき、新しいidTokenを入手するまでは前のidTokenを保持するようにしている。
+            // こうすることで、一時的にidTokenがundefinedになるせいでApolloClientが一時的にidTokenなしモードに切り替わることを防ぐ狙いがある。
+            setResult(idToken);
+        });
+    }, [user]);
+    return result;
+};
+
+// localForageを用いてRoomConfigを読み込み、ReduxのStateと紐付ける。
+// Userが変わるたびに、useUserConfigが更新される必要がある。_app.tsxなどどこか一箇所でuseUserConfigを呼び出すだけでよい。
+// _app.tsxではProviderの範囲外なのでuseDispatchが使えないため、引数として受け取る形にしている。
+const useUserConfig = (userUid: string | null, dispatch: Dispatch<any>): void => {
+    React.useEffect(() => {
+        let unmounted = false;
+        const main = async () => {
+            dispatch(userConfigModule.actions.reset(null));
+            if (userUid == null) {
+                return;
+            }
+            const userConfig = await getUserConfig(userUid);
+            if (unmounted) {
+                return;
+            }
+            dispatch(userConfigModule.actions.reset(userConfig));
+        };
+        main();
+        return () => {
+            unmounted = true;
+        };
+    }, [userUid, dispatch]);
+};
+
+// _app.tsxで1回のみ呼ばれることを想定。firebase authのデータを取得したい場合はContextで行う。
+const useFirebaseUser = (): FirebaseUserState => {
+    const config = React.useContext(ConfigContext);
+    const auth = getAuth(config);
+    const [user, setUser] = React.useState<FirebaseUserState>(loading);
+    React.useEffect(() => {
+        console.log('auth updated: %o', auth);
+        if (auth == null) {
+            setUser(authNotFound);
+            return;
+        }
+        const unsubscribe = auth.onIdTokenChanged(user => {
+            console.log('onIdTokenChaned: %o', user);
+            setUser(user == null ? notSignIn : user);
+        });
+        return () => {
+            unsubscribe();
+            setUser(loading);
+        };
+    }, [auth]);
+    return user;
+};
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     const httpUri = urljoin(getHttpUri(config), 'graphql');
@@ -80,7 +155,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         monaco.languages.typescript.typescriptDefaults.addExtraLib(monacoLibSource);
     }, [monaco]);
 
-    if (idToken == null || apolloClient == null) {
+    if (apolloClient == null) {
         return <div style={{ padding: 5 }}>{'しばらくお待ち下さい… / Please wait…'}</div>;
     }
     return (
@@ -95,7 +170,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
                             <FirebaseStorageUrlCacheContext.Provider
                                 value={firebaseStorageUrlCache}
                             >
-                                <FirebaseAuthenticationIdTokenContext.Provider value={idToken}>
+                                <FirebaseAuthenticationIdTokenContext.Provider value={idToken ?? null}>
                                     <Component {...pageProps} />
                                 </FirebaseAuthenticationIdTokenContext.Provider>
                             </FirebaseStorageUrlCacheContext.Provider>

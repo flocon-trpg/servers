@@ -1,5 +1,5 @@
 import React from 'react';
-import MyAuthContext from '../contexts/MyAuthContext';
+import { MyAuthContext } from '../contexts/MyAuthContext';
 
 export const useMyUserUid = () => {
     const myAuth = React.useContext(MyAuthContext);
