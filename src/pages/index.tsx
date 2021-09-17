@@ -114,7 +114,7 @@ const Index: React.FC = () => {
                 <Typography.Title level={3}>バグと対処法</Typography.Title>
                 <ul>
                     <li>
-                        ブラウザはChrome系(Edgeを含む)かFirefoxを推奨します。Safariでは、概ね正常に動きますが、メッセージのスクロールでカクつくかもしれません（要調査）。
+                        ブラウザはChrome系(Edgeを含む)かFirefoxを推奨します。Internet Explorerではおそらく動作しません。Safariでは、概ね正常に動きますが、メッセージのスクロールでカクつくかもしれません（要調査）。
                     </li>
                     <li>
                         AdblockやAdblock
