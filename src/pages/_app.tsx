@@ -39,6 +39,7 @@ import userConfigModule from '../modules/userConfigModule';
 import { getAuth } from '../utils/firebaseHelpers';
 import ConfigContext from '../contexts/ConfigContext';
 import { useMyUserUid } from '../hooks/useMyUserUid';
+import { AllContextProvider as AllContextProvider } from '../components/AllContextProvider';
 
 enableMapSet();
 
@@ -201,23 +202,16 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
             <Head>
                 <link rel="shortcut icon" href="/logo.png" />
             </Head>
-            <ClientIdContext.Provider value={clientId}>
-                <ApolloProvider client={apolloClient}>
-                    <Provider store={store}>
-                        <MyAuthContext.Provider value={user}>
-                            <FirebaseStorageUrlCacheContext.Provider
-                                value={firebaseStorageUrlCache}
-                            >
-                                <FirebaseAuthenticationIdTokenContext.Provider
-                                    value={typeof idToken === 'string' ? idToken : null}
-                                >
-                                    <Component {...pageProps} />
-                                </FirebaseAuthenticationIdTokenContext.Provider>
-                            </FirebaseStorageUrlCacheContext.Provider>
-                        </MyAuthContext.Provider>
-                    </Provider>
-                </ApolloProvider>
-            </ClientIdContext.Provider>
+            <AllContextProvider
+                clientId={clientId}
+                apolloClient={apolloClient}
+                store={store}
+                user={user}
+                firebaseStorageUrlCache={firebaseStorageUrlCache}
+                idToken={typeof idToken === 'string' ? idToken : null}
+            >
+                <Component {...pageProps} />
+            </AllContextProvider>
         </>
     );
 };
