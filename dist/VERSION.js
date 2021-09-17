@@ -7,7 +7,7 @@ const VERSION = new util_1.SemVer({
     patch: 0,
     prerelease: {
         type: util_1.alpha,
-        version: 3,
+        version: 4,
     },
 });
 exports.default = VERSION;
