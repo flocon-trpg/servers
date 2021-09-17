@@ -22,6 +22,7 @@ const appConsole_1 = require("./utils/appConsole");
 const fs_extra_1 = require("fs-extra");
 const FilePermissionType_1 = require("./enums/FilePermissionType");
 const easyFlake_1 = require("./utils/easyFlake");
+const thumbsDir_1 = require("./utils/thumbsDir");
 const createServer = async ({ serverConfig, promiseQueue, connectionManager, em, schema, debug, getDecodedIdTokenFromExpressRequest, getDecodedIdTokenFromWsContext, port, }) => {
     var _a;
     const context = async (context) => {
@@ -140,7 +141,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
                 return;
             }
             const thumbFileName = `${file.filename}.webp`;
-            const thumbDir = path_1.default.join(path_1.default.dirname(file.path), 'thumbs');
+            const thumbDir = path_1.default.join(path_1.default.dirname(file.path), thumbsDir_1.thumbsDir);
             await fs_extra_1.ensureDir(thumbDir);
             const thumbPath = path_1.default.join(thumbDir, thumbFileName);
             const thumbnailSaved = await sharp_1.default(file.path)

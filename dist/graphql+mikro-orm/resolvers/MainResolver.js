@@ -38,6 +38,9 @@ const object_args_input_1 = require("./object+args+input");
 const mikro_orm_2 = require("../entities/file/mikro-orm");
 const core_1 = require("@mikro-orm/core");
 const mikro_orm_3 = require("../entities/fileTag/mikro-orm");
+const fs_extra_1 = require("fs-extra");
+const path_1 = __importDefault(require("path"));
+const thumbsDir_1 = require("../../utils/thumbsDir");
 let MainResolver = class MainResolver {
     async getAvailableGameSystems() {
         return {
@@ -62,7 +65,13 @@ let MainResolver = class MainResolver {
         };
     }
     async deleteFiles(filenames, context) {
-        const result = [];
+        var _a;
+        const directory = (_a = context.serverConfig.uploader) === null || _a === void 0 ? void 0 : _a.directory;
+        if (directory == null) {
+            return [];
+        }
+        const filenamesToDelete = [];
+        const thumbFilenamesToDelete = [];
         const user = helpers_1.ensureAuthorizedUser(context);
         for (const filename of filenames) {
             const file = await context.em.findOne(mikro_orm_2.File, {
@@ -70,7 +79,10 @@ let MainResolver = class MainResolver {
                 filename,
             });
             if (file != null) {
-                result.push(file.filename);
+                if (file.thumbFilename != null) {
+                    thumbFilenamesToDelete.push(file.thumbFilename);
+                }
+                filenamesToDelete.push(file.filename);
                 await user.files.init();
                 user.files.remove(file);
                 await file.fileTags.init();
@@ -79,7 +91,27 @@ let MainResolver = class MainResolver {
             }
         }
         await context.em.flush();
-        return result;
+        for (const filename of filenamesToDelete) {
+            const filePath = path_1.default.resolve(directory, filename);
+            const statResult = await fs_extra_1.stat(filePath);
+            if (statResult.isFile()) {
+                await fs_extra_1.remove(filePath);
+            }
+            else {
+                console.warn('%s is not a file', filePath);
+            }
+        }
+        for (const filename of thumbFilenamesToDelete) {
+            const filePath = path_1.default.resolve(directory, thumbsDir_1.thumbsDir, filename);
+            const statResult = await fs_extra_1.stat(filePath);
+            if (statResult.isFile()) {
+                await fs_extra_1.remove(filePath);
+            }
+            else {
+                console.warn('%s is not a file', filePath);
+            }
+        }
+        return filenamesToDelete;
     }
     async editFileTags(input, context) {
         const user = helpers_1.ensureAuthorizedUser(context);

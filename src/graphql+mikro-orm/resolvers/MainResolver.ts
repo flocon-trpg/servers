@@ -30,7 +30,7 @@ import { listAvailableGameSystems as getAvailableGameSystems } from '../../messa
 import { ServerInfo } from '../entities/serverInfo/graphql';
 import VERSION from '../../VERSION';
 import { PrereleaseType } from '../../enums/PrereleaseType';
-import { alpha, beta, DualKeyMap, isStrIndex10, rc } from '@kizahasi/util';
+import { alpha, beta, DualKeyMap, rc } from '@kizahasi/util';
 import { BaasType } from '../../enums/BaasType';
 import { GetFilesResult } from '../results/GetFilesResult';
 import { ENTRY } from '../../roles';
@@ -38,6 +38,9 @@ import { EditFileTagsInput, FileTag as FileTagGraphQL, GetFilesInput } from './o
 import { File } from '../entities/file/mikro-orm';
 import { QueryOrder, Reference } from '@mikro-orm/core';
 import { FileTag as FileTagEntity } from '../entities/fileTag/mikro-orm';
+import { remove, stat } from 'fs-extra';
+import path from 'path';
+import { thumbsDir } from '../../utils/thumbsDir';
 
 export type PongPayload = {
     value: number;
@@ -90,7 +93,13 @@ export class MainResolver {
         @Arg('filenames', () => [String]) filenames: string[],
         @Ctx() context: ResolverContext
     ): Promise<string[]> {
-        const result: string[] = [];
+        const directory = context.serverConfig.uploader?.directory;
+        if (directory == null) {
+            return [];
+        }
+
+        const filenamesToDelete: string[] = [];
+        const thumbFilenamesToDelete: string[] = [];
         const user = ensureAuthorizedUser(context);
         for (const filename of filenames) {
             const file = await context.em.findOne(File, {
@@ -98,7 +107,10 @@ export class MainResolver {
                 filename,
             });
             if (file != null) {
-                result.push(file.filename);
+                if (file.thumbFilename != null) {
+                    thumbFilenamesToDelete.push(file.thumbFilename);
+                }
+                filenamesToDelete.push(file.filename);
                 await user.files.init();
                 user.files.remove(file);
                 await file.fileTags.init();
@@ -107,7 +119,27 @@ export class MainResolver {
             }
         }
         await context.em.flush();
-        return result;
+        for (const filename of filenamesToDelete) {
+            const filePath = path.resolve(directory, filename);
+            const statResult = await stat(filePath);
+            // バグなどで想定外のディレクトリが指定されてしまったときの保険的対策として、fileかどうかチェックしている
+            if (statResult.isFile()) {
+                await remove(filePath);
+            } else {
+                console.warn('%s is not a file', filePath);
+            }
+        }
+        for (const filename of thumbFilenamesToDelete) {
+            const filePath = path.resolve(directory, thumbsDir, filename);
+            const statResult = await stat(filePath);
+            // バグなどで想定外のディレクトリが指定されてしまったときの保険的対策として、fileかどうかチェックしている
+            if (statResult.isFile()) {
+                await remove(filePath);
+            } else {
+                console.warn('%s is not a file', filePath);
+            }
+        }
+        return filenamesToDelete;
     }
 
     @Mutation(() => Boolean)

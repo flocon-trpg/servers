@@ -24,6 +24,7 @@ import { InMemoryConnectionManager } from './connection/main';
 import { EM } from './utils/types';
 import { Result } from '@kizahasi/result';
 import { Context } from 'graphql-ws';
+import { thumbsDir } from './utils/thumbsDir';
 
 export const createServer = async ({
     serverConfig,
@@ -185,7 +186,7 @@ export const createServer = async ({
                     return;
                 }
                 const thumbFileName = `${file.filename}.webp`;
-                const thumbDir = path.join(path.dirname(file.path), 'thumbs');
+                const thumbDir = path.join(path.dirname(file.path), thumbsDir);
                 await ensureDir(thumbDir);
                 const thumbPath = path.join(thumbDir, thumbFileName);
                 const thumbnailSaved = await sharp(file.path)
