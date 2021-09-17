@@ -38,6 +38,7 @@ import { getUserConfig } from '../utils/localStorage/userConfig';
 import userConfigModule from '../modules/userConfigModule';
 import { getAuth } from '../utils/firebaseHelpers';
 import ConfigContext from '../contexts/ConfigContext';
+import { useMyUserUid } from '../hooks/useMyUserUid';
 
 enableMapSet();
 
@@ -50,17 +51,24 @@ type IdTokenState = string | { type: typeof loading | typeof notSignIn | typeof 
 const useIdToken = (user: FirebaseUserState): IdTokenState => {
     const [result, setResult] = React.useState<IdTokenState>({ type: loading });
     React.useEffect(() => {
-        console.log('[バグ調査ログ] user is updated: %o', user);
-        if (typeof user === 'string') {
-            setResult({ type: user });
-            return;
+        switch (user) {
+            case loading:
+                // ユーザーが変わったとき、新しいidTokenを入手するまでは前のidTokenを保持するようにしている。
+                // こうすることで、一時的にidTokenがundefinedになるせいでApolloClientが一時的にidTokenなしモードに切り替わることを防ぐ狙いがある。
+                return;
+            case notSignIn:
+            case authNotFound:
+                setResult({ type: user });
+                return;
+            default: {
+                user.value.getIdToken().then(idToken => {
+                    // ユーザーが変わったとき、新しいidTokenを入手するまでは前のidTokenを保持するようにしている。
+                    // こうすることで、一時的にidTokenがundefinedになるせいでApolloClientが一時的にidTokenなしモードに切り替わることを防ぐ狙いがある。
+                    setResult(idToken);
+                });
+                return;
+            }
         }
-        user.value.getIdToken().then(idToken => {
-            console.log('[バグ調査ログ] idToken is updated');
-            // ユーザーが変わったとき、新しいidTokenを入手するまでは前のidTokenを保持するようにしている。
-            // こうすることで、一時的にidTokenがundefinedになるせいでApolloClientが一時的にidTokenなしモードに切り替わることを防ぐ狙いがある。
-            setResult(idToken);
-        });
     }, [user]);
     return result;
 };
@@ -95,19 +103,13 @@ const useFirebaseUser = (): FirebaseUserState => {
     const auth = getAuth(config);
     const [user, setUser] = React.useState<FirebaseUserState>(loading);
     React.useEffect(() => {
-        console.log('[バグ調査ログ] auth updated: %o', auth);
         if (auth == null) {
             setUser(authNotFound);
             return;
         }
         const unsubscribe = auth.onIdTokenChanged(user => {
-            console.log('[バグ調査ログ] onIdTokenChaned: %o', user);
-            setUser(prevUser => {
-                if (typeof prevUser !== 'string') {
-                    console.log('[バグ調査ログ] prevUser.value === user', prevUser.value === user);
-                }
-                return user == null ? notSignIn : { value: user };
-            });
+            // onIdTokenChangedが実行されるたびにgetIdTokenの結果は変わるが、userの参照は以前と同じである。そのため、depsに直接Userを入れると以前のものと等しいためidTokenの更新処理がされなくなってしまう。そのため、代わりにRef<User>としている。getIdTokenを実行するhookのdepsには、UserではなくRef<User>を書くことを忘れずに。
+            setUser(user == null ? notSignIn : { value: user });
         });
         return () => {
             unsubscribe();
@@ -128,7 +130,8 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     }, [wsUri]);
 
     const user = useFirebaseUser();
-    useUserConfig(typeof user === 'string' ? null : user.value.uid, store.dispatch);
+    const myUserUid = useMyUserUid(user);
+    useUserConfig(myUserUid ?? null, store.dispatch);
 
     const idToken = useIdToken(user);
     const [apolloClient, setApolloClient] = React.useState<ReturnType<typeof createApolloClient>>();

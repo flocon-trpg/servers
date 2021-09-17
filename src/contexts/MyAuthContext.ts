@@ -5,7 +5,7 @@ import { Ref } from '../utils/ref';
 export const loading = 'loading';
 export const notSignIn = 'notSignIn';
 export const authNotFound = 'authNotFound';
-// onIdTokenChangedが実行されるたびにgetIdTokenの結果は変わるが、おそらくUserの参照は変わらない。そのため、depsに直接Userを入れるとidTokenの更新処理がされなくなってしまう。そのため、代わりにRef<User>としている。getIdTokenを実行するhookのdepsには、UserではなくRef<User>を書くことを忘れずに。
+// UserではなくRef<User>としている理由は、useFirebaseUser内のonIdTokenChangedのコードを参照。
 export type FirebaseUserState =
     | Ref<firebase.User>
     | typeof loading
