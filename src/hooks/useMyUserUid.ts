@@ -6,5 +6,5 @@ export const useMyUserUid = () => {
     if (typeof myAuth === 'string') {
         return undefined;
     }
-    return myAuth.uid;
+    return myAuth.value.uid;
 };

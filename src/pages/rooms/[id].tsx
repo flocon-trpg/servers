@@ -39,6 +39,7 @@ import roomConfigModule from '../../modules/roomConfigModule';
 import { getRoomConfig } from '../../utils/localStorage/roomConfig';
 import { MyAuthContext } from '../../contexts/MyAuthContext';
 import { bufferTime, Subject } from 'rxjs';
+import { Ref } from '../../utils/ref';
 
 type JoinRoomFormProps = {
     roomState: RoomAsListItemFragment;
@@ -48,7 +49,7 @@ type JoinRoomFormProps = {
 const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRoomFormProps) => {
     const myAuth = React.useContext(MyAuthContext);
     const [name, setName] = React.useState<string>(
-        typeof myAuth === 'string' ? '' : myAuth.displayName ?? ''
+        typeof myAuth === 'string' ? '' : myAuth.value.displayName ?? ''
     );
     const [playerPhrase, setPlayerPhrase] = React.useState<string>('');
     const [spectatorPhrase, setSpectatorPhrase] = React.useState<string>('');
@@ -168,8 +169,6 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
         </Spin>
     );
 };
-
-type Ref<T> = { value: T };
 
 function useBufferedWritingMessageStatusInputType() {
     const timeSpan = 1500;

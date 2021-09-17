@@ -1135,7 +1135,7 @@ export const RoomMenu: React.FC = () => {
                     icon={<Icon.UserOutlined />}
                     title={
                         <span>
-                            {myAuth.displayName} - {myAuth.uid}
+                            {myAuth.value.displayName} - {myAuth.value.uid}
                         </span>
                     }
                 >

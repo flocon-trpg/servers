@@ -43,18 +43,20 @@ enableMapSet();
 
 const config = getConfig();
 
+// idTokenの値が変わらない場合はuseEffectをトリガーさせたくないため、トリガー回避が簡単にできるように、idTokenが取得できた場合はstringとして返している
+type IdTokenState = string | { type: typeof loading | typeof notSignIn | typeof authNotFound };
+
 // getIdTokenを複数箇所で呼び出すとidTokenの新旧が混在する可能性がある（要調査）ので、念のため_appのみで呼び出すようにしている
-const useIdToken = () => {
-    const user = useFirebaseUser();
-    const [result, setResult] = React.useState<string>();
+const useIdToken = (user: FirebaseUserState): IdTokenState => {
+    const [result, setResult] = React.useState<IdTokenState>({ type: loading });
     React.useEffect(() => {
-        console.log('user is updated: %o', user);
+        console.log('[バグ調査ログ] user is updated: %o', user);
         if (typeof user === 'string') {
-            setResult(undefined);
+            setResult({ type: user });
             return;
         }
-        user.getIdToken().then(idToken => {
-            console.log('idToken is updated');
+        user.value.getIdToken().then(idToken => {
+            console.log('[バグ調査ログ] idToken is updated');
             // ユーザーが変わったとき、新しいidTokenを入手するまでは前のidTokenを保持するようにしている。
             // こうすることで、一時的にidTokenがundefinedになるせいでApolloClientが一時的にidTokenなしモードに切り替わることを防ぐ狙いがある。
             setResult(idToken);
@@ -93,14 +95,19 @@ const useFirebaseUser = (): FirebaseUserState => {
     const auth = getAuth(config);
     const [user, setUser] = React.useState<FirebaseUserState>(loading);
     React.useEffect(() => {
-        console.log('auth updated: %o', auth);
+        console.log('[バグ調査ログ] auth updated: %o', auth);
         if (auth == null) {
             setUser(authNotFound);
             return;
         }
         const unsubscribe = auth.onIdTokenChanged(user => {
-            console.log('onIdTokenChaned: %o', user);
-            setUser(user == null ? notSignIn : user);
+            console.log('[バグ調査ログ] onIdTokenChaned: %o', user);
+            setUser(prevUser => {
+                if (typeof prevUser !== 'string') {
+                    console.log('[バグ調査ログ] prevUser.value === user', prevUser.value === user);
+                }
+                return user == null ? notSignIn : { value: user };
+            });
         });
         return () => {
             unsubscribe();
@@ -121,12 +128,31 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     }, [wsUri]);
 
     const user = useFirebaseUser();
-    useUserConfig(typeof user === 'string' ? null : user.uid, store.dispatch);
+    useUserConfig(typeof user === 'string' ? null : user.value.uid, store.dispatch);
 
-    const idToken = useIdToken();
+    const idToken = useIdToken(user);
     const [apolloClient, setApolloClient] = React.useState<ReturnType<typeof createApolloClient>>();
+    const [authNotFoundState, setAuthNotFoundState] = React.useState(false);
     React.useEffect(() => {
-        setApolloClient(createApolloClient(httpUri, wsUri, idToken ?? null));
+        if (typeof idToken === 'string') {
+            setApolloClient(createApolloClient(httpUri, wsUri, idToken));
+            setAuthNotFoundState(false);
+            return;
+        }
+        switch (idToken.type) {
+            case notSignIn:
+                setApolloClient(createApolloClient(httpUri, wsUri, null));
+                setAuthNotFoundState(false);
+                break;
+            case authNotFound:
+                setApolloClient(undefined);
+                setAuthNotFoundState(true);
+                break;
+            default:
+                setApolloClient(undefined);
+                setAuthNotFoundState(false);
+                break;
+        }
     }, [httpUri, wsUri, idToken]);
 
     const clientId = useConstant(() => simpleId());
@@ -155,6 +181,15 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         monaco.languages.typescript.typescriptDefaults.addExtraLib(monacoLibSource);
     }, [monaco]);
 
+    if (authNotFoundState) {
+        return (
+            <div style={{ padding: 5 }}>
+                {
+                    '予期しないエラーが発生しました: authNotFound / An unexpected error occured: authNotFound'
+                }
+            </div>
+        );
+    }
     if (apolloClient == null) {
         return <div style={{ padding: 5 }}>{'しばらくお待ち下さい… / Please wait…'}</div>;
     }
@@ -170,7 +205,9 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
                             <FirebaseStorageUrlCacheContext.Provider
                                 value={firebaseStorageUrlCache}
                             >
-                                <FirebaseAuthenticationIdTokenContext.Provider value={idToken ?? null}>
+                                <FirebaseAuthenticationIdTokenContext.Provider
+                                    value={typeof idToken === 'string' ? idToken : null}
+                                >
                                     <Component {...pageProps} />
                                 </FirebaseAuthenticationIdTokenContext.Provider>
                             </FirebaseStorageUrlCacheContext.Provider>

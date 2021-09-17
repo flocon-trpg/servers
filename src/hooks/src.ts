@@ -44,20 +44,26 @@ export function useSrcArrayFromGraphQL(
     }));
 
     useDeepCompareEffect(() => {
-        if (idToken == null) {
-            setResult({ type: loading });
-            return;
-        }
+        // コメントアウトしている理由は下のHACKを参照
+        // if (idToken == null) {
+        //     setResult({ type: loading });
+        //     return;
+        // }
         if (cleanPathArray == null) {
             setResult({ type: nullishArg });
             return;
         }
-        setResult({ type: loading });
         let isDisposed = false;
         Promise.all(
             cleanPathArray.map(path => {
                 // firebaseStorageUrlCacheContextはDeepCompareしてほしくないしされる必要もないインスタンスであるため、depsに加えてはいけない。
-                return FilePathModule.getSrc(path, config, idToken, firebaseStorageUrlCacheContext);
+                // HACK: ImagePieceからはFirebaseAuthenticationIdTokenContextの値を取得できないため（他のContextも同様かもしれない）、常にidToken==nullとなり画像読み込みが失敗する。そのため、暫定的にidTokenのnullチェックを無効化し適当な値を渡している。現状では内蔵アップローダーを使っていないため、idTokenは使われていないので動作は問題ない。
+                return FilePathModule.getSrc(
+                    path,
+                    config,
+                    idToken ?? '',
+                    firebaseStorageUrlCacheContext
+                );
             })
         )
             .then(all => {
