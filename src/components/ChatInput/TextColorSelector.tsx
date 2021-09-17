@@ -7,7 +7,6 @@ import { ChatPalettePanelConfig } from '../../states/ChatPalettePanelConfig';
 import { MessagePanelConfig } from '../../states/MessagePanelConfig';
 import { reset } from '../../utils/types';
 import classNames from 'classnames';
-import { useDispatch } from 'react-redux';
 import {
     UpdateChatPalettePanelAction,
     UpdateMessagePanelAction,

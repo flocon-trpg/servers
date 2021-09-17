@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Col, Slider, InputNumber, Typography } from 'antd';
+import {  Slider, InputNumber, Typography } from 'antd';
 import { flex, flexRow, itemsCenter } from '../utils/className';
 import classNames from 'classnames';
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import * as jdenticon from 'jdenticon';
-import { Popover, Tooltip } from 'antd';
+import { Popover, } from 'antd';
 import classNames from 'classnames';
 import { flex, flexColumn } from '../utils/className';
 

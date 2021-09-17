@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import React, { PropsWithChildren, ReactNode } from 'react';
+import React from 'react';
 import RoomComponent from '../../pageComponents/room/Room';
 import {
     GetRoomFailureType,

@@ -7,31 +7,25 @@ import 'firebase/storage';
 
 import React from 'react';
 import { AppProps } from 'next/app';
-import { ApolloProvider } from '@apollo/client';
 import 'firebase/auth';
 import 'firebase/storage';
-import { Provider } from 'react-redux';
 import useConstant from 'use-constant';
 import {
     authNotFound,
     FirebaseUserState,
     loading,
-    MyAuthContext,
     notSignIn,
 } from '../contexts/MyAuthContext';
 import store from '../store';
 import { appConsole } from '../utils/appConsole';
 import { getConfig, getHttpUri, getWsUri } from '../config';
 import { simpleId } from '../utils/generators';
-import ClientIdContext from '../contexts/ClientIdContext';
 import { enableMapSet } from 'immer';
 import Head from 'next/head';
 import { useMonaco, loader } from '@monaco-editor/react';
 import { ExpiryMap } from '../utils/expiryMap';
-import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
 import urljoin from 'url-join';
 import { monacoLibSource } from '../utils/libSource';
-import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { createApolloClient } from '../utils/createApolloClient';
 import { Dispatch } from '@reduxjs/toolkit';
 import { getUserConfig } from '../utils/localStorage/userConfig';

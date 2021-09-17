@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import React from 'react';
 import Layout, { loginAndEntry } from '../../layouts/Layout';
 import {
-    CreateRoomFailureType,
     CreateRoomInput,
     useCreateRoomMutation,
 } from '../../generated/graphql';

@@ -4,7 +4,6 @@ import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import { ChatPalettePanelConfig } from '../../states/ChatPalettePanelConfig';
 import { MessagePanelConfig } from '../../states/MessagePanelConfig';
 import { $free, PublicChannelKey } from '@kizahasi/util';
-import _ from 'lodash';
 import {
     UpdateChatPalettePanelAction,
     UpdateMessagePanelAction,

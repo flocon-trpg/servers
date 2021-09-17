@@ -1,6 +1,5 @@
 import React from 'react';
 
-import * as Icon from '@ant-design/icons';
 import { Select } from 'antd';
 import { ChatPalettePanelConfig } from '../../states/ChatPalettePanelConfig';
 import { MessagePanelConfig } from '../../states/MessagePanelConfig';
