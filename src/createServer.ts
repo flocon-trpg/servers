@@ -24,6 +24,7 @@ import { InMemoryConnectionManager } from './connection/main';
 import { EM } from './utils/types';
 import { Result } from '@kizahasi/result';
 import { Context } from 'graphql-ws';
+import { thumbsDir } from './utils/thumbsDir';
 
 export const createServer = async ({
     serverConfig,
@@ -96,7 +97,7 @@ export const createServer = async ({
         });
     }
 
-    if (serverConfig.uploader?.enabled === true) {
+    if (serverConfig.uploader != null) {
         AppConsole.log({
             en: `The uploader of API server is enabled.`,
             ja: `APIサーバーのアップローダーは有効化されています。`,
@@ -185,7 +186,7 @@ export const createServer = async ({
                     return;
                 }
                 const thumbFileName = `${file.filename}.webp`;
-                const thumbDir = path.join(path.dirname(file.path), 'thumbs');
+                const thumbDir = path.join(path.dirname(file.path), thumbsDir);
                 await ensureDir(thumbDir);
                 const thumbPath = path.join(thumbDir, thumbFileName);
                 const thumbnailSaved = await sharp(file.path)
@@ -194,7 +195,9 @@ export const createServer = async ({
                     .toFile(thumbPath)
                     .then(() => true)
                     .catch(err => {
-                        console.info(err);
+                        // 画像かどうかに関わらず全てのファイルをsharpに渡すため、mp3などといった画像でないファイルの場合はほぼ確実にこの関数が実行される
+
+                        console.log(err);
                         return false;
                     });
                 const permission =
@@ -236,7 +239,7 @@ export const createServer = async ({
                 return;
         }
 
-        if (serverConfig.uploader?.enabled !== true) {
+        if (serverConfig.uploader == null) {
             res.status(403).send('Flocon uploader is disabled by server config');
             return;
         }
@@ -272,7 +275,7 @@ export const createServer = async ({
             }
             filepath = path.join(
                 path.resolve(serverConfig.uploader.directory),
-                'thumb',
+                'thumbs',
                 sanitize(filename)
             );
         }

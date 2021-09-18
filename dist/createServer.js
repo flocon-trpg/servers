@@ -22,8 +22,8 @@ const appConsole_1 = require("./utils/appConsole");
 const fs_extra_1 = require("fs-extra");
 const FilePermissionType_1 = require("./enums/FilePermissionType");
 const easyFlake_1 = require("./utils/easyFlake");
+const thumbsDir_1 = require("./utils/thumbsDir");
 const createServer = async ({ serverConfig, promiseQueue, connectionManager, em, schema, debug, getDecodedIdTokenFromExpressRequest, getDecodedIdTokenFromWsContext, port, }) => {
-    var _a;
     const context = async (context) => {
         return {
             decodedIdToken: await getDecodedIdTokenFromExpressRequest(context.req),
@@ -60,7 +60,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
             next();
         });
     }
-    if (((_a = serverConfig.uploader) === null || _a === void 0 ? void 0 : _a.enabled) === true) {
+    if (serverConfig.uploader != null) {
         appConsole_1.AppConsole.log({
             en: `The uploader of API server is enabled.`,
             ja: `APIサーバーのアップローダーは有効化されています。`,
@@ -140,7 +140,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
                 return;
             }
             const thumbFileName = `${file.filename}.webp`;
-            const thumbDir = path_1.default.join(path_1.default.dirname(file.path), 'thumbs');
+            const thumbDir = path_1.default.join(path_1.default.dirname(file.path), thumbsDir_1.thumbsDir);
             await fs_extra_1.ensureDir(thumbDir);
             const thumbPath = path_1.default.join(thumbDir, thumbFileName);
             const thumbnailSaved = await sharp_1.default(file.path)
@@ -149,7 +149,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
                 .toFile(thumbPath)
                 .then(() => true)
                 .catch(err => {
-                console.info(err);
+                console.log(err);
                 return false;
             });
             const permission = permissionParam === 'public'
@@ -167,7 +167,6 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
         });
     }
     app.get('/uploader/:type/:file_name', async (req, res) => {
-        var _a;
         let typeParam;
         switch (req.params.type) {
             case 'files':
@@ -180,7 +179,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
                 res.sendStatus(404);
                 return;
         }
-        if (((_a = serverConfig.uploader) === null || _a === void 0 ? void 0 : _a.enabled) !== true) {
+        if (serverConfig.uploader == null) {
             res.status(403).send('Flocon uploader is disabled by server config');
             return;
         }
@@ -211,7 +210,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
                 res.sendStatus(404);
                 return;
             }
-            filepath = path_1.default.join(path_1.default.resolve(serverConfig.uploader.directory), 'thumb', sanitize_filename_1.default(filename));
+            filepath = path_1.default.join(path_1.default.resolve(serverConfig.uploader.directory), 'thumbs', sanitize_filename_1.default(filename));
         }
         res.header('Content-Security-Policy', "script-src 'unsafe-hashes'");
         res.sendFile(filepath, () => {

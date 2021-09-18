@@ -39,9 +39,6 @@ const entryPassword = t.type({
 export type EntryPasswordConfig = t.TypeOf<typeof entryPassword>;
 
 const uploader = t.type({
-    // false（もしくはuploader == null）ならばFloconアップローダーを無効にする。
-    enabled: t.boolean,
-
     // 1ファイルあたりの最大サイズ。
     // 注意点として、現在のファイルサイズのquotaの仕様では、「もしこのファイルをアップロードしてquotaを超えるようならばアップロードを拒否」ではなく「現在の合計ファイルサイズがquotaを超えているならばどのアップロードも拒否、そうでなければアップロードは許可」となっている（理由は、例えばquotaを100MBに設定していて合計ファイルサイズが99.99MBだったとき、ファイルのアップロードがほぼ常に失敗するため。）。そのため、1ユーザーあたりが保存できるファイルサイズをFとすると、適切な不等式は F < quota ではなく、(F + maxFileSize) < quota となる。 よって、もしmaxFileSizeが大きすぎると、
     maxFileSize: t.number,

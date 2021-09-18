@@ -40,7 +40,6 @@ const entryPassword = t.type({
     value: t.string,
 });
 const uploader = t.type({
-    enabled: t.boolean,
     maxFileSize: t.number,
     sizeQuota: t.number,
     countQuota: t.number,

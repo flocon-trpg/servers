@@ -31,4 +31,7 @@ export class SemVer {
 export class ServerInfo {
     @Field(() => SemVer)
     public version!: SemVer;
+
+    @Field()
+    public uploaderEnabled!: boolean;
 }

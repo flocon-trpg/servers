@@ -16,7 +16,9 @@ export type DecodedIdToken = {
 };
 
 export type ResolverContext = {
+    // TODO: decodedIdTokenが必要ない場面でもFirebaseから取得するため、無駄がある。
     readonly decodedIdToken?: Result<Readonly<DecodedIdToken>, unknown>;
+
     readonly promiseQueue: PromiseQueue;
     readonly connectionManager: InMemoryConnectionManager;
     readonly serverConfig: Readonly<ServerConfig>;
