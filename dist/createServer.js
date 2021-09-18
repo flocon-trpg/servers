@@ -212,7 +212,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
                 res.sendStatus(404);
                 return;
             }
-            filepath = path_1.default.join(path_1.default.resolve(serverConfig.uploader.directory), 'thumb', sanitize_filename_1.default(filename));
+            filepath = path_1.default.join(path_1.default.resolve(serverConfig.uploader.directory), 'thumbs', sanitize_filename_1.default(filename));
         }
         res.header('Content-Security-Policy', "script-src 'unsafe-hashes'");
         res.sendFile(filepath, () => {

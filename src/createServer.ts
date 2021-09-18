@@ -273,7 +273,7 @@ export const createServer = async ({
             }
             filepath = path.join(
                 path.resolve(serverConfig.uploader.directory),
-                'thumb',
+                'thumbs',
                 sanitize(filename)
             );
         }
