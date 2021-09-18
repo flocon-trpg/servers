@@ -53,7 +53,7 @@ const ToggleButton: React.FC<Props> = ({
             <Button
                 type={disabled && showAsTextWhenDisabled === true ? 'text' : 'dashed'}
                 icon={checked ? checkedIcon : unCheckedIcon}
-                shape="circle"
+                shape='circle'
                 onClick={() => onChange(!checked)}
                 disabled={disabled}
                 size={size}

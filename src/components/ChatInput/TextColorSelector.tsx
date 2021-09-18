@@ -30,7 +30,7 @@ export const TextColorSelector: React.FC<Props> = ({
         <div className={classNames(flexNone, flex, flexRow, itemsCenter)}>
             <div style={titleStyle}>文字色</div>
             <Popover
-                trigger="click"
+                trigger='click'
                 content={
                     <SketchPicker
                         className={cancelRnd}
@@ -66,14 +66,14 @@ export const TextColorSelector: React.FC<Props> = ({
                         width: 80,
                         margin: '4px 4px 4px 0',
                     }}
-                    type="dashed"
-                    size="small"
+                    type='dashed'
+                    size='small'
                 >
                     {config.selectedTextColor?.toUpperCase() ?? 'デフォルト'}
                 </Button>
             </Popover>
             <Button
-                size="small"
+                size='small'
                 onClick={() => onConfigUpdate({ selectedTextColor: { type: reset } })}
             >
                 リセット

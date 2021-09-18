@@ -57,8 +57,8 @@ const IdView: React.FC = () => {
     }
 
     return (
-        <Row gutter={gutter} align="middle">
-            <Col flex="auto" />
+        <Row gutter={gutter} align='middle'>
+            <Col flex='auto' />
             <Col flex={0}>ID</Col>
             <Col span={inputSpan}>
                 {drawerType.type === update
@@ -215,8 +215,8 @@ export const ImagePieceDrawer: React.FC = () => {
 
                 {/* TODO: isPrivateがまだ未実装 */}
 
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col flex={0}>画像</Col>
                     <Col span={inputSpan}>
                         <InputFile
@@ -233,13 +233,13 @@ export const ImagePieceDrawer: React.FC = () => {
                     </Col>
                 </Row>
 
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col flex={0}>名前</Col>
                     <Col span={inputSpan}>
                         <BufferedInput
-                            bufferDuration="default"
-                            size="small"
+                            bufferDuration='default'
+                            size='small'
                             value={state.name}
                             onChange={e => {
                                 if (e.previousValue === e.currentValue) {
@@ -252,13 +252,13 @@ export const ImagePieceDrawer: React.FC = () => {
                 </Row>
 
                 <Typography.Title level={4}>メモ</Typography.Title>
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col flex={0}></Col>
                     <Col span={inputSpan}>
                         <BufferedTextArea
-                            size="small"
-                            bufferDuration="default"
+                            size='small'
+                            bufferDuration='default'
                             value={state.memo}
                             rows={8}
                             onChange={e => setState({ ...state, memo: e.currentValue })}

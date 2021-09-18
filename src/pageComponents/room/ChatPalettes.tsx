@@ -146,7 +146,7 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                 <div style={titleStyle}>キャラクター</div>
                 <Select
                     style={{ flex: 1, maxWidth: miniInputMaxWidth }}
-                    placeholder="キャラクター"
+                    placeholder='キャラクター'
                     value={config.selectedCharacterStateId}
                     onSelect={(value, option) => {
                         if (typeof option.key !== 'string') {
@@ -188,7 +188,7 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                 onSelectedChannelTypeChange={setSelectedChannelType}
                 config={config}
                 onConfigUpdate={onConfigUpdate}
-                selectedCharacterType="some"
+                selectedCharacterType='some'
                 autoSubmitter={subject}
             />
         </div>

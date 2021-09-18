@@ -1096,7 +1096,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
     const boardsMenu =
         dropDownItems == null ? null : (
             <Menu>
-                <Menu.ItemGroup title="ボード一覧">{dropDownItems}</Menu.ItemGroup>
+                <Menu.ItemGroup title='ボード一覧'>{dropDownItems}</Menu.ItemGroup>
                 <Menu.Divider />
                 <Menu.Item
                     icon={<Icons.PlusOutlined />}

@@ -10,12 +10,7 @@ import { AppProps } from 'next/app';
 import 'firebase/auth';
 import 'firebase/storage';
 import useConstant from 'use-constant';
-import {
-    authNotFound,
-    FirebaseUserState,
-    loading,
-    notSignIn,
-} from '../contexts/MyAuthContext';
+import { authNotFound, FirebaseUserState, loading, notSignIn } from '../contexts/MyAuthContext';
 import store from '../store';
 import { appConsole } from '../utils/appConsole';
 import { getConfig, getHttpUri, getWsUri } from '../config';
@@ -194,7 +189,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     return (
         <>
             <Head>
-                <link rel="shortcut icon" href="/logo.png" />
+                <link rel='shortcut icon' href='/logo.png' />
             </Head>
             <AllContextProvider
                 clientId={clientId}

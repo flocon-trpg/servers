@@ -237,10 +237,10 @@ const CharacterList: React.FC = () => {
             width: 36,
             // eslint-disable-next-line react/display-name
             render: (_: unknown, { character }: DataSource) => (
-                <Tooltip title="編集">
+                <Tooltip title='編集'>
                     <Button
                         style={{ alignSelf: 'center' }}
-                        size="small"
+                        size='small'
                         onClick={() =>
                             dispatch(
                                 roomDrawerAndPopoverAndModalModule.actions.set({
@@ -264,7 +264,7 @@ const CharacterList: React.FC = () => {
             // eslint-disable-next-line react/display-name
             render: (_: unknown, { character, operate }: DataSource) => (
                 <ToggleButton
-                    size="small"
+                    size='small'
                     checked={!character.state.isPrivate}
                     disabled={
                         character.createdByMe ? false : characterIsNotPrivateAndNotCreatedByMe
@@ -304,7 +304,7 @@ const CharacterList: React.FC = () => {
                     <Input
                         style={{ minWidth: 100 }}
                         value={character.state.name}
-                        size="small"
+                        size='small'
                         onChange={newValue => {
                             operate(
                                 characterUpdateOperation(character.stateKey, {
@@ -327,7 +327,7 @@ const CharacterList: React.FC = () => {
     return (
         <div>
             <Button
-                size="small"
+                size='small'
                 onClick={() =>
                     dispatch(
                         roomDrawerAndPopoverAndModalModule.actions.set({
@@ -339,7 +339,7 @@ const CharacterList: React.FC = () => {
                 キャラクターを作成
             </Button>
             <Button
-                size="small"
+                size='small'
                 onClick={() =>
                     dispatch(
                         roomDrawerAndPopoverAndModalModule.actions.set({
@@ -353,7 +353,7 @@ const CharacterList: React.FC = () => {
             <Table
                 columns={columns}
                 dataSource={charactersDataSource}
-                size="small"
+                size='small'
                 pagination={false}
             />
         </div>

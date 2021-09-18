@@ -84,7 +84,7 @@ export const ActiveBoardSelectorModal: React.FC<Props> = ({ visible, onComplete 
         <Modal
             className={cancelRnd}
             visible={visible}
-            title="ボードビュアーに表示させるボードの変更"
+            title='ボードビュアーに表示させるボードの変更'
             onOk={onOk}
             okButtonProps={
                 hasSelectedBoardKey || selectedBoardKey?.delete === true
@@ -116,8 +116,8 @@ export const ActiveBoardSelectorModal: React.FC<Props> = ({ visible, onComplete 
                         setSelectedBoardKey({ delete: false, boardId: newValue.toString() });
                     }}
                 >
-                    <Select.Option value="$$delete">クリアする</Select.Option>
-                    <Select.OptGroup label="ボード一覧">{options}</Select.OptGroup>
+                    <Select.Option value='$$delete'>クリアする</Select.Option>
+                    <Select.OptGroup label='ボード一覧'>{options}</Select.OptGroup>
                 </Select>
             </div>
         </Modal>

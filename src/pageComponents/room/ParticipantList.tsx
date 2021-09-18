@@ -95,7 +95,7 @@ const ParticipantList: React.FC = () => {
 
     return (
         <div>
-            <Table columns={columns} dataSource={dataSource} size="small" pagination={false} />
+            <Table columns={columns} dataSource={dataSource} size='small' pagination={false} />
         </div>
     );
 };

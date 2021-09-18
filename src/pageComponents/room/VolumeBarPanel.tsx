@@ -33,7 +33,7 @@ const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
     // Math.roundがないと60.000000001のような中途半端な値が表示されることがある
     const masterVolumeBar = (
         <VolumeBar
-            inputNumberType="0-1"
+            inputNumberType='0-1'
             readonly={false}
             value={masterVolume}
             onChange={i =>
@@ -43,7 +43,7 @@ const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
     );
     const channel1VolumeBar = (
         <VolumeBar
-            inputNumberType="0-1"
+            inputNumberType='0-1'
             readonly={false}
             value={channelVolumes['1'] ?? defaultChannelVolume}
             onChange={i =>
@@ -59,7 +59,7 @@ const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
     );
     const channel2VolumeBar = (
         <VolumeBar
-            inputNumberType="0-1"
+            inputNumberType='0-1'
             readonly={false}
             value={channelVolumes['2'] ?? defaultChannelVolume}
             onChange={i =>
@@ -75,7 +75,7 @@ const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
     );
     const channel3VolumeBar = (
         <VolumeBar
-            inputNumberType="0-1"
+            inputNumberType='0-1'
             readonly={false}
             value={channelVolumes['3'] ?? defaultChannelVolume}
             onChange={i =>
@@ -91,7 +91,7 @@ const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
     );
     const channel4VolumeBar = (
         <VolumeBar
-            inputNumberType="0-1"
+            inputNumberType='0-1'
             readonly={false}
             value={channelVolumes['4'] ?? defaultChannelVolume}
             onChange={i =>
@@ -107,7 +107,7 @@ const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
     );
     const channel5VolumeBar = (
         <VolumeBar
-            inputNumberType="0-1"
+            inputNumberType='0-1'
             readonly={false}
             value={channelVolumes['5'] ?? defaultChannelVolume}
             onChange={i =>
@@ -123,7 +123,7 @@ const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
     );
     const seVolumeBar = (
         <VolumeBar
-            inputNumberType="0-1"
+            inputNumberType='0-1'
             readonly={false}
             value={seVolume}
             onChange={i =>

@@ -44,7 +44,7 @@ const EntryFormComponent: React.FC<EntryFormComponentProps> = (props: EntryFormC
 
     return (
         <Form
-            name="entryPhrase"
+            name='entryPhrase'
             onFinish={e => {
                 if (isSubmitting || isFinishedSuccessfully) {
                     return;
@@ -70,27 +70,27 @@ const EntryFormComponent: React.FC<EntryFormComponentProps> = (props: EntryFormC
                 });
             }}
         >
-            <Form.Item label="Phrase" name={phraseName}>
+            <Form.Item label='Phrase' name={phraseName}>
                 <Input />
             </Form.Item>
 
             <Form.Item>
                 <Button
                     disabled={isSubmitting || isFinishedSuccessfully}
-                    type="primary"
-                    htmlType="submit"
+                    type='primary'
+                    htmlType='submit'
                 >
                     Submit
                 </Button>
                 {isSubmitting ? <Spin /> : null}
                 {entryToServerResult?.data?.result.type === EntryToServerResultType.WrongPhrase ? (
-                    <Alert message="wrong phrase" type="error" showIcon />
+                    <Alert message='wrong phrase' type='error' showIcon />
                 ) : null}
                 {entryToServerResult?.error == null ? null : (
-                    <Alert message={entryToServerResult.error.message} type="error" showIcon />
+                    <Alert message={entryToServerResult.error.message} type='error' showIcon />
                 )}
                 {isFinishedSuccessfully ? (
-                    <Alert message="success" type="success" showIcon />
+                    <Alert message='success' type='success' showIcon />
                 ) : null}
             </Form.Item>
         </Form>
@@ -157,7 +157,7 @@ const Layout: React.FC<PropsWithChildren<Props>> = ({
 
     if (myAuth === authNotFound) {
         return (
-            <Result status="info" title="Firebase Authentication インスタンスが見つかりません。" />
+            <Result status='info' title='Firebase Authentication インスタンスが見つかりません。' />
         );
     }
 
@@ -168,18 +168,18 @@ const Layout: React.FC<PropsWithChildren<Props>> = ({
             return getChildren();
         }
         if (myAuth === loading) {
-            return <LoadingResult title="Firebase Authentication による認証を行っています…" />;
+            return <LoadingResult title='Firebase Authentication による認証を行っています…' />;
         }
         if (myAuth === notSignIn) {
             return <NotSignInResult />;
         }
         switch (isEntry) {
             case 'loading':
-                return <LoadingResult title="エントリーの有無を確認しています…" />;
+                return <LoadingResult title='エントリーの有無を確認しています…' />;
             case false:
                 return (
                     <Center>
-                        <Card title="エントリーパスワードの入力">
+                        <Card title='エントリーパスワードの入力'>
                             <EntryFormComponent
                                 onEntry={() => {
                                     setIsEntry(true);
@@ -214,10 +214,10 @@ const Layout: React.FC<PropsWithChildren<Props>> = ({
                 <Header>
                     <Row>
                         <Col flex={0}>
-                            <Link href="/">
+                            <Link href='/'>
                                 <img
                                     style={{ cursor: 'pointer' }}
-                                    src="/logo.png"
+                                    src='/logo.png'
                                     width={32}
                                     height={32}
                                 />
@@ -234,11 +234,11 @@ const Layout: React.FC<PropsWithChildren<Props>> = ({
                                     </div>
                                 )}
                                 {typeof myAuth === 'string' ? (
-                                    <Button key="2" onClick={() => router.push('/signin')}>
+                                    <Button key='2' onClick={() => router.push('/signin')}>
                                         Log in
                                     </Button>
                                 ) : (
-                                    <Button key="2" onClick={() => signOut()}>
+                                    <Button key='2' onClick={() => signOut()}>
                                         Logout
                                     </Button>
                                 )}

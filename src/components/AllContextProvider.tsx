@@ -24,7 +24,7 @@ export const AllContextProvider: React.FC<PropsWithChildren<Props>> = ({
     user,
     firebaseStorageUrlCache,
     idToken,
-    children
+    children,
 }: PropsWithChildren<Props>) => {
     return (
         <ClientIdContext.Provider value={clientId}>
@@ -32,9 +32,7 @@ export const AllContextProvider: React.FC<PropsWithChildren<Props>> = ({
                 <Provider store={store}>
                     <MyAuthContext.Provider value={user}>
                         <FirebaseStorageUrlCacheContext.Provider value={firebaseStorageUrlCache}>
-                            <FirebaseAuthenticationIdTokenContext.Provider
-                                value={idToken}
-                            >
+                            <FirebaseAuthenticationIdTokenContext.Provider value={idToken}>
                                 {children}
                             </FirebaseAuthenticationIdTokenContext.Provider>
                         </FirebaseStorageUrlCacheContext.Provider>

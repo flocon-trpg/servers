@@ -88,7 +88,7 @@ const DrawerFooter: React.FC<Props> = ({ close, ok, destroy }: Props) => {
                     ok.onClick();
                 }}
                 disabled={ok.disabled ?? false}
-                type="primary"
+                type='primary'
                 style={{ marginLeft: 8 }}
             >
                 {ok.textType}

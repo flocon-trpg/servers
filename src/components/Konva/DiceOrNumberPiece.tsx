@@ -109,7 +109,7 @@ const NumberPieceValueContent: React.FC<NumberPieceValueContentProps> = (
                 width={props.w}
                 height={props.h}
                 strokeWidth={2}
-                stroke="#606060B0"
+                stroke='#606060B0'
                 cornerRadius={5}
             />
             {/* fontSizeの決め方は適当 */}
@@ -119,10 +119,10 @@ const NumberPieceValueContent: React.FC<NumberPieceValueContentProps> = (
                 width={props.w}
                 height={props.h}
                 fontSize={props.w / 2.5}
-                fontFamily="Noto Sans JP Regular"
-                fill="black"
-                align="center"
-                verticalAlign="middle"
+                fontFamily='Noto Sans JP Regular'
+                fill='black'
+                align='center'
+                verticalAlign='middle'
             />
         </>
     );
@@ -237,7 +237,7 @@ const DicePieceValueContent: React.FC<DicePieceValueContentProps> = ({
             return null;
     }
 
-    const background = <ReactKonva.Rect x={0} y={0} width={w} height={h} fill="transparent" />;
+    const background = <ReactKonva.Rect x={0} y={0} width={w} height={h} fill='transparent' />;
 
     if (count === 0) {
         return (

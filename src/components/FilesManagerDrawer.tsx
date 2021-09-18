@@ -21,8 +21,8 @@ const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => 
         if (typeof myAuth === 'string') {
             return (
                 <Result
-                    status="warning"
-                    title="この機能を利用するにはログインする必要があります。"
+                    status='warning'
+                    title='この機能を利用するにはログインする必要があります。'
                 />
             );
         }
@@ -35,24 +35,24 @@ const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => 
         }
         return (
             <Tabs>
-                <Tabs.TabPane tab="Firebase Storage" key="1">
+                <Tabs.TabPane tab='Firebase Storage' key='1'>
                     <FirebaseFilesManager
                         onFlieOpen={onFileOpen}
                         defaultFilteredValue={drawerType?.defaultFilteredValue}
                     />
                 </Tabs.TabPane>
-                <Tabs.TabPane tab="内蔵アップローダー" key="2">
-                    <FloconFilesManager 
+                <Tabs.TabPane tab='内蔵アップローダー' key='2'>
+                    <FloconFilesManager
                         onFlieOpen={onFileOpen}
                         defaultFilteredValue={drawerType?.defaultFilteredValue}
                     />
                 </Tabs.TabPane>
                 {drawerType?.openFileType === some && (
-                    <Tabs.TabPane tab="URL" key="2">
+                    <Tabs.TabPane tab='URL' key='2'>
                         <div>
                             <Input value={input} onChange={e => setInput(e.target.value)} />
                             <Button
-                                type="primary"
+                                type='primary'
                                 style={{ marginTop: 2 }}
                                 disabled={input.trim() === '' /* このチェックはかなり簡易的 */}
                                 onClick={() => {

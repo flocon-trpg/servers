@@ -11,7 +11,7 @@ export const NewTabLinkify: React.FC<React.PropsWithChildren<Props>> = ({
         <Linkify
             componentDecorator={(href, text, key) => {
                 return (
-                    <a key={key} href={href} target="_blank" rel="noopener noreferrer">
+                    <a key={key} href={href} target='_blank' rel='noopener noreferrer'>
                         {text}
                     </a>
                 );

@@ -144,7 +144,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                 onCancel={() => onCancel()}
             >
                 <Input
-                    placeholder="フレーズ"
+                    placeholder='フレーズ'
                     value={inputValue}
                     onChange={e => setInputValue(e.target.value)}
                 />
@@ -235,10 +235,10 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
     return (
         <Modal
             visible={visible}
-            title="部屋の削除"
+            title='部屋の削除'
             okButtonProps={{ disabled }}
-            okType="danger"
-            okText="削除する"
+            okType='danger'
+            okText='削除する'
             cancelText={disabled ? '閉じる' : 'キャンセル'}
             onOk={() => {
                 setIsPosting(true);
@@ -356,7 +356,7 @@ const GenerateSimpleLogModal: React.FC<GenerateSimpleLogModalProps> = ({
     return (
         <Modal
             visible={visible}
-            title="ログのダウンロード"
+            title='ログのダウンロード'
             onOk={() => {
                 getLogQuery({ variables: { roomId } });
                 onOk();
@@ -479,9 +479,9 @@ const GenerateRichLogModal: React.FC<GenerateRichLogModalProps> = ({
             width={700}
             closable={false}
             maskClosable={!isDownloading}
-            title="ログのダウンロード"
+            title='ログのダウンロード'
             okButtonProps={{ style: { display: 'none' } }}
-            cancelText="閉じる"
+            cancelText='閉じる'
             cancelButtonProps={{ disabled: isDownloading }}
             onCancel={() => onCancel()}
         >
@@ -501,7 +501,7 @@ const GenerateRichLogModal: React.FC<GenerateRichLogModalProps> = ({
                 />
                 <Button
                     style={{ alignSelf: 'start', marginTop: 8 }}
-                    type="primary"
+                    type='primary'
                     disabled={isDownloading}
                     onClick={() => {
                         getLogQuery({ variables: { roomId } });
@@ -593,13 +593,13 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
     return (
         <Modal
             visible={visible}
-            title="名前を変更"
+            title='名前を変更'
             okButtonProps={{ disabled: isPosting }}
             onOk={() => onOk()}
             onCancel={() => onCancel()}
         >
             <Input
-                placeholder="新しい名前"
+                placeholder='新しい名前'
                 autoFocus
                 value={inputValue}
                 onChange={e => setInputValue(e.target.value)}
@@ -661,11 +661,11 @@ export const RoomMenu: React.FC = () => {
 
     return (
         <>
-            <Menu triggerSubMenuAction="click" selectable={false} mode="horizontal">
+            <Menu triggerSubMenuAction='click' selectable={false} mode='horizontal'>
                 <Menu.Item onClick={() => router.push('/')}>
-                    <img src="/logo.png" width={24} height={24} />
+                    <img src='/logo.png' width={24} height={24} />
                 </Menu.Item>
-                <Menu.SubMenu title="部屋">
+                <Menu.SubMenu title='部屋'>
                     <Menu.Item
                         onClick={() =>
                             dispatch(
@@ -688,7 +688,7 @@ export const RoomMenu: React.FC = () => {
                         ログをダウンロード（新）
                     </Menu.Item>
                 </Menu.SubMenu>
-                <Menu.SubMenu title="ウィンドウ">
+                <Menu.SubMenu title='ウィンドウ'>
                     <Menu.Item
                         onClick={() => {
                             dispatch(
@@ -745,7 +745,7 @@ export const RoomMenu: React.FC = () => {
                             <span>ボードビュアー</span>
                         </div>
                     </Menu.Item>
-                    <Menu.SubMenu title="ボードエディター">
+                    <Menu.SubMenu title='ボードエディター'>
                         {recordToArray(boardPanels).map((pair, i) => {
                             return (
                                 <Menu.Item
@@ -814,7 +814,7 @@ export const RoomMenu: React.FC = () => {
                             </div>
                         </Menu.Item>
                     </Menu.SubMenu>
-                    <Menu.SubMenu title="メッセージ">
+                    <Menu.SubMenu title='メッセージ'>
                         {recordToArray(messagePanels).map((pair, i) => {
                             return (
                                 <Menu.Item
@@ -871,7 +871,7 @@ export const RoomMenu: React.FC = () => {
                             </div>
                         </Menu.Item>
                     </Menu.SubMenu>
-                    <Menu.SubMenu title="チャットパレット">
+                    <Menu.SubMenu title='チャットパレット'>
                         {recordToArray(chatPalettePanels).map((pair, i) => {
                             return (
                                 <Menu.Item
@@ -940,7 +940,7 @@ export const RoomMenu: React.FC = () => {
                             </div>
                         </Menu.Item>
                     </Menu.SubMenu>
-                    <Menu.SubMenu title="共有メモ（部屋）">
+                    <Menu.SubMenu title='共有メモ（部屋）'>
                         {recordToArray(memoPanels).map((pair, i) => {
                             return (
                                 <Menu.Item
@@ -1083,7 +1083,7 @@ export const RoomMenu: React.FC = () => {
                     </Menu.Item>
                 </Menu.SubMenu>
                 <Menu.Item>
-                    <Popover trigger="click" content={<VolumeBarPanel roomId={roomId} />}>
+                    <Popover trigger='click' content={<VolumeBarPanel roomId={roomId} />}>
                         ボリューム
                     </Popover>
                 </Menu.Item>
@@ -1113,7 +1113,7 @@ export const RoomMenu: React.FC = () => {
                     >
                         {me.role === ParticipantRole.Player ||
                         me.role === ParticipantRole.Master ? (
-                            <Tooltip title="すでに昇格済みです。">参加者に昇格</Tooltip>
+                            <Tooltip title='すでに昇格済みです。'>参加者に昇格</Tooltip>
                         ) : (
                             '参加者に昇格'
                         )}

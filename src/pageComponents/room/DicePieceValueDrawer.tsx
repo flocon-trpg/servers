@@ -53,8 +53,8 @@ const IdView: React.FC = () => {
     }
 
     return (
-        <Row gutter={gutter} align="middle">
-            <Col flex="auto" />
+        <Row gutter={gutter} align='middle'>
+            <Col flex='auto' />
             <Col flex={0}>ID</Col>
             <Col span={inputSpan}>
                 {drawerType.type === update
@@ -200,8 +200,8 @@ export const DicePieceValueDrawer: React.FC = () => {
         >
             <div>
                 <IdView />
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col flex={0}>所有者</Col>
                     <Col span={inputSpan}>
                         <MyCharactersSelect
@@ -220,12 +220,12 @@ export const DicePieceValueDrawer: React.FC = () => {
                     const die = state.dice[key];
 
                     return (
-                        <Row key={key} style={{ minHeight: 28 }} gutter={gutter} align="middle">
-                            <Col flex="auto" />
+                        <Row key={key} style={{ minHeight: 28 }} gutter={gutter} align='middle'>
+                            <Col flex='auto' />
                             <Col flex={0}>{`ダイス${key}`}</Col>
                             <Col span={inputSpan}>
                                 <InputDie
-                                    size="small"
+                                    size='small'
                                     state={die ?? null}
                                     onChange={e => {
                                         if (e.type === replace) {

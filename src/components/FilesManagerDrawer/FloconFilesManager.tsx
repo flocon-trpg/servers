@@ -161,7 +161,7 @@ const fileTypeColumn = (defaultFilteredValue: FilterValue | null | undefined): C
     title: (
         <span>
             種類{' '}
-            <InformationIcon title="種類の分類はあくまで簡易的なものです。誤った分類がされることがあります。" />
+            <InformationIcon title='種類の分類はあくまで簡易的なものです。誤った分類がされることがあります。' />
         </span>
     ),
     key: 'fileType',
@@ -356,9 +356,9 @@ const FloconFilesList: React.FC<FloconFilesListProps> = ({
                         setSelectedRowKeys(selected);
                     },
                 }}
-                size="small"
+                size='small'
                 pagination={{ pageSize: 15 }}
-                rowKey="filename"
+                rowKey='filename'
                 columns={columns}
                 dataSource={getFilesQueryResult.data?.result.files ?? []}
             />

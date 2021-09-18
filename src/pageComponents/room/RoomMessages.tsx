@@ -130,7 +130,7 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
         <Drawer
             className={cancelRnd}
             visible={config != null}
-            title="タブの編集"
+            title='タブの編集'
             closable
             onClose={() => onClose()}
             width={500}
@@ -143,8 +143,8 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
                 />
             }
         >
-            <Row gutter={drawerGutter} align="middle">
-                <Col flex="auto" />
+            <Row gutter={drawerGutter} align='middle'>
+                <Col flex='auto' />
                 <Col flex={0}>タブ名</Col>
                 <Col span={drawerInputSpan}>
                     <Input
@@ -155,17 +155,17 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
                         <>
                             <br />
                             <Alert
-                                type="info"
+                                type='info'
                                 showIcon
-                                message="タブ名が空白であるため、自動的に決定された名前が表示されます。"
+                                message='タブ名が空白であるため、自動的に決定された名前が表示されます。'
                             />
                         </>
                     )}
                 </Col>
             </Row>
             <Divider />
-            <Row gutter={drawerGutter} align="middle">
-                <Col flex="auto" />
+            <Row gutter={drawerGutter} align='middle'>
+                <Col flex='auto' />
                 <Col flex={0}>特殊チャンネル</Col>
                 <Col span={drawerInputSpan}>
                     <Checkbox
@@ -191,8 +191,8 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
                 </Col>
             </Row>
             <Divider dashed />
-            <Row gutter={drawerGutter} align="middle">
-                <Col flex="auto" />
+            <Row gutter={drawerGutter} align='middle'>
+                <Col flex='auto' />
                 <Col flex={0}>一般チャンネル</Col>
                 <Col span={drawerInputSpan}>
                     <Checkbox
@@ -267,8 +267,8 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
                 </Col>
             </Row>
             <Divider dashed />
-            <Row gutter={drawerGutter} align="middle">
-                <Col flex="auto" />
+            <Row gutter={drawerGutter} align='middle'>
+                <Col flex='auto' />
                 <Col flex={0}>秘話</Col>
                 <Col span={drawerInputSpan}>
                     <Radio.Group
@@ -331,7 +331,7 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
                                 );
                             })}
                     {hiwaSelectValue === custom && participantsMap.size <= 1 && (
-                        <Alert type="info" showIcon message="自分以外の入室者がいません。" />
+                        <Alert type='info' showIcon message='自分以外の入室者がいません。' />
                     )}
                 </Col>
             </Row>
@@ -356,7 +356,7 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
         <Drawer
             className={cancelRnd}
             visible={visible}
-            title="チャンネル名の編集"
+            title='チャンネル名の編集'
             closable
             onClose={() => onClose()}
             width={500}
@@ -372,12 +372,12 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
             {([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).map(i => {
                 const key = `publicChannel${i}Name` as const;
                 return (
-                    <Row key={i} gutter={drawerGutter} align="middle">
-                        <Col flex="auto" />
+                    <Row key={i} gutter={drawerGutter} align='middle'>
+                        <Col flex='auto' />
                         <Col flex={0}>チャンネル{i}</Col>
                         <Col span={drawerInputSpan}>
                             <BufferedInput
-                                bufferDuration="default"
+                                bufferDuration='default'
                                 value={publicChannelNames == null ? '' : publicChannelNames[key]}
                                 onChange={e => {
                                     if (e.previousValue === e.currentValue) {
@@ -651,14 +651,14 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
             >
                 {allMenuItemsAreNull ? null : (
                     <Dropdown overlay={<Menu>{menuItems}</Menu>} trigger={['click']}>
-                        <Button type="text" size="small">
+                        <Button type='text' size='small'>
                             <Icon.EllipsisOutlined />
                         </Button>
                     </Dropdown>
                 )}
             </div>
             <InputModal
-                title="メッセージの編集"
+                title='メッセージの編集'
                 visible={isEditModalVisible}
                 isTextArea={true}
                 onOk={(value, setValue) => {
@@ -828,8 +828,8 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
         case failure:
             return (
                 <Result
-                    status="error"
-                    title="エラー"
+                    status='error'
+                    title='エラー'
                     subTitle={allRoomMessagesResult.failureType}
                 />
             );
@@ -905,8 +905,8 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                                       >
                                           <Button
                                               style={{ width: 16 }}
-                                              type="text"
-                                              size="small"
+                                              type='text'
+                                              size='small'
                                               icon={
                                                   <Icon.EllipsisOutlined style={{ opacity: 0.6 }} />
                                               }
@@ -957,7 +957,7 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
             <div className={classNames(flex, flexRow, itemsCenter)}>
                 <Button
                     style={{ margin: `4px ${marginX}px 4px ${marginX}px`, width: 170 }}
-                    size="small"
+                    size='small'
                     onClick={() => setIsChannelNamesEditorVisible(true)}
                 >
                     チャンネルの名前を編集
@@ -965,7 +965,7 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                 <div style={{ width: 16 }} />
                 <div>フォントサイズ</div>
                 <Button
-                    size="small"
+                    size='small'
                     onClick={() => {
                         dispatch(
                             userConfigModule.actions.set({
@@ -977,7 +977,7 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                     <Icons.MinusOutlined />
                 </Button>
                 <Button
-                    size="small"
+                    size='small'
                     onClick={() => {
                         dispatch(
                             userConfigModule.actions.set({
@@ -991,7 +991,7 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
             </div>
             <Tabs
                 style={{ flexBasis: `${tabsHeight}px`, margin: `0 ${marginX}px 4px ${marginX}px` }}
-                type="editable-card"
+                type='editable-card'
                 onEdit={(e, type) => {
                     if (type === 'remove') {
                         if (typeof e !== 'string') {

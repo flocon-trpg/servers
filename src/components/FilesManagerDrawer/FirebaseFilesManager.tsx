@@ -42,10 +42,7 @@ type UploaderProps = {
     storageType: StorageType;
 };
 
-const Uploader: React.FC<UploaderProps> = ({
-    onUploaded,
-    storageType,
-}: UploaderProps) => {
+const Uploader: React.FC<UploaderProps> = ({ onUploaded, storageType }: UploaderProps) => {
     const myUserUid = useMyUserUid();
     const config = React.useContext(ConfigContext);
 
@@ -122,7 +119,7 @@ const fileTypeColumn = (defaultFilteredValue: FilterValue | null | undefined): C
     title: (
         <span>
             種類{' '}
-            <InformationIcon title="種類の分類はあくまで簡易的なものです。誤った分類がされることがあります。" />
+            <InformationIcon title='種類の分類はあくまで簡易的なものです。誤った分類がされることがあります。' />
         </span>
     ),
     key: 'fileType',
@@ -318,9 +315,9 @@ const FirebaseFilesList: React.FC<FirebaseFilesListProps> = ({
                         setSelectedRowKeys(selected);
                     },
                 }}
-                size="small"
+                size='small'
                 pagination={{ pageSize: 15 }}
-                rowKey="fullPath"
+                rowKey='fullPath'
                 columns={columns}
                 dataSource={(storageType === unlisted ? unlistedFiles : publicFiles) ?? []}
             />
@@ -429,7 +426,7 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
     const unlistedTabPane: JSX.Element = (() => {
         if (config.web.firebase.storage.enableUnlisted) {
             return (
-                <Tabs.TabPane tab="unlisted" key="storage1">
+                <Tabs.TabPane tab='unlisted' key='storage1'>
                     <div>
                         <Uploader
                             storageType={unlisted}
@@ -439,20 +436,20 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
                         />
                         <FirebaseFilesList
                             onFlieOpen={onFirebaseFileOpen}
-                            storageType="unlisted"
+                            storageType='unlisted'
                             defaultFilteredValue={defaultFilteredValue}
                         />
                     </div>
                 </Tabs.TabPane>
             );
         }
-        return <Tabs.TabPane tab="unlisted" disabled key="storage1" />;
+        return <Tabs.TabPane tab='unlisted' disabled key='storage1' />;
     })();
 
     const publicTabPane: JSX.Element = (() => {
         if (config.web.firebase.storage.enablePublic) {
             return (
-                <Tabs.TabPane tab="public" key="storage2">
+                <Tabs.TabPane tab='public' key='storage2'>
                     <div>
                         <Uploader
                             storageType={$public}
@@ -462,14 +459,14 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
                         />
                         <FirebaseFilesList
                             onFlieOpen={onFirebaseFileOpen}
-                            storageType="public"
+                            storageType='public'
                             defaultFilteredValue={defaultFilteredValue}
                         />
                     </div>
                 </Tabs.TabPane>
             );
         }
-        return <Tabs.TabPane tab="public" disabled key="storage2" />;
+        return <Tabs.TabPane tab='public' disabled key='storage2' />;
     })();
 
     return (

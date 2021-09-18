@@ -20,9 +20,9 @@ const QueryResultViewer: React.FC<PropsWithChildren<Props>> = ({
 }: PropsWithChildren<Props>) => {
     if (error != null) {
         if (compact) {
-            return <Alert type="error" showIcon message={`APIエラー: ${error.message}`} />;
+            return <Alert type='error' showIcon message={`APIエラー: ${error.message}`} />;
         }
-        return <Result status="error" title="APIエラー" subTitle={error.message} />;
+        return <Result status='error' title='APIエラー' subTitle={error.message} />;
     }
     if (loading === true) {
         if (compact) {

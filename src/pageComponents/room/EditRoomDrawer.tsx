@@ -27,7 +27,7 @@ const EditRoomDrawer: React.FC = () => {
     return (
         <Drawer
             {...drawerBaseProps}
-            title="部屋の設定"
+            title='部屋の設定'
             visible={editRoomDrawerVisibility}
             closable
             onClose={() =>
@@ -52,12 +52,12 @@ const EditRoomDrawer: React.FC = () => {
             }
         >
             <div>
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col flex={0}>名前</Col>
                     <Col span={inputSpan}>
                         <Input
-                            size="small"
+                            size='small'
                             value={name}
                             onChange={e => {
                                 const operation: UpOperation = {

@@ -52,7 +52,7 @@ const RoomMessagePanels: React.FC<{ roomId: string }> = ({ roomId }: { roomId: s
                 return (
                     <DraggableCard
                         key={pair.key}
-                        header="Message"
+                        header='Message'
                         onDragStop={e =>
                             dispatch(
                                 roomConfigModule.actions.moveMessagePanel({
@@ -155,7 +155,7 @@ const Room: React.FC = () => {
         pieceValuePanel == null ||
         participantPanel == null
     ) {
-        return <LoadingResult title="個人設定のデータをブラウザから読み込んでいます…" />;
+        return <LoadingResult title='個人設定のデータをブラウザから読み込んでいます…' />;
     }
 
     if (myUserUid == null) {
@@ -163,8 +163,8 @@ const Room: React.FC = () => {
             <AntdLayout>
                 <AntdLayout.Content>
                     <Result
-                        status="warning"
-                        title="ログインしていないか、Participantの取得に失敗しました。"
+                        status='warning'
+                        title='ログインしていないか、Participantの取得に失敗しました。'
                     />
                 </AntdLayout.Content>
             </AntdLayout>
@@ -180,7 +180,7 @@ const Room: React.FC = () => {
         return (
             <DraggableCard
                 key={pair.key}
-                header="ボードエディター"
+                header='ボードエディター'
                 onDragStop={e =>
                     dispatch(
                         roomConfigModule.actions.moveBoardPanel({
@@ -226,7 +226,7 @@ const Room: React.FC = () => {
                 <Board
                     canvasWidth={pair.value.width}
                     canvasHeight={pair.value.height}
-                    type="boardEditor"
+                    type='boardEditor'
                     boardEditorPanelId={pair.key}
                     boardEditorPanel={pair.value}
                 />
@@ -242,7 +242,7 @@ const Room: React.FC = () => {
         return (
             <DraggableCard
                 key={pair.key}
-                header="チャットパレット"
+                header='チャットパレット'
                 onDragStop={e =>
                     dispatch(
                         roomConfigModule.actions.moveChatPalettePanel({
@@ -298,7 +298,7 @@ const Room: React.FC = () => {
         return (
             <DraggableCard
                 key={pair.key}
-                header="共有メモ（部屋）"
+                header='共有メモ（部屋）'
                 onDragStop={e =>
                     dispatch(
                         roomConfigModule.actions.moveMemoPanel({ ...e, roomId, panelId: pair.key })
@@ -357,7 +357,7 @@ const Room: React.FC = () => {
                 <div>
                     {activeBoardPanelConfig.isMinimized ? null : (
                         <DraggableCard
-                            header="ボードビュアー"
+                            header='ボードビュアー'
                             onDragStop={e =>
                                 dispatch(
                                     roomConfigModule.actions.moveBoardPanel({
@@ -404,7 +404,7 @@ const Room: React.FC = () => {
                             <Board
                                 canvasWidth={activeBoardPanelConfig.width}
                                 canvasHeight={activeBoardPanelConfig.height}
-                                type="activeBoard"
+                                type='activeBoard'
                                 activeBoardPanel={activeBoardPanelConfig}
                             />
                         </DraggableCard>
@@ -413,7 +413,7 @@ const Room: React.FC = () => {
                     <RoomMessagePanels roomId={roomId} />
                     {characterPanel.isMinimized ? null : (
                         <DraggableCard
-                            header="Characters"
+                            header='Characters'
                             onDragStop={e =>
                                 dispatch(
                                     roomConfigModule.actions.moveCharacterPanel({ ...e, roomId })
@@ -461,7 +461,7 @@ const Room: React.FC = () => {
                     {chatPalettePanels}
                     {gameEffectPanel.isMinimized ? null : (
                         <DraggableCard
-                            header="SE, BGM"
+                            header='SE, BGM'
                             onDragStop={e =>
                                 dispatch(
                                     roomConfigModule.actions.moveGameEffectPanel({ ...e, roomId })
@@ -509,7 +509,7 @@ const Room: React.FC = () => {
                     {memoPanels}
                     {participantPanel.isMinimized ? null : (
                         <DraggableCard
-                            header="Participants"
+                            header='Participants'
                             onDragStop={e =>
                                 dispatch(
                                     roomConfigModule.actions.moveParticipantPanel({ ...e, roomId })
@@ -556,7 +556,7 @@ const Room: React.FC = () => {
                     )}
                     {pieceValuePanel.isMinimized ? null : (
                         <DraggableCard
-                            header="コマ"
+                            header='コマ'
                             onDragStop={e =>
                                 dispatch(
                                     roomConfigModule.actions.movePieceValuePanel({ ...e, roomId })

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Checkbox, Divider, Drawer,  Tooltip, Typography } from 'antd';
+import { Button, Checkbox, Divider, Drawer, Tooltip, Typography } from 'antd';
 import {
     FilePathInput,
     FileSourceType,
@@ -40,12 +40,12 @@ const VolumeBarForSoundPlayer: React.FC<VolumeBarForSoundPlayerProps> = ({
     hasMarginLeft,
 }: VolumeBarForSoundPlayerProps) => {
     return (
-        <Tooltip title="ボリューム補正の値は、自分だけでなく部屋にいる全員に反映されます">
+        <Tooltip title='ボリューム補正の値は、自分だけでなく部屋にいる全員に反映されます'>
             <div className={classNames(flex, flexRow, itemsCenter)}>
                 <Icon.SoundOutlined style={{ marginLeft: hasMarginLeft ? 16 : undefined }} />
                 <span>ボリューム補正</span>
                 <VolumeBar
-                    inputNumberType="0-1"
+                    inputNumberType='0-1'
                     readonly={false}
                     value={volumeBarValue}
                     onChange={i => {
@@ -89,8 +89,8 @@ const FilePathView: React.FC<FilePathViewProps> = ({
             </div>
             {closable && (
                 <Button
-                    type="text"
-                    size="small"
+                    type='text'
+                    size='small'
                     style={{ flex: 0 }}
                     onClick={() => (onClose == null ? undefined : onClose())}
                 >
@@ -234,8 +234,8 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({
                 {tags.length === 0 ? 'BGMに指定するファイルが1つも選択されていません。' : tags}
                 <Button
                     icon={<Icon.PlusOutlined />}
-                    type="dashed"
-                    size="small"
+                    type='dashed'
+                    size='small'
                     onClick={() =>
                         setFilesManagerDrawerType({
                             openFileType: some,
@@ -282,7 +282,7 @@ const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({
     return (
         <Drawer
             className={cancelRnd}
-            title="SE"
+            title='SE'
             width={400}
             closable
             visible={visible}
@@ -332,8 +332,8 @@ const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({
                 {!fileInput && (
                     <Button
                         icon={<Icon.PlusOutlined />}
-                        type="dashed"
-                        size="small"
+                        type='dashed'
+                        size='small'
                         onClick={() =>
                             setFilesManagerDrawerType({
                                 openFileType: some,
@@ -402,7 +402,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                 {volumeInput != null && (bgmState?.files ?? []).length !== 0 && (
                     <>
                         <Button
-                            size="small"
+                            size='small'
                             onClick={() => {
                                 if (volumeInput == null || bgmState == null) {
                                     return;
@@ -425,7 +425,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                             適用
                         </Button>
                         <Button
-                            size="small"
+                            size='small'
                             onClick={() => {
                                 setVolumeInput(undefined);
                             }}
@@ -438,7 +438,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
             {tags.length === 0 ? '(再生中のBGMはありません)' : tags}
             <div style={{ display: 'flex', flexDirection: 'row', marginTop: 2 }}>
                 <Button
-                    size="small"
+                    size='small'
                     onClick={() => {
                         setIsDrawerVisible(true);
                     }}
@@ -446,7 +446,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                     編集
                 </Button>
                 <Button
-                    size="small"
+                    size='small'
                     disabled={(bgmState?.files ?? []).length === 0}
                     onClick={() => {
                         if (bgmState == null) {
@@ -472,7 +472,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                     {bgmState?.isPaused === true ? '再生' : '停止'}
                 </Button>
                 <Button
-                    size="small"
+                    size='small'
                     disabled={(bgmState?.files ?? []).length === 0}
                     onClick={() => {
                         const operation: UpOperation = {
@@ -509,7 +509,7 @@ const SoundPlayer: React.FC = () => {
 
             <div style={MyStyle.Text.larger}>SE</div>
             <Button
-                size="small"
+                size='small'
                 style={{ marginTop: 2 }}
                 onClick={() => {
                     setIsSeDrawerVisible(true);
@@ -518,15 +518,15 @@ const SoundPlayer: React.FC = () => {
                 流す
             </Button>
             <div style={{ height: padding }} />
-            <BgmPlayer bgmState={(bgmsState ?? {})['1']} channelKey="1" />
+            <BgmPlayer bgmState={(bgmsState ?? {})['1']} channelKey='1' />
             <div style={{ height: padding }} />
-            <BgmPlayer bgmState={(bgmsState ?? {})['2']} channelKey="2" />
+            <BgmPlayer bgmState={(bgmsState ?? {})['2']} channelKey='2' />
             <div style={{ height: padding }} />
-            <BgmPlayer bgmState={(bgmsState ?? {})['3']} channelKey="3" />
+            <BgmPlayer bgmState={(bgmsState ?? {})['3']} channelKey='3' />
             <div style={{ height: padding }} />
-            <BgmPlayer bgmState={(bgmsState ?? {})['4']} channelKey="4" />
+            <BgmPlayer bgmState={(bgmsState ?? {})['4']} channelKey='4' />
             <div style={{ height: padding }} />
-            <BgmPlayer bgmState={(bgmsState ?? {})['5']} channelKey="5" />
+            <BgmPlayer bgmState={(bgmsState ?? {})['5']} channelKey='5' />
         </div>
     );
 };

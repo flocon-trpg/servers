@@ -25,7 +25,7 @@ export const ImageView: React.FC<Props> = ({
             // CONSIDER: 画像のURLを取得中のときだけでなく、画像を読込中のときもLoadingとして表示しないと少し混乱しそう
             // TODO: Uploaderのときは新しいタブで開くのではなくダウンロードする
             if (link) {
-                <a href={src.value} target="_blank" rel="noopener noreferrer">
+                <a href={src.value} target='_blank' rel='noopener noreferrer'>
                     <LazyAndPreloadImage
                         src={src.value}
                         width={size}
