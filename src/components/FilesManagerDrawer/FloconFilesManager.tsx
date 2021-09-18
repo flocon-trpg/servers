@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, Dropdown, Menu, notification, Table, Upload } from 'antd';
+import { Button, Dropdown, Menu, notification, Table, Tooltip, Upload } from 'antd';
 import { accept } from './helper';
 import ConfigContext from '../../contexts/ConfigContext';
 import { getHttpUri } from '../../config';
@@ -124,14 +124,24 @@ const Thumb: React.FC<ThumbProps> = ({ thumbFilePath, size }: ThumbProps) => {
         return URL.createObjectURL(blob);
     }, [thumbFilePath, config, idToken]);
 
-    console.info('src', src.value);
     return (
-        <LazyAndPreloadImage
-            src={src.value ?? undefined}
-            width={size}
-            height={size}
-            loadingPlaceholder={loadingIcon}
-        />
+        <Tooltip
+            overlay={
+                <LazyAndPreloadImage
+                    src={src.value ?? undefined}
+                    width={80}
+                    height={80}
+                    loadingPlaceholder={loadingIcon}
+                />
+            }
+        >
+            <LazyAndPreloadImage
+                src={src.value ?? undefined}
+                width={size}
+                height={size}
+                loadingPlaceholder={loadingIcon}
+            />
+        </Tooltip>
     );
 };
 
