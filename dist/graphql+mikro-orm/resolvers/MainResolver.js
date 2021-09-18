@@ -93,7 +93,13 @@ let MainResolver = class MainResolver {
         await context.em.flush();
         for (const filename of filenamesToDelete) {
             const filePath = path_1.default.resolve(directory, filename);
-            const statResult = await fs_extra_1.stat(filePath);
+            const statResult = await fs_extra_1.stat(filePath).catch(err => {
+                console.warn('stat(%s) threw an error. Maybe the file was not found?: %o', filePath, err);
+                return false;
+            });
+            if (statResult === false) {
+                continue;
+            }
             if (statResult.isFile()) {
                 await fs_extra_1.remove(filePath);
             }
@@ -103,7 +109,13 @@ let MainResolver = class MainResolver {
         }
         for (const filename of thumbFilenamesToDelete) {
             const filePath = path_1.default.resolve(directory, thumbsDir_1.thumbsDir, filename);
-            const statResult = await fs_extra_1.stat(filePath);
+            const statResult = await fs_extra_1.stat(filePath).catch(err => {
+                console.warn('stat(%s) threw an error. Maybe the file was not found?: %o', filePath, err);
+                return false;
+            });
+            if (statResult === false) {
+                continue;
+            }
             if (statResult.isFile()) {
                 await fs_extra_1.remove(filePath);
             }

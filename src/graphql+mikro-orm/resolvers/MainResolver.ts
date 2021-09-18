@@ -121,7 +121,17 @@ export class MainResolver {
         await context.em.flush();
         for (const filename of filenamesToDelete) {
             const filePath = path.resolve(directory, filename);
-            const statResult = await stat(filePath);
+            const statResult = await stat(filePath).catch(err => {
+                console.warn(
+                    'stat(%s) threw an error. Maybe the file was not found?: %o',
+                    filePath,
+                    err
+                );
+                return false as const;
+            });
+            if (statResult === false) {
+                continue;
+            }
             // バグなどで想定外のディレクトリが指定されてしまったときの保険的対策として、fileかどうかチェックしている
             if (statResult.isFile()) {
                 await remove(filePath);
@@ -131,7 +141,17 @@ export class MainResolver {
         }
         for (const filename of thumbFilenamesToDelete) {
             const filePath = path.resolve(directory, thumbsDir, filename);
-            const statResult = await stat(filePath);
+            const statResult = await stat(filePath).catch(err => {
+                console.warn(
+                    'stat(%s) threw an error. Maybe the file was not found?: %o',
+                    filePath,
+                    err
+                );
+                return false as const;
+            });
+            if (statResult === false) {
+                continue;
+            }
             // バグなどで想定外のディレクトリが指定されてしまったときの保険的対策として、fileかどうかチェックしている
             if (statResult.isFile()) {
                 await remove(filePath);
