@@ -149,7 +149,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
                 .toFile(thumbPath)
                 .then(() => true)
                 .catch(err => {
-                console.info(err);
+                console.log(err);
                 return false;
             });
             const permission = permissionParam === 'public'

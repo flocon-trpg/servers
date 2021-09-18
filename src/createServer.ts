@@ -195,7 +195,9 @@ export const createServer = async ({
                     .toFile(thumbPath)
                     .then(() => true)
                     .catch(err => {
-                        console.info(err);
+                        // 画像かどうかに関わらず全てのファイルをsharpに渡すため、mp3などといった画像でないファイルの場合はほぼ確実にこの関数が実行される
+
+                        console.log(err);
                         return false;
                     });
                 const permission =
