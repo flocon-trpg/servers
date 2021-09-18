@@ -210,7 +210,7 @@ let MainResolver = class MainResolver {
             serverConfig: context.serverConfig,
         });
     }
-    async getServerInfo() {
+    async getServerInfo(context) {
         const prerelease = (() => {
             if (VERSION_1.default.prerelease == null) {
                 return undefined;
@@ -226,6 +226,7 @@ let MainResolver = class MainResolver {
         })();
         return {
             version: Object.assign(Object.assign({}, VERSION_1.default), { prerelease }),
+            uploaderEnabled: context.serverConfig.uploader != null,
         };
     }
     async entryToServer(phrase, context) {
@@ -348,8 +349,9 @@ __decorate([
 ], MainResolver.prototype, "isEntry", null);
 __decorate([
     type_graphql_1.Query(() => graphql_2.ServerInfo),
+    __param(0, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], MainResolver.prototype, "getServerInfo", null);
 __decorate([

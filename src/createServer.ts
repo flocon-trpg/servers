@@ -97,7 +97,7 @@ export const createServer = async ({
         });
     }
 
-    if (serverConfig.uploader?.enabled === true) {
+    if (serverConfig.uploader != null) {
         AppConsole.log({
             en: `The uploader of API server is enabled.`,
             ja: `APIサーバーのアップローダーは有効化されています。`,
@@ -237,7 +237,7 @@ export const createServer = async ({
                 return;
         }
 
-        if (serverConfig.uploader?.enabled !== true) {
+        if (serverConfig.uploader == null) {
             res.status(403).send('Flocon uploader is disabled by server config');
             return;
         }

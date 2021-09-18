@@ -56,6 +56,10 @@ __decorate([
     type_graphql_1.Field(() => SemVer),
     __metadata("design:type", SemVer)
 ], ServerInfo.prototype, "version", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", Boolean)
+], ServerInfo.prototype, "uploaderEnabled", void 0);
 ServerInfo = __decorate([
     type_graphql_1.ObjectType()
 ], ServerInfo);

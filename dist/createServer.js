@@ -24,7 +24,6 @@ const FilePermissionType_1 = require("./enums/FilePermissionType");
 const easyFlake_1 = require("./utils/easyFlake");
 const thumbsDir_1 = require("./utils/thumbsDir");
 const createServer = async ({ serverConfig, promiseQueue, connectionManager, em, schema, debug, getDecodedIdTokenFromExpressRequest, getDecodedIdTokenFromWsContext, port, }) => {
-    var _a;
     const context = async (context) => {
         return {
             decodedIdToken: await getDecodedIdTokenFromExpressRequest(context.req),
@@ -61,7 +60,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
             next();
         });
     }
-    if (((_a = serverConfig.uploader) === null || _a === void 0 ? void 0 : _a.enabled) === true) {
+    if (serverConfig.uploader != null) {
         appConsole_1.AppConsole.log({
             en: `The uploader of API server is enabled.`,
             ja: `APIサーバーのアップローダーは有効化されています。`,
@@ -168,7 +167,6 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
         });
     }
     app.get('/uploader/:type/:file_name', async (req, res) => {
-        var _a;
         let typeParam;
         switch (req.params.type) {
             case 'files':
@@ -181,7 +179,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
                 res.sendStatus(404);
                 return;
         }
-        if (((_a = serverConfig.uploader) === null || _a === void 0 ? void 0 : _a.enabled) !== true) {
+        if (serverConfig.uploader == null) {
             res.status(403).send('Flocon uploader is disabled by server config');
             return;
         }

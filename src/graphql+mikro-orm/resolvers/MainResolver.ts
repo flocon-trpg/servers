@@ -268,9 +268,9 @@ export class MainResolver {
         });
     }
 
-    // CONSIDER: 内部情報に簡単にアクセスできるのはセキュリティリスクになりうる
+    // CONSIDER: 内部情報に簡単にアクセスできるのはセキュリティリスクになりうる。
     @Query(() => ServerInfo)
-    public async getServerInfo(): Promise<ServerInfo> {
+    public async getServerInfo(@Ctx() context: ResolverContext): Promise<ServerInfo> {
         const prerelease = (() => {
             if (VERSION.prerelease == null) {
                 return undefined;
@@ -298,6 +298,7 @@ export class MainResolver {
                 ...VERSION,
                 prerelease,
             },
+            uploaderEnabled: context.serverConfig.uploader != null,
         };
     }
 
