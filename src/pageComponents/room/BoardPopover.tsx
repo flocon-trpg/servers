@@ -174,7 +174,7 @@ namespace PopupEditorBase {
                                 style={{ flex: 0, minWidth: titleWidth, width: titleWidth }}
                             >{`ダイス${key}`}</div>
                             <InputDie
-                                size="small"
+                                size='small'
                                 state={die ?? null}
                                 onChange={e => {
                                     operate(
@@ -340,7 +340,7 @@ namespace ContextMenuModule {
         }
         return (
             <>
-                {characterPiecesOnCursor.map(({ characterKey, character,pieceKey }) => (
+                {characterPiecesOnCursor.map(({ characterKey, character, pieceKey }) => (
                     // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が他にもあるため、キーを互いに異なるものにするように文字列を付加している。
                     <Menu.SubMenu
                         key={keyNames(characterKey) + '@selected-piece'}
@@ -544,7 +544,7 @@ namespace ContextMenuModule {
         }
         return (
             <>
-                <Menu.SubMenu title="キャラクターコマンド">{itemGroups}</Menu.SubMenu>
+                <Menu.SubMenu title='キャラクターコマンド'>{itemGroups}</Menu.SubMenu>
                 <Menu.Divider />
             </>
         );
@@ -583,7 +583,7 @@ namespace ContextMenuModule {
                                 <DicePieceValue.images
                                     state={dicePieceValue}
                                     size={22}
-                                    padding="6px 0 0 0"
+                                    padding='6px 0 0 0'
                                 />
                             }
                         >
@@ -933,9 +933,9 @@ namespace ContextMenuModule {
 
         return (
             <>
-                <Menu.SubMenu title="キャラクターコマを追加">{pieceMenus}</Menu.SubMenu>
-                <Menu.SubMenu title="キャラクター立ち絵を追加">{tachieMenus}</Menu.SubMenu>
-                <Menu.SubMenu title="ダイスコマを追加">
+                <Menu.SubMenu title='キャラクターコマを追加'>{pieceMenus}</Menu.SubMenu>
+                <Menu.SubMenu title='キャラクター立ち絵を追加'>{tachieMenus}</Menu.SubMenu>
+                <Menu.SubMenu title='ダイスコマを追加'>
                     <Menu.Item
                         onClick={() => {
                             dispatch(
@@ -967,7 +967,7 @@ namespace ContextMenuModule {
                         セルにスナップしない
                     </Menu.Item>
                 </Menu.SubMenu>
-                <Menu.SubMenu title="数値コマを追加">
+                <Menu.SubMenu title='数値コマを追加'>
                     <Menu.Item
                         onClick={() => {
                             dispatch(
@@ -999,7 +999,7 @@ namespace ContextMenuModule {
                         セルにスナップしない
                     </Menu.Item>
                 </Menu.SubMenu>
-                <Menu.SubMenu title="画像コマを追加">
+                <Menu.SubMenu title='画像コマを追加'>
                     <Menu.Item
                         onClick={() => {
                             dispatch(

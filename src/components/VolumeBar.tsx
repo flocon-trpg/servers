@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Col, Slider, InputNumber, Typography } from 'antd';
+import { Slider, InputNumber, Typography } from 'antd';
 import { flex, flexRow, itemsCenter } from '../utils/className';
 import classNames from 'classnames';
 
@@ -40,7 +40,7 @@ const VolumeBar: React.FC<Props> = ({ value, onChange, readonly, inputNumberType
                 <Typography.Text style={textStyle}>{value}</Typography.Text>
             ) : (
                 <InputNumber
-                    size="small"
+                    size='small'
                     min={0}
                     max={100}
                     step={1}

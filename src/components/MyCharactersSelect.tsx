@@ -42,7 +42,7 @@ export const MyCharactersSelect: React.FC<Props> = ({
     return (
         <Select
             style={{ minWidth: 150 }}
-            size="small"
+            size='small'
             value={selectedCharacterId}
             onSelect={value => {
                 if (value == null) {

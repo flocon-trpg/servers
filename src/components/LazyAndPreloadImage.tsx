@@ -1,11 +1,11 @@
 import * as React from 'react';
 
 type Props = React.ImgHTMLAttributes<HTMLImageElement> & {
-    placeHolderElement: JSX.Element;
+    loadingPlaceholder: JSX.Element;
 };
 
 export const LazyAndPreloadImage: React.FC<Props> = (props: Props) => {
-    const { placeHolderElement, src, ...restProps } = props;
+    const { loadingPlaceholder: placeHolderElement, src, ...restProps } = props;
     const [loaded, setLoaded] = React.useState(false);
 
     React.useEffect(() => {
@@ -15,6 +15,7 @@ export const LazyAndPreloadImage: React.FC<Props> = (props: Props) => {
         const img = new Image();
         img.src = src;
 
+        // TODO: 取得に失敗したとき（srcが404など）にはloadingPlaceholderから切り替わらないので、エラーの場合のplaceholderにも対応させる
         img.onload = () => {
             setLoaded(true);
         };

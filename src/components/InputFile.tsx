@@ -47,7 +47,7 @@ const InputFile: React.FC<Props> = ({
         switch (filePath.sourceType) {
             case FileSourceType.Default:
                 return (
-                    <a href={filePath.path} target="_blank" rel="noopener noreferrer">
+                    <a href={filePath.path} target='_blank' rel='noopener noreferrer'>
                         {filePath.path}
                     </a>
                 );

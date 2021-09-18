@@ -5,9 +5,9 @@ import * as Icon from '@ant-design/icons';
 const NotSignInResult: React.FC = () => {
     return (
         <Result
-            status="warning"
-            title="ログインしていません。"
-            subTitle="このページを表示するにはログインする必要があります。"
+            status='warning'
+            title='ログインしていません。'
+            subTitle='このページを表示するにはログインする必要があります。'
         />
     );
 };

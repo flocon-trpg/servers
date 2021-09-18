@@ -16,7 +16,7 @@ const Main: React.FC = () => {
         <div>
             <BufferedTextArea
                 value={value}
-                bufferDuration="default"
+                bufferDuration='default'
                 onChange={e => {
                     setChangelog(state => [...state, e]);
                 }}

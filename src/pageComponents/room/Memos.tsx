@@ -140,7 +140,7 @@ const Memo: React.FC<MemoProps> = ({ memoId, state }: MemoProps) => {
     return (
         <div className={classNames(flex1, flex, flexColumn)}>
             <BufferedInput
-                bufferDuration="default"
+                bufferDuration='default'
                 value={state.name}
                 onChange={e =>
                     operate({
@@ -159,7 +159,7 @@ const Memo: React.FC<MemoProps> = ({ memoId, state }: MemoProps) => {
             />
             <BufferedTextArea
                 style={{ flex: 1, height: '100%', resize: 'none' }}
-                bufferDuration="default"
+                bufferDuration='default'
                 value={state.text}
                 disableResize
                 onChange={e => {
@@ -250,7 +250,7 @@ export const Memos: React.FC<Props> = ({ selectedMemoId, onSelectedMemoIdChange 
                 </Button>
                 <div style={{ width: 12 }} />
                 <Popover
-                    trigger="click"
+                    trigger='click'
                     onVisibleChange={newValue => setPopoverVisible(newValue)}
                     visible={popoverVisible}
                     content={
@@ -261,7 +261,7 @@ export const Memos: React.FC<Props> = ({ selectedMemoId, onSelectedMemoIdChange 
                             }}
                         />
                     }
-                    placement="bottom"
+                    placement='bottom'
                 >
                     <Button>メモ一覧</Button>
                 </Popover>

@@ -1,7 +1,5 @@
 import React from 'react';
 import { UpdateMessagePanelAction } from '../../modules/roomConfigModule';
-import { MessagePanelConfig } from '../../states/MessagePanelConfig';
-import _ from 'lodash';
 import { CharacterSelector } from './CharacterSelector';
 import { GameSelector } from './GameSelector';
 import { TextColorSelector } from './TextColorSelector';

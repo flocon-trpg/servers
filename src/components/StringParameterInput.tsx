@@ -41,8 +41,8 @@ const StringParameterInput: React.FC<Props> = ({
     const input = ({ disabled }: { disabled: boolean }) => (
         <BufferedInput
             style={{ width: inputWidth }}
-            size="small"
-            bufferDuration="default"
+            size='small'
+            bufferDuration='default'
             disabled={disabled}
             value={parameter?.value ?? ''}
             onChange={e => {
@@ -94,7 +94,7 @@ const StringParameterInput: React.FC<Props> = ({
             }
             checkedChildren={<EyeOutlined />}
             unCheckedChildren={<EyeInvisibleOutlined />}
-            size="small"
+            size='small'
             onChange={e => {
                 const operation: CharacterUpOperation = {
                     $v: 1,

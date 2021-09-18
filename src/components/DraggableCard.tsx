@@ -55,7 +55,7 @@ const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) => {
     return (
         <Rnd
             bounds={props.bounds}
-            cancel=".cancel-rnd"
+            cancel='.cancel-rnd'
             position={props.position}
             size={props.size}
             minHeight={props.minHeight}

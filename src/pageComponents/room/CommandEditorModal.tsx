@@ -46,9 +46,9 @@ const Editor: React.FC<EditorProps> = ({ script, onChange }: EditorProps) => {
     return (
         <>
             <MonacoEditor
-                language="typescript"
+                language='typescript'
                 value={scriptState}
-                height="70vh"
+                height='70vh'
                 onChange={newValue => {
                     if (newValue == null) {
                         return;
@@ -150,7 +150,7 @@ export const CommandEditorModal: React.FC = () => {
         editorElement = (
             <>
                 <Input
-                    placeholder="コマンド名"
+                    placeholder='コマンド名'
                     value={privateCommand.name}
                     onChange={e => {
                         setCommandName(selectedKey, e.target.value);

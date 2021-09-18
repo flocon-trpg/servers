@@ -28,7 +28,7 @@ const Index: React.FC = () => {
 
                 <p>
                     Floconでは
-                    <Link href="/docs/auth">
+                    <Link href='/docs/auth'>
                         ユーザー認証にFirebase Authenticationというサービスを用いています。
                     </Link>
                     FirebaseにはFirebase Authenticationの他にFirebase
@@ -83,7 +83,7 @@ const Index: React.FC = () => {
                     参考までに、2021/06/09現在の拡張子判定のコードは下のようになっています。jpg～webpが画像ファイル、mp3～webaが音声ファイル、それ以外はその他という具合です。
                 </p>
 
-                <img src="/file-types.png" width={361} height={406} />
+                <img src='/file-types.png' width={361} height={406} />
             </div>
         </Layout>
     );

@@ -64,6 +64,8 @@ import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 import { useDicePieces } from '../../hooks/state/useDicePieces';
 import { useNumberPieces } from '../../hooks/state/useNumberPieces';
 import { useImagePieces } from '../../hooks/state/useImagePieces';
+import { useAllContext } from '../../hooks/useAllContext';
+import { AllContextProvider } from '../../components/AllContextProvider';
 
 const createPiecePostOperation = ({
     e,
@@ -191,6 +193,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     canvasWidth,
     canvasHeight,
 }: BoardCoreProps) => {
+    const allContext = useAllContext();
+
     const roomId = useSelector(state => state.roomModule.roomId);
     const characters = useCharacters();
     const participants = useParticipants();
@@ -675,13 +679,15 @@ const BoardCore: React.FC<BoardCoreProps> = ({
         );
 
         pieces = (
-            <ReactKonva.Layer>
-                {tachieLocationElements}
-                {characterPieceElements}
-                {imagePieceElements}
-                {dicePieceElements}
-                {numberPieceElements}
-            </ReactKonva.Layer>
+            <AllContextProvider {...allContext}>
+                <ReactKonva.Layer>
+                    {tachieLocationElements}
+                    {characterPieceElements}
+                    {imagePieceElements}
+                    {dicePieceElements}
+                    {numberPieceElements}
+                </ReactKonva.Layer>
+            </AllContextProvider>
         );
     }
 
@@ -742,45 +748,47 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             }}
         >
             {/* background: ドラッグで全体を動かせる */}
-            <ReactKonva.Layer
-                onMouseDown={e => {
-                    if ((e.evt.buttons & 1) !== 0) {
-                        setIsBackgroundDragging(true);
-                    }
-                }}
-                onMouseUp={e => {
-                    if ((e.evt.buttons & 1) !== 0) {
+            <AllContextProvider {...allContext}>
+                <ReactKonva.Layer
+                    onMouseDown={e => {
+                        if ((e.evt.buttons & 1) !== 0) {
+                            setIsBackgroundDragging(true);
+                        }
+                    }}
+                    onMouseUp={e => {
+                        if ((e.evt.buttons & 1) !== 0) {
+                            setIsBackgroundDragging(false);
+                        }
+                    }}
+                    onMouseLeave={() => {
                         setIsBackgroundDragging(false);
-                    }
-                }}
-                onMouseLeave={() => {
-                    setIsBackgroundDragging(false);
-                }}
-                onMouseMove={e => {
-                    // マウスの左ボタンが押下されていない場合は抜ける
-                    if ((e.evt.buttons & 1) === 0) {
-                        return;
-                    }
-                    if (!isBackgroundDragging) {
-                        return;
-                    }
-                    const nonZeroScale = scale === 0 ? 0.01 : scale;
-                    dispatch(
-                        roomConfigModule.actions.updateBoard({
-                            roomId,
-                            boardKey,
-                            boardEditorPanelId: boardEditorPanelId,
-                            offsetXDelta: -e.evt.movementX / nonZeroScale,
-                            offsetYDelta: -e.evt.movementY / nonZeroScale,
-                        })
-                    );
-                }}
-            >
-                {/* このRectがないと画像がないところで位置をドラッグで変えることができない。ただもっといい方法があるかも */}
-                <ReactKonva.Rect x={-100000} y={-100000} width={200000} height={200000} />
-                {backgroundImageKonva}
-                {grid}
-            </ReactKonva.Layer>
+                    }}
+                    onMouseMove={e => {
+                        // マウスの左ボタンが押下されていない場合は抜ける
+                        if ((e.evt.buttons & 1) === 0) {
+                            return;
+                        }
+                        if (!isBackgroundDragging) {
+                            return;
+                        }
+                        const nonZeroScale = scale === 0 ? 0.01 : scale;
+                        dispatch(
+                            roomConfigModule.actions.updateBoard({
+                                roomId,
+                                boardKey,
+                                boardEditorPanelId: boardEditorPanelId,
+                                offsetXDelta: -e.evt.movementX / nonZeroScale,
+                                offsetYDelta: -e.evt.movementY / nonZeroScale,
+                            })
+                        );
+                    }}
+                >
+                    {/* このRectがないと画像がないところで位置をドラッグで変えることができない。ただもっといい方法があるかも */}
+                    <ReactKonva.Rect x={-100000} y={-100000} width={200000} height={200000} />
+                    {backgroundImageKonva}
+                    {grid}
+                </ReactKonva.Layer>
+            </AllContextProvider>
             {/* pieces: ドラッグでpieceのみを動かせる */}
             {pieces}
         </ReactKonva.Stage>
@@ -1088,7 +1096,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
     const boardsMenu =
         dropDownItems == null ? null : (
             <Menu>
-                <Menu.ItemGroup title="ボード一覧">{dropDownItems}</Menu.ItemGroup>
+                <Menu.ItemGroup title='ボード一覧'>{dropDownItems}</Menu.ItemGroup>
                 <Menu.Divider />
                 <Menu.Item
                     icon={<Icons.PlusOutlined />}

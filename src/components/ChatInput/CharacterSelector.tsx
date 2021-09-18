@@ -62,7 +62,7 @@ export const CharacterSelector: React.FC<Props> = ({
             {selectedCharacterType === some && (
                 <Select
                     style={{ flex: 1, maxWidth: inputMaxWidth }}
-                    placeholder="キャラクター"
+                    placeholder='キャラクター'
                     value={config.selectedCharacterStateId}
                     onSelect={(value, option) => {
                         if (typeof option.key !== 'string') {
@@ -79,7 +79,7 @@ export const CharacterSelector: React.FC<Props> = ({
             {selectedCharacterType === custom && (
                 <Input
                     style={{ flex: 1, maxWidth: inputMaxWidth }}
-                    placeholder="名前"
+                    placeholder='名前'
                     value={config.customCharacterName}
                     onChange={e => onConfigUpdate({ customCharacterName: e.target.value })}
                 />

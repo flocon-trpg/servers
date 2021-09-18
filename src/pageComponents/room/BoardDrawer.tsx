@@ -170,13 +170,13 @@ const BoardDrawer: React.FC = () => {
             }
         >
             <div>
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col flex={0}>名前</Col>
                     <Col span={inputSpan}>
                         <BufferedInput
-                            bufferDuration="default"
-                            size="small"
+                            bufferDuration='default'
+                            size='small'
                             value={board.name}
                             onChange={e => {
                                 if (e.previousValue === e.currentValue) {
@@ -187,8 +187,8 @@ const BoardDrawer: React.FC = () => {
                         />
                     </Col>
                 </Row>
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col flex={0}>背景画像</Col>
                     <Col span={inputSpan}>
                         <InputFile
@@ -202,12 +202,12 @@ const BoardDrawer: React.FC = () => {
                         />
                     </Col>
                 </Row>
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col flex={0}>背景画像の拡大率</Col>
                     <Col span={inputSpan}>
                         <InputNumber
-                            size="small"
+                            size='small'
                             value={board.backgroundImageZoom * 100}
                             min={0}
                             formatter={value => `${value}%`}
@@ -229,13 +229,13 @@ const BoardDrawer: React.FC = () => {
                         />
                     </Col>
                 </Row>
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col flex={0}>グリッドの数</Col>
                     <Col span={inputSpan}>
                         <span>x=</span>
                         <InputNumber
-                            size="small"
+                            size='small'
                             style={{ width: 80 }}
                             value={board.cellColumnCount}
                             onChange={newValue =>
@@ -246,7 +246,7 @@ const BoardDrawer: React.FC = () => {
                         />
                         <span style={{ marginLeft: 10 }}>y=</span>
                         <InputNumber
-                            size="small"
+                            size='small'
                             style={{ width: 80 }}
                             value={board.cellRowCount}
                             onChange={newValue =>
@@ -257,13 +257,13 @@ const BoardDrawer: React.FC = () => {
                         />
                     </Col>
                 </Row>
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col flex={0}>グリッドの大きさ</Col>
                     <Col span={inputSpan}>
                         {/* cellWidth === cellHeight という前提だが、もし異なる場合は代表してcellWidthの値を用いることにしている */}
                         <InputNumber
-                            size="small"
+                            size='small'
                             value={board.cellWidth}
                             onChange={newValue =>
                                 typeof newValue === 'number'
@@ -273,13 +273,13 @@ const BoardDrawer: React.FC = () => {
                         />
                     </Col>
                 </Row>
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col flex={0}>グリッドの基準点</Col>
                     <Col span={inputSpan}>
                         <span>x=</span>
                         <InputNumber
-                            size="small"
+                            size='small'
                             value={board.cellOffsetX}
                             onChange={newValue =>
                                 typeof newValue === 'number'
@@ -289,7 +289,7 @@ const BoardDrawer: React.FC = () => {
                         />
                         <span style={{ marginLeft: 10 }}>y=</span>
                         <InputNumber
-                            size="small"
+                            size='small'
                             value={board.cellOffsetY}
                             onChange={newValue =>
                                 typeof newValue === 'number'

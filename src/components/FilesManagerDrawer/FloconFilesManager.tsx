@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, Dropdown, Menu, notification, Table, Upload } from 'antd';
+import { Button, Dropdown, Menu, notification, Table, Tooltip, Upload } from 'antd';
 import { accept } from './helper';
 import ConfigContext from '../../contexts/ConfigContext';
 import { getHttpUri } from '../../config';
@@ -10,6 +10,7 @@ import {
     FileItemFragment,
     FilePathFragment,
     FileSourceType,
+    useDeleteFilesMutation,
     useGetFilesQuery,
 } from '../../generated/graphql';
 import { FloconUploaderFileLink } from '../FloconUploaderFileLink';
@@ -20,6 +21,9 @@ import copy from 'clipboard-copy';
 import * as Icons from '@ant-design/icons';
 import { DeleteFloconStorageFileModal } from '../DeleteFloconStorageFileModal';
 import { FirebaseAuthenticationIdTokenContext } from '../../contexts/FirebaseAuthenticationIdTokenContext';
+import { useAsync } from 'react-use';
+import { LazyAndPreloadImage } from '../LazyAndPreloadImage';
+import { getFloconUploaderFile, thumbs } from '../../utils/getFloconUploaderFile';
 
 type DataSource = FileItemFragment;
 
@@ -34,7 +38,7 @@ const Uploader: React.FC<UploaderProps> = ({ unlistedMode, onUploaded }: Uploade
     const config = React.useContext(ConfigContext);
     const idToken = React.useContext(FirebaseAuthenticationIdTokenContext);
 
-    if (idToken== null) {
+    if (idToken == null) {
         return null;
     }
 
@@ -94,6 +98,64 @@ const Uploader: React.FC<UploaderProps> = ({ unlistedMode, onUploaded }: Uploade
     );
 };
 
+type ThumbProps = {
+    thumbFilePath: string | undefined;
+    size: number;
+};
+
+const Thumb: React.FC<ThumbProps> = ({ thumbFilePath, size }: ThumbProps) => {
+    const config = React.useContext(ConfigContext);
+    const idToken = React.useContext(FirebaseAuthenticationIdTokenContext);
+    const loadingIcon = <Icons.LoadingOutlined style={{ fontSize: size }} />;
+    const src = useAsync(async () => {
+        if (thumbFilePath == null || idToken == null) {
+            return null;
+        }
+        const axiosResponse = await getFloconUploaderFile({
+            filename: thumbFilePath,
+            config,
+            idToken,
+            mode: thumbs,
+        });
+        if (axiosResponse.data == null) {
+            return null;
+        }
+        const blob = new Blob([axiosResponse.data]);
+        return URL.createObjectURL(blob);
+    }, [thumbFilePath, config, idToken]);
+
+    return (
+        <Tooltip
+            overlay={
+                <LazyAndPreloadImage
+                    src={src.value ?? undefined}
+                    width={80}
+                    height={80}
+                    loadingPlaceholder={loadingIcon}
+                />
+            }
+        >
+            <LazyAndPreloadImage
+                src={src.value ?? undefined}
+                width={size}
+                height={size}
+                loadingPlaceholder={loadingIcon}
+            />
+        </Tooltip>
+    );
+};
+
+const thumbColumn: Column = {
+    title: 'サムネイル',
+    // eslint-disable-next-line react/display-name
+    render: (_, record: DataSource) => {
+        if (record.thumbFilename == null) {
+            return null;
+        }
+        return <Thumb key={record.filename} thumbFilePath={record.thumbFilename} size={20} />;
+    },
+};
+
 const screennameColumn: Column = {
     title: 'ファイル名',
     sorter: (x, y) => x.screenname.localeCompare(y.screenname),
@@ -108,7 +170,7 @@ const fileTypeColumn = (defaultFilteredValue: FilterValue | null | undefined): C
     title: (
         <span>
             種類{' '}
-            <InformationIcon title="種類の分類はあくまで簡易的なものです。誤った分類がされることがあります。" />
+            <InformationIcon title='種類の分類はあくまで簡易的なものです。誤った分類がされることがあります。' />
         </span>
     ),
     key: 'fileType',
@@ -136,7 +198,7 @@ const fileTypeColumn = (defaultFilteredValue: FilterValue | null | undefined): C
     width: 100,
     // eslint-disable-next-line react/display-name
     render: (_, record: DataSource) => {
-        switch (record.screenname) {
+        switch (guessFileType(record.screenname)) {
             case image:
                 return '画像';
             case sound:
@@ -175,6 +237,9 @@ type FileOptionsMenuProps = {
 };
 
 const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({ fileItem }: FileOptionsMenuProps) => {
+    const { refetch } = useGetFilesQuery({ variables: { input: { fileTagIds: [] } } });
+    const [deleteFilesMutation] = useDeleteFilesMutation();
+
     return (
         <div>
             <Menu>
@@ -193,7 +258,21 @@ const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({ fileItem }: FileOptio
                 </Menu.Item>
                 <Menu.Item
                     icon={<Icons.DeleteOutlined />}
-                    onClick={() => DeleteFloconStorageFileModal([fileItem])}
+                    onClick={() =>
+                        DeleteFloconStorageFileModal([fileItem], async filenamesToDelete => {
+                            if (filenamesToDelete.length === 0) {
+                                return;
+                            }
+                            const isSuccess = await deleteFilesMutation({
+                                variables: { filenames: filenamesToDelete },
+                            })
+                                .then(() => true)
+                                .catch(() => false);
+                            if (isSuccess) {
+                                await refetch();
+                            }
+                        })
+                    }
                 >
                     削除
                 </Menu.Item>
@@ -229,10 +308,13 @@ const FloconFilesList: React.FC<FloconFilesListProps> = ({
 }: FloconFilesListProps) => {
     const getFilesQueryResult = useGetFilesQuery({ variables: { input: { fileTagIds: [] } } });
     const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([]);
+    const { refetch } = useGetFilesQuery({ variables: { input: { fileTagIds: [] } } });
+    const [deleteFilesMutation] = useDeleteFilesMutation();
 
     const columns = (() => {
         if (onFlieOpen != null) {
             return [
+                thumbColumn,
                 screennameColumn,
                 fileTypeColumn(defaultFilteredValue),
                 createdAtColumn,
@@ -241,6 +323,7 @@ const FloconFilesList: React.FC<FloconFilesListProps> = ({
             ];
         }
         return [
+            thumbColumn,
             screennameColumn,
             fileTypeColumn(defaultFilteredValue),
             createdAtColumn,
@@ -255,7 +338,22 @@ const FloconFilesList: React.FC<FloconFilesListProps> = ({
                     const selectedFiles = getFilesQueryResult.data?.result.files.filter(f =>
                         selectedRowKeys.some(key => f.filename === key)
                     );
-                    DeleteFloconStorageFileModal(selectedFiles ?? []);
+                    if (selectedFiles == null) {
+                        return;
+                    }
+                    DeleteFloconStorageFileModal(selectedFiles, async filenamesToDelete => {
+                        if (filenamesToDelete.length === 0) {
+                            return;
+                        }
+                        const isSuccess = await deleteFilesMutation({
+                            variables: { filenames: filenamesToDelete },
+                        })
+                            .then(() => true)
+                            .catch(() => false);
+                        if (isSuccess) {
+                            await refetch();
+                        }
+                    });
                 }}
             >
                 選択したファイルを削除
@@ -267,9 +365,9 @@ const FloconFilesList: React.FC<FloconFilesListProps> = ({
                         setSelectedRowKeys(selected);
                     },
                 }}
-                size="small"
+                size='small'
                 pagination={{ pageSize: 15 }}
-                rowKey="fullPath"
+                rowKey='filename'
                 columns={columns}
                 dataSource={getFilesQueryResult.data?.result.files ?? []}
             />

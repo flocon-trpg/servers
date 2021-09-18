@@ -7,31 +7,20 @@ import 'firebase/storage';
 
 import React from 'react';
 import { AppProps } from 'next/app';
-import { ApolloProvider } from '@apollo/client';
 import 'firebase/auth';
 import 'firebase/storage';
-import { Provider } from 'react-redux';
 import useConstant from 'use-constant';
-import {
-    authNotFound,
-    FirebaseUserState,
-    loading,
-    MyAuthContext,
-    notSignIn,
-} from '../contexts/MyAuthContext';
+import { authNotFound, FirebaseUserState, loading, notSignIn } from '../contexts/MyAuthContext';
 import store from '../store';
 import { appConsole } from '../utils/appConsole';
 import { getConfig, getHttpUri, getWsUri } from '../config';
 import { simpleId } from '../utils/generators';
-import ClientIdContext from '../contexts/ClientIdContext';
 import { enableMapSet } from 'immer';
 import Head from 'next/head';
 import { useMonaco, loader } from '@monaco-editor/react';
 import { ExpiryMap } from '../utils/expiryMap';
-import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
 import urljoin from 'url-join';
 import { monacoLibSource } from '../utils/libSource';
-import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { createApolloClient } from '../utils/createApolloClient';
 import { Dispatch } from '@reduxjs/toolkit';
 import { getUserConfig } from '../utils/localStorage/userConfig';
@@ -39,6 +28,7 @@ import userConfigModule from '../modules/userConfigModule';
 import { getAuth } from '../utils/firebaseHelpers';
 import ConfigContext from '../contexts/ConfigContext';
 import { useMyUserUid } from '../hooks/useMyUserUid';
+import { AllContextProvider as AllContextProvider } from '../components/AllContextProvider';
 
 enableMapSet();
 
@@ -199,25 +189,18 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     return (
         <>
             <Head>
-                <link rel="shortcut icon" href="/logo.png" />
+                <link rel='shortcut icon' href='/logo.png' />
             </Head>
-            <ClientIdContext.Provider value={clientId}>
-                <ApolloProvider client={apolloClient}>
-                    <Provider store={store}>
-                        <MyAuthContext.Provider value={user}>
-                            <FirebaseStorageUrlCacheContext.Provider
-                                value={firebaseStorageUrlCache}
-                            >
-                                <FirebaseAuthenticationIdTokenContext.Provider
-                                    value={typeof idToken === 'string' ? idToken : null}
-                                >
-                                    <Component {...pageProps} />
-                                </FirebaseAuthenticationIdTokenContext.Provider>
-                            </FirebaseStorageUrlCacheContext.Provider>
-                        </MyAuthContext.Provider>
-                    </Provider>
-                </ApolloProvider>
-            </ClientIdContext.Provider>
+            <AllContextProvider
+                clientId={clientId}
+                apolloClient={apolloClient}
+                store={store}
+                user={user}
+                firebaseStorageUrlCache={firebaseStorageUrlCache}
+                idToken={typeof idToken === 'string' ? idToken : null}
+            >
+                <Component {...pageProps} />
+            </AllContextProvider>
         </>
     );
 };

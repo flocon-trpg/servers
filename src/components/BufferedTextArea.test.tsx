@@ -28,7 +28,7 @@ test.each`
         };
         render(
             <BufferedTextArea
-                value="TEXT_VALUE1"
+                value='TEXT_VALUE1'
                 bufferDuration={bufferDuration}
                 onChange={onChange}
             />
@@ -56,7 +56,7 @@ test.each(['default', 'short', 1000] as const)(
         };
         render(
             <BufferedTextArea
-                value="TEXT_VALUE1"
+                value='TEXT_VALUE1'
                 bufferDuration={bufferDuration}
                 onChange={onChange}
             />
@@ -75,7 +75,7 @@ test.each(['default', 'short', 1000] as const)(
         };
         render(
             <BufferedTextArea
-                value="TEXT_VALUE1"
+                value='TEXT_VALUE1'
                 bufferDuration={bufferDuration}
                 onChange={onChange}
             />
@@ -110,7 +110,7 @@ test.each`
         };
         const { rerender } = render(
             <BufferedTextArea
-                value="TEXT_VALUE1"
+                value='TEXT_VALUE1'
                 bufferDuration={bufferDuration}
                 onChange={onChange}
             />
@@ -118,7 +118,7 @@ test.each`
         fireEvent.change(screen.getByDisplayValue('TEXT_VALUE1'), { target: { value: newValue } });
         rerender(
             <BufferedTextArea
-                value="TEXT_VALUE3"
+                value='TEXT_VALUE3'
                 bufferDuration={bufferDuration}
                 onChange={onChange}
             />
@@ -145,7 +145,7 @@ test.each`
         };
         const { rerender } = render(
             <BufferedTextArea
-                value="TEXT_VALUE1"
+                value='TEXT_VALUE1'
                 bufferDuration={bufferDuration}
                 onChange={onChange}
             />
@@ -153,7 +153,7 @@ test.each`
         fireEvent.change(screen.getByDisplayValue('TEXT_VALUE1'), { target: { value: newValue } });
         rerender(
             <BufferedTextArea
-                value="TEXT_VALUE3"
+                value='TEXT_VALUE3'
                 bufferDuration={bufferDuration}
                 onChange={onChange}
             />

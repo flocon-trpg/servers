@@ -307,10 +307,10 @@ export namespace RoomMessage {
             case 'info':
             case 'error':
             case pieceValueLog:
-                return <IconView image="Message" size={size} />;
+                return <IconView image='Message' size={size} />;
         }
         if (message.value.createdBy == null) {
-            return <IconView image="Message" size={size} />;
+            return <IconView image='Message' size={size} />;
         }
         return <IconView image={message.value.character?.image ?? 'Person'} size={size} />;
     };
@@ -348,7 +348,7 @@ export namespace RoomMessage {
         );
 
         return (
-            <Popover trigger="hover" content={popoverContent}>
+            <Popover trigger='hover' content={popoverContent}>
                 <div>
                     {message.value.customName ??
                         message.value.character?.name ??

@@ -295,8 +295,8 @@ const CharacterDrawer: React.FC = () => {
         }
         return (
             <>
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col flex={0}></Col>
                     <Col span={inputSpan}>
                         <Checkbox
@@ -308,8 +308,8 @@ const CharacterDrawer: React.FC = () => {
                     </Col>
                 </Row>
 
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col flex={0}></Col>
                     <Col span={inputSpan}>
                         <Checkbox
@@ -323,8 +323,8 @@ const CharacterDrawer: React.FC = () => {
 
                 {piece.isCellMode ? (
                     <>
-                        <Row gutter={gutter} align="middle">
-                            <Col flex="auto" />
+                        <Row gutter={gutter} align='middle'>
+                            <Col flex='auto' />
                             <Col flex={0}>位置</Col>
                             <Col span={inputSpan}>
                                 <Space>
@@ -348,8 +348,8 @@ const CharacterDrawer: React.FC = () => {
                                 </Space>
                             </Col>
                         </Row>
-                        <Row gutter={gutter} align="middle">
-                            <Col flex="auto" />
+                        <Row gutter={gutter} align='middle'>
+                            <Col flex='auto' />
                             <Col flex={0}>大きさ</Col>
                             <Col span={inputSpan}>
                                 <Space>
@@ -376,8 +376,8 @@ const CharacterDrawer: React.FC = () => {
                     </>
                 ) : (
                     <>
-                        <Row gutter={gutter} align="middle">
-                            <Col flex="auto" />
+                        <Row gutter={gutter} align='middle'>
+                            <Col flex='auto' />
                             <Col flex={0}>位置</Col>
                             <Col span={inputSpan}>
                                 <Space>
@@ -401,8 +401,8 @@ const CharacterDrawer: React.FC = () => {
                                 </Space>
                             </Col>
                         </Row>
-                        <Row gutter={gutter} align="middle">
-                            <Col flex="auto" />
+                        <Row gutter={gutter} align='middle'>
+                            <Col flex='auto' />
                             <Col flex={0}>大きさ</Col>
                             <Col span={inputSpan}>
                                 <Space>
@@ -440,8 +440,8 @@ const CharacterDrawer: React.FC = () => {
             <>
                 {
                     <>
-                        <Row gutter={gutter} align="middle">
-                            <Col flex="auto" />
+                        <Row gutter={gutter} align='middle'>
+                            <Col flex='auto' />
                             <Col flex={0}>位置</Col>
                             <Col span={inputSpan}>
                                 <Space>
@@ -465,8 +465,8 @@ const CharacterDrawer: React.FC = () => {
                                 </Space>
                             </Col>
                         </Row>
-                        <Row gutter={gutter} align="middle">
-                            <Col flex="auto" />
+                        <Row gutter={gutter} align='middle'>
+                            <Col flex='auto' />
                             <Col flex={0}>大きさ</Col>
                             <Col span={inputSpan}>
                                 <Space>
@@ -537,8 +537,8 @@ const CharacterDrawer: React.FC = () => {
                 {drawerType?.type === update && (
                     <>
                         <Typography.Title level={4}>作成者</Typography.Title>
-                        <Row gutter={gutter} align="middle">
-                            <Col flex="auto" />
+                        <Row gutter={gutter} align='middle'>
+                            <Col flex='auto' />
                             <Col flex={0}>作成者</Col>
                             <Col span={inputSpan}>
                                 <span>{participants.get(drawerType.stateKey.createdBy)?.name}</span>
@@ -556,14 +556,14 @@ const CharacterDrawer: React.FC = () => {
                     <>
                         <Typography.Title level={4}>複製</Typography.Title>
 
-                        <Row gutter={gutter} align="middle">
-                            <Col flex="auto" />
+                        <Row gutter={gutter} align='middle'>
+                            <Col flex='auto' />
                             <Col flex={0}></Col>
                             <Col span={inputSpan}>
                                 {/* TODO: 複製したことを何らかの形で通知したほうがいい */}
-                                <Tooltip title="コマの情報を除き、このキャラクターを複製します。">
+                                <Tooltip title='コマの情報を除き、このキャラクターを複製します。'>
                                     <Button
-                                        size="small"
+                                        size='small'
                                         onClick={() => {
                                             const id = simpleId();
                                             operate(
@@ -590,12 +590,12 @@ const CharacterDrawer: React.FC = () => {
                 {pieceElement}
 
                 <Typography.Title level={4}>全体公開</Typography.Title>
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col flex={0}>全体公開</Col>
                     <Col span={inputSpan}>
                         <ToggleButton
-                            size="small"
+                            size='small'
                             disabled={
                                 createdByMe || drawerType?.type === create
                                     ? false
@@ -627,13 +627,13 @@ const CharacterDrawer: React.FC = () => {
 
                 <Typography.Title level={4}>パラメーター</Typography.Title>
 
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col flex={0}>名前</Col>
                     <Col span={inputSpan}>
                         <BufferedInput
-                            bufferDuration="default"
-                            size="small"
+                            bufferDuration='default'
+                            size='small'
                             value={character.name}
                             onChange={e => {
                                 if (e.previousValue === e.currentValue) {
@@ -645,8 +645,8 @@ const CharacterDrawer: React.FC = () => {
                     </Col>
                 </Row>
 
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col flex={0}>アイコン画像</Col>
                     <Col span={inputSpan}>
                         <InputFile
@@ -662,8 +662,8 @@ const CharacterDrawer: React.FC = () => {
                     </Col>
                 </Row>
 
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col flex={0}>立ち絵画像</Col>
                     <Col span={inputSpan}>
                         <InputFile
@@ -687,8 +687,8 @@ const CharacterDrawer: React.FC = () => {
                     const value = character.numParams[key];
                     const maxValue = character.numMaxParams[key];
                     return (
-                        <Row key={`numParam${key}Row`} gutter={gutter} align="middle">
-                            <Col flex="auto" />
+                        <Row key={`numParam${key}Row`} gutter={gutter} align='middle'>
+                            <Col flex='auto' />
                             <Col flex={0}>{paramName.name}</Col>
                             <Col span={inputSpan}>
                                 <NumberParameterInput
@@ -714,8 +714,8 @@ const CharacterDrawer: React.FC = () => {
                     }
                     const value = character.boolParams[key];
                     return (
-                        <Row key={`boolParam${key}Row`} gutter={gutter} align="middle">
-                            <Col flex="auto" />
+                        <Row key={`boolParam${key}Row`} gutter={gutter} align='middle'>
+                            <Col flex='auto' />
                             <Col flex={0}>{paramName.name}</Col>
                             <Col span={inputSpan}>
                                 <BooleanParameterInput
@@ -740,8 +740,8 @@ const CharacterDrawer: React.FC = () => {
                     }
                     const value = character.strParams[key];
                     return (
-                        <Row key={`strParam${key}Row`} gutter={gutter} align="middle">
-                            <Col flex="auto" />
+                        <Row key={`strParam${key}Row`} gutter={gutter} align='middle'>
+                            <Col flex='auto' />
                             <Col flex={0}>{paramName.name}</Col>
                             <Col span={inputSpan}>
                                 <StringParameterInput
@@ -762,13 +762,13 @@ const CharacterDrawer: React.FC = () => {
 
                 <Typography.Title level={4}>メモ</Typography.Title>
 
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col flex={0}></Col>
                     <Col span={inputSpan}>
                         <BufferedTextArea
-                            size="small"
-                            bufferDuration="default"
+                            size='small'
+                            bufferDuration='default'
                             value={character.memo}
                             rows={8}
                             onChange={e => updateCharacter({ memo: e.currentValue })}
@@ -780,13 +780,13 @@ const CharacterDrawer: React.FC = () => {
                     <>
                         <Typography.Title level={4}>変数</Typography.Title>
 
-                        <Row gutter={gutter} align="middle">
-                            <Col flex="auto" />
+                        <Row gutter={gutter} align='middle'>
+                            <Col flex='auto' />
                             <Col flex={0}></Col>
                             <Col span={inputSpan}>
                                 <TomlInput
-                                    size="small"
-                                    bufferDuration="default"
+                                    size='small'
+                                    bufferDuration='default'
                                     value={character.privateVarToml}
                                     rows={8}
                                     onChange={e =>
@@ -802,8 +802,8 @@ const CharacterDrawer: React.FC = () => {
                     <>
                         <Typography.Title level={4}>チャットパレット</Typography.Title>
 
-                        <Row gutter={gutter} align="middle">
-                            <Col flex="auto" />
+                        <Row gutter={gutter} align='middle'>
+                            <Col flex='auto' />
                             <Col flex={0}></Col>
                             <Col span={inputSpan}>
                                 <Button
@@ -829,8 +829,8 @@ const CharacterDrawer: React.FC = () => {
                     <>
                         <Typography.Title level={4}>コマンド</Typography.Title>
 
-                        <Row gutter={gutter} align="middle">
-                            <Col flex="auto" />
+                        <Row gutter={gutter} align='middle'>
+                            <Col flex='auto' />
                             <Col flex={0}></Col>
                             <Col span={inputSpan}>
                                 <Button

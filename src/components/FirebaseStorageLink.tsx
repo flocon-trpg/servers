@@ -53,7 +53,7 @@ const FirebaseStorageLink: React.FC<Props> = ({ reference }: Props) => {
     }
 
     return (
-        <a href={url} target="_blank" rel="noopener noreferrer">
+        <a href={url} target='_blank' rel='noopener noreferrer'>
             {fileName(fullPath)}
         </a>
     );

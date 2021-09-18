@@ -1,6 +1,5 @@
 import React from 'react';
 
-import * as Icon from '@ant-design/icons';
 import { Select } from 'antd';
 import { ChatPalettePanelConfig } from '../../states/ChatPalettePanelConfig';
 import { MessagePanelConfig } from '../../states/MessagePanelConfig';
@@ -51,7 +50,7 @@ export const GameSelector: React.FC<Props> = ({
             <div style={titleStyle}>ダイス</div>
             <Select
                 style={{ flex: 1, maxWidth: inputMaxWidth }}
-                placeholder="ゲームの種類"
+                placeholder='ゲームの種類'
                 showSearch
                 value={config.selectedGameSystem}
                 onSelect={(value, option) => {

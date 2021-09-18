@@ -51,7 +51,7 @@ const RoomsListComponent: React.FC<RoomsListComponentProps> = ({
                 <div style={{ flex: 'auto' }} />
             </div>
             <div style={{ flex: '10px' }} />
-            <Table rowKey="id" style={{ flex: 'auto' }} columns={columns} dataSource={rooms} />
+            <Table rowKey='id' style={{ flex: 'auto' }} columns={columns} dataSource={rooms} />
         </div>
     );
 };

@@ -2,11 +2,7 @@ import { Alert, Button, Card, Form, Input, Spin, Switch } from 'antd';
 import { useRouter } from 'next/router';
 import React from 'react';
 import Layout, { loginAndEntry } from '../../layouts/Layout';
-import {
-    CreateRoomFailureType,
-    CreateRoomInput,
-    useCreateRoomMutation,
-} from '../../generated/graphql';
+import { CreateRoomInput, useCreateRoomMutation } from '../../generated/graphql';
 import Center from '../../components/Center';
 import { MyAuthContext } from '../../contexts/MyAuthContext';
 
@@ -31,12 +27,13 @@ const CreateRoomCore: React.FC = () => {
     // TODO: 横幅などが足りないため、Formで表現するようなものではない気がする。
     const form = (
         <Form
-            name="createRoom"
+            name='createRoom'
             labelCol={{ span: labelCol }}
             wrapperCol={{ span: wrapperCol }}
             style={{ width: 600 }}
             initialValues={{
-                [participantName]: typeof myAuth === 'string' ? undefined : myAuth.value.displayName,
+                [participantName]:
+                    typeof myAuth === 'string' ? undefined : myAuth.value.displayName,
             }}
             onFinish={e => {
                 if (isSubmitting) {
@@ -73,38 +70,38 @@ const CreateRoomCore: React.FC = () => {
                 });
             }}
         >
-            <Form.Item label="部屋の名前" name={roomName}>
+            <Form.Item label='部屋の名前' name={roomName}>
                 <Input />
             </Form.Item>
-            <Form.Item label="自分の名前" name={participantName}>
+            <Form.Item label='自分の名前' name={participantName}>
                 <Input />
             </Form.Item>
-            <Form.Item label="参加フレーズを有効化">
+            <Form.Item label='参加フレーズを有効化'>
                 <Switch
                     checked={isJoinAsPlayerPhraseEnabled}
                     onChange={setIsJoinAsPlayerPhraseEnabled}
                 />
             </Form.Item>
-            <Form.Item label="参加フレーズ" name={joinAsPlayerPhrase}>
+            <Form.Item label='参加フレーズ' name={joinAsPlayerPhrase}>
                 <Input disabled={!isJoinAsPlayerPhraseEnabled} />
             </Form.Item>
-            <Form.Item label="観戦フレーズを有効化">
+            <Form.Item label='観戦フレーズを有効化'>
                 <Switch
                     checked={isJoinAsSpectatorPhraseEnabled}
                     onChange={setIsJoinAsSpectatorPhraseEnabled}
                 />
             </Form.Item>
-            <Form.Item label="観戦フレーズ" name={joinAsSpectatorPhrase}>
+            <Form.Item label='観戦フレーズ' name={joinAsSpectatorPhrase}>
                 <Input disabled={!isJoinAsSpectatorPhraseEnabled} />
             </Form.Item>
 
             <Form.Item wrapperCol={{ offset: labelCol, span: wrapperCol }}>
-                <Button disabled={isSubmitting} type="primary" htmlType="submit">
+                <Button disabled={isSubmitting} type='primary' htmlType='submit'>
                     OK
                 </Button>
                 {isSubmitting ? <Spin /> : null}
                 {createRoomResult.error == null ? null : (
-                    <Alert message={createRoomResult.error.message} type="error" showIcon />
+                    <Alert message={createRoomResult.error.message} type='error' showIcon />
                 )}
             </Form.Item>
         </Form>
@@ -113,7 +110,7 @@ const CreateRoomCore: React.FC = () => {
     return (
         <Layout requires={loginAndEntry}>
             <Center>
-                <Card title="部屋の新規作成">{form}</Card>
+                <Card title='部屋の新規作成'>{form}</Card>
             </Center>
         </Layout>
     );

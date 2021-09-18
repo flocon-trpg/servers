@@ -125,7 +125,7 @@ const PingPongCore: React.FC = () => {
             />
             <Button
                 onClick={() => pingMutation({ variables: { value: postValue } })}
-                type="primary"
+                type='primary'
             >
                 Ping
             </Button>

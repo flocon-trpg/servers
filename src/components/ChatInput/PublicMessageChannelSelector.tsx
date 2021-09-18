@@ -4,7 +4,6 @@ import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import { ChatPalettePanelConfig } from '../../states/ChatPalettePanelConfig';
 import { MessagePanelConfig } from '../../states/MessagePanelConfig';
 import { $free, PublicChannelKey } from '@kizahasi/util';
-import _ from 'lodash';
 import {
     UpdateChatPalettePanelAction,
     UpdateMessagePanelAction,
@@ -45,34 +44,34 @@ export const PublicMessageChannelSelector: React.FC<Props> = ({
                 <Select.Option key={$free} value={$free}>
                     雑談
                 </Select.Option>
-                <Select.Option key="1" value="1">
+                <Select.Option key='1' value='1'>
                     {publicChannelNames?.publicChannel1Name}
                 </Select.Option>
-                <Select.Option key="2" value="2">
+                <Select.Option key='2' value='2'>
                     {publicChannelNames?.publicChannel2Name}
                 </Select.Option>
-                <Select.Option key="3" value="3">
+                <Select.Option key='3' value='3'>
                     {publicChannelNames?.publicChannel3Name}
                 </Select.Option>
-                <Select.Option key="4" value="4">
+                <Select.Option key='4' value='4'>
                     {publicChannelNames?.publicChannel4Name}
                 </Select.Option>
-                <Select.Option key="5" value="5">
+                <Select.Option key='5' value='5'>
                     {publicChannelNames?.publicChannel5Name}
                 </Select.Option>
-                <Select.Option key="6" value="6">
+                <Select.Option key='6' value='6'>
                     {publicChannelNames?.publicChannel6Name}
                 </Select.Option>
-                <Select.Option key="7" value="7">
+                <Select.Option key='7' value='7'>
                     {publicChannelNames?.publicChannel7Name}
                 </Select.Option>
-                <Select.Option key="8" value="8">
+                <Select.Option key='8' value='8'>
                     {publicChannelNames?.publicChannel8Name}
                 </Select.Option>
-                <Select.Option key="9" value="9">
+                <Select.Option key='9' value='9'>
                     {publicChannelNames?.publicChannel9Name}
                 </Select.Option>
-                <Select.Option key="10" value="10">
+                <Select.Option key='10' value='10'>
                     {publicChannelNames?.publicChannel10Name}
                 </Select.Option>
             </Select>

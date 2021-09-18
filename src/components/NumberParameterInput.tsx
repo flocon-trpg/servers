@@ -26,7 +26,7 @@ type Props = {
     compact: boolean;
 };
 
-const disabledInput = <Input style={{ width: inputWidth }} disabled value="?" size="small" />;
+const disabledInput = <Input style={{ width: inputWidth }} disabled value='?' size='small' />;
 
 const NumberParameterInput: React.FC<Props> = ({
     isCharacterPrivate,
@@ -50,7 +50,7 @@ const NumberParameterInput: React.FC<Props> = ({
             return (
                 <Tooltip title={addParameter}>
                     <Button
-                        size="small"
+                        size='small'
                         disabled={disabled}
                         onClick={() => {
                             const operation: CharacterUpOperation = {
@@ -73,7 +73,7 @@ const NumberParameterInput: React.FC<Props> = ({
         return (
             <Tooltip title={deleteParameter}>
                 <Button
-                    size="small"
+                    size='small'
                     disabled={disabled}
                     onClick={() => {
                         const operation: CharacterUpOperation = {
@@ -106,7 +106,7 @@ const NumberParameterInput: React.FC<Props> = ({
             return (
                 <Tooltip title={addParameter}>
                     <Button
-                        size="small"
+                        size='small'
                         disabled={disabled}
                         onClick={() => {
                             const operation: CharacterUpOperation = {
@@ -129,7 +129,7 @@ const NumberParameterInput: React.FC<Props> = ({
         return (
             <Tooltip title={deleteParameter}>
                 <Button
-                    size="small"
+                    size='small'
                     disabled={disabled}
                     onClick={() => {
                         const operation: CharacterUpOperation = {
@@ -182,7 +182,7 @@ const NumberParameterInput: React.FC<Props> = ({
                 }
                 checkedChildren={<EyeOutlined />}
                 unCheckedChildren={<EyeInvisibleOutlined />}
-                size="small"
+                size='small'
                 onChange={e => {
                     const operation: CharacterUpOperation = {
                         $v: 1,
@@ -213,7 +213,7 @@ const NumberParameterInput: React.FC<Props> = ({
             <>
                 <InputNumber
                     style={{ width: inputWidth }}
-                    size="small"
+                    size='small'
                     disabled={numberParameter?.value == null}
                     value={numberParameter?.value ?? 0}
                     onChange={newValue => {
@@ -269,7 +269,7 @@ const NumberParameterInput: React.FC<Props> = ({
                 }
                 checkedChildren={<EyeOutlined />}
                 unCheckedChildren={<EyeInvisibleOutlined />}
-                size="small"
+                size='small'
                 onChange={e => {
                     const operation: CharacterUpOperation = {
                         $v: 1,
@@ -300,7 +300,7 @@ const NumberParameterInput: React.FC<Props> = ({
             <>
                 <InputNumber
                     style={{ width: inputWidth }}
-                    size="small"
+                    size='small'
                     disabled={numberMaxParameter.value == null}
                     value={numberMaxParameter?.value ?? 0}
                     onChange={newValue => {

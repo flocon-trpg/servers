@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import React, { PropsWithChildren, ReactNode } from 'react';
+import React from 'react';
 import RoomComponent from '../../pageComponents/room/Room';
 import {
     GetRoomFailureType,
@@ -103,7 +103,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
     };
     return (
         <Spin spinning={disableJoinActions}>
-            {errorMessage == null ? null : <Alert message={errorMessage} type="error" showIcon />}
+            {errorMessage == null ? null : <Alert message={errorMessage} type='error' showIcon />}
             <div
                 style={{
                     display: 'grid',
@@ -119,7 +119,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                     style={{ gridColumn: 2, gridRow: 1 }}
                     onChange={e => setName(e.target.value)}
                     value={name}
-                    placeholder="名前"
+                    placeholder='名前'
                 />
                 <div style={{ gridColumn: 1, gridRow: 3, marginRight: 8, justifySelf: 'right' }}>
                     参加者として入室
@@ -129,7 +129,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                         style={{ gridColumn: 2, gridRow: 3 }}
                         onChange={e => setPlayerPhrase(e.target.value)}
                         value={playerPhrase}
-                        placeholder="参加フレーズ"
+                        placeholder='参加フレーズ'
                     />
                 ) : (
                     <div style={{ gridColumn: 2, gridRow: 3, marginLeft: 4, fontSize: 'small' }}>
@@ -138,7 +138,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                 )}
                 <Button
                     style={{ gridColumn: 3, gridRow: 3 }}
-                    type="primary"
+                    type='primary'
                     onClick={onJoinAsPlayerButtonClick}
                 >
                     入室
@@ -151,7 +151,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                         style={{ gridColumn: 2, gridRow: 4 }}
                         onChange={e => setSpectatorPhrase(e.target.value)}
                         value={spectatorPhrase}
-                        placeholder="観戦フレーズ"
+                        placeholder='観戦フレーズ'
                     />
                 ) : (
                     <div style={{ gridColumn: 2, gridRow: 4, marginLeft: 4, fontSize: 'small' }}>
@@ -160,7 +160,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                 )}
                 <Button
                     style={{ gridColumn: 3, gridRow: 4 }}
-                    type="primary"
+                    type='primary'
                     onClick={onJoinAsSpectatorButtonClick}
                 >
                     入室
@@ -317,9 +317,9 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
     if (error != null) {
         return (
             <Result
-                status="error"
+                status='error'
                 title={`Apollo subscription エラー: ${error.message}`}
-                subTitle="ブラウザを更新してください。"
+                subTitle='ブラウザを更新してください。'
             />
         );
     }
@@ -330,9 +330,9 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
                 // TODO: Buttonなどを用いたreloadに対応させる。
                 return (
                     <Result
-                        status="error"
-                        title="サーバーから応答を受け取ることができませんでした。"
-                        subTitle="ブラウザを更新してください。"
+                        status='error'
+                        title='サーバーから応答を受け取ることができませんでした。'
+                        subTitle='ブラウザを更新してください。'
                     />
                 );
             }
@@ -341,7 +341,7 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
         case nonJoined:
             return (
                 <Center>
-                    <Card title="入室">
+                    <Card title='入室'>
                         <JoinRoomForm
                             roomState={roomState.nonJoinedRoom}
                             onJoin={() => refetchRoomState()}
@@ -354,9 +354,9 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
                 case GetRoomFailureType.NotFound:
                     return (
                         <Result
-                            status="404"
-                            title="該当する部屋が見つかりませんでした。"
-                            subTitle="部屋が存在しているか、適切な権限があるかどうか確認してください。"
+                            status='404'
+                            title='該当する部屋が見つかりませんでした。'
+                            subTitle='部屋が存在しているか、適切な権限があるかどうか確認してください。'
                         />
                     );
             }
@@ -370,13 +370,13 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
             // TODO: mutationFailureが細分化されたら、こちらも細分化する。
             return (
                 <Result
-                    status="error"
-                    title="mutationに失敗しました。"
-                    subTitle="ログイン、エントリーしていることと、ネットワークに問題がないことを確認してください。"
+                    status='error'
+                    title='mutationに失敗しました。'
+                    subTitle='ログイン、エントリーしていることと、ネットワークに問題がないことを確認してください。'
                 />
             );
         case deleted:
-            return <Result status="warning" title="この部屋は削除されました。" />;
+            return <Result status='warning' title='この部屋は削除されました。' />;
     }
 };
 
@@ -387,7 +387,7 @@ const RoomCore: React.FC<{ children: JSX.Element }> = ({ children }: { children:
     if (Array.isArray(id) || id == null) {
         return (
             <Layout requires={loginAndEntry}>
-                <Result status="error" title="パラメーターが不正です。" />
+                <Result status='error' title='パラメーターが不正です。' />
             </Layout>
         );
     }

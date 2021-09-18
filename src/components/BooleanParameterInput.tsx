@@ -59,7 +59,7 @@ const BooleanParameterInput: React.FC<Props> = ({
             return (
                 <Tooltip title={addParameter}>
                     <Button
-                        size="small"
+                        size='small'
                         disabled={disabled}
                         onClick={() => {
                             const operation: CharacterUpOperation = {
@@ -82,7 +82,7 @@ const BooleanParameterInput: React.FC<Props> = ({
         return (
             <Tooltip title={deleteParameter}>
                 <Button
-                    size="small"
+                    size='small'
                     disabled={disabled}
                     onClick={() => {
                         const operation: CharacterUpOperation = {
@@ -134,7 +134,7 @@ const BooleanParameterInput: React.FC<Props> = ({
             }
             checkedChildren={<EyeOutlined />}
             unCheckedChildren={<EyeInvisibleOutlined />}
-            size="small"
+            size='small'
             onChange={e => {
                 const operation: CharacterUpOperation = {
                     $v: 1,

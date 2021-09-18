@@ -38,7 +38,7 @@ const PrivateMessageDrawer: React.FC<PrivateMessageDrawerProps> = ({
         <Drawer
             className={cancelRnd}
             width={600}
-            title="秘話の送信先"
+            title='秘話の送信先'
             visible={visible}
             closable
             onClose={() => onClose()}
@@ -52,8 +52,8 @@ const PrivateMessageDrawer: React.FC<PrivateMessageDrawerProps> = ({
             }
         >
             <div>
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col flex={0}>送信先</Col>
                     <Col span={inputSpan}>
                         <div>
@@ -61,7 +61,9 @@ const PrivateMessageDrawer: React.FC<PrivateMessageDrawerProps> = ({
                                 ? '(自分以外の入室者がいません)'
                                 : recordToArray(participants)
                                       .filter(pair => myUserUid !== pair.key)
-                                      .sort((x, y) => (x.value.name ?? '').localeCompare(y.value.name ?? ''))
+                                      .sort((x, y) =>
+                                          (x.value.name ?? '').localeCompare(y.value.name ?? '')
+                                      )
                                       .map(pair => {
                                           return (
                                               <React.Fragment key={pair.key}>
@@ -90,13 +92,13 @@ const PrivateMessageDrawer: React.FC<PrivateMessageDrawerProps> = ({
                         </div>
                     </Col>
                 </Row>
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col span={inputSpan}>
                         {selectedParticipants.size === 0 ? (
                             <Alert
-                                message="送信先のユーザーが選択されていないため、独り言になります。独り言を使うことで、自分の考えをログに残すことができます。"
-                                type="info"
+                                message='送信先のユーザーが選択されていないため、独り言になります。独り言を使うことで、自分の考えをログに残すことができます。'
+                                type='info'
                                 showIcon
                             />
                         ) : null}

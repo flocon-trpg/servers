@@ -85,7 +85,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
             >
                 <Space>
                     <BufferedInput
-                        size="small"
+                        size='small'
                         value={state.name}
                         bufferDuration={200}
                         onChange={e => {
@@ -108,7 +108,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                         }}
                     />
                     <Button
-                        size="small"
+                        size='small'
                         onClick={() => {
                             const operation: UpOperation = {
                                 $v: 1,
@@ -145,7 +145,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
             >
                 <Space>
                     <BufferedInput
-                        size="small"
+                        size='small'
                         value={state.name}
                         bufferDuration={200}
                         onChange={e => {
@@ -168,7 +168,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                         }}
                     />
                     <Button
-                        size="small"
+                        size='small'
                         onClick={() => {
                             const operation: UpOperation = {
                                 $v: 1,
@@ -205,7 +205,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
             >
                 <Space>
                     <BufferedInput
-                        size="small"
+                        size='small'
                         value={state.name}
                         bufferDuration={200}
                         onChange={e => {
@@ -228,7 +228,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                         }}
                     />
                     <Button
-                        size="small"
+                        size='small'
                         onClick={() => {
                             const operation: UpOperation = {
                                 $v: 1,
@@ -253,7 +253,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
 
     return (
         <Drawer
-            title="キャラクターのパラメーター名の追加・編集・削除"
+            title='キャラクターのパラメーター名の追加・編集・削除'
             width={600}
             visible={characterParameterNamesDrawerVisibility}
             closable
@@ -280,7 +280,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
         >
             <Form>
                 <Collapse defaultActiveKey={['num', 'str', 'bool']}>
-                    <Collapse.Panel header="数値パラメーター" key="num">
+                    <Collapse.Panel header='数値パラメーター' key='num'>
                         {strIndex20Array.map(createNumParamName)}
                         {strIndex20Array.some(key => numParamNamesMap.has(key)) ? (
                             <div style={{ padding: 6 }} />
@@ -288,7 +288,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                         <div className={classNames(flex, flexRow)}>
                             <Select
                                 style={{ minWidth: 150 }}
-                                size="small"
+                                size='small'
                                 value={addNumParamSelector}
                                 onSelect={newValue => {
                                     setAddNumParamSelector(newValue);
@@ -311,7 +311,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                 })}
                             </Select>
                             <Button
-                                size="small"
+                                size='small'
                                 disabled={addNumParamSelector == null}
                                 icon={<PlusOutlined />}
                                 onClick={() => {
@@ -332,7 +332,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                             </Button>
                         </div>
                     </Collapse.Panel>
-                    <Collapse.Panel header="チェックマークパラメーター" key="bool">
+                    <Collapse.Panel header='チェックマークパラメーター' key='bool'>
                         {strIndex20Array.map(createBoolParamName)}
                         {strIndex20Array.some(key => boolParamNamesMap.has(key)) ? (
                             <div style={{ padding: 6 }} />
@@ -340,7 +340,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                         <div className={classNames(flex, flexRow)}>
                             <Select
                                 style={{ minWidth: 150 }}
-                                size="small"
+                                size='small'
                                 value={addBoolParamSelector}
                                 onSelect={newValue => {
                                     setAddBoolParamSelector(newValue);
@@ -363,7 +363,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                 })}
                             </Select>
                             <Button
-                                size="small"
+                                size='small'
                                 disabled={addBoolParamSelector == null}
                                 icon={<PlusOutlined />}
                                 onClick={() => {
@@ -384,7 +384,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                             </Button>
                         </div>
                     </Collapse.Panel>
-                    <Collapse.Panel header="文字列パラメーター" key="str">
+                    <Collapse.Panel header='文字列パラメーター' key='str'>
                         {strIndex20Array.map(createStrParamName)}
                         {strIndex20Array.some(key => strParamNamesMap.has(key)) ? (
                             <div style={{ padding: 6 }} />
@@ -392,7 +392,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                         <div style={{ display: 'flex', flexDirection: 'row' }}>
                             <Select
                                 style={{ minWidth: 150 }}
-                                size="small"
+                                size='small'
                                 value={addStrParamSelector}
                                 onSelect={newValue => {
                                     setAddStrParamSelector(newValue);
@@ -415,7 +415,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                 })}
                             </Select>
                             <Button
-                                size="small"
+                                size='small'
                                 disabled={addStrParamSelector == null}
                                 icon={<PlusOutlined />}
                                 onClick={() => {

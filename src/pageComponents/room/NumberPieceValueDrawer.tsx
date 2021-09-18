@@ -52,8 +52,8 @@ const IdView: React.FC = () => {
     }
 
     return (
-        <Row gutter={gutter} align="middle">
-            <Col flex="auto" />
+        <Row gutter={gutter} align='middle'>
+            <Col flex='auto' />
             <Col flex={0}>ID</Col>
             <Col span={inputSpan}>
                 {drawerType.type === update
@@ -199,8 +199,8 @@ export const NumberPieceValueDrawer: React.FC = () => {
         >
             <div>
                 <IdView />
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col flex={0}>所有者</Col>
                     <Col span={inputSpan}>
                         <MyCharactersSelect
@@ -214,12 +214,12 @@ export const NumberPieceValueDrawer: React.FC = () => {
                         />
                     </Col>
                 </Row>
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col flex={0}>値</Col>
                     <Col span={inputSpan}>
                         <InputNumber
-                            size="small"
+                            size='small'
                             value={state.value ?? 0}
                             onChange={e => {
                                 if (typeof e !== 'number') {
@@ -230,8 +230,8 @@ export const NumberPieceValueDrawer: React.FC = () => {
                         />
                     </Col>
                 </Row>
-                <Row gutter={gutter} align="middle">
-                    <Col flex="auto" />
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
                     <Col flex={0}>値を非公開にする</Col>
                     <Col span={inputSpan}>
                         <Checkbox

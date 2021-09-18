@@ -7,12 +7,8 @@
 
 import { FilePath } from '@kizahasi/flocon-core';
 import React from 'react';
-import { useAsync } from 'react-use';
-import ConfigContext from '../contexts/ConfigContext';
-import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { FilePathFragment } from '../generated/graphql';
 import { analyzeUrl } from '../utils/analyzeUrl';
-import { getFloconUploaderFile } from '../utils/getFloconUploaderFile';
 import { useSrcFromGraphQL } from './src';
 
 type Size = {
