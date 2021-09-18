@@ -30,7 +30,7 @@ export const ImageView: React.FC<Props> = ({
                         src={src.value}
                         width={size}
                         height={size}
-                        placeHolderElement={loadingIcon}
+                        loadingPlaceholder={loadingIcon}
                     />
                 </a>;
             }
@@ -39,7 +39,7 @@ export const ImageView: React.FC<Props> = ({
                     src={src.value}
                     width={size}
                     height={size}
-                    placeHolderElement={loadingIcon}
+                    loadingPlaceholder={loadingIcon}
                 />
             );
         case error:

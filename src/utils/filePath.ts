@@ -3,7 +3,7 @@ import * as Core from '@kizahasi/flocon-core';
 import { getStorageForce } from './firebaseHelpers';
 import { Config } from '../config';
 import { ExpiryMap } from './expiryMap';
-import { getFloconUploaderFile } from './getFloconUploaderFile';
+import { files, getFloconUploaderFile } from './getFloconUploaderFile';
 
 export type FilePath = {
     path: string;
@@ -85,6 +85,7 @@ export namespace FilePath {
                     filename: path.path,
                     config,
                     idToken,
+                    mode: files,
                 });
                 if (axiosResponse.data == null) {
                     return {

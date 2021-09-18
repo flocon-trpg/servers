@@ -21,6 +21,9 @@ import copy from 'clipboard-copy';
 import * as Icons from '@ant-design/icons';
 import { DeleteFloconStorageFileModal } from '../DeleteFloconStorageFileModal';
 import { FirebaseAuthenticationIdTokenContext } from '../../contexts/FirebaseAuthenticationIdTokenContext';
+import { useAsync } from 'react-use';
+import { LazyAndPreloadImage } from '../LazyAndPreloadImage';
+import { getFloconUploaderFile, thumbs } from '../../utils/getFloconUploaderFile';
 
 type DataSource = FileItemFragment;
 
@@ -95,6 +98,55 @@ const Uploader: React.FC<UploaderProps> = ({ unlistedMode, onUploaded }: Uploade
     );
 };
 
+type ThumbProps = {
+    thumbFilePath: string | undefined;
+    size: number;
+};
+
+const Thumb: React.FC<ThumbProps> = ({ thumbFilePath, size }: ThumbProps) => {
+    const config = React.useContext(ConfigContext);
+    const idToken = React.useContext(FirebaseAuthenticationIdTokenContext);
+    const loadingIcon = <Icons.LoadingOutlined style={{ fontSize: size }} />;
+    const src = useAsync(async () => {
+        if (thumbFilePath == null || idToken == null) {
+            return null;
+        }
+        const axiosResponse = await getFloconUploaderFile({
+            filename: thumbFilePath,
+            config,
+            idToken,
+            mode: thumbs,
+        });
+        if (axiosResponse.data == null) {
+            return null;
+        }
+        const blob = new Blob([axiosResponse.data]);
+        return URL.createObjectURL(blob);
+    }, [thumbFilePath, config, idToken]);
+
+    console.info('src', src.value);
+    return (
+        <LazyAndPreloadImage
+            src={src.value ?? undefined}
+            width={size}
+            height={size}
+            loadingPlaceholder={loadingIcon}
+        />
+    );
+};
+
+const thumbColumn: Column = {
+    title: 'サムネイル',
+    // eslint-disable-next-line react/display-name
+    render: (_, record: DataSource) => {
+        console.info('thumbFilename', record.thumbFilename);
+        if (record.thumbFilename == null) {
+            return null;
+        }
+        return <Thumb key={record.filename} thumbFilePath={record.thumbFilename} size={20} />;
+    },
+};
+
 const screennameColumn: Column = {
     title: 'ファイル名',
     sorter: (x, y) => x.screenname.localeCompare(y.screenname),
@@ -137,7 +189,7 @@ const fileTypeColumn = (defaultFilteredValue: FilterValue | null | undefined): C
     width: 100,
     // eslint-disable-next-line react/display-name
     render: (_, record: DataSource) => {
-        switch (record.screenname) {
+        switch (guessFileType(record.screenname)) {
             case image:
                 return '画像';
             case sound:
@@ -253,6 +305,7 @@ const FloconFilesList: React.FC<FloconFilesListProps> = ({
     const columns = (() => {
         if (onFlieOpen != null) {
             return [
+                thumbColumn,
                 screennameColumn,
                 fileTypeColumn(defaultFilteredValue),
                 createdAtColumn,
@@ -261,6 +314,7 @@ const FloconFilesList: React.FC<FloconFilesListProps> = ({
             ];
         }
         return [
+            thumbColumn,
             screennameColumn,
             fileTypeColumn(defaultFilteredValue),
             createdAtColumn,
