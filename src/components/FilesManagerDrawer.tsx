@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Button, Drawer, Input, Result, Tabs } from 'antd';
-import { FilePathFragment, FileSourceType } from '../generated/graphql';
+import { Button, Drawer, Input, Result, Tabs, Tooltip } from 'antd';
+import { FilePathFragment, FileSourceType, useGetServerInfoQuery } from '../generated/graphql';
 import DrawerFooter from '../layouts/DrawerFooter';
 import { FilesManagerDrawerType, some } from '../utils/types';
 import { cancelRnd } from '../utils/className';
@@ -16,6 +16,8 @@ type Props = {
 const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => {
     const myAuth = React.useContext(MyAuthContext);
     const [input, setInput] = React.useState<string>('');
+    const { data: serverInfo } = useGetServerInfoQuery();
+    const isUploaderDisabled = serverInfo?.result.uploaderEnabled !== true;
 
     const child = (() => {
         if (typeof myAuth === 'string') {
@@ -41,7 +43,19 @@ const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => 
                         defaultFilteredValue={drawerType?.defaultFilteredValue}
                     />
                 </Tabs.TabPane>
-                <Tabs.TabPane tab='内蔵アップローダー' key='2'>
+                <Tabs.TabPane
+                    tab={
+                        isUploaderDisabled ? (
+                            <Tooltip title='APIサーバーの設定で有効化されていないため、使用できません'>
+                                内蔵アップローダー
+                            </Tooltip>
+                        ) : (
+                            '内蔵アップローダー'
+                        )
+                    }
+                    key='2'
+                    disabled={isUploaderDisabled}
+                >
                     <FloconFilesManager
                         onFlieOpen={onFileOpen}
                         defaultFilteredValue={drawerType?.defaultFilteredValue}

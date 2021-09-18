@@ -739,6 +739,7 @@ export type SemVer = {
 
 export type ServerInfo = {
     __typename?: 'ServerInfo';
+    uploaderEnabled: Scalars['Boolean'];
     version: SemVer;
 };
 
@@ -1552,6 +1553,7 @@ export type GetServerInfoQuery = {
     __typename?: 'Query';
     result: {
         __typename?: 'ServerInfo';
+        uploaderEnabled: boolean;
         version: {
             __typename?: 'SemVer';
             major: number;
@@ -2826,6 +2828,7 @@ export const GetServerInfoDocument = gql`
             version {
                 ...SemVer
             }
+            uploaderEnabled
         }
     }
     ${SemVerFragmentDoc}
