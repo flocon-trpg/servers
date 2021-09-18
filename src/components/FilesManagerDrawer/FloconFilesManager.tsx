@@ -149,7 +149,6 @@ const thumbColumn: Column = {
     title: 'サムネイル',
     // eslint-disable-next-line react/display-name
     render: (_, record: DataSource) => {
-        console.info('thumbFilename', record.thumbFilename);
         if (record.thumbFilename == null) {
             return null;
         }
