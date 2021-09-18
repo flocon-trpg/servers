@@ -10,6 +10,7 @@ import {
     FileItemFragment,
     FilePathFragment,
     FileSourceType,
+    useDeleteFilesMutation,
     useGetFilesQuery,
 } from '../../generated/graphql';
 import { FloconUploaderFileLink } from '../FloconUploaderFileLink';
@@ -34,7 +35,7 @@ const Uploader: React.FC<UploaderProps> = ({ unlistedMode, onUploaded }: Uploade
     const config = React.useContext(ConfigContext);
     const idToken = React.useContext(FirebaseAuthenticationIdTokenContext);
 
-    if (idToken== null) {
+    if (idToken == null) {
         return null;
     }
 
@@ -175,6 +176,9 @@ type FileOptionsMenuProps = {
 };
 
 const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({ fileItem }: FileOptionsMenuProps) => {
+    const { refetch } = useGetFilesQuery({ variables: { input: { fileTagIds: [] } } });
+    const [deleteFilesMutation] = useDeleteFilesMutation();
+
     return (
         <div>
             <Menu>
@@ -193,7 +197,21 @@ const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({ fileItem }: FileOptio
                 </Menu.Item>
                 <Menu.Item
                     icon={<Icons.DeleteOutlined />}
-                    onClick={() => DeleteFloconStorageFileModal([fileItem])}
+                    onClick={() =>
+                        DeleteFloconStorageFileModal([fileItem], async filenamesToDelete => {
+                            if (filenamesToDelete.length === 0) {
+                                return;
+                            }
+                            const isSuccess = await deleteFilesMutation({
+                                variables: { filenames: filenamesToDelete },
+                            })
+                                .then(() => true)
+                                .catch(() => false);
+                            if (isSuccess) {
+                                await refetch();
+                            }
+                        })
+                    }
                 >
                     削除
                 </Menu.Item>
@@ -229,6 +247,8 @@ const FloconFilesList: React.FC<FloconFilesListProps> = ({
 }: FloconFilesListProps) => {
     const getFilesQueryResult = useGetFilesQuery({ variables: { input: { fileTagIds: [] } } });
     const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([]);
+    const { refetch } = useGetFilesQuery({ variables: { input: { fileTagIds: [] } } });
+    const [deleteFilesMutation] = useDeleteFilesMutation();
 
     const columns = (() => {
         if (onFlieOpen != null) {
@@ -255,7 +275,22 @@ const FloconFilesList: React.FC<FloconFilesListProps> = ({
                     const selectedFiles = getFilesQueryResult.data?.result.files.filter(f =>
                         selectedRowKeys.some(key => f.filename === key)
                     );
-                    DeleteFloconStorageFileModal(selectedFiles ?? []);
+                    if (selectedFiles == null) {
+                        return;
+                    }
+                    DeleteFloconStorageFileModal(selectedFiles, async filenamesToDelete => {
+                        if (filenamesToDelete.length === 0) {
+                            return;
+                        }
+                        const isSuccess = await deleteFilesMutation({
+                            variables: { filenames: filenamesToDelete },
+                        })
+                            .then(() => true)
+                            .catch(() => false);
+                        if (isSuccess) {
+                            await refetch();
+                        }
+                    });
                 }}
             >
                 選択したファイルを削除
@@ -269,7 +304,7 @@ const FloconFilesList: React.FC<FloconFilesListProps> = ({
                 }}
                 size="small"
                 pagination={{ pageSize: 15 }}
-                rowKey="fullPath"
+                rowKey="filename"
                 columns={columns}
                 dataSource={getFilesQueryResult.data?.result.files ?? []}
             />
