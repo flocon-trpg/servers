@@ -28,6 +28,7 @@ import * as Icon from '@ant-design/icons';
 import { useSignOut } from '../hooks/useSignOut';
 import { useApolloClient } from '@apollo/client';
 import { authNotFound, loading, MyAuthContext, notSignIn } from '../contexts/MyAuthContext';
+import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 const { Header, Content } = AntdLayout;
 
 type EntryFormComponentProps = {
@@ -122,12 +123,16 @@ const Layout: React.FC<PropsWithChildren<Props>> = ({
     const myUserUid = typeof myAuth === 'string' ? null : myAuth.value.uid;
     const apolloClient = useApolloClient();
     const signOut = useSignOut();
-    const [isEntry, setIsEntry] = React.useState<'notRequired' | 'loading' | boolean>(
-        'notRequired'
-    );
+    const [isEntry, setIsEntry] = React.useState<'notRequired' | 'loading' | boolean>('loading');
+    const idToken = React.useContext(FirebaseAuthenticationIdTokenContext);
+    const hasIdToken = idToken != null;
     const requiresEntry = requires === loginAndEntry;
     React.useEffect(() => {
         if (requiresEntry && myUserUid != null) {
+            if (!hasIdToken) {
+                setIsEntry(false);
+                return;
+            }
             let unsubscribed = false;
             setIsEntry('loading');
             apolloClient
@@ -146,7 +151,7 @@ const Layout: React.FC<PropsWithChildren<Props>> = ({
             };
         }
         setIsEntry('notRequired');
-    }, [requiresEntry, myUserUid, apolloClient]);
+    }, [requiresEntry, myUserUid, apolloClient, hasIdToken]);
 
     const getChildren = (): React.ReactNode => {
         if (typeof children === 'function') {
