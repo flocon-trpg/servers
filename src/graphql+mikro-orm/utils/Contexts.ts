@@ -27,7 +27,7 @@ export type ResolverContext = {
     // @Authorizedの処理で用いたEMと同じインスタンス。理由は、authorizedUserをManyToOneなどでセットする際に、もしEMが異なっているとエラーが出るかもしれないと思ったから（未検証）。
     readonly em: EM;
 
-    // @Authorizedを使用 ⇔ これがnon-null
-    // Authorized属性を通してセットされる
+    // @Authorizedを使用していてなおかつENTRY以上 ⇔ これがnon-null
+    // authChecker関数を通してセットされる
     authorizedUser: User | null;
 };

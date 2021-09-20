@@ -17,6 +17,7 @@ import {
     checkSignIn,
     comparePassword,
     ensureAuthorizedUser,
+    ensureUserUid,
     NotSignIn,
 } from './utils/helpers';
 import { queueLimitReached } from '../../utils/promiseQueue';
@@ -255,14 +256,12 @@ export class MainResolver {
     }
 
     @Query(() => Boolean)
+    @Authorized()
     public async isEntry(@Ctx() context: ResolverContext): Promise<boolean> {
-        const decodedIdToken = checkSignIn(context);
-        if (decodedIdToken === NotSignIn) {
-            return false;
-        }
+        const userUid = ensureUserUid(context);
         return await checkEntry({
             em: context.em,
-            userUid: decodedIdToken.uid,
+            userUid,
             baasType: BaasType.Firebase,
             serverConfig: context.serverConfig,
         });

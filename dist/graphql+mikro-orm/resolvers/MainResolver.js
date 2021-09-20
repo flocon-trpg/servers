@@ -199,13 +199,10 @@ let MainResolver = class MainResolver {
         return true;
     }
     async isEntry(context) {
-        const decodedIdToken = helpers_1.checkSignIn(context);
-        if (decodedIdToken === helpers_1.NotSignIn) {
-            return false;
-        }
+        const userUid = helpers_1.ensureUserUid(context);
         return await helpers_1.checkEntry({
             em: context.em,
-            userUid: decodedIdToken.uid,
+            userUid,
             baasType: BaasType_1.BaasType.Firebase,
             serverConfig: context.serverConfig,
         });
@@ -342,6 +339,7 @@ __decorate([
 ], MainResolver.prototype, "deleteFileTag", null);
 __decorate([
     type_graphql_1.Query(() => Boolean),
+    type_graphql_1.Authorized(),
     __param(0, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
