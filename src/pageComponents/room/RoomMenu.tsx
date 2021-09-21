@@ -1,4 +1,4 @@
-import { Button, Input, Menu, Modal, Popover, Progress, Tooltip } from 'antd';
+import { Input, Menu, Modal, Popover, Tooltip } from 'antd';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import {
@@ -7,7 +7,6 @@ import {
     PromoteFailureType,
     useChangeParticipantNameMutation,
     useDeleteRoomMutation,
-    useGetLogLazyQuery,
     useLeaveRoomMutation,
     usePromoteToPlayerMutation,
     useRequiresPhraseToJoinAsPlayerLazyQuery,
@@ -22,27 +21,18 @@ import { roomModule, Notification } from '../../modules/roomModule';
 import path from '../../utils/path';
 import { useRouter } from 'next/router';
 import { defaultMessagePanelConfig } from '../../states/MessagePanelConfig';
-import fileDownload from 'js-file-download';
-import { generateAsRichLog, generateAsStaticHtml } from '../../utils/roomLogGenerator';
-import moment from 'moment';
-import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
-import { useParticipants } from '../../hooks/state/useParticipants';
 import { recordToArray } from '@kizahasi/util';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { defaultMemoPanelConfig } from '../../states/MemoPanelConfig';
 import FilesManagerDrawer from '../../components/FilesManagerDrawer';
 import { FilesManagerDrawerType, none } from '../../utils/types';
-import { useReadonlyRef } from '../../hooks/useReadonlyRef';
 import { useMe } from '../../hooks/useMe';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useSignOut } from '../../hooks/useSignOut';
-import ConfigContext from '../../contexts/ConfigContext';
-import { FirebaseStorageUrlCacheContext } from '../../contexts/FirebaseStorageUrlCacheContext';
-import { ChannelsFilter, ChannelsFilterOptions } from '../../components/ChannelsFilter';
 import classNames from 'classnames';
-import { flex, flexColumn, flexRow, itemsCenter } from '../../utils/className';
-import { FirebaseAuthenticationIdTokenContext } from '../../contexts/FirebaseAuthenticationIdTokenContext';
+import { flex, flexRow, itemsCenter } from '../../utils/className';
 import { MyAuthContext } from '../../contexts/MyAuthContext';
+import { GenerateLogModal } from '../../components/GenerateLogModal';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -302,238 +292,6 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
     );
 };
 
-type GenerateSimpleLogModalProps = {
-    roomId: string;
-    visible: boolean;
-    onOk: () => void;
-    onCancel: () => void;
-};
-
-const GenerateSimpleLogModal: React.FC<GenerateSimpleLogModalProps> = ({
-    roomId,
-    visible,
-    onOk,
-    onCancel,
-}: GenerateSimpleLogModalProps) => {
-    const publicChannelNames = usePublicChannelNames();
-    const publicChannelNamesRef = useReadonlyRef(publicChannelNames);
-    const participants = useParticipants();
-    const participantsRef = useReadonlyRef(participants);
-    const [channelsFilterOptions, setChannelsFilterOptions] = React.useState(
-        ChannelsFilterOptions.defaultValue
-    );
-    const channelsFilterOptionsRef = useReadonlyRef(channelsFilterOptions);
-
-    const [getLogQuery, getLogQueryResult] = useGetLogLazyQuery({ fetchPolicy: 'network-only' });
-
-    React.useEffect(() => {
-        const data = getLogQueryResult.data;
-        if (data == null) {
-            return;
-        }
-        if (data.result.__typename !== 'RoomMessages') {
-            // TODO: エラーメッセージを出す
-            return;
-        }
-        if (publicChannelNamesRef.current == null || participantsRef.current == null) {
-            return;
-        }
-        fileDownload(
-            generateAsStaticHtml({
-                ...publicChannelNamesRef.current,
-                messages: data.result,
-                participants: participantsRef.current,
-                filter: ChannelsFilterOptions.toFilter(channelsFilterOptionsRef.current),
-            }),
-            `log_${moment(new Date()).format('YYYYMMDDHHmmss')}.html`
-        );
-    }, [getLogQueryResult.data, participantsRef, publicChannelNamesRef, channelsFilterOptionsRef]);
-
-    if (publicChannelNames == null) {
-        return null;
-    }
-
-    return (
-        <Modal
-            visible={visible}
-            title='ログのダウンロード'
-            onOk={() => {
-                getLogQuery({ variables: { roomId } });
-                onOk();
-            }}
-            onCancel={() => onCancel()}
-        >
-            <div className={classNames(flex, flexColumn)}>
-                <div style={{ marginBottom: 8 }}>
-                    ログには、秘話などの非公開情報も含めることが可能です。また、ログをダウンロードすると、システムメッセージによって全員に通知されます。
-                </div>
-                <ChannelsFilter
-                    value={channelsFilterOptions}
-                    onChange={setChannelsFilterOptions}
-                    disabled={false}
-                />
-            </div>
-        </Modal>
-    );
-};
-
-type GenerateRichLogModalProps = {
-    roomId: string;
-    visible: boolean;
-    onCancel: () => void;
-};
-
-const GenerateRichLogModal: React.FC<GenerateRichLogModalProps> = ({
-    roomId,
-    visible,
-    onCancel,
-}: GenerateRichLogModalProps) => {
-    const config = React.useContext(ConfigContext);
-    const configRef = useReadonlyRef(config);
-    const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
-    const firebaseStorageUrlCacheContextRef = useReadonlyRef(firebaseStorageUrlCacheContext);
-    const idToken = React.useContext(FirebaseAuthenticationIdTokenContext);
-
-    const publicChannelNames = usePublicChannelNames();
-    const publicChannelNamesRef = useReadonlyRef(publicChannelNames);
-    const participants = useParticipants();
-    const participantsRef = useReadonlyRef(participants);
-    const [channelsFilterOptions, setChannelsFilterOptions] = React.useState(
-        ChannelsFilterOptions.defaultValue
-    );
-    const channelsFilterOptionsRef = useReadonlyRef(channelsFilterOptions);
-
-    // undefinedならばダウンロード
-    const [progress, setProgress] = React.useState<number>();
-    const [errorMessage, setErrorMessage] = React.useState<string>();
-    React.useEffect(() => {
-        setProgress(undefined);
-        setErrorMessage(undefined);
-    }, [visible]);
-
-    const [getLogQuery, getLogQueryResult] = useGetLogLazyQuery({ fetchPolicy: 'network-only' });
-
-    React.useEffect(() => {
-        const main = async () => {
-            if (idToken == null) {
-                return;
-            }
-            const data = getLogQueryResult.data;
-            if (data == null) {
-                return;
-            }
-            if (data.result.__typename !== 'RoomMessages') {
-                // TODO: エラーメッセージを出す
-                return;
-            }
-            if (
-                publicChannelNamesRef.current == null ||
-                participantsRef.current == null ||
-                firebaseStorageUrlCacheContextRef.current == null
-            ) {
-                return;
-            }
-
-            const zipBlob = await generateAsRichLog({
-                params: {
-                    ...publicChannelNamesRef.current,
-                    messages: data.result,
-                    participants: participantsRef.current,
-                    filter: ChannelsFilterOptions.toFilter(channelsFilterOptionsRef.current),
-                },
-                config: configRef.current,
-                idToken,
-                firebaseStorageUrlCache: firebaseStorageUrlCacheContextRef.current,
-                onProgressChange: p => setProgress(p.percent),
-            }).catch(err => {
-                setProgress(undefined);
-                setErrorMessage(err.message);
-                return null;
-            });
-            if (zipBlob == null) {
-                return;
-            }
-            setProgress(100);
-            fileDownload(zipBlob, `log_${moment(new Date()).format('YYYYMMDDHHmmss')}.zip`);
-        };
-        main();
-    }, [
-        getLogQueryResult.data,
-        participantsRef,
-        publicChannelNamesRef,
-        configRef,
-        firebaseStorageUrlCacheContextRef,
-        channelsFilterOptionsRef,
-        idToken,
-    ]);
-
-    if (publicChannelNames == null) {
-        return null;
-    }
-
-    const isDownloading = progress != null && progress !== 100;
-
-    return (
-        <Modal
-            visible={visible}
-            width={700}
-            closable={false}
-            maskClosable={!isDownloading}
-            title='ログのダウンロード'
-            okButtonProps={{ style: { display: 'none' } }}
-            cancelText='閉じる'
-            cancelButtonProps={{ disabled: isDownloading }}
-            onCancel={() => onCancel()}
-        >
-            <div className={classNames(flex, flexColumn)}>
-                <div>
-                    <p>
-                        ログには、秘話などの非公開情報も含めることが可能です。また、ログをダウンロードすると、システムメッセージによって全員に通知されます。
-                    </p>
-                    <p>
-                        キャラクターの画像もあわせてダウンロードするため、zipファイル生成までに数十秒程度の時間がかかることがあります。
-                    </p>
-                </div>
-                <ChannelsFilter
-                    value={channelsFilterOptions}
-                    onChange={setChannelsFilterOptions}
-                    disabled={isDownloading}
-                />
-                <Button
-                    style={{ alignSelf: 'start', marginTop: 8 }}
-                    type='primary'
-                    disabled={isDownloading}
-                    onClick={() => {
-                        getLogQuery({ variables: { roomId } });
-                        setProgress(0);
-                        setErrorMessage(undefined);
-                    }}
-                >
-                    ログ生成を開始
-                </Button>
-                {progress != null && (
-                    <Progress
-                        percent={progress}
-                        status={
-                            progress === 100
-                                ? 'success'
-                                : errorMessage == null
-                                ? 'normal'
-                                : 'exception'
-                        }
-                    />
-                )}
-                {progress === 100 && (
-                    <div>
-                        zipファイル生成が完了しました。間もなくzipファイルのダウンロードが開始されます。
-                    </div>
-                )}
-                {errorMessage != null && <div>{errorMessage}</div>}
-            </div>
-        </Modal>
-    );
-};
-
 type ChangeMyParticipantNameModalProps = {
     roomId: string;
     visible: boolean;
@@ -635,9 +393,7 @@ export const RoomMenu: React.FC = () => {
     const [isChangeMyParticipantNameModalVisible, setIsChangeMyParticipantNameModalVisible] =
         React.useState(false);
     const [isDeleteRoomModalVisible, setIsDeleteRoomModalVisible] = React.useState(false);
-    const [isGenerateSimpleLogModalVisible, setIsGenerateSimpleLogModalVisible] =
-        React.useState(false);
-    const [isGenerateRichLogModalVisible, setIsGenerateRichLogModalVisible] = React.useState(false);
+    const [isGenerateLogModalVisible, setIsGenerateSimpleLogModalVisible] = React.useState(false);
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
         React.useState<FilesManagerDrawerType | null>(null);
 
@@ -682,10 +438,7 @@ export const RoomMenu: React.FC = () => {
                     </Menu.Item>
                     <Menu.Divider />
                     <Menu.Item onClick={() => setIsGenerateSimpleLogModalVisible(true)}>
-                        ログをダウンロード（旧）
-                    </Menu.Item>
-                    <Menu.Item onClick={() => setIsGenerateRichLogModalVisible(true)}>
-                        ログをダウンロード（新）
+                        ログをダウンロード
                     </Menu.Item>
                 </Menu.SubMenu>
                 <Menu.SubMenu title='ウィンドウ'>
@@ -1165,15 +918,9 @@ export const RoomMenu: React.FC = () => {
                 roomId={roomId}
                 roomCreatedByMe={myUserUid === createdBy}
             />
-            <GenerateSimpleLogModal
-                visible={isGenerateSimpleLogModalVisible}
-                onOk={() => setIsGenerateSimpleLogModalVisible(false)}
-                onCancel={() => setIsGenerateSimpleLogModalVisible(false)}
-                roomId={roomId}
-            />
-            <GenerateRichLogModal
-                visible={isGenerateRichLogModalVisible}
-                onCancel={() => setIsGenerateRichLogModalVisible(false)}
+            <GenerateLogModal
+                visible={isGenerateLogModalVisible}
+                onClose={() => setIsGenerateSimpleLogModalVisible(false)}
                 roomId={roomId}
             />
         </>
