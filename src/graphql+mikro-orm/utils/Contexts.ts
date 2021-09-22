@@ -1,4 +1,5 @@
 import { Result } from '@kizahasi/result';
+import { RateLimiterAbstract } from 'rate-limiter-flexible';
 import { ServerConfig } from '../../configType';
 import { InMemoryConnectionManager } from '../../connection/main';
 import { BaasType } from '../../enums/BaasType';
@@ -18,6 +19,10 @@ export type DecodedIdToken = {
 export type ResolverContext = {
     // TODO: decodedIdTokenが必要ない場面でもFirebaseから取得するため、無駄がある。
     readonly decodedIdToken?: Result<Readonly<DecodedIdToken>, unknown>;
+
+    // DecodedIdTokenをキーとしている。IPアドレスをキーにしたrate limitは、nginxなどのほうで行ってもらうことを現時点では想定。
+    // nullの場合はrate limitは一切行わない。
+    readonly rateLimiter: RateLimiterAbstract | null;
 
     readonly promiseQueue: PromiseQueue;
     readonly connectionManager: InMemoryConnectionManager;

@@ -88,6 +88,7 @@ const loadServerConfig = ({ databaseArg, }) => {
         entryPassword: right.entryPassword,
         uploader: right.uploader,
         accessControlAllowOrigin: right.accessControlAllowOrigin,
+        '-experimental-disableRateLimit': right['-experimental-disableRateLimit'],
     };
 };
 let firebaseConfig;

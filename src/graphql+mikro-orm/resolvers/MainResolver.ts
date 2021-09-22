@@ -9,6 +9,7 @@ import {
     Resolver,
     Root,
     Subscription,
+    UseMiddleware,
 } from 'type-graphql';
 import { ResolverContext } from '../utils/Contexts';
 import { EntryToServerResultType } from '../../enums/EntryToServerResultType';
@@ -42,6 +43,7 @@ import { FileTag as FileTagEntity } from '../entities/fileTag/mikro-orm';
 import { remove, stat } from 'fs-extra';
 import path from 'path';
 import { thumbsDir } from '../../utils/thumbsDir';
+import { RateLimitMiddleware } from '../middlewares/RateLimitMiddleware';
 
 export type PongPayload = {
     value: number;
@@ -59,6 +61,7 @@ export class MainResolver {
 
     @Query(() => GetFilesResult)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
     public async getFiles(
         @Arg('input') input: GetFilesInput,
         @Ctx() context: ResolverContext
@@ -90,6 +93,7 @@ export class MainResolver {
 
     @Mutation(() => [String])
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
     public async deleteFiles(
         @Arg('filenames', () => [String]) filenames: string[],
         @Ctx() context: ResolverContext
@@ -165,6 +169,7 @@ export class MainResolver {
 
     @Mutation(() => Boolean)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
     public async editFileTags(
         @Arg('input') input: EditFileTagsInput,
         @Ctx() context: ResolverContext
@@ -215,6 +220,7 @@ export class MainResolver {
 
     @Mutation(() => FileTagGraphQL, { nullable: true })
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
     public async createFileTag(
         @Ctx() context: ResolverContext,
         @Arg('tagName') tagName: string
@@ -238,6 +244,7 @@ export class MainResolver {
 
     @Mutation(() => Boolean)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
     public async deleteFileTag(
         @Ctx() context: ResolverContext,
         @Arg('tagId') tagId: string
@@ -257,6 +264,7 @@ export class MainResolver {
 
     @Query(() => Boolean)
     @Authorized()
+    @UseMiddleware(RateLimitMiddleware(1))
     public async isEntry(@Ctx() context: ResolverContext): Promise<boolean> {
         const userUid = ensureUserUid(context);
         return await checkEntry({

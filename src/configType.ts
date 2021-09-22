@@ -1,5 +1,6 @@
 import { maybe } from '@kizahasi/flocon-core';
 import * as t from 'io-ts';
+import { boolean } from 'yargs';
 
 export const postgresql = 'postgresql';
 export const sqlite = 'sqlite';
@@ -62,6 +63,9 @@ export const serverConfigJson = t.type({
 
     // この文字が Access-Control-Allow-Origin と等しくなる。uploaderが有効でapi_serverとweb_serverが同一ドメインでない場合、これを設定しないとアップロードができない。現状、uploaderが有効なときにのみ使われる。キー名を 'Access-Control-Allow-Origin' ではなくcamelCaseにしているのは、「JSONに書いたヘッダーがすべて反映される」という勘違いを防ぐため。
     accessControlAllowOrigin: maybe(t.string),
+
+    // rate limitのフォーマットが決まっていない（pointとdurationの指定のカスタマイズ、メソッドごとの消費pointのカスタマイズなど）が、とりあえずテストではrate limitは無効化したいため、experimentalとしている
+    ['-experimental-disableRateLimit']: maybe(t.boolean),
 });
 
 type ServerConfigJson = t.TypeOf<typeof serverConfigJson>;

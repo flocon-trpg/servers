@@ -98,6 +98,7 @@ const loadServerConfig = ({
         entryPassword: right.entryPassword,
         uploader: right.uploader,
         accessControlAllowOrigin: right.accessControlAllowOrigin,
+        '-experimental-disableRateLimit': right['-experimental-disableRateLimit'],
     };
 };
 

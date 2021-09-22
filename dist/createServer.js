@@ -23,10 +23,21 @@ const fs_extra_1 = require("fs-extra");
 const FilePermissionType_1 = require("./enums/FilePermissionType");
 const easyFlake_1 = require("./utils/easyFlake");
 const thumbsDir_1 = require("./utils/thumbsDir");
+const rate_limiter_flexible_1 = require("rate-limiter-flexible");
+const consume_1 = require("./rateLimit/consume");
 const createServer = async ({ serverConfig, promiseQueue, connectionManager, em, schema, debug, getDecodedIdTokenFromExpressRequest, getDecodedIdTokenFromWsContext, port, }) => {
+    let rateLimiter = null;
+    if (serverConfig['-experimental-disableRateLimit'] !== true) {
+        rateLimiter = new rate_limiter_flexible_1.RateLimiterMemory({
+            duration: 60,
+            points: 600,
+        });
+    }
     const context = async (context) => {
+        context.req.socket.remoteAddress;
         return {
             decodedIdToken: await getDecodedIdTokenFromExpressRequest(context.req),
+            rateLimiter,
             serverConfig,
             promiseQueue,
             connectionManager,
@@ -79,6 +90,11 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
             const decodedIdToken = await getDecodedIdTokenFromExpressRequest(req);
             if (decodedIdToken == null || decodedIdToken.isError) {
                 res.status(403).send('Invalid Authorization header');
+                return;
+            }
+            const rateLimitError = await consume_1.consume(rateLimiter, decodedIdToken.value.uid, 10);
+            if (rateLimitError != null) {
+                res.status(429).send(rateLimitError.errorMessage);
                 return;
             }
             const forkedEm = em.fork();
@@ -183,10 +199,14 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
             res.status(403).send('Flocon uploader is disabled by server config');
             return;
         }
-        const filename = sanitize_filename_1.default(req.params.file_name);
         const decodedIdToken = await getDecodedIdTokenFromExpressRequest(req);
         if (decodedIdToken == null || decodedIdToken.isError) {
             res.status(403).send('Invalid Authorization header');
+            return;
+        }
+        const rateLimitError = await consume_1.consume(rateLimiter, decodedIdToken.value.uid, 5);
+        if (rateLimitError != null) {
+            res.status(429).send(rateLimitError.errorMessage);
             return;
         }
         const forkedEm = em.fork();
@@ -195,6 +215,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
             res.status(403).send('Requires entry');
             return;
         }
+        const filename = sanitize_filename_1.default(req.params.file_name);
         let filepath;
         if (typeParam === 'files') {
             const fileCount = await forkedEm.count(mikro_orm_2.File, { filename });
@@ -231,6 +252,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
                 const decodedIdToken = await getDecodedIdTokenFromWsContext(ctx);
                 const result = {
                     decodedIdToken,
+                    rateLimiter,
                     serverConfig,
                     promiseQueue,
                     connectionManager,

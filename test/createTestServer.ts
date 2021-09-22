@@ -63,6 +63,7 @@ export const createTestServer = async (
             countQuota: 10,
             directory: './uploader',
         },
+        '-experimental-disableRateLimit': true,
     };
 
     const schema = await buildSchema(serverConfig)({

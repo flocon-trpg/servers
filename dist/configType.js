@@ -51,4 +51,5 @@ exports.serverConfigJson = t.type({
     entryPassword: flocon_core_1.maybe(entryPassword),
     uploader: flocon_core_1.maybe(uploader),
     accessControlAllowOrigin: flocon_core_1.maybe(t.string),
+    ['-experimental-disableRateLimit']: flocon_core_1.maybe(t.boolean),
 });

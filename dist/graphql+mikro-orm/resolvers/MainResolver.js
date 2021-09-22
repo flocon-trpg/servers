@@ -41,6 +41,7 @@ const mikro_orm_3 = require("../entities/fileTag/mikro-orm");
 const fs_extra_1 = require("fs-extra");
 const path_1 = __importDefault(require("path"));
 const thumbsDir_1 = require("../../utils/thumbsDir");
+const RateLimitMiddleware_1 = require("../middlewares/RateLimitMiddleware");
 let MainResolver = class MainResolver {
     async getAvailableGameSystems() {
         return {
@@ -295,6 +296,7 @@ __decorate([
 __decorate([
     type_graphql_1.Query(() => GetFilesResult_1.GetFilesResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
     __param(0, type_graphql_1.Arg('input')),
     __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
@@ -304,6 +306,7 @@ __decorate([
 __decorate([
     type_graphql_1.Mutation(() => [String]),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
     __param(0, type_graphql_1.Arg('filenames', () => [String])),
     __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
@@ -313,6 +316,7 @@ __decorate([
 __decorate([
     type_graphql_1.Mutation(() => Boolean),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
     __param(0, type_graphql_1.Arg('input')),
     __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
@@ -322,6 +326,7 @@ __decorate([
 __decorate([
     type_graphql_1.Mutation(() => object_args_input_1.FileTag, { nullable: true }),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
     __param(0, type_graphql_1.Ctx()),
     __param(1, type_graphql_1.Arg('tagName')),
     __metadata("design:type", Function),
@@ -331,6 +336,7 @@ __decorate([
 __decorate([
     type_graphql_1.Mutation(() => Boolean),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
     __param(0, type_graphql_1.Ctx()),
     __param(1, type_graphql_1.Arg('tagId')),
     __metadata("design:type", Function),
@@ -340,6 +346,7 @@ __decorate([
 __decorate([
     type_graphql_1.Query(() => Boolean),
     type_graphql_1.Authorized(),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(1)),
     __param(0, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),

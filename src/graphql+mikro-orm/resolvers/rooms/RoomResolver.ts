@@ -10,6 +10,7 @@ import {
     Arg,
     PubSubEngine,
     Authorized,
+    UseMiddleware,
 } from 'type-graphql';
 import { ResolverContext } from '../../utils/Contexts';
 import { GetRoomFailureType } from '../../../enums/GetRoomFailureType';
@@ -154,6 +155,7 @@ import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-
 import { ParticipantRole as ParticipantRoleEnum } from '../../../enums/ParticipantRole';
 import { ENTRY } from '../../../roles';
 import { ParticipantRoleType } from '../../../enums/ParticipantRoleType';
+import { RateLimitMiddleware } from '../../middlewares/RateLimitMiddleware';
 
 const find = <T>(source: Record<string, T | undefined>, key: string): T | undefined => source[key];
 
@@ -733,6 +735,7 @@ const publishRoomEvent = async (pubSub: PubSubEngine, payload: RoomEventPayload)
 export class RoomResolver {
     @Query(() => GetRoomsListResult)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
     public async getRoomsList(@Ctx() context: ResolverContext): Promise<typeof GetRoomsListResult> {
         const queue = async () => {
             const em = context.em;
@@ -756,6 +759,7 @@ export class RoomResolver {
 
     @Query(() => RequiresPhraseResult)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
     public async requiresPhraseToJoinAsPlayer(
         @Arg('roomId') roomId: string,
         @Ctx() context: ResolverContext
@@ -859,6 +863,7 @@ export class RoomResolver {
 
     @Query(() => GetRoomMessagesResult)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(10))
     public async getMessages(
         @Args() args: GetMessagesArgs,
         @Ctx() context: ResolverContext
@@ -900,6 +905,7 @@ export class RoomResolver {
 
     @Query(() => GetRoomLogResult)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(10))
     public async getLog(
         @Args() args: GetLogArgs,
         @Ctx() context: ResolverContext,
@@ -982,6 +988,7 @@ export class RoomResolver {
 
     @Query(() => GetRoomConnectionsResult)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
     public async getRoomConnections(
         @Arg('roomId') roomId: string,
         @Ctx() context: ResolverContext
@@ -1030,6 +1037,7 @@ export class RoomResolver {
 
     @Mutation(() => CreateRoomResult)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
     public async createRoom(
         @Arg('input') input: CreateRoomInput,
         @Ctx() context: ResolverContext
@@ -1108,6 +1116,7 @@ export class RoomResolver {
 
     @Mutation(() => DeleteRoomResult)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
     public async deleteRoom(
         @Args() args: DeleteRoomArgs,
         @Ctx() context: ResolverContext,
@@ -1160,6 +1169,7 @@ export class RoomResolver {
 
     @Mutation(() => JoinRoomResult)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
     public async joinRoomAsPlayer(
         @Args() args: JoinRoomArgs,
         @Ctx() context: ResolverContext,
@@ -1191,6 +1201,7 @@ export class RoomResolver {
 
     @Mutation(() => JoinRoomResult)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
     public async joinRoomAsSpectator(
         @Args() args: JoinRoomArgs,
         @Ctx() context: ResolverContext,
@@ -1225,6 +1236,7 @@ export class RoomResolver {
 
     @Mutation(() => PromoteResult)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
     public async promoteToPlayer(
         @Args() args: PromoteArgs,
         @Ctx() context: ResolverContext,
@@ -1261,6 +1273,7 @@ export class RoomResolver {
 
     @Mutation(() => ChangeParticipantNameResult)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
     public async changeParticipantName(
         @Args() args: ChangeParticipantNameArgs,
         @Ctx() context: ResolverContext,
@@ -1327,6 +1340,7 @@ export class RoomResolver {
 
     @Query(() => GetRoomResult)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
     public async getRoom(
         @Args() args: GetRoomArgs,
         @Ctx() context: ResolverContext
@@ -1376,6 +1390,7 @@ export class RoomResolver {
 
     @Mutation(() => LeaveRoomResult)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
     public async leaveRoom(
         @Arg('id') id: string,
         @Ctx() context: ResolverContext,
@@ -1605,6 +1620,7 @@ export class RoomResolver {
 
     @Mutation(() => OperateRoomResult)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(3))
     public async operate(
         @Args() args: OperateArgs,
         @Ctx() context: ResolverContext,
@@ -1625,6 +1641,7 @@ export class RoomResolver {
 
     @Mutation(() => WriteRoomPublicMessageResult)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(3))
     public async writePublicMessage(
         @Args() args: WritePublicMessageArgs,
         @Ctx() context: ResolverContext,
@@ -1740,6 +1757,7 @@ export class RoomResolver {
 
     @Mutation(() => WriteRoomPrivateMessageResult)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(3))
     public async writePrivateMessage(
         @Args() args: WritePrivateMessageArgs,
         @Ctx() context: ResolverContext,
@@ -1871,6 +1889,7 @@ export class RoomResolver {
 
     @Mutation(() => WriteRoomSoundEffectResult)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(3))
     public async writeRoomSoundEffect(
         @Args() args: WriteRoomSoundEffectArgs,
         @Ctx() context: ResolverContext,
@@ -1958,6 +1977,7 @@ export class RoomResolver {
 
     @Mutation(() => MakeMessageNotSecretResult)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
     public async makeMessageNotSecret(
         @Args() args: MessageIdArgs,
         @Ctx() context: ResolverContext,
@@ -2102,6 +2122,7 @@ export class RoomResolver {
 
     @Mutation(() => DeleteMessageResult)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
     public async deleteMessage(
         @Args() args: MessageIdArgs,
         @Ctx() context: ResolverContext,
@@ -2248,6 +2269,7 @@ export class RoomResolver {
 
     @Mutation(() => EditMessageResult)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
     public async editMessage(
         @Args() args: EditMessageArgs,
         @Ctx() context: ResolverContext,
@@ -2394,6 +2416,7 @@ export class RoomResolver {
 
     @Mutation(() => Boolean)
     @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
     public async updateWritingMessageStatus(
         @Args() args: UpdateWritingMessageStateArgs,
         @Ctx() context: ResolverContext,
