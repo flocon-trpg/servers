@@ -12,6 +12,8 @@ import {
 } from '../src';
 import { Resources } from './resources';
 
+const undefinedOrError = 'undefinedOrError';
+
 namespace Test {
     export namespace Basic {
         export const testServerTransformToReject = ({
@@ -62,7 +64,7 @@ namespace Test {
             }: {
                 testName: string;
                 requestedBy: RequestedBy;
-                expected: TwoWayOperation | undefined;
+                expected: TwoWayOperation | undefined | typeof undefinedOrError;
             }) => {
                 it(testName, () => {
                     const actualOperation = serverTransform(requestedBy)({
@@ -72,9 +74,14 @@ namespace Test {
                         clientOperation,
                     });
                     if (actualOperation.isError) {
+                        if (expected === undefinedOrError) {
+                            return;
+                        }
                         throw actualOperation.error;
                     }
-                    expect(actualOperation.value).toEqual(expected);
+                    expect(actualOperation.value).toEqual(
+                        expected === undefinedOrError ? undefined : expected
+                    );
                 });
             };
     }
@@ -249,7 +256,7 @@ describe.each`
         clientOperation,
     });
 
-    const expected: TwoWayOperation | undefined = isValidId
+    const expected: TwoWayOperation | typeof undefinedOrError = isValidId
         ? {
               $v: 1,
               bgms: {
@@ -261,7 +268,7 @@ describe.each`
                   },
               },
           }
-        : undefined;
+        : undefinedOrError;
 
     tester({ testName: 'tests server', requestedBy: { type: admin }, expected });
     tester({
