@@ -62,7 +62,7 @@ type RestoreResult<TState, TTwoWayOperation> = {
     twoWayOperation: TTwoWayOperation | undefined;
 };
 
-const dummyKey = '';
+const fakeKey = 'FAKE-KEY';
 
 // Make sure this:
 // - apply(prevState, source) = nextState
@@ -81,10 +81,10 @@ export const toClientState = <TSourceState, TClientState>({
 }) => {
     return (
         DualKeyRecordOperation.toClientState({
-            serverState: { [dummyKey]: serverState },
+            serverState: { [fakeKey]: serverState },
             isPrivate: (state, key) => isPrivate(state, key.second),
             toClientState: ({ state, key }) => toClientState({ state, key: key.second }),
-        })[dummyKey] ?? {}
+        })[fakeKey] ?? {}
     );
 };
 
@@ -119,8 +119,8 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
     }
 
     const result = DualKeyRecordOperation.restore({
-        nextState: { [dummyKey]: nextState },
-        downOperation: { [dummyKey]: downOperation },
+        nextState: { [fakeKey]: nextState },
+        downOperation: { [fakeKey]: downOperation },
         innerRestore: ({ key, ...params }) => innerRestore({ ...params, key: key.second }),
         innerDiff: ({ key, ...params }) => innerDiff({ ...params, key: key.second }),
     });
@@ -128,11 +128,11 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
         return result;
     }
     return Result.ok({
-        prevState: result.value.prevState[dummyKey] ?? {},
+        prevState: result.value.prevState[fakeKey] ?? {},
         twoWayOperation:
             result.value.twoWayOperation === undefined
                 ? undefined
-                : result.value.twoWayOperation[dummyKey],
+                : result.value.twoWayOperation[fakeKey],
     });
 };
 
@@ -154,14 +154,14 @@ export const apply = <TState, TOperation, TCustomError = string>({
     }
 
     const result = DualKeyRecordOperation.apply({
-        prevState: { [dummyKey]: prevState },
-        operation: { [dummyKey]: operation },
+        prevState: { [fakeKey]: prevState },
+        operation: { [fakeKey]: operation },
         innerApply: ({ key, ...params }) => innerApply({ ...params, key: key.second }),
     });
     if (result.isError) {
         return result;
     }
-    return Result.ok(result.value[dummyKey] ?? {});
+    return Result.ok(result.value[fakeKey] ?? {});
 };
 
 export const applyBack = <TState, TDownOperation, TCustomError = string>({
@@ -182,14 +182,14 @@ export const applyBack = <TState, TDownOperation, TCustomError = string>({
     }
 
     const result = DualKeyRecordOperation.applyBack({
-        nextState: { [dummyKey]: nextState },
-        operation: { [dummyKey]: operation },
+        nextState: { [fakeKey]: nextState },
+        operation: { [fakeKey]: operation },
         innerApplyBack: ({ key, ...params }) => innerApplyBack({ ...params, key: key.second }),
     });
     if (result.isError) {
         return result;
     }
-    return Result.ok(result.value[dummyKey] ?? {});
+    return Result.ok(result.value[fakeKey] ?? {});
 };
 
 // stateが必要ないため処理を高速化&簡略化できるが、その代わり戻り値のreplaceにおいて oldValue === undefined && newValue === undefined もしくは oldValue !== undefined && newValue !== undefinedになるケースがある。
@@ -220,15 +220,15 @@ export const composeDownOperation = <TState, TDownOperation, TCustomError = stri
     }
 
     const result = DualKeyRecordOperation.composeDownOperation({
-        first: { [dummyKey]: first },
-        second: { [dummyKey]: second },
+        first: { [fakeKey]: first },
+        second: { [fakeKey]: second },
         innerApplyBack: ({ key, ...params }) => innerApplyBack({ ...params, key: key.second }),
         innerCompose: ({ key, ...params }) => innerCompose({ ...params, key: key.second }),
     });
     if (result.isError) {
         return result;
     }
-    return Result.ok(result.value === undefined ? undefined : result.value[dummyKey]);
+    return Result.ok(result.value === undefined ? undefined : result.value[fakeKey]);
 };
 
 // Make sure these:
@@ -268,10 +268,10 @@ export const serverTransform = <
     const cancelRemove = cancellationPolicy.cancelRemove;
 
     const result = DualKeyRecordOperation.serverTransform({
-        first: first === undefined ? undefined : { [dummyKey]: first },
-        second: second === undefined ? undefined : { [dummyKey]: second },
-        prevState: { [dummyKey]: prevState },
-        nextState: { [dummyKey]: nextState },
+        first: first === undefined ? undefined : { [fakeKey]: first },
+        second: second === undefined ? undefined : { [fakeKey]: second },
+        prevState: { [fakeKey]: prevState },
+        nextState: { [fakeKey]: nextState },
         innerTransform: ({ key, ...params }) => innerTransform({ ...params, key: key.second }),
         toServerState: (state, key) => toServerState(state, key.second),
         cancellationPolicy: {
@@ -294,7 +294,7 @@ export const serverTransform = <
         return result;
     }
 
-    return Result.ok(result.value === undefined ? undefined : result.value[dummyKey]);
+    return Result.ok(result.value === undefined ? undefined : result.value[fakeKey]);
 };
 
 type InnerClientTransform<TFirstOperation, TSecondOperation, TError = string> = (params: {
@@ -326,8 +326,8 @@ export const clientTransform = <TState, TOperation, TError = string>({
     TError
 > => {
     const result = DualKeyRecordOperation.clientTransform({
-        first: first == null ? undefined : { [dummyKey]: first },
-        second: second == null ? undefined : { [dummyKey]: second },
+        first: first == null ? undefined : { [fakeKey]: first },
+        second: second == null ? undefined : { [fakeKey]: second },
         innerTransform: params => innerTransform(params),
         innerDiff: params => innerDiff(params),
     });
@@ -335,9 +335,9 @@ export const clientTransform = <TState, TOperation, TError = string>({
         return result;
     }
     return Result.ok({
-        firstPrime: result.value.firstPrime == null ? undefined : result.value.firstPrime[dummyKey],
+        firstPrime: result.value.firstPrime == null ? undefined : result.value.firstPrime[fakeKey],
         secondPrime:
-            result.value.secondPrime == null ? undefined : result.value.secondPrime[dummyKey],
+            result.value.secondPrime == null ? undefined : result.value.secondPrime[fakeKey],
     });
 };
 
@@ -355,12 +355,12 @@ export const diff = <TState, TOperation>({
     }) => TOperation | undefined;
 }) => {
     const dualKeyResult = DualKeyRecordOperation.diff({
-        prevState: { [dummyKey]: prevState },
-        nextState: { [dummyKey]: nextState },
+        prevState: { [fakeKey]: prevState },
+        nextState: { [fakeKey]: nextState },
         innerDiff: ({ key, ...params }) => innerDiff({ ...params, key: key.second }),
     });
     if (dualKeyResult == null) {
         return undefined;
     }
-    return dualKeyResult[dummyKey];
+    return dualKeyResult[fakeKey];
 };

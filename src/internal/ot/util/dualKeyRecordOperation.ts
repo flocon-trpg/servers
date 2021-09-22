@@ -12,6 +12,7 @@ import {
     dualKeyRecordToDualKeyMap,
 } from '@kizahasi/util';
 import * as t from 'io-ts';
+import { isValidKey } from './isValidKey';
 import { DualStringKeyRecord, record } from './record';
 import {
     recordDownOperationElementFactory,
@@ -553,6 +554,10 @@ export const serverTransform = <
     >();
 
     for (const [key, operation] of DualKeyMap.ofRecord(second)) {
+        if (!isValidKey(key.first) || !isValidKey(key.second)) {
+            return Result.error(`"${dualKeyToJsonString(key)}" is not a valid key.`);
+        }
+
         switch (operation.type) {
             case replace: {
                 const innerPrevState = dualKeyRecordFind(prevState, key);

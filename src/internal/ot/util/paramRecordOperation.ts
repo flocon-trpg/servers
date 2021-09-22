@@ -1,6 +1,7 @@
 import { Result } from '@kizahasi/result';
 import { both, groupJoinMap, left, mapToRecord, recordToMap, right } from '@kizahasi/util';
 import * as DualKeyRecordOperation from './dualKeyRecordOperation';
+import { isValidKey } from './isValidKey';
 import { StringKeyRecord } from './record';
 
 type RestoreResult<TState, TTwoWayOperation> = {
@@ -231,6 +232,10 @@ export const serverTransform = <
     const first = unsafeFirst == null ? undefined : recordToMap(unsafeFirst);
 
     for (const [key, operation] of recordToMap(unsafeSecond)) {
+        if (!isValidKey(key)) {
+            return Result.error(`${key} is not a valid key.`);
+        }
+
         const innerPrevState = prevState.get(key) ?? defaultState;
         const innerNextState = nextState.get(key) ?? defaultState;
         const innerFirst = first == null ? undefined : first.get(key);
