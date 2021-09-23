@@ -1,4 +1,3 @@
-export { anonymous, authToken, $free, $system } from './internal/constants';
 export {
     KeyFactory,
     CustomDualKeyMap,
@@ -15,23 +14,8 @@ export {
     groupJoin3 as groupJoin3DualKeyMap,
     groupJoin4 as groupJoin4DualKeyMap,
 } from './internal/dualKeyMap';
-export {
-    StrIndex5,
-    strIndex5Array,
-    isStrIndex5,
-    StrIndex10,
-    strIndex10Array,
-    isStrIndex10,
-    StrIndex20,
-    strIndex20Array,
-    isStrIndex20,
-    StrIndex100,
-    strIndex100Array,
-    isStrIndex100,
-} from './internal/indexes';
 export { keyNames } from './internal/keyNames';
 export { groupJoin as groupJoinMap } from './internal/map';
-export { PublicChannelKey } from './internal/publicChannelKey';
 export {
     SemVer,
     alpha,
