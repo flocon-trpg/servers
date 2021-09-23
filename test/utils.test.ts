@@ -215,16 +215,16 @@ describe('recordToArray', () => {
 describe('recordToMap', () => {
     it('tests {}', () => {
         const source = {};
-        expect(recordToMap(source).size).toBe(0);
+        expect(recordToMap(source)).toEqual(new Map());
     });
 
     it('tests non-empty Record', () => {
         const source = { a: 'A', b: 'B' };
-        const expected = [
+        const expected = new Map([
             ['a', 'A'],
             ['b', 'B'],
-        ];
-        expect([...recordToMap(source)].sort()).toEqual(expected.sort());
+        ]);
+        expect(recordToMap(source)).toEqual(expected);
     });
 });
 
