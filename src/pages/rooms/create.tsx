@@ -39,10 +39,10 @@ const CreateRoomCore: React.FC = () => {
                 if (isSubmitting) {
                     return;
                 }
-                const roomNameValue: string = e[roomName];
-                const participantNameValue: string = e[participantName];
-                const joinAsPlayerPhraseValue: string = e[joinAsPlayerPhrase];
-                const joinAsSpectatorPhraseValue: string = e[joinAsSpectatorPhrase];
+                const roomNameValue: string = e[roomName] ?? '';
+                const participantNameValue: string = e[participantName] ?? '';
+                const joinAsPlayerPhraseValue: string = e[joinAsPlayerPhrase] ?? '';
+                const joinAsSpectatorPhraseValue: string = e[joinAsSpectatorPhrase] ?? '';
                 const input: CreateRoomInput = {
                     roomName: roomNameValue,
                     participantName: participantNameValue,
