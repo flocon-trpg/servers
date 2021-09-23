@@ -88,8 +88,8 @@ const findRoomAndMyParticipant = async ({ em, userUid, roomId, }) => {
 exports.findRoomAndMyParticipant = findRoomAndMyParticipant;
 const ensureUserUid = (context) => {
     const decodedIdToken = exports.checkSignIn(context);
-    if (decodedIdToken == exports.NotSignIn) {
-        throw new Error('authorizedUser was not found. "@Attribute()" might be missing.');
+    if (decodedIdToken === exports.NotSignIn) {
+        throw new Error('Not sign in. "@Attribute()" might be missing.');
     }
     return decodedIdToken.uid;
 };

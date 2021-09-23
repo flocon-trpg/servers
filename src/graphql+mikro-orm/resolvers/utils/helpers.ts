@@ -129,8 +129,8 @@ export const findRoomAndMyParticipant = async ({
 
 export const ensureUserUid = (context: ResolverContext): string => {
     const decodedIdToken = checkSignIn(context);
-    if (decodedIdToken == NotSignIn) {
-        throw new Error('authorizedUser was not found. "@Attribute()" might be missing.');
+    if (decodedIdToken === NotSignIn) {
+        throw new Error('Not sign in. "@Attribute()" might be missing.');
     }
     return decodedIdToken.uid;
 };

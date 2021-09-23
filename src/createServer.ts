@@ -25,6 +25,8 @@ import { EM } from './utils/types';
 import { Result } from '@kizahasi/result';
 import { Context } from 'graphql-ws';
 import { thumbsDir } from './utils/thumbsDir';
+import { RateLimiterAbstract, RateLimiterMemory } from 'rate-limiter-flexible';
+import { consume } from './rateLimit/consume';
 
 export const createServer = async ({
     serverConfig,
@@ -51,9 +53,20 @@ export const createServer = async ({
     ) => Promise<Result<Readonly<DecodedIdToken>, unknown> | undefined>;
     port: string | number;
 }) => {
+    let rateLimiter: RateLimiterAbstract | null = null;
+    if (serverConfig['-experimental-disableRateLimit'] !== true) {
+        rateLimiter = new RateLimiterMemory({
+            // TODO: 値をちゃんと決める
+            duration: 60,
+            points: 600,
+        });
+    }
+
     const context = async (context: ExpressContext): Promise<ResolverContext> => {
+        context.req.socket.remoteAddress;
         return {
             decodedIdToken: await getDecodedIdTokenFromExpressRequest(context.req),
+            rateLimiter,
             serverConfig,
             promiseQueue,
             connectionManager,
@@ -121,6 +134,12 @@ export const createServer = async ({
                 const decodedIdToken = await getDecodedIdTokenFromExpressRequest(req);
                 if (decodedIdToken == null || decodedIdToken.isError) {
                     res.status(403).send('Invalid Authorization header');
+                    return;
+                }
+
+                const rateLimitError = await consume(rateLimiter, decodedIdToken.value.uid, 10);
+                if (rateLimitError != null) {
+                    res.status(429).send(rateLimitError.errorMessage);
                     return;
                 }
 
@@ -244,11 +263,15 @@ export const createServer = async ({
             return;
         }
 
-        const filename = sanitize(req.params.file_name);
-
         const decodedIdToken = await getDecodedIdTokenFromExpressRequest(req);
         if (decodedIdToken == null || decodedIdToken.isError) {
             res.status(403).send('Invalid Authorization header');
+            return;
+        }
+
+        const rateLimitError = await consume(rateLimiter, decodedIdToken.value.uid, 5);
+        if (rateLimitError != null) {
+            res.status(429).send(rateLimitError.errorMessage);
             return;
         }
 
@@ -258,6 +281,8 @@ export const createServer = async ({
             res.status(403).send('Requires entry');
             return;
         }
+
+        const filename = sanitize(req.params.file_name);
 
         let filepath: string;
         if (typeParam === 'files') {
@@ -306,6 +331,7 @@ export const createServer = async ({
                     const decodedIdToken = await getDecodedIdTokenFromWsContext(ctx);
                     const result: ResolverContext = {
                         decodedIdToken,
+                        rateLimiter,
                         serverConfig,
                         promiseQueue,
                         connectionManager,

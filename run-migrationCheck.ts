@@ -1,6 +1,10 @@
 import { migrate } from './src/migrate';
+import { AppConsole } from './src/utils/appConsole';
 
 migrate('check').catch(err => {
-    console.log(err);
-    console.log('❌ migration-check failed. / マイグレーションのチェックに失敗しました。');
+    console.error(err);
+    AppConsole.error({
+        en: '❌ migration-check failed. ',
+        ja: '❌ マイグレーションのチェックに失敗しました。',
+    });
 });

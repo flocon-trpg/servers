@@ -91,6 +91,7 @@ const flocon_core_1 = require("@kizahasi/flocon-core");
 const ParticipantRole_1 = require("../../../enums/ParticipantRole");
 const roles_1 = require("../../../roles");
 const ParticipantRoleType_1 = require("../../../enums/ParticipantRoleType");
+const RateLimitMiddleware_1 = require("../../middlewares/RateLimitMiddleware");
 const find = (source, key) => source[key];
 const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUserUids, create, update, }) => {
     const prevRevision = room.revision;
@@ -1971,6 +1972,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
 __decorate([
     type_graphql_1.Query(() => GetRoomsListResult_1.GetRoomsListResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
     __param(0, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -1979,6 +1981,7 @@ __decorate([
 __decorate([
     type_graphql_1.Query(() => RequiresPhraseResult_1.RequiresPhraseResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
     __param(0, type_graphql_1.Arg('roomId')),
     __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
@@ -1988,6 +1991,7 @@ __decorate([
 __decorate([
     type_graphql_1.Query(() => graphql_2.GetRoomMessagesResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(10)),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
@@ -1997,6 +2001,7 @@ __decorate([
 __decorate([
     type_graphql_1.Query(() => graphql_2.GetRoomLogResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(10)),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2007,6 +2012,7 @@ __decorate([
 __decorate([
     type_graphql_1.Query(() => object_args_input_1.GetRoomConnectionsResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
     __param(0, type_graphql_1.Arg('roomId')),
     __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
@@ -2016,6 +2022,7 @@ __decorate([
 __decorate([
     type_graphql_1.Mutation(() => CreateRoomResult_1.CreateRoomResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
     __param(0, type_graphql_1.Arg('input')),
     __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
@@ -2025,6 +2032,7 @@ __decorate([
 __decorate([
     type_graphql_1.Mutation(() => DeleteRoomResult_1.DeleteRoomResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2035,6 +2043,7 @@ __decorate([
 __decorate([
     type_graphql_1.Mutation(() => JoinRoomResult_1.JoinRoomResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2045,6 +2054,7 @@ __decorate([
 __decorate([
     type_graphql_1.Mutation(() => JoinRoomResult_1.JoinRoomResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2055,6 +2065,7 @@ __decorate([
 __decorate([
     type_graphql_1.Mutation(() => PromoteMeResult_1.PromoteResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2065,6 +2076,7 @@ __decorate([
 __decorate([
     type_graphql_1.Mutation(() => ChangeParticipantNameResult_1.ChangeParticipantNameResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2075,6 +2087,7 @@ __decorate([
 __decorate([
     type_graphql_1.Query(() => GetRoomResult_1.GetRoomResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
@@ -2084,6 +2097,7 @@ __decorate([
 __decorate([
     type_graphql_1.Mutation(() => LeaveRoomResult_1.LeaveRoomResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
     __param(0, type_graphql_1.Arg('id')),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2094,6 +2108,7 @@ __decorate([
 __decorate([
     type_graphql_1.Mutation(() => OperateRoomResult_1.OperateRoomResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(3)),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2104,6 +2119,7 @@ __decorate([
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.WriteRoomPublicMessageResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(3)),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2114,6 +2130,7 @@ __decorate([
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.WriteRoomPrivateMessageResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(3)),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2124,6 +2141,7 @@ __decorate([
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.WriteRoomSoundEffectResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(3)),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2134,6 +2152,7 @@ __decorate([
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.MakeMessageNotSecretResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2144,6 +2163,7 @@ __decorate([
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.DeleteMessageResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2154,6 +2174,7 @@ __decorate([
 __decorate([
     type_graphql_1.Mutation(() => graphql_2.EditMessageResult),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
@@ -2164,6 +2185,7 @@ __decorate([
 __decorate([
     type_graphql_1.Mutation(() => Boolean),
     type_graphql_1.Authorized(roles_1.ENTRY),
+    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
     __param(0, type_graphql_1.Args()),
     __param(1, type_graphql_1.Ctx()),
     __param(2, type_graphql_1.PubSub()),
