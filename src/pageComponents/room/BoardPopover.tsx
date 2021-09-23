@@ -11,13 +11,7 @@ import {
     toUpOperation,
     FilePath,
 } from '@kizahasi/flocon-core';
-import {
-    CompositeKey,
-    dualKeyRecordToDualKeyMap,
-    keyNames,
-    ReadonlyStateMap,
-    recordToArray,
-} from '@kizahasi/util';
+import { CompositeKey, keyNames, ReadonlyStateMap, recordToArray } from '@kizahasi/util';
 import { Menu, Tooltip } from 'antd';
 import _ from 'lodash';
 import React from 'react';
@@ -66,7 +60,7 @@ export const PieceTooltip: React.FC = () => {
     }
 
     const left = boardTooltipState.pagePosition.x - 30;
-    const top = boardTooltipState.pagePosition.y - 3;
+    const top = boardTooltipState.pagePosition.y + 1;
 
     const style: React.CSSProperties = {
         position: 'absolute',
@@ -339,12 +333,12 @@ namespace ContextMenuModule {
             return null;
         }
         return (
-            <>
+            <Menu.ItemGroup title='コマ'>
                 {characterPiecesOnCursor.map(({ characterKey, character, pieceKey }) => (
                     // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が他にもあるため、キーを互いに異なるものにするように文字列を付加している。
                     <Menu.SubMenu
                         key={keyNames(characterKey) + '@selected-piece'}
-                        title={`${character.name} (コマ)`}
+                        title={character.name}
                     >
                         <Menu.Item
                             onClick={() => {
@@ -385,7 +379,7 @@ namespace ContextMenuModule {
                     </Menu.SubMenu>
                 ))}
                 <Menu.Divider />
-            </>
+            </Menu.ItemGroup>
         );
     };
 
@@ -408,12 +402,12 @@ namespace ContextMenuModule {
             return null;
         }
         return (
-            <>
+            <Menu.ItemGroup title='立ち絵'>
                 {tachiesOnCursor.map(({ characterKey, character, tachieLocationKey }) => (
                     // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が他にもあるため、キーを互いに異なるものにするように文字列を付加している。
                     <Menu.SubMenu
                         key={keyNames(characterKey) + '@selected-tachie'}
-                        title={`${character.name} (立ち絵)`}
+                        title={character.name}
                     >
                         <Menu.Item
                             onClick={() => {
@@ -454,7 +448,7 @@ namespace ContextMenuModule {
                     </Menu.SubMenu>
                 ))}
                 <Menu.Divider />
-            </>
+            </Menu.ItemGroup>
         );
     };
 
@@ -490,7 +484,7 @@ namespace ContextMenuModule {
             }
             characters.push({ key: elem.characterKey, value: elem.character });
         });
-        const itemGroups = _(characters)
+        const characterMenuItems = _(characters)
             .map(characterPair => {
                 const privateCommands = recordToArray(characterPair.value.privateCommands).map(
                     ({ key, value }) => {
@@ -530,6 +524,9 @@ namespace ContextMenuModule {
                         );
                     }
                 );
+                if (privateCommands.length === 0) {
+                    return null;
+                }
                 const characterKey = keyNames(characterPair.key);
                 return (
                     <Menu.ItemGroup key={characterKey} title={characterPair.value.name}>
@@ -539,12 +536,12 @@ namespace ContextMenuModule {
             })
             .compact()
             .value();
-        if (itemGroups.length === 0) {
+        if (characterMenuItems.length === 0) {
             return null;
         }
         return (
             <>
-                <Menu.SubMenu title='キャラクターコマンド'>{itemGroups}</Menu.SubMenu>
+                <Menu.ItemGroup title='キャラクターコマンド'>{characterMenuItems}</Menu.ItemGroup>
                 <Menu.Divider />
             </>
         );
@@ -573,7 +570,7 @@ namespace ContextMenuModule {
             return null;
         }
         return (
-            <>
+            <Menu.ItemGroup title='ダイスコマ'>
                 {dicePieceValuesOnCursor.map(
                     ({ dicePieceValueKey, dicePieceValue, characterKey }) => (
                         // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が下にもあるため、キーを互いに異なるものにするように文字列を付加している。
@@ -632,7 +629,7 @@ namespace ContextMenuModule {
                     )
                 )}
                 <Menu.Divider />
-            </>
+            </Menu.ItemGroup>
         );
     };
 
@@ -657,7 +654,7 @@ namespace ContextMenuModule {
             return null;
         }
         return (
-            <>
+            <Menu.ItemGroup title='数値コマ'>
                 {numberPieceValuesOnCursor.map(
                     ({ numberPieceValueKey, numberPieceValue, characterKey }) => (
                         // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が下にもあるため、キーを互いに異なるものにするように文字列を付加している。
@@ -710,7 +707,7 @@ namespace ContextMenuModule {
                     )
                 )}
                 <Menu.Divider />
-            </>
+            </Menu.ItemGroup>
         );
     };
 
@@ -733,7 +730,7 @@ namespace ContextMenuModule {
             return null;
         }
         return (
-            <>
+            <Menu.ItemGroup title='画像コマ'>
                 {imagePieceValuesOnCursor.map(({ participantKey, valueId, value }) => (
                     <Menu.SubMenu key={`${participantKey}@${valueId}`} title={value.name}>
                         <Menu.Item
@@ -781,7 +778,7 @@ namespace ContextMenuModule {
                     </Menu.SubMenu>
                 ))}
                 <Menu.Divider />
-            </>
+            </Menu.ItemGroup>
         );
     };
 
@@ -932,10 +929,10 @@ namespace ContextMenuModule {
         });
 
         return (
-            <>
-                <Menu.SubMenu title='キャラクターコマを追加'>{pieceMenus}</Menu.SubMenu>
-                <Menu.SubMenu title='キャラクター立ち絵を追加'>{tachieMenus}</Menu.SubMenu>
-                <Menu.SubMenu title='ダイスコマを追加'>
+            <Menu.ItemGroup title='新規作成'>
+                <Menu.SubMenu title='キャラクターコマ'>{pieceMenus}</Menu.SubMenu>
+                <Menu.SubMenu title='キャラクター立ち絵'>{tachieMenus}</Menu.SubMenu>
+                <Menu.SubMenu title='ダイスコマ'>
                     <Menu.Item
                         onClick={() => {
                             dispatch(
@@ -967,7 +964,7 @@ namespace ContextMenuModule {
                         セルにスナップしない
                     </Menu.Item>
                 </Menu.SubMenu>
-                <Menu.SubMenu title='数値コマを追加'>
+                <Menu.SubMenu title='数値コマ'>
                     <Menu.Item
                         onClick={() => {
                             dispatch(
@@ -999,7 +996,7 @@ namespace ContextMenuModule {
                         セルにスナップしない
                     </Menu.Item>
                 </Menu.SubMenu>
-                <Menu.SubMenu title='画像コマを追加'>
+                <Menu.SubMenu title='画像コマ'>
                     <Menu.Item
                         onClick={() => {
                             dispatch(
@@ -1031,7 +1028,7 @@ namespace ContextMenuModule {
                         セルにスナップしない
                     </Menu.Item>
                 </Menu.SubMenu>
-            </>
+            </Menu.ItemGroup>
         );
     };
 
