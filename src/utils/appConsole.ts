@@ -20,4 +20,8 @@ export namespace AppConsole {
     export const warn = (message: Message): void => {
         console.warn(messageToString(message));
     };
+
+    export const error = (message: Message): void => {
+        console.error(messageToString(message));
+    };
 }

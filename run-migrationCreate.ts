@@ -1,12 +1,16 @@
 import { migrate } from './src/migrate';
+import { AppConsole } from './src/utils/appConsole';
 import { loadMigrationCreate } from './src/utils/commandLineArgs';
 
 const main = async () => {
     const commandLineArgs = await loadMigrationCreate();
 
     migrate(commandLineArgs.init ? 'create-initial' : 'create').catch(err => {
-        console.log(err);
-        console.log('❌ migration failed. / マイグレーションに失敗しました。');
+        console.error(err);
+        AppConsole.error({
+            en: '❌ migration failed. ',
+            ja: '❌ マイグレーションに失敗しました。',
+        });
     });
 };
 

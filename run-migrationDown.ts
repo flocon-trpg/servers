@@ -1,6 +1,9 @@
 import { migrate } from './src/migrate';
+import { AppConsole } from './src/utils/appConsole';
 
 migrate('down').catch(err => {
-    console.log(err);
-    console.log('❌ migration failed. / マイグレーションに失敗しました。');
+    console.error(err);
+    AppConsole.error({
+        en: '❌ migration-down failed. ',
+    });
 });

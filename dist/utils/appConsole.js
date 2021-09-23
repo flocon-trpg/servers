@@ -16,4 +16,7 @@ var AppConsole;
     AppConsole.warn = (message) => {
         console.warn(messageToString(message));
     };
+    AppConsole.error = (message) => {
+        console.error(messageToString(message));
+    };
 })(AppConsole = exports.AppConsole || (exports.AppConsole = {}));

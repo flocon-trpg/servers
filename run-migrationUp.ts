@@ -1,6 +1,10 @@
 import { migrate } from './src/migrate';
+import { AppConsole } from './src/utils/appConsole';
 
 migrate('up').catch(err => {
-    console.log(err);
-    console.log('❌ migration failed. / マイグレーションに失敗しました。');
+    console.error(err);
+    AppConsole.error({
+        en: '❌ migration failed. ',
+        ja: '❌ マイグレーションに失敗しました。',
+    });
 });
