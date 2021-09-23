@@ -80,18 +80,14 @@ const RoomCore: React.FC = () => {
     })();
 
     return (
-        <Layout requires={loginAndEntry} onEntry={() => rooms.refetch()}>
-            {() => (
-                <QueryResultViewer loading={rooms.loading} error={rooms.error} compact={false}>
-                    {roomsData == null ? null : <RoomsListComponent rooms={roomsData ?? []} />}
-                </QueryResultViewer>
-            )}
-        </Layout>
+        <QueryResultViewer loading={rooms.loading} error={rooms.error} compact={false}>
+            {roomsData == null ? null : <RoomsListComponent rooms={roomsData ?? []} />}
+        </QueryResultViewer>
     );
 };
 
 const Room: React.FC = () => {
-    return <RoomCore />;
+    return <Layout requires={loginAndEntry}>{() => <RoomCore />}</Layout>;
 };
 
 export default Room;
