@@ -60,7 +60,7 @@ export const PieceTooltip: React.FC = () => {
     }
 
     const left = boardTooltipState.pagePosition.x - 30;
-    const top = boardTooltipState.pagePosition.y - 3;
+    const top = boardTooltipState.pagePosition.y + 1;
 
     const style: React.CSSProperties = {
         position: 'absolute',
