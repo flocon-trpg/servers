@@ -15,7 +15,8 @@ export {
     groupJoin4 as groupJoin4DualKeyMap,
 } from './internal/dualKeyMap';
 export { keyNames } from './internal/keyNames';
-export { groupJoin as groupJoinMap } from './internal/map';
+export { groupJoinMap } from './internal/groupJoinMap';
+export { groupJoinSet } from './internal/groupJoinSet';
 export {
     SemVer,
     alpha,
@@ -27,7 +28,6 @@ export {
     apiServerRequiresUpdate,
     webServerRequiresUpdate,
 } from './internal/semver';
-export { groupJoin as groupJoinSet } from './internal/set';
 export {
     CompositeKey,
     stringToCompositeKey,

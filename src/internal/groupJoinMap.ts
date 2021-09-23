@@ -1,6 +1,6 @@
 import { GroupJoinResult } from './types';
 
-export const groupJoin = <TKey, TLeft, TRight>(
+export const groupJoinMap = <TKey, TLeft, TRight>(
     left: ReadonlyMap<TKey, TLeft>,
     right: ReadonlyMap<TKey, TRight>
 ): Map<TKey, GroupJoinResult<TLeft, TRight>> => {
