@@ -1,4 +1,24 @@
-import { chooseDualKeyRecord, mapDualKeyRecord, mapRecord } from '../src';
+import { chooseDualKeyRecord, mapDualKeyRecord, mapRecord, mapToRecord } from '../src';
+
+describe('mapToRecord', () => {
+    it('tests empty Map', () => {
+        const map = new Map<string, string>();
+        expect(mapToRecord(map)).toEqual({});
+    });
+
+    it('tests non-empty Map', () => {
+        const map = new Map<string, string>();
+        map.set('a', 'A');
+        map.set('b', 'B');
+        expect(mapToRecord(map)).toEqual({ a: 'A', b: 'B' });
+    });
+
+    it('tests setting "__proto__" to throw', () => {
+        const map = new Map<string, string>();
+        map.set('__proto__', 'value');
+        expect(() => mapToRecord(map)).toThrow();
+    });
+});
 
 it('tests mapDualKeyRecord', () => {
     const source: Record<string, Record<string, number | undefined> | undefined> = {
