@@ -3,7 +3,6 @@ import {
     DualKey,
     DualKeyMap,
     dualKeyToJsonString,
-    dualKeyRecordFind,
     dualKeyRecordForEach,
     groupJoinDualKeyMap,
     left,
@@ -12,6 +11,7 @@ import {
     dualKeyRecordToDualKeyMap,
 } from '@kizahasi/util';
 import * as t from 'io-ts';
+import { isValidKey } from './isValidKey';
 import { DualStringKeyRecord, record } from './record';
 import {
     recordDownOperationElementFactory,
@@ -170,7 +170,7 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
         switch (value.type) {
             case 'replace': {
                 const oldValue = value.replace.oldValue;
-                const newValue = dualKeyRecordFind(nextState, key);
+                const newValue = nextState[key.first]?.[key.second];
                 if (oldValue === undefined) {
                     prevState.delete(key);
                 } else {
@@ -204,7 +204,7 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
                 break;
             }
             case 'update': {
-                const nextStateElement = dualKeyRecordFind(nextState, key);
+                const nextStateElement = nextState[key.first]?.[key.second];
                 if (nextStateElement === undefined) {
                     return Result.error(
                         `tried to update "${dualKeyToJsonString(
@@ -274,7 +274,7 @@ export const apply = <TState, TOperation, TCustomError = string>({
                 break;
             }
             case 'update': {
-                const prevStateElement = dualKeyRecordFind(prevState, key);
+                const prevStateElement = prevState[key.first]?.[key.second];
                 if (prevStateElement === undefined) {
                     return Result.error(
                         `tried to update "${dualKeyToJsonString(
@@ -334,7 +334,7 @@ export const applyBack = <TState, TDownOperation, TCustomError = string>({
                 break;
             }
             case 'update': {
-                const nextStateElement = dualKeyRecordFind(nextState, key);
+                const nextStateElement = nextState[key.first]?.[key.second];
                 if (nextStateElement === undefined) {
                     return Result.error(
                         `tried to update "${dualKeyToJsonString(
@@ -553,10 +553,14 @@ export const serverTransform = <
     >();
 
     for (const [key, operation] of DualKeyMap.ofRecord(second)) {
+        if (!isValidKey(key.first) || !isValidKey(key.second)) {
+            return Result.error(`"${dualKeyToJsonString(key)}" is not a valid key.`);
+        }
+
         switch (operation.type) {
             case replace: {
-                const innerPrevState = dualKeyRecordFind(prevState, key);
-                const innerNextState = dualKeyRecordFind(nextState, key);
+                const innerPrevState = prevState[key.first]?.[key.second];
+                const innerNextState = nextState[key.first]?.[key.second];
 
                 /**** requested to remove ****/
 
@@ -624,9 +628,9 @@ export const serverTransform = <
                 break;
             }
             case update: {
-                const innerPrevState = dualKeyRecordFind(prevState, key);
-                const innerNextState = dualKeyRecordFind(nextState, key);
-                const innerFirst = dualKeyRecordFind(first ?? {}, key);
+                const innerPrevState = prevState[key.first]?.[key.second];
+                const innerNextState = nextState[key.first]?.[key.second];
+                const innerFirst = first?.[key.first]?.[key.second];
                 if (innerPrevState === undefined) {
                     return Result.error(
                         `tried to update "${dualKeyToJsonString(key)}", but not found.`

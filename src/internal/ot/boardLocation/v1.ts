@@ -1,4 +1,5 @@
 import { Result } from '@kizahasi/result';
+import { CompositeKey, compositeKeyEquals } from '@kizahasi/util';
 import * as t from 'io-ts';
 import { compositeKey } from '../compositeKey/v1';
 import { createOperation } from '../util/createOperation';
@@ -26,6 +27,7 @@ export const state = t.type({
 export type State = t.TypeOf<typeof state>;
 
 export const downOperation = createOperation(1, {
+    boardKey: t.type({ oldValue: compositeKey }),
     h: numberDownOperation,
     isPrivate: booleanDownOperation,
     w: numberDownOperation,
@@ -36,6 +38,7 @@ export const downOperation = createOperation(1, {
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
 export const upOperation = createOperation(1, {
+    boardKey: t.type({ newValue: compositeKey }),
     h: numberUpOperation,
     isPrivate: booleanUpOperation,
     w: numberUpOperation,
@@ -48,6 +51,7 @@ export type UpOperation = t.TypeOf<typeof upOperation>;
 export type TwoWayOperation = {
     $v: 1;
 
+    boardKey?: ReplaceOperation.ReplaceValueTwoWayOperation<CompositeKey>;
     h?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     isPrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     w?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
@@ -69,6 +73,9 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
 
 export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     const result: State = { ...state };
+    if (operation.boardKey != null) {
+        result.boardKey = operation.boardKey.newValue;
+    }
     if (operation.h != null) {
         result.h = operation.h.newValue;
     }
@@ -90,6 +97,9 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
 export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
     const result = { ...state };
 
+    if (operation.boardKey != null) {
+        result.boardKey = operation.boardKey.oldValue;
+    }
     if (operation.h !== undefined) {
         result.h = operation.h.oldValue;
     }
@@ -112,6 +122,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const valueProps: DownOperation = {
         $v: 1,
+        boardKey: ReplaceOperation.composeDownOperation(first.boardKey, second.boardKey),
         h: ReplaceOperation.composeDownOperation(first.h, second.h),
         isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
         w: ReplaceOperation.composeDownOperation(first.w, second.w),
@@ -131,6 +142,10 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     const prevState = { ...nextState };
     const twoWayOperation: TwoWayOperation = { $v: 1 };
 
+    if (downOperation.boardKey !== undefined) {
+        prevState.boardKey = downOperation.boardKey.oldValue;
+        twoWayOperation.boardKey = { ...downOperation.boardKey, newValue: nextState.boardKey };
+    }
     if (downOperation.h !== undefined) {
         prevState.h = downOperation.h.oldValue;
         twoWayOperation.h = { ...downOperation.h, newValue: nextState.h };
@@ -160,6 +175,9 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
     const resultType: TwoWayOperation = { $v: 1 };
+    if (!compositeKeyEquals(prevState.boardKey, nextState.boardKey)) {
+        resultType.boardKey = { oldValue: prevState.boardKey, newValue: nextState.boardKey };
+    }
     if (prevState.h !== nextState.h) {
         resultType.h = { oldValue: prevState.h, newValue: nextState.h };
     }
@@ -191,6 +209,11 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
 }) => {
     const twoWayOperation: TwoWayOperation = { $v: 1 };
 
+    twoWayOperation.boardKey = ReplaceOperation.serverTransform({
+        first: serverOperation?.boardKey,
+        second: clientOperation.boardKey,
+        prevState: prevState.boardKey,
+    });
     twoWayOperation.h = ReplaceOperation.serverTransform({
         first: serverOperation?.h,
         second: clientOperation.h,
@@ -225,6 +248,10 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
 };
 
 export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
+    const boardKey = ReplaceOperation.clientTransform({
+        first: first.boardKey,
+        second: second.boardKey,
+    });
     const h = ReplaceOperation.clientTransform({
         first: first.h,
         second: second.h,
@@ -248,6 +275,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const firstPrime: UpOperation = {
         $v: 1,
+        boardKey: boardKey.firstPrime,
         h: h.firstPrime,
         isPrivate: isPrivate.firstPrime,
         w: w.firstPrime,
@@ -257,6 +285,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const secondPrime: UpOperation = {
         $v: 1,
+        boardKey: boardKey.secondPrime,
         h: h.secondPrime,
         isPrivate: isPrivate.secondPrime,
         w: w.secondPrime,
