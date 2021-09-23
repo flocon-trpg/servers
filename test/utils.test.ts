@@ -1,4 +1,4 @@
-import { chooseDualKeyRecord, mapDualKeyRecord, mapRecord, mapToRecord } from '../src';
+import { chooseDualKeyRecord, chooseRecord, mapDualKeyRecord, mapToRecord } from '../src';
 
 describe('mapToRecord', () => {
     it('tests empty Map', () => {
@@ -17,6 +17,41 @@ describe('mapToRecord', () => {
         const map = new Map<string, string>();
         map.set('__proto__', 'value');
         expect(() => mapToRecord(map)).toThrow();
+    });
+});
+
+describe('chooseRecord', () => {
+    it('tests {}', () => {
+        const source = {};
+        expect(
+            chooseRecord(source, () => {
+                throw 'this should not be called';
+            })
+        ).toEqual({});
+    });
+
+    it('tests non-empty Record', () => {
+        const source = {
+            a: 'A',
+            b: 'B',
+            c: null,
+        };
+        expect(
+            chooseRecord(source, (element, key) => {
+                if (element === null) {
+                    return null;
+                }
+                if (key === 'b') {
+                    return undefined;
+                }
+                return key + element;
+            })
+        ).toEqual({ a: 'aA', c: null });
+    });
+
+    it('tests "__proto__" as a key to fail', () => {
+        const source: Record<string, number | undefined> = JSON.parse('{ "__proto__": 1 }');
+        expect(() => chooseRecord(source, x => x)).toThrow();
     });
 });
 
@@ -45,11 +80,6 @@ it('tests mapDualKeyRecord {}', () => {
     const source: Record<string, Record<string, number>> = {};
     const actual = mapDualKeyRecord<number, string>(source, x => x.toString());
     expect(actual).toEqual({});
-});
-
-it('tests mapRecord (__proto__)', () => {
-    const source: Record<string, number | undefined> = JSON.parse('{ "__proto__": 1 }');
-    expect(() => mapRecord(source, x => x)).toThrow();
 });
 
 it('tests chooseDualKeyRecord', () => {
