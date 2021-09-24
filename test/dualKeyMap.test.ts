@@ -1,3 +1,4 @@
+import { Option } from '@kizahasi/option';
 import { both, DualKeyMap, groupJoinDualKeyMap, left, right } from '../src';
 
 describe('dualKeyMap', () => {
@@ -100,6 +101,25 @@ describe('dualKeyMap', () => {
                 x => x
             )
         ).toEqual(expected);
+    });
+
+    it('tests choose', () => {
+        const source = new DualKeyMap<number, number, Option<string>>();
+        source.set({ first: 0, second: 0 }, Option.none());
+        source.set({ first: 1, second: 1 }, Option.some('1-1'));
+        const actual = source.choose(x => x);
+        expect(actual.toArray()).toEqual([[{ first: 1, second: 1 }, '1-1']]);
+    });
+
+    it('tests map', () => {
+        const source = new DualKeyMap<number, number, number>();
+        source.set({ first: 0, second: 0 }, 0);
+        source.set({ first: 1, second: 1 }, 1);
+        const actual = source.map(x => x.toString());
+        const expected = new DualKeyMap<number, number, string>();
+        expected.set({ first: 0, second: 0 }, '0');
+        expected.set({ first: 1, second: 1 }, '1');
+        expect(actual.toMap()).toEqual(expected.toMap());
     });
 
     describe('groupJoinDualKeyMap', () => {
