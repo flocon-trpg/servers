@@ -1,4 +1,3 @@
-import { StrIndex10 } from '@kizahasi/util';
 import {
     State,
     UpOperation,
@@ -9,6 +8,7 @@ import {
     admin,
     replace,
     update,
+    StrIndex10,
 } from '../src';
 import { Resources } from './resources';
 
