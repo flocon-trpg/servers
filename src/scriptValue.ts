@@ -224,21 +224,10 @@ export const beginCast = (source: FValue) => {
 export class FBoolean implements FObjectBase {
     public constructor(public readonly raw: boolean) {}
 
-    private static prepareInstanceMethod(
-        $this: FValue,
-        isNew: boolean,
-        astInfo: AstInfo | undefined
-    ): FBoolean {
+    private static prepareInstanceMethod(isNew: boolean, astInfo: AstInfo | undefined) {
         if (isNew) {
             throw ScriptError.notConstructorError(astInfo?.range);
         }
-        if ($this?.type !== FType.Boolean) {
-            throw new ScriptError(
-                `Expected 'this' to be an Boolean, but actully ${toTypeName($this)}`,
-                astInfo?.range
-            );
-        }
-        return $this;
     }
 
     public get type(): typeof FType.Boolean {
@@ -249,14 +238,10 @@ export class FBoolean implements FObjectBase {
         const propertyName = tryToPropertyName(property);
         switch (propertyName) {
             case 'toString':
-                return new FFunction(
-                    ({ $this, isNew }) => {
-                        const $$this = FBoolean.prepareInstanceMethod($this, isNew, astInfo);
-                        return new FString($$this.raw.toString());
-                    },
-                    this,
-                    false
-                );
+                return new FFunction(({ isNew }) => {
+                    FBoolean.prepareInstanceMethod(isNew, astInfo);
+                    return new FString(this.raw.toString());
+                });
             default:
                 return undefined;
         }
@@ -282,21 +267,10 @@ export class FBoolean implements FObjectBase {
 export class FNumber implements FObjectBase {
     public constructor(public readonly raw: number) {}
 
-    private static prepareInstanceMethod(
-        $this: FValue,
-        isNew: boolean,
-        astInfo: AstInfo | undefined
-    ): FNumber {
+    private static prepareInstanceMethod(isNew: boolean, astInfo: AstInfo | undefined) {
         if (isNew) {
             throw ScriptError.notConstructorError(astInfo?.range);
         }
-        if ($this?.type !== FType.Number) {
-            throw new ScriptError(
-                `Expected 'this' to be an Number, but actully ${toTypeName($this)}`,
-                astInfo?.range
-            );
-        }
-        return $this;
     }
 
     public get type(): typeof FType.Number {
@@ -308,19 +282,15 @@ export class FNumber implements FObjectBase {
         switch (propertyName) {
             // TODO: もっと実装する
             case 'toString':
-                return new FFunction(
-                    ({ args, $this, isNew }) => {
-                        const $$this = FNumber.prepareInstanceMethod($this, isNew, astInfo);
-                        const radix = args[0];
-                        return new FString(
-                            $$this.raw.toString(
-                                beginCast(radix).addNumber().addUndefined().cast(astInfo?.range)
-                            )
-                        );
-                    },
-                    this,
-                    false
-                );
+                return new FFunction(({ args, isNew }) => {
+                    FNumber.prepareInstanceMethod(isNew, astInfo);
+                    const radix = args[0];
+                    return new FString(
+                        this.raw.toString(
+                            beginCast(radix).addNumber().addUndefined().cast(astInfo?.range)
+                        )
+                    );
+                });
             default:
                 return undefined;
         }
@@ -346,21 +316,10 @@ export class FNumber implements FObjectBase {
 export class FString implements FObjectBase {
     public constructor(public readonly raw: string) {}
 
-    private static prepareInstanceMethod(
-        $this: FValue,
-        isNew: boolean,
-        astInfo: AstInfo | undefined
-    ): FString {
+    private static prepareInstanceMethod(isNew: boolean, astInfo: AstInfo | undefined) {
         if (isNew) {
             throw ScriptError.notConstructorError(astInfo?.range);
         }
-        if ($this?.type !== FType.String) {
-            throw new ScriptError(
-                `Expected 'this' to be an String, but actully ${toTypeName($this)}`,
-                astInfo?.range
-            );
-        }
-        return $this;
     }
 
     public get type(): typeof FType.String {
@@ -372,14 +331,10 @@ export class FString implements FObjectBase {
         switch (propertyName) {
             // TODO: もっと実装する
             case 'toString':
-                return new FFunction(
-                    ({ $this, isNew }) => {
-                        const $$this = FString.prepareInstanceMethod($this, isNew, astInfo);
-                        return $$this;
-                    },
-                    this,
-                    false
-                );
+                return new FFunction(({ isNew }) => {
+                    FString.prepareInstanceMethod(isNew, astInfo);
+                    return this;
+                });
             default:
                 return undefined;
         }
@@ -410,21 +365,10 @@ export class FArray implements FObjectBase {
         private readonly convertBack: (value: FValue, astInfo: AstInfo | undefined) => unknown
     ) {}
 
-    private static prepareInstanceMethod(
-        $this: FValue,
-        isNew: boolean,
-        astInfo: AstInfo | undefined
-    ) {
+    private static prepareInstanceMethod(isNew: boolean, astInfo: AstInfo | undefined) {
         if (isNew) {
             throw ScriptError.notConstructorError(astInfo?.range);
         }
-        if ($this?.type !== FType.Array) {
-            throw new ScriptError(
-                `Expected 'this' to be an Array, but actully ${toTypeName($this)}`,
-                astInfo?.range
-            );
-        }
-        return $this;
     }
 
     public static createCloned(source: FValue[]): FArray {
@@ -459,33 +403,21 @@ export class FArray implements FObjectBase {
         const propertyName = index;
         switch (propertyName) {
             case 'filter':
-                return new FFunction(
-                    ({ args, $this, isNew }) => {
-                        const $$this = FArray.prepareInstanceMethod($this, isNew, astInfo);
-                        const predicate = beginCast(args[0]).addFunction().cast(astInfo?.range)(
-                            false
-                        );
-                        const raw = $$this
-                            .iterate()
-                            .filter((value, index) =>
-                                predicate([value, new FNumber(index)])?.toJObject()
-                            );
-                        return FArray.createCloned(raw);
-                    },
-                    this,
-                    false
-                );
+                return new FFunction(({ args, isNew }) => {
+                    FArray.prepareInstanceMethod(isNew, astInfo);
+                    const predicate = beginCast(args[0]).addFunction().cast(astInfo?.range)(false);
+                    const raw = this.iterate().filter((value, index) =>
+                        predicate([value, new FNumber(index)])?.toJObject()
+                    );
+                    return FArray.createCloned(raw);
+                });
             case 'push':
-                return new FFunction(
-                    ({ args, $this, isNew }) => {
-                        const $$this = FArray.prepareInstanceMethod($this, isNew, astInfo);
-                        const newValue = this.convertBack(args[0], astInfo);
-                        $$this.source.push(newValue);
-                        return undefined;
-                    },
-                    this,
-                    false
-                );
+                return new FFunction(({ args, isNew }) => {
+                    FArray.prepareInstanceMethod(isNew, astInfo);
+                    const newValue = this.convertBack(args[0], astInfo);
+                    this.source.push(newValue);
+                    return undefined;
+                });
         }
         return undefined;
     }
@@ -592,27 +524,14 @@ type FFunctionParams = {
 };
 
 export class FFunction implements FObjectBase {
-    public constructor(
-        private readonly func: (params: FFunctionParams & { $this: FValue }) => FValue,
-
-        // Function内のthisを表す値。
-        // isArrowFunction === false のとき、fを作成するとして、例えばx.fの場合はxを渡し、単にfの場合はundefinedを渡す。
-        // isArrowFunction === true のときはそこに位置するthisを渡す。
-        private readonly $this: FValue,
-
-        private readonly isArrowFunction: boolean
-    ) {}
-
-    public bind($this: FValue): FFunction {
-        return new FFunction(this.func, $this, this.isArrowFunction);
-    }
+    public constructor(private readonly func: (params: FFunctionParams) => FValue) {}
 
     public get type(): typeof FType.Function {
         return FType.Function;
     }
 
     public exec(params: FFunctionParams): FValue {
-        return this.func({ ...params, $this: this.$this });
+        return this.func({ ...params });
     }
 
     protected onGetting(params: GetCoreParams): Option<FValue> {

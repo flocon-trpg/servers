@@ -4,13 +4,9 @@ import { ScriptError } from '..';
 
 class FArrayClass extends FFunction {
     public constructor() {
-        super(
-            () => {
-                throw new Error('Array constructor is not supported');
-            },
-            undefined,
-            false
-        );
+        super(() => {
+            throw new Error('Array constructor is not supported');
+        });
     }
 
     private static prepareStaticMethod(isNew: boolean, astInfo: AstInfo | undefined): void {
@@ -23,15 +19,11 @@ class FArrayClass extends FFunction {
         switch (key) {
             case 'isArray': {
                 return Option.some(
-                    new FFunction(
-                        ({ args, isNew }) => {
-                            FArrayClass.prepareStaticMethod(isNew, astInfo);
-                            const arg = args[0];
-                            return new FBoolean(arg?.type === FType.Array);
-                        },
-                        this,
-                        false
-                    )
+                    new FFunction(({ args, isNew }) => {
+                        FArrayClass.prepareStaticMethod(isNew, astInfo);
+                        const arg = args[0];
+                        return new FBoolean(arg?.type === FType.Array);
+                    })
                 );
             }
             default:

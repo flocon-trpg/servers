@@ -89,13 +89,6 @@ function ofFMemberExpression(
     });
 }
 
-const bind = (value: FValue, $this: FValue): FValue => {
-    if (value?.type === FType.Function) {
-        return value.bind($this);
-    }
-    return value;
-};
-
 function ofFExpression(expression: FExpression, context: Context): FValue {
     switch (expression.type) {
         case 'ArrayExpression': {
@@ -133,14 +126,14 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                 context.scopeOut();
                 return result;
             };
-            return new FFunction(f, context.currentThis, true);
+            return new FFunction(f);
         }
         case 'AssignmentExpression': {
             switch (expression.left.type) {
                 case 'Identifier': {
                     context.assign(
                         expression.left.name,
-                        bind(ofFExpression(expression.right, context), undefined),
+                        ofFExpression(expression.right, context),
                         toRange(expression)
                     );
                     return undefined;
@@ -160,7 +153,7 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                             }
                             object.set({
                                 property,
-                                newValue: bind(ofFExpression(expression.right, context), object),
+                                newValue: ofFExpression(expression.right, context),
                                 astInfo: { range: toRange(expression) },
                             });
                             return undefined;
@@ -301,8 +294,25 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
             return result;
         }
         case 'ThisExpression':
-            // 現時点ではFunction, class, Function.callなどをサポートしていないため、常にglobalThisを返して構わない。
-            return context.globalThis;
+            /*
+            thisは常にglobalThisと等しいわけではなく、例えば下のようなコードではglobalThisと異なる挙動を示す。
+
+            // コード1
+            let x = {
+                a: 1,
+                b() {
+                    console.log(this.a); // 1と出力される
+                }
+            }
+
+            // コード2
+            let set = new Set();
+            [1].forEach(set.add); // ここで"add method called on incompatible undefined"というエラー。i => set.add(i) などとすれば正常に動く。
+
+            他にも様々なケースがあり、これらに対応するのは困難。本来のjavascriptと異なる挙動で実装して混乱させるよりは、いっそのこと無効化したほうがいいと判断した。
+            thisが使えないと困るケースは、classなどを自分で定義する場合が考えられる。だが、classの実装予定は今の所ないので大丈夫か。
+            */
+            throw new Error(`'this' keyword is not supported. Use globalThis instead.`);
         case 'UnaryExpression': {
             const argument = ofFExpression(expression.argument, context);
             switch (expression.operator) {
@@ -440,7 +450,7 @@ function ofFStatement(statement: FStatement, context: Context): FStatementResult
                 // let x; のような場合は let x = undefined; と同等とみなして良さそう。const x; はparseの時点で弾かれるはず。
                 context.declare(
                     d.id.name,
-                    d.init == null ? undefined : bind(ofFExpression(d.init, context), undefined),
+                    d.init == null ? undefined : ofFExpression(d.init, context),
                     kind
                 );
             });
