@@ -1,3 +1,4 @@
+import { Option } from '@kizahasi/option';
 import { both, GroupJoinResult, left, right } from './types';
 import { mapToRecord } from './utils';
 
@@ -19,19 +20,20 @@ export type DualKeyMapSource<TKey1, TKey2, TValue> =
 type RecordKey = string | number | symbol;
 
 export class DualKeyMap<TKey1, TKey2, TValue> {
+    // Map<TKey2, TValue>は常に空でないMapとなる
     private _core: Map<TKey1, Map<TKey2, TValue>>;
 
     public constructor(sourceMap?: DualKeyMapSource<TKey1, TKey2, TValue>) {
         if (sourceMap != null) {
-            this._core = DualKeyMap.mapMap(sourceMap, x => x);
+            this._core = DualKeyMap.chooseMap(sourceMap, x => Option.some(x));
             return;
         }
         this._core = new Map<TKey1, Map<TKey2, TValue>>();
     }
 
-    private static mapMap<TKey1, TKey2, TValue1, TValue2>(
+    private static chooseMap<TKey1, TKey2, TValue1, TValue2>(
         source: DualKeyMapSource<TKey1, TKey2, TValue1>,
-        mapping: (source: TValue1, key: DualKey<TKey1, TKey2>) => TValue2
+        chooser: (source: TValue1, key: DualKey<TKey1, TKey2>) => Option<TValue2>
     ): Map<TKey1, Map<TKey2, TValue2>> {
         const result = new Map<TKey1, Map<TKey2, TValue2>>();
         for (const [firstKey, first] of source) {
@@ -40,7 +42,11 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
             }
             const toSet = new Map<TKey2, TValue2>();
             for (const [secondKey, second] of first) {
-                toSet.set(secondKey, mapping(second, { first: firstKey, second: secondKey }));
+                const chooserResult = chooser(second, { first: firstKey, second: secondKey });
+                if (chooserResult.isNone) {
+                    continue;
+                }
+                toSet.set(secondKey, chooserResult.value);
             }
             result.set(firstKey, toSet);
         }
@@ -49,12 +55,12 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
 
     private static create<TKey1, TKey2, TValue1, TValue2>(
         source: DualKeyMapSource<TKey1, TKey2, TValue1> | DualKeyMap<TKey1, TKey2, TValue1>,
-        mapping: (source: TValue1, key: DualKey<TKey1, TKey2>) => TValue2
+        chooser: (source: TValue1, key: DualKey<TKey1, TKey2>) => Option<TValue2>
     ): DualKeyMap<TKey1, TKey2, TValue2> {
         const result = new DualKeyMap<TKey1, TKey2, TValue2>();
-        result._core = DualKeyMap.mapMap(
+        result._core = DualKeyMap.chooseMap(
             source instanceof DualKeyMap ? source._core : source,
-            mapping
+            chooser
         );
         return result;
     }
@@ -81,11 +87,17 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
     public map<TResult>(
         mapping: (source: TValue, key: DualKey<TKey1, TKey2>) => TResult
     ): DualKeyMap<TKey1, TKey2, TResult> {
-        return DualKeyMap.create(this, mapping);
+        return DualKeyMap.create(this, (source, key) => Option.some(mapping(source, key)));
+    }
+
+    public choose<TResult>(
+        chooser: (source: TValue, key: DualKey<TKey1, TKey2>) => Option<TResult>
+    ): DualKeyMap<TKey1, TKey2, TResult> {
+        return DualKeyMap.create(this, (source, key) => chooser(source, key));
     }
 
     public clone(): DualKeyMap<TKey1, TKey2, TValue> {
-        return DualKeyMap.create(this, x => x);
+        return DualKeyMap.create(this, x => Option.some(x));
     }
 
     public get({ first, second }: DualKey<TKey1, TKey2>): TValue | undefined {
@@ -96,8 +108,9 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
         return inner.get(second);
     }
 
-    public getByFirst(first: TKey1): Map<TKey2, TValue> | undefined {
-        return this._core.get(first);
+    // 戻り値のReadonlyMapをMapにするとDualKeyMapを操作できて一見便利そうだが、そうすると_coreの制約を満たせなくなる。また、ReadonlyMapであれば戻り値がundefinedのときは空のMapを作成して返せるため綺麗になる。
+    public getByFirst(first: TKey1): ReadonlyMap<TKey2, TValue> {
+        return this._core.get(first) ?? new Map();
     }
 
     public set(
@@ -142,7 +155,7 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
     }
 
     public toMap() {
-        return DualKeyMap.mapMap(this._core, x => x);
+        return DualKeyMap.chooseMap(this._core, x => Option.some(x));
     }
 
     public toStringRecord(
@@ -183,7 +196,7 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
         return result;
     }
 
-    // 主な使用目的はデバッグのために文字列化させるため
+    // 主な使用目的はデバッグ目的で文字列化させるため
     public toJSON(valueToString?: (value: TValue) => string): string {
         return JSON.stringify(
             [...this._core].map(([key1, value]) => [
@@ -205,7 +218,7 @@ export type ReadonlyDualKeyMap<TKey1, TKey2, TValue> = Omit<
     getByFirst(key: TKey1): ReadonlyMap<TKey2, TValue> | undefined;
 };
 
-export const groupJoin = <TKey1, TKey2, TLeft, TRight>(
+export const groupJoinDualKeyMap = <TKey1, TKey2, TLeft, TRight>(
     left: ReadonlyDualKeyMap<TKey1, TKey2, TLeft>,
     right: ReadonlyDualKeyMap<TKey1, TKey2, TRight>
 ): DualKeyMap<TKey1, TKey2, GroupJoinResult<TLeft, TRight>> => {
@@ -231,12 +244,12 @@ export const groupJoin = <TKey1, TKey2, TLeft, TRight>(
 };
 
 // [undefined, undefined, undefined]が返されることはない
-export const groupJoin3 = <TKey1, TKey2, T1, T2, T3>(
+export const groupJoin3DualKeyMap = <TKey1, TKey2, T1, T2, T3>(
     source1: ReadonlyDualKeyMap<TKey1, TKey2, T1>,
     source2: ReadonlyDualKeyMap<TKey1, TKey2, T2>,
     source3: ReadonlyDualKeyMap<TKey1, TKey2, T3>
 ): DualKeyMap<TKey1, TKey2, readonly [T1 | undefined, T2 | undefined, T3 | undefined]> => {
-    const source = groupJoin(source1, groupJoin(source2, source3));
+    const source = groupJoinDualKeyMap(source1, groupJoinDualKeyMap(source2, source3));
     return source.map(group => {
         switch (group.type) {
             case left:
@@ -263,7 +276,7 @@ export const groupJoin3 = <TKey1, TKey2, T1, T2, T3>(
 };
 
 // [undefined, undefined, undefined, undefined]が返されることはない
-export const groupJoin4 = <TKey1, TKey2, T1, T2, T3, T4>(
+export const groupJoin4DualKeyMap = <TKey1, TKey2, T1, T2, T3, T4>(
     source1: ReadonlyDualKeyMap<TKey1, TKey2, T1>,
     source2: ReadonlyDualKeyMap<TKey1, TKey2, T2>,
     source3: ReadonlyDualKeyMap<TKey1, TKey2, T3>,
@@ -273,7 +286,7 @@ export const groupJoin4 = <TKey1, TKey2, T1, T2, T3, T4>(
     TKey2,
     readonly [T1 | undefined, T2 | undefined, T3 | undefined, T4 | undefined]
 > => {
-    const source = groupJoin(groupJoin3(source1, source2, source3), source4);
+    const source = groupJoinDualKeyMap(groupJoin3DualKeyMap(source1, source2, source3), source4);
     return source.map(group => {
         switch (group.type) {
             case left:

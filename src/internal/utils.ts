@@ -108,11 +108,6 @@ export const dualKeyRecordToDualKeyMap = <T>(
     return result;
 };
 
-/**
- * @deprecated Use dualKeyRecordToDualKeyMap instead.
- */
-export const recordToDualKeyMap = dualKeyRecordToDualKeyMap;
-
 export const recordForEach = <T>(
     source: Record<string, T | undefined>,
     action: (value: T, key: string) => void
@@ -166,18 +161,4 @@ export const dualKeyRecordForEach = <T>(
             action(value, { first, second });
         }
     }
-};
-
-/**
- * @deprecated Use x?.[key]
- */
-export const dualKeyRecordFind = <T>(
-    source: Record<string, Record<string, T | undefined> | undefined>,
-    key: DualKey<string, string>
-) => {
-    const inner = source[key.first];
-    if (inner === undefined) {
-        return undefined;
-    }
-    return inner[key.second];
 };

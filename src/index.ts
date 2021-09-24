@@ -1,9 +1,8 @@
-export { anonymous, authToken, $free, $system } from './internal/constants';
 export {
     KeyFactory,
     CustomDualKeyMap,
     ReadonlyCustomDualKeyMap,
-    groupJoin as groupJoinCustomDualKeyMap,
+    groupJoinCustomDualKeyMap,
 } from './internal/customDualKeyMap';
 export {
     DualKey,
@@ -11,27 +10,13 @@ export {
     ReadonlyDualKeyMap,
     DualKeyMapSource,
     toJsonString as dualKeyToJsonString,
-    groupJoin as groupJoinDualKeyMap,
-    groupJoin3 as groupJoin3DualKeyMap,
-    groupJoin4 as groupJoin4DualKeyMap,
+    groupJoinDualKeyMap,
+    groupJoin3DualKeyMap,
+    groupJoin4DualKeyMap,
 } from './internal/dualKeyMap';
-export {
-    StrIndex5,
-    strIndex5Array,
-    isStrIndex5,
-    StrIndex10,
-    strIndex10Array,
-    isStrIndex10,
-    StrIndex20,
-    strIndex20Array,
-    isStrIndex20,
-    StrIndex100,
-    strIndex100Array,
-    isStrIndex100,
-} from './internal/indexes';
 export { keyNames } from './internal/keyNames';
-export { groupJoin as groupJoinMap } from './internal/map';
-export { PublicChannelKey } from './internal/publicChannelKey';
+export { groupJoinMap } from './internal/groupJoinMap';
+export { groupJoinSet } from './internal/groupJoinSet';
 export {
     SemVer,
     alpha,
@@ -43,7 +28,6 @@ export {
     apiServerRequiresUpdate,
     webServerRequiresUpdate,
 } from './internal/semver';
-export { groupJoin as groupJoinSet } from './internal/set';
 export {
     CompositeKey,
     stringToCompositeKey,
@@ -57,7 +41,6 @@ export { left, right, both } from './internal/types';
 export {
     chooseDualKeyRecord,
     chooseRecord,
-    dualKeyRecordFind,
     dualKeyRecordForEach,
     isRecordEmpty,
     mapDualKeyRecord,
@@ -66,7 +49,6 @@ export {
     recordForEach,
     recordForEachAsync,
     recordToArray,
-    recordToDualKeyMap,
     dualKeyRecordToDualKeyMap,
     recordToMap,
 } from './internal/utils';

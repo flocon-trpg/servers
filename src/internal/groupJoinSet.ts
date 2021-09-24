@@ -2,7 +2,7 @@ import { both, left, right } from './types';
 
 type GroupJoinResultType = typeof left | typeof right | typeof both;
 
-export const groupJoin = <T>(
+export const groupJoinSet = <T>(
     left: ReadonlySet<T>,
     right: ReadonlySet<T>
 ): Map<T, GroupJoinResultType> => {
