@@ -86,6 +86,22 @@ describe('dualKeyMap', () => {
         ).toEqual({ key1: { key1_2: '1_2' } });
     });
 
+    it('tests ofRecord', () => {
+        const actual = DualKeyMap.ofRecord<string, string, string>({
+            key1: { key1_2: '1_2', key1_3: undefined, key1_4: '1_4' },
+            key2: undefined,
+            key3: {},
+            key4: { key4_1: '4_1' },
+        });
+        const expected = { key1: { key1_2: '1_2', key1_4: '1_4' }, key4: { key4_1: '4_1' } };
+        expect(
+            actual.toStringRecord(
+                x => x,
+                x => x
+            )
+        ).toEqual(expected);
+    });
+
     describe('groupJoinDualKeyMap', () => {
         it('tests empty vs empty', () => {
             const leftDualKeyMap = new DualKeyMap();
