@@ -103,6 +103,39 @@ describe('dualKeyMap', () => {
         ).toEqual(expected);
     });
 
+    it('tests stringToRecord to throw when it contains "__proto__" as a first key', () => {
+        const source = new DualKeyMap<string, string, string>();
+        source.set({ first: '__proto__', second: 'x' }, 'value');
+        expect(() =>
+            source.toStringRecord(
+                x => x,
+                x => x
+            )
+        ).toThrow();
+    });
+
+    it('tests stringToRecord to throw when it contains "__proto__" as a second key', () => {
+        const source = new DualKeyMap<string, string, string>();
+        source.set({ first: 'x', second: '__proto__' }, 'value');
+        expect(() =>
+            source.toStringRecord(
+                x => x,
+                x => x
+            )
+        ).toThrow();
+    });
+
+    it('tests stringToRecord to throw when it contains "__proto__" as both keys', () => {
+        const source = new DualKeyMap<string, string, string>();
+        source.set({ first: '__proto__', second: '__proto__' }, 'value');
+        expect(() =>
+            source.toStringRecord(
+                x => x,
+                x => x
+            )
+        ).toThrow();
+    });
+
     it('tests choose', () => {
         const source = new DualKeyMap<number, number, Option<string>>();
         source.set({ first: 0, second: 0 }, Option.none());
