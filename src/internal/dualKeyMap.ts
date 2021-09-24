@@ -1,3 +1,4 @@
+import { Option } from '@kizahasi/option';
 import { both, GroupJoinResult, left, right } from './types';
 import { mapToRecord } from './utils';
 
@@ -24,15 +25,15 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
 
     public constructor(sourceMap?: DualKeyMapSource<TKey1, TKey2, TValue>) {
         if (sourceMap != null) {
-            this._core = DualKeyMap.mapMap(sourceMap, x => x);
+            this._core = DualKeyMap.chooseMap(sourceMap, x => Option.some(x));
             return;
         }
         this._core = new Map<TKey1, Map<TKey2, TValue>>();
     }
 
-    private static mapMap<TKey1, TKey2, TValue1, TValue2>(
+    private static chooseMap<TKey1, TKey2, TValue1, TValue2>(
         source: DualKeyMapSource<TKey1, TKey2, TValue1>,
-        mapping: (source: TValue1, key: DualKey<TKey1, TKey2>) => TValue2
+        chooser: (source: TValue1, key: DualKey<TKey1, TKey2>) => Option<TValue2>
     ): Map<TKey1, Map<TKey2, TValue2>> {
         const result = new Map<TKey1, Map<TKey2, TValue2>>();
         for (const [firstKey, first] of source) {
@@ -41,7 +42,11 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
             }
             const toSet = new Map<TKey2, TValue2>();
             for (const [secondKey, second] of first) {
-                toSet.set(secondKey, mapping(second, { first: firstKey, second: secondKey }));
+                const chooserResult = chooser(second, { first: firstKey, second: secondKey });
+                if (chooserResult.isNone) {
+                    continue;
+                }
+                toSet.set(secondKey, chooserResult.value);
             }
             result.set(firstKey, toSet);
         }
@@ -50,12 +55,12 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
 
     private static create<TKey1, TKey2, TValue1, TValue2>(
         source: DualKeyMapSource<TKey1, TKey2, TValue1> | DualKeyMap<TKey1, TKey2, TValue1>,
-        mapping: (source: TValue1, key: DualKey<TKey1, TKey2>) => TValue2
+        chooser: (source: TValue1, key: DualKey<TKey1, TKey2>) => Option<TValue2>
     ): DualKeyMap<TKey1, TKey2, TValue2> {
         const result = new DualKeyMap<TKey1, TKey2, TValue2>();
-        result._core = DualKeyMap.mapMap(
+        result._core = DualKeyMap.chooseMap(
             source instanceof DualKeyMap ? source._core : source,
-            mapping
+            chooser
         );
         return result;
     }
@@ -82,11 +87,17 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
     public map<TResult>(
         mapping: (source: TValue, key: DualKey<TKey1, TKey2>) => TResult
     ): DualKeyMap<TKey1, TKey2, TResult> {
-        return DualKeyMap.create(this, mapping);
+        return DualKeyMap.create(this, (source, key) => Option.some(mapping(source, key)));
+    }
+
+    public choose<TResult>(
+        chooser: (source: TValue, key: DualKey<TKey1, TKey2>) => Option<TResult>
+    ): DualKeyMap<TKey1, TKey2, TResult> {
+        return DualKeyMap.create(this, (source, key) => chooser(source, key));
     }
 
     public clone(): DualKeyMap<TKey1, TKey2, TValue> {
-        return DualKeyMap.create(this, x => x);
+        return DualKeyMap.create(this, x => Option.some(x));
     }
 
     public get({ first, second }: DualKey<TKey1, TKey2>): TValue | undefined {
@@ -144,7 +155,7 @@ export class DualKeyMap<TKey1, TKey2, TValue> {
     }
 
     public toMap() {
-        return DualKeyMap.mapMap(this._core, x => x);
+        return DualKeyMap.chooseMap(this._core, x => Option.some(x));
     }
 
     public toStringRecord(
