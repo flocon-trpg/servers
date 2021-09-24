@@ -21,9 +21,28 @@ export const privateCommandsDiff = ({
     });
 };
 
+export { anonymous, authToken, $free, $system } from './internal/constants';
+
 export { firebaseConfig, FirebaseConfig } from './internal/firebaseConfig';
 
+export {
+    StrIndex5,
+    strIndex5Array,
+    isStrIndex5,
+    StrIndex10,
+    strIndex10Array,
+    isStrIndex10,
+    StrIndex20,
+    strIndex20Array,
+    isStrIndex20,
+    StrIndex100,
+    strIndex100Array,
+    isStrIndex100,
+} from './internal/indexes';
+
 export { maybe, Maybe } from './internal/maybe';
+
+export { PublicChannelKey } from './internal/publicChannelKey';
 
 export { Cache, createNodeCache, createRedisCache } from './internal/cache/main';
 
