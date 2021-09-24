@@ -2,7 +2,7 @@ export {
     KeyFactory,
     CustomDualKeyMap,
     ReadonlyCustomDualKeyMap,
-    groupJoin as groupJoinCustomDualKeyMap,
+    groupJoinCustomDualKeyMap,
 } from './internal/customDualKeyMap';
 export {
     DualKey,
@@ -10,9 +10,9 @@ export {
     ReadonlyDualKeyMap,
     DualKeyMapSource,
     toJsonString as dualKeyToJsonString,
-    groupJoin as groupJoinDualKeyMap,
-    groupJoin3 as groupJoin3DualKeyMap,
-    groupJoin4 as groupJoin4DualKeyMap,
+    groupJoinDualKeyMap,
+    groupJoin3DualKeyMap,
+    groupJoin4DualKeyMap,
 } from './internal/dualKeyMap';
 export { keyNames } from './internal/keyNames';
 export { groupJoinMap } from './internal/groupJoinMap';

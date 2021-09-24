@@ -72,7 +72,7 @@ export class CustomDualKeyMap<TKey, TKeySource1, TKeySource2, TValue> {
         return this._dualKeyMap.get(dualKey);
     }
 
-    public getByFirst(first: TKeySource1): Map<TKeySource2, TValue> | undefined {
+    public getByFirst(first: TKeySource1): ReadonlyMap<TKeySource2, TValue> {
         return this._dualKeyMap.getByFirst(first);
     }
 
@@ -142,10 +142,10 @@ export type ReadonlyCustomDualKeyMap<TKey, TKeySource1, TKeySource2, TValue> = O
 
 // groupJoin系において、createKeyとcreateDualKeyはleftのもののみが使われる。leftとrightで異なるcreateKeyやcreateDualKeyを使用していないという前提。
 
-export const groupJoin = <TKey, TKeySource1, TKeySource2, TLeft, TRight>(
+export const groupJoinCustomDualKeyMap = <TKey, TKeySource1, TKeySource2, TLeft, TRight>(
     left: ReadonlyCustomDualKeyMap<TKey, TKeySource1, TKeySource2, TLeft>,
     right: ReadonlyCustomDualKeyMap<TKey, TKeySource1, TKeySource2, TRight>
 ): CustomDualKeyMap<TKey, TKeySource1, TKeySource2, GroupJoinResult<TLeft, TRight>> => {
-    const result = $DualKeyMap.groupJoin(left.dualKeyMap, right.dualKeyMap);
+    const result = $DualKeyMap.groupJoinDualKeyMap(left.dualKeyMap, right.dualKeyMap);
     return new CustomDualKeyMap({ ...left, sourceMap: result });
 };
