@@ -25,8 +25,9 @@ import { isIdRecord, record } from '../util/record';
 import { CompositeKey, compositeKey } from '../compositeKey/v1';
 import { Result } from '@kizahasi/result';
 import { ApplyError, PositiveInt, ComposeAndTransformError } from '@kizahasi/ot-string';
-import { chooseRecord, isStrIndex20, isStrIndex5 } from '@kizahasi/util';
+import { chooseRecord } from '@kizahasi/util';
 import { Maybe, maybe } from '../../maybe';
+import { isStrIndex20, isStrIndex5 } from '../../indexes';
 
 const replaceStringDownOperation = t.type({ oldValue: t.string });
 const replaceStringUpOperation = t.type({ newValue: t.string });

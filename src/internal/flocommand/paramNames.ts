@@ -9,7 +9,7 @@ import {
     OnGettingParams,
     ScriptError,
 } from '@kizahasi/flocon-script';
-import { isStrIndex20 } from '@kizahasi/util';
+import { isStrIndex20 } from '../indexes';
 import * as ParamName from '../ot/room/paramName/v1';
 import * as Room from '../ot/room/v1';
 

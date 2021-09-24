@@ -8,10 +8,10 @@ import {
     OnGettingParams,
     ScriptError,
 } from '@kizahasi/flocon-script';
-import { isStrIndex5 } from '@kizahasi/util';
 import * as Room from '../ot/room/v1';
 import * as Bgm from '../ot/room/bgm/v1';
 import { FBgm } from './bgm';
+import { isStrIndex5 } from '../indexes';
 
 export class FBgms extends FObject {
     public constructor(private readonly room: Room.State) {

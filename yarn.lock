@@ -763,6 +763,13 @@
   resolved "https://registry.yarnpkg.com/@kizahasi/util/-/util-0.8.1.tgz#f67d684c63a00360f4c4d469c94a0df527fc84f1"
   integrity sha512-xK9pEuTH7ZSdCNKXVytTsAfMpna1EcgyicbVq3Vz35rNeMZ7LQYJUGyKbSNk+rbejNeV1NIWfBvyKiQD1i1vIw==
 
+"@kizahasi/util@^0.9.1":
+  version "0.9.1"
+  resolved "https://registry.yarnpkg.com/@kizahasi/util/-/util-0.9.1.tgz#9c19eac7d5554898b1bc5e79edd13fb3f1b491ef"
+  integrity sha512-O4+hCuQDebTIK3ffSJ5pQFZd8rLDjTjzsjL3iZZDdlJyZ6NZ5Mok9iP5AwhWndet4pJA5PxADuIKF5VQrFvI9g==
+  dependencies:
+    "@kizahasi/option" "^1.0.0"
+
 "@ltd/j-toml@^1.12.2":
   version "1.15.0"
   resolved "https://registry.yarnpkg.com/@ltd/j-toml/-/j-toml-1.15.0.tgz#daf85359b945547582e0082affd6781b03cb829f"
