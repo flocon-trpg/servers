@@ -41,7 +41,6 @@ export { left, right, both } from './internal/types';
 export {
     chooseDualKeyRecord,
     chooseRecord,
-    dualKeyRecordFind,
     dualKeyRecordForEach,
     isRecordEmpty,
     mapDualKeyRecord,
@@ -50,7 +49,6 @@ export {
     recordForEach,
     recordForEachAsync,
     recordToArray,
-    recordToDualKeyMap,
     dualKeyRecordToDualKeyMap,
     recordToMap,
 } from './internal/utils';
