@@ -730,14 +730,14 @@
     "@types/yargs" "^16.0.0"
     chalk "^4.0.0"
 
-"@kizahasi/flocon-script@^0.7.0":
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/@kizahasi/flocon-script/-/flocon-script-0.7.0.tgz#f76db6e9010d3d87987ca58a28da433241cad139"
-  integrity sha512-l1rj9TcRhNLpCHRCpl1nqYAj9vYkKhpNbs/gRo7yLb6z7egoYfsnIeOnGqOrmwWJS9uIgcGKYhVkrc5STJlpyQ==
+"@kizahasi/flocon-script@^0.7.1":
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/@kizahasi/flocon-script/-/flocon-script-0.7.1.tgz#50c0acf46627e065a6eb58d81accb62b234f3662"
+  integrity sha512-l4JO6gON7L+hGUyUc0Aq8/vlhyNfhCh7LBPKJYGb8kwLzIKHb/UlfjusR1GE4Hz4J9kWZtiUZ1fRsn+NBXixLw==
   dependencies:
     "@kizahasi/option" "^1.0.0"
-    "@kizahasi/util" "^0.8.0"
-    acorn "^8.4.1"
+    "@kizahasi/util" "^0.9.1"
+    acorn "^8.5.0"
 
 "@kizahasi/option@^1.0.0":
   version "1.0.0"
@@ -757,11 +757,6 @@
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@kizahasi/result/-/result-1.0.0.tgz#702660f8f0a5c67a91b737c7aea319448c3dd54c"
   integrity sha512-od5eGg6fe2lLmh6+HDKt2qXe9EKn1UZ1EWdT+O5JOT6asl8IHhvGxIpLdN9q7PcQJdzck8lc6ea18aZYWD1FyQ==
-
-"@kizahasi/util@^0.8.0":
-  version "0.8.1"
-  resolved "https://registry.yarnpkg.com/@kizahasi/util/-/util-0.8.1.tgz#f67d684c63a00360f4c4d469c94a0df527fc84f1"
-  integrity sha512-xK9pEuTH7ZSdCNKXVytTsAfMpna1EcgyicbVq3Vz35rNeMZ7LQYJUGyKbSNk+rbejNeV1NIWfBvyKiQD1i1vIw==
 
 "@kizahasi/util@^0.9.1":
   version "0.9.1"
@@ -1046,10 +1041,10 @@ acorn@^8.2.4:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.2.4.tgz#caba24b08185c3b56e3168e97d15ed17f4d31fd0"
   integrity sha512-Ibt84YwBDDA890eDiDCEqcbwvHlBvzzDkU2cGBBDDI1QWT12jTiXIOn2CIw5KK4i6N5Z2HUxwYjzriDyqaqqZg==
 
-acorn@^8.4.1:
-  version "8.4.1"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.4.1.tgz#56c36251fc7cabc7096adc18f05afe814321a28c"
-  integrity sha512-asabaBSkEKosYKMITunzX177CXxQ4Q8BSSzMTKD+FefUhipQC70gfW5SiUDhYQ3vk8G+81HqQk7Fv9OXwwn9KA==
+acorn@^8.5.0:
+  version "8.5.0"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.5.0.tgz#4512ccb99b3698c752591e9bb4472e38ad43cee2"
+  integrity sha512-yXbYeFy+jUuYd3/CDcg2NkIYE991XYX/bje7LmjJigUciaeO1JR4XxXgCIV1/Zc/dRuFEyw1L0pbA+qynJkW5Q==
 
 agent-base@6:
   version "6.0.2"
