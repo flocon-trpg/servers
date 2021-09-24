@@ -1,7 +1,7 @@
 import { Result } from '@kizahasi/result';
 import fc from 'fast-check';
 import { getArbitrary } from 'fast-check-io-ts';
-import * as Room from '../src/internal/ot/room/v1';
+import * as Room from '../src/internal/ot/room/functions';
 import { normalizeRoomState } from './normalizeRoomState';
 
 const TEST_NUM_RUNS = process.env.TEST_NUM_RUNS;

@@ -1,5 +1,5 @@
 import * as t from 'io-ts';
-import * as Room from './v1';
+import * as Room from './types';
 
 export const parseState = (source: string): Room.State => {
     const result = t.exact(Room.state).decode(JSON.parse(source));
