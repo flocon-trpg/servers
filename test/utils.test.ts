@@ -256,11 +256,11 @@ describe('dualKeyRecordToDualKeyMap', () => {
 
 describe('recordForEach', () => {
     it('tests {}', () => {
-        let execCount = 0;
+        let loopCount = 0;
         recordForEach({}, () => {
-            execCount++;
+            loopCount++;
         });
-        expect(execCount).toBe(0);
+        expect(loopCount).toBe(0);
     });
 
     it('tests non-empty Record', () => {
@@ -274,11 +274,11 @@ describe('recordForEach', () => {
 
 describe('recordForEachAsync', () => {
     it('tests {}', async () => {
-        let execCount = 0;
+        let loopCount = 0;
         await recordForEachAsync({}, async () => {
-            execCount++;
+            loopCount++;
         });
-        expect(execCount).toBe(0);
+        expect(loopCount).toBe(0);
     });
 
     it('tests non-empty Record', async () => {
@@ -301,11 +301,11 @@ it.each([
 
 describe('dualKeyRecordForEach', () => {
     it('tests {}', () => {
-        let execCount = 0;
+        let loopCount = 0;
         dualKeyRecordForEach({}, () => {
-            execCount++;
+            loopCount++;
         });
-        expect(execCount).toBe(0);
+        expect(loopCount).toBe(0);
     });
 
     it('tests non-empty Record', () => {
