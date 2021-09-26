@@ -242,26 +242,26 @@ export {
 
 export {
     apply as applyNumberPieceValue,
-    diff as numberPieceValueDiff,
-    toUpOperation as toNumberPieceValueUpOperation,
-} from './internal/ot/room/participant/character/numberPieceValue/functions';
+    diff as stringPieceValueDiff,
+    toUpOperation as toStringPieceValueUpOperation,
+} from './internal/ot/room/participant/character/stringPieceValue/functions';
 
 export {
-    State as NumberPieceValueState,
-    UpOperation as NumberPieceValueUpOperation,
-    DownOperation as NumberPieceValueDownOperation,
-} from './internal/ot/room/participant/character/numberPieceValue/types';
+    State as StringPieceValueState,
+    UpOperation as StringPieceValueUpOperation,
+    DownOperation as StringPieceValueDownOperation,
+} from './internal/ot/room/participant/character/stringPieceValue/types';
 
 export {
-    decode as decodeNumberPieceValue,
-    parse as parseNumberPieceValue,
-    exact as exactNumberPieceValue,
-} from './internal/ot/room/participant/character/numberPieceValue/converter';
+    decode as decodeStringPieceValue,
+    parse as parseStringPieceValue,
+    exact as exactStringPieceValue,
+} from './internal/ot/room/participant/character/stringPieceValue/converter';
 
 export {
-    type as numberPieceValueLog,
-    Type as NumberPieceValueLog,
-} from './internal/ot/room/participant/character/numberPieceValue/log';
+    type as stringPieceValueLog,
+    Type as StringPieceValueLog,
+} from './internal/ot/room/participant/character/stringPieceValue/log';
 
 export {
     State as MemoState,
