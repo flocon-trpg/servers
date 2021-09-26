@@ -29,6 +29,7 @@ import {
     toTypeName,
     FArray,
 } from './scriptValue';
+import { toJObject } from './utils/toJObject';
 
 function ofFLiteral(literal: FLiteral): FBoolean | FNumber | FString | null {
     if (literal.value == null) {
@@ -398,7 +399,7 @@ function ofFStatement(statement: FStatement, context: Context): FStatementResult
         }
         case 'IfStatement': {
             const test = ofFExpression(statement.test, context);
-            if (test?.toJObject()) {
+            if (toJObject(test)) {
                 return ofFStatement(statement.consequent, context);
             }
             if (statement.alternate == null) {
