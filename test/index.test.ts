@@ -140,6 +140,25 @@ a;
     expect(actual.getGlobalThis()).toEqual({ ...globalThis, a: 1 });
 });
 
+describe('if', () => {
+    test.each([true, false])('if-else', bool => {
+        const actual = exec(
+            `
+let result = 0;
+let x = ${bool ? 'true' : 'false'}
+if (x) {
+    result = 1;
+} else {
+    result = 2;
+}
+result;
+        `,
+            {}
+        );
+        expect(actual.result).toBe(bool ? 1 : 2);
+    });
+});
+
 describe('Array', () => {
     test('isArray', () => {
         const actual = exec(
