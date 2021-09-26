@@ -2,6 +2,7 @@ import { Result } from '@kizahasi/result';
 import fc from 'fast-check';
 import { getArbitrary } from 'fast-check-io-ts';
 import * as Room from '../src/internal/ot/room/functions';
+import * as RoomTypes from '../src/internal/ot/room/types';
 import { normalizeRoomState } from './normalizeRoomState';
 
 const TEST_NUM_RUNS = process.env.TEST_NUM_RUNS;
@@ -19,7 +20,7 @@ if (TEST_NUM_RUNS == null) {
 
 console.log(`numRuns: ${numRuns}`);
 
-const expectRoomStateToEqual = (actual: Room.State, expected: Room.State) => {
+const expectRoomStateToEqual = (actual: RoomTypes.State, expected: RoomTypes.State) => {
     expect({
         ...normalizeRoomState(actual),
         createdBy: undefined,
@@ -32,7 +33,7 @@ const expectRoomStateToEqual = (actual: Room.State, expected: Room.State) => {
 // fc.preで弾かれるパターンをテストしている
 it.concurrent('tests id diff', () => {
     fc.assert(
-        fc.property(getArbitrary(Room.state), state => {
+        fc.property(getArbitrary(RoomTypes.state), state => {
             const diff = Room.diff({ prevState: state, nextState: state });
             expect(diff).toBeUndefined();
         }),
@@ -42,42 +43,50 @@ it.concurrent('tests id diff', () => {
 
 it.concurrent('tests Room.apply', () => {
     fc.assert(
-        fc.property(getArbitrary(Room.state), getArbitrary(Room.state), (prevState, nextState) => {
-            const diff = Room.diff({ prevState, nextState });
-            if (diff == null) {
-                fc.pre(false);
-                return;
+        fc.property(
+            getArbitrary(RoomTypes.state),
+            getArbitrary(RoomTypes.state),
+            (prevState, nextState) => {
+                const diff = Room.diff({ prevState, nextState });
+                if (diff == null) {
+                    fc.pre(false);
+                    return;
+                }
+                const actualNextState = Room.apply({
+                    state: prevState,
+                    operation: Room.toUpOperation(diff),
+                });
+                if (actualNextState.isError) {
+                    throw actualNextState.error;
+                }
+                expectRoomStateToEqual(actualNextState.value, nextState);
             }
-            const actualNextState = Room.apply({
-                state: prevState,
-                operation: Room.toUpOperation(diff),
-            });
-            if (actualNextState.isError) {
-                throw actualNextState.error;
-            }
-            expectRoomStateToEqual(actualNextState.value, nextState);
-        }),
+        ),
         { numRuns }
     );
 });
 
 it.concurrent('tests Room.applyBack', () => {
     fc.assert(
-        fc.property(getArbitrary(Room.state), getArbitrary(Room.state), (prevState, nextState) => {
-            const diff = Room.diff({ prevState, nextState });
-            if (diff == null) {
-                fc.pre(false);
-                return;
+        fc.property(
+            getArbitrary(RoomTypes.state),
+            getArbitrary(RoomTypes.state),
+            (prevState, nextState) => {
+                const diff = Room.diff({ prevState, nextState });
+                if (diff == null) {
+                    fc.pre(false);
+                    return;
+                }
+                const actualPrevState = Room.applyBack({
+                    state: nextState,
+                    operation: Room.toDownOperation(diff),
+                });
+                if (actualPrevState.isError) {
+                    throw actualPrevState.error;
+                }
+                expectRoomStateToEqual(actualPrevState.value, prevState);
             }
-            const actualPrevState = Room.applyBack({
-                state: nextState,
-                operation: Room.toDownOperation(diff),
-            });
-            if (actualPrevState.isError) {
-                throw actualPrevState.error;
-            }
-            expectRoomStateToEqual(actualPrevState.value, prevState);
-        }),
+        ),
         { numRuns }
     );
 });
@@ -85,9 +94,9 @@ it.concurrent('tests Room.applyBack', () => {
 it.concurrent('tests Room.composeDownOperation', () => {
     fc.assert(
         fc.property(
-            getArbitrary(Room.state),
-            getArbitrary(Room.state),
-            getArbitrary(Room.state),
+            getArbitrary(RoomTypes.state),
+            getArbitrary(RoomTypes.state),
+            getArbitrary(RoomTypes.state),
             (state1, state2, state3) => {
                 const diff1 = Room.diff({ prevState: state1, nextState: state2 });
                 const diff2 = Room.diff({ prevState: state2, nextState: state3 });
@@ -129,47 +138,54 @@ it.concurrent('tests Room.composeDownOperation', () => {
 
 it.concurrent('tests Room.restore', () => {
     fc.assert(
-        fc.property(getArbitrary(Room.state), getArbitrary(Room.state), (prevState, nextState) => {
-            const diff = Room.diff({ prevState, nextState });
-            if (diff == null) {
-                fc.pre(false);
-                return;
-            }
-            const actual = Room.restore({
-                nextState,
-                downOperation: Room.toDownOperation(diff),
-            });
+        fc.property(
+            getArbitrary(RoomTypes.state),
+            getArbitrary(RoomTypes.state),
+            (prevState, nextState) => {
+                const diff = Room.diff({ prevState, nextState });
+                if (diff == null) {
+                    fc.pre(false);
+                    return;
+                }
+                const actual = Room.restore({
+                    nextState,
+                    downOperation: Room.toDownOperation(diff),
+                });
 
-            if (actual.isError) {
-                // 例えばstrParamなどのキャラクターのパラメーターは、nextStateになったときに削除されることはありえず、Errorとなる。そのようなケースをここで弾いている。
-                fc.pre(false);
-                throw actual.error;
-            }
+                if (actual.isError) {
+                    // 例えばstrParamなどのキャラクターのパラメーターは、nextStateになったときに削除されることはありえず、Errorとなる。そのようなケースをここで弾いている。
+                    fc.pre(false);
+                    throw actual.error;
+                }
 
-            expectRoomStateToEqual(actual.value.prevState, prevState);
+                expectRoomStateToEqual(actual.value.prevState, prevState);
 
-            if (actual.value.twoWayOperation == null) {
-                expectRoomStateToEqual(prevState, nextState);
-                return;
-            }
+                if (actual.value.twoWayOperation == null) {
+                    expectRoomStateToEqual(prevState, nextState);
+                    return;
+                }
 
-            const actualUpOperation = Room.toUpOperation(actual.value.twoWayOperation);
-            const actualNextState = Room.apply({ state: prevState, operation: actualUpOperation });
-            if (actualNextState.isError) {
-                throw actualNextState.error;
-            }
-            expectRoomStateToEqual(Result.get(actualNextState), nextState);
+                const actualUpOperation = Room.toUpOperation(actual.value.twoWayOperation);
+                const actualNextState = Room.apply({
+                    state: prevState,
+                    operation: actualUpOperation,
+                });
+                if (actualNextState.isError) {
+                    throw actualNextState.error;
+                }
+                expectRoomStateToEqual(Result.get(actualNextState), nextState);
 
-            const actualDownOperation = Room.toDownOperation(actual.value.twoWayOperation);
-            const actualPrevState = Room.applyBack({
-                state: nextState,
-                operation: actualDownOperation,
-            });
-            if (actualPrevState.isError) {
-                throw actualPrevState.error;
+                const actualDownOperation = Room.toDownOperation(actual.value.twoWayOperation);
+                const actualPrevState = Room.applyBack({
+                    state: nextState,
+                    operation: actualDownOperation,
+                });
+                if (actualPrevState.isError) {
+                    throw actualPrevState.error;
+                }
+                expectRoomStateToEqual(Result.get(actualPrevState), prevState);
             }
-            expectRoomStateToEqual(Result.get(actualPrevState), prevState);
-        }),
+        ),
         { numRuns }
     );
 });
@@ -177,9 +193,9 @@ it.concurrent('tests Room.restore', () => {
 it.concurrent('tests Room.clientTransform', () => {
     fc.assert(
         fc.property(
-            getArbitrary(Room.state),
-            getArbitrary(Room.state),
-            getArbitrary(Room.state),
+            getArbitrary(RoomTypes.state),
+            getArbitrary(RoomTypes.state),
+            getArbitrary(RoomTypes.state),
             (rootState, nextState1, nextState2) => {
                 const twoWayFirst = Room.diff({ prevState: rootState, nextState: nextState1 });
                 const twoWaySecond = Room.diff({ prevState: rootState, nextState: nextState2 });
