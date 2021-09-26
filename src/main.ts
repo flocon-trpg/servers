@@ -409,10 +409,20 @@ function ofFStatement(statement: FStatement, context: Context): FStatementResult
         }
         case 'SwitchStatement': {
             const discriminant = ofFExpression(statement.discriminant, context);
+            let caseMatched = false;
             for (const $case of statement.cases) {
-                if ($case.test != null && discriminant !== ofFExpression($case.test, context)) {
+                if (
+                    $case.test == null || // default:のときは$case.test==nullとなる
+                    toJObject(discriminant) === toJObject(ofFExpression($case.test, context))
+                ) {
+                    caseMatched = true;
+                }
+
+                // caseにどれか1つでもマッチしたら、breakなどがない限りはそれ以降のcaseもすべてマッチする扱いとなる。いわゆるフォールスルー。
+                if (!caseMatched) {
                     continue;
                 }
+
                 for (const consequent of $case.consequent) {
                     if (consequent.type === 'ReturnStatement') {
                         return {
@@ -432,10 +442,7 @@ function ofFStatement(statement: FStatement, context: Context): FStatementResult
                         };
                     }
                     if (consequent.type === 'BreakStatement') {
-                        if (consequent.label != null) {
-                            throw new Error('continue label not supported');
-                        }
-                        break;
+                        return { type: 'end', value: undefined };
                     }
                     ofFStatement(consequent, context);
                 }
