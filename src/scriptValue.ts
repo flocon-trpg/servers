@@ -410,6 +410,15 @@ export class FArray implements FObjectBase {
                     );
                     return FArray.createCloned(raw);
                 });
+            case 'map':
+                return new FFunction(({ args, isNew }) => {
+                    FArray.prepareInstanceMethod(isNew, astInfo);
+                    const mapping = beginCast(args[0]).addFunction().cast(astInfo?.range)(false);
+                    const raw = this.iterate().map((value, index) =>
+                        mapping([value, new FNumber(index)])
+                    );
+                    return FArray.createCloned(raw);
+                });
             case 'push':
                 return new FFunction(({ args, isNew }) => {
                     FArray.prepareInstanceMethod(isNew, astInfo);
