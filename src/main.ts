@@ -398,7 +398,7 @@ function ofFStatement(statement: FStatement, context: Context): FStatementResult
         }
         case 'IfStatement': {
             const test = ofFExpression(statement.test, context);
-            if (test) {
+            if (test?.toJObject()) {
                 return ofFStatement(statement.consequent, context);
             }
             if (statement.alternate == null) {
