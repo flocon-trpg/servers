@@ -160,6 +160,16 @@ test('Array.filter', () => {
     expect(actual.result).toEqual([3, 4]);
 });
 
+test('Array.map', () => {
+    const actual = exec(
+        `
+[1,2].map(i => i * 2);
+        `,
+        {}
+    );
+    expect(actual.result).toEqual([2, 4]);
+});
+
 test('Array.push', () => {
     const actual = exec(
         `
