@@ -149,3 +149,25 @@ Array.isArray([1,2]);
     );
     expect(actual.result).toBe(true);
 });
+
+test('Array.filter', () => {
+    const actual = exec(
+        `
+[1,2,3,4].filter(i => i >= 3);
+        `,
+        {}
+    );
+    expect(actual.result).toEqual([3, 4]);
+});
+
+test('Array.push', () => {
+    const actual = exec(
+        `
+let result = [1,2];
+result.push(3);
+result;
+        `,
+        {}
+    );
+    expect(actual.result).toEqual([1, 2, 3]);
+});

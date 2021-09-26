@@ -357,7 +357,6 @@ export class FString implements FObjectBase {
     }
 }
 
-// unknownをジェネリック化して、FArray<T>のようにすることは困難。なぜならば、sandboxにおけるthisの指す値が配列であってもFArray<T>にキャストできないため。
 export class FArray implements FObjectBase {
     protected constructor(
         private readonly source: unknown[],
