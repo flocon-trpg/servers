@@ -26,7 +26,7 @@ const participantRole = t.union([t.literal(Player), t.literal(Spectator), t.lite
 export type ParticipantRole = t.TypeOf<typeof participantRole>;
 
 export const dbState = t.type({
-    $v: t.literal(1),
+    $v: t.literal(2),
 
     boards: record(t.string, Board.state),
     characters: record(t.string, Character.state),
@@ -34,6 +34,16 @@ export const dbState = t.type({
 });
 
 export type DbState = t.TypeOf<typeof dbState>;
+
+export const dbStateV1 = t.type({
+    $v: t.literal(1),
+
+    boards: record(t.string, Board.state),
+    characters: record(t.string, Character.stateV1),
+    imagePieceValues: record(t.string, ImagePieceValue.state),
+});
+
+export type DbStateV1 = t.TypeOf<typeof dbStateV1>;
 
 export const state = t.intersection([
     dbState,
@@ -45,42 +55,80 @@ export const state = t.intersection([
 
 export type State = t.TypeOf<typeof state>;
 
-export const downOperation = createOperation(1, {
+export const stateV1 = t.intersection([
+    dbStateV1,
+    t.type({
+        name: maybe(t.string),
+        role: maybe(participantRole),
+    }),
+]);
+
+export type StateV1 = t.TypeOf<typeof stateV1>;
+
+const downOperationBase = {
     name: t.type({ oldValue: maybe(t.string) }),
     role: t.type({ oldValue: maybe(participantRole) }),
 
     boards: record(t.string, recordDownOperationElementFactory(Board.state, Board.downOperation)),
-    characters: record(
-        t.string,
-        recordDownOperationElementFactory(Character.state, Character.downOperation)
-    ),
     imagePieceValues: record(
         t.string,
         recordDownOperationElementFactory(ImagePieceValue.state, ImagePieceValue.downOperation)
+    ),
+};
+
+export const downOperation = createOperation(2, {
+    ...downOperationBase,
+    characters: record(
+        t.string,
+        recordDownOperationElementFactory(Character.state, Character.downOperation)
     ),
 });
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
-export const upOperation = createOperation(1, {
+export const downOperationV1 = createOperation(1, {
+    ...downOperationBase,
+    characters: record(
+        t.string,
+        recordDownOperationElementFactory(Character.state, Character.downOperationV1)
+    ),
+});
+
+export type DownOperationV1 = t.TypeOf<typeof downOperationV1>;
+
+const upOperationBase = {
     name: t.type({ newValue: maybe(t.string) }),
     role: t.type({ newValue: maybe(participantRole) }),
 
     boards: record(t.string, recordUpOperationElementFactory(Board.state, Board.upOperation)),
-    characters: record(
-        t.string,
-        recordUpOperationElementFactory(Character.state, Character.upOperation)
-    ),
     imagePieceValues: record(
         t.string,
         recordUpOperationElementFactory(ImagePieceValue.state, ImagePieceValue.upOperation)
+    ),
+};
+
+export const upOperation = createOperation(2, {
+    ...upOperationBase,
+    characters: record(
+        t.string,
+        recordUpOperationElementFactory(Character.state, Character.upOperation)
     ),
 });
 
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
+export const upOperationV1 = createOperation(1, {
+    ...upOperationBase,
+    characters: record(
+        t.string,
+        recordUpOperationElementFactory(Character.state, Character.upOperationV1)
+    ),
+});
+
+export type UpOperationV1 = t.TypeOf<typeof upOperationV1>;
+
 export type TwoWayOperation = {
-    $v: 1;
+    $v: 2;
 
     name?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<string>>;
     role?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<ParticipantRole>>;

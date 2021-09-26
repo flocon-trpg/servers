@@ -77,7 +77,10 @@ export type RecordTwoWayOperationElement<TState, TOperation> =
           update: TOperation;
       };
 
-export const mapRecordOperationElement = <TReplace1, TReplace2, TOperation1, TOperation2>({
+/**
+ * @deprecated Consider using map(Dual)?KeyRecord(Up|Down)?Operation
+ */
+export const mapRecordOperationElement = <TReplace1, TReplace2, TUpdate1, TUpdate2>({
     source,
     mapOperation,
     mapReplace,
@@ -89,10 +92,10 @@ export const mapRecordOperationElement = <TReplace1, TReplace2, TOperation1, TOp
           }
         | {
               type: typeof update;
-              update: TOperation1;
+              update: TUpdate1;
           };
     mapReplace: (replace: TReplace1) => TReplace2;
-    mapOperation: (operation: TOperation1) => TOperation2;
+    mapOperation: (operation: TUpdate1) => TUpdate2;
 }):
     | {
           type: typeof replace;
@@ -100,7 +103,7 @@ export const mapRecordOperationElement = <TReplace1, TReplace2, TOperation1, TOp
       }
     | {
           type: typeof update;
-          update: TOperation2;
+          update: TUpdate2;
       } => {
     if (source.type === replace) {
         return {

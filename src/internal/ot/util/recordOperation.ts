@@ -8,6 +8,8 @@ import {
     RecordTwoWayOperationElement,
     recordUpOperationElementFactory,
     RecordUpOperationElement,
+    replace,
+    update,
 } from './recordOperationElement';
 
 export type RecordDownOperation<TState, TOperation> = StringKeyRecord<
@@ -363,4 +365,74 @@ export const diff = <TState, TOperation>({
         return undefined;
     }
     return dualKeyResult[fakeKey];
+};
+
+const dummyKey = 'dummyKey';
+
+export const mapRecordUpOperation = <TState1, TState2, TOperation1, TOperation2>({
+    source,
+    mapState,
+    mapOperation,
+}: {
+    source: Record<string, RecordUpOperationElement<TState1, TOperation1> | undefined>;
+    mapState: (state: TState1) => TState2;
+    mapOperation: (state: TOperation1) => TOperation2;
+}): Record<string, RecordUpOperationElement<TState2, TOperation2>> => {
+    const result = DualKeyRecordOperation.mapDualKeyRecordUpOperation({
+        source: { [dummyKey]: source },
+        mapState,
+        mapOperation,
+    })[dummyKey];
+    if (result == null) {
+        throw new Error('this should not happen');
+    }
+    return result;
+};
+
+export const mapRecordDownOperation = <TState1, TState2, TOperation1, TOperation2>({
+    source,
+    mapState,
+    mapOperation,
+}: {
+    source: Record<string, RecordDownOperationElement<TState1, TOperation1> | undefined>;
+    mapState: (state: TState1) => TState2;
+    mapOperation: (state: TOperation1) => TOperation2;
+}): Record<string, RecordDownOperationElement<TState2, TOperation2>> => {
+    const result = DualKeyRecordOperation.mapDualKeyRecordDownOperation({
+        source: { [dummyKey]: source },
+        mapState,
+        mapOperation,
+    })[dummyKey];
+    if (result == null) {
+        throw new Error('this should not happen');
+    }
+    return result;
+};
+
+export const mapRecordOperation = <TReplace1, TReplace2, TUpdate1, TUpdate2>({
+    source,
+    mapReplace,
+    mapUpdate,
+}: {
+    source: Record<
+        string,
+        | { type: typeof replace; replace: TReplace1 }
+        | { type: typeof update; update: TUpdate1 }
+        | undefined
+    >;
+    mapReplace: (state: TReplace1) => TReplace2;
+    mapUpdate: (state: TUpdate1) => TUpdate2;
+}): Record<
+    string,
+    { type: typeof replace; replace: TReplace2 } | { type: typeof update; update: TUpdate2 }
+> => {
+    const result = DualKeyRecordOperation.mapDualKeyRecordOperation({
+        source: { [dummyKey]: source },
+        mapReplace,
+        mapUpdate,
+    })[dummyKey];
+    if (result == null) {
+        throw new Error('this should not happen');
+    }
+    return result;
 };

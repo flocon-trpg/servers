@@ -8,8 +8,8 @@ import { CompositeKey } from '../compositeKey/types';
 import { recordForEach, dualKeyRecordForEach } from '@kizahasi/util';
 import * as DicePieceValue from './participant/character/dicePieceValue/functions';
 import * as DicePieceValueLog from './participant/character/dicePieceValue/log';
-import * as NumberPieceValue from './participant/character/numberPieceValue/functions';
-import * as NumberPieceValueLog from './participant/character/numberPieceValue/log';
+import * as StringPieceValue from './participant/character/stringPieceValue/functions';
+import * as StringPieceValueLog from './participant/character/stringPieceValue/log';
 import { createType, deleteType } from '../piece/log';
 
 type DicePieceValueLogType = {
@@ -18,10 +18,10 @@ type DicePieceValueLogType = {
     value: DicePieceValueLog.Type;
 };
 
-type NumberPieceValueLogType = {
+type StringPieceValueLogType = {
     characterKey: CompositeKey;
     stateId: string;
-    value: NumberPieceValueLog.Type;
+    value: StringPieceValueLog.Type;
 };
 
 const charactersAsDualKeyRecord = (room: RoomTypes.State) => {
@@ -52,7 +52,7 @@ export const createLogs = ({
     }
 
     const dicePieceValueLogs: DicePieceValueLogType[] = [];
-    const numberPieceValueLogs: NumberPieceValueLogType[] = [];
+    const stringPieceValueLogs: StringPieceValueLogType[] = [];
 
     dualKeyRecordForEach<
         RecordTwoWayOperationElement<CharacterTypes.State, CharacterTypes.TwoWayOperation>
@@ -86,14 +86,14 @@ export const createLogs = ({
                 });
             });
 
-            recordForEach(diff.replace.oldValue?.numberPieceValues ?? {}, (value, stateId) => {
-                numberPieceValueLogs.push({
+            recordForEach(diff.replace.oldValue?.stringPieceValues ?? {}, (value, stateId) => {
+                stringPieceValueLogs.push({
                     characterKey,
                     stateId,
                     value: {
                         $v: 1,
                         type: deleteType,
-                        value: NumberPieceValue.toClientState(
+                        value: StringPieceValue.toClientState(
                             false,
                             { type: restrict },
                             null
@@ -101,14 +101,14 @@ export const createLogs = ({
                     },
                 });
             });
-            recordForEach(diff.replace.newValue?.numberPieceValues ?? {}, (value, stateId) => {
-                numberPieceValueLogs.push({
+            recordForEach(diff.replace.newValue?.stringPieceValues ?? {}, (value, stateId) => {
+                stringPieceValueLogs.push({
                     characterKey,
                     stateId,
                     value: {
                         $v: 1,
                         type: createType,
-                        value: NumberPieceValue.toClientState(
+                        value: StringPieceValue.toClientState(
                             false,
                             { type: restrict },
                             null
@@ -173,16 +173,16 @@ export const createLogs = ({
             });
         });
 
-        recordForEach(diff.update.numberPieceValues ?? {}, (operation, stateId) => {
+        recordForEach(diff.update.stringPieceValues ?? {}, (operation, stateId) => {
             if (operation.type === replace) {
                 if (operation.replace.oldValue != null) {
-                    numberPieceValueLogs.push({
+                    stringPieceValueLogs.push({
                         characterKey,
                         stateId,
                         value: {
                             $v: 1,
                             type: deleteType,
-                            value: NumberPieceValue.toClientState(
+                            value: StringPieceValue.toClientState(
                                 false,
                                 { type: restrict },
                                 null
@@ -191,13 +191,13 @@ export const createLogs = ({
                     });
                 }
                 if (operation.replace.newValue != null) {
-                    numberPieceValueLogs.push({
+                    stringPieceValueLogs.push({
                         characterKey,
                         stateId,
                         value: {
                             $v: 1,
                             type: createType,
-                            value: NumberPieceValue.toClientState(
+                            value: StringPieceValue.toClientState(
                                 false,
                                 { type: restrict },
                                 null
@@ -209,20 +209,20 @@ export const createLogs = ({
                 return;
             }
 
-            const nextNumberPieceValue = nextCharacter.numberPieceValues[stateId];
-            if (nextNumberPieceValue == null) {
+            const nextStringPieceValue = nextCharacter.stringPieceValues[stateId];
+            if (nextStringPieceValue == null) {
                 throw new Error('this should not happen');
             }
-            numberPieceValueLogs.push({
+            stringPieceValueLogs.push({
                 characterKey,
                 stateId,
-                value: NumberPieceValueLog.ofOperation(operation.update, nextNumberPieceValue),
+                value: StringPieceValueLog.ofOperation(operation.update, nextStringPieceValue),
             });
         });
     });
 
     return {
         dicePieceValueLogs,
-        numberPieceValueLogs,
+        stringPieceValueLogs,
     };
 };

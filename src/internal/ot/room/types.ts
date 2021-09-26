@@ -18,8 +18,6 @@ const replaceStringDownOperation = t.type({ oldValue: t.string });
 const replaceStringUpOperation = t.type({ newValue: t.string });
 
 export const stateBase = t.type({
-    $v: t.literal(1),
-
     activeBoardKey: maybe(compositeKey),
     bgms: record(t.string, Bgm.state), // keyはStrIndex5
     boolParamNames: record(t.string, ParamNames.state), //keyはStrIndex20
@@ -41,15 +39,27 @@ export const stateBase = t.type({
 export const dbState = t.intersection([
     stateBase,
     t.type({
+        $v: t.literal(2),
         participants: record(t.string, Participant.dbState),
     }),
 ]);
 
 export type DbState = t.TypeOf<typeof dbState>;
 
+export const dbStateV1 = t.intersection([
+    stateBase,
+    t.type({
+        $v: t.literal(1),
+        participants: record(t.string, Participant.dbStateV1),
+    }),
+]);
+
+export type DbStateV1 = t.TypeOf<typeof dbStateV1>;
+
 export const state = t.intersection([
     stateBase,
     t.type({
+        $v: t.literal(2),
         createdBy: t.string,
         name: t.string,
         participants: record(t.string, Participant.state),
@@ -59,7 +69,20 @@ export const state = t.intersection([
 // nameはDBから頻繁に取得されると思われる値なので独立させている。
 export type State = t.TypeOf<typeof state>;
 
-export const downOperation = createOperation(1, {
+export const stateV1 = t.intersection([
+    stateBase,
+    t.type({
+        $v: t.literal(1),
+        createdBy: t.string,
+        name: t.string,
+        participants: record(t.string, Participant.stateV1),
+    }),
+]);
+
+// nameはDBから頻繁に取得されると思われる値なので独立させている。
+export type StateV1 = t.TypeOf<typeof stateV1>;
+
+const downOperationBase = {
     activeBoardKey: t.type({ oldValue: maybe(compositeKey) }),
     bgms: record(t.string, recordDownOperationElementFactory(Bgm.state, Bgm.downOperation)),
     boolParamNames: record(
@@ -71,10 +94,6 @@ export const downOperation = createOperation(1, {
     numParamNames: record(
         t.string,
         recordDownOperationElementFactory(ParamNames.state, ParamNames.downOperation)
-    ),
-    participants: record(
-        t.string,
-        recordDownOperationElementFactory(Participant.state, Participant.downOperation)
     ),
     publicChannel1Name: replaceStringDownOperation,
     publicChannel2Name: replaceStringDownOperation,
@@ -90,11 +109,29 @@ export const downOperation = createOperation(1, {
         t.string,
         recordDownOperationElementFactory(ParamNames.state, ParamNames.downOperation)
     ),
+};
+
+export const downOperation = createOperation(2, {
+    ...downOperationBase,
+    participants: record(
+        t.string,
+        recordDownOperationElementFactory(Participant.state, Participant.downOperation)
+    ),
 });
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
-export const upOperation = createOperation(1, {
+export const downOperationV1 = createOperation(1, {
+    ...downOperationBase,
+    participants: record(
+        t.string,
+        recordDownOperationElementFactory(Participant.stateV1, Participant.downOperationV1)
+    ),
+});
+
+export type DownOperationV1 = t.TypeOf<typeof downOperationV1>;
+
+const upOperationBase = {
     activeBoardKey: t.type({ newValue: maybe(compositeKey) }),
     bgms: record(t.string, recordUpOperationElementFactory(Bgm.state, Bgm.upOperation)),
     boolParamNames: record(
@@ -106,10 +143,6 @@ export const upOperation = createOperation(1, {
     numParamNames: record(
         t.string,
         recordUpOperationElementFactory(ParamNames.state, ParamNames.upOperation)
-    ),
-    participants: record(
-        t.string,
-        recordUpOperationElementFactory(Participant.state, Participant.upOperation)
     ),
     publicChannel1Name: replaceStringUpOperation,
     publicChannel2Name: replaceStringUpOperation,
@@ -125,12 +158,30 @@ export const upOperation = createOperation(1, {
         t.string,
         recordUpOperationElementFactory(ParamNames.state, ParamNames.upOperation)
     ),
+};
+
+export const upOperation = createOperation(2, {
+    ...upOperationBase,
+    participants: record(
+        t.string,
+        recordUpOperationElementFactory(Participant.state, Participant.upOperation)
+    ),
 });
 
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
+export const upOperationV1 = createOperation(1, {
+    ...upOperationBase,
+    participants: record(
+        t.string,
+        recordUpOperationElementFactory(Participant.stateV1, Participant.upOperationV1)
+    ),
+});
+
+export type UpOperationV1 = t.TypeOf<typeof upOperationV1>;
+
 export type TwoWayOperation = {
-    $v: 1;
+    $v: 2;
 
     activeBoardKey?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<CompositeKey>>;
     bgms?: RecordOperation.RecordTwoWayOperation<Bgm.State, Bgm.TwoWayOperation>;

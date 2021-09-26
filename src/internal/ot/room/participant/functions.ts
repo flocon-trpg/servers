@@ -312,7 +312,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     }
 
     const valueProps: DownOperation = {
-        $v: 1,
+        $v: 2,
         name: ReplaceOperation.composeDownOperation(
             first.name ?? undefined,
             second.name ?? undefined
@@ -388,7 +388,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         imagePieceValues: imagePieceValues.value.prevState,
     };
     const twoWayOperation: TwoWayOperation = {
-        $v: 1,
+        $v: 2,
         boards: boards.value.twoWayOperation,
         characters: characters.value.twoWayOperation,
         imagePieceValues: imagePieceValues.value.twoWayOperation,
@@ -432,7 +432,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         innerDiff: params => ImagePieceValue.diff(params),
     });
     const result: TwoWayOperation = {
-        $v: 1,
+        $v: 2,
         boards,
         characters,
         imagePieceValues,
@@ -576,7 +576,7 @@ export const serverTransform =
         }
 
         const twoWayOperation: TwoWayOperation = {
-            $v: 1,
+            $v: 2,
             boards: boards.value,
             characters: characters.value,
             imagePieceValues: imagePieceValues.value,
@@ -678,7 +678,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     });
 
     const firstPrime: UpOperation = {
-        $v: 1,
+        $v: 2,
         boards: boards.value.firstPrime,
         characters: characters.value.firstPrime,
         imagePieceValues: imagePieceValues.value.firstPrime,
@@ -687,7 +687,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     };
 
     const secondPrime: UpOperation = {
-        $v: 1,
+        $v: 2,
         boards: boards.value.secondPrime,
         characters: characters.value.secondPrime,
         imagePieceValues: imagePieceValues.value.secondPrime,

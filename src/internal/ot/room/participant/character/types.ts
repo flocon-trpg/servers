@@ -9,6 +9,7 @@ import * as Piece from '../../../piece/types';
 import * as BoardLocation from '../../../boardLocation/types';
 import * as DicePieceValue from './dicePieceValue/types';
 import * as NumberPieceValue from './numberPieceValue/types';
+import * as StringPieceValue from './stringPieceValue/types';
 import * as ReplaceOperation from '../../../util/replaceOperation';
 import * as RecordOperation from '../../../util/recordOperation';
 import { RecordTwoWayOperation } from '../../../util/recordOperation';
@@ -25,9 +26,7 @@ import { Maybe, maybe } from '../../../../maybe';
 // privateCommands, dicePieceValues, numberPieceValues: キーはランダムな文字列。キャラクターに紐付いた値であり、なおかつキャラクターの作成者しか値を作成できない。
 // pieces, tachieLocations: 誰でも作成できる値。第一キーはuserUid、第二キーはランダムな文字列。
 
-export const state = t.type({
-    $v: t.literal(1),
-
+const stateBase = t.type({
     image: maybe(filePath),
     isPrivate: t.boolean,
     memo: t.string,
@@ -45,12 +44,31 @@ export const state = t.type({
     privateCommands: record(t.string, Command.state),
     tachieLocations: record(t.string, record(t.string, BoardLocation.state)),
     dicePieceValues: record(t.string, DicePieceValue.state),
-    numberPieceValues: record(t.string, NumberPieceValue.state),
 });
+
+export const state = t.intersection([
+    stateBase,
+    t.type({
+        $v: t.literal(2),
+
+        stringPieceValues: record(t.string, StringPieceValue.state),
+    }),
+]);
 
 export type State = t.TypeOf<typeof state>;
 
-export const downOperation = createOperation(1, {
+export const stateV1 = t.intersection([
+    stateBase,
+    t.type({
+        $v: t.literal(1),
+
+        numberPieceValues: record(t.string, NumberPieceValue.state),
+    }),
+]);
+
+export type StateV1 = t.TypeOf<typeof stateV1>;
+
+const downOperationBase = {
     image: t.type({ oldValue: maybe(filePath) }),
     isPrivate: t.type({ oldValue: t.boolean }),
     memo: TextOperation.downOperation,
@@ -83,15 +101,29 @@ export const downOperation = createOperation(1, {
         t.string,
         recordDownOperationElementFactory(DicePieceValue.state, DicePieceValue.downOperation)
     ),
+};
+
+export const downOperation = createOperation(2, {
+    ...downOperationBase,
+    stringPieceValues: record(
+        t.string,
+        recordDownOperationElementFactory(StringPieceValue.state, StringPieceValue.downOperation)
+    ),
+});
+
+export type DownOperation = t.TypeOf<typeof downOperation>;
+
+export const downOperationV1 = createOperation(1, {
+    ...downOperationBase,
     numberPieceValues: record(
         t.string,
         recordDownOperationElementFactory(NumberPieceValue.state, NumberPieceValue.downOperation)
     ),
 });
 
-export type DownOperation = t.TypeOf<typeof downOperation>;
+export type DownOperationV1 = t.TypeOf<typeof downOperationV1>;
 
-export const upOperation = createOperation(1, {
+const upOperationBase = {
     image: t.type({ newValue: maybe(filePath) }),
     isPrivate: t.type({ newValue: t.boolean }),
     memo: TextOperation.upOperation,
@@ -124,16 +156,30 @@ export const upOperation = createOperation(1, {
         t.string,
         recordUpOperationElementFactory(DicePieceValue.state, DicePieceValue.upOperation)
     ),
+};
+
+export const upOperation = createOperation(2, {
+    ...upOperationBase,
+    stringPieceValues: record(
+        t.string,
+        recordUpOperationElementFactory(StringPieceValue.state, StringPieceValue.upOperation)
+    ),
+});
+
+export type UpOperation = t.TypeOf<typeof upOperation>;
+
+export const upOperationV1 = createOperation(1, {
+    ...upOperationBase,
     numberPieceValues: record(
         t.string,
         recordUpOperationElementFactory(NumberPieceValue.state, NumberPieceValue.upOperation)
     ),
 });
 
-export type UpOperation = t.TypeOf<typeof upOperation>;
+export type UpOperationV1 = t.TypeOf<typeof upOperationV1>;
 
 export type TwoWayOperation = {
-    $v: 1;
+    $v: 2;
 
     image?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<FilePath>>;
     isPrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
@@ -158,8 +204,8 @@ export type TwoWayOperation = {
         DicePieceValue.State,
         DicePieceValue.TwoWayOperation
     >;
-    numberPieceValues?: RecordOperation.RecordTwoWayOperation<
-        NumberPieceValue.State,
-        NumberPieceValue.TwoWayOperation
+    stringPieceValues?: RecordOperation.RecordTwoWayOperation<
+        StringPieceValue.State,
+        StringPieceValue.TwoWayOperation
     >;
 };
