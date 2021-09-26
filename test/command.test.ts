@@ -78,7 +78,7 @@ describe('characterCommand', () => {
             ...room,
             participants: {
                 [Resources.Participant.Player1.userUid]: {
-                    $v: 1,
+                    $v: 2,
                     name: Resources.Participant.Player1.name,
                     role: 'Player',
                     boards: {},
