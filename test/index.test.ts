@@ -96,11 +96,13 @@ test.each([{}, { y: 0 }, { x: 0, y: 0 }])('[1,2,3,4].filter(x => x === 2)', glob
 });
 
 test('prevent __proto__ attack', () => {
-    expect(() => exec('__proto__.foobar = 1', {})).toThrow();
-});
+    expect(() => {
+        // この段階では、globalThisはMapで表現されているため例外は発生しない
+        const execResult = exec('__proto__ = {};', {});
 
-test('prevent Object.__proto__ attack', () => {
-    expect(() => exec('Object.__proto__.foobar = 1', {})).toThrow();
+        // これによりMapをRecordに変換しようとするが、この際に防御機構が働き例外が発生する
+        return execResult.getGlobalThis();
+    }).toThrow();
 });
 
 test.each([{}, { x: 0 }])('let x = { a: 1 }; x.a;', globalThis => {
