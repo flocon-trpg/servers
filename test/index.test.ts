@@ -140,44 +140,46 @@ a;
     expect(actual.getGlobalThis()).toEqual({ ...globalThis, a: 1 });
 });
 
-test('Array.isArray', () => {
-    const actual = exec(
-        `
+describe('Array', () => {
+    test('isArray', () => {
+        const actual = exec(
+            `
 Array.isArray([1,2]);
         `,
-        { Array: arrayClass }
-    );
-    expect(actual.result).toBe(true);
-});
+            { Array: arrayClass }
+        );
+        expect(actual.result).toBe(true);
+    });
 
-test('Array.filter', () => {
-    const actual = exec(
-        `
+    test('filter', () => {
+        const actual = exec(
+            `
 [1,2,3,4].filter(i => i >= 3);
         `,
-        {}
-    );
-    expect(actual.result).toEqual([3, 4]);
-});
+            {}
+        );
+        expect(actual.result).toEqual([3, 4]);
+    });
 
-test('Array.map', () => {
-    const actual = exec(
-        `
+    test('map', () => {
+        const actual = exec(
+            `
 [1,2].map(i => i * 2);
         `,
-        {}
-    );
-    expect(actual.result).toEqual([2, 4]);
-});
+            {}
+        );
+        expect(actual.result).toEqual([2, 4]);
+    });
 
-test('Array.push', () => {
-    const actual = exec(
-        `
+    test('push', () => {
+        const actual = exec(
+            `
 let result = [1,2];
 result.push(3);
 result;
         `,
-        {}
-    );
-    expect(actual.result).toEqual([1, 2, 3]);
+            {}
+        );
+        expect(actual.result).toEqual([1, 2, 3]);
+    });
 });
