@@ -4,9 +4,9 @@ import * as ReplaceOperation from '../../util/replaceOperation';
 import * as TextOperation from '../../util/textOperation';
 
 export const Plain = 'Plain';
-export const MarkDown = 'MarkDown';
+export const Markdown = 'Markdown';
 
-const textType = t.union([t.literal(Plain), t.literal(MarkDown)]);
+const textType = t.union([t.literal(Plain), t.literal(Markdown)]);
 type TextType = t.TypeOf<typeof textType>;
 
 export const state = t.type({
