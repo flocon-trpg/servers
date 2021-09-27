@@ -84,15 +84,22 @@ y.toString();
     }
 );
 
-test.each([{ x: 0 }, { x: 0, y: 1 }])('x.toString() (this)', globalThis => {
+test.each([{ x: 0 }, { x: 0, y: 1 }])('x.toString() with globalThis', globalThis => {
     const actual = exec('x.toString()', globalThis);
     expect(actual.result).toBe('0');
 });
 
-test.each([{}, { y: 0 }, { x: 0, y: 0 }])('[1,2,3,4].filter(x => x === 2)', globalThis => {
-    const actual = exec('[1,2,3,4].filter(x => x === 2)', globalThis);
-    expect(actual.result).toEqual([2]);
-    expect(actual.getGlobalThis()).toEqual(globalThis);
+it.each([{ x: 0 }, { x: 0, y: 0 }])('tests arrow functions scope', globalThis => {
+    const globalThisClone = { ...globalThis };
+    const actual = exec(
+        `
+let f = x => x + 1;
+f(10);
+    `,
+        globalThis
+    );
+    expect(actual.result).toEqual(11);
+    expect(actual.getGlobalThis()).toEqual(globalThisClone);
 });
 
 test('prevent __proto__ attack', () => {
@@ -230,14 +237,24 @@ result;
 });
 
 describe('Array', () => {
-    test('isArray', () => {
+    test.each(['[]', '[1,2]'])('isArray to return true', source => {
         const actual = exec(
             `
-Array.isArray([1,2]);
+Array.isArray(${source});
         `,
             { Array: arrayClass }
         );
         expect(actual.result).toBe(true);
+    });
+
+    test.each(['1', '"1"', '{}'])('isArray to return false', source => {
+        const actual = exec(
+            `
+Array.isArray(${source});
+        `,
+            { Array: arrayClass }
+        );
+        expect(actual.result).toBe(false);
     });
 
     test('filter', () => {
