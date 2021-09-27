@@ -149,6 +149,10 @@ a;
     expect(actual.getGlobalThis()).toEqual({ ...globalThis, a: 1 });
 });
 
+test('const x = 1; x = 2;', () => {
+    expect(() => exec('const x = 1; x = 2;', {})).toThrow();
+});
+
 describe('if', () => {
     test.each([true, false])('if', bool => {
         const actual = exec(
