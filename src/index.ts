@@ -267,6 +267,8 @@ export {
     State as MemoState,
     UpOperation as MemoUpOperation,
     DownOperation as MemoDownOperation,
+    Plain,
+    Markdown,
 } from './internal/ot/room/memo/types';
 
 export { isIdRecord } from './internal/ot/util/record';
