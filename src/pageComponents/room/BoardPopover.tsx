@@ -39,7 +39,7 @@ import { useSelector } from '../../store';
 import { testCommand } from '../../utils/command';
 import { noValue } from '../../utils/dice';
 import { DicePieceValue } from '../../utils/dicePieceValue';
-import { NumberPieceValue } from '../../utils/numberPieceValue';
+import { StringPieceValue } from '../../utils/stringPieceValue';
 import { Piece } from '../../utils/piece';
 import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 import { simpleId } from '../../utils/generators';
@@ -173,7 +173,7 @@ namespace PopupEditorBase {
                                 onChange={e => {
                                     operate(
                                         characterUpdateOperation(element.characterKey, {
-                                            $v: 1,
+                                            $v: 2,
                                             dicePieceValues: {
                                                 [element.valueId]: {
                                                     type: update,
@@ -223,7 +223,7 @@ namespace PopupEditorBase {
                                 onIsValuePrivateChange={e => {
                                     operate(
                                         characterUpdateOperation(element.characterKey, {
-                                            $v: 1,
+                                            $v: 2,
                                             dicePieceValues: {
                                                 [element.valueId]: {
                                                     type: update,
@@ -360,7 +360,7 @@ namespace ContextMenuModule {
                             onClick={() => {
                                 operate(
                                     characterUpdateOperation(characterKey, {
-                                        $v: 1,
+                                        $v: 2,
                                         pieces: {
                                             [pieceKey.createdBy]: {
                                                 [pieceKey.id]: {
@@ -429,7 +429,7 @@ namespace ContextMenuModule {
                             onClick={() => {
                                 operate(
                                     characterUpdateOperation(characterKey, {
-                                        $v: 1,
+                                        $v: 2,
                                         tachieLocations: {
                                             [tachieLocationKey.createdBy]: {
                                                 [tachieLocationKey.id]: {
@@ -611,7 +611,7 @@ namespace ContextMenuModule {
                                 onClick={() => {
                                     operate(
                                         characterUpdateOperation(characterKey, {
-                                            $v: 1,
+                                            $v: 2,
                                             dicePieceValues: {
                                                 [dicePieceValueKey]: {
                                                     type: replace,
@@ -634,7 +634,7 @@ namespace ContextMenuModule {
     };
 
     type SelectedNumberPiecesMenuProps = {
-        numberPieceValuesOnCursor: ContextMenuState['numberPieceValuesOnCursor'];
+        stringPieceValuesOnCursor: ContextMenuState['stringPieceValuesOnCursor'];
         onContextMenuClear: () => void;
         boardKey: CompositeKey;
         myUserUid: string;
@@ -642,35 +642,39 @@ namespace ContextMenuModule {
         operate: ReturnType<typeof useOperate>;
     };
 
-    const selectedNumberPiecesMenu = ({
-        numberPieceValuesOnCursor,
+    const selectedStringPiecesMenu = ({
+        stringPieceValuesOnCursor,
         onContextMenuClear,
         boardKey: boardKeyToShow,
         myUserUid,
         dispatch,
         operate,
     }: SelectedNumberPiecesMenuProps): JSX.Element | null => {
-        if (numberPieceValuesOnCursor.length === 0) {
+        if (stringPieceValuesOnCursor.length === 0) {
             return null;
         }
         return (
             <Menu.ItemGroup title='数値コマ'>
-                {numberPieceValuesOnCursor.map(
-                    ({ numberPieceValueKey, numberPieceValue, characterKey }) => (
+                {stringPieceValuesOnCursor.map(
+                    ({
+                        stringPieceValueKey: stringPieceValueKey,
+                        stringPieceValue: numberPieceValue,
+                        characterKey,
+                    }) => (
                         // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が下にもあるため、キーを互いに異なるものにするように文字列を付加している。
                         <Menu.SubMenu
-                            key={numberPieceValueKey + '@selected'}
-                            title={NumberPieceValue.stringify(numberPieceValue)}
+                            key={stringPieceValueKey + '@selected'}
+                            title={StringPieceValue.stringify(numberPieceValue)}
                         >
                             {characterKey.createdBy === myUserUid ? (
                                 <Menu.Item
                                     onClick={() => {
                                         dispatch(
                                             roomDrawerAndPopoverAndModalModule.actions.set({
-                                                numberPieceValueDrawerType: {
+                                                stringPieceValueDrawerType: {
                                                     type: update,
                                                     boardKey: boardKeyToShow,
-                                                    stateKey: numberPieceValueKey,
+                                                    stateKey: stringPieceValueKey,
                                                     characterKey,
                                                 },
                                             })
@@ -689,9 +693,9 @@ namespace ContextMenuModule {
                                 onClick={() => {
                                     operate(
                                         characterUpdateOperation(characterKey, {
-                                            $v: 1,
-                                            numberPieceValues: {
-                                                [numberPieceValueKey]: {
+                                            $v: 2,
+                                            stringPieceValues: {
+                                                [stringPieceValueKey]: {
                                                     type: replace,
                                                     replace: { newValue: undefined },
                                                 },
@@ -753,12 +757,12 @@ namespace ContextMenuModule {
                         <Menu.Item
                             onClick={() => {
                                 const operation: UpOperation = {
-                                    $v: 1,
+                                    $v: 2,
                                     participants: {
                                         [participantKey]: {
                                             type: update,
                                             update: {
-                                                $v: 1,
+                                                $v: 2,
                                                 imagePieceValues: {
                                                     [valueId]: {
                                                         type: replace,
@@ -856,7 +860,7 @@ namespace ContextMenuModule {
                         onClick={() => {
                             operate(
                                 characterUpdateOperation(characterKey, {
-                                    $v: 1,
+                                    $v: 2,
                                     pieces: {
                                         [myUserUid]: {
                                             [simpleId()]: {
@@ -878,7 +882,7 @@ namespace ContextMenuModule {
                         onClick={() => {
                             operate(
                                 characterUpdateOperation(characterKey, {
-                                    $v: 1,
+                                    $v: 2,
                                     pieces: {
                                         [myUserUid]: {
                                             [simpleId()]: {
@@ -907,7 +911,7 @@ namespace ContextMenuModule {
                     onClick={() => {
                         operate(
                             characterUpdateOperation(characterKey, {
-                                $v: 1,
+                                $v: 2,
                                 tachieLocations: {
                                     [myUserUid]: {
                                         [simpleId()]: {
@@ -969,7 +973,7 @@ namespace ContextMenuModule {
                         onClick={() => {
                             dispatch(
                                 roomDrawerAndPopoverAndModalModule.actions.set({
-                                    numberPieceValueDrawerType: {
+                                    stringPieceValueDrawerType: {
                                         type: create,
                                         piece: pieceLocationWhichIsCellMode,
                                     },
@@ -984,7 +988,7 @@ namespace ContextMenuModule {
                         onClick={() => {
                             dispatch(
                                 roomDrawerAndPopoverAndModalModule.actions.set({
-                                    numberPieceValueDrawerType: {
+                                    stringPieceValueDrawerType: {
                                         type: create,
                                         piece: pieceLocationWhichIsNotCellMode,
                                     },
@@ -1099,7 +1103,7 @@ namespace ContextMenuModule {
                         operate,
                         myUserUid,
                     })}
-                    {selectedNumberPiecesMenu({
+                    {selectedStringPiecesMenu({
                         ...contextMenuState,
                         onContextMenuClear,
                         boardKey,

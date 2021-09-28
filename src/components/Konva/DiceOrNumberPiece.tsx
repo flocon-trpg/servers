@@ -4,38 +4,38 @@ import { animated, useSpring } from '@react-spring/konva';
 import {
     DicePieceValueState,
     dicePieceValueStrIndexes,
-    NumberPieceValueState,
+    StringPieceValueState,
+    DieValueState,
 } from '@kizahasi/flocon-core';
-import { NumberPieceValue } from '../../utils/numberPieceValue';
+import { StringPieceValue } from '../../utils/stringPieceValue';
 import { KonvaD6 } from '../KonvaDice';
-import { State as DieValueState } from '@kizahasi/flocon-core/dist/types/internal/ot/room/participant/character/dicePieceValue/dieValue/v1';
 import { DicePieceValue } from '../../utils/dicePieceValue';
 import { usePrevious } from 'react-use';
 import { Size } from '../../utils/types';
 import { PieceGroup, PieceGroupProps } from './PieceGroup';
 
-export const numberPiece = 'numberPiece';
+export const stringPiece = 'stringPiece';
 export const dicePiece = 'dicePiece';
 
-export type DiceOrNumberPieceState =
+export type DiceOrStringPieceState =
     | {
-          type: typeof numberPiece;
-          state: NumberPieceValueState;
+          type: typeof stringPiece;
+          state: StringPieceValueState;
       }
     | {
           type: typeof dicePiece;
           state: DicePieceValueState;
       };
 
-type NumberPieceValueContentProps = {
+type StringPieceValueContentProps = {
     createdByMe: boolean;
-    state: NumberPieceValueState;
+    state: StringPieceValueState;
 } & Size;
 
-const NumberPieceValueContent: React.FC<NumberPieceValueContentProps> = (
-    props: NumberPieceValueContentProps
+const StringPieceValueContent: React.FC<StringPieceValueContentProps> = (
+    props: StringPieceValueContentProps
 ) => {
-    const text = NumberPieceValue.toKonvaText(props.state, props.createdByMe);
+    const text = StringPieceValue.toKonvaText(props.state, props.createdByMe);
 
     const prevText = usePrevious(text);
 
@@ -307,7 +307,7 @@ const DicePieceValueContent: React.FC<DicePieceValueContentProps> = ({
 
 type ValueContentProps = {
     createdByMe: boolean;
-    state: DiceOrNumberPieceState;
+    state: DiceOrStringPieceState;
     opacity: number;
 } & Size;
 
@@ -316,14 +316,14 @@ const ValueContent: React.FC<ValueContentProps> = (props: ValueContentProps) => 
         case dicePiece: {
             return <DicePieceValueContent {...props} state={props.state.state} />;
         }
-        case numberPiece: {
-            return <NumberPieceValueContent {...props} state={props.state.state} />;
+        case stringPiece: {
+            return <StringPieceValueContent {...props} state={props.state.state} />;
         }
     }
 };
 
 type Props = {
-    state: DiceOrNumberPieceState;
+    state: DiceOrStringPieceState;
     createdByMe: boolean;
     opacity: number;
 } & PieceGroupProps;

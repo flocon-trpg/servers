@@ -6,12 +6,12 @@ export const characterUpdateOperation = (
     operation: CharacterUpOperation
 ): UpOperation => {
     return {
-        $v: 1,
+        $v: 2,
         participants: {
             [characterKey.createdBy]: {
                 type: update,
                 update: {
-                    $v: 1,
+                    $v: 2,
                     characters: {
                         [characterKey.id]: {
                             type: update,

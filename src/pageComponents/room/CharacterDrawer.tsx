@@ -2,7 +2,6 @@ import { Button, Checkbox, Col, Drawer, InputNumber, Row, Space, Tooltip, Typogr
 import React from 'react';
 import DrawerFooter from '../../layouts/DrawerFooter';
 import { simpleId } from '../../utils/generators';
-import { replace } from '../../stateManagers/states/types';
 import { DrawerProps } from 'antd/lib/drawer';
 import InputFile from '../../components/InputFile';
 import { FilesManagerDrawerType } from '../../utils/types';
@@ -38,10 +37,9 @@ import {
     CharacterUpOperation,
     PieceState,
     toCharacterUpOperation,
-    UpOperation,
     pieceDiff,
+    strIndex20Array,
 } from '@kizahasi/flocon-core';
-import { dualKeyRecordFind, strIndex20Array } from '@kizahasi/util';
 import { useSelector } from '../../store';
 import { useDispatch } from 'react-redux';
 import {
@@ -63,7 +61,7 @@ const drawerBaseProps: Partial<DrawerProps> = {
 };
 
 const defaultCharacter: CharacterState = {
-    $v: 1,
+    $v: 2,
     chatPalette: '',
     memo: '',
     name: '',
@@ -80,7 +78,7 @@ const defaultCharacter: CharacterState = {
     strParams: {},
     pieces: {},
     dicePieceValues: {},
-    numberPieceValues: {},
+    stringPieceValues: {},
 };
 
 const gutter: [Gutter, Gutter] = [16, 16];
@@ -159,12 +157,7 @@ const CharacterDrawer: React.FC = () => {
         if (drawerType?.type !== update || drawerType.boardKey == null) {
             return null;
         }
-        return (
-            dualKeyRecordFind<PieceState>(character.pieces, {
-                first: drawerType.boardKey.createdBy,
-                second: drawerType.boardKey.id,
-            }) ?? null
-        );
+        return character.pieces[drawerType.boardKey.createdBy]?.[drawerType.boardKey.id] ?? null;
     })();
 
     const tachieLocation = (() => {
@@ -172,10 +165,8 @@ const CharacterDrawer: React.FC = () => {
             return null;
         }
         return (
-            dualKeyRecordFind<BoardLocationState>(character.tachieLocations, {
-                first: drawerType.boardKey.createdBy,
-                second: drawerType.boardKey.id,
-            }) ?? null
+            character.tachieLocations[drawerType.boardKey.createdBy]?.[drawerType.boardKey.id] ??
+            null
         );
     })();
 
@@ -232,7 +223,7 @@ const CharacterDrawer: React.FC = () => {
         }
         operate(
             characterUpdateOperation(drawerType.stateKey, {
-                $v: 1,
+                $v: 2,
                 pieces: {
                     [drawerType.boardKey.createdBy]: {
                         [drawerType.boardKey.id]: {
@@ -258,7 +249,7 @@ const CharacterDrawer: React.FC = () => {
         }
         operate(
             characterUpdateOperation(drawerType.stateKey, {
-                $v: 1,
+                $v: 2,
                 tachieLocations: {
                     [drawerType.boardKey.createdBy]: {
                         [drawerType.boardKey.id]: {

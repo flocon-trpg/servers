@@ -9,9 +9,9 @@ import {
     parameterIsNotPrivateAndNotCreatedByMe,
 } from '../resource/text/main';
 import BufferedInput from './BufferedInput';
-import { StrIndex20 } from '@kizahasi/util';
 import {
     CharacterUpOperation,
+    StrIndex20,
     StrParamState,
     textDiff,
     toTextUpOperation,
@@ -51,7 +51,7 @@ const StringParameterInput: React.FC<Props> = ({
                 }
                 const diff2 = textDiff({ prev: e.previousValue, next: e.currentValue });
                 const operation: CharacterUpOperation = {
-                    $v: 1,
+                    $v: 2,
                     strParams: {
                         [parameterKey]: {
                             $v: 1,
@@ -97,7 +97,7 @@ const StringParameterInput: React.FC<Props> = ({
             size='small'
             onChange={e => {
                 const operation: CharacterUpOperation = {
-                    $v: 1,
+                    $v: 2,
                     strParams: {
                         [parameterKey]: {
                             $v: 1,

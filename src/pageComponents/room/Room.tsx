@@ -26,7 +26,7 @@ import { useMessageNotification } from '../../hooks/useMessageNotification';
 import { RoomMenu } from './RoomMenu';
 import { recordToArray } from '@kizahasi/util';
 import { PieceValueList } from './PieceValueList';
-import { NumberPieceValueDrawer } from './NumberPieceValueDrawer';
+import { StringPieceValueDrawer } from './StringPieceValueDrawer';
 import { DicePieceValueDrawer } from './DicePieceValueDrawer';
 import { Memos } from './Memos';
 import { BoardContextMenu, PieceTooltip, PopoverEditor } from './BoardPopover';
@@ -611,7 +611,7 @@ const Room: React.FC = () => {
                 <CharacterDrawer />
                 <DicePieceValueDrawer />
                 <ImagePieceDrawer />
-                <NumberPieceValueDrawer />
+                <StringPieceValueDrawer />
                 <CharacterParameterNamesDrawer />
                 <EditRoomDrawer />
 

@@ -1,4 +1,3 @@
-import { PublicChannelKey } from '@kizahasi/util';
 import produce from 'immer';
 import React from 'react';
 import { interval } from 'rxjs';

@@ -33,9 +33,9 @@ import {
     BoardLocationUpOperation,
     BoardState,
     BoardLocationState,
+    $free,
 } from '@kizahasi/flocon-core';
 import {
-    $free,
     CompositeKey,
     compositeKeyEquals,
     dualKeyRecordToDualKeyMap,
@@ -55,14 +55,14 @@ import { DragEndResult, Vector2 } from '../../utils/types';
 import {
     DiceOrNumberPiece,
     dicePiece,
-    numberPiece,
+    stringPiece,
 } from '../../components/Konva/DiceOrNumberPiece';
 import { useTransition, animated } from '@react-spring/konva';
 import { useCharacterPieces } from '../../hooks/state/useCharacterPieces';
 import { useTachieLocations } from '../../hooks/state/useTachieLocations';
 import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 import { useDicePieces } from '../../hooks/state/useDicePieces';
-import { useNumberPieces } from '../../hooks/state/useNumberPieces';
+import { useStringPieces } from '../../hooks/state/useStringPieces';
 import { useImagePieces } from '../../hooks/state/useImagePieces';
 import { useAllContext } from '../../hooks/useAllContext';
 import { AllContextProvider } from '../../components/AllContextProvider';
@@ -199,7 +199,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const characters = useCharacters();
     const participants = useParticipants();
     const dicePieces = useDicePieces(boardKey);
-    const numberPieces = useNumberPieces(boardKey);
+    const numberPieces = useStringPieces(boardKey);
     const imagePieces = useImagePieces(boardKey);
     const characterPieces = useCharacterPieces(boardKey);
     const tacheLocations = useTachieLocations(boardKey);
@@ -367,7 +367,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             });
                             operate(
                                 characterUpdateOperation(characterKey, {
-                                    $v: 1,
+                                    $v: 2,
                                     pieces: {
                                         [pieceKey.createdBy]: {
                                             [pieceKey.id]: {
@@ -444,7 +444,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             });
                             operate(
                                 characterUpdateOperation(characterKey, {
-                                    $v: 1,
+                                    $v: 2,
                                     tachieLocations: {
                                         [tachieLocationKey.createdBy]: {
                                             [tachieLocationKey.id]: {
@@ -507,12 +507,12 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                                 board,
                             });
                             const operation: UpOperation = {
-                                $v: 1,
+                                $v: 2,
                                 participants: {
                                     [element.participantKey]: {
                                         type: update,
                                         update: {
-                                            $v: 1,
+                                            $v: 2,
                                             imagePieceValues: {
                                                 [element.valueId]: {
                                                     type: update,
@@ -584,7 +584,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         });
                         operate(
                             characterUpdateOperation(element.characterKey, {
-                                $v: 1,
+                                $v: 2,
                                 dicePieceValues: {
                                     [element.valueId]: {
                                         type: update,
@@ -615,7 +615,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         {...Piece.getPosition({ ...board, state: piece })}
                         key={keyNames(element.characterKey, element.valueId, pieceKey)}
                         opacity={1}
-                        state={{ type: numberPiece, state: element.value }}
+                        state={{ type: stringPiece, state: element.value }}
                         createdByMe={element.characterKey.createdBy === myUserUid}
                         draggable
                         listening
@@ -653,8 +653,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             });
                             operate(
                                 characterUpdateOperation(element.characterKey, {
-                                    $v: 1,
-                                    numberPieceValues: {
+                                    $v: 2,
+                                    stringPieceValues: {
                                         [element.valueId]: {
                                             type: update,
                                             update: {
@@ -853,7 +853,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
     })();
 
     const dicePieceValues = useDicePieces(boardKeyToShow ?? false);
-    const numberPieceValues = useNumberPieces(boardKeyToShow ?? false);
+    const stringPieceValues = useStringPieces(boardKeyToShow ?? false);
     const imagePieces = useImagePieces(boardKeyToShow ?? false);
 
     if (
@@ -862,7 +862,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
         roomId == null ||
         boards == null ||
         characters == null ||
-        numberPieceValues == null
+        stringPieceValues == null
     ) {
         return null;
     }
@@ -1036,7 +1036,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                             id: element.characterKey.id,
                                         },
                                     })),
-                                numberPieceValuesOnCursor: (numberPieceValues ?? [])
+                                stringPieceValuesOnCursor: (stringPieceValues ?? [])
                                     .filter(pieceValueElement => {
                                         if (pieceValueElement.piece == null) {
                                             return false;
@@ -1048,8 +1048,8 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                         });
                                     })
                                     .map(({ value: element, piece }) => ({
-                                        numberPieceValueKey: element.valueId,
-                                        numberPieceValue: element.value,
+                                        stringPieceValueKey: element.valueId,
+                                        stringPieceValue: element.value,
                                         piece,
                                         characterKey: {
                                             createdBy: element.characterKey.createdBy,

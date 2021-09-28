@@ -6,12 +6,12 @@ export const boardUpdateOperation = (
     operation: BoardUpOperation
 ): UpOperation => {
     return {
-        $v: 1,
+        $v: 2,
         participants: {
             [boardKey.createdBy]: {
                 type: update,
                 update: {
-                    $v: 1,
+                    $v: 2,
                     boards: {
                         [boardKey.id]: {
                             type: update,

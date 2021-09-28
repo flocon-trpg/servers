@@ -1,4 +1,4 @@
-import { mapToRecord, recordToArray, recordToMap } from '@kizahasi/util';
+import { mapToRecord, recordToMap } from '@kizahasi/util';
 import { Button, Input, Modal, Select } from 'antd';
 import React from 'react';
 import { useCharacter } from '../../hooks/state/useCharacter';
@@ -9,7 +9,7 @@ import { simpleId } from '../../utils/generators';
 import { useBufferValue } from '../../hooks/useBufferValue';
 import { testCommand } from '../../utils/command';
 import { useOperate } from '../../hooks/useOperate';
-import { privateCommandsDiff, update } from '@kizahasi/flocon-core';
+import { privateCommandsDiff } from '@kizahasi/flocon-core';
 import { useDispatch } from 'react-redux';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import classNames from 'classnames';
@@ -192,7 +192,7 @@ export const CommandEditorModal: React.FC = () => {
                 }
                 operate(
                     characterUpdateOperation(commandEditorModalType.characterKey, {
-                        $v: 1,
+                        $v: 2,
                         privateCommands: privateCommandsDiff({
                             prevState: character.privateCommands,
                             nextState: mapToRecord(privateCommands),

@@ -10,7 +10,6 @@ import {
 import { TextAreaRef } from 'antd/lib/input/TextArea';
 import { useSelector } from '../../store';
 import { UserConfig } from '../../states/UserConfig';
-import { $free, PublicChannelKey } from '@kizahasi/util';
 import * as Icon from '@ant-design/icons';
 import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import { custom, SelectedCharacterType, some } from './getSelectedCharacterType';
@@ -29,6 +28,7 @@ import { Observable } from 'rxjs';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
 import classNames from 'classnames';
 import { flex, flexColumn, flexNone } from '../../utils/className';
+import { $free, PublicChannelKey } from '@kizahasi/flocon-core';
 
 /* react-virtuosoはおそらくheightを指定しなければ正常に動作しないため、もしこれが可変だとheightの指定が無理とは言わないまでも面倒になる。そのため、70pxという適当な値で固定している */
 const height = 70;

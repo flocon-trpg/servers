@@ -1,10 +1,10 @@
 import React from 'react';
-import { $free, $system } from '@kizahasi/util';
 import { Checkbox } from 'antd';
 import { RoomPrivateMessage, RoomPublicMessage } from '../generated/graphql';
 import { usePublicChannelNames } from '../hooks/state/usePublicChannelNames';
 import classNames from 'classnames';
 import { flex, flexColumn } from '../utils/className';
+import { $system, $free } from '@kizahasi/flocon-core';
 
 export type ChannelsFilterOptions = {
     includesPublicChannel1: boolean;

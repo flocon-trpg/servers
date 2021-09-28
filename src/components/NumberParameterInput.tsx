@@ -10,8 +10,7 @@ import {
     parameterIsPrivateAndNotCreatedByMe,
     parameterIsNotPrivateAndNotCreatedByMe,
 } from '../resource/text/main';
-import { StrIndex20 } from '@kizahasi/util';
-import { CharacterUpOperation, NumParamState } from '@kizahasi/flocon-core';
+import { CharacterUpOperation, NumParamState, StrIndex20 } from '@kizahasi/flocon-core';
 
 const inputWidth = 50;
 
@@ -54,7 +53,7 @@ const NumberParameterInput: React.FC<Props> = ({
                         disabled={disabled}
                         onClick={() => {
                             const operation: CharacterUpOperation = {
-                                $v: 1,
+                                $v: 2,
                                 numParams: {
                                     [parameterKey]: {
                                         $v: 1,
@@ -77,7 +76,7 @@ const NumberParameterInput: React.FC<Props> = ({
                     disabled={disabled}
                     onClick={() => {
                         const operation: CharacterUpOperation = {
-                            $v: 1,
+                            $v: 2,
                             numParams: {
                                 [parameterKey]: {
                                     $v: 1,
@@ -110,7 +109,7 @@ const NumberParameterInput: React.FC<Props> = ({
                         disabled={disabled}
                         onClick={() => {
                             const operation: CharacterUpOperation = {
-                                $v: 1,
+                                $v: 2,
                                 numMaxParams: {
                                     [parameterKey]: {
                                         $v: 1,
@@ -133,7 +132,7 @@ const NumberParameterInput: React.FC<Props> = ({
                     disabled={disabled}
                     onClick={() => {
                         const operation: CharacterUpOperation = {
-                            $v: 1,
+                            $v: 2,
                             numMaxParams: {
                                 [parameterKey]: {
                                     $v: 1,
@@ -185,7 +184,7 @@ const NumberParameterInput: React.FC<Props> = ({
                 size='small'
                 onChange={e => {
                     const operation: CharacterUpOperation = {
-                        $v: 1,
+                        $v: 2,
                         numParams: {
                             [parameterKey]: {
                                 $v: 1,
@@ -221,7 +220,7 @@ const NumberParameterInput: React.FC<Props> = ({
                             return;
                         }
                         const operation: CharacterUpOperation = {
-                            $v: 1,
+                            $v: 2,
                             numParams: {
                                 [parameterKey]: {
                                     $v: 1,
@@ -272,7 +271,7 @@ const NumberParameterInput: React.FC<Props> = ({
                 size='small'
                 onChange={e => {
                     const operation: CharacterUpOperation = {
-                        $v: 1,
+                        $v: 2,
                         numMaxParams: {
                             [parameterKey]: {
                                 $v: 1,
@@ -308,7 +307,7 @@ const NumberParameterInput: React.FC<Props> = ({
                             return;
                         }
                         const operation: CharacterUpOperation = {
-                            $v: 1,
+                            $v: 2,
                             numMaxParams: {
                                 [parameterKey]: {
                                     $v: 1,

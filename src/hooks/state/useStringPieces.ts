@@ -1,20 +1,20 @@
 import React from 'react';
 import { CompositeKey, compositeKeyEquals, dualKeyRecordToDualKeyMap } from '@kizahasi/util';
 import { PieceState } from '@kizahasi/flocon-core';
-import { NumberPieceValueElement, useNumberPieceValues } from './useNumberPieceValues';
+import { StringPieceValueElement, useStringPieceValues } from './useStringPieceValues';
 import { useBooleanOrCompositeKeyMemo } from '../useBooleanOrCompositeKeyMemo';
 
-export type NumberPieceElement = {
-    value: NumberPieceValueElement;
+export type StringPieceElement = {
+    value: StringPieceValueElement;
     pieceKey: CompositeKey;
     piece: PieceState;
 };
 
-export const useNumberPieces = (
+export const useStringPieces = (
     boardKey: CompositeKey | boolean
-): ReadonlyArray<NumberPieceElement> | undefined => {
+): ReadonlyArray<StringPieceElement> | undefined => {
     const boardKeyMemo = useBooleanOrCompositeKeyMemo(boardKey);
-    const numberPieceValues = useNumberPieceValues();
+    const numberPieceValues = useStringPieceValues();
     return React.useMemo(() => {
         if (numberPieceValues == null) {
             return undefined;
