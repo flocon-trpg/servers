@@ -327,7 +327,7 @@ export namespace Resources {
             MEMO_ID: {
                 $v: 1,
                 name: 'MEMO_NAME',
-                dir: ['MEMO_DIR'],
+                dirId: 'MEMO_DIR_ID',
                 text: 'MEMO_TEXT',
                 textType: 'Plain',
             },
