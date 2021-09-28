@@ -296,24 +296,15 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
         }
         case 'ThisExpression':
             /*
-            thisは常にglobalThisと等しいわけではなく、例えば下のようなコードではglobalThisと異なる挙動を示す。
+            javascriptのthisは複雑な挙動を示す。そのため、functionやclassを使用不可能にすることで、常にthis===globalThisとして扱えるようにして実装を簡略化している。ただし、これにより例えば下のコードにおいて本来のjavascriptと異なる挙動を示す。本来のjavascriptであればエラーだが、このライブラリでは正常に終了しaは[1]となる。
 
-            // コード1
-            let x = {
-                a: 1,
-                b() {
-                    console.log(this.a); // 1と出力される
-                }
-            }
+            let a = [];
+            let f = a.push;
+            f(1);
 
-            // コード2
-            let set = new Set();
-            [1].forEach(set.add); // ここで"add method called on incompatible undefined"というエラー。i => set.add(i) などとすれば正常に動く。
-
-            他にも様々なケースがあり、これらに対応するのは困難。本来のjavascriptと異なる挙動で実装して混乱させるよりは、いっそのこと無効化したほうがいいと判断した。
-            thisが使えないと困るケースは、classなどを自分で定義する場合が考えられる。だが、classの実装予定は今の所ないので大丈夫か。
+            thisを完全に無効化してglobalThisを使ってもらうという作戦は、monaco editorの設定がうまくいかなかったので却下。
             */
-            throw new Error(`'this' keyword is not supported. Use globalThis instead.`);
+            return context.globalThis;
         case 'UnaryExpression': {
             const argument = ofFExpression(expression.argument, context);
             switch (expression.operator) {
