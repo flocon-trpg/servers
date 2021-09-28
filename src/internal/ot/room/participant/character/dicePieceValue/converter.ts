@@ -1,4 +1,4 @@
-import * as DiePieceValueLog from './log-v1';
+import * as DiePieceValueLog from './log';
 
 export const decode = (source: unknown): DiePieceValueLog.Type => {
     const result = DiePieceValueLog.exactType.decode(source);

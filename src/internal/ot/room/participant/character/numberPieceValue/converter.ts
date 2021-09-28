@@ -1,4 +1,4 @@
-import * as NumberPieceValueLog from './log-v1';
+import * as NumberPieceValueLog from './log';
 
 export const decode = (source: unknown): NumberPieceValueLog.Type => {
     const result = NumberPieceValueLog.exactType.decode(source);

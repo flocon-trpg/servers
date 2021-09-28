@@ -31,7 +31,7 @@ export namespace Resources {
 
     export namespace Character {
         export const emptyState: CharacterState = {
-            $v: 1,
+            $v: 2,
             chatPalette: '',
             memo: '',
             name: '',
@@ -46,21 +46,21 @@ export namespace Resources {
             numMaxParams: {},
             strParams: {},
             dicePieceValues: {},
-            numberPieceValues: {},
+            stringPieceValues: {},
             pieces: {},
             tachieLocations: {},
         };
     }
 
     export const minimumState: State = {
-        $v: 1,
+        $v: 2,
         activeBoardKey: null,
         createdBy: 'CREATED_BY',
         name: 'ROOM_NAME',
         bgms: {},
         participants: {
             [Participant.Player1.userUid]: {
-                $v: 1,
+                $v: 2,
                 name: Participant.Player1.name,
                 role: Player,
                 boards: {},
@@ -68,7 +68,7 @@ export namespace Resources {
                 imagePieceValues: {},
             },
             [Participant.Player2.userUid]: {
-                $v: 1,
+                $v: 2,
                 name: Participant.Player2.name,
                 role: Player,
                 boards: {},
@@ -76,7 +76,7 @@ export namespace Resources {
                 imagePieceValues: {},
             },
             [Participant.Spectator.userUid]: {
-                $v: 1,
+                $v: 2,
                 name: Participant.Spectator.name,
                 role: Spectator,
                 boards: {},
@@ -84,7 +84,7 @@ export namespace Resources {
                 imagePieceValues: {},
             },
             [Participant.Null.userUid]: {
-                $v: 1,
+                $v: 2,
                 name: Participant.Null.name,
                 role: null,
                 boards: {},
@@ -109,7 +109,7 @@ export namespace Resources {
     };
 
     export const complexState: State = {
-        $v: 1,
+        $v: 2,
         activeBoardKey: null,
         createdBy: 'CREATED_BY',
         name: 'ROOM_NAME',
@@ -124,7 +124,7 @@ export namespace Resources {
         participants: {
             ...minimumState.participants,
             [Participant.Player1.userUid]: {
-                $v: 1,
+                $v: 2,
                 name: Participant.Player1.name,
                 role: 'Player',
                 boards: {
@@ -149,13 +149,13 @@ export namespace Resources {
                 imagePieceValues: {},
             },
             [Participant.Player2.userUid]: {
-                $v: 1,
+                $v: 2,
                 name: Participant.Player2.name,
                 role: 'Player',
                 boards: {},
                 characters: {
                     CHARACTER_ID: {
-                        $v: 1,
+                        $v: 2,
                         image: {
                             $v: 1,
                             path: 'CHARA_IMAGE_PATH',
@@ -272,11 +272,11 @@ export namespace Resources {
                                 },
                             },
                         },
-                        numberPieceValues: {
-                            NUM_PIECE_KEY: {
+                        stringPieceValues: {
+                            STR_PIECE_KEY: {
                                 $v: 1,
                                 isValuePrivate: false,
-                                value: 1,
+                                value: 'STR_PIECE_VALUE',
                                 pieces: {
                                     DICE_PIECE_FIRST_KEY: {
                                         DICE_PIECE_SECOND_KEY: {

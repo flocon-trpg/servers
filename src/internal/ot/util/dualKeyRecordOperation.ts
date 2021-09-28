@@ -9,6 +9,7 @@ import {
     right,
     both,
     dualKeyRecordToDualKeyMap,
+    chooseDualKeyRecord,
 } from '@kizahasi/util';
 import * as t from 'io-ts';
 import { isValidKey } from './isValidKey';
@@ -21,6 +22,7 @@ import {
     RecordUpOperationElement,
     replace,
     update,
+    mapRecordOperationElement,
 } from './recordOperationElement';
 
 export type DualKeyRecordDownOperation<TState, TOperation> = DualStringKeyRecord<
@@ -952,4 +954,95 @@ export const diff = <TState, TOperation>({
         x => x,
         x => x
     );
+};
+
+export const mapDualKeyRecordUpOperation = <TState1, TState2, TOperation1, TOperation2>({
+    source,
+    mapState,
+    mapOperation,
+}: {
+    source: Record<
+        string,
+        Record<string, RecordUpOperationElement<TState1, TOperation1> | undefined> | undefined
+    >;
+    mapState: (state: TState1) => TState2;
+    mapOperation: (state: TOperation1) => TOperation2;
+}): Record<string, Record<string, RecordUpOperationElement<TState2, TOperation2>>> => {
+    return chooseDualKeyRecord(source, element => {
+        if (element.type === replace) {
+            return {
+                type: replace,
+                replace: {
+                    newValue:
+                        element.replace.newValue == null
+                            ? undefined
+                            : mapState(element.replace.newValue),
+                },
+            };
+        }
+        return {
+            type: update,
+            update: mapOperation(element.update),
+        };
+    });
+};
+
+export const mapDualKeyRecordDownOperation = <TState1, TState2, TOperation1, TOperation2>({
+    source,
+    mapState,
+    mapOperation,
+}: {
+    source: Record<
+        string,
+        Record<string, RecordDownOperationElement<TState1, TOperation1> | undefined> | undefined
+    >;
+    mapState: (state: TState1) => TState2;
+    mapOperation: (state: TOperation1) => TOperation2;
+}): Record<string, Record<string, RecordDownOperationElement<TState2, TOperation2>>> => {
+    return chooseDualKeyRecord(source, element => {
+        if (element.type === replace) {
+            return {
+                type: replace,
+                replace: {
+                    oldValue:
+                        element.replace.oldValue == null
+                            ? undefined
+                            : mapState(element.replace.oldValue),
+                },
+            };
+        }
+        return {
+            type: update,
+            update: mapOperation(element.update),
+        };
+    });
+};
+
+export const mapDualKeyRecordOperation = <TReplace1, TReplace2, TUpdate1, TUpdate2>({
+    source,
+    mapReplace,
+    mapUpdate,
+}: {
+    source: Record<
+        string,
+        | Record<
+              string,
+              | { type: typeof replace; replace: TReplace1 }
+              | { type: typeof update; update: TUpdate1 }
+              | undefined
+          >
+        | undefined
+    >;
+    mapReplace: (state: TReplace1) => TReplace2;
+    mapUpdate: (state: TUpdate1) => TUpdate2;
+}): Record<
+    string,
+    Record<
+        string,
+        { type: typeof replace; replace: TReplace2 } | { type: typeof update; update: TUpdate2 }
+    >
+> => {
+    return chooseDualKeyRecord(source, element => {
+        return mapRecordOperationElement({ source: element, mapReplace, mapOperation: mapUpdate });
+    });
 };
