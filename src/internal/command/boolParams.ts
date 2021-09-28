@@ -73,49 +73,33 @@ export class FBoolParams extends FObject {
         const keyAsString = key.toString();
         switch (keyAsString) {
             case 'find':
-                return new FFunction(
-                    ({ args }) => {
-                        const result = this.findByNameOrKey(args[0], astInfo);
-                        if (result == null) {
-                            return undefined;
-                        }
-                        return new FBoolParam(result);
-                    },
-                    this,
-                    false
-                );
+                return new FFunction(({ args }) => {
+                    const result = this.findByNameOrKey(args[0], astInfo);
+                    if (result == null) {
+                        return undefined;
+                    }
+                    return new FBoolParam(result);
+                });
             case 'toggleValue':
-                return new FFunction(
-                    ({ args }) => {
-                        this.toggleValue(args[0], astInfo);
-                        return undefined;
-                    },
-                    this,
-                    false
-                );
+                return new FFunction(({ args }) => {
+                    this.toggleValue(args[0], astInfo);
+                    return undefined;
+                });
             case 'setValue':
-                return new FFunction(
-                    ({ args }) => {
-                        const newValue = beginCast(args[1]).addBoolean().cast(astInfo?.range);
-                        const found = this.findByNameOrKey(args[0], astInfo);
-                        if (found == null) {
-                            return;
-                        }
-                        found.value = newValue;
-                        return undefined;
-                    },
-                    this,
-                    false
-                );
+                return new FFunction(({ args }) => {
+                    const newValue = beginCast(args[1]).addBoolean().cast(astInfo?.range);
+                    const found = this.findByNameOrKey(args[0], astInfo);
+                    if (found == null) {
+                        return;
+                    }
+                    found.value = newValue;
+                    return undefined;
+                });
             case 'setIsValueSecret':
-                return new FFunction(
-                    ({ args }) => {
-                        this.setIsValuePrivate(args[0], args[1], astInfo);
-                        return undefined;
-                    },
-                    this,
-                    false
-                );
+                return new FFunction(({ args }) => {
+                    this.setIsValuePrivate(args[0], args[1], astInfo);
+                    return undefined;
+                });
             default:
                 break;
         }

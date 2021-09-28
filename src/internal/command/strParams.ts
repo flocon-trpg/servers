@@ -65,40 +65,28 @@ export class FStrParams extends FObject {
         const keyAsString = key.toString();
         switch (keyAsString) {
             case 'find':
-                return new FFunction(
-                    ({ args }) => {
-                        const result = this.findByName(args[0], astInfo);
-                        if (result == null) {
-                            return undefined;
-                        }
-                        return new FStrParam(result);
-                    },
-                    this,
-                    false
-                );
+                return new FFunction(({ args }) => {
+                    const result = this.findByName(args[0], astInfo);
+                    if (result == null) {
+                        return undefined;
+                    }
+                    return new FStrParam(result);
+                });
             case 'setValue':
-                return new FFunction(
-                    ({ args }) => {
-                        const newValue = beginCast(args[1]).addString().cast(astInfo?.range);
-                        const found = this.findByName(args[0], astInfo);
-                        if (found == null) {
-                            return;
-                        }
-                        found.value = newValue;
-                        return undefined;
-                    },
-                    this,
-                    false
-                );
+                return new FFunction(({ args }) => {
+                    const newValue = beginCast(args[1]).addString().cast(astInfo?.range);
+                    const found = this.findByName(args[0], astInfo);
+                    if (found == null) {
+                        return;
+                    }
+                    found.value = newValue;
+                    return undefined;
+                });
             case 'setIsValueSecret':
-                return new FFunction(
-                    ({ args }) => {
-                        this.setIsValuePrivate(args[0], args[1], astInfo);
-                        return undefined;
-                    },
-                    this,
-                    false
-                );
+                return new FFunction(({ args }) => {
+                    this.setIsValuePrivate(args[0], args[1], astInfo);
+                    return undefined;
+                });
 
             default:
                 break;

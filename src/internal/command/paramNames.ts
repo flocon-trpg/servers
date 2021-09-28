@@ -74,39 +74,27 @@ export class FParamNames extends FObject {
         const keyAsString = key.toString();
         switch (keyAsString) {
             case 'getName':
-                return new FFunction(
-                    ({ args }) => {
-                        const result = this.find(args[0], astInfo);
-                        if (result == null) {
-                            return undefined;
-                        }
-                        return new FString(result.name);
-                    },
-                    this,
-                    false
-                );
-            case 'setName':
-                return new FFunction(
-                    ({ args }) => {
-                        const result = this.ensure(args[0], astInfo);
-                        const newName = beginCast(args[1]).addString().cast(astInfo?.range);
-                        if (result == null) {
-                            return undefined;
-                        }
-                        result.name = newName;
+                return new FFunction(({ args }) => {
+                    const result = this.find(args[0], astInfo);
+                    if (result == null) {
                         return undefined;
-                    },
-                    this,
-                    false
-                );
+                    }
+                    return new FString(result.name);
+                });
+            case 'setName':
+                return new FFunction(({ args }) => {
+                    const result = this.ensure(args[0], astInfo);
+                    const newName = beginCast(args[1]).addString().cast(astInfo?.range);
+                    if (result == null) {
+                        return undefined;
+                    }
+                    result.name = newName;
+                    return undefined;
+                });
             case 'delete':
-                return new FFunction(
-                    ({ args }) => {
-                        return new FBoolean(this.delete(args[0], astInfo));
-                    },
-                    this,
-                    false
-                );
+                return new FFunction(({ args }) => {
+                    return new FBoolean(this.delete(args[0], astInfo));
+                });
             default:
                 break;
         }
