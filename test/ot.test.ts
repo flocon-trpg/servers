@@ -279,7 +279,7 @@ describe.each`
 });
 
 describe('tests creating DicePieceValue', () => {
-    const characterKey = 'CHARA_KEY';
+    const characterKey = 'CHARACTER_KEY';
     const dicePieceValueKey = 'DICE_KEY';
 
     const state: State = {
@@ -405,7 +405,7 @@ describe('tests creating DicePieceValue', () => {
 });
 
 describe('tests creating Character', () => {
-    const characterKey = 'CHARA_KEY';
+    const characterKey = 'CHARACTER_KEY';
 
     const state: State = Resources.minimumState;
 
@@ -479,7 +479,7 @@ describe('tests creating Character', () => {
 describe.each([[true], [false]])(
     'tests updating Character when isPrivate === %o',
     (isPrivate: boolean) => {
-        const characterKey = 'CHARA_KEY';
+        const characterKey = 'CHARACTER_KEY';
         const newName = 'NEW_NAME';
 
         const state: State = {
@@ -578,7 +578,7 @@ describe.each([[true], [false]])(
 describe.each([[true], [false]])(
     'tests deleting Character when isPrivate === %o',
     (isPrivate: boolean) => {
-        const characterKey = 'CHARA_KEY';
+        const characterKey = 'CHARACTER_KEY';
 
         const state: State = {
             ...Resources.minimumState,
