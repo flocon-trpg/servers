@@ -86,7 +86,6 @@ const WritingMessageStatusType_1 = require("../../../enums/WritingMessageStatusT
 const WritingMessageStatusInputType_1 = require("../../../enums/WritingMessageStatusInputType");
 const FileSourceType_1 = require("../../../enums/FileSourceType");
 const result_1 = require("@kizahasi/result");
-const util_1 = require("@kizahasi/util");
 const flocon_core_1 = require("@kizahasi/flocon-core");
 const ParticipantRole_1 = require("../../../enums/ParticipantRole");
 const roles_1 = require("../../../roles");
@@ -104,7 +103,7 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
                 type: flocon_core_1.replace,
                 replace: {
                     newValue: {
-                        $v: 1,
+                        $v: 2,
                         name: create.name,
                         role: create.role,
                         boards: {},
@@ -120,7 +119,7 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
             participantOperation = {
                 type: 'update',
                 update: {
-                    $v: 1,
+                    $v: 2,
                     role: update.role,
                     name: update.name,
                 },
@@ -134,12 +133,12 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
         };
     }
     const roomUpOperation = {
-        $v: 1,
+        $v: 2,
         participants: {
             [myUserUid]: participantOperation,
         },
     };
-    const transformed = flocon_core_1.serverTransform({ type: flocon_core_1.admin })({
+    const transformed = (0, flocon_core_1.serverTransform)({ type: flocon_core_1.admin })({
         prevState: roomState,
         currentState: roomState,
         clientOperation: roomUpOperation,
@@ -192,8 +191,8 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
 const joinRoomCore = async ({ args, context, strategy, }) => {
     const queue = async () => {
         const em = context.em;
-        const authorizedUser = helpers_1.ensureAuthorizedUser(context);
-        const findResult = await helpers_1.findRoomAndMyParticipant({
+        const authorizedUser = (0, helpers_1.ensureAuthorizedUser)(context);
+        const findResult = await (0, helpers_1.findRoomAndMyParticipant)({
             em,
             userUid: authorizedUser.userUid,
             roomId: args.id,
@@ -261,8 +260,8 @@ const promoteMeCore = async ({ roomId, context, strategy, }) => {
     const queue = async () => {
         var _a;
         const em = context.em;
-        const authorizedUser = helpers_1.ensureAuthorizedUser(context);
-        const findResult = await helpers_1.findRoomAndMyParticipant({
+        const authorizedUser = (0, helpers_1.ensureAuthorizedUser)(context);
+        const findResult = await (0, helpers_1.findRoomAndMyParticipant)({
             em,
             userUid: authorizedUser.userUid,
             roomId,
@@ -351,9 +350,9 @@ const checkChannelKey = (channelKey, isSpectator) => {
                 return WriteRoomPublicMessageFailureType_1.WriteRoomPublicMessageFailureType.NotAuthorized;
             }
             return null;
-        case util_1.$free:
+        case flocon_core_1.$free:
             return null;
-        case util_1.$system:
+        case flocon_core_1.$system:
             return WriteRoomPublicMessageFailureType_1.WriteRoomPublicMessageFailureType.NotAuthorized;
         default:
             return WriteRoomPublicMessageFailureType_1.WriteRoomPublicMessageFailureType.NotAllowedChannelKey;
@@ -362,7 +361,7 @@ const checkChannelKey = (channelKey, isSpectator) => {
 const analyzeTextAndSetToEntity = async (params) => {
     var _a, _b, _c;
     const defaultGameType = 'DiceBot';
-    const analyzed = await main_1.analyze(Object.assign(Object.assign({}, params), { gameType: (_a = params.gameType) !== null && _a !== void 0 ? _a : defaultGameType, text: params.textSource }));
+    const analyzed = await (0, main_1.analyze)(Object.assign(Object.assign({}, params), { gameType: (_a = params.gameType) !== null && _a !== void 0 ? _a : defaultGameType, text: params.textSource }));
     if (analyzed.isError) {
         return analyzed;
     }
@@ -478,7 +477,7 @@ const createRoomPrivateMessage = async ({ msg, visibleTo, }) => {
 };
 const fixTextColor = (color) => {
     try {
-        return color_1.default(color).hex();
+        return (0, color_1.default)(color).hex();
     }
     catch (_a) {
         return undefined;
@@ -492,7 +491,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
         const queue = async () => {
             const em = context.em;
             const roomModels = await em.find(Room$MikroORM.Room, {});
-            const rooms = roomModels.map(model => global_1.stateToGraphQL({ roomEntity: model }));
+            const rooms = roomModels.map(model => (0, global_1.stateToGraphQL)({ roomEntity: model }));
             return {
                 rooms,
             };
@@ -565,7 +564,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             pieceValueLogs.push(global_3.DicePieceValueLog.MikroORM.ToGraphQL.state(msg));
         }
         for (const msg of await room.numberPieceValueLogs.loadItems()) {
-            pieceValueLogs.push(global_3.NumberPieceValueLog.MikroORM.ToGraphQL.state(msg));
+            pieceValueLogs.push(global_3.StringPieceValueLog.MikroORM.ToGraphQL.state(msg));
         }
         const soundEffects = [];
         for (const se of await room.roomSes.loadItems()) {
@@ -595,8 +594,8 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
     async getMessages(args, context) {
         const queue = async () => {
             const em = context.em;
-            const authorizedUserUid = helpers_1.ensureAuthorizedUser(context).userUid;
-            const findResult = await helpers_1.findRoomAndMyParticipant({
+            const authorizedUserUid = (0, helpers_1.ensureAuthorizedUser)(context).userUid;
+            const findResult = await (0, helpers_1.findRoomAndMyParticipant)({
                 em,
                 userUid: authorizedUserUid,
                 roomId: args.roomId,
@@ -629,8 +628,8 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
     async getLog(args, context, pubSub) {
         const queue = async () => {
             const em = context.em;
-            const authorizedUserUid = helpers_1.ensureAuthorizedUser(context).userUid;
-            const findResult = await helpers_1.findRoomAndMyParticipant({
+            const authorizedUserUid = (0, helpers_1.ensureAuthorizedUser)(context).userUid;
+            const findResult = await (0, helpers_1.findRoomAndMyParticipant)({
                 em,
                 userUid: authorizedUserUid,
                 roomId: args.roomId,
@@ -662,7 +661,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             }
             const messages = await this.getRoomMessagesFromDb(room, authorizedUserUid, 'log');
             em.clear();
-            const systemMessageEntity = await roomMessage_1.writeSystemMessage({
+            const systemMessageEntity = await (0, roomMessage_1.writeSystemMessage)({
                 em,
                 text: `${me.name}(${authorizedUserUid}) が全てのログを出力しました。`,
                 room: room,
@@ -675,7 +674,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
                     roomId: room.id,
                     value: createRoomPublicMessage({
                         msg: systemMessageEntity,
-                        channelKey: util_1.$system,
+                        channelKey: flocon_core_1.$system,
                     }),
                     createdBy: undefined,
                     visibleTo: undefined,
@@ -697,8 +696,8 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
     async getRoomConnections(roomId, context) {
         const queue = async () => {
             const em = context.em;
-            const authorizedUserUid = helpers_1.ensureAuthorizedUser(context).userUid;
-            const findResult = await helpers_1.findRoomAndMyParticipant({
+            const authorizedUserUid = (0, helpers_1.ensureAuthorizedUser)(context).userUid;
+            const findResult = await (0, helpers_1.findRoomAndMyParticipant)({
                 em,
                 userUid: authorizedUserUid,
                 roomId,
@@ -738,15 +737,15 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
     async createRoom(input, context) {
         const queue = async () => {
             const em = context.em;
-            const authorizedUser = helpers_1.ensureAuthorizedUser(context);
+            const authorizedUser = (0, helpers_1.ensureAuthorizedUser)(context);
             const newRoom = new Room$MikroORM.Room({
                 name: input.roomName,
                 createdBy: authorizedUser.userUid,
                 value: {
-                    $v: 1,
+                    $v: 2,
                     participants: {
                         [authorizedUser.userUid]: {
-                            $v: 1,
+                            $v: 2,
                             boards: {},
                             characters: {},
                             imagePieceValues: {},
@@ -800,7 +799,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
     async deleteRoom(args, context, pubSub) {
         const queue = async () => {
             const em = context.em;
-            const authorizedUserUid = helpers_1.ensureAuthorizedUser(context).userUid;
+            const authorizedUserUid = (0, helpers_1.ensureAuthorizedUser)(context).userUid;
             const room = await em.findOne(Room$MikroORM.Room, { id: args.id });
             if (room == null) {
                 return {
@@ -910,8 +909,8 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
     async changeParticipantName(args, context, pubSub) {
         const queue = async () => {
             const em = context.em;
-            const authorizedUserUid = helpers_1.ensureAuthorizedUser(context).userUid;
-            const findResult = await helpers_1.findRoomAndMyParticipant({
+            const authorizedUserUid = (0, helpers_1.ensureAuthorizedUser)(context).userUid;
+            const findResult = await (0, helpers_1.findRoomAndMyParticipant)({
                 em,
                 userUid: authorizedUserUid,
                 roomId: args.roomId,
@@ -962,8 +961,8 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
     async getRoom(args, context) {
         const queue = async () => {
             const em = context.em;
-            const authorizedUserUid = helpers_1.ensureAuthorizedUser(context).userUid;
-            const findResult = await helpers_1.findRoomAndMyParticipant({
+            const authorizedUserUid = (0, helpers_1.ensureAuthorizedUser)(context).userUid;
+            const findResult = await (0, helpers_1.findRoomAndMyParticipant)({
                 em,
                 userUid: authorizedUserUid,
                 roomId: args.id,
@@ -976,7 +975,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             const { room, me } = findResult;
             if ((me === null || me === void 0 ? void 0 : me.role) == null) {
                 return result_1.Result.ok({
-                    roomAsListItem: global_1.stateToGraphQL({ roomEntity: room }),
+                    roomAsListItem: (0, global_1.stateToGraphQL)({ roomEntity: room }),
                 });
             }
             const roomState = await global_2.GlobalRoom.MikroORM.ToGlobal.state(room, em);
@@ -1000,8 +999,8 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
     async leaveRoom(id, context, pubSub) {
         const queue = async () => {
             const em = context.em;
-            const authorizedUserUid = helpers_1.ensureAuthorizedUser(context).userUid;
-            const findResult = await helpers_1.findRoomAndMyParticipant({
+            const authorizedUserUid = (0, helpers_1.ensureAuthorizedUser)(context).userUid;
+            const findResult = await (0, helpers_1.findRoomAndMyParticipant)({
                 em,
                 userUid: authorizedUserUid,
                 roomId: id,
@@ -1049,8 +1048,8 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
     static async operateCore({ args, context, }) {
         const queue = async () => {
             const em = context.em;
-            const authorizedUserUid = helpers_1.ensureAuthorizedUser(context).userUid;
-            const findResult = await helpers_1.findRoomAndMyParticipant({
+            const authorizedUserUid = (0, helpers_1.ensureAuthorizedUser)(context).userUid;
+            const findResult = await (0, helpers_1.findRoomAndMyParticipant)({
                 em,
                 userUid: authorizedUserUid,
                 roomId: args.id,
@@ -1066,7 +1065,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             if (me === undefined) {
                 return result_1.Result.ok({
                     type: 'nonJoined',
-                    result: { roomAsListItem: global_1.stateToGraphQL({ roomEntity: room }) },
+                    result: { roomAsListItem: (0, global_1.stateToGraphQL)({ roomEntity: room }) },
                 });
             }
             const clientOperation = global_2.GlobalRoom.GraphQL.ToGlobal.upOperation(args.operation);
@@ -1081,7 +1080,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
             let prevState = roomState;
             let twoWayOperation = undefined;
             if (downOperation.value !== undefined) {
-                const restoredRoom = flocon_core_1.restore({
+                const restoredRoom = (0, flocon_core_1.restore)({
                     nextState: roomState,
                     downOperation: downOperation.value,
                 });
@@ -1091,7 +1090,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
                 prevState = restoredRoom.value.prevState;
                 twoWayOperation = restoredRoom.value.twoWayOperation;
             }
-            const transformed = flocon_core_1.serverTransform({ type: flocon_core_1.client, userUid: authorizedUserUid })({
+            const transformed = (0, flocon_core_1.serverTransform)({ type: flocon_core_1.client, userUid: authorizedUserUid })({
                 prevState,
                 currentState: roomState,
                 clientOperation: clientOperation,
@@ -1111,7 +1110,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
                 prevState: roomState,
                 operation,
             });
-            const logs = flocon_core_1.createLogs({ prevState: roomState, nextState: nextRoomState });
+            const logs = (0, flocon_core_1.createLogs)({ prevState: roomState, nextState: nextRoomState });
             const dicePieceLogEntities = [];
             logs === null || logs === void 0 ? void 0 : logs.dicePieceValueLogs.forEach(log => {
                 const entity = new mikro_orm_1.DicePieceValueLog({
@@ -1124,16 +1123,16 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
                 dicePieceLogEntities.push(entity);
                 em.persist(entity);
             });
-            const numberPieceLogEntities = [];
-            logs === null || logs === void 0 ? void 0 : logs.numberPieceValueLogs.forEach(log => {
-                const entity = new mikro_orm_1.NumberPieceValueLog({
+            const stringPieceLogEntities = [];
+            logs === null || logs === void 0 ? void 0 : logs.stringPieceValueLogs.forEach(log => {
+                const entity = new mikro_orm_1.StringPieceValueLog({
                     characterCreatedBy: log.characterKey.createdBy,
                     characterId: log.characterKey.id,
                     stateId: log.stateId,
                     room,
                     value: log.value,
                 });
-                numberPieceLogEntities.push(entity);
+                stringPieceLogEntities.push(entity);
                 em.persist(entity);
             });
             await em.flush();
@@ -1169,12 +1168,12 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
                         visibleTo: undefined,
                         value: global_3.DicePieceValueLog.MikroORM.ToGraphQL.state(log),
                     })),
-                    ...numberPieceLogEntities.map(log => ({
+                    ...stringPieceLogEntities.map(log => ({
                         type: 'messageUpdatePayload',
                         roomId: room.id,
                         createdBy: undefined,
                         visibleTo: undefined,
-                        value: global_3.NumberPieceValueLog.MikroORM.ToGraphQL.state(log),
+                        value: global_3.StringPieceValueLog.MikroORM.ToGraphQL.state(log),
                     })),
                 ],
                 result: {
@@ -1210,8 +1209,8 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
         const queue = async () => {
             var _a, _b, _c, _d, _e, _f;
             const em = context.em;
-            const authorizedUser = helpers_1.ensureAuthorizedUser(context);
-            const findResult = await helpers_1.findRoomAndMyParticipant({
+            const authorizedUser = (0, helpers_1.ensureAuthorizedUser)(context);
+            const findResult = await (0, helpers_1.findRoomAndMyParticipant)({
                 em,
                 userUid: authorizedUser.userUid,
                 roomId: args.roomId,
@@ -1307,8 +1306,8 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
         const queue = async () => {
             var _a, _b, _c, _d, _e, _f;
             const em = context.em;
-            const authorizedUser = helpers_1.ensureAuthorizedUser(context);
-            const findResult = await helpers_1.findRoomAndMyParticipant({
+            const authorizedUser = (0, helpers_1.ensureAuthorizedUser)(context);
+            const findResult = await (0, helpers_1.findRoomAndMyParticipant)({
                 em,
                 userUid: authorizedUser.userUid,
                 roomId: args.roomId,
@@ -1405,8 +1404,8 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
     async writeRoomSoundEffect(args, context, pubSub) {
         const queue = async () => {
             const em = context.em;
-            const authorizedUser = helpers_1.ensureAuthorizedUser(context);
-            const findResult = await helpers_1.findRoomAndMyParticipant({
+            const authorizedUser = (0, helpers_1.ensureAuthorizedUser)(context);
+            const findResult = await (0, helpers_1.findRoomAndMyParticipant)({
                 em,
                 userUid: authorizedUser.userUid,
                 roomId: args.roomId,
@@ -1473,8 +1472,8 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
         const queue = async () => {
             var _a, _b, _c, _d;
             const em = context.em;
-            const authorizedUserUid = helpers_1.ensureAuthorizedUser(context).userUid;
-            const findResult = await helpers_1.findRoomAndMyParticipant({
+            const authorizedUserUid = (0, helpers_1.ensureAuthorizedUser)(context).userUid;
+            const findResult = await (0, helpers_1.findRoomAndMyParticipant)({
                 em,
                 userUid: authorizedUserUid,
                 roomId: args.roomId,
@@ -1602,8 +1601,8 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
         const queue = async () => {
             var _a, _b, _c, _d;
             const em = context.em;
-            const authorizedUserUid = helpers_1.ensureAuthorizedUser(context).userUid;
-            const findResult = await helpers_1.findRoomAndMyParticipant({
+            const authorizedUserUid = (0, helpers_1.ensureAuthorizedUser)(context).userUid;
+            const findResult = await (0, helpers_1.findRoomAndMyParticipant)({
                 em,
                 userUid: authorizedUserUid,
                 roomId: args.roomId,
@@ -1730,8 +1729,8 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
         const queue = async () => {
             var _a, _b, _c, _d;
             const em = context.em;
-            const authorizedUserUid = helpers_1.ensureAuthorizedUser(context).userUid;
-            const findResult = await helpers_1.findRoomAndMyParticipant({
+            const authorizedUserUid = (0, helpers_1.ensureAuthorizedUser)(context).userUid;
+            const findResult = await (0, helpers_1.findRoomAndMyParticipant)({
                 em,
                 userUid: authorizedUserUid,
                 roomId: args.roomId,
@@ -1858,7 +1857,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
         return result.value.value.result;
     }
     async updateWritingMessageStatus(args, context, pubSub) {
-        const authorizedUserUid = helpers_1.ensureAuthorizedUser(context).userUid;
+        const authorizedUserUid = (0, helpers_1.ensureAuthorizedUser)(context).userUid;
         let status;
         switch (args.newStatus) {
             case WritingMessageStatusInputType_1.WritingMessageStatusInputType.Cleared:
@@ -1970,242 +1969,242 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
     }
 };
 __decorate([
-    type_graphql_1.Query(() => GetRoomsListResult_1.GetRoomsListResult),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
-    __param(0, type_graphql_1.Ctx()),
+    (0, type_graphql_1.Query)(() => GetRoomsListResult_1.GetRoomsListResult),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(2)),
+    __param(0, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "getRoomsList", null);
 __decorate([
-    type_graphql_1.Query(() => RequiresPhraseResult_1.RequiresPhraseResult),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
-    __param(0, type_graphql_1.Arg('roomId')),
-    __param(1, type_graphql_1.Ctx()),
+    (0, type_graphql_1.Query)(() => RequiresPhraseResult_1.RequiresPhraseResult),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(2)),
+    __param(0, (0, type_graphql_1.Arg)('roomId')),
+    __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "requiresPhraseToJoinAsPlayer", null);
 __decorate([
-    type_graphql_1.Query(() => graphql_2.GetRoomMessagesResult),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(10)),
-    __param(0, type_graphql_1.Args()),
-    __param(1, type_graphql_1.Ctx()),
+    (0, type_graphql_1.Query)(() => graphql_2.GetRoomMessagesResult),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(10)),
+    __param(0, (0, type_graphql_1.Args)()),
+    __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.GetMessagesArgs, Object]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "getMessages", null);
 __decorate([
-    type_graphql_1.Query(() => graphql_2.GetRoomLogResult),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(10)),
-    __param(0, type_graphql_1.Args()),
-    __param(1, type_graphql_1.Ctx()),
-    __param(2, type_graphql_1.PubSub()),
+    (0, type_graphql_1.Query)(() => graphql_2.GetRoomLogResult),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(10)),
+    __param(0, (0, type_graphql_1.Args)()),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __param(2, (0, type_graphql_1.PubSub)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.GetLogArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "getLog", null);
 __decorate([
-    type_graphql_1.Query(() => object_args_input_1.GetRoomConnectionsResult),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
-    __param(0, type_graphql_1.Arg('roomId')),
-    __param(1, type_graphql_1.Ctx()),
+    (0, type_graphql_1.Query)(() => object_args_input_1.GetRoomConnectionsResult),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(2)),
+    __param(0, (0, type_graphql_1.Arg)('roomId')),
+    __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "getRoomConnections", null);
 __decorate([
-    type_graphql_1.Mutation(() => CreateRoomResult_1.CreateRoomResult),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
-    __param(0, type_graphql_1.Arg('input')),
-    __param(1, type_graphql_1.Ctx()),
+    (0, type_graphql_1.Mutation)(() => CreateRoomResult_1.CreateRoomResult),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(2)),
+    __param(0, (0, type_graphql_1.Arg)('input')),
+    __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.CreateRoomInput, Object]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "createRoom", null);
 __decorate([
-    type_graphql_1.Mutation(() => DeleteRoomResult_1.DeleteRoomResult),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
-    __param(0, type_graphql_1.Args()),
-    __param(1, type_graphql_1.Ctx()),
-    __param(2, type_graphql_1.PubSub()),
+    (0, type_graphql_1.Mutation)(() => DeleteRoomResult_1.DeleteRoomResult),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(2)),
+    __param(0, (0, type_graphql_1.Args)()),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __param(2, (0, type_graphql_1.PubSub)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.DeleteRoomArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "deleteRoom", null);
 __decorate([
-    type_graphql_1.Mutation(() => JoinRoomResult_1.JoinRoomResult),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
-    __param(0, type_graphql_1.Args()),
-    __param(1, type_graphql_1.Ctx()),
-    __param(2, type_graphql_1.PubSub()),
+    (0, type_graphql_1.Mutation)(() => JoinRoomResult_1.JoinRoomResult),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(2)),
+    __param(0, (0, type_graphql_1.Args)()),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __param(2, (0, type_graphql_1.PubSub)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.JoinRoomArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "joinRoomAsPlayer", null);
 __decorate([
-    type_graphql_1.Mutation(() => JoinRoomResult_1.JoinRoomResult),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
-    __param(0, type_graphql_1.Args()),
-    __param(1, type_graphql_1.Ctx()),
-    __param(2, type_graphql_1.PubSub()),
+    (0, type_graphql_1.Mutation)(() => JoinRoomResult_1.JoinRoomResult),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(2)),
+    __param(0, (0, type_graphql_1.Args)()),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __param(2, (0, type_graphql_1.PubSub)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.JoinRoomArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "joinRoomAsSpectator", null);
 __decorate([
-    type_graphql_1.Mutation(() => PromoteMeResult_1.PromoteResult),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
-    __param(0, type_graphql_1.Args()),
-    __param(1, type_graphql_1.Ctx()),
-    __param(2, type_graphql_1.PubSub()),
+    (0, type_graphql_1.Mutation)(() => PromoteMeResult_1.PromoteResult),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(2)),
+    __param(0, (0, type_graphql_1.Args)()),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __param(2, (0, type_graphql_1.PubSub)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.PromoteArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "promoteToPlayer", null);
 __decorate([
-    type_graphql_1.Mutation(() => ChangeParticipantNameResult_1.ChangeParticipantNameResult),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
-    __param(0, type_graphql_1.Args()),
-    __param(1, type_graphql_1.Ctx()),
-    __param(2, type_graphql_1.PubSub()),
+    (0, type_graphql_1.Mutation)(() => ChangeParticipantNameResult_1.ChangeParticipantNameResult),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(2)),
+    __param(0, (0, type_graphql_1.Args)()),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __param(2, (0, type_graphql_1.PubSub)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.ChangeParticipantNameArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "changeParticipantName", null);
 __decorate([
-    type_graphql_1.Query(() => GetRoomResult_1.GetRoomResult),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
-    __param(0, type_graphql_1.Args()),
-    __param(1, type_graphql_1.Ctx()),
+    (0, type_graphql_1.Query)(() => GetRoomResult_1.GetRoomResult),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(2)),
+    __param(0, (0, type_graphql_1.Args)()),
+    __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.GetRoomArgs, Object]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "getRoom", null);
 __decorate([
-    type_graphql_1.Mutation(() => LeaveRoomResult_1.LeaveRoomResult),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
-    __param(0, type_graphql_1.Arg('id')),
-    __param(1, type_graphql_1.Ctx()),
-    __param(2, type_graphql_1.PubSub()),
+    (0, type_graphql_1.Mutation)(() => LeaveRoomResult_1.LeaveRoomResult),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(2)),
+    __param(0, (0, type_graphql_1.Arg)('id')),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __param(2, (0, type_graphql_1.PubSub)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "leaveRoom", null);
 __decorate([
-    type_graphql_1.Mutation(() => OperateRoomResult_1.OperateRoomResult),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(3)),
-    __param(0, type_graphql_1.Args()),
-    __param(1, type_graphql_1.Ctx()),
-    __param(2, type_graphql_1.PubSub()),
+    (0, type_graphql_1.Mutation)(() => OperateRoomResult_1.OperateRoomResult),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(3)),
+    __param(0, (0, type_graphql_1.Args)()),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __param(2, (0, type_graphql_1.PubSub)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.OperateArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "operate", null);
 __decorate([
-    type_graphql_1.Mutation(() => graphql_2.WriteRoomPublicMessageResult),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(3)),
-    __param(0, type_graphql_1.Args()),
-    __param(1, type_graphql_1.Ctx()),
-    __param(2, type_graphql_1.PubSub()),
+    (0, type_graphql_1.Mutation)(() => graphql_2.WriteRoomPublicMessageResult),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(3)),
+    __param(0, (0, type_graphql_1.Args)()),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __param(2, (0, type_graphql_1.PubSub)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.WritePublicMessageArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "writePublicMessage", null);
 __decorate([
-    type_graphql_1.Mutation(() => graphql_2.WriteRoomPrivateMessageResult),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(3)),
-    __param(0, type_graphql_1.Args()),
-    __param(1, type_graphql_1.Ctx()),
-    __param(2, type_graphql_1.PubSub()),
+    (0, type_graphql_1.Mutation)(() => graphql_2.WriteRoomPrivateMessageResult),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(3)),
+    __param(0, (0, type_graphql_1.Args)()),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __param(2, (0, type_graphql_1.PubSub)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.WritePrivateMessageArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "writePrivateMessage", null);
 __decorate([
-    type_graphql_1.Mutation(() => graphql_2.WriteRoomSoundEffectResult),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(3)),
-    __param(0, type_graphql_1.Args()),
-    __param(1, type_graphql_1.Ctx()),
-    __param(2, type_graphql_1.PubSub()),
+    (0, type_graphql_1.Mutation)(() => graphql_2.WriteRoomSoundEffectResult),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(3)),
+    __param(0, (0, type_graphql_1.Args)()),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __param(2, (0, type_graphql_1.PubSub)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.WriteRoomSoundEffectArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "writeRoomSoundEffect", null);
 __decorate([
-    type_graphql_1.Mutation(() => graphql_2.MakeMessageNotSecretResult),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
-    __param(0, type_graphql_1.Args()),
-    __param(1, type_graphql_1.Ctx()),
-    __param(2, type_graphql_1.PubSub()),
+    (0, type_graphql_1.Mutation)(() => graphql_2.MakeMessageNotSecretResult),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(2)),
+    __param(0, (0, type_graphql_1.Args)()),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __param(2, (0, type_graphql_1.PubSub)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.MessageIdArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "makeMessageNotSecret", null);
 __decorate([
-    type_graphql_1.Mutation(() => graphql_2.DeleteMessageResult),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
-    __param(0, type_graphql_1.Args()),
-    __param(1, type_graphql_1.Ctx()),
-    __param(2, type_graphql_1.PubSub()),
+    (0, type_graphql_1.Mutation)(() => graphql_2.DeleteMessageResult),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(2)),
+    __param(0, (0, type_graphql_1.Args)()),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __param(2, (0, type_graphql_1.PubSub)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.MessageIdArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "deleteMessage", null);
 __decorate([
-    type_graphql_1.Mutation(() => graphql_2.EditMessageResult),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
-    __param(0, type_graphql_1.Args()),
-    __param(1, type_graphql_1.Ctx()),
-    __param(2, type_graphql_1.PubSub()),
+    (0, type_graphql_1.Mutation)(() => graphql_2.EditMessageResult),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(2)),
+    __param(0, (0, type_graphql_1.Args)()),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __param(2, (0, type_graphql_1.PubSub)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.EditMessageArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "editMessage", null);
 __decorate([
-    type_graphql_1.Mutation(() => Boolean),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
-    __param(0, type_graphql_1.Args()),
-    __param(1, type_graphql_1.Ctx()),
-    __param(2, type_graphql_1.PubSub()),
+    (0, type_graphql_1.Mutation)(() => Boolean),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(2)),
+    __param(0, (0, type_graphql_1.Args)()),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __param(2, (0, type_graphql_1.PubSub)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.UpdateWritingMessageStateArgs, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "updateWritingMessageStatus", null);
 __decorate([
-    type_graphql_1.Subscription(() => object_args_input_1.RoomEvent, {
+    (0, type_graphql_1.Subscription)(() => object_args_input_1.RoomEvent, {
         topics: Topics_1.ROOM_EVENT,
         nullable: true,
     }),
-    __param(0, type_graphql_1.Root()),
-    __param(1, type_graphql_1.Arg('id')),
-    __param(2, type_graphql_1.Ctx()),
+    __param(0, (0, type_graphql_1.Root)()),
+    __param(1, (0, type_graphql_1.Arg)('id')),
+    __param(2, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Object)
 ], RoomResolver.prototype, "roomEvent", null);
 RoomResolver = RoomResolver_1 = __decorate([
-    type_graphql_1.Resolver()
+    (0, type_graphql_1.Resolver)()
 ], RoomResolver);
 exports.RoomResolver = RoomResolver;

@@ -45,11 +45,11 @@ const RateLimitMiddleware_1 = require("../middlewares/RateLimitMiddleware");
 let MainResolver = class MainResolver {
     async getAvailableGameSystems() {
         return {
-            value: main_1.listAvailableGameSystems(),
+            value: (0, main_1.listAvailableGameSystems)(),
         };
     }
     async getFiles(input, context) {
-        const user = helpers_1.ensureAuthorizedUser(context);
+        const user = (0, helpers_1.ensureAuthorizedUser)(context);
         const fileTagsFilter = input.fileTagIds.map(id => ({
             fileTags: {
                 id,
@@ -73,7 +73,7 @@ let MainResolver = class MainResolver {
         }
         const filenamesToDelete = [];
         const thumbFilenamesToDelete = [];
-        const user = helpers_1.ensureAuthorizedUser(context);
+        const user = (0, helpers_1.ensureAuthorizedUser)(context);
         for (const filename of filenames) {
             const file = await context.em.findOne(mikro_orm_2.File, {
                 createdBy: user,
@@ -94,7 +94,7 @@ let MainResolver = class MainResolver {
         await context.em.flush();
         for (const filename of filenamesToDelete) {
             const filePath = path_1.default.resolve(directory, filename);
-            const statResult = await fs_extra_1.stat(filePath).catch(err => {
+            const statResult = await (0, fs_extra_1.stat)(filePath).catch(err => {
                 console.warn('stat(%s) threw an error. Maybe the file was not found?: %o', filePath, err);
                 return false;
             });
@@ -102,7 +102,7 @@ let MainResolver = class MainResolver {
                 continue;
             }
             if (statResult.isFile()) {
-                await fs_extra_1.remove(filePath);
+                await (0, fs_extra_1.remove)(filePath);
             }
             else {
                 console.warn('%s is not a file', filePath);
@@ -110,7 +110,7 @@ let MainResolver = class MainResolver {
         }
         for (const filename of thumbFilenamesToDelete) {
             const filePath = path_1.default.resolve(directory, thumbsDir_1.thumbsDir, filename);
-            const statResult = await fs_extra_1.stat(filePath).catch(err => {
+            const statResult = await (0, fs_extra_1.stat)(filePath).catch(err => {
                 console.warn('stat(%s) threw an error. Maybe the file was not found?: %o', filePath, err);
                 return false;
             });
@@ -118,7 +118,7 @@ let MainResolver = class MainResolver {
                 continue;
             }
             if (statResult.isFile()) {
-                await fs_extra_1.remove(filePath);
+                await (0, fs_extra_1.remove)(filePath);
             }
             else {
                 console.warn('%s is not a file', filePath);
@@ -127,7 +127,7 @@ let MainResolver = class MainResolver {
         return filenamesToDelete;
     }
     async editFileTags(input, context) {
-        const user = helpers_1.ensureAuthorizedUser(context);
+        const user = (0, helpers_1.ensureAuthorizedUser)(context);
         const map = new util_1.DualKeyMap();
         input.actions.forEach(action => {
             action.add.forEach(a => {
@@ -173,7 +173,7 @@ let MainResolver = class MainResolver {
     }
     async createFileTag(context, tagName) {
         const maxTagsCount = 10;
-        const user = helpers_1.ensureAuthorizedUser(context);
+        const user = (0, helpers_1.ensureAuthorizedUser)(context);
         const tagsCount = await context.em.count(mikro_orm_3.FileTag, { user });
         if (maxTagsCount <= tagsCount) {
             return null;
@@ -188,7 +188,7 @@ let MainResolver = class MainResolver {
         };
     }
     async deleteFileTag(context, tagId) {
-        const user = helpers_1.ensureAuthorizedUser(context);
+        const user = (0, helpers_1.ensureAuthorizedUser)(context);
         const fileTagToDelete = await context.em.findOne(mikro_orm_3.FileTag, { user, id: tagId });
         if (fileTagToDelete == null) {
             return false;
@@ -200,8 +200,8 @@ let MainResolver = class MainResolver {
         return true;
     }
     async isEntry(context) {
-        const userUid = helpers_1.ensureUserUid(context);
-        return await helpers_1.checkEntry({
+        const userUid = (0, helpers_1.ensureUserUid)(context);
+        return await (0, helpers_1.checkEntry)({
             em: context.em,
             userUid,
             baasType: BaasType_1.BaasType.Firebase,
@@ -231,7 +231,7 @@ let MainResolver = class MainResolver {
         const queue = async () => {
             const em = context.em;
             const serverConfig = context.serverConfig;
-            const decodedIdToken = helpers_1.checkSignIn(context);
+            const decodedIdToken = (0, helpers_1.checkSignIn)(context);
             if (decodedIdToken === helpers_1.NotSignIn) {
                 return {
                     type: EntryToServerResultType_1.EntryToServerResultType.NotSignIn,
@@ -257,7 +257,7 @@ let MainResolver = class MainResolver {
                         : EntryToServerResultType_1.EntryToServerResultType.NoPhraseRequired,
                 };
             }
-            if (phrase == null || !(await helpers_1.comparePassword(phrase, serverConfig.entryPassword))) {
+            if (phrase == null || !(await (0, helpers_1.comparePassword)(phrase, serverConfig.entryPassword))) {
                 return {
                     type: EntryToServerResultType_1.EntryToServerResultType.WrongPhrase,
                 };
@@ -288,102 +288,102 @@ let MainResolver = class MainResolver {
     }
 };
 __decorate([
-    type_graphql_1.Query(() => GetAvailableGameSystemsResult_1.GetAvailableGameSystemsResult),
+    (0, type_graphql_1.Query)(() => GetAvailableGameSystemsResult_1.GetAvailableGameSystemsResult),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], MainResolver.prototype, "getAvailableGameSystems", null);
 __decorate([
-    type_graphql_1.Query(() => GetFilesResult_1.GetFilesResult),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
-    __param(0, type_graphql_1.Arg('input')),
-    __param(1, type_graphql_1.Ctx()),
+    (0, type_graphql_1.Query)(() => GetFilesResult_1.GetFilesResult),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(2)),
+    __param(0, (0, type_graphql_1.Arg)('input')),
+    __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.GetFilesInput, Object]),
     __metadata("design:returntype", Promise)
 ], MainResolver.prototype, "getFiles", null);
 __decorate([
-    type_graphql_1.Mutation(() => [String]),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
-    __param(0, type_graphql_1.Arg('filenames', () => [String])),
-    __param(1, type_graphql_1.Ctx()),
+    (0, type_graphql_1.Mutation)(() => [String]),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(2)),
+    __param(0, (0, type_graphql_1.Arg)('filenames', () => [String])),
+    __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Array, Object]),
     __metadata("design:returntype", Promise)
 ], MainResolver.prototype, "deleteFiles", null);
 __decorate([
-    type_graphql_1.Mutation(() => Boolean),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
-    __param(0, type_graphql_1.Arg('input')),
-    __param(1, type_graphql_1.Ctx()),
+    (0, type_graphql_1.Mutation)(() => Boolean),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(2)),
+    __param(0, (0, type_graphql_1.Arg)('input')),
+    __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [object_args_input_1.EditFileTagsInput, Object]),
     __metadata("design:returntype", Promise)
 ], MainResolver.prototype, "editFileTags", null);
 __decorate([
-    type_graphql_1.Mutation(() => object_args_input_1.FileTag, { nullable: true }),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
-    __param(0, type_graphql_1.Ctx()),
-    __param(1, type_graphql_1.Arg('tagName')),
+    (0, type_graphql_1.Mutation)(() => object_args_input_1.FileTag, { nullable: true }),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(2)),
+    __param(0, (0, type_graphql_1.Ctx)()),
+    __param(1, (0, type_graphql_1.Arg)('tagName')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], MainResolver.prototype, "createFileTag", null);
 __decorate([
-    type_graphql_1.Mutation(() => Boolean),
-    type_graphql_1.Authorized(roles_1.ENTRY),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(2)),
-    __param(0, type_graphql_1.Ctx()),
-    __param(1, type_graphql_1.Arg('tagId')),
+    (0, type_graphql_1.Mutation)(() => Boolean),
+    (0, type_graphql_1.Authorized)(roles_1.ENTRY),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(2)),
+    __param(0, (0, type_graphql_1.Ctx)()),
+    __param(1, (0, type_graphql_1.Arg)('tagId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], MainResolver.prototype, "deleteFileTag", null);
 __decorate([
-    type_graphql_1.Query(() => Boolean),
-    type_graphql_1.Authorized(),
-    type_graphql_1.UseMiddleware(RateLimitMiddleware_1.RateLimitMiddleware(1)),
-    __param(0, type_graphql_1.Ctx()),
+    (0, type_graphql_1.Query)(() => Boolean),
+    (0, type_graphql_1.Authorized)(),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(1)),
+    __param(0, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], MainResolver.prototype, "isEntry", null);
 __decorate([
-    type_graphql_1.Query(() => graphql_2.ServerInfo),
-    __param(0, type_graphql_1.Ctx()),
+    (0, type_graphql_1.Query)(() => graphql_2.ServerInfo),
+    __param(0, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], MainResolver.prototype, "getServerInfo", null);
 __decorate([
-    type_graphql_1.Mutation(() => EntryToServerResult_1.EntryToServerResult),
-    __param(0, type_graphql_1.Arg('phrase', () => String, { nullable: true })),
-    __param(1, type_graphql_1.Ctx()),
+    (0, type_graphql_1.Mutation)(() => EntryToServerResult_1.EntryToServerResult),
+    __param(0, (0, type_graphql_1.Arg)('phrase', () => String, { nullable: true })),
+    __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], MainResolver.prototype, "entryToServer", null);
 __decorate([
-    type_graphql_1.Mutation(() => graphql_1.Pong, { description: 'for test' }),
-    __param(0, type_graphql_1.Arg('value')),
-    __param(1, type_graphql_1.Ctx()),
-    __param(2, type_graphql_1.PubSub()),
+    (0, type_graphql_1.Mutation)(() => graphql_1.Pong, { description: 'for test' }),
+    __param(0, (0, type_graphql_1.Arg)('value')),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __param(2, (0, type_graphql_1.PubSub)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number, Object, type_graphql_1.PubSubEngine]),
     __metadata("design:returntype", Promise)
 ], MainResolver.prototype, "ping", null);
 __decorate([
-    type_graphql_1.Subscription(() => graphql_1.Pong, { topics: Topics_1.PONG, description: 'for test' }),
-    __param(0, type_graphql_1.Root()),
+    (0, type_graphql_1.Subscription)(() => graphql_1.Pong, { topics: Topics_1.PONG, description: 'for test' }),
+    __param(0, (0, type_graphql_1.Root)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", graphql_1.Pong)
 ], MainResolver.prototype, "pong", null);
 MainResolver = __decorate([
-    type_graphql_1.Resolver()
+    (0, type_graphql_1.Resolver)()
 ], MainResolver);
 exports.MainResolver = MainResolver;

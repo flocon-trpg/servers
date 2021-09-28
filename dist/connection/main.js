@@ -8,8 +8,8 @@ const Topics_1 = require("../graphql+mikro-orm/utils/Topics");
 exports.pubSub = new graphql_subscriptions_1.PubSub();
 class ConnectionIdDatabase {
     constructor() {
-        this.userUidDatabase = flocon_core_1.createNodeCache({ stdTTL: 60 * 60 * 48 });
-        this.roomIdDatabase = flocon_core_1.createNodeCache({ stdTTL: 60 * 60 * 48 });
+        this.userUidDatabase = (0, flocon_core_1.createNodeCache)({ stdTTL: 60 * 60 * 48 });
+        this.roomIdDatabase = (0, flocon_core_1.createNodeCache)({ stdTTL: 60 * 60 * 48 });
     }
     async set({ roomId, connectionId, userUid, }) {
         await this.userUidDatabase.set(connectionId, userUid);
@@ -28,7 +28,7 @@ class ConnectionIdDatabase {
 }
 class ConnectionCountDatabase {
     constructor() {
-        this.database = flocon_core_1.createNodeCache({});
+        this.database = (0, flocon_core_1.createNodeCache)({});
     }
     async incr({ roomId, userUid }) {
         const key = `${roomId}@${userUid}`;
@@ -67,7 +67,7 @@ class ConnectionCountDatabase {
 }
 class WritingMessageStatusDatabase {
     constructor() {
-        this.database = flocon_core_1.createNodeCache({ stdTTL: 600, maxKeys: 10000, checkperiod: 299 });
+        this.database = (0, flocon_core_1.createNodeCache)({ stdTTL: 600, maxKeys: 10000, checkperiod: 299 });
     }
     async set({ roomId, status, userUid, }) {
         const key = `${roomId}@${userUid}`;

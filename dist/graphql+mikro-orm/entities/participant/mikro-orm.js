@@ -17,31 +17,31 @@ const mikro_orm_1 = require("../room/mikro-orm");
 const mikro_orm_2 = require("../user/mikro-orm");
 let Participant = class Participant {
     constructor() {
-        this.id = uuid_1.v4();
+        this.id = (0, uuid_1.v4)();
     }
 };
 __decorate([
-    core_1.PrimaryKey(),
+    (0, core_1.PrimaryKey)(),
     __metadata("design:type", String)
 ], Participant.prototype, "id", void 0);
 __decorate([
-    core_1.Enum({ items: () => ParticipantRoleType_1.ParticipantRoleType, index: true, nullable: true }),
+    (0, core_1.Enum)({ items: () => ParticipantRoleType_1.ParticipantRoleType, index: true, nullable: true }),
     __metadata("design:type", String)
 ], Participant.prototype, "role", void 0);
 __decorate([
-    core_1.Property({ nullable: true }),
+    (0, core_1.Property)({ nullable: true }),
     __metadata("design:type", String)
 ], Participant.prototype, "name", void 0);
 __decorate([
-    core_1.ManyToOne(() => mikro_orm_1.Room),
+    (0, core_1.ManyToOne)(() => mikro_orm_1.Room),
     __metadata("design:type", Object)
 ], Participant.prototype, "room", void 0);
 __decorate([
-    core_1.ManyToOne(() => mikro_orm_2.User),
+    (0, core_1.ManyToOne)(() => mikro_orm_2.User),
     __metadata("design:type", Object)
 ], Participant.prototype, "user", void 0);
 Participant = __decorate([
-    core_1.Entity(),
-    core_1.Unique({ properties: ['room', 'user'] })
+    (0, core_1.Entity)(),
+    (0, core_1.Unique)({ properties: ['room', 'user'] })
 ], Participant);
 exports.Participant = Participant;

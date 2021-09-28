@@ -27,11 +27,11 @@ exports.sqlite = 'sqlite';
 exports.plain = 'plain';
 exports.bcrypt = 'bcrypt';
 const database = t.type({
-    postgresql: flocon_core_1.maybe(t.type({
+    postgresql: (0, flocon_core_1.maybe)(t.type({
         dbName: t.string,
         clientUrl: t.string,
     })),
-    sqlite: flocon_core_1.maybe(t.type({
+    sqlite: (0, flocon_core_1.maybe)(t.type({
         dbName: t.string,
     })),
 });
@@ -46,10 +46,10 @@ const uploader = t.type({
     directory: t.string,
 });
 exports.serverConfigJson = t.type({
-    admin: flocon_core_1.maybe(t.union([t.string, t.array(t.string)])),
+    admin: (0, flocon_core_1.maybe)(t.union([t.string, t.array(t.string)])),
     database,
-    entryPassword: flocon_core_1.maybe(entryPassword),
-    uploader: flocon_core_1.maybe(uploader),
-    accessControlAllowOrigin: flocon_core_1.maybe(t.string),
-    ['-experimental-disableRateLimit']: flocon_core_1.maybe(t.boolean),
+    entryPassword: (0, flocon_core_1.maybe)(entryPassword),
+    uploader: (0, flocon_core_1.maybe)(uploader),
+    accessControlAllowOrigin: (0, flocon_core_1.maybe)(t.string),
+    ['-experimental-disableRateLimit']: (0, flocon_core_1.maybe)(t.boolean),
 });

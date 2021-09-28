@@ -17,7 +17,7 @@ const mikro_orm_1 = require("../participant/mikro-orm");
 const mikro_orm_2 = require("../roomMessage/mikro-orm");
 let Room = class Room {
     constructor({ createdBy, name, value, }) {
-        this.id = easyFlake_1.easyFlake();
+        this.id = (0, easyFlake_1.easyFlake)();
         this.version = 1;
         this.revision = 0;
         this.participants = new core_1.Collection(this);
@@ -33,104 +33,104 @@ let Room = class Room {
     }
 };
 __decorate([
-    core_1.PrimaryKey(),
+    (0, core_1.PrimaryKey)(),
     __metadata("design:type", String)
 ], Room.prototype, "id", void 0);
 __decorate([
-    core_1.Property({ version: true, index: true }),
+    (0, core_1.Property)({ version: true, index: true }),
     __metadata("design:type", Number)
 ], Room.prototype, "version", void 0);
 __decorate([
-    core_1.Property({ type: Date, nullable: true, onCreate: () => new Date(), index: true }),
+    (0, core_1.Property)({ type: Date, nullable: true, onCreate: () => new Date(), index: true }),
     __metadata("design:type", Date)
 ], Room.prototype, "createdAt", void 0);
 __decorate([
-    core_1.Property({ type: Date, nullable: true, onUpdate: () => new Date(), index: true }),
+    (0, core_1.Property)({ type: Date, nullable: true, onUpdate: () => new Date(), index: true }),
     __metadata("design:type", Date)
 ], Room.prototype, "updatedAt", void 0);
 __decorate([
-    core_1.Property({ nullable: true }),
+    (0, core_1.Property)({ nullable: true }),
     __metadata("design:type", String)
 ], Room.prototype, "joinAsPlayerPhrase", void 0);
 __decorate([
-    core_1.Property({ nullable: true }),
+    (0, core_1.Property)({ nullable: true }),
     __metadata("design:type", String)
 ], Room.prototype, "joinAsSpectatorPhrase", void 0);
 __decorate([
-    core_1.Property({ index: true }),
+    (0, core_1.Property)({ index: true }),
     __metadata("design:type", String)
 ], Room.prototype, "createdBy", void 0);
 __decorate([
-    core_1.Property(),
+    (0, core_1.Property)(),
     __metadata("design:type", String)
 ], Room.prototype, "name", void 0);
 __decorate([
-    core_1.Property({ type: core_1.JsonType }),
+    (0, core_1.Property)({ type: core_1.JsonType }),
     __metadata("design:type", Object)
 ], Room.prototype, "value", void 0);
 __decorate([
-    core_1.Property(),
+    (0, core_1.Property)(),
     __metadata("design:type", Number)
 ], Room.prototype, "revision", void 0);
 __decorate([
-    core_1.OneToMany(() => mikro_orm_1.Participant, x => x.room, { orphanRemoval: true }),
+    (0, core_1.OneToMany)(() => mikro_orm_1.Participant, x => x.room, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], Room.prototype, "participants", void 0);
 __decorate([
-    core_1.OneToMany(() => RoomOp, x => x.room, { orphanRemoval: true }),
+    (0, core_1.OneToMany)(() => RoomOp, x => x.room, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], Room.prototype, "roomOperations", void 0);
 __decorate([
-    core_1.OneToMany(() => mikro_orm_2.RoomPubCh, x => x.room, { orphanRemoval: true }),
+    (0, core_1.OneToMany)(() => mikro_orm_2.RoomPubCh, x => x.room, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], Room.prototype, "roomChatChs", void 0);
 __decorate([
-    core_1.OneToMany(() => mikro_orm_2.RoomPrvMsg, x => x.room, { orphanRemoval: true }),
+    (0, core_1.OneToMany)(() => mikro_orm_2.RoomPrvMsg, x => x.room, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], Room.prototype, "roomPrvMsgs", void 0);
 __decorate([
-    core_1.OneToMany(() => mikro_orm_2.DicePieceValueLog, x => x.room, { orphanRemoval: true }),
+    (0, core_1.OneToMany)(() => mikro_orm_2.DicePieceValueLog, x => x.room, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], Room.prototype, "dicePieceValueLogs", void 0);
 __decorate([
-    core_1.OneToMany(() => mikro_orm_2.NumberPieceValueLog, x => x.room, { orphanRemoval: true }),
+    (0, core_1.OneToMany)(() => mikro_orm_2.StringPieceValueLog, x => x.room, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], Room.prototype, "numberPieceValueLogs", void 0);
 __decorate([
-    core_1.OneToMany(() => mikro_orm_2.RoomSe, x => x.room, { orphanRemoval: true }),
+    (0, core_1.OneToMany)(() => mikro_orm_2.RoomSe, x => x.room, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], Room.prototype, "roomSes", void 0);
 Room = __decorate([
-    core_1.Entity(),
+    (0, core_1.Entity)(),
     __metadata("design:paramtypes", [Object])
 ], Room);
 exports.Room = Room;
 let RoomOp = class RoomOp {
     constructor({ prevRevision, value }) {
-        this.id = uuid_1.v4();
+        this.id = (0, uuid_1.v4)();
         this.prevRevision = prevRevision;
         this.value = value;
     }
 };
 __decorate([
-    core_1.PrimaryKey(),
+    (0, core_1.PrimaryKey)(),
     __metadata("design:type", String)
 ], RoomOp.prototype, "id", void 0);
 __decorate([
-    core_1.Property({ index: true }),
+    (0, core_1.Property)({ index: true }),
     __metadata("design:type", Number)
 ], RoomOp.prototype, "prevRevision", void 0);
 __decorate([
-    core_1.Property({ type: core_1.JsonType }),
+    (0, core_1.Property)({ type: core_1.JsonType }),
     __metadata("design:type", Object)
 ], RoomOp.prototype, "value", void 0);
 __decorate([
-    core_1.ManyToOne(() => Room, { wrappedReference: true }),
+    (0, core_1.ManyToOne)(() => Room, { wrappedReference: true }),
     __metadata("design:type", Object)
 ], RoomOp.prototype, "room", void 0);
 RoomOp = __decorate([
-    core_1.Entity(),
-    core_1.Unique({ properties: ['prevRevision', 'room'] }),
+    (0, core_1.Entity)(),
+    (0, core_1.Unique)({ properties: ['prevRevision', 'room'] }),
     __metadata("design:paramtypes", [Object])
 ], RoomOp);
 exports.RoomOp = RoomOp;

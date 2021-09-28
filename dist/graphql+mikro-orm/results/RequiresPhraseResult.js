@@ -15,24 +15,24 @@ const RequiresPhraseFailureType_1 = require("../../enums/RequiresPhraseFailureTy
 let RequiresPhraseSuccessResult = class RequiresPhraseSuccessResult {
 };
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", Boolean)
 ], RequiresPhraseSuccessResult.prototype, "value", void 0);
 RequiresPhraseSuccessResult = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], RequiresPhraseSuccessResult);
 exports.RequiresPhraseSuccessResult = RequiresPhraseSuccessResult;
 let RequiresPhraseFailureResult = class RequiresPhraseFailureResult {
 };
 __decorate([
-    type_graphql_1.Field(() => RequiresPhraseFailureType_1.RequiresPhraseFailureType),
+    (0, type_graphql_1.Field)(() => RequiresPhraseFailureType_1.RequiresPhraseFailureType),
     __metadata("design:type", String)
 ], RequiresPhraseFailureResult.prototype, "failureType", void 0);
 RequiresPhraseFailureResult = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], RequiresPhraseFailureResult);
 exports.RequiresPhraseFailureResult = RequiresPhraseFailureResult;
-exports.RequiresPhraseResult = type_graphql_1.createUnionType({
+exports.RequiresPhraseResult = (0, type_graphql_1.createUnionType)({
     name: 'RequiresPhraseResult',
     types: () => [RequiresPhraseSuccessResult, RequiresPhraseFailureResult],
     resolveType: value => {

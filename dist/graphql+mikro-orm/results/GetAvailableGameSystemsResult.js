@@ -14,28 +14,28 @@ const type_graphql_1 = require("type-graphql");
 let AvailableGameSystem = class AvailableGameSystem {
 };
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", String)
 ], AvailableGameSystem.prototype, "id", void 0);
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", String)
 ], AvailableGameSystem.prototype, "sortKey", void 0);
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", String)
 ], AvailableGameSystem.prototype, "name", void 0);
 AvailableGameSystem = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], AvailableGameSystem);
 exports.AvailableGameSystem = AvailableGameSystem;
 let GetAvailableGameSystemsResult = class GetAvailableGameSystemsResult {
 };
 __decorate([
-    type_graphql_1.Field(() => [AvailableGameSystem]),
+    (0, type_graphql_1.Field)(() => [AvailableGameSystem]),
     __metadata("design:type", Array)
 ], GetAvailableGameSystemsResult.prototype, "value", void 0);
 GetAvailableGameSystemsResult = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], GetAvailableGameSystemsResult);
 exports.GetAvailableGameSystemsResult = GetAvailableGameSystemsResult;

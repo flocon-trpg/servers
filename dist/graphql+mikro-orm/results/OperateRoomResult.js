@@ -17,44 +17,44 @@ const graphql_2 = require("../entities/roomAsListItem/graphql");
 let OperateRoomSuccessResult = class OperateRoomSuccessResult {
 };
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", graphql_1.RoomOperation)
 ], OperateRoomSuccessResult.prototype, "operation", void 0);
 OperateRoomSuccessResult = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], OperateRoomSuccessResult);
 exports.OperateRoomSuccessResult = OperateRoomSuccessResult;
 let OperateRoomIdResult = class OperateRoomIdResult {
 };
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", String)
 ], OperateRoomIdResult.prototype, "requestId", void 0);
 OperateRoomIdResult = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], OperateRoomIdResult);
 exports.OperateRoomIdResult = OperateRoomIdResult;
 let OperateRoomNonJoinedResult = class OperateRoomNonJoinedResult {
 };
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", graphql_2.RoomAsListItem)
 ], OperateRoomNonJoinedResult.prototype, "roomAsListItem", void 0);
 OperateRoomNonJoinedResult = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], OperateRoomNonJoinedResult);
 exports.OperateRoomNonJoinedResult = OperateRoomNonJoinedResult;
 let OperateRoomFailureResult = class OperateRoomFailureResult {
 };
 __decorate([
-    type_graphql_1.Field(() => OperateRoomFailureType_1.OperateRoomFailureType),
+    (0, type_graphql_1.Field)(() => OperateRoomFailureType_1.OperateRoomFailureType),
     __metadata("design:type", String)
 ], OperateRoomFailureResult.prototype, "failureType", void 0);
 OperateRoomFailureResult = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], OperateRoomFailureResult);
 exports.OperateRoomFailureResult = OperateRoomFailureResult;
-exports.OperateRoomResult = type_graphql_1.createUnionType({
+exports.OperateRoomResult = (0, type_graphql_1.createUnionType)({
     name: 'OperateRoomResult',
     types: () => [
         OperateRoomSuccessResult,

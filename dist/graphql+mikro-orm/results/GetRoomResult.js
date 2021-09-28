@@ -18,38 +18,38 @@ const graphql_2 = require("../entities/roomAsListItem/graphql");
 let GetJoinedRoomResult = class GetJoinedRoomResult {
 };
 __decorate([
-    type_graphql_1.Field(() => ParticipantRole_1.ParticipantRole, { description: '自分の現在のParticipantRole。' }),
+    (0, type_graphql_1.Field)(() => ParticipantRole_1.ParticipantRole, { description: '自分の現在のParticipantRole。' }),
     __metadata("design:type", String)
 ], GetJoinedRoomResult.prototype, "role", void 0);
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", graphql_1.RoomGetState)
 ], GetJoinedRoomResult.prototype, "room", void 0);
 GetJoinedRoomResult = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], GetJoinedRoomResult);
 exports.GetJoinedRoomResult = GetJoinedRoomResult;
 let GetNonJoinedRoomResult = class GetNonJoinedRoomResult {
 };
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", graphql_2.RoomAsListItem)
 ], GetNonJoinedRoomResult.prototype, "roomAsListItem", void 0);
 GetNonJoinedRoomResult = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], GetNonJoinedRoomResult);
 exports.GetNonJoinedRoomResult = GetNonJoinedRoomResult;
 let GetRoomFailureResult = class GetRoomFailureResult {
 };
 __decorate([
-    type_graphql_1.Field(() => GetRoomFailureType_1.GetRoomFailureType),
+    (0, type_graphql_1.Field)(() => GetRoomFailureType_1.GetRoomFailureType),
     __metadata("design:type", String)
 ], GetRoomFailureResult.prototype, "failureType", void 0);
 GetRoomFailureResult = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], GetRoomFailureResult);
 exports.GetRoomFailureResult = GetRoomFailureResult;
-exports.GetRoomResult = type_graphql_1.createUnionType({
+exports.GetRoomResult = (0, type_graphql_1.createUnionType)({
     name: 'GetRoomResult',
     types: () => [GetJoinedRoomResult, GetNonJoinedRoomResult, GetRoomFailureResult],
     resolveType: value => {

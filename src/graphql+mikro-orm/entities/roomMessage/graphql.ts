@@ -1,5 +1,5 @@
-import { $free, $system } from '@kizahasi/util';
-import { createUnionType, Field, InputType, ObjectType } from 'type-graphql';
+import { $free, $system } from '@kizahasi/flocon-core';
+import { createUnionType, Field, ObjectType } from 'type-graphql';
 import { DeleteMessageFailureType } from '../../../enums/DeleteMessageFailureType';
 import { EditMessageFailureType } from '../../../enums/EditMessageFailureType';
 import { GetRoomLogFailureType } from '../../../enums/GetRoomLogFailureType';

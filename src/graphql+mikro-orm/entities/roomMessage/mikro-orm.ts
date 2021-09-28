@@ -1,6 +1,6 @@
 import {
     DicePieceValueLog as DicePieceValueLogState,
-    NumberPieceValueLog as NumberPieceValueLogState,
+    StringPieceValueLog as StringPieceValueLogState,
 } from '@kizahasi/flocon-core';
 import {
     Collection,
@@ -347,7 +347,7 @@ export class DicePieceValueLog {
 }
 
 @Entity()
-export class NumberPieceValueLog {
+export class StringPieceValueLog {
     public constructor({
         characterCreatedBy,
         characterId,
@@ -359,7 +359,7 @@ export class NumberPieceValueLog {
         characterId: string;
         room: Room;
         stateId: string;
-        value: NumberPieceValueLogState;
+        value: StringPieceValueLogState;
     }) {
         this.characterCreatedBy = characterCreatedBy;
         this.characterId = characterId;
@@ -384,7 +384,7 @@ export class NumberPieceValueLog {
     public stateId: string;
 
     @Property({ type: JsonType, nullable: true })
-    public value?: NumberPieceValueLogState;
+    public value?: StringPieceValueLogState;
 
     @ManyToOne(() => Room, { wrappedReference: true })
     public room: IdentifiedReference<Room>;

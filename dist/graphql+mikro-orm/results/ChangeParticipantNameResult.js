@@ -15,10 +15,10 @@ const ChangeParticipantNameFailureType_1 = require("../../enums/ChangeParticipan
 let ChangeParticipantNameResult = class ChangeParticipantNameResult {
 };
 __decorate([
-    type_graphql_1.Field(() => ChangeParticipantNameFailureType_1.ChangeParticipantNameFailureType, { nullable: true }),
+    (0, type_graphql_1.Field)(() => ChangeParticipantNameFailureType_1.ChangeParticipantNameFailureType, { nullable: true }),
     __metadata("design:type", String)
 ], ChangeParticipantNameResult.prototype, "failureType", void 0);
 ChangeParticipantNameResult = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], ChangeParticipantNameResult);
 exports.ChangeParticipantNameResult = ChangeParticipantNameResult;

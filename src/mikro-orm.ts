@@ -6,7 +6,7 @@ import { Participant } from './graphql+mikro-orm/entities/participant/mikro-orm'
 import { Room, RoomOp } from './graphql+mikro-orm/entities/room/mikro-orm';
 import {
     DicePieceValueLog,
-    NumberPieceValueLog,
+    StringPieceValueLog,
     RoomPrvMsg,
     RoomPubCh,
     RoomPubMsg,
@@ -20,7 +20,7 @@ const entities = [
     RoomPubMsg,
     RoomPrvMsg,
     DicePieceValueLog,
-    NumberPieceValueLog,
+    StringPieceValueLog,
     RoomPubCh,
     RoomSe,
     User,

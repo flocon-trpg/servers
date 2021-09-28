@@ -51,7 +51,7 @@ import {
     RoomPubCh,
     RoomPubMsg,
     RoomSe,
-    NumberPieceValueLog as NumberPieceValueLog$MikroORM,
+    StringPieceValueLog as StringPieceValueLog$MikroORM,
     DicePieceValueLog as DicePieceValueLog$MikroORM,
 } from '../../entities/roomMessage/mikro-orm';
 import {
@@ -114,7 +114,7 @@ import Color from 'color';
 import { GetRoomMessagesFailureType } from '../../../enums/GetRoomMessagesFailureType';
 import {
     DicePieceValueLog as DicePieceValueLogNameSpace,
-    NumberPieceValueLog as NumberPieceValueLogNameSpace,
+    StringPieceValueLog as StringPieceValueLogNameSpace,
 } from '../../entities/roomMessage/global';
 import { GetRoomLogFailureType } from '../../../enums/GetRoomLogFailureType';
 import { writeSystemMessage } from '../utils/roomMessage';
@@ -131,7 +131,6 @@ import { WritingMessageStatusType } from '../../../enums/WritingMessageStatusTyp
 import { WritingMessageStatusInputType } from '../../../enums/WritingMessageStatusInputType';
 import { FileSourceTypeModule } from '../../../enums/FileSourceType';
 import { Result } from '@kizahasi/result';
-import { $free, $system } from '@kizahasi/util';
 import {
     Master,
     Player,
@@ -150,6 +149,8 @@ import {
     createLogs,
     admin,
     client,
+    $free,
+    $system,
 } from '@kizahasi/flocon-core';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
 import { ParticipantRole as ParticipantRoleEnum } from '../../../enums/ParticipantRole';
@@ -264,7 +265,7 @@ const operateParticipantAndFlush = async ({
                 type: replace,
                 replace: {
                     newValue: {
-                        $v: 1,
+                        $v: 2,
                         name: create.name,
                         role: create.role,
                         boards: {},
@@ -279,7 +280,7 @@ const operateParticipantAndFlush = async ({
             participantOperation = {
                 type: 'update',
                 update: {
-                    $v: 1,
+                    $v: 2,
                     role: update.role,
                     name: update.name,
                 },
@@ -295,7 +296,7 @@ const operateParticipantAndFlush = async ({
     }
 
     const roomUpOperation: UpOperation = {
-        $v: 1,
+        $v: 2,
         participants: {
             [myUserUid]: participantOperation,
         },
@@ -832,7 +833,7 @@ export class RoomResolver {
             pieceValueLogs.push(DicePieceValueLogNameSpace.MikroORM.ToGraphQL.state(msg));
         }
         for (const msg of await room.numberPieceValueLogs.loadItems()) {
-            pieceValueLogs.push(NumberPieceValueLogNameSpace.MikroORM.ToGraphQL.state(msg));
+            pieceValueLogs.push(StringPieceValueLogNameSpace.MikroORM.ToGraphQL.state(msg));
         }
 
         const soundEffects: RoomSoundEffect[] = [];
@@ -1050,10 +1051,10 @@ export class RoomResolver {
                 name: input.roomName,
                 createdBy: authorizedUser.userUid,
                 value: {
-                    $v: 1,
+                    $v: 2,
                     participants: {
                         [authorizedUser.userUid]: {
-                            $v: 1,
+                            $v: 2,
                             boards: {},
                             characters: {},
                             imagePieceValues: {},
@@ -1540,16 +1541,16 @@ export class RoomResolver {
                 dicePieceLogEntities.push(entity);
                 em.persist(entity);
             });
-            const numberPieceLogEntities: NumberPieceValueLog$MikroORM[] = [];
-            logs?.numberPieceValueLogs.forEach(log => {
-                const entity = new NumberPieceValueLog$MikroORM({
+            const stringPieceLogEntities: StringPieceValueLog$MikroORM[] = [];
+            logs?.stringPieceValueLogs.forEach(log => {
+                const entity = new StringPieceValueLog$MikroORM({
                     characterCreatedBy: log.characterKey.createdBy,
                     characterId: log.characterKey.id,
                     stateId: log.stateId,
                     room,
                     value: log.value,
                 });
-                numberPieceLogEntities.push(entity);
+                stringPieceLogEntities.push(entity);
                 em.persist(entity);
             });
 
@@ -1590,14 +1591,14 @@ export class RoomResolver {
                                 value: DicePieceValueLogNameSpace.MikroORM.ToGraphQL.state(log),
                             } as const)
                     ),
-                    ...numberPieceLogEntities.map(
+                    ...stringPieceLogEntities.map(
                         log =>
                             ({
                                 type: 'messageUpdatePayload',
                                 roomId: room.id,
                                 createdBy: undefined,
                                 visibleTo: undefined,
-                                value: NumberPieceValueLogNameSpace.MikroORM.ToGraphQL.state(log),
+                                value: StringPieceValueLogNameSpace.MikroORM.ToGraphQL.state(log),
                             } as const)
                     ),
                 ],

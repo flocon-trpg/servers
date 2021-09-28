@@ -31,47 +31,47 @@ let User = class User {
     }
 };
 __decorate([
-    core_1.PrimaryKey(),
+    (0, core_1.PrimaryKey)(),
     __metadata("design:type", String)
 ], User.prototype, "userUid", void 0);
 __decorate([
-    core_1.Enum({ items: () => BaasType_1.BaasType, index: true }),
+    (0, core_1.Enum)({ items: () => BaasType_1.BaasType, index: true }),
     __metadata("design:type", String)
 ], User.prototype, "baasType", void 0);
 __decorate([
-    core_1.Property({ index: true }),
+    (0, core_1.Property)({ index: true }),
     __metadata("design:type", Boolean)
 ], User.prototype, "isEntry", void 0);
 __decorate([
-    core_1.OneToMany(() => mikro_orm_3.Participant, x => x.user, { orphanRemoval: true }),
+    (0, core_1.OneToMany)(() => mikro_orm_3.Participant, x => x.user, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], User.prototype, "participants", void 0);
 __decorate([
-    core_1.OneToMany(() => mikro_orm_1.File, x => x.createdBy, { orphanRemoval: true }),
+    (0, core_1.OneToMany)(() => mikro_orm_1.File, x => x.createdBy, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], User.prototype, "files", void 0);
 __decorate([
-    core_1.OneToMany(() => mikro_orm_2.FileTag, x => x.user, { orphanRemoval: true }),
+    (0, core_1.OneToMany)(() => mikro_orm_2.FileTag, x => x.user, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], User.prototype, "fileTags", void 0);
 __decorate([
-    core_1.OneToMany(() => mikro_orm_4.RoomPubMsg, x => x.createdBy, { orphanRemoval: true }),
+    (0, core_1.OneToMany)(() => mikro_orm_4.RoomPubMsg, x => x.createdBy, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], User.prototype, "roomPubMsgs", void 0);
 __decorate([
-    core_1.OneToMany(() => mikro_orm_4.RoomPrvMsg, x => x.createdBy, { orphanRemoval: true }),
+    (0, core_1.OneToMany)(() => mikro_orm_4.RoomPrvMsg, x => x.createdBy, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], User.prototype, "roomPrvMsgs", void 0);
 __decorate([
-    core_1.OneToMany(() => mikro_orm_4.RoomPrvMsg, x => x.createdBy, { orphanRemoval: true }),
+    (0, core_1.OneToMany)(() => mikro_orm_4.RoomPrvMsg, x => x.createdBy, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], User.prototype, "roomSEs", void 0);
 __decorate([
-    core_1.ManyToMany(() => mikro_orm_4.RoomPrvMsg, x => x.visibleTo, { owner: true }),
+    (0, core_1.ManyToMany)(() => mikro_orm_4.RoomPrvMsg, x => x.visibleTo, { owner: true }),
     __metadata("design:type", Object)
 ], User.prototype, "visibleRoomPrvMsgs", void 0);
 User = __decorate([
-    core_1.Entity(),
+    (0, core_1.Entity)(),
     __metadata("design:paramtypes", [Object])
 ], User);
 exports.User = User;

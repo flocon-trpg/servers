@@ -15,10 +15,10 @@ const LeaveRoomFailureType_1 = require("../../enums/LeaveRoomFailureType");
 let LeaveRoomResult = class LeaveRoomResult {
 };
 __decorate([
-    type_graphql_1.Field(() => LeaveRoomFailureType_1.LeaveRoomFailureType, { nullable: true }),
+    (0, type_graphql_1.Field)(() => LeaveRoomFailureType_1.LeaveRoomFailureType, { nullable: true }),
     __metadata("design:type", String)
 ], LeaveRoomResult.prototype, "failureType", void 0);
 LeaveRoomResult = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], LeaveRoomResult);
 exports.LeaveRoomResult = LeaveRoomResult;

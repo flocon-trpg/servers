@@ -11,7 +11,7 @@ const config_1 = require("./config");
 const migrate_1 = require("./migrate");
 const main_1 = require("./connection/main");
 const result_1 = require("@kizahasi/result");
-const util_1 = require("@kizahasi/util");
+const flocon_core_1 = require("@kizahasi/flocon-core");
 const BaasType_1 = require("./enums/BaasType");
 const appConsole_1 = require("./utils/appConsole");
 const createServer_1 = require("./createServer");
@@ -34,14 +34,14 @@ const logEntryPasswordConfig = (serverConfig) => {
 const main = async (params) => {
     var _a;
     firebase_admin_1.default.initializeApp({
-        projectId: config_1.loadFirebaseConfig().projectId,
+        projectId: (0, config_1.loadFirebaseConfig)().projectId,
     });
     const connectionManager = new main_1.InMemoryConnectionManager();
-    const serverConfig = await config_1.loadServerConfigAsMain();
-    const schema = await buildSchema_1.buildSchema(serverConfig)({ emitSchemaFile: false, pubSub: main_1.pubSub });
+    const serverConfig = await (0, config_1.loadServerConfigAsMain)();
+    const schema = await (0, buildSchema_1.buildSchema)(serverConfig)({ emitSchemaFile: false, pubSub: main_1.pubSub });
     const dbType = serverConfig.database.__type;
-    const orm = await mikro_orm_1.prepareORM(serverConfig.database, params.debug);
-    await migrate_1.checkMigrationsBeforeStart(orm, dbType);
+    const orm = await (0, mikro_orm_1.prepareORM)(serverConfig.database, params.debug);
+    await (0, migrate_1.checkMigrationsBeforeStart)(orm, dbType);
     logEntryPasswordConfig(serverConfig);
     const getDecodedIdToken = async (idToken) => {
         const decodedIdToken = await firebase_admin_1.default
@@ -64,7 +64,7 @@ const main = async (params) => {
     const getDecodedIdTokenFromWsContext = async (ctx) => {
         let authTokenValue;
         if (ctx.connectionParams != null) {
-            const authTokenValueAsUnknown = ctx.connectionParams[util_1.authToken];
+            const authTokenValueAsUnknown = ctx.connectionParams[flocon_core_1.authToken];
             if (typeof authTokenValueAsUnknown === 'string') {
                 authTokenValue = authTokenValueAsUnknown;
             }
@@ -72,7 +72,7 @@ const main = async (params) => {
         return authTokenValue == null ? undefined : await getDecodedIdToken(authTokenValue);
     };
     const promiseQueue = new promiseQueue_1.PromiseQueue({ queueLimit: 50 });
-    await createServer_1.createServer({
+    await (0, createServer_1.createServer)({
         promiseQueue,
         serverConfig,
         connectionManager,

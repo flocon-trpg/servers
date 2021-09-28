@@ -16,7 +16,7 @@ import { EM } from '../../../utils/types';
 import { Participant } from '../participant/mikro-orm';
 import {
     DicePieceValueLog as DicePieceValueLogEntity,
-    NumberPieceValueLog as NumberPieceValueLogEntity,
+    StringPieceValueLog as StringPieceValueLogEntity,
     RoomPrvMsg,
     RoomPubCh,
     RoomSe as RoomSe,
@@ -88,8 +88,8 @@ export class Room {
     @OneToMany(() => DicePieceValueLogEntity, x => x.room, { orphanRemoval: true })
     public dicePieceValueLogs = new Collection<DicePieceValueLogEntity>(this);
 
-    @OneToMany(() => NumberPieceValueLogEntity, x => x.room, { orphanRemoval: true })
-    public numberPieceValueLogs = new Collection<NumberPieceValueLogEntity>(this);
+    @OneToMany(() => StringPieceValueLogEntity, x => x.room, { orphanRemoval: true })
+    public numberPieceValueLogs = new Collection<StringPieceValueLogEntity>(this);
 
     @OneToMany(() => RoomSe, x => x.room, { orphanRemoval: true })
     public roomSes = new Collection<RoomSe>(this);

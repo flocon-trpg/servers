@@ -16,24 +16,24 @@ const graphql_1 = require("../entities/roomAsListItem/graphql");
 let GetRoomsListSuccessResult = class GetRoomsListSuccessResult {
 };
 __decorate([
-    type_graphql_1.Field(() => [graphql_1.RoomAsListItem]),
+    (0, type_graphql_1.Field)(() => [graphql_1.RoomAsListItem]),
     __metadata("design:type", Array)
 ], GetRoomsListSuccessResult.prototype, "rooms", void 0);
 GetRoomsListSuccessResult = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], GetRoomsListSuccessResult);
 exports.GetRoomsListSuccessResult = GetRoomsListSuccessResult;
 let GetRoomsListFailureResult = class GetRoomsListFailureResult {
 };
 __decorate([
-    type_graphql_1.Field(() => GetRoomFailureType_1.GetRoomFailureType),
+    (0, type_graphql_1.Field)(() => GetRoomFailureType_1.GetRoomFailureType),
     __metadata("design:type", String)
 ], GetRoomsListFailureResult.prototype, "failureType", void 0);
 GetRoomsListFailureResult = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], GetRoomsListFailureResult);
 exports.GetRoomsListFailureResult = GetRoomsListFailureResult;
-exports.GetRoomsListResult = type_graphql_1.createUnionType({
+exports.GetRoomsListResult = (0, type_graphql_1.createUnionType)({
     name: 'GetRoomsListResult',
     types: () => [GetRoomsListSuccessResult, GetRoomsListFailureResult],
     resolveType: value => {

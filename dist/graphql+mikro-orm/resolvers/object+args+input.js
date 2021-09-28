@@ -14,54 +14,54 @@ const type_graphql_1 = require("type-graphql");
 let GetFilesInput = class GetFilesInput {
 };
 __decorate([
-    type_graphql_1.Field(() => [String], {
+    (0, type_graphql_1.Field)(() => [String], {
         description: 'FileTagのidを指定することで、指定したタグが付いているファイルのみを抽出して表示する。例えばidがx,yの3つのタグが付いているファイルは、[]や[x]や[x,y]と指定した場合にマッチするが、[x,y,z]と指定された場合は除外される。',
     }),
     __metadata("design:type", Array)
 ], GetFilesInput.prototype, "fileTagIds", void 0);
 GetFilesInput = __decorate([
-    type_graphql_1.InputType()
+    (0, type_graphql_1.InputType)()
 ], GetFilesInput);
 exports.GetFilesInput = GetFilesInput;
 let EditFileTagActionInput = class EditFileTagActionInput {
 };
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", String)
 ], EditFileTagActionInput.prototype, "filename", void 0);
 __decorate([
-    type_graphql_1.Field(() => [String]),
+    (0, type_graphql_1.Field)(() => [String]),
     __metadata("design:type", Array)
 ], EditFileTagActionInput.prototype, "add", void 0);
 __decorate([
-    type_graphql_1.Field(() => [String]),
+    (0, type_graphql_1.Field)(() => [String]),
     __metadata("design:type", Array)
 ], EditFileTagActionInput.prototype, "remove", void 0);
 EditFileTagActionInput = __decorate([
-    type_graphql_1.InputType()
+    (0, type_graphql_1.InputType)()
 ], EditFileTagActionInput);
 exports.EditFileTagActionInput = EditFileTagActionInput;
 let EditFileTagsInput = class EditFileTagsInput {
 };
 __decorate([
-    type_graphql_1.Field(() => [EditFileTagActionInput]),
+    (0, type_graphql_1.Field)(() => [EditFileTagActionInput]),
     __metadata("design:type", Array)
 ], EditFileTagsInput.prototype, "actions", void 0);
 EditFileTagsInput = __decorate([
-    type_graphql_1.InputType()
+    (0, type_graphql_1.InputType)()
 ], EditFileTagsInput);
 exports.EditFileTagsInput = EditFileTagsInput;
 let FileTag = class FileTag {
 };
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", String)
 ], FileTag.prototype, "id", void 0);
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", String)
 ], FileTag.prototype, "name", void 0);
 FileTag = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], FileTag);
 exports.FileTag = FileTag;

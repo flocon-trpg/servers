@@ -16,29 +16,29 @@ const mikro_orm_1 = require("../file/mikro-orm");
 const mikro_orm_2 = require("../user/mikro-orm");
 let FileTag = class FileTag {
     constructor({ name }) {
-        this.id = uuid_1.v4();
+        this.id = (0, uuid_1.v4)();
         this.files = new core_1.Collection(this);
         this.name = name;
     }
 };
 __decorate([
-    core_1.PrimaryKey(),
+    (0, core_1.PrimaryKey)(),
     __metadata("design:type", String)
 ], FileTag.prototype, "id", void 0);
 __decorate([
-    core_1.Property(),
+    (0, core_1.Property)(),
     __metadata("design:type", String)
 ], FileTag.prototype, "name", void 0);
 __decorate([
-    core_1.ManyToOne(() => mikro_orm_2.User),
+    (0, core_1.ManyToOne)(() => mikro_orm_2.User),
     __metadata("design:type", Object)
 ], FileTag.prototype, "user", void 0);
 __decorate([
-    core_1.ManyToMany(() => mikro_orm_1.File, x => x.fileTags),
+    (0, core_1.ManyToMany)(() => mikro_orm_1.File, x => x.fileTags),
     __metadata("design:type", Object)
 ], FileTag.prototype, "files", void 0);
 FileTag = __decorate([
-    core_1.Entity(),
+    (0, core_1.Entity)(),
     __metadata("design:paramtypes", [Object])
 ], FileTag);
 exports.FileTag = FileTag;

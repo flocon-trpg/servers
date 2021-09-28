@@ -104,7 +104,7 @@ const loadServerConfigAsMain = async () => {
     var _a;
     if (serverConfigAsMainCache == null) {
         serverConfigAsMainCache = loadServerConfig({
-            databaseArg: (_a = (await commandLineArgs_1.loadAsMain()).db) !== null && _a !== void 0 ? _a : null,
+            databaseArg: (_a = (await (0, commandLineArgs_1.loadAsMain)()).db) !== null && _a !== void 0 ? _a : null,
         });
     }
     return serverConfigAsMainCache;
@@ -114,7 +114,7 @@ let serverConfigAsMigrationCreateCache = null;
 const loadServerConfigAsMigrationCreate = async () => {
     if (serverConfigAsMigrationCreateCache == null) {
         serverConfigAsMigrationCreateCache = loadServerConfig({
-            databaseArg: (await commandLineArgs_1.loadMigrationCreate()).db,
+            databaseArg: (await (0, commandLineArgs_1.loadMigrationCreate)()).db,
         });
     }
     return serverConfigAsMigrationCreateCache;
@@ -124,7 +124,7 @@ let serverConfigAsMigrationUpCache = null;
 const loadServerConfigAsMigrationUp = async () => {
     if (serverConfigAsMigrationUpCache == null) {
         serverConfigAsMigrationUpCache = loadServerConfig({
-            databaseArg: (await commandLineArgs_1.loadMigrationUp()).db,
+            databaseArg: (await (0, commandLineArgs_1.loadMigrationUp)()).db,
         });
     }
     return serverConfigAsMigrationUpCache;
@@ -133,7 +133,7 @@ exports.loadServerConfigAsMigrationUp = loadServerConfigAsMigrationUp;
 let serverConfigAsMigrationDownCache = null;
 const loadServerConfigAsMigrationDown = async () => {
     if (serverConfigAsMigrationDownCache == null) {
-        const loaded = await commandLineArgs_1.loadMigrationDown();
+        const loaded = await (0, commandLineArgs_1.loadMigrationDown)();
         serverConfigAsMigrationDownCache = Object.assign(Object.assign({}, loadServerConfig({ databaseArg: loaded.db })), { count: loaded.count });
     }
     return serverConfigAsMigrationDownCache;

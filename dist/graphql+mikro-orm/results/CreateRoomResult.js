@@ -16,28 +16,28 @@ const graphql_1 = require("../entities/room/graphql");
 let CreateRoomSuccessResult = class CreateRoomSuccessResult {
 };
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", String)
 ], CreateRoomSuccessResult.prototype, "id", void 0);
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", graphql_1.RoomGetState)
 ], CreateRoomSuccessResult.prototype, "room", void 0);
 CreateRoomSuccessResult = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], CreateRoomSuccessResult);
 exports.CreateRoomSuccessResult = CreateRoomSuccessResult;
 let CreateRoomFailureResult = class CreateRoomFailureResult {
 };
 __decorate([
-    type_graphql_1.Field(() => CreateRoomFailureType_1.CreateRoomFailureType),
+    (0, type_graphql_1.Field)(() => CreateRoomFailureType_1.CreateRoomFailureType),
     __metadata("design:type", String)
 ], CreateRoomFailureResult.prototype, "failureType", void 0);
 CreateRoomFailureResult = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], CreateRoomFailureResult);
 exports.CreateRoomFailureResult = CreateRoomFailureResult;
-exports.CreateRoomResult = type_graphql_1.createUnionType({
+exports.CreateRoomResult = (0, type_graphql_1.createUnionType)({
     name: 'CreateRoomResult',
     types: () => [CreateRoomSuccessResult, CreateRoomFailureResult],
     resolveType: value => {

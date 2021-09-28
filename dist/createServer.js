@@ -51,7 +51,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
         debug,
     });
     await apolloServer.start();
-    const app = express_1.default();
+    const app = (0, express_1.default)();
     apolloServer.applyMiddleware({ app });
     if (serverConfig.accessControlAllowOrigin == null) {
         appConsole_1.AppConsole.log({
@@ -77,13 +77,13 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
             ja: `APIサーバーのアップローダーは有効化されています。`,
         });
         const uploaderConfig = serverConfig.uploader;
-        await fs_extra_1.ensureDir(path_1.default.resolve(uploaderConfig.directory));
+        await (0, fs_extra_1.ensureDir)(path_1.default.resolve(uploaderConfig.directory));
         const storage = multer_1.default.diskStorage({
             destination: function (req, file, cb) {
                 cb(null, path_1.default.resolve(uploaderConfig.directory));
             },
             filename: function (req, file, cb) {
-                cb(null, easyFlake_1.easyFlake() + path_1.default.extname(file.originalname));
+                cb(null, (0, easyFlake_1.easyFlake)() + path_1.default.extname(file.originalname));
             },
         });
         app.post('/uploader/upload/:permission', async (req, res, next) => {
@@ -92,14 +92,14 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
                 res.status(403).send('Invalid Authorization header');
                 return;
             }
-            const rateLimitError = await consume_1.consume(rateLimiter, decodedIdToken.value.uid, 10);
+            const rateLimitError = await (0, consume_1.consume)(rateLimiter, decodedIdToken.value.uid, 10);
             if (rateLimitError != null) {
                 res.status(429).send(rateLimitError.errorMessage);
                 return;
             }
             const forkedEm = em.fork();
             const userUid = decodedIdToken.value.uid;
-            const user = await helpers_1.getUserIfEntry({
+            const user = await (0, helpers_1.getUserIfEntry)({
                 em: forkedEm,
                 userUid,
                 baasType: BaasType_1.BaasType.Firebase,
@@ -114,7 +114,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
             const [files, filesCount] = await forkedEm.findAndCount(mikro_orm_2.File, {
                 createdBy: { userUid: user.userUid },
             });
-            const upload = multer_1.default({
+            const upload = (0, multer_1.default)({
                 storage,
                 limits: {
                     fileSize: uploaderConfig.maxFileSize,
@@ -157,9 +157,9 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
             }
             const thumbFileName = `${file.filename}.webp`;
             const thumbDir = path_1.default.join(path_1.default.dirname(file.path), thumbsDir_1.thumbsDir);
-            await fs_extra_1.ensureDir(thumbDir);
+            await (0, fs_extra_1.ensureDir)(thumbDir);
             const thumbPath = path_1.default.join(thumbDir, thumbFileName);
-            const thumbnailSaved = await sharp_1.default(file.path)
+            const thumbnailSaved = await (0, sharp_1.default)(file.path)
                 .resize(80)
                 .webp()
                 .toFile(thumbPath)
@@ -204,7 +204,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
             res.status(403).send('Invalid Authorization header');
             return;
         }
-        const rateLimitError = await consume_1.consume(rateLimiter, decodedIdToken.value.uid, 5);
+        const rateLimitError = await (0, consume_1.consume)(rateLimiter, decodedIdToken.value.uid, 5);
         if (rateLimitError != null) {
             res.status(429).send(rateLimitError.errorMessage);
             return;
@@ -215,7 +215,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
             res.status(403).send('Requires entry');
             return;
         }
-        const filename = sanitize_filename_1.default(req.params.file_name);
+        const filename = (0, sanitize_filename_1.default)(req.params.file_name);
         let filepath;
         if (typeParam === 'files') {
             const fileCount = await forkedEm.count(mikro_orm_2.File, { filename });
@@ -231,7 +231,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
                 res.sendStatus(404);
                 return;
             }
-            filepath = path_1.default.join(path_1.default.resolve(serverConfig.uploader.directory), 'thumbs', sanitize_filename_1.default(filename));
+            filepath = path_1.default.join(path_1.default.resolve(serverConfig.uploader.directory), 'thumbs', (0, sanitize_filename_1.default)(filename));
         }
         res.header('Content-Security-Policy', "script-src 'unsafe-hashes'");
         res.sendFile(filepath, () => {
@@ -244,7 +244,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
             server,
             path: subscriptionsPath,
         });
-        ws_2.useServer({
+        (0, ws_2.useServer)({
             schema,
             execute: graphql_1.execute,
             subscribe: graphql_1.subscribe,

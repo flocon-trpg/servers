@@ -16,24 +16,24 @@ const graphql_1 = require("../entities/file/graphql");
 let GetUploadedFilesSuccessResult = class GetUploadedFilesSuccessResult {
 };
 __decorate([
-    type_graphql_1.Field(() => [graphql_1.FileItem]),
+    (0, type_graphql_1.Field)(() => [graphql_1.FileItem]),
     __metadata("design:type", Array)
 ], GetUploadedFilesSuccessResult.prototype, "files", void 0);
 GetUploadedFilesSuccessResult = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], GetUploadedFilesSuccessResult);
 exports.GetUploadedFilesSuccessResult = GetUploadedFilesSuccessResult;
 let GetUploadedFilesFailureResult = class GetUploadedFilesFailureResult {
 };
 __decorate([
-    type_graphql_1.Field(() => GetFileItemsFailureType_1.GetFileItemsFailureType),
+    (0, type_graphql_1.Field)(() => GetFileItemsFailureType_1.GetFileItemsFailureType),
     __metadata("design:type", String)
 ], GetUploadedFilesFailureResult.prototype, "failureType", void 0);
 GetUploadedFilesFailureResult = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], GetUploadedFilesFailureResult);
 exports.GetUploadedFilesFailureResult = GetUploadedFilesFailureResult;
-exports.GetUploadedFilesResult = type_graphql_1.createUnionType({
+exports.GetUploadedFilesResult = (0, type_graphql_1.createUnionType)({
     name: 'GetUploadedFilesResult',
     types: () => [GetUploadedFilesSuccessResult, GetUploadedFilesFailureResult],
     resolveType: value => {

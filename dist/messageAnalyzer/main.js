@@ -14,7 +14,7 @@ const roll = async (text, gameType) => {
     if (text.trim() === '') {
         return null;
     }
-    const gameSystemInfo = exports.listAvailableGameSystems().find(info => info.id === gameType);
+    const gameSystemInfo = (0, exports.listAvailableGameSystems)().find(info => info.id === gameType);
     if (gameSystemInfo == null) {
         return null;
     }
@@ -35,11 +35,11 @@ const getParameter = async ({ parameterPath, context, room, }) => {
         if (((_a = context.value.privateVarToml) !== null && _a !== void 0 ? _a : '').trim() === '') {
             return null;
         }
-        const tomlObject = flocon_core_1.parseToml((_b = context.value.privateVarToml) !== null && _b !== void 0 ? _b : '');
+        const tomlObject = (0, flocon_core_1.parseToml)((_b = context.value.privateVarToml) !== null && _b !== void 0 ? _b : '');
         if (tomlObject.isError) {
             return null;
         }
-        const result = flocon_core_1.getVariableFromVarTomlObject(tomlObject.value, parameterPath);
+        const result = (0, flocon_core_1.getVariableFromVarTomlObject)(tomlObject.value, parameterPath);
         if (result.isError) {
             return null;
         }
@@ -56,9 +56,9 @@ const getParameter = async ({ parameterPath, context, room, }) => {
         if ((context === null || context === void 0 ? void 0 : context.type) !== exports.chara) {
             return result_1.Result.ok(undefined);
         }
-        const matchedBoolParams = util_1.recordToArray(room.boolParamNames).filter(({ value }) => value.name === parameter);
-        const matchedNumParams = util_1.recordToArray(room.numParamNames).filter(({ value }) => value.name === parameter);
-        const matchedStrParams = util_1.recordToArray(room.strParamNames).filter(({ value }) => value.name === parameter);
+        const matchedBoolParams = (0, util_1.recordToArray)(room.boolParamNames).filter(({ value }) => value.name === parameter);
+        const matchedNumParams = (0, util_1.recordToArray)(room.numParamNames).filter(({ value }) => value.name === parameter);
+        const matchedStrParams = (0, util_1.recordToArray)(room.strParamNames).filter(({ value }) => value.name === parameter);
         const totalLength = matchedBoolParams.length + matchedNumParams.length + matchedStrParams.length;
         if (totalLength >= 2) {
             return result_1.Result.error(`"${parameter}"という名前のパラメーターが複数存在します。パラメーターの名前を変えることを検討してください`);
@@ -89,7 +89,7 @@ const getParameter = async ({ parameterPath, context, room, }) => {
     return undefined;
 };
 const analyze = async (params) => {
-    const expressions = flocon_core_1.analyze(params.text);
+    const expressions = (0, flocon_core_1.analyze)(params.text);
     if (expressions.isError) {
         return expressions;
     }

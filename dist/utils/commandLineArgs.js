@@ -19,7 +19,7 @@ const toDbType = (source) => {
     }
 };
 const getMain = async () => {
-    const options = await yargs_1.default(process.argv.slice(2))
+    const options = await (0, yargs_1.default)(process.argv.slice(2))
         .options({
         db: {
             type: 'string',
@@ -52,7 +52,7 @@ const loadAsMain = async () => {
 };
 exports.loadAsMain = loadAsMain;
 const getMigrationUp = async () => {
-    const options = await yargs_1.default(process.argv.slice(2)).options({
+    const options = await (0, yargs_1.default)(process.argv.slice(2)).options({
         db: {
             type: 'string',
             demandOption: true,
@@ -84,7 +84,7 @@ const loadMigrationUp = async () => {
 };
 exports.loadMigrationUp = loadMigrationUp;
 const getMigrationDown = async () => {
-    const options = await yargs_1.default(process.argv.slice(2)).options({
+    const options = await (0, yargs_1.default)(process.argv.slice(2)).options({
         db: {
             type: 'string',
             demandOption: true,
@@ -131,7 +131,7 @@ const loadMigrationDown = async () => {
 };
 exports.loadMigrationDown = loadMigrationDown;
 const getMigrationCreate = async () => {
-    const options = await yargs_1.default(process.argv.slice(2)).options({
+    const options = await (0, yargs_1.default)(process.argv.slice(2)).options({
         db: {
             type: 'string',
             demandOption: true,
