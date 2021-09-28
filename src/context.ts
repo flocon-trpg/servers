@@ -14,11 +14,8 @@ export class Context {
     のようなとき、let f の括弧の外では [{ x: 1 }]、let x = 2 のすぐ上では [{ x: 1 }, {}]、下から ) までは [{ x: 1 }, { x: 2 }] となる。
     */
     private varTables: Map<string, Ref<ScriptValue.FValue>>[] = [new Map()];
-    public currentThis: ScriptValue.FRecord | undefined;
 
-    public constructor(public globalThis: ScriptValue.FRecord) {
-        this.currentThis = globalThis;
-    }
+    public constructor(public globalThis: ScriptValue.FRecord) {}
 
     public get(name: string, range: Range | undefined): ScriptValue.FValue {
         const found = this.varTables
