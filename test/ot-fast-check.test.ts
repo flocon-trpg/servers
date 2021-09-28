@@ -8,9 +8,9 @@ import { normalizeRoomState } from './normalizeRoomState';
 const TEST_NUM_RUNS = process.env.TEST_NUM_RUNS;
 let numRuns: number;
 if (TEST_NUM_RUNS == null) {
-    // 組み合わせ量が多いため、デフォルト値(100)より多い値を設定している
-    // ただしこれでも足りないため、多数のテストを行う場合はTEST_NUM_RUNSを用いる
-    numRuns = 300;
+    // 組み合わせ量が多いため、numRuns=100では足りない
+    // TEST_NUM_RUNSの値を大きくしたテストをCIなど別箇所で行う前提のため、numRunsの初期値はテストを高速化する目的で100という小さめの値にしている
+    numRuns = 100;
 } else {
     numRuns = parseInt(TEST_NUM_RUNS);
     if (isNaN(numRuns)) {
