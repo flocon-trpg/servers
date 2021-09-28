@@ -71,7 +71,7 @@ import { UpOperation, parseState } from '@kizahasi/flocon-core';
 import axios from 'axios';
 import FormData from 'form-data';
 import urljoin from 'url-join';
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync } from 'fs';
 
 const timeout = 20000;
 
@@ -640,7 +640,7 @@ it.each([
             const requestId = 'P1_REQID'; // @MaxLength(10)であるため10文字以下にしている
 
             const operation: UpOperation = {
-                $v: 1,
+                $v: 2,
                 name: {
                     newValue: newRoomName,
                 },
