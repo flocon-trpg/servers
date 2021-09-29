@@ -33,6 +33,8 @@
         "url": "https://github.com/kizahasi/util"
     },
     "devDependencies": {
+        "@commitlint/cli": "^13.2.0",
+        "@commitlint/config-conventional": "^13.2.0",
         "@types/jest": "27.0.2",
         "@typescript-eslint/eslint-plugin": "4.31.2",
         "@typescript-eslint/parser": "4.31.2",
