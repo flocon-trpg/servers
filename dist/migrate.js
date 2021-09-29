@@ -46,24 +46,24 @@ const migrate = async (type) => {
     const serverConfig = await (() => {
         switch (type) {
             case up:
-                return config_1.loadServerConfigAsMigrationUp();
+                return (0, config_1.loadServerConfigAsMigrationUp)();
             case down:
-                return config_1.loadServerConfigAsMigrationDown();
+                return (0, config_1.loadServerConfigAsMigrationDown)();
             case check:
-                return config_1.loadServerConfigAsMain();
+                return (0, config_1.loadServerConfigAsMain)();
             default:
-                return config_1.loadServerConfigAsMigrationCreate();
+                return (0, config_1.loadServerConfigAsMigrationCreate)();
         }
     })();
     let orm;
     let dbType;
     switch (serverConfig.database.__type) {
         case sqlite:
-            orm = await mikro_orm_1.createSQLite(Object.assign(Object.assign({}, serverConfig.database), { debug: type !== check }));
+            orm = await (0, mikro_orm_1.createSQLite)(Object.assign(Object.assign({}, serverConfig.database), { debug: type !== check }));
             dbType = sqlite;
             break;
         case postgresql:
-            orm = await mikro_orm_1.createPostgreSQL(Object.assign(Object.assign({}, serverConfig.database), { debug: type !== check }));
+            orm = await (0, mikro_orm_1.createPostgreSQL)(Object.assign(Object.assign({}, serverConfig.database), { debug: type !== check }));
             dbType = postgresql;
             break;
     }
@@ -144,7 +144,7 @@ const migrate = async (type) => {
                 en: `Migration-down is started. DB is ${prettify(dbType)}.`,
                 ja: `マイグレーションのdownを開始します。DBは${prettify(dbType)}です。`,
             });
-            const config = await config_1.loadServerConfigAsMigrationDown();
+            const config = await (0, config_1.loadServerConfigAsMigrationDown)();
             if (!Number.isInteger(config.count)) {
                 appConsole_1.AppConsole.log({ icon: '❌', en: '"--count" must be integer' });
                 return;

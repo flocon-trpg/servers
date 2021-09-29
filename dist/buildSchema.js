@@ -24,7 +24,7 @@ const authChecker = (serverConfig) => async ({ context }, roles) => {
     else if (roles.includes(roles_1.ENTRY)) {
         role = roles_1.ENTRY;
     }
-    const decodedIdToken = helpers_1.checkSignIn(context);
+    const decodedIdToken = (0, helpers_1.checkSignIn)(context);
     if (decodedIdToken === helpers_1.NotSignIn) {
         return false;
     }
@@ -47,7 +47,7 @@ const authChecker = (serverConfig) => async ({ context }, roles) => {
             return false;
         }
     }
-    const user = await helpers_1.getUserIfEntry({
+    const user = await (0, helpers_1.getUserIfEntry)({
         em: context.em,
         userUid: decodedIdToken.uid,
         baasType: BaasType_1.BaasType.Firebase,
@@ -68,20 +68,20 @@ const emitSchemaFileOptions = {
     commentDescriptions: true,
 };
 const buildSchema = (serverConfig) => async (options) => {
-    registerEnumTypes_1.default();
+    (0, registerEnumTypes_1.default)();
     let emitSchemaFile = undefined;
     if (options.emitSchemaFile) {
         emitSchemaFile = emitSchemaFileOptions;
     }
-    return await type_graphql_1.buildSchema(Object.assign(Object.assign({}, optionBase), { authChecker: authChecker(serverConfig), emitSchemaFile, pubSub: options.pubSub }));
+    return await (0, type_graphql_1.buildSchema)(Object.assign(Object.assign({}, optionBase), { authChecker: authChecker(serverConfig), emitSchemaFile, pubSub: options.pubSub }));
 };
 exports.buildSchema = buildSchema;
 const buildSchemaSync = (serverConfig) => (options) => {
-    registerEnumTypes_1.default();
+    (0, registerEnumTypes_1.default)();
     let emitSchemaFile = undefined;
     if (options.emitSchemaFile) {
         emitSchemaFile = emitSchemaFileOptions;
     }
-    return type_graphql_1.buildSchemaSync(Object.assign(Object.assign({}, optionBase), { authChecker: authChecker(serverConfig), emitSchemaFile, pubSub: options.pubSub }));
+    return (0, type_graphql_1.buildSchemaSync)(Object.assign(Object.assign({}, optionBase), { authChecker: authChecker(serverConfig), emitSchemaFile, pubSub: options.pubSub }));
 };
 exports.buildSchemaSync = buildSchemaSync;

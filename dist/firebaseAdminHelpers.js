@@ -12,7 +12,7 @@ function getAdmin() {
     }
     else {
         const app = firebase_admin_1.default.initializeApp({
-            projectId: config_1.loadFirebaseConfig().projectId,
+            projectId: (0, config_1.loadFirebaseConfig)().projectId,
         });
         return app;
     }

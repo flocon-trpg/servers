@@ -15,10 +15,10 @@ const DeleteRoomFailureType_1 = require("../../enums/DeleteRoomFailureType");
 let DeleteRoomResult = class DeleteRoomResult {
 };
 __decorate([
-    type_graphql_1.Field(() => DeleteRoomFailureType_1.DeleteRoomFailureType, { nullable: true }),
+    (0, type_graphql_1.Field)(() => DeleteRoomFailureType_1.DeleteRoomFailureType, { nullable: true }),
     __metadata("design:type", String)
 ], DeleteRoomResult.prototype, "failureType", void 0);
 DeleteRoomResult = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], DeleteRoomResult);
 exports.DeleteRoomResult = DeleteRoomResult;

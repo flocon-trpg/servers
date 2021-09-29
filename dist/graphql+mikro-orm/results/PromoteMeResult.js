@@ -15,10 +15,10 @@ const PromoteFailureType_1 = require("../../enums/PromoteFailureType");
 let PromoteResult = class PromoteResult {
 };
 __decorate([
-    type_graphql_1.Field(() => PromoteFailureType_1.PromoteFailureType, { nullable: true }),
+    (0, type_graphql_1.Field)(() => PromoteFailureType_1.PromoteFailureType, { nullable: true }),
     __metadata("design:type", String)
 ], PromoteResult.prototype, "failureType", void 0);
 PromoteResult = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], PromoteResult);
 exports.PromoteResult = PromoteResult;

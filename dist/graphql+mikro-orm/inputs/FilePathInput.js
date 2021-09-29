@@ -14,10 +14,10 @@ const type_graphql_1 = require("type-graphql");
 let FilePathInput = class FilePathInput {
 };
 __decorate([
-    type_graphql_1.Field({ nullable: true }),
+    (0, type_graphql_1.Field)({ nullable: true }),
     __metadata("design:type", String)
 ], FilePathInput.prototype, "path", void 0);
 FilePathInput = __decorate([
-    type_graphql_1.InputType()
+    (0, type_graphql_1.InputType)()
 ], FilePathInput);
 exports.FilePathInput = FilePathInput;

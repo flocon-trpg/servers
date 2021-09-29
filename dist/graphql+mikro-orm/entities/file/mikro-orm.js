@@ -31,67 +31,67 @@ let File = class File {
     }
 };
 __decorate([
-    core_1.PrimaryKey(),
+    (0, core_1.PrimaryKey)(),
     __metadata("design:type", String)
 ], File.prototype, "filename", void 0);
 __decorate([
-    core_1.Property(),
-    core_1.Index(),
+    (0, core_1.Property)(),
+    (0, core_1.Index)(),
     __metadata("design:type", String)
 ], File.prototype, "screenname", void 0);
 __decorate([
-    core_1.Property({ type: Date, nullable: true, onCreate: () => new Date() }),
-    core_1.Index(),
+    (0, core_1.Property)({ type: Date, nullable: true, onCreate: () => new Date() }),
+    (0, core_1.Index)(),
     __metadata("design:type", Date)
 ], File.prototype, "createdAt", void 0);
 __decorate([
-    core_1.Property(),
+    (0, core_1.Property)(),
     __metadata("design:type", String)
 ], File.prototype, "encoding", void 0);
 __decorate([
-    core_1.Property(),
+    (0, core_1.Property)(),
     __metadata("design:type", Number)
 ], File.prototype, "size", void 0);
 __decorate([
-    core_1.Property({ nullable: true }),
-    core_1.Index(),
+    (0, core_1.Property)({ nullable: true }),
+    (0, core_1.Index)(),
     __metadata("design:type", String)
 ], File.prototype, "thumbFilename", void 0);
 __decorate([
-    core_1.Property(),
-    core_1.Index(),
+    (0, core_1.Property)(),
+    (0, core_1.Index)(),
     __metadata("design:type", String)
 ], File.prototype, "mimetype", void 0);
 __decorate([
-    core_1.Property(),
-    core_1.Index(),
+    (0, core_1.Property)(),
+    (0, core_1.Index)(),
     __metadata("design:type", Number)
 ], File.prototype, "filesize", void 0);
 __decorate([
-    core_1.Property(),
-    core_1.Index(),
+    (0, core_1.Property)(),
+    (0, core_1.Index)(),
     __metadata("design:type", String)
 ], File.prototype, "listPermission", void 0);
 __decorate([
-    core_1.Property(),
-    core_1.Index(),
+    (0, core_1.Property)(),
+    (0, core_1.Index)(),
     __metadata("design:type", String)
 ], File.prototype, "renamePermission", void 0);
 __decorate([
-    core_1.Property(),
-    core_1.Index(),
+    (0, core_1.Property)(),
+    (0, core_1.Index)(),
     __metadata("design:type", String)
 ], File.prototype, "deletePermission", void 0);
 __decorate([
-    core_1.ManyToOne(() => mikro_orm_2.User),
+    (0, core_1.ManyToOne)(() => mikro_orm_2.User),
     __metadata("design:type", Object)
 ], File.prototype, "createdBy", void 0);
 __decorate([
-    core_1.ManyToMany(() => mikro_orm_1.FileTag, x => x.files, { owner: true }),
+    (0, core_1.ManyToMany)(() => mikro_orm_1.FileTag, x => x.files, { owner: true }),
     __metadata("design:type", Object)
 ], File.prototype, "fileTags", void 0);
 File = __decorate([
-    core_1.Entity(),
+    (0, core_1.Entity)(),
     __metadata("design:paramtypes", [Object])
 ], File);
 exports.File = File;

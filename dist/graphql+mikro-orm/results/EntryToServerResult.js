@@ -15,10 +15,10 @@ const EntryToServerResultType_1 = require("../../enums/EntryToServerResultType")
 let EntryToServerResult = class EntryToServerResult {
 };
 __decorate([
-    type_graphql_1.Field(() => EntryToServerResultType_1.EntryToServerResultType),
+    (0, type_graphql_1.Field)(() => EntryToServerResultType_1.EntryToServerResultType),
     __metadata("design:type", String)
 ], EntryToServerResult.prototype, "type", void 0);
 EntryToServerResult = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], EntryToServerResult);
 exports.EntryToServerResult = EntryToServerResult;

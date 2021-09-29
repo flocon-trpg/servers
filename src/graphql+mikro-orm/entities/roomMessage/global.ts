@@ -1,9 +1,9 @@
 import {
     DicePieceValueLog as DicePieceValueLog$MikroORM,
-    NumberPieceValueLog as NumberPieceValueLog$MikroORM,
+    StringPieceValueLog as StringPieceValueLog$MikroORM,
 } from './mikro-orm';
 import { PieceValueLog, PieceValueLogType } from './graphql';
-import { decodeDicePieceValue, decodeNumberPieceValue } from '@kizahasi/flocon-core';
+import { decodeDicePieceValue, decodeStringPieceValue } from '@kizahasi/flocon-core';
 import { PieceValueLogType as PieceValueLogTypeEnum } from '../../../enums/PieceValueLogType';
 
 export namespace DicePieceValueLog {
@@ -25,10 +25,10 @@ export namespace DicePieceValueLog {
     }
 }
 
-export namespace NumberPieceValueLog {
+export namespace StringPieceValueLog {
     export namespace MikroORM {
         export namespace ToGraphQL {
-            export const state = (entity: NumberPieceValueLog$MikroORM): PieceValueLog => {
+            export const state = (entity: StringPieceValueLog$MikroORM): PieceValueLog => {
                 return {
                     __tstype: PieceValueLogType,
                     messageId: entity.id,
@@ -37,7 +37,7 @@ export namespace NumberPieceValueLog {
                     characterId: entity.characterId,
                     createdAt: entity.createdAt.getTime(),
                     logType: PieceValueLogTypeEnum.Number,
-                    valueJson: JSON.stringify(decodeNumberPieceValue(entity.value)),
+                    valueJson: JSON.stringify(decodeStringPieceValue(entity.value)),
                 };
             };
         }

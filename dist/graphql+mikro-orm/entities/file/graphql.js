@@ -14,33 +14,33 @@ const type_graphql_1 = require("type-graphql");
 let FileItem = class FileItem {
 };
 __decorate([
-    type_graphql_1.Field(() => type_graphql_1.ID, {
+    (0, type_graphql_1.Field)(() => type_graphql_1.ID, {
         description: 'サーバーで管理されているファイル名。axiosなどでファイルを取得する際はこれを用いる。ソートするとアップロードした時系列順になる。',
     }),
     __metadata("design:type", String)
 ], FileItem.prototype, "filename", void 0);
 __decorate([
-    type_graphql_1.Field({
+    (0, type_graphql_1.Field)({
         nullable: true,
         description: 'サムネイル画像のファイル名。axiosなどを用いてファイルを取得する。',
     }),
     __metadata("design:type", String)
 ], FileItem.prototype, "thumbFilename", void 0);
 __decorate([
-    type_graphql_1.Field({ description: 'ユーザーが名付けたファイル名。' }),
+    (0, type_graphql_1.Field)({ description: 'ユーザーが名付けたファイル名。' }),
     __metadata("design:type", String)
 ], FileItem.prototype, "screenname", void 0);
 __decorate([
-    type_graphql_1.Field({ nullable: true }),
+    (0, type_graphql_1.Field)({ nullable: true }),
     __metadata("design:type", Number)
 ], FileItem.prototype, "createdAt", void 0);
 __decorate([
-    type_graphql_1.Field({
+    (0, type_graphql_1.Field)({
         description: 'ファイルをアップロードしたユーザー。Firebase AuthenticationのUserUidで表現される。',
     }),
     __metadata("design:type", String)
 ], FileItem.prototype, "createdBy", void 0);
 FileItem = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], FileItem);
 exports.FileItem = FileItem;

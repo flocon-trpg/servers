@@ -27,7 +27,6 @@ import {
 import { Participant } from '../participant/mikro-orm';
 import { recordForEachAsync } from '@kizahasi/util';
 import { User } from '../user/mikro-orm';
-import { reduceEachTrailingCommentRange } from 'typescript';
 import { nullableStringToParticipantRoleType } from '../../../enums/ParticipantRoleType';
 
 type IsSequentialResult<T> =
@@ -217,7 +216,7 @@ export namespace GlobalRoom {
                 });
                 const upOperation =
                     diffOperation == null ? undefined : toUpOperation(diffOperation);
-                return stringifyUpOperation(upOperation ?? { $v: 1 });
+                return stringifyUpOperation(upOperation ?? { $v: 2 });
             };
         }
 

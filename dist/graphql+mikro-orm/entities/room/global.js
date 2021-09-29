@@ -51,9 +51,9 @@ var GlobalRoom;
         let ToGlobal;
         (function (ToGlobal) {
             ToGlobal.state = async (roomEntity, em) => {
-                const result = flocon_core_1.decodeDbState(roomEntity.value);
+                const result = (0, flocon_core_1.decodeDbState)(roomEntity.value);
                 const participants = {};
-                await util_1.recordForEachAsync(result.participants, async (participant, participantKey) => {
+                await (0, util_1.recordForEachAsync)(result.participants, async (participant, participantKey) => {
                     const participantEntity = await em.findOne(mikro_orm_2.Participant, {
                         room: { id: roomEntity.id },
                         user: { userUid: participantKey },
@@ -63,7 +63,7 @@ var GlobalRoom;
                 return Object.assign(Object.assign({}, result), { createdBy: roomEntity.createdBy, name: roomEntity.name, participants });
             };
             const downOperation = (entity) => {
-                const result = flocon_core_1.decodeDownOperation(entity.value);
+                const result = (0, flocon_core_1.decodeDownOperation)(entity.value);
                 return result;
             };
             ToGlobal.downOperationMany = async ({ em, roomId, revisionRange, }) => {
@@ -104,7 +104,7 @@ var GlobalRoom;
                         operation = second;
                         continue;
                     }
-                    const composed = flocon_core_1.composeDownOperation({ first: operation, second });
+                    const composed = (0, flocon_core_1.composeDownOperation)({ first: operation, second });
                     if (composed.isError) {
                         return composed;
                     }
@@ -120,18 +120,18 @@ var GlobalRoom;
         (function (ToGraphQL) {
             ToGraphQL.state = ({ source, requestedBy, }) => {
                 return {
-                    stateJson: flocon_core_1.stringifyState(flocon_core_1.toClientState(requestedBy)(source)),
+                    stateJson: (0, flocon_core_1.stringifyState)((0, flocon_core_1.toClientState)(requestedBy)(source)),
                 };
             };
             ToGraphQL.operation = ({ prevState, nextState, requestedBy, }) => {
-                const prevClientState = flocon_core_1.toClientState(requestedBy)(prevState);
-                const nextClientState = flocon_core_1.toClientState(requestedBy)(nextState);
-                const diffOperation = flocon_core_1.diff({
+                const prevClientState = (0, flocon_core_1.toClientState)(requestedBy)(prevState);
+                const nextClientState = (0, flocon_core_1.toClientState)(requestedBy)(nextState);
+                const diffOperation = (0, flocon_core_1.diff)({
                     prevState: prevClientState,
                     nextState: nextClientState,
                 });
-                const upOperation = diffOperation == null ? undefined : flocon_core_1.toUpOperation(diffOperation);
-                return flocon_core_1.stringifyUpOperation(upOperation !== null && upOperation !== void 0 ? upOperation : { $v: 1 });
+                const upOperation = diffOperation == null ? undefined : (0, flocon_core_1.toUpOperation)(diffOperation);
+                return (0, flocon_core_1.stringifyUpOperation)(upOperation !== null && upOperation !== void 0 ? upOperation : { $v: 2 });
             };
         })(ToGraphQL = Global.ToGraphQL || (Global.ToGraphQL = {}));
         class EnsureParticipantEntity {
@@ -163,18 +163,18 @@ var GlobalRoom;
         }
         Global.applyToEntity = async ({ em, target, prevState, operation, }) => {
             var _a;
-            const nextState = flocon_core_1.apply({
+            const nextState = (0, flocon_core_1.apply)({
                 state: prevState,
-                operation: flocon_core_1.toUpOperation(operation),
+                operation: (0, flocon_core_1.toUpOperation)(operation),
             });
             if (nextState.isError) {
                 throw nextState.error;
             }
             target.name = nextState.value.name;
-            target.value = flocon_core_1.exactDbState(nextState.value);
+            target.value = (0, flocon_core_1.exactDbState)(nextState.value);
             const prevRevision = target.revision;
             target.revision += 1;
-            await util_1.recordForEachAsync((_a = operation.participants) !== null && _a !== void 0 ? _a : {}, async (participant, participantKey) => {
+            await (0, util_1.recordForEachAsync)((_a = operation.participants) !== null && _a !== void 0 ? _a : {}, async (participant, participantKey) => {
                 var _a, _b, _c, _d;
                 const ensureEntity = new EnsureParticipantEntity(em, target, participantKey);
                 if (participant.type === flocon_core_1.update) {
@@ -184,7 +184,7 @@ var GlobalRoom;
                     }
                     if (participant.update.role != null) {
                         (await ensureEntity.get()).role =
-                            (_b = ParticipantRoleType_1.nullableStringToParticipantRoleType(participant.update.role.newValue)) !== null && _b !== void 0 ? _b : undefined;
+                            (_b = (0, ParticipantRoleType_1.nullableStringToParticipantRoleType)(participant.update.role.newValue)) !== null && _b !== void 0 ? _b : undefined;
                     }
                     return;
                 }
@@ -195,11 +195,11 @@ var GlobalRoom;
                 const newParticipant = await ensureEntity.get();
                 newParticipant.name = (_c = participant.replace.newValue.name) !== null && _c !== void 0 ? _c : undefined;
                 newParticipant.role =
-                    (_d = ParticipantRoleType_1.nullableStringToParticipantRoleType(participant.replace.newValue.role)) !== null && _d !== void 0 ? _d : undefined;
+                    (_d = (0, ParticipantRoleType_1.nullableStringToParticipantRoleType)(participant.replace.newValue.role)) !== null && _d !== void 0 ? _d : undefined;
             });
             const op = new mikro_orm_1.RoomOp({
                 prevRevision,
-                value: flocon_core_1.toDownOperation(operation),
+                value: (0, flocon_core_1.toDownOperation)(operation),
             });
             op.room = core_1.Reference.create(target);
             em.persist(op);
@@ -211,7 +211,7 @@ var GlobalRoom;
         let ToGlobal;
         (function (ToGlobal) {
             ToGlobal.upOperation = (source) => {
-                return flocon_core_1.parseUpOperation(source.valueJson);
+                return (0, flocon_core_1.parseUpOperation)(source.valueJson);
             };
         })(ToGlobal = GraphQL.ToGlobal || (GraphQL.ToGlobal = {}));
     })(GraphQL = GlobalRoom.GraphQL || (GlobalRoom.GraphQL = {}));

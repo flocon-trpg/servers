@@ -14,10 +14,10 @@ const type_graphql_1 = require("type-graphql");
 let NullableStringInput = class NullableStringInput {
 };
 __decorate([
-    type_graphql_1.Field({ nullable: true }),
+    (0, type_graphql_1.Field)({ nullable: true }),
     __metadata("design:type", String)
 ], NullableStringInput.prototype, "value", void 0);
 NullableStringInput = __decorate([
-    type_graphql_1.InputType()
+    (0, type_graphql_1.InputType)()
 ], NullableStringInput);
 exports.NullableStringInput = NullableStringInput;

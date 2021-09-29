@@ -15,15 +15,15 @@ const FileSourceType_1 = require("../../../enums/FileSourceType");
 let FilePath = class FilePath {
 };
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", String)
 ], FilePath.prototype, "path", void 0);
 __decorate([
-    type_graphql_1.Field(() => FileSourceType_1.FileSourceType),
+    (0, type_graphql_1.Field)(() => FileSourceType_1.FileSourceType),
     __metadata("design:type", String)
 ], FilePath.prototype, "sourceType", void 0);
 FilePath = __decorate([
-    type_graphql_1.ObjectType(),
-    type_graphql_1.InputType('FilePathInput')
+    (0, type_graphql_1.ObjectType)(),
+    (0, type_graphql_1.InputType)('FilePathInput')
 ], FilePath);
 exports.FilePath = FilePath;

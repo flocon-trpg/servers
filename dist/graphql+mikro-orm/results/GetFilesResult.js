@@ -15,10 +15,10 @@ const graphql_1 = require("../entities/file/graphql");
 let GetFilesResult = class GetFilesResult {
 };
 __decorate([
-    type_graphql_1.Field(() => [graphql_1.FileItem]),
+    (0, type_graphql_1.Field)(() => [graphql_1.FileItem]),
     __metadata("design:type", Array)
 ], GetFilesResult.prototype, "files", void 0);
 GetFilesResult = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], GetFilesResult);
 exports.GetFilesResult = GetFilesResult;

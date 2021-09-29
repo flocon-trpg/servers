@@ -7,6 +7,7 @@ exports.comparePassword = exports.ensureAuthorizedUser = exports.ensureUserUid =
 const mikro_orm_1 = require("../../entities/user/mikro-orm");
 const mikro_orm_2 = require("../../entities/room/mikro-orm");
 const global_1 = require("../../entities/room/global");
+const flocon_core_1 = require("@kizahasi/flocon-core");
 const util_1 = require("@kizahasi/util");
 const configType_1 = require("../../../configType");
 const safe_compare_1 = __importDefault(require("safe-compare"));
@@ -22,11 +23,11 @@ const checkSignIn = (context) => {
 };
 exports.checkSignIn = checkSignIn;
 const checkSignInAndNotAnonymous = (context) => {
-    const decodedIdToken = exports.checkSignIn(context);
+    const decodedIdToken = (0, exports.checkSignIn)(context);
     if (decodedIdToken == exports.NotSignIn) {
         return exports.NotSignIn;
     }
-    if (decodedIdToken.firebase.sign_in_provider === util_1.anonymous) {
+    if (decodedIdToken.firebase.sign_in_provider === flocon_core_1.anonymous) {
         return exports.AnonymousAccount;
     }
     return decodedIdToken;
@@ -63,7 +64,7 @@ const getUserIfEntry = async ({ em, userUid, baasType, serverConfig, noFlush, })
 };
 exports.getUserIfEntry = getUserIfEntry;
 const checkEntry = async ({ em, userUid, baasType, serverConfig, noFlush, }) => {
-    return (await exports.getUserIfEntry({ em, userUid, baasType, serverConfig, noFlush })) != null;
+    return (await (0, exports.getUserIfEntry)({ em, userUid, baasType, serverConfig, noFlush })) != null;
 };
 exports.checkEntry = checkEntry;
 class FindRoomAndMyParticipantResult {
@@ -73,7 +74,7 @@ class FindRoomAndMyParticipantResult {
         this.me = me;
     }
     participantIds() {
-        return new Set(util_1.recordToArray(this.roomState.participants).map(({ key }) => key));
+        return new Set((0, util_1.recordToArray)(this.roomState.participants).map(({ key }) => key));
     }
 }
 const findRoomAndMyParticipant = async ({ em, userUid, roomId, }) => {
@@ -87,7 +88,7 @@ const findRoomAndMyParticipant = async ({ em, userUid, roomId, }) => {
 };
 exports.findRoomAndMyParticipant = findRoomAndMyParticipant;
 const ensureUserUid = (context) => {
-    const decodedIdToken = exports.checkSignIn(context);
+    const decodedIdToken = (0, exports.checkSignIn)(context);
     if (decodedIdToken === exports.NotSignIn) {
         throw new Error('Not sign in. "@Attribute()" might be missing.');
     }
@@ -103,7 +104,7 @@ const ensureAuthorizedUser = (context) => {
 exports.ensureAuthorizedUser = ensureAuthorizedUser;
 const comparePassword = async (plainPassword, config) => {
     if (config.type === configType_1.plain) {
-        return safe_compare_1.default(plainPassword, config.value);
+        return (0, safe_compare_1.default)(plainPassword, config.value);
     }
     return await bcrypt_1.default.compare(plainPassword, config.value);
 };

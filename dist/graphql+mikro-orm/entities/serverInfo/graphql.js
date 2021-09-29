@@ -15,52 +15,52 @@ const PrereleaseType_1 = require("../../../enums/PrereleaseType");
 let Prerelease = class Prerelease {
 };
 __decorate([
-    type_graphql_1.Field(() => PrereleaseType_1.PrereleaseType),
+    (0, type_graphql_1.Field)(() => PrereleaseType_1.PrereleaseType),
     __metadata("design:type", String)
 ], Prerelease.prototype, "type", void 0);
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", Number)
 ], Prerelease.prototype, "version", void 0);
 Prerelease = __decorate([
-    type_graphql_1.ObjectType(),
-    type_graphql_1.InputType('PrereleaseInput')
+    (0, type_graphql_1.ObjectType)(),
+    (0, type_graphql_1.InputType)('PrereleaseInput')
 ], Prerelease);
 exports.Prerelease = Prerelease;
 let SemVer = class SemVer {
 };
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", Number)
 ], SemVer.prototype, "major", void 0);
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", Number)
 ], SemVer.prototype, "minor", void 0);
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", Number)
 ], SemVer.prototype, "patch", void 0);
 __decorate([
-    type_graphql_1.Field({ nullable: true }),
+    (0, type_graphql_1.Field)({ nullable: true }),
     __metadata("design:type", Prerelease)
 ], SemVer.prototype, "prerelease", void 0);
 SemVer = __decorate([
-    type_graphql_1.ObjectType(),
-    type_graphql_1.InputType('SemVerInput')
+    (0, type_graphql_1.ObjectType)(),
+    (0, type_graphql_1.InputType)('SemVerInput')
 ], SemVer);
 exports.SemVer = SemVer;
 let ServerInfo = class ServerInfo {
 };
 __decorate([
-    type_graphql_1.Field(() => SemVer),
+    (0, type_graphql_1.Field)(() => SemVer),
     __metadata("design:type", SemVer)
 ], ServerInfo.prototype, "version", void 0);
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", Boolean)
 ], ServerInfo.prototype, "uploaderEnabled", void 0);
 ServerInfo = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], ServerInfo);
 exports.ServerInfo = ServerInfo;

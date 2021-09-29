@@ -62,9 +62,9 @@ class PromiseQueue {
             };
             return rawObservable.pipe(Rx.timeout({
                 each: timeout,
-                with: () => rxjs_2.defer(() => {
+                with: () => (0, rxjs_2.defer)(() => {
                     this._pendingPromises.delete(id);
-                    return rxjs_2.of(timeoutValue);
+                    return (0, rxjs_2.of)(timeoutValue);
                 }),
             }));
         }), Rx.concatAll(), Rx.share());
@@ -79,7 +79,7 @@ class PromiseQueue {
         });
     }
     nextCore(execute, timeout) {
-        const id = uuid_1.v4();
+        const id = (0, uuid_1.v4)();
         this._pendingPromises.add(id);
         const result = new Promise((resolver, reject) => {
             this._result.pipe(Rx.first(x => x.id === id)).subscribe({

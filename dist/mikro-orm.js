@@ -15,7 +15,7 @@ const entities = [
     mikro_orm_5.RoomPubMsg,
     mikro_orm_5.RoomPrvMsg,
     mikro_orm_5.DicePieceValueLog,
-    mikro_orm_5.NumberPieceValueLog,
+    mikro_orm_5.StringPieceValueLog,
     mikro_orm_5.RoomPubCh,
     mikro_orm_5.RoomSe,
     mikro_orm_6.User,
@@ -54,9 +54,9 @@ const prepareORM = async (config, debug) => {
     try {
         switch (config.__type) {
             case configType_1.postgresql:
-                return await exports.createPostgreSQL(Object.assign(Object.assign({}, config), { debug }));
+                return await (0, exports.createPostgreSQL)(Object.assign(Object.assign({}, config), { debug }));
             case configType_1.sqlite:
-                return await exports.createSQLite(Object.assign(Object.assign({}, config), { debug }));
+                return await (0, exports.createSQLite)(Object.assign(Object.assign({}, config), { debug }));
         }
     }
     catch (error) {

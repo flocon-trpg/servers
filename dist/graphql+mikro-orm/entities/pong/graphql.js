@@ -14,14 +14,14 @@ const type_graphql_1 = require("type-graphql");
 let Pong = class Pong {
 };
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", Number)
 ], Pong.prototype, "value", void 0);
 __decorate([
-    type_graphql_1.Field({ nullable: true }),
+    (0, type_graphql_1.Field)({ nullable: true }),
     __metadata("design:type", String)
 ], Pong.prototype, "createdBy", void 0);
 Pong = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], Pong);
 exports.Pong = Pong;

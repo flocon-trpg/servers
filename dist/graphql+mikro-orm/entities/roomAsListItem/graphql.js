@@ -14,26 +14,26 @@ const type_graphql_1 = require("type-graphql");
 let RoomAsListItem = class RoomAsListItem {
 };
 __decorate([
-    type_graphql_1.Field(() => type_graphql_1.ID),
+    (0, type_graphql_1.Field)(() => type_graphql_1.ID),
     __metadata("design:type", String)
 ], RoomAsListItem.prototype, "id", void 0);
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", String)
 ], RoomAsListItem.prototype, "name", void 0);
 __decorate([
-    type_graphql_1.Field({ description: 'この部屋の作成者。Firebase AuthenticationのUserUidで表現される。' }),
+    (0, type_graphql_1.Field)({ description: 'この部屋の作成者。Firebase AuthenticationのUserUidで表現される。' }),
     __metadata("design:type", String)
 ], RoomAsListItem.prototype, "createdBy", void 0);
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", Boolean)
 ], RoomAsListItem.prototype, "requiresPhraseToJoinAsPlayer", void 0);
 __decorate([
-    type_graphql_1.Field(),
+    (0, type_graphql_1.Field)(),
     __metadata("design:type", Boolean)
 ], RoomAsListItem.prototype, "requiresPhraseToJoinAsSpectator", void 0);
 RoomAsListItem = __decorate([
-    type_graphql_1.ObjectType()
+    (0, type_graphql_1.ObjectType)()
 ], RoomAsListItem);
 exports.RoomAsListItem = RoomAsListItem;

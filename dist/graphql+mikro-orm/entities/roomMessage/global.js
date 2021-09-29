@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NumberPieceValueLog = exports.DicePieceValueLog = void 0;
+exports.StringPieceValueLog = exports.DicePieceValueLog = void 0;
 const graphql_1 = require("./graphql");
 const flocon_core_1 = require("@kizahasi/flocon-core");
 const PieceValueLogType_1 = require("../../../enums/PieceValueLogType");
@@ -19,14 +19,14 @@ var DicePieceValueLog;
                     characterId: entity.characterId,
                     createdAt: entity.createdAt.getTime(),
                     logType: PieceValueLogType_1.PieceValueLogType.Dice,
-                    valueJson: JSON.stringify(flocon_core_1.decodeDicePieceValue(entity.value)),
+                    valueJson: JSON.stringify((0, flocon_core_1.decodeDicePieceValue)(entity.value)),
                 };
             };
         })(ToGraphQL = MikroORM.ToGraphQL || (MikroORM.ToGraphQL = {}));
     })(MikroORM = DicePieceValueLog.MikroORM || (DicePieceValueLog.MikroORM = {}));
 })(DicePieceValueLog = exports.DicePieceValueLog || (exports.DicePieceValueLog = {}));
-var NumberPieceValueLog;
-(function (NumberPieceValueLog) {
+var StringPieceValueLog;
+(function (StringPieceValueLog) {
     let MikroORM;
     (function (MikroORM) {
         let ToGraphQL;
@@ -40,9 +40,9 @@ var NumberPieceValueLog;
                     characterId: entity.characterId,
                     createdAt: entity.createdAt.getTime(),
                     logType: PieceValueLogType_1.PieceValueLogType.Number,
-                    valueJson: JSON.stringify(flocon_core_1.decodeNumberPieceValue(entity.value)),
+                    valueJson: JSON.stringify((0, flocon_core_1.decodeStringPieceValue)(entity.value)),
                 };
             };
         })(ToGraphQL = MikroORM.ToGraphQL || (MikroORM.ToGraphQL = {}));
-    })(MikroORM = NumberPieceValueLog.MikroORM || (NumberPieceValueLog.MikroORM = {}));
-})(NumberPieceValueLog = exports.NumberPieceValueLog || (exports.NumberPieceValueLog = {}));
+    })(MikroORM = StringPieceValueLog.MikroORM || (StringPieceValueLog.MikroORM = {}));
+})(StringPieceValueLog = exports.StringPieceValueLog || (exports.StringPieceValueLog = {}));
