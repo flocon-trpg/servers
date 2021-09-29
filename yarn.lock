@@ -879,10 +879,10 @@
     "@types/yargs" "^16.0.0"
     chalk "^4.0.0"
 
-"@kizahasi/flocon-script@^0.8.0":
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/@kizahasi/flocon-script/-/flocon-script-0.8.0.tgz#76c6b98929f05f01c419bdec3998d1fed9e38dda"
-  integrity sha512-LpmyWEUlOCT26XFqtSspbuC4UpAWbLx5j+Fz87OAMuTzAkBdMTwVtr7iAQrpsVbWFr/poTVM/78s2nXd3iykew==
+"@kizahasi/flocon-script@0.8.1-beta.1":
+  version "0.8.1-beta.1"
+  resolved "https://registry.yarnpkg.com/@kizahasi/flocon-script/-/flocon-script-0.8.1-beta.1.tgz#29b4362f4bddfd52e26fb2ebc9abd62131678cd6"
+  integrity sha512-NW6ZX7l+gjsO+8mS6/0zLvUjkDIvHRTKFqwmm0fCZWe7kJ19CgxXyM9tHR9kElvtzGX7QsCCm3tnaqPe4AgEKg==
   dependencies:
     "@kizahasi/option" "^1.0.0"
     "@kizahasi/util" "^0.9.1"
