@@ -6,22 +6,11 @@
 
 var 独自の仕様に対応させるのが面倒なため、var は実装していない。代わりに let や const を使う。
 
-### this は使用不可
+### this は常に globalThis と等しい
 
-原則として、どの状況であっても this を使うことはできない。グローバルオブジェクトを参照したい場合は代わりに globalThis を使わなければならない。
+原則として、どの状況であっても this は globalThis と等しくなる。this は一般的な言語と比べて複雑な挙動となるため、それを正確に再現するのは時間がかかると判断した。ただし、function や class などが使用不可であるため、この仕様は実際に触る上ではほぼ顕在化しない。
 
-this が使えない理由は、実装コストの問題。通常の Javascript では、例えば下のコードで x.b()とすると undefined ではなく 1 を返す。
-
-```typescript
-let x = {
-    a: 1,
-    b() {
-        return this.a;
-    },
-};
-```
-
-また、下のコードでは通常の Javascript では a に 1 が push されそうだが、実際は push のときに`can't convert undefined to object`といったエラーを返す。理由は、`a.push(1)`とすると、配列クラス（？）のメソッド内における this は a になり正常に処理されるが、`f(1)`とすると this は a ではなく undefined になり正常に処理できないため。
+ただ、この仕様による挙動の違いも一部存在する。例えば下のコードでは通常の Javascript では a に 1 が push されそうだが、実際は push のときに`can't convert undefined to object`といったエラーを返す。だが、このライブラリでは正常に処理され、a は`[1]`となる。
 
 ```typescript
 let a = [];
@@ -29,9 +18,7 @@ let f = a.push;
 f(1);
 ```
 
-これらの場合分けの処理が面倒なうえ、Flocon のスクリプトという小規模なコードでは実装に見合う対価が少ないと判断し、this を一切使えないようにすることで対処している。
-
-なお、2 つ目コードはこのライブラリでは正常に処理され、a に 1 が push される（function が実行されたとき、.の左側が this になるという場合分けも省略しているため）。
+この理由は、配列の実装の違いによるもの。通常の Javascript における this は関数呼び出しのベースオブジェクトを参照するため、上のコードはエラーとなる。一方このライブラリでは、this は常に不変であるため、this がベースオブジェクトの影響を受けない。このライブラリにおける配列の実装コードには this を用いていない（用いることができない）ため、this の影響を受けることなく正常に動作する。
 
 ### globalThis の参照について
 
@@ -47,7 +34,7 @@ type FValue = FString | FArray | FObject | …
 // 例1
 
 const globalThis = { obj: { x: 1 } };
-const execResult = exec('globalThis.obj.x = 2', globalThis);
+const execResult = exec('this.obj.x = 2', globalThis);
 const globalThisAfterExec = execResult.getGlobalThis();
 
 console.log(globalThis.obj.x); // 一見2が出力されそうだが、実際は1
@@ -59,7 +46,7 @@ console.log(globalThisAfterExec.obj.x); // 2
 
 const obj = { x: 1 };
 const globalThis = { obj1: obj, obj2: obj };
-const execResult = exec('globalThis.obj1.x = 2; globalThis.obj2.x;', globalThis);
+const execResult = exec('this.obj1.x = 2; this.obj2.x;', globalThis);
 const globalThisAfterExec = execResult.getGlobalThis();
 
 console.log(execResult.result); // 一見2が出力されそうだが、実際は1
