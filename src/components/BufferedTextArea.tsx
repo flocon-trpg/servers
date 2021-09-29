@@ -26,6 +26,7 @@ export type BottomElementParams =
 export type Props = {
     style?: React.CSSProperties;
     value: string;
+    placeholder?: string;
     rows?: number;
     cols?: number;
     size?: 'small' | 'middle';

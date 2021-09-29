@@ -24,9 +24,11 @@ import {
     CharacterState,
     ParamNameState,
     ParticipantState,
+    StrIndex20,
+    strIndex20Array,
     UpOperation,
 } from '@kizahasi/flocon-core';
-import { CompositeKey, keyNames, StrIndex20, strIndex20Array } from '@kizahasi/util';
+import { CompositeKey, keyNames } from '@kizahasi/util';
 import _ from 'lodash';
 import { useDispatch } from 'react-redux';
 import {
@@ -280,7 +282,7 @@ const CharacterList: React.FC = () => {
                     onChange={newValue => {
                         operate(
                             characterUpdateOperation(character.stateKey, {
-                                $v: 1,
+                                $v: 2,
                                 isPrivate: { newValue: !newValue },
                             })
                         );
@@ -308,7 +310,7 @@ const CharacterList: React.FC = () => {
                         onChange={newValue => {
                             operate(
                                 characterUpdateOperation(character.stateKey, {
-                                    $v: 1,
+                                    $v: 2,
                                     name: { newValue: newValue.target.value },
                                 })
                             );

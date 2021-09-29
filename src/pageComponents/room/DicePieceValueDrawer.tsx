@@ -107,7 +107,7 @@ export const DicePieceValueDrawer: React.FC = () => {
                     }
                     operate(
                         characterUpdateOperation(drawerType.characterKey, {
-                            $v: 1,
+                            $v: 2,
                             dicePieceValues: {
                                 [drawerType.stateKey]: {
                                     type: update,
@@ -139,7 +139,7 @@ export const DicePieceValueDrawer: React.FC = () => {
                 characterUpdateOperation(
                     { createdBy: myUserUid, id: activeCharacter.key },
                     {
-                        $v: 1,
+                        $v: 2,
                         dicePieceValues: {
                             [id]: {
                                 type: replace,

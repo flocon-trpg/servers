@@ -109,12 +109,12 @@ export const ImagePieceDrawer: React.FC = () => {
                         return;
                     }
                     const operation: UpOperation = {
-                        $v: 1,
+                        $v: 2,
                         participants: {
                             [drawerType.participantKey]: {
                                 type: update,
                                 update: {
-                                    $v: 1,
+                                    $v: 2,
                                     imagePieceValues: {
                                         [drawerType.stateKey]: {
                                             type: update,
@@ -147,12 +147,12 @@ export const ImagePieceDrawer: React.FC = () => {
         onCreate = () => {
             const id = simpleId();
             const operation: UpOperation = {
-                $v: 1,
+                $v: 2,
                 participants: {
                     [myUserUid]: {
                         type: update,
                         update: {
-                            $v: 1,
+                            $v: 2,
                             imagePieceValues: {
                                 [id]: {
                                     type: replace,

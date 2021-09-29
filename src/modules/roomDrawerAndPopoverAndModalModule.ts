@@ -2,14 +2,14 @@ import {
     BoardLocationState,
     CharacterState,
     DicePieceValueState,
-    NumberPieceValueState,
+    StringPieceValueState,
     PieceState,
 } from '@kizahasi/flocon-core';
 import { CompositeKey } from '@kizahasi/util';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DicePieceValueElement } from '../hooks/state/useDicePieceValues';
 import { ImagePieceValueElement } from '../hooks/state/useImagePieceValues';
-import { NumberPieceValueElement } from '../hooks/state/useNumberPieceValues';
+import { StringPieceValueElement } from '../hooks/state/useStringPieceValues';
 import { BoardConfig } from '../states/BoardConfig';
 import { Vector2 } from '../utils/types';
 
@@ -99,7 +99,7 @@ export type ClickOn =
       }
     | {
           type: typeof numberPieceValue;
-          element: NumberPieceValueElement;
+          element: StringPieceValueElement;
       }
     | {
           type: typeof imagePieceValue;
@@ -143,10 +143,10 @@ export type ContextMenuState = {
         dicePieceValue: DicePieceValueState;
         piece: PieceState;
     }>;
-    numberPieceValuesOnCursor: ReadonlyArray<{
+    stringPieceValuesOnCursor: ReadonlyArray<{
         characterKey: CompositeKey;
-        numberPieceValueKey: string;
-        numberPieceValue: NumberPieceValueState;
+        stringPieceValueKey: string;
+        stringPieceValue: StringPieceValueState;
         piece: PieceState;
     }>;
     imagePieceValuesOnCursor: ReadonlyArray<ImagePieceValueElement>;
@@ -161,7 +161,7 @@ export type State = {
     characterDrawerType: CharacterEditorDrawerType | null;
     dicePieceValueDrawerType: PieceValueDrawerType | null;
     imagePieceDrawerType: ImagePieceDrawerType | null;
-    numberPieceValueDrawerType: PieceValueDrawerType | null;
+    stringPieceValueDrawerType: PieceValueDrawerType | null;
     editRoomDrawerVisibility: boolean;
     chatPaletteEditorModalType: ChatPaletteOrCommandEditorModalType | null;
     commandEditorModalType: ChatPaletteOrCommandEditorModalType | null;
@@ -177,7 +177,7 @@ const initState: State = {
     characterDrawerType: null,
     dicePieceValueDrawerType: null,
     imagePieceDrawerType: null,
-    numberPieceValueDrawerType: null,
+    stringPieceValueDrawerType: null,
     editRoomDrawerVisibility: false,
     chatPaletteEditorModalType: null,
     commandEditorModalType: null,
@@ -217,10 +217,10 @@ export const roomDrawerAndPopoverAndModalModule = createSlice({
                     action.payload.imagePieceDrawerType === undefined
                         ? state.imagePieceDrawerType
                         : action.payload.imagePieceDrawerType,
-                numberPieceValueDrawerType:
-                    action.payload.numberPieceValueDrawerType === undefined
-                        ? state.numberPieceValueDrawerType
-                        : action.payload.numberPieceValueDrawerType,
+                stringPieceValueDrawerType:
+                    action.payload.stringPieceValueDrawerType === undefined
+                        ? state.stringPieceValueDrawerType
+                        : action.payload.stringPieceValueDrawerType,
                 editRoomDrawerVisibility:
                     action.payload.editRoomDrawerVisibility === undefined
                         ? state.editRoomDrawerVisibility

@@ -144,7 +144,7 @@ const Memo: React.FC<MemoProps> = ({ memoId, state }: MemoProps) => {
                 value={state.name}
                 onChange={e =>
                     operate({
-                        $v: 1,
+                        $v: 2,
                         memos: {
                             [memoId]: {
                                 type: update,
@@ -161,11 +161,12 @@ const Memo: React.FC<MemoProps> = ({ memoId, state }: MemoProps) => {
                 style={{ flex: 1, height: '100%', resize: 'none' }}
                 bufferDuration='default'
                 value={state.text}
+                placeholder='本文'
                 disableResize
                 onChange={e => {
                     const diff2 = textDiff({ prev: e.previousValue, next: e.currentValue });
                     operate({
-                        $v: 1,
+                        $v: 2,
                         memos: {
                             [memoId]: {
                                 type: update,
@@ -201,7 +202,7 @@ export const Memos: React.FC<Props> = ({ selectedMemoId, onSelectedMemoIdChange 
                     onClick={() => {
                         const id = simpleId();
                         operate({
-                            $v: 1,
+                            $v: 2,
                             memos: {
                                 [id]: {
                                     type: replace,
@@ -232,7 +233,7 @@ export const Memos: React.FC<Props> = ({ selectedMemoId, onSelectedMemoIdChange 
                             title: '現在開いているメモを削除してよろしいですか？',
                             onOk: () => {
                                 operate({
-                                    $v: 1,
+                                    $v: 2,
                                     memos: {
                                         [selectedMemoId]: {
                                             type: replace,

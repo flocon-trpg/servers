@@ -1,4 +1,4 @@
-import { Checkbox, Col, Drawer, Form, Input, InputNumber, Row, Space } from 'antd';
+import { Col, Drawer, Input, Row } from 'antd';
 import React from 'react';
 import DrawerFooter from '../../layouts/DrawerFooter';
 import { DrawerProps } from 'antd/lib/drawer';
@@ -61,7 +61,7 @@ const EditRoomDrawer: React.FC = () => {
                             value={name}
                             onChange={e => {
                                 const operation: UpOperation = {
-                                    $v: 1,
+                                    $v: 2,
                                     name: { newValue: e.target.value },
                                 };
                                 operate(operation);

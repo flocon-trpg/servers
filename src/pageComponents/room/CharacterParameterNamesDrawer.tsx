@@ -6,8 +6,8 @@ import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import BufferedInput from '../../components/BufferedInput';
 import { useSelector } from '../../store';
 import { useOperate } from '../../hooks/useOperate';
-import { recordToMap, StrIndex20, strIndex20Array } from '@kizahasi/util';
-import { UpOperation } from '@kizahasi/flocon-core';
+import { recordToMap } from '@kizahasi/util';
+import { StrIndex20, strIndex20Array, UpOperation } from '@kizahasi/flocon-core';
 import { useDispatch } from 'react-redux';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { InputModal } from '../../components/InputModal';
@@ -93,7 +93,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                 return;
                             }
                             const operation: UpOperation = {
-                                $v: 1,
+                                $v: 2,
                                 numParamNames: {
                                     [key]: {
                                         type: update,
@@ -111,7 +111,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                         size='small'
                         onClick={() => {
                             const operation: UpOperation = {
-                                $v: 1,
+                                $v: 2,
                                 numParamNames: {
                                     [key]: {
                                         type: replace,
@@ -153,7 +153,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                 return;
                             }
                             const operation: UpOperation = {
-                                $v: 1,
+                                $v: 2,
                                 boolParamNames: {
                                     [key]: {
                                         type: update,
@@ -171,7 +171,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                         size='small'
                         onClick={() => {
                             const operation: UpOperation = {
-                                $v: 1,
+                                $v: 2,
                                 boolParamNames: {
                                     [key]: {
                                         type: replace,
@@ -213,7 +213,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                 return;
                             }
                             const operation: UpOperation = {
-                                $v: 1,
+                                $v: 2,
                                 strParamNames: {
                                     [key]: {
                                         type: update,
@@ -231,7 +231,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                         size='small'
                         onClick={() => {
                             const operation: UpOperation = {
-                                $v: 1,
+                                $v: 2,
                                 strParamNames: {
                                     [key]: {
                                         type: replace,
@@ -451,7 +451,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                         switch (visibleParameterForm.type) {
                             case 'Bool':
                                 operation = {
-                                    $v: 1,
+                                    $v: 2,
                                     boolParamNames: {
                                         [visibleParameterForm.key]: {
                                             type: replace,
@@ -467,7 +467,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                 break;
                             case 'Num':
                                 operation = {
-                                    $v: 1,
+                                    $v: 2,
                                     numParamNames: {
                                         [visibleParameterForm.key]: {
                                             type: replace,
@@ -483,7 +483,7 @@ const CharacterParameterNamesDrawer: React.FC = () => {
                                 break;
                             case 'Str':
                                 operation = {
-                                    $v: 1,
+                                    $v: 2,
                                     strParamNames: {
                                         [visibleParameterForm.key]: {
                                             type: replace,

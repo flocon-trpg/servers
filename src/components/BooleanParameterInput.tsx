@@ -10,8 +10,7 @@ import {
     parameterIsPrivate,
     parameterIsPrivateAndNotCreatedByMe,
 } from '../resource/text/main';
-import { StrIndex20 } from '@kizahasi/util';
-import { BoolParamState, CharacterUpOperation } from '@kizahasi/flocon-core';
+import { BoolParamState, CharacterUpOperation, StrIndex20 } from '@kizahasi/flocon-core';
 
 type Props = {
     isCharacterPrivate: boolean;
@@ -38,7 +37,7 @@ const BooleanParameterInput: React.FC<Props> = ({
             checked={parameter?.value ?? false}
             onChange={e => {
                 const operation: CharacterUpOperation = {
-                    $v: 1,
+                    $v: 2,
                     boolParams: {
                         [parameterKey]: {
                             $v: 1,
@@ -63,7 +62,7 @@ const BooleanParameterInput: React.FC<Props> = ({
                         disabled={disabled}
                         onClick={() => {
                             const operation: CharacterUpOperation = {
-                                $v: 1,
+                                $v: 2,
                                 boolParams: {
                                     [parameterKey]: {
                                         $v: 1,
@@ -86,7 +85,7 @@ const BooleanParameterInput: React.FC<Props> = ({
                     disabled={disabled}
                     onClick={() => {
                         const operation: CharacterUpOperation = {
-                            $v: 1,
+                            $v: 2,
                             boolParams: {
                                 [parameterKey]: {
                                     $v: 1,
@@ -137,7 +136,7 @@ const BooleanParameterInput: React.FC<Props> = ({
             size='small'
             onChange={e => {
                 const operation: CharacterUpOperation = {
-                    $v: 1,
+                    $v: 2,
                     boolParams: {
                         [parameterKey]: {
                             $v: 1,

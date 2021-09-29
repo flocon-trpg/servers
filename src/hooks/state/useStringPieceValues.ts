@@ -1,24 +1,24 @@
 import React from 'react';
 import { CompositeKey, keyNames, recordForEach } from '@kizahasi/util';
-import { NumberPieceValueState } from '@kizahasi/flocon-core';
+import { StringPieceValueState } from '@kizahasi/flocon-core';
 import { useCharacters } from './useCharacters';
 import _ from 'lodash';
 
-export type NumberPieceValueElement = {
+export type StringPieceValueElement = {
     characterKey: CompositeKey;
     valueId: string;
-    value: NumberPieceValueState;
+    value: StringPieceValueState;
 };
 
-export const useNumberPieceValues = (): ReadonlyArray<NumberPieceValueElement> | undefined => {
+export const useStringPieceValues = (): ReadonlyArray<StringPieceValueElement> | undefined => {
     const characters = useCharacters();
     return React.useMemo(() => {
         if (characters == null) {
             return undefined;
         }
-        const result: NumberPieceValueElement[] = [];
+        const result: StringPieceValueElement[] = [];
         characters.forEach((character, characterKey) => {
-            recordForEach(character.numberPieceValues, (value, key) => {
+            recordForEach(character.stringPieceValues, (value, key) => {
                 result.push({
                     characterKey,
                     valueId: key,

@@ -15,8 +15,7 @@ import DrawerFooter from '../../layouts/DrawerFooter';
 import { MyStyle } from '../../utils/myStyle';
 import { useSelector } from '../../store';
 import { useOperate } from '../../hooks/useOperate';
-import { StrIndex5 } from '@kizahasi/util';
-import { BgmState, FilePath, UpOperation } from '@kizahasi/flocon-core';
+import { BgmState, FilePath, StrIndex5, UpOperation } from '@kizahasi/flocon-core';
 import _ from 'lodash';
 import { cancelRnd, flex, flexColumn, flexRow, itemsCenter } from '../../utils/className';
 import classNames from 'classnames';
@@ -160,7 +159,7 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({
                         onClick: () => {
                             if (bgmState == null) {
                                 const operation: UpOperation = {
-                                    $v: 1,
+                                    $v: 2,
                                     bgms: {
                                         [channelKey]: {
                                             type: replace,
@@ -183,7 +182,7 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({
                                 return;
                             }
                             const operation: UpOperation = {
-                                $v: 1,
+                                $v: 2,
                                 bgms: {
                                     [channelKey]: {
                                         type: update,
@@ -408,7 +407,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                                     return;
                                 }
                                 const operation: UpOperation = {
-                                    $v: 1,
+                                    $v: 2,
                                     bgms: {
                                         [channelKey]: {
                                             type: update,
@@ -453,7 +452,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                             return;
                         }
                         const operation: UpOperation = {
-                            $v: 1,
+                            $v: 2,
                             bgms: {
                                 [channelKey]: {
                                     type: update,
@@ -476,7 +475,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                     disabled={(bgmState?.files ?? []).length === 0}
                     onClick={() => {
                         const operation: UpOperation = {
-                            $v: 1,
+                            $v: 2,
                             bgms: {
                                 [channelKey]: {
                                     type: replace,

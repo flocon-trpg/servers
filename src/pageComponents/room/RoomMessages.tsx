@@ -384,7 +384,7 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
                                         return;
                                     }
                                     const operation: UpOperation = {
-                                        $v: 1,
+                                        $v: 2,
                                     };
                                     operation[key] = { newValue: e.currentValue };
                                     operate(operation);

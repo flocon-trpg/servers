@@ -1,4 +1,4 @@
-import { $free, $system } from '@kizahasi/util';
+import { $free, $system } from '@kizahasi/flocon-core';
 import _ from 'lodash';
 import React from 'react';
 import { MessageFilter } from '../states/MessagePanelConfig';

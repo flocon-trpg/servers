@@ -20,10 +20,11 @@ import {
     RecordUpOperationElement,
     replace,
     update,
-    parseNumberPieceValue,
+    parseStringPieceValue,
     parseDicePieceValue,
+    $free,
 } from '@kizahasi/flocon-core';
-import { $free, dualKeyRecordToDualKeyMap, keyNames, recordToMap } from '@kizahasi/util';
+import { dualKeyRecordToDualKeyMap, keyNames, recordToMap } from '@kizahasi/util';
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../utils/className';
 import { IconView } from '../../components/IconView';
@@ -173,7 +174,7 @@ export namespace RoomMessage {
                         message.value.characterId,
                         message.value.stateId
                     );
-                    const value = parseNumberPieceValue(message.value.valueJson);
+                    const value = parseStringPieceValue(message.value.valueJson);
 
                     if (value.type === 'create') {
                         return (

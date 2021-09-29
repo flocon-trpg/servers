@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { css } from '@emotion/react';
-import { State } from '@kizahasi/flocon-core/dist/types/internal/ot/room/participant/character/dicePieceValue/dieValue/v1';
+import { DieValueState } from '@kizahasi/flocon-core';
 import { D6Value, noDie, noValue } from '../utils/dice';
 import * as Icons from '@ant-design/icons';
 import { Button } from 'antd';
@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import { flex, flexRow, itemsCenter, justifyItemsCenter } from '../utils/className';
 
 type AddDieProps = {
-    onAdd: (dieType: State['dieType']) => void;
+    onAdd: (dieType: DieValueState['dieType']) => void;
 };
 
 const AddDie: React.FC<AddDieProps> = ({ onAdd }: AddDieProps) => {
@@ -164,13 +164,13 @@ type onChangeParams =
           type: typeof replace;
           newValue:
               | {
-                    dieType: State['dieType'];
+                    dieType: DieValueState['dieType'];
                 }
               | undefined;
       };
 
 type Props = {
-    state: State | null;
+    state: DieValueState | null;
     onChange: (newValue: onChangeParams) => void;
     onIsValuePrivateChange: (newValue: boolean) => void;
     size: 'small' | 'middle';

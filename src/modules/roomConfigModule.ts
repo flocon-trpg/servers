@@ -20,9 +20,10 @@ import { BoardEditorPanelConfig } from '../states/BoardEditorPanelConfig';
 import { MessageFilter, MessagePanelConfig } from '../states/MessagePanelConfig';
 import { reset, Reset } from '../utils/types';
 import { BoardConfig, defaultBoardConfig } from '../states/BoardConfig';
-import { StrIndex5, CompositeKey, recordToArray, keyNames } from '@kizahasi/util';
+import { CompositeKey, recordToArray, keyNames } from '@kizahasi/util';
 import { MemoPanelConfig } from '../states/MemoPanelConfig';
 import { ChatPalettePanelConfig } from '../states/ChatPalettePanelConfig';
+import { StrIndex5 } from '@kizahasi/flocon-core';
 
 export type SetOtherValuesAction = {
     roomId: string;

@@ -8,13 +8,13 @@ import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
 import { useOperate } from '../../hooks/useOperate';
 import {
-    NumberPieceValueState,
+    StringPieceValueState,
     UpOperation,
-    toNumberPieceValueUpOperation,
-    numberPieceValueDiff,
+    toStringPieceValueUpOperation,
+    stringPieceValueDiff,
     CharacterState,
 } from '@kizahasi/flocon-core';
-import { useNumberPieceValues } from '../../hooks/state/useNumberPieceValues';
+import { useStringPieceValues } from '../../hooks/state/useStringPieceValues';
 import { useDispatch } from 'react-redux';
 import { useSelector } from '../../store';
 import {
@@ -31,9 +31,9 @@ const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
 };
 
-const defaultNumberPieceValue: NumberPieceValueState = {
+const defaultStringPieceValue: StringPieceValueState = {
     $v: 1,
-    value: 0,
+    value: '',
     isValuePrivate: false,
     pieces: {},
 };
@@ -64,31 +64,39 @@ const IdView: React.FC = () => {
     );
 };
 
-export const NumberPieceValueDrawer: React.FC = () => {
+const parseIntSafe = (value: string) => {
+    const result = parseInt(value, 10);
+    if (Number.isNaN(result) || !Number.isFinite(result)) {
+        return 0;
+    }
+    return result;
+};
+
+export const StringPieceValueDrawer: React.FC = () => {
     const drawerType = useSelector(
-        state => state.roomDrawerAndPopoverAndModalModule.numberPieceValueDrawerType
+        state => state.roomDrawerAndPopoverAndModalModule.stringPieceValueDrawerType
     );
     const dispatch = useDispatch();
     const operate = useOperate();
     const myUserUid = useMyUserUid();
-    const numberPieceValues = useNumberPieceValues();
+    const stringPieceValues = useStringPieceValues();
     const [activeCharacter, setActiveCharacter] = React.useState<{
         key: string;
         state: CharacterState;
     }>();
-    let stateEditorParams: StateEditorParams<NumberPieceValueState | undefined>;
+    let stateEditorParams: StateEditorParams<StringPieceValueState | undefined>;
     switch (drawerType?.type) {
         case create:
         case undefined:
             stateEditorParams = {
                 type: create,
-                initState: defaultNumberPieceValue,
+                initState: defaultStringPieceValue,
             };
             break;
         case update:
             stateEditorParams = {
                 type: update,
-                state: numberPieceValues?.find(
+                state: stringPieceValues?.find(
                     value =>
                         value.characterKey.createdBy === myUserUid &&
                         value.valueId === drawerType.stateKey
@@ -100,17 +108,17 @@ export const NumberPieceValueDrawer: React.FC = () => {
                     if (prevState == null || nextState == null) {
                         return;
                     }
-                    const diff = numberPieceValueDiff({ prevState, nextState });
+                    const diff = stringPieceValueDiff({ prevState, nextState });
                     if (diff == null) {
                         return;
                     }
                     operate(
                         characterUpdateOperation(drawerType.characterKey, {
-                            $v: 1,
-                            numberPieceValues: {
+                            $v: 2,
+                            stringPieceValues: {
                                 [drawerType.stateKey]: {
                                     type: update,
-                                    update: toNumberPieceValueUpOperation(diff),
+                                    update: toStringPieceValueUpOperation(diff),
                                 },
                             },
                         })
@@ -138,8 +146,8 @@ export const NumberPieceValueDrawer: React.FC = () => {
                 characterUpdateOperation(
                     { createdBy: myUserUid, id: activeCharacter.key },
                     {
-                        $v: 1,
-                        numberPieceValues: {
+                        $v: 2,
+                        stringPieceValues: {
                             [id]: {
                                 type: replace,
                                 replace: {
@@ -162,10 +170,10 @@ export const NumberPieceValueDrawer: React.FC = () => {
                 )
             );
             dispatch(
-                roomDrawerAndPopoverAndModalModule.actions.set({ numberPieceValueDrawerType: null })
+                roomDrawerAndPopoverAndModalModule.actions.set({ stringPieceValueDrawerType: null })
             );
             setActiveCharacter(undefined);
-            setState(defaultNumberPieceValue);
+            setState(defaultStringPieceValue);
         };
     }
 
@@ -178,7 +186,7 @@ export const NumberPieceValueDrawer: React.FC = () => {
             onClose={() =>
                 dispatch(
                     roomDrawerAndPopoverAndModalModule.actions.set({
-                        numberPieceValueDrawerType: null,
+                        stringPieceValueDrawerType: null,
                     })
                 )
             }
@@ -189,7 +197,7 @@ export const NumberPieceValueDrawer: React.FC = () => {
                         onClick: () =>
                             dispatch(
                                 roomDrawerAndPopoverAndModalModule.actions.set({
-                                    numberPieceValueDrawerType: null,
+                                    stringPieceValueDrawerType: null,
                                 })
                             ),
                     }}
@@ -220,12 +228,9 @@ export const NumberPieceValueDrawer: React.FC = () => {
                     <Col span={inputSpan}>
                         <InputNumber
                             size='small'
-                            value={state.value ?? 0}
+                            value={parseIntSafe(state.value)}
                             onChange={e => {
-                                if (typeof e !== 'number') {
-                                    return;
-                                }
-                                setState({ ...state, value: e });
+                                setState({ ...state, value: e.toString() });
                             }}
                         />
                     </Col>

@@ -5,14 +5,14 @@ import * as Icon from '@ant-design/icons';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import _ from 'lodash';
 import {
-    NumberPieceValueElement,
-    useNumberPieceValues,
-} from '../../hooks/state/useNumberPieceValues';
+    StringPieceValueElement,
+    useStringPieceValues,
+} from '../../hooks/state/useStringPieceValues';
 import { useDispatch } from 'react-redux';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { DicePieceValueElement, useDicePieceValues } from '../../hooks/state/useDicePieceValues';
 import { DicePieceValue } from '../../utils/dicePieceValue';
-import { NumberPieceValue } from '../../utils/numberPieceValue';
+import { StringPieceValue } from '../../utils/stringPieceValue';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { keyNames } from '@kizahasi/util';
 
@@ -25,14 +25,14 @@ type DataSource =
     | {
           type: 'number';
           key: string;
-          value: NumberPieceValueElement;
+          value: StringPieceValueElement;
       };
 export const PieceValueList: React.FC = () => {
     const myUserUid = useMyUserUid();
     const dispatch = useDispatch();
     const participants = useParticipants();
     const dicePieceValues = useDicePieceValues();
-    const numberPieceValues = useNumberPieceValues();
+    const numberPieceValues = useStringPieceValues();
 
     if (dicePieceValues == null || numberPieceValues == null || participants == null) {
         return null;
@@ -61,7 +61,7 @@ export const PieceValueList: React.FC = () => {
                                                       characterKey: dataSource.value.characterKey,
                                                   }
                                                 : undefined,
-                                        numberPieceValueDrawerType:
+                                        stringPieceValueDrawerType:
                                             dataSource.type === 'number'
                                                 ? {
                                                       type: update,
@@ -124,7 +124,7 @@ export const PieceValueList: React.FC = () => {
                 if (dataSource.type === 'dice') {
                     return <DicePieceValue.images state={dataSource.value.value} size={22} />;
                 }
-                return <div>{NumberPieceValue.stringify(dataSource.value.value)}</div>;
+                return <div>{StringPieceValue.stringify(dataSource.value.value)}</div>;
             },
         },
         {
