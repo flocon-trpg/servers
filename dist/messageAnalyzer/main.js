@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.analyze = exports.chara = exports.listAvailableGameSystems = void 0;
+exports.analyze = exports.chara = exports.helpMessage = exports.listAvailableGameSystems = void 0;
 const flocon_core_1 = require("@kizahasi/flocon-core");
 const result_1 = require("@kizahasi/result");
 const util_1 = require("@kizahasi/util");
@@ -10,6 +10,11 @@ const listAvailableGameSystems = () => {
     return loader.listAvailableGameSystems();
 };
 exports.listAvailableGameSystems = listAvailableGameSystems;
+const helpMessage = async (gameSystemId) => {
+    const gameSystem = await loader.dynamicLoad(gameSystemId);
+    return gameSystem.HELP_MESSAGE;
+};
+exports.helpMessage = helpMessage;
 const roll = async (text, gameType) => {
     if (text.trim() === '') {
         return null;
