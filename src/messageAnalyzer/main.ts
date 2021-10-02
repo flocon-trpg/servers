@@ -17,6 +17,11 @@ export const listAvailableGameSystems = () => {
     return loader.listAvailableGameSystems();
 };
 
+export const helpMessage = async (gameSystemId: string) => {
+    const gameSystem = await loader.dynamicLoad(gameSystemId);
+    return gameSystem.HELP_MESSAGE;
+};
+
 const roll = async (text: string, gameType: string): Promise<BcdiceResult | null> => {
     if (text.trim() === '') {
         // 空のメッセージを渡すとbcdiceでエラーが出るようなので弾いている

@@ -28,7 +28,7 @@ import { Pong } from '../entities/pong/graphql';
 import { PONG } from '../utils/Topics';
 import { EntryToServerResult } from '../results/EntryToServerResult';
 import { GetAvailableGameSystemsResult } from '../results/GetAvailableGameSystemsResult';
-import { listAvailableGameSystems as getAvailableGameSystems } from '../../messageAnalyzer/main';
+import { helpMessage, listAvailableGameSystems } from '../../messageAnalyzer/main';
 import { ServerInfo } from '../entities/serverInfo/graphql';
 import VERSION from '../../VERSION';
 import { PrereleaseType } from '../../enums/PrereleaseType';
@@ -55,8 +55,20 @@ export class MainResolver {
     @Query(() => GetAvailableGameSystemsResult)
     public async getAvailableGameSystems(): Promise<GetAvailableGameSystemsResult> {
         return {
-            value: getAvailableGameSystems(),
+            value: listAvailableGameSystems(),
         };
+    }
+
+    @Query(() => String, { nullable: true })
+    public async getDiceHelpMessage(@Arg('id') id: string): Promise<string | null> {
+        return await helpMessage(id).catch(err => {
+            if (err instanceof Error) {
+                if (err.message === 'GameSystem is not found') {
+                    return null;
+                }
+            }
+            throw err;
+        });
     }
 
     @Query(() => GetFilesResult)

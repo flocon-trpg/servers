@@ -48,6 +48,16 @@ let MainResolver = class MainResolver {
             value: (0, main_1.listAvailableGameSystems)(),
         };
     }
+    async getDiceHelpMessage(id) {
+        return await (0, main_1.helpMessage)(id).catch(err => {
+            if (err instanceof Error) {
+                if (err.message === 'GameSystem is not found') {
+                    return null;
+                }
+            }
+            throw err;
+        });
+    }
     async getFiles(input, context) {
         const user = (0, helpers_1.ensureAuthorizedUser)(context);
         const fileTagsFilter = input.fileTagIds.map(id => ({
@@ -293,6 +303,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], MainResolver.prototype, "getAvailableGameSystems", null);
+__decorate([
+    (0, type_graphql_1.Query)(() => String, { nullable: true }),
+    __param(0, (0, type_graphql_1.Arg)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], MainResolver.prototype, "getDiceHelpMessage", null);
 __decorate([
     (0, type_graphql_1.Query)(() => GetFilesResult_1.GetFilesResult),
     (0, type_graphql_1.Authorized)(roles_1.ENTRY),
