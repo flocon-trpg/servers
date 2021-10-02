@@ -231,34 +231,6 @@ const BoardDrawer: React.FC = () => {
                 </Row>
                 <Row gutter={gutter} align='middle'>
                     <Col flex='auto' />
-                    <Col flex={0}>グリッドの数</Col>
-                    <Col span={inputSpan}>
-                        <span>x=</span>
-                        <InputNumber
-                            size='small'
-                            style={{ width: 80 }}
-                            value={board.cellColumnCount}
-                            onChange={newValue =>
-                                typeof newValue === 'number'
-                                    ? updateBoard({ cellColumnCount: newValue })
-                                    : undefined
-                            }
-                        />
-                        <span style={{ marginLeft: 10 }}>y=</span>
-                        <InputNumber
-                            size='small'
-                            style={{ width: 80 }}
-                            value={board.cellRowCount}
-                            onChange={newValue =>
-                                typeof newValue === 'number'
-                                    ? updateBoard({ cellRowCount: newValue })
-                                    : undefined
-                            }
-                        />
-                    </Col>
-                </Row>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
                     <Col flex={0}>グリッドの大きさ</Col>
                     <Col span={inputSpan}>
                         {/* cellWidth === cellHeight という前提だが、もし異なる場合は代表してcellWidthの値を用いることにしている */}
