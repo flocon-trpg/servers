@@ -534,6 +534,7 @@ export type PromoteResult = {
 export type Query = {
     __typename?: 'Query';
     getAvailableGameSystems: GetAvailableGameSystemsResult;
+    getDiceHelpMessage?: Maybe<Scalars['String']>;
     getFiles: GetFilesResult;
     getLog: GetRoomLogResult;
     getMessages: GetRoomMessagesResult;
@@ -543,6 +544,10 @@ export type Query = {
     getServerInfo: ServerInfo;
     isEntry: Scalars['Boolean'];
     requiresPhraseToJoinAsPlayer: RequiresPhraseResult;
+};
+
+export type QueryGetDiceHelpMessageArgs = {
+    id: Scalars['String'];
 };
 
 export type QueryGetFilesArgs = {
@@ -1227,6 +1232,12 @@ export type GetAvailableGameSystemsQuery = {
         }>;
     };
 };
+
+export type GetDiceHelpMessagesQueryVariables = Exact<{
+    id: Scalars['String'];
+}>;
+
+export type GetDiceHelpMessagesQuery = { __typename?: 'Query'; result?: Maybe<string> };
 
 export type GetFilesQueryVariables = Exact<{
     input: GetFilesInput;
@@ -2476,6 +2487,60 @@ export type GetAvailableGameSystemsLazyQueryHookResult = ReturnType<
 export type GetAvailableGameSystemsQueryResult = Apollo.QueryResult<
     GetAvailableGameSystemsQuery,
     GetAvailableGameSystemsQueryVariables
+>;
+export const GetDiceHelpMessagesDocument = gql`
+    query GetDiceHelpMessages($id: String!) {
+        result: getDiceHelpMessage(id: $id)
+    }
+`;
+
+/**
+ * __useGetDiceHelpMessagesQuery__
+ *
+ * To run a query within a React component, call `useGetDiceHelpMessagesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetDiceHelpMessagesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetDiceHelpMessagesQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetDiceHelpMessagesQuery(
+    baseOptions: Apollo.QueryHookOptions<
+        GetDiceHelpMessagesQuery,
+        GetDiceHelpMessagesQueryVariables
+    >
+) {
+    const options = { ...defaultOptions, ...baseOptions };
+    return Apollo.useQuery<GetDiceHelpMessagesQuery, GetDiceHelpMessagesQueryVariables>(
+        GetDiceHelpMessagesDocument,
+        options
+    );
+}
+export function useGetDiceHelpMessagesLazyQuery(
+    baseOptions?: Apollo.LazyQueryHookOptions<
+        GetDiceHelpMessagesQuery,
+        GetDiceHelpMessagesQueryVariables
+    >
+) {
+    const options = { ...defaultOptions, ...baseOptions };
+    return Apollo.useLazyQuery<GetDiceHelpMessagesQuery, GetDiceHelpMessagesQueryVariables>(
+        GetDiceHelpMessagesDocument,
+        options
+    );
+}
+export type GetDiceHelpMessagesQueryHookResult = ReturnType<typeof useGetDiceHelpMessagesQuery>;
+export type GetDiceHelpMessagesLazyQueryHookResult = ReturnType<
+    typeof useGetDiceHelpMessagesLazyQuery
+>;
+export type GetDiceHelpMessagesQueryResult = Apollo.QueryResult<
+    GetDiceHelpMessagesQuery,
+    GetDiceHelpMessagesQueryVariables
 >;
 export const GetFilesDocument = gql`
     query GetFiles($input: GetFilesInput!) {
