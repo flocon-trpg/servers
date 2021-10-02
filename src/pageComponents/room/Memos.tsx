@@ -27,10 +27,11 @@ class Dir {
         return _.last(this.dir);
     }
 
-    // 例えば this.dir=['a', 'b']ならば'{a}{b}'を返す。
-    // もし例えば単純に'a/b'を返す実装にしてしまうと、this.dirの要素に'/'という文字が含まれていたときに困る。
     public get reactKey(): string {
-        return this.dir.reduce((seed, elem) => `${seed}{${elem}}`, '');
+        return this.dir.reduce(
+            (seed, elem) => `${seed}:${elem.replace('/', '//').replace(':', '/:')}`,
+            ''
+        );
     }
 }
 
