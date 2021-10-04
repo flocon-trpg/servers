@@ -857,7 +857,7 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                                       {TabConfig.toTabName(tab)}
                                   </div>
                                   <div style={{ flex: 1 }} />
-                                  <div style={{ flex: '0 0 auto', marginLeft: 15 }}>
+                                  <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
                                       <Dropdown
                                           trigger={['click']}
                                           overlay={
@@ -900,14 +900,19 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                                           }
                                       >
                                           <Button
-                                              style={{ width: 16 }}
+                                              style={{
+                                                  width: 18,
+                                                  minWidth: 18,
+
+                                                  // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
+                                                  padding: '0 2px',
+                                              }}
                                               type='text'
                                               size='small'
-                                              icon={
-                                                  <Icon.EllipsisOutlined style={{ opacity: 0.6 }} />
-                                              }
                                               onClick={e => e.stopPropagation()}
-                                          ></Button>
+                                          >
+                                              <Icon.EllipsisOutlined />
+                                          </Button>
                                       </Dropdown>
                                   </div>
                               </div>
