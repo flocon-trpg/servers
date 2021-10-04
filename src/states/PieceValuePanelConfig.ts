@@ -1,31 +1,25 @@
-import { castToBoolean } from '../utils/cast';
-import isObject from '../utils/isObject';
 import {
-    castToPartialDraggablePanelConfigBase,
     DraggablePanelConfigBase,
+    serializedDraggablePanelConfigBase,
     toCompleteDraggablePanelConfigBase,
 } from './DraggablePanelConfigBase';
+import * as t from 'io-ts';
 
 export type PieceValuePanelConfig = {
     isMinimized: boolean;
 } & DraggablePanelConfigBase;
 
-export type PartialPieceValuePanelConfig = Partial<PieceValuePanelConfig>;
+export const serializedPieceValuePanelConfig = t.intersection([
+    t.partial({
+        isMinimized: t.boolean,
+    }),
+    serializedDraggablePanelConfigBase,
+]);
 
-export const castToPartialPieceValuePanelConfig = (
-    source: unknown
-): PartialPieceValuePanelConfig | undefined => {
-    if (!isObject<PartialPieceValuePanelConfig>(source)) {
-        return;
-    }
-    return {
-        ...castToPartialDraggablePanelConfigBase(source),
-        isMinimized: castToBoolean(source.isMinimized),
-    };
-};
+export type SerializedPieceValuePanelConfig = t.TypeOf<typeof serializedPieceValuePanelConfig>;
 
 export const toCompletePieceValuePanelConfig = (
-    source: PartialPieceValuePanelConfig
+    source: SerializedPieceValuePanelConfig
 ): PieceValuePanelConfig => {
     return {
         ...toCompleteDraggablePanelConfigBase(source),

@@ -1,18 +1,15 @@
-import { castToBoolean, castToNullableString, castToNumber, castToRecord } from '../utils/cast';
-import isObject from '../utils/isObject';
 import {
-    castToPartialDraggablePanelConfigBase,
     DraggablePanelConfigBase,
+    serializedDraggablePanelConfigBase,
     toCompleteDraggablePanelConfigBase,
 } from './DraggablePanelConfigBase';
 import {
     BoardConfig,
-    castToPartialBoardConfig,
     defaultBoardConfig,
-    PartialBoardConfig,
+    serializedBoardConfig,
     toCompleteBoardConfig,
 } from './BoardConfig';
-import { chooseRecord } from '@kizahasi/util';
+import * as t from 'io-ts';
 
 export type ActiveBoardPanelConfig = {
     // ボードエディターとは異なり、オフセットやズーム設定は共通化しているほうが演出効果が狙えることがあるため、共通化している。
@@ -20,26 +17,18 @@ export type ActiveBoardPanelConfig = {
     isMinimized: boolean;
 } & DraggablePanelConfigBase;
 
-export type PartialActiveBoardPanelConfig = Omit<Partial<ActiveBoardPanelConfig>, 'board'> & {
-    board?: PartialBoardConfig;
-};
+export const serializedActiveBoardPanelConfig = t.intersection([
+    t.partial({
+        board: serializedBoardConfig,
+        isMinimized: t.boolean,
+    }),
+    serializedDraggablePanelConfigBase,
+]);
 
-export const castToPartialActiveBoardPanelConfig = (
-    source: unknown
-): PartialActiveBoardPanelConfig | undefined => {
-    if (!isObject<PartialActiveBoardPanelConfig>(source)) {
-        return;
-    }
-
-    return {
-        ...castToPartialDraggablePanelConfigBase(source),
-        board: castToPartialBoardConfig(source.board),
-        isMinimized: castToBoolean(source.isMinimized),
-    };
-};
+export type SerializedActiveBoardPanelConfig = t.TypeOf<typeof serializedActiveBoardPanelConfig>;
 
 export const toCompleteActiveBoardPanelConfig = (
-    source: PartialActiveBoardPanelConfig
+    source: SerializedActiveBoardPanelConfig
 ): ActiveBoardPanelConfig => {
     return {
         ...toCompleteDraggablePanelConfigBase(source),

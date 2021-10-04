@@ -1,31 +1,25 @@
-import { castToBoolean } from '../utils/cast';
-import isObject from '../utils/isObject';
 import {
-    castToPartialDraggablePanelConfigBase,
     DraggablePanelConfigBase,
+    serializedDraggablePanelConfigBase,
     toCompleteDraggablePanelConfigBase,
 } from './DraggablePanelConfigBase';
+import * as t from 'io-ts';
 
 export type GameEffectPanelConfig = {
     isMinimized: boolean;
 } & DraggablePanelConfigBase;
 
-export type PartialGameEffectPanelConfig = Partial<GameEffectPanelConfig>;
+export const serializedGameEffectPanelConfig = t.intersection([
+    t.partial({
+        isMinimized: t.boolean,
+    }),
+    serializedDraggablePanelConfigBase,
+]);
 
-export const castToPartialGameEffectPanelConfig = (
-    source: unknown
-): PartialGameEffectPanelConfig | undefined => {
-    if (!isObject<PartialGameEffectPanelConfig>(source)) {
-        return;
-    }
-    return {
-        ...castToPartialDraggablePanelConfigBase(source),
-        isMinimized: castToBoolean(source.isMinimized),
-    };
-};
+export type SerializedGameEffectPanelConfig = t.TypeOf<typeof serializedGameEffectPanelConfig>;
 
 export const toCompleteGameEffectPanelConfig = (
-    source: PartialGameEffectPanelConfig
+    source: SerializedGameEffectPanelConfig
 ): GameEffectPanelConfig => {
     return {
         ...toCompleteDraggablePanelConfigBase(source),

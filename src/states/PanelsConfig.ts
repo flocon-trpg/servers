@@ -1,118 +1,88 @@
-import { castToRecord } from '../utils/cast';
-import isObject from '../utils/isObject';
 import {
-    castToPartialCharactersPanelConfig,
     CharactersPanelConfig,
     defaultCharactersPanelConfig,
-    PartialCharactersPanelConfig,
+    serializedCharactersPanelConfig,
     toCompleteCharactersPanelConfig,
 } from './CharactersPanelConfig';
 import {
     BoardEditorPanelConfig,
-    castToPartialBoardEditorPanelConfig,
     defaultBoardEditorPanelsConfig,
-    PartialBoardEditorPanelConfig,
+    serializedBoardEditorPanelConfig,
     toCompleteBoardEditorPanelConfig,
 } from './BoardEditorPanelConfig';
 import {
-    castToPartialMessagePanelConfig,
     defaultMessagePanelsConfig,
     MessagePanelConfig,
-    PartialMessagePanelConfig,
+    serializedMessagePanelConfig,
     toCompleteMessagePanelConfig,
 } from './MessagePanelConfig';
 import {
-    castToPartialGameEffectPanelConfig,
     defaultGameEffectPanelConfig,
     GameEffectPanelConfig,
-    PartialGameEffectPanelConfig,
+    serializedGameEffectPanelConfig,
     toCompleteGameEffectPanelConfig,
 } from './GameEffectPanelConfig';
 import {
-    castToPartialParticipantPanelConfig,
     defaultParticipantPanelConfig,
-    PartialParticipantPanelConfig,
+    serializedParticipantPanelConfig,
     ParticipantPanelConfig,
     toCompleteParticipantsPanelConfig,
 } from './ParticipantsPanelConfig';
 import {
-    castToPartialPieceValuePanelConfig,
     defaultPieceValuePanelConfig,
     PieceValuePanelConfig,
-    PartialPieceValuePanelConfig,
     toCompletePieceValuePanelConfig,
+    serializedPieceValuePanelConfig,
 } from './PieceValuePanelConfig';
 import {
     ActiveBoardPanelConfig,
-    castToPartialActiveBoardPanelConfig,
     defaultActiveBoardPanelsConfig,
-    PartialActiveBoardPanelConfig,
+    serializedActiveBoardPanelConfig,
     toCompleteActiveBoardPanelConfig,
 } from './ActiveBoardPanelConfig';
 import { chooseRecord } from '@kizahasi/util';
 import {
-    castToPartialMemoPanelConfig,
     defaultMemoPanelsConfig,
     MemoPanelConfig,
-    PartialMemoPanelConfig,
+    serializedMemoPanelConfig,
     toCompleteMemoPanelConfig,
 } from './MemoPanelConfig';
 import {
-    castToPartialChatPalettePanelConfig,
     ChatPalettePanelConfig,
     defaultChatPalettePanelsConfig,
-    PartialChatPalettePanelConfig,
+    serializedChatPalettePanelConfig,
     toCompleteChatPalettePanelConfig,
 } from './ChatPalettePanelConfig';
+import * as t from 'io-ts';
+import { record } from '../utils/io-ts/record';
 
 export type PanelsConfig = {
     activeBoardPanel: ActiveBoardPanelConfig;
-    boardEditorPanels: Record<string, BoardEditorPanelConfig>;
+    boardEditorPanels: Record<string, BoardEditorPanelConfig | undefined>;
     characterPanel: CharactersPanelConfig;
-    chatPalettePanels: Record<string, ChatPalettePanelConfig>;
+    chatPalettePanels: Record<string, ChatPalettePanelConfig | undefined>;
     gameEffectPanel: GameEffectPanelConfig;
-    memoPanels: Record<string, MemoPanelConfig>;
-    messagePanels: Record<string, MessagePanelConfig>;
+    memoPanels: Record<string, MemoPanelConfig | undefined>;
+    messagePanels: Record<string, MessagePanelConfig | undefined>;
     pieceValuePanel: PieceValuePanelConfig;
     participantPanel: ParticipantPanelConfig;
 };
 
-export type PartialPanelsConfig = {
-    activeBoardPanel?: PartialActiveBoardPanelConfig;
-    boardEditorPanels?: Record<string, PartialBoardEditorPanelConfig>;
-    characterPanel?: PartialCharactersPanelConfig;
-    chatPalettePanels?: Record<string, PartialChatPalettePanelConfig>;
-    gameEffectPanel?: PartialGameEffectPanelConfig;
-    messagePanels?: Record<string, PartialMessagePanelConfig>;
-    memoPanels?: Record<string, PartialMemoPanelConfig>;
-    pieceValuePanel?: PartialPieceValuePanelConfig;
-    participantPanel?: PartialParticipantPanelConfig;
-};
+export const serializedPanelsConfig = t.partial({
+    activeBoardPanel: serializedActiveBoardPanelConfig,
+    boardEditorPanels: record(t.string, serializedBoardEditorPanelConfig),
+    characterPanel: serializedCharactersPanelConfig,
+    chatPalettePanels: record(t.string, serializedChatPalettePanelConfig),
+    gameEffectPanel: serializedGameEffectPanelConfig,
+    messagePanels: record(t.string, serializedMessagePanelConfig),
+    memoPanels: record(t.string, serializedMemoPanelConfig),
+    pieceValuePanel: serializedPieceValuePanelConfig,
+    participantPanel: serializedParticipantPanelConfig,
+});
 
-export const castToPartialPanelsConfig = (source: unknown): PartialPanelsConfig | undefined => {
-    if (!isObject<PartialPanelsConfig>(source)) {
-        return;
-    }
-    return {
-        activeBoardPanel: castToPartialActiveBoardPanelConfig(source.activeBoardPanel),
-        boardEditorPanels: castToRecord(
-            source.boardEditorPanels,
-            castToPartialBoardEditorPanelConfig
-        ),
-        characterPanel: castToPartialCharactersPanelConfig(source.characterPanel),
-        chatPalettePanels: castToRecord(
-            source.chatPalettePanels,
-            castToPartialChatPalettePanelConfig
-        ),
-        gameEffectPanel: castToPartialGameEffectPanelConfig(source.gameEffectPanel),
-        memoPanels: castToRecord(source.memoPanels, castToPartialMemoPanelConfig),
-        messagePanels: castToRecord(source.messagePanels, castToPartialMessagePanelConfig),
-        pieceValuePanel: castToPartialPieceValuePanelConfig(source.pieceValuePanel),
-        participantPanel: castToPartialParticipantPanelConfig(source.participantPanel),
-    };
-};
+export type SerializedPanelsConfig = t.TypeOf<typeof serializedPanelsConfig>;
 
-export const toCompletePanelsConfig = (source: PartialPanelsConfig): PanelsConfig => {
+export const toCompletePanelsConfig = (source: SerializedPanelsConfig): PanelsConfig => {
     return {
         activeBoardPanel: toCompleteActiveBoardPanelConfig(source.activeBoardPanel ?? {}),
         boardEditorPanels: chooseRecord(

@@ -1,28 +1,25 @@
-import * as Room from '../stateManagers/states/room';
-import isObject from '../utils/isObject';
 import {
-    castToPartialDraggablePanelConfigBase,
     DraggablePanelConfigBase,
+    serializedDraggablePanelConfigBase,
     toCompleteDraggablePanelConfigBase,
 } from './DraggablePanelConfigBase';
+import * as t from 'io-ts';
 
 export type CharactersPanelConfig = {
     isMinimized: boolean;
 } & DraggablePanelConfigBase;
 
-export type PartialCharactersPanelConfig = Partial<CharactersPanelConfig>;
+export const serializedCharactersPanelConfig = t.intersection([
+    t.partial({
+        isMinimized: t.boolean,
+    }),
+    serializedDraggablePanelConfigBase,
+]);
 
-export const castToPartialCharactersPanelConfig = (
-    source: unknown
-): PartialCharactersPanelConfig | undefined => {
-    if (!isObject<PartialCharactersPanelConfig>(source)) {
-        return;
-    }
-    return castToPartialDraggablePanelConfigBase(source);
-};
+export type SerializedCharactersPanelConfig = t.TypeOf<typeof serializedCharactersPanelConfig>;
 
 export const toCompleteCharactersPanelConfig = (
-    source: PartialCharactersPanelConfig
+    source: SerializedCharactersPanelConfig
 ): CharactersPanelConfig => {
     return {
         ...toCompleteDraggablePanelConfigBase(source),

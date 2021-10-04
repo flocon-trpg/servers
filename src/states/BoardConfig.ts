@@ -1,5 +1,4 @@
-import { castToNumber } from '../utils/cast';
-import isObject from '../utils/isObject';
+import * as t from 'io-ts';
 
 export type BoardConfig = {
     offsetX: number;
@@ -8,20 +7,15 @@ export type BoardConfig = {
     zoom: number;
 };
 
-export type PartialBoardConfig = Partial<BoardConfig>;
+export const serializedBoardConfig = t.partial({
+    offsetX: t.number,
+    offsetY: t.number,
+    zoom: t.number,
+});
 
-export const castToPartialBoardConfig = (source: unknown): PartialBoardConfig | undefined => {
-    if (!isObject<PartialBoardConfig>(source)) {
-        return;
-    }
-    return {
-        offsetX: castToNumber(source.offsetX),
-        offsetY: castToNumber(source.offsetY),
-        zoom: castToNumber(source.zoom),
-    };
-};
+export type SerializedBoardConfig = t.TypeOf<typeof serializedBoardConfig>;
 
-export const toCompleteBoardConfig = (source: PartialBoardConfig): BoardConfig => {
+export const toCompleteBoardConfig = (source: SerializedBoardConfig): BoardConfig => {
     return {
         offsetX: source.offsetX ?? 0,
         offsetY: source.offsetY ?? 0,

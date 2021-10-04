@@ -1,10 +1,9 @@
-import { castToArray, castToBoolean, castToNumber, castToString } from '../utils/cast';
-import isObject from '../utils/isObject';
 import {
-    castToPartialDraggablePanelConfigBase,
     DraggablePanelConfigBase,
+    serializedDraggablePanelConfigBase,
     toCompleteDraggablePanelConfigBase,
 } from './DraggablePanelConfigBase';
+import * as t from 'io-ts';
 import * as generators from '../utils/generators';
 
 export type MemoPanelConfig = {
@@ -12,22 +11,17 @@ export type MemoPanelConfig = {
     selectedMemoId?: string;
 } & DraggablePanelConfigBase;
 
-export type PartialMemoPanelConfig = Partial<MemoPanelConfig>;
+export const serializedMemoPanelConfig = t.intersection([
+    t.partial({
+        isMinimized: t.boolean,
+        selectedMemoId: t.string,
+    }),
+    serializedDraggablePanelConfigBase,
+]);
 
-export const castToPartialMemoPanelConfig = (
-    source: unknown
-): PartialMemoPanelConfig | undefined => {
-    if (!isObject<PartialMemoPanelConfig>(source)) {
-        return;
-    }
-    return {
-        ...castToPartialDraggablePanelConfigBase(source),
-        isMinimized: castToBoolean(source.isMinimized),
-        selectedMemoId: castToString(source.selectedMemoId),
-    };
-};
+export type SerializedMemoPanelConfig = t.TypeOf<typeof serializedMemoPanelConfig>;
 
-export const toCompleteMemoPanelConfig = (source: PartialMemoPanelConfig): MemoPanelConfig => {
+export const toCompleteMemoPanelConfig = (source: SerializedMemoPanelConfig): MemoPanelConfig => {
     return {
         ...toCompleteDraggablePanelConfigBase(source),
         isMinimized: source.isMinimized ?? false,
