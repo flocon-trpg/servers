@@ -3,6 +3,7 @@ import {
     formatValidationErrors as formatValidationErrorsCore,
     ReporterOptions,
 } from 'io-ts-reporters';
+
 export const formatValidationErrors = (
     errors: Errors,
     options?: ReporterOptions | undefined
