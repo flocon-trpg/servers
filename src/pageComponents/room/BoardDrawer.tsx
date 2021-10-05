@@ -33,8 +33,11 @@ const drawerBaseProps: Partial<DrawerProps> = {
 const defaultBoard: BoardState = {
     $v: 1,
     name: '',
+
+    // cellColumnCountとcellRowCountは現在使われていない
     cellColumnCount: 0,
     cellRowCount: 0,
+
     cellHeight: 50,
     cellWidth: 50,
     cellOffsetX: 0,

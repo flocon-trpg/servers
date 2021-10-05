@@ -66,6 +66,7 @@ import { useStringPieces } from '../../hooks/state/useStringPieces';
 import { useImagePieces } from '../../hooks/state/useImagePieces';
 import { useAllContext } from '../../hooks/useAllContext';
 import { AllContextProvider } from '../../components/AllContextProvider';
+import { range } from '../../utils/range';
 
 const createPiecePostOperation = ({
     e,
@@ -266,46 +267,49 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     })();
 
     const grid = (() => {
-        if (
-            board.cellRowCount <= 0 ||
-            board.cellColumnCount <= 0 ||
-            board.cellHeight <= 0 ||
-            board.cellWidth <= 0
-        ) {
+        // 本来はグリッドを縦横無限に表示するのが理想だが、実装簡略化のためとりあえず200本ずつだけ表示している。
+
+        if (!boardConfig.showGrid) {
+            return null;
+        }
+        if (board.cellHeight <= 0 || board.cellWidth <= 0) {
             return null;
         }
         const cellWidth = board.cellWidth;
         const cellHeight = board.cellHeight;
-        // TODO: Lineの色を変える
-        const verticalLines = [...new Array(board.cellRowCount + 1)].map((_, i) => {
-            const height = board.cellColumnCount * cellHeight;
+        const verticalLinesFrom = -99;
+        const verticalLinesCount = 200;
+        const verticalLines = [...range(verticalLinesFrom, verticalLinesCount)].map(i => {
+            const height = verticalLinesCount * cellHeight;
             return (
                 <ReactKonva.Line
                     key={i}
                     points={[
                         i * cellWidth + board.cellOffsetX,
-                        board.cellOffsetY,
+                        verticalLinesFrom * height + board.cellOffsetY,
                         i * cellHeight + board.cellOffsetX,
-                        height + board.cellOffsetY,
+                        verticalLinesCount * height + board.cellOffsetY,
                     ]}
-                    stroke={'red'}
-                    tension={1}
+                    stroke={boardConfig.gridLineColor}
+                    tension={boardConfig.gridLineTension}
                 />
             );
         });
-        const horizontalLines = [...new Array(board.cellColumnCount + 1)].map((_, i) => {
-            const width = board.cellRowCount * cellWidth;
+        const horizontalLinesFrom = -99;
+        const horizontalLinesCount = 200;
+        const horizontalLines = [...range(horizontalLinesFrom, horizontalLinesCount)].map(i => {
+            const width = horizontalLinesCount * cellWidth;
             return (
                 <ReactKonva.Line
                     key={i}
                     points={[
-                        board.cellOffsetX,
+                        horizontalLinesFrom * width + board.cellOffsetX,
                         i * cellWidth + board.cellOffsetY,
-                        width + board.cellOffsetX,
+                        horizontalLinesCount * width + board.cellOffsetX,
                         i * cellHeight + board.cellOffsetY,
                     ]}
-                    stroke={'red'}
-                    tension={1}
+                    stroke={boardConfig.gridLineColor}
+                    tension={boardConfig.gridLineTension}
                 />
             );
         });
@@ -1160,6 +1164,24 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
             </div>
             <div style={zoomButtonStyle}>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <Button
+                        onClick={() => {
+                            if (boardKeyToShow == null) {
+                                return;
+                            }
+                            dispatch(
+                                roomConfigModule.actions.updateBoard({
+                                    roomId,
+                                    boardKey: boardKeyToShow,
+                                    boardEditorPanelId,
+                                    showGrid: !boardConfig.showGrid,
+                                })
+                            );
+                        }}
+                    >
+                        グリッドの表示/非表示を切り替える
+                    </Button>
+                    <div style={{ height: 18 }} />
                     <Button
                         onClick={() => {
                             if (boardKeyToShow == null) {

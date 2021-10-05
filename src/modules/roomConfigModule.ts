@@ -74,6 +74,9 @@ export type UpdateBoardAction = {
     offsetXDelta?: number;
     offsetYDelta?: number;
     zoomDelta?: number;
+    showGrid?: boolean;
+    gridLineTension?: number;
+    gridLineColor?: string;
 };
 
 export type ZoomBoardAction = {
@@ -526,6 +529,15 @@ const roomConfigModule = createSlice({
                 }
                 if (action.payload.zoomDelta != null) {
                     board.zoom = board.zoom + action.payload.zoomDelta;
+                }
+                if (action.payload.showGrid != null) {
+                    board.showGrid = action.payload.showGrid;
+                }
+                if (action.payload.gridLineColor != null) {
+                    board.gridLineColor = action.payload.gridLineColor;
+                }
+                if (action.payload.gridLineTension != null) {
+                    board.gridLineTension = action.payload.gridLineTension;
                 }
             });
         },
