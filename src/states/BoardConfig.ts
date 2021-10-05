@@ -28,7 +28,7 @@ export const toCompleteBoardConfig = (source: SerializedBoardConfig): BoardConfi
         zoom: source.zoom ?? 1,
         showGrid: source.showGrid ?? false,
         gridLineTension: source.gridLineTension ?? 1,
-        gridLineColor: source.gridLineColor ?? 'black',
+        gridLineColor: source.gridLineColor ?? 'rgba(0, 0, 0, 1)',
     };
 };
 
@@ -38,5 +38,5 @@ export const defaultBoardConfig = (): BoardConfig => ({
     zoom: 0,
     showGrid: false,
     gridLineTension: 1,
-    gridLineColor: 'black',
+    gridLineColor: 'rgba(0, 0, 0, 1)',
 });

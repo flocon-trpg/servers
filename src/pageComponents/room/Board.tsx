@@ -1,7 +1,8 @@
+/** @jsxImportSource @emotion/react */
 import React from 'react';
 import { success, useImageFromGraphQL } from '../../hooks/image';
 import * as ReactKonva from 'react-konva';
-import { Button, Dropdown, Menu } from 'antd';
+import { Button, Divider, Dropdown, InputNumber, Menu, Popover } from 'antd';
 import * as Icons from '@ant-design/icons';
 import { useDispatch } from 'react-redux';
 import roomConfigModule from '../../modules/roomConfigModule';
@@ -67,6 +68,11 @@ import { useImagePieces } from '../../hooks/state/useImagePieces';
 import { useAllContext } from '../../hooks/useAllContext';
 import { AllContextProvider } from '../../components/AllContextProvider';
 import { range } from '../../utils/range';
+import classNames from 'classnames';
+import { cancelRnd, flex, flexColumn, flexRow, itemsCenter } from '../../utils/className';
+import { SketchPicker } from 'react-color';
+import { css } from '@emotion/react';
+import { rgba } from '../../utils/rgba';
 
 const createPiecePostOperation = ({
     e,
@@ -291,7 +297,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         verticalLinesCount * height + board.cellOffsetY,
                     ]}
                     stroke={boardConfig.gridLineColor}
-                    tension={boardConfig.gridLineTension}
+                    strokeWidth={boardConfig.gridLineTension}
                 />
             );
         });
@@ -309,7 +315,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         i * cellHeight + board.cellOffsetY,
                     ]}
                     stroke={boardConfig.gridLineColor}
-                    tension={boardConfig.gridLineTension}
+                    strokeWidth={boardConfig.gridLineTension}
                 />
             );
         });
@@ -1118,6 +1124,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
         );
 
     const noActiveBoardText = '';
+    const titleStyle: React.CSSProperties = { maxWidth: 40, minWidth: 40 };
 
     return (
         <div style={{ position: 'relative' }}>
@@ -1164,23 +1171,86 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
             </div>
             <div style={zoomButtonStyle}>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                    <Button
-                        onClick={() => {
-                            if (boardKeyToShow == null) {
-                                return;
+                    <div className={classNames(flex, flexRow)}>
+                        <Button
+                            onClick={() => {
+                                if (boardKeyToShow == null) {
+                                    return;
+                                }
+                                dispatch(
+                                    roomConfigModule.actions.updateBoard({
+                                        roomId,
+                                        boardKey: boardKeyToShow,
+                                        boardEditorPanelId,
+                                        showGrid: !boardConfig.showGrid,
+                                    })
+                                );
+                            }}
+                        >
+                            グリッドの表示/非表示
+                        </Button>
+                        <Popover
+                            trigger='click'
+                            content={
+                                <div className={classNames(cancelRnd, flex, flexColumn)}>
+                                    <div style={{ paddingBottom: 8 }}>グリッドの設定</div>
+                                    <div className={classNames(flex, flexRow, itemsCenter)}>
+                                        <div style={titleStyle}>太さ</div>
+                                        <InputNumber
+                                            value={boardConfig.gridLineTension}
+                                            onChange={e => {
+                                                if (boardKeyToShow == null) {
+                                                    return;
+                                                }
+                                                dispatch(
+                                                    roomConfigModule.actions.updateBoard({
+                                                        roomId,
+                                                        boardKey: boardKeyToShow,
+                                                        boardEditorPanelId,
+                                                        gridLineTension: e,
+                                                    })
+                                                );
+                                            }}
+                                        />
+                                    </div>
+                                    <div className={classNames(flex, flexRow, itemsCenter)}>
+                                        <div style={titleStyle}>色</div>
+                                        {/* ↓ trigger='click' にすると、SketchPickerを開いている状態でPopover全体を閉じたときに次にSketchPickerが開かず（開き直したら直る）操作性が悪いため、'click'は用いていない */}
+                                        <Popover
+                                            content={
+                                                <SketchPicker
+                                                    className={cancelRnd}
+                                                    css={css`
+                                                        color: black;
+                                                    `}
+                                                    color={boardConfig.gridLineColor}
+                                                    onChange={e => {
+                                                        if (boardKeyToShow == null) {
+                                                            return;
+                                                        }
+                                                        dispatch(
+                                                            roomConfigModule.actions.updateBoard({
+                                                                roomId,
+                                                                boardKey: boardKeyToShow,
+                                                                boardEditorPanelId,
+                                                                gridLineColor: rgba(e.rgb),
+                                                            })
+                                                        );
+                                                    }}
+                                                />
+                                            }
+                                        >
+                                            <Button>{boardConfig.gridLineColor}</Button>
+                                        </Popover>
+                                    </div>
+                                </div>
                             }
-                            dispatch(
-                                roomConfigModule.actions.updateBoard({
-                                    roomId,
-                                    boardKey: boardKeyToShow,
-                                    boardEditorPanelId,
-                                    showGrid: !boardConfig.showGrid,
-                                })
-                            );
-                        }}
-                    >
-                        グリッドの表示/非表示を切り替える
-                    </Button>
+                        >
+                            <Button>
+                                <Icons.EllipsisOutlined />
+                            </Button>
+                        </Popover>
+                    </div>
                     <div style={{ height: 18 }} />
                     <Button
                         onClick={() => {

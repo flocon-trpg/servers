@@ -12,6 +12,7 @@ import {
     UpdateMessagePanelAction,
 } from '../../modules/roomConfigModule';
 import { cancelRnd, flex, flexNone, flexRow, itemsCenter } from '../../utils/className';
+import { rgb } from '../../utils/rgb';
 
 type Props = {
     config: ChatPalettePanelConfig | MessagePanelConfig;
@@ -41,7 +42,7 @@ export const TextColorSelector: React.FC<Props> = ({
                         color={
                             config.selectedTextColor == null ? '#000000' : config.selectedTextColor
                         }
-                        onChange={e => onConfigUpdate({ selectedTextColor: e.hex })}
+                        onChange={e => onConfigUpdate({ selectedTextColor: rgb(e.rgb) })}
                         presetColors={[
                             '#F26262',
                             '#F2A962',
@@ -63,13 +64,13 @@ export const TextColorSelector: React.FC<Props> = ({
                 <Button
                     style={{
                         color: config.selectedTextColor,
-                        width: 80,
+                        width: 110,
                         margin: '4px 4px 4px 0',
                     }}
                     type='dashed'
                     size='small'
                 >
-                    {config.selectedTextColor?.toUpperCase() ?? 'デフォルト'}
+                    {config.selectedTextColor ?? 'デフォルト'}
                 </Button>
             </Popover>
             <Button
