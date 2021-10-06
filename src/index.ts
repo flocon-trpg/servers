@@ -41,6 +41,8 @@ export {
     isStrIndex100,
 } from './internal/indexes';
 
+export { maxLengthString } from './internal/maxLengthString';
+
 export { maybe, Maybe } from './internal/maybe';
 
 export { PublicChannelKey } from './internal/publicChannelKey';
