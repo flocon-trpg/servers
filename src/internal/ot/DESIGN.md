@@ -1,6 +1,16 @@
-# Operational Transformation library
+# ot ディレクトリにあるコードについて
+
+Flocon の部屋(Room)を Operational Transformation を用いて編集する機能を提供している。ログを表すオブジェクトを生成する関数も付属している。
+
+中核となるのは`./room`にある`functions.ts`と`types.ts`。ただし Room には例えば Bgm や Participant などが 1:N の関係で存在しており、これらを 1 つのファイルで表すとあまりにもコードが長くなるため、`./room/bgm`や`./room/participant`などに分割している。
+
+## types.ts
+
+型の定義と、io-ts を用いて型チェックを行う関数を提供する。
 
 io-ts では、Record の key を string にすることはできるが、例えば ('1' | '2' | '3') にすることはシンプルな方法で実現できない模様。そのため、代わりに string を使っている。
+
+## functions.ts
 
 権限の処理(例えば isPrivate === true の値は作成者以外の編集を拒否するなど)は、全て serverTransform で行う。
 
