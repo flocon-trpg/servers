@@ -1,5 +1,4 @@
-import { castToNumber } from '../utils/cast';
-import isObject from '../utils/isObject';
+import * as t from 'io-ts';
 
 export type DraggablePanelConfigBase = {
     x: number;
@@ -9,25 +8,20 @@ export type DraggablePanelConfigBase = {
     zIndex: number;
 };
 
-export type PartialDraggablePanelConfigBase = Partial<DraggablePanelConfigBase>;
+export const serializedDraggablePanelConfigBase = t.partial({
+    x: t.number,
+    y: t.number,
+    width: t.number,
+    height: t.number,
+    zIndex: t.number,
+});
 
-export const castToPartialDraggablePanelConfigBase = (
-    source: unknown
-): PartialDraggablePanelConfigBase | undefined => {
-    if (!isObject<PartialDraggablePanelConfigBase>(source)) {
-        return;
-    }
-    return {
-        x: castToNumber(source.x),
-        y: castToNumber(source.y),
-        width: castToNumber(source.width),
-        height: castToNumber(source.height),
-        zIndex: castToNumber(source.zIndex),
-    };
-};
+export type SerializedDraggablePanelConfigBase = t.TypeOf<
+    typeof serializedDraggablePanelConfigBase
+>;
 
 export const toCompleteDraggablePanelConfigBase = (
-    source: PartialDraggablePanelConfigBase
+    source: SerializedDraggablePanelConfigBase
 ): DraggablePanelConfigBase => {
     return {
         x: source.x ?? 0,

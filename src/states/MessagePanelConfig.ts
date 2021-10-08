@@ -1,11 +1,12 @@
-import { castToArray, castToBoolean, castToNumber, castToString } from '../utils/cast';
-import isObject from '../utils/isObject';
 import {
-    castToPartialDraggablePanelConfigBase,
     DraggablePanelConfigBase,
+    serializedDraggablePanelConfigBase,
     toCompleteDraggablePanelConfigBase,
 } from './DraggablePanelConfigBase';
 import * as generators from '../utils/generators';
+import { chooseRecord } from '@kizahasi/util';
+import * as t from 'io-ts';
+import { record } from '../utils/io-ts/record';
 
 export type MessageFilter = {
     showNotification: boolean;
@@ -25,14 +26,38 @@ export type MessageFilter = {
     privateChannels: string | boolean;
 };
 
-export type TabConfig = {
-    // keyとcreatedAtはReactのkeyに使われる
-    key: string;
-    createdAt: number;
+export const serializedMessageFilter = t.partial({
+    showNotification: t.boolean,
+    showSystem: t.boolean,
+    showFree: t.boolean,
+    showPublic1: t.boolean,
+    showPublic2: t.boolean,
+    showPublic3: t.boolean,
+    showPublic4: t.boolean,
+    showPublic5: t.boolean,
+    showPublic6: t.boolean,
+    showPublic7: t.boolean,
+    showPublic8: t.boolean,
+    showPublic9: t.boolean,
+    showPublic10: t.boolean,
+    privateChannels: t.union([t.string, t.boolean]),
+});
 
+export type SerializedMessageFilter = t.TypeOf<typeof serializedMessageFilter>;
+
+export type TabConfig = {
     // nullishならば自動で名付けられる
     tabName?: string;
 } & MessageFilter;
+
+export const partialTabConfig = t.intersection([
+    t.partial({
+        tabName: t.string,
+    }),
+    serializedMessageFilter,
+]);
+
+export type PartialTabConfig = t.TypeOf<typeof partialTabConfig>;
 
 export namespace MessageFilter {
     export const isEmpty = (source: MessageFilter): boolean => {
@@ -117,8 +142,6 @@ export namespace TabConfig {
         return {
             ...MessageFilter.createEmpty(),
             tabName,
-            key: generators.simpleId(),
-            createdAt: new Date().getTime(),
         };
     };
 
@@ -126,8 +149,6 @@ export namespace TabConfig {
         return {
             ...MessageFilter.createAll(),
             tabName,
-            key: generators.simpleId(),
-            createdAt: new Date().getTime(),
         };
     };
 
@@ -153,34 +174,7 @@ export namespace TabConfig {
         return '(タブ)';
     };
 }
-
-export type PartialMessageFilter = Partial<MessageFilter>;
-export type PartialTabConfig = Partial<TabConfig>;
-
-export const castToPartialMessageFilter = (source: unknown): PartialMessageFilter | undefined => {
-    if (!isObject<PartialMessageFilter>(source)) {
-        return;
-    }
-    return {
-        privateChannels:
-            castToBoolean(source.privateChannels) ?? castToString(source.privateChannels),
-        showNotification: castToBoolean(source.showNotification),
-        showFree: castToBoolean(source.showFree),
-        showPublic10: castToBoolean(source.showPublic10),
-        showPublic1: castToBoolean(source.showPublic1),
-        showPublic2: castToBoolean(source.showPublic2),
-        showPublic3: castToBoolean(source.showPublic3),
-        showPublic4: castToBoolean(source.showPublic4),
-        showPublic5: castToBoolean(source.showPublic5),
-        showPublic6: castToBoolean(source.showPublic6),
-        showPublic7: castToBoolean(source.showPublic7),
-        showPublic8: castToBoolean(source.showPublic8),
-        showPublic9: castToBoolean(source.showPublic9),
-        showSystem: castToBoolean(source.showSystem),
-    };
-};
-
-export const toCompleteMessageFilter = (source: PartialMessageFilter): MessageFilter => {
+export const toCompleteMessageFilter = (source: SerializedMessageFilter): MessageFilter => {
     return {
         privateChannels: source.privateChannels ?? false,
         showNotification: source.showNotification ?? false,
@@ -199,30 +193,16 @@ export const toCompleteMessageFilter = (source: PartialMessageFilter): MessageFi
     };
 };
 
-export const castToPartialTabConfig = (source: unknown): PartialTabConfig | undefined => {
-    if (!isObject<PartialTabConfig>(source)) {
-        return;
-    }
-    return {
-        ...castToPartialMessageFilter(source),
-        createdAt: castToNumber(source.createdAt),
-        key: castToString(source.key),
-        tabName: castToString(source.tabName),
-    };
-};
-
 export const toCompleteTabConfig = (source: PartialTabConfig): TabConfig => {
     return {
         ...toCompleteMessageFilter(source),
-        createdAt: source.createdAt ?? new Date().getTime(),
-        key: source.key ?? generators.simpleId(),
         tabName: source.tabName,
     };
 };
 
 export type MessagePanelConfig = {
     isMinimized: boolean;
-    tabs: TabConfig[];
+    tabs: Record<string, TabConfig | undefined>;
     selectedTextColor?: string;
     isPrivateMessageMode: boolean;
     selectedPublicChannelKey?: string;
@@ -232,35 +212,30 @@ export type MessagePanelConfig = {
     selectedGameSystem?: string;
 } & DraggablePanelConfigBase;
 
-export type PartialMessagePanelConfig = Partial<MessagePanelConfig>;
+export const serializedMessagePanelConfig = t.intersection([
+    t.partial({
+        isMinimized: t.boolean,
+        tabs: record(t.string, partialTabConfig),
+        selectedTextColor: t.string,
+        isPrivateMessageMode: t.boolean,
+        selectedPublicChannelKey: t.string,
+        selectedCharacterType: t.string,
+        selectedCharacterStateId: t.string,
+        customCharacterName: t.string,
+        selectedGameSystem: t.string,
+    }),
+    serializedDraggablePanelConfigBase,
+]);
 
-export const castToPartialMessagePanelConfig = (
-    source: unknown
-): PartialMessagePanelConfig | undefined => {
-    if (!isObject<PartialMessagePanelConfig>(source)) {
-        return;
-    }
-    return {
-        ...castToPartialDraggablePanelConfigBase(source),
-        isMinimized: castToBoolean(source.isMinimized),
-        tabs: castToArray(source.tabs, castToPartialTabConfig)?.map(toCompleteTabConfig),
-        selectedTextColor: castToString(source.selectedTextColor),
-        isPrivateMessageMode: castToBoolean(source.isPrivateMessageMode),
-        selectedPublicChannelKey: castToString(source.selectedPublicChannelKey),
-        selectedCharacterType: castToString(source.selectedCharacterType),
-        selectedCharacterStateId: castToString(source.selectedCharacterStateId),
-        customCharacterName: castToString(source.customCharacterName),
-        selectedGameSystem: castToString(source.selectedGameSystem),
-    };
-};
+export type SerializedMessagePanelConfig = t.TypeOf<typeof serializedMessagePanelConfig>;
 
 export const toCompleteMessagePanelConfig = (
-    source: PartialMessagePanelConfig
+    source: SerializedMessagePanelConfig
 ): MessagePanelConfig => {
     return {
         ...toCompleteDraggablePanelConfigBase(source),
         isMinimized: source.isMinimized ?? false,
-        tabs: source.tabs ?? [],
+        tabs: chooseRecord(source.tabs ?? {}, toCompleteTabConfig),
         selectedTextColor: source.selectedTextColor,
         isPrivateMessageMode: source.isPrivateMessageMode ?? false,
         selectedPublicChannelKey: source.selectedPublicChannelKey,
@@ -279,7 +254,7 @@ export const defaultMessagePanelConfig = (): MessagePanelConfig => {
         height: 300,
         zIndex: 0,
         isMinimized: false,
-        tabs: [TabConfig.createAll({})],
+        tabs: { [generators.simpleId()]: TabConfig.createAll({}) },
         isPrivateMessageMode: false,
         customCharacterName: '',
     };

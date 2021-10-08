@@ -1,14 +1,16 @@
-import { castToNumber, castToRecord, castToString } from '../utils/cast';
-import isObject from '../utils/isObject';
 import {
-    castToPartialPanelsConfig,
     defaultPanelsConfig,
     PanelsConfig,
-    PartialPanelsConfig,
+    serializedPanelsConfig,
     toCompletePanelsConfig,
 } from './PanelsConfig';
-import * as Room from '../stateManagers/states/room';
-import { MessageFilter } from './MessagePanelConfig';
+import {
+    MessageFilter,
+    serializedMessageFilter,
+    toCompleteMessageFilter,
+} from './MessagePanelConfig';
+import * as t from 'io-ts';
+import { record } from '../utils/io-ts/record';
 
 export const defaultMasterVolume = 0.5;
 export const defaultChannelVolume = 1;
@@ -17,26 +19,26 @@ export const defaultSeVolume = 1;
 export type RoomConfig = {
     roomId: string;
 
-    version: 1;
     messageNotificationFilter: MessageFilter;
     panels: PanelsConfig;
     masterVolume: number;
-    channelVolumes: Record<string, number>;
+    channelVolumes: Record<string, number | undefined>;
     seVolume: number;
 };
 
-export type PartialRoomConfig = {
+export const serializedRoomConfig = t.partial({
     // PartialRoomConfigはlocalforage.getItemで使われるが、localforage.setItemでは使われない。
     // getItemする際、roomIdをキーに用いるため、roomIdをストレージに保存していない。
     // そのため、RoomConfigのほうでは定義しているroomIdは、こちらでは定義していない。
 
-    version?: number;
-    messageNotificationFilter?: MessageFilter;
-    panels?: PartialPanelsConfig;
-    masterVolume?: number;
-    channelVolumes?: Record<string, number>;
-    seVolume?: number;
-};
+    messageNotificationFilter: serializedMessageFilter,
+    panels: serializedPanelsConfig,
+    masterVolume: t.number,
+    channelVolumes: record(t.string, t.number),
+    seVolume: t.number,
+});
+
+export type SerializedRoomConfig = t.TypeOf<typeof serializedRoomConfig>;
 
 export type UpdateGameSystemAction = {
     roomId: string;
@@ -94,34 +96,12 @@ export type PanelAction = {
           };
 };
 
-export const castToPartialRoomConfig = (source: unknown): PartialRoomConfig | undefined => {
-    if (!isObject<PartialRoomConfig>(source)) {
-        return;
-    }
-    return {
-        version: 1,
-        panels: castToPartialPanelsConfig(source.panels),
-        masterVolume: castToNumber(source.masterVolume),
-        channelVolumes: castToRecord(source.channelVolumes, castToNumber),
-        seVolume: castToNumber(source.seVolume),
-    };
-};
-
-// versionが未対応のものの場合はundefinedを返す。
-// TODO: Configをユーザーがリセットできないと、versionが不正になってしまったときに永遠に使用できなくなる問題への対処。
-export const toCompleteRoomConfig = (
-    source: PartialRoomConfig,
-    roomId: string
-): RoomConfig | undefined => {
-    if (source.version !== 1) {
-        return;
-    }
+export const toCompleteRoomConfig = (source: SerializedRoomConfig, roomId: string): RoomConfig => {
     return {
         roomId,
-        version: source.version,
         panels:
             source.panels == null ? defaultPanelsConfig() : toCompletePanelsConfig(source.panels),
-        messageNotificationFilter: source.messageNotificationFilter ?? MessageFilter.createAll(),
+        messageNotificationFilter: toCompleteMessageFilter(source.messageNotificationFilter ?? {}),
         masterVolume: source.masterVolume ?? defaultMasterVolume,
         channelVolumes: source.channelVolumes ?? {},
         seVolume: source.seVolume ?? defaultSeVolume,
@@ -131,7 +111,6 @@ export const toCompleteRoomConfig = (
 export const defaultRoomConfig = (roomId: string): RoomConfig => {
     return {
         roomId,
-        version: 1,
         panels: defaultPanelsConfig(),
         messageNotificationFilter: MessageFilter.createAll(),
         masterVolume: defaultMasterVolume,

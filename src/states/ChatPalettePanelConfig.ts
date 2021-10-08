@@ -1,11 +1,10 @@
-import { castToBoolean, castToString } from '../utils/cast';
-import isObject from '../utils/isObject';
 import {
-    castToPartialDraggablePanelConfigBase,
     DraggablePanelConfigBase,
+    serializedDraggablePanelConfigBase,
     toCompleteDraggablePanelConfigBase,
 } from './DraggablePanelConfigBase';
 import * as generators from '../utils/generators';
+import * as t from 'io-ts';
 
 export type ChatPalettePanelConfig = {
     selectedTextColor?: string;
@@ -17,29 +16,23 @@ export type ChatPalettePanelConfig = {
     isMinimized: boolean;
 } & DraggablePanelConfigBase;
 
-export type PartialChatPalettePanelConfig = Partial<ChatPalettePanelConfig>;
+export const serializedChatPalettePanelConfig = t.intersection([
+    t.partial({
+        selectedTextColor: t.string,
+        isPrivateMessageMode: t.boolean,
+        selectedPublicChannelKey: t.string,
+        selectedCharacterStateId: t.string,
+        customCharacterName: t.string,
+        selectedGameSystem: t.string,
+        isMinimized: t.boolean,
+    }),
+    serializedDraggablePanelConfigBase,
+]);
 
-export const castToPartialChatPalettePanelConfig = (
-    source: unknown
-): PartialChatPalettePanelConfig | undefined => {
-    if (!isObject<PartialChatPalettePanelConfig>(source)) {
-        return;
-    }
-
-    return {
-        ...castToPartialDraggablePanelConfigBase(source),
-        selectedTextColor: castToString(source.selectedTextColor),
-        isPrivateMessageMode: castToBoolean(source.isPrivateMessageMode),
-        selectedPublicChannelKey: castToString(source.selectedPublicChannelKey),
-        selectedCharacterStateId: castToString(source.selectedCharacterStateId),
-        customCharacterName: castToString(source.customCharacterName),
-        selectedGameSystem: castToString(source.selectedGameSystem),
-        isMinimized: castToBoolean(source.isMinimized),
-    };
-};
+export type SerializedChatPalettePanelConfig = t.TypeOf<typeof serializedChatPalettePanelConfig>;
 
 export const toCompleteChatPalettePanelConfig = (
-    source: PartialChatPalettePanelConfig
+    source: SerializedChatPalettePanelConfig
 ): ChatPalettePanelConfig => {
     return {
         ...toCompleteDraggablePanelConfigBase(source),

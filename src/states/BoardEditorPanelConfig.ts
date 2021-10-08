@@ -1,46 +1,34 @@
-import { castToBoolean, castToNullableString, castToNumber, castToRecord } from '../utils/cast';
-import isObject from '../utils/isObject';
 import {
-    castToPartialDraggablePanelConfigBase,
     DraggablePanelConfigBase,
+    serializedDraggablePanelConfigBase,
     toCompleteDraggablePanelConfigBase,
 } from './DraggablePanelConfigBase';
 import * as generators from '../utils/generators';
-import {
-    BoardConfig,
-    castToPartialBoardConfig,
-    PartialBoardConfig,
-    toCompleteBoardConfig,
-} from './BoardConfig';
+import { BoardConfig, serializedBoardConfig, toCompleteBoardConfig } from './BoardConfig';
 import { chooseRecord } from '@kizahasi/util';
+import * as t from 'io-ts';
+import { maybe } from '@kizahasi/flocon-core';
+import { record } from '../utils/io-ts/record';
 
 export type BoardEditorPanelConfig = {
     activeBoardKey: string | null;
-    boards: Record<string, BoardConfig>;
+    boards: Record<string, BoardConfig | undefined>;
     isMinimized: boolean;
 } & DraggablePanelConfigBase;
 
-export type PartialBoardEditorPanelConfig = Omit<Partial<BoardEditorPanelConfig>, 'boards'> & {
-    boards?: Record<string, PartialBoardConfig>;
-};
+export const serializedBoardEditorPanelConfig = t.intersection([
+    t.partial({
+        activeBoardKey: maybe(t.string),
+        boards: record(t.string, serializedBoardConfig),
+        isMinimized: t.boolean,
+    }),
+    serializedDraggablePanelConfigBase,
+]);
 
-export const castToPartialBoardEditorPanelConfig = (
-    source: unknown
-): PartialBoardEditorPanelConfig | undefined => {
-    if (!isObject<PartialBoardEditorPanelConfig>(source)) {
-        return;
-    }
-
-    return {
-        ...castToPartialDraggablePanelConfigBase(source),
-        activeBoardKey: castToNullableString(source.activeBoardKey),
-        boards: castToRecord(source.boards, castToPartialBoardConfig),
-        isMinimized: castToBoolean(source.isMinimized),
-    };
-};
+export type SerializedBoardEditorPanelConfig = t.TypeOf<typeof serializedBoardEditorPanelConfig>;
 
 export const toCompleteBoardEditorPanelConfig = (
-    source: PartialBoardEditorPanelConfig
+    source: SerializedBoardEditorPanelConfig
 ): BoardEditorPanelConfig => {
     return {
         ...toCompleteDraggablePanelConfigBase(source),

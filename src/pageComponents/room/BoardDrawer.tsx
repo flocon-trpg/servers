@@ -33,8 +33,11 @@ const drawerBaseProps: Partial<DrawerProps> = {
 const defaultBoard: BoardState = {
     $v: 1,
     name: '',
+
+    // cellColumnCountとcellRowCountは現在使われていない
     cellColumnCount: 0,
     cellRowCount: 0,
+
     cellHeight: 50,
     cellWidth: 50,
     cellOffsetX: 0,
@@ -224,34 +227,6 @@ const BoardDrawer: React.FC = () => {
                             onChange={newValue =>
                                 typeof newValue === 'number'
                                     ? updateBoard({ backgroundImageZoom: newValue / 100 })
-                                    : undefined
-                            }
-                        />
-                    </Col>
-                </Row>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
-                    <Col flex={0}>グリッドの数</Col>
-                    <Col span={inputSpan}>
-                        <span>x=</span>
-                        <InputNumber
-                            size='small'
-                            style={{ width: 80 }}
-                            value={board.cellColumnCount}
-                            onChange={newValue =>
-                                typeof newValue === 'number'
-                                    ? updateBoard({ cellColumnCount: newValue })
-                                    : undefined
-                            }
-                        />
-                        <span style={{ marginLeft: 10 }}>y=</span>
-                        <InputNumber
-                            size='small'
-                            style={{ width: 80 }}
-                            value={board.cellRowCount}
-                            onChange={newValue =>
-                                typeof newValue === 'number'
-                                    ? updateBoard({ cellRowCount: newValue })
                                     : undefined
                             }
                         />

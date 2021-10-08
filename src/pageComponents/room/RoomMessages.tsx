@@ -57,7 +57,7 @@ import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import { useOperate } from '../../hooks/useOperate';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { UpOperation } from '@kizahasi/flocon-core';
-import { recordToMap } from '@kizahasi/util';
+import { recordToArray, recordToMap } from '@kizahasi/util';
 import { Color } from '../../utils/color';
 import userConfigModule from '../../modules/userConfigModule';
 import { UserConfig } from '../../states/UserConfig';
@@ -67,6 +67,7 @@ import { JumpToBottomVirtuoso } from '../../components/JumpToBottomVirtuoso';
 import { cancelRnd, flex, flexColumn, flexNone, flexRow, itemsCenter } from '../../utils/className';
 import classNames from 'classnames';
 import { getUserUid, MyAuthContext } from '../../contexts/MyAuthContext';
+import { simpleId } from '../../utils/generators';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -791,16 +792,13 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
 
     const dispatch = useDispatch();
 
-    const [editingTabConfigKey, setEditingTabConfigKey] = React.useState<{
-        key: string;
-        createdAt: number;
-    }>();
+    const [editingTabConfigKey, setEditingTabConfigKey] = React.useState<string>();
     const editingTabConfig = React.useMemo(() => {
-        return tabs?.find(
-            x =>
-                x.createdAt === editingTabConfigKey?.createdAt && x.key === editingTabConfigKey?.key
-        );
-    }, [tabs, editingTabConfigKey?.createdAt, editingTabConfigKey?.key]);
+        if (editingTabConfigKey == null) {
+            return undefined;
+        }
+        return tabs?.[editingTabConfigKey];
+    }, [tabs, editingTabConfigKey]);
 
     const [isChannelNamesEditorVisible, setIsChannelNamesEditorVisible] = React.useState(false);
 
@@ -840,11 +838,11 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
     const tabPanels =
         contentHeight <= 0
             ? null
-            : tabs.map(tab => {
+            : recordToArray(tabs).map(({ key: tabKey, value: tab }) => {
                   return (
                       <Tabs.TabPane
-                          key={tab.key}
-                          tabKey={tab.key}
+                          key={tabKey}
+                          tabKey={tabKey}
                           closable={false}
                           style={{ backgroundColor: Color.chatBackgroundColor }}
                           tab={
@@ -859,14 +857,14 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                                       {TabConfig.toTabName(tab)}
                                   </div>
                                   <div style={{ flex: 1 }} />
-                                  <div style={{ flex: '0 0 auto', marginLeft: 15 }}>
+                                  <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
                                       <Dropdown
                                           trigger={['click']}
                                           overlay={
                                               <Menu>
                                                   <Menu.Item
                                                       icon={<Icon.SettingOutlined />}
-                                                      onClick={() => setEditingTabConfigKey(tab)}
+                                                      onClick={() => setEditingTabConfigKey(tabKey)}
                                                   >
                                                       編集
                                                   </Menu.Item>
@@ -881,13 +879,11 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                                                                               roomId,
                                                                               panelId,
                                                                               panel: {
-                                                                                  tabs: tabs.filter(
-                                                                                      elem =>
-                                                                                          elem.key !==
-                                                                                              tab.key ||
-                                                                                          elem.createdAt !==
-                                                                                              tab.createdAt
-                                                                                  ),
+                                                                                  tabs: {
+                                                                                      ...tabs,
+                                                                                      [tabKey]:
+                                                                                          undefined,
+                                                                                  },
                                                                               },
                                                                           }
                                                                       )
@@ -904,14 +900,19 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                                           }
                                       >
                                           <Button
-                                              style={{ width: 16 }}
+                                              style={{
+                                                  width: 18,
+                                                  minWidth: 18,
+
+                                                  // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
+                                                  padding: '0 2px',
+                                              }}
                                               type='text'
                                               size='small'
-                                              icon={
-                                                  <Icon.EllipsisOutlined style={{ opacity: 0.6 }} />
-                                              }
                                               onClick={e => e.stopPropagation()}
-                                          ></Button>
+                                          >
+                                              <Icon.EllipsisOutlined />
+                                          </Button>
                                       </Dropdown>
                                   </div>
                               </div>
@@ -933,17 +934,18 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                 config={editingTabConfig}
                 onClose={() => setEditingTabConfigKey(undefined)}
                 onChange={newValue => {
+                    if (editingTabConfigKey == null) {
+                        return;
+                    }
                     dispatch(
                         roomConfigModule.actions.updateMessagePanel({
                             roomId,
                             panelId,
                             panel: {
-                                tabs: tabs.map(oldValue =>
-                                    oldValue.key === newValue.key &&
-                                    oldValue.createdAt === newValue.createdAt
-                                        ? newValue
-                                        : oldValue
-                                ),
+                                tabs: {
+                                    ...tabs,
+                                    [editingTabConfigKey]: newValue,
+                                },
                             },
                         })
                     );
@@ -1002,7 +1004,10 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                                 roomId,
                                 panelId,
                                 panel: {
-                                    tabs: tabs.filter(tab => tab.key !== e),
+                                    tabs: {
+                                        ...tabs,
+                                        [e]: undefined,
+                                    },
                                 },
                             })
                         );
@@ -1013,7 +1018,10 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                             roomId,
                             panelId,
                             panel: {
-                                tabs: [...tabs, TabConfig.createEmpty({})],
+                                tabs: {
+                                    ...tabs,
+                                    [simpleId()]: TabConfig.createEmpty({}),
+                                },
                             },
                         })
                     );
