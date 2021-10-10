@@ -55,6 +55,7 @@ export namespace Resources {
     }
 
     export const minimumState: State = {
+        $v: 1,
         $r: 2,
         activeBoardKey: null,
         createdBy: 'CREATED_BY',
@@ -115,6 +116,7 @@ export namespace Resources {
     };
 
     export const complexState: State = {
+        $v: 1,
         $r: 2,
         activeBoardKey: null,
         createdBy: 'CREATED_BY',
