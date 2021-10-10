@@ -82,6 +82,9 @@
         "prettier": "^2.4.1",
         "ts-jest": "^27.0.5"
     },
+    "engines": {
+        "node": ">=14"
+    },
     "prettier": {
         "printWidth": 100,
         "semi": true,
