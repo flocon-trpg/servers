@@ -56,8 +56,11 @@ export const parseUpOperation = (source: string): Room.UpOperation => {
 };
 
 export const stringifyUpOperation = (source: Room.UpOperation): string => {
-    const result = t.exact(Room.upOperation).encode(source);
-    return JSON.stringify(result);
+    const result = t.exact(Room.upOperation).decode(source);
+    if (result._tag === 'Left') {
+        throw new Error('decode failed');
+    }
+    return JSON.stringify(result.right);
 };
 
 export const decodeDownOperation = (source: unknown): Room.DownOperation => {
@@ -73,5 +76,9 @@ export const decodeDownOperation = (source: unknown): Room.DownOperation => {
 };
 
 export const exactDownOperation = (source: Room.DownOperation): Room.DownOperation => {
-    return t.exact(Room.downOperation).encode(source);
+    const result = t.exact(Room.downOperation).decode(source);
+    if (result._tag === 'Left') {
+        throw new Error('decode failed');
+    }
+    return result.right;
 };

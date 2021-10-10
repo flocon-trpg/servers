@@ -41,7 +41,7 @@ export {
     isStrIndex100,
 } from './internal/indexes';
 
-export { maxLengthString } from './internal/maxLengthString';
+export { MaxLength100String, maxLength100String } from './internal/maxLengthString';
 
 export { maybe, Maybe } from './internal/maybe';
 

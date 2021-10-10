@@ -1,12 +1,12 @@
 import * as t from 'io-ts';
-import { maxLengthString } from '../src';
+import { maxLengthString } from '../src/internal/maxLengthString';
 
 const obj = t.type({
     str5: maxLengthString(5),
     str10: maxLengthString(10),
 });
 
-type Obj = t.OutputOf<typeof obj>;
+type Obj = t.InputOf<typeof obj>;
 
 describe('maxLengthString', () => {
     it('tests valid source', () => {
@@ -16,6 +16,7 @@ describe('maxLengthString', () => {
         };
         const actual = obj.decode(source);
         expect(actual._tag === 'Left' ? undefined : actual.right).toBe(source);
+        obj.props.str5;
     });
 
     it('tests invalid source', () => {
