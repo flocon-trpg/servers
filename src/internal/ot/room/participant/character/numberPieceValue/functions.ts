@@ -110,6 +110,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
 
     const valueProps: DownOperation = {
         $v: 1,
+        $r: 1,
         isValuePrivate: ReplaceOperation.composeDownOperation(
             first.isValuePrivate ?? undefined,
             second.isValuePrivate ?? undefined
@@ -149,6 +150,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     const prevState: State = { ...nextState, pieces: pieces.value.prevState };
     const twoWayOperation: TwoWayOperation = {
         $v: 1,
+        $r: 1,
         pieces: pieces.value.twoWayOperation,
     };
 
@@ -178,6 +180,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     });
     const resultType: TwoWayOperation = {
         $v: 1,
+        $r: 1,
         pieces,
     };
     if (prevState.isValuePrivate !== nextState.isValuePrivate) {
@@ -237,6 +240,7 @@ export const serverTransform =
 
         const twoWayOperation: TwoWayOperation = {
             $v: 1,
+            $r: 1,
             pieces: pieces.value,
         };
 
@@ -286,6 +290,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const firstPrime: UpOperation = {
         $v: 1,
+        $r: 1,
         pieces: pieces.value.firstPrime,
         isValuePrivate: isValuePrivate.firstPrime,
         value: value.firstPrime,
@@ -293,6 +298,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const secondPrime: UpOperation = {
         $v: 1,
+        $r: 1,
         pieces: pieces.value.secondPrime,
         isValuePrivate: isValuePrivate.secondPrime,
         value: value.secondPrime,

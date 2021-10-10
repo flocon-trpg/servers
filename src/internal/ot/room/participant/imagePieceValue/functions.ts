@@ -158,6 +158,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
 
     const valueProps: DownOperation = {
         $v: 1,
+        $r: 1,
         image: ReplaceOperation.composeDownOperation(first.image, second.image),
         isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
         memo: memo.value,
@@ -196,6 +197,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     };
     const twoWayOperation: TwoWayOperation = {
         $v: 1,
+        $r: 1,
         pieces: pieces.value.twoWayOperation,
     };
 
@@ -247,6 +249,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     });
     const result: TwoWayOperation = {
         $v: 1,
+        $r: 1,
         pieces,
     };
     if (prevState.image !== nextState.image) {
@@ -307,6 +310,7 @@ export const serverTransform =
 
         const twoWayOperation: TwoWayOperation = {
             $v: 1,
+            $r: 1,
             pieces: pieces.value,
         };
 
@@ -389,6 +393,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const firstPrime: UpOperation = {
         $v: 1,
+        $r: 1,
         image: image.firstPrime,
         isPrivate: isPrivate.firstPrime,
         memo: memo.value.firstPrime,
@@ -397,6 +402,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     };
     const secondPrime: UpOperation = {
         $v: 1,
+        $r: 1,
         image: image.secondPrime,
         isPrivate: isPrivate.secondPrime,
         memo: memo.value.secondPrime,

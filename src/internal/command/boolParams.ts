@@ -15,6 +15,7 @@ import { FBoolParam } from './boolParam';
 
 const createDefaultState = (): BoolParam.State => ({
     $v: 1,
+    $r: 1,
     value: false,
     isValuePrivate: false,
 });

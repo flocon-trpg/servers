@@ -10,6 +10,7 @@ const numberUpOperation = t.type({ newValue: t.number });
 
 export const state = t.type({
     $v: t.literal(1),
+    $r: t.literal(1),
 
     backgroundImage: maybe(filePath),
     backgroundImageZoom: t.number,
@@ -24,7 +25,7 @@ export const state = t.type({
 
 export type State = t.TypeOf<typeof state>;
 
-export const downOperation = createOperation(1, {
+export const downOperation = createOperation(1, 1, {
     backgroundImage: t.type({ oldValue: maybe(filePath) }),
     backgroundImageZoom: numberDownOperation,
     cellColumnCount: numberDownOperation,
@@ -38,7 +39,7 @@ export const downOperation = createOperation(1, {
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
-export const upOperation = createOperation(1, {
+export const upOperation = createOperation(1, 1, {
     backgroundImage: t.type({ newValue: maybe(filePath) }),
     backgroundImageZoom: numberUpOperation,
     cellColumnCount: numberUpOperation,
@@ -54,6 +55,7 @@ export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
     $v: 1;
+    $r: 1;
 
     backgroundImage?: ReplaceOperation.ReplaceValueTwoWayOperation<
         t.TypeOf<typeof filePath> | null | undefined

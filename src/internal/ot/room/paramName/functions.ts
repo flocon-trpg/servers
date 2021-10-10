@@ -53,6 +53,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     }
     const valueProps: DownOperation = {
         $v: 1,
+        $r: 1,
         name: name.value,
     };
     return Result.ok(valueProps);
@@ -67,7 +68,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     }
 
     const prevState: State = { ...nextState };
-    const twoWayOperation: TwoWayOperation = { $v: 1 };
+    const twoWayOperation: TwoWayOperation = { $v: 1, $r: 1 };
 
     if (downOperation.name !== undefined) {
         const restored = TextOperation.restore({
@@ -85,7 +86,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const resultType: TwoWayOperation = { $v: 1 };
+    const resultType: TwoWayOperation = { $v: 1, $r: 1 };
     if (prevState.name !== nextState.name) {
         resultType.name = TextOperation.diff({ prev: prevState.name, next: nextState.name });
     }
@@ -100,7 +101,7 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
     clientOperation,
     serverOperation,
 }) => {
-    const twoWayOperation: TwoWayOperation = { $v: 1 };
+    const twoWayOperation: TwoWayOperation = { $v: 1, $r: 1 };
 
     const name = TextOperation.serverTransform({
         first: serverOperation?.name,
@@ -130,11 +131,13 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const firstPrime: UpOperation = {
         $v: 1,
+        $r: 1,
         name: name.value.firstPrime,
     };
 
     const secondPrime: UpOperation = {
         $v: 1,
+        $r: 1,
         name: name.value.secondPrime,
     };
 

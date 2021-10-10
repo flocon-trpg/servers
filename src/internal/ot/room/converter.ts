@@ -7,9 +7,9 @@ export const decodeState = (source: unknown): Room.State => {
     if (result._tag === 'Right') {
         return result.right;
     }
-    const resultV1 = t.exact(Room.stateV1).decode(source);
-    if (resultV1._tag === 'Right') {
-        return migrateState(resultV1.right);
+    const resultRev1 = t.exact(Room.stateRev1).decode(source);
+    if (resultRev1._tag === 'Right') {
+        return migrateState(resultRev1.right);
     }
     throw new Error('decodeState failure');
 };
@@ -28,9 +28,9 @@ export const decodeDbState = (source: unknown): Room.DbState => {
     if (result._tag === 'Right') {
         return result.right;
     }
-    const resultV1 = t.exact(Room.dbStateV1).decode(source);
-    if (resultV1._tag === 'Right') {
-        return migrateDbState(resultV1.right);
+    const resultRev1 = t.exact(Room.dbStateRev1).decode(source);
+    if (resultRev1._tag === 'Right') {
+        return migrateDbState(resultRev1.right);
     }
     throw new Error('decodeDbState failure');
 };
@@ -44,9 +44,9 @@ const decodeUpOperation = (source: unknown): Room.UpOperation => {
     if (result._tag === 'Right') {
         return result.right;
     }
-    const resultV1 = t.exact(Room.upOperationV1).decode(source);
-    if (resultV1._tag === 'Right') {
-        return migrateUpOperation(resultV1.right);
+    const resultRev1 = t.exact(Room.upOperationRev1).decode(source);
+    if (resultRev1._tag === 'Right') {
+        return migrateUpOperation(resultRev1.right);
     }
     throw new Error('decodeUpOperation failure');
 };
@@ -68,9 +68,9 @@ export const decodeDownOperation = (source: unknown): Room.DownOperation => {
     if (result._tag === 'Right') {
         return result.right;
     }
-    const resultV1 = t.exact(Room.downOperationV1).decode(source);
-    if (resultV1._tag === 'Right') {
-        return migrateDownOperation(resultV1.right);
+    const resultRev1 = t.exact(Room.downOperationRev1).decode(source);
+    if (resultRev1._tag === 'Right') {
+        return migrateDownOperation(resultRev1.right);
     }
     throw new Error('decodeDownOperation failure');
 };

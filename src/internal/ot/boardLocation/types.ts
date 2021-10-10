@@ -13,6 +13,7 @@ const booleanUpOperation = t.type({ newValue: t.boolean });
 
 export const state = t.type({
     $v: t.literal(1),
+    $r: t.literal(1),
     boardKey: compositeKey,
     h: t.number,
     isPrivate: t.boolean,
@@ -23,7 +24,7 @@ export const state = t.type({
 
 export type State = t.TypeOf<typeof state>;
 
-export const downOperation = createOperation(1, {
+export const downOperation = createOperation(1, 1, {
     boardKey: t.type({ oldValue: compositeKey }),
     h: numberDownOperation,
     isPrivate: booleanDownOperation,
@@ -34,7 +35,7 @@ export const downOperation = createOperation(1, {
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
-export const upOperation = createOperation(1, {
+export const upOperation = createOperation(1, 1, {
     boardKey: t.type({ newValue: compositeKey }),
     h: numberUpOperation,
     isPrivate: booleanUpOperation,
@@ -47,6 +48,7 @@ export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
     $v: 1;
+    $r: 1;
 
     boardKey?: ReplaceOperation.ReplaceValueTwoWayOperation<CompositeKey>;
     h?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;

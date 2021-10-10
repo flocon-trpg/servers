@@ -40,18 +40,20 @@ import { DownOperation, State, TwoWayOperation, UpOperation } from './types';
 
 const defaultBoolParamState: BoolParamTypes.State = {
     $v: 1,
+    $r: 1,
     isValuePrivate: false,
     value: null,
 };
 
 const defaultNumParamState: NumParamTypes.State = {
     $v: 1,
+    $r: 1,
     isValuePrivate: false,
     value: null,
 };
 
 const defaultStrParamState: StrParamType.State = {
-    $v: 1,
+    $r: 1,
     isValuePrivate: false,
     value: '',
 };
@@ -859,7 +861,8 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     }
 
     const valueProps: DownOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
 
         isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
         memo: memo.value,
@@ -1014,7 +1017,8 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         stringPieceValues: stringPieceValues.value.prevState,
     };
     const twoWayOperation: TwoWayOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         boolParams: boolParams.value.twoWayOperation,
         numParams: numParams.value.twoWayOperation,
         numMaxParams: numMaxParams.value.twoWayOperation,
@@ -1114,11 +1118,13 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
             SimpleValueParam.diff<Maybe<boolean>>()({
                 prevState: prevState ?? {
                     $v: 1,
+                    $r: 1,
                     isValuePrivate: false,
                     value: null,
                 },
                 nextState: nextState ?? {
                     $v: 1,
+                    $r: 1,
                     isValuePrivate: false,
                     value: null,
                 },
@@ -1131,11 +1137,13 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
             SimpleValueParam.diff<Maybe<number>>()({
                 prevState: prevState ?? {
                     $v: 1,
+                    $r: 1,
                     isValuePrivate: false,
                     value: null,
                 },
                 nextState: nextState ?? {
                     $v: 1,
+                    $r: 1,
                     isValuePrivate: false,
                     value: null,
                 },
@@ -1148,11 +1156,13 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
             SimpleValueParam.diff<Maybe<number>>()({
                 prevState: prevState ?? {
                     $v: 1,
+                    $r: 1,
                     isValuePrivate: false,
                     value: null,
                 },
                 nextState: nextState ?? {
                     $v: 1,
+                    $r: 1,
                     isValuePrivate: false,
                     value: null,
                 },
@@ -1164,12 +1174,12 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         innerDiff: ({ prevState, nextState }) =>
             StrParam.diff({
                 prevState: prevState ?? {
-                    $v: 1,
+                    $r: 1,
                     isValuePrivate: false,
                     value: '',
                 },
                 nextState: nextState ?? {
-                    $v: 1,
+                    $r: 1,
                     isValuePrivate: false,
                     value: '',
                 },
@@ -1210,7 +1220,8 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         innerDiff: params => StringPieceValue.diff(params),
     });
     const result: TwoWayOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         boolParams,
         numParams,
         numMaxParams,
@@ -1549,7 +1560,8 @@ export const serverTransform =
         }
 
         const twoWayOperation: TwoWayOperation = {
-            $v: 2,
+            $v: 1,
+            $r: 2,
             boolParams: boolParams.value,
             numParams: numParams.value,
             numMaxParams: numMaxParams.value,
@@ -1815,7 +1827,8 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     }
 
     const firstPrime: UpOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         boolParams: boolParams.value.firstPrime,
         dicePieceValues: dicePieceValues.value.firstPrime,
         stringPieceValues: stringPieceValues.value.firstPrime,
@@ -1836,7 +1849,8 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         tachieImage: tachieImage.firstPrime,
     };
     const secondPrime: UpOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         boolParams: boolParams.value.secondPrime,
         dicePieceValues: dicePieceValues.value.secondPrime,
         stringPieceValues: stringPieceValues.value.secondPrime,

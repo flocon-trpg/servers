@@ -603,7 +603,8 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     }
 
     const valueProps: DownOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         activeBoardKey: ReplaceOperation.composeDownOperation(
             first.activeBoardKey,
             second.activeBoardKey
@@ -706,7 +707,8 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         participants: participants.value.prevState,
     };
     const twoWayOperation: TwoWayOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         bgms: bgms.value.twoWayOperation,
         boolParamNames: boolParamNames.value.twoWayOperation,
         memos: memo.value.twoWayOperation,
@@ -786,7 +788,8 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         innerDiff: params => Participant.diff(params),
     });
     const result: TwoWayOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         bgms,
         boolParamNames,
         memos: memo,
@@ -995,7 +998,8 @@ export const serverTransform =
         }
 
         const twoWayOperation: TwoWayOperation = {
-            $v: 2,
+            $v: 1,
+            $r: 2,
             bgms: bgms.value,
             boolParamNames: boolParamNames.value,
             memos: memos.value,
@@ -1186,7 +1190,8 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     }
 
     const firstPrime: UpOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         activeBoardKey: activeBoardKey.firstPrime,
         bgms: bgms.value.firstPrime,
         boolParamNames: boolParamNames.value.firstPrime,
@@ -1198,7 +1203,8 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     };
 
     const secondPrime: UpOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         activeBoardKey: activeBoardKey.secondPrime,
         bgms: bgms.value.secondPrime,
         boolParamNames: boolParamNames.value.secondPrime,

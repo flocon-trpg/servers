@@ -88,6 +88,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     }
     const valueProps: DownOperation = {
         $v: 1,
+        $r: 1,
         dir: ReplaceOperation.composeDownOperation(first.dir, second.dir),
         name: name.value,
         text: text.value,
@@ -105,7 +106,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     }
 
     const prevState: State = { ...nextState };
-    const twoWayOperation: TwoWayOperation = { $v: 1 };
+    const twoWayOperation: TwoWayOperation = { $v: 1, $r: 1 };
 
     if (downOperation.dir !== undefined) {
         prevState.dir = downOperation.dir.oldValue;
@@ -148,7 +149,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const resultType: TwoWayOperation = { $v: 1 };
+    const resultType: TwoWayOperation = { $v: 1, $r: 1 };
 
     if (prevState.dir !== nextState.dir) {
         resultType.dir = {
@@ -180,7 +181,7 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
     clientOperation,
     serverOperation,
 }) => {
-    const twoWayOperation: TwoWayOperation = { $v: 1 };
+    const twoWayOperation: TwoWayOperation = { $v: 1, $r: 1 };
 
     // 暫定的にディレクトリの深さは1までとしている
     if ((clientOperation.dir?.newValue.length ?? 0) <= 1) {
@@ -253,6 +254,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const firstPrime: UpOperation = {
         $v: 1,
+        $r: 1,
         name: name.value.firstPrime,
         dir: dir.firstPrime,
         text: text.value.firstPrime,
@@ -261,6 +263,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const secondPrime: UpOperation = {
         $v: 1,
+        $r: 1,
         name: name.value.secondPrime,
         dir: dir.secondPrime,
         text: text.value.secondPrime,

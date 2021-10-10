@@ -13,7 +13,8 @@ describe('characterCommand', () => {
             name: prevRoomName,
             participants: {
                 [Resources.Participant.Player1.userUid]: {
-                    $v: 2,
+                    $v: 1,
+                    $r: 2,
                     name: Resources.Participant.Player1.name,
                     role: 'Player',
                     boards: {},
@@ -50,7 +51,8 @@ describe('characterCommand', () => {
             ...Resources.minimumState,
             participants: {
                 [Resources.Participant.Player1.userUid]: {
-                    $v: 2,
+                    $v: 1,
+                    $r: 2,
                     name: Resources.Participant.Player1.name,
                     role: 'Player',
                     boards: {},
@@ -78,7 +80,8 @@ describe('characterCommand', () => {
             ...room,
             participants: {
                 [Resources.Participant.Player1.userUid]: {
-                    $v: 2,
+                    $v: 1,
+                    $r: 2,
                     name: Resources.Participant.Player1.name,
                     role: 'Player',
                     boards: {},

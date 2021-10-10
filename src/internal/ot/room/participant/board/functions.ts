@@ -115,6 +115,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     }
     const valueProps: DownOperation = {
         $v: 1,
+        $r: 1,
 
         backgroundImage: ReplaceOperation.composeDownOperation(
             first.backgroundImage,
@@ -154,6 +155,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     };
     const twoWayOperation: TwoWayOperation = {
         $v: 1,
+        $r: 1,
     };
 
     if (downOperation.backgroundImage !== undefined) {
@@ -228,7 +230,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const resultType: TwoWayOperation = { $v: 1 };
+    const resultType: TwoWayOperation = { $v: 1, $r: 1 };
     if (prevState.backgroundImage !== nextState.backgroundImage) {
         resultType.backgroundImage = {
             oldValue: prevState.backgroundImage,
@@ -289,7 +291,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
 export const serverTransform =
     (requestedBy: RequestedBy): ServerTransform<State, TwoWayOperation, UpOperation> =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
-        const twoWayOperation: TwoWayOperation = { $v: 1 };
+        const twoWayOperation: TwoWayOperation = { $v: 1, $r: 1 };
 
         twoWayOperation.backgroundImage = ReplaceOperation.serverTransform({
             first: serverOperation?.backgroundImage,
@@ -391,6 +393,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const firstPrime: UpOperation = {
         $v: 1,
+        $r: 1,
         backgroundImage: backgroundImage.firstPrime,
         backgroundImageZoom: backgroundImageZoom.firstPrime,
         cellColumnCount: cellColumnCount.firstPrime,
@@ -404,6 +407,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const secondPrime: UpOperation = {
         $v: 1,
+        $r: 1,
         backgroundImage: backgroundImage.secondPrime,
         backgroundImageZoom: backgroundImageZoom.secondPrime,
         cellColumnCount: cellColumnCount.secondPrime,

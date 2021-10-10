@@ -12,6 +12,7 @@ import {
 } from '../src';
 import { Resources } from './resources';
 import * as TextOperation from '../src/internal/ot/util/textOperation';
+import { forceMaxLength100String } from './forceMaxLength100String';
 
 const undefinedOrError = 'undefinedOrError';
 
@@ -98,7 +99,8 @@ namespace Test {
 
 describe.each([Resources.minimumState, Resources.complexState])('tests id', state => {
     const clientOperation: UpOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
     };
 
     Test.Basic.testServerTransformToReject({
@@ -127,7 +129,8 @@ describe.each([Resources.minimumState, Resources.complexState])('tests name', st
     const newName = 'NEW_NAME';
 
     const clientOperation: UpOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         name: textUpDiff({ prev: state.name, next: newName }),
     };
 
@@ -146,7 +149,8 @@ describe.each([Resources.minimumState, Resources.complexState])('tests name', st
     });
 
     const expected: TwoWayOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         name: TextOperation.diff({ prev: state.name, next: newName }),
     };
 
@@ -176,7 +180,8 @@ describe.each`
     const newName = 'NEW_NAME';
 
     const clientOperation: UpOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         [key]: textUpDiff({ prev: Resources.minimumState[key], next: newName }),
     };
 
@@ -195,7 +200,8 @@ describe.each`
     });
 
     const expected: TwoWayOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         [key]: TextOperation.diff({
             prev: Resources.minimumState[key],
             next: newName,
@@ -225,9 +231,11 @@ describe.each`
 `('tests bgm', ({ id, isValidId }: { id: string; isValidId: boolean }) => {
     const newValue = {
         $v: 1 as const,
+        $r: 1 as const,
         files: [
             {
                 $v: 1 as const,
+                $r: 1 as const,
                 sourceType: 'Default' as const,
                 path: 'PATH',
             },
@@ -237,7 +245,8 @@ describe.each`
     };
 
     const clientOperation: UpOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         bgms: {
             [id]: {
                 type: replace,
@@ -264,7 +273,8 @@ describe.each`
 
     const expected: TwoWayOperation | typeof undefinedOrError = isValidId
         ? {
-              $v: 2,
+              $v: 1,
+              $r: 2,
               bgms: {
                   [id]: {
                       type: replace,
@@ -293,8 +303,9 @@ describe('tests creating DicePieceValue', () => {
         participants: {
             ...Resources.minimumState.participants,
             [Resources.Participant.Player1.userUid]: {
-                $v: 2,
-                name: 'PARTICIPANT_NAME',
+                $v: 1,
+                $r: 2,
+                name: forceMaxLength100String('PARTICIPANT_NAME'),
                 role: 'Player',
                 boards: {},
                 characters: {
@@ -306,26 +317,31 @@ describe('tests creating DicePieceValue', () => {
     };
 
     const clientOperation: UpOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         participants: {
             [Resources.Participant.Player1.userUid]: {
                 type: update,
                 update: {
-                    $v: 2,
+                    $v: 1,
+                    $r: 2,
                     characters: {
                         [characterKey]: {
                             type: update,
                             update: {
-                                $v: 2,
+                                $v: 1,
+                                $r: 2,
                                 dicePieceValues: {
                                     [dicePieceValueKey]: {
                                         type: replace,
                                         replace: {
                                             newValue: {
                                                 $v: 1,
+                                                $r: 1,
                                                 dice: {
                                                     '1': {
                                                         $v: 1,
+                                                        $r: 1,
                                                         dieType: 'D6',
                                                         value: 1,
                                                         isValuePrivate: false,
@@ -359,26 +375,31 @@ describe('tests creating DicePieceValue', () => {
     });
 
     const expected: TwoWayOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         participants: {
             [Resources.Participant.Player1.userUid]: {
                 type: update,
                 update: {
-                    $v: 2,
+                    $v: 1,
+                    $r: 2,
                     characters: {
                         [characterKey]: {
                             type: update,
                             update: {
-                                $v: 2,
+                                $v: 1,
+                                $r: 2,
                                 dicePieceValues: {
                                     [dicePieceValueKey]: {
                                         type: replace,
                                         replace: {
                                             newValue: {
                                                 $v: 1,
+                                                $r: 1,
                                                 dice: {
                                                     '1': {
                                                         $v: 1,
+                                                        $r: 1,
                                                         dieType: 'D6',
                                                         value: 1,
                                                         isValuePrivate: false,
@@ -416,12 +437,14 @@ describe('tests creating Character', () => {
     const state: State = Resources.minimumState;
 
     const clientOperation: UpOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         participants: {
             [Resources.Participant.Player1.userUid]: {
                 type: update,
                 update: {
-                    $v: 2,
+                    $v: 1,
+                    $r: 2,
                     characters: {
                         [characterKey]: {
                             type: replace,
@@ -450,12 +473,14 @@ describe('tests creating Character', () => {
     });
 
     const expected: TwoWayOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         participants: {
             [Resources.Participant.Player1.userUid]: {
                 type: update,
                 update: {
-                    $v: 2,
+                    $v: 1,
+                    $r: 2,
                     characters: {
                         [characterKey]: {
                             type: replace,
@@ -493,8 +518,9 @@ describe.each([[true], [false]])(
             participants: {
                 ...Resources.minimumState.participants,
                 [Resources.Participant.Player1.userUid]: {
-                    $v: 2,
-                    name: 'PARTICIPANT_NAME',
+                    $v: 1,
+                    $r: 2,
+                    name: forceMaxLength100String('PARTICIPANT_NAME'),
                     role: 'Player',
                     boards: {},
                     characters: {
@@ -509,17 +535,20 @@ describe.each([[true], [false]])(
         };
 
         const clientOperation: UpOperation = {
-            $v: 2,
+            $v: 1,
+            $r: 2,
             participants: {
                 [Resources.Participant.Player1.userUid]: {
                     type: update,
                     update: {
-                        $v: 2,
+                        $v: 1,
+                        $r: 2,
                         characters: {
                             [characterKey]: {
                                 type: update,
                                 update: {
-                                    $v: 2,
+                                    $v: 1,
+                                    $r: 2,
                                     name: textUpDiff({
                                         prev: Resources.Character.emptyState.name,
                                         next: newName,
@@ -547,17 +576,20 @@ describe.each([[true], [false]])(
         });
 
         const expected: TwoWayOperation = {
-            $v: 2,
+            $v: 1,
+            $r: 2,
             participants: {
                 [Resources.Participant.Player1.userUid]: {
                     type: update,
                     update: {
-                        $v: 2,
+                        $v: 1,
+                        $r: 2,
                         characters: {
                             [characterKey]: {
                                 type: update,
                                 update: {
-                                    $v: 2,
+                                    $v: 1,
+                                    $r: 2,
                                     name: TextOperation.diff({
                                         prev: Resources.Character.emptyState.name,
                                         next: newName,
@@ -594,7 +626,8 @@ describe.each([[true], [false]])(
             participants: {
                 ...Resources.minimumState.participants,
                 [Resources.Participant.Player1.userUid]: {
-                    $v: 2,
+                    $v: 1,
+                    $r: 2,
                     name: Resources.Participant.Player1.name,
                     role: 'Player',
                     boards: {},
@@ -610,12 +643,14 @@ describe.each([[true], [false]])(
         };
 
         const clientOperation: UpOperation = {
-            $v: 2,
+            $v: 1,
+            $r: 2,
             participants: {
                 [Resources.Participant.Player1.userUid]: {
                     type: update,
                     update: {
-                        $v: 2,
+                        $v: 1,
+                        $r: 2,
                         characters: {
                             [characterKey]: {
                                 type: replace,
@@ -644,12 +679,14 @@ describe.each([[true], [false]])(
         });
 
         const expected: TwoWayOperation = {
-            $v: 2,
+            $v: 1,
+            $r: 2,
             participants: {
                 [Resources.Participant.Player1.userUid]: {
                     type: update,
                     update: {
-                        $v: 2,
+                        $v: 1,
+                        $r: 2,
                         characters: {
                             [characterKey]: {
                                 type: replace,

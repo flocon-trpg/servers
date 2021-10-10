@@ -37,27 +37,29 @@ export const stateBase = t.type({
 export const dbState = t.intersection([
     stateBase,
     t.type({
-        $v: t.literal(2),
+        $v: t.literal(1),
+        $r: t.literal(2),
         participants: record(t.string, Participant.dbState),
     }),
 ]);
 
 export type DbState = t.TypeOf<typeof dbState>;
 
-export const dbStateV1 = t.intersection([
+export const dbStateRev1 = t.intersection([
     stateBase,
     t.type({
         $v: t.literal(1),
-        participants: record(t.string, Participant.dbStateV1),
+        $r: t.literal(1),
+        participants: record(t.string, Participant.dbStateRev1),
     }),
 ]);
 
-export type DbStateV1 = t.TypeOf<typeof dbStateV1>;
+export type DbStateRev1 = t.TypeOf<typeof dbStateRev1>;
 
 export const state = t.intersection([
     stateBase,
     t.type({
-        $v: t.literal(2),
+        $r: t.literal(2),
         createdBy: t.string,
         name: t.string,
         participants: record(t.string, Participant.state),
@@ -67,18 +69,19 @@ export const state = t.intersection([
 // nameはDBから頻繁に取得されると思われる値なので独立させている。
 export type State = t.TypeOf<typeof state>;
 
-export const stateV1 = t.intersection([
+export const stateRev1 = t.intersection([
     stateBase,
     t.type({
         $v: t.literal(1),
+        $r: t.literal(1),
         createdBy: t.string,
         name: t.string,
-        participants: record(t.string, Participant.stateV1),
+        participants: record(t.string, Participant.stateRev1),
     }),
 ]);
 
 // nameはDBから頻繁に取得されると思われる値なので独立させている。
-export type StateV1 = t.TypeOf<typeof stateV1>;
+export type StateRev1 = t.TypeOf<typeof stateRev1>;
 
 const downOperationBase = {
     activeBoardKey: t.type({ oldValue: maybe(compositeKey) }),
@@ -109,7 +112,7 @@ const downOperationBase = {
     ),
 };
 
-export const downOperation = createOperation(2, {
+export const downOperation = createOperation(1, 2, {
     ...downOperationBase,
     participants: record(
         t.string,
@@ -119,15 +122,15 @@ export const downOperation = createOperation(2, {
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
-export const downOperationV1 = createOperation(1, {
+export const downOperationRev1 = createOperation(1, 1, {
     ...downOperationBase,
     participants: record(
         t.string,
-        recordDownOperationElementFactory(Participant.stateV1, Participant.downOperationV1)
+        recordDownOperationElementFactory(Participant.stateRev1, Participant.downOperationRev1)
     ),
 });
 
-export type DownOperationV1 = t.TypeOf<typeof downOperationV1>;
+export type DownOperationRev1 = t.TypeOf<typeof downOperationRev1>;
 
 const upOperationBase = {
     activeBoardKey: t.type({ newValue: maybe(compositeKey) }),
@@ -158,7 +161,7 @@ const upOperationBase = {
     ),
 };
 
-export const upOperation = createOperation(2, {
+export const upOperation = createOperation(1, 2, {
     ...upOperationBase,
     participants: record(
         t.string,
@@ -168,18 +171,19 @@ export const upOperation = createOperation(2, {
 
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
-export const upOperationV1 = createOperation(1, {
+export const upOperationRev1 = createOperation(1, 1, {
     ...upOperationBase,
     participants: record(
         t.string,
-        recordUpOperationElementFactory(Participant.stateV1, Participant.upOperationV1)
+        recordUpOperationElementFactory(Participant.stateRev1, Participant.upOperationRev1)
     ),
 });
 
-export type UpOperationV1 = t.TypeOf<typeof upOperationV1>;
+export type UpOperationRev1 = t.TypeOf<typeof upOperationRev1>;
 
 export type TwoWayOperation = {
-    $v: 2;
+    $v: 1;
+    $r: 2;
 
     activeBoardKey?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<CompositeKey>>;
     bgms?: RecordOperation.RecordTwoWayOperation<Bgm.State, Bgm.TwoWayOperation>;

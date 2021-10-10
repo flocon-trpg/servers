@@ -1,42 +1,42 @@
 import * as Types from './types';
 
-export const migrateState = (source: Types.State | Types.StateV1): Types.State => {
-    switch (source.$v) {
+export const migrateState = (source: Types.State | Types.StateRev1): Types.State => {
+    switch (source.$r) {
         case 2:
             return source;
         case 1:
             return {
                 ...source,
-                $v: 2,
+                $r: 2,
                 stringPieceValues: {},
             };
     }
 };
 
 export const migrateUpOperation = (
-    source: Types.UpOperation | Types.UpOperationV1
+    source: Types.UpOperation | Types.UpOperationRev1
 ): Types.UpOperation => {
-    switch (source.$v) {
+    switch (source.$r) {
         case 2:
             return source;
         case 1:
             return {
                 ...source,
-                $v: 2,
+                $r: 2,
             };
     }
 };
 
 export const migrateDownOperation = (
-    source: Types.DownOperation | Types.DownOperationV1
+    source: Types.DownOperation | Types.DownOperationRev1
 ): Types.DownOperation => {
-    switch (source.$v) {
+    switch (source.$r) {
         case 2:
             return source;
         case 1:
             return {
                 ...source,
-                $v: 2,
+                $r: 2,
             };
     }
 };

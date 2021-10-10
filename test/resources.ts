@@ -1,4 +1,5 @@
 import { State, Player, Spectator, CharacterState } from '../src';
+import { forceMaxLength100String } from './forceMaxLength100String';
 
 export namespace Resources {
     const boardId = 'BOARD_ID';
@@ -6,22 +7,22 @@ export namespace Resources {
     export namespace Participant {
         export namespace Spectator {
             export const userUid = 'SPECTATOR';
-            export const name = 'SPECTATOR_NAME';
+            export const name = forceMaxLength100String('SPECTATOR_NAME');
         }
 
         export namespace Player1 {
             export const userUid = 'PLAYER1';
-            export const name = 'PLAYER1_NAME';
+            export const name = forceMaxLength100String('PLAYER1_NAME');
         }
 
         export namespace Player2 {
             export const userUid = 'PLAYER2';
-            export const name = 'PLAYER2_NAME';
+            export const name = forceMaxLength100String('PLAYER2_NAME');
         }
 
         export namespace Null {
             export const userUid = 'NULL_PARTICIPANT';
-            export const name = 'NULL_PARTICIPANT_NAME';
+            export const name = forceMaxLength100String('NULL_PARTICIPANT_NAME');
         }
 
         export namespace None {
@@ -31,7 +32,8 @@ export namespace Resources {
 
     export namespace Character {
         export const emptyState: CharacterState = {
-            $v: 2,
+            $v: 1,
+            $r: 2,
             chatPalette: '',
             memo: '',
             name: '',
@@ -53,14 +55,15 @@ export namespace Resources {
     }
 
     export const minimumState: State = {
-        $v: 2,
+        $r: 2,
         activeBoardKey: null,
         createdBy: 'CREATED_BY',
         name: 'ROOM_NAME',
         bgms: {},
         participants: {
             [Participant.Player1.userUid]: {
-                $v: 2,
+                $v: 1,
+                $r: 2,
                 name: Participant.Player1.name,
                 role: Player,
                 boards: {},
@@ -68,7 +71,8 @@ export namespace Resources {
                 imagePieceValues: {},
             },
             [Participant.Player2.userUid]: {
-                $v: 2,
+                $v: 1,
+                $r: 2,
                 name: Participant.Player2.name,
                 role: Player,
                 boards: {},
@@ -76,7 +80,8 @@ export namespace Resources {
                 imagePieceValues: {},
             },
             [Participant.Spectator.userUid]: {
-                $v: 2,
+                $v: 1,
+                $r: 2,
                 name: Participant.Spectator.name,
                 role: Spectator,
                 boards: {},
@@ -84,7 +89,8 @@ export namespace Resources {
                 imagePieceValues: {},
             },
             [Participant.Null.userUid]: {
-                $v: 2,
+                $v: 1,
+                $r: 2,
                 name: Participant.Null.name,
                 role: null,
                 boards: {},
@@ -109,29 +115,40 @@ export namespace Resources {
     };
 
     export const complexState: State = {
-        $v: 2,
+        $r: 2,
         activeBoardKey: null,
         createdBy: 'CREATED_BY',
         name: 'ROOM_NAME',
         bgms: {
             '1': {
                 $v: 1,
+                $r: 1,
                 isPaused: false,
-                files: [{ $v: 1, path: 'BGM_FILE_PATH', sourceType: 'Default' }],
+                files: [
+                    {
+                        $v: 1,
+                        $r: 1,
+                        path: 'BGM_FILE_PATH',
+                        sourceType: 'Default',
+                    },
+                ],
                 volume: 1,
             },
         },
         participants: {
             ...minimumState.participants,
             [Participant.Player1.userUid]: {
-                $v: 2,
+                $v: 1,
+                $r: 2,
                 name: Participant.Player1.name,
                 role: 'Player',
                 boards: {
                     [boardId]: {
                         $v: 1,
+                        $r: 1,
                         backgroundImage: {
                             $v: 1,
+                            $r: 1,
                             path: 'BOARD_IMAGE_PATH',
                             sourceType: 'Default',
                         },
@@ -149,15 +166,18 @@ export namespace Resources {
                 imagePieceValues: {},
             },
             [Participant.Player2.userUid]: {
-                $v: 2,
+                $v: 1,
+                $r: 2,
                 name: Participant.Player2.name,
                 role: 'Player',
                 boards: {},
                 characters: {
                     CHARACTER_ID: {
-                        $v: 2,
+                        $v: 1,
+                        $r: 2,
                         image: {
                             $v: 1,
+                            $r: 1,
                             path: 'CHARA_IMAGE_PATH',
                             sourceType: 'Default',
                         },
@@ -170,12 +190,14 @@ export namespace Resources {
                         privateVarToml: '',
                         tachieImage: {
                             $v: 1,
+                            $r: 1,
                             path: 'TACHIE_IMAGE_PATH',
                             sourceType: 'Default',
                         },
                         boolParams: {
                             '1': {
                                 $v: 1,
+                                $r: 1,
                                 isValuePrivate: false,
                                 value: false,
                             },
@@ -183,6 +205,7 @@ export namespace Resources {
                         numParams: {
                             '1': {
                                 $v: 1,
+                                $r: 1,
                                 isValuePrivate: false,
                                 value: 10,
                             },
@@ -190,13 +213,14 @@ export namespace Resources {
                         numMaxParams: {
                             '1': {
                                 $v: 1,
+                                $r: 1,
                                 isValuePrivate: false,
                                 value: 20,
                             },
                         },
                         strParams: {
                             '1': {
-                                $v: 1,
+                                $r: 1,
                                 isValuePrivate: false,
                                 value: 'STR_PARAM_VALUE',
                             },
@@ -205,6 +229,7 @@ export namespace Resources {
                             CHARA_PIECE_FIRST_KEY: {
                                 CHARA_PIECE_SECOND_KEY: {
                                     $v: 1,
+                                    $r: 1,
                                     boardKey: {
                                         createdBy: Participant.Player1.userUid,
                                         id: boardId,
@@ -226,6 +251,7 @@ export namespace Resources {
                             TACHIE_LOCATION_FIRST_KEY: {
                                 TACHIE_LOCATION_SECOND_KEY: {
                                     $v: 1,
+                                    $r: 1,
                                     boardKey: {
                                         createdBy: Participant.Player1.userUid,
                                         id: boardId,
@@ -241,9 +267,11 @@ export namespace Resources {
                         dicePieceValues: {
                             DICE_PIECE_KEY: {
                                 $v: 1,
+                                $r: 1,
                                 dice: {
                                     '1': {
                                         $v: 1,
+                                        $r: 1,
                                         dieType: 'D6',
                                         isValuePrivate: false,
                                         value: 3,
@@ -253,6 +281,7 @@ export namespace Resources {
                                     DICE_PIECE_FIRST_KEY: {
                                         DICE_PIECE_SECOND_KEY: {
                                             $v: 1,
+                                            $r: 1,
                                             boardKey: {
                                                 createdBy: Participant.Player1.userUid,
                                                 id: boardId,
@@ -275,12 +304,14 @@ export namespace Resources {
                         stringPieceValues: {
                             STR_PIECE_KEY: {
                                 $v: 1,
+                                $r: 1,
                                 isValuePrivate: false,
                                 value: 'STR_PIECE_VALUE',
                                 pieces: {
                                     DICE_PIECE_FIRST_KEY: {
                                         DICE_PIECE_SECOND_KEY: {
                                             $v: 1,
+                                            $r: 1,
                                             boardKey: {
                                                 createdBy: Participant.Player1.userUid,
                                                 id: boardId,
@@ -308,24 +339,28 @@ export namespace Resources {
         boolParamNames: {
             '1': {
                 $v: 1,
+                $r: 1,
                 name: 'BOOL_PARAM_NAME',
             },
         },
         numParamNames: {
             '1': {
                 $v: 1,
+                $r: 1,
                 name: 'NUM_PARAM_NAME',
             },
         },
         strParamNames: {
             '1': {
                 $v: 1,
+                $r: 1,
                 name: 'STR_PARAM_NAME',
             },
         },
         memos: {
             MEMO_ID: {
                 $v: 1,
+                $r: 1,
                 name: 'MEMO_NAME',
                 dir: ['MEMO_DIR'],
                 text: 'MEMO_TEXT',

@@ -68,7 +68,7 @@ export const createLogs = ({
                     characterKey,
                     stateId,
                     value: {
-                        $v: 1,
+                        $r: 1,
                         type: deleteType,
                         value: DicePieceValue.toClientState(false, { type: restrict }, null)(value),
                     },
@@ -79,7 +79,7 @@ export const createLogs = ({
                     characterKey,
                     stateId,
                     value: {
-                        $v: 1,
+                        $r: 1,
                         type: createType,
                         value: DicePieceValue.toClientState(false, { type: restrict }, null)(value),
                     },
@@ -91,7 +91,7 @@ export const createLogs = ({
                     characterKey,
                     stateId,
                     value: {
-                        $v: 1,
+                        $r: 1,
                         type: deleteType,
                         value: StringPieceValue.toClientState(
                             false,
@@ -106,7 +106,7 @@ export const createLogs = ({
                     characterKey,
                     stateId,
                     value: {
-                        $v: 1,
+                        $r: 1,
                         type: createType,
                         value: StringPieceValue.toClientState(
                             false,
@@ -133,7 +133,7 @@ export const createLogs = ({
                         characterKey,
                         stateId,
                         value: {
-                            $v: 1,
+                            $r: 1,
                             type: deleteType,
                             value: DicePieceValue.toClientState(
                                 false,
@@ -148,7 +148,7 @@ export const createLogs = ({
                         characterKey,
                         stateId,
                         value: {
-                            $v: 1,
+                            $r: 1,
                             type: createType,
                             value: DicePieceValue.toClientState(
                                 false,
@@ -180,7 +180,7 @@ export const createLogs = ({
                         characterKey,
                         stateId,
                         value: {
-                            $v: 1,
+                            $r: 1,
                             type: deleteType,
                             value: StringPieceValue.toClientState(
                                 false,
@@ -195,7 +195,7 @@ export const createLogs = ({
                         characterKey,
                         stateId,
                         value: {
-                            $v: 1,
+                            $r: 1,
                             type: createType,
                             value: StringPieceValue.toClientState(
                                 false,

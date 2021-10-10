@@ -61,6 +61,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const valueProps: DownOperation = {
         $v: 1,
+        $r: 1,
         dieType: ReplaceOperation.composeDownOperation(
             first.dieType ?? undefined,
             second.dieType ?? undefined
@@ -88,6 +89,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     const prevState: State = { ...nextState };
     const twoWayOperation: TwoWayOperation = {
         $v: 1,
+        $r: 1,
     };
 
     if (downOperation.dieType != null) {
@@ -118,6 +120,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
     const resultType: TwoWayOperation = {
         $v: 1,
+        $r: 1,
     };
     if (prevState.dieType !== nextState.dieType) {
         resultType.dieType = {
@@ -153,6 +156,7 @@ export const serverTransform =
 
         const twoWayOperation: TwoWayOperation = {
             $v: 1,
+            $r: 1,
         };
 
         twoWayOperation.dieType = ReplaceOperation.serverTransform({
@@ -197,6 +201,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const firstPrime: UpOperation = {
         $v: 1,
+        $r: 1,
         dieType: dieType.firstPrime,
         isValuePrivate: isValuePrivate.firstPrime,
         value: value.firstPrime,
@@ -204,6 +209,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const secondPrime: UpOperation = {
         $v: 1,
+        $r: 1,
         dieType: dieType.secondPrime,
         isValuePrivate: isValuePrivate.secondPrime,
         value: value.secondPrime,

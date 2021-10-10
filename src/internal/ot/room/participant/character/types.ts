@@ -49,7 +49,8 @@ const stateBase = t.type({
 export const state = t.intersection([
     stateBase,
     t.type({
-        $v: t.literal(2),
+        $v: t.literal(1),
+        $r: t.literal(2),
 
         stringPieceValues: record(t.string, StringPieceValue.state),
     }),
@@ -57,16 +58,17 @@ export const state = t.intersection([
 
 export type State = t.TypeOf<typeof state>;
 
-export const stateV1 = t.intersection([
+export const stateRev1 = t.intersection([
     stateBase,
     t.type({
         $v: t.literal(1),
+        $r: t.literal(1),
 
         numberPieceValues: record(t.string, NumberPieceValue.state),
     }),
 ]);
 
-export type StateV1 = t.TypeOf<typeof stateV1>;
+export type StateRev1 = t.TypeOf<typeof stateRev1>;
 
 const downOperationBase = {
     image: t.type({ oldValue: maybe(filePath) }),
@@ -103,7 +105,7 @@ const downOperationBase = {
     ),
 };
 
-export const downOperation = createOperation(2, {
+export const downOperation = createOperation(1, 2, {
     ...downOperationBase,
     stringPieceValues: record(
         t.string,
@@ -113,7 +115,7 @@ export const downOperation = createOperation(2, {
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
-export const downOperationV1 = createOperation(1, {
+export const downOperationRev1 = createOperation(1, 1, {
     ...downOperationBase,
     numberPieceValues: record(
         t.string,
@@ -121,7 +123,7 @@ export const downOperationV1 = createOperation(1, {
     ),
 });
 
-export type DownOperationV1 = t.TypeOf<typeof downOperationV1>;
+export type DownOperationRev1 = t.TypeOf<typeof downOperationRev1>;
 
 const upOperationBase = {
     image: t.type({ newValue: maybe(filePath) }),
@@ -158,7 +160,7 @@ const upOperationBase = {
     ),
 };
 
-export const upOperation = createOperation(2, {
+export const upOperation = createOperation(1, 2, {
     ...upOperationBase,
     stringPieceValues: record(
         t.string,
@@ -168,7 +170,7 @@ export const upOperation = createOperation(2, {
 
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
-export const upOperationV1 = createOperation(1, {
+export const upOperationRev1 = createOperation(1, 1, {
     ...upOperationBase,
     numberPieceValues: record(
         t.string,
@@ -176,10 +178,11 @@ export const upOperationV1 = createOperation(1, {
     ),
 });
 
-export type UpOperationV1 = t.TypeOf<typeof upOperationV1>;
+export type UpOperationRev1 = t.TypeOf<typeof upOperationRev1>;
 
 export type TwoWayOperation = {
-    $v: 2;
+    $v: 1;
+    $r: 2;
 
     image?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<FilePath>>;
     isPrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;

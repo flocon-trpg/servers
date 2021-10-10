@@ -51,6 +51,7 @@ export class FParamNames extends FObject {
         }
         const result: ParamName.State = {
             $v: 1,
+            $r: 1,
             name: '',
         };
         this.getParamNames()[keyAsString] = result;

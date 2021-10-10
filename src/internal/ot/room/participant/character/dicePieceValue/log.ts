@@ -14,7 +14,7 @@ import { record } from '../../../../util/record';
 import { createType, deleteType, updateType } from '../../../../piece/log';
 import { maybe } from '../../../../../maybe';
 
-const dieValueUpOperation = createOperation(1, {
+const dieValueUpOperation = createOperation(1, 1, {
     dieType: t.type({ newValue: DieValueTypes.dieType }),
     isValuePrivateChanged: t.type({ newValue: maybe(t.number) }),
     isValueChanged: t.boolean,
@@ -24,7 +24,7 @@ type DieValueUpOperation = t.TypeOf<typeof dieValueUpOperation>;
 
 const update = t.intersection([
     t.type({
-        $v: t.literal(1),
+        $r: t.literal(1),
 
         type: t.literal(updateType),
     }),
@@ -45,12 +45,12 @@ const update = t.intersection([
 
 export const type = t.union([
     t.type({
-        $v: t.literal(1),
+        $r: t.literal(1),
         type: t.literal(createType),
         value: DicePieceValueTypes.state,
     }),
     t.type({
-        $v: t.literal(1),
+        $r: t.literal(1),
         type: t.literal(deleteType),
         value: DicePieceValueTypes.state,
     }),
@@ -59,12 +59,12 @@ export const type = t.union([
 
 export const exactType = t.union([
     t.strict({
-        $v: t.literal(1),
+        $r: t.literal(1),
         type: t.literal(createType),
         value: DicePieceValueTypes.state,
     }),
     t.strict({
-        $v: t.literal(1),
+        $r: t.literal(1),
         type: t.literal(deleteType),
         value: DicePieceValueTypes.state,
     }),
@@ -78,7 +78,7 @@ export const ofOperation = (
     currentState: DicePieceValueTypes.State
 ): Type => {
     return {
-        $v: 1,
+        $r: 1,
         type: updateType,
         dice:
             operation.dice == null
@@ -92,6 +92,7 @@ export const ofOperation = (
                               }
                               const update: DieValueUpOperation = {
                                   $v: 1,
+                                  $r: 1,
                                   dieType: element.update.dieType,
                                   isValuePrivateChanged:
                                       element.update.isValuePrivate == null ||

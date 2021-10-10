@@ -10,6 +10,8 @@ Flocon の部屋(Room)を Operational Transformation を用いて編集する機
 
 io-ts では、Record の key を string にすることはできるが、例えば ('1' | '2' | '3') にすることはシンプルな方法で実現できない模様。そのため、代わりに string を使っている。
 
+types.ts の定義を変更した場合、変更した型自身および影響のある型の$vもしくは$r の値を 1 増やす。$vはversion、$r は revision を表す。$vが等しくて$r が異なる場合は変換可能であり互換性があることを示す。この変換処理は migrate.ts に書く。$v が異なる場合は互換性がないため、このライブラリでは片方のサポートを停止するか、両方のバージョンをサポートしなければならない。
+
 ## functions.ts
 
 権限の処理(例えば isPrivate === true の値は作成者以外の編集を拒否するなど)は、全て serverTransform で行う。
