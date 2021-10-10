@@ -265,7 +265,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         });
     }
     if (prevState.name !== nextState.name) {
-        result.memo = TextOperation.diff({
+        result.name = TextOperation.diff({
             prev: prevState.name,
             next: nextState.name,
         });
