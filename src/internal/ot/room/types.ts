@@ -59,6 +59,7 @@ export type DbStateRev1 = t.TypeOf<typeof dbStateRev1>;
 export const state = t.intersection([
     stateBase,
     t.type({
+        $v: t.literal(1),
         $r: t.literal(2),
         createdBy: t.string,
         name: t.string,
