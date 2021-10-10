@@ -9,13 +9,11 @@ import {
     recordUpOperationElementFactory,
 } from '../util/recordOperationElement';
 import * as ReplaceOperation from '../util/replaceOperation';
+import * as TextOperation from '../util/textOperation';
 import { createOperation } from '../util/createOperation';
 import { record } from '../util/record';
 import { CompositeKey, compositeKey } from '../compositeKey/types';
 import { Maybe, maybe } from '../../maybe';
-
-const replaceStringDownOperation = t.type({ oldValue: t.string });
-const replaceStringUpOperation = t.type({ newValue: t.string });
 
 export const stateBase = t.type({
     activeBoardKey: maybe(compositeKey),
@@ -90,21 +88,21 @@ const downOperationBase = {
         recordDownOperationElementFactory(ParamNames.state, ParamNames.downOperation)
     ),
     memos: record(t.string, recordDownOperationElementFactory(Memo.state, Memo.downOperation)),
-    name: replaceStringDownOperation,
+    name: TextOperation.downOperation,
     numParamNames: record(
         t.string,
         recordDownOperationElementFactory(ParamNames.state, ParamNames.downOperation)
     ),
-    publicChannel1Name: replaceStringDownOperation,
-    publicChannel2Name: replaceStringDownOperation,
-    publicChannel3Name: replaceStringDownOperation,
-    publicChannel4Name: replaceStringDownOperation,
-    publicChannel5Name: replaceStringDownOperation,
-    publicChannel6Name: replaceStringDownOperation,
-    publicChannel7Name: replaceStringDownOperation,
-    publicChannel8Name: replaceStringDownOperation,
-    publicChannel9Name: replaceStringDownOperation,
-    publicChannel10Name: replaceStringDownOperation,
+    publicChannel1Name: TextOperation.downOperation,
+    publicChannel2Name: TextOperation.downOperation,
+    publicChannel3Name: TextOperation.downOperation,
+    publicChannel4Name: TextOperation.downOperation,
+    publicChannel5Name: TextOperation.downOperation,
+    publicChannel6Name: TextOperation.downOperation,
+    publicChannel7Name: TextOperation.downOperation,
+    publicChannel8Name: TextOperation.downOperation,
+    publicChannel9Name: TextOperation.downOperation,
+    publicChannel10Name: TextOperation.downOperation,
     strParamNames: record(
         t.string,
         recordDownOperationElementFactory(ParamNames.state, ParamNames.downOperation)
@@ -139,21 +137,21 @@ const upOperationBase = {
         recordUpOperationElementFactory(ParamNames.state, ParamNames.upOperation)
     ),
     memos: record(t.string, recordUpOperationElementFactory(Memo.state, Memo.upOperation)),
-    name: replaceStringUpOperation,
+    name: TextOperation.upOperation,
     numParamNames: record(
         t.string,
         recordUpOperationElementFactory(ParamNames.state, ParamNames.upOperation)
     ),
-    publicChannel1Name: replaceStringUpOperation,
-    publicChannel2Name: replaceStringUpOperation,
-    publicChannel3Name: replaceStringUpOperation,
-    publicChannel4Name: replaceStringUpOperation,
-    publicChannel5Name: replaceStringUpOperation,
-    publicChannel6Name: replaceStringUpOperation,
-    publicChannel7Name: replaceStringUpOperation,
-    publicChannel8Name: replaceStringUpOperation,
-    publicChannel9Name: replaceStringUpOperation,
-    publicChannel10Name: replaceStringUpOperation,
+    publicChannel1Name: TextOperation.upOperation,
+    publicChannel2Name: TextOperation.upOperation,
+    publicChannel3Name: TextOperation.upOperation,
+    publicChannel4Name: TextOperation.upOperation,
+    publicChannel5Name: TextOperation.upOperation,
+    publicChannel6Name: TextOperation.upOperation,
+    publicChannel7Name: TextOperation.upOperation,
+    publicChannel8Name: TextOperation.upOperation,
+    publicChannel9Name: TextOperation.upOperation,
+    publicChannel10Name: TextOperation.upOperation,
     strParamNames: record(
         t.string,
         recordUpOperationElementFactory(ParamNames.state, ParamNames.upOperation)
@@ -190,7 +188,7 @@ export type TwoWayOperation = {
         ParamNames.TwoWayOperation
     >;
     memos?: RecordOperation.RecordTwoWayOperation<Memo.State, Memo.TwoWayOperation>;
-    name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
+    name?: TextOperation.TwoWayOperation;
     numParamNames?: RecordOperation.RecordTwoWayOperation<
         ParamNames.State,
         ParamNames.TwoWayOperation
@@ -199,16 +197,16 @@ export type TwoWayOperation = {
         Participant.State,
         Participant.TwoWayOperation
     >;
-    publicChannel1Name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
-    publicChannel2Name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
-    publicChannel3Name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
-    publicChannel4Name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
-    publicChannel5Name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
-    publicChannel6Name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
-    publicChannel7Name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
-    publicChannel8Name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
-    publicChannel9Name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
-    publicChannel10Name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
+    publicChannel1Name?: TextOperation.TwoWayOperation;
+    publicChannel2Name?: TextOperation.TwoWayOperation;
+    publicChannel3Name?: TextOperation.TwoWayOperation;
+    publicChannel4Name?: TextOperation.TwoWayOperation;
+    publicChannel5Name?: TextOperation.TwoWayOperation;
+    publicChannel6Name?: TextOperation.TwoWayOperation;
+    publicChannel7Name?: TextOperation.TwoWayOperation;
+    publicChannel8Name?: TextOperation.TwoWayOperation;
+    publicChannel9Name?: TextOperation.TwoWayOperation;
+    publicChannel10Name?: TextOperation.TwoWayOperation;
     strParamNames?: RecordOperation.RecordTwoWayOperation<
         ParamNames.State,
         ParamNames.TwoWayOperation

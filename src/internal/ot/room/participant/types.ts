@@ -3,6 +3,7 @@ Participantとは、そのRoomに入っているユーザーのこと。通常�
 Participantのstateには、roleやname（その部屋でのユーザーの表示名）といったデータはもちろん、そのParticipantが作成したBoard、Characterなどのstateも保持される。
 Board、Characterを保持するのがRoomなどではなくParticipantなのは、BoardやCharacterなどは作成者が誰かを保持する必要があり、キーがuserUidであるParticipantで保存するほうが都合がよく構成も綺麗になるため。
 */
+// nameはJSONのあるエンティティとは別に保存される想定であるため、nameが見つからないもしくは一時的に取得できないという状況がありうる。そのため、maybeを付けており、TextOperationではなくReplaceOperationとして定義している。
 
 import * as t from 'io-ts';
 import * as ReplaceOperation from '../../util/replaceOperation';

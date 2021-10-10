@@ -1,4 +1,5 @@
 import * as ReplaceOperation from '../../../util/replaceOperation';
+import * as TextOperation from '../../../util/textOperation';
 import {
     Apply,
     ClientTransform,
@@ -17,11 +18,17 @@ export const toClientState = (source: State): State => {
 };
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
-    return source;
+    return {
+        ...source,
+        name: source.name == null ? undefined : TextOperation.toDownOperation(source.name),
+    };
 };
 
 export const toUpOperation = (source: TwoWayOperation): UpOperation => {
-    return source;
+    return {
+        ...source,
+        name: source.name == null ? undefined : TextOperation.toUpOperation(source.name),
+    };
 };
 
 export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
@@ -51,7 +58,11 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
         result.cellWidth = operation.cellWidth.newValue;
     }
     if (operation.name != null) {
-        result.name = operation.name.newValue;
+        const applied = TextOperation.apply(state.name, operation.name);
+        if (applied.isError) {
+            return applied;
+        }
+        result.name = applied.value;
     }
 
     return Result.ok(result);
@@ -86,14 +97,22 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     if (operation.cellWidth !== undefined) {
         result.cellWidth = operation.cellWidth.oldValue ?? undefined;
     }
-    if (operation.name !== undefined) {
-        result.name = operation.name.oldValue;
+    if (operation.name != null) {
+        const applied = TextOperation.applyBack(state.name, operation.name);
+        if (applied.isError) {
+            return applied;
+        }
+        result.name = applied.value;
     }
 
     return Result.ok(result);
 };
 
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
+    const name = TextOperation.composeDownOperation(first.name, second.name);
+    if (name.isError) {
+        return name;
+    }
     const valueProps: DownOperation = {
         $v: 1,
 
@@ -117,7 +136,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
             second.cellRowCount
         ),
         cellWidth: ReplaceOperation.composeDownOperation(first.cellWidth, second.cellWidth),
-        name: ReplaceOperation.composeDownOperation(first.name, second.name),
+        name: name.value,
     };
     return Result.ok(valueProps);
 };
@@ -194,11 +213,15 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         };
     }
     if (downOperation.name !== undefined) {
-        prevState.name = downOperation.name.oldValue;
-        twoWayOperation.name = {
-            ...downOperation.name,
-            newValue: nextState.name,
-        };
+        const restored = TextOperation.restore({
+            nextState: nextState.name,
+            downOperation: downOperation.name,
+        });
+        if (restored.isError) {
+            return restored;
+        }
+        prevState.name = restored.value.prevState;
+        twoWayOperation.name = restored.value.twoWayOperation;
     }
 
     return Result.ok({ prevState, twoWayOperation });
@@ -255,10 +278,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         };
     }
     if (prevState.name !== nextState.name) {
-        resultType.name = {
-            oldValue: prevState.name,
-            newValue: nextState.name,
-        };
+        resultType.name = TextOperation.diff({ prev: prevState.name, next: nextState.name });
     }
     if (isIdRecord(resultType)) {
         return undefined;
@@ -311,11 +331,15 @@ export const serverTransform =
             second: clientOperation.cellWidth,
             prevState: prevState.cellWidth,
         });
-        twoWayOperation.name = ReplaceOperation.serverTransform({
+        const name = TextOperation.serverTransform({
             first: serverOperation?.name,
             second: clientOperation.name,
             prevState: prevState.name,
         });
+        if (name.isError) {
+            return name;
+        }
+        twoWayOperation.name = name.value.secondPrime;
 
         if (isIdRecord(twoWayOperation)) {
             return Result.ok(undefined);
@@ -357,10 +381,13 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         first: first.cellWidth,
         second: second.cellWidth,
     });
-    const name = ReplaceOperation.clientTransform({
+    const name = TextOperation.clientTransform({
         first: first.name,
         second: second.name,
     });
+    if (name.isError) {
+        return name;
+    }
 
     const firstPrime: UpOperation = {
         $v: 1,
@@ -372,7 +399,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         cellOffsetY: cellOffsetY.firstPrime,
         cellRowCount: cellRowCount.firstPrime,
         cellWidth: cellWidth.firstPrime,
-        name: name.firstPrime,
+        name: name.value.firstPrime,
     };
 
     const secondPrime: UpOperation = {
@@ -385,7 +412,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         cellOffsetY: cellOffsetY.secondPrime,
         cellRowCount: cellRowCount.secondPrime,
         cellWidth: cellWidth.secondPrime,
-        name: name.secondPrime,
+        name: name.value.secondPrime,
     };
 
     return Result.ok({

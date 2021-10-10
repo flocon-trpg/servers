@@ -139,7 +139,7 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
     };
 };
 
-export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
+export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     const result: State = { ...state };
     if (operation.name != null) {
         result.name = operation.name.newValue;

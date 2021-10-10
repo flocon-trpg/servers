@@ -135,6 +135,7 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return {
         ...source,
         memo: source.memo == null ? undefined : TextOperation.toDownOperation(source.memo),
+        name: source.name == null ? undefined : TextOperation.toDownOperation(source.name),
         chatPalette:
             source.chatPalette == null
                 ? undefined
@@ -220,6 +221,7 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
     return {
         ...source,
         memo: source.memo == null ? undefined : TextOperation.toUpOperation(source.memo),
+        name: source.name == null ? undefined : TextOperation.toUpOperation(source.name),
         chatPalette:
             source.chatPalette == null
                 ? undefined
@@ -317,7 +319,11 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
         result.memo = valueResult.value;
     }
     if (operation.name != null) {
-        result.name = operation.name.newValue;
+        const valueResult = TextOperation.apply(state.name, operation.name);
+        if (valueResult.isError) {
+            return valueResult;
+        }
+        result.name = valueResult.value;
     }
 
     if (operation.chatPalette != null) {
@@ -527,7 +533,11 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
         result.memo = valueResult.value;
     }
     if (operation.name != null) {
-        result.name = operation.name.oldValue;
+        const valueResult = TextOperation.applyBack(state.name, operation.name);
+        if (valueResult.isError) {
+            return valueResult;
+        }
+        result.name = valueResult.value;
     }
     if (operation.chatPalette != null) {
         const valueResult = TextOperation.applyBack(state.chatPalette, operation.chatPalette);
@@ -825,6 +835,10 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     if (memo.isError) {
         return memo;
     }
+    const name = TextOperation.composeDownOperation(first.name, second.name);
+    if (name.isError) {
+        return name;
+    }
     const chatPalette = TextOperation.composeDownOperation(first.chatPalette, second.chatPalette);
     if (chatPalette.isError) {
         return chatPalette;
@@ -849,7 +863,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
 
         isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
         memo: memo.value,
-        name: ReplaceOperation.composeDownOperation(first.name, second.name),
+        name: name.value,
         chatPalette: chatPalette.value,
         privateCommand: privateCommand.value,
         privateVarToml: privateVarToml.value,
@@ -1045,11 +1059,15 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         twoWayOperation.memo = restored.value.twoWayOperation;
     }
     if (downOperation.name !== undefined) {
-        prevState.name = downOperation.name.oldValue;
-        twoWayOperation.name = {
-            ...downOperation.name,
-            newValue: nextState.name,
-        };
+        const restored = TextOperation.restore({
+            nextState: nextState.name,
+            downOperation: downOperation.name,
+        });
+        if (restored.isError) {
+            return restored;
+        }
+        prevState.name = restored.value.prevState;
+        twoWayOperation.name = restored.value.twoWayOperation;
     }
     if (downOperation.chatPalette !== undefined) {
         const restored = TextOperation.restore({
@@ -1225,7 +1243,10 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         });
     }
     if (prevState.name !== nextState.name) {
-        result.name = { oldValue: prevState.name, newValue: nextState.name };
+        result.name = TextOperation.diff({
+            prev: prevState.name,
+            next: nextState.name,
+        });
     }
     if (prevState.chatPalette !== nextState.chatPalette) {
         result.chatPalette = TextOperation.diff({
@@ -1564,11 +1585,15 @@ export const serverTransform =
             return transformedMemo;
         }
         twoWayOperation.memo = transformedMemo.value.secondPrime;
-        twoWayOperation.name = ReplaceOperation.serverTransform({
+        const transformedName = TextOperation.serverTransform({
             first: serverOperation?.name,
             second: clientOperation.name,
             prevState: prevState.name,
         });
+        if (transformedName.isError) {
+            return transformedName;
+        }
+        twoWayOperation.name = transformedName.value.secondPrime;
         if (isAuthorized) {
             const transformedChatPalette = TextOperation.serverTransform({
                 first: serverOperation?.chatPalette,
@@ -1757,10 +1782,13 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         return memo;
     }
 
-    const name = ReplaceOperation.clientTransform({
+    const name = TextOperation.clientTransform({
         first: first.name,
         second: second.name,
     });
+    if (name.isError) {
+        return name;
+    }
 
     const chatPalette = TextOperation.clientTransform({
         first: first.chatPalette,
@@ -1801,7 +1829,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         isPrivate: isPrivate.firstPrime,
         image: image.firstPrime,
         memo: memo.value.firstPrime,
-        name: name.firstPrime,
+        name: name.value.firstPrime,
         chatPalette: chatPalette.value.firstPrime,
         privateCommand: privateCommand.value.firstPrime,
         privateVarToml: privateVarToml.value.firstPrime,
@@ -1822,7 +1850,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         isPrivate: isPrivate.secondPrime,
         image: image.secondPrime,
         memo: memo.value.secondPrime,
-        name: name.secondPrime,
+        name: name.value.secondPrime,
         chatPalette: chatPalette.value.secondPrime,
         privateCommand: privateCommand.value.secondPrime,
         privateVarToml: privateVarToml.value.secondPrime,

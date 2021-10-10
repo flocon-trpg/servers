@@ -27,7 +27,7 @@ export const downOperation = createOperation(1, {
     image: t.type({ oldValue: maybe(filePath) }),
     isPrivate: t.type({ oldValue: t.boolean }),
     memo: TextOperation.downOperation,
-    name: t.type({ oldValue: t.string }),
+    name: TextOperation.downOperation,
     pieces: record(
         t.string,
         record(t.string, recordDownOperationElementFactory(Piece.state, Piece.downOperation))
@@ -40,7 +40,7 @@ export const upOperation = createOperation(1, {
     image: t.type({ newValue: maybe(filePath) }),
     isPrivate: t.type({ newValue: t.boolean }),
     memo: TextOperation.upOperation,
-    name: t.type({ newValue: t.string }),
+    name: TextOperation.upOperation,
     pieces: record(
         t.string,
         record(t.string, recordUpOperationElementFactory(Piece.state, Piece.upOperation))
@@ -54,7 +54,7 @@ export type TwoWayOperation = {
     image?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<FilePath>>;
     isPrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     memo?: TextOperation.TwoWayOperation;
-    name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
+    name?: TextOperation.TwoWayOperation;
     pieces?: DualKeyRecordOperation.DualKeyRecordTwoWayOperation<
         Piece.State,
         Piece.TwoWayOperation

@@ -72,7 +72,7 @@ const downOperationBase = {
     image: t.type({ oldValue: maybe(filePath) }),
     isPrivate: t.type({ oldValue: t.boolean }),
     memo: TextOperation.downOperation,
-    name: t.type({ oldValue: t.string }),
+    name: TextOperation.downOperation,
     chatPalette: TextOperation.downOperation,
     privateCommand: TextOperation.downOperation,
     privateVarToml: TextOperation.downOperation,
@@ -127,7 +127,7 @@ const upOperationBase = {
     image: t.type({ newValue: maybe(filePath) }),
     isPrivate: t.type({ newValue: t.boolean }),
     memo: TextOperation.upOperation,
-    name: t.type({ newValue: t.string }),
+    name: TextOperation.upOperation,
     chatPalette: TextOperation.upOperation,
     privateCommand: TextOperation.upOperation,
     privateVarToml: TextOperation.upOperation,
@@ -184,7 +184,7 @@ export type TwoWayOperation = {
     image?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<FilePath>>;
     isPrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     memo?: TextOperation.TwoWayOperation;
-    name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
+    name?: TextOperation.TwoWayOperation;
     chatPalette?: TextOperation.TwoWayOperation;
     privateCommand?: TextOperation.TwoWayOperation;
     privateVarToml?: TextOperation.TwoWayOperation;

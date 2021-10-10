@@ -1,11 +1,10 @@
 import * as t from 'io-ts';
 import { filePath } from '../../../filePath/types';
 import * as ReplaceOperation from '../../../util/replaceOperation';
+import * as TextOperation from '../../../util/textOperation';
 import { createOperation } from '../../../util/createOperation';
 import { maybe } from '../../../../maybe';
 
-const stringDownOperation = t.type({ oldValue: t.string });
-const stringUpOperation = t.type({ newValue: t.string });
 const numberDownOperation = t.type({ oldValue: t.number });
 const numberUpOperation = t.type({ newValue: t.number });
 
@@ -34,7 +33,7 @@ export const downOperation = createOperation(1, {
     cellOffsetY: numberDownOperation,
     cellRowCount: numberDownOperation,
     cellWidth: numberDownOperation,
-    name: stringDownOperation,
+    name: TextOperation.downOperation,
 });
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
@@ -48,7 +47,7 @@ export const upOperation = createOperation(1, {
     cellOffsetY: numberUpOperation,
     cellRowCount: numberUpOperation,
     cellWidth: numberUpOperation,
-    name: stringUpOperation,
+    name: TextOperation.upOperation,
 });
 
 export type UpOperation = t.TypeOf<typeof upOperation>;
@@ -66,5 +65,5 @@ export type TwoWayOperation = {
     cellOffsetY?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     cellRowCount?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     cellWidth?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
-    name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
+    name?: TextOperation.TwoWayOperation;
 };

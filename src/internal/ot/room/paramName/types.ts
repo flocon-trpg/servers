@@ -1,6 +1,6 @@
 import * as t from 'io-ts';
 import { createOperation } from '../../util/createOperation';
-import * as ReplaceOperation from '../../util/replaceOperation';
+import * as TextOperation from '../../util/textOperation';
 
 export const state = t.type({
     $v: t.literal(1),
@@ -11,13 +11,13 @@ export const state = t.type({
 export type State = t.TypeOf<typeof state>;
 
 export const downOperation = createOperation(1, {
-    name: t.type({ oldValue: t.string }),
+    name: TextOperation.downOperation,
 });
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
 export const upOperation = createOperation(1, {
-    name: t.type({ newValue: t.string }),
+    name: TextOperation.upOperation,
 });
 
 export type UpOperation = t.TypeOf<typeof upOperation>;
@@ -25,5 +25,5 @@ export type UpOperation = t.TypeOf<typeof upOperation>;
 export type TwoWayOperation = {
     $v: 1;
 
-    name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
+    name?: TextOperation.TwoWayOperation;
 };

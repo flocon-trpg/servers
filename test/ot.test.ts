@@ -11,8 +11,17 @@ import {
     StrIndex10,
 } from '../src';
 import { Resources } from './resources';
+import * as TextOperation from '../src/internal/ot/util/textOperation';
 
 const undefinedOrError = 'undefinedOrError';
+
+const textUpDiff = ({ prev, next }: { prev: string; next: string }) => {
+    const diff = TextOperation.diff({ prev, next });
+    if (diff == null) {
+        return undefined;
+    }
+    return TextOperation.toUpOperation(diff);
+};
 
 namespace Test {
     export namespace Basic {
@@ -119,7 +128,7 @@ describe.each([Resources.minimumState, Resources.complexState])('tests name', st
 
     const clientOperation: UpOperation = {
         $v: 2,
-        name: { newValue: newName },
+        name: textUpDiff({ prev: state.name, next: newName }),
     };
 
     Test.Basic.testServerTransformToReject({
@@ -138,10 +147,7 @@ describe.each([Resources.minimumState, Resources.complexState])('tests name', st
 
     const expected: TwoWayOperation = {
         $v: 2,
-        name: {
-            oldValue: state.name,
-            newValue: newName,
-        },
+        name: TextOperation.diff({ prev: state.name, next: newName }),
     };
 
     tester({ testName: 'tests server', requestedBy: { type: admin }, expected });
@@ -171,7 +177,7 @@ describe.each`
 
     const clientOperation: UpOperation = {
         $v: 2,
-        [key]: { newValue: newName },
+        [key]: textUpDiff({ prev: Resources.minimumState[key], next: newName }),
     };
 
     Test.Basic.testServerTransformToReject({
@@ -190,10 +196,10 @@ describe.each`
 
     const expected: TwoWayOperation = {
         $v: 2,
-        [key]: {
-            oldValue: Resources.minimumState[key],
-            newValue: newName,
-        },
+        [key]: TextOperation.diff({
+            prev: Resources.minimumState[key],
+            next: newName,
+        }),
     };
 
     tester({ testName: 'tests server', requestedBy: { type: admin }, expected });
@@ -514,7 +520,10 @@ describe.each([[true], [false]])(
                                 type: update,
                                 update: {
                                     $v: 2,
-                                    name: { newValue: newName },
+                                    name: textUpDiff({
+                                        prev: Resources.Character.emptyState.name,
+                                        next: newName,
+                                    }),
                                 },
                             },
                         },
@@ -549,10 +558,10 @@ describe.each([[true], [false]])(
                                 type: update,
                                 update: {
                                     $v: 2,
-                                    name: {
-                                        oldValue: Resources.Character.emptyState.name,
-                                        newValue: newName,
-                                    },
+                                    name: TextOperation.diff({
+                                        prev: Resources.Character.emptyState.name,
+                                        next: newName,
+                                    }),
                                 },
                             },
                         },

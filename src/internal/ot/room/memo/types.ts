@@ -21,7 +21,7 @@ export const state = t.type({
 export type State = t.TypeOf<typeof state>;
 
 export const downOperation = createOperation(1, {
-    name: t.type({ oldValue: t.string }),
+    name: TextOperation.downOperation,
     dir: t.type({ oldValue: t.array(t.string) }),
     text: TextOperation.downOperation,
     textType: t.type({ oldValue: textType }),
@@ -30,7 +30,7 @@ export const downOperation = createOperation(1, {
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
 export const upOperation = createOperation(1, {
-    name: t.type({ newValue: t.string }),
+    name: TextOperation.upOperation,
     dir: t.type({ newValue: t.array(t.string) }),
     text: TextOperation.upOperation,
     textType: t.type({ newValue: textType }),
@@ -41,7 +41,7 @@ export type UpOperation = t.TypeOf<typeof upOperation>;
 export type TwoWayOperation = {
     $v: 1;
 
-    name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
+    name?: TextOperation.TwoWayOperation;
     dir?: ReplaceOperation.ReplaceValueTwoWayOperation<string[]>;
     text?: TextOperation.TwoWayOperation;
     textType?: ReplaceOperation.ReplaceValueTwoWayOperation<TextType>;
