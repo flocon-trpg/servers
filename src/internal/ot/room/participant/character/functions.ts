@@ -53,6 +53,7 @@ const defaultNumParamState: NumParamTypes.State = {
 };
 
 const defaultStrParamState: StrParamType.State = {
+    $v: 1,
     $r: 1,
     isValuePrivate: false,
     value: '',
@@ -1174,11 +1175,13 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         innerDiff: ({ prevState, nextState }) =>
             StrParam.diff({
                 prevState: prevState ?? {
+                    $v: 1,
                     $r: 1,
                     isValuePrivate: false,
                     value: '',
                 },
                 nextState: nextState ?? {
+                    $v: 1,
                     $r: 1,
                     isValuePrivate: false,
                     value: '',

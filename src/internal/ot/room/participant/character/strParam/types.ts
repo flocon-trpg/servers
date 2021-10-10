@@ -4,6 +4,7 @@ import * as ReplaceOperation from '../../../../util/replaceOperation';
 import { createOperation } from '../../../../util/createOperation';
 
 export const state = t.type({
+    $v: t.literal(1),
     $r: t.literal(1),
 
     isValuePrivate: t.boolean,

@@ -222,6 +222,7 @@ export namespace Resources {
                         },
                         strParams: {
                             '1': {
+                                $v: 1,
                                 $r: 1,
                                 isValuePrivate: false,
                                 value: 'STR_PARAM_VALUE',
