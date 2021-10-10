@@ -3,7 +3,12 @@ import React from 'react';
 import ConfigContext from '../contexts/ConfigContext';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
-import { GetLogDocument, GetLogQuery, GetLogQueryVariables } from '../generated/graphql';
+import {
+    GetLogDocument,
+    GetLogQuery,
+    GetLogQueryVariables,
+    GetRoomLogFailureType,
+} from '../generated/graphql';
 import { useParticipants } from '../hooks/state/useParticipants';
 import { usePublicChannelNames } from '../hooks/state/usePublicChannelNames';
 import { useReadonlyRef } from '../hooks/useReadonlyRef';
@@ -85,7 +90,22 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                 },
             });
             if (logData.data.result.__typename !== 'RoomMessages') {
-                setErrorMessage('APIサーバーからログをダウンロードできませんでした。');
+                if (logData.data.result.__typename === 'GetRoomLogFailureResult') {
+                    switch (logData.data.result.failureType) {
+                        case GetRoomLogFailureType.NotAuthorized: {
+                            setErrorMessage('観戦者はログをダウンロードすることはできません。');
+                            break;
+                        }
+                        default:
+                            setErrorMessage(
+                                `エラーが発生しました: ${logData.data.result.failureType}`
+                            );
+                            break;
+                    }
+                } else {
+                    setErrorMessage('APIサーバーからログをダウンロードできませんでした。');
+                }
+                setIsDownloading(false);
                 return;
             }
 
