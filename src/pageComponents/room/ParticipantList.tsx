@@ -74,7 +74,6 @@ const ParticipantList: React.FC = () => {
             render: (_: unknown, { participant }: DataSource) => {
                 switch (participant.state.role) {
                     case ParticipantRole.Master:
-                        return '参加者（マスター）';
                     case ParticipantRole.Player:
                         return '参加者';
                     case ParticipantRole.Spectator:
