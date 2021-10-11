@@ -5,7 +5,7 @@ import _ from 'lodash';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { useSelector } from '../../store';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
-import DrawerFooter from '../../layouts/DrawerFooter';
+import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { Gutter } from 'antd/lib/grid/row';
 import { cancelRnd, flex, flexNone, flexRow, itemsCenter } from '../../utils/className';
 import classNames from 'classnames';

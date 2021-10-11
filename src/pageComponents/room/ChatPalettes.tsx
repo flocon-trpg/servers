@@ -11,7 +11,8 @@ import {
     SelectedChannelType,
     SubmitMessage,
 } from '../../components/ChatInput/SubmitMessage';
-import roomConfigModule, {
+import {
+    roomConfigModule,
     UpdateChatPalettePanelAction,
     UpdateMessagePanelAction,
 } from '../../modules/roomConfigModule';

@@ -2,7 +2,7 @@ import { Button } from 'antd';
 import * as React from 'react';
 import { FileSourceType } from '../generated/graphql';
 import { some } from '../utils/types';
-import FirebaseStorageLink from './FirebaseStorageLink';
+import { FirebaseStorageLink } from './FirebaseStorageLink';
 import * as Core from '@kizahasi/flocon-core';
 import { FilterValue } from 'antd/lib/table/interface';
 import { FilePath } from '../utils/filePath';
@@ -22,7 +22,7 @@ type Props = {
     showImage?: boolean;
 };
 
-const InputFile: React.FC<Props> = ({
+export const InputFile: React.FC<Props> = ({
     filePath,
     onPathChange,
     openFilesManager,
@@ -87,5 +87,3 @@ const InputFile: React.FC<Props> = ({
         </div>
     );
 };
-
-export default InputFile;

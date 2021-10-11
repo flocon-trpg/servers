@@ -2,11 +2,11 @@
 import React from 'react';
 import { Table, Button, Input, Tooltip } from 'antd';
 import { update } from '../../stateManagers/states/types';
-import NumberParameterInput from '../../components/NumberParameterInput';
-import BooleanParameterInput from '../../components/BooleanParameterInput';
-import StringParameterInput from '../../components/StringParameterInput';
+import { NumberParameterInput } from '../../components/NumberParameterInput';
+import { BooleanParameterInput } from '../../components/BooleanParameterInput';
+import { StringParameterInput } from '../../components/StringParameterInput';
 import * as Icon from '@ant-design/icons';
-import ToggleButton from '../../components/ToggleButton';
+import { ToggleButton } from '../../components/ToggleButton';
 import {
     characterIsPrivate,
     characterIsNotPrivate,
@@ -197,7 +197,7 @@ const createStringParameterColumn = ({
     };
 };
 
-const CharacterList: React.FC = () => {
+export const CharacterList: React.FC = () => {
     const myAuth = React.useContext(MyAuthContext);
     const dispatch = useDispatch();
     const operate = useOperate();
@@ -361,5 +361,3 @@ const CharacterList: React.FC = () => {
         </div>
     );
 };
-
-export default CharacterList;

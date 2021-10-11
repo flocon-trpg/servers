@@ -1,8 +1,8 @@
 import classNames from 'classnames';
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import VolumeBar from '../../components/VolumeBar';
-import roomConfigModule from '../../modules/roomConfigModule';
+import { VolumeBar } from '../../components/VolumeBar';
+import { roomConfigModule } from '../../modules/roomConfigModule';
 import { defaultChannelVolume } from '../../states/RoomConfig';
 import { useSelector } from '../../store';
 import { flex, flexColumn, flexRow, itemsCenter } from '../../utils/className';
@@ -11,7 +11,7 @@ type Props = {
     roomId: string;
 };
 
-const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
+export const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
     const masterVolume = useSelector(state => state.roomConfigModule?.masterVolume);
     const channelVolumes = useSelector(state => state.roomConfigModule?.channelVolumes);
     const seVolume = useSelector(state => state.roomConfigModule?.seVolume);
@@ -144,5 +144,3 @@ const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
         </div>
     );
 };
-
-export default VolumeBarPanel;

@@ -1,6 +1,6 @@
 import { Col, Drawer, Row, Typography } from 'antd';
 import React from 'react';
-import DrawerFooter from '../../layouts/DrawerFooter';
+import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { simpleId } from '../../utils/generators';
 import { replace } from '../../stateManagers/states/types';
 import { DrawerProps } from 'antd/lib/drawer';
@@ -22,10 +22,10 @@ import {
 } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useImagePieceValues } from '../../hooks/state/useImagePieceValues';
-import InputFile from '../../components/InputFile';
+import { InputFile } from '../../components/InputFile';
 import { FilesManagerDrawerType } from '../../utils/types';
-import FilesManagerDrawer from '../../components/FilesManagerDrawer';
-import BufferedInput from '../../components/BufferedInput';
+import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
+import { BufferedInput } from '../../components/BufferedInput';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
 import { FilePath } from '../../utils/filePath';
 import { keyNames } from '@kizahasi/util';

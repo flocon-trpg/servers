@@ -17,7 +17,7 @@ type DataSource = {
     };
 };
 
-const ParticipantList: React.FC = () => {
+export const ParticipantList: React.FC = () => {
     const roomConnections = useRoomConnections();
     const participants = useParticipants();
     const myUserUid = useMyUserUid();
@@ -98,5 +98,3 @@ const ParticipantList: React.FC = () => {
         </div>
     );
 };
-
-export default ParticipantList;

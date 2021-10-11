@@ -11,20 +11,20 @@ import {
     usePromoteToPlayerMutation,
     useRequiresPhraseToJoinAsPlayerLazyQuery,
 } from '../../generated/graphql';
-import roomConfigModule from '../../modules/roomConfigModule';
+import { roomConfigModule } from '../../modules/roomConfigModule';
 import { useSelector } from '../../store';
 import * as Icon from '@ant-design/icons';
 import { boardEditorPanel, chatPalettePanel } from '../../states/RoomConfig';
-import VolumeBarPanel from './VolumeBarPanel';
+import { VolumeBarPanel } from './VolumeBarPanel';
 import { Jdenticon } from '../../components/Jdenticon';
 import { roomModule, Notification } from '../../modules/roomModule';
-import path from '../../utils/path';
+import { path } from '../../utils/path';
 import { useRouter } from 'next/router';
 import { defaultMessagePanelConfig } from '../../states/MessagePanelConfig';
 import { recordToArray } from '@kizahasi/util';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { defaultMemoPanelConfig } from '../../states/MemoPanelConfig';
-import FilesManagerDrawer from '../../components/FilesManagerDrawer';
+import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
 import { FilesManagerDrawerType, none } from '../../utils/types';
 import { useMe } from '../../hooks/useMe';
 import { useMyUserUid } from '../../hooks/useMyUserUid';

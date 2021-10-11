@@ -6,12 +6,12 @@ import {
     useWriteRoomSoundEffectMutation,
 } from '../../generated/graphql';
 import * as Icon from '@ant-design/icons';
-import FilesManagerDrawer from '../../components/FilesManagerDrawer';
+import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
 import { FilesManagerDrawerType, some } from '../../utils/types';
 import { replace, update } from '../../stateManagers/states/types';
 import { filePathEquals } from '../../stateManagers/states/comparer';
-import VolumeBar from '../../components/VolumeBar';
-import DrawerFooter from '../../layouts/DrawerFooter';
+import { VolumeBar } from '../../components/VolumeBar';
+import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { MyStyle } from '../../utils/myStyle';
 import { useSelector } from '../../store';
 import { useOperate } from '../../hooks/useOperate';
@@ -493,7 +493,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
     );
 };
 
-const SoundPlayer: React.FC = () => {
+export const SoundPlayer: React.FC = () => {
     const bgmsState = useSelector(state => state.roomModule.roomState?.state?.bgms);
     const [isSeDrawerVisible, setIsSeDrawerVisible] = React.useState(false);
 
@@ -529,5 +529,3 @@ const SoundPlayer: React.FC = () => {
         </div>
     );
 };
-
-export default SoundPlayer;

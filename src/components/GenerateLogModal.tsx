@@ -1,6 +1,6 @@
 import fileDownload from 'js-file-download';
 import React from 'react';
-import ConfigContext from '../contexts/ConfigContext';
+import { ConfigContext } from '../contexts/ConfigContext';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
 import {

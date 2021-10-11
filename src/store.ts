@@ -3,9 +3,9 @@ import { configureStore } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook } from 'react-redux';
 import { useSelector as useReduxSelector } from 'react-redux';
 import { createEpicMiddleware } from 'redux-observable';
-import roomConfigModule from './modules/roomConfigModule';
+import { roomConfigModule } from './modules/roomConfigModule';
 import { rootEpic } from './epics/rootEpic';
-import userConfigModule from './modules/userConfigModule';
+import { userConfigModule } from './modules/userConfigModule';
 import { roomDrawerAndPopoverAndModalModule } from './modules/roomDrawerAndPopoverAndModalModule';
 import { fileModule } from './modules/fileModule';
 import { roomModule } from './modules/roomModule';
@@ -38,6 +38,4 @@ const createStore = () => {
     return store;
 };
 
-const store = createStore();
-
-export default store;
+export const store = createStore();

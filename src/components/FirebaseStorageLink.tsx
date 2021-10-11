@@ -1,5 +1,5 @@
 import React from 'react';
-import ConfigContext from '../contexts/ConfigContext';
+import { ConfigContext } from '../contexts/ConfigContext';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
 import { useReadonlyRef } from '../hooks/useReadonlyRef';
 import { fileName } from '../utils/filename';
@@ -9,7 +9,7 @@ type Props = {
     reference: firebase.default.storage.Reference | string;
 };
 
-const FirebaseStorageLink: React.FC<Props> = ({ reference }: Props) => {
+export const FirebaseStorageLink: React.FC<Props> = ({ reference }: Props) => {
     const cache = React.useContext(FirebaseStorageUrlCacheContext);
     const cacheRef = useReadonlyRef(cache);
     const [url, setUrl] = React.useState<string>();
@@ -58,5 +58,3 @@ const FirebaseStorageLink: React.FC<Props> = ({ reference }: Props) => {
         </a>
     );
 };
-
-export default FirebaseStorageLink;

@@ -1,14 +1,14 @@
 import React from 'react';
 import { Tooltip } from 'antd';
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
-import ToggleButton from './ToggleButton';
+import { ToggleButton } from './ToggleButton';
 import {
     parameterIsPrivate,
     parameterIsNotPrivate,
     parameterIsPrivateAndNotCreatedByMe,
     parameterIsNotPrivateAndNotCreatedByMe,
 } from '../resource/text/main';
-import BufferedInput from './BufferedInput';
+import { BufferedInput } from './BufferedInput';
 import {
     CharacterUpOperation,
     StrIndex20,
@@ -29,7 +29,7 @@ type Props = {
     compact: boolean;
 };
 
-const StringParameterInput: React.FC<Props> = ({
+export const StringParameterInput: React.FC<Props> = ({
     isCharacterPrivate,
     isCreate,
     parameterKey,
@@ -116,5 +116,3 @@ const StringParameterInput: React.FC<Props> = ({
         </div>
     );
 };
-
-export default StringParameterInput;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Input, InputNumber, Tooltip } from 'antd';
 import { EyeInvisibleOutlined, EyeOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-import ToggleButton from './ToggleButton';
+import { ToggleButton } from './ToggleButton';
 import {
     addParameter,
     deleteParameter,
@@ -27,7 +27,7 @@ type Props = {
 
 const disabledInput = <Input style={{ width: inputWidth }} disabled value='?' size='small' />;
 
-const NumberParameterInput: React.FC<Props> = ({
+export const NumberParameterInput: React.FC<Props> = ({
     isCharacterPrivate,
     isCreate,
     parameterKey,
@@ -333,5 +333,3 @@ const NumberParameterInput: React.FC<Props> = ({
         </div>
     );
 };
-
-export default NumberParameterInput;

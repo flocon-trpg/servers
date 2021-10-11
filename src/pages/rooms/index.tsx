@@ -1,10 +1,10 @@
 import React from 'react';
 import { RoomAsListItemFragment, useGetRoomsListQuery } from '../../generated/graphql';
-import Layout, { loginAndEntry } from '../../layouts/Layout';
+import { Layout, loginAndEntry } from '../../layouts/Layout';
 import Link from 'next/link';
 import { Button, Table } from 'antd';
 import { useRouter } from 'next/router';
-import QueryResultViewer from '../../components/QueryResultViewer';
+import { QueryResultViewer } from '../../components/QueryResultViewer';
 import classNames from 'classnames';
 import { flex, flexNone } from '../../utils/className';
 

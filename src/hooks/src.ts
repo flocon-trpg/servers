@@ -1,7 +1,7 @@
 import { FilePath } from '@kizahasi/flocon-core';
 import React from 'react';
 import { useDeepCompareEffect } from 'react-use';
-import ConfigContext from '../contexts/ConfigContext';
+import { ConfigContext } from '../contexts/ConfigContext';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
 import { FilePathFragment } from '../generated/graphql';

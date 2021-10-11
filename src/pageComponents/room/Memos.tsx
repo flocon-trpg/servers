@@ -6,7 +6,7 @@ import { useOperate } from '../../hooks/useOperate';
 import { Button, Popover, Tree, Modal, Menu, Dropdown, Input } from 'antd';
 import { DataNode } from 'rc-tree/lib/interface';
 import { simpleId } from '../../utils/generators';
-import BufferedInput from '../../components/BufferedInput';
+import { BufferedInput } from '../../components/BufferedInput';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
 import classNames from 'classnames';
 import { cancelRnd, flex, flex1, flexColumn, flexRow, itemsCenter } from '../../utils/className';

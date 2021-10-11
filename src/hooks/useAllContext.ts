@@ -2,7 +2,7 @@ import { useApolloClient } from '@apollo/client';
 import React from 'react';
 import { useStore } from 'react-redux';
 import { Props } from '../components/AllContextProvider';
-import ClientIdContext from '../contexts/ClientIdContext';
+import { ClientIdContext } from '../contexts/ClientIdContext';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
 import { MyAuthContext } from '../contexts/MyAuthContext';

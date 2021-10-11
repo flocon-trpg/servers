@@ -34,7 +34,7 @@ import {
 import { PrivateChannelSet, PrivateChannelSets } from '../../utils/PrivateChannelSet';
 import { ChatInput } from '../../components/ChatInput/Main';
 import { useDispatch } from 'react-redux';
-import roomConfigModule from '../../modules/roomConfigModule';
+import { roomConfigModule } from '../../modules/roomConfigModule';
 import {
     useDeleteMessageMutation,
     useEditMessageMutation,
@@ -44,9 +44,9 @@ import {
 import * as Icon from '@ant-design/icons';
 import { MessageFilter, TabConfig } from '../../states/MessagePanelConfig';
 import { Gutter } from 'antd/lib/grid/row';
-import DrawerFooter from '../../layouts/DrawerFooter';
-import BufferedInput from '../../components/BufferedInput';
-import QueryResultViewer from '../../components/QueryResultViewer';
+import { DrawerFooter } from '../../layouts/DrawerFooter';
+import { BufferedInput } from '../../components/BufferedInput';
+import { QueryResultViewer } from '../../components/QueryResultViewer';
 import { useMessageFilter } from '../../hooks/useMessageFilter';
 import { RoomMessage as RoomMessageNameSpace } from './RoomMessage';
 import { useWritingMessageStatus } from '../../hooks/useWritingMessageStatus';
@@ -59,7 +59,7 @@ import { useParticipants } from '../../hooks/state/useParticipants';
 import { UpOperation } from '@kizahasi/flocon-core';
 import { recordToArray, recordToMap } from '@kizahasi/util';
 import { Color } from '../../utils/color';
-import userConfigModule from '../../modules/userConfigModule';
+import { userConfigModule } from '../../modules/userConfigModule';
 import { UserConfig } from '../../states/UserConfig';
 import * as Icons from '@ant-design/icons';
 import { InputModal } from '../../components/InputModal';

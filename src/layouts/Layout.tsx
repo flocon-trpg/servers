@@ -20,10 +20,10 @@ import {
     IsEntryQueryVariables,
     useEntryToServerMutation,
 } from '../generated/graphql';
-import Center from '../components/Center';
+import { Center } from '../components/Center';
 import Link from 'next/link';
-import NotSignInResult from '../components/Result/NotSignInResult';
-import LoadingResult from '../components/Result/LoadingResult';
+import { NotSignInResult } from '../components/Result/NotSignInResult';
+import { LoadingResult } from '../components/Result/LoadingResult';
 import * as Icon from '@ant-design/icons';
 import { useSignOut } from '../hooks/useSignOut';
 import { useApolloClient } from '@apollo/client';
@@ -112,7 +112,7 @@ type Props = {
     hideHeader?: typeof always | typeof success;
 };
 
-const Layout: React.FC<PropsWithChildren<Props>> = ({
+export const Layout: React.FC<PropsWithChildren<Props>> = ({
     children,
     onEntry,
     requires,
@@ -256,5 +256,3 @@ const Layout: React.FC<PropsWithChildren<Props>> = ({
         </AntdLayout>
     );
 };
-
-export default Layout;

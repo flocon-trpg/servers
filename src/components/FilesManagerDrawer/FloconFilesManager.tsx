@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Button, Dropdown, Menu, notification, Table, Tooltip, Upload } from 'antd';
 import { accept } from './helper';
-import ConfigContext from '../../contexts/ConfigContext';
+import { ConfigContext } from '../../contexts/ConfigContext';
 import { getHttpUri } from '../../config';
 import urljoin from 'url-join';
 import axios from 'axios';

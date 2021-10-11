@@ -1,9 +1,9 @@
 import { Alert, Button, Card, Form, Input, Spin, Switch } from 'antd';
 import { useRouter } from 'next/router';
 import React from 'react';
-import Layout, { loginAndEntry } from '../../layouts/Layout';
+import { Layout, loginAndEntry } from '../../layouts/Layout';
 import { CreateRoomInput, useCreateRoomMutation } from '../../generated/graphql';
-import Center from '../../components/Center';
+import { Center } from '../../components/Center';
 import { MyAuthContext } from '../../contexts/MyAuthContext';
 
 const labelCol = 10;

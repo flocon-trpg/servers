@@ -5,7 +5,7 @@ import * as ReactKonva from 'react-konva';
 import { Button, Divider, Dropdown, InputNumber, Menu, Popover } from 'antd';
 import * as Icons from '@ant-design/icons';
 import { useDispatch } from 'react-redux';
-import roomConfigModule from '../../modules/roomConfigModule';
+import { roomConfigModule } from '../../modules/roomConfigModule';
 import { BoardEditorPanelConfig } from '../../states/BoardEditorPanelConfig';
 import { KonvaEventObject } from 'konva/types/Node';
 import { update } from '../../stateManagers/states/types';

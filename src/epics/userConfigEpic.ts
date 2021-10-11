@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { StateObservable } from 'redux-observable';
 import * as Rx from 'rxjs/operators';
 import { RootState } from '../store';
-import userConfigModule from '../modules/userConfigModule';
+import { userConfigModule } from '../modules/userConfigModule';
 import { setUserConfig } from '../utils/localStorage/userConfig';
 
 const saveToStorageSampleTime = 500;

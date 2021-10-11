@@ -1,12 +1,12 @@
 import { Alert, Button, Typography } from 'antd';
 import Link from 'next/link';
 import React from 'react';
-import FilesManagerDrawer from '../components/FilesManagerDrawer';
-import QueryResultViewer from '../components/QueryResultViewer';
+import { FilesManagerDrawer } from '../components/FilesManagerDrawer';
+import { QueryResultViewer } from '../components/QueryResultViewer';
 import { PrereleaseType, useGetServerInfoQuery } from '../generated/graphql';
-import Layout from '../layouts/Layout';
+import { Layout } from '../layouts/Layout';
 import { FilesManagerDrawerType, none } from '../utils/types';
-import VERSION from '../VERSION';
+import { VERSION } from '../VERSION';
 import * as Icon from '@ant-design/icons';
 import {
     alpha,

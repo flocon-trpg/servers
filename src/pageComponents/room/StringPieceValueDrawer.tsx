@@ -1,6 +1,6 @@
 import { Checkbox, Col, Drawer, InputNumber, Row } from 'antd';
 import React from 'react';
-import DrawerFooter from '../../layouts/DrawerFooter';
+import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { simpleId } from '../../utils/generators';
 import { replace } from '../../stateManagers/states/types';
 import { DrawerProps } from 'antd/lib/drawer';

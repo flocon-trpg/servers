@@ -1,9 +1,9 @@
 import { Button, Collapse, Drawer, Form, Input, Select, Space } from 'antd';
 import React from 'react';
-import DrawerFooter from '../../layouts/DrawerFooter';
+import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { replace, update } from '../../stateManagers/states/types';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-import BufferedInput from '../../components/BufferedInput';
+import { BufferedInput } from '../../components/BufferedInput';
 import { useSelector } from '../../store';
 import { useOperate } from '../../hooks/useOperate';
 import { recordToMap } from '@kizahasi/util';
@@ -19,7 +19,7 @@ type VisibleParameterForm = {
     key: StrIndex20;
 };
 
-const CharacterParameterNamesDrawer: React.FC = () => {
+export const CharacterParameterNamesDrawer: React.FC = () => {
     const characterParameterNamesDrawerVisibility = useSelector(
         state => state.roomDrawerAndPopoverAndModalModule.characterParameterNamesDrawerVisibility
     );
@@ -519,5 +519,3 @@ const CharacterParameterNamesDrawer: React.FC = () => {
         </Drawer>
     );
 };
-
-export default CharacterParameterNamesDrawer;

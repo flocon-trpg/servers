@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import React from 'react';
-import RoomComponent from '../../pageComponents/room/Room';
+import { Room as RoomComponent } from '../../pageComponents/room/Room';
 import {
     GetRoomFailureType,
     JoinRoomAsPlayerMutation,
@@ -12,7 +12,7 @@ import {
     WritingMessageStatusInputType,
 } from '../../generated/graphql';
 import { Alert, Button, Card, Input, Result, Spin, notification as antdNotification } from 'antd';
-import Layout, { loginAndEntry, success } from '../../layouts/Layout';
+import { Layout, loginAndEntry, success } from '../../layouts/Layout';
 import { FetchResult } from '@apollo/client';
 import {
     deleted,
@@ -24,8 +24,8 @@ import {
     nonJoined,
     useRoomState,
 } from '../../hooks/useRoomState';
-import Center from '../../components/Center';
-import LoadingResult from '../../components/Result/LoadingResult';
+import { Center } from '../../components/Center';
+import { LoadingResult } from '../../components/Result/LoadingResult';
 import { usePublishRoomEventSubscription } from '../../hooks/usePublishRoomEventSubscription';
 import { useDispatch } from 'react-redux';
 import { roomModule } from '../../modules/roomModule';
@@ -35,7 +35,7 @@ import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndP
 import { messageInputTextModule } from '../../modules/messageInputTextModule';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
 import { usePrevious } from 'react-use';
-import roomConfigModule from '../../modules/roomConfigModule';
+import { roomConfigModule } from '../../modules/roomConfigModule';
 import { getRoomConfig } from '../../utils/localStorage/roomConfig';
 import { MyAuthContext } from '../../contexts/MyAuthContext';
 import { bufferTime, Subject } from 'rxjs';

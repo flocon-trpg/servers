@@ -1,6 +1,6 @@
 import { Col, Drawer, Input, Row } from 'antd';
 import React from 'react';
-import DrawerFooter from '../../layouts/DrawerFooter';
+import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
 import { useOperate } from '../../hooks/useOperate';
@@ -16,7 +16,7 @@ const drawerBaseProps: Partial<DrawerProps> = {
 const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
-const EditRoomDrawer: React.FC = () => {
+export const EditRoomDrawer: React.FC = () => {
     const editRoomDrawerVisibility = useSelector(
         state => state.roomDrawerAndPopoverAndModalModule.editRoomDrawerVisibility
     );
@@ -73,5 +73,3 @@ const EditRoomDrawer: React.FC = () => {
         </Drawer>
     );
 };
-
-export default EditRoomDrawer;

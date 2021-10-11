@@ -328,7 +328,7 @@ const editBoard = (
 };
 
 // CONSIDER: 各panelのmoveとresizeは、細分化する必要性が薄いため統合したほうがよさそう。
-const roomConfigModule = createSlice({
+export const roomConfigModule = createSlice({
     name: 'roomConfig',
     initialState: null as RoomConfig | null,
     reducers: {
@@ -921,5 +921,3 @@ const roomConfigModule = createSlice({
         },
     },
 });
-
-export default roomConfigModule;

@@ -6,7 +6,7 @@ import React from 'react';
 import firebase from 'firebase/app';
 import * as firebaseui from 'firebaseui';
 import { getAuth } from '../utils/firebaseHelpers';
-import ConfigContext from '../contexts/ConfigContext';
+import { ConfigContext } from '../contexts/ConfigContext';
 import { Config } from '../config';
 
 const toSignInOptions = (provider: Config['web']['firebase']['auth']['provider']) => {
