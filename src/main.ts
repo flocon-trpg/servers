@@ -30,7 +30,7 @@ const logEntryPasswordConfig = (serverConfig: ServerConfig) => {
     }
 };
 
-const main = async (params: { debug: boolean }): Promise<void> => {
+export const main = async (params: { debug: boolean }): Promise<void> => {
     admin.initializeApp({
         projectId: loadFirebaseConfig().projectId,
     });
@@ -102,5 +102,3 @@ const main = async (params: { debug: boolean }): Promise<void> => {
         getDecodedIdTokenFromWsContext,
     });
 };
-
-export default main;

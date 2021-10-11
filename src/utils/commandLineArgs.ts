@@ -1,5 +1,5 @@
 import yargs from 'yargs';
-import VERSION from '../VERSION';
+import { VERSION } from '../VERSION';
 
 export const postgresql = 'postgresql';
 export const sqlite = 'sqlite';

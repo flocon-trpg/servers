@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.registerEnumTypes = void 0;
 const type_graphql_1 = require("type-graphql");
 const ParticipantRole_1 = require("../enums/ParticipantRole");
 const JoinRoomFailureType_1 = require("../enums/JoinRoomFailureType");
@@ -124,4 +125,4 @@ const registerEnumTypes = () => {
         name: 'WritingMessageStatusType',
     });
 };
-exports.default = registerEnumTypes;
+exports.registerEnumTypes = registerEnumTypes;

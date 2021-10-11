@@ -30,7 +30,7 @@ import { EntryToServerResult } from '../results/EntryToServerResult';
 import { GetAvailableGameSystemsResult } from '../results/GetAvailableGameSystemsResult';
 import { helpMessage, listAvailableGameSystems } from '../../messageAnalyzer/main';
 import { ServerInfo } from '../entities/serverInfo/graphql';
-import VERSION from '../../VERSION';
+import { VERSION } from '../../VERSION';
 import { PrereleaseType } from '../../enums/PrereleaseType';
 import { alpha, beta, DualKeyMap, rc } from '@kizahasi/util';
 import { BaasType } from '../../enums/BaasType';

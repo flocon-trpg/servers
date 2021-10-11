@@ -1,6 +1,6 @@
 import { SemVer, alpha } from '@kizahasi/util';
 
-const VERSION = new SemVer({
+export const VERSION = new SemVer({
     major: 0,
     minor: 4,
     patch: 0,
@@ -9,5 +9,3 @@ const VERSION = new SemVer({
         version: 8,
     },
 });
-
-export default VERSION;
