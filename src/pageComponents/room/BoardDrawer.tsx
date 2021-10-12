@@ -1,7 +1,6 @@
 import { Col, Drawer, InputNumber, Row } from 'antd';
 import React from 'react';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
-import { simpleId } from '../../utils/generators';
 import { InputFile } from '../../components/InputFile';
 import { DrawerProps } from 'antd/lib/drawer';
 import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
@@ -12,7 +11,7 @@ import { useOperate } from '../../hooks/useOperate';
 import { useSelector } from '../../store';
 import { BufferedInput } from '../../components/BufferedInput';
 import { useBoards } from '../../hooks/state/useBoards';
-import { boardDiff, BoardState, toBoardUpOperation } from '@kizahasi/flocon-core';
+import { boardDiff, BoardState, simpleId, toBoardUpOperation } from '@kizahasi/flocon-core';
 import { useDispatch } from 'react-redux';
 import {
     create,
@@ -32,6 +31,7 @@ const drawerBaseProps: Partial<DrawerProps> = {
 
 const defaultBoard: BoardState = {
     $v: 1,
+    $r: 1,
     name: '',
 
     // cellColumnCountとcellRowCountは現在使われていない

@@ -5,11 +5,10 @@ import { useCharacter } from '../../hooks/state/useCharacter';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
 import { useSelector } from '../../store';
 import MonacoEditor from '@monaco-editor/react';
-import { simpleId } from '../../utils/generators';
 import { useBufferValue } from '../../hooks/useBufferValue';
 import { testCommand } from '../../utils/command';
 import { useOperate } from '../../hooks/useOperate';
-import { privateCommandsDiff } from '@kizahasi/flocon-core';
+import { privateCommandsDiff, simpleId } from '@kizahasi/flocon-core';
 import { useDispatch } from 'react-redux';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import classNames from 'classnames';
@@ -67,6 +66,7 @@ const Editor: React.FC<EditorProps> = ({ script, onChange }: EditorProps) => {
 
 type CommandState = {
     $v: 1;
+    $r: 1;
     name: string;
     value: string;
 };
@@ -192,7 +192,8 @@ export const CommandEditorModal: React.FC = () => {
                 }
                 operate(
                     characterUpdateOperation(commandEditorModalType.characterKey, {
-                        $v: 2,
+                        $v: 1,
+                        $r: 2,
                         privateCommands: privateCommandsDiff({
                             prevState: character.privateCommands,
                             nextState: mapToRecord(privateCommands),
@@ -238,6 +239,7 @@ export const CommandEditorModal: React.FC = () => {
                                 }
                                 privateCommands.set(id, {
                                     $v: 1,
+                                    $r: 1,
                                     name: '新規作成コマンド',
                                     value: '',
                                 });

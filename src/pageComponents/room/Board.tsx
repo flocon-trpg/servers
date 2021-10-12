@@ -2,7 +2,7 @@
 import React from 'react';
 import { success, useImageFromGraphQL } from '../../hooks/image';
 import * as ReactKonva from 'react-konva';
-import { Button, Divider, Dropdown, InputNumber, Menu, Popover } from 'antd';
+import { Button, Dropdown, InputNumber, Menu, Popover } from 'antd';
 import * as Icons from '@ant-design/icons';
 import { useDispatch } from 'react-redux';
 import { roomConfigModule } from '../../modules/roomConfigModule';
@@ -83,7 +83,7 @@ const createPiecePostOperation = ({
     piece: PieceState;
     board: BoardState;
 }): PieceUpOperation => {
-    const pieceOperation: PieceUpOperation = { $v: 1 };
+    const pieceOperation: PieceUpOperation = { $v: 1, $r: 1 };
     if (piece.isCellMode) {
         if (e.newLocation != null) {
             const position = Piece.getCellPosition({ ...e.newLocation, board });
@@ -109,7 +109,7 @@ const createPiecePostOperation = ({
 };
 
 const createTachieLocationPostOperation = ({ e }: { e: DragEndResult }): PieceUpOperation => {
-    const pieceOperation: BoardLocationUpOperation = { $v: 1 };
+    const pieceOperation: BoardLocationUpOperation = { $v: 1, $r: 1 };
     if (e.newLocation != null) {
         pieceOperation.x = { newValue: e.newLocation.x };
         pieceOperation.y = { newValue: e.newLocation.y };
@@ -377,7 +377,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             });
                             operate(
                                 characterUpdateOperation(characterKey, {
-                                    $v: 2,
+                                    $v: 1,
+                                    $r: 2,
                                     pieces: {
                                         [pieceKey.createdBy]: {
                                             [pieceKey.id]: {
@@ -454,7 +455,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             });
                             operate(
                                 characterUpdateOperation(characterKey, {
-                                    $v: 2,
+                                    $v: 1,
+                                    $r: 2,
                                     tachieLocations: {
                                         [tachieLocationKey.createdBy]: {
                                             [tachieLocationKey.id]: {
@@ -517,17 +519,20 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                                 board,
                             });
                             const operation: UpOperation = {
-                                $v: 2,
+                                $v: 1,
+                                $r: 2,
                                 participants: {
                                     [element.participantKey]: {
                                         type: update,
                                         update: {
-                                            $v: 2,
+                                            $v: 1,
+                                            $r: 2,
                                             imagePieceValues: {
                                                 [element.valueId]: {
                                                     type: update,
                                                     update: {
                                                         $v: 1,
+                                                        $r: 1,
                                                         pieces: {
                                                             [pieceKey.createdBy]: {
                                                                 [pieceKey.id]: {
@@ -594,12 +599,14 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         });
                         operate(
                             characterUpdateOperation(element.characterKey, {
-                                $v: 2,
+                                $v: 1,
+                                $r: 2,
                                 dicePieceValues: {
                                     [element.valueId]: {
                                         type: update,
                                         update: {
                                             $v: 1,
+                                            $r: 1,
                                             pieces: {
                                                 [pieceKey.createdBy]: {
                                                     [pieceKey.id]: {
@@ -663,12 +670,14 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             });
                             operate(
                                 characterUpdateOperation(element.characterKey, {
-                                    $v: 2,
+                                    $v: 1,
+                                    $r: 2,
                                     stringPieceValues: {
                                         [element.valueId]: {
                                             type: update,
                                             update: {
                                                 $v: 1,
+                                                $r: 1,
                                                 pieces: {
                                                     [pieceKey.createdBy]: {
                                                         [pieceKey.id]: {

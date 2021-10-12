@@ -13,6 +13,8 @@ import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndP
 import { InputModal } from '../../components/InputModal';
 import classNames from 'classnames';
 import { flex, flexRow } from '../../utils/className';
+import { useOperateAsState } from '../../hooks/useOperateAsState';
+import produce from 'immer';
 
 type VisibleParameterForm = {
     type: 'Bool' | 'Str' | 'Num';
@@ -24,6 +26,7 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
         state => state.roomDrawerAndPopoverAndModalModule.characterParameterNamesDrawerVisibility
     );
     const operate = useOperate();
+    const operateAsState = useOperateAsState();
     const dispatch = useDispatch();
     const [visibleParameterForm, setVisibleParameterForm] = React.useState<VisibleParameterForm>();
     const [addNumParamSelector, setAddNumParamSelector] = React.useState<StrIndex20>();
@@ -92,26 +95,23 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
                             if (e.previousValue === e.currentValue) {
                                 return;
                             }
-                            const operation: UpOperation = {
-                                $v: 2,
-                                numParamNames: {
-                                    [key]: {
-                                        type: update,
-                                        update: {
-                                            $v: 1,
-                                            name: { newValue: e.currentValue },
-                                        },
-                                    },
-                                },
-                            };
-                            operate(operation);
+                            operateAsState(state =>
+                                produce(state, state => {
+                                    const targetNumParamName = state.numParamNames[key];
+                                    if (targetNumParamName == null) {
+                                        return;
+                                    }
+                                    targetNumParamName.name = e.currentValue;
+                                })
+                            );
                         }}
                     />
                     <Button
                         size='small'
                         onClick={() => {
                             const operation: UpOperation = {
-                                $v: 2,
+                                $v: 1,
+                                $r: 2,
                                 numParamNames: {
                                     [key]: {
                                         type: replace,
@@ -152,26 +152,23 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
                             if (e.previousValue === e.currentValue) {
                                 return;
                             }
-                            const operation: UpOperation = {
-                                $v: 2,
-                                boolParamNames: {
-                                    [key]: {
-                                        type: update,
-                                        update: {
-                                            $v: 1,
-                                            name: { newValue: e.currentValue },
-                                        },
-                                    },
-                                },
-                            };
-                            operate(operation);
+                            operateAsState(state =>
+                                produce(state, state => {
+                                    const targetBoolParamName = state.boolParamNames[key];
+                                    if (targetBoolParamName == null) {
+                                        return;
+                                    }
+                                    targetBoolParamName.name = e.currentValue;
+                                })
+                            );
                         }}
                     />
                     <Button
                         size='small'
                         onClick={() => {
                             const operation: UpOperation = {
-                                $v: 2,
+                                $v: 1,
+                                $r: 2,
                                 boolParamNames: {
                                     [key]: {
                                         type: replace,
@@ -212,26 +209,23 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
                             if (e.previousValue === e.currentValue) {
                                 return;
                             }
-                            const operation: UpOperation = {
-                                $v: 2,
-                                strParamNames: {
-                                    [key]: {
-                                        type: update,
-                                        update: {
-                                            $v: 1,
-                                            name: { newValue: e.currentValue },
-                                        },
-                                    },
-                                },
-                            };
-                            operate(operation);
+                            operateAsState(state =>
+                                produce(state, state => {
+                                    const targetStrParamName = state.strParamNames[key];
+                                    if (targetStrParamName == null) {
+                                        return;
+                                    }
+                                    targetStrParamName.name = e.currentValue;
+                                })
+                            );
                         }}
                     />
                     <Button
                         size='small'
                         onClick={() => {
                             const operation: UpOperation = {
-                                $v: 2,
+                                $v: 1,
+                                $r: 2,
                                 strParamNames: {
                                     [key]: {
                                         type: replace,
@@ -451,13 +445,15 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
                         switch (visibleParameterForm.type) {
                             case 'Bool':
                                 operation = {
-                                    $v: 2,
+                                    $v: 1,
+                                    $r: 2,
                                     boolParamNames: {
                                         [visibleParameterForm.key]: {
                                             type: replace,
                                             replace: {
                                                 newValue: {
                                                     $v: 1,
+                                                    $r: 1,
                                                     name: value,
                                                 },
                                             },
@@ -467,13 +463,15 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
                                 break;
                             case 'Num':
                                 operation = {
-                                    $v: 2,
+                                    $v: 1,
+                                    $r: 2,
                                     numParamNames: {
                                         [visibleParameterForm.key]: {
                                             type: replace,
                                             replace: {
                                                 newValue: {
                                                     $v: 1,
+                                                    $r: 1,
                                                     name: value,
                                                 },
                                             },
@@ -483,13 +481,15 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
                                 break;
                             case 'Str':
                                 operation = {
-                                    $v: 2,
+                                    $v: 1,
+                                    $r: 2,
                                     strParamNames: {
                                         [visibleParameterForm.key]: {
                                             type: replace,
                                             replace: {
                                                 newValue: {
                                                     $v: 1,
+                                                    $r: 1,
                                                     name: value,
                                                 },
                                             },

@@ -1,5 +1,4 @@
-import { Input, Select } from 'antd';
-import { triggerFocus } from 'antd/lib/input/Input';
+import { Select } from 'antd';
 import Modal from 'antd/lib/modal/Modal';
 import React from 'react';
 import { useMyBoards } from '../../hooks/state/useMyBoards';
@@ -58,7 +57,8 @@ export const ActiveBoardSelectorModal: React.FC<Props> = ({ visible, onComplete 
         }
         if (selectedBoardKey.delete) {
             operate({
-                $v: 2,
+                $v: 1,
+                $r: 2,
                 activeBoardKey: {
                     newValue: undefined,
                 },
@@ -68,7 +68,8 @@ export const ActiveBoardSelectorModal: React.FC<Props> = ({ visible, onComplete 
             return;
         }
         operate({
-            $v: 2,
+            $v: 1,
+            $r: 2,
             activeBoardKey: {
                 newValue: {
                     createdBy: myUserUid,

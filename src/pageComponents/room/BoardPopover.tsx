@@ -10,6 +10,7 @@ import {
     diff,
     toUpOperation,
     FilePath,
+    simpleId,
 } from '@kizahasi/flocon-core';
 import { CompositeKey, keyNames, ReadonlyStateMap, recordToArray } from '@kizahasi/util';
 import { Menu, Tooltip } from 'antd';
@@ -42,7 +43,6 @@ import { DicePieceValue } from '../../utils/dicePieceValue';
 import { StringPieceValue } from '../../utils/stringPieceValue';
 import { Piece } from '../../utils/piece';
 import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
-import { simpleId } from '../../utils/generators';
 
 /* absolute positionで表示するときにBoardの子として表示させると、Boardウィンドウから要素がはみ出ることができないため、ウィンドウ右端に近いところで要素を表示させるときに不便なことがある。そのため、ページ全体の子として持たせるようにしている。 */
 
@@ -173,12 +173,14 @@ namespace PopupEditorBase {
                                 onChange={e => {
                                     operate(
                                         characterUpdateOperation(element.characterKey, {
-                                            $v: 2,
+                                            $v: 1,
+                                            $r: 2,
                                             dicePieceValues: {
                                                 [element.valueId]: {
                                                     type: update,
                                                     update: {
                                                         $v: 1,
+                                                        $r: 1,
                                                         dice: {
                                                             [key]:
                                                                 e.type === replace
@@ -190,6 +192,7 @@ namespace PopupEditorBase {
                                                                                       ? undefined
                                                                                       : {
                                                                                             $v: 1,
+                                                                                            $r: 1,
                                                                                             dieType:
                                                                                                 e
                                                                                                     .newValue
@@ -204,6 +207,7 @@ namespace PopupEditorBase {
                                                                           type: update,
                                                                           update: {
                                                                               $v: 1,
+                                                                              $r: 1,
                                                                               value: {
                                                                                   newValue:
                                                                                       e.newValue ===
@@ -223,17 +227,20 @@ namespace PopupEditorBase {
                                 onIsValuePrivateChange={e => {
                                     operate(
                                         characterUpdateOperation(element.characterKey, {
-                                            $v: 2,
+                                            $v: 1,
+                                            $r: 2,
                                             dicePieceValues: {
                                                 [element.valueId]: {
                                                     type: update,
                                                     update: {
                                                         $v: 1,
+                                                        $r: 1,
                                                         dice: {
                                                             [key]: {
                                                                 type: update,
                                                                 update: {
                                                                     $v: 1,
+                                                                    $r: 1,
                                                                     isValuePrivate: {
                                                                         newValue: e,
                                                                     },
@@ -360,7 +367,8 @@ namespace ContextMenuModule {
                             onClick={() => {
                                 operate(
                                     characterUpdateOperation(characterKey, {
-                                        $v: 2,
+                                        $v: 1,
+                                        $r: 2,
                                         pieces: {
                                             [pieceKey.createdBy]: {
                                                 [pieceKey.id]: {
@@ -429,7 +437,8 @@ namespace ContextMenuModule {
                             onClick={() => {
                                 operate(
                                     characterUpdateOperation(characterKey, {
-                                        $v: 2,
+                                        $v: 1,
+                                        $r: 2,
                                         tachieLocations: {
                                             [tachieLocationKey.createdBy]: {
                                                 [tachieLocationKey.id]: {
@@ -611,7 +620,8 @@ namespace ContextMenuModule {
                                 onClick={() => {
                                     operate(
                                         characterUpdateOperation(characterKey, {
-                                            $v: 2,
+                                            $v: 1,
+                                            $r: 2,
                                             dicePieceValues: {
                                                 [dicePieceValueKey]: {
                                                     type: replace,
@@ -693,7 +703,8 @@ namespace ContextMenuModule {
                                 onClick={() => {
                                     operate(
                                         characterUpdateOperation(characterKey, {
-                                            $v: 2,
+                                            $v: 1,
+                                            $r: 2,
                                             stringPieceValues: {
                                                 [stringPieceValueKey]: {
                                                     type: replace,
@@ -757,12 +768,14 @@ namespace ContextMenuModule {
                         <Menu.Item
                             onClick={() => {
                                 const operation: UpOperation = {
-                                    $v: 2,
+                                    $v: 1,
+                                    $r: 2,
                                     participants: {
                                         [participantKey]: {
                                             type: update,
                                             update: {
-                                                $v: 2,
+                                                $v: 1,
+                                                $r: 2,
                                                 imagePieceValues: {
                                                     [valueId]: {
                                                         type: replace,
@@ -815,6 +828,7 @@ namespace ContextMenuModule {
         // TODO: x,y,w,h の値が適当
         const pieceLocationWhichIsCellMode: PieceState = {
             $v: 1,
+            $r: 1,
             boardKey,
             x: 0,
             y: 0,
@@ -830,6 +844,7 @@ namespace ContextMenuModule {
 
         const pieceLocationWhichIsNotCellMode: PieceState = {
             $v: 1,
+            $r: 1,
             boardKey,
             x,
             y,
@@ -845,6 +860,7 @@ namespace ContextMenuModule {
 
         const tachieLocationWhichIsNotCellMode: BoardLocationState = {
             $v: 1,
+            $r: 1,
             boardKey,
             x,
             y,
@@ -860,7 +876,8 @@ namespace ContextMenuModule {
                         onClick={() => {
                             operate(
                                 characterUpdateOperation(characterKey, {
-                                    $v: 2,
+                                    $v: 1,
+                                    $r: 2,
                                     pieces: {
                                         [myUserUid]: {
                                             [simpleId()]: {
@@ -882,7 +899,8 @@ namespace ContextMenuModule {
                         onClick={() => {
                             operate(
                                 characterUpdateOperation(characterKey, {
-                                    $v: 2,
+                                    $v: 1,
+                                    $r: 2,
                                     pieces: {
                                         [myUserUid]: {
                                             [simpleId()]: {
@@ -911,7 +929,8 @@ namespace ContextMenuModule {
                     onClick={() => {
                         operate(
                             characterUpdateOperation(characterKey, {
-                                $v: 2,
+                                $v: 1,
+                                $r: 2,
                                 tachieLocations: {
                                     [myUserUid]: {
                                         [simpleId()]: {

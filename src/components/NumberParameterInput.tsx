@@ -53,10 +53,12 @@ export const NumberParameterInput: React.FC<Props> = ({
                         disabled={disabled}
                         onClick={() => {
                             const operation: CharacterUpOperation = {
-                                $v: 2,
+                                $v: 1,
+                                $r: 2,
                                 numParams: {
                                     [parameterKey]: {
                                         $v: 1,
+                                        $r: 1,
                                         value: { newValue: 0 },
                                     },
                                 },
@@ -76,10 +78,12 @@ export const NumberParameterInput: React.FC<Props> = ({
                     disabled={disabled}
                     onClick={() => {
                         const operation: CharacterUpOperation = {
-                            $v: 2,
+                            $v: 1,
+                            $r: 2,
                             numParams: {
                                 [parameterKey]: {
                                     $v: 1,
+                                    $r: 1,
                                     value: { newValue: undefined },
                                 },
                             },
@@ -109,10 +113,12 @@ export const NumberParameterInput: React.FC<Props> = ({
                         disabled={disabled}
                         onClick={() => {
                             const operation: CharacterUpOperation = {
-                                $v: 2,
+                                $v: 1,
+                                $r: 2,
                                 numMaxParams: {
                                     [parameterKey]: {
                                         $v: 1,
+                                        $r: 1,
                                         value: { newValue: 0 },
                                     },
                                 },
@@ -132,10 +138,12 @@ export const NumberParameterInput: React.FC<Props> = ({
                     disabled={disabled}
                     onClick={() => {
                         const operation: CharacterUpOperation = {
-                            $v: 2,
+                            $v: 1,
+                            $r: 2,
                             numMaxParams: {
                                 [parameterKey]: {
                                     $v: 1,
+                                    $r: 1,
                                     value: { newValue: undefined },
                                 },
                             },
@@ -184,10 +192,12 @@ export const NumberParameterInput: React.FC<Props> = ({
                 size='small'
                 onChange={e => {
                     const operation: CharacterUpOperation = {
-                        $v: 2,
+                        $v: 1,
+                        $r: 2,
                         numParams: {
                             [parameterKey]: {
                                 $v: 1,
+                                $r: 1,
                                 isValuePrivate: { newValue: !e },
                             },
                         },
@@ -220,10 +230,12 @@ export const NumberParameterInput: React.FC<Props> = ({
                             return;
                         }
                         const operation: CharacterUpOperation = {
-                            $v: 2,
+                            $v: 1,
+                            $r: 2,
                             numParams: {
                                 [parameterKey]: {
                                     $v: 1,
+                                    $r: 1,
                                     value: { newValue },
                                 },
                             },
@@ -271,10 +283,12 @@ export const NumberParameterInput: React.FC<Props> = ({
                 size='small'
                 onChange={e => {
                     const operation: CharacterUpOperation = {
-                        $v: 2,
+                        $v: 1,
+                        $r: 2,
                         numMaxParams: {
                             [parameterKey]: {
                                 $v: 1,
+                                $r: 1,
                                 isValuePrivate: { newValue: !e },
                             },
                         },
@@ -307,10 +321,12 @@ export const NumberParameterInput: React.FC<Props> = ({
                             return;
                         }
                         const operation: CharacterUpOperation = {
-                            $v: 2,
+                            $v: 1,
+                            $r: 2,
                             numMaxParams: {
                                 [parameterKey]: {
                                     $v: 1,
+                                    $r: 1,
                                     value: { newValue },
                                 },
                             },

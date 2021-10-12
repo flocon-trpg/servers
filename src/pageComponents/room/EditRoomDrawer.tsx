@@ -3,11 +3,11 @@ import React from 'react';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
-import { useOperate } from '../../hooks/useOperate';
 import { useSelector } from '../../store';
-import { UpOperation } from '@kizahasi/flocon-core';
 import { useDispatch } from 'react-redux';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
+import { useOperateAsState } from '../../hooks/useOperateAsState';
+import produce from 'immer';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -21,7 +21,7 @@ export const EditRoomDrawer: React.FC = () => {
         state => state.roomDrawerAndPopoverAndModalModule.editRoomDrawerVisibility
     );
     const dispatch = useDispatch();
-    const operate = useOperate();
+    const operateAsState = useOperateAsState();
     const name = useSelector(state => state.roomModule.roomState?.state?.name);
 
     return (
@@ -60,11 +60,11 @@ export const EditRoomDrawer: React.FC = () => {
                             size='small'
                             value={name}
                             onChange={e => {
-                                const operation: UpOperation = {
-                                    $v: 2,
-                                    name: { newValue: e.target.value },
-                                };
-                                operate(operation);
+                                operateAsState(state =>
+                                    produce(state, state => {
+                                        state.name = e.target.value;
+                                    })
+                                );
                             }}
                         />
                     </Col>

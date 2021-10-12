@@ -6,12 +6,14 @@ export const characterReplaceOperation = (
     newValue: CharacterState | undefined
 ): UpOperation => {
     return {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         participants: {
             [characterKey.createdBy]: {
                 type: update,
                 update: {
-                    $v: 2,
+                    $v: 1,
+                    $r: 2,
                     characters: {
                         [characterKey.id]: {
                             type: replace,

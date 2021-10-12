@@ -7,6 +7,7 @@ import * as generators from '../utils/generators';
 import { chooseRecord } from '@kizahasi/util';
 import * as t from 'io-ts';
 import { record } from '../utils/io-ts/record';
+import { simpleId } from '@kizahasi/flocon-core';
 
 export type MessageFilter = {
     showNotification: boolean;
@@ -254,7 +255,7 @@ export const defaultMessagePanelConfig = (): MessagePanelConfig => {
         height: 300,
         zIndex: 0,
         isMinimized: false,
-        tabs: { [generators.simpleId()]: TabConfig.createAll({}) },
+        tabs: { [simpleId()]: TabConfig.createAll({}) },
         isPrivateMessageMode: false,
         customCharacterName: '',
     };
@@ -262,7 +263,7 @@ export const defaultMessagePanelConfig = (): MessagePanelConfig => {
 
 export const defaultMessagePanelsConfig = (): Record<string, MessagePanelConfig> => {
     const result: Record<string, MessagePanelConfig> = {};
-    const id = generators.simpleId();
+    const id = simpleId();
     result[id] = defaultMessagePanelConfig();
     return result;
 };

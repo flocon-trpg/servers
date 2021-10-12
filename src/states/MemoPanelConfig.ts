@@ -4,7 +4,7 @@ import {
     toCompleteDraggablePanelConfigBase,
 } from './DraggablePanelConfigBase';
 import * as t from 'io-ts';
-import * as generators from '../utils/generators';
+import { simpleId } from '@kizahasi/flocon-core';
 
 export type MemoPanelConfig = {
     isMinimized: boolean;
@@ -42,7 +42,7 @@ export const defaultMemoPanelConfig = (): MemoPanelConfig => {
 
 export const defaultMemoPanelsConfig = (): Record<string, MemoPanelConfig> => {
     const result: Record<string, MemoPanelConfig> = {};
-    const id = generators.simpleId();
+    const id = simpleId();
     result[id] = defaultMemoPanelConfig();
     return result;
 };

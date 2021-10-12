@@ -13,15 +13,14 @@ import {
 } from '../generated/graphql';
 import * as Rx from 'rxjs/operators';
 import { ApolloError, FetchResult, useApolloClient } from '@apollo/client';
-import { StateManager } from '../stateManagers/StateManager';
 import { create as createStateManager } from '../stateManagers/main';
-import { Room } from '../stateManagers/states/room';
 import { useClientId } from './useClientId';
 import { useDispatch } from 'react-redux';
 import { roomModule, Notification } from '../modules/roomModule';
-import { State, UpOperation } from '@kizahasi/flocon-core';
+import { State, StateManager, UpOperation } from '@kizahasi/flocon-core';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { authNotFound, MyAuthContext, notSignIn } from '../contexts/MyAuthContext';
+import { Room } from '../stateManagers/states/room';
 
 const sampleTime = 3000;
 
@@ -35,6 +34,8 @@ export const getRoomFailure = 'getRoomFailure';
 export const mutationFailure = 'mutationFailure';
 export const deleted = 'deleted';
 
+type SetAction<State> = State | ((prevState: State) => State);
+
 // operate === undefined ⇔ operateAsState === undefined
 export type RoomState =
     | {
@@ -46,9 +47,12 @@ export type RoomState =
     | {
           type: typeof joined;
           state: State;
+
           // operateとoperateAsStateは、undefinedならばrefetchが必要。
           operate: ((operation: UpOperation) => void) | undefined;
-          operateAsState: ((state: State) => void) | undefined;
+
+          operateAsState: ((setState: SetAction<State>) => void) | undefined;
+
           // participantの更新は、mutationを直接呼び出すことで行う。
       }
     | {
@@ -358,10 +362,10 @@ export const useRoomState = (
                                 });
                                 return;
                             }
-                            if (operation.type === 'operation') {
-                                $stateManager.operate(operation.operation);
-                            } else {
+                            if (operation.type === 'state') {
                                 $stateManager.operateAsState(operation.state);
+                            } else {
+                                $stateManager.operate(operation.operation);
                             }
                             onRoomStateManagerUpdate();
                             postTrigger.next();
@@ -372,10 +376,19 @@ export const useRoomState = (
                             state: newRoomStateManager.uiState,
                             operate: newRoomStateManager.requiresReload
                                 ? undefined
-                                : op => operateCore({ type: 'operation', operation: op }),
+                                : operation => operateCore({ type: 'operation', operation }),
                             operateAsState: newRoomStateManager.requiresReload
                                 ? undefined
-                                : state => operateCore({ type: 'state', state }),
+                                : setState => {
+                                      if (typeof setState === 'function') {
+                                          operateCore({
+                                              type: 'state',
+                                              state: setState(newRoomStateManager.uiState),
+                                          });
+                                          return;
+                                      }
+                                      operateCore({ type: 'state', state: setState });
+                                  },
                         });
 
                         break;

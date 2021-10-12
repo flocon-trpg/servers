@@ -77,7 +77,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
         [participantIdsOfSendTo, participants]
     );
     const selectedParticipants = React.useMemo(
-        () => selectedParticipantsBase.map(([, participant]) => participant.name),
+        () => selectedParticipantsBase.map(([, participant]) => participant.name ?? ''),
         [selectedParticipantsBase]
     );
     const placeholder = `秘話 (${
@@ -88,7 +88,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
                       return elem;
                   }
                   return `${seed}, ${elem}`;
-              }, '')
+              }, '' as string)
     }) へ投稿`;
 
     const onPost = (text: string) => {

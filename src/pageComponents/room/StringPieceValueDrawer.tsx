@@ -1,7 +1,6 @@
 import { Checkbox, Col, Drawer, InputNumber, Row } from 'antd';
 import React from 'react';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
-import { simpleId } from '../../utils/generators';
 import { replace } from '../../stateManagers/states/types';
 import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
@@ -13,6 +12,7 @@ import {
     toStringPieceValueUpOperation,
     stringPieceValueDiff,
     CharacterState,
+    simpleId,
 } from '@kizahasi/flocon-core';
 import { useStringPieceValues } from '../../hooks/state/useStringPieceValues';
 import { useDispatch } from 'react-redux';
@@ -33,6 +33,7 @@ const drawerBaseProps: Partial<DrawerProps> = {
 
 const defaultStringPieceValue: StringPieceValueState = {
     $v: 1,
+    $r: 1,
     value: '',
     isValuePrivate: false,
     pieces: {},
@@ -114,7 +115,8 @@ export const StringPieceValueDrawer: React.FC = () => {
                     }
                     operate(
                         characterUpdateOperation(drawerType.characterKey, {
-                            $v: 2,
+                            $v: 1,
+                            $r: 2,
                             stringPieceValues: {
                                 [drawerType.stateKey]: {
                                     type: update,
@@ -146,7 +148,8 @@ export const StringPieceValueDrawer: React.FC = () => {
                 characterUpdateOperation(
                     { createdBy: myUserUid, id: activeCharacter.key },
                     {
-                        $v: 2,
+                        $v: 1,
+                        $r: 2,
                         stringPieceValues: {
                             [id]: {
                                 type: replace,

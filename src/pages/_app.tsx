@@ -14,7 +14,6 @@ import { authNotFound, FirebaseUserState, loading, notSignIn } from '../contexts
 import { store } from '../store';
 import { appConsole } from '../utils/appConsole';
 import { getConfig, getHttpUri, getWsUri } from '../config';
-import { simpleId } from '../utils/generators';
 import { enableMapSet } from 'immer';
 import Head from 'next/head';
 import { useMonaco, loader } from '@monaco-editor/react';
@@ -29,6 +28,7 @@ import { getAuth } from '../utils/firebaseHelpers';
 import { ConfigContext } from '../contexts/ConfigContext';
 import { useMyUserUid } from '../hooks/useMyUserUid';
 import { AllContextProvider as AllContextProvider } from '../components/AllContextProvider';
+import { simpleId } from '@kizahasi/flocon-core';
 
 enableMapSet();
 

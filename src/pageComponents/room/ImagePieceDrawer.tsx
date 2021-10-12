@@ -1,7 +1,6 @@
 import { Col, Drawer, Row, Typography } from 'antd';
 import React from 'react';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
-import { simpleId } from '../../utils/generators';
 import { replace } from '../../stateManagers/states/types';
 import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
@@ -12,6 +11,7 @@ import {
     ImagePieceValueState,
     imagePieceValueDiff,
     toImagePieceValueUpOperation,
+    simpleId,
 } from '@kizahasi/flocon-core';
 import { useDispatch } from 'react-redux';
 import { useSelector } from '../../store';
@@ -36,6 +36,7 @@ const drawerBaseProps: Partial<DrawerProps> = {
 
 const defaultImagePieceValue: ImagePieceValueState = {
     $v: 1,
+    $r: 1,
     image: undefined,
     isPrivate: false,
     memo: '',
@@ -109,12 +110,14 @@ export const ImagePieceDrawer: React.FC = () => {
                         return;
                     }
                     const operation: UpOperation = {
-                        $v: 2,
+                        $v: 1,
+                        $r: 2,
                         participants: {
                             [drawerType.participantKey]: {
                                 type: update,
                                 update: {
-                                    $v: 2,
+                                    $v: 1,
+                                    $r: 2,
                                     imagePieceValues: {
                                         [drawerType.stateKey]: {
                                             type: update,
@@ -147,12 +150,14 @@ export const ImagePieceDrawer: React.FC = () => {
         onCreate = () => {
             const id = simpleId();
             const operation: UpOperation = {
-                $v: 2,
+                $v: 1,
+                $r: 2,
                 participants: {
                     [myUserUid]: {
                         type: update,
                         update: {
-                            $v: 2,
+                            $v: 1,
+                            $r: 2,
                             imagePieceValues: {
                                 [id]: {
                                     type: replace,

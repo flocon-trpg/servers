@@ -23,7 +23,7 @@ import { BoardConfig, defaultBoardConfig } from '../states/BoardConfig';
 import { CompositeKey, recordToArray, keyNames } from '@kizahasi/util';
 import { MemoPanelConfig } from '../states/MemoPanelConfig';
 import { ChatPalettePanelConfig } from '../states/ChatPalettePanelConfig';
-import { StrIndex5 } from '@kizahasi/flocon-core';
+import { simpleId, StrIndex5 } from '@kizahasi/flocon-core';
 
 export type SetOtherValuesAction = {
     roomId: string;
@@ -439,7 +439,7 @@ export const roomConfigModule = createSlice({
             if (state == null || state.roomId !== action.payload.roomId) {
                 return;
             }
-            const panelId = generators.simpleId();
+            const panelId = simpleId();
             state.panels.boardEditorPanels[panelId] = { ...action.payload.panel, zIndex: 0 };
             bringPanelToFront(state, {
                 roomId: action.payload.roomId,
@@ -601,7 +601,7 @@ export const roomConfigModule = createSlice({
             if (state == null || state.roomId !== action.payload.roomId) {
                 return;
             }
-            const panelId = generators.simpleId();
+            const panelId = simpleId();
             state.panels.chatPalettePanels[panelId] = { ...action.payload.panel, zIndex: 0 };
             bringPanelToFront(state, {
                 roomId: action.payload.roomId,
@@ -713,7 +713,7 @@ export const roomConfigModule = createSlice({
             if (state == null || state.roomId !== action.payload.roomId) {
                 return;
             }
-            const panelId = generators.simpleId();
+            const panelId = simpleId();
             state.panels.memoPanels[panelId] = { ...action.payload.panel, zIndex: 0 };
             bringPanelToFront(state, {
                 roomId: action.payload.roomId,
@@ -785,7 +785,7 @@ export const roomConfigModule = createSlice({
             if (state == null || state.roomId !== action.payload.roomId) {
                 return;
             }
-            const panelId = generators.simpleId();
+            const panelId = simpleId();
             state.panels.messagePanels[panelId] = { ...action.payload.panel, zIndex: 0 };
             bringPanelToFront(state, {
                 roomId: action.payload.roomId,
