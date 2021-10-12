@@ -3,6 +3,12 @@ import { Diff } from './types';
 
 // syncedState、postingState、uiStateが中心で、diffは関数で求めるというコンセプト。
 
+type PostingState<TState, TOperation, TMetadata> = {
+    operation: TOperation | undefined;
+    state: TState;
+    metadata: TMetadata;
+};
+
 export class StateGetter<TState, TOperation, TMetadata> {
     public syncedState: TState;
 
@@ -10,9 +16,7 @@ export class StateGetter<TState, TOperation, TMetadata> {
 
     // this._syncedStateにthis._postingState.operationをapplyした結果がstateになる。通常、this._postingState.operationをAPIサーバーに送信して、その応答を待つ形になる。
     // operationは、transformの結果idになることもあり得るので、undefinedも代入可能にしている。
-    private _postingState:
-        | { operation: TOperation | undefined; state: TState; metadata: TMetadata }
-        | undefined;
+    private _postingState: PostingState<TState, TOperation, TMetadata> | undefined;
 
     private _uiStateCore: Option<TState> = Option.none();
 
@@ -42,7 +46,7 @@ export class StateGetter<TState, TOperation, TMetadata> {
         this._uiStateCore = Option.none();
     }
 
-    public get postingState(): Readonly<typeof this._postingState> {
+    public get postingState(): Readonly<PostingState<TState, TOperation, TMetadata>> | undefined {
         return this._postingState;
     }
 
