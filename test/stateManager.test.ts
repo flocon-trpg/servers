@@ -317,3 +317,31 @@ test('tests StateManager: operate -> post -> operate -> onPosted({ isSuccess: tr
     expect(target.uiState).toBe(secondOperation.newValue);
     expect(target.waitingResponseSince()).toBeNull();
 });
+
+test('tests StateManager: operate -> post -> operate -> onPosted({ isId: true })', () => {
+    const firstOperation = { oldValue: initState, newValue: 2 };
+    const secondOperation = { oldValue: 2, newValue: 20 };
+
+    const target = createStateManager();
+
+    target.operateAsState(firstOperation.newValue);
+
+    const postResult = target.post();
+    if (postResult === undefined) {
+        throw new Error('Guard');
+    }
+
+    target.operateAsState(secondOperation.newValue);
+
+    postResult.onPosted({
+        isSuccess: true,
+        isId: true,
+        requestId: postResult.requestId,
+    });
+
+    expect(target.isPosting).toBe(false);
+    expect(target.requiresReload).toBe(false);
+    expect(target.revision).toBe(initRevision);
+    expect(target.uiState).toBe(secondOperation.newValue);
+    expect(target.waitingResponseSince()).toBeNull();
+});

@@ -252,24 +252,6 @@ export class StateManagerCore<TState, TOperation> {
             this._stateGetter.clearUiState();
             return true;
         }
-        const undoOperation = this.params.diff({
-            prevState: this._stateGetter.postingState.state,
-            nextState: this._stateGetter.syncedState,
-        });
-        if (undoOperation === undefined) {
-            this._stateGetter.clearPostingState();
-            return true;
-        }
-        const newLocalOperation = this.params.transform({
-            first: undoOperation,
-            second: localOperation,
-        }).secondPrime;
-        this._stateGetter.setUiState(
-            this.params.apply({
-                state: this._stateGetter.postingState.state,
-                operation: newLocalOperation,
-            })
-        );
         this._stateGetter.clearPostingState();
         return true;
     }
