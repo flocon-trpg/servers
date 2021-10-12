@@ -1,5 +1,5 @@
 import { StateManagerCore } from './stateManagerCore';
-import { Apply, StateManagerParameters } from './types';
+import { StateManagerParameters } from './types';
 
 type OnPosted<T> =
     | {
@@ -116,43 +116,5 @@ export class StateManager<TState, TOperation> {
             state,
         });
         this._requiresReload = false;
-    }
-}
-
-export type GetOnlyStateManagerParameters<TState, TOperation> = {
-    revision: number;
-    state: TState;
-    apply: Apply<TState, TOperation>;
-};
-
-export class GetOnlyStateManager<TState, TOperation> {
-    private readonly core: StateManager<TState, TOperation>;
-
-    public constructor(params: GetOnlyStateManagerParameters<TState, TOperation>) {
-        this.core = new StateManager<TState, TOperation>({
-            ...params,
-            transform: () => {
-                throw new Error('transform should not be called');
-            },
-            diff: () => {
-                throw new Error('diff should not be called');
-            },
-        });
-    }
-
-    public get uiState(): TState {
-        return this.core.uiState;
-    }
-
-    public get revision(): number {
-        return this.core.revision;
-    }
-
-    public reload({ state, revision }: { state: TState; revision: number }): void {
-        this.reload({ state, revision });
-    }
-
-    public onGet(operation: TOperation, revisionTo: number): void {
-        this.core.onOtherClientsGet(operation, revisionTo);
     }
 }
