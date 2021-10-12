@@ -59,12 +59,18 @@ export class StateManager<TState, TOperation> {
         this.core.onGet(operation, revisionTo, false);
     }
 
-    public operate(state: TState): void {
+    public operateAsState(state: TState): void {
         if (this.requiresReload) {
             throw new Error('this.requiresReload === true');
         }
 
         this.core.operateAsState(state);
+    }
+
+    // このメソッドは「operateAsStateを使えばよい」と判断して一時削除していたが、Operationを書いて適用させたいという場面が少なくなく、必要なapply関数もStateManager内部で保持しているため復帰させた。
+    public operate(operation: TOperation): void {
+        const newState = this.params.apply({ state: this.uiState, operation });
+        this.operateAsState(newState);
     }
 
     public post():
