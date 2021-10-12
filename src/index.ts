@@ -41,9 +41,13 @@ export {
     isStrIndex100,
 } from './internal/indexes';
 
+export { MaxLength100String, maxLength100String } from './internal/maxLengthString';
+
 export { maybe, Maybe } from './internal/maybe';
 
 export { PublicChannelKey } from './internal/publicChannelKey';
+
+export { simpleId } from './internal/simpleId';
 
 export { Cache, createNodeCache, createRedisCache } from './internal/cache/main';
 
@@ -301,3 +305,5 @@ export { client, admin, restrict, RequestedBy } from './internal/ot/util/type';
 export { updateType, createType, deleteType } from './internal/ot/piece/log';
 
 export { createLogs } from './internal/ot/room/log';
+
+export { StateManager } from './internal/stateManagers/main';

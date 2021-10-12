@@ -10,7 +10,6 @@ import {
 } from '../../../../util/type';
 import { isIdRecord } from '../../../../util/record';
 import { Result } from '@kizahasi/result';
-import * as ReplaceOperation from '../../../../util/replaceOperation';
 import { DownOperation, State, TwoWayOperation, UpOperation } from './types';
 
 export const toClientState = (source: State): State => {
@@ -22,6 +21,7 @@ export const toClientOperation = ({
 }: ToClientOperationParams<State, TwoWayOperation>): UpOperation => {
     return {
         ...diff,
+        name: diff.name == null ? undefined : TextOperation.toUpOperation(diff.name),
         value: diff.value == null ? undefined : TextOperation.toUpOperation(diff.value),
     };
 };
@@ -29,6 +29,7 @@ export const toClientOperation = ({
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return {
         ...source,
+        name: source.name == null ? undefined : TextOperation.toDownOperation(source.name),
         value: source.value == null ? undefined : TextOperation.toDownOperation(source.value),
     };
 };
@@ -36,6 +37,7 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
 export const toUpOperation = (source: TwoWayOperation): UpOperation => {
     return {
         ...source,
+        name: source.name == null ? undefined : TextOperation.toUpOperation(source.name),
         value: source.value == null ? undefined : TextOperation.toUpOperation(source.value),
     };
 };
@@ -44,7 +46,11 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     const result: State = { ...state };
 
     if (operation.name != null) {
-        result.name = operation.name.newValue;
+        const valueResult = TextOperation.apply(state.name, operation.name);
+        if (valueResult.isError) {
+            return valueResult;
+        }
+        result.name = valueResult.value;
     }
     if (operation.value != null) {
         const valueResult = TextOperation.apply(state.value, operation.value);
@@ -59,8 +65,12 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
 export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
     const result = { ...state };
 
-    if (operation.name != null) {
-        result.name = operation.name.oldValue;
+    if (operation.name !== undefined) {
+        const prevValue = TextOperation.applyBack(state.name, operation.name);
+        if (prevValue.isError) {
+            return prevValue;
+        }
+        result.name = prevValue.value;
     }
     if (operation.value !== undefined) {
         const prevValue = TextOperation.applyBack(state.value, operation.value);
@@ -74,13 +84,18 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 };
 
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
+    const name = TextOperation.composeDownOperation(first.name, second.name);
+    if (name.isError) {
+        return name;
+    }
     const value = TextOperation.composeDownOperation(first.value, second.value);
     if (value.isError) {
         return value;
     }
     const valueProps: DownOperation = {
         $v: 1,
-        name: ReplaceOperation.composeDownOperation(first.name, second.name),
+        $r: 1,
+        name: name.value,
         value: value.value,
     };
     return Result.ok(valueProps);
@@ -99,14 +114,18 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     }
 
     const prevState: State = { ...nextState };
-    const twoWayOperation: TwoWayOperation = { $v: 1 };
+    const twoWayOperation: TwoWayOperation = { $v: 1, $r: 1 };
 
     if (downOperation.name != null) {
-        prevState.name = downOperation.name.oldValue;
-        twoWayOperation.name = {
-            oldValue: downOperation.name.oldValue,
-            newValue: nextState.name,
-        };
+        const restored = TextOperation.restore({
+            nextState: nextState.name,
+            downOperation: downOperation.name,
+        });
+        if (restored.isError) {
+            return restored;
+        }
+        prevState.name = restored.value.prevState;
+        twoWayOperation.name = restored.value.twoWayOperation;
     }
 
     if (downOperation.value != null) {
@@ -125,13 +144,13 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const resultType: TwoWayOperation = { $v: 1 };
+    const resultType: TwoWayOperation = { $v: 1, $r: 1 };
 
     if (prevState.name !== nextState.name) {
-        resultType.name = {
-            oldValue: prevState.name,
-            newValue: nextState.name,
-        };
+        resultType.name = TextOperation.diff({
+            prev: prevState.name,
+            next: nextState.name,
+        });
     }
     if (prevState.value !== nextState.value) {
         resultType.value = TextOperation.diff({
@@ -153,12 +172,18 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
 }) => {
     const twoWayOperation: TwoWayOperation = {
         $v: 1,
-        name: ReplaceOperation.serverTransform({
-            first: serverOperation?.name,
-            second: clientOperation.name,
-            prevState: prevState.name,
-        }),
+        $r: 1,
     };
+
+    const name = TextOperation.serverTransform({
+        first: serverOperation?.name,
+        second: clientOperation.name,
+        prevState: prevState.name,
+    });
+    if (name.isError) {
+        return name;
+    }
+    twoWayOperation.name = name.value.secondPrime;
 
     const value = TextOperation.serverTransform({
         first: serverOperation?.value,
@@ -178,7 +203,13 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
 };
 
 export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
-    const name = ReplaceOperation.clientTransform({ first: first.name, second: second.name });
+    const name = TextOperation.clientTransform({
+        first: first.name,
+        second: second.name,
+    });
+    if (name.isError) {
+        return name;
+    }
 
     const value = TextOperation.clientTransform({
         first: first.value,
@@ -190,13 +221,15 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const firstPrime: UpOperation = {
         $v: 1,
-        name: name.firstPrime,
+        $r: 1,
+        name: name.value.firstPrime,
         value: value.value.firstPrime,
     };
 
     const secondPrime: UpOperation = {
         $v: 1,
-        name: name.secondPrime,
+        $r: 1,
+        name: name.value.secondPrime,
         value: value.value.secondPrime,
     };
 

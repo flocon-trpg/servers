@@ -12,6 +12,7 @@ export const sourceType = t.union([
 
 export const filePath = t.type({
     $v: t.literal(1),
+    $r: t.literal(1),
 
     path: t.string,
     sourceType,

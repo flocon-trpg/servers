@@ -45,6 +45,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const valueProps: DownOperation = {
         $v: 1,
+        $r: 1,
         isPaused: ReplaceOperation.composeDownOperation(first.isPaused, second.isPaused),
         files: ReplaceOperation.composeDownOperation(first.files, second.files),
         volume: ReplaceOperation.composeDownOperation(first.volume, second.volume),
@@ -61,7 +62,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     }
 
     const prevState: State = { ...nextState };
-    const twoWayOperation: TwoWayOperation = { $v: 1 };
+    const twoWayOperation: TwoWayOperation = { $v: 1, $r: 1 };
 
     if (downOperation.isPaused !== undefined) {
         prevState.isPaused = downOperation.isPaused.oldValue;
@@ -92,7 +93,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const resultType: TwoWayOperation = { $v: 1 };
+    const resultType: TwoWayOperation = { $v: 1, $r: 1 };
     if (prevState.isPaused !== nextState.isPaused) {
         resultType.isPaused = {
             oldValue: prevState.isPaused,
@@ -122,7 +123,7 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
     clientOperation,
     serverOperation,
 }) => {
-    const twoWayOperation: TwoWayOperation = { $v: 1 };
+    const twoWayOperation: TwoWayOperation = { $v: 1, $r: 1 };
 
     twoWayOperation.isPaused = ReplaceOperation.serverTransform({
         first: serverOperation?.isPaused,
@@ -163,6 +164,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const firstPrime: UpOperation = {
         $v: 1,
+        $r: 1,
         isPaused: isPaused.firstPrime,
         files: files.firstPrime,
         volume: volume.firstPrime,
@@ -170,6 +172,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const secondPrime: UpOperation = {
         $v: 1,
+        $r: 1,
         isPaused: isPaused.secondPrime,
         files: files.secondPrime,
         volume: volume.secondPrime,

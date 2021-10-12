@@ -13,7 +13,12 @@ import * as NumParam from '../ot/room/participant/character/numParam/types';
 import * as Room from '../ot/room/types';
 import { FNumParam } from './numParam';
 
-const createDefaultState = (): NumParam.State => ({ $v: 1, value: 0, isValuePrivate: false });
+const createDefaultState = (): NumParam.State => ({
+    $v: 1,
+    $r: 1,
+    value: 0,
+    isValuePrivate: false,
+});
 
 export class FNumParams extends FObject {
     public constructor(

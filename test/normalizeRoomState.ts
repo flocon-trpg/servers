@@ -14,6 +14,7 @@ const isDefaultSimpleParam = (source: Record<string, unknown>) => {
     if (
         _.isEqual(source, {
             $v: 1,
+            $r: 1,
             isValuePrivate: false,
             value: null,
         })
@@ -22,6 +23,7 @@ const isDefaultSimpleParam = (source: Record<string, unknown>) => {
     }
     return _.isEqual(source, {
         $v: 1,
+        $r: 1,
         isValuePrivate: false,
         value: undefined,
     });
@@ -30,6 +32,7 @@ const isDefaultSimpleParam = (source: Record<string, unknown>) => {
 const isDefaultStrParam = (source: Record<string, unknown>) => {
     return _.isEqual(source, {
         $v: 1,
+        $r: 1,
         isValuePrivate: false,
         value: '',
     });
@@ -51,7 +54,7 @@ const isDefaultParam = (source: Record<string, unknown>) => {
 これにより、例えば { a: {} } のようなDualKeyRecordを {} と等しいとみなすことができるようになる。
 
 # 行われること2
-strParamなどのようなキャラクターのパラメーター値がデフォルト値の場合、undefinedに変換する。これは、undefinedはデフォルト値とみなされ、デフォルト値に変換されることがあるため。
+キャラクターのパラメーター値（e.g. strParam）がデフォルト値の場合、undefinedに変換する。これは、undefinedは自動的に何らかのデフォルト値に変換されることがあるため。
 レコード内の場所は見ずに、ただ単に値がデフォルト値のどれかに等しいかのみ見る。
 
 # 行われること3

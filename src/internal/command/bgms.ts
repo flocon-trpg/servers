@@ -37,6 +37,7 @@ export class FBgms extends FObject {
         }
         const newBgm: BgmTypes.State = {
             $v: 1,
+            $r: 1,
             files: [],
             isPaused: true,
             volume: 0.5,

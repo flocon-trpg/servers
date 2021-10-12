@@ -10,6 +10,7 @@ export const toClientState = (source: State): State => source;
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return {
         ...source,
+        name: source.name == null ? undefined : TextOperation.toDownOperation(source.name),
         text: source.text == null ? undefined : TextOperation.toDownOperation(source.text),
     };
 };
@@ -17,6 +18,7 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
 export const toUpOperation = (source: TwoWayOperation): UpOperation => {
     return {
         ...source,
+        name: source.name == null ? undefined : TextOperation.toUpOperation(source.name),
         text: source.text == null ? undefined : TextOperation.toUpOperation(source.text),
     };
 };
@@ -24,11 +26,15 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
 export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
     const result: State = { ...state };
 
-    if (operation.name != null) {
-        result.name = operation.name.newValue;
-    }
     if (operation.dir != null) {
         result.dir = operation.dir.newValue;
+    }
+    if (operation.name != null) {
+        const applied = TextOperation.apply(state.name, operation.name);
+        if (applied.isError) {
+            return applied;
+        }
+        result.name = applied.value;
     }
     if (operation.text != null) {
         const applied = TextOperation.apply(state.text, operation.text);
@@ -47,11 +53,15 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
 export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
     const result = { ...state };
 
-    if (operation.name !== undefined) {
-        result.name = operation.name.oldValue;
-    }
     if (operation.dir !== undefined) {
         result.dir = operation.dir.oldValue;
+    }
+    if (operation.name != null) {
+        const applied = TextOperation.applyBack(state.name, operation.name);
+        if (applied.isError) {
+            return applied;
+        }
+        result.name = applied.value;
     }
     if (operation.text != null) {
         const applied = TextOperation.applyBack(state.text, operation.text);
@@ -68,14 +78,19 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 };
 
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
+    const name = TextOperation.composeDownOperation(first.name, second.name);
+    if (name.isError) {
+        return name;
+    }
     const text = TextOperation.composeDownOperation(first.text, second.text);
     if (text.isError) {
         return text;
     }
     const valueProps: DownOperation = {
         $v: 1,
-        name: ReplaceOperation.composeDownOperation(first.name, second.name),
+        $r: 1,
         dir: ReplaceOperation.composeDownOperation(first.dir, second.dir),
+        name: name.value,
         text: text.value,
         textType: ReplaceOperation.composeDownOperation(first.textType, second.textType),
     };
@@ -91,21 +106,25 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     }
 
     const prevState: State = { ...nextState };
-    const twoWayOperation: TwoWayOperation = { $v: 1 };
+    const twoWayOperation: TwoWayOperation = { $v: 1, $r: 1 };
 
-    if (downOperation.name !== undefined) {
-        prevState.name = downOperation.name.oldValue;
-        twoWayOperation.name = {
-            ...downOperation.name,
-            newValue: nextState.name,
-        };
-    }
     if (downOperation.dir !== undefined) {
         prevState.dir = downOperation.dir.oldValue;
         twoWayOperation.dir = {
             ...downOperation.dir,
             newValue: nextState.dir,
         };
+    }
+    if (downOperation.name !== undefined) {
+        const restored = TextOperation.restore({
+            nextState: nextState.name,
+            downOperation: downOperation.name,
+        });
+        if (restored.isError) {
+            return restored;
+        }
+        prevState.name = restored.value.prevState;
+        twoWayOperation.name = restored.value.twoWayOperation;
     }
     if (downOperation.text !== undefined) {
         const restored = TextOperation.restore({
@@ -130,19 +149,16 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const resultType: TwoWayOperation = { $v: 1 };
+    const resultType: TwoWayOperation = { $v: 1, $r: 1 };
 
-    if (prevState.name !== nextState.name) {
-        resultType.name = {
-            oldValue: prevState.name,
-            newValue: nextState.name,
-        };
-    }
     if (prevState.dir !== nextState.dir) {
         resultType.dir = {
             oldValue: prevState.dir,
             newValue: nextState.dir,
         };
+    }
+    if (prevState.name !== nextState.name) {
+        resultType.name = TextOperation.diff({ prev: prevState.name, next: nextState.name });
     }
     if (prevState.text !== nextState.text) {
         resultType.text = TextOperation.diff({ prev: prevState.text, next: nextState.text });
@@ -165,13 +181,7 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
     clientOperation,
     serverOperation,
 }) => {
-    const twoWayOperation: TwoWayOperation = { $v: 1 };
-
-    twoWayOperation.name = ReplaceOperation.serverTransform({
-        first: serverOperation?.name,
-        second: clientOperation.name,
-        prevState: prevState.name,
-    });
+    const twoWayOperation: TwoWayOperation = { $v: 1, $r: 1 };
 
     // 暫定的にディレクトリの深さは1までとしている
     if ((clientOperation.dir?.newValue.length ?? 0) <= 1) {
@@ -182,7 +192,16 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
         });
     }
 
-    // TODO: ファイルサイズが巨大になりそうなときに拒否する機能
+    const name = TextOperation.serverTransform({
+        first: serverOperation?.name,
+        second: clientOperation.name,
+        prevState: prevState.name,
+    });
+    if (name.isError) {
+        return name;
+    }
+    twoWayOperation.name = name.value.secondPrime;
+
     const text = TextOperation.serverTransform({
         first: serverOperation?.text,
         second: clientOperation.text,
@@ -207,15 +226,18 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
 };
 
 export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
-    const name = ReplaceOperation.clientTransform({
-        first: first.name,
-        second: second.name,
-    });
-
     const dir = ReplaceOperation.clientTransform({
         first: first.dir,
         second: second.dir,
     });
+
+    const name = TextOperation.clientTransform({
+        first: first.name,
+        second: second.name,
+    });
+    if (name.isError) {
+        return name;
+    }
 
     const text = TextOperation.clientTransform({
         first: first.text,
@@ -232,7 +254,8 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const firstPrime: UpOperation = {
         $v: 1,
-        name: name.firstPrime,
+        $r: 1,
+        name: name.value.firstPrime,
         dir: dir.firstPrime,
         text: text.value.firstPrime,
         textType: textType.firstPrime,
@@ -240,7 +263,8 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const secondPrime: UpOperation = {
         $v: 1,
-        name: name.secondPrime,
+        $r: 1,
+        name: name.value.secondPrime,
         dir: dir.secondPrime,
         text: text.value.secondPrime,
         textType: textType.secondPrime,

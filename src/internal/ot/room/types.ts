@@ -9,13 +9,11 @@ import {
     recordUpOperationElementFactory,
 } from '../util/recordOperationElement';
 import * as ReplaceOperation from '../util/replaceOperation';
+import * as TextOperation from '../util/textOperation';
 import { createOperation } from '../util/createOperation';
 import { record } from '../util/record';
 import { CompositeKey, compositeKey } from '../compositeKey/types';
 import { Maybe, maybe } from '../../maybe';
-
-const replaceStringDownOperation = t.type({ oldValue: t.string });
-const replaceStringUpOperation = t.type({ newValue: t.string });
 
 export const stateBase = t.type({
     activeBoardKey: maybe(compositeKey),
@@ -39,27 +37,30 @@ export const stateBase = t.type({
 export const dbState = t.intersection([
     stateBase,
     t.type({
-        $v: t.literal(2),
+        $v: t.literal(1),
+        $r: t.literal(2),
         participants: record(t.string, Participant.dbState),
     }),
 ]);
 
 export type DbState = t.TypeOf<typeof dbState>;
 
-export const dbStateV1 = t.intersection([
+export const dbStateRev1 = t.intersection([
     stateBase,
     t.type({
         $v: t.literal(1),
-        participants: record(t.string, Participant.dbStateV1),
+        $r: t.literal(1),
+        participants: record(t.string, Participant.dbStateRev1),
     }),
 ]);
 
-export type DbStateV1 = t.TypeOf<typeof dbStateV1>;
+export type DbStateRev1 = t.TypeOf<typeof dbStateRev1>;
 
 export const state = t.intersection([
     stateBase,
     t.type({
-        $v: t.literal(2),
+        $v: t.literal(1),
+        $r: t.literal(2),
         createdBy: t.string,
         name: t.string,
         participants: record(t.string, Participant.state),
@@ -69,18 +70,19 @@ export const state = t.intersection([
 // nameはDBから頻繁に取得されると思われる値なので独立させている。
 export type State = t.TypeOf<typeof state>;
 
-export const stateV1 = t.intersection([
+export const stateRev1 = t.intersection([
     stateBase,
     t.type({
         $v: t.literal(1),
+        $r: t.literal(1),
         createdBy: t.string,
         name: t.string,
-        participants: record(t.string, Participant.stateV1),
+        participants: record(t.string, Participant.stateRev1),
     }),
 ]);
 
 // nameはDBから頻繁に取得されると思われる値なので独立させている。
-export type StateV1 = t.TypeOf<typeof stateV1>;
+export type StateRev1 = t.TypeOf<typeof stateRev1>;
 
 const downOperationBase = {
     activeBoardKey: t.type({ oldValue: maybe(compositeKey) }),
@@ -90,28 +92,28 @@ const downOperationBase = {
         recordDownOperationElementFactory(ParamNames.state, ParamNames.downOperation)
     ),
     memos: record(t.string, recordDownOperationElementFactory(Memo.state, Memo.downOperation)),
-    name: replaceStringDownOperation,
+    name: TextOperation.downOperation,
     numParamNames: record(
         t.string,
         recordDownOperationElementFactory(ParamNames.state, ParamNames.downOperation)
     ),
-    publicChannel1Name: replaceStringDownOperation,
-    publicChannel2Name: replaceStringDownOperation,
-    publicChannel3Name: replaceStringDownOperation,
-    publicChannel4Name: replaceStringDownOperation,
-    publicChannel5Name: replaceStringDownOperation,
-    publicChannel6Name: replaceStringDownOperation,
-    publicChannel7Name: replaceStringDownOperation,
-    publicChannel8Name: replaceStringDownOperation,
-    publicChannel9Name: replaceStringDownOperation,
-    publicChannel10Name: replaceStringDownOperation,
+    publicChannel1Name: TextOperation.downOperation,
+    publicChannel2Name: TextOperation.downOperation,
+    publicChannel3Name: TextOperation.downOperation,
+    publicChannel4Name: TextOperation.downOperation,
+    publicChannel5Name: TextOperation.downOperation,
+    publicChannel6Name: TextOperation.downOperation,
+    publicChannel7Name: TextOperation.downOperation,
+    publicChannel8Name: TextOperation.downOperation,
+    publicChannel9Name: TextOperation.downOperation,
+    publicChannel10Name: TextOperation.downOperation,
     strParamNames: record(
         t.string,
         recordDownOperationElementFactory(ParamNames.state, ParamNames.downOperation)
     ),
 };
 
-export const downOperation = createOperation(2, {
+export const downOperation = createOperation(1, 2, {
     ...downOperationBase,
     participants: record(
         t.string,
@@ -121,15 +123,15 @@ export const downOperation = createOperation(2, {
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
-export const downOperationV1 = createOperation(1, {
+export const downOperationRev1 = createOperation(1, 1, {
     ...downOperationBase,
     participants: record(
         t.string,
-        recordDownOperationElementFactory(Participant.stateV1, Participant.downOperationV1)
+        recordDownOperationElementFactory(Participant.stateRev1, Participant.downOperationRev1)
     ),
 });
 
-export type DownOperationV1 = t.TypeOf<typeof downOperationV1>;
+export type DownOperationRev1 = t.TypeOf<typeof downOperationRev1>;
 
 const upOperationBase = {
     activeBoardKey: t.type({ newValue: maybe(compositeKey) }),
@@ -139,28 +141,28 @@ const upOperationBase = {
         recordUpOperationElementFactory(ParamNames.state, ParamNames.upOperation)
     ),
     memos: record(t.string, recordUpOperationElementFactory(Memo.state, Memo.upOperation)),
-    name: replaceStringUpOperation,
+    name: TextOperation.upOperation,
     numParamNames: record(
         t.string,
         recordUpOperationElementFactory(ParamNames.state, ParamNames.upOperation)
     ),
-    publicChannel1Name: replaceStringUpOperation,
-    publicChannel2Name: replaceStringUpOperation,
-    publicChannel3Name: replaceStringUpOperation,
-    publicChannel4Name: replaceStringUpOperation,
-    publicChannel5Name: replaceStringUpOperation,
-    publicChannel6Name: replaceStringUpOperation,
-    publicChannel7Name: replaceStringUpOperation,
-    publicChannel8Name: replaceStringUpOperation,
-    publicChannel9Name: replaceStringUpOperation,
-    publicChannel10Name: replaceStringUpOperation,
+    publicChannel1Name: TextOperation.upOperation,
+    publicChannel2Name: TextOperation.upOperation,
+    publicChannel3Name: TextOperation.upOperation,
+    publicChannel4Name: TextOperation.upOperation,
+    publicChannel5Name: TextOperation.upOperation,
+    publicChannel6Name: TextOperation.upOperation,
+    publicChannel7Name: TextOperation.upOperation,
+    publicChannel8Name: TextOperation.upOperation,
+    publicChannel9Name: TextOperation.upOperation,
+    publicChannel10Name: TextOperation.upOperation,
     strParamNames: record(
         t.string,
         recordUpOperationElementFactory(ParamNames.state, ParamNames.upOperation)
     ),
 };
 
-export const upOperation = createOperation(2, {
+export const upOperation = createOperation(1, 2, {
     ...upOperationBase,
     participants: record(
         t.string,
@@ -170,18 +172,19 @@ export const upOperation = createOperation(2, {
 
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
-export const upOperationV1 = createOperation(1, {
+export const upOperationRev1 = createOperation(1, 1, {
     ...upOperationBase,
     participants: record(
         t.string,
-        recordUpOperationElementFactory(Participant.stateV1, Participant.upOperationV1)
+        recordUpOperationElementFactory(Participant.stateRev1, Participant.upOperationRev1)
     ),
 });
 
-export type UpOperationV1 = t.TypeOf<typeof upOperationV1>;
+export type UpOperationRev1 = t.TypeOf<typeof upOperationRev1>;
 
 export type TwoWayOperation = {
-    $v: 2;
+    $v: 1;
+    $r: 2;
 
     activeBoardKey?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<CompositeKey>>;
     bgms?: RecordOperation.RecordTwoWayOperation<Bgm.State, Bgm.TwoWayOperation>;
@@ -190,7 +193,7 @@ export type TwoWayOperation = {
         ParamNames.TwoWayOperation
     >;
     memos?: RecordOperation.RecordTwoWayOperation<Memo.State, Memo.TwoWayOperation>;
-    name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
+    name?: TextOperation.TwoWayOperation;
     numParamNames?: RecordOperation.RecordTwoWayOperation<
         ParamNames.State,
         ParamNames.TwoWayOperation
@@ -199,16 +202,16 @@ export type TwoWayOperation = {
         Participant.State,
         Participant.TwoWayOperation
     >;
-    publicChannel1Name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
-    publicChannel2Name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
-    publicChannel3Name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
-    publicChannel4Name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
-    publicChannel5Name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
-    publicChannel6Name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
-    publicChannel7Name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
-    publicChannel8Name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
-    publicChannel9Name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
-    publicChannel10Name?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
+    publicChannel1Name?: TextOperation.TwoWayOperation;
+    publicChannel2Name?: TextOperation.TwoWayOperation;
+    publicChannel3Name?: TextOperation.TwoWayOperation;
+    publicChannel4Name?: TextOperation.TwoWayOperation;
+    publicChannel5Name?: TextOperation.TwoWayOperation;
+    publicChannel6Name?: TextOperation.TwoWayOperation;
+    publicChannel7Name?: TextOperation.TwoWayOperation;
+    publicChannel8Name?: TextOperation.TwoWayOperation;
+    publicChannel9Name?: TextOperation.TwoWayOperation;
+    publicChannel10Name?: TextOperation.TwoWayOperation;
     strParamNames?: RecordOperation.RecordTwoWayOperation<
         ParamNames.State,
         ParamNames.TwoWayOperation

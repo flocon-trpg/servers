@@ -68,6 +68,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
     const valueProps: DownOperation = {
         $v: 1,
+        $r: 1,
         boardKey: ReplaceOperation.composeDownOperation(first.boardKey, second.boardKey),
         h: ReplaceOperation.composeDownOperation(first.h, second.h),
         isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
@@ -86,7 +87,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         return Result.ok({ prevState: nextState, twoWayOperation: undefined });
     }
     const prevState = { ...nextState };
-    const twoWayOperation: TwoWayOperation = { $v: 1 };
+    const twoWayOperation: TwoWayOperation = { $v: 1, $r: 1 };
 
     if (downOperation.boardKey !== undefined) {
         prevState.boardKey = downOperation.boardKey.oldValue;
@@ -120,7 +121,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const resultType: TwoWayOperation = { $v: 1 };
+    const resultType: TwoWayOperation = { $v: 1, $r: 1 };
     if (!compositeKeyEquals(prevState.boardKey, nextState.boardKey)) {
         resultType.boardKey = { oldValue: prevState.boardKey, newValue: nextState.boardKey };
     }
@@ -153,7 +154,7 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
     clientOperation,
     serverOperation,
 }) => {
-    const twoWayOperation: TwoWayOperation = { $v: 1 };
+    const twoWayOperation: TwoWayOperation = { $v: 1, $r: 1 };
 
     twoWayOperation.boardKey = ReplaceOperation.serverTransform({
         first: serverOperation?.boardKey,
@@ -221,6 +222,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const firstPrime: UpOperation = {
         $v: 1,
+        $r: 1,
         boardKey: boardKey.firstPrime,
         h: h.firstPrime,
         isPrivate: isPrivate.firstPrime,
@@ -231,6 +233,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const secondPrime: UpOperation = {
         $v: 1,
+        $r: 1,
         boardKey: boardKey.secondPrime,
         h: h.secondPrime,
         isPrivate: isPrivate.secondPrime,

@@ -74,6 +74,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     }
     const valueProps: DownOperation = {
         $v: 1,
+        $r: 1,
         isValuePrivate: ReplaceOperation.composeDownOperation(
             first.isValuePrivate,
             second.isValuePrivate
@@ -96,7 +97,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     }
 
     const prevState: State = { ...nextState };
-    const twoWayOperation: TwoWayOperation = { $v: 1 };
+    const twoWayOperation: TwoWayOperation = { $v: 1, $r: 1 };
 
     if (downOperation.isValuePrivate !== undefined) {
         prevState.isValuePrivate = downOperation.isValuePrivate.oldValue;
@@ -121,7 +122,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const resultType: TwoWayOperation = { $v: 1 };
+    const resultType: TwoWayOperation = { $v: 1, $r: 1 };
     if (prevState.isValuePrivate !== nextState.isValuePrivate) {
         resultType.isValuePrivate = {
             oldValue: prevState.isValuePrivate,
@@ -143,7 +144,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
 export const serverTransform =
     (isAuthorized: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
-        const twoWayOperation: TwoWayOperation = { $v: 1 };
+        const twoWayOperation: TwoWayOperation = { $v: 1, $r: 1 };
 
         if (isAuthorized) {
             twoWayOperation.isValuePrivate = ReplaceOperation.serverTransform({
@@ -187,12 +188,14 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const firstPrime: UpOperation = {
         $v: 1,
+        $r: 1,
         isValuePrivate: isValuePrivate.firstPrime,
         value: value.value.firstPrime,
     };
 
     const secondPrime: UpOperation = {
         $v: 1,
+        $r: 1,
         isValuePrivate: isValuePrivate.secondPrime,
         value: value.value.secondPrime,
     };

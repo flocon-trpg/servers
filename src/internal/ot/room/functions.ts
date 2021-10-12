@@ -9,6 +9,7 @@ import * as ParticipantTypes from './participant/types';
 import * as RecordOperation from '../util/recordOperation';
 import { mapRecordOperationElement } from '../util/recordOperationElement';
 import * as ReplaceOperation from '../util/replaceOperation';
+import * as TextOperation from '../util/textOperation';
 import {
     Apply,
     client,
@@ -102,6 +103,7 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
                           mapOperation: Memo.toDownOperation,
                       })
                   ),
+        name: source.name == null ? undefined : TextOperation.toDownOperation(source.name),
         numParamNames:
             source.numParamNames == null
                 ? undefined
@@ -122,6 +124,46 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
                           mapOperation: Participant.toDownOperation,
                       })
                   ),
+        publicChannel1Name:
+            source.publicChannel1Name == null
+                ? undefined
+                : TextOperation.toDownOperation(source.publicChannel1Name),
+        publicChannel2Name:
+            source.publicChannel2Name == null
+                ? undefined
+                : TextOperation.toDownOperation(source.publicChannel2Name),
+        publicChannel3Name:
+            source.publicChannel3Name == null
+                ? undefined
+                : TextOperation.toDownOperation(source.publicChannel3Name),
+        publicChannel4Name:
+            source.publicChannel4Name == null
+                ? undefined
+                : TextOperation.toDownOperation(source.publicChannel4Name),
+        publicChannel5Name:
+            source.publicChannel5Name == null
+                ? undefined
+                : TextOperation.toDownOperation(source.publicChannel5Name),
+        publicChannel6Name:
+            source.publicChannel6Name == null
+                ? undefined
+                : TextOperation.toDownOperation(source.publicChannel6Name),
+        publicChannel7Name:
+            source.publicChannel7Name == null
+                ? undefined
+                : TextOperation.toDownOperation(source.publicChannel7Name),
+        publicChannel8Name:
+            source.publicChannel8Name == null
+                ? undefined
+                : TextOperation.toDownOperation(source.publicChannel8Name),
+        publicChannel9Name:
+            source.publicChannel9Name == null
+                ? undefined
+                : TextOperation.toDownOperation(source.publicChannel9Name),
+        publicChannel10Name:
+            source.publicChannel10Name == null
+                ? undefined
+                : TextOperation.toDownOperation(source.publicChannel10Name),
         strParamNames:
             source.strParamNames == null
                 ? undefined
@@ -168,6 +210,7 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
                           mapOperation: Memo.toUpOperation,
                       })
                   ),
+        name: source.name == null ? undefined : TextOperation.toUpOperation(source.name),
         numParamNames:
             source.numParamNames == null
                 ? undefined
@@ -188,6 +231,46 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
                           mapOperation: Participant.toUpOperation,
                       })
                   ),
+        publicChannel1Name:
+            source.publicChannel1Name == null
+                ? undefined
+                : TextOperation.toUpOperation(source.publicChannel1Name),
+        publicChannel2Name:
+            source.publicChannel2Name == null
+                ? undefined
+                : TextOperation.toUpOperation(source.publicChannel2Name),
+        publicChannel3Name:
+            source.publicChannel3Name == null
+                ? undefined
+                : TextOperation.toUpOperation(source.publicChannel3Name),
+        publicChannel4Name:
+            source.publicChannel4Name == null
+                ? undefined
+                : TextOperation.toUpOperation(source.publicChannel4Name),
+        publicChannel5Name:
+            source.publicChannel5Name == null
+                ? undefined
+                : TextOperation.toUpOperation(source.publicChannel5Name),
+        publicChannel6Name:
+            source.publicChannel6Name == null
+                ? undefined
+                : TextOperation.toUpOperation(source.publicChannel6Name),
+        publicChannel7Name:
+            source.publicChannel7Name == null
+                ? undefined
+                : TextOperation.toUpOperation(source.publicChannel7Name),
+        publicChannel8Name:
+            source.publicChannel8Name == null
+                ? undefined
+                : TextOperation.toUpOperation(source.publicChannel8Name),
+        publicChannel9Name:
+            source.publicChannel9Name == null
+                ? undefined
+                : TextOperation.toUpOperation(source.publicChannel9Name),
+        publicChannel10Name:
+            source.publicChannel10Name == null
+                ? undefined
+                : TextOperation.toUpOperation(source.publicChannel10Name),
         strParamNames:
             source.strParamNames == null
                 ? undefined
@@ -241,7 +324,11 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     result.boolParamNames = boolParamNames.value;
 
     if (operation.name != null) {
-        result.name = operation.name.newValue;
+        const applied = TextOperation.apply(state.name, operation.name);
+        if (applied.isError) {
+            return applied;
+        }
+        result.name = applied.value;
     }
 
     const numParamNames = RecordOperation.apply<
@@ -278,7 +365,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
 
     const participants = RecordOperation.apply<
         ParticipantTypes.State,
-        ParticipantTypes.UpOperation | ParticipantTypes.TwoWayOperation,
+        ParticipantTypes.UpOperation,
         string | ApplyError<PositiveInt> | ComposeAndTransformError
     >({
         prevState: state.participants,
@@ -292,12 +379,17 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     }
     result.participants = participants.value;
 
-    ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).forEach(i => {
-        const operationElement = operation[`publicChannel${i}Name` as const];
+    for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
+        const key = `publicChannel${i}Name` as const;
+        const operationElement = operation[key];
         if (operationElement != null) {
-            result[`publicChannel${i}Name` as const] = operationElement.newValue;
+            const applied = TextOperation.apply(state[key], operationElement);
+            if (applied.isError) {
+                return applied;
+            }
+            result[key] = applied.value;
         }
-    });
+    }
 
     const strParamNames = RecordOperation.apply<
         ParamNamesTypes.State,
@@ -358,7 +450,11 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     result.boolParamNames = boolParamNames.value;
 
     if (operation.name != null) {
-        result.name = operation.name.oldValue;
+        const applied = TextOperation.applyBack(state.name, operation.name);
+        if (applied.isError) {
+            return applied;
+        }
+        result.name = applied.value;
     }
 
     const numParamNames = RecordOperation.applyBack<
@@ -409,12 +505,17 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     }
     result.participants = participants.value;
 
-    ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).forEach(i => {
-        const operationElement = operation[`publicChannel${i}Name` as const];
+    for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
+        const key = `publicChannel${i}Name` as const;
+        const operationElement = operation[key];
         if (operationElement != null) {
-            result[`publicChannel${i}Name` as const] = operationElement.oldValue;
+            const applied = TextOperation.applyBack(state[key], operationElement);
+            if (applied.isError) {
+                return applied;
+            }
+            result[key] = applied.value;
         }
-    });
+    }
 
     const strParamNames = RecordOperation.applyBack<
         ParamNamesTypes.State,
@@ -466,6 +567,11 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
         return memo;
     }
 
+    const name = TextOperation.composeDownOperation(first.name, second.name);
+    if (name.isError) {
+        return name;
+    }
+
     const numParamNames = RecordOperation.composeDownOperation({
         first: first.numParamNames,
         second: second.numParamNames,
@@ -497,52 +603,13 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     }
 
     const valueProps: DownOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         activeBoardKey: ReplaceOperation.composeDownOperation(
             first.activeBoardKey,
             second.activeBoardKey
         ),
-        name: ReplaceOperation.composeDownOperation(first.name, second.name),
-        publicChannel1Name: ReplaceOperation.composeDownOperation(
-            first.publicChannel1Name,
-            second.publicChannel1Name
-        ),
-        publicChannel2Name: ReplaceOperation.composeDownOperation(
-            first.publicChannel2Name,
-            second.publicChannel2Name
-        ),
-        publicChannel3Name: ReplaceOperation.composeDownOperation(
-            first.publicChannel3Name,
-            second.publicChannel3Name
-        ),
-        publicChannel4Name: ReplaceOperation.composeDownOperation(
-            first.publicChannel4Name,
-            second.publicChannel4Name
-        ),
-        publicChannel5Name: ReplaceOperation.composeDownOperation(
-            first.publicChannel5Name,
-            second.publicChannel5Name
-        ),
-        publicChannel6Name: ReplaceOperation.composeDownOperation(
-            first.publicChannel6Name,
-            second.publicChannel6Name
-        ),
-        publicChannel7Name: ReplaceOperation.composeDownOperation(
-            first.publicChannel7Name,
-            second.publicChannel7Name
-        ),
-        publicChannel8Name: ReplaceOperation.composeDownOperation(
-            first.publicChannel8Name,
-            second.publicChannel8Name
-        ),
-        publicChannel9Name: ReplaceOperation.composeDownOperation(
-            first.publicChannel9Name,
-            second.publicChannel9Name
-        ),
-        publicChannel10Name: ReplaceOperation.composeDownOperation(
-            first.publicChannel10Name,
-            second.publicChannel10Name
-        ),
+        name: name.value,
         bgms: bgms.value,
         boolParamNames: boolParamNames.value,
         memos: memo.value,
@@ -550,6 +617,15 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
         strParamNames: strParamNames.value,
         participants: participants.value,
     };
+
+    for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
+        const key = `publicChannel${i}Name` as const;
+        const composed = TextOperation.composeDownOperation(first[key], second[key]);
+        if (composed.isError) {
+            return composed;
+        }
+        valueProps[key] = composed.value;
+    }
     return Result.ok(valueProps);
 };
 
@@ -631,7 +707,8 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         participants: participants.value.prevState,
     };
     const twoWayOperation: TwoWayOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         bgms: bgms.value.twoWayOperation,
         boolParamNames: boolParamNames.value.twoWayOperation,
         memos: memo.value.twoWayOperation,
@@ -649,24 +726,32 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     }
 
     if (downOperation.name !== undefined) {
-        prevState.name = downOperation.name.oldValue;
-        twoWayOperation.name = {
-            ...downOperation.name,
-            newValue: nextState.name,
-        };
+        const restored = TextOperation.restore({
+            nextState: nextState.name,
+            downOperation: downOperation.name,
+        });
+        if (restored.isError) {
+            return restored;
+        }
+        prevState.name = restored.value.prevState;
+        twoWayOperation.name = restored.value.twoWayOperation;
     }
 
-    ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).forEach(i => {
+    for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
         const key = `publicChannel${i}Name` as const;
         const downOperationValue = downOperation[key];
         if (downOperationValue !== undefined) {
-            prevState[key] = downOperationValue.oldValue;
-            twoWayOperation[key] = {
-                ...downOperationValue,
-                newValue: nextState[key],
-            };
+            const restored = TextOperation.restore({
+                nextState: nextState[key],
+                downOperation: downOperationValue,
+            });
+            if (restored.isError) {
+                return restored;
+            }
+            prevState[key] = restored.value.prevState;
+            twoWayOperation[key] = restored.value.twoWayOperation;
         }
-    });
+    }
 
     return Result.ok({ prevState, twoWayOperation });
 };
@@ -703,7 +788,8 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         innerDiff: params => Participant.diff(params),
     });
     const result: TwoWayOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         bgms,
         boolParamNames,
         memos: memo,
@@ -721,17 +807,14 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         };
     }
     if (prevState.name !== nextState.name) {
-        result.name = { oldValue: prevState.name, newValue: nextState.name };
+        result.name = TextOperation.diff({ prev: prevState.name, next: nextState.name });
     }
-    ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).forEach(i => {
+    for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
         const key = `publicChannel${i}Name` as const;
         if (prevState[key] !== nextState[key]) {
-            result[key] = {
-                oldValue: prevState[key],
-                newValue: nextState[key],
-            };
+            result[key] = TextOperation.diff({ prev: prevState[key], next: nextState[key] });
         }
-    });
+    }
     if (isIdRecord(result)) {
         return undefined;
     }
@@ -915,7 +998,8 @@ export const serverTransform =
         }
 
         const twoWayOperation: TwoWayOperation = {
-            $v: 2,
+            $v: 1,
+            $r: 2,
             bgms: bgms.value,
             boolParamNames: boolParamNames.value,
             memos: memos.value,
@@ -941,20 +1025,28 @@ export const serverTransform =
             }
         }
 
-        twoWayOperation.name = ReplaceOperation.serverTransform({
+        const name = TextOperation.serverTransform({
             first: serverOperation?.name,
             second: clientOperation.name,
             prevState: prevState.name,
         });
+        if (name.isError) {
+            return name;
+        }
+        twoWayOperation.name = name.value.secondPrime;
 
-        ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).forEach(i => {
+        for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
             const key = `publicChannel${i}Name` as const;
-            twoWayOperation[key] = ReplaceOperation.serverTransform({
-                first: serverOperation == null ? undefined : serverOperation[key],
+            const transformed = TextOperation.serverTransform({
+                first: serverOperation?.[key],
                 second: clientOperation[key],
                 prevState: prevState[key],
             });
-        });
+            if (transformed.isError) {
+                return transformed;
+            }
+            twoWayOperation[key] = transformed.value.secondPrime;
+        }
 
         if (isIdRecord(twoWayOperation)) {
             return Result.ok(undefined);
@@ -1089,13 +1181,17 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         return participants;
     }
 
-    const name = ReplaceOperation.clientTransform({
+    const name = TextOperation.clientTransform({
         first: first.name,
         second: second.name,
     });
+    if (name.isError) {
+        return name;
+    }
 
     const firstPrime: UpOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         activeBoardKey: activeBoardKey.firstPrime,
         bgms: bgms.value.firstPrime,
         boolParamNames: boolParamNames.value.firstPrime,
@@ -1103,11 +1199,12 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         numParamNames: numParamNames.value.firstPrime,
         strParamNames: strParamNames.value.firstPrime,
         participants: participants.value.firstPrime,
-        name: name.firstPrime,
+        name: name.value.firstPrime,
     };
 
     const secondPrime: UpOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         activeBoardKey: activeBoardKey.secondPrime,
         bgms: bgms.value.secondPrime,
         boolParamNames: boolParamNames.value.secondPrime,
@@ -1115,18 +1212,21 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         numParamNames: numParamNames.value.secondPrime,
         strParamNames: strParamNames.value.secondPrime,
         participants: participants.value.secondPrime,
-        name: name.secondPrime,
+        name: name.value.secondPrime,
     };
 
-    ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).forEach(i => {
+    for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
         const key = `publicChannel${i}Name` as const;
-        const operation = ReplaceOperation.clientTransform({
+        const operation = TextOperation.clientTransform({
             first: first[key],
             second: second[key],
         });
-        firstPrime[key] = operation.firstPrime;
-        secondPrime[key] = operation.secondPrime;
-    });
+        if (operation.isError) {
+            return operation;
+        }
+        firstPrime[key] = operation.value.firstPrime;
+        secondPrime[key] = operation.value.secondPrime;
+    }
 
     return Result.ok({
         firstPrime: isIdRecord(firstPrime) ? undefined : firstPrime,

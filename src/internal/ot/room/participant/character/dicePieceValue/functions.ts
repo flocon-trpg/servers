@@ -154,6 +154,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
 
     const valueProps: DownOperation = {
         $v: 1,
+        $r: 1,
         dice: dice.value,
         pieces: pieces.value,
     };
@@ -205,6 +206,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     };
     const twoWayOperation: TwoWayOperation = {
         $v: 1,
+        $r: 1,
         dice: dice.value.twoWayOperation,
         pieces: pieces.value.twoWayOperation,
     };
@@ -225,6 +227,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     });
     const resultType: TwoWayOperation = {
         $v: 1,
+        $r: 1,
         dice,
         pieces,
     };
@@ -303,6 +306,7 @@ export const serverTransform =
 
         const twoWayOperation: TwoWayOperation = {
             $v: 1,
+            $r: 1,
             dice: dice.value,
             pieces: pieces.value,
         };
@@ -345,12 +349,14 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
 
     const firstPrime: UpOperation = {
         $v: 1,
+        $r: 1,
         dice: dice.value.firstPrime,
         pieces: pieces.value.firstPrime,
     };
 
     const secondPrime: UpOperation = {
         $v: 1,
+        $r: 1,
         dice: dice.value.secondPrime,
         pieces: pieces.value.secondPrime,
     };
