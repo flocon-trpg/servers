@@ -50,7 +50,7 @@ it('tests StateManager.operate', () => {
     const target = createStateManager();
 
     const newState = 2;
-    target.operate(newState);
+    target.operateAsState(newState);
 
     expect(target.isPosting).toBe(false);
     expect(target.requiresReload).toBe(false);
@@ -64,7 +64,7 @@ it('tests StateManager.post', () => {
 
     const target = createStateManager();
 
-    target.operate(operation.newValue);
+    target.operateAsState(operation.newValue);
     const postResult = target.post();
 
     expect(target.isPosting).toBe(true);
@@ -88,7 +88,7 @@ it('tests StateManager: post -> non-id onPosted', () => {
 
     const target = createStateManager();
 
-    target.operate(operation.newValue);
+    target.operateAsState(operation.newValue);
     const postResult = target.post();
     if (postResult === undefined) {
         throw new Error('Guard');
@@ -113,7 +113,7 @@ it('tests StateManager: post -> onPosted({ isId: true })', () => {
 
     const target = createStateManager();
 
-    target.operate(operation.newValue);
+    target.operateAsState(operation.newValue);
     const postResult = target.post();
     if (postResult === undefined) {
         throw new Error('Guard');
@@ -137,7 +137,7 @@ it('tests StateManager: post -> onPosted({ isSuccess: null })', () => {
 
     const target = createStateManager();
 
-    target.operate(operation.newValue);
+    target.operateAsState(operation.newValue);
     const postResult = target.post();
     if (postResult === undefined) {
         throw new Error('Guard');
@@ -157,7 +157,7 @@ it('tests StateManager: post -> onPosted({ isSuccess: false })', () => {
 
     const target = createStateManager();
 
-    target.operate(operation.newValue);
+    target.operateAsState(operation.newValue);
     const postResult = target.post();
     if (postResult === undefined) {
         throw new Error('Guard');
@@ -239,7 +239,7 @@ it('tests StateManager: post -> onPosted -> onOthersGet(initRevision + 2)', () =
 
     const target = createStateManager();
 
-    target.operate(operation.newValue);
+    target.operateAsState(operation.newValue);
     const postResult = target.post();
     if (postResult === undefined) {
         throw new Error('Guard');
@@ -267,7 +267,7 @@ test('tests StateManager: post -> onOthersGet(initRevision + 2) -> onPosted', ()
 
     const target = createStateManager();
 
-    target.operate(firstOperation.newValue);
+    target.operateAsState(firstOperation.newValue);
     const postResult = target.post();
     if (postResult === undefined) {
         throw new Error('Guard');
@@ -295,14 +295,14 @@ test('tests StateManager: operate -> post -> operate -> onPosted({ isSuccess: tr
 
     const target = createStateManager();
 
-    target.operate(firstOperation.newValue);
+    target.operateAsState(firstOperation.newValue);
 
     const postResult = target.post();
     if (postResult === undefined) {
         throw new Error('Guard');
     }
 
-    target.operate(secondOperation.newValue);
+    target.operateAsState(secondOperation.newValue);
 
     postResult.onPosted({
         isSuccess: true,
