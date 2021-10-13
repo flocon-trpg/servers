@@ -1,10 +1,8 @@
-import { gql } from '@apollo/client';
-import * as Apollo from '@apollo/client';
+import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
-const defaultOptions = {};
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
     ID: string;
@@ -2144,2048 +2142,3511 @@ export type PongSubscription = {
     pong: { __typename?: 'Pong'; createdBy?: Maybe<string>; value: number };
 };
 
-export const RoomGetStateFragmentDoc = gql`
-    fragment RoomGetState on RoomGetState {
-        revision
-        createdBy
-        stateJson
-    }
-`;
-export const CreateRoomResultFragmentDoc = gql`
-    fragment CreateRoomResult on CreateRoomResult {
-        ... on CreateRoomSuccessResult {
-            id
-            room {
-                ...RoomGetState
-            }
-        }
-        ... on CreateRoomFailureResult {
-            failureType
-        }
-    }
-    ${RoomGetStateFragmentDoc}
-`;
-export const FileItemFragmentDoc = gql`
-    fragment FileItem on FileItem {
-        filename
-        thumbFilename
-        screenname
-        createdBy
-        createdAt
-    }
-`;
-export const FileTagFragmentDoc = gql`
-    fragment FileTag on FileTag {
-        id
-        name
-    }
-`;
-export const RoomAsListItemFragmentDoc = gql`
-    fragment RoomAsListItem on RoomAsListItem {
-        id
-        name
-        createdBy
-        requiresPhraseToJoinAsPlayer
-        requiresPhraseToJoinAsSpectator
-    }
-`;
-export const GetRoomListResultFragmentDoc = gql`
-    fragment GetRoomListResult on GetRoomsListResult {
-        ... on GetRoomsListSuccessResult {
-            rooms {
-                ...RoomAsListItem
-            }
-        }
-        ... on GetRoomsListFailureResult {
-            failureType
-        }
-    }
-    ${RoomAsListItemFragmentDoc}
-`;
-export const GetNonJoinedRoomResultFragmentDoc = gql`
-    fragment GetNonJoinedRoomResult on GetNonJoinedRoomResult {
-        roomAsListItem {
-            ...RoomAsListItem
-        }
-    }
-    ${RoomAsListItemFragmentDoc}
-`;
-export const GetRoomResultFragmentDoc = gql`
-    fragment GetRoomResult on GetRoomResult {
-        ... on GetJoinedRoomResult {
-            role
-            room {
-                ...RoomGetState
-            }
-        }
-        ... on GetNonJoinedRoomResult {
-            ...GetNonJoinedRoomResult
-        }
-        ... on GetRoomFailureResult {
-            failureType
-        }
-    }
-    ${RoomGetStateFragmentDoc}
-    ${GetNonJoinedRoomResultFragmentDoc}
-`;
-export const RoomOperationFragmentDoc = gql`
-    fragment RoomOperation on RoomOperation {
-        revisionTo
-        operatedBy {
-            userUid
-            clientId
-        }
-        valueJson
-    }
-`;
-export const JoinRoomResultFragmentDoc = gql`
-    fragment JoinRoomResult on JoinRoomResult {
-        ... on JoinRoomSuccessResult {
-            operation {
-                ...RoomOperation
-            }
-        }
-        ... on JoinRoomFailureResult {
-            failureType
-        }
-    }
-    ${RoomOperationFragmentDoc}
-`;
-export const FilePathFragmentDoc = gql`
-    fragment FilePath on FilePath {
-        sourceType
-        path
-    }
-`;
-export const RoomSoundEffectFragmentDoc = gql`
-    fragment RoomSoundEffect on RoomSoundEffect {
-        messageId
-        file {
-            ...FilePath
-        }
-        createdBy
-        createdAt
-        volume
-    }
-    ${FilePathFragmentDoc}
-`;
-export const CharacterValueForMessageFragmentDoc = gql`
-    fragment CharacterValueForMessage on CharacterValueForMessage {
-        stateId
-        isPrivate
-        name
-        image {
-            ...FilePath
-        }
-        tachieImage {
-            ...FilePath
-        }
-    }
-    ${FilePathFragmentDoc}
-`;
-export const RoomPublicMessageFragmentDoc = gql`
-    fragment RoomPublicMessage on RoomPublicMessage {
-        messageId
-        channelKey
-        initText
-        initTextSource
-        updatedText {
-            currentText
-            updatedAt
-        }
-        textColor
-        commandResult {
-            text
-            isSuccess
-        }
-        altTextToSecret
-        isSecret
-        createdBy
-        character {
-            ...CharacterValueForMessage
-        }
-        customName
-        createdAt
-        updatedAt
-    }
-    ${CharacterValueForMessageFragmentDoc}
-`;
-export const RoomPublicChannelFragmentDoc = gql`
-    fragment RoomPublicChannel on RoomPublicChannel {
-        key
-        name
-    }
-`;
-export const RoomPrivateMessageFragmentDoc = gql`
-    fragment RoomPrivateMessage on RoomPrivateMessage {
-        messageId
-        visibleTo
-        initText
-        initTextSource
-        updatedText {
-            currentText
-            updatedAt
-        }
-        textColor
-        commandResult {
-            text
-            isSuccess
-        }
-        altTextToSecret
-        isSecret
-        createdBy
-        character {
-            ...CharacterValueForMessage
-        }
-        customName
-        createdAt
-        updatedAt
-    }
-    ${CharacterValueForMessageFragmentDoc}
-`;
-export const PieceValueLogFragmentDoc = gql`
-    fragment PieceValueLog on PieceValueLog {
-        messageId
-        characterCreatedBy
-        characterId
-        stateId
-        createdAt
-        logType
-        valueJson
-    }
-`;
-export const RoomMessageEventFragmentDoc = gql`
-    fragment RoomMessageEvent on RoomMessageEvent {
-        ... on RoomSoundEffect {
-            ...RoomSoundEffect
-        }
-        ... on RoomPublicMessage {
-            ...RoomPublicMessage
-        }
-        ... on RoomPublicChannel {
-            ...RoomPublicChannel
-        }
-        ... on RoomPrivateMessage {
-            ...RoomPrivateMessage
-        }
-        ... on PieceValueLog {
-            ...PieceValueLog
-        }
-        ... on RoomPublicChannelUpdate {
-            key
-            name
-        }
-        ... on RoomPublicMessageUpdate {
-            messageId
-            initText
-            initTextSource
-            updatedText {
-                currentText
-                updatedAt
-            }
-            commandResult {
-                text
-                isSuccess
-            }
-            altTextToSecret
-            isSecret
-            updatedAt
-        }
-        ... on RoomPrivateMessageUpdate {
-            messageId
-            initText
-            initTextSource
-            updatedText {
-                currentText
-                updatedAt
-            }
-            commandResult {
-                text
-                isSuccess
-            }
-            altTextToSecret
-            isSecret
-            updatedAt
-        }
-    }
-    ${RoomSoundEffectFragmentDoc}
-    ${RoomPublicMessageFragmentDoc}
-    ${RoomPublicChannelFragmentDoc}
-    ${RoomPrivateMessageFragmentDoc}
-    ${PieceValueLogFragmentDoc}
-`;
-export const SemVerFragmentDoc = gql`
-    fragment SemVer on SemVer {
-        major
-        minor
-        patch
-        prerelease {
-            type
-            version
-        }
-    }
-`;
-export const GetAvailableGameSystemsDocument = gql`
-    query GetAvailableGameSystems {
-        result: getAvailableGameSystems {
-            value {
-                id
-                name
-                sortKey
-            }
-        }
-    }
-`;
-
-/**
- * __useGetAvailableGameSystemsQuery__
- *
- * To run a query within a React component, call `useGetAvailableGameSystemsQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetAvailableGameSystemsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetAvailableGameSystemsQuery({
- *   variables: {
- *   },
- * });
- */
-export function useGetAvailableGameSystemsQuery(
-    baseOptions?: Apollo.QueryHookOptions<
-        GetAvailableGameSystemsQuery,
-        GetAvailableGameSystemsQueryVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useQuery<GetAvailableGameSystemsQuery, GetAvailableGameSystemsQueryVariables>(
-        GetAvailableGameSystemsDocument,
-        options
-    );
-}
-export function useGetAvailableGameSystemsLazyQuery(
-    baseOptions?: Apollo.LazyQueryHookOptions<
-        GetAvailableGameSystemsQuery,
-        GetAvailableGameSystemsQueryVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useLazyQuery<GetAvailableGameSystemsQuery, GetAvailableGameSystemsQueryVariables>(
-        GetAvailableGameSystemsDocument,
-        options
-    );
-}
-export type GetAvailableGameSystemsQueryHookResult = ReturnType<
-    typeof useGetAvailableGameSystemsQuery
->;
-export type GetAvailableGameSystemsLazyQueryHookResult = ReturnType<
-    typeof useGetAvailableGameSystemsLazyQuery
->;
-export type GetAvailableGameSystemsQueryResult = Apollo.QueryResult<
-    GetAvailableGameSystemsQuery,
-    GetAvailableGameSystemsQueryVariables
->;
-export const GetDiceHelpMessagesDocument = gql`
-    query GetDiceHelpMessages($id: String!) {
-        result: getDiceHelpMessage(id: $id)
-    }
-`;
-
-/**
- * __useGetDiceHelpMessagesQuery__
- *
- * To run a query within a React component, call `useGetDiceHelpMessagesQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetDiceHelpMessagesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetDiceHelpMessagesQuery({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useGetDiceHelpMessagesQuery(
-    baseOptions: Apollo.QueryHookOptions<
-        GetDiceHelpMessagesQuery,
-        GetDiceHelpMessagesQueryVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useQuery<GetDiceHelpMessagesQuery, GetDiceHelpMessagesQueryVariables>(
-        GetDiceHelpMessagesDocument,
-        options
-    );
-}
-export function useGetDiceHelpMessagesLazyQuery(
-    baseOptions?: Apollo.LazyQueryHookOptions<
-        GetDiceHelpMessagesQuery,
-        GetDiceHelpMessagesQueryVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useLazyQuery<GetDiceHelpMessagesQuery, GetDiceHelpMessagesQueryVariables>(
-        GetDiceHelpMessagesDocument,
-        options
-    );
-}
-export type GetDiceHelpMessagesQueryHookResult = ReturnType<typeof useGetDiceHelpMessagesQuery>;
-export type GetDiceHelpMessagesLazyQueryHookResult = ReturnType<
-    typeof useGetDiceHelpMessagesLazyQuery
->;
-export type GetDiceHelpMessagesQueryResult = Apollo.QueryResult<
-    GetDiceHelpMessagesQuery,
-    GetDiceHelpMessagesQueryVariables
->;
-export const GetFilesDocument = gql`
-    query GetFiles($input: GetFilesInput!) {
-        result: getFiles(input: $input) {
-            files {
-                ...FileItem
-            }
-        }
-    }
-    ${FileItemFragmentDoc}
-`;
-
-/**
- * __useGetFilesQuery__
- *
- * To run a query within a React component, call `useGetFilesQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetFilesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetFilesQuery({
- *   variables: {
- *      input: // value for 'input'
- *   },
- * });
- */
-export function useGetFilesQuery(
-    baseOptions: Apollo.QueryHookOptions<GetFilesQuery, GetFilesQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useQuery<GetFilesQuery, GetFilesQueryVariables>(GetFilesDocument, options);
-}
-export function useGetFilesLazyQuery(
-    baseOptions?: Apollo.LazyQueryHookOptions<GetFilesQuery, GetFilesQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useLazyQuery<GetFilesQuery, GetFilesQueryVariables>(GetFilesDocument, options);
-}
-export type GetFilesQueryHookResult = ReturnType<typeof useGetFilesQuery>;
-export type GetFilesLazyQueryHookResult = ReturnType<typeof useGetFilesLazyQuery>;
-export type GetFilesQueryResult = Apollo.QueryResult<GetFilesQuery, GetFilesQueryVariables>;
-export const GetRoomDocument = gql`
-    query GetRoom($id: String!) {
-        result: getRoom(id: $id) {
-            ... on GetJoinedRoomResult {
-                role
-                room {
-                    ...RoomGetState
-                }
-            }
-            ... on GetNonJoinedRoomResult {
-                roomAsListItem {
-                    ...RoomAsListItem
-                }
-            }
-            ... on GetRoomFailureResult {
-                failureType
-            }
-        }
-    }
-    ${RoomGetStateFragmentDoc}
-    ${RoomAsListItemFragmentDoc}
-`;
-
-/**
- * __useGetRoomQuery__
- *
- * To run a query within a React component, call `useGetRoomQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetRoomQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetRoomQuery({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useGetRoomQuery(
-    baseOptions: Apollo.QueryHookOptions<GetRoomQuery, GetRoomQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useQuery<GetRoomQuery, GetRoomQueryVariables>(GetRoomDocument, options);
-}
-export function useGetRoomLazyQuery(
-    baseOptions?: Apollo.LazyQueryHookOptions<GetRoomQuery, GetRoomQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useLazyQuery<GetRoomQuery, GetRoomQueryVariables>(GetRoomDocument, options);
-}
-export type GetRoomQueryHookResult = ReturnType<typeof useGetRoomQuery>;
-export type GetRoomLazyQueryHookResult = ReturnType<typeof useGetRoomLazyQuery>;
-export type GetRoomQueryResult = Apollo.QueryResult<GetRoomQuery, GetRoomQueryVariables>;
-export const GetRoomsListDocument = gql`
-    query GetRoomsList {
-        result: getRoomsList {
-            ... on GetRoomsListSuccessResult {
-                rooms {
-                    ...RoomAsListItem
-                }
-            }
-            ... on GetRoomsListFailureResult {
-                failureType
-            }
-        }
-    }
-    ${RoomAsListItemFragmentDoc}
-`;
-
-/**
- * __useGetRoomsListQuery__
- *
- * To run a query within a React component, call `useGetRoomsListQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetRoomsListQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetRoomsListQuery({
- *   variables: {
- *   },
- * });
- */
-export function useGetRoomsListQuery(
-    baseOptions?: Apollo.QueryHookOptions<GetRoomsListQuery, GetRoomsListQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useQuery<GetRoomsListQuery, GetRoomsListQueryVariables>(
-        GetRoomsListDocument,
-        options
-    );
-}
-export function useGetRoomsListLazyQuery(
-    baseOptions?: Apollo.LazyQueryHookOptions<GetRoomsListQuery, GetRoomsListQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useLazyQuery<GetRoomsListQuery, GetRoomsListQueryVariables>(
-        GetRoomsListDocument,
-        options
-    );
-}
-export type GetRoomsListQueryHookResult = ReturnType<typeof useGetRoomsListQuery>;
-export type GetRoomsListLazyQueryHookResult = ReturnType<typeof useGetRoomsListLazyQuery>;
-export type GetRoomsListQueryResult = Apollo.QueryResult<
-    GetRoomsListQuery,
-    GetRoomsListQueryVariables
->;
-export const GetMessagesDocument = gql`
-    query GetMessages($roomId: String!) {
-        result: getMessages(roomId: $roomId) {
-            ... on RoomMessages {
-                publicMessages {
-                    ...RoomPublicMessage
-                }
-                privateMessages {
-                    ...RoomPrivateMessage
-                }
-                pieceValueLogs {
-                    ...PieceValueLog
-                }
-                publicChannels {
-                    ...RoomPublicChannel
-                }
-                soundEffects {
-                    ...RoomSoundEffect
-                }
-            }
-            ... on GetRoomMessagesFailureResult {
-                failureType
-            }
-        }
-    }
-    ${RoomPublicMessageFragmentDoc}
-    ${RoomPrivateMessageFragmentDoc}
-    ${PieceValueLogFragmentDoc}
-    ${RoomPublicChannelFragmentDoc}
-    ${RoomSoundEffectFragmentDoc}
-`;
-
-/**
- * __useGetMessagesQuery__
- *
- * To run a query within a React component, call `useGetMessagesQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetMessagesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetMessagesQuery({
- *   variables: {
- *      roomId: // value for 'roomId'
- *   },
- * });
- */
-export function useGetMessagesQuery(
-    baseOptions: Apollo.QueryHookOptions<GetMessagesQuery, GetMessagesQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useQuery<GetMessagesQuery, GetMessagesQueryVariables>(
-        GetMessagesDocument,
-        options
-    );
-}
-export function useGetMessagesLazyQuery(
-    baseOptions?: Apollo.LazyQueryHookOptions<GetMessagesQuery, GetMessagesQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useLazyQuery<GetMessagesQuery, GetMessagesQueryVariables>(
-        GetMessagesDocument,
-        options
-    );
-}
-export type GetMessagesQueryHookResult = ReturnType<typeof useGetMessagesQuery>;
-export type GetMessagesLazyQueryHookResult = ReturnType<typeof useGetMessagesLazyQuery>;
-export type GetMessagesQueryResult = Apollo.QueryResult<
-    GetMessagesQuery,
-    GetMessagesQueryVariables
->;
-export const GetLogDocument = gql`
-    query GetLog($roomId: String!) {
-        result: getLog(roomId: $roomId) {
-            ... on RoomMessages {
-                publicMessages {
-                    ...RoomPublicMessage
-                }
-                privateMessages {
-                    ...RoomPrivateMessage
-                }
-                pieceValueLogs {
-                    ...PieceValueLog
-                }
-                publicChannels {
-                    ...RoomPublicChannel
-                }
-                soundEffects {
-                    ...RoomSoundEffect
-                }
-            }
-            ... on GetRoomLogFailureResult {
-                failureType
-            }
-        }
-    }
-    ${RoomPublicMessageFragmentDoc}
-    ${RoomPrivateMessageFragmentDoc}
-    ${PieceValueLogFragmentDoc}
-    ${RoomPublicChannelFragmentDoc}
-    ${RoomSoundEffectFragmentDoc}
-`;
-
-/**
- * __useGetLogQuery__
- *
- * To run a query within a React component, call `useGetLogQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetLogQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetLogQuery({
- *   variables: {
- *      roomId: // value for 'roomId'
- *   },
- * });
- */
-export function useGetLogQuery(
-    baseOptions: Apollo.QueryHookOptions<GetLogQuery, GetLogQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useQuery<GetLogQuery, GetLogQueryVariables>(GetLogDocument, options);
-}
-export function useGetLogLazyQuery(
-    baseOptions?: Apollo.LazyQueryHookOptions<GetLogQuery, GetLogQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useLazyQuery<GetLogQuery, GetLogQueryVariables>(GetLogDocument, options);
-}
-export type GetLogQueryHookResult = ReturnType<typeof useGetLogQuery>;
-export type GetLogLazyQueryHookResult = ReturnType<typeof useGetLogLazyQuery>;
-export type GetLogQueryResult = Apollo.QueryResult<GetLogQuery, GetLogQueryVariables>;
-export const GetRoomConnectionsDocument = gql`
-    query GetRoomConnections($roomId: String!) {
-        result: getRoomConnections(roomId: $roomId) {
-            ... on GetRoomConnectionsSuccessResult {
-                fetchedAt
-                connectedUserUids
-            }
-            ... on GetRoomConnectionsFailureResult {
-                failureType
-            }
-        }
-    }
-`;
-
-/**
- * __useGetRoomConnectionsQuery__
- *
- * To run a query within a React component, call `useGetRoomConnectionsQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetRoomConnectionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetRoomConnectionsQuery({
- *   variables: {
- *      roomId: // value for 'roomId'
- *   },
- * });
- */
-export function useGetRoomConnectionsQuery(
-    baseOptions: Apollo.QueryHookOptions<GetRoomConnectionsQuery, GetRoomConnectionsQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useQuery<GetRoomConnectionsQuery, GetRoomConnectionsQueryVariables>(
-        GetRoomConnectionsDocument,
-        options
-    );
-}
-export function useGetRoomConnectionsLazyQuery(
-    baseOptions?: Apollo.LazyQueryHookOptions<
-        GetRoomConnectionsQuery,
-        GetRoomConnectionsQueryVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useLazyQuery<GetRoomConnectionsQuery, GetRoomConnectionsQueryVariables>(
-        GetRoomConnectionsDocument,
-        options
-    );
-}
-export type GetRoomConnectionsQueryHookResult = ReturnType<typeof useGetRoomConnectionsQuery>;
-export type GetRoomConnectionsLazyQueryHookResult = ReturnType<
-    typeof useGetRoomConnectionsLazyQuery
->;
-export type GetRoomConnectionsQueryResult = Apollo.QueryResult<
-    GetRoomConnectionsQuery,
-    GetRoomConnectionsQueryVariables
->;
-export const GetServerInfoDocument = gql`
-    query GetServerInfo {
-        result: getServerInfo {
-            version {
-                ...SemVer
-            }
-            uploaderEnabled
-        }
-    }
-    ${SemVerFragmentDoc}
-`;
-
-/**
- * __useGetServerInfoQuery__
- *
- * To run a query within a React component, call `useGetServerInfoQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetServerInfoQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetServerInfoQuery({
- *   variables: {
- *   },
- * });
- */
-export function useGetServerInfoQuery(
-    baseOptions?: Apollo.QueryHookOptions<GetServerInfoQuery, GetServerInfoQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useQuery<GetServerInfoQuery, GetServerInfoQueryVariables>(
-        GetServerInfoDocument,
-        options
-    );
-}
-export function useGetServerInfoLazyQuery(
-    baseOptions?: Apollo.LazyQueryHookOptions<GetServerInfoQuery, GetServerInfoQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useLazyQuery<GetServerInfoQuery, GetServerInfoQueryVariables>(
-        GetServerInfoDocument,
-        options
-    );
-}
-export type GetServerInfoQueryHookResult = ReturnType<typeof useGetServerInfoQuery>;
-export type GetServerInfoLazyQueryHookResult = ReturnType<typeof useGetServerInfoLazyQuery>;
-export type GetServerInfoQueryResult = Apollo.QueryResult<
-    GetServerInfoQuery,
-    GetServerInfoQueryVariables
->;
-export const IsEntryDocument = gql`
-    query IsEntry {
-        result: isEntry
-    }
-`;
-
-/**
- * __useIsEntryQuery__
- *
- * To run a query within a React component, call `useIsEntryQuery` and pass it any options that fit your needs.
- * When your component renders, `useIsEntryQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useIsEntryQuery({
- *   variables: {
- *   },
- * });
- */
-export function useIsEntryQuery(
-    baseOptions?: Apollo.QueryHookOptions<IsEntryQuery, IsEntryQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useQuery<IsEntryQuery, IsEntryQueryVariables>(IsEntryDocument, options);
-}
-export function useIsEntryLazyQuery(
-    baseOptions?: Apollo.LazyQueryHookOptions<IsEntryQuery, IsEntryQueryVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useLazyQuery<IsEntryQuery, IsEntryQueryVariables>(IsEntryDocument, options);
-}
-export type IsEntryQueryHookResult = ReturnType<typeof useIsEntryQuery>;
-export type IsEntryLazyQueryHookResult = ReturnType<typeof useIsEntryLazyQuery>;
-export type IsEntryQueryResult = Apollo.QueryResult<IsEntryQuery, IsEntryQueryVariables>;
-export const RequiresPhraseToJoinAsPlayerDocument = gql`
-    query RequiresPhraseToJoinAsPlayer($roomId: String!) {
-        result: requiresPhraseToJoinAsPlayer(roomId: $roomId) {
-            ... on RequiresPhraseSuccessResult {
-                value
-            }
-            ... on RequiresPhraseFailureResult {
-                failureType
-            }
-        }
-    }
-`;
-
-/**
- * __useRequiresPhraseToJoinAsPlayerQuery__
- *
- * To run a query within a React component, call `useRequiresPhraseToJoinAsPlayerQuery` and pass it any options that fit your needs.
- * When your component renders, `useRequiresPhraseToJoinAsPlayerQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useRequiresPhraseToJoinAsPlayerQuery({
- *   variables: {
- *      roomId: // value for 'roomId'
- *   },
- * });
- */
-export function useRequiresPhraseToJoinAsPlayerQuery(
-    baseOptions: Apollo.QueryHookOptions<
-        RequiresPhraseToJoinAsPlayerQuery,
-        RequiresPhraseToJoinAsPlayerQueryVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useQuery<
-        RequiresPhraseToJoinAsPlayerQuery,
-        RequiresPhraseToJoinAsPlayerQueryVariables
-    >(RequiresPhraseToJoinAsPlayerDocument, options);
-}
-export function useRequiresPhraseToJoinAsPlayerLazyQuery(
-    baseOptions?: Apollo.LazyQueryHookOptions<
-        RequiresPhraseToJoinAsPlayerQuery,
-        RequiresPhraseToJoinAsPlayerQueryVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useLazyQuery<
-        RequiresPhraseToJoinAsPlayerQuery,
-        RequiresPhraseToJoinAsPlayerQueryVariables
-    >(RequiresPhraseToJoinAsPlayerDocument, options);
-}
-export type RequiresPhraseToJoinAsPlayerQueryHookResult = ReturnType<
-    typeof useRequiresPhraseToJoinAsPlayerQuery
->;
-export type RequiresPhraseToJoinAsPlayerLazyQueryHookResult = ReturnType<
-    typeof useRequiresPhraseToJoinAsPlayerLazyQuery
->;
-export type RequiresPhraseToJoinAsPlayerQueryResult = Apollo.QueryResult<
+export const RoomGetStateFragmentDoc = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomGetState' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomGetState' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'revision' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'stateJson' } },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<RoomGetStateFragment, unknown>;
+export const CreateRoomResultFragmentDoc = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'CreateRoomResult' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'CreateRoomResult' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'CreateRoomSuccessResult' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'room' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'FragmentSpread',
+                                                name: { kind: 'Name', value: 'RoomGetState' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'CreateRoomFailureResult' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'failureType' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...RoomGetStateFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<CreateRoomResultFragment, unknown>;
+export const FileItemFragmentDoc = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'FileItem' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'FileItem' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'filename' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'thumbFilename' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'screenname' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<FileItemFragment, unknown>;
+export const FileTagFragmentDoc = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'FileTag' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'FileTag' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<FileTagFragment, unknown>;
+export const RoomAsListItemFragmentDoc = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomAsListItem' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomAsListItem' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'requiresPhraseToJoinAsPlayer' },
+                    },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'requiresPhraseToJoinAsSpectator' },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<RoomAsListItemFragment, unknown>;
+export const GetRoomListResultFragmentDoc = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'GetRoomListResult' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'GetRoomsListResult' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'GetRoomsListSuccessResult' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'rooms' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'FragmentSpread',
+                                                name: { kind: 'Name', value: 'RoomAsListItem' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'GetRoomsListFailureResult' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'failureType' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...RoomAsListItemFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<GetRoomListResultFragment, unknown>;
+export const GetNonJoinedRoomResultFragmentDoc = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'GetNonJoinedRoomResult' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'GetNonJoinedRoomResult' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'roomAsListItem' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'RoomAsListItem' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...RoomAsListItemFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<GetNonJoinedRoomResultFragment, unknown>;
+export const GetRoomResultFragmentDoc = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'GetRoomResult' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'GetRoomResult' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'GetJoinedRoomResult' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'role' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'room' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'FragmentSpread',
+                                                name: { kind: 'Name', value: 'RoomGetState' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'GetNonJoinedRoomResult' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'GetNonJoinedRoomResult' },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'GetRoomFailureResult' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'failureType' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...RoomGetStateFragmentDoc.definitions,
+        ...GetNonJoinedRoomResultFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<GetRoomResultFragment, unknown>;
+export const RoomOperationFragmentDoc = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomOperation' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomOperation' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'revisionTo' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'operatedBy' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'userUid' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'clientId' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'valueJson' } },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<RoomOperationFragment, unknown>;
+export const JoinRoomResultFragmentDoc = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'JoinRoomResult' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'JoinRoomResult' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'JoinRoomSuccessResult' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'operation' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'FragmentSpread',
+                                                name: { kind: 'Name', value: 'RoomOperation' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'JoinRoomFailureResult' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'failureType' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...RoomOperationFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<JoinRoomResultFragment, unknown>;
+export const FilePathFragmentDoc = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'FilePath' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'FilePath' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'sourceType' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'path' } },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<FilePathFragment, unknown>;
+export const RoomSoundEffectFragmentDoc = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomSoundEffect' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomSoundEffect' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'file' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'volume' } },
+                ],
+            },
+        },
+        ...FilePathFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<RoomSoundEffectFragment, unknown>;
+export const CharacterValueForMessageFragmentDoc = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'CharacterValueForMessage' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'CharacterValueForMessage' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'stateId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isPrivate' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'image' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'tachieImage' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...FilePathFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<CharacterValueForMessageFragment, unknown>;
+export const RoomPublicMessageFragmentDoc = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomPublicMessage' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'RoomPublicMessage' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'channelKey' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initText' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initTextSource' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'updatedText' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'currentText' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'textColor' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'commandResult' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'text' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'isSuccess' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'altTextToSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'character' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'CharacterValueForMessage' },
+                                },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'customName' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                ],
+            },
+        },
+        ...CharacterValueForMessageFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<RoomPublicMessageFragment, unknown>;
+export const RoomPublicChannelFragmentDoc = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomPublicChannel' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'RoomPublicChannel' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'key' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<RoomPublicChannelFragment, unknown>;
+export const RoomPrivateMessageFragmentDoc = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomPrivateMessage' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'RoomPrivateMessage' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'visibleTo' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initText' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initTextSource' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'updatedText' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'currentText' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'textColor' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'commandResult' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'text' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'isSuccess' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'altTextToSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'character' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'CharacterValueForMessage' },
+                                },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'customName' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                ],
+            },
+        },
+        ...CharacterValueForMessageFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<RoomPrivateMessageFragment, unknown>;
+export const PieceValueLogFragmentDoc = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'PieceValueLog' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'PieceValueLog' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'characterCreatedBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'characterId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'stateId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'logType' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'valueJson' } },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<PieceValueLogFragment, unknown>;
+export const RoomMessageEventFragmentDoc = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomMessageEvent' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomMessageEvent' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'RoomSoundEffect' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'RoomSoundEffect' },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'RoomPublicMessage' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'RoomPublicMessage' },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'RoomPublicChannel' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'RoomPublicChannel' },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'RoomPrivateMessage' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'RoomPrivateMessage' },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'PieceValueLog' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'PieceValueLog' },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'RoomPublicChannelUpdate' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'key' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'RoomPublicMessageUpdate' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'initText' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'initTextSource' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'updatedText' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'currentText' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'updatedAt' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'commandResult' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'text' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'isSuccess' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'altTextToSecret' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'isSecret' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'RoomPrivateMessageUpdate' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'initText' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'initTextSource' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'updatedText' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'currentText' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'updatedAt' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'commandResult' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'text' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'isSuccess' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'altTextToSecret' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'isSecret' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...RoomSoundEffectFragmentDoc.definitions,
+        ...RoomPublicMessageFragmentDoc.definitions,
+        ...RoomPublicChannelFragmentDoc.definitions,
+        ...RoomPrivateMessageFragmentDoc.definitions,
+        ...PieceValueLogFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<RoomMessageEventFragment, unknown>;
+export const SemVerFragmentDoc = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'SemVer' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'SemVer' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'major' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'minor' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'patch' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'prerelease' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'version' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<SemVerFragment, unknown>;
+export const GetAvailableGameSystemsDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'GetAvailableGameSystems' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'getAvailableGameSystems' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'value' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'sortKey' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<GetAvailableGameSystemsQuery, GetAvailableGameSystemsQueryVariables>;
+export const GetDiceHelpMessagesDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'GetDiceHelpMessages' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'getDiceHelpMessage' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                            },
+                        ],
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<GetDiceHelpMessagesQuery, GetDiceHelpMessagesQueryVariables>;
+export const GetFilesDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'GetFiles' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'GetFilesInput' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'getFiles' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'input' },
+                                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'files' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'FragmentSpread',
+                                                name: { kind: 'Name', value: 'FileItem' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...FileItemFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<GetFilesQuery, GetFilesQueryVariables>;
+export const GetRoomDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'GetRoom' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'getRoom' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: { kind: 'Name', value: 'GetJoinedRoomResult' },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'role' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'room' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'FragmentSpread',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'RoomGetState',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: { kind: 'Name', value: 'GetNonJoinedRoomResult' },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'roomAsListItem' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'FragmentSpread',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'RoomAsListItem',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: { kind: 'Name', value: 'GetRoomFailureResult' },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'failureType' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...RoomGetStateFragmentDoc.definitions,
+        ...RoomAsListItemFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<GetRoomQuery, GetRoomQueryVariables>;
+export const GetRoomsListDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'GetRoomsList' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'getRoomsList' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: { kind: 'Name', value: 'GetRoomsListSuccessResult' },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'rooms' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'FragmentSpread',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'RoomAsListItem',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: { kind: 'Name', value: 'GetRoomsListFailureResult' },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'failureType' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...RoomAsListItemFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<GetRoomsListQuery, GetRoomsListQueryVariables>;
+export const GetMessagesDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'GetMessages' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'roomId' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'getMessages' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'roomId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'roomId' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: { kind: 'Name', value: 'RoomMessages' },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'publicMessages' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'FragmentSpread',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'RoomPublicMessage',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'privateMessages' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'FragmentSpread',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'RoomPrivateMessage',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'pieceValueLogs' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'FragmentSpread',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'PieceValueLog',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'publicChannels' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'FragmentSpread',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'RoomPublicChannel',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'soundEffects' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'FragmentSpread',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'RoomSoundEffect',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: {
+                                            kind: 'Name',
+                                            value: 'GetRoomMessagesFailureResult',
+                                        },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'failureType' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...RoomPublicMessageFragmentDoc.definitions,
+        ...RoomPrivateMessageFragmentDoc.definitions,
+        ...PieceValueLogFragmentDoc.definitions,
+        ...RoomPublicChannelFragmentDoc.definitions,
+        ...RoomSoundEffectFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<GetMessagesQuery, GetMessagesQueryVariables>;
+export const GetLogDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'GetLog' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'roomId' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'getLog' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'roomId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'roomId' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: { kind: 'Name', value: 'RoomMessages' },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'publicMessages' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'FragmentSpread',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'RoomPublicMessage',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'privateMessages' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'FragmentSpread',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'RoomPrivateMessage',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'pieceValueLogs' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'FragmentSpread',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'PieceValueLog',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'publicChannels' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'FragmentSpread',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'RoomPublicChannel',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'soundEffects' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'FragmentSpread',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'RoomSoundEffect',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: { kind: 'Name', value: 'GetRoomLogFailureResult' },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'failureType' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...RoomPublicMessageFragmentDoc.definitions,
+        ...RoomPrivateMessageFragmentDoc.definitions,
+        ...PieceValueLogFragmentDoc.definitions,
+        ...RoomPublicChannelFragmentDoc.definitions,
+        ...RoomSoundEffectFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<GetLogQuery, GetLogQueryVariables>;
+export const GetRoomConnectionsDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'GetRoomConnections' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'roomId' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'getRoomConnections' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'roomId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'roomId' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: {
+                                            kind: 'Name',
+                                            value: 'GetRoomConnectionsSuccessResult',
+                                        },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'fetchedAt' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'connectedUserUids' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: {
+                                            kind: 'Name',
+                                            value: 'GetRoomConnectionsFailureResult',
+                                        },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'failureType' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<GetRoomConnectionsQuery, GetRoomConnectionsQueryVariables>;
+export const GetServerInfoDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'GetServerInfo' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'getServerInfo' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'version' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'FragmentSpread',
+                                                name: { kind: 'Name', value: 'SemVer' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'uploaderEnabled' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...SemVerFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<GetServerInfoQuery, GetServerInfoQueryVariables>;
+export const IsEntryDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'IsEntry' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'isEntry' },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<IsEntryQuery, IsEntryQueryVariables>;
+export const RequiresPhraseToJoinAsPlayerDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'RequiresPhraseToJoinAsPlayer' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'roomId' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'requiresPhraseToJoinAsPlayer' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'roomId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'roomId' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: {
+                                            kind: 'Name',
+                                            value: 'RequiresPhraseSuccessResult',
+                                        },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'value' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: {
+                                            kind: 'Name',
+                                            value: 'RequiresPhraseFailureResult',
+                                        },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'failureType' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
     RequiresPhraseToJoinAsPlayerQuery,
     RequiresPhraseToJoinAsPlayerQueryVariables
 >;
-export const CreateFileTagDocument = gql`
-    mutation CreateFileTag($tagName: String!) {
-        result: createFileTag(tagName: $tagName) {
-            ...FileTag
-        }
-    }
-    ${FileTagFragmentDoc}
-`;
-export type CreateFileTagMutationFn = Apollo.MutationFunction<
-    CreateFileTagMutation,
-    CreateFileTagMutationVariables
->;
-
-/**
- * __useCreateFileTagMutation__
- *
- * To run a mutation, you first call `useCreateFileTagMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreateFileTagMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [createFileTagMutation, { data, loading, error }] = useCreateFileTagMutation({
- *   variables: {
- *      tagName: // value for 'tagName'
- *   },
- * });
- */
-export function useCreateFileTagMutation(
-    baseOptions?: Apollo.MutationHookOptions<CreateFileTagMutation, CreateFileTagMutationVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<CreateFileTagMutation, CreateFileTagMutationVariables>(
-        CreateFileTagDocument,
-        options
-    );
-}
-export type CreateFileTagMutationHookResult = ReturnType<typeof useCreateFileTagMutation>;
-export type CreateFileTagMutationResult = Apollo.MutationResult<CreateFileTagMutation>;
-export type CreateFileTagMutationOptions = Apollo.BaseMutationOptions<
-    CreateFileTagMutation,
-    CreateFileTagMutationVariables
->;
-export const ChangeParticipantNameDocument = gql`
-    mutation ChangeParticipantName($roomId: String!, $newName: String!) {
-        result: changeParticipantName(roomId: $roomId, newName: $newName) {
-            failureType
-        }
-    }
-`;
-export type ChangeParticipantNameMutationFn = Apollo.MutationFunction<
-    ChangeParticipantNameMutation,
-    ChangeParticipantNameMutationVariables
->;
-
-/**
- * __useChangeParticipantNameMutation__
- *
- * To run a mutation, you first call `useChangeParticipantNameMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useChangeParticipantNameMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [changeParticipantNameMutation, { data, loading, error }] = useChangeParticipantNameMutation({
- *   variables: {
- *      roomId: // value for 'roomId'
- *      newName: // value for 'newName'
- *   },
- * });
- */
-export function useChangeParticipantNameMutation(
-    baseOptions?: Apollo.MutationHookOptions<
-        ChangeParticipantNameMutation,
-        ChangeParticipantNameMutationVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<
-        ChangeParticipantNameMutation,
-        ChangeParticipantNameMutationVariables
-    >(ChangeParticipantNameDocument, options);
-}
-export type ChangeParticipantNameMutationHookResult = ReturnType<
-    typeof useChangeParticipantNameMutation
->;
-export type ChangeParticipantNameMutationResult =
-    Apollo.MutationResult<ChangeParticipantNameMutation>;
-export type ChangeParticipantNameMutationOptions = Apollo.BaseMutationOptions<
-    ChangeParticipantNameMutation,
-    ChangeParticipantNameMutationVariables
->;
-export const CreateRoomDocument = gql`
-    mutation CreateRoom($input: CreateRoomInput!) {
-        result: createRoom(input: $input) {
-            ... on CreateRoomSuccessResult {
-                ...CreateRoomResult
-            }
-            ... on CreateRoomFailureResult {
-                failureType
-            }
-        }
-    }
-    ${CreateRoomResultFragmentDoc}
-`;
-export type CreateRoomMutationFn = Apollo.MutationFunction<
-    CreateRoomMutation,
-    CreateRoomMutationVariables
->;
-
-/**
- * __useCreateRoomMutation__
- *
- * To run a mutation, you first call `useCreateRoomMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreateRoomMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [createRoomMutation, { data, loading, error }] = useCreateRoomMutation({
- *   variables: {
- *      input: // value for 'input'
- *   },
- * });
- */
-export function useCreateRoomMutation(
-    baseOptions?: Apollo.MutationHookOptions<CreateRoomMutation, CreateRoomMutationVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<CreateRoomMutation, CreateRoomMutationVariables>(
-        CreateRoomDocument,
-        options
-    );
-}
-export type CreateRoomMutationHookResult = ReturnType<typeof useCreateRoomMutation>;
-export type CreateRoomMutationResult = Apollo.MutationResult<CreateRoomMutation>;
-export type CreateRoomMutationOptions = Apollo.BaseMutationOptions<
-    CreateRoomMutation,
-    CreateRoomMutationVariables
->;
-export const DeleteFilesDocument = gql`
-    mutation DeleteFiles($filenames: [String!]!) {
-        result: deleteFiles(filenames: $filenames)
-    }
-`;
-export type DeleteFilesMutationFn = Apollo.MutationFunction<
-    DeleteFilesMutation,
-    DeleteFilesMutationVariables
->;
-
-/**
- * __useDeleteFilesMutation__
- *
- * To run a mutation, you first call `useDeleteFilesMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeleteFilesMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [deleteFilesMutation, { data, loading, error }] = useDeleteFilesMutation({
- *   variables: {
- *      filenames: // value for 'filenames'
- *   },
- * });
- */
-export function useDeleteFilesMutation(
-    baseOptions?: Apollo.MutationHookOptions<DeleteFilesMutation, DeleteFilesMutationVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<DeleteFilesMutation, DeleteFilesMutationVariables>(
-        DeleteFilesDocument,
-        options
-    );
-}
-export type DeleteFilesMutationHookResult = ReturnType<typeof useDeleteFilesMutation>;
-export type DeleteFilesMutationResult = Apollo.MutationResult<DeleteFilesMutation>;
-export type DeleteFilesMutationOptions = Apollo.BaseMutationOptions<
-    DeleteFilesMutation,
-    DeleteFilesMutationVariables
->;
-export const DeleteFileTagDocument = gql`
-    mutation DeleteFileTag($tagId: String!) {
-        result: deleteFileTag(tagId: $tagId)
-    }
-`;
-export type DeleteFileTagMutationFn = Apollo.MutationFunction<
-    DeleteFileTagMutation,
-    DeleteFileTagMutationVariables
->;
-
-/**
- * __useDeleteFileTagMutation__
- *
- * To run a mutation, you first call `useDeleteFileTagMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeleteFileTagMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [deleteFileTagMutation, { data, loading, error }] = useDeleteFileTagMutation({
- *   variables: {
- *      tagId: // value for 'tagId'
- *   },
- * });
- */
-export function useDeleteFileTagMutation(
-    baseOptions?: Apollo.MutationHookOptions<DeleteFileTagMutation, DeleteFileTagMutationVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<DeleteFileTagMutation, DeleteFileTagMutationVariables>(
-        DeleteFileTagDocument,
-        options
-    );
-}
-export type DeleteFileTagMutationHookResult = ReturnType<typeof useDeleteFileTagMutation>;
-export type DeleteFileTagMutationResult = Apollo.MutationResult<DeleteFileTagMutation>;
-export type DeleteFileTagMutationOptions = Apollo.BaseMutationOptions<
-    DeleteFileTagMutation,
-    DeleteFileTagMutationVariables
->;
-export const DeleteRoomDocument = gql`
-    mutation DeleteRoom($id: String!) {
-        result: deleteRoom(id: $id) {
-            failureType
-        }
-    }
-`;
-export type DeleteRoomMutationFn = Apollo.MutationFunction<
-    DeleteRoomMutation,
-    DeleteRoomMutationVariables
->;
-
-/**
- * __useDeleteRoomMutation__
- *
- * To run a mutation, you first call `useDeleteRoomMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeleteRoomMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [deleteRoomMutation, { data, loading, error }] = useDeleteRoomMutation({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useDeleteRoomMutation(
-    baseOptions?: Apollo.MutationHookOptions<DeleteRoomMutation, DeleteRoomMutationVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<DeleteRoomMutation, DeleteRoomMutationVariables>(
-        DeleteRoomDocument,
-        options
-    );
-}
-export type DeleteRoomMutationHookResult = ReturnType<typeof useDeleteRoomMutation>;
-export type DeleteRoomMutationResult = Apollo.MutationResult<DeleteRoomMutation>;
-export type DeleteRoomMutationOptions = Apollo.BaseMutationOptions<
-    DeleteRoomMutation,
-    DeleteRoomMutationVariables
->;
-export const EditFileTagsDocument = gql`
-    mutation EditFileTags($input: EditFileTagsInput!) {
-        result: editFileTags(input: $input)
-    }
-`;
-export type EditFileTagsMutationFn = Apollo.MutationFunction<
-    EditFileTagsMutation,
-    EditFileTagsMutationVariables
->;
-
-/**
- * __useEditFileTagsMutation__
- *
- * To run a mutation, you first call `useEditFileTagsMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useEditFileTagsMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [editFileTagsMutation, { data, loading, error }] = useEditFileTagsMutation({
- *   variables: {
- *      input: // value for 'input'
- *   },
- * });
- */
-export function useEditFileTagsMutation(
-    baseOptions?: Apollo.MutationHookOptions<EditFileTagsMutation, EditFileTagsMutationVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<EditFileTagsMutation, EditFileTagsMutationVariables>(
-        EditFileTagsDocument,
-        options
-    );
-}
-export type EditFileTagsMutationHookResult = ReturnType<typeof useEditFileTagsMutation>;
-export type EditFileTagsMutationResult = Apollo.MutationResult<EditFileTagsMutation>;
-export type EditFileTagsMutationOptions = Apollo.BaseMutationOptions<
-    EditFileTagsMutation,
-    EditFileTagsMutationVariables
->;
-export const JoinRoomAsPlayerDocument = gql`
-    mutation JoinRoomAsPlayer($id: String!, $name: String!, $phrase: String) {
-        result: joinRoomAsPlayer(id: $id, name: $name, phrase: $phrase) {
-            ...JoinRoomResult
-        }
-    }
-    ${JoinRoomResultFragmentDoc}
-`;
-export type JoinRoomAsPlayerMutationFn = Apollo.MutationFunction<
-    JoinRoomAsPlayerMutation,
-    JoinRoomAsPlayerMutationVariables
->;
-
-/**
- * __useJoinRoomAsPlayerMutation__
- *
- * To run a mutation, you first call `useJoinRoomAsPlayerMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useJoinRoomAsPlayerMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [joinRoomAsPlayerMutation, { data, loading, error }] = useJoinRoomAsPlayerMutation({
- *   variables: {
- *      id: // value for 'id'
- *      name: // value for 'name'
- *      phrase: // value for 'phrase'
- *   },
- * });
- */
-export function useJoinRoomAsPlayerMutation(
-    baseOptions?: Apollo.MutationHookOptions<
-        JoinRoomAsPlayerMutation,
-        JoinRoomAsPlayerMutationVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<JoinRoomAsPlayerMutation, JoinRoomAsPlayerMutationVariables>(
-        JoinRoomAsPlayerDocument,
-        options
-    );
-}
-export type JoinRoomAsPlayerMutationHookResult = ReturnType<typeof useJoinRoomAsPlayerMutation>;
-export type JoinRoomAsPlayerMutationResult = Apollo.MutationResult<JoinRoomAsPlayerMutation>;
-export type JoinRoomAsPlayerMutationOptions = Apollo.BaseMutationOptions<
-    JoinRoomAsPlayerMutation,
-    JoinRoomAsPlayerMutationVariables
->;
-export const JoinRoomAsSpectatorDocument = gql`
-    mutation JoinRoomAsSpectator($id: String!, $name: String!, $phrase: String) {
-        result: joinRoomAsSpectator(id: $id, name: $name, phrase: $phrase) {
-            ...JoinRoomResult
-        }
-    }
-    ${JoinRoomResultFragmentDoc}
-`;
-export type JoinRoomAsSpectatorMutationFn = Apollo.MutationFunction<
-    JoinRoomAsSpectatorMutation,
-    JoinRoomAsSpectatorMutationVariables
->;
-
-/**
- * __useJoinRoomAsSpectatorMutation__
- *
- * To run a mutation, you first call `useJoinRoomAsSpectatorMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useJoinRoomAsSpectatorMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [joinRoomAsSpectatorMutation, { data, loading, error }] = useJoinRoomAsSpectatorMutation({
- *   variables: {
- *      id: // value for 'id'
- *      name: // value for 'name'
- *      phrase: // value for 'phrase'
- *   },
- * });
- */
-export function useJoinRoomAsSpectatorMutation(
-    baseOptions?: Apollo.MutationHookOptions<
-        JoinRoomAsSpectatorMutation,
-        JoinRoomAsSpectatorMutationVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<JoinRoomAsSpectatorMutation, JoinRoomAsSpectatorMutationVariables>(
-        JoinRoomAsSpectatorDocument,
-        options
-    );
-}
-export type JoinRoomAsSpectatorMutationHookResult = ReturnType<
-    typeof useJoinRoomAsSpectatorMutation
->;
-export type JoinRoomAsSpectatorMutationResult = Apollo.MutationResult<JoinRoomAsSpectatorMutation>;
-export type JoinRoomAsSpectatorMutationOptions = Apollo.BaseMutationOptions<
-    JoinRoomAsSpectatorMutation,
-    JoinRoomAsSpectatorMutationVariables
->;
-export const EntryToServerDocument = gql`
-    mutation EntryToServer($phrase: String!) {
-        result: entryToServer(phrase: $phrase) {
-            type
-        }
-    }
-`;
-export type EntryToServerMutationFn = Apollo.MutationFunction<
-    EntryToServerMutation,
-    EntryToServerMutationVariables
->;
-
-/**
- * __useEntryToServerMutation__
- *
- * To run a mutation, you first call `useEntryToServerMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useEntryToServerMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [entryToServerMutation, { data, loading, error }] = useEntryToServerMutation({
- *   variables: {
- *      phrase: // value for 'phrase'
- *   },
- * });
- */
-export function useEntryToServerMutation(
-    baseOptions?: Apollo.MutationHookOptions<EntryToServerMutation, EntryToServerMutationVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<EntryToServerMutation, EntryToServerMutationVariables>(
-        EntryToServerDocument,
-        options
-    );
-}
-export type EntryToServerMutationHookResult = ReturnType<typeof useEntryToServerMutation>;
-export type EntryToServerMutationResult = Apollo.MutationResult<EntryToServerMutation>;
-export type EntryToServerMutationOptions = Apollo.BaseMutationOptions<
-    EntryToServerMutation,
-    EntryToServerMutationVariables
->;
-export const LeaveRoomDocument = gql`
-    mutation LeaveRoom($id: String!) {
-        result: leaveRoom(id: $id) {
-            failureType
-        }
-    }
-`;
-export type LeaveRoomMutationFn = Apollo.MutationFunction<
-    LeaveRoomMutation,
-    LeaveRoomMutationVariables
->;
-
-/**
- * __useLeaveRoomMutation__
- *
- * To run a mutation, you first call `useLeaveRoomMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useLeaveRoomMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [leaveRoomMutation, { data, loading, error }] = useLeaveRoomMutation({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useLeaveRoomMutation(
-    baseOptions?: Apollo.MutationHookOptions<LeaveRoomMutation, LeaveRoomMutationVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<LeaveRoomMutation, LeaveRoomMutationVariables>(
-        LeaveRoomDocument,
-        options
-    );
-}
-export type LeaveRoomMutationHookResult = ReturnType<typeof useLeaveRoomMutation>;
-export type LeaveRoomMutationResult = Apollo.MutationResult<LeaveRoomMutation>;
-export type LeaveRoomMutationOptions = Apollo.BaseMutationOptions<
-    LeaveRoomMutation,
-    LeaveRoomMutationVariables
->;
-export const OperateDocument = gql`
-    mutation Operate(
-        $id: String!
-        $revisionFrom: Int!
-        $operation: RoomOperationInput!
-        $requestId: String!
-    ) {
-        result: operate(
-            id: $id
-            prevRevision: $revisionFrom
-            operation: $operation
-            requestId: $requestId
-        ) {
-            ... on OperateRoomSuccessResult {
-                operation {
-                    ...RoomOperation
-                }
-            }
-            ... on OperateRoomIdResult {
-                requestId
-            }
-            ... on OperateRoomFailureResult {
-                failureType
-            }
-            ... on OperateRoomNonJoinedResult {
-                roomAsListItem {
-                    ...RoomAsListItem
-                }
-            }
-        }
-    }
-    ${RoomOperationFragmentDoc}
-    ${RoomAsListItemFragmentDoc}
-`;
-export type OperateMutationFn = Apollo.MutationFunction<OperateMutation, OperateMutationVariables>;
-
-/**
- * __useOperateMutation__
- *
- * To run a mutation, you first call `useOperateMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useOperateMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [operateMutation, { data, loading, error }] = useOperateMutation({
- *   variables: {
- *      id: // value for 'id'
- *      revisionFrom: // value for 'revisionFrom'
- *      operation: // value for 'operation'
- *      requestId: // value for 'requestId'
- *   },
- * });
- */
-export function useOperateMutation(
-    baseOptions?: Apollo.MutationHookOptions<OperateMutation, OperateMutationVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<OperateMutation, OperateMutationVariables>(OperateDocument, options);
-}
-export type OperateMutationHookResult = ReturnType<typeof useOperateMutation>;
-export type OperateMutationResult = Apollo.MutationResult<OperateMutation>;
-export type OperateMutationOptions = Apollo.BaseMutationOptions<
-    OperateMutation,
-    OperateMutationVariables
->;
-export const PingDocument = gql`
-    mutation Ping($value: Float!) {
-        result: ping(value: $value) {
-            createdBy
-            value
-        }
-    }
-`;
-export type PingMutationFn = Apollo.MutationFunction<PingMutation, PingMutationVariables>;
-
-/**
- * __usePingMutation__
- *
- * To run a mutation, you first call `usePingMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `usePingMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [pingMutation, { data, loading, error }] = usePingMutation({
- *   variables: {
- *      value: // value for 'value'
- *   },
- * });
- */
-export function usePingMutation(
-    baseOptions?: Apollo.MutationHookOptions<PingMutation, PingMutationVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<PingMutation, PingMutationVariables>(PingDocument, options);
-}
-export type PingMutationHookResult = ReturnType<typeof usePingMutation>;
-export type PingMutationResult = Apollo.MutationResult<PingMutation>;
-export type PingMutationOptions = Apollo.BaseMutationOptions<PingMutation, PingMutationVariables>;
-export const PromoteToPlayerDocument = gql`
-    mutation PromoteToPlayer($roomId: String!, $phrase: String) {
-        result: promoteToPlayer(roomId: $roomId, phrase: $phrase) {
-            failureType
-        }
-    }
-`;
-export type PromoteToPlayerMutationFn = Apollo.MutationFunction<
-    PromoteToPlayerMutation,
-    PromoteToPlayerMutationVariables
->;
-
-/**
- * __usePromoteToPlayerMutation__
- *
- * To run a mutation, you first call `usePromoteToPlayerMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `usePromoteToPlayerMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [promoteToPlayerMutation, { data, loading, error }] = usePromoteToPlayerMutation({
- *   variables: {
- *      roomId: // value for 'roomId'
- *      phrase: // value for 'phrase'
- *   },
- * });
- */
-export function usePromoteToPlayerMutation(
-    baseOptions?: Apollo.MutationHookOptions<
-        PromoteToPlayerMutation,
-        PromoteToPlayerMutationVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<PromoteToPlayerMutation, PromoteToPlayerMutationVariables>(
-        PromoteToPlayerDocument,
-        options
-    );
-}
-export type PromoteToPlayerMutationHookResult = ReturnType<typeof usePromoteToPlayerMutation>;
-export type PromoteToPlayerMutationResult = Apollo.MutationResult<PromoteToPlayerMutation>;
-export type PromoteToPlayerMutationOptions = Apollo.BaseMutationOptions<
-    PromoteToPlayerMutation,
-    PromoteToPlayerMutationVariables
->;
-export const WritePublicMessageDocument = gql`
-    mutation WritePublicMessage(
-        $roomId: String!
-        $text: String!
-        $textColor: String
-        $channelKey: String!
-        $characterStateId: String
-        $customName: String
-        $gameType: String
-    ) {
-        result: writePublicMessage(
-            roomId: $roomId
-            text: $text
-            textColor: $textColor
-            channelKey: $channelKey
-            characterStateId: $characterStateId
-            customName: $customName
-            gameType: $gameType
-        ) {
-            ... on RoomPublicMessage {
-                ...RoomPublicMessage
-            }
-            ... on WriteRoomPublicMessageFailureResult {
-                failureType
-            }
-        }
-    }
-    ${RoomPublicMessageFragmentDoc}
-`;
-export type WritePublicMessageMutationFn = Apollo.MutationFunction<
-    WritePublicMessageMutation,
-    WritePublicMessageMutationVariables
->;
-
-/**
- * __useWritePublicMessageMutation__
- *
- * To run a mutation, you first call `useWritePublicMessageMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useWritePublicMessageMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [writePublicMessageMutation, { data, loading, error }] = useWritePublicMessageMutation({
- *   variables: {
- *      roomId: // value for 'roomId'
- *      text: // value for 'text'
- *      textColor: // value for 'textColor'
- *      channelKey: // value for 'channelKey'
- *      characterStateId: // value for 'characterStateId'
- *      customName: // value for 'customName'
- *      gameType: // value for 'gameType'
- *   },
- * });
- */
-export function useWritePublicMessageMutation(
-    baseOptions?: Apollo.MutationHookOptions<
-        WritePublicMessageMutation,
-        WritePublicMessageMutationVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<WritePublicMessageMutation, WritePublicMessageMutationVariables>(
-        WritePublicMessageDocument,
-        options
-    );
-}
-export type WritePublicMessageMutationHookResult = ReturnType<typeof useWritePublicMessageMutation>;
-export type WritePublicMessageMutationResult = Apollo.MutationResult<WritePublicMessageMutation>;
-export type WritePublicMessageMutationOptions = Apollo.BaseMutationOptions<
-    WritePublicMessageMutation,
-    WritePublicMessageMutationVariables
->;
-export const WritePrivateMessageDocument = gql`
-    mutation WritePrivateMessage(
-        $roomId: String!
-        $visibleTo: [String!]!
-        $text: String!
-        $textColor: String
-        $characterStateId: String
-        $customName: String
-        $gameType: String
-    ) {
-        result: writePrivateMessage(
-            roomId: $roomId
-            visibleTo: $visibleTo
-            text: $text
-            textColor: $textColor
-            characterStateId: $characterStateId
-            customName: $customName
-            gameType: $gameType
-        ) {
-            ... on RoomPrivateMessage {
-                ...RoomPrivateMessage
-            }
-            ... on WriteRoomPrivateMessageFailureResult {
-                failureType
-            }
-        }
-    }
-    ${RoomPrivateMessageFragmentDoc}
-`;
-export type WritePrivateMessageMutationFn = Apollo.MutationFunction<
-    WritePrivateMessageMutation,
-    WritePrivateMessageMutationVariables
->;
-
-/**
- * __useWritePrivateMessageMutation__
- *
- * To run a mutation, you first call `useWritePrivateMessageMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useWritePrivateMessageMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [writePrivateMessageMutation, { data, loading, error }] = useWritePrivateMessageMutation({
- *   variables: {
- *      roomId: // value for 'roomId'
- *      visibleTo: // value for 'visibleTo'
- *      text: // value for 'text'
- *      textColor: // value for 'textColor'
- *      characterStateId: // value for 'characterStateId'
- *      customName: // value for 'customName'
- *      gameType: // value for 'gameType'
- *   },
- * });
- */
-export function useWritePrivateMessageMutation(
-    baseOptions?: Apollo.MutationHookOptions<
-        WritePrivateMessageMutation,
-        WritePrivateMessageMutationVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<WritePrivateMessageMutation, WritePrivateMessageMutationVariables>(
-        WritePrivateMessageDocument,
-        options
-    );
-}
-export type WritePrivateMessageMutationHookResult = ReturnType<
-    typeof useWritePrivateMessageMutation
->;
-export type WritePrivateMessageMutationResult = Apollo.MutationResult<WritePrivateMessageMutation>;
-export type WritePrivateMessageMutationOptions = Apollo.BaseMutationOptions<
-    WritePrivateMessageMutation,
-    WritePrivateMessageMutationVariables
->;
-export const WriteRoomSoundEffectDocument = gql`
-    mutation WriteRoomSoundEffect($roomId: String!, $file: FilePathInput!, $volume: Float!) {
-        result: writeRoomSoundEffect(roomId: $roomId, file: $file, volume: $volume) {
-            ... on RoomSoundEffect {
-                ...RoomSoundEffect
-            }
-            ... on WriteRoomSoundEffectFailureResult {
-                failureType
-            }
-        }
-    }
-    ${RoomSoundEffectFragmentDoc}
-`;
-export type WriteRoomSoundEffectMutationFn = Apollo.MutationFunction<
-    WriteRoomSoundEffectMutation,
-    WriteRoomSoundEffectMutationVariables
->;
-
-/**
- * __useWriteRoomSoundEffectMutation__
- *
- * To run a mutation, you first call `useWriteRoomSoundEffectMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useWriteRoomSoundEffectMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [writeRoomSoundEffectMutation, { data, loading, error }] = useWriteRoomSoundEffectMutation({
- *   variables: {
- *      roomId: // value for 'roomId'
- *      file: // value for 'file'
- *      volume: // value for 'volume'
- *   },
- * });
- */
-export function useWriteRoomSoundEffectMutation(
-    baseOptions?: Apollo.MutationHookOptions<
-        WriteRoomSoundEffectMutation,
-        WriteRoomSoundEffectMutationVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<WriteRoomSoundEffectMutation, WriteRoomSoundEffectMutationVariables>(
-        WriteRoomSoundEffectDocument,
-        options
-    );
-}
-export type WriteRoomSoundEffectMutationHookResult = ReturnType<
-    typeof useWriteRoomSoundEffectMutation
->;
-export type WriteRoomSoundEffectMutationResult =
-    Apollo.MutationResult<WriteRoomSoundEffectMutation>;
-export type WriteRoomSoundEffectMutationOptions = Apollo.BaseMutationOptions<
-    WriteRoomSoundEffectMutation,
-    WriteRoomSoundEffectMutationVariables
->;
-export const EditMessageDocument = gql`
-    mutation EditMessage($roomId: String!, $messageId: String!, $text: String!) {
-        result: editMessage(roomId: $roomId, messageId: $messageId, text: $text) {
-            failureType
-        }
-    }
-`;
-export type EditMessageMutationFn = Apollo.MutationFunction<
-    EditMessageMutation,
-    EditMessageMutationVariables
->;
-
-/**
- * __useEditMessageMutation__
- *
- * To run a mutation, you first call `useEditMessageMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useEditMessageMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [editMessageMutation, { data, loading, error }] = useEditMessageMutation({
- *   variables: {
- *      roomId: // value for 'roomId'
- *      messageId: // value for 'messageId'
- *      text: // value for 'text'
- *   },
- * });
- */
-export function useEditMessageMutation(
-    baseOptions?: Apollo.MutationHookOptions<EditMessageMutation, EditMessageMutationVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<EditMessageMutation, EditMessageMutationVariables>(
-        EditMessageDocument,
-        options
-    );
-}
-export type EditMessageMutationHookResult = ReturnType<typeof useEditMessageMutation>;
-export type EditMessageMutationResult = Apollo.MutationResult<EditMessageMutation>;
-export type EditMessageMutationOptions = Apollo.BaseMutationOptions<
-    EditMessageMutation,
-    EditMessageMutationVariables
->;
-export const DeleteMessageDocument = gql`
-    mutation DeleteMessage($roomId: String!, $messageId: String!) {
-        result: deleteMessage(roomId: $roomId, messageId: $messageId) {
-            failureType
-        }
-    }
-`;
-export type DeleteMessageMutationFn = Apollo.MutationFunction<
-    DeleteMessageMutation,
-    DeleteMessageMutationVariables
->;
-
-/**
- * __useDeleteMessageMutation__
- *
- * To run a mutation, you first call `useDeleteMessageMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeleteMessageMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [deleteMessageMutation, { data, loading, error }] = useDeleteMessageMutation({
- *   variables: {
- *      roomId: // value for 'roomId'
- *      messageId: // value for 'messageId'
- *   },
- * });
- */
-export function useDeleteMessageMutation(
-    baseOptions?: Apollo.MutationHookOptions<DeleteMessageMutation, DeleteMessageMutationVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<DeleteMessageMutation, DeleteMessageMutationVariables>(
-        DeleteMessageDocument,
-        options
-    );
-}
-export type DeleteMessageMutationHookResult = ReturnType<typeof useDeleteMessageMutation>;
-export type DeleteMessageMutationResult = Apollo.MutationResult<DeleteMessageMutation>;
-export type DeleteMessageMutationOptions = Apollo.BaseMutationOptions<
-    DeleteMessageMutation,
-    DeleteMessageMutationVariables
->;
-export const MakeMessageNotSecretDocument = gql`
-    mutation MakeMessageNotSecret($roomId: String!, $messageId: String!) {
-        result: makeMessageNotSecret(roomId: $roomId, messageId: $messageId) {
-            failureType
-        }
-    }
-`;
-export type MakeMessageNotSecretMutationFn = Apollo.MutationFunction<
-    MakeMessageNotSecretMutation,
-    MakeMessageNotSecretMutationVariables
->;
-
-/**
- * __useMakeMessageNotSecretMutation__
- *
- * To run a mutation, you first call `useMakeMessageNotSecretMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useMakeMessageNotSecretMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [makeMessageNotSecretMutation, { data, loading, error }] = useMakeMessageNotSecretMutation({
- *   variables: {
- *      roomId: // value for 'roomId'
- *      messageId: // value for 'messageId'
- *   },
- * });
- */
-export function useMakeMessageNotSecretMutation(
-    baseOptions?: Apollo.MutationHookOptions<
-        MakeMessageNotSecretMutation,
-        MakeMessageNotSecretMutationVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<MakeMessageNotSecretMutation, MakeMessageNotSecretMutationVariables>(
-        MakeMessageNotSecretDocument,
-        options
-    );
-}
-export type MakeMessageNotSecretMutationHookResult = ReturnType<
-    typeof useMakeMessageNotSecretMutation
->;
-export type MakeMessageNotSecretMutationResult =
-    Apollo.MutationResult<MakeMessageNotSecretMutation>;
-export type MakeMessageNotSecretMutationOptions = Apollo.BaseMutationOptions<
-    MakeMessageNotSecretMutation,
-    MakeMessageNotSecretMutationVariables
->;
-export const UpdateWritingMessageStatusDocument = gql`
-    mutation UpdateWritingMessageStatus(
-        $roomId: String!
-        $newStatus: WritingMessageStatusInputType!
-    ) {
-        result: updateWritingMessageStatus(roomId: $roomId, newStatus: $newStatus)
-    }
-`;
-export type UpdateWritingMessageStatusMutationFn = Apollo.MutationFunction<
+export const CreateFileTagDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'CreateFileTag' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'tagName' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'createFileTag' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'tagName' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'tagName' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FileTag' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...FileTagFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<CreateFileTagMutation, CreateFileTagMutationVariables>;
+export const ChangeParticipantNameDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'ChangeParticipantName' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'roomId' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'newName' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'changeParticipantName' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'roomId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'roomId' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'newName' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'newName' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'failureType' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<ChangeParticipantNameMutation, ChangeParticipantNameMutationVariables>;
+export const CreateRoomDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'CreateRoom' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'CreateRoomInput' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'createRoom' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'input' },
+                                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: { kind: 'Name', value: 'CreateRoomSuccessResult' },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'FragmentSpread',
+                                                name: { kind: 'Name', value: 'CreateRoomResult' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: { kind: 'Name', value: 'CreateRoomFailureResult' },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'failureType' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...CreateRoomResultFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<CreateRoomMutation, CreateRoomMutationVariables>;
+export const DeleteFilesDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'DeleteFiles' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'filenames' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'ListType',
+                            type: {
+                                kind: 'NonNullType',
+                                type: {
+                                    kind: 'NamedType',
+                                    name: { kind: 'Name', value: 'String' },
+                                },
+                            },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'deleteFiles' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'filenames' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'filenames' },
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<DeleteFilesMutation, DeleteFilesMutationVariables>;
+export const DeleteFileTagDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'DeleteFileTag' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'tagId' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'deleteFileTag' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'tagId' },
+                                value: { kind: 'Variable', name: { kind: 'Name', value: 'tagId' } },
+                            },
+                        ],
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<DeleteFileTagMutation, DeleteFileTagMutationVariables>;
+export const DeleteRoomDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'DeleteRoom' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'deleteRoom' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'failureType' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<DeleteRoomMutation, DeleteRoomMutationVariables>;
+export const EditFileTagsDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'EditFileTags' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'EditFileTagsInput' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'editFileTags' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'input' },
+                                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+                            },
+                        ],
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<EditFileTagsMutation, EditFileTagsMutationVariables>;
+export const JoinRoomAsPlayerDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'JoinRoomAsPlayer' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'name' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'phrase' } },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'joinRoomAsPlayer' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'name' },
+                                value: { kind: 'Variable', name: { kind: 'Name', value: 'name' } },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'phrase' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'phrase' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'JoinRoomResult' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...JoinRoomResultFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<JoinRoomAsPlayerMutation, JoinRoomAsPlayerMutationVariables>;
+export const JoinRoomAsSpectatorDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'JoinRoomAsSpectator' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'name' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'phrase' } },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'joinRoomAsSpectator' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'name' },
+                                value: { kind: 'Variable', name: { kind: 'Name', value: 'name' } },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'phrase' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'phrase' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'JoinRoomResult' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...JoinRoomResultFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<JoinRoomAsSpectatorMutation, JoinRoomAsSpectatorMutationVariables>;
+export const EntryToServerDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'EntryToServer' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'phrase' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'entryToServer' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'phrase' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'phrase' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [{ kind: 'Field', name: { kind: 'Name', value: 'type' } }],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<EntryToServerMutation, EntryToServerMutationVariables>;
+export const LeaveRoomDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'LeaveRoom' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'leaveRoom' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'failureType' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<LeaveRoomMutation, LeaveRoomMutationVariables>;
+export const OperateDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'Operate' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'revisionFrom' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'operation' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'RoomOperationInput' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'requestId' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'operate' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'prevRevision' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'revisionFrom' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'operation' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'operation' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'requestId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'requestId' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: { kind: 'Name', value: 'OperateRoomSuccessResult' },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'operation' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'FragmentSpread',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'RoomOperation',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: { kind: 'Name', value: 'OperateRoomIdResult' },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'requestId' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: { kind: 'Name', value: 'OperateRoomFailureResult' },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'failureType' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: { kind: 'Name', value: 'OperateRoomNonJoinedResult' },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'roomAsListItem' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'FragmentSpread',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'RoomAsListItem',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...RoomOperationFragmentDoc.definitions,
+        ...RoomAsListItemFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<OperateMutation, OperateMutationVariables>;
+export const PingDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'Ping' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'value' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'Float' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'ping' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'value' },
+                                value: { kind: 'Variable', name: { kind: 'Name', value: 'value' } },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'value' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<PingMutation, PingMutationVariables>;
+export const PromoteToPlayerDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'PromoteToPlayer' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'roomId' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'phrase' } },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'promoteToPlayer' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'roomId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'roomId' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'phrase' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'phrase' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'failureType' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<PromoteToPlayerMutation, PromoteToPlayerMutationVariables>;
+export const WritePublicMessageDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'WritePublicMessage' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'roomId' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'text' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'textColor' } },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'channelKey' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'characterStateId' },
+                    },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'customName' } },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'gameType' } },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'writePublicMessage' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'roomId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'roomId' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'text' },
+                                value: { kind: 'Variable', name: { kind: 'Name', value: 'text' } },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'textColor' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'textColor' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'channelKey' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'channelKey' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'characterStateId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'characterStateId' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'customName' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'customName' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'gameType' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'gameType' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: { kind: 'Name', value: 'RoomPublicMessage' },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'FragmentSpread',
+                                                name: { kind: 'Name', value: 'RoomPublicMessage' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: {
+                                            kind: 'Name',
+                                            value: 'WriteRoomPublicMessageFailureResult',
+                                        },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'failureType' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...RoomPublicMessageFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<WritePublicMessageMutation, WritePublicMessageMutationVariables>;
+export const WritePrivateMessageDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'WritePrivateMessage' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'roomId' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'visibleTo' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'ListType',
+                            type: {
+                                kind: 'NonNullType',
+                                type: {
+                                    kind: 'NamedType',
+                                    name: { kind: 'Name', value: 'String' },
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'text' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'textColor' } },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'characterStateId' },
+                    },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'customName' } },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'gameType' } },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'writePrivateMessage' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'roomId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'roomId' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'visibleTo' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'visibleTo' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'text' },
+                                value: { kind: 'Variable', name: { kind: 'Name', value: 'text' } },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'textColor' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'textColor' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'characterStateId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'characterStateId' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'customName' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'customName' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'gameType' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'gameType' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: { kind: 'Name', value: 'RoomPrivateMessage' },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'FragmentSpread',
+                                                name: { kind: 'Name', value: 'RoomPrivateMessage' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: {
+                                            kind: 'Name',
+                                            value: 'WriteRoomPrivateMessageFailureResult',
+                                        },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'failureType' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...RoomPrivateMessageFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<WritePrivateMessageMutation, WritePrivateMessageMutationVariables>;
+export const WriteRoomSoundEffectDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'WriteRoomSoundEffect' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'roomId' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'file' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'FilePathInput' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'volume' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'Float' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'writeRoomSoundEffect' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'roomId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'roomId' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'file' },
+                                value: { kind: 'Variable', name: { kind: 'Name', value: 'file' } },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'volume' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'volume' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: { kind: 'Name', value: 'RoomSoundEffect' },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'FragmentSpread',
+                                                name: { kind: 'Name', value: 'RoomSoundEffect' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: {
+                                            kind: 'Name',
+                                            value: 'WriteRoomSoundEffectFailureResult',
+                                        },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'failureType' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...RoomSoundEffectFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<WriteRoomSoundEffectMutation, WriteRoomSoundEffectMutationVariables>;
+export const EditMessageDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'EditMessage' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'roomId' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'messageId' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'text' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'editMessage' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'roomId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'roomId' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'messageId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'messageId' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'text' },
+                                value: { kind: 'Variable', name: { kind: 'Name', value: 'text' } },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'failureType' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<EditMessageMutation, EditMessageMutationVariables>;
+export const DeleteMessageDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'DeleteMessage' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'roomId' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'messageId' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'deleteMessage' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'roomId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'roomId' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'messageId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'messageId' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'failureType' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<DeleteMessageMutation, DeleteMessageMutationVariables>;
+export const MakeMessageNotSecretDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'MakeMessageNotSecret' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'roomId' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'messageId' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'makeMessageNotSecret' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'roomId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'roomId' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'messageId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'messageId' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'failureType' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<MakeMessageNotSecretMutation, MakeMessageNotSecretMutationVariables>;
+export const UpdateWritingMessageStatusDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'UpdateWritingMessageStatus' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'roomId' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'newStatus' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'WritingMessageStatusInputType' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'updateWritingMessageStatus' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'roomId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'roomId' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'newStatus' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'newStatus' },
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
     UpdateWritingMessageStatusMutation,
     UpdateWritingMessageStatusMutationVariables
 >;
-
-/**
- * __useUpdateWritingMessageStatusMutation__
- *
- * To run a mutation, you first call `useUpdateWritingMessageStatusMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUpdateWritingMessageStatusMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [updateWritingMessageStatusMutation, { data, loading, error }] = useUpdateWritingMessageStatusMutation({
- *   variables: {
- *      roomId: // value for 'roomId'
- *      newStatus: // value for 'newStatus'
- *   },
- * });
- */
-export function useUpdateWritingMessageStatusMutation(
-    baseOptions?: Apollo.MutationHookOptions<
-        UpdateWritingMessageStatusMutation,
-        UpdateWritingMessageStatusMutationVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useMutation<
-        UpdateWritingMessageStatusMutation,
-        UpdateWritingMessageStatusMutationVariables
-    >(UpdateWritingMessageStatusDocument, options);
-}
-export type UpdateWritingMessageStatusMutationHookResult = ReturnType<
-    typeof useUpdateWritingMessageStatusMutation
->;
-export type UpdateWritingMessageStatusMutationResult =
-    Apollo.MutationResult<UpdateWritingMessageStatusMutation>;
-export type UpdateWritingMessageStatusMutationOptions = Apollo.BaseMutationOptions<
-    UpdateWritingMessageStatusMutation,
-    UpdateWritingMessageStatusMutationVariables
->;
-export const RoomEventDocument = gql`
-    subscription RoomEvent($id: String!) {
-        roomEvent(id: $id) {
-            roomOperation {
-                ...RoomOperation
-            }
-            deleteRoomOperation {
-                deletedBy
-            }
-            roomMessageEvent {
-                ...RoomMessageEvent
-            }
-            roomConnectionEvent {
-                userUid
-                isConnected
-                updatedAt
-            }
-            writingMessageStatus {
-                userUid
-                status
-            }
-        }
-    }
-    ${RoomOperationFragmentDoc}
-    ${RoomMessageEventFragmentDoc}
-`;
-
-/**
- * __useRoomEventSubscription__
- *
- * To run a query within a React component, call `useRoomEventSubscription` and pass it any options that fit your needs.
- * When your component renders, `useRoomEventSubscription` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useRoomEventSubscription({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useRoomEventSubscription(
-    baseOptions: Apollo.SubscriptionHookOptions<
-        RoomEventSubscription,
-        RoomEventSubscriptionVariables
-    >
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useSubscription<RoomEventSubscription, RoomEventSubscriptionVariables>(
-        RoomEventDocument,
-        options
-    );
-}
-export type RoomEventSubscriptionHookResult = ReturnType<typeof useRoomEventSubscription>;
-export type RoomEventSubscriptionResult = Apollo.SubscriptionResult<RoomEventSubscription>;
-export const PongDocument = gql`
-    subscription Pong {
-        pong {
-            createdBy
-            value
-        }
-    }
-`;
-
-/**
- * __usePongSubscription__
- *
- * To run a query within a React component, call `usePongSubscription` and pass it any options that fit your needs.
- * When your component renders, `usePongSubscription` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = usePongSubscription({
- *   variables: {
- *   },
- * });
- */
-export function usePongSubscription(
-    baseOptions?: Apollo.SubscriptionHookOptions<PongSubscription, PongSubscriptionVariables>
-) {
-    const options = { ...defaultOptions, ...baseOptions };
-    return Apollo.useSubscription<PongSubscription, PongSubscriptionVariables>(
-        PongDocument,
-        options
-    );
-}
-export type PongSubscriptionHookResult = ReturnType<typeof usePongSubscription>;
-export type PongSubscriptionResult = Apollo.SubscriptionResult<PongSubscription>;
+export const RoomEventDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'subscription',
+            name: { kind: 'Name', value: 'RoomEvent' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'roomEvent' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'roomOperation' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'FragmentSpread',
+                                                name: { kind: 'Name', value: 'RoomOperation' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'deleteRoomOperation' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'deletedBy' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'roomMessageEvent' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'FragmentSpread',
+                                                name: { kind: 'Name', value: 'RoomMessageEvent' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'roomConnectionEvent' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'userUid' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'isConnected' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'updatedAt' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'writingMessageStatus' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'userUid' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'status' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...RoomOperationFragmentDoc.definitions,
+        ...RoomMessageEventFragmentDoc.definitions,
+    ],
+} as unknown as DocumentNode<RoomEventSubscription, RoomEventSubscriptionVariables>;
+export const PongDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'subscription',
+            name: { kind: 'Name', value: 'Pong' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'pong' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'value' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<PongSubscription, PongSubscriptionVariables>;

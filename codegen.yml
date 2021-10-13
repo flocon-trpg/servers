@@ -6,9 +6,9 @@ generates:
         plugins:
             - 'typescript'
             - 'typescript-operations'
-            - 'typescript-react-apollo'
+            - 'typed-document-node'
     ./test/graphql.ts:
         plugins:
             - 'typescript'
             - 'typescript-operations'
-            - 'typescript-react-apollo'
+            - 'typed-document-node'
