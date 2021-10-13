@@ -43,21 +43,21 @@ const useIdToken = (user: FirebaseUserState): IdTokenState => {
     React.useEffect(() => {
         switch (user) {
             case loading:
-                console.log('useIdToken loading');
+                console.info('useIdToken loading');
                 // ユーザーが変わったとき、新しいidTokenを入手するまでは前のidTokenを保持するようにしている。
                 // こうすることで、一時的にidTokenがundefinedになるせいでApolloClientが一時的にidTokenなしモードに切り替わることを防ぐ狙いがある。
                 return;
             case notSignIn:
             case authNotFound:
-                console.log('useIdToken ' + user);
+                console.info('useIdToken ' + user);
                 setResult({ type: user });
                 return;
             default: {
-                console.log('useIdToken userRef');
+                console.info('useIdToken userRef');
                 user.value.getIdToken().then(idToken => {
                     // ユーザーが変わったとき、新しいidTokenを入手するまでは前のidTokenを保持するようにしている。
                     // こうすることで、一時的にidTokenがundefinedになるせいでApolloClientが一時的にidTokenなしモードに切り替わることを防ぐ狙いがある。
-                    console.log('useIdToken set idToken');
+                    console.info('useIdToken set idToken');
                     setResult(idToken);
                 });
                 return;
@@ -98,10 +98,13 @@ const useFirebaseUser = (): FirebaseUserState => {
     const [user, setUser] = React.useState<FirebaseUserState>(loading);
     React.useEffect(() => {
         if (auth == null) {
+            console.info('auth changed (null)');
             setUser(authNotFound);
             return;
         }
+        console.info('authChange(non-null)');
         const unsubscribe = auth.onIdTokenChanged(user => {
+            console.info('onIdTokenChanged');
             // onIdTokenChangedが実行されるたびにgetIdTokenの結果は変わるが、userの参照は以前と同じである。そのため、depsに直接Userを入れると以前のものと等しいためidTokenの更新処理がされなくなってしまう。そのため、代わりにRef<User>としている。getIdTokenを実行するhookのdepsには、UserではなくRef<User>を書くことを忘れずに。
             setUser(user == null ? notSignIn : { value: user });
         });
