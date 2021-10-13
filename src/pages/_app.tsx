@@ -27,7 +27,7 @@ import { userConfigModule } from '../modules/userConfigModule';
 import { getAuth } from '../utils/firebaseHelpers';
 import { ConfigContext } from '../contexts/ConfigContext';
 import { useMyUserUid } from '../hooks/useMyUserUid';
-import { AllContextProvider as AllContextProvider } from '../components/AllContextProvider';
+import { AllContextProvider } from '../components/AllContextProvider';
 import { simpleId } from '@kizahasi/flocon-core';
 
 enableMapSet();
@@ -43,17 +43,21 @@ const useIdToken = (user: FirebaseUserState): IdTokenState => {
     React.useEffect(() => {
         switch (user) {
             case loading:
+                console.log('useIdToken loading');
                 // ユーザーが変わったとき、新しいidTokenを入手するまでは前のidTokenを保持するようにしている。
                 // こうすることで、一時的にidTokenがundefinedになるせいでApolloClientが一時的にidTokenなしモードに切り替わることを防ぐ狙いがある。
                 return;
             case notSignIn:
             case authNotFound:
+                console.log('useIdToken ' + user);
                 setResult({ type: user });
                 return;
             default: {
+                console.log('useIdToken userRef');
                 user.value.getIdToken().then(idToken => {
                     // ユーザーが変わったとき、新しいidTokenを入手するまでは前のidTokenを保持するようにしている。
                     // こうすることで、一時的にidTokenがundefinedになるせいでApolloClientが一時的にidTokenなしモードに切り替わることを防ぐ狙いがある。
+                    console.log('useIdToken set idToken');
                     setResult(idToken);
                 });
                 return;

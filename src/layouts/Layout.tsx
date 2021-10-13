@@ -123,7 +123,9 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
     const myUserUid = typeof myAuth === 'string' ? null : myAuth.value.uid;
     const apolloClient = useApolloClient();
     const signOut = useSignOut();
-    const [isEntry, setIsEntry] = React.useState<'notRequired' | 'loading' | boolean>('loading');
+    const [isEntry, setIsEntry] = React.useState<
+        'notRequired' | 'loading' | { type: 'error'; error: Error } | boolean
+    >('loading');
     const idToken = React.useContext(FirebaseAuthenticationIdTokenContext);
     const hasIdToken = idToken != null;
     const requiresEntry = requires === loginAndEntry;
@@ -145,6 +147,13 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                         return;
                     }
                     setIsEntry(queryResult.data.result);
+                })
+                .catch(e => {
+                    if (e instanceof Error) {
+                        setIsEntry({ type: 'error', error: e });
+                        return;
+                    }
+                    throw e;
                 });
             return () => {
                 unsubscribed = true;
@@ -196,6 +205,11 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                         </Card>
                     </Center>
                 );
+            case true:
+            case 'notRequired':
+                break;
+            default:
+                return <Result status='error' title='APIエラー' subTitle={isEntry.error.message} />;
         }
         showChildren = true;
         return getChildren();
