@@ -163,6 +163,7 @@ var GlobalRoom;
                 return this.participantEntity;
             }
         }
+        const maxJsonLength = 1000000;
         Global.applyToEntity = async ({ em, target, prevState, operation, }) => {
             var _a;
             const nextState = (0, flocon_core_1.apply)({
@@ -173,7 +174,16 @@ var GlobalRoom;
                 throw nextState.error;
             }
             target.name = nextState.value.name;
-            target.value = (0, flocon_core_1.exactDbState)(nextState.value);
+            const newValue = (0, flocon_core_1.exactDbState)(nextState.value);
+            const newValueJson = JSON.stringify(newValue);
+            if (newValueJson.length > maxJsonLength) {
+                const oldValue = target.value;
+                const oldValueJson = JSON.stringify(oldValue);
+                if (oldValueJson.length < maxJsonLength) {
+                    throw new Error('value size limit exceeded');
+                }
+            }
+            target.value = newValue;
             const prevRevision = target.revision;
             target.revision += 1;
             await (0, util_1.recordForEachAsync)((_a = operation.participants) !== null && _a !== void 0 ? _a : {}, async (participant, participantKey) => {

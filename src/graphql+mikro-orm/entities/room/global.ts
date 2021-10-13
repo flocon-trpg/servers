@@ -254,6 +254,8 @@ export namespace GlobalRoom {
             }
         }
 
+        const maxJsonLength = 1_000_000;
+
         // prevStateにおけるDbStateの部分とtargetのJSONは等しい
         export const applyToEntity = async ({
             em,
@@ -274,8 +276,18 @@ export namespace GlobalRoom {
                 throw nextState.error;
             }
 
+            // CONSIDER: サイズの大きいオブジェクトに対してJSON.stringifyするのは重い可能性。そもそももしJSON.stringifyが重いのであればio-tsのdecodeはより重くなりそう。
             target.name = nextState.value.name;
-            target.value = exactDbState(nextState.value);
+            const newValue = exactDbState(nextState.value);
+            const newValueJson = JSON.stringify(newValue);
+            if (newValueJson.length > maxJsonLength) {
+                const oldValue = target.value;
+                const oldValueJson = JSON.stringify(oldValue);
+                if (oldValueJson.length < maxJsonLength) {
+                    throw new Error('value size limit exceeded');
+                }
+            }
+            target.value = newValue;
             const prevRevision = target.revision;
             target.revision += 1;
 
