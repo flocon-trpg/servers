@@ -445,9 +445,7 @@ export type OperateRoomFailureResult = {
 };
 
 export enum OperateRoomFailureType {
-    InvalidId = 'InvalidId',
     NotFound = 'NotFound',
-    NotParticipant = 'NotParticipant',
 }
 
 export type OperateRoomIdResult = {
