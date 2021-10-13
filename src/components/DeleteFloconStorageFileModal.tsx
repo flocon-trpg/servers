@@ -1,5 +1,5 @@
 import { Modal } from 'antd';
-import { FileItemFragment, useDeleteFilesMutation, useGetFilesQuery } from '../generated/graphql';
+import { FileItemFragment } from '../generated/graphql';
 
 export const DeleteFloconStorageFileModal = (
     filesToDelete: FileItemFragment | FileItemFragment[],

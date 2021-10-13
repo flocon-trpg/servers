@@ -3,17 +3,17 @@ import React from 'react';
 import { Room as RoomComponent } from '../../pageComponents/room/Room';
 import {
     GetRoomFailureType,
+    JoinRoomAsPlayerDocument,
     JoinRoomAsPlayerMutation,
+    JoinRoomAsSpectatorDocument,
     JoinRoomFailureType,
     RoomAsListItemFragment,
-    useJoinRoomAsPlayerMutation,
-    useJoinRoomAsSpectatorMutation,
-    useUpdateWritingMessageStatusMutation,
+    UpdateWritingMessageStatusDocument,
     WritingMessageStatusInputType,
 } from '../../generated/graphql';
 import { Alert, Button, Card, Input, Result, Spin, notification as antdNotification } from 'antd';
 import { Layout, loginAndEntry, success } from '../../layouts/Layout';
-import { FetchResult } from '@apollo/client';
+import { FetchResult, useMutation } from '@apollo/client';
 import {
     deleted,
     getRoomFailure,
@@ -53,8 +53,10 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
     );
     const [playerPhrase, setPlayerPhrase] = React.useState<string>('');
     const [spectatorPhrase, setSpectatorPhrase] = React.useState<string>('');
-    const [joinRoomAsPlayer, joinRoomAsPlayerResult] = useJoinRoomAsPlayerMutation();
-    const [joinRoomAsSpectator, joinRoomAsSpectatorResult] = useJoinRoomAsSpectatorMutation();
+    const [joinRoomAsPlayer, joinRoomAsPlayerResult] = useMutation(JoinRoomAsPlayerDocument);
+    const [joinRoomAsSpectator, joinRoomAsSpectatorResult] = useMutation(
+        JoinRoomAsSpectatorDocument
+    );
     const [errorMessage, setErrorMessage] = React.useState<string | undefined>(undefined);
 
     const disableJoinActions = joinRoomAsPlayerResult.loading || joinRoomAsSpectatorResult.loading;
@@ -230,7 +232,7 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
     useRoomConfig(roomId);
 
     const dispatch = useDispatch();
-    const [updateWritingMessageStatus] = useUpdateWritingMessageStatusMutation();
+    const [updateWritingMessageStatus] = useMutation(UpdateWritingMessageStatusDocument);
 
     React.useEffect(() => {
         dispatch(roomDrawerAndPopoverAndModalModule.actions.reset());

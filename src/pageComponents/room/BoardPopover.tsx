@@ -19,7 +19,7 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import { InputDie } from '../../components/InputDie';
 import { NewTabLinkify } from '../../components/NewTabLinkify';
-import { FileSourceType, useWriteRoomSoundEffectMutation } from '../../generated/graphql';
+import { FileSourceType, WriteRoomSoundEffectDocument } from '../../generated/graphql';
 import { useBoards } from '../../hooks/state/useBoards';
 import { useCharacters } from '../../hooks/state/useCharacters';
 import { DicePieceValueElement } from '../../hooks/state/useDicePieceValues';
@@ -43,6 +43,7 @@ import { DicePieceValue } from '../../utils/dicePieceValue';
 import { StringPieceValue } from '../../utils/stringPieceValue';
 import { Piece } from '../../utils/piece';
 import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
+import { useMutation } from '@apollo/client';
 
 /* absolute positionで表示するときにBoardの子として表示させると、Boardウィンドウから要素がはみ出ることができないため、ウィンドウ右端に近いところで要素を表示させるときに不便なことがある。そのため、ページ全体の子として持たせるようにしている。 */
 
@@ -1066,7 +1067,7 @@ namespace ContextMenuModule {
             state => state.roomDrawerAndPopoverAndModalModule.boardContextMenu
         );
         const roomId = useSelector(state => state.roomModule.roomId);
-        const [writeSe] = useWriteRoomSoundEffectMutation();
+        const [writeSe] = useMutation(WriteRoomSoundEffectDocument);
 
         if (
             contextMenuState == null ||

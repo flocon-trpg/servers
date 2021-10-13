@@ -1,5 +1,5 @@
 import React from 'react';
-import { RoomAsListItemFragment, useGetRoomsListQuery } from '../../generated/graphql';
+import { GetRoomsListDocument, RoomAsListItemFragment } from '../../generated/graphql';
 import { Layout, loginAndEntry } from '../../layouts/Layout';
 import Link from 'next/link';
 import { Button, Table } from 'antd';
@@ -7,6 +7,7 @@ import { useRouter } from 'next/router';
 import { QueryResultViewer } from '../../components/QueryResultViewer';
 import classNames from 'classnames';
 import { flex, flexNone } from '../../utils/className';
+import { useQuery } from '@apollo/client';
 
 type Data = RoomAsListItemFragment;
 
@@ -59,7 +60,7 @@ const RoomsListComponent: React.FC<RoomsListComponentProps> = ({
 const pollingInterval = 30000;
 
 const RoomCore: React.FC = () => {
-    const rooms = useGetRoomsListQuery({ fetchPolicy: 'network-only' });
+    const rooms = useQuery(GetRoomsListDocument, { fetchPolicy: 'network-only' });
 
     switch (rooms.data?.result.__typename) {
         case 'GetRoomsListSuccessResult':

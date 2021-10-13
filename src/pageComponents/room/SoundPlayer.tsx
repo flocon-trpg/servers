@@ -3,7 +3,7 @@ import { Button, Checkbox, Divider, Drawer, Tooltip, Typography } from 'antd';
 import {
     FilePathInput,
     FileSourceType,
-    useWriteRoomSoundEffectMutation,
+    WriteRoomSoundEffectDocument,
 } from '../../generated/graphql';
 import * as Icon from '@ant-design/icons';
 import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
@@ -20,6 +20,7 @@ import { cancelRnd, flex, flexColumn, flexRow, itemsCenter } from '../../utils/c
 import classNames from 'classnames';
 import { sound } from '../../utils/fileType';
 import { FilePath as FilePathModule } from '../../utils/filePath';
+import { useMutation } from '@apollo/client';
 
 const defaultVolume = 0.5;
 
@@ -271,7 +272,7 @@ const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
         React.useState<FilesManagerDrawerType | null>(null);
 
-    const [writeRoomSoundEffect] = useWriteRoomSoundEffectMutation();
+    const [writeRoomSoundEffect] = useMutation(WriteRoomSoundEffectDocument);
     const [fileInput, setFileInput] = React.useState<FilePathInput>();
     const [volumeInput, setVolumeInput] = React.useState<number>(defaultVolume);
 

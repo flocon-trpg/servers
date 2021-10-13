@@ -1,7 +1,7 @@
-import { ApolloError } from '@apollo/client';
+import { ApolloError, useSubscription } from '@apollo/client';
 import React from 'react';
 import { Observable, Subject } from 'rxjs';
-import { RoomEventSubscription, useRoomEventSubscription } from '../generated/graphql';
+import { RoomEventDocument, RoomEventSubscription } from '../generated/graphql';
 
 type Result = {
     observable: Observable<RoomEventSubscription>;
@@ -12,7 +12,9 @@ type Result = {
 
 // 1つのSubscriptionのみで、複数の場所でsubscribeできるようにするHook。Rxにおけるpublishのようなことをしている。ただ、現状では必要ないかもしれない。
 export function usePublishRoomEventSubscription(roomId: string): Result {
-    const { data, loading, error } = useRoomEventSubscription({ variables: { id: roomId } });
+    const { data, loading, error } = useSubscription(RoomEventDocument, {
+        variables: { id: roomId },
+    });
     const [subject, setSubject] = React.useState(new Subject<RoomEventSubscription>());
     const subjectRef = React.useRef(subject);
 

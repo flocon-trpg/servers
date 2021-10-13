@@ -1,13 +1,12 @@
-import { useApolloClient } from '@apollo/client';
-import { Button, Input, InputNumber } from 'antd';
+import { useApolloClient, useMutation, useSubscription } from '@apollo/client';
+import { Button, InputNumber } from 'antd';
 import { GraphQLError } from 'graphql';
 import React from 'react';
 import {
+    PingDocument,
     PongDocument,
     PongSubscription,
     PongSubscriptionVariables,
-    usePingMutation,
-    usePongSubscription,
 } from '../../generated/graphql';
 
 type PongObservableResultState =
@@ -33,8 +32,8 @@ type PongObservableResultState =
 
 const PingPongCore: React.FC = () => {
     const apolloClient = useApolloClient();
-    const [pingMutation, pingMutationResult] = usePingMutation();
-    const pongSubscription = usePongSubscription();
+    const [pingMutation, pingMutationResult] = useMutation(PingDocument);
+    const pongSubscription = useSubscription(PongDocument);
     const [postValue, setPostValue] = React.useState(0);
     const [pongObservableResult, setPongObservableResult] =
         React.useState<PongObservableResultState>();

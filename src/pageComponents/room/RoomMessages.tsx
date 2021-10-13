@@ -36,9 +36,9 @@ import { ChatInput } from '../../components/ChatInput/Main';
 import { useDispatch } from 'react-redux';
 import { roomConfigModule } from '../../modules/roomConfigModule';
 import {
-    useDeleteMessageMutation,
-    useEditMessageMutation,
-    useMakeMessageNotSecretMutation,
+    DeleteMessageDocument,
+    EditMessageDocument,
+    MakeMessageNotSecretDocument,
     WritingMessageStatusType,
 } from '../../generated/graphql';
 import * as Icon from '@ant-design/icons';
@@ -68,6 +68,7 @@ import classNames from 'classnames';
 import { getUserUid, MyAuthContext } from '../../contexts/MyAuthContext';
 import { useOperateAsState } from '../../hooks/useOperateAsState';
 import produce from 'immer';
+import { useMutation } from '@apollo/client';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -416,9 +417,9 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
     const { message, showPrivateMessageMembers } = props;
 
     const myAuth = React.useContext(MyAuthContext);
-    const [editMessageMutation] = useEditMessageMutation();
-    const [deleteMessageMutation] = useDeleteMessageMutation();
-    const [makeMessageNotSecret] = useMakeMessageNotSecretMutation();
+    const [editMessageMutation] = useMutation(EditMessageDocument);
+    const [deleteMessageMutation] = useMutation(DeleteMessageDocument);
+    const [makeMessageNotSecret] = useMutation(MakeMessageNotSecretDocument);
     const [isEditModalVisible, setIsEditModalVisible] = React.useState(false);
     const roomId = useSelector(state => state.roomModule.roomId);
     const publicChannelNames = usePublicChannelNames();

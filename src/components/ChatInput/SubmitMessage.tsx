@@ -16,9 +16,8 @@ import { custom, SelectedCharacterType, some } from './getSelectedCharacterType'
 import _ from 'lodash';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import {
-    useWritePrivateMessageMutation,
-    useWritePublicMessageMutation,
-    WriteRoomPrivateMessageFailureType,
+    WritePrivateMessageDocument,
+    WritePublicMessageDocument,
     WriteRoomPublicMessageFailureType,
 } from '../../generated/graphql';
 import { UISelector } from '../UISelector';
@@ -32,6 +31,7 @@ import classNames from 'classnames';
 import { flex, flexColumn, flexNone } from '../../utils/className';
 import { $free, PublicChannelKey } from '@kizahasi/flocon-core';
 import { Notification, roomModule } from '../../modules/roomModule';
+import { useMutation } from '@apollo/client';
 
 /* react-virtuosoはおそらくheightを指定しなければ正常に動作しないため、もしこれが可変だとheightの指定が無理とは言わないまでも面倒になる。そのため、70pxという適当な値で固定している */
 const height = 70;
@@ -53,7 +53,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
 }: PrivateMessageElementProps) => {
     const dispatch = useDispatch();
     const text = useSelector(state => state.messageInputTextModule.privateMessage);
-    const [writePrivateMessage] = useWritePrivateMessageMutation();
+    const [writePrivateMessage] = useMutation(WritePrivateMessageDocument);
     const textAreaRef = React.useRef<TextAreaRef | null>(null);
     const [isPosting, setIsPosting] = React.useState(false); // 現状、並列投稿は「PublicMessage1つとPrivateMessage1つの最大2つまで」という制限になっているが、これは単に実装が楽だからというのが一番の理由。
     const roomMessagesFontSizeDelta = useSelector(
@@ -205,7 +205,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
 }: PublicMessageElementProps) => {
     const dispatch = useDispatch();
     const text = useSelector(state => state.messageInputTextModule.publicMessage);
-    const [writePublicMessage] = useWritePublicMessageMutation();
+    const [writePublicMessage] = useMutation(WritePublicMessageDocument);
     const textAreaRef = React.useRef<TextAreaRef | null>(null);
     const [isPosting, setIsPosting] = React.useState(false); // 現状、並列投稿は「PublicMessage1つとPrivateMessage1つの最大2つまで」という制限になっているが、これは単に実装が楽だからというのが一番の理由。
     const roomMessagesFontSizeDelta = useSelector(

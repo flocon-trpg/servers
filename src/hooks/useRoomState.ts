@@ -5,14 +5,14 @@ import {
     GetRoomFailureType,
     GetRoomQuery,
     GetRoomQueryVariables,
+    OperateDocument,
     OperateMutation,
     RoomAsListItemFragment,
     RoomEventSubscription,
     RoomOperationFragment,
-    useOperateMutation,
 } from '../generated/graphql';
 import * as Rx from 'rxjs/operators';
-import { ApolloError, FetchResult, useApolloClient } from '@apollo/client';
+import { ApolloError, FetchResult, useApolloClient, useMutation } from '@apollo/client';
 import { create as createStateManager } from '../stateManagers/main';
 import { useClientId } from './useClientId';
 import { useDispatch } from 'react-redux';
@@ -104,7 +104,7 @@ export const useRoomState = (
     const hasIdToken = React.useContext(FirebaseAuthenticationIdTokenContext) != null;
     const clientId = useClientId();
     const apolloClient = useApolloClient();
-    const [operateMutation] = useOperateMutation();
+    const [operateMutation] = useMutation(OperateDocument);
     const [state, setState] = React.useState<RoomState>({ type: loading });
     // refetchしたい場合、これを前の値と異なる値にすることで、useEffectが再度実行されてrefetchになる。
     const [refetchKey, setRefetchKey] = React.useState(0);
