@@ -1,3 +1,5 @@
+# dedupeFragmentsをtrueにしないと、使用する際にエラーが出る
+
 overwrite: true
 schema: '../graphql/generated/schema.gql'
 documents: '../graphql/documents/**/*.graphql'
@@ -7,8 +9,12 @@ generates:
             - 'typescript'
             - 'typescript-operations'
             - 'typed-document-node'
+        config:
+            dedupeFragments: true
     ./test/graphql.ts:
         plugins:
             - 'typescript'
             - 'typescript-operations'
             - 'typed-document-node'
+        config:
+            dedupeFragments: true
