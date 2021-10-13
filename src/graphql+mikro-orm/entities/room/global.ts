@@ -28,6 +28,7 @@ import { Participant } from '../participant/mikro-orm';
 import { recordForEachAsync } from '@kizahasi/util';
 import { User } from '../user/mikro-orm';
 import { nullableStringToParticipantRoleType } from '../../../enums/ParticipantRoleType';
+import { convertToMaxLength100String } from '../../../utils/convertToMaxLength100String';
 
 type IsSequentialResult<T> =
     | {
@@ -97,9 +98,10 @@ export namespace GlobalRoom {
                             room: { id: roomEntity.id },
                             user: { userUid: participantKey },
                         });
+                        const name = participantEntity?.name;
                         participants[participantKey] = {
                             ...participant,
-                            name: participantEntity?.name,
+                            name: name == null ? undefined : convertToMaxLength100String(name),
                             role: participantEntity?.role,
                         };
                     }
@@ -216,7 +218,7 @@ export namespace GlobalRoom {
                 });
                 const upOperation =
                     diffOperation == null ? undefined : toUpOperation(diffOperation);
-                return stringifyUpOperation(upOperation ?? { $v: 2 });
+                return stringifyUpOperation(upOperation ?? { $v: 1, $r: 2 });
             };
         }
 

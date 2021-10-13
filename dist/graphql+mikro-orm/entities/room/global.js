@@ -9,6 +9,7 @@ const mikro_orm_2 = require("../participant/mikro-orm");
 const util_1 = require("@kizahasi/util");
 const mikro_orm_3 = require("../user/mikro-orm");
 const ParticipantRoleType_1 = require("../../../enums/ParticipantRoleType");
+const convertToMaxLength100String_1 = require("../../../utils/convertToMaxLength100String");
 const isSequential = (array, getIndex) => {
     const sorted = array
         .map(value => ({ index: getIndex(value), value }))
@@ -58,7 +59,8 @@ var GlobalRoom;
                         room: { id: roomEntity.id },
                         user: { userUid: participantKey },
                     });
-                    participants[participantKey] = Object.assign(Object.assign({}, participant), { name: participantEntity === null || participantEntity === void 0 ? void 0 : participantEntity.name, role: participantEntity === null || participantEntity === void 0 ? void 0 : participantEntity.role });
+                    const name = participantEntity === null || participantEntity === void 0 ? void 0 : participantEntity.name;
+                    participants[participantKey] = Object.assign(Object.assign({}, participant), { name: name == null ? undefined : (0, convertToMaxLength100String_1.convertToMaxLength100String)(name), role: participantEntity === null || participantEntity === void 0 ? void 0 : participantEntity.role });
                 });
                 return Object.assign(Object.assign({}, result), { createdBy: roomEntity.createdBy, name: roomEntity.name, participants });
             };
@@ -131,7 +133,7 @@ var GlobalRoom;
                     nextState: nextClientState,
                 });
                 const upOperation = diffOperation == null ? undefined : (0, flocon_core_1.toUpOperation)(diffOperation);
-                return (0, flocon_core_1.stringifyUpOperation)(upOperation !== null && upOperation !== void 0 ? upOperation : { $v: 2 });
+                return (0, flocon_core_1.stringifyUpOperation)(upOperation !== null && upOperation !== void 0 ? upOperation : { $v: 1, $r: 2 });
             };
         })(ToGraphQL = Global.ToGraphQL || (Global.ToGraphQL = {}));
         class EnsureParticipantEntity {

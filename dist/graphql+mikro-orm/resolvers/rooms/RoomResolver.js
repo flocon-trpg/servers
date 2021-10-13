@@ -91,6 +91,7 @@ const ParticipantRole_1 = require("../../../enums/ParticipantRole");
 const roles_1 = require("../../../roles");
 const ParticipantRoleType_1 = require("../../../enums/ParticipantRoleType");
 const RateLimitMiddleware_1 = require("../../middlewares/RateLimitMiddleware");
+const convertToMaxLength100String_1 = require("../../../utils/convertToMaxLength100String");
 const find = (source, key) => source[key];
 const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUserUids, create, update, }) => {
     const prevRevision = room.revision;
@@ -103,7 +104,8 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
                 type: flocon_core_1.replace,
                 replace: {
                     newValue: {
-                        $v: 2,
+                        $v: 1,
+                        $r: 2,
                         name: create.name,
                         role: create.role,
                         boards: {},
@@ -119,7 +121,8 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
             participantOperation = {
                 type: 'update',
                 update: {
-                    $v: 2,
+                    $v: 1,
+                    $r: 2,
                     role: update.role,
                     name: update.name,
                 },
@@ -133,7 +136,8 @@ const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUser
         };
     }
     const roomUpOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         participants: {
             [myUserUid]: participantOperation,
         },
@@ -240,7 +244,7 @@ const joinRoomCore = async ({ args, context, strategy, }) => {
                     participantUserUids,
                     myUserUid: authorizedUser.userUid,
                     create: {
-                        name: args.name,
+                        name: (0, convertToMaxLength100String_1.convertToMaxLength100String)(args.name),
                         role: strategyResult,
                     },
                     update: {
@@ -742,10 +746,12 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
                 name: input.roomName,
                 createdBy: authorizedUser.userUid,
                 value: {
-                    $v: 2,
+                    $v: 1,
+                    $r: 2,
                     participants: {
                         [authorizedUser.userUid]: {
-                            $v: 2,
+                            $v: 1,
+                            $r: 2,
                             boards: {},
                             characters: {},
                             imagePieceValues: {},
@@ -937,7 +943,7 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
                 em,
                 myUserUid: authorizedUserUid,
                 update: {
-                    name: { newValue: args.newName },
+                    name: { newValue: (0, convertToMaxLength100String_1.convertToMaxLength100String)(args.newName) },
                 },
                 room,
                 participantUserUids,
@@ -1061,13 +1067,13 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
                 });
             }
             const { room, me, roomState } = findResult;
-            const participantUserUids = findResult.participantIds();
             if (me === undefined) {
                 return result_1.Result.ok({
                     type: 'nonJoined',
                     result: { roomAsListItem: (0, global_1.stateToGraphQL)({ roomEntity: room }) },
                 });
             }
+            const participantUserUids = findResult.participantIds();
             const clientOperation = global_2.GlobalRoom.GraphQL.ToGlobal.upOperation(args.operation);
             const downOperation = await global_2.GlobalRoom.MikroORM.ToGlobal.downOperationMany({
                 em,
