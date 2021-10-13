@@ -1,4 +1,4 @@
-import { ApolloError } from '@apollo/client';
+import { ApolloError, useLazyQuery } from '@apollo/client';
 import produce from 'immer';
 import React from 'react';
 import {
@@ -10,7 +10,7 @@ import {
     PieceValueLogFragment,
     RoomEventSubscription,
     GetRoomMessagesFailureType,
-    useGetMessagesLazyQuery,
+    GetMessagesDocument,
 } from '../generated/graphql';
 import { appConsole } from '../utils/appConsole';
 import { PrivateChannelSet, PrivateChannelSets } from '../utils/PrivateChannelSet';
@@ -393,7 +393,9 @@ export const useAllRoomMessages = ({
         type: loading,
         events: [],
     });
-    const [getMessages, messages] = useGetMessagesLazyQuery({ fetchPolicy: 'network-only' });
+    const [getMessages, messages] = useLazyQuery(GetMessagesDocument, {
+        fetchPolicy: 'network-only',
+    });
 
     React.useEffect(() => {
         if (myUserUid == null || !beginFetch) {

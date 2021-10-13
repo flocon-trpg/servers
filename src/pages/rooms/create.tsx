@@ -1,10 +1,11 @@
 import { Alert, Button, Card, Form, Input, Spin, Switch } from 'antd';
 import { useRouter } from 'next/router';
 import React from 'react';
-import Layout, { loginAndEntry } from '../../layouts/Layout';
-import { CreateRoomInput, useCreateRoomMutation } from '../../generated/graphql';
-import Center from '../../components/Center';
+import { Layout, loginAndEntry } from '../../layouts/Layout';
+import { CreateRoomDocument, CreateRoomInput } from '../../generated/graphql';
+import { Center } from '../../components/Center';
 import { MyAuthContext } from '../../contexts/MyAuthContext';
+import { useMutation } from '@apollo/client';
 
 const labelCol = 10;
 const wrapperCol = 24 - labelCol;
@@ -16,7 +17,7 @@ const joinAsSpectatorPhrase = 'joinAsSpectatorPhrase';
 
 const CreateRoomCore: React.FC = () => {
     const router = useRouter();
-    const [createRoom, createRoomResult] = useCreateRoomMutation();
+    const [createRoom, createRoomResult] = useMutation(CreateRoomDocument);
     const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
     const [isJoinAsPlayerPhraseEnabled, setIsJoinAsPlayerPhraseEnabled] =
         React.useState<boolean>(false);

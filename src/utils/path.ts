@@ -6,5 +6,5 @@ const pathCore = {
         index: '/rooms',
     },
 };
-const path: Readonly<typeof pathCore> = pathCore;
-export default path;
+
+export const path: Readonly<typeof pathCore> = pathCore;

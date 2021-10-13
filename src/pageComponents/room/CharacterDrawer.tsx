@@ -1,16 +1,15 @@
 import { Button, Checkbox, Col, Drawer, InputNumber, Row, Space, Tooltip, Typography } from 'antd';
 import React from 'react';
-import DrawerFooter from '../../layouts/DrawerFooter';
-import { simpleId } from '../../utils/generators';
+import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { DrawerProps } from 'antd/lib/drawer';
-import InputFile from '../../components/InputFile';
+import { InputFile } from '../../components/InputFile';
 import { FilesManagerDrawerType } from '../../utils/types';
-import FilesManagerDrawer from '../../components/FilesManagerDrawer';
+import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
 import { Gutter } from 'antd/lib/grid/row';
-import NumberParameterInput from '../../components/NumberParameterInput';
-import BooleanParameterInput from '../../components/BooleanParameterInput';
-import StringParameterInput from '../../components/StringParameterInput';
-import ToggleButton from '../../components/ToggleButton';
+import { NumberParameterInput } from '../../components/NumberParameterInput';
+import { BooleanParameterInput } from '../../components/BooleanParameterInput';
+import { StringParameterInput } from '../../components/StringParameterInput';
+import { ToggleButton } from '../../components/ToggleButton';
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import {
     characterIsPrivate,
@@ -19,7 +18,7 @@ import {
 } from '../../resource/text/main';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
 import { useOperate } from '../../hooks/useOperate';
-import BufferedInput from '../../components/BufferedInput';
+import { BufferedInput } from '../../components/BufferedInput';
 import { TomlInput } from '../../components/Tomllnput';
 import { useCharacters } from '../../hooks/state/useCharacters';
 import { useParticipants } from '../../hooks/state/useParticipants';
@@ -39,6 +38,7 @@ import {
     toCharacterUpOperation,
     pieceDiff,
     strIndex20Array,
+    simpleId,
 } from '@kizahasi/flocon-core';
 import { useSelector } from '../../store';
 import { useDispatch } from 'react-redux';
@@ -61,7 +61,8 @@ const drawerBaseProps: Partial<DrawerProps> = {
 };
 
 const defaultCharacter: CharacterState = {
-    $v: 2,
+    $v: 1,
+    $r: 2,
     chatPalette: '',
     memo: '',
     name: '',
@@ -84,7 +85,7 @@ const defaultCharacter: CharacterState = {
 const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
-const CharacterDrawer: React.FC = () => {
+export const CharacterDrawer: React.FC = () => {
     const myUserUid = useMyUserUid();
     const drawerType = useSelector(
         state => state.roomDrawerAndPopoverAndModalModule.characterDrawerType
@@ -223,7 +224,8 @@ const CharacterDrawer: React.FC = () => {
         }
         operate(
             characterUpdateOperation(drawerType.stateKey, {
-                $v: 2,
+                $v: 1,
+                $r: 2,
                 pieces: {
                     [drawerType.boardKey.createdBy]: {
                         [drawerType.boardKey.id]: {
@@ -249,7 +251,8 @@ const CharacterDrawer: React.FC = () => {
         }
         operate(
             characterUpdateOperation(drawerType.stateKey, {
-                $v: 2,
+                $v: 1,
+                $r: 2,
                 tachieLocations: {
                     [drawerType.boardKey.createdBy]: {
                         [drawerType.boardKey.id]: {
@@ -851,5 +854,3 @@ const CharacterDrawer: React.FC = () => {
         </Drawer>
     );
 };
-
-export default CharacterDrawer;

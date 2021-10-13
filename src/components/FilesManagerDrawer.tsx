@@ -1,22 +1,23 @@
 import * as React from 'react';
 import { Button, Drawer, Input, Result, Tabs, Tooltip } from 'antd';
-import { FilePathFragment, FileSourceType, useGetServerInfoQuery } from '../generated/graphql';
-import DrawerFooter from '../layouts/DrawerFooter';
+import { FilePathFragment, FileSourceType, GetServerInfoDocument } from '../generated/graphql';
+import { DrawerFooter } from '../layouts/DrawerFooter';
 import { FilesManagerDrawerType, some } from '../utils/types';
 import { cancelRnd } from '../utils/className';
 import { FirebaseFilesManager } from './FilesManagerDrawer/FirebaseFilesManager';
 import { FloconFilesManager } from './FilesManagerDrawer/FloconFilesManager';
 import { MyAuthContext } from '../contexts/MyAuthContext';
+import { useQuery } from '@apollo/client';
 
 type Props = {
     drawerType: FilesManagerDrawerType | null;
     onClose: () => void;
 };
 
-const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => {
+export const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => {
     const myAuth = React.useContext(MyAuthContext);
     const [input, setInput] = React.useState<string>('');
-    const { data: serverInfo } = useGetServerInfoQuery();
+    const { data: serverInfo } = useQuery(GetServerInfoDocument);
     const isUploaderDisabled = serverInfo?.result.uploaderEnabled !== true;
 
     const child = (() => {
@@ -107,5 +108,3 @@ const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => 
         </Drawer>
     );
 };
-
-export default FilesManagerDrawer;

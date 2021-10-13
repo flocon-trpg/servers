@@ -7,7 +7,7 @@ import * as generators from '../utils/generators';
 import { BoardConfig, serializedBoardConfig, toCompleteBoardConfig } from './BoardConfig';
 import { chooseRecord } from '@kizahasi/util';
 import * as t from 'io-ts';
-import { maybe } from '@kizahasi/flocon-core';
+import { maybe, simpleId } from '@kizahasi/flocon-core';
 import { record } from '../utils/io-ts/record';
 
 export type BoardEditorPanelConfig = {
@@ -50,7 +50,7 @@ export const defaultBoardEditorPanelsConfig = (): Record<string, BoardEditorPane
         isMinimized: false,
     };
     const result: Record<string, BoardEditorPanelConfig> = {};
-    const id = generators.simpleId();
+    const id = simpleId();
     result[id] = config;
     return result;
 };

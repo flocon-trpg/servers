@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { StateObservable, combineEpics } from 'redux-observable';
 import * as Rx from 'rxjs/operators';
 import { RootState } from '../store';
-import roomConfigModule from '../modules/roomConfigModule';
+import { roomConfigModule } from '../modules/roomConfigModule';
 import { setRoomConfig } from '../utils/localStorage/roomConfig';
 
 const saveToStorageSampleTime = 500;

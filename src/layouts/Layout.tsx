@@ -14,19 +14,19 @@ import {
     Result,
 } from 'antd';
 import {
+    EntryToServerDocument,
     EntryToServerResultType,
     IsEntryDocument,
     IsEntryQuery,
     IsEntryQueryVariables,
-    useEntryToServerMutation,
 } from '../generated/graphql';
-import Center from '../components/Center';
+import { Center } from '../components/Center';
 import Link from 'next/link';
-import NotSignInResult from '../components/Result/NotSignInResult';
-import LoadingResult from '../components/Result/LoadingResult';
+import { NotSignInResult } from '../components/Result/NotSignInResult';
+import { LoadingResult } from '../components/Result/LoadingResult';
 import * as Icon from '@ant-design/icons';
 import { useSignOut } from '../hooks/useSignOut';
-import { useApolloClient } from '@apollo/client';
+import { useApolloClient, useMutation } from '@apollo/client';
 import { authNotFound, loading, MyAuthContext, notSignIn } from '../contexts/MyAuthContext';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 const { Header, Content } = AntdLayout;
@@ -37,7 +37,7 @@ type EntryFormComponentProps = {
 };
 
 const EntryFormComponent: React.FC<EntryFormComponentProps> = (props: EntryFormComponentProps) => {
-    const [entryToServer, entryToServerResult] = useEntryToServerMutation();
+    const [entryToServer, entryToServerResult] = useMutation(EntryToServerDocument);
     const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
     const [isFinishedSuccessfully, setIsFinishedSuccessfully] = React.useState<boolean>(false);
 
@@ -112,7 +112,7 @@ type Props = {
     hideHeader?: typeof always | typeof success;
 };
 
-const Layout: React.FC<PropsWithChildren<Props>> = ({
+export const Layout: React.FC<PropsWithChildren<Props>> = ({
     children,
     onEntry,
     requires,
@@ -256,5 +256,3 @@ const Layout: React.FC<PropsWithChildren<Props>> = ({
         </AntdLayout>
     );
 };
-
-export default Layout;

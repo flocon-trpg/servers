@@ -17,7 +17,7 @@ type DataSource = {
     };
 };
 
-const ParticipantList: React.FC = () => {
+export const ParticipantList: React.FC = () => {
     const roomConnections = useRoomConnections();
     const participants = useParticipants();
     const myUserUid = useMyUserUid();
@@ -74,7 +74,6 @@ const ParticipantList: React.FC = () => {
             render: (_: unknown, { participant }: DataSource) => {
                 switch (participant.state.role) {
                     case ParticipantRole.Master:
-                        return '参加者（マスター）';
                     case ParticipantRole.Player:
                         return '参加者';
                     case ParticipantRole.Spectator:
@@ -99,5 +98,3 @@ const ParticipantList: React.FC = () => {
         </div>
     );
 };
-
-export default ParticipantList;

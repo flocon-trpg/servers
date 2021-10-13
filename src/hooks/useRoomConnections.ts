@@ -1,7 +1,8 @@
+import { useLazyQuery } from '@apollo/client';
 import produce from 'immer';
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { useGetRoomConnectionsLazyQuery } from '../generated/graphql';
+import { GetRoomConnectionsDocument } from '../generated/graphql';
 import { Notification, roomModule } from '../modules/roomModule';
 import { useSelector } from '../store';
 import { useParticipants } from './state/useParticipants';
@@ -17,7 +18,7 @@ export function useRoomConnections() {
         state => state.roomModule.roomEventSubscription?.roomEvent?.roomConnectionEvent
     );
     const [result, setResult] = React.useState<RoomConnectionsResult>({});
-    const [getRoomConnections, roomConnections] = useGetRoomConnectionsLazyQuery({
+    const [getRoomConnections, roomConnections] = useLazyQuery(GetRoomConnectionsDocument, {
         fetchPolicy: 'network-only',
     });
     const dispatch = useDispatch();

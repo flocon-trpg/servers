@@ -3,15 +3,14 @@ import { Button, Checkbox, Divider, Drawer, Tooltip, Typography } from 'antd';
 import {
     FilePathInput,
     FileSourceType,
-    useWriteRoomSoundEffectMutation,
+    WriteRoomSoundEffectDocument,
 } from '../../generated/graphql';
 import * as Icon from '@ant-design/icons';
-import FilesManagerDrawer from '../../components/FilesManagerDrawer';
+import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
 import { FilesManagerDrawerType, some } from '../../utils/types';
 import { replace, update } from '../../stateManagers/states/types';
-import { filePathEquals } from '../../stateManagers/states/comparer';
-import VolumeBar from '../../components/VolumeBar';
-import DrawerFooter from '../../layouts/DrawerFooter';
+import { VolumeBar } from '../../components/VolumeBar';
+import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { MyStyle } from '../../utils/myStyle';
 import { useSelector } from '../../store';
 import { useOperate } from '../../hooks/useOperate';
@@ -20,6 +19,8 @@ import _ from 'lodash';
 import { cancelRnd, flex, flexColumn, flexRow, itemsCenter } from '../../utils/className';
 import classNames from 'classnames';
 import { sound } from '../../utils/fileType';
+import { FilePath as FilePathModule } from '../../utils/filePath';
+import { useMutation } from '@apollo/client';
 
 const defaultVolume = 0.5;
 
@@ -135,7 +136,7 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({
                 closable
                 onClose={() => {
                     setFilesInput(oldValue => {
-                        return oldValue.filter(x => !filePathEquals(file, x));
+                        return oldValue.filter(x => !FilePathModule.equals(file, x));
                     });
                 }}
                 filePath={file}
@@ -159,16 +160,19 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({
                         onClick: () => {
                             if (bgmState == null) {
                                 const operation: UpOperation = {
-                                    $v: 2,
+                                    $v: 1,
+                                    $r: 2,
                                     bgms: {
                                         [channelKey]: {
                                             type: replace,
                                             replace: {
                                                 newValue: {
                                                     $v: 1,
+                                                    $r: 1,
                                                     files: filesInput.map(x => ({
                                                         ...x,
                                                         $v: 1,
+                                                        $r: 1,
                                                     })),
                                                     volume: volumeInput,
                                                     isPaused: !isNotPausedInput,
@@ -182,16 +186,19 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({
                                 return;
                             }
                             const operation: UpOperation = {
-                                $v: 2,
+                                $v: 1,
+                                $r: 2,
                                 bgms: {
                                     [channelKey]: {
                                         type: update,
                                         update: {
                                             $v: 1,
+                                            $r: 1,
                                             files: {
                                                 newValue: filesInput.map(x => ({
                                                     ...x,
                                                     $v: 1,
+                                                    $r: 1,
                                                 })),
                                             },
                                             volume: {
@@ -265,7 +272,7 @@ const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
         React.useState<FilesManagerDrawerType | null>(null);
 
-    const [writeRoomSoundEffect] = useWriteRoomSoundEffectMutation();
+    const [writeRoomSoundEffect] = useMutation(WriteRoomSoundEffectDocument);
     const [fileInput, setFileInput] = React.useState<FilePathInput>();
     const [volumeInput, setVolumeInput] = React.useState<number>(defaultVolume);
 
@@ -407,12 +414,14 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                                     return;
                                 }
                                 const operation: UpOperation = {
-                                    $v: 2,
+                                    $v: 1,
+                                    $r: 2,
                                     bgms: {
                                         [channelKey]: {
                                             type: update,
                                             update: {
                                                 $v: 1,
+                                                $r: 1,
                                                 volume: { newValue: volumeInput },
                                             },
                                         },
@@ -452,12 +461,14 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                             return;
                         }
                         const operation: UpOperation = {
-                            $v: 2,
+                            $v: 1,
+                            $r: 2,
                             bgms: {
                                 [channelKey]: {
                                     type: update,
                                     update: {
                                         $v: 1,
+                                        $r: 1,
                                         isPaused: {
                                             newValue: !bgmState.isPaused,
                                         },
@@ -475,7 +486,8 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                     disabled={(bgmState?.files ?? []).length === 0}
                     onClick={() => {
                         const operation: UpOperation = {
-                            $v: 2,
+                            $v: 1,
+                            $r: 2,
                             bgms: {
                                 [channelKey]: {
                                     type: replace,
@@ -493,7 +505,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
     );
 };
 
-const SoundPlayer: React.FC = () => {
+export const SoundPlayer: React.FC = () => {
     const bgmsState = useSelector(state => state.roomModule.roomState?.state?.bgms);
     const [isSeDrawerVisible, setIsSeDrawerVisible] = React.useState(false);
 
@@ -529,5 +541,3 @@ const SoundPlayer: React.FC = () => {
         </div>
     );
 };
-
-export default SoundPlayer;

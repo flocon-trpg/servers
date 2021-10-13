@@ -1,9 +1,10 @@
-import { FileSourceType } from '../generated/graphql';
+import { FilePathFragment, FileSourceType } from '../generated/graphql';
 import * as Core from '@kizahasi/flocon-core';
 import { getStorageForce } from './firebaseHelpers';
 import { Config } from '../config';
 import { ExpiryMap } from './expiryMap';
 import { files, getFloconUploaderFile } from './getFloconUploaderFile';
+import { boolean } from 'fp-ts';
 
 export type FilePath = {
     path: string;
@@ -11,6 +12,19 @@ export type FilePath = {
 };
 
 export namespace FilePath {
+    export const equals = (
+        x: FilePathFragment | null | undefined,
+        y: FilePathFragment | null | undefined
+    ): boolean => {
+        if (x == null) {
+            return y == null;
+        }
+        if (y == null) {
+            return false;
+        }
+        return x.path === y.path && x.sourceType === y.sourceType;
+    };
+
     export const toGraphQL = (source: FilePath | Core.FilePath): FilePath => {
         let sourceType: FileSourceType;
         switch (source.sourceType) {
@@ -51,6 +65,7 @@ export namespace FilePath {
         }
         return {
             $v: 1,
+            $r: 1,
             path: source.path,
             sourceType,
         };
@@ -74,7 +89,7 @@ export namespace FilePath {
           };
 
     export const getSrc = async (
-        path: FilePath | Omit<Core.FilePath, '$v'>,
+        path: FilePath | Omit<Core.FilePath, '$v' | '$r'>,
         config: Config,
         idToken: string,
         cache: ExpiryMap<string, string> | null

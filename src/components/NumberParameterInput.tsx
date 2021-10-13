@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Input, InputNumber, Tooltip } from 'antd';
 import { EyeInvisibleOutlined, EyeOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-import ToggleButton from './ToggleButton';
+import { ToggleButton } from './ToggleButton';
 import {
     addParameter,
     deleteParameter,
@@ -27,7 +27,7 @@ type Props = {
 
 const disabledInput = <Input style={{ width: inputWidth }} disabled value='?' size='small' />;
 
-const NumberParameterInput: React.FC<Props> = ({
+export const NumberParameterInput: React.FC<Props> = ({
     isCharacterPrivate,
     isCreate,
     parameterKey,
@@ -53,10 +53,12 @@ const NumberParameterInput: React.FC<Props> = ({
                         disabled={disabled}
                         onClick={() => {
                             const operation: CharacterUpOperation = {
-                                $v: 2,
+                                $v: 1,
+                                $r: 2,
                                 numParams: {
                                     [parameterKey]: {
                                         $v: 1,
+                                        $r: 1,
                                         value: { newValue: 0 },
                                     },
                                 },
@@ -76,10 +78,12 @@ const NumberParameterInput: React.FC<Props> = ({
                     disabled={disabled}
                     onClick={() => {
                         const operation: CharacterUpOperation = {
-                            $v: 2,
+                            $v: 1,
+                            $r: 2,
                             numParams: {
                                 [parameterKey]: {
                                     $v: 1,
+                                    $r: 1,
                                     value: { newValue: undefined },
                                 },
                             },
@@ -109,10 +113,12 @@ const NumberParameterInput: React.FC<Props> = ({
                         disabled={disabled}
                         onClick={() => {
                             const operation: CharacterUpOperation = {
-                                $v: 2,
+                                $v: 1,
+                                $r: 2,
                                 numMaxParams: {
                                     [parameterKey]: {
                                         $v: 1,
+                                        $r: 1,
                                         value: { newValue: 0 },
                                     },
                                 },
@@ -132,10 +138,12 @@ const NumberParameterInput: React.FC<Props> = ({
                     disabled={disabled}
                     onClick={() => {
                         const operation: CharacterUpOperation = {
-                            $v: 2,
+                            $v: 1,
+                            $r: 2,
                             numMaxParams: {
                                 [parameterKey]: {
                                     $v: 1,
+                                    $r: 1,
                                     value: { newValue: undefined },
                                 },
                             },
@@ -184,10 +192,12 @@ const NumberParameterInput: React.FC<Props> = ({
                 size='small'
                 onChange={e => {
                     const operation: CharacterUpOperation = {
-                        $v: 2,
+                        $v: 1,
+                        $r: 2,
                         numParams: {
                             [parameterKey]: {
                                 $v: 1,
+                                $r: 1,
                                 isValuePrivate: { newValue: !e },
                             },
                         },
@@ -220,10 +230,12 @@ const NumberParameterInput: React.FC<Props> = ({
                             return;
                         }
                         const operation: CharacterUpOperation = {
-                            $v: 2,
+                            $v: 1,
+                            $r: 2,
                             numParams: {
                                 [parameterKey]: {
                                     $v: 1,
+                                    $r: 1,
                                     value: { newValue },
                                 },
                             },
@@ -271,10 +283,12 @@ const NumberParameterInput: React.FC<Props> = ({
                 size='small'
                 onChange={e => {
                     const operation: CharacterUpOperation = {
-                        $v: 2,
+                        $v: 1,
+                        $r: 2,
                         numMaxParams: {
                             [parameterKey]: {
                                 $v: 1,
+                                $r: 1,
                                 isValuePrivate: { newValue: !e },
                             },
                         },
@@ -307,10 +321,12 @@ const NumberParameterInput: React.FC<Props> = ({
                             return;
                         }
                         const operation: CharacterUpOperation = {
-                            $v: 2,
+                            $v: 1,
+                            $r: 2,
                             numMaxParams: {
                                 [parameterKey]: {
                                     $v: 1,
+                                    $r: 1,
                                     value: { newValue },
                                 },
                             },
@@ -333,5 +349,3 @@ const NumberParameterInput: React.FC<Props> = ({
         </div>
     );
 };
-
-export default NumberParameterInput;

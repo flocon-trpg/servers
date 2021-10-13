@@ -5,14 +5,19 @@ import moment from 'moment';
 import { PublicChannelNames } from './types';
 import { messageContentMaxHeight, RoomMessage } from '../pageComponents/room/RoomMessage';
 import { isDeleted, toText } from './message';
-import { Default, FirebaseStorage, ParticipantState, Uploader } from '@kizahasi/flocon-core';
+import {
+    Default,
+    FirebaseStorage,
+    ParticipantState,
+    Uploader,
+    simpleId,
+} from '@kizahasi/flocon-core';
 import { Color } from './color';
 import { FilePath } from './filePath';
 import axios from 'axios';
 import JSZip from 'jszip';
 import { Config } from '../config';
 import { analyzeUrl } from './analyzeUrl';
-import { simpleId } from './generators';
 import { ExpiryMap } from './expiryMap';
 import { logCss } from './richLogResource/logCss';
 import { logHtml } from './richLogResource/logHtml';

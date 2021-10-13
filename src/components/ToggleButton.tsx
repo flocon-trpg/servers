@@ -20,7 +20,7 @@ type Props = {
     size?: SizeType;
 };
 
-const ToggleButton: React.FC<Props> = ({
+export const ToggleButton: React.FC<Props> = ({
     checkedChildren,
     checkedIcon,
     unCheckedChildren,
@@ -70,5 +70,3 @@ const ToggleButton: React.FC<Props> = ({
     }
     return button;
 };
-
-export default ToggleButton;

@@ -1,7 +1,7 @@
 import { State } from '@kizahasi/flocon-core';
 import { useSelector } from '../store';
 
-const emptyOperateAsState = (state: State): void => {
+const emptyOperateAsState = (state: State | ((prevState: State) => State)): void => {
     throw new Error('useOperateAsState is not ready');
 };
 

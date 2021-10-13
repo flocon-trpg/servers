@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { UserConfig } from '../states/UserConfig';
 
-const userConfigModule = createSlice({
+export const userConfigModule = createSlice({
     name: 'userConfig',
     initialState: null as UserConfig | null,
     reducers: {
@@ -23,5 +23,3 @@ const userConfigModule = createSlice({
         },
     },
 });
-
-export default userConfigModule;

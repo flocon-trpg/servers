@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { Typography } from 'antd';
-import Layout from '../../layouts/Layout';
+import { Layout } from '../../layouts/Layout';
 import { css } from '@emotion/react';
 
 const $css = css`

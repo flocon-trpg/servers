@@ -17,7 +17,7 @@ export type Props = Omit<InputProps, 'defaultValue' | 'value' | 'ref' | 'onChang
     onChange: (params: OnChangeParams) => void;
 };
 
-const BufferedInput: React.FC<Props> = (props: Props) => {
+export const BufferedInput: React.FC<Props> = (props: Props) => {
     const { value, bufferDuration: bufferDurationCore, onChange } = props;
 
     if (bufferDurationCore < 0) {
@@ -58,5 +58,3 @@ const BufferedInput: React.FC<Props> = (props: Props) => {
         />
     );
 };
-
-export default BufferedInput;

@@ -42,7 +42,7 @@ type Props = {
     zIndex: number;
 };
 
-const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) => {
+export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) => {
     const bottomElementContainerHeight =
         props.bottomElement == null
             ? 0
@@ -136,5 +136,3 @@ const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) => {
         </Rnd>
     );
 };
-
-export default DraggableCard;

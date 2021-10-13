@@ -5,7 +5,9 @@ import { Row, Col } from 'antd';
 // eslint-disable-next-line @typescript-eslint/ban-types
 type Props = {};
 
-const Center: React.FC<PropsWithChildren<Props>> = ({ children }: PropsWithChildren<Props>) => {
+export const Center: React.FC<PropsWithChildren<Props>> = ({
+    children,
+}: PropsWithChildren<Props>) => {
     return (
         <Row style={{ height: '100%' }} justify='center' align='middle'>
             <Col flex={1} />
@@ -14,5 +16,3 @@ const Center: React.FC<PropsWithChildren<Props>> = ({ children }: PropsWithChild
         </Row>
     );
 };
-
-export default Center;

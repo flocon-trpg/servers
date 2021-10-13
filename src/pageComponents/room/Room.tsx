@@ -1,14 +1,14 @@
 import React from 'react';
 import { Layout as AntdLayout, Result, Modal } from 'antd';
-import DraggableCard, { horizontalPadding } from '../../components/DraggableCard';
-import CharacterList from './CharacterList';
+import { DraggableCard, horizontalPadding } from '../../components/DraggableCard';
+import { CharacterList } from './CharacterList';
 import { useSelector } from '../../store';
-import roomConfigModule from '../../modules/roomConfigModule';
+import { roomConfigModule } from '../../modules/roomConfigModule';
 import { useDispatch } from 'react-redux';
 import { RoomMessages } from './RoomMessages';
-import CharacterParameterNamesDrawer from './CharacterParameterNamesDrawer';
-import CharacterDrawer from './CharacterDrawer';
-import BoardDrawer from './BoardDrawer';
+import { CharacterParameterNamesDrawer } from './CharacterParameterNamesDrawer';
+import { CharacterDrawer } from './CharacterDrawer';
+import { BoardDrawer } from './BoardDrawer';
 import {
     activeBoardPanel,
     boardEditorPanel,
@@ -16,10 +16,10 @@ import {
     memoPanel,
     messagePanel,
 } from '../../states/RoomConfig';
-import SoundPlayer from './SoundPlayer';
-import EditRoomDrawer from './EditRoomDrawer';
-import ParticipantList from './ParticipantList';
-import LoadingResult from '../../components/Result/LoadingResult';
+import { SoundPlayer } from './SoundPlayer';
+import { EditRoomDrawer } from './EditRoomDrawer';
+import { ParticipantList } from './ParticipantList';
+import { LoadingResult } from '../../components/Result/LoadingResult';
 import { usePlayBgm } from '../../hooks/usePlayBgm';
 import { usePlaySoundEffect } from '../../hooks/usePlaySoundEffect';
 import { useMessageNotification } from '../../hooks/useMessageNotification';
@@ -117,7 +117,7 @@ const RoomMessagePanels: React.FC<{ roomId: string }> = ({ roomId }: { roomId: s
 const childrenContainerPadding = `12px ${horizontalPadding}px`;
 const bottomContainerPadding = `0px ${horizontalPadding}px`;
 
-const Room: React.FC = () => {
+export const Room: React.FC = () => {
     const myUserUid = useMyUserUid();
     const roomIdOfRoomConfig = useSelector(state => state.roomConfigModule?.roomId);
     const activeBoardPanelConfig = useSelector(
@@ -621,5 +621,3 @@ const Room: React.FC = () => {
         </AntdLayout>
     );
 };
-
-export default Room;

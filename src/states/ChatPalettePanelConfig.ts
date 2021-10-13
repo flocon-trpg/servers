@@ -5,6 +5,7 @@ import {
 } from './DraggablePanelConfigBase';
 import * as generators from '../utils/generators';
 import * as t from 'io-ts';
+import { simpleId } from '@kizahasi/flocon-core';
 
 export type ChatPalettePanelConfig = {
     selectedTextColor?: string;
@@ -58,7 +59,7 @@ export const defaultChatPalettePanelsConfig = (): Record<string, ChatPalettePane
         isMinimized: false,
     };
     const result: Record<string, ChatPalettePanelConfig> = {};
-    const id = generators.simpleId();
+    const id = simpleId();
     result[id] = config;
     return result;
 };

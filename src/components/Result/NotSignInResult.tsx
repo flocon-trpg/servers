@@ -1,8 +1,7 @@
 import { Result } from 'antd';
 import React from 'react';
-import * as Icon from '@ant-design/icons';
 
-const NotSignInResult: React.FC = () => {
+export const NotSignInResult: React.FC = () => {
     return (
         <Result
             status='warning'
@@ -11,5 +10,3 @@ const NotSignInResult: React.FC = () => {
         />
     );
 };
-
-export default NotSignInResult;

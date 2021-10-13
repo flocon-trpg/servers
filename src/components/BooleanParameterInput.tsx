@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Checkbox, Tooltip } from 'antd';
 import { EyeInvisibleOutlined, EyeOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-import ToggleButton from './ToggleButton';
+import { ToggleButton } from './ToggleButton';
 import {
     addParameter,
     deleteParameter,
@@ -22,7 +22,7 @@ type Props = {
     compact: boolean;
 };
 
-const BooleanParameterInput: React.FC<Props> = ({
+export const BooleanParameterInput: React.FC<Props> = ({
     isCharacterPrivate,
     isCreate,
     parameterKey,
@@ -37,10 +37,12 @@ const BooleanParameterInput: React.FC<Props> = ({
             checked={parameter?.value ?? false}
             onChange={e => {
                 const operation: CharacterUpOperation = {
-                    $v: 2,
+                    $v: 1,
+                    $r: 2,
                     boolParams: {
                         [parameterKey]: {
                             $v: 1,
+                            $r: 1,
                             value: { newValue: e.target.checked },
                         },
                     },
@@ -62,10 +64,12 @@ const BooleanParameterInput: React.FC<Props> = ({
                         disabled={disabled}
                         onClick={() => {
                             const operation: CharacterUpOperation = {
-                                $v: 2,
+                                $v: 1,
+                                $r: 2,
                                 boolParams: {
                                     [parameterKey]: {
                                         $v: 1,
+                                        $r: 1,
                                         value: { newValue: false },
                                     },
                                 },
@@ -85,10 +89,12 @@ const BooleanParameterInput: React.FC<Props> = ({
                     disabled={disabled}
                     onClick={() => {
                         const operation: CharacterUpOperation = {
-                            $v: 2,
+                            $v: 1,
+                            $r: 2,
                             boolParams: {
                                 [parameterKey]: {
                                     $v: 1,
+                                    $r: 1,
                                     value: { newValue: undefined },
                                 },
                             },
@@ -136,10 +142,12 @@ const BooleanParameterInput: React.FC<Props> = ({
             size='small'
             onChange={e => {
                 const operation: CharacterUpOperation = {
-                    $v: 2,
+                    $v: 1,
+                    $r: 2,
                     boolParams: {
                         [parameterKey]: {
                             $v: 1,
+                            $r: 1,
                             isValuePrivate: { newValue: !e },
                         },
                     },
@@ -168,5 +176,3 @@ const BooleanParameterInput: React.FC<Props> = ({
         </div>
     );
 };
-
-export default BooleanParameterInput;

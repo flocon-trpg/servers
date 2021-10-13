@@ -1,12 +1,12 @@
 import { Alert, Button, Typography } from 'antd';
 import Link from 'next/link';
 import React from 'react';
-import FilesManagerDrawer from '../components/FilesManagerDrawer';
-import QueryResultViewer from '../components/QueryResultViewer';
-import { PrereleaseType, useGetServerInfoQuery } from '../generated/graphql';
-import Layout from '../layouts/Layout';
+import { FilesManagerDrawer } from '../components/FilesManagerDrawer';
+import { QueryResultViewer } from '../components/QueryResultViewer';
+import { GetServerInfoDocument, PrereleaseType } from '../generated/graphql';
+import { Layout } from '../layouts/Layout';
 import { FilesManagerDrawerType, none } from '../utils/types';
-import VERSION from '../VERSION';
+import { VERSION } from '../VERSION';
 import * as Icon from '@ant-design/icons';
 import {
     alpha,
@@ -19,12 +19,13 @@ import {
 import { useRouter } from 'next/router';
 import classNames from 'classnames';
 import { flex, flexColumn } from '../utils/className';
+import { useQuery } from '@apollo/client';
 
 const Index: React.FC = () => {
     const [drawerType, setDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
     const router = useRouter();
 
-    const { data: serverInfo, loading, error } = useGetServerInfoQuery();
+    const { data: serverInfo, loading, error } = useQuery(GetServerInfoDocument);
 
     const apiServerSemVer = (() => {
         if (serverInfo == null) {

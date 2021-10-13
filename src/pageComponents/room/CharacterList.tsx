@@ -2,11 +2,11 @@
 import React from 'react';
 import { Table, Button, Input, Tooltip } from 'antd';
 import { update } from '../../stateManagers/states/types';
-import NumberParameterInput from '../../components/NumberParameterInput';
-import BooleanParameterInput from '../../components/BooleanParameterInput';
-import StringParameterInput from '../../components/StringParameterInput';
+import { NumberParameterInput } from '../../components/NumberParameterInput';
+import { BooleanParameterInput } from '../../components/BooleanParameterInput';
+import { StringParameterInput } from '../../components/StringParameterInput';
 import * as Icon from '@ant-design/icons';
-import ToggleButton from '../../components/ToggleButton';
+import { ToggleButton } from '../../components/ToggleButton';
 import {
     characterIsPrivate,
     characterIsNotPrivate,
@@ -42,6 +42,8 @@ import { SortOrder } from 'antd/lib/table/interface';
 import { IconView } from '../../components/IconView';
 import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 import { getUserUid, MyAuthContext } from '../../contexts/MyAuthContext';
+import { useOperateAsState } from '../../hooks/useOperateAsState';
+import produce from 'immer';
 
 type DataSource = {
     key: string;
@@ -197,10 +199,11 @@ const createStringParameterColumn = ({
     };
 };
 
-const CharacterList: React.FC = () => {
+export const CharacterList: React.FC = () => {
     const myAuth = React.useContext(MyAuthContext);
     const dispatch = useDispatch();
     const operate = useOperate();
+    const operateAsState = useOperateAsState();
 
     const characters = useCharacters();
     const participants = useParticipants();
@@ -282,7 +285,8 @@ const CharacterList: React.FC = () => {
                     onChange={newValue => {
                         operate(
                             characterUpdateOperation(character.stateKey, {
-                                $v: 2,
+                                $v: 1,
+                                $r: 2,
                                 isPrivate: { newValue: !newValue },
                             })
                         );
@@ -308,10 +312,15 @@ const CharacterList: React.FC = () => {
                         value={character.state.name}
                         size='small'
                         onChange={newValue => {
-                            operate(
-                                characterUpdateOperation(character.stateKey, {
-                                    $v: 2,
-                                    name: { newValue: newValue.target.value },
+                            operateAsState(state =>
+                                produce(state, state => {
+                                    const targetCharacter =
+                                        state.participants[character.stateKey.createdBy]
+                                            ?.characters[character.stateKey.id];
+                                    if (targetCharacter == null) {
+                                        return;
+                                    }
+                                    targetCharacter.name = newValue.target.value;
                                 })
                             );
                         }}
@@ -361,5 +370,3 @@ const CharacterList: React.FC = () => {
         </div>
     );
 };
-
-export default CharacterList;

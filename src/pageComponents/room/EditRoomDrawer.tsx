@@ -1,13 +1,13 @@
 import { Col, Drawer, Input, Row } from 'antd';
 import React from 'react';
-import DrawerFooter from '../../layouts/DrawerFooter';
+import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
-import { useOperate } from '../../hooks/useOperate';
 import { useSelector } from '../../store';
-import { UpOperation } from '@kizahasi/flocon-core';
 import { useDispatch } from 'react-redux';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
+import { useOperateAsState } from '../../hooks/useOperateAsState';
+import produce from 'immer';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -16,12 +16,12 @@ const drawerBaseProps: Partial<DrawerProps> = {
 const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
-const EditRoomDrawer: React.FC = () => {
+export const EditRoomDrawer: React.FC = () => {
     const editRoomDrawerVisibility = useSelector(
         state => state.roomDrawerAndPopoverAndModalModule.editRoomDrawerVisibility
     );
     const dispatch = useDispatch();
-    const operate = useOperate();
+    const operateAsState = useOperateAsState();
     const name = useSelector(state => state.roomModule.roomState?.state?.name);
 
     return (
@@ -60,11 +60,11 @@ const EditRoomDrawer: React.FC = () => {
                             size='small'
                             value={name}
                             onChange={e => {
-                                const operation: UpOperation = {
-                                    $v: 2,
-                                    name: { newValue: e.target.value },
-                                };
-                                operate(operation);
+                                operateAsState(state =>
+                                    produce(state, state => {
+                                        state.name = e.target.value;
+                                    })
+                                );
                             }}
                         />
                     </Col>
@@ -73,5 +73,3 @@ const EditRoomDrawer: React.FC = () => {
         </Drawer>
     );
 };
-
-export default EditRoomDrawer;

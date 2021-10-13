@@ -1,7 +1,6 @@
 import { Col, Drawer, Row } from 'antd';
 import React from 'react';
-import DrawerFooter from '../../layouts/DrawerFooter';
-import { simpleId } from '../../utils/generators';
+import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { replace } from '../../stateManagers/states/types';
 import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
@@ -13,6 +12,7 @@ import {
     DicePieceValueState,
     CharacterState,
     dicePieceValueStrIndexes,
+    simpleId,
 } from '@kizahasi/flocon-core';
 import { useDispatch } from 'react-redux';
 import { useSelector } from '../../store';
@@ -35,6 +35,7 @@ const drawerBaseProps: Partial<DrawerProps> = {
 
 const defaultDicePieceValue: DicePieceValueState = {
     $v: 1,
+    $r: 1,
     dice: {},
     pieces: {},
 };
@@ -107,7 +108,8 @@ export const DicePieceValueDrawer: React.FC = () => {
                     }
                     operate(
                         characterUpdateOperation(drawerType.characterKey, {
-                            $v: 2,
+                            $v: 1,
+                            $r: 2,
                             dicePieceValues: {
                                 [drawerType.stateKey]: {
                                     type: update,
@@ -139,7 +141,8 @@ export const DicePieceValueDrawer: React.FC = () => {
                 characterUpdateOperation(
                     { createdBy: myUserUid, id: activeCharacter.key },
                     {
-                        $v: 2,
+                        $v: 1,
+                        $r: 2,
                         dicePieceValues: {
                             [id]: {
                                 type: replace,
@@ -238,6 +241,7 @@ export const DicePieceValueDrawer: React.FC = () => {
                                                             ? undefined
                                                             : {
                                                                   $v: 1,
+                                                                  $r: 1,
                                                                   dieType: e.newValue.dieType,
                                                                   isValuePrivate: false,
                                                                   value: null,

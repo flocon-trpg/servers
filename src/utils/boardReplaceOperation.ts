@@ -6,12 +6,14 @@ export const boardReplaceOperation = (
     newValue: BoardState | undefined
 ): UpOperation => {
     return {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         participants: {
             [boardKey.createdBy]: {
                 type: update,
                 update: {
-                    $v: 2,
+                    $v: 1,
+                    $r: 2,
                     boards: {
                         [boardKey.id]: {
                             type: replace,

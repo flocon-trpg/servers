@@ -2,10 +2,6 @@ import React from 'react';
 import { Button, Popover, Select } from 'antd';
 import { ChatPalettePanelConfig } from '../../states/ChatPalettePanelConfig';
 import { MessagePanelConfig } from '../../states/MessagePanelConfig';
-import {
-    useGetAvailableGameSystemsQuery,
-    useGetDiceHelpMessagesQuery,
-} from '../../generated/graphql';
 import { useDispatch } from 'react-redux';
 import { apolloError } from '../../hooks/useRoomMessages';
 import { roomModule } from '../../modules/roomModule';
@@ -17,13 +13,18 @@ import classNames from 'classnames';
 import { flex, flexNone, flexRow, itemsCenter } from '../../utils/className';
 import * as Icons from '@ant-design/icons';
 import { NewTabLinkify } from '../NewTabLinkify';
+import {
+    GetAvailableGameSystemsDocument,
+    GetDiceHelpMessagesDocument,
+} from '../../generated/graphql';
+import { useQuery } from '@apollo/client';
 
 type HelpMessageProps = {
     gameSystemId: string;
 };
 
 const HelpMessage = ({ gameSystemId }: HelpMessageProps) => {
-    const message = useGetDiceHelpMessagesQuery({ variables: { id: gameSystemId } });
+    const message = useQuery(GetDiceHelpMessagesDocument, { variables: { id: gameSystemId } });
     if (message.error != null) {
         return <div>取得中にエラーが発生しました。</div>;
     }
@@ -62,7 +63,7 @@ export const GameSelector: React.FC<Props> = ({
 }: Props) => {
     const dispatch = useDispatch();
 
-    const availableGameSystems = useGetAvailableGameSystemsQuery();
+    const availableGameSystems = useQuery(GetAvailableGameSystemsDocument);
     React.useEffect(() => {
         if (availableGameSystems.error == null) {
             return;

@@ -16,8 +16,9 @@ import { custom, SelectedCharacterType, some } from './getSelectedCharacterType'
 import _ from 'lodash';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import {
-    useWritePrivateMessageMutation,
-    useWritePublicMessageMutation,
+    WritePrivateMessageDocument,
+    WritePublicMessageDocument,
+    WriteRoomPublicMessageFailureType,
 } from '../../generated/graphql';
 import { UISelector } from '../UISelector';
 import { PrivateMessageChannelSelector } from './PrivateMessageChannelSelector';
@@ -29,6 +30,8 @@ import { useReadonlyRef } from '../../hooks/useReadonlyRef';
 import classNames from 'classnames';
 import { flex, flexColumn, flexNone } from '../../utils/className';
 import { $free, PublicChannelKey } from '@kizahasi/flocon-core';
+import { Notification, roomModule } from '../../modules/roomModule';
+import { useMutation } from '@apollo/client';
 
 /* react-virtuosoはおそらくheightを指定しなければ正常に動作しないため、もしこれが可変だとheightの指定が無理とは言わないまでも面倒になる。そのため、70pxという適当な値で固定している */
 const height = 70;
@@ -50,7 +53,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
 }: PrivateMessageElementProps) => {
     const dispatch = useDispatch();
     const text = useSelector(state => state.messageInputTextModule.privateMessage);
-    const [writePrivateMessage] = useWritePrivateMessageMutation();
+    const [writePrivateMessage] = useMutation(WritePrivateMessageDocument);
     const textAreaRef = React.useRef<TextAreaRef | null>(null);
     const [isPosting, setIsPosting] = React.useState(false); // 現状、並列投稿は「PublicMessage1つとPrivateMessage1つの最大2つまで」という制限になっているが、これは単に実装が楽だからというのが一番の理由。
     const roomMessagesFontSizeDelta = useSelector(
@@ -74,7 +77,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
         [participantIdsOfSendTo, participants]
     );
     const selectedParticipants = React.useMemo(
-        () => selectedParticipantsBase.map(([, participant]) => participant.name),
+        () => selectedParticipantsBase.map(([, participant]) => participant.name ?? ''),
         [selectedParticipantsBase]
     );
     const placeholder = `秘話 (${
@@ -85,7 +88,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
                       return elem;
                   }
                   return `${seed}, ${elem}`;
-              }, '')
+              }, '' as string)
     }) へ投稿`;
 
     const onPost = (text: string) => {
@@ -116,7 +119,24 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
                 gameType: config.selectedGameSystem,
             },
         })
-            .then(() => dispatch(messageInputTextModule.actions.set({ privateMessage: '' })))
+            .then(res => {
+                switch (res.data?.result.__typename) {
+                    case 'RoomPrivateMessage':
+                        dispatch(messageInputTextModule.actions.set({ privateMessage: '' }));
+                        return;
+                    case 'WriteRoomPrivateMessageFailureResult':
+                        dispatch(
+                            roomModule.actions.addNotification({
+                                type: Notification.text,
+                                notification: {
+                                    type: 'error',
+                                    message: `書き込みの際にエラーが発生しました: ${res.data.result.failureType}`,
+                                    createdAt: new Date().getTime(),
+                                },
+                            })
+                        );
+                }
+            })
             .finally(() => {
                 setIsPosting(false);
                 textAreaRef.current?.focus();
@@ -185,7 +205,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
 }: PublicMessageElementProps) => {
     const dispatch = useDispatch();
     const text = useSelector(state => state.messageInputTextModule.publicMessage);
-    const [writePublicMessage] = useWritePublicMessageMutation();
+    const [writePublicMessage] = useMutation(WritePublicMessageDocument);
     const textAreaRef = React.useRef<TextAreaRef | null>(null);
     const [isPosting, setIsPosting] = React.useState(false); // 現状、並列投稿は「PublicMessage1つとPrivateMessage1つの最大2つまで」という制限になっているが、これは単に実装が楽だからというのが一番の理由。
     const roomMessagesFontSizeDelta = useSelector(
@@ -241,8 +261,39 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
                 gameType: config.selectedGameSystem,
             },
         })
-            .then(() => {
-                dispatch(messageInputTextModule.actions.set({ publicMessage: '' }));
+            .then(res => {
+                switch (res.data?.result.__typename) {
+                    case 'RoomPublicMessage':
+                        dispatch(messageInputTextModule.actions.set({ publicMessage: '' }));
+                        return;
+                    case 'WriteRoomPublicMessageFailureResult':
+                        switch (res.data.result.failureType) {
+                            case WriteRoomPublicMessageFailureType.NotAuthorized:
+                                dispatch(
+                                    roomModule.actions.addNotification({
+                                        type: Notification.text,
+                                        notification: {
+                                            type: 'error',
+                                            message:
+                                                '観戦者は雑談チャンネル以外には投稿できません。',
+                                            createdAt: new Date().getTime(),
+                                        },
+                                    })
+                                );
+                                return;
+                            default:
+                                dispatch(
+                                    roomModule.actions.addNotification({
+                                        type: Notification.text,
+                                        notification: {
+                                            type: 'error',
+                                            message: `書き込みの際にエラーが発生しました: ${res.data.result.failureType}`,
+                                            createdAt: new Date().getTime(),
+                                        },
+                                    })
+                                );
+                        }
+                }
             })
             .finally(() => {
                 setIsPosting(false);

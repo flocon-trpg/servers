@@ -2,29 +2,29 @@ import { Input, Menu, Modal, Popover, Tooltip } from 'antd';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import {
+    ChangeParticipantNameDocument,
+    DeleteRoomDocument,
     DeleteRoomFailureType,
+    LeaveRoomDocument,
     ParticipantRole,
     PromoteFailureType,
-    useChangeParticipantNameMutation,
-    useDeleteRoomMutation,
-    useLeaveRoomMutation,
-    usePromoteToPlayerMutation,
-    useRequiresPhraseToJoinAsPlayerLazyQuery,
+    PromoteToPlayerDocument,
+    RequiresPhraseToJoinAsPlayerDocument,
 } from '../../generated/graphql';
-import roomConfigModule from '../../modules/roomConfigModule';
+import { roomConfigModule } from '../../modules/roomConfigModule';
 import { useSelector } from '../../store';
 import * as Icon from '@ant-design/icons';
 import { boardEditorPanel, chatPalettePanel } from '../../states/RoomConfig';
-import VolumeBarPanel from './VolumeBarPanel';
+import { VolumeBarPanel } from './VolumeBarPanel';
 import { Jdenticon } from '../../components/Jdenticon';
 import { roomModule, Notification } from '../../modules/roomModule';
-import path from '../../utils/path';
+import { path } from '../../utils/path';
 import { useRouter } from 'next/router';
 import { defaultMessagePanelConfig } from '../../states/MessagePanelConfig';
 import { recordToArray } from '@kizahasi/util';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { defaultMemoPanelConfig } from '../../states/MemoPanelConfig';
-import FilesManagerDrawer from '../../components/FilesManagerDrawer';
+import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
 import { FilesManagerDrawerType, none } from '../../utils/types';
 import { useMe } from '../../hooks/useMe';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
@@ -33,6 +33,7 @@ import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../utils/className';
 import { MyAuthContext } from '../../contexts/MyAuthContext';
 import { GenerateLogModal } from '../../components/GenerateLogModal';
+import { useLazyQuery, useMutation } from '@apollo/client';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -50,9 +51,10 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
     const dispatch = useDispatch();
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
-    const [promoteToPlayer] = usePromoteToPlayerMutation();
-    const [requiresPhraseToJoinAsPlayer, requiresPhraseToJoinAsPlayerResult] =
-        useRequiresPhraseToJoinAsPlayerLazyQuery();
+    const [promoteToPlayer] = useMutation(PromoteToPlayerDocument);
+    const [requiresPhraseToJoinAsPlayer, requiresPhraseToJoinAsPlayerResult] = useLazyQuery(
+        RequiresPhraseToJoinAsPlayerDocument
+    );
     const requiresPhraseToJoinAsPlayerRef = React.useRef(requiresPhraseToJoinAsPlayer);
     React.useEffect(() => {
         requiresPhraseToJoinAsPlayerRef.current = requiresPhraseToJoinAsPlayer;
@@ -216,7 +218,7 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
 }: DeleteRoomModalProps) => {
     const dispatch = useDispatch();
     const [isPosting, setIsPosting] = React.useState(false);
-    const [deleteRoom] = useDeleteRoomMutation();
+    const [deleteRoom] = useMutation(DeleteRoomDocument);
     React.useEffect(() => {
         setIsPosting(false);
     }, [visible, roomId]);
@@ -308,7 +310,7 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
     const dispatch = useDispatch();
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
-    const [changeParticipantName] = useChangeParticipantNameMutation();
+    const [changeParticipantName] = useMutation(ChangeParticipantNameDocument);
     React.useEffect(() => {
         setInputValue('');
         setIsPosting(false);
@@ -388,7 +390,7 @@ export const RoomMenu: React.FC = () => {
     const memoPanels = useSelector(state => state.roomConfigModule?.panels.memoPanels);
     const messagePanels = useSelector(state => state.roomConfigModule?.panels.messagePanels);
     const pieceValuePanel = useSelector(state => state.roomConfigModule?.panels.pieceValuePanel);
-    const [leaveRoomMutation] = useLeaveRoomMutation();
+    const [leaveRoomMutation] = useMutation(LeaveRoomDocument);
     const [isBecomePlayerModalVisible, setIsBecomePlayerModalVisible] = React.useState(false);
     const [isChangeMyParticipantNameModalVisible, setIsChangeMyParticipantNameModalVisible] =
         React.useState(false);

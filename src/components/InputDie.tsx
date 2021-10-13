@@ -6,7 +6,7 @@ import { D6Value, noDie, noValue } from '../utils/dice';
 import * as Icons from '@ant-design/icons';
 import { Button } from 'antd';
 import { update, replace } from '../stateManagers/states/types';
-import ToggleButton from './ToggleButton';
+import { ToggleButton } from './ToggleButton';
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter, justifyItemsCenter } from '../utils/className';
 

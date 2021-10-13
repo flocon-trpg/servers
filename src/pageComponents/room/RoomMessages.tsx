@@ -34,19 +34,19 @@ import {
 import { PrivateChannelSet, PrivateChannelSets } from '../../utils/PrivateChannelSet';
 import { ChatInput } from '../../components/ChatInput/Main';
 import { useDispatch } from 'react-redux';
-import roomConfigModule from '../../modules/roomConfigModule';
+import { roomConfigModule } from '../../modules/roomConfigModule';
 import {
-    useDeleteMessageMutation,
-    useEditMessageMutation,
-    useMakeMessageNotSecretMutation,
+    DeleteMessageDocument,
+    EditMessageDocument,
+    MakeMessageNotSecretDocument,
     WritingMessageStatusType,
 } from '../../generated/graphql';
 import * as Icon from '@ant-design/icons';
 import { MessageFilter, TabConfig } from '../../states/MessagePanelConfig';
 import { Gutter } from 'antd/lib/grid/row';
-import DrawerFooter from '../../layouts/DrawerFooter';
-import BufferedInput from '../../components/BufferedInput';
-import QueryResultViewer from '../../components/QueryResultViewer';
+import { DrawerFooter } from '../../layouts/DrawerFooter';
+import { BufferedInput } from '../../components/BufferedInput';
+import { QueryResultViewer } from '../../components/QueryResultViewer';
 import { useMessageFilter } from '../../hooks/useMessageFilter';
 import { RoomMessage as RoomMessageNameSpace } from './RoomMessage';
 import { useWritingMessageStatus } from '../../hooks/useWritingMessageStatus';
@@ -54,12 +54,11 @@ import { isDeleted, toText } from '../../utils/message';
 import { Notification } from '../../modules/roomModule';
 import { useSelector } from '../../store';
 import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
-import { useOperate } from '../../hooks/useOperate';
 import { useParticipants } from '../../hooks/state/useParticipants';
-import { UpOperation } from '@kizahasi/flocon-core';
+import { simpleId } from '@kizahasi/flocon-core';
 import { recordToArray, recordToMap } from '@kizahasi/util';
 import { Color } from '../../utils/color';
-import userConfigModule from '../../modules/userConfigModule';
+import { userConfigModule } from '../../modules/userConfigModule';
 import { UserConfig } from '../../states/UserConfig';
 import * as Icons from '@ant-design/icons';
 import { InputModal } from '../../components/InputModal';
@@ -67,7 +66,9 @@ import { JumpToBottomVirtuoso } from '../../components/JumpToBottomVirtuoso';
 import { cancelRnd, flex, flexColumn, flexNone, flexRow, itemsCenter } from '../../utils/className';
 import classNames from 'classnames';
 import { getUserUid, MyAuthContext } from '../../contexts/MyAuthContext';
-import { simpleId } from '../../utils/generators';
+import { useOperateAsState } from '../../hooks/useOperateAsState';
+import produce from 'immer';
+import { useMutation } from '@apollo/client';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -351,7 +352,7 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
 ) => {
     const { visible, onClose } = props;
     const publicChannelNames = usePublicChannelNames();
-    const operate = useOperate();
+    const operateAsState = useOperateAsState();
 
     return (
         <Drawer
@@ -384,11 +385,11 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
                                     if (e.previousValue === e.currentValue) {
                                         return;
                                     }
-                                    const operation: UpOperation = {
-                                        $v: 2,
-                                    };
-                                    operation[key] = { newValue: e.currentValue };
-                                    operate(operation);
+                                    operateAsState(state => {
+                                        return produce(state, state => {
+                                            state[key] = e.currentValue;
+                                        });
+                                    });
                                 }}
                             />
                         </Col>
@@ -416,9 +417,9 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
     const { message, showPrivateMessageMembers } = props;
 
     const myAuth = React.useContext(MyAuthContext);
-    const [editMessageMutation] = useEditMessageMutation();
-    const [deleteMessageMutation] = useDeleteMessageMutation();
-    const [makeMessageNotSecret] = useMakeMessageNotSecretMutation();
+    const [editMessageMutation] = useMutation(EditMessageDocument);
+    const [deleteMessageMutation] = useMutation(DeleteMessageDocument);
+    const [makeMessageNotSecret] = useMutation(MakeMessageNotSecretDocument);
     const [isEditModalVisible, setIsEditModalVisible] = React.useState(false);
     const roomId = useSelector(state => state.roomModule.roomId);
     const publicChannelNames = usePublicChannelNames();
@@ -738,7 +739,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
                 key !== getUserUid(myAuth) && value.current === WritingMessageStatusType.Writing
         )
         .map(([key]) => key)
-        .map(userUid => participantsMap?.get(userUid)?.name)
+        .map(userUid => participantsMap?.get(userUid)?.name ?? '')
         .sort();
     let writingStatus: JSX.Element | null = null;
     // TODO: background-colorが適当
@@ -754,8 +755,10 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
     } else {
         writingStatus = (
             <div css={writingStatusCss}>
-                {writingUsers.reduce((seed, elem, i) => (i === 0 ? elem : `${seed}, ${elem}`), '') +
-                    ' が書き込み中…'}
+                {writingUsers.reduce(
+                    (seed, elem, i) => (i === 0 ? elem : `${seed}, ${elem}`),
+                    '' as string
+                ) + ' が書き込み中…'}
             </div>
         );
     }

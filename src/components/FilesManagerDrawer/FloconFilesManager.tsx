@@ -1,17 +1,17 @@
 import * as React from 'react';
 import { Button, Dropdown, Menu, notification, Table, Tooltip, Upload } from 'antd';
 import { accept } from './helper';
-import ConfigContext from '../../contexts/ConfigContext';
+import { ConfigContext } from '../../contexts/ConfigContext';
 import { getHttpUri } from '../../config';
 import urljoin from 'url-join';
 import axios from 'axios';
 import { ColumnGroupType, ColumnType, FilterValue } from 'antd/lib/table/interface';
 import {
+    DeleteFilesDocument,
     FileItemFragment,
     FilePathFragment,
     FileSourceType,
-    useDeleteFilesMutation,
-    useGetFilesQuery,
+    GetFilesDocument,
 } from '../../generated/graphql';
 import { FloconUploaderFileLink } from '../FloconUploaderFileLink';
 import { InformationIcon } from '../InformationIcon';
@@ -24,6 +24,7 @@ import { FirebaseAuthenticationIdTokenContext } from '../../contexts/FirebaseAut
 import { useAsync } from 'react-use';
 import { LazyAndPreloadImage } from '../LazyAndPreloadImage';
 import { getFloconUploaderFile, thumbs } from '../../utils/getFloconUploaderFile';
+import { useMutation, useQuery } from '@apollo/client';
 
 type DataSource = FileItemFragment;
 
@@ -237,8 +238,8 @@ type FileOptionsMenuProps = {
 };
 
 const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({ fileItem }: FileOptionsMenuProps) => {
-    const { refetch } = useGetFilesQuery({ variables: { input: { fileTagIds: [] } } });
-    const [deleteFilesMutation] = useDeleteFilesMutation();
+    const { refetch } = useQuery(GetFilesDocument, { variables: { input: { fileTagIds: [] } } });
+    const [deleteFilesMutation] = useMutation(DeleteFilesDocument);
 
     return (
         <div>
@@ -306,10 +307,12 @@ const FloconFilesList: React.FC<FloconFilesListProps> = ({
     onFlieOpen,
     defaultFilteredValue,
 }: FloconFilesListProps) => {
-    const getFilesQueryResult = useGetFilesQuery({ variables: { input: { fileTagIds: [] } } });
+    const getFilesQueryResult = useQuery(GetFilesDocument, {
+        variables: { input: { fileTagIds: [] } },
+    });
     const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([]);
-    const { refetch } = useGetFilesQuery({ variables: { input: { fileTagIds: [] } } });
-    const [deleteFilesMutation] = useDeleteFilesMutation();
+    const { refetch } = useQuery(GetFilesDocument, { variables: { input: { fileTagIds: [] } } });
+    const [deleteFilesMutation] = useMutation(DeleteFilesDocument);
 
     const columns = (() => {
         if (onFlieOpen != null) {
@@ -381,7 +384,7 @@ type Props = {
 };
 
 export const FloconFilesManager: React.FC<Props> = (props: Props) => {
-    const { refetch } = useGetFilesQuery({ variables: { input: { fileTagIds: [] } } });
+    const { refetch } = useQuery(GetFilesDocument, { variables: { input: { fileTagIds: [] } } });
     return (
         <div>
             <Uploader onUploaded={() => refetch()} unlistedMode />

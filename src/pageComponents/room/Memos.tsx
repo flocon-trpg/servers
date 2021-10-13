@@ -1,17 +1,25 @@
 import React from 'react';
 import * as Icons from '@ant-design/icons';
 import { useMemos } from '../../hooks/state/useMemos';
-import { MemoState, replace, textDiff, toTextUpOperation, update } from '@kizahasi/flocon-core';
+import {
+    MemoState,
+    replace,
+    simpleId,
+    textDiff,
+    toTextUpOperation,
+    update,
+} from '@kizahasi/flocon-core';
 import { useOperate } from '../../hooks/useOperate';
 import { Button, Popover, Tree, Modal, Menu, Dropdown, Input } from 'antd';
 import { DataNode } from 'rc-tree/lib/interface';
-import { simpleId } from '../../utils/generators';
-import BufferedInput from '../../components/BufferedInput';
+import { BufferedInput } from '../../components/BufferedInput';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
 import classNames from 'classnames';
 import { cancelRnd, flex, flex1, flexColumn, flexRow, itemsCenter } from '../../utils/className';
 import _ from 'lodash';
 import moment from 'moment';
+import { useOperateAsState } from '../../hooks/useOperateAsState';
+import produce from 'immer';
 
 const padding = 4;
 const splitterPadding = 8;
@@ -208,12 +216,14 @@ const DirSelect = ({ memoId, memo }: DirSelectProps) => {
                 key={`DIRSELECT-${memoId}`}
                 onClick={() => {
                     operate({
-                        $v: 2,
+                        $v: 1,
+                        $r: 2,
                         memos: {
                             [memoId]: {
                                 type: update,
                                 update: {
                                     $v: 1,
+                                    $r: 1,
                                     dir: { newValue: [...dir] },
                                 },
                             },
@@ -244,12 +254,14 @@ const DirSelect = ({ memoId, memo }: DirSelectProps) => {
                 }}
                 onOk={() => {
                     operate({
-                        $v: 2,
+                        $v: 1,
+                        $r: 2,
                         memos: {
                             [memoId]: {
                                 type: update,
                                 update: {
                                     $v: 1,
+                                    $r: 1,
                                     dir: { newValue: [...memo.dir, newDirName] },
                                 },
                             },
@@ -282,6 +294,7 @@ type MemoProps = {
 
 const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
     const operate = useOperate();
+    const operateAsState = useOperateAsState();
 
     if (memoId == null) {
         return <div style={{ padding }}>表示するメモが指定されていません。</div>;
@@ -308,17 +321,13 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
                     bufferDuration='default'
                     value={memo.name}
                     onChange={e =>
-                        operate({
-                            $v: 2,
-                            memos: {
-                                [memoId]: {
-                                    type: update,
-                                    update: {
-                                        $v: 1,
-                                        name: { newValue: e.currentValue },
-                                    },
-                                },
-                            },
+                        operateAsState(prevState => {
+                            return produce(prevState, prevState => {
+                                const memo = prevState.memos[memoId];
+                                if (memo != null) {
+                                    memo.name = e.currentValue;
+                                }
+                            });
                         })
                     }
                 />
@@ -331,7 +340,8 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
                             title: '現在開いているメモを削除してよろしいですか？',
                             onOk: () => {
                                 operate({
-                                    $v: 2,
+                                    $v: 1,
+                                    $r: 2,
                                     memos: {
                                         [memoId]: {
                                             type: replace,
@@ -357,12 +367,14 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
                 onChange={e => {
                     const diff2 = textDiff({ prev: e.previousValue, next: e.currentValue });
                     operate({
-                        $v: 2,
+                        $v: 1,
+                        $r: 2,
                         memos: {
                             [memoId]: {
                                 type: update,
                                 update: {
                                     $v: 1,
+                                    $r: 1,
                                     text:
                                         diff2 === undefined ? undefined : toTextUpOperation(diff2),
                                 },
@@ -420,13 +432,15 @@ export const Memos: React.FC<Props> = ({ selectedMemoId, onSelectedMemoIdChange 
                     onClick={() => {
                         const id = simpleId();
                         operate({
-                            $v: 2,
+                            $v: 1,
+                            $r: 2,
                             memos: {
                                 [id]: {
                                     type: replace,
                                     replace: {
                                         newValue: {
                                             $v: 1,
+                                            $r: 1,
                                             text: '',
                                             textType: 'Plain',
                                             name: `新規メモ@${moment(new Date()).format(

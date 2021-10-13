@@ -1,14 +1,14 @@
 import React from 'react';
 import { Tooltip } from 'antd';
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
-import ToggleButton from './ToggleButton';
+import { ToggleButton } from './ToggleButton';
 import {
     parameterIsPrivate,
     parameterIsNotPrivate,
     parameterIsPrivateAndNotCreatedByMe,
     parameterIsNotPrivateAndNotCreatedByMe,
 } from '../resource/text/main';
-import BufferedInput from './BufferedInput';
+import { BufferedInput } from './BufferedInput';
 import {
     CharacterUpOperation,
     StrIndex20,
@@ -29,7 +29,7 @@ type Props = {
     compact: boolean;
 };
 
-const StringParameterInput: React.FC<Props> = ({
+export const StringParameterInput: React.FC<Props> = ({
     isCharacterPrivate,
     isCreate,
     parameterKey,
@@ -51,10 +51,12 @@ const StringParameterInput: React.FC<Props> = ({
                 }
                 const diff2 = textDiff({ prev: e.previousValue, next: e.currentValue });
                 const operation: CharacterUpOperation = {
-                    $v: 2,
+                    $v: 1,
+                    $r: 2,
                     strParams: {
                         [parameterKey]: {
                             $v: 1,
+                            $r: 1,
                             value: diff2 === undefined ? undefined : toTextUpOperation(diff2),
                         },
                     },
@@ -97,10 +99,12 @@ const StringParameterInput: React.FC<Props> = ({
             size='small'
             onChange={e => {
                 const operation: CharacterUpOperation = {
-                    $v: 2,
+                    $v: 1,
+                    $r: 2,
                     strParams: {
                         [parameterKey]: {
                             $v: 1,
+                            $r: 1,
                             isValuePrivate: { newValue: !e },
                         },
                     },
@@ -116,5 +120,3 @@ const StringParameterInput: React.FC<Props> = ({
         </div>
     );
 };
-
-export default StringParameterInput;

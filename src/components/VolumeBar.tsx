@@ -17,7 +17,12 @@ type Props = {
 
 const textStyle: React.CSSProperties = { flex: '100px', margin: '0 4px', width: 50 };
 
-const VolumeBar: React.FC<Props> = ({ value, onChange, readonly, inputNumberType }: Props) => {
+export const VolumeBar: React.FC<Props> = ({
+    value,
+    onChange,
+    readonly,
+    inputNumberType,
+}: Props) => {
     const roundedValue = Math.round(inputNumberType === '0-1' ? value * 100 : value);
     return (
         <div className={classNames(flex, flexRow, itemsCenter)}>
@@ -57,5 +62,3 @@ const VolumeBar: React.FC<Props> = ({ value, onChange, readonly, inputNumberType
         </div>
     );
 };
-
-export default VolumeBar;
