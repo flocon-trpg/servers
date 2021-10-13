@@ -72,8 +72,21 @@ import axios from 'axios';
 import FormData from 'form-data';
 import urljoin from 'url-join';
 import { readFileSync } from 'fs';
+import { TextTwoWayOperation, TextUpOperation } from '@kizahasi/ot-string';
 
 const timeout = 20000;
+
+const textDiff = ({ prev, next }: { prev: string; next: string }) => {
+    if (prev === next) {
+        return undefined;
+    }
+    const diff = TextTwoWayOperation.diff({
+        first: prev,
+        second: next,
+    });
+    const upOperation = TextTwoWayOperation.toUpOperation(diff);
+    return TextUpOperation.toUnit(upOperation);
+};
 
 const resetDatabase = async (em: EM): Promise<void> => {
     for (const room of await em.find($MikroORM.Room, {})) {
@@ -640,10 +653,9 @@ it.each([
             const requestId = 'P1_REQID'; // @MaxLength(10)であるため10文字以下にしている
 
             const operation: UpOperation = {
-                $v: 2,
-                name: {
-                    newValue: newRoomName,
-                },
+                $v: 1,
+                $r: 2,
+                name: textDiff({ prev: Resources.Room.name, next: newRoomName }),
             };
             const operationResult = Assert.OperateMutation.toBeSuccess(
                 await GraphQL.operateMutation(roomPlayer1Client, {
