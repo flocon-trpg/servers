@@ -151,12 +151,14 @@ import {
     client,
     $free,
     $system,
+    MaxLength100String,
 } from '@kizahasi/flocon-core';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
 import { ParticipantRole as ParticipantRoleEnum } from '../../../enums/ParticipantRole';
 import { ENTRY } from '../../../roles';
 import { ParticipantRoleType } from '../../../enums/ParticipantRoleType';
 import { RateLimitMiddleware } from '../../middlewares/RateLimitMiddleware';
+import { convertToMaxLength100String } from '../../../utils/convertToMaxLength100String';
 
 const find = <T>(source: Record<string, T | undefined>, key: string): T | undefined => source[key];
 
@@ -246,11 +248,11 @@ const operateParticipantAndFlush = async ({
     participantUserUids: ReadonlySet<string>;
     create?: {
         role: ParticipantRole | undefined;
-        name: string;
+        name: MaxLength100String;
     };
     update?: {
         role?: { newValue: ParticipantRole | undefined };
-        name?: { newValue: string };
+        name?: { newValue: MaxLength100String };
     };
 }): Promise<{ result: typeof JoinRoomResult; payload: RoomEventPayload | undefined }> => {
     const prevRevision = room.revision;
@@ -265,7 +267,8 @@ const operateParticipantAndFlush = async ({
                 type: replace,
                 replace: {
                     newValue: {
-                        $v: 2,
+                        $v: 1,
+                        $r: 2,
                         name: create.name,
                         role: create.role,
                         boards: {},
@@ -280,7 +283,8 @@ const operateParticipantAndFlush = async ({
             participantOperation = {
                 type: 'update',
                 update: {
-                    $v: 2,
+                    $v: 1,
+                    $r: 2,
                     role: update.role,
                     name: update.name,
                 },
@@ -296,7 +300,8 @@ const operateParticipantAndFlush = async ({
     }
 
     const roomUpOperation: UpOperation = {
-        $v: 2,
+        $v: 1,
+        $r: 2,
         participants: {
             [myUserUid]: participantOperation,
         },
@@ -427,7 +432,7 @@ const joinRoomCore = async ({
                     participantUserUids,
                     myUserUid: authorizedUser.userUid,
                     create: {
-                        name: args.name,
+                        name: convertToMaxLength100String(args.name),
                         role: strategyResult,
                     },
                     update: {
@@ -1051,10 +1056,12 @@ export class RoomResolver {
                 name: input.roomName,
                 createdBy: authorizedUser.userUid,
                 value: {
-                    $v: 2,
+                    $v: 1,
+                    $r: 2,
                     participants: {
                         [authorizedUser.userUid]: {
-                            $v: 2,
+                            $v: 1,
+                            $r: 2,
                             boards: {},
                             characters: {},
                             imagePieceValues: {},
@@ -1315,7 +1322,7 @@ export class RoomResolver {
                 em,
                 myUserUid: authorizedUserUid,
                 update: {
-                    name: { newValue: args.newName },
+                    name: { newValue: convertToMaxLength100String(args.newName) },
                 },
                 room,
                 participantUserUids,
@@ -1456,6 +1463,8 @@ export class RoomResolver {
         args: OperateArgs;
         context: ResolverContext;
     }): Promise<OperateCoreResult> {
+        // Spectatorであっても自分の名前などはoperateで変更する必要があるため、Spectatorならば無条件で弾くという手法は使えない
+
         const queue = async (): Promise<
             Result<OperateCoreResult, string | ApplyError<PositiveInt> | ComposeAndTransformError>
         > => {
@@ -1473,13 +1482,13 @@ export class RoomResolver {
                 });
             }
             const { room, me, roomState } = findResult;
-            const participantUserUids = findResult.participantIds();
             if (me === undefined) {
                 return Result.ok({
                     type: 'nonJoined',
                     result: { roomAsListItem: stateToGraphql$RoomAsListItem({ roomEntity: room }) },
                 });
             }
+            const participantUserUids = findResult.participantIds();
             const clientOperation = GlobalRoom.GraphQL.ToGlobal.upOperation(args.operation);
 
             const downOperation = await GlobalRoom.MikroORM.ToGlobal.downOperationMany({

@@ -30,7 +30,7 @@ import { CreateRoomFailureType } from '../enums/CreateRoomFailureType';
 import { GetRoomsListFailureType } from '../enums/GetRoomsListFailureType';
 
 let hasRegistered = false;
-const registerEnumTypes = (): void => {
+export const registerEnumTypes = (): void => {
     if (hasRegistered) {
         return;
     }
@@ -123,5 +123,3 @@ const registerEnumTypes = (): void => {
         name: 'WritingMessageStatusType',
     });
 };
-
-export default registerEnumTypes;

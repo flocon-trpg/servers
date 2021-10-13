@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadMigrationCreate = exports.loadMigrationDown = exports.loadMigrationUp = exports.loadAsMain = exports.sqlite = exports.postgresql = void 0;
 const yargs_1 = __importDefault(require("yargs"));
-const VERSION_1 = __importDefault(require("../VERSION"));
+const VERSION_1 = require("../VERSION");
 exports.postgresql = 'postgresql';
 exports.sqlite = 'sqlite';
 const toDbType = (source) => {
@@ -30,7 +30,7 @@ const getMain = async () => {
             type: 'boolean',
         },
     })
-        .version(VERSION_1.default.toString()).argv;
+        .version(VERSION_1.VERSION.toString()).argv;
     const result = {
         debug: options.debug === true,
     };

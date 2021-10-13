@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import main from './main';
+import { main } from './main';
 import { loadAsMain } from './utils/commandLineArgs';
 
 loadAsMain().then(args => {

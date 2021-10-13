@@ -10,12 +10,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FilePath = void 0;
+const class_validator_1 = require("class-validator");
 const type_graphql_1 = require("type-graphql");
 const FileSourceType_1 = require("../../../enums/FileSourceType");
 let FilePath = class FilePath {
 };
 __decorate([
     (0, type_graphql_1.Field)(),
+    (0, class_validator_1.MaxLength)(10000),
     __metadata("design:type", String)
 ], FilePath.prototype, "path", void 0);
 __decorate([

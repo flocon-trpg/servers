@@ -28,6 +28,7 @@ import { Participant } from '../participant/mikro-orm';
 import { recordForEachAsync } from '@kizahasi/util';
 import { User } from '../user/mikro-orm';
 import { nullableStringToParticipantRoleType } from '../../../enums/ParticipantRoleType';
+import { convertToMaxLength100String } from '../../../utils/convertToMaxLength100String';
 
 type IsSequentialResult<T> =
     | {
@@ -97,9 +98,10 @@ export namespace GlobalRoom {
                             room: { id: roomEntity.id },
                             user: { userUid: participantKey },
                         });
+                        const name = participantEntity?.name;
                         participants[participantKey] = {
                             ...participant,
-                            name: participantEntity?.name,
+                            name: name == null ? undefined : convertToMaxLength100String(name),
                             role: participantEntity?.role,
                         };
                     }
@@ -216,7 +218,7 @@ export namespace GlobalRoom {
                 });
                 const upOperation =
                     diffOperation == null ? undefined : toUpOperation(diffOperation);
-                return stringifyUpOperation(upOperation ?? { $v: 2 });
+                return stringifyUpOperation(upOperation ?? { $v: 1, $r: 2 });
             };
         }
 
@@ -252,6 +254,8 @@ export namespace GlobalRoom {
             }
         }
 
+        const maxJsonLength = 1_000_000;
+
         // prevStateにおけるDbStateの部分とtargetのJSONは等しい
         export const applyToEntity = async ({
             em,
@@ -272,8 +276,18 @@ export namespace GlobalRoom {
                 throw nextState.error;
             }
 
+            // CONSIDER: サイズの大きいオブジェクトに対してJSON.stringifyするのは重い可能性。そもそももしJSON.stringifyが重いのであればio-tsのdecodeはより重くなりそう。
             target.name = nextState.value.name;
-            target.value = exactDbState(nextState.value);
+            const newValue = exactDbState(nextState.value);
+            const newValueJson = JSON.stringify(newValue);
+            if (newValueJson.length > maxJsonLength) {
+                const oldValue = target.value;
+                const oldValueJson = JSON.stringify(oldValue);
+                if (oldValueJson.length < maxJsonLength) {
+                    throw new Error('value size limit exceeded');
+                }
+            }
+            target.value = newValue;
             const prevRevision = target.revision;
             target.revision += 1;
 

@@ -8,7 +8,7 @@ import {
 } from 'type-graphql';
 import path from 'path';
 import { GraphQLSchema } from 'graphql';
-import registerEnumTypes from './graphql+mikro-orm/registerEnumTypes';
+import { registerEnumTypes } from './graphql+mikro-orm/registerEnumTypes';
 import { RoomResolver } from './graphql+mikro-orm/resolvers/rooms/RoomResolver';
 import { MainResolver } from './graphql+mikro-orm/resolvers/MainResolver';
 import { PubSubOptions } from 'graphql-subscriptions';

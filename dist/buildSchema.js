@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildSchemaSync = exports.buildSchema = exports.noAuthCheck = void 0;
 const type_graphql_1 = require("type-graphql");
 const path_1 = __importDefault(require("path"));
-const registerEnumTypes_1 = __importDefault(require("./graphql+mikro-orm/registerEnumTypes"));
+const registerEnumTypes_1 = require("./graphql+mikro-orm/registerEnumTypes");
 const RoomResolver_1 = require("./graphql+mikro-orm/resolvers/rooms/RoomResolver");
 const MainResolver_1 = require("./graphql+mikro-orm/resolvers/MainResolver");
 const helpers_1 = require("./graphql+mikro-orm/resolvers/utils/helpers");
@@ -68,7 +68,7 @@ const emitSchemaFileOptions = {
     commentDescriptions: true,
 };
 const buildSchema = (serverConfig) => async (options) => {
-    (0, registerEnumTypes_1.default)();
+    (0, registerEnumTypes_1.registerEnumTypes)();
     let emitSchemaFile = undefined;
     if (options.emitSchemaFile) {
         emitSchemaFile = emitSchemaFileOptions;
@@ -77,7 +77,7 @@ const buildSchema = (serverConfig) => async (options) => {
 };
 exports.buildSchema = buildSchema;
 const buildSchemaSync = (serverConfig) => (options) => {
-    (0, registerEnumTypes_1.default)();
+    (0, registerEnumTypes_1.registerEnumTypes)();
     let emitSchemaFile = undefined;
     if (options.emitSchemaFile) {
         emitSchemaFile = emitSchemaFileOptions;

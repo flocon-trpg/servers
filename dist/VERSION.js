@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.VERSION = void 0;
 const util_1 = require("@kizahasi/util");
-const VERSION = new util_1.SemVer({
+exports.VERSION = new util_1.SemVer({
     major: 0,
     minor: 4,
     patch: 0,
     prerelease: {
         type: util_1.alpha,
-        version: 8,
+        version: 9,
     },
 });
-exports.default = VERSION;

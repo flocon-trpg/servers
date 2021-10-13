@@ -2,7 +2,7 @@
     "name": "flocon-api",
     "description": "Flocon API server",
     "dependencies": {
-        "@kizahasi/flocon-core": "0.20.0-beta.3",
+        "@kizahasi/flocon-core": "0.20.0-beta.7",
         "@kizahasi/ot-string": "^0.2.3",
         "@kizahasi/result": "^1.0.0",
         "@kizahasi/util": "^0.9.1",
@@ -59,9 +59,9 @@
         "@commitlint/cli": "^13.2.0",
         "@commitlint/config-conventional": "^13.2.0",
         "@graphql-codegen/cli": "^2.2.0",
+        "@graphql-codegen/typed-document-node": "^2.1.4",
         "@graphql-codegen/typescript": "^2.2.2",
         "@graphql-codegen/typescript-operations": "^2.1.4",
-        "@graphql-codegen/typescript-react-apollo": "^3.1.4",
         "@types/jest": "^27.0.2",
         "@types/url-join": "^4.0.1",
         "@typescript-eslint/eslint-plugin": "^4.32.0",
@@ -81,7 +81,7 @@
         "url-join": "^4.0.1"
     },
     "engines": {
-        "node": "14.x"
+        "node": ">=14"
     },
     "prettier": {
         "printWidth": 100,

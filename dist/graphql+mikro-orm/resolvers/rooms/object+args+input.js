@@ -137,6 +137,7 @@ __decorate([
 ], WritePublicMessageArgs.prototype, "roomId", void 0);
 __decorate([
     (0, type_graphql_1.Field)(),
+    (0, class_validator_1.MaxLength)(10000),
     __metadata("design:type", String)
 ], WritePublicMessageArgs.prototype, "text", void 0);
 __decorate([
@@ -154,6 +155,7 @@ __decorate([
 ], WritePublicMessageArgs.prototype, "characterStateId", void 0);
 __decorate([
     (0, type_graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.MaxLength)(1000),
     __metadata("design:type", String)
 ], WritePublicMessageArgs.prototype, "customName", void 0);
 __decorate([
@@ -176,6 +178,7 @@ __decorate([
 ], WritePrivateMessageArgs.prototype, "visibleTo", void 0);
 __decorate([
     (0, type_graphql_1.Field)(),
+    (0, class_validator_1.MaxLength)(10000),
     __metadata("design:type", String)
 ], WritePrivateMessageArgs.prototype, "text", void 0);
 __decorate([
@@ -189,6 +192,7 @@ __decorate([
 ], WritePrivateMessageArgs.prototype, "characterStateId", void 0);
 __decorate([
     (0, type_graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.MaxLength)(1000),
     __metadata("design:type", String)
 ], WritePrivateMessageArgs.prototype, "customName", void 0);
 __decorate([

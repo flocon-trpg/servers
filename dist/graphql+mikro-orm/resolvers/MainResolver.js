@@ -28,7 +28,7 @@ const EntryToServerResult_1 = require("../results/EntryToServerResult");
 const GetAvailableGameSystemsResult_1 = require("../results/GetAvailableGameSystemsResult");
 const main_1 = require("../../messageAnalyzer/main");
 const graphql_2 = require("../entities/serverInfo/graphql");
-const VERSION_1 = __importDefault(require("../../VERSION"));
+const VERSION_1 = require("../../VERSION");
 const PrereleaseType_1 = require("../../enums/PrereleaseType");
 const util_1 = require("@kizahasi/util");
 const BaasType_1 = require("../../enums/BaasType");
@@ -220,20 +220,20 @@ let MainResolver = class MainResolver {
     }
     async getServerInfo(context) {
         const prerelease = (() => {
-            if (VERSION_1.default.prerelease == null) {
+            if (VERSION_1.VERSION.prerelease == null) {
                 return undefined;
             }
-            switch (VERSION_1.default.prerelease.type) {
+            switch (VERSION_1.VERSION.prerelease.type) {
                 case util_1.alpha:
-                    return Object.assign(Object.assign({}, VERSION_1.default.prerelease), { type: PrereleaseType_1.PrereleaseType.Alpha });
+                    return Object.assign(Object.assign({}, VERSION_1.VERSION.prerelease), { type: PrereleaseType_1.PrereleaseType.Alpha });
                 case util_1.beta:
-                    return Object.assign(Object.assign({}, VERSION_1.default.prerelease), { type: PrereleaseType_1.PrereleaseType.Beta });
+                    return Object.assign(Object.assign({}, VERSION_1.VERSION.prerelease), { type: PrereleaseType_1.PrereleaseType.Beta });
                 case util_1.rc:
-                    return Object.assign(Object.assign({}, VERSION_1.default.prerelease), { type: PrereleaseType_1.PrereleaseType.Rc });
+                    return Object.assign(Object.assign({}, VERSION_1.VERSION.prerelease), { type: PrereleaseType_1.PrereleaseType.Rc });
             }
         })();
         return {
-            version: Object.assign(Object.assign({}, VERSION_1.default), { prerelease }),
+            version: Object.assign(Object.assign({}, VERSION_1.VERSION), { prerelease }),
             uploaderEnabled: context.serverConfig.uploader != null,
         };
     }

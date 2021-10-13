@@ -90,6 +90,7 @@ export class WritePublicMessageArgs {
     public roomId!: string;
 
     @Field()
+    @MaxLength(10_000)
     public text!: string;
 
     @Field({ nullable: true })
@@ -103,6 +104,7 @@ export class WritePublicMessageArgs {
     public characterStateId?: string;
 
     @Field({ nullable: true })
+    @MaxLength(1_000)
     public customName?: string;
 
     @Field({ nullable: true, description: 'BCDiceのgameType。' })
@@ -118,6 +120,7 @@ export class WritePrivateMessageArgs {
     public visibleTo!: string[];
 
     @Field()
+    @MaxLength(10_000)
     public text!: string;
 
     @Field({ nullable: true })
@@ -128,6 +131,7 @@ export class WritePrivateMessageArgs {
     public characterStateId?: string;
 
     @Field({ nullable: true })
+    @MaxLength(1_000)
     public customName?: string;
 
     @Field({ nullable: true, description: 'BCDiceのgameType。' })

@@ -72,8 +72,21 @@ import axios from 'axios';
 import FormData from 'form-data';
 import urljoin from 'url-join';
 import { readFileSync } from 'fs';
+import { TextTwoWayOperation, TextUpOperation } from '@kizahasi/ot-string';
 
 const timeout = 20000;
+
+const textDiff = ({ prev, next }: { prev: string; next: string }) => {
+    if (prev === next) {
+        return undefined;
+    }
+    const diff = TextTwoWayOperation.diff({
+        first: prev,
+        second: next,
+    });
+    const upOperation = TextTwoWayOperation.toUpOperation(diff);
+    return TextUpOperation.toUnit(upOperation);
+};
 
 const resetDatabase = async (em: EM): Promise<void> => {
     for (const room of await em.find($MikroORM.Room, {})) {
@@ -194,12 +207,18 @@ namespace Assert {
     }
 
     export namespace OperateMutation {
-        export const toBeSuccess = (source: FetchResult<OperateMutation>) => {
-            if (source.data?.result.__typename !== 'OperateRoomSuccessResult') {
-                expect(source.data?.result.__typename).toBe('OperateRoomSuccessResult');
+        export const toBeSuccess = async (source: Promise<FetchResult<OperateMutation>>) => {
+            const sourceResult = await source;
+            if (sourceResult.data?.result.__typename !== 'OperateRoomSuccessResult') {
+                expect(sourceResult.data?.result.__typename).toBe('OperateRoomSuccessResult');
                 throw new Error('Guard');
             }
-            return source.data.result;
+            return sourceResult.data.result;
+        };
+
+        export const toBeFailure = async (source: Promise<FetchResult<OperateMutation>>) => {
+            const sourceResult = await source.catch(() => 'error');
+            expect(sourceResult).toBe('error');
         };
     }
 
@@ -634,19 +653,68 @@ it.each([
             allSubscriptions.clear();
         }
 
-        // operateのテスト
-        const newRoomName = 'NEW_ROOM_NAME';
+        const requestId = 'P1_REQID'; // @MaxLength(10)であるため10文字以下にしている
+
+        // operateのテスト（異常系 - 無効なJSON）
         {
-            const requestId = 'P1_REQID'; // @MaxLength(10)であるため10文字以下にしている
+            await Assert.OperateMutation.toBeFailure(
+                GraphQL.operateMutation(roomPlayer1Client, {
+                    id: roomId,
+                    requestId,
+                    revisionFrom: initRoomRevision + 1,
+                    operation: {
+                        clientId: Resources.ClientId.player1,
+                        valueJson: JSON.stringify({}),
+                    },
+                })
+            );
+        }
+
+        // operateのテスト（異常系 - 大きすぎるname）
+        {
+            const lorem1000 =
+                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent egestas ligula vel velit sodales vestibulum. Vivamus sagittis faucibus faucibus. In imperdiet ac tortor et elementum. Fusce orci ante, interdum vitae enim sit amet, feugiat congue turpis. Aliquam sed erat scelerisque, facilisis mauris eget, vestibulum nisl. Etiam sit amet ex ut dolor volutpat sollicitudin eget eu lectus. Aliquam et diam fermentum, tincidunt quam non, interdum dolor. Vestibulum quis neque egestas, suscipit dui in, luctus sem. Etiam auctor suscipit dapibus. Aliquam porttitor lacus a urna lobortis, a venenatis nulla tincidunt. Nunc et lectus cursus, euismod orci quis, pulvinar odio. Sed id eros non lorem pellentesque gravida. Cras at est hendrerit elit maximus interdum non non diam. Maecenas congue sit amet nisi vitae hendrerit. Sed faucibus leo eget nisl hendrerit ultricies. Ut quis egestas sapien. Cras neque nunc, dignissim sed ipsum vel, pulvinar tempus magna. Lorem ipsum dolor sit amet, consectetur bia.';
+            expect(lorem1000).toHaveLength(1000);
+
+            const textLength = 1_100_000;
+            let text = '';
+            // eslint-disable-next-line no-constant-condition
+            while (true) {
+                text += lorem1000;
+                if (text.length >= textLength) {
+                    break;
+                }
+            }
 
             const operation: UpOperation = {
-                $v: 2,
-                name: {
-                    newValue: newRoomName,
-                },
+                $v: 1,
+                $r: 2,
+                name: textDiff({ prev: Resources.Room.name, next: text }),
             };
-            const operationResult = Assert.OperateMutation.toBeSuccess(
-                await GraphQL.operateMutation(roomPlayer1Client, {
+
+            await Assert.OperateMutation.toBeFailure(
+                GraphQL.operateMutation(roomPlayer1Client, {
+                    id: roomId,
+                    requestId,
+                    revisionFrom: initRoomRevision + 1,
+                    operation: {
+                        clientId: Resources.ClientId.player1,
+                        valueJson: JSON.stringify(operation),
+                    },
+                })
+            );
+        }
+
+        // operateのテスト（正常系）
+        const newRoomName = 'NEW_ROOM_NAME';
+        {
+            const operation: UpOperation = {
+                $v: 1,
+                $r: 2,
+                name: textDiff({ prev: Resources.Room.name, next: newRoomName }),
+            };
+            const operationResult = await Assert.OperateMutation.toBeSuccess(
+                GraphQL.operateMutation(roomPlayer1Client, {
                     id: roomId,
                     requestId,
                     revisionFrom: initRoomRevision,

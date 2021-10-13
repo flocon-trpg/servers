@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.main = void 0;
 const firebase_admin_1 = __importDefault(require("firebase-admin"));
 const buildSchema_1 = require("./buildSchema");
 const promiseQueue_1 = require("./utils/promiseQueue");
@@ -84,4 +85,4 @@ const main = async (params) => {
         getDecodedIdTokenFromWsContext,
     });
 };
-exports.default = main;
+exports.main = main;
