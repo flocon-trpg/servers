@@ -2212,7 +2212,6 @@ export const CreateRoomResultFragmentDoc = {
                 ],
             },
         },
-        ...RoomGetStateFragmentDoc.definitions,
     ],
 } as unknown as DocumentNode<CreateRoomResultFragment, unknown>;
 export const FileItemFragmentDoc = {
@@ -2332,7 +2331,6 @@ export const GetRoomListResultFragmentDoc = {
                 ],
             },
         },
-        ...RoomAsListItemFragmentDoc.definitions,
     ],
 } as unknown as DocumentNode<GetRoomListResultFragment, unknown>;
 export const GetNonJoinedRoomResultFragmentDoc = {
@@ -2364,7 +2362,6 @@ export const GetNonJoinedRoomResultFragmentDoc = {
                 ],
             },
         },
-        ...RoomAsListItemFragmentDoc.definitions,
     ],
 } as unknown as DocumentNode<GetNonJoinedRoomResultFragment, unknown>;
 export const GetRoomResultFragmentDoc = {
@@ -2435,8 +2432,6 @@ export const GetRoomResultFragmentDoc = {
                 ],
             },
         },
-        ...RoomGetStateFragmentDoc.definitions,
-        ...GetNonJoinedRoomResultFragmentDoc.definitions,
     ],
 } as unknown as DocumentNode<GetRoomResultFragment, unknown>;
 export const RoomOperationFragmentDoc = {
@@ -2518,7 +2513,6 @@ export const JoinRoomResultFragmentDoc = {
                 ],
             },
         },
-        ...RoomOperationFragmentDoc.definitions,
     ],
 } as unknown as DocumentNode<JoinRoomResultFragment, unknown>;
 export const FilePathFragmentDoc = {
@@ -2568,7 +2562,6 @@ export const RoomSoundEffectFragmentDoc = {
                 ],
             },
         },
-        ...FilePathFragmentDoc.definitions,
     ],
 } as unknown as DocumentNode<RoomSoundEffectFragment, unknown>;
 export const CharacterValueForMessageFragmentDoc = {
@@ -2616,7 +2609,6 @@ export const CharacterValueForMessageFragmentDoc = {
                 ],
             },
         },
-        ...FilePathFragmentDoc.definitions,
     ],
 } as unknown as DocumentNode<CharacterValueForMessageFragment, unknown>;
 export const RoomPublicMessageFragmentDoc = {
@@ -2681,7 +2673,6 @@ export const RoomPublicMessageFragmentDoc = {
                 ],
             },
         },
-        ...CharacterValueForMessageFragmentDoc.definitions,
     ],
 } as unknown as DocumentNode<RoomPublicMessageFragment, unknown>;
 export const RoomPublicChannelFragmentDoc = {
@@ -2766,7 +2757,6 @@ export const RoomPrivateMessageFragmentDoc = {
                 ],
             },
         },
-        ...CharacterValueForMessageFragmentDoc.definitions,
     ],
 } as unknown as DocumentNode<RoomPrivateMessageFragment, unknown>;
 export const PieceValueLogFragmentDoc = {
@@ -3002,11 +2992,6 @@ export const RoomMessageEventFragmentDoc = {
                 ],
             },
         },
-        ...RoomSoundEffectFragmentDoc.definitions,
-        ...RoomPublicMessageFragmentDoc.definitions,
-        ...RoomPublicChannelFragmentDoc.definitions,
-        ...RoomPrivateMessageFragmentDoc.definitions,
-        ...PieceValueLogFragmentDoc.definitions,
     ],
 } as unknown as DocumentNode<RoomMessageEventFragment, unknown>;
 export const SemVerFragmentDoc = {
@@ -3519,6 +3504,8 @@ export const GetMessagesDocument = {
             },
         },
         ...RoomPublicMessageFragmentDoc.definitions,
+        ...CharacterValueForMessageFragmentDoc.definitions,
+        ...FilePathFragmentDoc.definitions,
         ...RoomPrivateMessageFragmentDoc.definitions,
         ...PieceValueLogFragmentDoc.definitions,
         ...RoomPublicChannelFragmentDoc.definitions,
@@ -3677,6 +3664,8 @@ export const GetLogDocument = {
             },
         },
         ...RoomPublicMessageFragmentDoc.definitions,
+        ...CharacterValueForMessageFragmentDoc.definitions,
+        ...FilePathFragmentDoc.definitions,
         ...RoomPrivateMessageFragmentDoc.definitions,
         ...PieceValueLogFragmentDoc.definitions,
         ...RoomPublicChannelFragmentDoc.definitions,
@@ -4104,6 +4093,7 @@ export const CreateRoomDocument = {
             },
         },
         ...CreateRoomResultFragmentDoc.definitions,
+        ...RoomGetStateFragmentDoc.definitions,
     ],
 } as unknown as DocumentNode<CreateRoomMutation, CreateRoomMutationVariables>;
 export const DeleteFilesDocument = {
@@ -4346,6 +4336,7 @@ export const JoinRoomAsPlayerDocument = {
             },
         },
         ...JoinRoomResultFragmentDoc.definitions,
+        ...RoomOperationFragmentDoc.definitions,
     ],
 } as unknown as DocumentNode<JoinRoomAsPlayerMutation, JoinRoomAsPlayerMutationVariables>;
 export const JoinRoomAsSpectatorDocument = {
@@ -4419,6 +4410,7 @@ export const JoinRoomAsSpectatorDocument = {
             },
         },
         ...JoinRoomResultFragmentDoc.definitions,
+        ...RoomOperationFragmentDoc.definitions,
     ],
 } as unknown as DocumentNode<JoinRoomAsSpectatorMutation, JoinRoomAsSpectatorMutationVariables>;
 export const EntryToServerDocument = {
@@ -4957,6 +4949,8 @@ export const WritePublicMessageDocument = {
             },
         },
         ...RoomPublicMessageFragmentDoc.definitions,
+        ...CharacterValueForMessageFragmentDoc.definitions,
+        ...FilePathFragmentDoc.definitions,
     ],
 } as unknown as DocumentNode<WritePublicMessageMutation, WritePublicMessageMutationVariables>;
 export const WritePrivateMessageDocument = {
@@ -5131,6 +5125,8 @@ export const WritePrivateMessageDocument = {
             },
         },
         ...RoomPrivateMessageFragmentDoc.definitions,
+        ...CharacterValueForMessageFragmentDoc.definitions,
+        ...FilePathFragmentDoc.definitions,
     ],
 } as unknown as DocumentNode<WritePrivateMessageMutation, WritePrivateMessageMutationVariables>;
 export const WriteRoomSoundEffectDocument = {
@@ -5241,6 +5237,7 @@ export const WriteRoomSoundEffectDocument = {
             },
         },
         ...RoomSoundEffectFragmentDoc.definitions,
+        ...FilePathFragmentDoc.definitions,
     ],
 } as unknown as DocumentNode<WriteRoomSoundEffectMutation, WriteRoomSoundEffectMutationVariables>;
 export const EditMessageDocument = {
@@ -5622,6 +5619,13 @@ export const RoomEventDocument = {
         },
         ...RoomOperationFragmentDoc.definitions,
         ...RoomMessageEventFragmentDoc.definitions,
+        ...RoomSoundEffectFragmentDoc.definitions,
+        ...FilePathFragmentDoc.definitions,
+        ...RoomPublicMessageFragmentDoc.definitions,
+        ...CharacterValueForMessageFragmentDoc.definitions,
+        ...RoomPublicChannelFragmentDoc.definitions,
+        ...RoomPrivateMessageFragmentDoc.definitions,
+        ...PieceValueLogFragmentDoc.definitions,
     ],
 } as unknown as DocumentNode<RoomEventSubscription, RoomEventSubscriptionVariables>;
 export const PongDocument = {
