@@ -8,4 +8,8 @@ export class ScriptError extends Error {
     public static notConstructorError(range?: Range) {
         return new ScriptError('Not a constructor', range);
     }
+
+    public static requiresNewError(range?: Range) {
+        return new ScriptError('Need to call with `new` keyword', range);
+    }
 }
