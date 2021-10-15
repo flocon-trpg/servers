@@ -32,6 +32,9 @@ const typesOptionToString = (source: TypesOption) => {
         source.string ? 'string' : null,
         source.undefined ? 'undefined' : null,
     ].reduce((seed, elem) => {
+        if (elem == null) {
+            return seed;
+        }
         if (seed === '') {
             return elem;
         }
