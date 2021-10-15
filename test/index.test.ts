@@ -1,4 +1,4 @@
-import { exec, arrayClass, mapClass, createFValue } from '../src';
+import { exec, arrayClass, mapClass, createFValue, symbolClass } from '../src';
 
 test('docs.md 例1', () => {
     const globalThis = { obj: { x: 1 } };
@@ -323,5 +323,27 @@ map.has(${param});
             { Map: mapClass }
         );
         expect(actual.result).toBe(expected);
+    });
+});
+
+describe('Symbol', () => {
+    test('Symbol()', () => {
+        const actual = exec(
+            `
+Symbol()
+        `,
+            { Symbol: symbolClass }
+        );
+        expect(typeof actual.result).toBe('symbol');
+    });
+
+    test("Symbol('x')", () => {
+        const actual = exec(
+            `
+Symbol('x')
+        `,
+            { Symbol: symbolClass }
+        );
+        expect(typeof actual.result).toBe('symbol');
     });
 });

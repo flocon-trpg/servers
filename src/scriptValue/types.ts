@@ -17,14 +17,14 @@ export type SetParams = {
 };
 
 export type GetCoreParams = {
-    key: string | number;
+    key: string | number | symbol;
     astInfo?: AstInfo;
 };
 
 export type OnGettingParams = GetCoreParams;
 
 export type SetCoreParams = {
-    key: string | number;
+    key: string | number | symbol;
     newValue: FValue;
     astInfo?: AstInfo;
 };

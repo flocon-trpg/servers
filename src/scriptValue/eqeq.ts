@@ -17,6 +17,7 @@ export const eqeq = (x: FValue, y: FValue): boolean => {
         case FType.Boolean:
         case FType.Number:
         case FType.String:
+        case FType.Symbol:
             switch (y.type) {
                 case FType.Boolean:
                 case FType.Number:
@@ -32,6 +33,7 @@ export const eqeq = (x: FValue, y: FValue): boolean => {
                 case FType.Boolean:
                 case FType.Number:
                 case FType.String:
+                case FType.Symbol:
                     // eslint-disable-next-line eqeqeq
                     return toPrimitive(x, 'default') == y.raw;
                 default:

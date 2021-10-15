@@ -12,6 +12,7 @@ export const eqeqeq = (x: FValue, y: FValue): boolean => {
         case FType.Boolean:
         case FType.Number:
         case FType.String:
+        case FType.Symbol:
             if (y?.type !== x.type) {
                 return false;
             }

@@ -10,6 +10,7 @@ export const isTruthy = (value: FValue): boolean => {
         case FType.Boolean:
         case FType.Number:
         case FType.String:
+        case FType.Symbol:
             if (value.raw) {
                 return true;
             } else {

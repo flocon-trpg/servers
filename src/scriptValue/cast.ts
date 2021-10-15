@@ -7,6 +7,7 @@ import { FFunction } from './FFunction';
 import { FNumber } from './FNumber';
 import { FObject } from './FObject';
 import { FString } from './FString';
+import { FSymbol } from './FSymbol';
 import { FValue } from './FValue';
 import { toTypeName } from './toTypeName';
 
@@ -18,6 +19,7 @@ type TypesOption = {
     number?: boolean;
     object?: boolean;
     string?: boolean;
+    symbol?: boolean;
     undefined?: boolean;
 };
 
@@ -30,6 +32,7 @@ const typesOptionToString = (source: TypesOption) => {
         source.number ? 'number' : null,
         source.object ? 'object' : null,
         source.string ? 'string' : null,
+        source.symbol ? 'symbol' : null,
         source.undefined ? 'undefined' : null,
     ].reduce((seed, elem) => {
         if (elem == null) {
@@ -139,6 +142,17 @@ class JObjectCaster<T = never> {
             return new JObjectCaster<T | string>(
                 this.source,
                 { ...this.addedTypes, string: true },
+                Option.some(this.source.raw)
+            );
+        }
+        return this;
+    }
+
+    public addSymbol(): JObjectCaster<T | symbol> {
+        if (this.source instanceof FSymbol) {
+            return new JObjectCaster<T | symbol>(
+                this.source,
+                { ...this.addedTypes, symbol: true },
                 Option.some(this.source.raw)
             );
         }

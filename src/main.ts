@@ -331,6 +331,8 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                             return new FString('number');
                         case FType.String:
                             return new FString('string');
+                        case FType.Symbol:
+                            return new FString('symbol');
                         default:
                             return new FString('object');
                     }
