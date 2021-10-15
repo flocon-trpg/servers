@@ -17,6 +17,7 @@ export { createFValue } from './scriptValue/createFValue';
 export { FArray, FTypedArray } from './scriptValue/FArray';
 export { FBoolean } from './scriptValue/FBoolean';
 export { FFunction } from './scriptValue/FFunction';
+export { FMap } from './scriptValue/FMap';
 export { FNumber } from './scriptValue/FNumber';
 export { FObject } from './scriptValue/FObject';
 export { FRecord } from './scriptValue/FRecord';
