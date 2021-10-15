@@ -271,6 +271,24 @@ Array.isArray(${source});
         expect(actual.result).toEqual([3, 4]);
     });
 
+    test.each([[3, 3, [0, 1, 2], [-1, undefined, [0, 1, 2, 3]]]])(
+        'find',
+        (searchKey, expectedValue, expectedIndexes) => {
+            const actual = exec(
+                `
+let indexes = [];
+const found = [1,2,3,4].find((x, i) => {
+    indexes.push(i);
+    return x === ${searchKey};
+});
+({ found, indexes });
+        `,
+                {}
+            );
+            expect(actual.result).toEqual({ found: expectedValue, indexes: expectedIndexes });
+        }
+    );
+
     test('forEach', () => {
         const actual = exec(
             `
@@ -280,7 +298,7 @@ let indexes = [];
     sum = sum + x;
     indexes.push(i);
 });
-({sum, indexes});
+({ sum, indexes });
         `,
             {}
         );
