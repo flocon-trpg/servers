@@ -102,8 +102,10 @@ export class FArray implements FObjectBase {
             case 'push':
                 return new FFunction(({ args, isNew }) => {
                     FArray.prepareInstanceMethod(isNew, astInfo);
-                    const newValue = this.convertBack(args[0], astInfo);
-                    this.source.push(newValue);
+                    args.forEach(arg => {
+                        const newValue = this.convertBack(arg, astInfo);
+                        this.source.push(newValue);
+                    });
                     return undefined;
                 });
             case 'shift':

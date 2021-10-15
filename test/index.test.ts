@@ -332,16 +332,21 @@ const popped = result.pop();
         expect(actual.result).toEqual({ popped: expectedPopped, result: expectedArray });
     });
 
-    test('push', () => {
+    test.each`
+        args     | expected
+        ${'3'}   | ${[1, 2, 3]}
+        ${'3,4'} | ${[1, 2, 3, 4]}
+        ${''}    | ${[1, 2]}
+    `('push', ({ args, expected }) => {
         const actual = exec(
             `
 let result = [1,2];
-result.push(3);
+result.push(${args});
 result;
         `,
             {}
         );
-        expect(actual.result).toEqual([1, 2, 3]);
+        expect(actual.result).toEqual(expected);
     });
 
     test.each`
