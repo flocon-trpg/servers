@@ -365,16 +365,21 @@ const shifted = result.shift();
         expect(actual.result).toEqual({ shifted: expectedShifted, result: expectedArray });
     });
 
-    test('unshift', () => {
+    test.each`
+        args        | expected
+        ${'-1'}     | ${[-1, 1, 2]}
+        ${'-2, -1'} | ${[-2, -1, 1, 2]}
+        ${''}       | ${[1, 2]}
+    `('unshift', ({ args, expected }) => {
         const actual = exec(
             `
 let result = [1,2];
-result.unshift(0);
+result.unshift(${args});
 result;
         `,
             {}
         );
-        expect(actual.result).toEqual([0, 1, 2]);
+        expect(actual.result).toEqual(expected);
     });
 });
 

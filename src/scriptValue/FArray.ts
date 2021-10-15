@@ -117,8 +117,10 @@ export class FArray implements FObjectBase {
             case 'unshift':
                 return new FFunction(({ args, isNew }) => {
                     FArray.prepareInstanceMethod(isNew, astInfo);
-                    const newValue = this.convertBack(args[0], astInfo);
-                    this.source.unshift(newValue);
+                    args.reduceRight<void>((seed, arg) => {
+                        const newValue = this.convertBack(arg, astInfo);
+                        this.source.unshift(newValue);
+                    }, undefined);
                     return undefined;
                 });
             case Symbol.iterator:
