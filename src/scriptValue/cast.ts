@@ -1,5 +1,4 @@
 import { Option } from '@kizahasi/option';
-import { Range } from '../range';
 import { ScriptError } from '../ScriptError';
 import { FArray } from './FArray';
 import { FBoolean } from './FBoolean';
@@ -10,6 +9,7 @@ import { FString } from './FString';
 import { FSymbol } from './FSymbol';
 import { FValue } from './FValue';
 import { toTypeName } from './toTypeName';
+import { AstInfo } from './types';
 
 type TypesOption = {
     array?: boolean;
@@ -50,20 +50,21 @@ class JObjectCaster<T = never> {
     private constructor(
         private readonly source: FValue,
         private readonly addedTypes: TypesOption,
-        private readonly successfullyCastedValue: Option<T>
+        private readonly successfullyCastedValue: Option<T>,
+        private readonly astInfo: AstInfo | undefined
     ) {}
 
-    public static begin(source: FValue) {
-        return new JObjectCaster<never>(source, {}, Option.none());
+    public static begin(source: FValue, astInfo: AstInfo | undefined) {
+        return new JObjectCaster<never>(source, {}, Option.none(), astInfo);
     }
 
-    public cast(errorRange?: Range): T {
+    public cast(): T {
         if (this.successfullyCastedValue.isNone) {
             throw new ScriptError(
                 `Expected type: ${typesOptionToString(this.addedTypes)}, Actual type: ${toTypeName(
                     this.source
                 )}`,
-                errorRange
+                this.astInfo?.range
             );
         }
         return this.successfullyCastedValue.value;
@@ -74,7 +75,8 @@ class JObjectCaster<T = never> {
             return new JObjectCaster<T | FArray>(
                 this.source,
                 { ...this.addedTypes, array: true },
-                Option.some(this.source)
+                Option.some(this.source),
+                this.astInfo
             );
         }
         return this;
@@ -85,7 +87,8 @@ class JObjectCaster<T = never> {
             return new JObjectCaster<T | boolean>(
                 this.source,
                 { ...this.addedTypes, boolean: true },
-                Option.some(this.source.raw)
+                Option.some(this.source.raw),
+                this.astInfo
             );
         }
         return this;
@@ -97,7 +100,11 @@ class JObjectCaster<T = never> {
             return new JObjectCaster<T | ((isNew: boolean) => (args: FValue[]) => FValue)>(
                 source,
                 { ...this.addedTypes, function: true },
-                Option.some((isNew: boolean) => (args: FValue[]) => source.exec({ args, isNew }))
+                Option.some(
+                    (isNew: boolean) => (args: FValue[]) =>
+                        source.exec({ args, isNew, astInfo: this.astInfo })
+                ),
+                this.astInfo
             );
         }
         return this;
@@ -109,7 +116,8 @@ class JObjectCaster<T = never> {
             return new JObjectCaster<T | null>(
                 source,
                 { ...this.addedTypes, null: true },
-                Option.some(null)
+                Option.some(null),
+                this.astInfo
             );
         }
         return this;
@@ -120,7 +128,8 @@ class JObjectCaster<T = never> {
             return new JObjectCaster<T | number>(
                 this.source,
                 { ...this.addedTypes, number: true },
-                Option.some(this.source.raw)
+                Option.some(this.source.raw),
+                this.astInfo
             );
         }
         return this;
@@ -131,7 +140,8 @@ class JObjectCaster<T = never> {
             return new JObjectCaster<T | FObject>(
                 this.source,
                 { ...this.addedTypes, object: true },
-                Option.some(this.source)
+                Option.some(this.source),
+                this.astInfo
             );
         }
         return this;
@@ -142,7 +152,8 @@ class JObjectCaster<T = never> {
             return new JObjectCaster<T | string>(
                 this.source,
                 { ...this.addedTypes, string: true },
-                Option.some(this.source.raw)
+                Option.some(this.source.raw),
+                this.astInfo
             );
         }
         return this;
@@ -153,7 +164,8 @@ class JObjectCaster<T = never> {
             return new JObjectCaster<T | symbol>(
                 this.source,
                 { ...this.addedTypes, symbol: true },
-                Option.some(this.source.raw)
+                Option.some(this.source.raw),
+                this.astInfo
             );
         }
         return this;
@@ -165,13 +177,14 @@ class JObjectCaster<T = never> {
             return new JObjectCaster<T | undefined>(
                 source,
                 { ...this.addedTypes, undefined: true },
-                Option.some(undefined)
+                Option.some(undefined),
+                this.astInfo
             );
         }
         return this;
     }
 }
 
-export const beginCast = (source: FValue) => {
-    return JObjectCaster.begin(source);
+export const beginCast = (source: FValue, astInfo: AstInfo | undefined) => {
+    return JObjectCaster.begin(source, astInfo);
 };

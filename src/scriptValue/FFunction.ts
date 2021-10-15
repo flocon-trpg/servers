@@ -3,11 +3,12 @@ import { ScriptError } from '../ScriptError';
 import { beginCast } from './cast';
 import { FType } from './FType';
 import { FValue } from './FValue';
-import { FObjectBase, GetCoreParams, GetParams, SetParams } from './types';
+import { FObjectBase, GetCoreParams, GetParams, SetParams, AstInfo } from './types';
 
 type FFunctionParams = {
     args: FValue[];
     isNew: boolean;
+    astInfo: AstInfo | undefined;
 };
 
 export class FFunction implements FObjectBase {
@@ -26,7 +27,7 @@ export class FFunction implements FObjectBase {
     }
 
     public get({ property, astInfo }: GetParams): FValue {
-        const key = beginCast(property).addNumber().addString().cast(astInfo?.range);
+        const key = beginCast(property, astInfo).addNumber().addString().cast();
         const onGettingResult = this.onGetting({ key, astInfo });
         if (!onGettingResult.isNone) {
             return onGettingResult.value;

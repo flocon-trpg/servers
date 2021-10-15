@@ -8,11 +8,11 @@ import { FValue } from '../scriptValue/FValue';
 
 class FSymbolClass extends FFunction {
     public constructor() {
-        super(({ isNew, args }) => {
+        super(({ isNew, args, astInfo }) => {
             if (isNew) {
                 throw ScriptError.notConstructorError();
             }
-            const description = beginCast(args[0]).addString().addUndefined().cast();
+            const description = beginCast(args[0], astInfo).addString().addUndefined().cast();
             return new FSymbol(Symbol(description));
         });
     }

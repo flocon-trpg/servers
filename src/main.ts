@@ -58,7 +58,7 @@ function ofFCallExpression(
     if (callee?.type !== FType.Function) {
         throw new Error(`${callee} is not a function`);
     }
-    return callee.exec({ args, isNew: isNew != null });
+    return callee.exec({ args, isNew: isNew != null, astInfo: { range: toRange(expression) } });
 }
 
 function ofFMemberExpression(

@@ -40,7 +40,7 @@ export class FArray implements FObjectBase {
     }
 
     public get({ property, astInfo }: GetParams): FValue {
-        const index = beginCast(property).addString().addNumber().cast(astInfo?.range).toString();
+        const index = beginCast(property, astInfo).addString().addNumber().cast().toString();
         if (FArray.isValidIndex(index)) {
             const found = this.source[index as unknown as number];
             if (found === undefined) {
@@ -53,7 +53,7 @@ export class FArray implements FObjectBase {
             case 'filter':
                 return new FFunction(({ args, isNew }) => {
                     FArray.prepareInstanceMethod(isNew, astInfo);
-                    const predicate = beginCast(args[0]).addFunction().cast(astInfo?.range)(false);
+                    const predicate = beginCast(args[0], astInfo).addFunction().cast()(false);
                     const raw = this.iterate().filter((value, index) =>
                         predicate([value, new FNumber(index)])?.toJObject()
                     );
@@ -62,7 +62,7 @@ export class FArray implements FObjectBase {
             case 'map':
                 return new FFunction(({ args, isNew }) => {
                     FArray.prepareInstanceMethod(isNew, astInfo);
-                    const mapping = beginCast(args[0]).addFunction().cast(astInfo?.range)(false);
+                    const mapping = beginCast(args[0], astInfo).addFunction().cast()(false);
                     const raw = this.iterate().map((value, index) =>
                         mapping([value, new FNumber(index)])
                     );
@@ -80,7 +80,7 @@ export class FArray implements FObjectBase {
     }
 
     public set({ property, newValue, astInfo }: SetParams): void {
-        const index = beginCast(property).addNumber().addString().toString();
+        const index = beginCast(property, astInfo).addNumber().addString().toString();
         if (FArray.isValidIndex(index)) {
             this.source[index as unknown as number] = this.convertBack(newValue, astInfo);
             return;

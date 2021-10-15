@@ -33,13 +33,13 @@ export class FMap extends FObject {
     }
 
     private convertKeyBack(source: FValue, astInfo: AstInfo | undefined) {
-        return beginCast(source)
+        return beginCast(source, astInfo)
             .addBoolean()
             .addNumber()
             .addString()
             .addNull()
             .addUndefined()
-            .cast(astInfo?.range);
+            .cast();
     }
 
     public get type(): typeof FType.Object {

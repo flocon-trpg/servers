@@ -7,7 +7,7 @@ export abstract class FObject implements FObjectBase {
     protected abstract getCore(params: GetCoreParams): FValue;
 
     public get({ property, astInfo }: GetParams): FValue {
-        const key = beginCast(property).addNumber().addString().addSymbol().cast(astInfo?.range);
+        const key = beginCast(property, astInfo).addNumber().addString().addSymbol().cast();
         return this.getCore({ key, astInfo });
     }
 
@@ -15,7 +15,7 @@ export abstract class FObject implements FObjectBase {
     protected abstract setCore(params: SetCoreParams): void;
 
     public set({ property, newValue, astInfo }: SetParams): void {
-        const key = beginCast(property).addNumber().addString().addSymbol().cast(astInfo?.range);
+        const key = beginCast(property, astInfo).addNumber().addString().addSymbol().cast();
         this.setCore({ key, newValue, astInfo });
     }
 
