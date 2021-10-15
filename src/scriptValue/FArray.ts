@@ -93,6 +93,12 @@ export class FArray implements FObjectBase {
                     );
                     return FArray.create(raw);
                 });
+            case 'pop':
+                return new FFunction(({ isNew }) => {
+                    FArray.prepareInstanceMethod(isNew, astInfo);
+                    const result = this.source.pop();
+                    return this.convert(result);
+                });
             case 'push':
                 return new FFunction(({ args, isNew }) => {
                     FArray.prepareInstanceMethod(isNew, astInfo);

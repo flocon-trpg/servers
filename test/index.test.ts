@@ -271,11 +271,13 @@ Array.isArray(${source});
         expect(actual.result).toEqual([3, 4]);
     });
 
-    test.each([[3, 3, [0, 1, 2], [-1, undefined, [0, 1, 2, 3]]]])(
-        'find',
-        (searchKey, expectedValue, expectedIndexes) => {
-            const actual = exec(
-                `
+    test.each`
+        searchKey | expectedValue | expectedIndexes
+        ${3}      | ${3}          | ${[0, 1, 2]}
+        ${-1}     | ${undefined}  | ${[0, 1, 2, 3]}
+    `('find', ({ searchKey, expectedValue, expectedIndexes }) => {
+        const actual = exec(
+            `
 let indexes = [];
 const found = [1,2,3,4].find((x, i) => {
     indexes.push(i);
@@ -283,11 +285,10 @@ const found = [1,2,3,4].find((x, i) => {
 });
 ({ found, indexes });
         `,
-                {}
-            );
-            expect(actual.result).toEqual({ found: expectedValue, indexes: expectedIndexes });
-        }
-    );
+            {}
+        );
+        expect(actual.result).toEqual({ found: expectedValue, indexes: expectedIndexes });
+    });
 
     test('forEach', () => {
         const actual = exec(
@@ -313,6 +314,22 @@ let indexes = [];
             {}
         );
         expect(actual.result).toEqual([2, 4]);
+    });
+
+    test.each`
+        source    | expectedPopped | expectedArray
+        ${[1, 2]} | ${2}           | ${[1]}
+        ${[]}     | ${undefined}   | ${[]}
+    `('pop', ({ source, expectedPopped, expectedArray }) => {
+        const actual = exec(
+            `
+let result = ${JSON.stringify(source)};
+const popped = result.pop();
+({ popped, result });
+        `,
+            {}
+        );
+        expect(actual.result).toEqual({ popped: expectedPopped, result: expectedArray });
     });
 
     test('push', () => {
