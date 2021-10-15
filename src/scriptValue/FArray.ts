@@ -66,6 +66,15 @@ export class FArray implements FObjectBase {
                     );
                     return FArray.create(raw);
                 });
+            case 'forEach':
+                return new FFunction(({ args, isNew }) => {
+                    FArray.prepareInstanceMethod(isNew, astInfo);
+                    const callbackfn = beginCast(args[0], astInfo).addFunction().cast()(false);
+                    this.iterate().forEach((value, index) =>
+                        callbackfn([value, new FNumber(index)])
+                    );
+                    return undefined;
+                });
             case 'map':
                 return new FFunction(({ args, isNew }) => {
                     FArray.prepareInstanceMethod(isNew, astInfo);

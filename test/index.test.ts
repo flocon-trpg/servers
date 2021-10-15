@@ -271,6 +271,22 @@ Array.isArray(${source});
         expect(actual.result).toEqual([3, 4]);
     });
 
+    test('forEach', () => {
+        const actual = exec(
+            `
+let sum = 0;
+let indexes = [];
+[1,2,3,4].forEach((x, i) => {
+    sum = sum + x;
+    indexes.push(i);
+});
+({sum, indexes});
+        `,
+            {}
+        );
+        expect(actual.result).toEqual({ sum: 10, indexes: [0, 1, 2, 3] });
+    });
+
     test('map', () => {
         const actual = exec(
             `
