@@ -343,6 +343,22 @@ result;
         );
         expect(actual.result).toEqual([1, 2, 3]);
     });
+
+    test.each`
+        source    | expectedShifted | expectedArray
+        ${[1, 2]} | ${1}            | ${[2]}
+        ${[]}     | ${undefined}    | ${[]}
+    `('shift', ({ source, expectedShifted, expectedArray }) => {
+        const actual = exec(
+            `
+let result = ${JSON.stringify(source)};
+const shifted = result.shift();
+({ shifted, result });
+        `,
+            {}
+        );
+        expect(actual.result).toEqual({ shifted: expectedShifted, result: expectedArray });
+    });
 });
 
 describe('Map', () => {

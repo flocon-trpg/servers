@@ -106,6 +106,12 @@ export class FArray implements FObjectBase {
                     this.source.push(newValue);
                     return undefined;
                 });
+            case 'shift':
+                return new FFunction(({ isNew }) => {
+                    FArray.prepareInstanceMethod(isNew, astInfo);
+                    const result = this.source.shift();
+                    return this.convert(result);
+                });
             case Symbol.iterator:
                 return new FFunction(({ isNew }) => {
                     FArray.prepareInstanceMethod(isNew, astInfo);
