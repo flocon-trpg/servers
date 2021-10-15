@@ -106,7 +106,7 @@ export class FArray implements FObjectBase {
                         const newValue = this.convertBack(arg, astInfo);
                         this.source.push(newValue);
                     });
-                    return undefined;
+                    return new FNumber(this.source.length);
                 });
             case 'shift':
                 return new FFunction(({ isNew }) => {
@@ -121,7 +121,7 @@ export class FArray implements FObjectBase {
                         const newValue = this.convertBack(arg, astInfo);
                         this.source.unshift(newValue);
                     }, undefined);
-                    return undefined;
+                    return new FNumber(this.source.length);
                 });
             case Symbol.iterator:
                 return new FFunction(({ isNew }) => {

@@ -323,30 +323,30 @@ let indexes = [];
     `('pop', ({ source, expectedPopped, expectedArray }) => {
         const actual = exec(
             `
-let result = ${JSON.stringify(source)};
-const popped = result.pop();
-({ popped, result });
+let array = ${JSON.stringify(source)};
+let popped = array.pop();
+({ popped, array });
         `,
             {}
         );
-        expect(actual.result).toEqual({ popped: expectedPopped, result: expectedArray });
+        expect(actual.result).toEqual({ popped: expectedPopped, array: expectedArray });
     });
 
     test.each`
-        args     | expected
-        ${'3'}   | ${[1, 2, 3]}
-        ${'3,4'} | ${[1, 2, 3, 4]}
-        ${''}    | ${[1, 2]}
-    `('push', ({ args, expected }) => {
+        args     | expectedResult | expectedArray
+        ${'3'}   | ${3}           | ${[1, 2, 3]}
+        ${'3,4'} | ${4}           | ${[1, 2, 3, 4]}
+        ${''}    | ${2}           | ${[1, 2]}
+    `('push', ({ args, expectedResult, expectedArray }) => {
         const actual = exec(
             `
-let result = [1,2];
-result.push(${args});
-result;
+let array = [1,2];
+let result = array.push(${args});
+({ array, result });
         `,
             {}
         );
-        expect(actual.result).toEqual(expected);
+        expect(actual.result).toEqual({ array: expectedArray, result: expectedResult });
     });
 
     test.each`
@@ -356,30 +356,30 @@ result;
     `('shift', ({ source, expectedShifted, expectedArray }) => {
         const actual = exec(
             `
-let result = ${JSON.stringify(source)};
-const shifted = result.shift();
-({ shifted, result });
+let array = ${JSON.stringify(source)};
+let shifted = array.shift();
+({ shifted, array });
         `,
             {}
         );
-        expect(actual.result).toEqual({ shifted: expectedShifted, result: expectedArray });
+        expect(actual.result).toEqual({ shifted: expectedShifted, array: expectedArray });
     });
 
     test.each`
-        args        | expected
-        ${'-1'}     | ${[-1, 1, 2]}
-        ${'-2, -1'} | ${[-2, -1, 1, 2]}
-        ${''}       | ${[1, 2]}
-    `('unshift', ({ args, expected }) => {
+        args        | expectedResult | expectedArray
+        ${'-1'}     | ${3}           | ${[-1, 1, 2]}
+        ${'-2, -1'} | ${4}           | ${[-2, -1, 1, 2]}
+        ${''}       | ${2}           | ${[1, 2]}
+    `('unshift', ({ args, expectedResult, expectedArray }) => {
         const actual = exec(
             `
-let result = [1,2];
-result.unshift(${args});
-result;
+let array = [1,2];
+let result = array.unshift(${args});
+({ array, result });
         `,
             {}
         );
-        expect(actual.result).toEqual(expected);
+        expect(actual.result).toEqual({ array: expectedArray, result: expectedResult });
     });
 });
 
