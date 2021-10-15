@@ -1,8 +1,8 @@
 import { Option } from '@kizahasi/option';
 import { ScriptError } from '../ScriptError';
-import { beginCast } from './cast';
 import { FType } from './FType';
 import { FValue } from './FValue';
+import { tryToPropertyName } from './tryToPropertyName';
 import { FObjectBase, GetCoreParams, GetParams, SetParams, AstInfo } from './types';
 
 type FFunctionParams = {
@@ -27,7 +27,10 @@ export class FFunction implements FObjectBase {
     }
 
     public get({ property, astInfo }: GetParams): FValue {
-        const key = beginCast(property, astInfo).addNumber().addString().cast();
+        const key = tryToPropertyName(property);
+        if (key == null) {
+            return undefined;
+        }
         const onGettingResult = this.onGetting({ key, astInfo });
         if (!onGettingResult.isNone) {
             return onGettingResult.value;

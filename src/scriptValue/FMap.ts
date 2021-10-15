@@ -37,6 +37,7 @@ export class FMap extends FObject {
             .addBoolean()
             .addNumber()
             .addString()
+            .addSymbol()
             .addNull()
             .addUndefined()
             .cast();

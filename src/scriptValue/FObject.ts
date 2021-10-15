@@ -1,13 +1,17 @@
-import { beginCast } from './cast';
 import { FType } from './FType';
 import { FValue } from './FValue';
+import { toPropertyName } from './toPropertyName';
+import { tryToPropertyName } from './tryToPropertyName';
 import { FObjectBase, GetCoreParams, GetParams, SetCoreParams, SetParams } from './types';
 
 export abstract class FObject implements FObjectBase {
     protected abstract getCore(params: GetCoreParams): FValue;
 
     public get({ property, astInfo }: GetParams): FValue {
-        const key = beginCast(property, astInfo).addNumber().addString().addSymbol().cast();
+        const key = tryToPropertyName(property);
+        if (key == null) {
+            return undefined;
+        }
         return this.getCore({ key, astInfo });
     }
 
@@ -15,7 +19,7 @@ export abstract class FObject implements FObjectBase {
     protected abstract setCore(params: SetCoreParams): void;
 
     public set({ property, newValue, astInfo }: SetParams): void {
-        const key = beginCast(property, astInfo).addNumber().addString().addSymbol().cast();
+        const key = toPropertyName(property, astInfo);
         this.setCore({ key, newValue, astInfo });
     }
 
