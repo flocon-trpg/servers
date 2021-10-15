@@ -1,5 +1,6 @@
 export { exec, test } from './main';
 export { arrayClass } from './builtIn/Array';
+export { mapClass } from './builtIn/Map';
 
 export {
     AstInfo,

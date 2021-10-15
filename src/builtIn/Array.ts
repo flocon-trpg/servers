@@ -19,7 +19,7 @@ class FArrayClass extends FFunction {
         }
     }
 
-    public onGetting({ key, astInfo }: GetCoreParams): Option<FValue> {
+    public override onGetting({ key, astInfo }: GetCoreParams): Option<FValue> {
         switch (key) {
             case 'isArray': {
                 return Option.some(

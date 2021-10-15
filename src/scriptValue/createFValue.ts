@@ -37,7 +37,7 @@ export function createFValue(source: unknown): FValue {
         return source;
     }
     if (Array.isArray(source)) {
-        return FArray.createCloned(source.map(x => createFValue(x)));
+        return FArray.create(source.map(x => createFValue(x)));
     }
     return createFRecord(source as Record<string, unknown>);
 }

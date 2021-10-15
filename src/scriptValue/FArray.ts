@@ -19,7 +19,7 @@ export class FArray implements FObjectBase {
         }
     }
 
-    public static createCloned(source: FValue[]): FArray {
+    public static create(source: FValue[]): FArray {
         return new FArray(
             source,
             x => x as FValue,
@@ -57,7 +57,7 @@ export class FArray implements FObjectBase {
                     const raw = this.iterate().filter((value, index) =>
                         predicate([value, new FNumber(index)])?.toJObject()
                     );
-                    return FArray.createCloned(raw);
+                    return FArray.create(raw);
                 });
             case 'map':
                 return new FFunction(({ args, isNew }) => {
@@ -66,7 +66,7 @@ export class FArray implements FObjectBase {
                     const raw = this.iterate().map((value, index) =>
                         mapping([value, new FNumber(index)])
                     );
-                    return FArray.createCloned(raw);
+                    return FArray.create(raw);
                 });
             case 'push':
                 return new FFunction(({ args, isNew }) => {

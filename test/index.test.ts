@@ -1,4 +1,4 @@
-import { exec, arrayClass, createFValue } from '../src';
+import { exec, arrayClass, mapClass, createFValue } from '../src';
 
 test('docs.md 例1', () => {
     const globalThis = { obj: { x: 1 } };
@@ -291,5 +291,37 @@ result;
             {}
         );
         expect(actual.result).toEqual([1, 2, 3]);
+    });
+});
+
+describe('Map', () => {
+    test.each([
+        [1, '1'],
+        [2, undefined],
+    ])('set and get', (param, expected) => {
+        const actual = exec(
+            `
+let map = new Map();
+map.set(1, '1');
+map.get(${param});
+        `,
+            { Map: mapClass }
+        );
+        expect(actual.result).toBe(expected);
+    });
+
+    test.each([
+        [1, true],
+        [2, false],
+    ])('has', (param, expected) => {
+        const actual = exec(
+            `
+let map = new Map();
+map.set(1, '1');
+map.has(${param});
+        `,
+            { Map: mapClass }
+        );
+        expect(actual.result).toBe(expected);
     });
 });

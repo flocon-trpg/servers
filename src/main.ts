@@ -97,7 +97,7 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                 }
                 result.push(ofFExpression(d, context));
             });
-            return FArray.createCloned(result);
+            return FArray.create(result);
         }
         case 'ArrowFunctionExpression': {
             const f = ({ args, isNew }: { args: FValue[]; isNew: boolean }): FValue => {
