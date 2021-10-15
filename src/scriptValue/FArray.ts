@@ -1,6 +1,8 @@
 import { ScriptError } from '../ScriptError';
+import { mapIterator } from '../utils/mapIterator';
 import { beginCast } from './cast';
 import { FFunction } from './FFunction';
+import { FIterator } from './FIterator';
 import { FNumber } from './FNumber';
 import { FType } from './FType';
 import { FValue } from './FValue';
@@ -79,6 +81,12 @@ export class FArray implements FObjectBase {
                     const newValue = this.convertBack(args[0], astInfo);
                     this.source.push(newValue);
                     return undefined;
+                });
+            case Symbol.iterator:
+                return new FFunction(({ isNew }) => {
+                    FArray.prepareInstanceMethod(isNew, astInfo);
+                    const source = this.source[Symbol.iterator]();
+                    return FIterator.create(mapIterator(source, x => this.convert(x)));
                 });
         }
         return undefined;
