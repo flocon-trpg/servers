@@ -359,6 +359,18 @@ const shifted = result.shift();
         );
         expect(actual.result).toEqual({ shifted: expectedShifted, result: expectedArray });
     });
+
+    test('unshift', () => {
+        const actual = exec(
+            `
+let result = [1,2];
+result.unshift(0);
+result;
+        `,
+            {}
+        );
+        expect(actual.result).toEqual([0, 1, 2]);
+    });
 });
 
 describe('Map', () => {
