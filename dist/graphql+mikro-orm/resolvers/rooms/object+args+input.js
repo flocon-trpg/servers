@@ -142,7 +142,7 @@ __decorate([
 ], WritePublicMessageArgs.prototype, "text", void 0);
 __decorate([
     (0, type_graphql_1.Field)({ nullable: true }),
-    (0, class_validator_1.MaxLength)(30),
+    (0, class_validator_1.MaxLength)(50),
     __metadata("design:type", String)
 ], WritePublicMessageArgs.prototype, "textColor", void 0);
 __decorate([
