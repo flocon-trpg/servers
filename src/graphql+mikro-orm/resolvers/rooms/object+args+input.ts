@@ -94,7 +94,7 @@ export class WritePublicMessageArgs {
     public text!: string;
 
     @Field({ nullable: true })
-    @MaxLength(30)
+    @MaxLength(50)
     public textColor?: string;
 
     @Field()
