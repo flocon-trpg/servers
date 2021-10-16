@@ -16,10 +16,9 @@ import { appConsole } from '../utils/appConsole';
 import { getConfig, getHttpUri, getWsUri } from '../config';
 import { enableMapSet } from 'immer';
 import Head from 'next/head';
-import { useMonaco, loader } from '@monaco-editor/react';
+import { loader } from '@monaco-editor/react';
 import { ExpiryMap } from '../utils/expiryMap';
 import urljoin from 'url-join';
-import { monacoLibSource } from '../utils/libSource';
 import { createApolloClient } from '../utils/createApolloClient';
 import { Dispatch } from '@reduxjs/toolkit';
 import { getUserConfig } from '../utils/localStorage/userConfig';
@@ -166,20 +165,6 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         // monaco editorのコンテキストメニューなどを日本語にしている。
         loader.config({ 'vs/nls': { availableLanguages: { '*': 'ja' } } });
     }, []);
-    const monaco = useMonaco();
-    React.useEffect(() => {
-        if (monaco == null) {
-            return;
-        }
-        const opts = monaco.languages.typescript.typescriptDefaults.getCompilerOptions();
-        monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-            ...opts,
-            noLib: true,
-            allowTsExtensions: true,
-        });
-
-        monaco.languages.typescript.typescriptDefaults.addExtraLib(monacoLibSource);
-    }, [monaco]);
 
     if (authNotFoundState) {
         return (

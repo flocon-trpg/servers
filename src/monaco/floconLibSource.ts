@@ -1,4 +1,4 @@
-export const monacoLibSource = `
+export const floconLibSource = `
 declare type Index5 = 1 | 2 | 3 | 4 | 5;
 
 declare type Index20 =
@@ -320,8 +320,4 @@ declare type Room = {
      */
     get stringParameterNames(): ParameterNames;
 };
-
-
-declare var room: Room;
-declare var character: Character;
         `;
