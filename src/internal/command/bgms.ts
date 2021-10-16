@@ -19,7 +19,7 @@ export class FBgms extends FObject {
     }
 
     private find(key: FValue, astInfo: AstInfo | undefined) {
-        const keyAsString = beginCast(key).addNumber().cast(astInfo?.range).toString();
+        const keyAsString = beginCast(key, astInfo).addNumber().cast().toString();
         if (!isStrIndex5(keyAsString)) {
             return undefined;
         }
@@ -27,7 +27,7 @@ export class FBgms extends FObject {
     }
 
     private ensure(key: FValue, astInfo: AstInfo | undefined) {
-        const keyAsString = beginCast(key).addNumber().cast(astInfo?.range).toString();
+        const keyAsString = beginCast(key, astInfo).addNumber().cast().toString();
         if (!isStrIndex5(keyAsString)) {
             return undefined;
         }
@@ -47,7 +47,7 @@ export class FBgms extends FObject {
     }
 
     private delete(key: FValue, astInfo: AstInfo | undefined) {
-        const keyAsString = beginCast(key).addNumber().cast(astInfo?.range).toString();
+        const keyAsString = beginCast(key, astInfo).addNumber().cast().toString();
         if (!isStrIndex5(keyAsString)) {
             return false;
         }

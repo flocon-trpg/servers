@@ -58,12 +58,12 @@ export class FCharacter extends FObject {
     override setCore({ key, newValue, astInfo }: OnSettingParams): void {
         switch (key) {
             case icon: {
-                const $newValue = beginCast(newValue).addObject().cast(astInfo?.range);
+                const $newValue = beginCast(newValue, astInfo).addObject().cast();
                 this.character.image = toFilePathOrUndefined($newValue, astInfo);
                 return;
             }
             case name: {
-                const $newValue = beginCast(newValue).addString().cast(astInfo?.range);
+                const $newValue = beginCast(newValue, astInfo).addString().cast();
                 this.character.name = $newValue;
                 return;
             }
@@ -74,12 +74,15 @@ export class FCharacter extends FObject {
                 throw new ScriptError(`${key}は読み取り専用プロパティです。`);
             }
             case portrait: {
-                const $newValue = beginCast(newValue).addObject().cast(astInfo?.range);
+                const $newValue = beginCast(newValue, astInfo).addObject().cast();
                 this.character.tachieImage = toFilePathOrUndefined($newValue, astInfo);
                 return;
             }
             default:
-                throw new ScriptError(`'${key}' is not supported.`, astInfo?.range);
+                throw new ScriptError(
+                    `'${typeof key === 'symbol' ? 'symbol' : key}' is not supported.`,
+                    astInfo?.range
+                );
         }
     }
 

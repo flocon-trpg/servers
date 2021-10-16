@@ -54,12 +54,15 @@ export class FRoom extends FObject {
     override setCore({ key, newValue, astInfo }: SetCoreParams): void {
         switch (key) {
             case name: {
-                const $newValue = beginCast(newValue).addString().cast(astInfo?.range);
+                const $newValue = beginCast(newValue, astInfo).addString().cast();
                 this._room.name = $newValue;
                 return;
             }
             default:
-                throw new ScriptError(`${key}への値のセットは制限されています。`, astInfo?.range);
+                throw new ScriptError(
+                    `${typeof key === 'symbol' ? 'symbol' : key}への値のセットは制限されています。`,
+                    astInfo?.range
+                );
         }
     }
 

@@ -33,7 +33,7 @@ export class FParamNames extends FObject {
     }
 
     private find(key: FValue, astInfo: AstInfo | undefined) {
-        const keyAsString = beginCast(key).addNumber().cast(astInfo?.range).toString();
+        const keyAsString = beginCast(key, astInfo).addNumber().cast().toString();
         if (!isStrIndex20(keyAsString)) {
             return undefined;
         }
@@ -41,7 +41,7 @@ export class FParamNames extends FObject {
     }
 
     private ensure(key: FValue, astInfo: AstInfo | undefined) {
-        const keyAsString = beginCast(key).addNumber().cast(astInfo?.range).toString();
+        const keyAsString = beginCast(key, astInfo).addNumber().cast().toString();
         if (!isStrIndex20(keyAsString)) {
             return undefined;
         }
@@ -59,7 +59,7 @@ export class FParamNames extends FObject {
     }
 
     private delete(key: FValue, astInfo: AstInfo | undefined) {
-        const keyAsString = beginCast(key).addNumber().cast(astInfo?.range).toString();
+        const keyAsString = beginCast(key, astInfo).addNumber().cast().toString();
         if (!isStrIndex20(keyAsString)) {
             return false;
         }
@@ -85,7 +85,7 @@ export class FParamNames extends FObject {
             case 'setName':
                 return new FFunction(({ args }) => {
                     const result = this.ensure(args[0], astInfo);
-                    const newName = beginCast(args[1]).addString().cast(astInfo?.range);
+                    const newName = beginCast(args[1], astInfo).addString().cast();
                     if (result == null) {
                         return undefined;
                     }
