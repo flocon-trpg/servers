@@ -136,7 +136,6 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                 return;
             }
             let unsubscribed = false;
-            setIsEntry('loading');
             apolloClient
                 .query<IsEntryQuery, IsEntryQueryVariables>({
                     query: IsEntryDocument,
