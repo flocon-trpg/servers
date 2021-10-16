@@ -34,18 +34,18 @@ export class FNumParam extends FObject {
         const keyAsString = key.toString();
         switch (keyAsString) {
             case value:
-                this.numParam.value = beginCast(newValue)
+                this.numParam.value = beginCast(newValue, astInfo)
                     .addNumber()
                     .addUndefined()
-                    .cast(astInfo?.range);
+                    .cast();
                 return;
             case isValueSecret:
-                this.numParam.isValuePrivate = beginCast(newValue)
-                    .addBoolean()
-                    .cast(astInfo?.range);
+                this.numParam.isValuePrivate = beginCast(newValue, astInfo).addBoolean().cast();
                 return;
             default:
-                throw new ScriptError(`${key}への値のセットは制限されています。`);
+                throw new ScriptError(
+                    `${typeof key === 'symbol' ? 'symbol' : key}への値のセットは制限されています。`
+                );
         }
     }
 

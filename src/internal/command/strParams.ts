@@ -35,7 +35,7 @@ export class FStrParams extends FObject {
     }
 
     private findByName(nameOrKeyValue: FValue, astInfo: AstInfo | undefined) {
-        const name = beginCast(nameOrKeyValue).addString().cast(astInfo?.range);
+        const name = beginCast(nameOrKeyValue, astInfo).addString().cast();
         const keys = this.findKeysByName(name);
         for (const key of keys) {
             const found = this.strParams[key];
@@ -54,7 +54,7 @@ export class FStrParams extends FObject {
         newValue: FValue,
         astInfo: AstInfo | undefined
     ) {
-        const $newValue = beginCast(newValue).addBoolean().cast(astInfo?.range);
+        const $newValue = beginCast(newValue, astInfo).addBoolean().cast();
         const found = this.findByName(nameOrKeyValue, astInfo);
         if (found == null) {
             return;
@@ -75,7 +75,7 @@ export class FStrParams extends FObject {
                 });
             case 'setValue':
                 return new FFunction(({ args }) => {
-                    const newValue = beginCast(args[1]).addString().cast(astInfo?.range);
+                    const newValue = beginCast(args[1], astInfo).addString().cast();
                     const found = this.findByName(args[0], astInfo);
                     if (found == null) {
                         return;

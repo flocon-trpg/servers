@@ -44,17 +44,17 @@ export class FBgm extends FObject {
         const keyAsString = key.toString();
         switch (keyAsString) {
             case isPlaying: {
-                const $newValue = beginCast(newValue).addBoolean().cast(astInfo?.range);
+                const $newValue = beginCast(newValue, astInfo).addBoolean().cast();
                 this.bgm.isPaused = !$newValue;
                 return;
             }
             case files: {
-                const $newValue = beginCast(newValue).addArray().cast(astInfo?.range);
+                const $newValue = beginCast(newValue, astInfo).addArray().cast();
                 this.bgm.files = $newValue.iterate().map(x => toFilePath(x, astInfo));
                 return;
             }
             case volume: {
-                const $newValue = beginCast(newValue).addNumber().cast(astInfo?.range);
+                const $newValue = beginCast(newValue, astInfo).addNumber().cast();
                 this.bgm.volume = $newValue / 100;
                 return;
             }

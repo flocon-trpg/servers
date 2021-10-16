@@ -35,18 +35,18 @@ export class FBoolParam extends FObject {
         const keyAsString = key.toString();
         switch (keyAsString) {
             case value:
-                this.boolParam.value = beginCast(newValue)
+                this.boolParam.value = beginCast(newValue, astInfo)
                     .addBoolean()
                     .addUndefined()
-                    .cast(astInfo?.range);
+                    .cast();
                 return;
             case isValueSecret:
-                this.boolParam.isValuePrivate = beginCast(newValue)
-                    .addBoolean()
-                    .cast(astInfo?.range);
+                this.boolParam.isValuePrivate = beginCast(newValue, astInfo).addBoolean().cast();
                 return;
             default:
-                throw new ScriptError(`${key}への値のセットは制限されています。`);
+                throw new ScriptError(
+                    `${typeof key === 'symbol' ? 'symbol' : key}への値のセットは制限されています。`
+                );
         }
     }
 

@@ -31,10 +31,13 @@ export const toFilePathOrUndefined = (
     if (source?.type !== FType.Object) {
         throw new ScriptError();
     }
-    const path = beginCast(source.get({ property: new FString('path'), astInfo }))
+    const path = beginCast(source.get({ property: new FString('path'), astInfo }), astInfo)
         .addString()
         .cast();
-    const sourceType = beginCast(source.get({ property: new FString('sourceType'), astInfo }))
+    const sourceType = beginCast(
+        source.get({ property: new FString('sourceType'), astInfo }),
+        astInfo
+    )
         .addString()
         .cast();
     if (sourceType !== FilePath.Default && sourceType !== FilePath.FirebaseStorage) {
