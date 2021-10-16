@@ -1,5 +1,7 @@
 import { Range } from './range';
-import * as ScriptValue from './scriptValue';
+import { FRecord } from './scriptValue/FRecord';
+import { FString } from './scriptValue/FString';
+import { FValue } from './scriptValue/FValue';
 
 type Ref<T> = { ref: T; isConst: boolean };
 
@@ -13,11 +15,11 @@ export class Context {
     
     のようなとき、let f の括弧の外では [{ x: 1 }]、let x = 2 のすぐ上では [{ x: 1 }, {}]、下から ) までは [{ x: 1 }, { x: 2 }] となる。
     */
-    private varTables: Map<string, Ref<ScriptValue.FValue>>[] = [new Map()];
+    private varTables: Map<string, Ref<FValue>>[] = [new Map()];
 
-    public constructor(public globalThis: ScriptValue.FRecord) {}
+    public constructor(public globalThis: FRecord) {}
 
-    public get(name: string, range: Range | undefined): ScriptValue.FValue {
+    public get(name: string, range: Range | undefined): FValue {
         const found = this.varTables
             .map(table => table.get(name))
             .filter(val => val !== undefined)
@@ -26,7 +28,7 @@ export class Context {
             return found.ref;
         }
         const prop = this.globalThis.get({
-            property: new ScriptValue.FString(name),
+            property: new FString(name),
             astInfo: { range },
         });
         if (prop !== undefined) {
@@ -35,7 +37,7 @@ export class Context {
         return undefined;
     }
 
-    public assign(name: string, newValue: ScriptValue.FValue, range: Range | undefined): void {
+    public assign(name: string, newValue: FValue, range: Range | undefined): void {
         const found = this.varTables
             .map(table => table.get(name))
             .filter(val => val !== undefined)
@@ -48,13 +50,13 @@ export class Context {
             return;
         }
         this.globalThis.set({
-            property: new ScriptValue.FString(name),
+            property: new FString(name),
             newValue,
             astInfo: { range },
         });
     }
 
-    public declare(name: string, value: ScriptValue.FValue, type: 'let' | 'const'): void {
+    public declare(name: string, value: FValue, type: 'let' | 'const'): void {
         const varTable = this.varTables[this.varTables.length - 1];
         if (varTable === undefined) {
             throw new Error('this should not happen');

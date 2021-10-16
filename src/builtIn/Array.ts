@@ -1,6 +1,10 @@
-import { AstInfo, FBoolean, FFunction, FType, FValue, GetCoreParams } from '../scriptValue';
+import { AstInfo, GetCoreParams } from '../scriptValue/types';
 import { Option } from '@kizahasi/option';
-import { ScriptError } from '..';
+import { ScriptError } from '../ScriptError';
+import { FFunction } from '../scriptValue/FFunction';
+import { FValue } from '../scriptValue/FValue';
+import { FBoolean } from '../scriptValue/FBoolean';
+import { FType } from '../scriptValue/FType';
 
 class FArrayClass extends FFunction {
     public constructor() {
@@ -15,7 +19,7 @@ class FArrayClass extends FFunction {
         }
     }
 
-    public onGetting({ key, astInfo }: GetCoreParams): Option<FValue> {
+    public override onGetting({ key, astInfo }: GetCoreParams): Option<FValue> {
         switch (key) {
             case 'isArray': {
                 return Option.some(

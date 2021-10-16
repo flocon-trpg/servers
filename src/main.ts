@@ -11,24 +11,20 @@ import {
 import { fFStatement as fStatement, FStatement } from './fStatement';
 import { toRange } from './range';
 import { ScriptError } from './ScriptError';
-import {
-    compareToBoolean,
-    compareToNumber,
-    compareToNumberOrString,
-    createFGlobalRecord,
-    eqeq,
-    eqeqeq,
-    isTruthy,
-    FBoolean,
-    FFunction,
-    FNumber,
-    FRecord,
-    FString,
-    FType,
-    FValue,
-    toTypeName,
-    FArray,
-} from './scriptValue';
+import { compareToBoolean, compareToNumber, compareToNumberOrString } from './scriptValue/compare';
+import { createFGlobalRecord } from './scriptValue/createFGlobalRecord';
+import { eqeq } from './scriptValue/eqeq';
+import { eqeqeq } from './scriptValue/eqeqeq';
+import { FArray } from './scriptValue/FArray';
+import { FBoolean } from './scriptValue/FBoolean';
+import { FFunction } from './scriptValue/FFunction';
+import { FNumber } from './scriptValue/FNumber';
+import { FRecord } from './scriptValue/FRecord';
+import { FString } from './scriptValue/FString';
+import { FType } from './scriptValue/FType';
+import { FValue } from './scriptValue/FValue';
+import { isTruthy } from './scriptValue/isTruthy';
+import { toTypeName } from './scriptValue/toTypeName';
 import { toJObject } from './utils/toJObject';
 
 function ofFLiteral(literal: FLiteral): FBoolean | FNumber | FString | null {
@@ -62,7 +58,7 @@ function ofFCallExpression(
     if (callee?.type !== FType.Function) {
         throw new Error(`${callee} is not a function`);
     }
-    return callee.exec({ args, isNew: isNew != null });
+    return callee.exec({ args, isNew: isNew != null, astInfo: { range: toRange(expression) } });
 }
 
 function ofFMemberExpression(
@@ -101,7 +97,7 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                 }
                 result.push(ofFExpression(d, context));
             });
-            return FArray.createCloned(result);
+            return FArray.create(result);
         }
         case 'ArrowFunctionExpression': {
             const f = ({ args, isNew }: { args: FValue[]; isNew: boolean }): FValue => {
@@ -335,6 +331,8 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                             return new FString('number');
                         case FType.String:
                             return new FString('string');
+                        case FType.Symbol:
+                            return new FString('symbol');
                         default:
                             return new FString('object');
                     }
