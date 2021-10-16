@@ -4,7 +4,7 @@ import React from 'react';
 import { useCharacter } from '../../hooks/state/useCharacter';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
 import { useSelector } from '../../store';
-import MonacoEditor from '@monaco-editor/react';
+import MonacoEditor, { useMonaco } from '@monaco-editor/react';
 import { useBufferValue } from '../../hooks/useBufferValue';
 import { testCommand } from '../../utils/command';
 import { useOperate } from '../../hooks/useOperate';
@@ -14,13 +14,50 @@ import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndP
 import classNames from 'classnames';
 import { flex, flexRow } from '../../utils/className';
 import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
+import { usePrevious } from 'react-use';
+import { characterCommandLibSource } from '../../monaco/characterCommandLibSource';
+import { defaultLibSource } from '../../monaco/defaultLibSource';
+
+/*
+Monaco Editorでは、複数のエディターごとに異なるextraLibなどを個別に設定することはできない( https://github.com/microsoft/monaco-editor/issues/2098 , https://stackoverflow.com/questions/53881473/monaco-editor-configure-libs-by-editor )。
+そのため、Monaco Editorを表示する要素はすべてシングルトンとして管理することで、状況に応じてextraLibを差し替えることを可能にしている。
+*/
 
 type EditorProps = {
     script: string;
     onChange: (newValue: string) => void;
+    extraLib: 'defaultCommand' | 'characterCommand';
 };
 
-const Editor: React.FC<EditorProps> = ({ script, onChange }: EditorProps) => {
+const Editor: React.FC<EditorProps> = ({ script, onChange, extraLib }: EditorProps) => {
+    const monaco = useMonaco();
+    const previousExtraLib = usePrevious(extraLib);
+    React.useEffect(() => {
+        if (monaco == null) {
+            return;
+        }
+        if (previousExtraLib === extraLib) {
+            return;
+        }
+        const opts = monaco.languages.typescript.typescriptDefaults.getCompilerOptions();
+        monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+            ...opts,
+            noLib: true,
+            allowTsExtensions: true,
+        });
+        monaco.languages.typescript.typescriptDefaults.setExtraLibs([]);
+        switch (extraLib) {
+            case 'characterCommand':
+                monaco.languages.typescript.typescriptDefaults.addExtraLib(
+                    characterCommandLibSource
+                );
+                break;
+            default:
+                monaco.languages.typescript.typescriptDefaults.addExtraLib(defaultLibSource);
+                break;
+        }
+    }, [monaco, extraLib, previousExtraLib]);
+
     const [scriptState, setScriptState] = React.useState(script);
     React.useEffect(() => {
         setScriptState(script);
@@ -71,6 +108,7 @@ type CommandState = {
     value: string;
 };
 
+// シングルトンとして使わなければならないことに注意（理由はこのコードの上部）
 export const CommandEditorModal: React.FC = () => {
     const modalWidth = 10000;
 
@@ -164,6 +202,7 @@ export const CommandEditorModal: React.FC = () => {
                         }
                         setCommandValue(selectedKey, newValue);
                     }}
+                    extraLib='characterCommand'
                 />
             </>
         );
