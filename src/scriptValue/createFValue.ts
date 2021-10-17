@@ -1,3 +1,4 @@
+import { FSymbol } from './FSymbol';
 import { createFRecord } from './createFRecord';
 import { FArray } from './FArray';
 import { FBoolean } from './FBoolean';
@@ -6,6 +7,7 @@ import { FNumber } from './FNumber';
 import { FObject } from './FObject';
 import { FString } from './FString';
 import { FValue } from './FValue';
+import { FMap } from './FMap';
 
 export function createFValue(source: unknown): FValue {
     if (source === null) {
@@ -21,6 +23,8 @@ export function createFValue(source: unknown): FValue {
             return new FNumber(source);
         case 'string':
             return new FString(source);
+        case 'symbol':
+            return new FSymbol(source);
         case 'function':
             throw new Error('Function is not supported. Use FFunction instead.');
         default:
@@ -32,12 +36,16 @@ export function createFValue(source: unknown): FValue {
         source instanceof FFunction ||
         source instanceof FNumber ||
         source instanceof FObject ||
-        source instanceof FString
+        source instanceof FString ||
+        source instanceof FSymbol
     ) {
         return source;
     }
     if (Array.isArray(source)) {
         return FArray.create(source.map(x => createFValue(x)));
+    }
+    if (source instanceof Map) {
+        return FMap.create(source);
     }
     return createFRecord(source as Record<string, unknown>);
 }
