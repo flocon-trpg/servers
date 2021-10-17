@@ -132,7 +132,7 @@ type SelectedPieceKey =
     | {
           type: typeof character;
           characterKey: CompositeKey;
-          pieceKey: CompositeKey;
+          pieceBoardKey: CompositeKey;
       }
     | {
           type: typeof tachie;
@@ -141,12 +141,15 @@ type SelectedPieceKey =
       }
     | {
           type: typeof dicePieceValue | typeof numberPieceValue;
+          characterKey: CompositeKey;
           stateId: string;
-          pieceKey: CompositeKey;
+          pieceBoardKey: CompositeKey;
       }
     | {
           type: typeof imagePiece;
-          pieceKey: CompositeKey;
+          participantKey: string;
+          valueId: string;
+          pieceBoardKey: CompositeKey;
       };
 
 const publicMessageFilter = (message: Message): boolean => {
@@ -346,11 +349,15 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         isSelected={
                             selectedPieceKey?.type === 'character' &&
                             compositeKeyEquals(selectedPieceKey.characterKey, characterKey) &&
-                            compositeKeyEquals(selectedPieceKey.pieceKey, pieceKey)
+                            compositeKeyEquals(selectedPieceKey.pieceBoardKey, pieceKey)
                         }
                         onClick={() => {
                             unsetPopoverEditor();
-                            setSelectedPieceKey({ type: 'character', characterKey, pieceKey });
+                            setSelectedPieceKey({
+                                type: 'character',
+                                characterKey,
+                                pieceBoardKey: pieceKey,
+                            });
                         }}
                         onDblClick={e => {
                             if (onPopoverEditorRef.current == null) {
@@ -474,7 +481,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
         );
 
         const imagePieceElements = (imagePieces ?? []).map(
-            ({ value: element, pieceKey, piece }) => {
+            ({ value: element, pieceBoardKey, piece }) => {
                 const defaultImageFilePath: FilePath = {
                     // TODO: 適切な画像に変える
                     path: '/logo.png',
@@ -484,17 +491,23 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     <ImagePiece
                         {...Piece.getPosition({ ...board, state: piece })}
                         opacity={1}
-                        key={keyNames(pieceKey)}
+                        key={keyNames(element.participantKey, element.valueId, pieceBoardKey)}
                         filePath={element.value.image ?? defaultImageFilePath}
                         draggable
                         listening
                         isSelected={
                             selectedPieceKey?.type === 'imagePiece' &&
-                            compositeKeyEquals(selectedPieceKey.pieceKey, pieceKey)
+                            selectedPieceKey.valueId === element.valueId &&
+                            compositeKeyEquals(selectedPieceKey.pieceBoardKey, pieceBoardKey)
                         }
                         onClick={() => {
                             unsetPopoverEditor();
-                            setSelectedPieceKey({ type: 'imagePiece', pieceKey });
+                            setSelectedPieceKey({
+                                type: 'imagePiece',
+                                pieceBoardKey: pieceBoardKey,
+                                valueId: element.valueId,
+                                participantKey: element.participantKey,
+                            });
                         }}
                         onDblClick={e => {
                             if (onPopoverEditorRef.current == null) {
@@ -534,8 +547,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                                                         $v: 1,
                                                         $r: 1,
                                                         pieces: {
-                                                            [pieceKey.createdBy]: {
-                                                                [pieceKey.id]: {
+                                                            [pieceBoardKey.createdBy]: {
+                                                                [pieceBoardKey.id]: {
                                                                     type: update,
                                                                     update: pieceOperation,
                                                                 },
@@ -555,82 +568,85 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             }
         );
 
-        const dicePieceElements = (dicePieces ?? []).map(({ value: element, pieceKey, piece }) => {
-            return (
-                <DiceOrNumberPiece
-                    {...Piece.getPosition({ ...board, state: piece })}
-                    key={keyNames(element.characterKey, element.valueId, pieceKey)}
-                    opacity={1}
-                    state={{ type: dicePiece, state: element.value }}
-                    createdByMe={element.characterKey.createdBy === myUserUid}
-                    draggable
-                    listening
-                    isSelected={
-                        selectedPieceKey?.type === 'dicePieceValue' &&
-                        selectedPieceKey.stateId === element.valueId &&
-                        compositeKeyEquals(selectedPieceKey.pieceKey, pieceKey)
-                    }
-                    onClick={() => {
-                        unsetPopoverEditor();
-                        setSelectedPieceKey({
-                            type: 'dicePieceValue',
-                            stateId: element.valueId,
-                            pieceKey,
-                        });
-                    }}
-                    onDblClick={e => {
-                        if (onPopoverEditorRef.current == null) {
-                            return;
+        const dicePieceElements = (dicePieces ?? []).map(
+            ({ value: element, pieceBoardKey, piece }) => {
+                return (
+                    <DiceOrNumberPiece
+                        {...Piece.getPosition({ ...board, state: piece })}
+                        key={keyNames(element.characterKey, element.valueId, pieceBoardKey)}
+                        opacity={1}
+                        state={{ type: dicePiece, state: element.value }}
+                        createdByMe={element.characterKey.createdBy === myUserUid}
+                        draggable
+                        listening
+                        isSelected={
+                            selectedPieceKey?.type === 'dicePieceValue' &&
+                            selectedPieceKey.stateId === element.valueId &&
+                            compositeKeyEquals(selectedPieceKey.pieceBoardKey, pieceBoardKey)
                         }
-                        onPopoverEditorRef.current({
-                            pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
-                            dblClickOn: { type: 'dicePieceValue', element },
-                        });
-                    }}
-                    onMouseEnter={() =>
-                        (mouseOverOnRef.current = { type: 'dicePieceValue', element })
-                    }
-                    onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
-                    onDragEnd={e => {
-                        const pieceOperation = createPiecePostOperation({
-                            e,
-                            piece,
-                            board,
-                        });
-                        operate(
-                            characterUpdateOperation(element.characterKey, {
-                                $v: 1,
-                                $r: 2,
-                                dicePieceValues: {
-                                    [element.valueId]: {
-                                        type: update,
-                                        update: {
-                                            $v: 1,
-                                            $r: 1,
-                                            pieces: {
-                                                [pieceKey.createdBy]: {
-                                                    [pieceKey.id]: {
-                                                        type: update,
-                                                        update: pieceOperation,
+                        onClick={() => {
+                            unsetPopoverEditor();
+                            setSelectedPieceKey({
+                                type: 'dicePieceValue',
+                                characterKey: element.characterKey,
+                                stateId: element.valueId,
+                                pieceBoardKey: pieceBoardKey,
+                            });
+                        }}
+                        onDblClick={e => {
+                            if (onPopoverEditorRef.current == null) {
+                                return;
+                            }
+                            onPopoverEditorRef.current({
+                                pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
+                                dblClickOn: { type: 'dicePieceValue', element },
+                            });
+                        }}
+                        onMouseEnter={() =>
+                            (mouseOverOnRef.current = { type: 'dicePieceValue', element })
+                        }
+                        onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
+                        onDragEnd={e => {
+                            const pieceOperation = createPiecePostOperation({
+                                e,
+                                piece,
+                                board,
+                            });
+                            operate(
+                                characterUpdateOperation(element.characterKey, {
+                                    $v: 1,
+                                    $r: 2,
+                                    dicePieceValues: {
+                                        [element.valueId]: {
+                                            type: update,
+                                            update: {
+                                                $v: 1,
+                                                $r: 1,
+                                                pieces: {
+                                                    [pieceBoardKey.createdBy]: {
+                                                        [pieceBoardKey.id]: {
+                                                            type: update,
+                                                            update: pieceOperation,
+                                                        },
                                                     },
                                                 },
                                             },
                                         },
                                     },
-                                },
-                            })
-                        );
-                    }}
-                />
-            );
-        });
+                                })
+                            );
+                        }}
+                    />
+                );
+            }
+        );
 
         const numberPieceElements = (numberPieces ?? []).map(
-            ({ value: element, piece, pieceKey }) => {
+            ({ value: element, piece, pieceBoardKey }) => {
                 return (
                     <DiceOrNumberPiece
                         {...Piece.getPosition({ ...board, state: piece })}
-                        key={keyNames(element.characterKey, element.valueId, pieceKey)}
+                        key={keyNames(element.characterKey, element.valueId, pieceBoardKey)}
                         opacity={1}
                         state={{ type: stringPiece, state: element.value }}
                         createdByMe={element.characterKey.createdBy === myUserUid}
@@ -639,14 +655,15 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         isSelected={
                             selectedPieceKey?.type === 'numberPieceValue' &&
                             selectedPieceKey.stateId === element.valueId &&
-                            compositeKeyEquals(selectedPieceKey.pieceKey, pieceKey)
+                            compositeKeyEquals(selectedPieceKey.pieceBoardKey, pieceBoardKey)
                         }
                         onClick={() => {
                             unsetPopoverEditor();
                             setSelectedPieceKey({
                                 type: 'numberPieceValue',
+                                characterKey: element.characterKey,
                                 stateId: element.valueId,
-                                pieceKey,
+                                pieceBoardKey: pieceBoardKey,
                             });
                         }}
                         onDblClick={e => {
@@ -679,8 +696,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                                                 $v: 1,
                                                 $r: 1,
                                                 pieces: {
-                                                    [pieceKey.createdBy]: {
-                                                        [pieceKey.id]: {
+                                                    [pieceBoardKey.createdBy]: {
+                                                        [pieceBoardKey.id]: {
                                                             type: update,
                                                             update: pieceOperation,
                                                         },

@@ -6,7 +6,7 @@ import { useBooleanOrCompositeKeyMemo } from '../useBooleanOrCompositeKeyMemo';
 
 export type ImagePieceElement = {
     value: ImagePieceValueElement;
-    pieceKey: CompositeKey;
+    pieceBoardKey: CompositeKey;
     piece: PieceState;
 };
 
@@ -32,7 +32,7 @@ export const useImagePieces = (
                     ([pieceKey, piece]) =>
                         ({
                             value: element,
-                            pieceKey: { createdBy: pieceKey.first, id: pieceKey.second },
+                            pieceBoardKey: { createdBy: pieceKey.first, id: pieceKey.second },
                             piece,
                         } as const)
                 );
