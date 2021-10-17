@@ -13,7 +13,7 @@ export {
     SetCoreParams,
 } from './scriptValue/types';
 export { beginCast } from './scriptValue/cast';
-export { createFValue } from './scriptValue/createFValue';
+export { toFValue } from './scriptValue/toFValue';
 export { FArray, FTypedArray } from './scriptValue/FArray';
 export { FBoolean } from './scriptValue/FBoolean';
 export { FFunction } from './scriptValue/FFunction';
