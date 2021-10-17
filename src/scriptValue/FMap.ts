@@ -6,7 +6,7 @@ import { FType } from './FType';
 import { FValue } from './FValue';
 import { AstInfo, GetCoreParams, SetCoreParams } from './types';
 import { FBoolean } from './FBoolean';
-import { createFValue } from './createFValue';
+import { toFValue } from './toFValue';
 import { FNumber } from './FNumber';
 
 type Key = string | number | boolean | symbol | null | undefined;
@@ -70,7 +70,7 @@ export class FMap extends FObject {
                     FMap.prepareInstanceMethod(isNew, astInfo);
                     const callbackfn = beginCast(args[0], astInfo).addFunction().cast()(false);
                     this.source.forEach((value, key) =>
-                        callbackfn([this.convertValue(value), createFValue(key)])
+                        callbackfn([this.convertValue(value), toFValue(key)])
                     );
                     return undefined;
                 });

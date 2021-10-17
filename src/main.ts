@@ -12,7 +12,7 @@ import { fFStatement as fStatement, FStatement } from './fStatement';
 import { toRange } from './range';
 import { ScriptError } from './ScriptError';
 import { compareToBoolean, compareToNumber, compareToNumberOrString } from './scriptValue/compare';
-import { createFGlobalRecord } from './scriptValue/createFGlobalRecord';
+import { toFGlobalRecord } from './scriptValue/toFGlobalRecord';
 import { eqeq } from './scriptValue/eqeq';
 import { eqeqeq } from './scriptValue/eqeqeq';
 import { FArray } from './scriptValue/FArray';
@@ -467,10 +467,10 @@ const toProgram = (script: string) => {
     return parse(script, { ecmaVersion: 2020, ranges: true }) as unknown as Program;
 };
 
-// globalThisは、SValueであればそのまま維持し、それ以外であればSValueに自動変換される。
+// globalThisは、FValueであればそのまま維持し、それ以外であればFValueに自動変換される。
 export const exec = (script: string, globalThis: Record<string, unknown>): ExecResult => {
     const parsed = toProgram(script);
-    const context = new Context(createFGlobalRecord(globalThis));
+    const context = new Context(toFGlobalRecord(globalThis));
     const lastResult = parsed.body.map(statement => {
         return ofFStatement(fStatement(statement), context);
     })[parsed.body.length - 1];

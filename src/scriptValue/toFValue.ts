@@ -1,5 +1,5 @@
 import { FSymbol } from './FSymbol';
-import { createFRecord } from './createFRecord';
+import { toFRecord } from './toFRecord';
 import { FArray } from './FArray';
 import { FBoolean } from './FBoolean';
 import { FFunction } from './FFunction';
@@ -9,7 +9,7 @@ import { FString } from './FString';
 import { FValue } from './FValue';
 import { FMap } from './FMap';
 
-export function createFValue(source: unknown): FValue {
+export function toFValue(source: unknown): FValue {
     if (source === null) {
         return null;
     }
@@ -42,10 +42,10 @@ export function createFValue(source: unknown): FValue {
         return source;
     }
     if (Array.isArray(source)) {
-        return FArray.create(source.map(x => createFValue(x)));
+        return FArray.create(source.map(x => toFValue(x)));
     }
     if (source instanceof Map) {
         return FMap.create(source);
     }
-    return createFRecord(source as Record<string, unknown>);
+    return toFRecord(source as Record<string, unknown>);
 }
