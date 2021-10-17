@@ -1,4 +1,4 @@
-import { exec, arrayClass, mapClass, createFValue, symbolClass } from '../src';
+import { exec, arrayClass, mapClass, toFValue, symbolClass } from '../src';
 
 test('docs.md 例1', () => {
     const globalThis = { obj: { x: 1 } };
@@ -21,7 +21,7 @@ test('docs.md 例2', () => {
 });
 
 test('docs.md 例3', () => {
-    const obj = createFValue({ x: 1 });
+    const obj = toFValue({ x: 1 });
     const globalThis = { obj1: obj, obj2: obj };
     const execResult = exec('this.obj1.x = 2; this.obj2.x', globalThis);
     const globalThisAfterExec: any = execResult.getGlobalThis();
