@@ -6,7 +6,7 @@ import { useBooleanOrCompositeKeyMemo } from '../useBooleanOrCompositeKeyMemo';
 
 export type StringPieceElement = {
     value: StringPieceValueElement;
-    pieceKey: CompositeKey;
+    pieceBoardKey: CompositeKey;
     piece: PieceState;
 };
 
@@ -32,7 +32,7 @@ export const useStringPieces = (
                     ([pieceKey, piece]) =>
                         ({
                             value: element,
-                            pieceKey: { createdBy: pieceKey.first, id: pieceKey.second },
+                            pieceBoardKey: { createdBy: pieceKey.first, id: pieceKey.second },
                             piece,
                         } as const)
                 );
