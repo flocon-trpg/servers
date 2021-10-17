@@ -6,6 +6,8 @@ import { FType } from './FType';
 import { FValue } from './FValue';
 import { AstInfo, GetCoreParams, SetCoreParams } from './types';
 import { FBoolean } from './FBoolean';
+import { createFValue } from './createFValue';
+import { FNumber } from './FNumber';
 
 type Key = string | number | boolean | symbol | null | undefined;
 
@@ -51,8 +53,27 @@ export class FMap extends FObject {
         const { key, astInfo } = params;
         switch (key) {
             case 'clear':
-                this.source.clear();
-                return undefined;
+                return new FFunction(({ isNew }) => {
+                    FMap.prepareInstanceMethod(isNew, astInfo);
+                    this.source.clear();
+                    return undefined;
+                });
+            case 'delete':
+                return new FFunction(({ args, isNew }) => {
+                    FMap.prepareInstanceMethod(isNew, astInfo);
+                    const key = this.convertKeyBack(args[0], astInfo);
+                    const result = this.source.delete(key);
+                    return new FBoolean(result);
+                });
+            case 'forEach':
+                return new FFunction(({ args, isNew }) => {
+                    FMap.prepareInstanceMethod(isNew, astInfo);
+                    const callbackfn = beginCast(args[0], astInfo).addFunction().cast()(false);
+                    this.source.forEach((value, key) =>
+                        callbackfn([this.convertValue(value), createFValue(key)])
+                    );
+                    return undefined;
+                });
             case 'get':
                 return new FFunction(({ args, isNew }) => {
                     FMap.prepareInstanceMethod(isNew, astInfo);
@@ -67,6 +88,8 @@ export class FMap extends FObject {
                     const value = this.source.has(key);
                     return new FBoolean(value);
                 });
+            case 'size':
+                return new FNumber(this.source.size);
             case 'set':
                 return new FFunction(({ args, isNew }) => {
                     FMap.prepareInstanceMethod(isNew, astInfo);
