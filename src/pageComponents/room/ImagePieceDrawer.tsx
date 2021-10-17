@@ -134,9 +134,11 @@ export const ImagePieceDrawer: React.FC = () => {
             break;
     }
 
-    const { uiState: state, updateUiState: setState } = useStateEditor<
-        ImagePieceValueState | undefined
-    >(stateEditorParams);
+    const {
+        uiState: state,
+        updateUiState: setState,
+        resetUiState,
+    } = useStateEditor<ImagePieceValueState | undefined>(stateEditorParams);
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
         React.useState<FilesManagerDrawerType | null>(null);
 
@@ -185,7 +187,7 @@ export const ImagePieceDrawer: React.FC = () => {
             dispatch(
                 roomDrawerAndPopoverAndModalModule.actions.set({ imagePieceDrawerType: null })
             );
-            setState(undefined);
+            resetUiState();
         };
     }
 
