@@ -58,12 +58,23 @@ class WebSocketLink extends ApolloLink {
     }
 }
 
-export const createApolloClient = (httpUri: string, wsUri: string, userIdToken: string | null) => {
+// # getUserIdTokenについて
+// 以前はuserIdTokenというパラメーター名で型はstring | nullであり、onIdTokenChangedが呼び出されたときにだけidTokenを取得してそれを渡すという作りだった。
+// だがおそらく前のidTokenがexpireしてからonIdTokenChangedが呼び出されるまでの間にはラグがあることがあり、その間に認証が必要な処理が一時的にすべてできなくなるという問題があった。それを防ぐため、代わりに (() => Promise<string>) とすることで、idTokenが必要なときはgetIdToken()を常に呼び出すようにしている。Userが存在しない場合は代わりにnullを渡す。
+export const createApolloClient = (
+    httpUri: string,
+    wsUri: string,
+    getUserIdToken: (() => Promise<string | null>) | null
+) => {
     // headerについては https://hasura.io/blog/authentication-and-authorization-using-hasura-and-firebase/ を参考にした
 
     // https://www.apollographql.com/docs/react/networking/authentication/#header
     const authLink = setContext(async (_, { headers }) => {
-        if (userIdToken == null) {
+        if (getUserIdToken == null) {
+            return { headers };
+        }
+        const idToken = await getUserIdToken();
+        if (idToken == null) {
             return { headers };
         }
 
@@ -71,7 +82,7 @@ export const createApolloClient = (httpUri: string, wsUri: string, userIdToken: 
         return {
             headers: {
                 ...headers,
-                authorization: `Bearer ${userIdToken}`,
+                authorization: `Bearer ${idToken}`,
             },
         };
     });
@@ -86,11 +97,11 @@ export const createApolloClient = (httpUri: string, wsUri: string, userIdToken: 
         const wsLink = new WebSocketLink({
             url: wsUri,
             connectionParams: async () => {
-                if (userIdToken == null) {
+                if (getUserIdToken == null) {
                     return {};
                 }
                 return {
-                    [authToken]: userIdToken,
+                    [authToken]: (await getUserIdToken()) ?? undefined,
                 };
             },
         });

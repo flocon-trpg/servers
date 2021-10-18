@@ -49,7 +49,7 @@ type JoinRoomFormProps = {
 const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRoomFormProps) => {
     const myAuth = React.useContext(MyAuthContext);
     const [name, setName] = React.useState<string>(
-        typeof myAuth === 'string' ? '' : myAuth.value.displayName ?? ''
+        typeof myAuth === 'string' ? '' : myAuth.displayName ?? ''
     );
     const [playerPhrase, setPlayerPhrase] = React.useState<string>('');
     const [spectatorPhrase, setSpectatorPhrase] = React.useState<string>('');

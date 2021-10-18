@@ -10,7 +10,7 @@ type Props = {
 };
 
 export const FloconUploaderFileLink: React.FC<Props> = ({ state }: Props) => {
-    const idToken = React.useContext(FirebaseAuthenticationIdTokenContext);
+    const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
     const config = React.useContext(ConfigContext);
     const [isDownloading, setIsDownloading] = React.useState(false);
 
@@ -23,13 +23,13 @@ export const FloconUploaderFileLink: React.FC<Props> = ({ state }: Props) => {
             onClick={() => {
                 setIsDownloading(true);
                 const main = async () => {
-                    if (idToken == null) {
+                    if (getIdToken == null) {
                         return;
                     }
                     const axiosResponse = await getFloconUploaderFile({
                         filename: state.filename,
                         config,
-                        idToken,
+                        idToken: await getIdToken(),
                         mode: files,
                     });
                     if (axiosResponse.data == null) {

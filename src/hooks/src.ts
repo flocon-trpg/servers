@@ -35,7 +35,7 @@ export function useSrcArrayFromGraphQL(
     const config = React.useContext(ConfigContext);
     const [result, setResult] = React.useState<SrcArrayResult>({ type: loading });
     const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
-    const idToken = React.useContext(FirebaseAuthenticationIdTokenContext);
+    const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
 
     // deep equalityでチェックされるため、余計なプロパティを取り除いている
     const cleanPathArray = pathArray?.map(path => ({
@@ -44,7 +44,7 @@ export function useSrcArrayFromGraphQL(
     }));
 
     useDeepCompareEffect(() => {
-        if (idToken == null) {
+        if (getIdToken == null) {
             setResult({ type: loading });
             return;
         }
@@ -54,9 +54,14 @@ export function useSrcArrayFromGraphQL(
         }
         let isDisposed = false;
         Promise.all(
-            cleanPathArray.map(path => {
+            cleanPathArray.map(async path => {
                 // firebaseStorageUrlCacheContextはDeepCompareしてほしくないしされる必要もないインスタンスであるため、depsに加えてはいけない。
-                return FilePathModule.getSrc(path, config, idToken, firebaseStorageUrlCacheContext);
+                return FilePathModule.getSrc(
+                    path,
+                    config,
+                    await getIdToken(),
+                    firebaseStorageUrlCacheContext
+                );
             })
         )
             .then(all => {
@@ -73,7 +78,7 @@ export function useSrcArrayFromGraphQL(
         return () => {
             isDisposed = true;
         };
-    }, [cleanPathArray, idToken]);
+    }, [cleanPathArray, getIdToken]);
 
     return result;
 }

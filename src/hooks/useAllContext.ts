@@ -14,7 +14,7 @@ export const useAllContext = (): Props => {
     const store = useStore();
     const user = React.useContext(MyAuthContext);
     const firebaseStorageUrlCache = React.useContext(FirebaseStorageUrlCacheContext);
-    const idToken = React.useContext(FirebaseAuthenticationIdTokenContext);
+    const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
 
     return {
         clientId,
@@ -22,6 +22,6 @@ export const useAllContext = (): Props => {
         store,
         user,
         firebaseStorageUrlCache,
-        idToken,
+        getIdToken,
     };
 };

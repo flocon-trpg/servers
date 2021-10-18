@@ -22,7 +22,7 @@ export const useMyUserUid = (myAuth?: FirebaseUserState) => {
                 setResult(undefined);
                 return;
             default:
-                setResult($myAuth.value.uid);
+                setResult($myAuth.uid);
         }
     }, [$myAuth]);
     return result;

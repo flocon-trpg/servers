@@ -14,7 +14,7 @@ export type Props = {
     store: Store<unknown, AnyAction>;
     user: FirebaseUserState;
     firebaseStorageUrlCache: ExpiryMap<string, string> | null;
-    idToken: string | null;
+    getIdToken: (() => Promise<string>) | null;
 };
 
 export const AllContextProvider: React.FC<PropsWithChildren<Props>> = ({
@@ -23,7 +23,7 @@ export const AllContextProvider: React.FC<PropsWithChildren<Props>> = ({
     store,
     user,
     firebaseStorageUrlCache,
-    idToken,
+    getIdToken,
     children,
 }: PropsWithChildren<Props>) => {
     return (
@@ -32,7 +32,7 @@ export const AllContextProvider: React.FC<PropsWithChildren<Props>> = ({
                 <Provider store={store}>
                     <MyAuthContext.Provider value={user}>
                         <FirebaseStorageUrlCacheContext.Provider value={firebaseStorageUrlCache}>
-                            <FirebaseAuthenticationIdTokenContext.Provider value={idToken}>
+                            <FirebaseAuthenticationIdTokenContext.Provider value={getIdToken}>
                                 {children}
                             </FirebaseAuthenticationIdTokenContext.Provider>
                         </FirebaseStorageUrlCacheContext.Provider>
