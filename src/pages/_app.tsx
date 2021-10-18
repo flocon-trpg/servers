@@ -29,6 +29,7 @@ import { useMyUserUid } from '../hooks/useMyUserUid';
 import { AllContextProvider } from '../components/AllContextProvider';
 import { simpleId } from '@kizahasi/flocon-core';
 import { Notification, roomModule } from '../modules/roomModule';
+import { useLatest } from 'react-use';
 
 enableMapSet();
 
@@ -93,15 +94,19 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     }, [wsUri]);
 
     const user = useFirebaseUser();
+    const latestUser = useLatest(user);
     const myUserUid = useMyUserUid(user);
     useUserConfig(myUserUid ?? null, store.dispatch);
 
     const getIdToken = React.useMemo(() => {
-        if (typeof user === 'string') {
+        if (typeof latestUser.current === 'string') {
             return null;
         }
         return async () => {
-            return await user.getIdToken().catch(err => {
+            if (typeof latestUser.current === 'string') {
+                return null;
+            }
+            return await latestUser.current.getIdToken().catch(err => {
                 console.error('failed at getIdToken', err);
                 store.dispatch(
                     roomModule.actions.addNotification({
@@ -117,7 +122,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
                 return null;
             });
         };
-    }, [user]);
+    }, [latestUser]);
     const [apolloClient, setApolloClient] = React.useState<ReturnType<typeof createApolloClient>>();
     const [authNotFoundState, setAuthNotFoundState] = React.useState(false);
     React.useEffect(() => {
