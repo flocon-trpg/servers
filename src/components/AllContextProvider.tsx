@@ -14,7 +14,7 @@ export type Props = {
     store: Store<unknown, AnyAction>;
     user: FirebaseUserState;
     firebaseStorageUrlCache: ExpiryMap<string, string> | null;
-    getIdToken: (() => Promise<string>) | null;
+    getIdToken: (() => Promise<string | null>) | null;
 };
 
 export const AllContextProvider: React.FC<PropsWithChildren<Props>> = ({

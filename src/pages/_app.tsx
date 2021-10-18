@@ -28,6 +28,7 @@ import { ConfigContext } from '../contexts/ConfigContext';
 import { useMyUserUid } from '../hooks/useMyUserUid';
 import { AllContextProvider } from '../components/AllContextProvider';
 import { simpleId } from '@kizahasi/flocon-core';
+import { Notification, roomModule } from '../modules/roomModule';
 
 enableMapSet();
 
@@ -100,7 +101,21 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
             return null;
         }
         return async () => {
-            return await user.getIdToken();
+            return await user.getIdToken().catch(err => {
+                console.error('failed at getIdToken', err);
+                store.dispatch(
+                    roomModule.actions.addNotification({
+                        type: Notification.text,
+                        notification: {
+                            type: 'error',
+                            message:
+                                'Firebase AuthenticationでIdTokenの取得に失敗しました。ブラウザのコンソールにエラーの内容を出力しました。',
+                            createdAt: new Date().getTime(),
+                        },
+                    })
+                );
+                return null;
+            });
         };
     }, [user]);
     const [apolloClient, setApolloClient] = React.useState<ReturnType<typeof createApolloClient>>();

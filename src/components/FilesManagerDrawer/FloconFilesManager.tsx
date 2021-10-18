@@ -112,10 +112,14 @@ const Thumb: React.FC<ThumbProps> = ({ thumbFilePath, size }: ThumbProps) => {
         if (thumbFilePath == null || getIdToken == null) {
             return null;
         }
+        const idToken = await getIdToken();
+        if (idToken == null) {
+            return;
+        }
         const axiosResponse = await getFloconUploaderFile({
             filename: thumbFilePath,
             config,
-            idToken: await getIdToken(),
+            idToken,
             mode: thumbs,
         });
         if (axiosResponse.data == null) {

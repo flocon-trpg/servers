@@ -55,20 +55,23 @@ export function useSrcArrayFromGraphQL(
         let isDisposed = false;
         Promise.all(
             cleanPathArray.map(async path => {
+                const idToken = await getIdToken();
+                if (idToken == null) {
+                    return null;
+                }
+
                 // firebaseStorageUrlCacheContextはDeepCompareしてほしくないしされる必要もないインスタンスであるため、depsに加えてはいけない。
-                return FilePathModule.getSrc(
-                    path,
-                    config,
-                    await getIdToken(),
-                    firebaseStorageUrlCacheContext
-                );
+                return FilePathModule.getSrc(path, config, idToken, firebaseStorageUrlCacheContext);
             })
         )
             .then(all => {
                 if (isDisposed) {
                     return;
                 }
-                setResult({ type: done, value: all.map(x => x.src ?? null) });
+                setResult({
+                    type: done,
+                    value: all.flatMap(x => (x == null ? [] : [x.src ?? null])),
+                });
             })
             .catch(e => {
                 console.log('error', e);

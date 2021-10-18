@@ -81,6 +81,11 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                 return;
             }
 
+            const idToken = await getIdTokenRef.current();
+            if (idToken == null) {
+                return;
+            }
+
             setProgress(0);
             const logData = await apolloClientRef.current.query<GetLogQuery, GetLogQueryVariables>({
                 query: GetLogDocument,
@@ -132,7 +137,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                     filter: ChannelsFilterOptions.toFilter(channelsFilterOptionsRef.current),
                 },
                 config: configRef.current,
-                idToken: await getIdTokenRef.current(),
+                idToken,
                 firebaseStorageUrlCache: firebaseStorageUrlCacheContextRef.current,
                 onProgressChange: p => setProgress(p.percent),
             }).catch(err => {

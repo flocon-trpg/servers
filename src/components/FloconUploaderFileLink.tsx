@@ -26,10 +26,14 @@ export const FloconUploaderFileLink: React.FC<Props> = ({ state }: Props) => {
                     if (getIdToken == null) {
                         return;
                     }
+                    const idToken = await getIdToken();
+                    if (idToken == null) {
+                        return;
+                    }
                     const axiosResponse = await getFloconUploaderFile({
                         filename: state.filename,
                         config,
-                        idToken: await getIdToken(),
+                        idToken,
                         mode: files,
                     });
                     if (axiosResponse.data == null) {
