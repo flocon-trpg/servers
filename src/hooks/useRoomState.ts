@@ -112,7 +112,7 @@ export const useRoomState = (
     const refetch = React.useMemo(() => () => setRefetchKey(refetchKey + 1), [refetchKey]);
     const dispatch = useDispatch();
 
-    const userUid = typeof myAuth === 'string' ? null : myAuth.value.uid;
+    const userUid = typeof myAuth === 'string' ? null : myAuth.uid;
     const myAuthErrorType = typeof myAuth === 'string' ? myAuth : null;
 
     React.useEffect(() => {

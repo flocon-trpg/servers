@@ -28,43 +28,11 @@ import { ConfigContext } from '../contexts/ConfigContext';
 import { useMyUserUid } from '../hooks/useMyUserUid';
 import { AllContextProvider } from '../components/AllContextProvider';
 import { simpleId } from '@kizahasi/flocon-core';
+import { Notification, roomModule } from '../modules/roomModule';
 
 enableMapSet();
 
 const config = getConfig();
-
-// idTokenの値が変わらない場合はuseEffectをトリガーさせたくないため、トリガー回避が簡単にできるように、idTokenが取得できた場合はstringとして返している
-type IdTokenState = string | { type: typeof loading | typeof notSignIn | typeof authNotFound };
-
-// getIdTokenを複数箇所で呼び出すとidTokenの新旧が混在する可能性がある（要調査）ので、念のため_appのみで呼び出すようにしている
-const useIdToken = (user: FirebaseUserState): IdTokenState => {
-    const [result, setResult] = React.useState<IdTokenState>({ type: loading });
-    React.useEffect(() => {
-        switch (user) {
-            case loading:
-                console.info('useIdToken loading');
-                // ユーザーが変わったとき、新しいidTokenを入手するまでは前のidTokenを保持するようにしている。
-                // こうすることで、一時的にidTokenがundefinedになるせいでApolloClientが一時的にidTokenなしモードに切り替わることを防ぐ狙いがある。
-                return;
-            case notSignIn:
-            case authNotFound:
-                console.info('useIdToken ' + user);
-                setResult({ type: user });
-                return;
-            default: {
-                console.info('useIdToken userRef');
-                user.value.getIdToken().then(idToken => {
-                    // ユーザーが変わったとき、新しいidTokenを入手するまでは前のidTokenを保持するようにしている。
-                    // こうすることで、一時的にidTokenがundefinedになるせいでApolloClientが一時的にidTokenなしモードに切り替わることを防ぐ狙いがある。
-                    console.info('useIdToken set idToken');
-                    setResult(idToken);
-                });
-                return;
-            }
-        }
-    }, [user]);
-    return result;
-};
 
 // localForageを用いてRoomConfigを読み込み、ReduxのStateと紐付ける。
 // Userが変わるたびに、useUserConfigが更新される必要がある。_app.tsxなどどこか一箇所でuseUserConfigを呼び出すだけでよい。
@@ -97,15 +65,14 @@ const useFirebaseUser = (): FirebaseUserState => {
     const [user, setUser] = React.useState<FirebaseUserState>(loading);
     React.useEffect(() => {
         if (auth == null) {
-            console.info('auth changed (null)');
+            console.info('[調査用ログ] auth changed (null)');
             setUser(authNotFound);
             return;
         }
-        console.info('authChange(non-null)');
+        console.info('[調査用ログ] authChange(non-null)');
         const unsubscribe = auth.onIdTokenChanged(user => {
-            console.info('onIdTokenChanged');
-            // onIdTokenChangedが実行されるたびにgetIdTokenの結果は変わるが、userの参照は以前と同じである。そのため、depsに直接Userを入れると以前のものと等しいためidTokenの更新処理がされなくなってしまう。そのため、代わりにRef<User>としている。getIdTokenを実行するhookのdepsには、UserではなくRef<User>を書くことを忘れずに。
-            setUser(user == null ? notSignIn : { value: user });
+            console.info('[調査用ログ] onIdTokenChanged');
+            setUser(user == null ? notSignIn : user);
         });
         return () => {
             unsubscribe();
@@ -129,30 +96,34 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     const myUserUid = useMyUserUid(user);
     useUserConfig(myUserUid ?? null, store.dispatch);
 
-    const idToken = useIdToken(user);
+    const getIdToken = React.useMemo(() => {
+        if (typeof user === 'string') {
+            return null;
+        }
+        return async () => {
+            return await user.getIdToken().catch(err => {
+                console.error('failed at getIdToken', err);
+                store.dispatch(
+                    roomModule.actions.addNotification({
+                        type: Notification.text,
+                        notification: {
+                            type: 'error',
+                            message:
+                                'Firebase AuthenticationでIdTokenの取得に失敗しました。ブラウザのコンソールにエラーの内容を出力しました。',
+                            createdAt: new Date().getTime(),
+                        },
+                    })
+                );
+                return null;
+            });
+        };
+    }, [user]);
     const [apolloClient, setApolloClient] = React.useState<ReturnType<typeof createApolloClient>>();
     const [authNotFoundState, setAuthNotFoundState] = React.useState(false);
     React.useEffect(() => {
-        if (typeof idToken === 'string') {
-            setApolloClient(createApolloClient(httpUri, wsUri, idToken));
-            setAuthNotFoundState(false);
-            return;
-        }
-        switch (idToken.type) {
-            case notSignIn:
-                setApolloClient(createApolloClient(httpUri, wsUri, null));
-                setAuthNotFoundState(false);
-                break;
-            case authNotFound:
-                setApolloClient(undefined);
-                setAuthNotFoundState(true);
-                break;
-            default:
-                setApolloClient(undefined);
-                setAuthNotFoundState(false);
-                break;
-        }
-    }, [httpUri, wsUri, idToken]);
+        setApolloClient(createApolloClient(httpUri, wsUri, getIdToken));
+        setAuthNotFoundState(getIdToken == null);
+    }, [httpUri, wsUri, getIdToken]);
 
     const clientId = useConstant(() => simpleId());
     React.useEffect(() => {
@@ -189,7 +160,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
                 store={store}
                 user={user}
                 firebaseStorageUrlCache={firebaseStorageUrlCache}
-                idToken={typeof idToken === 'string' ? idToken : null}
+                getIdToken={getIdToken}
             >
                 <Component {...pageProps} />
             </AllContextProvider>

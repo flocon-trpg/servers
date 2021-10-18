@@ -39,8 +39,8 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
     const configRef = useReadonlyRef(config);
     const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
     const firebaseStorageUrlCacheContextRef = useReadonlyRef(firebaseStorageUrlCacheContext);
-    const idToken = React.useContext(FirebaseAuthenticationIdTokenContext);
-    const idTokenRef = useReadonlyRef(idToken);
+    const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
+    const getIdTokenRef = useReadonlyRef(getIdToken);
     const publicChannelNames = usePublicChannelNames();
     const publicChannelNamesRef = useReadonlyRef(publicChannelNames);
     const participants = useParticipants();
@@ -76,8 +76,13 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                 publicChannelNamesRef.current == null ||
                 participantsRef.current == null ||
                 firebaseStorageUrlCacheContextRef.current == null ||
-                idTokenRef.current == null
+                getIdTokenRef.current == null
             ) {
+                return;
+            }
+
+            const idToken = await getIdTokenRef.current();
+            if (idToken == null) {
                 return;
             }
 
@@ -132,7 +137,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                     filter: ChannelsFilterOptions.toFilter(channelsFilterOptionsRef.current),
                 },
                 config: configRef.current,
-                idToken: idTokenRef.current,
+                idToken,
                 firebaseStorageUrlCache: firebaseStorageUrlCacheContextRef.current,
                 onProgressChange: p => setProgress(p.percent),
             }).catch(err => {
@@ -156,7 +161,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
         publicChannelNamesRef,
         participantsRef,
         firebaseStorageUrlCacheContextRef,
-        idTokenRef,
+        getIdTokenRef,
         roomIdRef,
         logModeRef,
         channelsFilterOptionsRef,

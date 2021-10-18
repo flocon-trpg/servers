@@ -106,11 +106,15 @@ type ThumbProps = {
 
 const Thumb: React.FC<ThumbProps> = ({ thumbFilePath, size }: ThumbProps) => {
     const config = React.useContext(ConfigContext);
-    const idToken = React.useContext(FirebaseAuthenticationIdTokenContext);
+    const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
     const loadingIcon = <Icons.LoadingOutlined style={{ fontSize: size }} />;
     const src = useAsync(async () => {
-        if (thumbFilePath == null || idToken == null) {
+        if (thumbFilePath == null || getIdToken == null) {
             return null;
+        }
+        const idToken = await getIdToken();
+        if (idToken == null) {
+            return;
         }
         const axiosResponse = await getFloconUploaderFile({
             filename: thumbFilePath,
@@ -123,7 +127,7 @@ const Thumb: React.FC<ThumbProps> = ({ thumbFilePath, size }: ThumbProps) => {
         }
         const blob = new Blob([axiosResponse.data]);
         return URL.createObjectURL(blob);
-    }, [thumbFilePath, config, idToken]);
+    }, [thumbFilePath, config, getIdToken]);
 
     return (
         <Tooltip

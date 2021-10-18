@@ -35,7 +35,7 @@ export function useSrcArrayFromGraphQL(
     const config = React.useContext(ConfigContext);
     const [result, setResult] = React.useState<SrcArrayResult>({ type: loading });
     const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
-    const idToken = React.useContext(FirebaseAuthenticationIdTokenContext);
+    const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
 
     // deep equalityでチェックされるため、余計なプロパティを取り除いている
     const cleanPathArray = pathArray?.map(path => ({
@@ -44,7 +44,7 @@ export function useSrcArrayFromGraphQL(
     }));
 
     useDeepCompareEffect(() => {
-        if (idToken == null) {
+        if (getIdToken == null) {
             setResult({ type: loading });
             return;
         }
@@ -54,7 +54,12 @@ export function useSrcArrayFromGraphQL(
         }
         let isDisposed = false;
         Promise.all(
-            cleanPathArray.map(path => {
+            cleanPathArray.map(async path => {
+                const idToken = await getIdToken();
+                if (idToken == null) {
+                    return null;
+                }
+
                 // firebaseStorageUrlCacheContextはDeepCompareしてほしくないしされる必要もないインスタンスであるため、depsに加えてはいけない。
                 return FilePathModule.getSrc(path, config, idToken, firebaseStorageUrlCacheContext);
             })
@@ -63,7 +68,10 @@ export function useSrcArrayFromGraphQL(
                 if (isDisposed) {
                     return;
                 }
-                setResult({ type: done, value: all.map(x => x.src ?? null) });
+                setResult({
+                    type: done,
+                    value: all.flatMap(x => (x == null ? [] : [x.src ?? null])),
+                });
             })
             .catch(e => {
                 console.log('error', e);
@@ -73,7 +81,7 @@ export function useSrcArrayFromGraphQL(
         return () => {
             isDisposed = true;
         };
-    }, [cleanPathArray, idToken]);
+    }, [cleanPathArray, getIdToken]);
 
     return result;
 }
