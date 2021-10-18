@@ -1,5 +1,5 @@
 import * as Room from '../ot/room/types';
-import { exec, ScriptError, test } from '@kizahasi/flocon-script';
+import { arrayClass, exec, mapClass, ScriptError, test } from '@kizahasi/flocon-script';
 import { FRoom } from './room';
 import { CompositeKey, keyNames } from '@kizahasi/util';
 import { Result } from '@kizahasi/result';
@@ -47,7 +47,7 @@ export const execCharacterCommand = ({
     if (fCharacter == null) {
         throw new Error(`character(${keyNames(characterKey)}) not found`);
     }
-    const globalThis = { room: fRoom, character: fCharacter };
+    const globalThis = { room: fRoom, character: fCharacter, Array: arrayClass, Map: mapClass };
     try {
         exec(script, globalThis);
     } catch (e: unknown) {
