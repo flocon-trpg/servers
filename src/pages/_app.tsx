@@ -99,7 +99,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     useUserConfig(myUserUid ?? null, store.dispatch);
 
     const getIdToken = React.useMemo(() => {
-        if (typeof latestUser.current === 'string') {
+        if (typeof user === 'string') {
             return null;
         }
         return async () => {
@@ -122,7 +122,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
                 return null;
             });
         };
-    }, [latestUser]);
+    }, [latestUser, user]);
     const [apolloClient, setApolloClient] = React.useState<ReturnType<typeof createApolloClient>>();
     const [authNotFoundState, setAuthNotFoundState] = React.useState(false);
     React.useEffect(() => {
