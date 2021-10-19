@@ -67,6 +67,7 @@ const SignInCore: React.FC = () => {
             },
             signInSuccessUrl: '/',
             signInOptions,
+            signInFlow: 'popup',
             // TODO: Terms of service url
             //tosUrl: '<your-tos-url>',
             // TODO: Privacy policy url.
