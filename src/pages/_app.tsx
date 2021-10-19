@@ -29,7 +29,7 @@ import { useMyUserUid } from '../hooks/useMyUserUid';
 import { AllContextProvider } from '../components/AllContextProvider';
 import { simpleId } from '@kizahasi/flocon-core';
 import { Notification, roomModule } from '../modules/roomModule';
-import { useLatest } from 'react-use';
+import { Ref } from '../utils/ref';
 
 enableMapSet();
 
@@ -94,7 +94,6 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     }, [wsUri]);
 
     const user = useFirebaseUser();
-    const latestUser = useLatest(user);
     const myUserUid = useMyUserUid(user);
     useUserConfig(myUserUid ?? null, store.dispatch);
 
@@ -103,10 +102,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
             return null;
         }
         return async () => {
-            if (typeof latestUser.current === 'string') {
-                return null;
-            }
-            return await latestUser.current.getIdToken().catch(err => {
+            return await user.getIdToken().catch(err => {
                 console.error('failed at getIdToken', err);
                 store.dispatch(
                     roomModule.actions.addNotification({
@@ -122,10 +118,15 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
                 return null;
             });
         };
-    }, [latestUser, user]);
+    }, [user]);
     const [apolloClient, setApolloClient] = React.useState<ReturnType<typeof createApolloClient>>();
+    // useStateの引数に(() => T)を渡すとTに変換されてしまうため、useState(getIdToken) とすると正常に動かない。useState(() => getIdToken)でも駄目だった。そのため、Refを用いている。
+    const [getIdTokenState, setGetIdTokenState] = React.useState<Ref<typeof getIdToken>>({
+        value: getIdToken,
+    });
     React.useEffect(() => {
         setApolloClient(createApolloClient(httpUri, wsUri, getIdToken));
+        setGetIdTokenState({ value: getIdToken });
     }, [httpUri, wsUri, getIdToken]);
     const [authNotFoundState, setAuthNotFoundState] = React.useState(false);
     React.useEffect(() => {
@@ -167,7 +168,11 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
                 store={store}
                 user={user}
                 firebaseStorageUrlCache={firebaseStorageUrlCache}
-                getIdToken={getIdToken}
+                getIdToken={
+                    // getIdTokenを直接渡すのではなくわざわざuseStateを用いて渡している理由:
+                    // もし直接渡すと、「getIdTokenの値が変わる」の後に少し間をおいて「ApolloClientの値が変わる」ため、「getIdToken!=null ⇔ ApolloClientが認証済み」と判断しているコードにおいて、getIdTokenがnullからnon-nullに切り替わった瞬間の時点で認証されていないApolloClientが使われて、Access Denied!などのエラーが発生してしまうため。
+                    getIdTokenState.value
+                }
             >
                 <Component {...pageProps} />
             </AllContextProvider>

@@ -67,7 +67,10 @@ const SignInCore: React.FC = () => {
             },
             signInSuccessUrl: '/',
             signInOptions,
+
+            // これがないと、何故か「Sign in with Google」を押しても画面が切り替わらずログインできない。理由は不明。なおメールアドレスは問題なかった。Googleとメールアドレス以外は未調査。
             signInFlow: 'popup',
+
             // TODO: Terms of service url
             //tosUrl: '<your-tos-url>',
             // TODO: Privacy policy url.

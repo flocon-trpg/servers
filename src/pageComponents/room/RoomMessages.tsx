@@ -403,6 +403,9 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
 type RoomMessageComponentProps = {
     message: RoomMessageNameSpace.MessageState | Notification.StateElement;
     showPrivateMessageMembers?: boolean;
+
+    // もしRoomMessageComponent内でusePublicChannelNamesをそれぞれ呼び出す形にすると、画像が読み込まれた瞬間（スクロールでメッセージ一覧を上下するときに発生しやすい）に一瞬だけpublicChannelNamesが何故かnullになる（react-virtuosoの影響？）ため、チャンネル名が一瞬だけ'?'になるためチラついて見えてしまう。そのため、このように外部からpublicChannelNamesを受け取る形にすることで解決している。
+    publicChannelNames: ReturnType<typeof usePublicChannelNames>;
 };
 
 // margin を使うとvirtuosoで問題が発生するので、代わりにpaddingなどを用いなければならない。
@@ -414,7 +417,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
 ) => {
     const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
 
-    const { message, showPrivateMessageMembers } = props;
+    const { message, showPrivateMessageMembers, publicChannelNames } = props;
 
     const myAuth = React.useContext(MyAuthContext);
     const [editMessageMutation] = useMutation(EditMessageDocument);
@@ -422,7 +425,6 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
     const [makeMessageNotSecret] = useMutation(MakeMessageNotSecretDocument);
     const [isEditModalVisible, setIsEditModalVisible] = React.useState(false);
     const roomId = useSelector(state => state.roomModule.roomId);
-    const publicChannelNames = usePublicChannelNames();
     const roomMessagesFontSizeDelta = useSelector(
         state => state.userConfigModule?.roomMessagesFontSizeDelta
     );
@@ -698,6 +700,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
 
     const myAuth = React.useContext(MyAuthContext);
     const writingMessageStatusResult = useWritingMessageStatus();
+    const publicChannelNames = usePublicChannelNames();
     const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
     const participantsMap = React.useMemo(
         () => (participants == null ? null : recordToMap(participants)),
@@ -705,32 +708,36 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
     );
 
     const filter = useMessageFilter(config);
-    const thenMap = React.useCallback((messages: ReadonlyArray<Message>) => {
-        return [...messages]
-            .sort((x, y) => x.value.createdAt - y.value.createdAt)
-            .map(message => {
-                if (message.type === soundEffect) {
-                    // soundEffectはfilterで弾いていなければならない。
-                    throw new Error('soundEffect is not supported');
-                }
-                return (
-                    <RoomMessageComponent
-                        key={
-                            message.type === privateMessage || message.type === publicMessage
-                                ? message.value.messageId
-                                : message.value.createdAt
-                        }
-                        message={
-                            message.type === publicMessage ||
-                            message.type === privateMessage ||
-                            message.type === pieceValueLog
-                                ? message
-                                : message.value
-                        }
-                    />
-                );
-            });
-    }, []);
+    const thenMap = React.useCallback(
+        (messages: ReadonlyArray<Message>) => {
+            return [...messages]
+                .sort((x, y) => x.value.createdAt - y.value.createdAt)
+                .map(message => {
+                    if (message.type === soundEffect) {
+                        // soundEffectはfilterで弾いていなければならない。
+                        throw new Error('soundEffect is not supported');
+                    }
+                    return (
+                        <RoomMessageComponent
+                            key={
+                                message.type === privateMessage || message.type === publicMessage
+                                    ? message.value.messageId
+                                    : message.value.createdAt
+                            }
+                            publicChannelNames={publicChannelNames}
+                            message={
+                                message.type === publicMessage ||
+                                message.type === privateMessage ||
+                                message.type === pieceValueLog
+                                    ? message
+                                    : message.value
+                            }
+                        />
+                    );
+                });
+        },
+        [publicChannelNames]
+    );
     const messages = useFilteredAndMapRoomMessages({ filter, thenMap });
 
     const writingUsers = [...writingMessageStatusResult]
