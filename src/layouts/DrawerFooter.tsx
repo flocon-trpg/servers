@@ -1,6 +1,5 @@
 import { Button, Modal } from 'antd';
 import React from 'react';
-import { LoadingOutlined } from '@ant-design/icons';
 
 type closeTextType = 'close' | 'cancel';
 type okTextType = 'ok' | 'create' | 'post' | 'loading';
