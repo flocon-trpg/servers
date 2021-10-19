@@ -132,7 +132,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
     React.useEffect(() => {
         if (requiresEntry && myUserUid != null) {
             if (!hasIdToken) {
-                setIsEntry(false);
+                setIsEntry('loading');
                 return;
             }
             let unsubscribed = false;
