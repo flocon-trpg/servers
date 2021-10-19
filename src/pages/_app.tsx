@@ -124,11 +124,13 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         };
     }, [latestUser, user]);
     const [apolloClient, setApolloClient] = React.useState<ReturnType<typeof createApolloClient>>();
-    const [authNotFoundState, setAuthNotFoundState] = React.useState(false);
     React.useEffect(() => {
         setApolloClient(createApolloClient(httpUri, wsUri, getIdToken));
-        setAuthNotFoundState(getIdToken == null);
     }, [httpUri, wsUri, getIdToken]);
+    const [authNotFoundState, setAuthNotFoundState] = React.useState(false);
+    React.useEffect(() => {
+        setAuthNotFoundState(user === 'authNotFound');
+    }, [user]);
 
     const clientId = useConstant(() => simpleId());
     React.useEffect(() => {
