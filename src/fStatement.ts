@@ -29,7 +29,7 @@ export type FBlockStatement = Omit<BlockStatement, 'body'> & {
 export function fBlockStatement(statement: BlockStatement): FBlockStatement {
     return {
         ...statement,
-        body: statement.body.map(x => fFStatement(x)),
+        body: statement.body.map(x => fStatement(x)),
     };
 }
 
@@ -96,7 +96,7 @@ export type FStatement =
     | FSwitchStatement
     | FVariableDeclaration;
 
-export function fFStatement(statement: Directive | Statement | ModuleDeclaration): FStatement {
+export function fStatement(statement: Directive | Statement | ModuleDeclaration): FStatement {
     switch (statement.type) {
         case 'BlockStatement':
             return fBlockStatement(statement);
@@ -112,8 +112,8 @@ export function fFStatement(statement: Directive | Statement | ModuleDeclaration
                 alternate:
                     statement.alternate == null
                         ? statement.alternate
-                        : fFStatement(statement.alternate),
-                consequent: fFStatement(statement.consequent),
+                        : fStatement(statement.alternate),
+                consequent: fStatement(statement.consequent),
                 test: fExpression(statement.test),
             };
         case 'ReturnStatement':
@@ -129,7 +129,7 @@ export function fFStatement(statement: Directive | Statement | ModuleDeclaration
                 ...statement,
                 cases: statement.cases.map(c => ({
                     ...c,
-                    consequent: c.consequent.map(s => fFStatement(s)),
+                    consequent: c.consequent.map(s => fStatement(s)),
                     test: c.test == null ? c.test : fExpression(c.test),
                 })),
                 discriminant: fExpression(statement.discriminant),

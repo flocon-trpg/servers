@@ -8,7 +8,7 @@ import {
     FNewExpression,
     FSimpleCallExpression,
 } from './fExpression';
-import { fFStatement as fStatement, FStatement } from './fStatement';
+import { fStatement, FStatement } from './fStatement';
 import { toRange } from './range';
 import { ScriptError } from './ScriptError';
 import { compareToBoolean, compareToNumber, compareToNumberOrString } from './scriptValue/compare';
