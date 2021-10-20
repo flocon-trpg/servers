@@ -1,5 +1,7 @@
 import { DualKey, DualKeyMap } from './dualKeyMap';
 
+// Recordのkeyは、numberはstringとして解釈され、symbolはfor in文で列挙されないため、stringのみの対応としている。
+
 export const mapToRecord = <TValue>(source: Map<string, TValue>): Record<string, TValue> => {
     const result: Record<string, TValue> = {};
     source.forEach((value, key) => {
