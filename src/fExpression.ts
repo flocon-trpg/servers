@@ -25,8 +25,18 @@ import { fBlockStatement, FBlockStatement } from './fStatement';
 import { Range, toRange } from './range';
 import { ScriptError } from './ScriptError';
 
+type FArrayExpressionElement =
+    | {
+          isSpread: false;
+          expression: FExpression;
+      }
+    | {
+          isSpread: true;
+          argument: FExpression;
+      };
+
 export type FArrayExpression = Omit<ArrayExpression, 'elements'> & {
-    elements: Array<FExpression | null>;
+    elements: Array<FArrayExpressionElement | null>;
 };
 function fArrayExpression(expression: ArrayExpression): FArrayExpression {
     return {
@@ -36,9 +46,12 @@ function fArrayExpression(expression: ArrayExpression): FArrayExpression {
                 return e;
             }
             if (e.type === 'SpreadElement') {
-                throw new ScriptError('SpreadElement is not supported', toRange(expression));
+                return {
+                    isSpread: true,
+                    argument: fExpression(e.argument),
+                };
             }
-            return fExpression(e);
+            return { isSpread: false, expression: fExpression(e) };
         }),
     };
 }
@@ -239,17 +252,27 @@ function fNewExpression(expression: NewExpression): FNewExpression {
     };
 }
 
+type FObjectExpressionElement =
+    | {
+          isSpread: false;
+          property: FProperty;
+      }
+    | {
+          isSpread: true;
+          argument: FExpression;
+      };
+
 export type FObjectExpression = Omit<ObjectExpression, 'properties'> & {
-    properties: Array<FProperty>;
+    properties: Array<FObjectExpressionElement>;
 };
 function fObjectExpression(expression: ObjectExpression): FObjectExpression {
     return {
         ...expression,
         properties: expression.properties.map(prop => {
             if (prop.type === 'SpreadElement') {
-                throw new ScriptError("'SpreadElement' is not supported", toRange(expression));
+                return { isSpread: true, argument: fExpression(prop.argument) };
             }
-            return fProperty(prop);
+            return { isSpread: false, property: fProperty(prop) };
         }),
     };
 }

@@ -95,7 +95,18 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                     result.push(null);
                     return;
                 }
-                result.push(ofFExpression(d, context));
+                if (!d.isSpread) {
+                    result.push(ofFExpression(d.expression, context));
+                    return;
+                }
+                const argument = ofFExpression(d.argument, context);
+                if (argument == null || !('iterate' in argument)) {
+                    throw new ScriptError(
+                        `${argument?.toPrimitiveAsString()} is not iterable.`,
+                        toRange(d.argument)
+                    );
+                }
+                argument.iterate().forEach(elem => result.push(elem));
             });
             return FArray.create(result);
         }
@@ -258,10 +269,24 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
         case 'ObjectExpression': {
             const result = new FRecord();
             expression.properties.forEach(d => {
+                if (d.isSpread) {
+                    const spreadObject = ofFExpression(d.argument, context);
+                    if (spreadObject instanceof FRecord) {
+                        spreadObject.forEach((value, key) => {
+                            result.source.set(key, value);
+                        });
+                    } else {
+                        throw new ScriptError(
+                            'Record is expected, but actually not.',
+                            toRange(d.argument)
+                        );
+                    }
+                    return;
+                }
                 let key: string | number;
-                switch (d.key.type) {
+                switch (d.property.key.type) {
                     case 'Literal': {
-                        const literal = ofFLiteral(d.key);
+                        const literal = ofFLiteral(d.property.key);
                         switch (typeof literal) {
                             case 'string':
                             case 'number':
@@ -273,17 +298,17 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                         break;
                     }
                     case 'Identifier': {
-                        key = d.key.name;
+                        key = d.property.key.name;
                         break;
                     }
                 }
-                const value = ofFExpression(d.value, context);
-                switch (d.kind) {
+                const value = ofFExpression(d.property.value, context);
+                switch (d.property.kind) {
                     case 'init':
                         result.set({
                             property: new FString(key),
                             newValue: value,
-                            astInfo: { range: toRange(d.value) },
+                            astInfo: { range: toRange(d.property.value) },
                         });
                         break;
                 }

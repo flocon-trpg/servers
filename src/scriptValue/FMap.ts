@@ -8,6 +8,7 @@ import { AstInfo, GetCoreParams, SetCoreParams } from './types';
 import { FBoolean } from './FBoolean';
 import { toFValue } from './toFValue';
 import { FNumber } from './FNumber';
+import { FArray } from './FArray';
 
 type Key = string | number | boolean | symbol | null | undefined;
 
@@ -104,6 +105,14 @@ export class FMap extends FObject {
 
     public override setCore(params: SetCoreParams): void {
         throw new ScriptError('You cannot set any value to Map', params.astInfo?.range);
+    }
+
+    public iterate(): FValue[] {
+        return [...this.source].map(([keySource, valueSource]) => {
+            const key = toFValue(keySource);
+            const value = this.convertValue(valueSource);
+            return FArray.create([key, value]);
+        });
     }
 
     public override toPrimitiveAsString(): string {

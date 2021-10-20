@@ -57,7 +57,7 @@ type FSwitchCase = Omit<SwitchCase, 'consequent' | 'test'> & {
     test?: FExpression | null;
     consequent: Array<FStatement>;
 };
-type FSwitchStatement = Omit<SwitchStatement, 'alternate' | 'consequent' | 'test'> & {
+type FSwitchStatement = Omit<SwitchStatement, 'discriminant' | 'cases'> & {
     discriminant: FExpression;
     cases: Array<FSwitchCase>;
 };
@@ -124,7 +124,7 @@ export function fFStatement(statement: Directive | Statement | ModuleDeclaration
                         ? statement.argument
                         : fExpression(statement.argument),
             };
-        case 'SwitchStatement':
+        case 'SwitchStatement': {
             return {
                 ...statement,
                 cases: statement.cases.map(c => ({
@@ -134,6 +134,7 @@ export function fFStatement(statement: Directive | Statement | ModuleDeclaration
                 })),
                 discriminant: fExpression(statement.discriminant),
             };
+        }
         case 'VariableDeclaration':
             return fVariableDeclaration(statement);
         default:

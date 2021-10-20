@@ -37,4 +37,8 @@ export type FObjectBase = {
     toPrimitiveAsNumber(): number;
     toPrimitiveAsString(): string;
     toPrimitiveAsDefault?(): number | string;
+
+    // iterate可能な場合は実装する。実装しない場合はiterate不可能と判断される。
+    // 戻り値は代わりにIterableIterator<FValue>などでも可能だが、配列に比べてIterableIteratorは作成が面倒なためFValue[]としている。
+    iterate?(): FValue[];
 };

@@ -36,6 +36,10 @@ export class FString implements FObjectBase {
         throw new ScriptError('You cannot set any value to String', astInfo?.range);
     }
 
+    public iterate(): FValue[] {
+        return [...this.raw].map(c => new FString(c));
+    }
+
     public toPrimitiveAsString() {
         return this.raw.toString();
     }
