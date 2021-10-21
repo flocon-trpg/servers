@@ -60,8 +60,8 @@ export class FIterator extends FObject {
         throw new ScriptError('You cannot set any value to Iterator', params.astInfo?.range);
     }
 
-    public iterate(): FValue[] {
-        return [...this.source].map(x => this.convertValue(x));
+    public iterate(): IterableIterator<FValue> {
+        return mapIterator(this.source, x => this.convertValue(x));
     }
 
     public override toPrimitiveAsString(): string {

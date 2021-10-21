@@ -4,6 +4,7 @@ import {
     ContinueStatement,
     Directive,
     ExpressionStatement,
+    ForOfStatement,
     IfStatement,
     ModuleDeclaration,
     ReturnStatement,
@@ -13,6 +14,7 @@ import {
     VariableDeclaration,
 } from 'estree';
 import { FExpression, fExpression } from './fExpression';
+import { FPattern, fPattern } from './fPattern';
 import { toRange } from './range';
 import { ScriptError } from './ScriptError';
 
@@ -42,6 +44,14 @@ const fExpressionStatement = (statement: ExpressionStatement) => {
     };
 };
 type FExpressionStatement = ReturnType<typeof fExpressionStatement>;
+
+type ForLeft = FPattern | FVariableDeclaration;
+
+type FForOfStatement = Omit<ForOfStatement, 'left' | 'right' | 'body'> & {
+    left: ForLeft;
+    right: FExpression;
+    body: FStatement;
+};
 
 type FIfStatement = Omit<IfStatement, 'alternate' | 'consequent' | 'test'> & {
     alternate?: FStatement | null;
@@ -84,7 +94,7 @@ const fVariableDeclaration = (statement: VariableDeclaration) => {
         declarations,
     };
 };
-type FVariableDeclaration = ReturnType<typeof fVariableDeclaration>;
+export type FVariableDeclaration = ReturnType<typeof fVariableDeclaration>;
 
 export type FStatement =
     | FBlockStatement
@@ -92,6 +102,7 @@ export type FStatement =
     | ContinueStatement
     | FIfStatement
     | FExpressionStatement
+    | FForOfStatement
     | FReturnStatement
     | FSwitchStatement
     | FVariableDeclaration;
@@ -106,6 +117,16 @@ export function fStatement(statement: Directive | Statement | ModuleDeclaration)
             return statement;
         case 'ExpressionStatement':
             return fExpressionStatement(statement);
+        case 'ForOfStatement':
+            return {
+                ...statement,
+                left:
+                    statement.left.type === 'VariableDeclaration'
+                        ? fVariableDeclaration(statement.left)
+                        : fPattern(statement.left),
+                right: fExpression(statement.right),
+                body: fStatement(statement.body),
+            };
         case 'IfStatement':
             return {
                 ...statement,

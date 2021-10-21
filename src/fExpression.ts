@@ -225,7 +225,7 @@ export type FMemberExpression = Omit<MemberExpression, 'object' | 'property'> & 
     object: FExpression;
     property: FExpression;
 };
-function fMemberExpression(expression: MemberExpression): FMemberExpression {
+export function fMemberExpression(expression: MemberExpression): FMemberExpression {
     if (expression.object.type === 'Super') {
         throw new ScriptError("'Super' is not supported", toRange(expression));
     }

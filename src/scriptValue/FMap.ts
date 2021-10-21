@@ -9,6 +9,7 @@ import { FBoolean } from './FBoolean';
 import { toFValue } from './toFValue';
 import { FNumber } from './FNumber';
 import { FArray } from './FArray';
+import { mapIterator } from '../utils/mapIterator';
 
 type Key = string | number | boolean | symbol | null | undefined;
 
@@ -107,8 +108,8 @@ export class FMap extends FObject {
         throw new ScriptError('You cannot set any value to Map', params.astInfo?.range);
     }
 
-    public iterate(): FValue[] {
-        return [...this.source].map(([keySource, valueSource]) => {
+    public iterate(): IterableIterator<FValue> {
+        return mapIterator(this.source[Symbol.iterator](), ([keySource, valueSource]) => {
             const key = toFValue(keySource);
             const value = this.convertValue(valueSource);
             return FArray.create([key, value]);

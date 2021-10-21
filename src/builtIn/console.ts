@@ -3,8 +3,6 @@ import { Option } from '@kizahasi/option';
 import { ScriptError } from '../ScriptError';
 import { FFunction } from '../scriptValue/FFunction';
 import { FValue } from '../scriptValue/FValue';
-import { FBoolean } from '../scriptValue/FBoolean';
-import { FType } from '../scriptValue/FType';
 
 class FConsoleClass extends FFunction {
     public constructor(private readonly header: string) {

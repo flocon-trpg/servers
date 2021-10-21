@@ -8,7 +8,7 @@ import {
     FNewExpression,
     FSimpleCallExpression,
 } from './fExpression';
-import { fStatement, FStatement } from './fStatement';
+import { fStatement, FStatement, FVariableDeclaration } from './fStatement';
 import { toRange } from './range';
 import { ScriptError } from './ScriptError';
 import { compareToBoolean, compareToNumber, compareToNumberOrString } from './scriptValue/compare';
@@ -26,6 +26,7 @@ import { FValue } from './scriptValue/FValue';
 import { isTruthy } from './scriptValue/isTruthy';
 import { toTypeName } from './scriptValue/toTypeName';
 import { toJObject } from './utils/toJObject';
+import { FObjectBase } from './scriptValue/types';
 
 function ofFLiteral(literal: FLiteral): FBoolean | FNumber | FString | null {
     if (literal.value == null) {
@@ -61,7 +62,7 @@ function ofFCallExpression(
     return callee.exec({ args, isNew: isNew != null, astInfo: { range: toRange(expression) } });
 }
 
-function ofFMemberExpression(
+function ofFMemberExpressionAsGet(
     expression: FMemberExpression,
     context: Context,
     isChain: boolean
@@ -86,6 +87,52 @@ function ofFMemberExpression(
     });
 }
 
+function ofFMemberExpressionAsAssign(
+    expression: FMemberExpression,
+    newValue: FValue,
+    context: Context
+): FValue {
+    const object = ofFExpression(expression.object, context);
+    let property: FValue;
+    if (expression.property.type === 'Identifier') {
+        property = new FString(expression.property.name);
+    } else {
+        property = ofFExpression(expression.property, context);
+    }
+    if (object == null) {
+        throw new Error(`Object is ${toTypeName(object)}`);
+    }
+    object.set({
+        property,
+        newValue: newValue,
+        astInfo: { range: toRange(expression) },
+    });
+    return undefined;
+}
+
+/*
+let x; のようなコードでは、valueToSetにundefinedを渡す。
+for (let x of [1]) {} のようなコードでもinitはnullishであるため、valueToSetに1を渡さなければならない。
+*/
+function ofFVariableDeclaration(
+    statement: FVariableDeclaration,
+    context: Context,
+    valueToSet?: FValue
+): void {
+    const kind = statement.kind;
+    statement.declarations.forEach(d => {
+        if (d.id.type !== 'Identifier') {
+            throw new Error(`'${d.id.type}' is not supported`);
+        }
+        // let x; のような場合は let x = undefined; と同等とみなして良さそう。const x; はparseの時点で弾かれるはず。
+        context.declare(
+            d.id.name,
+            d.init == null ? valueToSet : ofFExpression(d.init, context),
+            kind
+        );
+    });
+}
+
 function ofFExpression(expression: FExpression, context: Context): FValue {
     switch (expression.type) {
         case 'ArrayExpression': {
@@ -99,14 +146,16 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                     result.push(ofFExpression(d.expression, context));
                     return;
                 }
-                const argument = ofFExpression(d.argument, context);
-                if (argument == null || !('iterate' in argument)) {
+                const argument: FObjectBase | null | undefined = ofFExpression(d.argument, context);
+                if (argument == null || argument.iterate == null) {
                     throw new ScriptError(
                         `${argument?.toPrimitiveAsString()} is not iterable.`,
                         toRange(d.argument)
                     );
                 }
-                argument.iterate().forEach(elem => result.push(elem));
+                for (const elem of argument.iterate()) {
+                    result.push(elem);
+                }
             });
             return FArray.create(result);
         }
@@ -147,26 +196,12 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                     return undefined;
                 }
                 case 'MemberExpression': {
-                    const object = ofFExpression(expression.left.object, context);
-                    let property: FValue;
-                    if (expression.left.property.type === 'Identifier') {
-                        property = new FString(expression.left.property.name);
-                    } else {
-                        property = ofFExpression(expression.left.property, context);
-                    }
-                    switch (expression.operator) {
-                        case '=': {
-                            if (object == null) {
-                                throw new Error(`Object is ${toTypeName(object)}`);
-                            }
-                            object.set({
-                                property,
-                                newValue: ofFExpression(expression.right, context),
-                                astInfo: { range: toRange(expression) },
-                            });
-                            return undefined;
-                        }
-                    }
+                    ofFMemberExpressionAsAssign(
+                        expression.left,
+                        ofFExpression(expression.right, context),
+                        context
+                    );
+                    return undefined;
                 }
             }
             break;
@@ -227,7 +262,7 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                     return ofFCallExpression(expression.expression, context, true);
                 }
                 case 'MemberExpression': {
-                    return ofFMemberExpression(expression.expression, context, true);
+                    return ofFMemberExpressionAsGet(expression.expression, context, true);
                 }
             }
             break;
@@ -261,7 +296,7 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
             break;
         }
         case 'MemberExpression': {
-            return ofFMemberExpression(expression, context, false);
+            return ofFMemberExpressionAsGet(expression, context, false);
         }
         case 'NewExpression': {
             return ofFCallExpression(expression, context, false, 'new');
@@ -411,6 +446,34 @@ function ofFStatement(statement: FStatement, context: Context): FStatementResult
                 value: ofFExpression(statement.expression, context),
             };
         }
+        case 'ForOfStatement': {
+            if (statement.await) {
+                throw new ScriptError('await is not supported');
+            }
+            const rightValue = ofFExpression(statement.right, context);
+            const rightValueAsFObjectBase: FObjectBase | null | undefined = rightValue;
+            if (rightValueAsFObjectBase?.iterate == null) {
+                throw new ScriptError(`${rightValue?.toPrimitiveAsString()} is not iterable`);
+            }
+            for (const elem of rightValueAsFObjectBase.iterate()) {
+                context.scopeIn();
+                switch (statement.left.type) {
+                    case 'Identifier':
+                        context.assign(statement.left.name, elem, statement.left.range);
+                        break;
+                    case 'MemberExpression': {
+                        ofFMemberExpressionAsAssign(statement.left, elem, context);
+                        break;
+                    }
+                    case 'VariableDeclaration':
+                        ofFVariableDeclaration(statement.left, context, elem);
+                        break;
+                }
+                ofFStatement(statement.body, context);
+                context.scopeOut();
+            }
+            return { type: 'end', value: undefined };
+        }
         case 'IfStatement': {
             const test = ofFExpression(statement.test, context);
             if (toJObject(test)) {
@@ -464,18 +527,7 @@ function ofFStatement(statement: FStatement, context: Context): FStatementResult
             return { type: 'end', value: undefined };
         }
         case 'VariableDeclaration': {
-            const kind = statement.kind;
-            statement.declarations.forEach(d => {
-                if (d.id.type !== 'Identifier') {
-                    throw new Error(`'${d.id.type}' is not supported`);
-                }
-                // let x; のような場合は let x = undefined; と同等とみなして良さそう。const x; はparseの時点で弾かれるはず。
-                context.declare(
-                    d.id.name,
-                    d.init == null ? undefined : ofFExpression(d.init, context),
-                    kind
-                );
-            });
+            ofFVariableDeclaration(statement, context);
             return { type: 'end', value: undefined };
         }
         default:
