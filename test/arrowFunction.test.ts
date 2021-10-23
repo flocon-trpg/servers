@@ -14,6 +14,32 @@ f(10);
         expect(actual.getGlobalThis()).toEqual(globalThisClone);
     });
 
+    it.each([{ x: 0 }, { x: 0, y: 0 }])('tests default parameter (y = 20)', globalThis => {
+        const globalThisClone = { ...globalThis };
+        const actual = exec(
+            `
+let f = (x, y = 20) => x + y + 1;
+[f(10), f(10, 30)];
+    `,
+            globalThis
+        );
+        expect(actual.result).toEqual([31, 41]);
+        expect(actual.getGlobalThis()).toEqual(globalThisClone);
+    });
+
+    it.each([{ x: 0 }, { x: 0, y: 0 }])('tests default parameter (y = x)', globalThis => {
+        const globalThisClone = { ...globalThis };
+        const actual = exec(
+            `
+let f = (x, y = x) => x + y + 1;
+[f(10), f(10, 30)];
+    `,
+            globalThis
+        );
+        expect(actual.result).toEqual([21, 41]);
+        expect(actual.getGlobalThis()).toEqual(globalThisClone);
+    });
+
     it.each([{ x: 0 }, { x: 0, y: 0 }])(
         'tests Array destruction in paramater with no RestElement',
         globalThis => {

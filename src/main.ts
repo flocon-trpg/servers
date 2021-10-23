@@ -135,6 +135,16 @@ function ofFPattern(
                     context.declare(pattern.name, value, kind);
                     return;
             }
+        case 'AssignmentPattern':
+            // JavaScriptでは引数が存在しない場合は引数がundefinedとみなされるため、このように単にundefinedかどうかチェックするだけでよい。
+            ofFPattern(
+                pattern.left,
+                context,
+                kind,
+                value === undefined ? ofFExpression(pattern.right, context) : value,
+                setToRestElementAs
+            );
+            return;
         case 'MemberExpression':
             ofFMemberExpressionAsAssign(pattern, value, context);
             return;

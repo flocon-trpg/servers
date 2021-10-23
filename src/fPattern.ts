@@ -1,6 +1,7 @@
-import { ArrayPattern, ObjectPattern, Pattern, RestElement } from 'estree';
-import { ScriptError } from './ScriptError';
+import { ArrayPattern, AssignmentPattern, ObjectPattern, Pattern, RestElement } from 'estree';
 import {
+    fExpression,
+    FExpression,
     FIdentifier,
     fMemberExpression,
     FMemberExpression,
@@ -14,6 +15,11 @@ export type FArrayPattern = Omit<ArrayPattern, 'elements'> & {
 
 export type FObjectPattern = Omit<ObjectPattern, 'properties'> & {
     properties: (FRestElement | FProperty)[];
+};
+
+export type FAssignmentPattern = Omit<AssignmentPattern, 'left' | 'right'> & {
+    left: FPattern;
+    right: FExpression;
 };
 
 export type FRestElement = Omit<RestElement, 'argument'> & {
@@ -31,6 +37,7 @@ export type FPattern =
     | FArrayPattern
     | FObjectPattern
     | FRestElement
+    | FAssignmentPattern
     | FIdentifier
     | FMemberExpression;
 
@@ -52,8 +59,11 @@ export const fPattern = (pattern: Pattern): FPattern => {
                 }),
             };
         case 'AssignmentPattern':
-            // function f(x=1) {return x;} のx=1の部分で使われる
-            throw new ScriptError(`${pattern.type} is not supported`);
+            return {
+                ...pattern,
+                left: fPattern(pattern.left),
+                right: fExpression(pattern.right),
+            };
         case 'RestElement':
             // function f(...x) {return x;} の...xの部分で使われる
             return fRestElement(pattern);
