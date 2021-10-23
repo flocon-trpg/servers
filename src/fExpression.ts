@@ -21,6 +21,7 @@ import {
     UnaryExpression,
     UnaryOperator,
 } from 'estree';
+import { fPattern, FPattern } from './fPattern';
 import { fBlockStatement, FBlockStatement } from './fStatement';
 import { Range, toRange } from './range';
 import { ScriptError } from './ScriptError';
@@ -58,15 +59,10 @@ function fArrayExpression(expression: ArrayExpression): FArrayExpression {
 
 export type FArrowFunctionExpression = Omit<ArrowFunctionExpression, 'body' | 'params'> & {
     body: FBlockStatement | FExpression;
-    params: Array<FIdentifier>;
+    params: Array<FPattern>;
 };
 function fArrowFuntionExpression(expression: ArrowFunctionExpression): FArrowFunctionExpression {
-    const params = expression.params.map(param => {
-        if (param.type !== 'Identifier') {
-            throw new ScriptError(`'${param.type}' is not supported`, toRange(expression));
-        }
-        return param;
-    });
+    const params = expression.params.map(param => fPattern(param));
     let body: FBlockStatement | FExpression;
     if (expression.body.type === 'BlockStatement') {
         body = fBlockStatement(expression.body);
@@ -282,7 +278,7 @@ export type FProperty = Omit<Property, 'key' | 'value' | 'kind'> & {
     value: FExpression;
     kind: 'init';
 };
-function fProperty(property: Property): FProperty {
+export function fProperty(property: Property): FProperty {
     let key: FIdentifier | FLiteral;
     switch (property.key.type) {
         case 'Identifier':

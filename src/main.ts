@@ -27,6 +27,9 @@ import { isTruthy } from './scriptValue/isTruthy';
 import { toTypeName } from './scriptValue/toTypeName';
 import { toJObject } from './utils/toJObject';
 import { FObjectBase } from './scriptValue/types';
+import { FPattern } from './fPattern';
+import { toBeNever } from './toBeNever';
+import { getRestValues } from './getRestValues';
 
 function ofFLiteral(literal: FLiteral): FBoolean | FNumber | FString | null {
     if (literal.value == null) {
@@ -110,9 +113,130 @@ function ofFMemberExpressionAsAssign(
     return undefined;
 }
 
+type SetToRestElementAs = 'array' | 'object';
+
+function ofFPattern(
+    pattern: FPattern,
+    context: Context,
+    kind: 'let' | 'const' | 'assign',
+    value: FValue,
+
+    // let {a, ...b} = foo; のbのようにbにobjectが入る場面では'object'を、let [a, ...b] = bar; のbのようにbにArrayが入る場面では'array'を渡す。
+    // function f(...p) { return p; } のpの場面ではArrayが入るため'array'を渡す。再帰以外でofFPatternが呼ばれてなおかつpatternがRestElementであるケースはそれしかないと思われるため、引数のデフォルト値は'array'としている。
+    setToRestElementAs: SetToRestElementAs = 'array'
+): void {
+    switch (pattern.type) {
+        case 'Identifier':
+            switch (kind) {
+                case 'assign':
+                    context.assign(pattern.name, value, toRange(pattern));
+                    return;
+                default:
+                    context.declare(pattern.name, value, kind);
+                    return;
+            }
+        case 'MemberExpression':
+            ofFMemberExpressionAsAssign(pattern, value, context);
+            return;
+        case 'ArrayPattern': {
+            const valueAsFObjectBase: FObjectBase | null | undefined = value;
+            if (valueAsFObjectBase?.iterate == null) {
+                throw new ScriptError(`${value} is not iterable`);
+            }
+
+            const valueIterator: IterableIterator<FValue> = valueAsFObjectBase.iterate();
+            const valueIteratorNext = () => {
+                const next = valueIterator.next();
+                if (next.done) {
+                    return undefined;
+                }
+                return next.value;
+            };
+            for (const arrayPatternElement of pattern.elements) {
+                if (arrayPatternElement?.type === 'RestElement') {
+                    ofFPattern(
+                        arrayPatternElement.argument,
+                        context,
+                        kind,
+                        FArray.create(getRestValues(valueIterator)),
+                        setToRestElementAs
+                    );
+                    // RestElementはArrayPatternの最後にしか存在し得ないため、breakで抜けてしまって構わない。
+                    break;
+                }
+                const rightValueElement = valueIteratorNext();
+                if (arrayPatternElement === null) {
+                    continue;
+                }
+                ofFPattern(arrayPatternElement, context, kind, rightValueElement, 'array');
+            }
+            return;
+        }
+        case 'ObjectPattern': {
+            if (value == null) {
+                throw new ScriptError(`${value} has no properties`);
+            }
+
+            // 本題の前に前提として、ObjectPattern内にRestElementがある場合、FRecordでなければエラーとみなすようにしている。理由は、TypeScriptでも同様の挙動を示すため（JavaScriptではエラーは出ないが、TypeScriptとして使う前提であるため考慮していない）。
+            // RestElementが来たときにそれ以前に書かれたプロパティを除外していなければならないため、valueがFRecordであれば、それらを除外した状態のオブジェクトをnextValueとして保持している。ただし、FRecordでない場合はnextValueは常にvalueと等しくなる。これは、RestElementはFRecordに対応していないので、FRecord以外のオブジェクトのプロパティを除外する必要がないため。
+            let nextValue = value;
+            for (const objectPatternProperty of pattern.properties) {
+                if (objectPatternProperty.type === 'RestElement') {
+                    ofFPattern(objectPatternProperty, context, kind, nextValue, 'object');
+                    continue;
+                }
+                if (objectPatternProperty.key.type === 'Literal') {
+                    // どのような場面でここに来るのかまだ分かっていない
+                    throw new ScriptError('Literal as a key of ObjectPattern is not supported');
+                }
+                const key = new FString(objectPatternProperty.key.name);
+                switch (kind) {
+                    case 'assign':
+                        context.assign(
+                            objectPatternProperty.key.name,
+                            nextValue.get({ property: key, astInfo: objectPatternProperty.key }),
+                            toRange(pattern)
+                        );
+                        break;
+                    default:
+                        context.declare(
+                            objectPatternProperty.key.name,
+                            nextValue.get({ property: key, astInfo: objectPatternProperty.key }),
+                            kind
+                        );
+                        break;
+                }
+                if (value instanceof FRecord) {
+                    const $nextValue = value.clone();
+                    $nextValue.source.delete(objectPatternProperty.key.name);
+                    nextValue = $nextValue;
+                } else {
+                    nextValue = value;
+                }
+            }
+            return;
+        }
+        case 'RestElement':
+            if (setToRestElementAs === 'array') {
+                const valueAsFObjectBase: FObjectBase | null | undefined = value;
+                if (valueAsFObjectBase?.iterate == null) {
+                    throw new ScriptError(`${value} is not iterable`);
+                }
+                ofFPattern(pattern.argument, context, kind, value, 'array');
+                return;
+            }
+            ofFPattern(pattern.argument, context, kind, value, 'object');
+            return;
+        default: {
+            toBeNever(pattern);
+        }
+    }
+}
+
 /*
 let x; のようなコードでは、valueToSetにundefinedを渡す。
-for (let x of [1]) {} のようなコードでもinitはnullishであるため、valueToSetに1を渡さなければならない。
+let x = 1; のようなコードでは、valueToSetに1を渡す。
+for (let x of [1]) {} のようなコードではinitはnullishであるため、valueToSetに1を渡さなければならない。
 */
 function ofFVariableDeclaration(
     statement: FVariableDeclaration,
@@ -121,14 +245,12 @@ function ofFVariableDeclaration(
 ): void {
     const kind = statement.kind;
     statement.declarations.forEach(d => {
-        if (d.id.type !== 'Identifier') {
-            throw new Error(`'${d.id.type}' is not supported`);
-        }
         // let x; のような場合は let x = undefined; と同等とみなして良さそう。const x; はparseの時点で弾かれるはず。
-        context.declare(
-            d.id.name,
-            d.init == null ? valueToSet : ofFExpression(d.init, context),
-            kind
+        ofFPattern(
+            d.id,
+            context,
+            kind,
+            d.init == null ? valueToSet : ofFExpression(d.init, context)
         );
     });
 }
@@ -149,7 +271,7 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                 const argument: FObjectBase | null | undefined = ofFExpression(d.argument, context);
                 if (argument == null || argument.iterate == null) {
                     throw new ScriptError(
-                        `${argument?.toPrimitiveAsString()} is not iterable.`,
+                        `${argument?.toPrimitiveAsString()} is not iterable`,
                         toRange(d.argument)
                     );
                 }
@@ -169,7 +291,7 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                 }
                 context.scopeIn();
                 expression.params.forEach((param, i) => {
-                    context.declare(param.name, args[i], 'let');
+                    ofFPattern(param, context, 'let', args[i]);
                 });
                 if (expression.body.type === 'BlockStatement') {
                     const result = ofFStatement(expression.body, context);

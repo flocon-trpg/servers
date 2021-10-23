@@ -33,6 +33,10 @@ export class FRecord extends FObject {
         this.source.set(key.toString(), newValue);
     }
 
+    public clone(): FRecord {
+        return new FRecord(this);
+    }
+
     public forEach(callbackfn: (value: FValue, key: string) => void) {
         this.source.forEach(callbackfn);
     }

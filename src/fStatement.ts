@@ -80,11 +80,9 @@ const fVariableDeclaration = (statement: VariableDeclaration) => {
         );
     }
     const declarations = statement.declarations.map(d => {
-        if (d.id.type !== 'Identifier') {
-            throw new ScriptError(`'${d.id.type}' is not supported`, toRange(d.id));
-        }
         return {
             ...d,
+            id: fPattern(d.id),
             init: d.init == null ? d.init : fExpression(d.init),
         };
     });
