@@ -124,7 +124,7 @@ export class WritePrivateMessageArgs {
     public text!: string;
 
     @Field({ nullable: true })
-    @MaxLength(10)
+    @MaxLength(50)
     public textColor?: string;
 
     @Field({ nullable: true })
