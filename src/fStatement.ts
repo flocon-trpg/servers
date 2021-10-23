@@ -5,6 +5,7 @@ import {
     Directive,
     ExpressionStatement,
     ForOfStatement,
+    ForStatement,
     IfStatement,
     ModuleDeclaration,
     ReturnStatement,
@@ -37,6 +38,8 @@ export function fBlockStatement(statement: BlockStatement): FBlockStatement {
 
 type FBreakStatement = Omit<BreakStatement, 'label'>;
 
+type FContinueStatement = Omit<ContinueStatement, 'label'>;
+
 const fExpressionStatement = (statement: ExpressionStatement) => {
     return {
         ...statement,
@@ -50,6 +53,13 @@ type ForLeft = FPattern | FVariableDeclaration;
 type FForOfStatement = Omit<ForOfStatement, 'left' | 'right' | 'body'> & {
     left: ForLeft;
     right: FExpression;
+    body: FStatement;
+};
+
+type FForStatement = Omit<ForStatement, 'init' | 'test' | 'update' | 'body'> & {
+    init: FVariableDeclaration | FExpression | null | undefined;
+    test: FExpression | null | undefined;
+    update: FExpression | null | undefined;
     body: FStatement;
 };
 
@@ -97,10 +107,11 @@ export type FVariableDeclaration = ReturnType<typeof fVariableDeclaration>;
 export type FStatement =
     | FBlockStatement
     | FBreakStatement
-    | ContinueStatement
+    | FContinueStatement
     | FIfStatement
     | FExpressionStatement
     | FForOfStatement
+    | FForStatement
     | FReturnStatement
     | FSwitchStatement
     | FVariableDeclaration;
@@ -110,8 +121,14 @@ export function fStatement(statement: Directive | Statement | ModuleDeclaration)
         case 'BlockStatement':
             return fBlockStatement(statement);
         case 'BreakStatement':
+            if (statement.label != null) {
+                throw new ScriptError('labels are not supported');
+            }
             return statement;
         case 'ContinueStatement':
+            if (statement.label != null) {
+                throw new ScriptError('labels are not supported');
+            }
             return statement;
         case 'ExpressionStatement':
             return fExpressionStatement(statement);
@@ -125,6 +142,23 @@ export function fStatement(statement: Directive | Statement | ModuleDeclaration)
                 right: fExpression(statement.right),
                 body: fStatement(statement.body),
             };
+        case 'ForStatement': {
+            let init: FForStatement['init'];
+            if (statement.init == null) {
+                init = statement.init;
+            } else if (statement.init.type === 'VariableDeclaration') {
+                init = fVariableDeclaration(statement.init);
+            } else {
+                init = fExpression(statement.init);
+            }
+            return {
+                ...statement,
+                init,
+                test: statement.test == null ? statement.test : fExpression(statement.test),
+                update: statement.update == null ? statement.update : fExpression(statement.update),
+                body: fStatement(statement.body),
+            };
+        }
         case 'IfStatement':
             return {
                 ...statement,

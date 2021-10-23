@@ -20,6 +20,7 @@ import {
     ThisExpression,
     UnaryExpression,
     UnaryOperator,
+    UpdateExpression,
 } from 'estree';
 import { fPattern, FPattern } from './fPattern';
 import { fBlockStatement, FBlockStatement } from './fStatement';
@@ -355,6 +356,27 @@ function fUnaryExpression(expression: UnaryExpression): FUnaryExpression {
     };
 }
 
+export type FUpdateExpression = Omit<UpdateExpression, 'argument'> & {
+    argument: FIdentifier | FMemberExpression;
+};
+function fUpdateExpression(expression: UpdateExpression): FUpdateExpression {
+    switch (expression.argument.type) {
+        case 'Identifier':
+            return {
+                ...expression,
+                argument: expression.argument,
+            };
+        case 'MemberExpression':
+            return {
+                ...expression,
+                argument: fMemberExpression(expression.argument),
+            };
+        default:
+            // ここに来る状況があるかどうか不明
+            throw new ScriptError('Invalid update expression argument', toRange(expression));
+    }
+}
+
 export type FExpression =
     | FArrayExpression
     | FArrowFunctionExpression
@@ -370,7 +392,8 @@ export type FExpression =
     | FObjectExpression
     | FThisExpression
     | FSimpleCallExpression
-    | FUnaryExpression;
+    | FUnaryExpression
+    | FUpdateExpression;
 
 export function fExpression(expression: Expression): FExpression {
     switch (expression.type) {
@@ -404,6 +427,8 @@ export function fExpression(expression: Expression): FExpression {
             return expression;
         case 'UnaryExpression':
             return fUnaryExpression(expression);
+        case 'UpdateExpression':
+            return fUpdateExpression(expression);
         default:
             throw new ScriptError(`'${expression.type}' is not supported`, toRange(expression));
     }

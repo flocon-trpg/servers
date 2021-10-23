@@ -244,8 +244,7 @@ function ofFPattern(
 }
 
 /*
-let x; のようなコードでは、valueToSetにundefinedを渡す。
-let x = 1; のようなコードでは、valueToSetに1を渡す。
+let x; や let x = 1; のようなコードでは、valueToSetにundefinedを渡す。
 for (let x of [1]) {} のようなコードではinitはnullishであるため、valueToSetに1を渡さなければならない。
 */
 function ofFVariableDeclaration(
@@ -306,7 +305,7 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                 if (expression.body.type === 'BlockStatement') {
                     const result = ofFStatement(expression.body, context);
                     context.scopeOut();
-                    if (result.type !== 'continue') {
+                    if (result.type === 'earlyReturn') {
                         return result.value;
                     }
                     return undefined;
@@ -531,6 +530,30 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
             }
             break;
         }
+        case 'UpdateExpression': {
+            let oldValue: FValue;
+            let newValue: FValue;
+            if (expression.argument.type === 'Identifier') {
+                oldValue = context.get(expression.argument.name, toRange(expression.argument));
+                newValue = compareToNumber(
+                    oldValue,
+                    new FNumber(expression.operator === '++' ? 1 : -1),
+                    'number',
+                    (left, right) => left + right
+                );
+                context.assign(expression.argument.name, newValue, toRange(expression));
+            } else {
+                oldValue = ofFMemberExpressionAsGet(expression.argument, context, false);
+                newValue = compareToNumber(
+                    oldValue,
+                    new FNumber(expression.operator === '++' ? 1 : -1),
+                    'number',
+                    (left, right) => left + right
+                );
+                ofFMemberExpressionAsAssign(expression.argument, newValue, context);
+            }
+            return expression.prefix ? newValue : oldValue;
+        }
         default:
             throw new Error('this should not happen');
     }
@@ -538,7 +561,7 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
 
 type FStatementResult =
     | {
-          type: 'continue';
+          type: 'break' | 'continue';
       }
     | {
           type: 'earlyReturn';
@@ -554,24 +577,27 @@ function ofFStatement(statement: FStatement, context: Context): FStatementResult
         case 'BlockStatement': {
             context.scopeIn();
             for (const b of statement.body) {
-                if (b.type === 'ReturnStatement') {
+                const bodyResult = ofFStatement(b, context);
+                if (bodyResult.type !== 'end') {
                     context.scopeOut();
-                    return {
-                        type: 'earlyReturn',
-                        value: b.argument == null ? undefined : ofFExpression(b.argument, context),
-                    };
+                    return bodyResult;
                 }
-                if (b.type === 'ContinueStatement') {
-                    context.scopeOut();
-                    return {
-                        type: 'continue',
-                    };
-                }
-                ofFStatement(b, context);
             }
             context.scopeOut();
             return { type: 'end', value: undefined };
         }
+        case 'BreakStatement':
+            return { type: 'break' };
+        case 'ContinueStatement':
+            return { type: 'continue' };
+        case 'ReturnStatement':
+            return {
+                type: 'earlyReturn',
+                value:
+                    statement.argument == null
+                        ? undefined
+                        : ofFExpression(statement.argument, context),
+            };
         case 'ExpressionStatement': {
             return {
                 type: 'end',
@@ -606,6 +632,39 @@ function ofFStatement(statement: FStatement, context: Context): FStatementResult
             }
             return { type: 'end', value: undefined };
         }
+        case 'ForStatement': {
+            context.scopeIn();
+            if (statement.init != null) {
+                if (statement.init.type === 'VariableDeclaration') {
+                    ofFVariableDeclaration(statement.init, context);
+                } else {
+                    ofFExpression(statement.init, context);
+                }
+            }
+            let isFirstLoop = true;
+            // eslint-disable-next-line no-constant-condition
+            while (true) {
+                if (!isFirstLoop && statement.update != null) {
+                    ofFExpression(statement.update, context);
+                }
+                isFirstLoop = false;
+                if (statement.test != null) {
+                    const test = ofFExpression(statement.test, context);
+                    if (!isTruthy(test)) {
+                        break;
+                    }
+                }
+                const bodyResult = ofFStatement(statement.body, context);
+                if (bodyResult.type === 'earlyReturn') {
+                    context.scopeOut();
+                    return { type: 'end', value: bodyResult.value };
+                } else if (bodyResult.type === 'break') {
+                    break;
+                }
+            }
+            context.scopeOut();
+            return { type: 'end', value: undefined };
+        }
         case 'IfStatement': {
             const test = ofFExpression(statement.test, context);
             if (toJObject(test)) {
@@ -633,27 +692,16 @@ function ofFStatement(statement: FStatement, context: Context): FStatementResult
                 }
 
                 for (const consequent of $case.consequent) {
-                    if (consequent.type === 'ReturnStatement') {
-                        return {
-                            type: 'earlyReturn',
-                            value:
-                                consequent.argument == null
-                                    ? undefined
-                                    : ofFExpression(consequent.argument, context),
-                        };
+                    const consequentResult = ofFStatement(consequent, context);
+                    switch (consequentResult.type) {
+                        case 'earlyReturn':
+                        case 'continue':
+                            return consequentResult;
+                        case 'break':
+                            return { type: 'end', value: undefined };
+                        default:
+                            break;
                     }
-                    if (consequent.type === 'ContinueStatement') {
-                        if (consequent.label != null) {
-                            throw new Error('continue label not supported');
-                        }
-                        return {
-                            type: 'continue',
-                        };
-                    }
-                    if (consequent.type === 'BreakStatement') {
-                        return { type: 'end', value: undefined };
-                    }
-                    ofFStatement(consequent, context);
                 }
             }
             return { type: 'end', value: undefined };
@@ -663,7 +711,7 @@ function ofFStatement(statement: FStatement, context: Context): FStatementResult
             return { type: 'end', value: undefined };
         }
         default:
-            throw new Error(`'${statement.type}' is not supported`);
+            return toBeNever(statement);
     }
 }
 
