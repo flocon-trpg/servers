@@ -4,6 +4,8 @@ import {
     ContinueStatement,
     Directive,
     ExpressionStatement,
+    ForOfStatement,
+    ForStatement,
     IfStatement,
     ModuleDeclaration,
     ReturnStatement,
@@ -13,6 +15,7 @@ import {
     VariableDeclaration,
 } from 'estree';
 import { FExpression, fExpression } from './fExpression';
+import { FPattern, fPattern } from './fPattern';
 import { toRange } from './range';
 import { ScriptError } from './ScriptError';
 
@@ -29,11 +32,13 @@ export type FBlockStatement = Omit<BlockStatement, 'body'> & {
 export function fBlockStatement(statement: BlockStatement): FBlockStatement {
     return {
         ...statement,
-        body: statement.body.map(x => fFStatement(x)),
+        body: statement.body.map(x => fStatement(x)),
     };
 }
 
 type FBreakStatement = Omit<BreakStatement, 'label'>;
+
+type FContinueStatement = Omit<ContinueStatement, 'label'>;
 
 const fExpressionStatement = (statement: ExpressionStatement) => {
     return {
@@ -42,6 +47,21 @@ const fExpressionStatement = (statement: ExpressionStatement) => {
     };
 };
 type FExpressionStatement = ReturnType<typeof fExpressionStatement>;
+
+type ForLeft = FPattern | FVariableDeclaration;
+
+type FForOfStatement = Omit<ForOfStatement, 'left' | 'right' | 'body'> & {
+    left: ForLeft;
+    right: FExpression;
+    body: FStatement;
+};
+
+type FForStatement = Omit<ForStatement, 'init' | 'test' | 'update' | 'body'> & {
+    init: FVariableDeclaration | FExpression | null | undefined;
+    test: FExpression | null | undefined;
+    update: FExpression | null | undefined;
+    body: FStatement;
+};
 
 type FIfStatement = Omit<IfStatement, 'alternate' | 'consequent' | 'test'> & {
     alternate?: FStatement | null;
@@ -57,7 +77,7 @@ type FSwitchCase = Omit<SwitchCase, 'consequent' | 'test'> & {
     test?: FExpression | null;
     consequent: Array<FStatement>;
 };
-type FSwitchStatement = Omit<SwitchStatement, 'alternate' | 'consequent' | 'test'> & {
+type FSwitchStatement = Omit<SwitchStatement, 'discriminant' | 'cases'> & {
     discriminant: FExpression;
     cases: Array<FSwitchCase>;
 };
@@ -70,11 +90,9 @@ const fVariableDeclaration = (statement: VariableDeclaration) => {
         );
     }
     const declarations = statement.declarations.map(d => {
-        if (d.id.type !== 'Identifier') {
-            throw new ScriptError(`'${d.id.type}' is not supported`, toRange(d.id));
-        }
         return {
             ...d,
+            id: fPattern(d.id),
             init: d.init == null ? d.init : fExpression(d.init),
         };
     });
@@ -84,36 +102,71 @@ const fVariableDeclaration = (statement: VariableDeclaration) => {
         declarations,
     };
 };
-type FVariableDeclaration = ReturnType<typeof fVariableDeclaration>;
+export type FVariableDeclaration = ReturnType<typeof fVariableDeclaration>;
 
 export type FStatement =
     | FBlockStatement
     | FBreakStatement
-    | ContinueStatement
+    | FContinueStatement
     | FIfStatement
     | FExpressionStatement
+    | FForOfStatement
+    | FForStatement
     | FReturnStatement
     | FSwitchStatement
     | FVariableDeclaration;
 
-export function fFStatement(statement: Directive | Statement | ModuleDeclaration): FStatement {
+export function fStatement(statement: Directive | Statement | ModuleDeclaration): FStatement {
     switch (statement.type) {
         case 'BlockStatement':
             return fBlockStatement(statement);
         case 'BreakStatement':
+            if (statement.label != null) {
+                throw new ScriptError('labels are not supported');
+            }
             return statement;
         case 'ContinueStatement':
+            if (statement.label != null) {
+                throw new ScriptError('labels are not supported');
+            }
             return statement;
         case 'ExpressionStatement':
             return fExpressionStatement(statement);
+        case 'ForOfStatement':
+            return {
+                ...statement,
+                left:
+                    statement.left.type === 'VariableDeclaration'
+                        ? fVariableDeclaration(statement.left)
+                        : fPattern(statement.left),
+                right: fExpression(statement.right),
+                body: fStatement(statement.body),
+            };
+        case 'ForStatement': {
+            let init: FForStatement['init'];
+            if (statement.init == null) {
+                init = statement.init;
+            } else if (statement.init.type === 'VariableDeclaration') {
+                init = fVariableDeclaration(statement.init);
+            } else {
+                init = fExpression(statement.init);
+            }
+            return {
+                ...statement,
+                init,
+                test: statement.test == null ? statement.test : fExpression(statement.test),
+                update: statement.update == null ? statement.update : fExpression(statement.update),
+                body: fStatement(statement.body),
+            };
+        }
         case 'IfStatement':
             return {
                 ...statement,
                 alternate:
                     statement.alternate == null
                         ? statement.alternate
-                        : fFStatement(statement.alternate),
-                consequent: fFStatement(statement.consequent),
+                        : fStatement(statement.alternate),
+                consequent: fStatement(statement.consequent),
                 test: fExpression(statement.test),
             };
         case 'ReturnStatement':
@@ -124,16 +177,17 @@ export function fFStatement(statement: Directive | Statement | ModuleDeclaration
                         ? statement.argument
                         : fExpression(statement.argument),
             };
-        case 'SwitchStatement':
+        case 'SwitchStatement': {
             return {
                 ...statement,
                 cases: statement.cases.map(c => ({
                     ...c,
-                    consequent: c.consequent.map(s => fFStatement(s)),
+                    consequent: c.consequent.map(s => fStatement(s)),
                     test: c.test == null ? c.test : fExpression(c.test),
                 })),
                 discriminant: fExpression(statement.discriminant),
             };
+        }
         case 'VariableDeclaration':
             return fVariableDeclaration(statement);
         default:

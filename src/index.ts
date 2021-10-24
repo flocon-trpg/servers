@@ -1,5 +1,6 @@
 export { exec, test } from './main';
 export { arrayClass } from './builtIn/Array';
+export { createConsoleClass } from './builtIn/console';
 export { mapClass } from './builtIn/Map';
 export { symbolClass } from './builtIn/Symbol';
 

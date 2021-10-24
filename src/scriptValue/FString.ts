@@ -1,4 +1,5 @@
 import { ScriptError } from '../ScriptError';
+import { mapIterator } from '../utils/mapIterator';
 import { FFunction } from './FFunction';
 import { FType } from './FType';
 import { FValue } from './FValue';
@@ -34,6 +35,10 @@ export class FString implements FObjectBase {
 
     public set({ astInfo }: SetParams): void {
         throw new ScriptError('You cannot set any value to String', astInfo?.range);
+    }
+
+    public iterate(): IterableIterator<FValue> {
+        return mapIterator(this.raw[Symbol.iterator](), x => new FString(x));
     }
 
     public toPrimitiveAsString() {

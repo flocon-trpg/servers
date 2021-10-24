@@ -1,3 +1,4 @@
+import { toJObject } from '../utils/toJObject';
 import { FBoolean } from './FBoolean';
 import { FNumber } from './FNumber';
 import { FString } from './FString';
@@ -7,9 +8,12 @@ import { toPrimitive } from './toPrimitive';
 const compare = <T>(
     left: FValue,
     right: FValue,
-    hint: 'default' | 'string' | 'number',
+    hint: 'default' | 'string' | 'number' | 'JObject',
     comparer: (left: unknown, right: unknown) => T
 ): T => {
+    if (hint === 'JObject') {
+        return comparer(toJObject(left), toJObject(right));
+    }
     return comparer(toPrimitive(left, hint), toPrimitive(right, hint));
 };
 
@@ -25,7 +29,7 @@ export const compareToNumber = (
 export const compareToBoolean = (
     left: FValue,
     right: FValue,
-    hint: 'default' | 'string' | 'number',
+    hint: 'default' | 'string' | 'number' | 'JObject',
     comparer: (left: any, right: any) => boolean
 ) => {
     return new FBoolean(compare(left, right, hint, comparer));

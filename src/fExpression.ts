@@ -20,13 +20,25 @@ import {
     ThisExpression,
     UnaryExpression,
     UnaryOperator,
+    UpdateExpression,
 } from 'estree';
+import { fPattern, FPattern } from './fPattern';
 import { fBlockStatement, FBlockStatement } from './fStatement';
 import { Range, toRange } from './range';
 import { ScriptError } from './ScriptError';
 
+type FArrayExpressionElement =
+    | {
+          isSpread: false;
+          expression: FExpression;
+      }
+    | {
+          isSpread: true;
+          argument: FExpression;
+      };
+
 export type FArrayExpression = Omit<ArrayExpression, 'elements'> & {
-    elements: Array<FExpression | null>;
+    elements: Array<FArrayExpressionElement | null>;
 };
 function fArrayExpression(expression: ArrayExpression): FArrayExpression {
     return {
@@ -36,24 +48,22 @@ function fArrayExpression(expression: ArrayExpression): FArrayExpression {
                 return e;
             }
             if (e.type === 'SpreadElement') {
-                throw new ScriptError('SpreadElement is not supported', toRange(expression));
+                return {
+                    isSpread: true,
+                    argument: fExpression(e.argument),
+                };
             }
-            return fExpression(e);
+            return { isSpread: false, expression: fExpression(e) };
         }),
     };
 }
 
 export type FArrowFunctionExpression = Omit<ArrowFunctionExpression, 'body' | 'params'> & {
     body: FBlockStatement | FExpression;
-    params: Array<FIdentifier>;
+    params: Array<FPattern>;
 };
 function fArrowFuntionExpression(expression: ArrowFunctionExpression): FArrowFunctionExpression {
-    const params = expression.params.map(param => {
-        if (param.type !== 'Identifier') {
-            throw new ScriptError(`'${param.type}' is not supported`, toRange(expression));
-        }
-        return param;
-    });
+    const params = expression.params.map(param => fPattern(param));
     let body: FBlockStatement | FExpression;
     if (expression.body.type === 'BlockStatement') {
         body = fBlockStatement(expression.body);
@@ -67,13 +77,8 @@ function fArrowFuntionExpression(expression: ArrowFunctionExpression): FArrowFun
     };
 }
 
-function fAssignmentOperator(operator: AssignmentOperator, range: Range | undefined) {
-    switch (operator) {
-        case '=':
-            return operator;
-        default:
-            throw new ScriptError(`'${operator}' is not supported`, range);
-    }
+function fAssignmentOperator(operator: AssignmentOperator) {
+    return operator;
 }
 export type FAssignmentOperator = ReturnType<typeof fAssignmentOperator>;
 
@@ -99,7 +104,7 @@ function fAssignmentExpression(expression: AssignmentExpression): FAssignmentExp
     }
     return {
         ...expression,
-        operator: fAssignmentOperator(expression.operator, toRange(expression)),
+        operator: fAssignmentOperator(expression.operator),
         left,
         right: fExpression(expression.right),
     };
@@ -212,7 +217,7 @@ export type FMemberExpression = Omit<MemberExpression, 'object' | 'property'> & 
     object: FExpression;
     property: FExpression;
 };
-function fMemberExpression(expression: MemberExpression): FMemberExpression {
+export function fMemberExpression(expression: MemberExpression): FMemberExpression {
     if (expression.object.type === 'Super') {
         throw new ScriptError("'Super' is not supported", toRange(expression));
     }
@@ -239,17 +244,27 @@ function fNewExpression(expression: NewExpression): FNewExpression {
     };
 }
 
+type FObjectExpressionElement =
+    | {
+          isSpread: false;
+          property: FProperty;
+      }
+    | {
+          isSpread: true;
+          argument: FExpression;
+      };
+
 export type FObjectExpression = Omit<ObjectExpression, 'properties'> & {
-    properties: Array<FProperty>;
+    properties: Array<FObjectExpressionElement>;
 };
 function fObjectExpression(expression: ObjectExpression): FObjectExpression {
     return {
         ...expression,
         properties: expression.properties.map(prop => {
             if (prop.type === 'SpreadElement') {
-                throw new ScriptError("'SpreadElement' is not supported", toRange(expression));
+                return { isSpread: true, argument: fExpression(prop.argument) };
             }
-            return fProperty(prop);
+            return { isSpread: false, property: fProperty(prop) };
         }),
     };
 }
@@ -259,7 +274,7 @@ export type FProperty = Omit<Property, 'key' | 'value' | 'kind'> & {
     value: FExpression;
     kind: 'init';
 };
-function fProperty(property: Property): FProperty {
+export function fProperty(property: Property): FProperty {
     let key: FIdentifier | FLiteral;
     switch (property.key.type) {
         case 'Identifier':
@@ -336,6 +351,27 @@ function fUnaryExpression(expression: UnaryExpression): FUnaryExpression {
     };
 }
 
+export type FUpdateExpression = Omit<UpdateExpression, 'argument'> & {
+    argument: FIdentifier | FMemberExpression;
+};
+function fUpdateExpression(expression: UpdateExpression): FUpdateExpression {
+    switch (expression.argument.type) {
+        case 'Identifier':
+            return {
+                ...expression,
+                argument: expression.argument,
+            };
+        case 'MemberExpression':
+            return {
+                ...expression,
+                argument: fMemberExpression(expression.argument),
+            };
+        default:
+            // ここに来る状況があるかどうか不明
+            throw new ScriptError('Invalid update expression argument', toRange(expression));
+    }
+}
+
 export type FExpression =
     | FArrayExpression
     | FArrowFunctionExpression
@@ -351,7 +387,8 @@ export type FExpression =
     | FObjectExpression
     | FThisExpression
     | FSimpleCallExpression
-    | FUnaryExpression;
+    | FUnaryExpression
+    | FUpdateExpression;
 
 export function fExpression(expression: Expression): FExpression {
     switch (expression.type) {
@@ -385,6 +422,8 @@ export function fExpression(expression: Expression): FExpression {
             return expression;
         case 'UnaryExpression':
             return fUnaryExpression(expression);
+        case 'UpdateExpression':
+            return fUpdateExpression(expression);
         default:
             throw new ScriptError(`'${expression.type}' is not supported`, toRange(expression));
     }

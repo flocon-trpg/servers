@@ -60,6 +60,10 @@ export class FIterator extends FObject {
         throw new ScriptError('You cannot set any value to Iterator', params.astInfo?.range);
     }
 
+    public iterate(): IterableIterator<FValue> {
+        return mapIterator(this.source, x => this.convertValue(x));
+    }
+
     public override toPrimitiveAsString(): string {
         // JavaScriptでは例えば配列由来なら'[object Array Iterator]'となる（ChromeとFirefoxで確認）が、ここでは実装を簡略化するためにすべてIteratorとしている
         return '[object Iterator]';
