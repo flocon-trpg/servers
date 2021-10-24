@@ -35,7 +35,7 @@ export class FArray implements FObjectBase {
         return FType.Array;
     }
 
-    private iterateAsArray(): FValue[] {
+    public toJArray(): FValue[] {
         return this.source.map(x => this.convert(x));
     }
 
@@ -65,7 +65,7 @@ export class FArray implements FObjectBase {
                 return new FFunction(({ args, isNew }) => {
                     FArray.prepareInstanceMethod(isNew, astInfo);
                     const predicate = beginCast(args[0], astInfo).addFunction().cast()(false);
-                    const raw = this.iterateAsArray().filter((value, index) =>
+                    const raw = this.toJArray().filter((value, index) =>
                         predicate([value, new FNumber(index)])?.toJObject()
                     );
                     return FArray.create(raw);
@@ -74,7 +74,7 @@ export class FArray implements FObjectBase {
                 return new FFunction(({ args, isNew }) => {
                     FArray.prepareInstanceMethod(isNew, astInfo);
                     const predicate = beginCast(args[0], astInfo).addFunction().cast()(false);
-                    const raw = this.iterateAsArray().find((value, index) =>
+                    const raw = this.toJArray().find((value, index) =>
                         predicate([value, new FNumber(index)])?.toJObject()
                     );
                     return raw;
@@ -83,7 +83,7 @@ export class FArray implements FObjectBase {
                 return new FFunction(({ args, isNew }) => {
                     FArray.prepareInstanceMethod(isNew, astInfo);
                     const callbackfn = beginCast(args[0], astInfo).addFunction().cast()(false);
-                    this.iterateAsArray().forEach((value, index) =>
+                    this.toJArray().forEach((value, index) =>
                         callbackfn([value, new FNumber(index)])
                     );
                     return undefined;
@@ -92,7 +92,7 @@ export class FArray implements FObjectBase {
                 return new FFunction(({ args, isNew }) => {
                     FArray.prepareInstanceMethod(isNew, astInfo);
                     const mapping = beginCast(args[0], astInfo).addFunction().cast()(false);
-                    const raw = this.iterateAsArray().map((value, index) =>
+                    const raw = this.toJArray().map((value, index) =>
                         mapping([value, new FNumber(index)])
                     );
                     return FArray.create(raw);
@@ -150,18 +150,18 @@ export class FArray implements FObjectBase {
     }
 
     public toPrimitiveAsString(): string {
-        return this.iterateAsArray()
+        return this.toJArray()
             .map(x => x?.toPrimitiveAsString())
             .toString();
     }
 
     public toPrimitiveAsNumber(): number {
-        return +this.iterateAsArray().map(x => x?.toPrimitiveAsNumber());
+        return +this.toJArray().map(x => x?.toPrimitiveAsNumber());
     }
 
     // 正確な型が表現できないのでunknown[]としている
     public toJObject(): unknown[] {
-        return this.iterateAsArray().map(x => (x == null ? x : x.toJObject()));
+        return this.toJArray().map(x => (x == null ? x : x.toJObject()));
     }
 }
 
