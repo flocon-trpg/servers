@@ -77,13 +77,8 @@ function fArrowFuntionExpression(expression: ArrowFunctionExpression): FArrowFun
     };
 }
 
-function fAssignmentOperator(operator: AssignmentOperator, range: Range | undefined) {
-    switch (operator) {
-        case '=':
-            return operator;
-        default:
-            throw new ScriptError(`'${operator}' is not supported`, range);
-    }
+function fAssignmentOperator(operator: AssignmentOperator) {
+    return operator;
 }
 export type FAssignmentOperator = ReturnType<typeof fAssignmentOperator>;
 
@@ -109,7 +104,7 @@ function fAssignmentExpression(expression: AssignmentExpression): FAssignmentExp
     }
     return {
         ...expression,
-        operator: fAssignmentOperator(expression.operator, toRange(expression)),
+        operator: fAssignmentOperator(expression.operator),
         left,
         right: fExpression(expression.right),
     };

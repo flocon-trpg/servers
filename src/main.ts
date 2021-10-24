@@ -317,25 +317,73 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
             return new FFunction(f);
         }
         case 'AssignmentExpression': {
-            switch (expression.left.type) {
-                case 'Identifier': {
-                    context.assign(
-                        expression.left.name,
-                        ofFExpression(expression.right, context),
-                        toRange(expression)
-                    );
-                    return undefined;
-                }
-                case 'MemberExpression': {
-                    ofFMemberExpressionAsAssign(
-                        expression.left,
-                        ofFExpression(expression.right, context),
-                        context
-                    );
-                    return undefined;
+            if (expression.operator === '=') {
+                const newValue = ofFExpression(expression.right, context);
+                switch (expression.left.type) {
+                    case 'Identifier': {
+                        context.assign(expression.left.name, newValue, toRange(expression));
+                        return newValue;
+                    }
+                    case 'MemberExpression': {
+                        ofFMemberExpressionAsAssign(expression.left, newValue, context);
+                        return newValue;
+                    }
                 }
             }
-            break;
+            let oldValue: FValue;
+            let newValue: FValue;
+            if (expression.left.type === 'Identifier') {
+                oldValue = context.get(expression.left.name, toRange(expression.left));
+            } else {
+                oldValue = ofFMemberExpressionAsGet(expression.left, context, false);
+            }
+            const right = ofFExpression(expression.right, context);
+            switch (expression.operator) {
+                case '+=':
+                    newValue = compareToNumber(oldValue, right, 'default', (l, r) => l + r);
+                    break;
+                case '-=':
+                    newValue = compareToNumber(oldValue, right, 'number', (l, r) => l - r);
+                    break;
+                case '%=':
+                    newValue = compareToNumber(oldValue, right, 'number', (l, r) => l % r);
+                    break;
+                case '&=':
+                    newValue = compareToNumber(oldValue, right, 'number', (l, r) => l & r);
+                    break;
+                case '*=':
+                    newValue = compareToNumber(oldValue, right, 'number', (l, r) => l * r);
+                    break;
+                case '**=':
+                    newValue = compareToNumber(oldValue, right, 'number', (l, r) => l ** r);
+                    break;
+                case '/=':
+                    newValue = compareToNumber(oldValue, right, 'number', (l, r) => l / r);
+                    break;
+                case '<<=':
+                    newValue = compareToNumber(oldValue, right, 'number', (l, r) => l << r);
+                    break;
+                case '>>=':
+                    newValue = compareToNumber(oldValue, right, 'number', (l, r) => l >> r);
+                    break;
+                case '>>>=':
+                    newValue = compareToNumber(oldValue, right, 'number', (l, r) => l >>> r);
+                    break;
+                case '^=':
+                    newValue = compareToNumber(oldValue, right, 'number', (l, r) => l ^ r);
+                    break;
+                case '|=':
+                    newValue = compareToNumber(oldValue, right, 'number', (l, r) => l | r);
+                    break;
+                default:
+                    toBeNever(expression.operator);
+            }
+            if (expression.left.type === 'Identifier') {
+                context.assign(expression.left.name, newValue, toRange(expression));
+            } else {
+                ofFMemberExpressionAsAssign(expression.left, newValue, context);
+            }
+            return newValue;
         }
         case 'BinaryExpression': {
             const left = ofFExpression(expression.left, context);
@@ -721,6 +769,7 @@ type ExecResult = {
 };
 
 const toProgram = (script: string) => {
+    // @types/estreeが2020までにしか対応していない模様（AssignmentOperatorに&&=などがない）ため、acornもとりあえず2020としている。
     return parse(script, { ecmaVersion: 2020, ranges: true }) as unknown as Program;
 };
 
