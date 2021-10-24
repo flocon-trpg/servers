@@ -20,7 +20,7 @@ export class Participant {
     @PrimaryKey()
     public id: string = v4();
 
-    @Enum({ items: () => ParticipantRoleType, index: true, nullable: true })
+    @Property({ type: () => String, index: true, nullable: true })
     public role?: ParticipantRoleType;
 
     @Property({ nullable: true })

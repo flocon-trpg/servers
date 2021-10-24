@@ -35,7 +35,7 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "userUid", void 0);
 __decorate([
-    (0, core_1.Enum)({ items: () => BaasType_1.BaasType, index: true }),
+    (0, core_1.Property)({ type: () => String, index: true }),
     __metadata("design:type", String)
 ], User.prototype, "baasType", void 0);
 __decorate([

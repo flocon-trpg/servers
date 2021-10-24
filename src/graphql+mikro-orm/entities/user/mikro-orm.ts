@@ -24,7 +24,7 @@ export class User {
     @PrimaryKey()
     public userUid: string;
 
-    @Enum({ items: () => BaasType, index: true })
+    @Property({ type: () => String, index: true })
     public baasType: BaasType;
 
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
