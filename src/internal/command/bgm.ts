@@ -50,7 +50,7 @@ export class FBgm extends FObject {
             }
             case files: {
                 const $newValue = beginCast(newValue, astInfo).addArray().cast();
-                this.bgm.files = $newValue.iterate().map(x => toFilePath(x, astInfo));
+                this.bgm.files = $newValue.toJArray().map(x => toFilePath(x, astInfo));
                 return;
             }
             case volume: {
