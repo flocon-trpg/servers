@@ -190,6 +190,8 @@ it.concurrent('tests Room.restore', () => {
     );
 });
 
+// serverTransformは、IDがisValidKeyの検証に失敗したときなどにエラーが発生するため、fast-checkを用いたテストは難しい。
+
 it.concurrent('tests Room.clientTransform', () => {
     fc.assert(
         fc.property(
