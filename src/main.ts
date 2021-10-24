@@ -408,19 +408,19 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                 case '/':
                     return compareToNumber(left, right, 'number', (l, r) => l / r);
                 case '<':
-                    return compareToBoolean(left, right, 'number', (l, r) => l < r);
+                    return compareToBoolean(left, right, 'JObject', (l, r) => l < r);
                 case '<<':
                     return compareToNumber(left, right, 'number', (l, r) => l << r);
                 case '<=':
-                    return compareToBoolean(left, right, 'number', (l, r) => l <= r);
+                    return compareToBoolean(left, right, 'JObject', (l, r) => l <= r);
                 case '==':
                     return new FBoolean(eqeq(left, right));
                 case '===':
                     return new FBoolean(eqeqeq(left, right));
                 case '>':
-                    return compareToBoolean(left, right, 'number', (l, r) => l > r);
+                    return compareToBoolean(left, right, 'JObject', (l, r) => l > r);
                 case '>=':
-                    return compareToBoolean(left, right, 'number', (l, r) => l >= r);
+                    return compareToBoolean(left, right, 'JObject', (l, r) => l >= r);
                 case '>>':
                     return compareToNumber(left, right, 'number', (l, r) => l >> r);
                 case '>>>':
