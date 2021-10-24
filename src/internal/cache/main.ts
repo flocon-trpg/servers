@@ -123,7 +123,7 @@ class RedisCache implements Cache {
     }
 
     public async getAsNumber(key: Key) {
-        const valueAsString = await this.getAsString(this.key(key));
+        const valueAsString = await this.getAsString(key);
         if (valueAsString == null) {
             return valueAsString;
         }
@@ -131,7 +131,12 @@ class RedisCache implements Cache {
     }
 
     public async set(key: Key, value: Value) {
-        const isOk = await this.redis.set(this.key(key), value, 'EX', this.config.stdTTL);
+        let isOk: string | null;
+        if (this.config.stdTTL == null) {
+            isOk = await this.redis.set(this.key(key), value);
+        } else {
+            isOk = await this.redis.set(this.key(key), value, 'EX', this.config.stdTTL);
+        }
         return isOk === 'OK';
     }
 
