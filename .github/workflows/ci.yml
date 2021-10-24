@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
     main:
-        name: Build, lint, and test on Node ${{ matrix.node }} and ${{ matrix.os }}
+        name: Build, lint, and test (without Redis test) on Node ${{ matrix.node }} and ${{ matrix.os }}
 
         runs-on: ${{ matrix.os }}
         strategy:
@@ -32,24 +32,31 @@ jobs:
 
             - name: Test
               run: yarn test --ci --coverage --maxWorkers=2
+              env:
+                  TEST_SKIP_REDIS: true
 
     large-test:
-        name: Large test on Node ${{ matrix.node }} and ${{ matrix.os }}
+        name: Large test & Redis test on ${{ matrix.container }} and ${{ matrix.os }}
 
         runs-on: ${{ matrix.os }}
         strategy:
             matrix:
-                node: ['16.x']
+                container: ['node:16']
                 os: [ubuntu-latest]
+        container: ${{ matrix.container }}
+
+        services:
+            redis:
+                image: redis
+                options: >-
+                    --health-cmd "redis-cli ping"
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
 
         steps:
             - name: Checkout repo
               uses: actions/checkout@v2
-
-            - name: Use Node ${{ matrix.node }}
-              uses: actions/setup-node@v2
-              with:
-                  node-version: ${{ matrix.node }}
 
             - name: Install
               run: yarn
