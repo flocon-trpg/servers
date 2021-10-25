@@ -85,7 +85,7 @@ this.recordRef;
         const execResult = exec(
             `
 let result = {};
-this.recordRef.forEach(([value, key]) => {
+this.recordRef.forEach((value, key) => {
     result[key] = value;
 });
 result;

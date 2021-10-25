@@ -7,7 +7,6 @@ import { FValue } from './FValue';
 import { AstInfo, GetCoreParams, SetCoreParams } from './types';
 import { FBoolean } from './FBoolean';
 import { toFValue } from './toFValue';
-import { FArray } from './FArray';
 
 // Recordのkeyのジェネリック化は、convertKeyBackの処理の場合分けが難しいと思われるため不採用。
 export class FRecordRef<TValue> extends FObject {
@@ -74,7 +73,7 @@ export class FRecordRef<TValue> extends FObject {
                         if (value == null) {
                             throw new Error('this should not happen');
                         }
-                        callbackfn([FArray.create([this.convertValue(value), toFValue(key)])]);
+                        callbackfn([this.convertValue(value), toFValue(key)]);
                     }
                     return undefined;
                 });
