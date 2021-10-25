@@ -56,6 +56,8 @@ console.log(globalThisAfterExec.obj2.x); // 一見2が出力されそうだが�
 
 例 2 で`obj1`と`obj2`の参照を一致させたい場合は、`createFValue`を使って下のようにすればよい。これは、globalThis に`FValue`のインスタンスが含まれている場合は、それは変換されずにそのまま渡されるという性質を利用している。
 
+もし既存の Record を編集可能にしたい場合は、`FRecordRef`を使用する。
+
 ```javascript
 // 例3
 

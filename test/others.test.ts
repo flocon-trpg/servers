@@ -59,6 +59,20 @@ x.a;
     expect(actual.getGlobalThis()).toEqual(globalThis);
 });
 
+test.each([{}, { x: 0 }])('let x = { a: 1 }; let key = "a"; x[key] = 2;', globalThis => {
+    const actual = exec(
+        `
+let x = { a: 1 };
+let key = 'a';
+x[key] = 2;
+[x, x[key]];
+        `,
+        globalThis
+    );
+    expect(actual.result).toEqual([{ a: 2 }, 2]);
+    expect(actual.getGlobalThis()).toEqual(globalThis);
+});
+
 test.each([{ a: 0 }, { a: 0, b: -1 }])('a = 1;', globalThis => {
     const actual = exec(
         `

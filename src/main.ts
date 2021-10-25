@@ -97,7 +97,7 @@ function ofFMemberExpressionAsAssign(
 ): FValue {
     const object = ofFExpression(expression.object, context);
     let property: FValue;
-    if (expression.property.type === 'Identifier') {
+    if (!expression.computed && expression.property.type === 'Identifier') {
         property = new FString(expression.property.name);
     } else {
         property = ofFExpression(expression.property, context);

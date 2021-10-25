@@ -1,5 +1,6 @@
 import { mapToRecord } from '@kizahasi/util';
 import { ScriptError } from '..';
+import { toJObject } from '../utils/toJObject';
 import { FObject } from './FObject';
 import { FValue } from './FValue';
 import { GetCoreParams, SetCoreParams } from './types';
@@ -44,7 +45,7 @@ export class FRecord extends FObject {
     public override toJObject(): unknown {
         const result = new Map<string, unknown>();
         this.source.forEach((value, key) => {
-            result.set(key, value?.toJObject());
+            result.set(key, toJObject(value));
         });
         return mapToRecord(result);
     }

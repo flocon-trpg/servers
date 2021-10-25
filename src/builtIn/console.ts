@@ -3,6 +3,7 @@ import { Option } from '@kizahasi/option';
 import { ScriptError } from '../ScriptError';
 import { FFunction } from '../scriptValue/FFunction';
 import { FValue } from '../scriptValue/FValue';
+import { toJObject } from '../utils/toJObject';
 
 class FConsoleClass extends FFunction {
     public constructor(private readonly header: string) {
@@ -23,7 +24,7 @@ class FConsoleClass extends FFunction {
                 return Option.some(
                     new FFunction(({ args, isNew }) => {
                         FConsoleClass.prepareStaticMethod(isNew, astInfo);
-                        console.log([this.header, ...args]);
+                        console.log(...[this.header, ...args.map(arg => toJObject(arg))]);
                         return undefined;
                     })
                 );
@@ -32,7 +33,7 @@ class FConsoleClass extends FFunction {
                 return Option.some(
                     new FFunction(({ args, isNew }) => {
                         FConsoleClass.prepareStaticMethod(isNew, astInfo);
-                        console.info([this.header, ...args]);
+                        console.info(...[this.header, ...args.map(arg => toJObject(arg))]);
                         return undefined;
                     })
                 );
@@ -41,7 +42,7 @@ class FConsoleClass extends FFunction {
                 return Option.some(
                     new FFunction(({ args, isNew }) => {
                         FConsoleClass.prepareStaticMethod(isNew, astInfo);
-                        console.warn([this.header, ...args]);
+                        console.warn(...[this.header, ...args.map(arg => toJObject(arg))]);
                         return undefined;
                     })
                 );
@@ -50,7 +51,7 @@ class FConsoleClass extends FFunction {
                 return Option.some(
                     new FFunction(({ args, isNew }) => {
                         FConsoleClass.prepareStaticMethod(isNew, astInfo);
-                        console.error([this.header, ...args]);
+                        console.error(...[this.header, ...args.map(arg => toJObject(arg))]);
                         return undefined;
                     })
                 );

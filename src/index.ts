@@ -22,6 +22,7 @@ export { FMap } from './scriptValue/FMap';
 export { FNumber } from './scriptValue/FNumber';
 export { FObject } from './scriptValue/FObject';
 export { FRecord } from './scriptValue/FRecord';
+export { FRecordRef } from './scriptValue/FRecordRef';
 export { FString } from './scriptValue/FString';
 export { FSymbol } from './scriptValue/FSymbol';
 export { FType } from './scriptValue/FType';
