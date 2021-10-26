@@ -85,6 +85,12 @@
     "engines": {
         "node": ">=14"
     },
+    "browserslist": [
+        ">0.5%",
+        "last 2 versions",
+        "not ie >= 0",
+        "not dead"
+    ],
     "prettier": {
         "printWidth": 100,
         "semi": true,
