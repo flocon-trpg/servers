@@ -1,3 +1,4 @@
+import { recordToMap } from '@kizahasi/util';
 import { execCharacterCommand, State } from '../src';
 import { Resources } from './resources';
 
@@ -152,6 +153,53 @@ myCharacter.name = '${nextCharacterName}';
                 },
             },
         });
+    });
+
+    it('tests creating character', () => {
+        const characterName = 'CHARA_NAME';
+
+        const room: State = {
+            ...Resources.minimumState,
+            participants: {
+                [Resources.Participant.Player1.userUid]: {
+                    $v: 1,
+                    $r: 2,
+                    name: Resources.Participant.Player1.name,
+                    role: 'Player',
+                    boards: {},
+                    characters: {
+                        [characterKey]: {
+                            ...Resources.Character.emptyState,
+                            name: characterName,
+                        },
+                    },
+                    imagePieceValues: {},
+                },
+            },
+        };
+
+        const actual = execCharacterCommand({
+            script: `
+let myParticipant = this.room.participants.get('${Resources.Participant.Player1.userUid}');
+let newCharacter = myParticipant.characters.create();
+newCharacter.value.name = 'NEW_CHARA_NAME';
+let newCharacterById = myParticipant.characters.get(newCharacter.id);
+newCharacter.value.name = newCharacterById.name + '!!';
+            `,
+            room,
+            characterKey: { createdBy: Resources.Participant.Player1.userUid, id: characterKey },
+        });
+        if (actual.isError) {
+            throw actual.error;
+        }
+        const actualCharacters = recordToMap(
+            actual.value.participants[Resources.Participant.Player1.userUid]?.characters ?? {}
+        );
+        expect(actualCharacters.size).toBe(2);
+        actualCharacters.delete(characterKey);
+        expect(actualCharacters.size).toBe(1);
+        const actualCreatedCharacter = [...actualCharacters][0]?.[1];
+        expect(actualCreatedCharacter?.name).toBe('NEW_CHARA_NAME!!');
     });
 
     it('tests deleting character', () => {
