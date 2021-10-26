@@ -49,6 +49,10 @@ export class FString implements FObjectBase {
         return +this.raw;
     }
 
+    public toPrimitiveAsDefault() {
+        return this.raw.toString();
+    }
+
     public toJObject(): string {
         return this.raw;
     }
