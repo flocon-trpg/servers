@@ -11,24 +11,24 @@ import { toFValue } from './toFValue';
 // Recordのkeyのジェネリック化は、convertKeyBackの処理の場合分けが難しいと思われるため不採用。
 export class FRecordRef<TValue> extends FObject {
     public constructor(
-        private readonly source: Record<string, TValue>,
-        private readonly convertValue: (value: TValue) => FValue,
-        private readonly convertValueBack: (value: FValue, astInfo: AstInfo | undefined) => TValue
+        public readonly source: Record<string, TValue>,
+        protected readonly convertValue: (value: TValue) => FValue,
+        protected readonly convertValueBack: (value: FValue, astInfo: AstInfo | undefined) => TValue
     ) {
         super();
     }
 
-    private static prepareInstanceMethod(isNew: boolean, astInfo: AstInfo | undefined) {
+    protected prepareInstanceMethod(isNew: boolean, astInfo: AstInfo | undefined) {
         if (isNew) {
             throw ScriptError.notConstructorError(astInfo?.range);
         }
     }
 
-    private convertKeyBack(source: FValue, astInfo: AstInfo | undefined) {
+    protected convertKeyBack(source: FValue, astInfo: AstInfo | undefined) {
         return beginCast(source, astInfo).addString().cast();
     }
 
-    private validateKey(key: string): void {
+    protected validateKey(key: string): void {
         const fail = () => {
             throw new ScriptError(`You cannot use "${key}" as a key`);
         };
@@ -58,7 +58,7 @@ export class FRecordRef<TValue> extends FObject {
         switch (key) {
             case 'delete':
                 return new FFunction(({ args, isNew }) => {
-                    FRecordRef.prepareInstanceMethod(isNew, astInfo);
+                    this.prepareInstanceMethod(isNew, astInfo);
                     const key = this.convertKeyBack(args[0], astInfo);
                     this.validateKey(key);
                     delete this.source[key];
@@ -66,7 +66,7 @@ export class FRecordRef<TValue> extends FObject {
                 });
             case 'forEach':
                 return new FFunction(({ args, isNew }) => {
-                    FRecordRef.prepareInstanceMethod(isNew, astInfo);
+                    this.prepareInstanceMethod(isNew, astInfo);
                     const callbackfn = beginCast(args[0], astInfo).addFunction().cast()(false);
                     for (const key in this.source) {
                         const value = this.source[key];
@@ -79,7 +79,7 @@ export class FRecordRef<TValue> extends FObject {
                 });
             case 'get':
                 return new FFunction(({ args, isNew }) => {
-                    FRecordRef.prepareInstanceMethod(isNew, astInfo);
+                    this.prepareInstanceMethod(isNew, astInfo);
                     const key = this.convertKeyBack(args[0], astInfo);
                     this.validateKey(key);
                     const value = this.source[key];
@@ -90,14 +90,14 @@ export class FRecordRef<TValue> extends FObject {
                 });
             case 'has':
                 return new FFunction(({ args, isNew }) => {
-                    FRecordRef.prepareInstanceMethod(isNew, astInfo);
+                    this.prepareInstanceMethod(isNew, astInfo);
                     const key = this.convertKeyBack(args[0], astInfo);
                     this.validateKey(key);
                     return new FBoolean(key in this.source);
                 });
             case 'set':
                 return new FFunction(({ args, isNew }) => {
-                    FRecordRef.prepareInstanceMethod(isNew, astInfo);
+                    this.prepareInstanceMethod(isNew, astInfo);
                     const key = this.convertKeyBack(args[0], astInfo);
                     this.validateKey(key);
                     const value = this.convertValueBack(args[1], astInfo);
@@ -122,5 +122,12 @@ export class FRecordRef<TValue> extends FObject {
 
     public override toJObject(): Record<string, TValue> {
         return this.source;
+    }
+
+    public equals(other: FValue): boolean {
+        if (other instanceof FRecordRef) {
+            return this.source === other.source;
+        }
+        return false;
     }
 }

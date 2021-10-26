@@ -40,4 +40,7 @@ export type FObjectBase = {
 
     // iterate可能な場合は実装する。実装しない場合はiterate不可能と判断される。
     iterate?(): IterableIterator<FValue>;
+
+    // ==と===の結果をカスタマイズしたい場合に実装する。実装した場合、このメソッドが高優先度で等価比較に使われる（ただしどちらかの値がnullishの場合は除く）。
+    equals?(other: FValue, operator: '==' | '==='): boolean;
 };
