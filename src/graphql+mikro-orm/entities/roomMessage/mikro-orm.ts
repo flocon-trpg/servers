@@ -172,7 +172,7 @@ export class RoomPubMsg {
     public charaImagePath?: string;
 
     // 「書き込んだとき」のCharaのimageSourceType
-    @Property({ type: () => String, nullable: true, default: null })
+    @Property({ type: 'string', nullable: true, default: null })
     public charaImageSourceType?: FileSourceType;
 
     // 「書き込んだとき」のCharaのimagePath
@@ -181,7 +181,7 @@ export class RoomPubMsg {
     public charaTachieImagePath?: string;
 
     // 「書き込んだとき」のCharaのimageSourceType
-    @Property({ type: () => String, nullable: true, default: null })
+    @Property({ type: 'string', nullable: true, default: null })
     public charaTachieImageSourceType?: FileSourceType;
 
     @Property({ nullable: true })
@@ -285,7 +285,7 @@ export class RoomPrvMsg {
     public charaTachieImagePath?: string;
 
     // 「書き込んだとき」のCharaのimageSourceType
-    @Property({ type: () => String, nullable: true, default: null })
+    @Property({ type: 'string', nullable: true, default: null })
     public charaTachieImageSourceType?: FileSourceType;
 
     @Property({ nullable: true })
@@ -416,7 +416,7 @@ export class RoomSe {
     @Property()
     public filePath: string;
 
-    @Property({ type: () => String })
+    @Property({ type: 'string' })
     public fileSourceType!: FileSourceType;
 
     @Property()

@@ -20,7 +20,7 @@ export class Participant {
     @PrimaryKey()
     public id: string = v4();
 
-    @Property({ type: () => String, index: true, nullable: true })
+    @Property({ type: 'string', index: true, nullable: true })
     public role?: ParticipantRoleType;
 
     @Property({ nullable: true })

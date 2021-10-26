@@ -25,7 +25,7 @@ __decorate([
     __metadata("design:type", String)
 ], Participant.prototype, "id", void 0);
 __decorate([
-    (0, core_1.Property)({ type: () => String, index: true, nullable: true }),
+    (0, core_1.Property)({ type: 'string', index: true, nullable: true }),
     __metadata("design:type", String)
 ], Participant.prototype, "role", void 0);
 __decorate([

@@ -1,12 +1,4 @@
-import {
-    Collection,
-    Entity,
-    Enum,
-    ManyToMany,
-    OneToMany,
-    PrimaryKey,
-    Property,
-} from '@mikro-orm/core';
+import { Collection, Entity, ManyToMany, OneToMany, PrimaryKey, Property } from '@mikro-orm/core';
 import { BaasType } from '../../../enums/BaasType';
 import { File } from '../file/mikro-orm';
 import { FileTag } from '../fileTag/mikro-orm';
@@ -24,7 +16,7 @@ export class User {
     @PrimaryKey()
     public userUid: string;
 
-    @Property({ type: () => String, index: true })
+    @Property({ type: 'string', index: true })
     public baasType: BaasType;
 
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
