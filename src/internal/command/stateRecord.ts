@@ -2,10 +2,8 @@ import {
     FString,
     FValue,
     OnGettingParams,
-    ScriptError,
     FRecordRef,
     FFunction,
-    AstInfo,
     FRecord,
 } from '@kizahasi/flocon-script';
 import { simpleId } from '../simpleId';
@@ -37,12 +35,6 @@ export class FStateRecord<TSource, TRef extends FValue> extends FRecordRef<TSour
         this.toRef = toRef;
     }
 
-    private static prepareInstanceMethod2(isNew: boolean, astInfo: AstInfo | undefined) {
-        if (isNew) {
-            throw ScriptError.notConstructorError(astInfo?.range);
-        }
-    }
-
     override getCore({ key, astInfo }: OnGettingParams): FValue {
         switch (key) {
             case 'set':
@@ -67,9 +59,9 @@ export class FStateRecord<TSource, TRef extends FValue> extends FRecordRef<TSour
                 */
 
                 return new FFunction(({ isNew, astInfo }) => {
-                    FStateRecord.prepareInstanceMethod2(isNew, astInfo);
+                    this.prepareInstanceMethod(isNew, astInfo);
                     const newState = createNewState();
-                    const record = this.toJObject();
+                    const record = this.source;
                     const id = simpleId();
                     record[id] = newState;
                     const result = new FRecord();
