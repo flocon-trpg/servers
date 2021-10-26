@@ -37,9 +37,9 @@ type UploaderProps = {
 
 const Uploader: React.FC<UploaderProps> = ({ unlistedMode, onUploaded }: UploaderProps) => {
     const config = React.useContext(ConfigContext);
-    const idToken = React.useContext(FirebaseAuthenticationIdTokenContext);
+    const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
 
-    if (idToken == null) {
+    if (getIdToken == null) {
         return null;
     }
 
@@ -51,6 +51,10 @@ const Uploader: React.FC<UploaderProps> = ({ unlistedMode, onUploaded }: Uploade
             customRequest={options => {
                 const main = async () => {
                     if (typeof options.file === 'string' || !('name' in options.file)) {
+                        return;
+                    }
+                    const idToken = await getIdToken();
+                    if (idToken == null) {
                         return;
                     }
                     const formData = new FormData();

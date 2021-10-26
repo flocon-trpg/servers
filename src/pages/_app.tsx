@@ -66,13 +66,10 @@ const useFirebaseUser = (): FirebaseUserState => {
     const [user, setUser] = React.useState<FirebaseUserState>(loading);
     React.useEffect(() => {
         if (auth == null) {
-            console.info('[調査用ログ] auth changed (null)');
             setUser(authNotFound);
             return;
         }
-        console.info('[調査用ログ] authChange(non-null)');
         const unsubscribe = auth.onIdTokenChanged(user => {
-            console.info('[調査用ログ] onIdTokenChanged');
             setUser(user == null ? notSignIn : user);
         });
         return () => {

@@ -4,7 +4,7 @@
     "dependencies": {
         "@apollo/client": "^3.4.15",
         "@emotion/react": "^11.4.1",
-        "@kizahasi/flocon-core": "^0.20.0-beta.9",
+        "@kizahasi/flocon-core": "^0.20.0-beta.11",
         "@kizahasi/result": "^1.0.0",
         "@kizahasi/util": "^0.9.1",
         "@monaco-editor/react": "^4.2.2",
@@ -85,6 +85,12 @@
     "engines": {
         "node": ">=14"
     },
+    "browserslist": [
+        ">0.5%",
+        "last 2 versions",
+        "not ie >= 0",
+        "not dead"
+    ],
     "prettier": {
         "printWidth": 100,
         "semi": true,

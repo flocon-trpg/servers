@@ -126,8 +126,8 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
     const [isEntry, setIsEntry] = React.useState<
         'notRequired' | 'loading' | { type: 'error'; error: Error } | boolean
     >('loading');
-    const idToken = React.useContext(FirebaseAuthenticationIdTokenContext);
-    const hasIdToken = idToken != null;
+    const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
+    const hasIdToken = getIdToken != null;
     const requiresEntry = requires === loginAndEntry;
     React.useEffect(() => {
         if (requiresEntry && myUserUid != null) {
