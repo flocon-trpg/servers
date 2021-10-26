@@ -137,7 +137,7 @@ __decorate([
     __metadata("design:type", String)
 ], RoomPubMsg.prototype, "charaImagePath", void 0);
 __decorate([
-    (0, core_1.Enum)({ items: () => FileSourceType_1.FileSourceType, nullable: true, default: null }),
+    (0, core_1.Property)({ type: 'string', nullable: true, default: null }),
     __metadata("design:type", String)
 ], RoomPubMsg.prototype, "charaImageSourceType", void 0);
 __decorate([
@@ -145,7 +145,7 @@ __decorate([
     __metadata("design:type", String)
 ], RoomPubMsg.prototype, "charaTachieImagePath", void 0);
 __decorate([
-    (0, core_1.Enum)({ items: () => FileSourceType_1.FileSourceType, nullable: true, default: null }),
+    (0, core_1.Property)({ type: 'string', nullable: true, default: null }),
     __metadata("design:type", String)
 ], RoomPubMsg.prototype, "charaTachieImageSourceType", void 0);
 __decorate([
@@ -245,7 +245,7 @@ __decorate([
     __metadata("design:type", String)
 ], RoomPrvMsg.prototype, "charaImagePath", void 0);
 __decorate([
-    (0, core_1.Enum)({ items: () => FileSourceType_1.FileSourceType, nullable: true, default: null }),
+    (0, core_1.Property)({ type: () => FileSourceType_1.FileSourceType, nullable: true, default: null }),
     __metadata("design:type", String)
 ], RoomPrvMsg.prototype, "charaImageSourceType", void 0);
 __decorate([
@@ -253,7 +253,7 @@ __decorate([
     __metadata("design:type", String)
 ], RoomPrvMsg.prototype, "charaTachieImagePath", void 0);
 __decorate([
-    (0, core_1.Enum)({ items: () => FileSourceType_1.FileSourceType, nullable: true, default: null }),
+    (0, core_1.Property)({ type: 'string', nullable: true, default: null }),
     __metadata("design:type", String)
 ], RoomPrvMsg.prototype, "charaTachieImageSourceType", void 0);
 __decorate([
@@ -387,7 +387,7 @@ __decorate([
     __metadata("design:type", String)
 ], RoomSe.prototype, "filePath", void 0);
 __decorate([
-    (0, core_1.Enum)({ items: () => FileSourceType_1.FileSourceType }),
+    (0, core_1.Property)({ type: 'string' }),
     __metadata("design:type", String)
 ], RoomSe.prototype, "fileSourceType", void 0);
 __decorate([
