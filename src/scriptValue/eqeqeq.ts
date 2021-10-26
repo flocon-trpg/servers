@@ -1,5 +1,6 @@
 import { FType } from './FType';
 import { FValue } from './FValue';
+import { FObjectBase } from './types';
 
 export const eqeqeq = (x: FValue, y: FValue): boolean => {
     if (x === null) {
@@ -7,6 +8,10 @@ export const eqeqeq = (x: FValue, y: FValue): boolean => {
     }
     if (x === undefined) {
         return y === undefined;
+    }
+    const xAsObjectBase: FObjectBase = x;
+    if (xAsObjectBase.equals != null) {
+        return xAsObjectBase.equals(y, '===');
     }
     switch (x.type) {
         case FType.Boolean:

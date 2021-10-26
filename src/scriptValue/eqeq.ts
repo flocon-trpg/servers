@@ -3,6 +3,7 @@
 import { FType } from './FType';
 import { FValue } from './FValue';
 import { toPrimitive } from './toPrimitive';
+import { FObjectBase } from './types';
 
 // https://developer.mozilla.org/ja/docs/Web/JavaScript/Equality_comparisons_and_sameness
 export const eqeq = (x: FValue, y: FValue): boolean => {
@@ -11,6 +12,10 @@ export const eqeq = (x: FValue, y: FValue): boolean => {
     }
     if (y == null) {
         return false;
+    }
+    const xAsObjectBase: FObjectBase = x;
+    if (xAsObjectBase.equals != null) {
+        return xAsObjectBase.equals(y, '==');
     }
 
     switch (x.type) {
