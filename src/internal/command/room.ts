@@ -12,6 +12,8 @@ import { CompositeKey } from '@kizahasi/util';
 import { FCharacter } from './character';
 import cloneDeep from 'lodash.clonedeep';
 import { FParamNames } from './paramNames';
+import { FStateRecord } from './stateRecord';
+import { FParticipant } from './participant';
 
 const name = 'name';
 
@@ -46,6 +48,18 @@ export class FRoom extends FObject {
                 return new FParamNames(this.room, 'Number');
             case 'stringParameterNames':
                 return new FParamNames(this.room, 'String');
+            case 'participants':
+                return new FStateRecord({
+                    states: this.room.participants,
+                    createNewState: undefined,
+                    toRef: x => new FParticipant(x, this.room),
+                    unRef: x => {
+                        if (x instanceof FParticipant) {
+                            return x.participant;
+                        }
+                        throw new Error('this should not happen');
+                    },
+                });
             default:
                 return undefined;
         }
