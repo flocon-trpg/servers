@@ -215,9 +215,14 @@ namespace Assert {
             return sourceResult.data.result;
         };
 
-        export const toBeFailure = async (source: Promise<OperationResult<OperateMutation>>) => {
+        export const toBeFailure = async (
+            source: Promise<OperationResult<OperateMutation>>,
+            errorType: 'GraphQL'
+        ) => {
             const sourceResult = await source;
-            expect(sourceResult.error).not.toBeUndefined();
+            if (errorType === 'GraphQL') {
+                expect(sourceResult.error?.graphQLErrors.length ?? 0).toBeGreaterThanOrEqual(1);
+            }
         };
     }
 
@@ -688,44 +693,12 @@ it.each([
                         clientId: Resources.ClientId.player1,
                         valueJson: JSON.stringify({}),
                     },
-                })
+                }),
+                'GraphQL'
             );
         }
 
-        // operateのテスト（異常系 - 大きすぎるname）
-        {
-            const lorem1000 =
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent egestas ligula vel velit sodales vestibulum. Vivamus sagittis faucibus faucibus. In imperdiet ac tortor et elementum. Fusce orci ante, interdum vitae enim sit amet, feugiat congue turpis. Aliquam sed erat scelerisque, facilisis mauris eget, vestibulum nisl. Etiam sit amet ex ut dolor volutpat sollicitudin eget eu lectus. Aliquam et diam fermentum, tincidunt quam non, interdum dolor. Vestibulum quis neque egestas, suscipit dui in, luctus sem. Etiam auctor suscipit dapibus. Aliquam porttitor lacus a urna lobortis, a venenatis nulla tincidunt. Nunc et lectus cursus, euismod orci quis, pulvinar odio. Sed id eros non lorem pellentesque gravida. Cras at est hendrerit elit maximus interdum non non diam. Maecenas congue sit amet nisi vitae hendrerit. Sed faucibus leo eget nisl hendrerit ultricies. Ut quis egestas sapien. Cras neque nunc, dignissim sed ipsum vel, pulvinar tempus magna. Lorem ipsum dolor sit amet, consectetur bia.';
-            expect(lorem1000).toHaveLength(1000);
-
-            const textLength = 1_100_000;
-            let text = '';
-            // eslint-disable-next-line no-constant-condition
-            while (true) {
-                text += lorem1000;
-                if (text.length >= textLength) {
-                    break;
-                }
-            }
-
-            const operation: UpOperation = {
-                $v: 1,
-                $r: 2,
-                name: textDiff({ prev: Resources.Room.name, next: text }),
-            };
-
-            await Assert.OperateMutation.toBeFailure(
-                GraphQL.operateMutation(roomPlayer1Client, {
-                    id: roomId,
-                    requestId,
-                    revisionFrom: initRoomRevision + 1,
-                    operation: {
-                        clientId: Resources.ClientId.player1,
-                        valueJson: JSON.stringify(operation),
-                    },
-                })
-            );
-        }
+        // TODO: Room.valueのJSONの容量が上限を超えるようなOperationを送信したときのテスト。例えば単にnameの文字数を一度に大量に増やそうとするとApollo ServerによりPayload Too Largeエラーが返されるため、テストには一工夫必要か。
 
         // operateのテスト（正常系）
         const newRoomName = 'NEW_ROOM_NAME';
