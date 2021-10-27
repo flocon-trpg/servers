@@ -30,11 +30,7 @@ export const createUrqlClient = (
                     subscribe: sink => ({
                         unsubscribe: wsClient(wsUrl, testAuthorizationHeaderValue).subscribe(
                             operation,
-                            {
-                                next: x => sink.next(x as any),
-                                error: err => sink.error(err),
-                                complete: () => sink.complete(),
-                            }
+                            sink as any
                         ),
                     }),
                 }),

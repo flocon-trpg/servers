@@ -68,6 +68,7 @@ import urljoin from 'url-join';
 import { readFileSync } from 'fs';
 import { TextTwoWayOperation, TextUpOperation } from '@kizahasi/ot-string';
 import { OperationResult } from '@urql/core';
+import { maskTypeNames } from './maskTypenames';
 
 const timeout = 20000;
 
@@ -749,13 +750,19 @@ it.each([
             expect(operationResult.operation.revisionTo).toBe(initRoomRevision + 1);
             const masterSubscriptionResult =
                 roomMasterClientSubscription.toBeExactlyOneRoomOperationEvent();
-            expect(masterSubscriptionResult).toEqual(operationResult.operation);
+            expect(maskTypeNames(masterSubscriptionResult)).toEqual(
+                maskTypeNames(operationResult.operation)
+            );
             const player2SubscriptionResult =
                 roomPlayer2ClientSubscription.toBeExactlyOneRoomOperationEvent();
-            expect(player2SubscriptionResult).toEqual(operationResult.operation);
+            expect(maskTypeNames(player2SubscriptionResult)).toEqual(
+                maskTypeNames(operationResult.operation)
+            );
             const spectatorSubscriptionResult =
                 roomSpectatorClientSubscription.toBeExactlyOneRoomOperationEvent();
-            expect(spectatorSubscriptionResult).toEqual(operationResult.operation);
+            expect(maskTypeNames(spectatorSubscriptionResult)).toEqual(
+                maskTypeNames(operationResult.operation)
+            );
             notJoinUserClientSubscription.toBeEmpty();
             allSubscriptions.clear();
         }
