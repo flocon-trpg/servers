@@ -215,8 +215,8 @@ namespace Assert {
         };
 
         export const toBeFailure = async (source: Promise<OperationResult<OperateMutation>>) => {
-            const sourceResult = await source.catch(() => 'error');
-            expect(sourceResult).toBe('error');
+            const sourceResult = await source;
+            expect(sourceResult.error).not.toBeUndefined();
         };
     }
 
