@@ -55,7 +55,6 @@
         "yargs": "^17.2.1"
     },
     "devDependencies": {
-        "@apollo/client": "^3.4.8",
         "@commitlint/cli": "^13.2.1",
         "@commitlint/config-conventional": "^13.2.0",
         "@graphql-codegen/cli": "^2.2.0",
@@ -66,6 +65,7 @@
         "@types/url-join": "^4.0.1",
         "@typescript-eslint/eslint-plugin": "^5.2.0",
         "@typescript-eslint/parser": "^5.2.0",
+        "@urql/core": "^2.3.3",
         "axios": "^0.21.4",
         "eslint": "^8.1.0",
         "eslint-config-prettier": "^8.2.0",

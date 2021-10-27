@@ -1,7 +1,7 @@
 import * as $MikroORM from '../src/graphql+mikro-orm/entities/room/mikro-orm';
 import { EM } from '../src/utils/types';
 import { User as User$MikroORM } from '../src/graphql+mikro-orm/entities/user/mikro-orm';
-import { createApolloClient } from './createApolloClient';
+import { createUrqlClient } from './createUrqlClient';
 import { createTestServer } from './createTestServer';
 import { Resources } from './resources';
 import {
@@ -60,12 +60,6 @@ import {
 } from './graphql';
 import { EntryToServerResultType } from '../src/enums/EntryToServerResultType';
 import { ServerConfig } from '../src/configType';
-import {
-    ApolloClient,
-    ApolloQueryResult,
-    FetchResult,
-    NormalizedCacheObject,
-} from '@apollo/client';
 import { CompositeTestRoomEventSubscription, TestRoomEventSubscription } from './subscription';
 import { UpOperation, parseState } from '@kizahasi/flocon-core';
 import axios from 'axios';
@@ -73,6 +67,7 @@ import FormData from 'form-data';
 import urljoin from 'url-join';
 import { readFileSync } from 'fs';
 import { TextTwoWayOperation, TextUpOperation } from '@kizahasi/ot-string';
+import { OperationResult } from '@urql/core';
 
 const timeout = 20000;
 
@@ -103,11 +98,11 @@ const plainEntryPassword: ServerConfig['entryPassword'] = {
     value: Resources.entryPassword,
 };
 
-type ApolloClientType = ApolloClient<NormalizedCacheObject>;
+type UrqlClientType = ReturnType<typeof createUrqlClient>;
 
 namespace Assert {
     export namespace CreateFileTagMutation {
-        export const toBeSuccess = (source: FetchResult<CreateFileTagMutation>) => {
+        export const toBeSuccess = (source: OperationResult<CreateFileTagMutation>) => {
             if (source.data?.result == null) {
                 expect(source.data?.result ?? undefined).not.toBeUndefined();
                 throw new Error('Guard');
@@ -117,7 +112,7 @@ namespace Assert {
     }
 
     export namespace CreateRoomMutation {
-        export const toBeSuccess = (source: FetchResult<CreateRoomMutation>) => {
+        export const toBeSuccess = (source: OperationResult<CreateRoomMutation>) => {
             if (source.data?.result.__typename !== 'CreateRoomSuccessResult') {
                 expect(source.data?.result.__typename).toBe('CreateRoomSuccessResult');
                 throw new Error('Guard');
@@ -127,29 +122,32 @@ namespace Assert {
     }
 
     export namespace DeleteRoomMutation {
-        export const toBeSuccess = (source: FetchResult<DeleteRoomMutation>) => {
+        export const toBeSuccess = (source: OperationResult<DeleteRoomMutation>) => {
             expect(source.data?.result.failureType ?? undefined).toBeUndefined();
         };
 
-        export const toBeNotCreatedByYou = (source: FetchResult<DeleteRoomMutation>) => {
+        export const toBeNotCreatedByYou = (source: OperationResult<DeleteRoomMutation>) => {
             expect(source.data?.result.failureType).toBe(DeleteRoomFailureType.NotCreatedByYou);
         };
     }
 
     export namespace EditFileTagsMutation {
-        export const toBeSuccess = (source: FetchResult<EditFileTagsMutation>) => {
+        export const toBeSuccess = (source: OperationResult<EditFileTagsMutation>) => {
             expect(source.data?.result).toBe(true);
         };
     }
 
     export namespace GetFilesQuery {
-        export const toBeSuccess = (source: ApolloQueryResult<GetFilesQuery>) => {
+        export const toBeSuccess = (source: OperationResult<GetFilesQuery>) => {
+            if (source.data == null) {
+                throw source.error;
+            }
             return source.data.result.files;
         };
     }
 
     export namespace GetMessagesQuery {
-        export const toBeSuccess = (source: ApolloQueryResult<GetMessagesQuery>) => {
+        export const toBeSuccess = (source: OperationResult<GetMessagesQuery>) => {
             if (source.data?.result.__typename !== 'RoomMessages') {
                 expect(source.data?.result.__typename).toBe('RoomMessages');
                 throw new Error('Guard');
@@ -159,7 +157,7 @@ namespace Assert {
     }
 
     export namespace GetRoomsListQuery {
-        export const toBeSuccess = (source: ApolloQueryResult<GetRoomsListQuery>) => {
+        export const toBeSuccess = (source: OperationResult<GetRoomsListQuery>) => {
             if (source.data?.result.__typename !== 'GetRoomsListSuccessResult') {
                 expect(source.data?.result.__typename).toBe('GetRoomsListSuccessResult');
                 throw new Error('Guard');
@@ -169,7 +167,7 @@ namespace Assert {
     }
 
     export namespace GetRoomQuery {
-        export const toBeSuccess = (source: ApolloQueryResult<GetRoomQuery>) => {
+        export const toBeSuccess = (source: OperationResult<GetRoomQuery>) => {
             if (source.data?.result.__typename !== 'GetJoinedRoomResult') {
                 expect(source.data?.result.__typename).toBe('GetJoinedRoomResult');
                 throw new Error('Guard');
@@ -180,7 +178,7 @@ namespace Assert {
 
     export namespace JoinRoomMutation {
         export const toBeSuccess = (
-            source: FetchResult<JoinRoomAsPlayerMutation | JoinRoomAsSpectatorMutation>
+            source: OperationResult<JoinRoomAsPlayerMutation | JoinRoomAsSpectatorMutation>
         ) => {
             if (source.data?.result.__typename !== 'JoinRoomSuccessResult') {
                 expect(source.data?.result.__typename).toBe('JoinRoomSuccessResult');
@@ -190,7 +188,7 @@ namespace Assert {
         };
 
         export const toBeFailure = (
-            source: FetchResult<JoinRoomAsPlayerMutation | JoinRoomAsSpectatorMutation>
+            source: OperationResult<JoinRoomAsPlayerMutation | JoinRoomAsSpectatorMutation>
         ) => {
             if (source.data?.result.__typename !== 'JoinRoomFailureResult') {
                 expect(source.data?.result.__typename).toBe('JoinRoomFailureResult');
@@ -201,13 +199,13 @@ namespace Assert {
     }
 
     export namespace LeaveRoomMutation {
-        export const toBeSuccess = (source: FetchResult<LeaveRoomMutation>) => {
+        export const toBeSuccess = (source: OperationResult<LeaveRoomMutation>) => {
             expect(source.data?.result.failureType ?? undefined).toBeUndefined();
         };
     }
 
     export namespace OperateMutation {
-        export const toBeSuccess = async (source: Promise<FetchResult<OperateMutation>>) => {
+        export const toBeSuccess = async (source: Promise<OperationResult<OperateMutation>>) => {
             const sourceResult = await source;
             if (sourceResult.data?.result.__typename !== 'OperateRoomSuccessResult') {
                 expect(sourceResult.data?.result.__typename).toBe('OperateRoomSuccessResult');
@@ -216,14 +214,14 @@ namespace Assert {
             return sourceResult.data.result;
         };
 
-        export const toBeFailure = async (source: Promise<FetchResult<OperateMutation>>) => {
+        export const toBeFailure = async (source: Promise<OperationResult<OperateMutation>>) => {
             const sourceResult = await source.catch(() => 'error');
             expect(sourceResult).toBe('error');
         };
     }
 
     export namespace WritePrivateMessageMutation {
-        export const toBeSuccess = (source: FetchResult<WritePrivateMessageMutation>) => {
+        export const toBeSuccess = (source: OperationResult<WritePrivateMessageMutation>) => {
             if (source.data?.result.__typename !== 'RoomPrivateMessage') {
                 expect(source.data?.result.__typename).toBe('RoomPrivateMessage');
                 throw new Error('Guard');
@@ -235,167 +233,194 @@ namespace Assert {
 
 namespace GraphQL {
     export const createFileTagMutation = async (
-        client: ApolloClientType,
+        client: UrqlClientType,
         variables: CreateFileTagMutationVariables
     ) => {
-        return await client.mutate<CreateFileTagMutation, CreateFileTagMutationVariables>({
-            mutation: CreateFileTagDocument,
-            fetchPolicy: 'network-only',
-            variables,
-        });
+        return await client
+            .mutation<CreateFileTagMutation, CreateFileTagMutationVariables>(
+                CreateFileTagDocument,
+                variables,
+                {
+                    requestPolicy: 'network-only',
+                }
+            )
+            .toPromise();
     };
 
     export const deleteFilesMutation = async (
-        client: ApolloClientType,
+        client: UrqlClientType,
         variables: DeleteFilesMutationVariables
     ) => {
-        return await client.mutate<DeleteFilesMutation, DeleteFilesMutationVariables>({
-            mutation: DeleteFilesDocument,
-            fetchPolicy: 'network-only',
-            variables,
-        });
+        return await client
+            .mutation<DeleteFilesMutation, DeleteFilesMutationVariables>(
+                DeleteFilesDocument,
+                variables,
+                {
+                    requestPolicy: 'network-only',
+                }
+            )
+            .toPromise();
     };
 
     export const deleteFileTagsMutation = async (
-        client: ApolloClientType,
+        client: UrqlClientType,
         variables: DeleteFileTagMutationVariables
     ) => {
-        return await client.mutate<DeleteFileTagMutation, DeleteFileTagMutationVariables>({
-            mutation: DeleteFileTagDocument,
-            fetchPolicy: 'network-only',
-            variables,
-        });
+        return await client
+            .mutation<DeleteFileTagMutation, DeleteFileTagMutationVariables>(
+                DeleteFileTagDocument,
+                variables,
+                {
+                    requestPolicy: 'network-only',
+                }
+            )
+            .toPromise();
     };
 
     export const deleteRoomMutation = async (
-        client: ApolloClientType,
+        client: UrqlClientType,
         variables: DeleteRoomMutationVariables
     ) => {
-        return await client.mutate<DeleteRoomMutation, DeleteRoomMutationVariables>({
-            mutation: DeleteRoomDocument,
-            fetchPolicy: 'network-only',
-            variables,
-        });
+        return await client
+            .mutation<DeleteRoomMutation, DeleteRoomMutationVariables>(
+                DeleteRoomDocument,
+                variables,
+                {
+                    requestPolicy: 'network-only',
+                }
+            )
+            .toPromise();
     };
 
     export const editFileTagsMutation = async (
-        client: ApolloClientType,
+        client: UrqlClientType,
         variables: EditFileTagsMutationVariables
     ) => {
-        return await client.mutate<EditFileTagsMutation, EditFileTagsMutationVariables>({
-            mutation: EditFileTagsDocument,
-            fetchPolicy: 'network-only',
-            variables,
-        });
+        return await client
+            .mutation<EditFileTagsMutation, EditFileTagsMutationVariables>(
+                EditFileTagsDocument,
+                variables,
+                {
+                    requestPolicy: 'network-only',
+                }
+            )
+            .toPromise();
     };
 
-    export const entryToServerMutation = async (client: ApolloClientType) => {
-        return await client.mutate<EntryToServerMutation, EntryToServerMutationVariables>({
-            mutation: EntryToServerDocument,
-            fetchPolicy: 'network-only',
-            variables: { phrase: Resources.entryPassword },
-        });
+    export const entryToServerMutation = async (client: UrqlClientType) => {
+        return await client
+            .mutation<EntryToServerMutation, EntryToServerMutationVariables>(
+                EntryToServerDocument,
+                { phrase: Resources.entryPassword },
+                { requestPolicy: 'network-only' }
+            )
+            .toPromise();
     };
 
     export const getFilesQuery = async (
-        client: ApolloClientType,
+        client: UrqlClientType,
         variables: GetFilesQueryVariables
     ) => {
-        return await client.query<GetFilesQuery, GetFilesQueryVariables>({
-            query: GetFilesDocument,
-            fetchPolicy: 'network-only',
-            variables,
-        });
+        return await client
+            .query<GetFilesQuery, GetFilesQueryVariables>(GetFilesDocument, variables, {
+                requestPolicy: 'network-only',
+            })
+            .toPromise();
     };
 
     export const getRoomQuery = async (
-        client: ApolloClientType,
+        client: UrqlClientType,
         variables: GetRoomQueryVariables
     ) => {
-        return await client.query<GetRoomQuery, GetRoomQueryVariables>({
-            query: GetRoomDocument,
-            fetchPolicy: 'network-only',
-            variables,
-        });
+        return await client
+            .query<GetRoomQuery, GetRoomQueryVariables>(GetRoomDocument, variables, {
+                requestPolicy: 'network-only',
+            })
+            .toPromise();
     };
 
-    export const getRoomsListQuery = async (client: ApolloClientType) => {
-        return await client.query<GetRoomsListQuery, GetRoomsListQueryVariables>({
-            query: GetRoomsListDocument,
-            fetchPolicy: 'network-only',
-        });
+    export const getRoomsListQuery = async (client: UrqlClientType) => {
+        return await client
+            .query<GetRoomsListQuery, GetRoomsListQueryVariables>(GetRoomsListDocument, undefined, {
+                requestPolicy: 'network-only',
+            })
+            .toPromise();
     };
 
     export const getMessagesQuery = async (
-        client: ApolloClientType,
+        client: UrqlClientType,
         variables: GetMessagesQueryVariables
     ) => {
-        return await client.query<GetMessagesQuery, GetMessagesQueryVariables>({
-            query: GetMessagesDocument,
-            fetchPolicy: 'network-only',
-            variables,
-        });
+        return await client
+            .query<GetMessagesQuery, GetMessagesQueryVariables>(GetMessagesDocument, variables, {
+                requestPolicy: 'network-only',
+            })
+            .toPromise();
     };
 
     export const joinRoomAsPlayerMutation = async (
-        client: ApolloClientType,
+        client: UrqlClientType,
         variables: JoinRoomAsPlayerMutationVariables
     ) => {
-        return await client.mutate<JoinRoomAsPlayerMutation, JoinRoomAsPlayerMutationVariables>({
-            mutation: JoinRoomAsPlayerDocument,
-            fetchPolicy: 'network-only',
-            variables,
-        });
+        return await client
+            .mutation<JoinRoomAsPlayerMutation, JoinRoomAsPlayerMutationVariables>(
+                JoinRoomAsPlayerDocument,
+                variables,
+                { requestPolicy: 'network-only' }
+            )
+            .toPromise();
     };
 
     export const joinRoomAsSpectatorMutation = async (
-        client: ApolloClientType,
+        client: UrqlClientType,
         variables: JoinRoomAsSpectatorMutationVariables
     ) => {
-        return await client.mutate<
-            JoinRoomAsSpectatorMutation,
-            JoinRoomAsSpectatorMutationVariables
-        >({
-            mutation: JoinRoomAsSpectatorDocument,
-            fetchPolicy: 'network-only',
-            variables,
-        });
+        return await client
+            .mutation<JoinRoomAsSpectatorMutation, JoinRoomAsSpectatorMutationVariables>(
+                JoinRoomAsSpectatorDocument,
+                variables,
+                {
+                    requestPolicy: 'network-only',
+                }
+            )
+            .toPromise();
     };
 
     export const leaveRoomMutation = async (
-        client: ApolloClientType,
+        client: UrqlClientType,
         variables: LeaveRoomMutationVariables
     ) => {
-        return await client.mutate<LeaveRoomMutation, LeaveRoomMutationVariables>({
-            mutation: LeaveRoomDocument,
-            fetchPolicy: 'network-only',
-            variables,
-        });
+        return await client
+            .mutation<LeaveRoomMutation, LeaveRoomMutationVariables>(LeaveRoomDocument, variables, {
+                requestPolicy: 'network-only',
+            })
+            .toPromise();
     };
 
     export const operateMutation = async (
-        client: ApolloClientType,
+        client: UrqlClientType,
         variables: OperateMutationVariables
     ) => {
-        return await client.mutate<OperateMutation, OperateMutationVariables>({
-            mutation: OperateDocument,
-            fetchPolicy: 'network-only',
-            variables,
-        });
+        return await client
+            .mutation<OperateMutation, OperateMutationVariables>(OperateDocument, variables, {
+                requestPolicy: 'network-only',
+            })
+            .toPromise();
     };
 
     export const writePrivateMessageMutation = async (
-        client: ApolloClientType,
+        client: UrqlClientType,
         variables: WritePrivateMessageMutationVariables
     ) => {
-        return await client.mutate<
-            WritePrivateMessageMutation,
-            WritePrivateMessageMutationVariables
-        >({
-            mutation: WritePrivateMessageDocument,
-            fetchPolicy: 'network-only',
-            variables,
-        });
+        return await client
+            .mutation<WritePrivateMessageMutation, WritePrivateMessageMutationVariables>(
+                WritePrivateMessageDocument,
+                variables,
+                {
+                    requestPolicy: 'network-only',
+                }
+            )
+            .toPromise();
     };
 }
 
@@ -410,27 +435,27 @@ it.each([
         const httpGraphQLUri = 'http://localhost:4000/graphql';
         const wsGraphQLUri = 'ws://localhost:4000/graphql';
 
-        const roomMasterClient = createApolloClient(
+        const roomMasterClient = createUrqlClient(
             httpGraphQLUri,
             wsGraphQLUri,
             Resources.User.master
         );
-        const roomPlayer1Client = createApolloClient(
+        const roomPlayer1Client = createUrqlClient(
             httpGraphQLUri,
             wsGraphQLUri,
             Resources.User.player1
         );
-        const roomPlayer2Client = createApolloClient(
+        const roomPlayer2Client = createUrqlClient(
             httpGraphQLUri,
             wsGraphQLUri,
             Resources.User.player2
         );
-        const roomSpectatorClient = createApolloClient(
+        const roomSpectatorClient = createUrqlClient(
             httpGraphQLUri,
             wsGraphQLUri,
             Resources.User.spectator
         );
-        const notJoinUserClient = createApolloClient(
+        const notJoinUserClient = createUrqlClient(
             httpGraphQLUri,
             wsGraphQLUri,
             Resources.User.notJoin
@@ -454,64 +479,60 @@ it.each([
         let roomId: string;
         // mutation createRoom
         {
-            const actual = await roomMasterClient.mutate<
-                CreateRoomMutation,
-                CreateRoomMutationVariables
-            >({
-                mutation: CreateRoomDocument,
-                variables: {
+            const actual = await roomMasterClient
+                .mutation<CreateRoomMutation, CreateRoomMutationVariables>(CreateRoomDocument, {
                     input: {
                         roomName: Resources.Room.name,
                         participantName: Resources.ParticipantName.master,
                         joinAsPlayerPhrase: Resources.Room.playerPassword,
                         joinAsSpectatorPhrase: Resources.Room.spectatorPassword,
                     },
-                },
-            });
+                })
+                .toPromise();
             const actualData = Assert.CreateRoomMutation.toBeSuccess(actual);
             roomId = actualData.id;
         }
 
         // because we got roomId, we can do subscriptions
         const roomMasterClientSubscription = new TestRoomEventSubscription(
-            roomMasterClient.subscribe<RoomEventSubscription, RoomEventSubscriptionVariables>({
-                query: RoomEventDocument,
-                variables: {
+            roomMasterClient.subscription<RoomEventSubscription, RoomEventSubscriptionVariables>(
+                RoomEventDocument,
+                {
                     id: roomId,
-                },
-            })
+                }
+            )
         );
         const roomPlayer1ClientSubscription = new TestRoomEventSubscription(
-            roomPlayer1Client.subscribe<RoomEventSubscription, RoomEventSubscriptionVariables>({
-                query: RoomEventDocument,
-                variables: {
+            roomPlayer1Client.subscription<RoomEventSubscription, RoomEventSubscriptionVariables>(
+                RoomEventDocument,
+                {
                     id: roomId,
-                },
-            })
+                }
+            )
         );
         const roomPlayer2ClientSubscription = new TestRoomEventSubscription(
-            roomPlayer2Client.subscribe<RoomEventSubscription, RoomEventSubscriptionVariables>({
-                query: RoomEventDocument,
-                variables: {
+            roomPlayer2Client.subscription<RoomEventSubscription, RoomEventSubscriptionVariables>(
+                RoomEventDocument,
+                {
                     id: roomId,
-                },
-            })
+                }
+            )
         );
         const roomSpectatorClientSubscription = new TestRoomEventSubscription(
-            roomSpectatorClient.subscribe<RoomEventSubscription, RoomEventSubscriptionVariables>({
-                query: RoomEventDocument,
-                variables: {
+            roomSpectatorClient.subscription<RoomEventSubscription, RoomEventSubscriptionVariables>(
+                RoomEventDocument,
+                {
                     id: roomId,
-                },
-            })
+                }
+            )
         );
         const notJoinUserClientSubscription = new TestRoomEventSubscription(
-            notJoinUserClient.subscribe<RoomEventSubscription, RoomEventSubscriptionVariables>({
-                query: RoomEventDocument,
-                variables: {
+            notJoinUserClient.subscription<RoomEventSubscription, RoomEventSubscriptionVariables>(
+                RoomEventDocument,
+                {
                     id: roomId,
-                },
-            })
+                }
+            )
         );
         const allSubscriptions = new CompositeTestRoomEventSubscription([
             roomMasterClientSubscription,
