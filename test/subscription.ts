@@ -1,17 +1,22 @@
-import Observable from 'zen-observable';
-import { FetchResult } from '@apollo/client';
 import { RoomEventSubscription } from './graphql';
 import _ from 'lodash';
+import { Source, pipe, subscribe } from 'wonka';
+import { OperationResult } from '@urql/core';
 
 export class TestRoomEventSubscription {
-    private values: FetchResult<RoomEventSubscription>[] = [];
+    private values: RoomEventSubscription[] = [];
 
-    public constructor(source: Observable<FetchResult<RoomEventSubscription>>) {
-        source.subscribe(
-            value => this.values.push(value),
-            err => {
-                throw err;
-            }
+    public constructor(source: Source<OperationResult<RoomEventSubscription>>) {
+        pipe(
+            source,
+            subscribe(result => {
+                if (result.error != null) {
+                    throw result.error;
+                }
+                if (result.data != null) {
+                    this.values.push(result.data);
+                }
+            })
         );
     }
 
@@ -20,7 +25,7 @@ export class TestRoomEventSubscription {
     }
 
     public toBeEmpty() {
-        expect(this.values.every(x => x.data?.roomEvent == null)).toBe(true);
+        expect(this.values.every(x => x.roomEvent == null)).toBe(true);
     }
 
     public toBeExactlyOneRoomConnectionEvent({
@@ -32,7 +37,7 @@ export class TestRoomEventSubscription {
     }) {
         expect(this.values).toHaveLength(1);
         const roomConnectionEvents = _(this.values)
-            .map(x => x.data?.roomEvent?.roomConnectionEvent)
+            .map(x => x.roomEvent?.roomConnectionEvent)
             .compact()
             .value();
         expect(roomConnectionEvents).toHaveLength(1);
@@ -44,7 +49,7 @@ export class TestRoomEventSubscription {
     public toBeExactlyOneRoomOperationEvent() {
         expect(this.values).toHaveLength(1);
         const roomOperationEvents = _(this.values)
-            .map(x => x.data?.roomEvent?.roomOperation)
+            .map(x => x.roomEvent?.roomOperation)
             .compact()
             .value();
         expect(roomOperationEvents).toHaveLength(1);
@@ -55,7 +60,7 @@ export class TestRoomEventSubscription {
         expect(this.values).toHaveLength(1);
         const roomPrivateMessages = _(this.values)
             .map(x => {
-                const roomMessageEvent = x.data?.roomEvent?.roomMessageEvent;
+                const roomMessageEvent = x.roomEvent?.roomMessageEvent;
                 if (roomMessageEvent?.__typename !== 'RoomPrivateMessage') {
                     return undefined;
                 }
@@ -71,7 +76,7 @@ export class TestRoomEventSubscription {
         expect(this.values).toHaveLength(1);
         const pieceValueLogs = _(this.values)
             .map(x => {
-                const roomMessageEvent = x.data?.roomEvent?.roomMessageEvent;
+                const roomMessageEvent = x.roomEvent?.roomMessageEvent;
                 if (roomMessageEvent?.__typename !== 'PieceValueLog') {
                     return undefined;
                 }
