@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as $MikroORM from '../src/graphql+mikro-orm/entities/room/mikro-orm';
 import { EM } from '../src/utils/types';
 import { User as User$MikroORM } from '../src/graphql+mikro-orm/entities/user/mikro-orm';
@@ -557,7 +558,7 @@ it.each([
             );
             console.log('getRoomsList query result: %o', roomMasterResult);
             expect(roomMasterResult.rooms).toHaveLength(1);
-            expect(roomMasterResult.rooms[0].id).toBe(roomId);
+            expect(roomMasterResult.rooms[0]!.id).toBe(roomId);
 
             // # testing
             // - another user can get the room
@@ -565,7 +566,7 @@ it.each([
                 await GraphQL.getRoomsListQuery(roomPlayer1Client)
             );
             expect(anotherUserResult.rooms).toHaveLength(1);
-            expect(anotherUserResult.rooms[0].id).toBe(roomId);
+            expect(anotherUserResult.rooms[0]!.id).toBe(roomId);
 
             allSubscriptions.clear();
         }
@@ -875,8 +876,8 @@ it.each([
             );
             console.log('GetFilesQuery result: %o', filesResult);
             expect(filesResult).toHaveLength(1);
-            filename = filesResult[0].filename;
-            thumbFilename = filesResult[0].thumbFilename;
+            filename = filesResult[0]!.filename;
+            thumbFilename = filesResult[0]!.thumbFilename;
             if (thumbFilename == null) {
                 throw new Error('thumbFilename should not be nullish');
             }

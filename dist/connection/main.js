@@ -48,11 +48,10 @@ class ConnectionCountDatabase {
         const keys = await this.database.keys();
         for (const key of keys) {
             const split = key.split('@');
-            if (split.length !== 2) {
+            const [roomIdKey, userUid, ...rest] = split;
+            if (roomIdKey == null || userUid == null || rest.length > 0) {
                 continue;
             }
-            const roomIdKey = split[0];
-            const userUid = split[1];
             if (roomIdKey !== roomId) {
                 continue;
             }

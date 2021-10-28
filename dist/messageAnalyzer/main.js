@@ -68,17 +68,17 @@ const getParameter = async ({ parameterPath, context, room, }) => {
         if (totalLength >= 2) {
             return result_1.Result.error(`"${parameter}"という名前のパラメーターが複数存在します。パラメーターの名前を変えることを検討してください`);
         }
-        if (matchedBoolParams.length !== 0) {
-            const matched = matchedBoolParams[0];
-            return result_1.Result.ok((_b = (_a = context.value.boolParams[matched.key]) === null || _a === void 0 ? void 0 : _a.value) !== null && _b !== void 0 ? _b : undefined);
+        const matchedBoolParams0 = matchedBoolParams[0];
+        if (matchedBoolParams0 != null) {
+            return result_1.Result.ok((_b = (_a = context.value.boolParams[matchedBoolParams0.key]) === null || _a === void 0 ? void 0 : _a.value) !== null && _b !== void 0 ? _b : undefined);
         }
-        if (matchedNumParams.length !== 0) {
-            const matched = matchedNumParams[0];
-            return result_1.Result.ok((_d = (_c = context.value.numParams[matched.key]) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : undefined);
+        const matchedNumParams0 = matchedNumParams[0];
+        if (matchedNumParams0 != null) {
+            return result_1.Result.ok((_d = (_c = context.value.numParams[matchedNumParams0.key]) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : undefined);
         }
-        if (matchedStrParams.length !== 0) {
-            const matched = matchedStrParams[0];
-            return result_1.Result.ok((_f = (_e = context.value.strParams[matched.key]) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : undefined);
+        const matchedStrParams0 = matchedStrParams[0];
+        if (matchedStrParams0 != null) {
+            return result_1.Result.ok((_f = (_e = context.value.strParams[matchedStrParams0.key]) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : undefined);
         }
         return result_1.Result.ok(undefined);
     })();

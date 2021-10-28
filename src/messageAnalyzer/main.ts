@@ -108,17 +108,17 @@ const getParameter = async ({
             );
         }
 
-        if (matchedBoolParams.length !== 0) {
-            const matched = matchedBoolParams[0];
-            return Result.ok(context.value.boolParams[matched.key]?.value ?? undefined);
+        const matchedBoolParams0 = matchedBoolParams[0];
+        if (matchedBoolParams0 != null) {
+            return Result.ok(context.value.boolParams[matchedBoolParams0.key]?.value ?? undefined);
         }
-        if (matchedNumParams.length !== 0) {
-            const matched = matchedNumParams[0];
-            return Result.ok(context.value.numParams[matched.key]?.value ?? undefined);
+        const matchedNumParams0 = matchedNumParams[0];
+        if (matchedNumParams0 != null) {
+            return Result.ok(context.value.numParams[matchedNumParams0.key]?.value ?? undefined);
         }
-        if (matchedStrParams.length !== 0) {
-            const matched = matchedStrParams[0];
-            return Result.ok(context.value.strParams[matched.key]?.value ?? undefined);
+        const matchedStrParams0 = matchedStrParams[0];
+        if (matchedStrParams0 != null) {
+            return Result.ok(context.value.strParams[matchedStrParams0.key]?.value ?? undefined);
         }
 
         return Result.ok(undefined);

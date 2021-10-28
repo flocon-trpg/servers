@@ -29,34 +29,33 @@ import { recordForEachAsync } from '@kizahasi/util';
 import { User } from '../user/mikro-orm';
 import { nullableStringToParticipantRoleType } from '../../../enums/ParticipantRoleType';
 import { convertToMaxLength100String } from '../../../utils/convertToMaxLength100String';
+import { isNonEmptyArray, ReadonlyNonEmptyArray } from '../../../utils/readonlyNonEmptyArray';
 
 type IsSequentialResult<T> =
     | {
           type: 'DuplicateElement';
       }
     | {
-          type: 'EmptyArray';
-      }
-    | {
           type: 'Sequential';
           minIndex: number;
           maxIndex: number;
+          sortedResult: ReadonlyNonEmptyArray<{ index: number; value: T }>;
       }
     | {
           type: 'NotSequential';
           minIndex: number;
-          maxIndex: number;
-          takeUntilSequential: { index: number; value: T }[];
       };
 
-const isSequential = <T>(array: T[], getIndex: (elem: T) => number): IsSequentialResult<T> => {
+const isSequential = <T>(
+    array: ReadonlyNonEmptyArray<T>,
+    getIndex: (elem: T) => number
+): IsSequentialResult<T> => {
     const sorted = array
         .map(value => ({ index: getIndex(value), value }))
         .sort((x, y) => x.index - y.index);
-    if (sorted.length === 0) {
-        return { type: 'EmptyArray' };
+    if (!isNonEmptyArray(sorted)) {
+        throw new Error('this should not happen');
     }
-    const takeUntilSequential: { index: number; value: T }[] = [];
     const minIndex = sorted[0].index;
     let maxIndex = minIndex;
     let previousElement: { index: number; value: T } | null = null;
@@ -69,19 +68,17 @@ const isSequential = <T>(array: T[], getIndex: (elem: T) => number): IsSequentia
                 return {
                     type: 'NotSequential',
                     minIndex,
-                    maxIndex,
-                    takeUntilSequential,
                 };
             }
         }
         maxIndex = elem.index;
         previousElement = elem;
-        takeUntilSequential.push(elem);
     }
     return {
         type: 'Sequential',
         minIndex,
         maxIndex,
+        sortedResult: sorted,
     };
 };
 
@@ -128,33 +125,50 @@ export namespace GlobalRoom {
                 roomId: string;
                 revisionRange: { from: number; expectedTo?: number };
             }) => {
+                if (revisionRange.expectedTo != null) {
+                    if (revisionRange.from > revisionRange.expectedTo) {
+                        throw new Error('Must be "revisionRange.from > revisionRange.expectedTo"');
+                    }
+                    if (revisionRange.from === revisionRange.expectedTo) {
+                        return Result.ok(undefined);
+                    }
+                }
                 const operationEntities = await em.find(RoomOp, {
                     room: { id: roomId },
                     prevRevision: { $gte: revisionRange.from },
                 });
+                if (!isNonEmptyArray(operationEntities)) {
+                    if (revisionRange.expectedTo == null) {
+                        return Result.ok(undefined);
+                    }
+                    return Result.error(
+                        'Database error: There are missing operations. Client state is too old?'
+                    );
+                }
+                if (revisionRange.expectedTo != null) {
+                    const expectedOperationEntitiesLength =
+                        revisionRange.expectedTo - revisionRange.from;
+                    if (expectedOperationEntitiesLength < operationEntities.length) {
+                        return Result.error(
+                            'Database error: There are duplicate operations. Multiple apps tried to update same database simultaneously?'
+                        );
+                    }
+                    if (expectedOperationEntitiesLength > operationEntities.length) {
+                        return Result.error(
+                            'Database error: There are missing operations. Client state is too old?'
+                        );
+                    }
+                }
                 const isSequentialResult = isSequential(operationEntities, o => o.prevRevision);
                 if (isSequentialResult.type === 'NotSequential') {
                     return Result.error(
-                        'Database error. There are missing operations. Multiple server apps edit same database simultaneously?'
+                        'Database error: There are missing operations. Multiple apps tried to update same database simultaneously?'
                     );
                 }
                 if (isSequentialResult.type === 'DuplicateElement') {
                     return Result.error(
-                        'Database error. There are duplicate operations. Multiple server apps edit same database simultaneously?'
+                        'Database error: There are duplicate operations. Multiple apps tried to update same database simultaneously?'
                     );
-                }
-                if (isSequentialResult.type === 'EmptyArray') {
-                    return Result.ok(undefined);
-                }
-                if (isSequentialResult.minIndex !== revisionRange.from) {
-                    return Result.error('revision out of range(too small)');
-                }
-                if (revisionRange.expectedTo !== undefined) {
-                    if (isSequentialResult.maxIndex !== revisionRange.expectedTo - 1) {
-                        return Result.error(
-                            'Database error. Revision of latest operation is not same as revision of state. Multiple server apps edit same database simultaneously?'
-                        );
-                    }
                 }
 
                 const sortedOperationEntities = operationEntities.sort(

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { RoomEventSubscription } from './graphql';
 import _ from 'lodash';
 import { Source, pipe, subscribe } from 'wonka';
@@ -41,7 +42,7 @@ export class TestRoomEventSubscription {
             .compact()
             .value();
         expect(roomConnectionEvents).toHaveLength(1);
-        const actualEvent = roomConnectionEvents[0];
+        const actualEvent = roomConnectionEvents[0]!;
         expect(actualEvent.isConnected ? 'connect' : 'disconnect').toBe(event);
         expect(actualEvent.userUid).toBe(userUid);
     }

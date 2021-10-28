@@ -10,14 +10,14 @@ const util_1 = require("@kizahasi/util");
 const mikro_orm_3 = require("../user/mikro-orm");
 const ParticipantRoleType_1 = require("../../../enums/ParticipantRoleType");
 const convertToMaxLength100String_1 = require("../../../utils/convertToMaxLength100String");
+const readonlyNonEmptyArray_1 = require("../../../utils/readonlyNonEmptyArray");
 const isSequential = (array, getIndex) => {
     const sorted = array
         .map(value => ({ index: getIndex(value), value }))
         .sort((x, y) => x.index - y.index);
-    if (sorted.length === 0) {
-        return { type: 'EmptyArray' };
+    if (!(0, readonlyNonEmptyArray_1.isNonEmptyArray)(sorted)) {
+        throw new Error('this should not happen');
     }
-    const takeUntilSequential = [];
     const minIndex = sorted[0].index;
     let maxIndex = minIndex;
     let previousElement = null;
@@ -30,19 +30,17 @@ const isSequential = (array, getIndex) => {
                 return {
                     type: 'NotSequential',
                     minIndex,
-                    maxIndex,
-                    takeUntilSequential,
                 };
             }
         }
         maxIndex = elem.index;
         previousElement = elem;
-        takeUntilSequential.push(elem);
     }
     return {
         type: 'Sequential',
         minIndex,
         maxIndex,
+        sortedResult: sorted,
     };
 };
 var GlobalRoom;
@@ -69,27 +67,39 @@ var GlobalRoom;
                 return result;
             };
             ToGlobal.downOperationMany = async ({ em, roomId, revisionRange, }) => {
+                if (revisionRange.expectedTo != null) {
+                    if (revisionRange.from > revisionRange.expectedTo) {
+                        throw new Error('Must be "revisionRange.from > revisionRange.expectedTo"');
+                    }
+                    if (revisionRange.from === revisionRange.expectedTo) {
+                        return result_1.Result.ok(undefined);
+                    }
+                }
                 const operationEntities = await em.find(mikro_orm_1.RoomOp, {
                     room: { id: roomId },
                     prevRevision: { $gte: revisionRange.from },
                 });
+                if (!(0, readonlyNonEmptyArray_1.isNonEmptyArray)(operationEntities)) {
+                    if (revisionRange.expectedTo == null) {
+                        return result_1.Result.ok(undefined);
+                    }
+                    return result_1.Result.error('Database error: There are missing operations. Client state is too old?');
+                }
+                if (revisionRange.expectedTo != null) {
+                    const expectedOperationEntitiesLength = revisionRange.expectedTo - revisionRange.from;
+                    if (expectedOperationEntitiesLength < operationEntities.length) {
+                        return result_1.Result.error('Database error: There are duplicate operations. Multiple apps tried to update same database simultaneously?');
+                    }
+                    if (expectedOperationEntitiesLength > operationEntities.length) {
+                        return result_1.Result.error('Database error: There are missing operations. Client state is too old?');
+                    }
+                }
                 const isSequentialResult = isSequential(operationEntities, o => o.prevRevision);
                 if (isSequentialResult.type === 'NotSequential') {
-                    return result_1.Result.error('Database error. There are missing operations. Multiple server apps edit same database simultaneously?');
+                    return result_1.Result.error('Database error: There are missing operations. Multiple apps tried to update same database simultaneously?');
                 }
                 if (isSequentialResult.type === 'DuplicateElement') {
-                    return result_1.Result.error('Database error. There are duplicate operations. Multiple server apps edit same database simultaneously?');
-                }
-                if (isSequentialResult.type === 'EmptyArray') {
-                    return result_1.Result.ok(undefined);
-                }
-                if (isSequentialResult.minIndex !== revisionRange.from) {
-                    return result_1.Result.error('revision out of range(too small)');
-                }
-                if (revisionRange.expectedTo !== undefined) {
-                    if (isSequentialResult.maxIndex !== revisionRange.expectedTo - 1) {
-                        return result_1.Result.error('Database error. Revision of latest operation is not same as revision of state. Multiple server apps edit same database simultaneously?');
-                    }
+                    return result_1.Result.error('Database error: There are duplicate operations. Multiple apps tried to update same database simultaneously?');
                 }
                 const sortedOperationEntities = operationEntities.sort((x, y) => x.prevRevision - y.prevRevision);
                 let operation = sortedOperationEntities.length === 0
