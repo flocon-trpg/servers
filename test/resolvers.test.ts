@@ -95,11 +95,14 @@ const clearAllRooms = async (em: EM): Promise<void> => {
 
 const clearAllFiles = async (em: EM): Promise<void> => {
     for (const file of await em.find(File$MikroORM, {})) {
+        await file.fileTags.init();
         file.fileTags.removeAll();
         em.remove(file);
     }
     for (const user of await em.find(User$MikroORM, {})) {
+        await user.files.init();
         user.files.removeAll();
+        await user.fileTags.init();
         user.fileTags.removeAll();
     }
     await em.flush();
@@ -545,18 +548,6 @@ describe.each([
             } = createUrqlClients();
 
             const server = await createTestServer(dbType, entryPasswordConfig);
-
-            // mutation entryToServer if entryPassword != null
-            if (entryPassword != null) {
-                const result = await GraphQL.entryToServerMutation(roomMasterClient);
-                expect(result.data?.result.type).toBe(EntryToServerResultType.Success);
-
-                // roomMaster以外のテストは成功するとみなし省略している
-                await GraphQL.entryToServerMutation(roomPlayer1Client);
-                await GraphQL.entryToServerMutation(roomPlayer2Client);
-                await GraphQL.entryToServerMutation(roomSpectatorClient);
-                await GraphQL.entryToServerMutation(notJoinUserClient);
-            }
 
             let roomId: string;
             // mutation createRoom

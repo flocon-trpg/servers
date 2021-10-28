@@ -1,9 +1,8 @@
 import { createPostgreSQL, createSQLite } from '../src/mikro-orm';
-import { EM, ORM } from '../src/utils/types';
 import { PromiseQueue } from '../src/utils/promiseQueue';
 import { InMemoryConnectionManager } from '../src/connection/main';
 import { BaasType } from '../src/enums/BaasType';
-import { DatabaseConfig, plain, postgresql, ServerConfig, sqlite } from '../src/configType';
+import { DatabaseConfig, postgresql, ServerConfig, sqlite } from '../src/configType';
 import { buildSchema } from '../src/buildSchema';
 import { PubSub } from 'graphql-subscriptions';
 import { createServer } from '../src/createServer';
