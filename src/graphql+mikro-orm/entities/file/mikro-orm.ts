@@ -12,6 +12,7 @@ import { FilePermissionType } from '../../../enums/FilePermissionType';
 import { FileTag } from '../fileTag/mikro-orm';
 import { User } from '../user/mikro-orm';
 
+// 内蔵アップローダーのファイルを表す。Firebase Storageのファイルは対象外。
 @Entity()
 export class File {
     public constructor({

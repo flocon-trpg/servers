@@ -19,38 +19,53 @@ const PostgreSQLConfig = {
     debug: true,
 };
 
-let sqliteIndex = 0;
-const createSQLiteConfig = () => {
-    sqliteIndex++;
-    return { dbName: `./test${sqliteIndex}.sqlite3`, debug: true };
+export type DbConfig =
+    | {
+          type: 'SQLite';
+          dbName: string;
+      }
+    | {
+          type: 'PostgreSQL';
+      };
+
+const createSQLiteConfig = (dbName: string) => {
+    return { dbName, debug: true };
+};
+
+export const createOrm = async (dbCofig: DbConfig) => {
+    switch (dbCofig.type) {
+        case 'PostgreSQL':
+            return await createPostgreSQL(PostgreSQLConfig);
+        case 'SQLite':
+            return await createSQLite(createSQLiteConfig(dbCofig.dbName));
+    }
+};
+
+const createDatabaseConfig = (dbConfig: DbConfig): DatabaseConfig => {
+    switch (dbConfig.type) {
+        case 'PostgreSQL':
+            return {
+                __type: postgresql,
+                clientUrl: postgresClientUrl,
+                dbName: 'test',
+            };
+        case 'SQLite':
+            return {
+                __type: sqlite,
+                dbName: dbConfig.dbName,
+            };
+    }
 };
 
 export const createTestServer = async (
-    orm: 'SQLite' | 'PostgreSQL',
+    dbConfig: DbConfig,
     entryPasswordConfig: ServerConfig['entryPassword']
 ) => {
     const promiseQueue = new PromiseQueue({ queueLimit: 2 });
     const connectionManager = new InMemoryConnectionManager();
 
-    let $orm: ORM;
-    let databaseConfig: DatabaseConfig;
-    switch (orm) {
-        case 'PostgreSQL':
-            $orm = await createPostgreSQL(PostgreSQLConfig);
-            databaseConfig = {
-                __type: postgresql,
-                clientUrl: postgresClientUrl,
-                dbName: 'test',
-            };
-            break;
-        case 'SQLite':
-            $orm = await createSQLite(createSQLiteConfig());
-            databaseConfig = {
-                __type: sqlite,
-                dbName: './test.sqlite3',
-            };
-            break;
-    }
+    const $orm = await createOrm(dbConfig);
+    const databaseConfig = createDatabaseConfig(dbConfig);
     const adminConfig: ServerConfig['admin'] = undefined;
     const serverConfig: ServerConfig = {
         accessControlAllowOrigin: '*',
