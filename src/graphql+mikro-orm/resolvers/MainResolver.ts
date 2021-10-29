@@ -44,6 +44,7 @@ import { remove, stat } from 'fs-extra';
 import path from 'path';
 import { thumbsDir } from '../../utils/thumbsDir';
 import { RateLimitMiddleware } from '../middlewares/RateLimitMiddleware';
+import { FilePermissionType } from '../../enums/FilePermissionType';
 
 export type PongPayload = {
     value: number;
@@ -90,7 +91,15 @@ export class MainResolver {
         const files = await context.em.find(
             File,
             {
-                $and: [...fileTagsFilter, { createdBy: { userUid: user.userUid } }],
+                $and: [
+                    ...fileTagsFilter,
+                    {
+                        $or: [
+                            { listPermission: FilePermissionType.Entry },
+                            { createdBy: { userUid: user.userUid } },
+                        ],
+                    },
+                ],
             },
             { orderBy: { screenname: QueryOrder.ASC } }
         );

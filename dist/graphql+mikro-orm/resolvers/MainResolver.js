@@ -42,6 +42,7 @@ const fs_extra_1 = require("fs-extra");
 const path_1 = __importDefault(require("path"));
 const thumbsDir_1 = require("../../utils/thumbsDir");
 const RateLimitMiddleware_1 = require("../middlewares/RateLimitMiddleware");
+const FilePermissionType_1 = require("../../enums/FilePermissionType");
 let MainResolver = class MainResolver {
     async getAvailableGameSystems() {
         return {
@@ -66,7 +67,15 @@ let MainResolver = class MainResolver {
             },
         }));
         const files = await context.em.find(mikro_orm_2.File, {
-            $and: [...fileTagsFilter, { createdBy: { userUid: user.userUid } }],
+            $and: [
+                ...fileTagsFilter,
+                {
+                    $or: [
+                        { listPermission: FilePermissionType_1.FilePermissionType.Entry },
+                        { createdBy: { userUid: user.userUid } },
+                    ],
+                },
+            ],
         }, { orderBy: { screenname: core_1.QueryOrder.ASC } });
         return {
             files: files.map(file => {
