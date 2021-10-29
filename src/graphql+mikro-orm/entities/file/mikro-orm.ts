@@ -87,15 +87,15 @@ export class File {
 
     // read permissionはPrivateにはできず、常にEntry。理由は、例えばボードに画像を表示するとき、Privateだったため自分以外には表示されなかったという事故を防ぐため。
 
-    @Property()
+    @Property({ type: 'string' })
     @Index()
     public listPermission: FilePermissionType;
 
-    @Property()
+    @Property({ type: 'string' })
     @Index()
     public renamePermission: FilePermissionType;
 
-    @Property()
+    @Property({ type: 'string' })
     @Index()
     public deletePermission: FilePermissionType;
 

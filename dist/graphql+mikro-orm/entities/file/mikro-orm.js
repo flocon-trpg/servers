@@ -68,17 +68,17 @@ __decorate([
     __metadata("design:type", Number)
 ], File.prototype, "filesize", void 0);
 __decorate([
-    (0, core_1.Property)(),
+    (0, core_1.Property)({ type: 'string' }),
     (0, core_1.Index)(),
     __metadata("design:type", String)
 ], File.prototype, "listPermission", void 0);
 __decorate([
-    (0, core_1.Property)(),
+    (0, core_1.Property)({ type: 'string' }),
     (0, core_1.Index)(),
     __metadata("design:type", String)
 ], File.prototype, "renamePermission", void 0);
 __decorate([
-    (0, core_1.Property)(),
+    (0, core_1.Property)({ type: 'string' }),
     (0, core_1.Index)(),
     __metadata("design:type", String)
 ], File.prototype, "deletePermission", void 0);
