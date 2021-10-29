@@ -532,12 +532,156 @@ describe.each([
             await GraphQL.entryToServerMutation(notJoinUserClient);
         }
 
-        // これがないとport 4000が開放されないので2個目以降のテストが失敗してしまう
+        // これがないとport 4000が開放されないので2個目以降のテストが失敗してしまう。以降のテストも同様。
         server.close();
     });
 
+    it.each(['public', 'unlisted'] as const)(
+        'tests upload and delete file in uploader',
+        async publicOrUnlisted => {
+            const server = await createTestServer(dbType, entryPasswordConfig);
+
+            const { roomPlayer1Client: clientToUploadFiles, roomPlayer2Client: anotherClient } =
+                createUrqlClients();
+
+            {
+                const formData = new FormData();
+                formData.append(
+                    'file',
+                    readFileSync('./test/pexels-public-domain-pictures-68147.jpg'),
+                    {
+                        filename: 'test-image.jpg',
+                    }
+                );
+                const axiosConfig = {
+                    headers: {
+                        ...formData.getHeaders(),
+                        [Resources.testAuthorizationHeader]: Resources.User.player1,
+                    },
+                };
+                const postResult = await axios
+                    .post(
+                        urljoin(httpUri, 'uploader', 'upload', publicOrUnlisted),
+                        formData,
+                        axiosConfig
+                    )
+                    .then(() => true)
+                    .catch(err => err);
+                expect(postResult).toBe(true);
+            }
+
+            let filename: string;
+            let thumbFilename: string | null | undefined;
+            {
+                const filesResult = Assert.GetFilesQuery.toBeSuccess(
+                    await GraphQL.getFilesQuery(clientToUploadFiles, { input: { fileTagIds: [] } })
+                );
+                console.log('GetFilesQuery result: %o', filesResult);
+                expect(filesResult).toHaveLength(1);
+                filename = filesResult[0]!.filename;
+                thumbFilename = filesResult[0]!.thumbFilename;
+                if (thumbFilename == null) {
+                    throw new Error('thumbFilename should not be nullish');
+                }
+            }
+
+            {
+                const filesResult = Assert.GetFilesQuery.toBeSuccess(
+                    await GraphQL.getFilesQuery(anotherClient, { input: { fileTagIds: [] } })
+                );
+                expect(filesResult).toHaveLength(publicOrUnlisted === 'public' ? 1 : 0);
+            }
+
+            const cases = [
+                ['files', Resources.User.player1],
+                ['files', Resources.User.player2],
+                ['thumbs', Resources.User.player1],
+                ['thumbs', Resources.User.player2],
+            ] as const;
+            for (const [fileType, id] of cases) {
+                const axiosResult = await axios
+                    .get(
+                        urljoin(
+                            httpUri,
+                            'uploader',
+                            fileType,
+                            fileType === 'files' ? filename : thumbFilename
+                        ),
+                        {
+                            headers: {
+                                [Resources.testAuthorizationHeader]: id,
+                            },
+                        }
+                    )
+                    .then(() => true)
+                    .catch(err => err);
+                expect(axiosResult).toBe(true);
+            }
+
+            let fileTagId: string;
+            {
+                const fileTagName = 'FILE_TAG_NAME';
+                const fileTagResult = Assert.CreateFileTagMutation.toBeSuccess(
+                    await GraphQL.createFileTagMutation(clientToUploadFiles, {
+                        tagName: fileTagName,
+                    })
+                );
+                expect(fileTagResult.name).toBe(fileTagName);
+                fileTagId = fileTagResult.id;
+            }
+
+            {
+                Assert.EditFileTagsMutation.toBeSuccess(
+                    await GraphQL.editFileTagsMutation(clientToUploadFiles, {
+                        input: { actions: [{ filename, add: [fileTagId], remove: [] }] },
+                    })
+                );
+            }
+
+            {
+                const filesResult = Assert.GetFilesQuery.toBeSuccess(
+                    await GraphQL.getFilesQuery(clientToUploadFiles, {
+                        input: { fileTagIds: [fileTagId] },
+                    })
+                );
+                expect(filesResult).toHaveLength(1);
+            }
+
+            for (const client of [clientToUploadFiles, anotherClient]) {
+                {
+                    const nonExistFileTagId = fileTagId + fileTagId;
+                    const filesResult = Assert.GetFilesQuery.toBeSuccess(
+                        await GraphQL.getFilesQuery(client, {
+                            input: { fileTagIds: [nonExistFileTagId] },
+                        })
+                    );
+                    expect(filesResult).toHaveLength(0);
+                }
+            }
+
+            {
+                // TODO: publicでアップロードしたファイルは、アップロード者以外による削除を可能にするかどうかがまだ決定していない
+                const actual = await GraphQL.deleteFilesMutation(clientToUploadFiles, {
+                    filenames: [filename],
+                });
+                expect(actual.data?.result).toEqual([filename]);
+            }
+
+            for (const client of [clientToUploadFiles, anotherClient]) {
+                const filesResult = Assert.GetFilesQuery.toBeSuccess(
+                    await GraphQL.getFilesQuery(client, {
+                        input: { fileTagIds: [] },
+                    })
+                );
+                expect(filesResult).toHaveLength(0);
+            }
+
+            server.close();
+        }
+    );
+
     it(
-        'tests mixed',
+        'tests room',
         async () => {
             const {
                 roomMasterClient,
@@ -910,129 +1054,6 @@ describe.each([
                 expect(anotherUserResult.rooms).toEqual([]);
 
                 allSubscriptions.clear();
-            }
-
-            {
-                const formData = new FormData();
-                formData.append(
-                    'file',
-                    readFileSync('./test/pexels-public-domain-pictures-68147.jpg'),
-                    {
-                        filename: 'test-image.jpg',
-                    }
-                );
-                const axiosConfig = {
-                    headers: {
-                        ...formData.getHeaders(),
-                        [Resources.testAuthorizationHeader]: Resources.User.player1,
-                    },
-                };
-                const postResult = await axios
-                    .post(urljoin(httpUri, 'uploader', 'upload', 'unlisted'), formData, axiosConfig)
-                    .then(() => true)
-                    .catch(err => err);
-                expect(postResult).toBe(true);
-            }
-
-            let filename: string;
-            let thumbFilename: string | null | undefined;
-            {
-                const filesResult = Assert.GetFilesQuery.toBeSuccess(
-                    await GraphQL.getFilesQuery(roomPlayer1Client, { input: { fileTagIds: [] } })
-                );
-                console.log('GetFilesQuery result: %o', filesResult);
-                expect(filesResult).toHaveLength(1);
-                filename = filesResult[0]!.filename;
-                thumbFilename = filesResult[0]!.thumbFilename;
-                if (thumbFilename == null) {
-                    throw new Error('thumbFilename should not be nullish');
-                }
-            }
-
-            {
-                const filesResult = Assert.GetFilesQuery.toBeSuccess(
-                    await GraphQL.getFilesQuery(roomPlayer2Client, { input: { fileTagIds: [] } })
-                );
-                expect(filesResult).toEqual([]);
-            }
-
-            const cases = [
-                ['files', Resources.User.player1],
-                ['files', Resources.User.player2],
-                ['thumbs', Resources.User.player1],
-                ['thumbs', Resources.User.player2],
-            ] as const;
-            for (const [fileType, id] of cases) {
-                const axiosResult = await axios
-                    .get(
-                        urljoin(
-                            httpUri,
-                            'uploader',
-                            fileType,
-                            fileType === 'files' ? filename : thumbFilename
-                        ),
-                        {
-                            headers: {
-                                [Resources.testAuthorizationHeader]: id,
-                            },
-                        }
-                    )
-                    .then(() => true)
-                    .catch(err => err);
-                expect(axiosResult).toBe(true);
-            }
-
-            let fileTagId: string;
-            {
-                const fileTagName = 'FILE_TAG_NAME';
-                const fileTagResult = Assert.CreateFileTagMutation.toBeSuccess(
-                    await GraphQL.createFileTagMutation(roomPlayer1Client, { tagName: fileTagName })
-                );
-                expect(fileTagResult.name).toBe(fileTagName);
-                fileTagId = fileTagResult.id;
-            }
-
-            {
-                Assert.EditFileTagsMutation.toBeSuccess(
-                    await GraphQL.editFileTagsMutation(roomPlayer1Client, {
-                        input: { actions: [{ filename, add: [fileTagId], remove: [] }] },
-                    })
-                );
-            }
-
-            {
-                const filesResult = Assert.GetFilesQuery.toBeSuccess(
-                    await GraphQL.getFilesQuery(roomPlayer1Client, {
-                        input: { fileTagIds: [fileTagId] },
-                    })
-                );
-                expect(filesResult).toHaveLength(1);
-            }
-
-            {
-                const nonExistFileTagId = fileTagId + fileTagId;
-                const filesResult = Assert.GetFilesQuery.toBeSuccess(
-                    await GraphQL.getFilesQuery(roomPlayer1Client, {
-                        input: { fileTagIds: [nonExistFileTagId] },
-                    })
-                );
-                expect(filesResult).toEqual([]);
-            }
-
-            {
-                const actual = await GraphQL.deleteFilesMutation(roomPlayer1Client, {
-                    filenames: [filename],
-                });
-                expect(actual.data?.result).toEqual([filename]);
-            }
-
-            {
-                const filesResult = Assert.GetFilesQuery.toBeSuccess(
-                    await GraphQL.getFilesQuery(roomPlayer1Client, {
-                        input: { fileTagIds: [] },
-                    })
-                );
-                expect(filesResult).toEqual([]);
             }
 
             server.close();
