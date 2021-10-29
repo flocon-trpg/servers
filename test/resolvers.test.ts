@@ -880,7 +880,7 @@ describe.each([
             }
 
             // operateのテストに必要なため、現在のroomのrevisionを取得
-            let initRoomRevision;
+            let initRoomRevision: number;
             {
                 initRoomRevision = Assert.GetRoomQuery.toBeSuccess(
                     await GraphQL.getRoomQuery(roomPlayer1Client, {
