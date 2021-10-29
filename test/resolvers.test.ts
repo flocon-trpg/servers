@@ -3,7 +3,7 @@ import * as $MikroORM from '../src/graphql+mikro-orm/entities/room/mikro-orm';
 import { EM } from '../src/utils/types';
 import { User as User$MikroORM } from '../src/graphql+mikro-orm/entities/user/mikro-orm';
 import { File as File$MikroORM } from '../src/graphql+mikro-orm/entities/file/mikro-orm';
-import { createUrqlClient } from './createUrqlClient';
+import { Client as UrqlClientType } from '@urql/core';
 import { createOrm, createTestServer, DbConfig } from './createTestServer';
 import { Resources } from './resources';
 import {
@@ -22,9 +22,6 @@ import {
     JoinRoomAsSpectatorMutation,
     JoinRoomAsSpectatorMutationVariables,
     JoinRoomAsSpectatorDocument,
-    RoomEventSubscription,
-    RoomEventSubscriptionVariables,
-    RoomEventDocument,
     OperateMutation,
     OperateMutationVariables,
     GetRoomQuery,
@@ -62,7 +59,6 @@ import {
 } from './graphql';
 import { EntryToServerResultType } from '../src/enums/EntryToServerResultType';
 import { ServerConfig } from '../src/configType';
-import { CompositeTestRoomEventSubscription, TestRoomEventSubscription } from './subscription';
 import { UpOperation, parseState } from '@kizahasi/flocon-core';
 import axios from 'axios';
 import FormData from 'form-data';
@@ -71,6 +67,7 @@ import { readFileSync } from 'fs';
 import { TextTwoWayOperation, TextUpOperation } from '@kizahasi/ot-string';
 import { OperationResult } from '@urql/core';
 import { maskTypeNames } from './maskTypenames';
+import { TestClients } from './testClients';
 
 const timeout = 20000;
 
@@ -112,8 +109,6 @@ const plainEntryPassword: ServerConfig['entryPassword'] = {
     type: 'plain',
     value: Resources.entryPassword,
 };
-
-type UrqlClientType = ReturnType<typeof createUrqlClient>;
 
 namespace Assert {
     export namespace CreateFileTagMutation {
@@ -474,43 +469,10 @@ describe.each([
     });
 
     const entryPassword = entryPasswordConfig == null ? undefined : Resources.entryPassword;
-    const createUrqlClients = () => {
-        const roomMasterClient = createUrqlClient(
-            httpGraphQLUri,
-            wsGraphQLUri,
-            Resources.User.master
-        );
-        const roomPlayer1Client = createUrqlClient(
-            httpGraphQLUri,
-            wsGraphQLUri,
-            Resources.User.player1
-        );
-        const roomPlayer2Client = createUrqlClient(
-            httpGraphQLUri,
-            wsGraphQLUri,
-            Resources.User.player2
-        );
-        const roomSpectatorClient = createUrqlClient(
-            httpGraphQLUri,
-            wsGraphQLUri,
-            Resources.User.spectator
-        );
-        const notJoinUserClient = createUrqlClient(
-            httpGraphQLUri,
-            wsGraphQLUri,
-            Resources.User.notJoin
-        );
-        return {
-            roomMasterClient,
-            roomPlayer1Client,
-            roomPlayer2Client,
-            roomSpectatorClient,
-            notJoinUserClient,
-        };
-    };
 
     it('tests entry (and setup users)', async () => {
         const server = await createTestServer(dbType, entryPasswordConfig);
+        const clients = new TestClients({ httpGraphQLUri, wsGraphQLUri });
 
         const {
             roomMasterClient,
@@ -518,7 +480,7 @@ describe.each([
             roomPlayer2Client,
             roomSpectatorClient,
             notJoinUserClient,
-        } = createUrqlClients();
+        } = clients.clients;
 
         // mutation entryToServer if entryPassword != null
         if (entryPassword != null) {
@@ -540,9 +502,10 @@ describe.each([
         'tests upload and delete file in uploader',
         async publicOrUnlisted => {
             const server = await createTestServer(dbType, entryPasswordConfig);
+            const clients = new TestClients({ httpGraphQLUri, wsGraphQLUri });
 
             const { roomPlayer1Client: clientToUploadFiles, roomPlayer2Client: anotherClient } =
-                createUrqlClients();
+                clients.clients;
 
             {
                 const formData = new FormData();
@@ -683,15 +646,10 @@ describe.each([
     it(
         'tests room',
         async () => {
-            const {
-                roomMasterClient,
-                roomPlayer1Client,
-                roomPlayer2Client,
-                roomSpectatorClient,
-                notJoinUserClient,
-            } = createUrqlClients();
-
             const server = await createTestServer(dbType, entryPasswordConfig);
+            const clients = new TestClients({ httpGraphQLUri, wsGraphQLUri });
+            const { roomMasterClient, roomPlayer1Client, roomPlayer2Client, roomSpectatorClient } =
+                clients.clients;
 
             let roomId: string;
             // mutation createRoom
@@ -710,54 +668,15 @@ describe.each([
                 roomId = actualData.id;
             }
 
-            // because we got roomId, we can do subscriptions
-            const roomMasterClientSubscription = new TestRoomEventSubscription(
-                roomMasterClient.subscription<
-                    RoomEventSubscription,
-                    RoomEventSubscriptionVariables
-                >(RoomEventDocument, {
-                    id: roomId,
-                })
-            );
-            const roomPlayer1ClientSubscription = new TestRoomEventSubscription(
-                roomPlayer1Client.subscription<
-                    RoomEventSubscription,
-                    RoomEventSubscriptionVariables
-                >(RoomEventDocument, {
-                    id: roomId,
-                })
-            );
-            const roomPlayer2ClientSubscription = new TestRoomEventSubscription(
-                roomPlayer2Client.subscription<
-                    RoomEventSubscription,
-                    RoomEventSubscriptionVariables
-                >(RoomEventDocument, {
-                    id: roomId,
-                })
-            );
-            const roomSpectatorClientSubscription = new TestRoomEventSubscription(
-                roomSpectatorClient.subscription<
-                    RoomEventSubscription,
-                    RoomEventSubscriptionVariables
-                >(RoomEventDocument, {
-                    id: roomId,
-                })
-            );
-            const notJoinUserClientSubscription = new TestRoomEventSubscription(
-                notJoinUserClient.subscription<
-                    RoomEventSubscription,
-                    RoomEventSubscriptionVariables
-                >(RoomEventDocument, {
-                    id: roomId,
-                })
-            );
-            const allSubscriptions = new CompositeTestRoomEventSubscription([
+            // because we have roomId, we can start subscriptions
+            const {
                 roomMasterClientSubscription,
                 roomPlayer1ClientSubscription,
                 roomPlayer2ClientSubscription,
                 roomSpectatorClientSubscription,
                 notJoinUserClientSubscription,
-            ]);
+                allSubscriptions,
+            } = clients.beginSubscriptions(roomId);
 
             // query getRoomsList
             {
