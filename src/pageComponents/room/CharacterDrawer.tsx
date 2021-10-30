@@ -53,6 +53,8 @@ import { BufferedTextArea } from '../../components/BufferedTextArea';
 import { FilePath } from '../../utils/filePath';
 import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 import { characterReplaceOperation } from '../../utils/characterReplaceOperation';
+import { useOperateAsState } from '../../hooks/useOperateAsState';
+import produce from 'immer';
 
 const notFound = 'notFound';
 
@@ -92,6 +94,7 @@ export const CharacterDrawer: React.FC = () => {
     );
     const dispatch = useDispatch();
     const operate = useOperate();
+    const operateAsState = useOperateAsState();
     const characters = useCharacters();
     const boolParamNames = useBoolParamNames();
     const numParamNames = useNumParamNames();
@@ -171,25 +174,26 @@ export const CharacterDrawer: React.FC = () => {
         );
     })();
 
-    const updateCharacter = (partialState: Partial<CharacterState>) => {
+    const updateCharacterByImmer = (recipe: (state: CharacterState) => void) => {
         switch (drawerType?.type) {
-            case create:
-                setCharacter({ ...character, ...partialState });
+            case create: {
+                const newCharacter = produce(character, recipe);
+                setCharacter(newCharacter);
                 return;
+            }
             case update: {
-                const diffOperation = characterDiff({
-                    prevState: character,
-                    nextState: { ...character, ...partialState },
+                operateAsState(prevRoom => {
+                    return produce(prevRoom, prevRoom => {
+                        const character =
+                            prevRoom.participants[drawerType.stateKey.createdBy]?.characters?.[
+                                drawerType.stateKey.id
+                            ];
+                        if (character == null) {
+                            return;
+                        }
+                        produce(character, recipe);
+                    });
                 });
-                if (diffOperation == null) {
-                    return;
-                }
-                operate(
-                    characterUpdateOperation(
-                        drawerType.stateKey,
-                        toCharacterUpOperation(diffOperation)
-                    )
-                );
                 return;
             }
         }
@@ -606,7 +610,11 @@ export const CharacterDrawer: React.FC = () => {
                                           isCreate: drawerType?.type === create,
                                       })
                             }
-                            onChange={newValue => updateCharacter({ isPrivate: !newValue })}
+                            onChange={newValue =>
+                                updateCharacterByImmer(character => {
+                                    character.isPrivate = !newValue;
+                                })
+                            }
                         />
                     </Col>
                 </Row>
@@ -633,7 +641,9 @@ export const CharacterDrawer: React.FC = () => {
                                 if (e.previousValue === e.currentValue) {
                                     return;
                                 }
-                                updateCharacter({ name: e.currentValue });
+                                updateCharacterByImmer(character => {
+                                    character.name = e.currentValue;
+                                });
                             }}
                         />
                     </Col>
@@ -646,8 +656,9 @@ export const CharacterDrawer: React.FC = () => {
                         <InputFile
                             filePath={character.image ?? undefined}
                             onPathChange={path =>
-                                updateCharacter({
-                                    image: path == null ? undefined : FilePath.toOt(path),
+                                updateCharacterByImmer(character => {
+                                    character.image =
+                                        path == null ? undefined : FilePath.toOt(path);
                                 })
                             }
                             openFilesManager={setFilesManagerDrawerType}
@@ -663,8 +674,9 @@ export const CharacterDrawer: React.FC = () => {
                         <InputFile
                             filePath={character.tachieImage ?? undefined}
                             onPathChange={path =>
-                                updateCharacter({
-                                    tachieImage: path == null ? undefined : FilePath.toOt(path),
+                                updateCharacterByImmer(character => {
+                                    character.tachieImage =
+                                        path == null ? undefined : FilePath.toOt(path);
                                 })
                             }
                             openFilesManager={setFilesManagerDrawerType}
@@ -765,7 +777,11 @@ export const CharacterDrawer: React.FC = () => {
                             bufferDuration='default'
                             value={character.memo}
                             rows={8}
-                            onChange={e => updateCharacter({ memo: e.currentValue })}
+                            onChange={e =>
+                                updateCharacterByImmer(character => {
+                                    character.memo = e.currentValue;
+                                })
+                            }
                         />
                     </Col>
                 </Row>
@@ -784,7 +800,9 @@ export const CharacterDrawer: React.FC = () => {
                                     value={character.privateVarToml}
                                     rows={8}
                                     onChange={e =>
-                                        updateCharacter({ privateVarToml: e.currentValue })
+                                        updateCharacterByImmer(character => {
+                                            character.privateVarToml = e.currentValue;
+                                        })
                                     }
                                 />
                             </Col>
