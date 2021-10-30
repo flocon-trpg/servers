@@ -832,12 +832,12 @@ export type CharacterValueForMessageFragment = {
 };
 
 type CreateRoomResult_CreateRoomFailureResult_Fragment = {
-    __typename?: 'CreateRoomFailureResult';
+    __typename: 'CreateRoomFailureResult';
     failureType: CreateRoomFailureType;
 };
 
 type CreateRoomResult_CreateRoomSuccessResult_Fragment = {
-    __typename?: 'CreateRoomSuccessResult';
+    __typename: 'CreateRoomSuccessResult';
     id: string;
     room: { __typename?: 'RoomGetState'; revision: number; createdBy: string; stateJson: string };
 };
@@ -876,12 +876,12 @@ export type GetNonJoinedRoomResultFragment = {
 };
 
 type GetRoomListResult_GetRoomsListFailureResult_Fragment = {
-    __typename?: 'GetRoomsListFailureResult';
+    __typename: 'GetRoomsListFailureResult';
     failureType: GetRoomFailureType;
 };
 
 type GetRoomListResult_GetRoomsListSuccessResult_Fragment = {
-    __typename?: 'GetRoomsListSuccessResult';
+    __typename: 'GetRoomsListSuccessResult';
     rooms: Array<{
         __typename?: 'RoomAsListItem';
         id: string;
@@ -897,13 +897,13 @@ export type GetRoomListResultFragment =
     | GetRoomListResult_GetRoomsListSuccessResult_Fragment;
 
 type GetRoomResult_GetJoinedRoomResult_Fragment = {
-    __typename?: 'GetJoinedRoomResult';
+    __typename: 'GetJoinedRoomResult';
     role: ParticipantRole;
     room: { __typename?: 'RoomGetState'; revision: number; createdBy: string; stateJson: string };
 };
 
 type GetRoomResult_GetNonJoinedRoomResult_Fragment = {
-    __typename?: 'GetNonJoinedRoomResult';
+    __typename: 'GetNonJoinedRoomResult';
     roomAsListItem: {
         __typename?: 'RoomAsListItem';
         id: string;
@@ -915,7 +915,7 @@ type GetRoomResult_GetNonJoinedRoomResult_Fragment = {
 };
 
 type GetRoomResult_GetRoomFailureResult_Fragment = {
-    __typename?: 'GetRoomFailureResult';
+    __typename: 'GetRoomFailureResult';
     failureType: GetRoomFailureType;
 };
 
@@ -925,12 +925,12 @@ export type GetRoomResultFragment =
     | GetRoomResult_GetRoomFailureResult_Fragment;
 
 type JoinRoomResult_JoinRoomFailureResult_Fragment = {
-    __typename?: 'JoinRoomFailureResult';
+    __typename: 'JoinRoomFailureResult';
     failureType: JoinRoomFailureType;
 };
 
 type JoinRoomResult_JoinRoomSuccessResult_Fragment = {
-    __typename?: 'JoinRoomSuccessResult';
+    __typename: 'JoinRoomSuccessResult';
     operation?: Maybe<{
         __typename?: 'RoomOperation';
         revisionTo: number;
@@ -1059,7 +1059,7 @@ export type RoomSoundEffectFragment = {
 };
 
 type RoomMessageEvent_PieceValueLog_Fragment = {
-    __typename?: 'PieceValueLog';
+    __typename: 'PieceValueLog';
     messageId: string;
     characterCreatedBy: string;
     characterId: string;
@@ -1070,7 +1070,7 @@ type RoomMessageEvent_PieceValueLog_Fragment = {
 };
 
 type RoomMessageEvent_RoomPrivateMessage_Fragment = {
-    __typename?: 'RoomPrivateMessage';
+    __typename: 'RoomPrivateMessage';
     messageId: string;
     visibleTo: Array<string>;
     initText?: Maybe<string>;
@@ -1103,7 +1103,7 @@ type RoomMessageEvent_RoomPrivateMessage_Fragment = {
 };
 
 type RoomMessageEvent_RoomPrivateMessageUpdate_Fragment = {
-    __typename?: 'RoomPrivateMessageUpdate';
+    __typename: 'RoomPrivateMessageUpdate';
     messageId: string;
     initText?: Maybe<string>;
     initTextSource?: Maybe<string>;
@@ -1123,19 +1123,19 @@ type RoomMessageEvent_RoomPrivateMessageUpdate_Fragment = {
 };
 
 type RoomMessageEvent_RoomPublicChannel_Fragment = {
-    __typename?: 'RoomPublicChannel';
+    __typename: 'RoomPublicChannel';
     key: string;
     name?: Maybe<string>;
 };
 
 type RoomMessageEvent_RoomPublicChannelUpdate_Fragment = {
-    __typename?: 'RoomPublicChannelUpdate';
+    __typename: 'RoomPublicChannelUpdate';
     key: string;
     name?: Maybe<string>;
 };
 
 type RoomMessageEvent_RoomPublicMessage_Fragment = {
-    __typename?: 'RoomPublicMessage';
+    __typename: 'RoomPublicMessage';
     messageId: string;
     channelKey: string;
     initText?: Maybe<string>;
@@ -1168,7 +1168,7 @@ type RoomMessageEvent_RoomPublicMessage_Fragment = {
 };
 
 type RoomMessageEvent_RoomPublicMessageUpdate_Fragment = {
-    __typename?: 'RoomPublicMessageUpdate';
+    __typename: 'RoomPublicMessageUpdate';
     messageId: string;
     initText?: Maybe<string>;
     initTextSource?: Maybe<string>;
@@ -1188,7 +1188,7 @@ type RoomMessageEvent_RoomPublicMessageUpdate_Fragment = {
 };
 
 type RoomMessageEvent_RoomSoundEffect_Fragment = {
-    __typename?: 'RoomSoundEffect';
+    __typename: 'RoomSoundEffect';
     messageId: string;
     createdBy?: Maybe<string>;
     createdAt: number;
@@ -1262,7 +1262,7 @@ export type GetRoomQuery = {
     __typename?: 'Query';
     result:
         | {
-              __typename?: 'GetJoinedRoomResult';
+              __typename: 'GetJoinedRoomResult';
               role: ParticipantRole;
               room: {
                   __typename?: 'RoomGetState';
@@ -1272,7 +1272,7 @@ export type GetRoomQuery = {
               };
           }
         | {
-              __typename?: 'GetNonJoinedRoomResult';
+              __typename: 'GetNonJoinedRoomResult';
               roomAsListItem: {
                   __typename?: 'RoomAsListItem';
                   id: string;
@@ -1282,7 +1282,7 @@ export type GetRoomQuery = {
                   requiresPhraseToJoinAsSpectator: boolean;
               };
           }
-        | { __typename?: 'GetRoomFailureResult'; failureType: GetRoomFailureType };
+        | { __typename: 'GetRoomFailureResult'; failureType: GetRoomFailureType };
 };
 
 export type GetRoomsListQueryVariables = Exact<{ [key: string]: never }>;
@@ -1290,9 +1290,9 @@ export type GetRoomsListQueryVariables = Exact<{ [key: string]: never }>;
 export type GetRoomsListQuery = {
     __typename?: 'Query';
     result:
-        | { __typename?: 'GetRoomsListFailureResult'; failureType: GetRoomFailureType }
+        | { __typename: 'GetRoomsListFailureResult'; failureType: GetRoomFailureType }
         | {
-              __typename?: 'GetRoomsListSuccessResult';
+              __typename: 'GetRoomsListSuccessResult';
               rooms: Array<{
                   __typename?: 'RoomAsListItem';
                   id: string;
@@ -1311,9 +1311,9 @@ export type GetMessagesQueryVariables = Exact<{
 export type GetMessagesQuery = {
     __typename?: 'Query';
     result:
-        | { __typename?: 'GetRoomMessagesFailureResult'; failureType: GetRoomMessagesFailureType }
+        | { __typename: 'GetRoomMessagesFailureResult'; failureType: GetRoomMessagesFailureType }
         | {
-              __typename?: 'RoomMessages';
+              __typename: 'RoomMessages';
               publicMessages: Array<{
                   __typename?: 'RoomPublicMessage';
                   messageId: string;
@@ -1427,9 +1427,9 @@ export type GetLogQueryVariables = Exact<{
 export type GetLogQuery = {
     __typename?: 'Query';
     result:
-        | { __typename?: 'GetRoomLogFailureResult'; failureType: GetRoomLogFailureType }
+        | { __typename: 'GetRoomLogFailureResult'; failureType: GetRoomLogFailureType }
         | {
-              __typename?: 'RoomMessages';
+              __typename: 'RoomMessages';
               publicMessages: Array<{
                   __typename?: 'RoomPublicMessage';
                   messageId: string;
@@ -1544,11 +1544,11 @@ export type GetRoomConnectionsQuery = {
     __typename?: 'Query';
     result:
         | {
-              __typename?: 'GetRoomConnectionsFailureResult';
+              __typename: 'GetRoomConnectionsFailureResult';
               failureType: GetRoomConnectionFailureType;
           }
         | {
-              __typename?: 'GetRoomConnectionsSuccessResult';
+              __typename: 'GetRoomConnectionsSuccessResult';
               fetchedAt: number;
               connectedUserUids: Array<string>;
           };
@@ -1619,9 +1619,9 @@ export type CreateRoomMutationVariables = Exact<{
 export type CreateRoomMutation = {
     __typename?: 'Mutation';
     result:
-        | { __typename?: 'CreateRoomFailureResult'; failureType: CreateRoomFailureType }
+        | { __typename: 'CreateRoomFailureResult'; failureType: CreateRoomFailureType }
         | {
-              __typename?: 'CreateRoomSuccessResult';
+              __typename: 'CreateRoomSuccessResult';
               id: string;
               room: {
                   __typename?: 'RoomGetState';
@@ -1668,9 +1668,9 @@ export type JoinRoomAsPlayerMutationVariables = Exact<{
 export type JoinRoomAsPlayerMutation = {
     __typename?: 'Mutation';
     result:
-        | { __typename?: 'JoinRoomFailureResult'; failureType: JoinRoomFailureType }
+        | { __typename: 'JoinRoomFailureResult'; failureType: JoinRoomFailureType }
         | {
-              __typename?: 'JoinRoomSuccessResult';
+              __typename: 'JoinRoomSuccessResult';
               operation?: Maybe<{
                   __typename?: 'RoomOperation';
                   revisionTo: number;
@@ -1693,9 +1693,9 @@ export type JoinRoomAsSpectatorMutationVariables = Exact<{
 export type JoinRoomAsSpectatorMutation = {
     __typename?: 'Mutation';
     result:
-        | { __typename?: 'JoinRoomFailureResult'; failureType: JoinRoomFailureType }
+        | { __typename: 'JoinRoomFailureResult'; failureType: JoinRoomFailureType }
         | {
-              __typename?: 'JoinRoomSuccessResult';
+              __typename: 'JoinRoomSuccessResult';
               operation?: Maybe<{
                   __typename?: 'RoomOperation';
                   revisionTo: number;
@@ -1737,10 +1737,10 @@ export type OperateMutationVariables = Exact<{
 export type OperateMutation = {
     __typename?: 'Mutation';
     result:
-        | { __typename?: 'OperateRoomFailureResult'; failureType: OperateRoomFailureType }
-        | { __typename?: 'OperateRoomIdResult'; requestId: string }
+        | { __typename: 'OperateRoomFailureResult'; failureType: OperateRoomFailureType }
+        | { __typename: 'OperateRoomIdResult'; requestId: string }
         | {
-              __typename?: 'OperateRoomNonJoinedResult';
+              __typename: 'OperateRoomNonJoinedResult';
               roomAsListItem: {
                   __typename?: 'RoomAsListItem';
                   id: string;
@@ -1751,7 +1751,7 @@ export type OperateMutation = {
               };
           }
         | {
-              __typename?: 'OperateRoomSuccessResult';
+              __typename: 'OperateRoomSuccessResult';
               operation: {
                   __typename?: 'RoomOperation';
                   revisionTo: number;
@@ -1798,7 +1798,7 @@ export type WritePublicMessageMutation = {
     __typename?: 'Mutation';
     result:
         | {
-              __typename?: 'RoomPublicMessage';
+              __typename: 'RoomPublicMessage';
               messageId: string;
               channelKey: string;
               initText?: Maybe<string>;
@@ -1838,7 +1838,7 @@ export type WritePublicMessageMutation = {
               }>;
           }
         | {
-              __typename?: 'WriteRoomPublicMessageFailureResult';
+              __typename: 'WriteRoomPublicMessageFailureResult';
               failureType: WriteRoomPublicMessageFailureType;
           };
 };
@@ -1857,7 +1857,7 @@ export type WritePrivateMessageMutation = {
     __typename?: 'Mutation';
     result:
         | {
-              __typename?: 'RoomPrivateMessage';
+              __typename: 'RoomPrivateMessage';
               messageId: string;
               visibleTo: Array<string>;
               initText?: Maybe<string>;
@@ -1897,7 +1897,7 @@ export type WritePrivateMessageMutation = {
               }>;
           }
         | {
-              __typename?: 'WriteRoomPrivateMessageFailureResult';
+              __typename: 'WriteRoomPrivateMessageFailureResult';
               failureType: WriteRoomPrivateMessageFailureType;
           };
 };
@@ -1912,7 +1912,7 @@ export type WriteRoomSoundEffectMutation = {
     __typename?: 'Mutation';
     result:
         | {
-              __typename?: 'RoomSoundEffect';
+              __typename: 'RoomSoundEffect';
               messageId: string;
               createdBy?: Maybe<string>;
               createdAt: number;
@@ -1920,7 +1920,7 @@ export type WriteRoomSoundEffectMutation = {
               file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
           }
         | {
-              __typename?: 'WriteRoomSoundEffectFailureResult';
+              __typename: 'WriteRoomSoundEffectFailureResult';
               failureType: WriteRoomSoundEffectFailureType;
           };
 };
@@ -1983,7 +1983,7 @@ export type RoomEventSubscription = {
         deleteRoomOperation?: Maybe<{ __typename?: 'DeleteRoomOperation'; deletedBy: string }>;
         roomMessageEvent?: Maybe<
             | {
-                  __typename?: 'PieceValueLog';
+                  __typename: 'PieceValueLog';
                   messageId: string;
                   characterCreatedBy: string;
                   characterId: string;
@@ -1993,7 +1993,7 @@ export type RoomEventSubscription = {
                   valueJson: string;
               }
             | {
-                  __typename?: 'RoomPrivateMessage';
+                  __typename: 'RoomPrivateMessage';
                   messageId: string;
                   visibleTo: Array<string>;
                   initText?: Maybe<string>;
@@ -2033,7 +2033,7 @@ export type RoomEventSubscription = {
                   }>;
               }
             | {
-                  __typename?: 'RoomPrivateMessageUpdate';
+                  __typename: 'RoomPrivateMessageUpdate';
                   messageId: string;
                   initText?: Maybe<string>;
                   initTextSource?: Maybe<string>;
@@ -2051,10 +2051,10 @@ export type RoomEventSubscription = {
                       isSuccess?: Maybe<boolean>;
                   }>;
               }
-            | { __typename?: 'RoomPublicChannel'; key: string; name?: Maybe<string> }
-            | { __typename?: 'RoomPublicChannelUpdate'; key: string; name?: Maybe<string> }
+            | { __typename: 'RoomPublicChannel'; key: string; name?: Maybe<string> }
+            | { __typename: 'RoomPublicChannelUpdate'; key: string; name?: Maybe<string> }
             | {
-                  __typename?: 'RoomPublicMessage';
+                  __typename: 'RoomPublicMessage';
                   messageId: string;
                   channelKey: string;
                   initText?: Maybe<string>;
@@ -2094,7 +2094,7 @@ export type RoomEventSubscription = {
                   }>;
               }
             | {
-                  __typename?: 'RoomPublicMessageUpdate';
+                  __typename: 'RoomPublicMessageUpdate';
                   messageId: string;
                   initText?: Maybe<string>;
                   initTextSource?: Maybe<string>;
@@ -2113,7 +2113,7 @@ export type RoomEventSubscription = {
                   }>;
               }
             | {
-                  __typename?: 'RoomSoundEffect';
+                  __typename: 'RoomSoundEffect';
                   messageId: string;
                   createdBy?: Maybe<string>;
                   createdAt: number;
@@ -2170,6 +2170,7 @@ export const CreateRoomResultFragmentDoc = {
             selectionSet: {
                 kind: 'SelectionSet',
                 selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
                     {
                         kind: 'InlineFragment',
                         typeCondition: {
@@ -2290,6 +2291,7 @@ export const GetRoomListResultFragmentDoc = {
             selectionSet: {
                 kind: 'SelectionSet',
                 selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
                     {
                         kind: 'InlineFragment',
                         typeCondition: {
@@ -2374,6 +2376,7 @@ export const GetRoomResultFragmentDoc = {
             selectionSet: {
                 kind: 'SelectionSet',
                 selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
                     {
                         kind: 'InlineFragment',
                         typeCondition: {
@@ -2472,6 +2475,7 @@ export const JoinRoomResultFragmentDoc = {
             selectionSet: {
                 kind: 'SelectionSet',
                 selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
                     {
                         kind: 'InlineFragment',
                         typeCondition: {
@@ -2791,6 +2795,7 @@ export const RoomMessageEventFragmentDoc = {
             selectionSet: {
                 kind: 'SelectionSet',
                 selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
                     {
                         kind: 'InlineFragment',
                         typeCondition: {
@@ -3193,6 +3198,7 @@ export const GetRoomDocument = {
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
                                 {
                                     kind: 'InlineFragment',
                                     typeCondition: {
@@ -3296,6 +3302,7 @@ export const GetRoomsListDocument = {
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
                                 {
                                     kind: 'InlineFragment',
                                     typeCondition: {
@@ -3386,6 +3393,7 @@ export const GetMessagesDocument = {
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
                                 {
                                     kind: 'InlineFragment',
                                     typeCondition: {
@@ -3549,6 +3557,7 @@ export const GetLogDocument = {
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
                                 {
                                     kind: 'InlineFragment',
                                     typeCondition: {
@@ -3709,6 +3718,7 @@ export const GetRoomConnectionsDocument = {
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
                                 {
                                     kind: 'InlineFragment',
                                     typeCondition: {
@@ -4054,6 +4064,7 @@ export const CreateRoomDocument = {
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
                                 {
                                     kind: 'InlineFragment',
                                     typeCondition: {
@@ -4585,6 +4596,7 @@ export const OperateDocument = {
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
                                 {
                                     kind: 'InlineFragment',
                                     typeCondition: {
@@ -4907,6 +4919,7 @@ export const WritePublicMessageDocument = {
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
                                 {
                                     kind: 'InlineFragment',
                                     typeCondition: {
@@ -5083,6 +5096,7 @@ export const WritePrivateMessageDocument = {
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
                                 {
                                     kind: 'InlineFragment',
                                     typeCondition: {
@@ -5195,6 +5209,7 @@ export const WriteRoomSoundEffectDocument = {
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
                                 {
                                     kind: 'InlineFragment',
                                     typeCondition: {
