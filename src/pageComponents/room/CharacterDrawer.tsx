@@ -812,33 +812,6 @@ export const CharacterDrawer: React.FC = () => {
 
                 {createdByMe && drawerType?.type === update && (
                     <>
-                        <Typography.Title level={4}>チャットパレット</Typography.Title>
-
-                        <Row gutter={gutter} align='middle'>
-                            <Col flex='auto' />
-                            <Col flex={0}></Col>
-                            <Col span={inputSpan}>
-                                <Button
-                                    onClick={() =>
-                                        dispatch(
-                                            roomDrawerAndPopoverAndModalModule.actions.set({
-                                                chatPaletteEditorModalType: {
-                                                    type: characterCommand,
-                                                    characterKey: drawerType.stateKey,
-                                                },
-                                            })
-                                        )
-                                    }
-                                >
-                                    編集
-                                </Button>
-                            </Col>
-                        </Row>
-                    </>
-                )}
-
-                {createdByMe && drawerType?.type === update && (
-                    <>
                         <Typography.Title level={4}>コマンド</Typography.Title>
 
                         <Row gutter={gutter} align='middle'>
