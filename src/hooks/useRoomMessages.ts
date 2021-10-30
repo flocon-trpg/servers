@@ -418,21 +418,22 @@ export const useAllRoomMessages = ({
                             failureType: messagesData.result.failureType,
                         };
                     case 'RoomMessages': {
+                        // CONSIDER: __typenameをnon-undefinedにしてgraphql.tsを生成し、Spread構文を不要にするほうが綺麗なコードになりそう
                         const actions: RoomMessageEventFragment[] = [...oldValue.events];
                         messagesData.result.publicMessages.forEach(msg => {
-                            actions.push(msg);
+                            actions.push({ ...msg, __typename: 'RoomPublicMessage' });
                         });
                         messagesData.result.publicChannels.forEach(ch => {
-                            actions.push(ch);
+                            actions.push({ ...ch, __typename: 'RoomPublicChannel' });
                         });
                         messagesData.result.privateMessages.forEach(msg => {
-                            actions.push(msg);
+                            actions.push({ ...msg, __typename: 'RoomPrivateMessage' });
                         });
                         messagesData.result.pieceValueLogs.forEach(msg => {
-                            actions.push(msg);
+                            actions.push({ ...msg, __typename: 'PieceValueLog' });
                         });
                         messagesData.result.soundEffects.forEach(se => {
-                            actions.push(se);
+                            actions.push({ ...se, __typename: 'RoomSoundEffect' });
                         });
                         return {
                             type: 'loaded',
