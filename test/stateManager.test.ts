@@ -233,6 +233,34 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
+    test('operate -> post -> onPosted -> onOthersGet(initRevision + 1)', () => {
+        const operation = { oldValue: initState, newValue: 2 };
+        const operationResult = { oldValue: 20, newValue: 200 };
+        const otherClientsGet = { oldValue: initState, newValue: 20 };
+
+        const target = createStateManager();
+
+        target.operateAsState(operation.newValue);
+        const postResult = target.post();
+        if (postResult === undefined) {
+            throw new Error('Guard');
+        }
+
+        postResult.onPosted({
+            isSuccess: true,
+            isId: false,
+            revisionTo: initRevision + 2,
+            result: operationResult,
+        });
+        target.onOtherClientsGet(otherClientsGet, initRevision + 1);
+
+        expect(target.isPosting).toBe(false);
+        expect(target.requiresReload).toBe(false);
+        expect(target.revision).toBe(initRevision + 2);
+        expect(target.uiState).toBe(operationResult.newValue);
+        expect(target.waitingResponseSince()).toBeNull();
+    });
+
     test('operate -> post -> onPosted -> onOthersGet(initRevision + 2)', () => {
         const operation = { oldValue: initState, newValue: 2 };
         const operationResult = { oldValue: initState, newValue: 20 };
