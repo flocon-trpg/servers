@@ -37,7 +37,7 @@ const createStateManager = () =>
     });
 
 describe('StateManager', () => {
-    it('tests init StateManager', () => {
+    test('init StateManager', () => {
         const target = createStateManager();
 
         expect(target.isPosting).toBe(false);
@@ -47,7 +47,7 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
-    it('tests StateManager.operate', () => {
+    test('operate', () => {
         const target = createStateManager();
 
         const newState = 2;
@@ -60,7 +60,7 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
-    it('tests StateManager.post', () => {
+    test('post', () => {
         const operation = { oldValue: initState, newValue: 2 };
 
         const target = createStateManager();
@@ -83,7 +83,7 @@ describe('StateManager', () => {
         expect(postResult.revision).toBe(initRevision);
     });
 
-    it('tests StateManager: post -> non-id onPosted', () => {
+    test('operate -> post -> non-id onPosted', () => {
         const operation = { oldValue: initState, newValue: 2 };
         const resultOperation = { oldValue: initState, newValue: 20 };
 
@@ -109,7 +109,7 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
-    it('tests StateManager: post -> onPosted({ isId: true })', () => {
+    test('operate -> post -> onPosted({ isId: true })', () => {
         const operation = { oldValue: initState, newValue: 2 };
 
         const target = createStateManager();
@@ -133,7 +133,7 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
-    it('tests StateManager: post -> onPosted({ isSuccess: null })', () => {
+    test('operate -> post -> onPosted({ isSuccess: null })', () => {
         const operation = { oldValue: initState, newValue: 2 };
 
         const target = createStateManager();
@@ -153,7 +153,7 @@ describe('StateManager', () => {
         expect(target.uiState).toBe(operation.newValue);
     });
 
-    it('tests StateManager: post -> onPosted({ isSuccess: false })', () => {
+    test('operate -> post -> onPosted({ isSuccess: false })', () => {
         const operation = { oldValue: initState, newValue: 2 };
 
         const target = createStateManager();
@@ -175,7 +175,7 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
-    it('tests StateManager.onOthersGet(initRevision + 1)', () => {
+    test('onOthersGet(initRevision + 1)', () => {
         const operation = { oldValue: initState, newValue: 2 };
 
         const target = createStateManager();
@@ -189,7 +189,7 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
-    test.each([initRevision - 1, initRevision])('tests StateManager.onOthersGet(%i)', revision => {
+    test.each([initRevision - 1, initRevision])('onOthersGet(%i)', revision => {
         const operation = { oldValue: initState, newValue: 2 };
 
         const target = createStateManager();
@@ -203,7 +203,7 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
-    test('tests StateManager: onOthersGet(initRevision + 2)', () => {
+    test('onOthersGet(initRevision + 2)', () => {
         const operation = { oldValue: initState, newValue: 2 };
 
         const target = createStateManager();
@@ -217,7 +217,7 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).not.toBeNull();
     });
 
-    test('tests StateManager.onOthersGet(initRevision + 2) -> onOthersGet(initRevision + 1)', () => {
+    test('onOthersGet(initRevision + 2) -> onOthersGet(initRevision + 1)', () => {
         const firstOperation = { oldValue: initState, newValue: 2 };
         const secondOperation = { oldValue: 2, newValue: 20 };
 
@@ -233,7 +233,7 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
-    it('tests StateManager: post -> onPosted -> onOthersGet(initRevision + 2)', () => {
+    test('operate -> post -> onPosted -> onOthersGet(initRevision + 2)', () => {
         const operation = { oldValue: initState, newValue: 2 };
         const operationResult = { oldValue: initState, newValue: 20 };
         const otherClientsGet = { oldValue: 20, newValue: 200 };
@@ -261,7 +261,7 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
-    test('tests StateManager: post -> onOthersGet(initRevision + 2) -> onPosted', () => {
+    test('tests StateManager: operate -> post -> onOthersGet(initRevision + 2) -> onPosted', () => {
         const firstOperation = { oldValue: initState, newValue: 2 };
         const secondOperation = { oldValue: 20, newValue: 200 };
         const firstOperationResult = { oldValue: initState, newValue: 20 };
@@ -289,7 +289,7 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
-    test('tests StateManager: operate -> post -> operate -> onPosted({ isSuccess: true })', () => {
+    test('operate -> post -> operate -> onPosted({ isSuccess: true })', () => {
         const firstOperation = { oldValue: initState, newValue: 2 };
         const secondOperation = { oldValue: 2, newValue: 20 };
         const firstOperationResult = { oldValue: initState, newValue: 200 };
@@ -319,7 +319,7 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
-    test('tests StateManager: operate -> post -> operate -> onPosted({ isId: true })', () => {
+    test('operate -> post -> operate -> onPosted({ isId: true })', () => {
         const firstOperation = { oldValue: initState, newValue: 2 };
         const secondOperation = { oldValue: 2, newValue: 20 };
 
