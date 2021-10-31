@@ -69,10 +69,11 @@ const ChatPaletteList: React.FC<ChatPaletteListProps> = ({
     if (isEditMode) {
         return (
             <ChatPaletteTomlInput
-                style={{ minHeight: 'calc(100% - 32px)', resize: 'none' }}
+                style={{ minHeight: 'calc(100% - 32px)' }}
+                disableResize
                 size='small'
                 bufferDuration='default'
-                value={bufferedChatPaletteToml ?? ''}
+                value={chatPaletteToml ?? ''}
                 onChange={e => onChange(e.currentValue)}
             />
         );
