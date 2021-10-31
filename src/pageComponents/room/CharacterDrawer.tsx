@@ -191,7 +191,7 @@ export const CharacterDrawer: React.FC = () => {
                         if (character == null) {
                             return;
                         }
-                        produce(character, recipe);
+                        recipe(character);
                     });
                 });
                 return;
