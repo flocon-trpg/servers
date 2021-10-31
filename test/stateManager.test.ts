@@ -289,7 +289,7 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
-    test('tests StateManager: operate -> post -> onOthersGet(initRevision + 2) -> onPosted', () => {
+    test('operate -> post -> onOthersGet(initRevision + 2) -> onPosted', () => {
         const firstOperation = { oldValue: initState, newValue: 2 };
         const secondOperation = { oldValue: 20, newValue: 200 };
         const firstOperationResult = { oldValue: initState, newValue: 20 };
