@@ -1,6 +1,10 @@
 import { Cache, createNodeCache, createRedisCache, simpleId } from '../src';
 import Redis from 'ioredis';
 
+/*
+To run tests in this file, you need to prepare a redis instance. If you want to skip redis tests, set TEST_SKIP_REDIS env to "true".
+*/
+
 const TEST_SKIP_REDIS = process.env.TEST_SKIP_REDIS;
 const skipRedis = TEST_SKIP_REDIS?.toLowerCase() === 'true';
 
