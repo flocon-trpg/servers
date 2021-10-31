@@ -13,7 +13,6 @@ import {
     memoPanel,
     chatPalettePanel,
 } from '../states/RoomConfig';
-import * as generators from '../utils/generators';
 import { ResizableDelta } from 'react-rnd';
 import { ResizeDirection } from 're-resizable';
 import { BoardEditorPanelConfig } from '../states/BoardEditorPanelConfig';
@@ -24,6 +23,8 @@ import { CompositeKey, recordToArray, keyNames } from '@kizahasi/util';
 import { MemoPanelConfig } from '../states/MemoPanelConfig';
 import { ChatPalettePanelConfig } from '../states/ChatPalettePanelConfig';
 import { simpleId, StrIndex5 } from '@kizahasi/flocon-core';
+
+const roomMenuHeight = 38;
 
 export type SetOtherValuesAction = {
     roomId: string;
@@ -153,13 +154,13 @@ export type RemoveMessagePanelAction = {
 };
 
 // DraggablePanelが移動できない位置に行くのを防ぐ処理。
-// Redux側ではなくUI側にこの処理を任せるとReduxとUIの独立性が高まるので一見良さそうだが、localforageからデータを読み込むときも似たような処理をしているため、もしRedux外に任せても結局Configを読み込むときにこの処理を行わなければならず、トータルで見たときの独立性は高くなっていない。UI側でデータの調整をしてdispatchする手もあるが、UI画面を開き直すたびにこの処理が走るので無駄。そのため、Redux側でこの処理を取り扱うことにしている。
+// Redux側ではなくUI側にこの処理を任せるとReduxとUIの独立性が高まるので一見良さそうだが、localforageからデータを読み込むときも似たような処理をしているため、もしRedux外に任せても結局Configを読み込むときにこの処理を行わなければならず、トータルで見たときの独立性は高くなっていない。そのため、Redux側でこの処理を取り扱うことにしている。
 const movePanel = (
     state: { x: number; y: number },
     newPosition: { x: number; y: number }
 ): void => {
     state.x = Math.max(0, newPosition.x);
-    state.y = Math.max(0, newPosition.y);
+    state.y = Math.max(roomMenuHeight, newPosition.y);
 };
 
 const resizePanel = (
@@ -195,7 +196,7 @@ const resizePanel = (
 const fixRoomConfig = (config: RoomConfig): void => {
     const fixPosition = (position: { x: number; y: number }): void => {
         position.x = Math.max(0, position.x);
-        position.y = Math.max(0, position.y);
+        position.y = Math.max(roomMenuHeight, position.y);
     };
     recordToArray(config.panels.boardEditorPanels).forEach(pair => fixPosition(pair.value));
     fixPosition(config.panels.characterPanel);
