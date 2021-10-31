@@ -20,15 +20,13 @@ const toDbType = (source) => {
 };
 const getMain = async () => {
     const options = await (0, yargs_1.default)(process.argv.slice(2))
-        .options({
-        db: {
-            type: 'string',
-            nargs: 1,
-            choices: [exports.postgresql, exports.sqlite],
-        },
-        debug: {
-            type: 'boolean',
-        },
+        .option('db', {
+        type: 'string',
+        nargs: 1,
+        choices: [exports.postgresql, exports.sqlite],
+    })
+        .option('debug', {
+        type: 'boolean',
     })
         .version(VERSION_1.VERSION.toString()).argv;
     const result = {

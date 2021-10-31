@@ -23,15 +23,13 @@ type Main = {
 };
 const getMain = async (): Promise<Main> => {
     const options = await yargs(process.argv.slice(2))
-        .options({
-            db: {
-                type: 'string',
-                nargs: 1,
-                choices: [postgresql, sqlite],
-            },
-            debug: {
-                type: 'boolean',
-            },
+        .option('db', {
+            type: 'string',
+            nargs: 1,
+            choices: [postgresql, sqlite],
+        })
+        .option('debug', {
+            type: 'boolean',
         })
         .version(VERSION.toString()).argv;
 
