@@ -34,7 +34,6 @@ import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { ImagePieceDrawer } from './ImagePieceDrawer';
 import { CommandEditorModal } from './CommandEditorModal';
 import { ChatPalette } from './ChatPalettes';
-import { ChatPaletteEditorModal } from './ChatPaletteEditorModal';
 import { Board } from './Board';
 
 const RoomMessagePanels: React.FC<{ roomId: string }> = ({ roomId }: { roomId: string }) => {
@@ -615,7 +614,6 @@ export const Room: React.FC = () => {
                 <CharacterParameterNamesDrawer />
                 <EditRoomDrawer />
 
-                <ChatPaletteEditorModal />
                 <CommandEditorModal />
             </AntdLayout.Content>
         </AntdLayout>

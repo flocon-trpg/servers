@@ -6,6 +6,6 @@ export const VERSION = new SemVer({
     patch: 0,
     prerelease: {
         type: alpha,
-        version: 26,
+        version: 27,
     },
 });

@@ -20,7 +20,12 @@ import { messageInputTextModule } from '../../modules/messageInputTextModule';
 import { Subject } from 'rxjs';
 import { useSelector } from '../../store';
 import classNames from 'classnames';
-import { flex, flexNone, flexRow, itemsCenter } from '../../utils/className';
+import { flex, flex1, flexColumn, flexNone, flexRow, itemsCenter } from '../../utils/className';
+import { ChatPaletteTomlInput } from '../../components/ChatPaletteTomlInput';
+import { useMyUserUid } from '../../hooks/useMyUserUid';
+import { useOperateAsState } from '../../hooks/useOperateAsState';
+import produce from 'immer';
+import { UISelector } from '../../components/UISelector';
 
 const titleStyle: React.CSSProperties = {
     flexBasis: '80px',
@@ -30,12 +35,16 @@ type ChatPaletteListProps = {
     chatPaletteToml: string | null;
     onClick: (text: string) => void;
     onDoubleClick: (text: string) => void;
+    isEditMode: boolean;
+    onChange: (toml: string) => void;
 };
 
 const ChatPaletteList: React.FC<ChatPaletteListProps> = ({
     chatPaletteToml,
     onClick,
     onDoubleClick,
+    isEditMode,
+    onChange,
 }: ChatPaletteListProps) => {
     const { currentValue: bufferedChatPaletteToml } = useBufferValue({
         value: chatPaletteToml,
@@ -55,6 +64,18 @@ const ChatPaletteList: React.FC<ChatPaletteListProps> = ({
 
     if (chatPaletteResult == null) {
         return <div style={baseStyle}>該当するキャラクターが見つかりませんでした</div>;
+    }
+
+    if (isEditMode) {
+        return (
+            <ChatPaletteTomlInput
+                style={{ minHeight: 'calc(100% - 32px)', resize: 'none' }}
+                size='small'
+                bufferDuration='default'
+                value={bufferedChatPaletteToml ?? ''}
+                onChange={e => onChange(e.currentValue)}
+            />
+        );
     }
 
     if (chatPaletteResult.isError) {
@@ -105,9 +126,12 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
         state => state.roomConfigModule?.panels.chatPalettePanels?.[panelId]
     );
     const subject = React.useMemo(() => new Subject<string>(), []);
+    const myUserUid = useMyUserUid();
     const myCharacters = useMyCharacters();
     const [selectedChannelType, setSelectedChannelType] =
         React.useState<SelectedChannelType>(publicChannel);
+    const [isEditMode, setIsEditMode] = React.useState(false);
+    const operateAsState = useOperateAsState();
 
     const myCharactersOptions = React.useMemo(() => {
         if (myCharacters == null) {
@@ -128,10 +152,9 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
         return null;
     }
 
+    const selectedCharacterStateId = config.selectedCharacterStateId;
     const selectedCharacter =
-        config.selectedCharacterStateId == null
-            ? undefined
-            : myCharacters?.get(config.selectedCharacterStateId);
+        selectedCharacterStateId == null ? undefined : myCharacters?.get(selectedCharacterStateId);
 
     const onConfigUpdate = (
         newValue: UpdateChatPalettePanelAction['panel'] & UpdateMessagePanelAction['panel']
@@ -172,16 +195,46 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                 onConfigUpdate={onConfigUpdate}
                 titleStyle={titleStyle}
             />
-            <ChatPaletteList
-                chatPaletteToml={selectedCharacter?.chatPalette ?? null}
-                onClick={text => {
-                    if (selectedChannelType === publicChannel) {
-                        dispatch(messageInputTextModule.actions.set({ publicMessage: text }));
-                        return;
-                    }
-                    dispatch(messageInputTextModule.actions.set({ privateMessage: text }));
-                }}
-                onDoubleClick={text => subject.next(text)}
+            <UISelector
+                style={{ padding: '2px 0' }}
+                className={classNames(flex1, flex, flexColumn)}
+                keys={[false, true]}
+                activeKey={isEditMode}
+                getName={key => (key ? '編集' : '通常')}
+                onChange={setIsEditMode}
+                render={isEditMode => (
+                    <ChatPaletteList
+                        chatPaletteToml={selectedCharacter?.chatPalette ?? null}
+                        onClick={text => {
+                            if (selectedChannelType === publicChannel) {
+                                dispatch(
+                                    messageInputTextModule.actions.set({ publicMessage: text })
+                                );
+                                return;
+                            }
+                            dispatch(messageInputTextModule.actions.set({ privateMessage: text }));
+                        }}
+                        onDoubleClick={text => subject.next(text)}
+                        isEditMode={isEditMode}
+                        onChange={toml => {
+                            operateAsState(prevRoom =>
+                                produce(prevRoom, prevRoom => {
+                                    if (myUserUid == null || selectedCharacterStateId == null) {
+                                        return;
+                                    }
+                                    const character =
+                                        prevRoom.participants[myUserUid]?.characters?.[
+                                            selectedCharacterStateId
+                                        ];
+                                    if (character == null) {
+                                        return;
+                                    }
+                                    character.chatPalette = toml;
+                                })
+                            );
+                        }}
+                    />
+                )}
             />
             <SubmitMessage
                 roomId={roomId}
