@@ -73,7 +73,7 @@ const ChatPaletteList: React.FC<ChatPaletteListProps> = ({
                 disableResize
                 size='small'
                 bufferDuration='default'
-                value={bufferedChatPaletteToml ?? ''}
+                value={chatPaletteToml ?? ''}
                 onChange={e => onChange(e.currentValue)}
             />
         );
