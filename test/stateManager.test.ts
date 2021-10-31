@@ -36,312 +36,314 @@ const createStateManager = () =>
                   },
     });
 
-it('tests init StateManager', () => {
-    const target = createStateManager();
+describe('StateManager', () => {
+    it('tests init StateManager', () => {
+        const target = createStateManager();
 
-    expect(target.isPosting).toBe(false);
-    expect(target.requiresReload).toBe(false);
-    expect(target.revision).toBe(initRevision);
-    expect(target.uiState).toBe(0);
-    expect(target.waitingResponseSince()).toBeNull();
-});
-
-it('tests StateManager.operate', () => {
-    const target = createStateManager();
-
-    const newState = 2;
-    target.operateAsState(newState);
-
-    expect(target.isPosting).toBe(false);
-    expect(target.requiresReload).toBe(false);
-    expect(target.revision).toBe(initRevision);
-    expect(target.uiState).toBe(newState);
-    expect(target.waitingResponseSince()).toBeNull();
-});
-
-it('tests StateManager.post', () => {
-    const operation = { oldValue: initState, newValue: 2 };
-
-    const target = createStateManager();
-
-    target.operateAsState(operation.newValue);
-    const postResult = target.post();
-
-    expect(target.isPosting).toBe(true);
-    expect(target.requiresReload).toBe(false);
-    expect(target.revision).toBe(initRevision);
-    expect(target.uiState).toBe(operation.newValue);
-    expect(target.waitingResponseSince()).not.toBeNull();
-
-    if (postResult === undefined) {
-        expect(postResult).not.toBeUndefined();
-        throw new Error('Guard');
-    }
-    expect(postResult.syncedState).toBe(0);
-    expect(postResult.operationToPost).toEqual(operation);
-    expect(postResult.revision).toBe(initRevision);
-});
-
-it('tests StateManager: post -> non-id onPosted', () => {
-    const operation = { oldValue: initState, newValue: 2 };
-    const resultOperation = { oldValue: initState, newValue: 20 };
-
-    const target = createStateManager();
-
-    target.operateAsState(operation.newValue);
-    const postResult = target.post();
-    if (postResult === undefined) {
-        throw new Error('Guard');
-    }
-
-    postResult.onPosted({
-        isSuccess: true,
-        isId: false,
-        revisionTo: initRevision + 1,
-        result: resultOperation,
+        expect(target.isPosting).toBe(false);
+        expect(target.requiresReload).toBe(false);
+        expect(target.revision).toBe(initRevision);
+        expect(target.uiState).toBe(0);
+        expect(target.waitingResponseSince()).toBeNull();
     });
 
-    expect(target.isPosting).toBe(false);
-    expect(target.requiresReload).toBe(false);
-    expect(target.revision).toBe(initRevision + 1);
-    expect(target.uiState).toBe(resultOperation.newValue);
-    expect(target.waitingResponseSince()).toBeNull();
-});
+    it('tests StateManager.operate', () => {
+        const target = createStateManager();
 
-it('tests StateManager: post -> onPosted({ isId: true })', () => {
-    const operation = { oldValue: initState, newValue: 2 };
+        const newState = 2;
+        target.operateAsState(newState);
 
-    const target = createStateManager();
-
-    target.operateAsState(operation.newValue);
-    const postResult = target.post();
-    if (postResult === undefined) {
-        throw new Error('Guard');
-    }
-
-    postResult.onPosted({
-        isSuccess: true,
-        isId: true,
-        requestId: postResult.requestId,
+        expect(target.isPosting).toBe(false);
+        expect(target.requiresReload).toBe(false);
+        expect(target.revision).toBe(initRevision);
+        expect(target.uiState).toBe(newState);
+        expect(target.waitingResponseSince()).toBeNull();
     });
 
-    expect(target.isPosting).toBe(false);
-    expect(target.requiresReload).toBe(false);
-    expect(target.revision).toBe(initRevision);
-    expect(target.uiState).toBe(initState);
-    expect(target.waitingResponseSince()).toBeNull();
-});
+    it('tests StateManager.post', () => {
+        const operation = { oldValue: initState, newValue: 2 };
 
-it('tests StateManager: post -> onPosted({ isSuccess: null })', () => {
-    const operation = { oldValue: initState, newValue: 2 };
+        const target = createStateManager();
 
-    const target = createStateManager();
+        target.operateAsState(operation.newValue);
+        const postResult = target.post();
 
-    target.operateAsState(operation.newValue);
-    const postResult = target.post();
-    if (postResult === undefined) {
-        throw new Error('Guard');
-    }
+        expect(target.isPosting).toBe(true);
+        expect(target.requiresReload).toBe(false);
+        expect(target.revision).toBe(initRevision);
+        expect(target.uiState).toBe(operation.newValue);
+        expect(target.waitingResponseSince()).not.toBeNull();
 
-    postResult.onPosted({
-        isSuccess: null,
+        if (postResult === undefined) {
+            expect(postResult).not.toBeUndefined();
+            throw new Error('Guard');
+        }
+        expect(postResult.syncedState).toBe(0);
+        expect(postResult.operationToPost).toEqual(operation);
+        expect(postResult.revision).toBe(initRevision);
     });
 
-    expect(target.isPosting).toBe(false);
-    expect(target.requiresReload).toBe(true);
-    expect(target.uiState).toBe(operation.newValue);
-});
+    it('tests StateManager: post -> non-id onPosted', () => {
+        const operation = { oldValue: initState, newValue: 2 };
+        const resultOperation = { oldValue: initState, newValue: 20 };
 
-it('tests StateManager: post -> onPosted({ isSuccess: false })', () => {
-    const operation = { oldValue: initState, newValue: 2 };
+        const target = createStateManager();
 
-    const target = createStateManager();
+        target.operateAsState(operation.newValue);
+        const postResult = target.post();
+        if (postResult === undefined) {
+            throw new Error('Guard');
+        }
 
-    target.operateAsState(operation.newValue);
-    const postResult = target.post();
-    if (postResult === undefined) {
-        throw new Error('Guard');
-    }
+        postResult.onPosted({
+            isSuccess: true,
+            isId: false,
+            revisionTo: initRevision + 1,
+            result: resultOperation,
+        });
 
-    postResult.onPosted({
-        isSuccess: false,
+        expect(target.isPosting).toBe(false);
+        expect(target.requiresReload).toBe(false);
+        expect(target.revision).toBe(initRevision + 1);
+        expect(target.uiState).toBe(resultOperation.newValue);
+        expect(target.waitingResponseSince()).toBeNull();
     });
 
-    expect(target.isPosting).toBe(false);
-    expect(target.requiresReload).toBe(false);
-    expect(target.revision).toBe(initRevision);
-    expect(target.uiState).toBe(operation.newValue);
-    expect(target.waitingResponseSince()).toBeNull();
-});
+    it('tests StateManager: post -> onPosted({ isId: true })', () => {
+        const operation = { oldValue: initState, newValue: 2 };
 
-it('tests StateManager.onOthersGet(initRevision + 1)', () => {
-    const operation = { oldValue: initState, newValue: 2 };
+        const target = createStateManager();
 
-    const target = createStateManager();
+        target.operateAsState(operation.newValue);
+        const postResult = target.post();
+        if (postResult === undefined) {
+            throw new Error('Guard');
+        }
 
-    target.onOtherClientsGet(operation, initRevision + 1);
+        postResult.onPosted({
+            isSuccess: true,
+            isId: true,
+            requestId: postResult.requestId,
+        });
 
-    expect(target.isPosting).toBe(false);
-    expect(target.requiresReload).toBe(false);
-    expect(target.revision).toBe(initRevision + 1);
-    expect(target.uiState).toBe(operation.newValue);
-    expect(target.waitingResponseSince()).toBeNull();
-});
-
-test.each([initRevision - 1, initRevision])('tests StateManager.onOthersGet(%i)', revision => {
-    const operation = { oldValue: initState, newValue: 2 };
-
-    const target = createStateManager();
-
-    target.onOtherClientsGet(operation, revision);
-
-    expect(target.isPosting).toBe(false);
-    expect(target.requiresReload).toBe(false);
-    expect(target.revision).toBe(initRevision);
-    expect(target.uiState).toBe(initState);
-    expect(target.waitingResponseSince()).toBeNull();
-});
-
-test('tests StateManager: onOthersGet(initRevision + 2)', () => {
-    const operation = { oldValue: initState, newValue: 2 };
-
-    const target = createStateManager();
-
-    target.onOtherClientsGet(operation, initRevision + 2);
-
-    expect(target.isPosting).toBe(false);
-    expect(target.requiresReload).toBe(false);
-    expect(target.revision).toBe(initRevision);
-    expect(target.uiState).toBe(initState);
-    expect(target.waitingResponseSince()).not.toBeNull();
-});
-
-test('tests StateManager.onOthersGet(initRevision + 2) -> onOthersGet(initRevision + 1)', () => {
-    const firstOperation = { oldValue: initState, newValue: 2 };
-    const secondOperation = { oldValue: 2, newValue: 20 };
-
-    const target = createStateManager();
-
-    target.onOtherClientsGet(secondOperation, initRevision + 2);
-    target.onOtherClientsGet(firstOperation, initRevision + 1);
-
-    expect(target.isPosting).toBe(false);
-    expect(target.requiresReload).toBe(false);
-    expect(target.revision).toBe(initRevision + 2);
-    expect(target.uiState).toBe(secondOperation.newValue);
-    expect(target.waitingResponseSince()).toBeNull();
-});
-
-it('tests StateManager: post -> onPosted -> onOthersGet(initRevision + 2)', () => {
-    const operation = { oldValue: initState, newValue: 2 };
-    const operationResult = { oldValue: initState, newValue: 20 };
-    const otherClientsGet = { oldValue: 20, newValue: 200 };
-
-    const target = createStateManager();
-
-    target.operateAsState(operation.newValue);
-    const postResult = target.post();
-    if (postResult === undefined) {
-        throw new Error('Guard');
-    }
-
-    postResult.onPosted({
-        isSuccess: true,
-        isId: false,
-        revisionTo: initRevision + 1,
-        result: operationResult,
-    });
-    target.onOtherClientsGet(otherClientsGet, initRevision + 2);
-
-    expect(target.isPosting).toBe(false);
-    expect(target.requiresReload).toBe(false);
-    expect(target.revision).toBe(initRevision + 2);
-    expect(target.uiState).toBe(otherClientsGet.newValue);
-    expect(target.waitingResponseSince()).toBeNull();
-});
-
-test('tests StateManager: post -> onOthersGet(initRevision + 2) -> onPosted', () => {
-    const firstOperation = { oldValue: initState, newValue: 2 };
-    const secondOperation = { oldValue: 20, newValue: 200 };
-    const firstOperationResult = { oldValue: initState, newValue: 20 };
-
-    const target = createStateManager();
-
-    target.operateAsState(firstOperation.newValue);
-    const postResult = target.post();
-    if (postResult === undefined) {
-        throw new Error('Guard');
-    }
-
-    target.onOtherClientsGet(secondOperation, initRevision + 2);
-    postResult.onPosted({
-        isSuccess: true,
-        isId: false,
-        revisionTo: initRevision + 1,
-        result: firstOperationResult,
+        expect(target.isPosting).toBe(false);
+        expect(target.requiresReload).toBe(false);
+        expect(target.revision).toBe(initRevision);
+        expect(target.uiState).toBe(initState);
+        expect(target.waitingResponseSince()).toBeNull();
     });
 
-    expect(target.isPosting).toBe(false);
-    expect(target.requiresReload).toBe(false);
-    expect(target.revision).toBe(initRevision + 2);
-    expect(target.uiState).toBe(secondOperation.newValue);
-    expect(target.waitingResponseSince()).toBeNull();
-});
+    it('tests StateManager: post -> onPosted({ isSuccess: null })', () => {
+        const operation = { oldValue: initState, newValue: 2 };
 
-test('tests StateManager: operate -> post -> operate -> onPosted({ isSuccess: true })', () => {
-    const firstOperation = { oldValue: initState, newValue: 2 };
-    const secondOperation = { oldValue: 2, newValue: 20 };
-    const firstOperationResult = { oldValue: initState, newValue: 200 };
+        const target = createStateManager();
 
-    const target = createStateManager();
+        target.operateAsState(operation.newValue);
+        const postResult = target.post();
+        if (postResult === undefined) {
+            throw new Error('Guard');
+        }
 
-    target.operateAsState(firstOperation.newValue);
+        postResult.onPosted({
+            isSuccess: null,
+        });
 
-    const postResult = target.post();
-    if (postResult === undefined) {
-        throw new Error('Guard');
-    }
-
-    target.operateAsState(secondOperation.newValue);
-
-    postResult.onPosted({
-        isSuccess: true,
-        isId: false,
-        revisionTo: initRevision + 1,
-        result: firstOperationResult,
+        expect(target.isPosting).toBe(false);
+        expect(target.requiresReload).toBe(true);
+        expect(target.uiState).toBe(operation.newValue);
     });
 
-    expect(target.isPosting).toBe(false);
-    expect(target.requiresReload).toBe(false);
-    expect(target.revision).toBe(initRevision + 1);
-    expect(target.uiState).toBe(secondOperation.newValue);
-    expect(target.waitingResponseSince()).toBeNull();
-});
+    it('tests StateManager: post -> onPosted({ isSuccess: false })', () => {
+        const operation = { oldValue: initState, newValue: 2 };
 
-test('tests StateManager: operate -> post -> operate -> onPosted({ isId: true })', () => {
-    const firstOperation = { oldValue: initState, newValue: 2 };
-    const secondOperation = { oldValue: 2, newValue: 20 };
+        const target = createStateManager();
 
-    const target = createStateManager();
+        target.operateAsState(operation.newValue);
+        const postResult = target.post();
+        if (postResult === undefined) {
+            throw new Error('Guard');
+        }
 
-    target.operateAsState(firstOperation.newValue);
+        postResult.onPosted({
+            isSuccess: false,
+        });
 
-    const postResult = target.post();
-    if (postResult === undefined) {
-        throw new Error('Guard');
-    }
-
-    target.operateAsState(secondOperation.newValue);
-
-    postResult.onPosted({
-        isSuccess: true,
-        isId: true,
-        requestId: postResult.requestId,
+        expect(target.isPosting).toBe(false);
+        expect(target.requiresReload).toBe(false);
+        expect(target.revision).toBe(initRevision);
+        expect(target.uiState).toBe(operation.newValue);
+        expect(target.waitingResponseSince()).toBeNull();
     });
 
-    expect(target.isPosting).toBe(false);
-    expect(target.requiresReload).toBe(false);
-    expect(target.revision).toBe(initRevision);
-    expect(target.uiState).toBe(secondOperation.newValue);
-    expect(target.waitingResponseSince()).toBeNull();
+    it('tests StateManager.onOthersGet(initRevision + 1)', () => {
+        const operation = { oldValue: initState, newValue: 2 };
+
+        const target = createStateManager();
+
+        target.onOtherClientsGet(operation, initRevision + 1);
+
+        expect(target.isPosting).toBe(false);
+        expect(target.requiresReload).toBe(false);
+        expect(target.revision).toBe(initRevision + 1);
+        expect(target.uiState).toBe(operation.newValue);
+        expect(target.waitingResponseSince()).toBeNull();
+    });
+
+    test.each([initRevision - 1, initRevision])('tests StateManager.onOthersGet(%i)', revision => {
+        const operation = { oldValue: initState, newValue: 2 };
+
+        const target = createStateManager();
+
+        target.onOtherClientsGet(operation, revision);
+
+        expect(target.isPosting).toBe(false);
+        expect(target.requiresReload).toBe(false);
+        expect(target.revision).toBe(initRevision);
+        expect(target.uiState).toBe(initState);
+        expect(target.waitingResponseSince()).toBeNull();
+    });
+
+    test('tests StateManager: onOthersGet(initRevision + 2)', () => {
+        const operation = { oldValue: initState, newValue: 2 };
+
+        const target = createStateManager();
+
+        target.onOtherClientsGet(operation, initRevision + 2);
+
+        expect(target.isPosting).toBe(false);
+        expect(target.requiresReload).toBe(false);
+        expect(target.revision).toBe(initRevision);
+        expect(target.uiState).toBe(initState);
+        expect(target.waitingResponseSince()).not.toBeNull();
+    });
+
+    test('tests StateManager.onOthersGet(initRevision + 2) -> onOthersGet(initRevision + 1)', () => {
+        const firstOperation = { oldValue: initState, newValue: 2 };
+        const secondOperation = { oldValue: 2, newValue: 20 };
+
+        const target = createStateManager();
+
+        target.onOtherClientsGet(secondOperation, initRevision + 2);
+        target.onOtherClientsGet(firstOperation, initRevision + 1);
+
+        expect(target.isPosting).toBe(false);
+        expect(target.requiresReload).toBe(false);
+        expect(target.revision).toBe(initRevision + 2);
+        expect(target.uiState).toBe(secondOperation.newValue);
+        expect(target.waitingResponseSince()).toBeNull();
+    });
+
+    it('tests StateManager: post -> onPosted -> onOthersGet(initRevision + 2)', () => {
+        const operation = { oldValue: initState, newValue: 2 };
+        const operationResult = { oldValue: initState, newValue: 20 };
+        const otherClientsGet = { oldValue: 20, newValue: 200 };
+
+        const target = createStateManager();
+
+        target.operateAsState(operation.newValue);
+        const postResult = target.post();
+        if (postResult === undefined) {
+            throw new Error('Guard');
+        }
+
+        postResult.onPosted({
+            isSuccess: true,
+            isId: false,
+            revisionTo: initRevision + 1,
+            result: operationResult,
+        });
+        target.onOtherClientsGet(otherClientsGet, initRevision + 2);
+
+        expect(target.isPosting).toBe(false);
+        expect(target.requiresReload).toBe(false);
+        expect(target.revision).toBe(initRevision + 2);
+        expect(target.uiState).toBe(otherClientsGet.newValue);
+        expect(target.waitingResponseSince()).toBeNull();
+    });
+
+    test('tests StateManager: post -> onOthersGet(initRevision + 2) -> onPosted', () => {
+        const firstOperation = { oldValue: initState, newValue: 2 };
+        const secondOperation = { oldValue: 20, newValue: 200 };
+        const firstOperationResult = { oldValue: initState, newValue: 20 };
+
+        const target = createStateManager();
+
+        target.operateAsState(firstOperation.newValue);
+        const postResult = target.post();
+        if (postResult === undefined) {
+            throw new Error('Guard');
+        }
+
+        target.onOtherClientsGet(secondOperation, initRevision + 2);
+        postResult.onPosted({
+            isSuccess: true,
+            isId: false,
+            revisionTo: initRevision + 1,
+            result: firstOperationResult,
+        });
+
+        expect(target.isPosting).toBe(false);
+        expect(target.requiresReload).toBe(false);
+        expect(target.revision).toBe(initRevision + 2);
+        expect(target.uiState).toBe(secondOperation.newValue);
+        expect(target.waitingResponseSince()).toBeNull();
+    });
+
+    test('tests StateManager: operate -> post -> operate -> onPosted({ isSuccess: true })', () => {
+        const firstOperation = { oldValue: initState, newValue: 2 };
+        const secondOperation = { oldValue: 2, newValue: 20 };
+        const firstOperationResult = { oldValue: initState, newValue: 200 };
+
+        const target = createStateManager();
+
+        target.operateAsState(firstOperation.newValue);
+
+        const postResult = target.post();
+        if (postResult === undefined) {
+            throw new Error('Guard');
+        }
+
+        target.operateAsState(secondOperation.newValue);
+
+        postResult.onPosted({
+            isSuccess: true,
+            isId: false,
+            revisionTo: initRevision + 1,
+            result: firstOperationResult,
+        });
+
+        expect(target.isPosting).toBe(false);
+        expect(target.requiresReload).toBe(false);
+        expect(target.revision).toBe(initRevision + 1);
+        expect(target.uiState).toBe(secondOperation.newValue);
+        expect(target.waitingResponseSince()).toBeNull();
+    });
+
+    test('tests StateManager: operate -> post -> operate -> onPosted({ isId: true })', () => {
+        const firstOperation = { oldValue: initState, newValue: 2 };
+        const secondOperation = { oldValue: 2, newValue: 20 };
+
+        const target = createStateManager();
+
+        target.operateAsState(firstOperation.newValue);
+
+        const postResult = target.post();
+        if (postResult === undefined) {
+            throw new Error('Guard');
+        }
+
+        target.operateAsState(secondOperation.newValue);
+
+        postResult.onPosted({
+            isSuccess: true,
+            isId: true,
+            requestId: postResult.requestId,
+        });
+
+        expect(target.isPosting).toBe(false);
+        expect(target.requiresReload).toBe(false);
+        expect(target.revision).toBe(initRevision);
+        expect(target.uiState).toBe(secondOperation.newValue);
+        expect(target.waitingResponseSince()).toBeNull();
+    });
 });
