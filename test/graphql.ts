@@ -189,6 +189,20 @@ export type GetNonJoinedRoomResult = {
     roomAsListItem: RoomAsListItem;
 };
 
+export type GetRoomAsListItemFailureResult = {
+    __typename?: 'GetRoomAsListItemFailureResult';
+    failureType: GetRoomFailureType;
+};
+
+export type GetRoomAsListItemResult =
+    | GetRoomAsListItemFailureResult
+    | GetRoomAsListItemSuccessResult;
+
+export type GetRoomAsListItemSuccessResult = {
+    __typename?: 'GetRoomAsListItemSuccessResult';
+    room: RoomAsListItem;
+};
+
 export enum GetRoomConnectionFailureType {
     NotParticipant = 'NotParticipant',
     RoomNotFound = 'RoomNotFound',
@@ -535,11 +549,11 @@ export type Query = {
     getLog: GetRoomLogResult;
     getMessages: GetRoomMessagesResult;
     getRoom: GetRoomResult;
+    getRoomAsListItem: GetRoomAsListItemResult;
     getRoomConnections: GetRoomConnectionsResult;
     getRoomsList: GetRoomsListResult;
     getServerInfo: ServerInfo;
     isEntry: Scalars['Boolean'];
-    requiresPhraseToJoinAsPlayer: RequiresPhraseResult;
 };
 
 export type QueryGetDiceHelpMessageArgs = {
@@ -562,28 +576,12 @@ export type QueryGetRoomArgs = {
     id: Scalars['String'];
 };
 
+export type QueryGetRoomAsListItemArgs = {
+    roomId: Scalars['String'];
+};
+
 export type QueryGetRoomConnectionsArgs = {
     roomId: Scalars['String'];
-};
-
-export type QueryRequiresPhraseToJoinAsPlayerArgs = {
-    roomId: Scalars['String'];
-};
-
-export type RequiresPhraseFailureResult = {
-    __typename?: 'RequiresPhraseFailureResult';
-    failureType: RequiresPhraseFailureType;
-};
-
-export enum RequiresPhraseFailureType {
-    NotFound = 'NotFound',
-}
-
-export type RequiresPhraseResult = RequiresPhraseFailureResult | RequiresPhraseSuccessResult;
-
-export type RequiresPhraseSuccessResult = {
-    __typename?: 'RequiresPhraseSuccessResult';
-    value: Scalars['Boolean'];
 };
 
 export type RoomAsListItem = {
@@ -1579,15 +1577,25 @@ export type IsEntryQueryVariables = Exact<{ [key: string]: never }>;
 
 export type IsEntryQuery = { __typename?: 'Query'; result: boolean };
 
-export type RequiresPhraseToJoinAsPlayerQueryVariables = Exact<{
+export type GetRoomAsListItemQueryVariables = Exact<{
     roomId: Scalars['String'];
 }>;
 
-export type RequiresPhraseToJoinAsPlayerQuery = {
+export type GetRoomAsListItemQuery = {
     __typename?: 'Query';
     result:
-        | { __typename?: 'RequiresPhraseFailureResult'; failureType: RequiresPhraseFailureType }
-        | { __typename?: 'RequiresPhraseSuccessResult'; value: boolean };
+        | { __typename?: 'GetRoomAsListItemFailureResult'; failureType: GetRoomFailureType }
+        | {
+              __typename?: 'GetRoomAsListItemSuccessResult';
+              room: {
+                  __typename?: 'RoomAsListItem';
+                  id: string;
+                  name: string;
+                  createdBy: string;
+                  requiresPhraseToJoinAsPlayer: boolean;
+                  requiresPhraseToJoinAsSpectator: boolean;
+              };
+          };
 };
 
 export type CreateFileTagMutationVariables = Exact<{
@@ -3829,13 +3837,13 @@ export const IsEntryDocument = {
         },
     ],
 } as unknown as DocumentNode<IsEntryQuery, IsEntryQueryVariables>;
-export const RequiresPhraseToJoinAsPlayerDocument = {
+export const GetRoomAsListItemDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'query',
-            name: { kind: 'Name', value: 'RequiresPhraseToJoinAsPlayer' },
+            name: { kind: 'Name', value: 'GetRoomAsListItem' },
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
@@ -3852,7 +3860,7 @@ export const RequiresPhraseToJoinAsPlayerDocument = {
                     {
                         kind: 'Field',
                         alias: { kind: 'Name', value: 'result' },
-                        name: { kind: 'Name', value: 'requiresPhraseToJoinAsPlayer' },
+                        name: { kind: 'Name', value: 'getRoomAsListItem' },
                         arguments: [
                             {
                                 kind: 'Argument',
@@ -3872,7 +3880,7 @@ export const RequiresPhraseToJoinAsPlayerDocument = {
                                         kind: 'NamedType',
                                         name: {
                                             kind: 'Name',
-                                            value: 'RequiresPhraseSuccessResult',
+                                            value: 'GetRoomAsListItemSuccessResult',
                                         },
                                     },
                                     selectionSet: {
@@ -3880,7 +3888,19 @@ export const RequiresPhraseToJoinAsPlayerDocument = {
                                         selections: [
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'value' },
+                                                name: { kind: 'Name', value: 'room' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'FragmentSpread',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'RoomAsListItem',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
                                             },
                                         ],
                                     },
@@ -3891,7 +3911,7 @@ export const RequiresPhraseToJoinAsPlayerDocument = {
                                         kind: 'NamedType',
                                         name: {
                                             kind: 'Name',
-                                            value: 'RequiresPhraseFailureResult',
+                                            value: 'GetRoomAsListItemFailureResult',
                                         },
                                     },
                                     selectionSet: {
@@ -3910,11 +3930,9 @@ export const RequiresPhraseToJoinAsPlayerDocument = {
                 ],
             },
         },
+        ...RoomAsListItemFragmentDoc.definitions,
     ],
-} as unknown as DocumentNode<
-    RequiresPhraseToJoinAsPlayerQuery,
-    RequiresPhraseToJoinAsPlayerQueryVariables
->;
+} as unknown as DocumentNode<GetRoomAsListItemQuery, GetRoomAsListItemQueryVariables>;
 export const CreateFileTagDocument = {
     kind: 'Document',
     definitions: [

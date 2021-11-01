@@ -48,11 +48,9 @@ const messages_1 = require("../utils/messages");
 const graphql_1 = require("../../entities/room/graphql");
 const OperateRoomFailureType_1 = require("../../../enums/OperateRoomFailureType");
 const LeaveRoomFailureType_1 = require("../../../enums/LeaveRoomFailureType");
-const RequiresPhraseFailureType_1 = require("../../../enums/RequiresPhraseFailureType");
 const OperateRoomResult_1 = require("../../results/OperateRoomResult");
 const JoinRoomResult_1 = require("../../results/JoinRoomResult");
 const GetRoomsListResult_1 = require("../../results/GetRoomsListResult");
-const RequiresPhraseResult_1 = require("../../results/RequiresPhraseResult");
 const CreateRoomResult_1 = require("../../results/CreateRoomResult");
 const GetRoomResult_1 = require("../../results/GetRoomResult");
 const LeaveRoomResult_1 = require("../../results/LeaveRoomResult");
@@ -92,6 +90,7 @@ const roles_1 = require("../../../roles");
 const ParticipantRoleType_1 = require("../../../enums/ParticipantRoleType");
 const RateLimitMiddleware_1 = require("../../middlewares/RateLimitMiddleware");
 const convertToMaxLength100String_1 = require("../../../utils/convertToMaxLength100String");
+const GetRoomAsListItemResult_1 = require("../../results/GetRoomAsListItemResult");
 const find = (source, key) => source[key];
 const operateParticipantAndFlush = async ({ myUserUid, em, room, participantUserUids, create, update, }) => {
     const prevRevision = room.revision;
@@ -506,18 +505,17 @@ let RoomResolver = RoomResolver_1 = class RoomResolver {
         }
         return result.value;
     }
-    async requiresPhraseToJoinAsPlayer(roomId, context) {
+    async getRoomAsListItem(roomId, context) {
         const queue = async () => {
             const em = context.em;
-            const room = await em.findOne(Room$MikroORM.Room, { id: roomId });
-            if (room == null) {
+            const roomEntity = await em.findOne(Room$MikroORM.Room, { id: roomId });
+            if (roomEntity == null) {
                 return {
-                    failureType: RequiresPhraseFailureType_1.RequiresPhraseFailureType.NotFound,
+                    failureType: GetRoomFailureType_1.GetRoomFailureType.NotFound,
                 };
             }
-            return {
-                value: room.joinAsPlayerPhrase != null,
-            };
+            const room = (0, global_1.stateToGraphQL)({ roomEntity: roomEntity });
+            return { room };
         };
         const result = await context.promiseQueue.next(queue);
         if (result.type === promiseQueue_1.queueLimitReached) {
@@ -1984,15 +1982,15 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], RoomResolver.prototype, "getRoomsList", null);
 __decorate([
-    (0, type_graphql_1.Query)(() => RequiresPhraseResult_1.RequiresPhraseResult),
+    (0, type_graphql_1.Query)(() => GetRoomAsListItemResult_1.GetRoomAsListItemResult),
     (0, type_graphql_1.Authorized)(roles_1.ENTRY),
-    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(2)),
+    (0, type_graphql_1.UseMiddleware)((0, RateLimitMiddleware_1.RateLimitMiddleware)(1)),
     __param(0, (0, type_graphql_1.Arg)('roomId')),
     __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
-], RoomResolver.prototype, "requiresPhraseToJoinAsPlayer", null);
+], RoomResolver.prototype, "getRoomAsListItem", null);
 __decorate([
     (0, type_graphql_1.Query)(() => graphql_2.GetRoomMessagesResult),
     (0, type_graphql_1.Authorized)(roles_1.ENTRY),

@@ -24,7 +24,6 @@ import { serverTooBusyMessage } from '../utils/messages';
 import { RoomOperation, deleteRoomOperation } from '../../entities/room/graphql';
 import { OperateRoomFailureType } from '../../../enums/OperateRoomFailureType';
 import { LeaveRoomFailureType } from '../../../enums/LeaveRoomFailureType';
-import { RequiresPhraseFailureType } from '../../../enums/RequiresPhraseFailureType';
 import {
     OperateRoomFailureResult,
     OperateRoomIdResult,
@@ -34,7 +33,6 @@ import {
 } from '../../results/OperateRoomResult';
 import { JoinRoomResult } from '../../results/JoinRoomResult';
 import { GetRoomsListResult } from '../../results/GetRoomsListResult';
-import { RequiresPhraseResult } from '../../results/RequiresPhraseResult';
 import { CreateRoomResult } from '../../results/CreateRoomResult';
 import { GetRoomResult } from '../../results/GetRoomResult';
 import { LeaveRoomResult } from '../../results/LeaveRoomResult';
@@ -159,6 +157,7 @@ import { ENTRY } from '../../../roles';
 import { ParticipantRoleType } from '../../../enums/ParticipantRoleType';
 import { RateLimitMiddleware } from '../../middlewares/RateLimitMiddleware';
 import { convertToMaxLength100String } from '../../../utils/convertToMaxLength100String';
+import { GetRoomAsListItemResult } from '../../results/GetRoomAsListItemResult';
 
 const find = <T>(source: Record<string, T | undefined>, key: string): T | undefined => source[key];
 
@@ -763,24 +762,23 @@ export class RoomResolver {
         return result.value;
     }
 
-    @Query(() => RequiresPhraseResult)
+    @Query(() => GetRoomAsListItemResult)
     @Authorized(ENTRY)
-    @UseMiddleware(RateLimitMiddleware(2))
-    public async requiresPhraseToJoinAsPlayer(
+    @UseMiddleware(RateLimitMiddleware(1))
+    public async getRoomAsListItem(
         @Arg('roomId') roomId: string,
         @Ctx() context: ResolverContext
-    ): Promise<typeof RequiresPhraseResult> {
+    ): Promise<typeof GetRoomAsListItemResult> {
         const queue = async () => {
             const em = context.em;
-            const room = await em.findOne(Room$MikroORM.Room, { id: roomId });
-            if (room == null) {
+            const roomEntity = await em.findOne(Room$MikroORM.Room, { id: roomId });
+            if (roomEntity == null) {
                 return {
-                    failureType: RequiresPhraseFailureType.NotFound,
+                    failureType: GetRoomFailureType.NotFound,
                 };
             }
-            return {
-                value: room.joinAsPlayerPhrase != null,
-            };
+            const room = stateToGraphql$RoomAsListItem({ roomEntity: roomEntity });
+            return { room };
         };
 
         const result = await context.promiseQueue.next(queue);

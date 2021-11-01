@@ -18,7 +18,6 @@ const DeleteMessageFailureType_1 = require("../enums/DeleteMessageFailureType");
 const EditMessageFailureType_1 = require("../enums/EditMessageFailureType");
 const MakeMessageNotSecretFailureType_1 = require("../enums/MakeMessageNotSecretFailureType");
 const GetRoomLogFailureType_1 = require("../enums/GetRoomLogFailureType");
-const RequiresPhraseFailureType_1 = require("../enums/RequiresPhraseFailureType");
 const PromoteFailureType_1 = require("../enums/PromoteFailureType");
 const ChangeParticipantNameFailureType_1 = require("../enums/ChangeParticipantNameFailureType");
 const DeleteRoomFailureType_1 = require("../enums/DeleteRoomFailureType");
@@ -102,9 +101,6 @@ const registerEnumTypes = () => {
     });
     (0, type_graphql_1.registerEnumType)(PromoteFailureType_1.PromoteFailureType, {
         name: 'PromoteFailureType',
-    });
-    (0, type_graphql_1.registerEnumType)(RequiresPhraseFailureType_1.RequiresPhraseFailureType, {
-        name: 'RequiresPhraseFailureType',
     });
     (0, type_graphql_1.registerEnumType)(RoomParameterNameType_1.RoomParameterNameType, {
         name: 'RoomParameterNameType',
