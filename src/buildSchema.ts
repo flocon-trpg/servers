@@ -92,7 +92,7 @@ const optionBase: BuildSchemaOptions = {
 };
 
 const emitSchemaFileOptions: EmitSchemaFileOptions = {
-    path: path.resolve(process.cwd(), '../graphql/generated/schema.gql'),
+    path: path.resolve(process.cwd(), './tmp/schema.gql'),
     commentDescriptions: true,
 };
 

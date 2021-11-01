@@ -1,17 +1,10 @@
 # dedupeFragmentsをtrueにしないと、使用する際にエラーが出る
 
 overwrite: true
-schema: '../graphql/generated/schema.gql'
-documents: '../graphql/documents/**/*.graphql'
+schema: './tmp/schema.gql'
+documents: './graphql/**/*.graphql'
 generates:
-    ../web_server/src/generated/graphql.ts:
-        plugins:
-            - 'typescript'
-            - 'typescript-operations'
-            - 'typed-document-node'
-        config:
-            dedupeFragments: true
-    ./test/graphql.ts:
+    ./generated/graphql.ts:
         plugins:
             - 'typescript'
             - 'typescript-operations'

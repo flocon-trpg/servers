@@ -56,7 +56,7 @@ import {
     DeleteFilesMutation,
     DeleteFilesMutationVariables,
     DeleteFilesDocument,
-} from './graphql';
+} from '../generated/graphql';
 import { EntryToServerResultType } from '../src/enums/EntryToServerResultType';
 import { ServerConfig } from '../src/configType';
 import { UpOperation, parseState } from '@kizahasi/flocon-core';

@@ -64,7 +64,7 @@ const optionBase = {
     resolvers,
 };
 const emitSchemaFileOptions = {
-    path: path_1.default.resolve(process.cwd(), '../graphql/generated/schema.gql'),
+    path: path_1.default.resolve(process.cwd(), './tmp/schema.gql'),
     commentDescriptions: true,
 };
 const buildSchema = (serverConfig) => async (options) => {
