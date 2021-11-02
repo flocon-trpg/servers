@@ -4,7 +4,7 @@ import {
     RoomEventDocument,
     RoomEventSubscription,
     RoomEventSubscriptionVariables,
-} from './graphql';
+} from '../generated/graphql';
 import { Resources } from './resources';
 import { CompositeTestRoomEventSubscription, TestRoomEventSubscription } from './subscription';
 import { createClient as createWsClient } from 'graphql-ws';
