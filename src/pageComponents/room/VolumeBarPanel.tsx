@@ -141,6 +141,11 @@ export const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
             {toRow(channel3VolumeBar, 'BGMチャンネル3音量')}
             {toRow(channel4VolumeBar, 'BGMチャンネル4音量')}
             {toRow(channel5VolumeBar, 'BGMチャンネル5音量')}
+            <div style={{ paddingTop: 8, color: 'gray' }}>
+                これらの設定は個人設定です。
+                <br />
+                他のユーザーには影響しません。
+            </div>
         </div>
     );
 };
