@@ -58,7 +58,7 @@
         "@kizahasi/ot-string": "^0.2.3",
         "@kizahasi/result": "^1.0.0",
         "@kizahasi/util": "^0.9.1",
-        "@ltd/j-toml": "^1.12.2",
+        "@ltd/j-toml": "^1.23.0",
         "fp-ts": "^2.11.5",
         "io-ts": "^2.2.16",
         "ioredis": "^4.28.0",
