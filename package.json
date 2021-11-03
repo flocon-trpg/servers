@@ -1,0 +1,9 @@
+{
+  "name": "@flocon-trpg/sdk",
+  "description": "core packages for Flocon",
+  "author": "kizahasi",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}
