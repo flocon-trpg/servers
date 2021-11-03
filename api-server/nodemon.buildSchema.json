@@ -1,0 +1,5 @@
+{
+    "watch": ["../graphql/documents"],
+    "ext": "graphql,gql",
+    "exec": "ts-node run-buildSchemaSync.ts"
+}

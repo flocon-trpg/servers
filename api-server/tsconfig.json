@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        /* Visit https://aka.ms/tsconfig.json to read more about this file */
+
+        "resolveJsonModule": false,
+        "target": "ES2017",
+        "module": "commonjs",
+        // https://typegraphql.com/docs/0.17.0/installation.html#packages-installation
+        "lib": ["es2019", "esnext.asynciterable"],
+        "removeComments": true,
+        "strict": true,
+        "esModuleInterop": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "noUncheckedIndexedAccess": true
+    },
+    "exclude": ["node_modules"],
+    "include": ["src/**/*.ts", "test/**/*.ts"]
+}
