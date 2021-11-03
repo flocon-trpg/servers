@@ -1,5 +1,5 @@
 {
-    "version": "0.8.1-beta.8",
+    "version": "0.9.1",
     "license": "MIT",
     "main": "dist/cjs/index.js",
     "module": "dist/esm/index.js",
@@ -15,14 +15,9 @@
         "test": "jest",
         "lint": "eslint src test"
     },
-    "name": "@flocon-trpg/flocon-script",
+    "name": "@flocon-trpg/utils",
     "author": "kizahasi",
-    "devDependencies": {
-        "@types/estree": "0.0.50"
-    },
     "dependencies": {
-        "@kizahasi/option": "^1.0.0",
-        "@kizahasi/util": "^0.9.1",
-        "acorn": "^8.5.0"
+        "@kizahasi/option": "^1.0.0"
     }
 }
