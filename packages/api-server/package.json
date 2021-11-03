@@ -1,5 +1,5 @@
 {
-    "name": "flocon-api",
+    "name": "@flocon-trpg/api-server",
     "description": "Flocon API server",
     "dependencies": {
         "@kizahasi/flocon-core": "0.20.0-beta.11",
@@ -34,7 +34,6 @@
         "fs-extra": "^10.0.0",
         "graphql": "^15.6.0",
         "graphql-ws": "^5.5.0",
-        "husky": "^7.0.1",
         "immer": "^9.0.6",
         "io-ts": "^2.2.16",
         "io-ts-reporters": "^2.0.0",
@@ -55,26 +54,18 @@
         "yargs": "^17.2.1"
     },
     "devDependencies": {
-        "@commitlint/cli": "^13.2.1",
-        "@commitlint/config-conventional": "^13.2.0",
         "@graphql-codegen/cli": "^2.2.0",
         "@graphql-codegen/typed-document-node": "^2.1.4",
         "@graphql-codegen/typescript": "^2.2.2",
         "@graphql-codegen/typescript-operations": "^2.1.4",
         "@types/jest": "^27.0.2",
         "@types/url-join": "^4.0.1",
-        "@typescript-eslint/eslint-plugin": "^5.2.0",
-        "@typescript-eslint/parser": "^5.2.0",
         "@urql/core": "^2.3.3",
         "axios": "^0.21.4",
-        "eslint": "^8.1.0",
-        "eslint-config-prettier": "^8.2.0",
-        "eslint-plugin-prettier": "^4.0.0",
         "form-data": "^4.0.0",
         "isomorphic-fetch": "^3.0.0",
         "isomorphic-ws": "^4.0.1",
         "jest": "^27.3.1",
-        "prettier": "^2.4.1",
         "react": "^17.0.2",
         "rimraf": "^3.0.2",
         "ts-jest": "^27.0.7",
@@ -82,14 +73,6 @@
     },
     "engines": {
         "node": ">=14"
-    },
-    "prettier": {
-        "printWidth": 100,
-        "semi": true,
-        "singleQuote": true,
-        "trailingComma": "es5",
-        "tabWidth": 4,
-        "arrowParens": "avoid"
     },
     "scripts": {
         "dev": "node dist/index.js",
@@ -106,12 +89,7 @@
         "test": "jest",
         "type-check": "tsc -p tsconfig.type-check.json",
         "watch": "run-p watch:*",
-        "watch:codegen": "graphql-codegen --config codegen.yml --watch",
-        "watch:schema": "nodemon --config nodemon.buildSchema.json",
-        "watch:node": "nodemon --config nodemon.node.json",
-        "prepare": "husky install",
-        "prettier": "npm run prettier:base -- --write",
-        "prettier:base": "prettier \"**/*.{ts,config.js,eslintrc.js,json,yml,md}\""
+        "watch:codegen": "graphql-codegen --config codegen.yml --watch"
     },
     "license": "MIT"
 }
