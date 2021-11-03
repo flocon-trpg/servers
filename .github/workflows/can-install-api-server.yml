@@ -1,0 +1,63 @@
+name: can-install packages/api-server
+
+on:
+    pull_request:
+        paths:
+            - 'packages/api-server/**'
+
+jobs:
+    npm:
+        name: Check npm install --production=${{matrix.is_production}} and build on Node ${{ matrix.node }}, and ${{ matrix.os }}
+
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                node: ['14.x', '16.x', '18.x']
+                os: [ubuntu-latest, windows-latest, macos-latest]
+                is_production: ['false', 'true']
+
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v2
+
+            - name: Use Node ${{ matrix.node }}
+              uses: actions/setup-node@v2
+              with:
+                  node-version: ${{ matrix.node }}
+
+            - name: Update to npm@latest
+              run: npm install -g npm@latest
+
+            - name: Install
+              run: npm install --production=${{matrix.is_production}}
+
+            - name: Build (as type checking)
+              run: npm run build
+
+    yarn:
+        name: Check yarn install --production=${{matrix.is_production}} and build on Node ${{ matrix.node }}, and ${{ matrix.os }}
+
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                node: ['14.x', '16.x', '18.x']
+                os: [ubuntu-latest, windows-latest, macos-latest]
+                is_production: ['false', 'true']
+
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v2
+
+            - name: Use Node ${{ matrix.node }}
+              uses: actions/setup-node@v2
+              with:
+                  node-version: ${{ matrix.node }}
+
+            - name: Install yarn
+              run: npm install -g yarn
+
+            - name: Install
+              run: yarn install --production=${{matrix.is_production}}
+
+            - name: Build (as type checking)
+              run: yarn build

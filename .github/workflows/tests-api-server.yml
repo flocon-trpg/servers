@@ -1,0 +1,94 @@
+name: tests packages/api-server
+
+on:
+    push:
+        branches:
+            - main
+        paths:
+            - 'packages/api-server/**'
+    pull_request:
+        paths:
+            - 'packages/api-server/**'
+
+jobs:
+    main:
+        name: Type-check and test on ${{ matrix.container }}
+
+        strategy:
+            matrix:
+                container: ['node:14']
+        defaults:
+            run:
+                working-directory: ./packages/api-server
+        runs-on: ubuntu-latest
+        container: ${{ matrix.container }}
+
+        services:
+            postgres:
+                image: postgres
+                env:
+                    POSTGRES_USER: postgres
+                    POSTGRES_PASSWORD: postgres
+                    POSTGRES_DB: test
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 5432:5432
+
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v2
+
+            - name: Install yarn
+              run: npm install -g yarn
+
+            - name: Install
+              run: yarn
+
+            - name: Type-check
+              run: yarn type-check
+
+            - name: Migration-up SQLite(1)
+              run: yarn migration-up --db sqlite
+              env:
+                  FLOCON_API_CONFIG: >
+                      {
+                          "database": {
+                              "sqlite": {
+                                  "dbName": "./test1.sqlite3"
+                              }
+                          }
+                      }
+
+            - name: Migration-up SQLite(2)
+              run: yarn migration-up --db sqlite
+              env:
+                  FLOCON_API_CONFIG: >
+                      {
+                          "database": {
+                              "sqlite": {
+                                  "dbName": "./test2.sqlite3"
+                              }
+                          }
+                      }
+
+            - name: Migration-up PostgreSQL
+              run: yarn migration-up --db postgresql
+              env:
+                  FLOCON_API_CONFIG: >
+                      {
+                          "database": {
+                              "postgresql": {
+                                  "dbName": "test",
+                                  "clientUrl": "postgresql://postgres:postgres@postgres:5432"
+                              }
+                          }
+                      }
+
+            # does not execute `npm run build` because it already has js files
+
+            - name: Test
+              run: yarn test --ci --coverage --maxWorkers=2
