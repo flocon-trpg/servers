@@ -57,7 +57,7 @@ jobs:
                   node-version: ${{ matrix.node }}
                   cache: yarn
 
-            - run: yarn install --production=${{matrix.is_production}}
+            - run: yarn workspaces focus --all --production
 
             - name: Build (as type checking)
               run: yarn build
