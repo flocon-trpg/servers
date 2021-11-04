@@ -30,7 +30,7 @@
         "class-validator": "^0.13.1",
         "color": "^4.0.1",
         "express": "^4.17.1",
-        "firebase-admin": "^9.11.0",
+        "firebase-admin": "^10.0.0",
         "fs-extra": "^10.0.0",
         "graphql": "^15.6.0",
         "graphql-ws": "^5.5.0",
