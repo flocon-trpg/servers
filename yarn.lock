@@ -816,7 +816,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@commitlint/cli@npm:^14.1.0":
+"@commitlint/cli@npm:14.1.0":
   version: 14.1.0
   resolution: "@commitlint/cli@npm:14.1.0"
   dependencies:
@@ -835,7 +835,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@commitlint/config-conventional@npm:^14.1.0":
+"@commitlint/config-conventional@npm:14.1.0":
   version: 14.1.0
   resolution: "@commitlint/config-conventional@npm:14.1.0"
   dependencies:
@@ -1142,10 +1142,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@flocon-trpg/api-server@workspace:packages/api-server"
   dependencies:
-    "@graphql-codegen/cli": ^2.2.0
-    "@graphql-codegen/typed-document-node": ^2.1.4
-    "@graphql-codegen/typescript": ^2.2.2
-    "@graphql-codegen/typescript-operations": ^2.1.4
+    "@graphql-codegen/cli": 2.2.2
+    "@graphql-codegen/typed-document-node": 2.2.0
+    "@graphql-codegen/typescript": 2.3.0
+    "@graphql-codegen/typescript-operations": 2.2.0
     "@kizahasi/flocon-core": 0.20.0-beta.11
     "@kizahasi/ot-string": ^0.2.3
     "@kizahasi/result": ^1.0.0
@@ -1158,19 +1158,19 @@ __metadata:
     "@types/color": ^3.0.2
     "@types/express": ^4.17.13
     "@types/fs-extra": ^9.0.13
-    "@types/jest": ^27.0.2
+    "@types/jest": 27.0.2
     "@types/lodash": ^4.14.175
     "@types/multer": ^1.4.7
     "@types/node": ^14.0.0
     "@types/safe-compare": ^1.1.0
     "@types/sharp": ^0.29.2
-    "@types/url-join": ^4.0.1
+    "@types/url-join": 4.0.1
     "@types/uuid": ^8.3.1
     "@types/ws": ^7.4.7
     "@types/yargs": ^17.0.3
-    "@urql/core": ^2.3.3
+    "@urql/core": 2.3.4
     apollo-server-express: ^3.3.0
-    axios: ^0.21.4
+    axios: 0.21.4
     bcdice: ^3.3.0
     bcrypt: ^5.0.1
     check-disk-space: ^3.0.1
@@ -1179,33 +1179,33 @@ __metadata:
     color: ^4.0.1
     express: ^4.17.1
     firebase-admin: ^9.11.0
-    form-data: ^4.0.0
+    form-data: 4.0.0
     fs-extra: ^10.0.0
     graphql: ^15.6.0
     graphql-ws: ^5.5.0
     immer: ^9.0.6
     io-ts: ^2.2.16
     io-ts-reporters: ^2.0.0
-    isomorphic-fetch: ^3.0.0
-    isomorphic-ws: ^4.0.1
-    jest: ^27.3.1
+    isomorphic-fetch: 3.0.0
+    isomorphic-ws: 4.0.1
+    jest: 27.3.1
     lodash: ^4.17.21
     multer: ^1.4.3
     nodemon: ^2.0.13
     npm-run-all: ^4.1.5
     rate-limiter-flexible: ^2.3.0
-    react: ^17.0.2
+    react: 17.0.2
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
+    rimraf: 3.0.2
     rxjs: ^7.3.0
     safe-compare: ^1.1.4
     sanitize-filename: ^1.6.3
     sharp: ^0.29.1
-    ts-jest: ^27.0.7
+    ts-jest: 27.0.7
     ts-node: ^10.2.0
     type-graphql: ^1.1.1
     typescript: ^4.4.3
-    url-join: ^4.0.1
+    url-join: 4.0.1
     uuid: ^8.3.2
     yargs: ^17.2.1
   languageName: unknown
@@ -1223,19 +1223,19 @@ __metadata:
     "@ltd/j-toml": ^1.23.0
     "@types/estree": 0.0.50
     "@types/ioredis": 4.27.8
-    "@types/jest": ^27.0.2
+    "@types/jest": 27.0.2
     "@types/lodash.clonedeep": 4.5.6
     fast-check: 2.19.0
     fast-check-io-ts: 0.5.0
     fp-ts: ^2.11.5
     io-ts: ^2.2.16
     ioredis: ^4.28.0
-    jest: ^27.3.1
+    jest: 27.3.1
     lodash.clonedeep: ^4.5.0
     node-cache: ^5.1.2
-    rimraf: ^3.0.2
-    ts-jest: ^27.0.7
-    typescript: ^4.4.4
+    rimraf: 3.0.2
+    ts-jest: 27.0.7
+    typescript: 4.4.4
   languageName: unknown
   linkType: soft
 
@@ -1246,12 +1246,12 @@ __metadata:
     "@kizahasi/option": ^1.0.0
     "@kizahasi/util": ^0.9.1
     "@types/estree": 0.0.50
-    "@types/jest": ^27.0.2
+    "@types/jest": 27.0.2
     acorn: ^8.5.0
-    jest: ^27.3.1
-    rimraf: ^3.0.2
-    ts-jest: ^27.0.7
-    typescript: ^4.4.4
+    jest: 27.3.1
+    rimraf: 3.0.2
+    ts-jest: 27.0.7
+    typescript: 4.4.4
   languageName: unknown
   linkType: soft
 
@@ -1260,11 +1260,11 @@ __metadata:
   resolution: "@flocon-trpg/utils@workspace:packages/utils"
   dependencies:
     "@kizahasi/option": ^1.0.0
-    "@types/jest": ^27.0.2
-    jest: ^27.3.1
-    rimraf: ^3.0.2
-    ts-jest: ^27.0.7
-    typescript: ^4.4.4
+    "@types/jest": 27.0.2
+    jest: 27.3.1
+    rimraf: 3.0.2
+    ts-jest: 27.0.7
+    typescript: 4.4.4
   languageName: unknown
   linkType: soft
 
@@ -1355,7 +1355,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-codegen/cli@npm:^2.2.0":
+"@graphql-codegen/cli@npm:2.2.2":
   version: 2.2.2
   resolution: "@graphql-codegen/cli@npm:2.2.2"
   dependencies:
@@ -1439,7 +1439,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-codegen/typed-document-node@npm:^2.1.4":
+"@graphql-codegen/typed-document-node@npm:2.2.0":
   version: 2.2.0
   resolution: "@graphql-codegen/typed-document-node@npm:2.2.0"
   dependencies:
@@ -1454,7 +1454,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-codegen/typescript-operations@npm:^2.1.4":
+"@graphql-codegen/typescript-operations@npm:2.2.0":
   version: 2.2.0
   resolution: "@graphql-codegen/typescript-operations@npm:2.2.0"
   dependencies:
@@ -1469,7 +1469,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-codegen/typescript@npm:^2.2.2, @graphql-codegen/typescript@npm:^2.3.0":
+"@graphql-codegen/typescript@npm:2.3.0, @graphql-codegen/typescript@npm:^2.3.0":
   version: 2.3.0
   resolution: "@graphql-codegen/typescript@npm:2.3.0"
   dependencies:
@@ -2768,7 +2768,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jest@npm:^27.0.2":
+"@types/jest@npm:27.0.2":
   version: 27.0.2
   resolution: "@types/jest@npm:27.0.2"
   dependencies:
@@ -3006,7 +3006,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/url-join@npm:^4.0.1":
+"@types/url-join@npm:4.0.1":
   version: 4.0.1
   resolution: "@types/url-join@npm:4.0.1"
   checksum: 29444b90e165b3970c8ad3fcef1e2de092e72b67e1f3aaff3016eea1697f98a01a28fb4f71f8044e3338a95bd2262327e9299be416efe5297018658760a331b4
@@ -3096,7 +3096,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/eslint-plugin@npm:^5.3.0":
+"@typescript-eslint/eslint-plugin@npm:5.3.0":
   version: 5.3.0
   resolution: "@typescript-eslint/eslint-plugin@npm:5.3.0"
   dependencies:
@@ -3134,7 +3134,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/parser@npm:^5.3.0":
+"@typescript-eslint/parser@npm:5.3.0":
   version: 5.3.0
   resolution: "@typescript-eslint/parser@npm:5.3.0"
   dependencies:
@@ -3196,7 +3196,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@urql/core@npm:^2.3.3":
+"@urql/core@npm:2.3.4":
   version: 2.3.4
   resolution: "@urql/core@npm:2.3.4"
   dependencies:
@@ -3808,7 +3808,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^0.21.4":
+"axios@npm:0.21.4":
   version: 0.21.4
   resolution: "axios@npm:0.21.4"
   dependencies:
@@ -5730,7 +5730,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-prettier@npm:^8.3.0":
+"eslint-config-prettier@npm:8.3.0":
   version: 8.3.0
   resolution: "eslint-config-prettier@npm:8.3.0"
   peerDependencies:
@@ -5786,7 +5786,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^8.1.0":
+"eslint@npm:8.1.0":
   version: 8.1.0
   resolution: "eslint@npm:8.1.0"
   dependencies:
@@ -6417,6 +6417,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"form-data@npm:4.0.0, form-data@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "form-data@npm:4.0.0"
+  dependencies:
+    asynckit: ^0.4.0
+    combined-stream: ^1.0.8
+    mime-types: ^2.1.12
+  checksum: 01135bf8675f9d5c61ff18e2e2932f719ca4de964e3be90ef4c36aacfc7b9cb2fceb5eca0b7e0190e3383fe51c5b37f4cb80b62ca06a99aaabfcfd6ac7c9328c
+  languageName: node
+  linkType: hard
+
 "form-data@npm:^3.0.0":
   version: 3.0.1
   resolution: "form-data@npm:3.0.1"
@@ -6425,17 +6436,6 @@ __metadata:
     combined-stream: ^1.0.8
     mime-types: ^2.1.12
   checksum: b019e8d35c8afc14a2bd8a7a92fa4f525a4726b6d5a9740e8d2623c30e308fbb58dc8469f90415a856698933c8479b01646a9dff33c87cc4e76d72aedbbf860d
-  languageName: node
-  linkType: hard
-
-"form-data@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "form-data@npm:4.0.0"
-  dependencies:
-    asynckit: ^0.4.0
-    combined-stream: ^1.0.8
-    mime-types: ^2.1.12
-  checksum: 01135bf8675f9d5c61ff18e2e2932f719ca4de964e3be90ef4c36aacfc7b9cb2fceb5eca0b7e0190e3383fe51c5b37f4cb80b62ca06a99aaabfcfd6ac7c9328c
   languageName: node
   linkType: hard
 
@@ -8131,7 +8131,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"isomorphic-fetch@npm:^3.0.0":
+"isomorphic-fetch@npm:3.0.0, isomorphic-fetch@npm:^3.0.0":
   version: 3.0.0
   resolution: "isomorphic-fetch@npm:3.0.0"
   dependencies:
@@ -8141,7 +8141,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"isomorphic-ws@npm:4.0.1, isomorphic-ws@npm:^4.0.1":
+"isomorphic-ws@npm:4.0.1":
   version: 4.0.1
   resolution: "isomorphic-ws@npm:4.0.1"
   peerDependencies:
@@ -8704,7 +8704,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest@npm:^27.3.1":
+"jest@npm:27.3.1":
   version: 27.3.1
   resolution: "jest@npm:27.3.1"
   dependencies:
@@ -11079,7 +11079,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^2.4.1":
+"prettier@npm:2.4.1":
   version: 2.4.1
   resolution: "prettier@npm:2.4.1"
   bin:
@@ -11338,7 +11338,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:^17.0.2":
+"react@npm:17.0.2":
   version: 17.0.2
   resolution: "react@npm:17.0.2"
   dependencies:
@@ -11798,7 +11798,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rimraf@npm:^3.0.0, rimraf@npm:^3.0.2":
+"rimraf@npm:3.0.2, rimraf@npm:^3.0.0, rimraf@npm:^3.0.2":
   version: 3.0.2
   resolution: "rimraf@npm:3.0.2"
   dependencies:
@@ -11813,14 +11813,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
-    "@commitlint/cli": ^14.1.0
-    "@commitlint/config-conventional": ^14.1.0
-    "@typescript-eslint/eslint-plugin": ^5.3.0
-    "@typescript-eslint/parser": ^5.3.0
-    eslint: ^8.1.0
-    eslint-config-prettier: ^8.3.0
+    "@commitlint/cli": 14.1.0
+    "@commitlint/config-conventional": 14.1.0
+    "@typescript-eslint/eslint-plugin": 5.3.0
+    "@typescript-eslint/parser": 5.3.0
+    eslint: 8.1.0
+    eslint-config-prettier: 8.3.0
     husky: ^7.0.4
-    prettier: ^2.4.1
+    prettier: 2.4.1
   languageName: unknown
   linkType: soft
 
@@ -13106,7 +13106,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-jest@npm:^27.0.7":
+"ts-jest@npm:27.0.7":
   version: 27.0.7
   resolution: "ts-jest@npm:27.0.7"
   dependencies:
@@ -13354,7 +13354,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^4.4.3, typescript@npm:^4.4.4":
+"typescript@npm:4.4.4, typescript@npm:^4.4.3":
   version: 4.4.4
   resolution: "typescript@npm:4.4.4"
   bin:
@@ -13364,7 +13364,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^4.4.3#~builtin<compat/typescript>, typescript@patch:typescript@^4.4.4#~builtin<compat/typescript>":
+"typescript@patch:typescript@4.4.4#~builtin<compat/typescript>, typescript@patch:typescript@^4.4.3#~builtin<compat/typescript>":
   version: 4.4.4
   resolution: "typescript@patch:typescript@npm%3A4.4.4#~builtin<compat/typescript>::version=4.4.4&hash=ddd1e8"
   bin:
@@ -13558,7 +13558,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"url-join@npm:^4.0.1":
+"url-join@npm:4.0.1":
   version: 4.0.1
   resolution: "url-join@npm:4.0.1"
   checksum: f74e868bf25dbc8be6a8d7237d4c36bb5b6c62c72e594d5ab1347fe91d6af7ccd9eb5d621e30152e4da45c2e9a26bec21390e911ab54a62d4d82e76028374ee5
