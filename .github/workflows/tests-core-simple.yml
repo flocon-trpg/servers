@@ -11,8 +11,8 @@ on:
             - 'packages/core/**'
 
 jobs:
-    main:
-        name: Build and test (without Redis test) on Node ${{ matrix.node }} and ${{ matrix.os }}
+    simple-test:
+        name: Build and test (without Redis) on Node ${{ matrix.node }} and ${{ matrix.os }}
 
         runs-on: ${{ matrix.os }}
         defaults:
@@ -42,8 +42,8 @@ jobs:
               env:
                   TEST_SKIP_REDIS: true
 
-    large-test:
-        name: Large test & Redis test on Node ${{ matrix.node}} and ${{ matrix.os }}
+    redis-test:
+        name: Test with Redis on Node ${{ matrix.node }} and ${{ matrix.os }}
 
         runs-on: ubuntu-latest
         defaults:
@@ -71,4 +71,4 @@ jobs:
             - run: yarn
 
             - name: Test
-              run: TEST_NUM_RUNS=5000 yarn test --ci --coverage --maxWorkers=2
+              run: yarn test --ci --coverage --maxWorkers=2
