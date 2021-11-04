@@ -1169,7 +1169,7 @@ __metadata:
     "@types/ws": ^7.4.7
     "@types/yargs": ^17.0.3
     "@urql/core": ^2.3.3
-    apollo-server-express: ^3.3.0
+    apollo-server-express: 3.4.0
     axios: ^0.21.4
     bcdice: ^3.3.0
     bcrypt: ^5.0.1
@@ -3538,7 +3538,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"apollo-server-express@npm:^3.3.0":
+"apollo-server-express@npm:3.4.0":
   version: 3.4.0
   resolution: "apollo-server-express@npm:3.4.0"
   dependencies:
