@@ -9,6 +9,9 @@
         "prettier": "yarn prettier:base --write",
         "prettier:base": "prettier \"**/*.{ts,js,json,yml,md}\""
     },
+    "dependencies": {
+        "husky": "^7.0.4"
+    },
     "devDependencies": {
         "@commitlint/cli": "^14.1.0",
         "@commitlint/config-conventional": "^14.1.0",
@@ -16,7 +19,6 @@
         "@typescript-eslint/parser": "^5.3.0",
         "eslint": "^8.1.0",
         "eslint-config-prettier": "^8.3.0",
-        "husky": "^7.0.4",
         "prettier": "^2.4.1"
     }
 }
