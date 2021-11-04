@@ -10,9 +10,12 @@ jobs:
         name: Check npm install --production=${{matrix.is_production}} and build on Node ${{ matrix.node }}, and ${{ matrix.os }}
 
         runs-on: ${{ matrix.os }}
+        defaults:
+            run:
+                working-directory: ./packages/api-server
         strategy:
             matrix:
-                node: ['14.x', '16.x', '18.x']
+                node: ['14.x', '16.x']
                 os: [ubuntu-latest, windows-latest, macos-latest]
                 is_production: ['false', 'true']
 
@@ -36,9 +39,12 @@ jobs:
         name: Check yarn install --production=${{matrix.is_production}} and build on Node ${{ matrix.node }}, and ${{ matrix.os }}
 
         runs-on: ${{ matrix.os }}
+        defaults:
+            run:
+                working-directory: ./packages/api-server
         strategy:
             matrix:
-                node: ['14.x', '16.x', '18.x']
+                node: ['14.x', '16.x']
                 os: [ubuntu-latest, windows-latest, macos-latest]
                 is_production: ['false', 'true']
 
