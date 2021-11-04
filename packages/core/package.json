@@ -19,7 +19,7 @@
     "description": "Core library for Flocon project(not released yet).",
     "devDependencies": {
         "@types/estree": "0.0.50",
-        "@types/ioredis": "4.27.8",
+        "@types/ioredis": "4.28.1",
         "@types/jest": "27.0.2",
         "@types/lodash.clonedeep": "4.5.6",
         "fast-check": "2.19.0",
