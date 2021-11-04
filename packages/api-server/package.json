@@ -54,22 +54,22 @@
         "yargs": "^17.2.1"
     },
     "devDependencies": {
-        "@graphql-codegen/cli": "^2.2.0",
-        "@graphql-codegen/typed-document-node": "^2.1.4",
-        "@graphql-codegen/typescript": "^2.2.2",
-        "@graphql-codegen/typescript-operations": "^2.1.4",
-        "@types/jest": "^27.0.2",
-        "@types/url-join": "^4.0.1",
-        "@urql/core": "^2.3.3",
-        "axios": "^0.21.4",
-        "form-data": "^4.0.0",
-        "isomorphic-fetch": "^3.0.0",
-        "isomorphic-ws": "^4.0.1",
-        "jest": "^27.3.1",
-        "react": "^17.0.2",
-        "rimraf": "^3.0.2",
-        "ts-jest": "^27.0.7",
-        "url-join": "^4.0.1"
+        "@graphql-codegen/cli": "2.2.2",
+        "@graphql-codegen/typed-document-node": "2.2.0",
+        "@graphql-codegen/typescript": "2.3.0",
+        "@graphql-codegen/typescript-operations": "2.2.0",
+        "@types/jest": "27.0.2",
+        "@types/url-join": "4.0.1",
+        "@urql/core": "2.3.4",
+        "axios": "0.21.4",
+        "form-data": "4.0.0",
+        "isomorphic-fetch": "3.0.0",
+        "isomorphic-ws": "4.0.1",
+        "jest": "27.3.1",
+        "react": "17.0.2",
+        "rimraf": "3.0.2",
+        "ts-jest": "27.0.7",
+        "url-join": "4.0.1"
     },
     "engines": {
         "node": ">=14"
