@@ -30,5 +30,9 @@ jobs:
 
             - run: yarn workspaces focus --all --production
 
+            - name: Prepare other packages
+              run: yarn build
+              working-directory: '.'
+
             - name: Build (as type checking)
               run: yarn build

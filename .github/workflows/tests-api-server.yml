@@ -45,6 +45,10 @@ jobs:
             - name: Install
               run: yarn
 
+            - name: Prepare other packages
+              run: yarn build
+              working-directory: '.'
+
             - name: Type-check
               run: yarn type-check
 

@@ -34,6 +34,10 @@ jobs:
 
             - run: yarn
 
+            - name: Prepare other packages
+              run: yarn build
+              working-directory: '.'
+
             - name: Build
               run: yarn build
 
@@ -69,6 +73,10 @@ jobs:
                   redis-version: 6
 
             - run: yarn
+
+            - name: Prepare other packages
+              run: yarn build
+              working-directory: '.'
 
             - name: Test
               run: yarn test --ci --coverage --maxWorkers=2

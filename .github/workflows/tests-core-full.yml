@@ -35,5 +35,9 @@ jobs:
 
             - run: yarn
 
+            - name: Prepare other packages
+              run: yarn build
+              working-directory: '.'
+
             - name: Test
               run: TEST_NUM_RUNS=5000 yarn test --ci --coverage --maxWorkers=2
