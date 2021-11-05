@@ -6,6 +6,7 @@ tmp/
 coverage/
 /packages/web-server/.next/
 /packages/web-server/out/
+/packages/web-server/src/css/antd.css
 
 .pnp.*
 .yarn/*
