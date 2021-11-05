@@ -37,7 +37,7 @@ jobs:
             - run: yarn
 
             - name: Prepare other packages
-              run: yarn build
+              run: yarn build-dist
               working-directory: '.'
 
             - name: Test
