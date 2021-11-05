@@ -4,11 +4,13 @@ on:
     push:
         branches:
             - main
-        paths:
-            - 'packages/api-server/**'
+        paths-ignore:
+            - 'packages/**'
+            - '!packages/api-server/**'
     pull_request:
-        paths:
-            - 'packages/api-server/**'
+        paths-ignore:
+            - 'packages/**'
+            - '!packages/api-server/**'
 
 jobs:
     main:

@@ -2,8 +2,9 @@ name: tests packages/core
 
 on:
     pull_request:
-        paths:
-            - 'packages/core/**'
+        paths-ignore:
+            - 'packages/**'
+            - '!packages/core/**'
 
 # to see more appropriate coverage, this has redis tests
 jobs:

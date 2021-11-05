@@ -4,11 +4,13 @@ on:
     push:
         branches:
             - main
-        paths:
-            - 'packages/core/**'
+        paths-ignore:
+            - 'packages/**'
+            - '!packages/core/**'
     pull_request:
-        paths:
-            - 'packages/core/**'
+        paths-ignore:
+            - 'packages/**'
+            - '!packages/core/**'
 
 jobs:
     simple-test:

@@ -2,8 +2,9 @@ name: can-install packages/api-server
 
 on:
     pull_request:
-        paths:
-            - 'packages/api-server/**'
+        paths-ignore:
+            - 'packages/**'
+            - '!packages/api-server/**'
 
 jobs:
     yarn:

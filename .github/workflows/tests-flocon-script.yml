@@ -4,11 +4,13 @@ on:
     push:
         branches:
             - main
-        paths:
-            - 'packages/flocon-script/**'
+        paths-ignore:
+            - 'packages/**'
+            - '!packages/flocon-script/**'
     pull_request:
-        paths:
-            - 'packages/flocon-script/**'
+        paths-ignore:
+            - 'packages/**'
+            - '!packages/flocon-script/**'
 
 jobs:
     main:
