@@ -1181,6 +1181,7 @@ __metadata:
     express: ^4.17.1
     firebase-admin: ^10.0.0
     form-data: 4.0.0
+    fp-ts: ^2.11.5
     fs-extra: ^10.0.0
     graphql: ^15.6.0
     graphql-ws: ^5.5.0
@@ -1207,6 +1208,7 @@ __metadata:
     typescript: ^4.4.3
     url-join: 4.0.1
     uuid: ^8.3.2
+    ws: 8.2.3
     yargs: ^17.2.1
   languageName: unknown
   linkType: soft
@@ -1260,6 +1262,7 @@ __metadata:
   resolution: "@flocon-trpg/typed-document-node@workspace:packages/typed-document-node"
   dependencies:
     "@graphql-typed-document-node/core": ^3.1.0
+    graphql: ^15.6.0
     rimraf: 3.0.2
     typescript: 4.4.4
   languageName: unknown

@@ -31,6 +31,7 @@
         "color": "^4.0.1",
         "express": "^4.17.1",
         "firebase-admin": "^10.0.0",
+        "fp-ts": "^2.11.5",
         "fs-extra": "^10.0.0",
         "graphql": "^15.6.0",
         "graphql-ws": "^5.5.0",
@@ -69,7 +70,8 @@
         "jest": "27.3.1",
         "rimraf": "3.0.2",
         "ts-jest": "27.0.7",
-        "url-join": "4.0.1"
+        "url-join": "4.0.1",
+        "ws": "8.2.3"
     },
     "engines": {
         "node": ">=14"
