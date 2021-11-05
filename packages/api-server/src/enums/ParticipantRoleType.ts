@@ -1,4 +1,4 @@
-import { Master, Player, Spectator } from '@kizahasi/flocon-core';
+import { Master, Player, Spectator } from '@flocon-trpg/core';
 
 export enum ParticipantRoleType {
     Master = 'Master',

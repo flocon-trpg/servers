@@ -32,7 +32,7 @@ import { helpMessage, listAvailableGameSystems } from '../../messageAnalyzer/mai
 import { ServerInfo } from '../entities/serverInfo/graphql';
 import { VERSION } from '../../VERSION';
 import { PrereleaseType } from '../../enums/PrereleaseType';
-import { alpha, beta, DualKeyMap, rc } from '@kizahasi/util';
+import { alpha, beta, DualKeyMap, rc } from '@flocon-trpg/utils';
 import { BaasType } from '../../enums/BaasType';
 import { GetFilesResult } from '../results/GetFilesResult';
 import { ENTRY } from '../../roles';

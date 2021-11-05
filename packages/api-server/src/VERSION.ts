@@ -1,4 +1,4 @@
-import { SemVer, alpha } from '@kizahasi/util';
+import { SemVer, alpha } from '@flocon-trpg/utils';
 
 export const VERSION = new SemVer({
     major: 0,

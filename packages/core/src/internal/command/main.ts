@@ -1,7 +1,13 @@
 import * as Room from '../ot/room/types';
-import { arrayClass, createConsoleClass, exec, ScriptError, test } from '@kizahasi/flocon-script';
+import {
+    arrayClass,
+    createConsoleClass,
+    exec,
+    ScriptError,
+    test,
+} from '@flocon-trpg/flocon-script';
 import { FRoom } from './room';
-import { CompositeKey, keyNames } from '@kizahasi/util';
+import { CompositeKey, keyNames } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 
 type CommandError = {

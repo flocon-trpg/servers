@@ -1,4 +1,4 @@
-import { recordToMap } from '@kizahasi/util';
+import { recordToMap } from '@flocon-trpg/utils';
 import { execCharacterCommand, State } from '../src';
 import { Resources } from './resources';
 

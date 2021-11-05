@@ -11,7 +11,7 @@ import {
 import * as ReplaceOperation from '../../util/replaceOperation';
 import { isIdRecord } from '../../util/record';
 import { Result } from '@kizahasi/result';
-import { chooseRecord, CompositeKey } from '@kizahasi/util';
+import { chooseRecord, CompositeKey } from '@flocon-trpg/utils';
 import { mapRecordOperationElement } from '../../util/recordOperationElement';
 import * as RecordOperation from '../../util/recordOperation';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';

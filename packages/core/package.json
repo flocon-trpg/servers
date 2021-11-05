@@ -30,11 +30,11 @@
         "typescript": "4.4.4"
     },
     "dependencies": {
-        "@kizahasi/flocon-script": "0.8.1-beta.8",
+        "@flocon-trpg/flocon-script": "workspace:^",
+        "@flocon-trpg/utils": "workspace:^",
         "@kizahasi/option": "^1.0.0",
         "@kizahasi/ot-string": "^0.2.3",
         "@kizahasi/result": "^1.0.1",
-        "@kizahasi/util": "^0.9.1",
         "@ltd/j-toml": "^1.23.0",
         "fp-ts": "^2.11.5",
         "io-ts": "^2.2.16",

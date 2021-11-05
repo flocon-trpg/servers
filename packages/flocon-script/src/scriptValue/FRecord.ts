@@ -1,4 +1,4 @@
-import { mapToRecord } from '@kizahasi/util';
+import { mapToRecord } from '@flocon-trpg/utils';
 import { ScriptError } from '..';
 import { toJObject } from '../utils/toJObject';
 import { FObject } from './FObject';

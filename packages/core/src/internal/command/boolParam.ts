@@ -6,7 +6,7 @@ import {
     ScriptError,
     OnGettingParams,
     OnSettingParams,
-} from '@kizahasi/flocon-script';
+} from '@flocon-trpg/flocon-script';
 import * as BoolParam from '../ot/room/participant/character/boolParam/types';
 
 const value = 'value';

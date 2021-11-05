@@ -1,4 +1,4 @@
-import { maybe } from '@kizahasi/flocon-core';
+import { maybe } from '@flocon-trpg/core';
 import * as t from 'io-ts';
 import { boolean } from 'yargs';
 

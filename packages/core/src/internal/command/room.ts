@@ -6,9 +6,9 @@ import {
     beginCast,
     GetCoreParams,
     SetCoreParams,
-} from '@kizahasi/flocon-script';
+} from '@flocon-trpg/flocon-script';
 import * as Room from '../ot/room/types';
-import { CompositeKey } from '@kizahasi/util';
+import { CompositeKey } from '@flocon-trpg/utils';
 import { FCharacter } from './character';
 import cloneDeep from 'lodash.clonedeep';
 import { FParamNames } from './paramNames';

@@ -2,10 +2,10 @@
     "name": "@flocon-trpg/api-server",
     "description": "Flocon API server",
     "dependencies": {
-        "@kizahasi/flocon-core": "0.20.0-beta.11",
+        "@flocon-trpg/core": "0.20.0-beta.11",
+        "@flocon-trpg/utils": "workspace:^",
         "@kizahasi/ot-string": "^0.2.3",
         "@kizahasi/result": "^1.0.0",
-        "@kizahasi/util": "^0.9.1",
         "@mikro-orm/core": "^4.5.7",
         "@mikro-orm/migrations": "^4.5.7",
         "@mikro-orm/postgresql": "^4.5.7",

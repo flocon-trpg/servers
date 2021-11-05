@@ -1,5 +1,5 @@
 import { Result } from '@kizahasi/result';
-import { both, groupJoinMap, left, mapToRecord, recordToMap, right } from '@kizahasi/util';
+import { both, groupJoinMap, left, mapToRecord, recordToMap, right } from '@flocon-trpg/utils';
 import * as DualKeyRecordOperation from './dualKeyRecordOperation';
 import { isValidKey } from './isValidKey';
 import { StringKeyRecord } from './record';

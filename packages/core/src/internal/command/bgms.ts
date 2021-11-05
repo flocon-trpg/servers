@@ -7,7 +7,7 @@ import {
     FValue,
     OnGettingParams,
     ScriptError,
-} from '@kizahasi/flocon-script';
+} from '@flocon-trpg/flocon-script';
 import * as RoomTypes from '../ot/room/types';
 import * as BgmTypes from '../ot/room/bgm/types';
 import { FBgm } from './bgm';

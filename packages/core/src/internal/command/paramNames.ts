@@ -8,7 +8,7 @@ import {
     FValue,
     OnGettingParams,
     ScriptError,
-} from '@kizahasi/flocon-script';
+} from '@flocon-trpg/flocon-script';
 import { isStrIndex20 } from '../indexes';
 import * as ParamName from '../ot/room/paramName/types';
 import * as Room from '../ot/room/types';

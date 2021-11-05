@@ -150,7 +150,7 @@ import {
     $free,
     $system,
     MaxLength100String,
-} from '@kizahasi/flocon-core';
+} from '@flocon-trpg/core';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
 import { ParticipantRole as ParticipantRoleEnum } from '../../../enums/ParticipantRole';
 import { ENTRY } from '../../../roles';

@@ -8,7 +8,7 @@ import * as DicePieceValueTypes from './types';
 import * as PieceTypes from '../../../../piece/types';
 import * as DieValue from './dieValue/functions';
 import * as DieValueTypes from './dieValue/types';
-import { chooseRecord } from '@kizahasi/util';
+import { chooseRecord } from '@flocon-trpg/utils';
 import { createOperation } from '../../../../util/createOperation';
 import { record } from '../../../../util/record';
 import { createType, deleteType, updateType } from '../../../../piece/log';

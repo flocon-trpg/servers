@@ -1,4 +1,4 @@
-import { FirebaseConfig, firebaseConfig as firebaseConfigIo } from '@kizahasi/flocon-core';
+import { FirebaseConfig, firebaseConfig as firebaseConfigIo } from '@flocon-trpg/core';
 import { DatabaseConfig, postgresql, ServerConfig, serverConfigJson } from './configType';
 import {
     loadAsMain,

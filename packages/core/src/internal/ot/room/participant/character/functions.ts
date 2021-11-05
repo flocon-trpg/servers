@@ -31,7 +31,7 @@ import * as SimpleValueParam from './simpleValueParam/functions';
 import { isIdRecord } from '../../../util/record';
 import { Result } from '@kizahasi/result';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
-import { chooseDualKeyRecord, chooseRecord, CompositeKey } from '@kizahasi/util';
+import { chooseDualKeyRecord, chooseRecord, CompositeKey } from '@flocon-trpg/utils';
 import { Maybe } from '../../../../maybe';
 import { isBoardVisible } from '../../../util/isBoardVisible';
 import { DownOperation, State, TwoWayOperation, UpOperation } from './types';

@@ -1,6 +1,6 @@
 import * as Types from './types';
 import * as Participant from './participant/migrate';
-import { mapRecord } from '@kizahasi/util';
+import { mapRecord } from '@flocon-trpg/utils';
 import { mapRecordDownOperation, mapRecordUpOperation } from '../util/recordOperation';
 
 // 引数にRoom.Stateを含めることで、Room.State.$rの間違いを検出する狙いがある。DbState,UpOperationなども同様。

@@ -15,7 +15,7 @@ import {
 import { isIdRecord } from '../../../../util/record';
 import { Result } from '@kizahasi/result';
 import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
-import { chooseRecord, CompositeKey } from '@kizahasi/util';
+import { chooseRecord, CompositeKey } from '@flocon-trpg/utils';
 import * as RecordOperation from '../../../../util/recordOperation';
 import {
     dicePieceValueStrIndexes,

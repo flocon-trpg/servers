@@ -1,6 +1,6 @@
 /*eslint require-await: "error"*/
 
-import { createNodeCache } from '@kizahasi/flocon-core';
+import { createNodeCache } from '@flocon-trpg/core';
 import { PubSub } from 'graphql-subscriptions';
 import { WritingMessageStatusType } from '../enums/WritingMessageStatusType';
 import { RoomEventPayload } from '../graphql+mikro-orm/resolvers/rooms/RoomResolver';

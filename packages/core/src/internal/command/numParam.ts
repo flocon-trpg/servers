@@ -7,7 +7,7 @@ import {
     ScriptError,
     OnGettingParams,
     OnSettingParams,
-} from '@kizahasi/flocon-script';
+} from '@flocon-trpg/flocon-script';
 import * as NumParam from '../ot/room/participant/character/numParam/types';
 
 const value = 'value';

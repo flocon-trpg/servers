@@ -1,4 +1,4 @@
-import { CompositeKey, compositeKeyEquals } from '@kizahasi/util';
+import { CompositeKey, compositeKeyEquals } from '@flocon-trpg/utils';
 import { RequestedBy } from './type';
 
 export const isBoardVisible = ({

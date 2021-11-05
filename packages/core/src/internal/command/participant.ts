@@ -6,7 +6,7 @@ import {
     OnSettingParams,
     ScriptError,
     beginCast,
-} from '@kizahasi/flocon-script';
+} from '@flocon-trpg/flocon-script';
 import { maxLength100String } from '../maxLengthString';
 import * as Participant from '../ot/room/participant/types';
 import * as Character from '../ot/room/participant/character/types';

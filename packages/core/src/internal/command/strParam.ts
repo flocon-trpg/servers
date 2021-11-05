@@ -7,7 +7,7 @@ import {
     OnGettingParams,
     OnSettingParams,
     FString,
-} from '@kizahasi/flocon-script';
+} from '@flocon-trpg/flocon-script';
 import * as StrParam from '../ot/room/participant/character/strParam/types';
 
 const value = 'value';

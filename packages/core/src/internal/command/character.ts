@@ -6,7 +6,7 @@ import {
     OnSettingParams,
     ScriptError,
     beginCast,
-} from '@kizahasi/flocon-script';
+} from '@flocon-trpg/flocon-script';
 import * as Character from '../ot/room/participant/character/types';
 import * as Room from '../ot/room/types';
 import { FBoolParams } from './boolParams';

@@ -11,7 +11,7 @@ import {
 } from '../../../util/type';
 import { isIdRecord } from '../../../util/record';
 import { Result } from '@kizahasi/result';
-import { CompositeKey } from '@kizahasi/util';
+import { CompositeKey } from '@flocon-trpg/utils';
 import * as Piece from '../../../piece/functions';
 import * as PieceTypes from '../../../piece/types';
 import * as DualKeyRecordOperation from '../../../util/dualKeyRecordOperation';

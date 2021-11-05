@@ -1,7 +1,7 @@
 import {
     DicePieceValueLog as DicePieceValueLogState,
     StringPieceValueLog as StringPieceValueLogState,
-} from '@kizahasi/flocon-core';
+} from '@flocon-trpg/core';
 import {
     Collection,
     Entity,

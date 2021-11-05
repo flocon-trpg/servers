@@ -6,8 +6,8 @@ import {
     FValue,
     OnGettingParams,
     ScriptError,
-} from '@kizahasi/flocon-script';
-import { recordToArray } from '@kizahasi/util';
+} from '@flocon-trpg/flocon-script';
+import { recordToArray } from '@flocon-trpg/utils';
 import * as Character from '../ot/room/participant/character/types';
 import * as BoolParam from '../ot/room/participant/character/boolParam/types';
 import * as Room from '../ot/room/types';

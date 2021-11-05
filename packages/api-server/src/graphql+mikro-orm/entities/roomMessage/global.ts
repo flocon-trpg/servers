@@ -3,7 +3,7 @@ import {
     StringPieceValueLog as StringPieceValueLog$MikroORM,
 } from './mikro-orm';
 import { PieceValueLog, PieceValueLogType } from './graphql';
-import { decodeDicePieceValue, decodeStringPieceValue } from '@kizahasi/flocon-core';
+import { decodeDicePieceValue, decodeStringPieceValue } from '@flocon-trpg/core';
 import { PieceValueLogType as PieceValueLogTypeEnum } from '../../../enums/PieceValueLogType';
 
 export namespace DicePieceValueLog {

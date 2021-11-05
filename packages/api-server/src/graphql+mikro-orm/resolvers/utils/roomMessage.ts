@@ -1,4 +1,4 @@
-import { $system } from '@kizahasi/flocon-core';
+import { $system } from '@flocon-trpg/core';
 import { Reference } from '@mikro-orm/core';
 import { EM } from '../../../utils/types';
 import { Room } from '../../entities/room/mikro-orm';

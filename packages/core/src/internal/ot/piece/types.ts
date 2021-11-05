@@ -1,4 +1,4 @@
-import { CompositeKey } from '@kizahasi/util';
+import { CompositeKey } from '@flocon-trpg/utils';
 import * as t from 'io-ts';
 import { createOperation } from '../util/createOperation';
 import * as ReplaceOperation from '../util/replaceOperation';

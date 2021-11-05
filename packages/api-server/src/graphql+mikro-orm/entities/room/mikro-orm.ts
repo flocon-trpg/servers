@@ -1,4 +1,4 @@
-import { DbState, DownOperation } from '@kizahasi/flocon-core';
+import { DbState, DownOperation } from '@flocon-trpg/core';
 import {
     Collection,
     Entity,

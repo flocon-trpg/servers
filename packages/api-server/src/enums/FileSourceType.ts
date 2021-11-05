@@ -1,4 +1,4 @@
-import * as FilePathModule from '@kizahasi/flocon-core';
+import * as FilePathModule from '@flocon-trpg/core';
 
 export enum FileSourceType {
     Default = 'Default',

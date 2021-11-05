@@ -23,7 +23,7 @@ import {
 import { isIdRecord } from '../util/record';
 import { Result } from '@kizahasi/result';
 import { ApplyError, PositiveInt, ComposeAndTransformError } from '@kizahasi/ot-string';
-import { chooseRecord } from '@kizahasi/util';
+import { chooseRecord } from '@flocon-trpg/utils';
 import { isStrIndex20, isStrIndex5 } from '../../indexes';
 import { DownOperation, State, TwoWayOperation, UpOperation } from './types';
 

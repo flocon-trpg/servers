@@ -1,6 +1,6 @@
 import * as Types from './types';
 import * as Character from './character/migrate';
-import { mapRecord } from '@kizahasi/util';
+import { mapRecord } from '@flocon-trpg/utils';
 import { mapRecordDownOperation, mapRecordUpOperation } from '../../util/recordOperation';
 
 export const migrateState = (source: Types.State | Types.StateRev1): Types.State => {

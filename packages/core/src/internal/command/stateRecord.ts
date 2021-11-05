@@ -5,7 +5,7 @@ import {
     FRecordRef,
     FFunction,
     FRecord,
-} from '@kizahasi/flocon-script';
+} from '@flocon-trpg/flocon-script';
 import { simpleId } from '../simpleId';
 
 export class FStateRecord<TSource, TRef extends FValue> extends FRecordRef<TSource | undefined> {

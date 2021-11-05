@@ -1,5 +1,5 @@
 import { Result } from '@kizahasi/result';
-import { CompositeKey, compositeKeyEquals } from '@kizahasi/util';
+import { CompositeKey, compositeKeyEquals } from '@flocon-trpg/utils';
 import { DualStringKeyRecord, isIdRecord } from '../util/record';
 import * as ReplaceOperation from '../util/replaceOperation';
 import * as DualKeyRecordOperation from '../util/dualKeyRecordOperation';

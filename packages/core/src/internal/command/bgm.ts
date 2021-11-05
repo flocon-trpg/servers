@@ -8,7 +8,7 @@ import {
     OnGettingParams,
     OnSettingParams,
     ScriptError,
-} from '@kizahasi/flocon-script';
+} from '@flocon-trpg/flocon-script';
 import * as BgmTypes from '../ot/room/bgm/types';
 import { toFFilePath, toFilePath } from './filePath';
 

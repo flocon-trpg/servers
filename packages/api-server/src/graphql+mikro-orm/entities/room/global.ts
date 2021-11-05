@@ -23,9 +23,9 @@ import {
     RequestedBy,
     ParticipantState,
     update,
-} from '@kizahasi/flocon-core';
+} from '@flocon-trpg/core';
 import { Participant } from '../participant/mikro-orm';
-import { recordForEachAsync } from '@kizahasi/util';
+import { recordForEachAsync } from '@flocon-trpg/utils';
 import { User } from '../user/mikro-orm';
 import { nullableStringToParticipantRoleType } from '../../../enums/ParticipantRoleType';
 import { convertToMaxLength100String } from '../../../utils/convertToMaxLength100String';

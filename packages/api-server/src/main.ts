@@ -7,7 +7,7 @@ import { Extra } from 'graphql-ws/lib/use/ws';
 import { checkMigrationsBeforeStart } from './migrate';
 import { InMemoryConnectionManager, pubSub } from './connection/main';
 import { Result } from '@kizahasi/result';
-import { authToken } from '@kizahasi/flocon-core';
+import { authToken } from '@flocon-trpg/core';
 import { Context } from 'graphql-ws/lib/server';
 import { BaasType } from './enums/BaasType';
 import { AppConsole } from './utils/appConsole';

@@ -5,9 +5,9 @@ import {
     analyze as analyzeToExpression,
     plain,
     parseToml,
-} from '@kizahasi/flocon-core';
+} from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
-import { recordToArray } from '@kizahasi/util';
+import { recordToArray } from '@flocon-trpg/utils';
 import { DynamicLoader } from 'bcdice';
 import BcdiceResult from 'bcdice/ts/result';
 

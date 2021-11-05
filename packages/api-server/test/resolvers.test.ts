@@ -59,7 +59,7 @@ import {
 } from '../generated/graphql';
 import { EntryToServerResultType } from '../src/enums/EntryToServerResultType';
 import { ServerConfig } from '../src/configType';
-import { UpOperation, parseState } from '@kizahasi/flocon-core';
+import { UpOperation, parseState } from '@flocon-trpg/core';
 import axios from 'axios';
 import FormData from 'form-data';
 import urljoin from 'url-join';

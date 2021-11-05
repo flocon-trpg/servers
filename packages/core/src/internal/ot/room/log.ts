@@ -5,7 +5,7 @@ import * as DualKeyRecordOperation from '../util/dualKeyRecordOperation';
 import { RecordTwoWayOperationElement, replace } from '../util/recordOperationElement';
 import { restrict } from '../util/type';
 import { CompositeKey } from '../compositeKey/types';
-import { recordForEach, dualKeyRecordForEach } from '@kizahasi/util';
+import { recordForEach, dualKeyRecordForEach } from '@flocon-trpg/utils';
 import * as DicePieceValue from './participant/character/dicePieceValue/functions';
 import * as DicePieceValueLog from './participant/character/dicePieceValue/log';
 import * as StringPieceValue from './participant/character/stringPieceValue/functions';

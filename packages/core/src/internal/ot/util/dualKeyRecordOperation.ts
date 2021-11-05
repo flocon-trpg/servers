@@ -10,7 +10,7 @@ import {
     both,
     dualKeyRecordToDualKeyMap,
     chooseDualKeyRecord,
-} from '@kizahasi/util';
+} from '@flocon-trpg/utils';
 import * as t from 'io-ts';
 import { isValidKey } from './isValidKey';
 import { DualStringKeyRecord, record } from './record';

@@ -7,7 +7,7 @@ import {
     FRecord,
     FString,
     AstInfo,
-} from '@kizahasi/flocon-script';
+} from '@flocon-trpg/flocon-script';
 import * as FilePath from '../ot/filePath/types';
 
 export const toFFilePath = (source: FilePath.FilePath, astInfo: AstInfo | undefined): FObject => {
