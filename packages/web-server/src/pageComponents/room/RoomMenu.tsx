@@ -9,7 +9,7 @@ import {
     ParticipantRole,
     PromoteFailureType,
     PromoteToPlayerDocument,
-    RequiresPhraseToJoinAsPlayerDocument,
+    GetRoomAsListItemDocument,
 } from '@flocon-trpg/typed-document-node';
 import { roomConfigModule } from '../../modules/roomConfigModule';
 import { useSelector } from '../../store';
@@ -52,13 +52,13 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
     const [promoteToPlayer] = useMutation(PromoteToPlayerDocument);
-    const [requiresPhraseToJoinAsPlayer, requiresPhraseToJoinAsPlayerResult] = useLazyQuery(
-        RequiresPhraseToJoinAsPlayerDocument
+    const [getRoomAsListItem, getRoomAsListItemResult] = useLazyQuery(
+        GetRoomAsListItemDocument
     );
-    const requiresPhraseToJoinAsPlayerRef = React.useRef(requiresPhraseToJoinAsPlayer);
+    const requiresPhraseToJoinAsPlayerRef = React.useRef(getRoomAsListItem);
     React.useEffect(() => {
-        requiresPhraseToJoinAsPlayerRef.current = requiresPhraseToJoinAsPlayer;
-    }, [requiresPhraseToJoinAsPlayer]);
+        requiresPhraseToJoinAsPlayerRef.current = getRoomAsListItem;
+    }, [getRoomAsListItem]);
     React.useEffect(() => {
         setInputValue('');
         setIsPosting(false);
@@ -68,7 +68,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
     const title = '参加者に昇格';
 
     if (
-        requiresPhraseToJoinAsPlayerResult.data?.result.__typename !== 'RequiresPhraseSuccessResult'
+        getRoomAsListItemResult.data?.result.__typename !== 'GetRoomAsListItemSuccessResult'
     ) {
         return (
             <Modal
@@ -81,7 +81,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
             </Modal>
         );
     }
-    if (requiresPhraseToJoinAsPlayerResult.data.result.value) {
+    if (getRoomAsListItemResult.data.result.room.requiresPhraseToJoinAsPlayer) {
         return (
             <Modal
                 visible={visible}
