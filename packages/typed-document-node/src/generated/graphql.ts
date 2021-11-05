@@ -825,8 +825,14 @@ export type CharacterValueForMessageFragment = {
     stateId: string;
     isPrivate: boolean;
     name: string;
-    image?: Maybe<{ __typename?: 'FilePath'; sourceType: FileSourceType; path: string }>;
-    tachieImage?: Maybe<{ __typename?: 'FilePath'; sourceType: FileSourceType; path: string }>;
+    image?:
+        | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
+        | null
+        | undefined;
+    tachieImage?:
+        | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
+        | null
+        | undefined;
 };
 
 type CreateRoomResult_CreateRoomFailureResult_Fragment = {
@@ -847,10 +853,10 @@ export type CreateRoomResultFragment =
 export type FileItemFragment = {
     __typename?: 'FileItem';
     filename: string;
-    thumbFilename?: Maybe<string>;
+    thumbFilename?: string | null | undefined;
     screenname: string;
     createdBy: string;
-    createdAt?: Maybe<number>;
+    createdAt?: number | null | undefined;
 };
 
 export type FilePathFragment = {
@@ -929,12 +935,18 @@ type JoinRoomResult_JoinRoomFailureResult_Fragment = {
 
 type JoinRoomResult_JoinRoomSuccessResult_Fragment = {
     __typename: 'JoinRoomSuccessResult';
-    operation?: Maybe<{
-        __typename?: 'RoomOperation';
-        revisionTo: number;
-        valueJson: string;
-        operatedBy?: Maybe<{ __typename?: 'OperatedBy'; userUid: string; clientId: string }>;
-    }>;
+    operation?:
+        | {
+              __typename?: 'RoomOperation';
+              revisionTo: number;
+              valueJson: string;
+              operatedBy?:
+                  | { __typename?: 'OperatedBy'; userUid: string; clientId: string }
+                  | null
+                  | undefined;
+          }
+        | null
+        | undefined;
 };
 
 export type JoinRoomResultFragment =
@@ -972,85 +984,102 @@ export type RoomOperationFragment = {
     __typename?: 'RoomOperation';
     revisionTo: number;
     valueJson: string;
-    operatedBy?: Maybe<{ __typename?: 'OperatedBy'; userUid: string; clientId: string }>;
+    operatedBy?:
+        | { __typename?: 'OperatedBy'; userUid: string; clientId: string }
+        | null
+        | undefined;
 };
 
 export type RoomPublicChannelFragment = {
     __typename?: 'RoomPublicChannel';
     key: string;
-    name?: Maybe<string>;
+    name?: string | null | undefined;
 };
 
 export type RoomPublicMessageFragment = {
     __typename?: 'RoomPublicMessage';
     messageId: string;
     channelKey: string;
-    initText?: Maybe<string>;
-    initTextSource?: Maybe<string>;
-    textColor?: Maybe<string>;
-    altTextToSecret?: Maybe<string>;
+    initText?: string | null | undefined;
+    initTextSource?: string | null | undefined;
+    textColor?: string | null | undefined;
+    altTextToSecret?: string | null | undefined;
     isSecret: boolean;
-    createdBy?: Maybe<string>;
-    customName?: Maybe<string>;
+    createdBy?: string | null | undefined;
+    customName?: string | null | undefined;
     createdAt: number;
-    updatedAt?: Maybe<number>;
-    updatedText?: Maybe<{
-        __typename?: 'UpdatedText';
-        currentText?: Maybe<string>;
-        updatedAt: number;
-    }>;
-    commandResult?: Maybe<{
-        __typename?: 'CommandResult';
-        text: string;
-        isSuccess?: Maybe<boolean>;
-    }>;
-    character?: Maybe<{
-        __typename?: 'CharacterValueForMessage';
-        stateId: string;
-        isPrivate: boolean;
-        name: string;
-        image?: Maybe<{ __typename?: 'FilePath'; sourceType: FileSourceType; path: string }>;
-        tachieImage?: Maybe<{ __typename?: 'FilePath'; sourceType: FileSourceType; path: string }>;
-    }>;
+    updatedAt?: number | null | undefined;
+    updatedText?:
+        | { __typename?: 'UpdatedText'; currentText?: string | null | undefined; updatedAt: number }
+        | null
+        | undefined;
+    commandResult?:
+        | { __typename?: 'CommandResult'; text: string; isSuccess?: boolean | null | undefined }
+        | null
+        | undefined;
+    character?:
+        | {
+              __typename?: 'CharacterValueForMessage';
+              stateId: string;
+              isPrivate: boolean;
+              name: string;
+              image?:
+                  | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
+                  | null
+                  | undefined;
+              tachieImage?:
+                  | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
+                  | null
+                  | undefined;
+          }
+        | null
+        | undefined;
 };
 
 export type RoomPrivateMessageFragment = {
     __typename?: 'RoomPrivateMessage';
     messageId: string;
     visibleTo: Array<string>;
-    initText?: Maybe<string>;
-    initTextSource?: Maybe<string>;
-    textColor?: Maybe<string>;
-    altTextToSecret?: Maybe<string>;
+    initText?: string | null | undefined;
+    initTextSource?: string | null | undefined;
+    textColor?: string | null | undefined;
+    altTextToSecret?: string | null | undefined;
     isSecret: boolean;
-    createdBy?: Maybe<string>;
-    customName?: Maybe<string>;
+    createdBy?: string | null | undefined;
+    customName?: string | null | undefined;
     createdAt: number;
-    updatedAt?: Maybe<number>;
-    updatedText?: Maybe<{
-        __typename?: 'UpdatedText';
-        currentText?: Maybe<string>;
-        updatedAt: number;
-    }>;
-    commandResult?: Maybe<{
-        __typename?: 'CommandResult';
-        text: string;
-        isSuccess?: Maybe<boolean>;
-    }>;
-    character?: Maybe<{
-        __typename?: 'CharacterValueForMessage';
-        stateId: string;
-        isPrivate: boolean;
-        name: string;
-        image?: Maybe<{ __typename?: 'FilePath'; sourceType: FileSourceType; path: string }>;
-        tachieImage?: Maybe<{ __typename?: 'FilePath'; sourceType: FileSourceType; path: string }>;
-    }>;
+    updatedAt?: number | null | undefined;
+    updatedText?:
+        | { __typename?: 'UpdatedText'; currentText?: string | null | undefined; updatedAt: number }
+        | null
+        | undefined;
+    commandResult?:
+        | { __typename?: 'CommandResult'; text: string; isSuccess?: boolean | null | undefined }
+        | null
+        | undefined;
+    character?:
+        | {
+              __typename?: 'CharacterValueForMessage';
+              stateId: string;
+              isPrivate: boolean;
+              name: string;
+              image?:
+                  | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
+                  | null
+                  | undefined;
+              tachieImage?:
+                  | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
+                  | null
+                  | undefined;
+          }
+        | null
+        | undefined;
 };
 
 export type RoomSoundEffectFragment = {
     __typename?: 'RoomSoundEffect';
     messageId: string;
-    createdBy?: Maybe<string>;
+    createdBy?: string | null | undefined;
     createdAt: number;
     volume: number;
     file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
@@ -1071,124 +1100,134 @@ type RoomMessageEvent_RoomPrivateMessage_Fragment = {
     __typename: 'RoomPrivateMessage';
     messageId: string;
     visibleTo: Array<string>;
-    initText?: Maybe<string>;
-    initTextSource?: Maybe<string>;
-    textColor?: Maybe<string>;
-    altTextToSecret?: Maybe<string>;
+    initText?: string | null | undefined;
+    initTextSource?: string | null | undefined;
+    textColor?: string | null | undefined;
+    altTextToSecret?: string | null | undefined;
     isSecret: boolean;
-    createdBy?: Maybe<string>;
-    customName?: Maybe<string>;
+    createdBy?: string | null | undefined;
+    customName?: string | null | undefined;
     createdAt: number;
-    updatedAt?: Maybe<number>;
-    updatedText?: Maybe<{
-        __typename?: 'UpdatedText';
-        currentText?: Maybe<string>;
-        updatedAt: number;
-    }>;
-    commandResult?: Maybe<{
-        __typename?: 'CommandResult';
-        text: string;
-        isSuccess?: Maybe<boolean>;
-    }>;
-    character?: Maybe<{
-        __typename?: 'CharacterValueForMessage';
-        stateId: string;
-        isPrivate: boolean;
-        name: string;
-        image?: Maybe<{ __typename?: 'FilePath'; sourceType: FileSourceType; path: string }>;
-        tachieImage?: Maybe<{ __typename?: 'FilePath'; sourceType: FileSourceType; path: string }>;
-    }>;
+    updatedAt?: number | null | undefined;
+    updatedText?:
+        | { __typename?: 'UpdatedText'; currentText?: string | null | undefined; updatedAt: number }
+        | null
+        | undefined;
+    commandResult?:
+        | { __typename?: 'CommandResult'; text: string; isSuccess?: boolean | null | undefined }
+        | null
+        | undefined;
+    character?:
+        | {
+              __typename?: 'CharacterValueForMessage';
+              stateId: string;
+              isPrivate: boolean;
+              name: string;
+              image?:
+                  | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
+                  | null
+                  | undefined;
+              tachieImage?:
+                  | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
+                  | null
+                  | undefined;
+          }
+        | null
+        | undefined;
 };
 
 type RoomMessageEvent_RoomPrivateMessageUpdate_Fragment = {
     __typename: 'RoomPrivateMessageUpdate';
     messageId: string;
-    initText?: Maybe<string>;
-    initTextSource?: Maybe<string>;
-    altTextToSecret?: Maybe<string>;
+    initText?: string | null | undefined;
+    initTextSource?: string | null | undefined;
+    altTextToSecret?: string | null | undefined;
     isSecret: boolean;
-    updatedAt?: Maybe<number>;
-    updatedText?: Maybe<{
-        __typename?: 'UpdatedText';
-        currentText?: Maybe<string>;
-        updatedAt: number;
-    }>;
-    commandResult?: Maybe<{
-        __typename?: 'CommandResult';
-        text: string;
-        isSuccess?: Maybe<boolean>;
-    }>;
+    updatedAt?: number | null | undefined;
+    updatedText?:
+        | { __typename?: 'UpdatedText'; currentText?: string | null | undefined; updatedAt: number }
+        | null
+        | undefined;
+    commandResult?:
+        | { __typename?: 'CommandResult'; text: string; isSuccess?: boolean | null | undefined }
+        | null
+        | undefined;
 };
 
 type RoomMessageEvent_RoomPublicChannel_Fragment = {
     __typename: 'RoomPublicChannel';
     key: string;
-    name?: Maybe<string>;
+    name?: string | null | undefined;
 };
 
 type RoomMessageEvent_RoomPublicChannelUpdate_Fragment = {
     __typename: 'RoomPublicChannelUpdate';
     key: string;
-    name?: Maybe<string>;
+    name?: string | null | undefined;
 };
 
 type RoomMessageEvent_RoomPublicMessage_Fragment = {
     __typename: 'RoomPublicMessage';
     messageId: string;
     channelKey: string;
-    initText?: Maybe<string>;
-    initTextSource?: Maybe<string>;
-    textColor?: Maybe<string>;
-    altTextToSecret?: Maybe<string>;
+    initText?: string | null | undefined;
+    initTextSource?: string | null | undefined;
+    textColor?: string | null | undefined;
+    altTextToSecret?: string | null | undefined;
     isSecret: boolean;
-    createdBy?: Maybe<string>;
-    customName?: Maybe<string>;
+    createdBy?: string | null | undefined;
+    customName?: string | null | undefined;
     createdAt: number;
-    updatedAt?: Maybe<number>;
-    updatedText?: Maybe<{
-        __typename?: 'UpdatedText';
-        currentText?: Maybe<string>;
-        updatedAt: number;
-    }>;
-    commandResult?: Maybe<{
-        __typename?: 'CommandResult';
-        text: string;
-        isSuccess?: Maybe<boolean>;
-    }>;
-    character?: Maybe<{
-        __typename?: 'CharacterValueForMessage';
-        stateId: string;
-        isPrivate: boolean;
-        name: string;
-        image?: Maybe<{ __typename?: 'FilePath'; sourceType: FileSourceType; path: string }>;
-        tachieImage?: Maybe<{ __typename?: 'FilePath'; sourceType: FileSourceType; path: string }>;
-    }>;
+    updatedAt?: number | null | undefined;
+    updatedText?:
+        | { __typename?: 'UpdatedText'; currentText?: string | null | undefined; updatedAt: number }
+        | null
+        | undefined;
+    commandResult?:
+        | { __typename?: 'CommandResult'; text: string; isSuccess?: boolean | null | undefined }
+        | null
+        | undefined;
+    character?:
+        | {
+              __typename?: 'CharacterValueForMessage';
+              stateId: string;
+              isPrivate: boolean;
+              name: string;
+              image?:
+                  | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
+                  | null
+                  | undefined;
+              tachieImage?:
+                  | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
+                  | null
+                  | undefined;
+          }
+        | null
+        | undefined;
 };
 
 type RoomMessageEvent_RoomPublicMessageUpdate_Fragment = {
     __typename: 'RoomPublicMessageUpdate';
     messageId: string;
-    initText?: Maybe<string>;
-    initTextSource?: Maybe<string>;
-    altTextToSecret?: Maybe<string>;
+    initText?: string | null | undefined;
+    initTextSource?: string | null | undefined;
+    altTextToSecret?: string | null | undefined;
     isSecret: boolean;
-    updatedAt?: Maybe<number>;
-    updatedText?: Maybe<{
-        __typename?: 'UpdatedText';
-        currentText?: Maybe<string>;
-        updatedAt: number;
-    }>;
-    commandResult?: Maybe<{
-        __typename?: 'CommandResult';
-        text: string;
-        isSuccess?: Maybe<boolean>;
-    }>;
+    updatedAt?: number | null | undefined;
+    updatedText?:
+        | { __typename?: 'UpdatedText'; currentText?: string | null | undefined; updatedAt: number }
+        | null
+        | undefined;
+    commandResult?:
+        | { __typename?: 'CommandResult'; text: string; isSuccess?: boolean | null | undefined }
+        | null
+        | undefined;
 };
 
 type RoomMessageEvent_RoomSoundEffect_Fragment = {
     __typename: 'RoomSoundEffect';
     messageId: string;
-    createdBy?: Maybe<string>;
+    createdBy?: string | null | undefined;
     createdAt: number;
     volume: number;
     file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
@@ -1209,7 +1248,10 @@ export type SemVerFragment = {
     major: number;
     minor: number;
     patch: number;
-    prerelease?: Maybe<{ __typename?: 'Prerelease'; type: PrereleaseType; version: number }>;
+    prerelease?:
+        | { __typename?: 'Prerelease'; type: PrereleaseType; version: number }
+        | null
+        | undefined;
 };
 
 export type GetAvailableGameSystemsQueryVariables = Exact<{ [key: string]: never }>;
@@ -1231,7 +1273,7 @@ export type GetDiceHelpMessagesQueryVariables = Exact<{
     id: Scalars['String'];
 }>;
 
-export type GetDiceHelpMessagesQuery = { __typename?: 'Query'; result?: Maybe<string> };
+export type GetDiceHelpMessagesQuery = { __typename?: 'Query'; result?: string | null | undefined };
 
 export type GetFilesQueryVariables = Exact<{
     input: GetFilesInput;
@@ -1244,10 +1286,10 @@ export type GetFilesQuery = {
         files: Array<{
             __typename?: 'FileItem';
             filename: string;
-            thumbFilename?: Maybe<string>;
+            thumbFilename?: string | null | undefined;
             screenname: string;
             createdBy: string;
-            createdAt?: Maybe<number>;
+            createdAt?: number | null | undefined;
         }>;
     };
 };
@@ -1316,81 +1358,111 @@ export type GetMessagesQuery = {
                   __typename?: 'RoomPublicMessage';
                   messageId: string;
                   channelKey: string;
-                  initText?: Maybe<string>;
-                  initTextSource?: Maybe<string>;
-                  textColor?: Maybe<string>;
-                  altTextToSecret?: Maybe<string>;
+                  initText?: string | null | undefined;
+                  initTextSource?: string | null | undefined;
+                  textColor?: string | null | undefined;
+                  altTextToSecret?: string | null | undefined;
                   isSecret: boolean;
-                  createdBy?: Maybe<string>;
-                  customName?: Maybe<string>;
+                  createdBy?: string | null | undefined;
+                  customName?: string | null | undefined;
                   createdAt: number;
-                  updatedAt?: Maybe<number>;
-                  updatedText?: Maybe<{
-                      __typename?: 'UpdatedText';
-                      currentText?: Maybe<string>;
-                      updatedAt: number;
-                  }>;
-                  commandResult?: Maybe<{
-                      __typename?: 'CommandResult';
-                      text: string;
-                      isSuccess?: Maybe<boolean>;
-                  }>;
-                  character?: Maybe<{
-                      __typename?: 'CharacterValueForMessage';
-                      stateId: string;
-                      isPrivate: boolean;
-                      name: string;
-                      image?: Maybe<{
-                          __typename?: 'FilePath';
-                          sourceType: FileSourceType;
-                          path: string;
-                      }>;
-                      tachieImage?: Maybe<{
-                          __typename?: 'FilePath';
-                          sourceType: FileSourceType;
-                          path: string;
-                      }>;
-                  }>;
+                  updatedAt?: number | null | undefined;
+                  updatedText?:
+                      | {
+                            __typename?: 'UpdatedText';
+                            currentText?: string | null | undefined;
+                            updatedAt: number;
+                        }
+                      | null
+                      | undefined;
+                  commandResult?:
+                      | {
+                            __typename?: 'CommandResult';
+                            text: string;
+                            isSuccess?: boolean | null | undefined;
+                        }
+                      | null
+                      | undefined;
+                  character?:
+                      | {
+                            __typename?: 'CharacterValueForMessage';
+                            stateId: string;
+                            isPrivate: boolean;
+                            name: string;
+                            image?:
+                                | {
+                                      __typename?: 'FilePath';
+                                      sourceType: FileSourceType;
+                                      path: string;
+                                  }
+                                | null
+                                | undefined;
+                            tachieImage?:
+                                | {
+                                      __typename?: 'FilePath';
+                                      sourceType: FileSourceType;
+                                      path: string;
+                                  }
+                                | null
+                                | undefined;
+                        }
+                      | null
+                      | undefined;
               }>;
               privateMessages: Array<{
                   __typename?: 'RoomPrivateMessage';
                   messageId: string;
                   visibleTo: Array<string>;
-                  initText?: Maybe<string>;
-                  initTextSource?: Maybe<string>;
-                  textColor?: Maybe<string>;
-                  altTextToSecret?: Maybe<string>;
+                  initText?: string | null | undefined;
+                  initTextSource?: string | null | undefined;
+                  textColor?: string | null | undefined;
+                  altTextToSecret?: string | null | undefined;
                   isSecret: boolean;
-                  createdBy?: Maybe<string>;
-                  customName?: Maybe<string>;
+                  createdBy?: string | null | undefined;
+                  customName?: string | null | undefined;
                   createdAt: number;
-                  updatedAt?: Maybe<number>;
-                  updatedText?: Maybe<{
-                      __typename?: 'UpdatedText';
-                      currentText?: Maybe<string>;
-                      updatedAt: number;
-                  }>;
-                  commandResult?: Maybe<{
-                      __typename?: 'CommandResult';
-                      text: string;
-                      isSuccess?: Maybe<boolean>;
-                  }>;
-                  character?: Maybe<{
-                      __typename?: 'CharacterValueForMessage';
-                      stateId: string;
-                      isPrivate: boolean;
-                      name: string;
-                      image?: Maybe<{
-                          __typename?: 'FilePath';
-                          sourceType: FileSourceType;
-                          path: string;
-                      }>;
-                      tachieImage?: Maybe<{
-                          __typename?: 'FilePath';
-                          sourceType: FileSourceType;
-                          path: string;
-                      }>;
-                  }>;
+                  updatedAt?: number | null | undefined;
+                  updatedText?:
+                      | {
+                            __typename?: 'UpdatedText';
+                            currentText?: string | null | undefined;
+                            updatedAt: number;
+                        }
+                      | null
+                      | undefined;
+                  commandResult?:
+                      | {
+                            __typename?: 'CommandResult';
+                            text: string;
+                            isSuccess?: boolean | null | undefined;
+                        }
+                      | null
+                      | undefined;
+                  character?:
+                      | {
+                            __typename?: 'CharacterValueForMessage';
+                            stateId: string;
+                            isPrivate: boolean;
+                            name: string;
+                            image?:
+                                | {
+                                      __typename?: 'FilePath';
+                                      sourceType: FileSourceType;
+                                      path: string;
+                                  }
+                                | null
+                                | undefined;
+                            tachieImage?:
+                                | {
+                                      __typename?: 'FilePath';
+                                      sourceType: FileSourceType;
+                                      path: string;
+                                  }
+                                | null
+                                | undefined;
+                        }
+                      | null
+                      | undefined;
               }>;
               pieceValueLogs: Array<{
                   __typename?: 'PieceValueLog';
@@ -1405,12 +1477,12 @@ export type GetMessagesQuery = {
               publicChannels: Array<{
                   __typename?: 'RoomPublicChannel';
                   key: string;
-                  name?: Maybe<string>;
+                  name?: string | null | undefined;
               }>;
               soundEffects: Array<{
                   __typename?: 'RoomSoundEffect';
                   messageId: string;
-                  createdBy?: Maybe<string>;
+                  createdBy?: string | null | undefined;
                   createdAt: number;
                   volume: number;
                   file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
@@ -1432,81 +1504,111 @@ export type GetLogQuery = {
                   __typename?: 'RoomPublicMessage';
                   messageId: string;
                   channelKey: string;
-                  initText?: Maybe<string>;
-                  initTextSource?: Maybe<string>;
-                  textColor?: Maybe<string>;
-                  altTextToSecret?: Maybe<string>;
+                  initText?: string | null | undefined;
+                  initTextSource?: string | null | undefined;
+                  textColor?: string | null | undefined;
+                  altTextToSecret?: string | null | undefined;
                   isSecret: boolean;
-                  createdBy?: Maybe<string>;
-                  customName?: Maybe<string>;
+                  createdBy?: string | null | undefined;
+                  customName?: string | null | undefined;
                   createdAt: number;
-                  updatedAt?: Maybe<number>;
-                  updatedText?: Maybe<{
-                      __typename?: 'UpdatedText';
-                      currentText?: Maybe<string>;
-                      updatedAt: number;
-                  }>;
-                  commandResult?: Maybe<{
-                      __typename?: 'CommandResult';
-                      text: string;
-                      isSuccess?: Maybe<boolean>;
-                  }>;
-                  character?: Maybe<{
-                      __typename?: 'CharacterValueForMessage';
-                      stateId: string;
-                      isPrivate: boolean;
-                      name: string;
-                      image?: Maybe<{
-                          __typename?: 'FilePath';
-                          sourceType: FileSourceType;
-                          path: string;
-                      }>;
-                      tachieImage?: Maybe<{
-                          __typename?: 'FilePath';
-                          sourceType: FileSourceType;
-                          path: string;
-                      }>;
-                  }>;
+                  updatedAt?: number | null | undefined;
+                  updatedText?:
+                      | {
+                            __typename?: 'UpdatedText';
+                            currentText?: string | null | undefined;
+                            updatedAt: number;
+                        }
+                      | null
+                      | undefined;
+                  commandResult?:
+                      | {
+                            __typename?: 'CommandResult';
+                            text: string;
+                            isSuccess?: boolean | null | undefined;
+                        }
+                      | null
+                      | undefined;
+                  character?:
+                      | {
+                            __typename?: 'CharacterValueForMessage';
+                            stateId: string;
+                            isPrivate: boolean;
+                            name: string;
+                            image?:
+                                | {
+                                      __typename?: 'FilePath';
+                                      sourceType: FileSourceType;
+                                      path: string;
+                                  }
+                                | null
+                                | undefined;
+                            tachieImage?:
+                                | {
+                                      __typename?: 'FilePath';
+                                      sourceType: FileSourceType;
+                                      path: string;
+                                  }
+                                | null
+                                | undefined;
+                        }
+                      | null
+                      | undefined;
               }>;
               privateMessages: Array<{
                   __typename?: 'RoomPrivateMessage';
                   messageId: string;
                   visibleTo: Array<string>;
-                  initText?: Maybe<string>;
-                  initTextSource?: Maybe<string>;
-                  textColor?: Maybe<string>;
-                  altTextToSecret?: Maybe<string>;
+                  initText?: string | null | undefined;
+                  initTextSource?: string | null | undefined;
+                  textColor?: string | null | undefined;
+                  altTextToSecret?: string | null | undefined;
                   isSecret: boolean;
-                  createdBy?: Maybe<string>;
-                  customName?: Maybe<string>;
+                  createdBy?: string | null | undefined;
+                  customName?: string | null | undefined;
                   createdAt: number;
-                  updatedAt?: Maybe<number>;
-                  updatedText?: Maybe<{
-                      __typename?: 'UpdatedText';
-                      currentText?: Maybe<string>;
-                      updatedAt: number;
-                  }>;
-                  commandResult?: Maybe<{
-                      __typename?: 'CommandResult';
-                      text: string;
-                      isSuccess?: Maybe<boolean>;
-                  }>;
-                  character?: Maybe<{
-                      __typename?: 'CharacterValueForMessage';
-                      stateId: string;
-                      isPrivate: boolean;
-                      name: string;
-                      image?: Maybe<{
-                          __typename?: 'FilePath';
-                          sourceType: FileSourceType;
-                          path: string;
-                      }>;
-                      tachieImage?: Maybe<{
-                          __typename?: 'FilePath';
-                          sourceType: FileSourceType;
-                          path: string;
-                      }>;
-                  }>;
+                  updatedAt?: number | null | undefined;
+                  updatedText?:
+                      | {
+                            __typename?: 'UpdatedText';
+                            currentText?: string | null | undefined;
+                            updatedAt: number;
+                        }
+                      | null
+                      | undefined;
+                  commandResult?:
+                      | {
+                            __typename?: 'CommandResult';
+                            text: string;
+                            isSuccess?: boolean | null | undefined;
+                        }
+                      | null
+                      | undefined;
+                  character?:
+                      | {
+                            __typename?: 'CharacterValueForMessage';
+                            stateId: string;
+                            isPrivate: boolean;
+                            name: string;
+                            image?:
+                                | {
+                                      __typename?: 'FilePath';
+                                      sourceType: FileSourceType;
+                                      path: string;
+                                  }
+                                | null
+                                | undefined;
+                            tachieImage?:
+                                | {
+                                      __typename?: 'FilePath';
+                                      sourceType: FileSourceType;
+                                      path: string;
+                                  }
+                                | null
+                                | undefined;
+                        }
+                      | null
+                      | undefined;
               }>;
               pieceValueLogs: Array<{
                   __typename?: 'PieceValueLog';
@@ -1521,12 +1623,12 @@ export type GetLogQuery = {
               publicChannels: Array<{
                   __typename?: 'RoomPublicChannel';
                   key: string;
-                  name?: Maybe<string>;
+                  name?: string | null | undefined;
               }>;
               soundEffects: Array<{
                   __typename?: 'RoomSoundEffect';
                   messageId: string;
-                  createdBy?: Maybe<string>;
+                  createdBy?: string | null | undefined;
                   createdAt: number;
                   volume: number;
                   file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
@@ -1564,11 +1666,10 @@ export type GetServerInfoQuery = {
             major: number;
             minor: number;
             patch: number;
-            prerelease?: Maybe<{
-                __typename?: 'Prerelease';
-                type: PrereleaseType;
-                version: number;
-            }>;
+            prerelease?:
+                | { __typename?: 'Prerelease'; type: PrereleaseType; version: number }
+                | null
+                | undefined;
         };
     };
 };
@@ -1604,7 +1705,7 @@ export type CreateFileTagMutationVariables = Exact<{
 
 export type CreateFileTagMutation = {
     __typename?: 'Mutation';
-    result?: Maybe<{ __typename?: 'FileTag'; id: string; name: string }>;
+    result?: { __typename?: 'FileTag'; id: string; name: string } | null | undefined;
 };
 
 export type ChangeParticipantNameMutationVariables = Exact<{
@@ -1616,7 +1717,7 @@ export type ChangeParticipantNameMutation = {
     __typename?: 'Mutation';
     result: {
         __typename?: 'ChangeParticipantNameResult';
-        failureType?: Maybe<ChangeParticipantNameFailureType>;
+        failureType?: ChangeParticipantNameFailureType | null | undefined;
     };
 };
 
@@ -1658,7 +1759,10 @@ export type DeleteRoomMutationVariables = Exact<{
 
 export type DeleteRoomMutation = {
     __typename?: 'Mutation';
-    result: { __typename?: 'DeleteRoomResult'; failureType?: Maybe<DeleteRoomFailureType> };
+    result: {
+        __typename?: 'DeleteRoomResult';
+        failureType?: DeleteRoomFailureType | null | undefined;
+    };
 };
 
 export type EditFileTagsMutationVariables = Exact<{
@@ -1679,16 +1783,18 @@ export type JoinRoomAsPlayerMutation = {
         | { __typename: 'JoinRoomFailureResult'; failureType: JoinRoomFailureType }
         | {
               __typename: 'JoinRoomSuccessResult';
-              operation?: Maybe<{
-                  __typename?: 'RoomOperation';
-                  revisionTo: number;
-                  valueJson: string;
-                  operatedBy?: Maybe<{
-                      __typename?: 'OperatedBy';
-                      userUid: string;
-                      clientId: string;
-                  }>;
-              }>;
+              operation?:
+                  | {
+                        __typename?: 'RoomOperation';
+                        revisionTo: number;
+                        valueJson: string;
+                        operatedBy?:
+                            | { __typename?: 'OperatedBy'; userUid: string; clientId: string }
+                            | null
+                            | undefined;
+                    }
+                  | null
+                  | undefined;
           };
 };
 
@@ -1704,16 +1810,18 @@ export type JoinRoomAsSpectatorMutation = {
         | { __typename: 'JoinRoomFailureResult'; failureType: JoinRoomFailureType }
         | {
               __typename: 'JoinRoomSuccessResult';
-              operation?: Maybe<{
-                  __typename?: 'RoomOperation';
-                  revisionTo: number;
-                  valueJson: string;
-                  operatedBy?: Maybe<{
-                      __typename?: 'OperatedBy';
-                      userUid: string;
-                      clientId: string;
-                  }>;
-              }>;
+              operation?:
+                  | {
+                        __typename?: 'RoomOperation';
+                        revisionTo: number;
+                        valueJson: string;
+                        operatedBy?:
+                            | { __typename?: 'OperatedBy'; userUid: string; clientId: string }
+                            | null
+                            | undefined;
+                    }
+                  | null
+                  | undefined;
           };
 };
 
@@ -1732,7 +1840,10 @@ export type LeaveRoomMutationVariables = Exact<{
 
 export type LeaveRoomMutation = {
     __typename?: 'Mutation';
-    result: { __typename?: 'LeaveRoomResult'; failureType?: Maybe<LeaveRoomFailureType> };
+    result: {
+        __typename?: 'LeaveRoomResult';
+        failureType?: LeaveRoomFailureType | null | undefined;
+    };
 };
 
 export type OperateMutationVariables = Exact<{
@@ -1764,11 +1875,10 @@ export type OperateMutation = {
                   __typename?: 'RoomOperation';
                   revisionTo: number;
                   valueJson: string;
-                  operatedBy?: Maybe<{
-                      __typename?: 'OperatedBy';
-                      userUid: string;
-                      clientId: string;
-                  }>;
+                  operatedBy?:
+                      | { __typename?: 'OperatedBy'; userUid: string; clientId: string }
+                      | null
+                      | undefined;
               };
           };
 };
@@ -1779,7 +1889,7 @@ export type PingMutationVariables = Exact<{
 
 export type PingMutation = {
     __typename?: 'Mutation';
-    result: { __typename?: 'Pong'; createdBy?: Maybe<string>; value: number };
+    result: { __typename?: 'Pong'; createdBy?: string | null | undefined; value: number };
 };
 
 export type PromoteToPlayerMutationVariables = Exact<{
@@ -1789,7 +1899,7 @@ export type PromoteToPlayerMutationVariables = Exact<{
 
 export type PromoteToPlayerMutation = {
     __typename?: 'Mutation';
-    result: { __typename?: 'PromoteResult'; failureType?: Maybe<PromoteFailureType> };
+    result: { __typename?: 'PromoteResult'; failureType?: PromoteFailureType | null | undefined };
 };
 
 export type WritePublicMessageMutationVariables = Exact<{
@@ -1809,41 +1919,48 @@ export type WritePublicMessageMutation = {
               __typename: 'RoomPublicMessage';
               messageId: string;
               channelKey: string;
-              initText?: Maybe<string>;
-              initTextSource?: Maybe<string>;
-              textColor?: Maybe<string>;
-              altTextToSecret?: Maybe<string>;
+              initText?: string | null | undefined;
+              initTextSource?: string | null | undefined;
+              textColor?: string | null | undefined;
+              altTextToSecret?: string | null | undefined;
               isSecret: boolean;
-              createdBy?: Maybe<string>;
-              customName?: Maybe<string>;
+              createdBy?: string | null | undefined;
+              customName?: string | null | undefined;
               createdAt: number;
-              updatedAt?: Maybe<number>;
-              updatedText?: Maybe<{
-                  __typename?: 'UpdatedText';
-                  currentText?: Maybe<string>;
-                  updatedAt: number;
-              }>;
-              commandResult?: Maybe<{
-                  __typename?: 'CommandResult';
-                  text: string;
-                  isSuccess?: Maybe<boolean>;
-              }>;
-              character?: Maybe<{
-                  __typename?: 'CharacterValueForMessage';
-                  stateId: string;
-                  isPrivate: boolean;
-                  name: string;
-                  image?: Maybe<{
-                      __typename?: 'FilePath';
-                      sourceType: FileSourceType;
-                      path: string;
-                  }>;
-                  tachieImage?: Maybe<{
-                      __typename?: 'FilePath';
-                      sourceType: FileSourceType;
-                      path: string;
-                  }>;
-              }>;
+              updatedAt?: number | null | undefined;
+              updatedText?:
+                  | {
+                        __typename?: 'UpdatedText';
+                        currentText?: string | null | undefined;
+                        updatedAt: number;
+                    }
+                  | null
+                  | undefined;
+              commandResult?:
+                  | {
+                        __typename?: 'CommandResult';
+                        text: string;
+                        isSuccess?: boolean | null | undefined;
+                    }
+                  | null
+                  | undefined;
+              character?:
+                  | {
+                        __typename?: 'CharacterValueForMessage';
+                        stateId: string;
+                        isPrivate: boolean;
+                        name: string;
+                        image?:
+                            | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
+                            | null
+                            | undefined;
+                        tachieImage?:
+                            | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
+                            | null
+                            | undefined;
+                    }
+                  | null
+                  | undefined;
           }
         | {
               __typename: 'WriteRoomPublicMessageFailureResult';
@@ -1868,41 +1985,48 @@ export type WritePrivateMessageMutation = {
               __typename: 'RoomPrivateMessage';
               messageId: string;
               visibleTo: Array<string>;
-              initText?: Maybe<string>;
-              initTextSource?: Maybe<string>;
-              textColor?: Maybe<string>;
-              altTextToSecret?: Maybe<string>;
+              initText?: string | null | undefined;
+              initTextSource?: string | null | undefined;
+              textColor?: string | null | undefined;
+              altTextToSecret?: string | null | undefined;
               isSecret: boolean;
-              createdBy?: Maybe<string>;
-              customName?: Maybe<string>;
+              createdBy?: string | null | undefined;
+              customName?: string | null | undefined;
               createdAt: number;
-              updatedAt?: Maybe<number>;
-              updatedText?: Maybe<{
-                  __typename?: 'UpdatedText';
-                  currentText?: Maybe<string>;
-                  updatedAt: number;
-              }>;
-              commandResult?: Maybe<{
-                  __typename?: 'CommandResult';
-                  text: string;
-                  isSuccess?: Maybe<boolean>;
-              }>;
-              character?: Maybe<{
-                  __typename?: 'CharacterValueForMessage';
-                  stateId: string;
-                  isPrivate: boolean;
-                  name: string;
-                  image?: Maybe<{
-                      __typename?: 'FilePath';
-                      sourceType: FileSourceType;
-                      path: string;
-                  }>;
-                  tachieImage?: Maybe<{
-                      __typename?: 'FilePath';
-                      sourceType: FileSourceType;
-                      path: string;
-                  }>;
-              }>;
+              updatedAt?: number | null | undefined;
+              updatedText?:
+                  | {
+                        __typename?: 'UpdatedText';
+                        currentText?: string | null | undefined;
+                        updatedAt: number;
+                    }
+                  | null
+                  | undefined;
+              commandResult?:
+                  | {
+                        __typename?: 'CommandResult';
+                        text: string;
+                        isSuccess?: boolean | null | undefined;
+                    }
+                  | null
+                  | undefined;
+              character?:
+                  | {
+                        __typename?: 'CharacterValueForMessage';
+                        stateId: string;
+                        isPrivate: boolean;
+                        name: string;
+                        image?:
+                            | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
+                            | null
+                            | undefined;
+                        tachieImage?:
+                            | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
+                            | null
+                            | undefined;
+                    }
+                  | null
+                  | undefined;
           }
         | {
               __typename: 'WriteRoomPrivateMessageFailureResult';
@@ -1922,7 +2046,7 @@ export type WriteRoomSoundEffectMutation = {
         | {
               __typename: 'RoomSoundEffect';
               messageId: string;
-              createdBy?: Maybe<string>;
+              createdBy?: string | null | undefined;
               createdAt: number;
               volume: number;
               file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
@@ -1941,7 +2065,10 @@ export type EditMessageMutationVariables = Exact<{
 
 export type EditMessageMutation = {
     __typename?: 'Mutation';
-    result: { __typename?: 'EditMessageResult'; failureType?: Maybe<EditMessageFailureType> };
+    result: {
+        __typename?: 'EditMessageResult';
+        failureType?: EditMessageFailureType | null | undefined;
+    };
 };
 
 export type DeleteMessageMutationVariables = Exact<{
@@ -1951,7 +2078,10 @@ export type DeleteMessageMutationVariables = Exact<{
 
 export type DeleteMessageMutation = {
     __typename?: 'Mutation';
-    result: { __typename?: 'DeleteMessageResult'; failureType?: Maybe<DeleteMessageFailureType> };
+    result: {
+        __typename?: 'DeleteMessageResult';
+        failureType?: DeleteMessageFailureType | null | undefined;
+    };
 };
 
 export type MakeMessageNotSecretMutationVariables = Exact<{
@@ -1963,7 +2093,7 @@ export type MakeMessageNotSecretMutation = {
     __typename?: 'Mutation';
     result: {
         __typename?: 'MakeMessageNotSecretResult';
-        failureType?: Maybe<MakeMessageNotSecretFailureType>;
+        failureType?: MakeMessageNotSecretFailureType | null | undefined;
     };
 };
 
@@ -1980,174 +2110,243 @@ export type RoomEventSubscriptionVariables = Exact<{
 
 export type RoomEventSubscription = {
     __typename?: 'Subscription';
-    roomEvent?: Maybe<{
-        __typename?: 'RoomEvent';
-        roomOperation?: Maybe<{
-            __typename?: 'RoomOperation';
-            revisionTo: number;
-            valueJson: string;
-            operatedBy?: Maybe<{ __typename?: 'OperatedBy'; userUid: string; clientId: string }>;
-        }>;
-        deleteRoomOperation?: Maybe<{ __typename?: 'DeleteRoomOperation'; deletedBy: string }>;
-        roomMessageEvent?: Maybe<
-            | {
-                  __typename: 'PieceValueLog';
-                  messageId: string;
-                  characterCreatedBy: string;
-                  characterId: string;
-                  stateId: string;
-                  createdAt: number;
-                  logType: PieceValueLogType;
-                  valueJson: string;
-              }
-            | {
-                  __typename: 'RoomPrivateMessage';
-                  messageId: string;
-                  visibleTo: Array<string>;
-                  initText?: Maybe<string>;
-                  initTextSource?: Maybe<string>;
-                  textColor?: Maybe<string>;
-                  altTextToSecret?: Maybe<string>;
-                  isSecret: boolean;
-                  createdBy?: Maybe<string>;
-                  customName?: Maybe<string>;
-                  createdAt: number;
-                  updatedAt?: Maybe<number>;
-                  updatedText?: Maybe<{
-                      __typename?: 'UpdatedText';
-                      currentText?: Maybe<string>;
-                      updatedAt: number;
-                  }>;
-                  commandResult?: Maybe<{
-                      __typename?: 'CommandResult';
-                      text: string;
-                      isSuccess?: Maybe<boolean>;
-                  }>;
-                  character?: Maybe<{
-                      __typename?: 'CharacterValueForMessage';
-                      stateId: string;
-                      isPrivate: boolean;
-                      name: string;
-                      image?: Maybe<{
-                          __typename?: 'FilePath';
-                          sourceType: FileSourceType;
-                          path: string;
-                      }>;
-                      tachieImage?: Maybe<{
-                          __typename?: 'FilePath';
-                          sourceType: FileSourceType;
-                          path: string;
-                      }>;
-                  }>;
-              }
-            | {
-                  __typename: 'RoomPrivateMessageUpdate';
-                  messageId: string;
-                  initText?: Maybe<string>;
-                  initTextSource?: Maybe<string>;
-                  altTextToSecret?: Maybe<string>;
-                  isSecret: boolean;
-                  updatedAt?: Maybe<number>;
-                  updatedText?: Maybe<{
-                      __typename?: 'UpdatedText';
-                      currentText?: Maybe<string>;
-                      updatedAt: number;
-                  }>;
-                  commandResult?: Maybe<{
-                      __typename?: 'CommandResult';
-                      text: string;
-                      isSuccess?: Maybe<boolean>;
-                  }>;
-              }
-            | { __typename: 'RoomPublicChannel'; key: string; name?: Maybe<string> }
-            | { __typename: 'RoomPublicChannelUpdate'; key: string; name?: Maybe<string> }
-            | {
-                  __typename: 'RoomPublicMessage';
-                  messageId: string;
-                  channelKey: string;
-                  initText?: Maybe<string>;
-                  initTextSource?: Maybe<string>;
-                  textColor?: Maybe<string>;
-                  altTextToSecret?: Maybe<string>;
-                  isSecret: boolean;
-                  createdBy?: Maybe<string>;
-                  customName?: Maybe<string>;
-                  createdAt: number;
-                  updatedAt?: Maybe<number>;
-                  updatedText?: Maybe<{
-                      __typename?: 'UpdatedText';
-                      currentText?: Maybe<string>;
-                      updatedAt: number;
-                  }>;
-                  commandResult?: Maybe<{
-                      __typename?: 'CommandResult';
-                      text: string;
-                      isSuccess?: Maybe<boolean>;
-                  }>;
-                  character?: Maybe<{
-                      __typename?: 'CharacterValueForMessage';
-                      stateId: string;
-                      isPrivate: boolean;
-                      name: string;
-                      image?: Maybe<{
-                          __typename?: 'FilePath';
-                          sourceType: FileSourceType;
-                          path: string;
-                      }>;
-                      tachieImage?: Maybe<{
-                          __typename?: 'FilePath';
-                          sourceType: FileSourceType;
-                          path: string;
-                      }>;
-                  }>;
-              }
-            | {
-                  __typename: 'RoomPublicMessageUpdate';
-                  messageId: string;
-                  initText?: Maybe<string>;
-                  initTextSource?: Maybe<string>;
-                  altTextToSecret?: Maybe<string>;
-                  isSecret: boolean;
-                  updatedAt?: Maybe<number>;
-                  updatedText?: Maybe<{
-                      __typename?: 'UpdatedText';
-                      currentText?: Maybe<string>;
-                      updatedAt: number;
-                  }>;
-                  commandResult?: Maybe<{
-                      __typename?: 'CommandResult';
-                      text: string;
-                      isSuccess?: Maybe<boolean>;
-                  }>;
-              }
-            | {
-                  __typename: 'RoomSoundEffect';
-                  messageId: string;
-                  createdBy?: Maybe<string>;
-                  createdAt: number;
-                  volume: number;
-                  file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
-              }
-        >;
-        roomConnectionEvent?: Maybe<{
-            __typename?: 'RoomConnectionEvent';
-            userUid: string;
-            isConnected: boolean;
-            updatedAt: number;
-        }>;
-        writingMessageStatus?: Maybe<{
-            __typename?: 'WritingMessageStatus';
-            userUid: string;
-            status: WritingMessageStatusType;
-        }>;
-    }>;
+    roomEvent?:
+        | {
+              __typename?: 'RoomEvent';
+              roomOperation?:
+                  | {
+                        __typename?: 'RoomOperation';
+                        revisionTo: number;
+                        valueJson: string;
+                        operatedBy?:
+                            | { __typename?: 'OperatedBy'; userUid: string; clientId: string }
+                            | null
+                            | undefined;
+                    }
+                  | null
+                  | undefined;
+              deleteRoomOperation?:
+                  | { __typename?: 'DeleteRoomOperation'; deletedBy: string }
+                  | null
+                  | undefined;
+              roomMessageEvent?:
+                  | {
+                        __typename: 'PieceValueLog';
+                        messageId: string;
+                        characterCreatedBy: string;
+                        characterId: string;
+                        stateId: string;
+                        createdAt: number;
+                        logType: PieceValueLogType;
+                        valueJson: string;
+                    }
+                  | {
+                        __typename: 'RoomPrivateMessage';
+                        messageId: string;
+                        visibleTo: Array<string>;
+                        initText?: string | null | undefined;
+                        initTextSource?: string | null | undefined;
+                        textColor?: string | null | undefined;
+                        altTextToSecret?: string | null | undefined;
+                        isSecret: boolean;
+                        createdBy?: string | null | undefined;
+                        customName?: string | null | undefined;
+                        createdAt: number;
+                        updatedAt?: number | null | undefined;
+                        updatedText?:
+                            | {
+                                  __typename?: 'UpdatedText';
+                                  currentText?: string | null | undefined;
+                                  updatedAt: number;
+                              }
+                            | null
+                            | undefined;
+                        commandResult?:
+                            | {
+                                  __typename?: 'CommandResult';
+                                  text: string;
+                                  isSuccess?: boolean | null | undefined;
+                              }
+                            | null
+                            | undefined;
+                        character?:
+                            | {
+                                  __typename?: 'CharacterValueForMessage';
+                                  stateId: string;
+                                  isPrivate: boolean;
+                                  name: string;
+                                  image?:
+                                      | {
+                                            __typename?: 'FilePath';
+                                            sourceType: FileSourceType;
+                                            path: string;
+                                        }
+                                      | null
+                                      | undefined;
+                                  tachieImage?:
+                                      | {
+                                            __typename?: 'FilePath';
+                                            sourceType: FileSourceType;
+                                            path: string;
+                                        }
+                                      | null
+                                      | undefined;
+                              }
+                            | null
+                            | undefined;
+                    }
+                  | {
+                        __typename: 'RoomPrivateMessageUpdate';
+                        messageId: string;
+                        initText?: string | null | undefined;
+                        initTextSource?: string | null | undefined;
+                        altTextToSecret?: string | null | undefined;
+                        isSecret: boolean;
+                        updatedAt?: number | null | undefined;
+                        updatedText?:
+                            | {
+                                  __typename?: 'UpdatedText';
+                                  currentText?: string | null | undefined;
+                                  updatedAt: number;
+                              }
+                            | null
+                            | undefined;
+                        commandResult?:
+                            | {
+                                  __typename?: 'CommandResult';
+                                  text: string;
+                                  isSuccess?: boolean | null | undefined;
+                              }
+                            | null
+                            | undefined;
+                    }
+                  | {
+                        __typename: 'RoomPublicChannel';
+                        key: string;
+                        name?: string | null | undefined;
+                    }
+                  | {
+                        __typename: 'RoomPublicChannelUpdate';
+                        key: string;
+                        name?: string | null | undefined;
+                    }
+                  | {
+                        __typename: 'RoomPublicMessage';
+                        messageId: string;
+                        channelKey: string;
+                        initText?: string | null | undefined;
+                        initTextSource?: string | null | undefined;
+                        textColor?: string | null | undefined;
+                        altTextToSecret?: string | null | undefined;
+                        isSecret: boolean;
+                        createdBy?: string | null | undefined;
+                        customName?: string | null | undefined;
+                        createdAt: number;
+                        updatedAt?: number | null | undefined;
+                        updatedText?:
+                            | {
+                                  __typename?: 'UpdatedText';
+                                  currentText?: string | null | undefined;
+                                  updatedAt: number;
+                              }
+                            | null
+                            | undefined;
+                        commandResult?:
+                            | {
+                                  __typename?: 'CommandResult';
+                                  text: string;
+                                  isSuccess?: boolean | null | undefined;
+                              }
+                            | null
+                            | undefined;
+                        character?:
+                            | {
+                                  __typename?: 'CharacterValueForMessage';
+                                  stateId: string;
+                                  isPrivate: boolean;
+                                  name: string;
+                                  image?:
+                                      | {
+                                            __typename?: 'FilePath';
+                                            sourceType: FileSourceType;
+                                            path: string;
+                                        }
+                                      | null
+                                      | undefined;
+                                  tachieImage?:
+                                      | {
+                                            __typename?: 'FilePath';
+                                            sourceType: FileSourceType;
+                                            path: string;
+                                        }
+                                      | null
+                                      | undefined;
+                              }
+                            | null
+                            | undefined;
+                    }
+                  | {
+                        __typename: 'RoomPublicMessageUpdate';
+                        messageId: string;
+                        initText?: string | null | undefined;
+                        initTextSource?: string | null | undefined;
+                        altTextToSecret?: string | null | undefined;
+                        isSecret: boolean;
+                        updatedAt?: number | null | undefined;
+                        updatedText?:
+                            | {
+                                  __typename?: 'UpdatedText';
+                                  currentText?: string | null | undefined;
+                                  updatedAt: number;
+                              }
+                            | null
+                            | undefined;
+                        commandResult?:
+                            | {
+                                  __typename?: 'CommandResult';
+                                  text: string;
+                                  isSuccess?: boolean | null | undefined;
+                              }
+                            | null
+                            | undefined;
+                    }
+                  | {
+                        __typename: 'RoomSoundEffect';
+                        messageId: string;
+                        createdBy?: string | null | undefined;
+                        createdAt: number;
+                        volume: number;
+                        file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
+                    }
+                  | null
+                  | undefined;
+              roomConnectionEvent?:
+                  | {
+                        __typename?: 'RoomConnectionEvent';
+                        userUid: string;
+                        isConnected: boolean;
+                        updatedAt: number;
+                    }
+                  | null
+                  | undefined;
+              writingMessageStatus?:
+                  | {
+                        __typename?: 'WritingMessageStatus';
+                        userUid: string;
+                        status: WritingMessageStatusType;
+                    }
+                  | null
+                  | undefined;
+          }
+        | null
+        | undefined;
 };
 
 export type PongSubscriptionVariables = Exact<{ [key: string]: never }>;
 
 export type PongSubscription = {
     __typename?: 'Subscription';
-    pong: { __typename?: 'Pong'; createdBy?: Maybe<string>; value: number };
+    pong: { __typename?: 'Pong'; createdBy?: string | null | undefined; value: number };
 };
 
 export const RoomGetStateFragmentDoc = {
