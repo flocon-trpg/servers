@@ -1713,7 +1713,7 @@ __metadata:
     "@types/jest": 27.0.2
     "@types/lodash": ^4.14.175
     "@types/multer": ^1.4.7
-    "@types/node": ^14.0.0
+    "@types/node": ^16.0.0
     "@types/safe-compare": ^1.1.0
     "@types/sharp": ^0.29.2
     "@types/url-join": 4.0.1
@@ -3749,7 +3749,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:>=12.12.47, @types/node@npm:>=13.7.0":
+"@types/node@npm:*, @types/node@npm:>=12.12.47, @types/node@npm:>=13.7.0, @types/node@npm:^16.0.0":
   version: 16.11.6
   resolution: "@types/node@npm:16.11.6"
   checksum: 6e19634766ff589d3d2f361c2196b671f8f133cdadc5ad347a621c360d8994b6c4fbccfb2ad9c60c588c593831a96497c9c6b77d2b7e91be723384b94f6368e7
@@ -3760,13 +3760,6 @@ __metadata:
   version: 10.17.60
   resolution: "@types/node@npm:10.17.60"
   checksum: 2cdb3a77d071ba8513e5e8306fa64bf50e3c3302390feeaeff1fd325dd25c8441369715dfc8e3701011a72fed5958c7dfa94eb9239a81b3c286caa4d97db6eef
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:^14.0.0":
-  version: 14.17.32
-  resolution: "@types/node@npm:14.17.32"
-  checksum: c3ec45db5d8ca6ed80bcc2fe3cd9f15c1518d43cf048dd5444d1fcbe308d302a42721cb3f19548ac2e7b8b7db4f7f6cd4bf9ed58ab1d30a0bf61758350edd9d5
   languageName: node
   linkType: hard
 
