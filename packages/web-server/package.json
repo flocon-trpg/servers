@@ -112,10 +112,7 @@
         "serve": "serve ./out",
         "test": "jest",
         "type-check": "tsc",
-        "tc": "npm run type-check",
-        "prepare": "husky install",
-        "prettier": "npm run prettier:base -- --write",
-        "prettier:base": "prettier \"**/*.{ts,tsx,config.js,eslintrc.js,json,yml,md}\""
+        "tc": "yarn run type-check"
     },
     "license": "MIT"
 }
