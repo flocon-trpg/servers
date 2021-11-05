@@ -2,6 +2,7 @@
 .DS_Store
 node_modules/
 dist/
+tmp/
 coverage/
 /packages/web-server/.next/
 /packages/web-server/out/
