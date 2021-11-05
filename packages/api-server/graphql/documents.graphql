@@ -388,6 +388,7 @@ query IsEntry {
 
 query GetRoomAsListItem($roomId: String!) {
   result: getRoomAsListItem(roomId: $roomId) {
+  __typename
     ... on GetRoomAsListItemSuccessResult {
       room {
         ...RoomAsListItem

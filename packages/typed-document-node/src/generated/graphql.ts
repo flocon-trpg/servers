@@ -1685,9 +1685,9 @@ export type GetRoomAsListItemQueryVariables = Exact<{
 export type GetRoomAsListItemQuery = {
     __typename?: 'Query';
     result:
-        | { __typename?: 'GetRoomAsListItemFailureResult'; failureType: GetRoomFailureType }
+        | { __typename: 'GetRoomAsListItemFailureResult'; failureType: GetRoomFailureType }
         | {
-              __typename?: 'GetRoomAsListItemSuccessResult';
+              __typename: 'GetRoomAsListItemSuccessResult';
               room: {
                   __typename?: 'RoomAsListItem';
                   id: string;
@@ -4073,6 +4073,7 @@ export const GetRoomAsListItemDocument = {
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
                                 {
                                     kind: 'InlineFragment',
                                     typeCondition: {
