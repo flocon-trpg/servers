@@ -1,5 +1,5 @@
-import { ParamNameState } from '@kizahasi/flocon-core';
-import { recordToMap } from '@kizahasi/util';
+import { ParamNameState } from '@flocon-trpg/core';
+import { recordToMap } from '@flocon-trpg/utils';
 import React from 'react';
 import { useSelector } from '../../store';
 

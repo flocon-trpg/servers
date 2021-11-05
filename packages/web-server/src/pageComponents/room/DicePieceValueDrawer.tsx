@@ -13,7 +13,7 @@ import {
     CharacterState,
     dicePieceValueStrIndexes,
     simpleId,
-} from '@kizahasi/flocon-core';
+} from '@flocon-trpg/core';
 import { useDispatch } from 'react-redux';
 import { useSelector } from '../../store';
 import {
@@ -26,7 +26,7 @@ import { MyCharactersSelect } from '../../components/MyCharactersSelect';
 import { InputDie } from '../../components/InputDie';
 import { noValue } from '../../utils/dice';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
-import { keyNames } from '@kizahasi/util';
+import { keyNames } from '@flocon-trpg/utils';
 import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 
 const drawerBaseProps: Partial<DrawerProps> = {

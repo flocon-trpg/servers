@@ -19,10 +19,10 @@ import { BoardEditorPanelConfig } from '../states/BoardEditorPanelConfig';
 import { MessageFilter, MessagePanelConfig } from '../states/MessagePanelConfig';
 import { reset, Reset } from '../utils/types';
 import { BoardConfig, defaultBoardConfig } from '../states/BoardConfig';
-import { CompositeKey, recordToArray, keyNames } from '@kizahasi/util';
+import { CompositeKey, recordToArray, keyNames } from '@flocon-trpg/utils';
 import { MemoPanelConfig } from '../states/MemoPanelConfig';
 import { ChatPalettePanelConfig } from '../states/ChatPalettePanelConfig';
-import { simpleId, StrIndex5 } from '@kizahasi/flocon-core';
+import { simpleId, StrIndex5 } from '@flocon-trpg/core';
 
 const roomMenuHeight = 38;
 

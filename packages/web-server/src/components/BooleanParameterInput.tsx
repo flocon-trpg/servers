@@ -10,7 +10,7 @@ import {
     parameterIsPrivate,
     parameterIsPrivateAndNotCreatedByMe,
 } from '../resource/text/main';
-import { BoolParamState, CharacterUpOperation, StrIndex20 } from '@kizahasi/flocon-core';
+import { BoolParamState, CharacterUpOperation, StrIndex20 } from '@flocon-trpg/core';
 
 type Props = {
     isCharacterPrivate: boolean;

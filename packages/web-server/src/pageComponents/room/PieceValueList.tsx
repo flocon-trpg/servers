@@ -14,7 +14,7 @@ import { DicePieceValueElement, useDicePieceValues } from '../../hooks/state/use
 import { DicePieceValue } from '../../utils/dicePieceValue';
 import { StringPieceValue } from '../../utils/stringPieceValue';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
-import { keyNames } from '@kizahasi/util';
+import { keyNames } from '@flocon-trpg/utils';
 
 type DataSource =
     | {

@@ -4,7 +4,7 @@ import { ParticipantRole } from '../../generated/graphql';
 import { Jdenticon } from '../../components/Jdenticon';
 import { useRoomConnections } from '../../hooks/useRoomConnections';
 import { useParticipants } from '../../hooks/state/useParticipants';
-import { ParticipantState } from '@kizahasi/flocon-core';
+import { ParticipantState } from '@flocon-trpg/core';
 import _ from 'lodash';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 

@@ -10,7 +10,7 @@ import {
     parameterIsPrivateAndNotCreatedByMe,
     parameterIsNotPrivateAndNotCreatedByMe,
 } from '../resource/text/main';
-import { CharacterUpOperation, NumParamState, StrIndex20 } from '@kizahasi/flocon-core';
+import { CharacterUpOperation, NumParamState, StrIndex20 } from '@flocon-trpg/core';
 
 const inputWidth = 50;
 

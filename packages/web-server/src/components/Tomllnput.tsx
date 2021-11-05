@@ -1,4 +1,4 @@
-import { isValidVarToml } from '@kizahasi/flocon-core';
+import { isValidVarToml } from '@flocon-trpg/core';
 import React from 'react';
 import {
     BufferedTextArea,

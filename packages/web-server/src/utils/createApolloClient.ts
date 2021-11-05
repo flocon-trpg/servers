@@ -14,7 +14,7 @@ import { setContext } from '@apollo/client/link/context';
 import { Client, ClientOptions, createClient } from 'graphql-ws';
 import { print, GraphQLError } from 'graphql';
 import { onError } from '@apollo/client/link/error';
-import { authToken } from '@kizahasi/flocon-core';
+import { authToken } from '@flocon-trpg/core';
 
 // https://github.com/enisdenjo/graphql-ws のコードを使用
 class WebSocketLink extends ApolloLink {

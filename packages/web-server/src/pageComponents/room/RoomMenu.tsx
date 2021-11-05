@@ -21,7 +21,7 @@ import { roomModule, Notification } from '../../modules/roomModule';
 import { path } from '../../utils/path';
 import { useRouter } from 'next/router';
 import { defaultMessagePanelConfig } from '../../states/MessagePanelConfig';
-import { recordToArray } from '@kizahasi/util';
+import { recordToArray } from '@flocon-trpg/utils';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { defaultMemoPanelConfig } from '../../states/MemoPanelConfig';
 import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';

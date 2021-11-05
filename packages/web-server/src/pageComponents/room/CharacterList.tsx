@@ -27,8 +27,8 @@ import {
     StrIndex20,
     strIndex20Array,
     UpOperation,
-} from '@kizahasi/flocon-core';
-import { CompositeKey, keyNames } from '@kizahasi/util';
+} from '@flocon-trpg/core';
+import { CompositeKey, keyNames } from '@flocon-trpg/utils';
 import _ from 'lodash';
 import { useDispatch } from 'react-redux';
 import {

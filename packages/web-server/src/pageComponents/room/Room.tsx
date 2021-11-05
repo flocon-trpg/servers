@@ -24,7 +24,7 @@ import { usePlayBgm } from '../../hooks/usePlayBgm';
 import { usePlaySoundEffect } from '../../hooks/usePlaySoundEffect';
 import { useMessageNotification } from '../../hooks/useMessageNotification';
 import { RoomMenu } from './RoomMenu';
-import { recordToArray } from '@kizahasi/util';
+import { recordToArray } from '@flocon-trpg/utils';
 import { PieceValueList } from './PieceValueList';
 import { StringPieceValueDrawer } from './StringPieceValueDrawer';
 import { DicePieceValueDrawer } from './DicePieceValueDrawer';

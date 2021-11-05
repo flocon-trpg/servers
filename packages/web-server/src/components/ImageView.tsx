@@ -1,5 +1,5 @@
 import React from 'react';
-import { FilePath } from '@kizahasi/flocon-core';
+import { FilePath } from '@flocon-trpg/core';
 import { error, loading, success, useSrcFromGraphQL } from '../hooks/src';
 import { FilePathFragment } from '../generated/graphql';
 import * as Icons from '@ant-design/icons';

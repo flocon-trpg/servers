@@ -4,7 +4,7 @@ import {
     toCompleteDraggablePanelConfigBase,
 } from './DraggablePanelConfigBase';
 import * as t from 'io-ts';
-import { simpleId } from '@kizahasi/flocon-core';
+import { simpleId } from '@flocon-trpg/core';
 
 export type MemoPanelConfig = {
     isMinimized: boolean;

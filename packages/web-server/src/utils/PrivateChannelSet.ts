@@ -1,4 +1,4 @@
-import { ParticipantState } from '@kizahasi/flocon-core';
+import { ParticipantState } from '@flocon-trpg/core';
 import { VisibleTo } from './visibleTo';
 
 export class PrivateChannelSet {

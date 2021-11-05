@@ -17,7 +17,7 @@ import { create as createStateManager } from '../stateManagers/main';
 import { useClientId } from './useClientId';
 import { useDispatch } from 'react-redux';
 import { roomModule, Notification } from '../modules/roomModule';
-import { State, StateManager, UpOperation } from '@kizahasi/flocon-core';
+import { State, StateManager, UpOperation } from '@flocon-trpg/core';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { authNotFound, MyAuthContext, notSignIn } from '../contexts/MyAuthContext';
 import { Room } from '../stateManagers/states/room';

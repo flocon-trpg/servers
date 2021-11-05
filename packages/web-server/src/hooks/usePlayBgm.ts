@@ -4,7 +4,7 @@ import { done, useSrcArrayFromGraphQL } from './src';
 import { volumeCap } from '../utils/variables';
 import { useSelector } from '../store';
 import { defaultChannelVolume, defaultMasterVolume } from '../states/RoomConfig';
-import { BgmState } from '@kizahasi/flocon-core';
+import { BgmState } from '@flocon-trpg/core';
 import _ from 'lodash';
 import { analyzeUrl } from '../utils/analyzeUrl';
 import { useDeepCompareEffect } from 'react-use';

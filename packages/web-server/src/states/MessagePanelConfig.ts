@@ -4,10 +4,10 @@ import {
     toCompleteDraggablePanelConfigBase,
 } from './DraggablePanelConfigBase';
 import * as generators from '../utils/generators';
-import { chooseRecord } from '@kizahasi/util';
+import { chooseRecord } from '@flocon-trpg/utils';
 import * as t from 'io-ts';
 import { record } from '../utils/io-ts/record';
-import { simpleId } from '@kizahasi/flocon-core';
+import { simpleId } from '@flocon-trpg/core';
 
 export type MessageFilter = {
     showNotification: boolean;

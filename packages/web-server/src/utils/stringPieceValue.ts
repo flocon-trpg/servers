@@ -1,4 +1,4 @@
-import { StringPieceValueState } from '@kizahasi/flocon-core';
+import { StringPieceValueState } from '@flocon-trpg/core';
 
 export namespace StringPieceValue {
     export const toKonvaText = (state: StringPieceValueState, createdByMe: boolean): string => {

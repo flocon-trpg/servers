@@ -1,4 +1,4 @@
-import { CharacterState } from '@kizahasi/flocon-core';
+import { CharacterState } from '@flocon-trpg/core';
 import { Select } from 'antd';
 import React from 'react';
 import { useMyCharacters } from '../hooks/state/useMyCharacters';

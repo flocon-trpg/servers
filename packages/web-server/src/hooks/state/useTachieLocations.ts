@@ -1,6 +1,6 @@
 import React from 'react';
-import { CompositeKey, compositeKeyEquals, dualKeyRecordToDualKeyMap } from '@kizahasi/util';
-import { BoardLocationState } from '@kizahasi/flocon-core';
+import { CompositeKey, compositeKeyEquals, dualKeyRecordToDualKeyMap } from '@flocon-trpg/utils';
+import { BoardLocationState } from '@flocon-trpg/core';
 import { useCharacters } from './useCharacters';
 import _ from 'lodash';
 import { useCompositeKeyMemo } from '../useCompositeKeyMemo';

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector } from '../../store';
-import { recordToMap } from '@kizahasi/util';
-import { MemoState } from '@kizahasi/flocon-core';
+import { recordToMap } from '@flocon-trpg/utils';
+import { MemoState } from '@flocon-trpg/core';
 
 export const useMemos = (): ReadonlyMap<string, MemoState> | undefined => {
     const memos = useSelector(state => state.roomModule.roomState?.state?.memos);

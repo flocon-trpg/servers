@@ -1,4 +1,4 @@
-import { CompositeKey } from '@kizahasi/util';
+import { CompositeKey } from '@flocon-trpg/utils';
 import React from 'react';
 
 export const useBooleanOrCompositeKeyMemo = (

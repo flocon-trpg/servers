@@ -2699,36 +2699,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@kizahasi/flocon-core@npm:^0.20.0-beta.11":
-  version: 0.20.0-beta.11
-  resolution: "@kizahasi/flocon-core@npm:0.20.0-beta.11"
-  dependencies:
-    "@kizahasi/flocon-script": 0.8.1-beta.8
-    "@kizahasi/option": ^1.0.0
-    "@kizahasi/ot-string": ^0.2.3
-    "@kizahasi/result": ^1.0.0
-    "@kizahasi/util": ^0.9.1
-    "@ltd/j-toml": ^1.12.2
-    fp-ts: ^2.11.5
-    io-ts: ^2.2.16
-    ioredis: ^4.28.0
-    lodash.clonedeep: ^4.5.0
-    node-cache: ^5.1.2
-  checksum: f900f8e39f1337c11531c0d4defbcccd3c8bd35677e0d3f6bfe59655fea64ef24fd6fac2acd2eca656b9d94ef75610d74f2cecf476c609b80201eaa2d005ffc9
-  languageName: node
-  linkType: hard
-
-"@kizahasi/flocon-script@npm:0.8.1-beta.8":
-  version: 0.8.1-beta.8
-  resolution: "@kizahasi/flocon-script@npm:0.8.1-beta.8"
-  dependencies:
-    "@kizahasi/option": ^1.0.0
-    "@kizahasi/util": ^0.9.1
-    acorn: ^8.5.0
-  checksum: d8c96c2d27c332ab5cc28ee0bda6de2f85d08e656823077680c7d819d1dfc8c48b5cdd8e9a1a9f1aa797f38f641d5ef75e412a9ae63c4857f4967b3e3949dbca
-  languageName: node
-  linkType: hard
-
 "@kizahasi/option@npm:^1.0.0":
   version: 1.0.0
   resolution: "@kizahasi/option@npm:1.0.0"
@@ -2754,16 +2724,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@kizahasi/util@npm:^0.9.1":
-  version: 0.9.1
-  resolution: "@kizahasi/util@npm:0.9.1"
-  dependencies:
-    "@kizahasi/option": ^1.0.0
-  checksum: f9aed2b8dc20cb9e779a94e562032e77246540f7566f78e9cfb9afc6b4dfb95537e85bd4a6d64a3aaae816e079baf8c5c5145c94304a56426790994f46300f75
-  languageName: node
-  linkType: hard
-
-"@ltd/j-toml@npm:^1.12.2, @ltd/j-toml@npm:^1.23.0":
+"@ltd/j-toml@npm:^1.23.0":
   version: 1.23.0
   resolution: "@ltd/j-toml@npm:1.23.0"
   checksum: 293bdfd3dac675d4a2435e868c53a820335c7a46b7f97cbf6182fc1b03847f509b7385bce70b22218005b9c207a035b27402e7d52a11e3199a6c1a38bc420aaf
@@ -8477,9 +8438,9 @@ __metadata:
   dependencies:
     "@apollo/client": ^3.4.15
     "@emotion/react": ^11.4.1
-    "@kizahasi/flocon-core": ^0.20.0-beta.11
+    "@flocon-trpg/core": "workspace:^"
+    "@flocon-trpg/utils": "workspace:^"
     "@kizahasi/result": ^1.0.0
-    "@kizahasi/util": ^0.9.1
     "@monaco-editor/react": ^4.2.2
     "@next/bundle-analyzer": ^11.0.0
     "@react-spring/konva": ^9.2.4

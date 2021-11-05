@@ -5,9 +5,9 @@ import {
 } from './DraggablePanelConfigBase';
 import * as generators from '../utils/generators';
 import { BoardConfig, serializedBoardConfig, toCompleteBoardConfig } from './BoardConfig';
-import { chooseRecord } from '@kizahasi/util';
+import { chooseRecord } from '@flocon-trpg/utils';
 import * as t from 'io-ts';
-import { maybe, simpleId } from '@kizahasi/flocon-core';
+import { maybe, simpleId } from '@flocon-trpg/core';
 import { record } from '../utils/io-ts/record';
 
 export type BoardEditorPanelConfig = {

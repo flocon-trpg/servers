@@ -14,7 +14,7 @@ import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { MyStyle } from '../../utils/myStyle';
 import { useSelector } from '../../store';
 import { useOperate } from '../../hooks/useOperate';
-import { BgmState, FilePath, StrIndex5, UpOperation } from '@kizahasi/flocon-core';
+import { BgmState, FilePath, StrIndex5, UpOperation } from '@flocon-trpg/core';
 import _ from 'lodash';
 import { cancelRnd, flex, flexColumn, flexRow, itemsCenter } from '../../utils/className';
 import classNames from 'classnames';

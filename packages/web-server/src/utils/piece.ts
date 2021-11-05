@@ -1,4 +1,4 @@
-import { BoardState, PieceState } from '@kizahasi/flocon-core';
+import { BoardState, PieceState } from '@flocon-trpg/core';
 
 export namespace Piece {
     export const getPosition = ({

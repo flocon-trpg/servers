@@ -1,5 +1,5 @@
 import React from 'react';
-import { DicePieceValueState, DieValueState } from '@kizahasi/flocon-core';
+import { DicePieceValueState, DieValueState } from '@flocon-trpg/core';
 
 export namespace DicePieceValue {
     export const privateValueOpacity = 0.5;

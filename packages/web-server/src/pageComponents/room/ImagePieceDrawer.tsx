@@ -12,7 +12,7 @@ import {
     imagePieceValueDiff,
     toImagePieceValueUpOperation,
     simpleId,
-} from '@kizahasi/flocon-core';
+} from '@flocon-trpg/core';
 import { useDispatch } from 'react-redux';
 import { useSelector } from '../../store';
 import {
@@ -28,7 +28,7 @@ import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
 import { BufferedInput } from '../../components/BufferedInput';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
 import { FilePath } from '../../utils/filePath';
-import { keyNames } from '@kizahasi/util';
+import { keyNames } from '@flocon-trpg/utils';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,

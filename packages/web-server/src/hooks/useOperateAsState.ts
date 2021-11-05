@@ -1,4 +1,4 @@
-import { State } from '@kizahasi/flocon-core';
+import { State } from '@flocon-trpg/core';
 import { useSelector } from '../store';
 
 const emptyOperateAsState = (state: State | ((prevState: State) => State)): void => {

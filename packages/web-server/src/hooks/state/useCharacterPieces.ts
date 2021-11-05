@@ -4,8 +4,8 @@ import {
     compositeKeyEquals,
     dualKeyRecordToDualKeyMap,
     keyNames,
-} from '@kizahasi/util';
-import { PieceState } from '@kizahasi/flocon-core';
+} from '@flocon-trpg/utils';
+import { PieceState } from '@flocon-trpg/core';
 import { useCharacters } from './useCharacters';
 import _ from 'lodash';
 import { useCompositeKeyMemo } from '../useCompositeKeyMemo';

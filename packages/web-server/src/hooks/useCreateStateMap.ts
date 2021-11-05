@@ -1,4 +1,4 @@
-import { createStateMap, ReadonlyStateMap, recordForEach, StateMap } from '@kizahasi/util';
+import { createStateMap, ReadonlyStateMap, recordForEach, StateMap } from '@flocon-trpg/utils';
 import React from 'react';
 import { useLatest } from 'react-use';
 

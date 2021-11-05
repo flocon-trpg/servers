@@ -1,6 +1,6 @@
 import React from 'react';
 import { Popover } from 'antd';
-import { FilePath } from '@kizahasi/flocon-core';
+import { FilePath } from '@flocon-trpg/core';
 import { FilePathFragment } from '../generated/graphql';
 import { ImageView } from './ImageView';
 

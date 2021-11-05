@@ -1,4 +1,4 @@
-import { mapToRecord, recordToMap } from '@kizahasi/util';
+import { mapToRecord, recordToMap } from '@flocon-trpg/utils';
 import { Button, Input, Modal, Select } from 'antd';
 import React from 'react';
 import { useCharacter } from '../../hooks/state/useCharacter';
@@ -8,7 +8,7 @@ import MonacoEditor, { useMonaco } from '@monaco-editor/react';
 import { useBufferValue } from '../../hooks/useBufferValue';
 import { testCommand } from '../../utils/command';
 import { useOperate } from '../../hooks/useOperate';
-import { privateCommandsDiff, simpleId } from '@kizahasi/flocon-core';
+import { privateCommandsDiff, simpleId } from '@flocon-trpg/core';
 import { useDispatch } from 'react-redux';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import classNames from 'classnames';

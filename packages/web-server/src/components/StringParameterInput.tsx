@@ -15,7 +15,7 @@ import {
     StrParamState,
     textDiff,
     toTextUpOperation,
-} from '@kizahasi/flocon-core';
+} from '@flocon-trpg/core';
 
 const inputWidth = 150;
 

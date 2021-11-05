@@ -1,4 +1,4 @@
-import { $free, $system } from '@kizahasi/flocon-core';
+import { $free, $system } from '@flocon-trpg/core';
 import _ from 'lodash';
 import React from 'react';
 import { MessageFilter } from '../states/MessagePanelConfig';

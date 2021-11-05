@@ -1,4 +1,4 @@
-import { firebaseConfig } from '@kizahasi/flocon-core';
+import { firebaseConfig } from '@flocon-trpg/core';
 import * as E from 'fp-ts/Either';
 import { webConfig } from './configType';
 import { formatValidationErrors } from './utils/io-ts-reporters';

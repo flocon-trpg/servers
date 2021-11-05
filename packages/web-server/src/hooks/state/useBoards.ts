@@ -1,6 +1,6 @@
 import React from 'react';
-import { createStateMap, ReadonlyStateMap, dualKeyRecordForEach } from '@kizahasi/util';
-import { BoardState } from '@kizahasi/flocon-core';
+import { createStateMap, ReadonlyStateMap, dualKeyRecordForEach } from '@flocon-trpg/utils';
+import { BoardState } from '@flocon-trpg/core';
 import { useSelector } from '../../store';
 import { useCreateStateMap } from '../useCreateStateMap';
 

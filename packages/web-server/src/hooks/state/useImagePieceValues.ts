@@ -1,6 +1,6 @@
 import React from 'react';
-import { keyNames, recordForEach } from '@kizahasi/util';
-import { ImagePieceValueState } from '@kizahasi/flocon-core';
+import { keyNames, recordForEach } from '@flocon-trpg/utils';
+import { ImagePieceValueState } from '@flocon-trpg/core';
 import { useParticipants } from './useParticipants';
 import _ from 'lodash';
 

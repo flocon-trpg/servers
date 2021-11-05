@@ -1,5 +1,5 @@
-import { BoardUpOperation, update, UpOperation } from '@kizahasi/flocon-core';
-import { CompositeKey } from '@kizahasi/util';
+import { BoardUpOperation, update, UpOperation } from '@flocon-trpg/core';
+import { CompositeKey } from '@flocon-trpg/utils';
 
 export const boardUpdateOperation = (
     boardKey: CompositeKey,

@@ -35,13 +35,13 @@ import {
     BoardState,
     BoardLocationState,
     $free,
-} from '@kizahasi/flocon-core';
+} from '@flocon-trpg/core';
 import {
     CompositeKey,
     compositeKeyEquals,
     dualKeyRecordToDualKeyMap,
     keyNames,
-} from '@kizahasi/util';
+} from '@flocon-trpg/utils';
 import {
     BoardTooltipState,
     create,

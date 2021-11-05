@@ -1,5 +1,5 @@
-import { BoardState } from '@kizahasi/flocon-core';
-import { recordForEach } from '@kizahasi/util';
+import { BoardState } from '@flocon-trpg/core';
+import { recordForEach } from '@flocon-trpg/utils';
 import React from 'react';
 import { useSelector } from '../../store';
 import { useMyUserUid } from '../useMyUserUid';

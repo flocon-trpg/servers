@@ -1,5 +1,5 @@
 import { FilePathFragment, FileSourceType } from '../generated/graphql';
-import * as Core from '@kizahasi/flocon-core';
+import * as Core from '@flocon-trpg/core';
 import { getStorageForce } from './firebaseHelpers';
 import { Config } from '../config';
 import { ExpiryMap } from './expiryMap';

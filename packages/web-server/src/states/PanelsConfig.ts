@@ -40,7 +40,7 @@ import {
     serializedActiveBoardPanelConfig,
     toCompleteActiveBoardPanelConfig,
 } from './ActiveBoardPanelConfig';
-import { chooseRecord } from '@kizahasi/util';
+import { chooseRecord } from '@flocon-trpg/utils';
 import {
     defaultMemoPanelsConfig,
     MemoPanelConfig,

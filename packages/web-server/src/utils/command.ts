@@ -2,9 +2,9 @@ import {
     execCharacterCommand as execCharacterCommandCore,
     State,
     testCommand as testCommandCore,
-} from '@kizahasi/flocon-core';
+} from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
-import { CompositeKey } from '@kizahasi/util';
+import { CompositeKey } from '@flocon-trpg/utils';
 import { transform } from 'sucrase';
 
 const transpile = (script: string): Result<string> => {

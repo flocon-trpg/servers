@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Drawer, Row, Col, Checkbox, Alert } from 'antd';
-import { recordToArray } from '@kizahasi/util';
+import { recordToArray } from '@flocon-trpg/utils';
 import _ from 'lodash';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { useSelector } from '../../store';

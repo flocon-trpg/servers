@@ -39,7 +39,7 @@ import {
     pieceDiff,
     strIndex20Array,
     simpleId,
-} from '@kizahasi/flocon-core';
+} from '@flocon-trpg/core';
 import { useSelector } from '../../store';
 import { useDispatch } from 'react-redux';
 import {

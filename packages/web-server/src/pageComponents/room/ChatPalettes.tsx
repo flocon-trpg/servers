@@ -1,5 +1,5 @@
 import React from 'react';
-import { generateChatPalette } from '@kizahasi/flocon-core';
+import { generateChatPalette } from '@flocon-trpg/core';
 import { Select } from 'antd';
 import { useBufferValue } from '../../hooks/useBufferValue';
 import { useDispatch } from 'react-redux';

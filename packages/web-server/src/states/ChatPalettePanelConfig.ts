@@ -5,7 +5,7 @@ import {
 } from './DraggablePanelConfigBase';
 import * as generators from '../utils/generators';
 import * as t from 'io-ts';
-import { simpleId } from '@kizahasi/flocon-core';
+import { simpleId } from '@flocon-trpg/core';
 
 export type ChatPalettePanelConfig = {
     selectedTextColor?: string;

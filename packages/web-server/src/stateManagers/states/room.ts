@@ -9,7 +9,7 @@ import {
     State,
     stringifyUpOperation,
     UpOperation,
-} from '@kizahasi/flocon-core';
+} from '@flocon-trpg/core';
 
 export namespace Room {
     export const createState = (source: RoomGetStateFragment): State => {

@@ -1,6 +1,6 @@
 import React from 'react';
-import { CompositeKey } from '@kizahasi/util';
-import { BoardState } from '@kizahasi/flocon-core';
+import { CompositeKey } from '@flocon-trpg/utils';
+import { BoardState } from '@flocon-trpg/core';
 import _ from 'lodash';
 import { useBoards } from './useBoards';
 import { useCompositeKeyMemo } from '../useCompositeKeyMemo';

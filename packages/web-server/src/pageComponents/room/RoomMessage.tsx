@@ -23,8 +23,8 @@ import {
     parseStringPieceValue,
     parseDicePieceValue,
     $free,
-} from '@kizahasi/flocon-core';
-import { dualKeyRecordToDualKeyMap, keyNames, recordToMap } from '@kizahasi/util';
+} from '@flocon-trpg/core';
+import { dualKeyRecordToDualKeyMap, keyNames, recordToMap } from '@flocon-trpg/utils';
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../utils/className';
 import { IconView } from '../../components/IconView';

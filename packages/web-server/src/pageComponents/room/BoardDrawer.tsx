@@ -11,7 +11,7 @@ import { useOperate } from '../../hooks/useOperate';
 import { useSelector } from '../../store';
 import { BufferedInput } from '../../components/BufferedInput';
 import { useBoards } from '../../hooks/state/useBoards';
-import { boardDiff, BoardState, simpleId, toBoardUpOperation } from '@kizahasi/flocon-core';
+import { boardDiff, BoardState, simpleId, toBoardUpOperation } from '@flocon-trpg/core';
 import { useDispatch } from 'react-redux';
 import {
     create,

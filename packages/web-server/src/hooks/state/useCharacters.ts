@@ -1,5 +1,5 @@
-import { ReadonlyStateMap } from '@kizahasi/util';
-import { CharacterState } from '@kizahasi/flocon-core';
+import { ReadonlyStateMap } from '@flocon-trpg/utils';
+import { CharacterState } from '@flocon-trpg/core';
 import { useSelector } from '../../store';
 import { useCreateStateMap } from '../useCreateStateMap';
 

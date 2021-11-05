@@ -13,7 +13,7 @@ import {
     stringPieceValueDiff,
     CharacterState,
     simpleId,
-} from '@kizahasi/flocon-core';
+} from '@flocon-trpg/core';
 import { useStringPieceValues } from '../../hooks/state/useStringPieceValues';
 import { useDispatch } from 'react-redux';
 import { useSelector } from '../../store';
@@ -24,7 +24,7 @@ import {
 } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { MyCharactersSelect } from '../../components/MyCharactersSelect';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
-import { keyNames } from '@kizahasi/util';
+import { keyNames } from '@flocon-trpg/utils';
 import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 
 const drawerBaseProps: Partial<DrawerProps> = {

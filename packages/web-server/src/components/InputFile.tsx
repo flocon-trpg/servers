@@ -3,7 +3,7 @@ import * as React from 'react';
 import { FileSourceType } from '../generated/graphql';
 import { some } from '../utils/types';
 import { FirebaseStorageLink } from './FirebaseStorageLink';
-import * as Core from '@kizahasi/flocon-core';
+import * as Core from '@flocon-trpg/core';
 import { FilterValue } from 'antd/lib/table/interface';
 import { FilePath } from '../utils/filePath';
 import classNames from 'classnames';

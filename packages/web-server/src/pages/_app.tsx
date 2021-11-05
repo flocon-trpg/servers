@@ -27,7 +27,7 @@ import { getAuth } from '../utils/firebaseHelpers';
 import { ConfigContext } from '../contexts/ConfigContext';
 import { useMyUserUid } from '../hooks/useMyUserUid';
 import { AllContextProvider } from '../components/AllContextProvider';
-import { simpleId } from '@kizahasi/flocon-core';
+import { simpleId } from '@flocon-trpg/core';
 import { Notification, roomModule } from '../modules/roomModule';
 import { Ref } from '../utils/ref';
 

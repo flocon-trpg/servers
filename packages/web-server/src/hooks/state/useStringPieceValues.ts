@@ -1,6 +1,6 @@
 import React from 'react';
-import { CompositeKey, keyNames, recordForEach } from '@kizahasi/util';
-import { StringPieceValueState } from '@kizahasi/flocon-core';
+import { CompositeKey, keyNames, recordForEach } from '@flocon-trpg/utils';
+import { StringPieceValueState } from '@flocon-trpg/core';
 import { useCharacters } from './useCharacters';
 import _ from 'lodash';
 

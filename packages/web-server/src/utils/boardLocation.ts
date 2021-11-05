@@ -1,4 +1,4 @@
-import { BoardLocationState } from '@kizahasi/flocon-core';
+import { BoardLocationState } from '@flocon-trpg/core';
 
 export namespace BoardLocation {
     export const isCursorOnIcon = ({

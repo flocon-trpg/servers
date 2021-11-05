@@ -5,7 +5,7 @@ import { animated, useSpring, useTransition } from '@react-spring/konva';
 import { RoomPublicMessageFragment } from '../../generated/graphql';
 import { interval } from 'rxjs';
 import { isDeleted, toText as toTextCore } from '../../utils/message';
-import { FilePath as CoreFilePath } from '@kizahasi/flocon-core';
+import { FilePath as CoreFilePath } from '@flocon-trpg/core';
 import { FilePath } from '../../utils/filePath';
 import { PieceGroup, PieceGroupProps } from './PieceGroup';
 

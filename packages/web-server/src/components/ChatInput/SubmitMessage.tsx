@@ -29,7 +29,7 @@ import { Observable } from 'rxjs';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
 import classNames from 'classnames';
 import { flex, flexColumn, flexNone } from '../../utils/className';
-import { $free, PublicChannelKey } from '@kizahasi/flocon-core';
+import { $free, PublicChannelKey } from '@flocon-trpg/core';
 import { Notification, roomModule } from '../../modules/roomModule';
 import { useMutation } from '@apollo/client';
 

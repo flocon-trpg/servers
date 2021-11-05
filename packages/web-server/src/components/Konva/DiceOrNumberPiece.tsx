@@ -6,7 +6,7 @@ import {
     dicePieceValueStrIndexes,
     StringPieceValueState,
     DieValueState,
-} from '@kizahasi/flocon-core';
+} from '@flocon-trpg/core';
 import { StringPieceValue } from '../../utils/stringPieceValue';
 import { KonvaD6 } from '../KonvaDice';
 import { DicePieceValue } from '../../utils/dicePieceValue';

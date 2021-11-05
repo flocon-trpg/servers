@@ -11,8 +11,8 @@ import {
     toUpOperation,
     FilePath,
     simpleId,
-} from '@kizahasi/flocon-core';
-import { CompositeKey, keyNames, ReadonlyStateMap, recordToArray } from '@kizahasi/util';
+} from '@flocon-trpg/core';
+import { CompositeKey, keyNames, ReadonlyStateMap, recordToArray } from '@flocon-trpg/utils';
 import { Menu, Tooltip } from 'antd';
 import _ from 'lodash';
 import React from 'react';

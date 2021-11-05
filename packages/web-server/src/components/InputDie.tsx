@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { css } from '@emotion/react';
-import { DieValueState } from '@kizahasi/flocon-core';
+import { DieValueState } from '@flocon-trpg/core';
 import { D6Value, noDie, noValue } from '../utils/dice';
 import * as Icons from '@ant-design/icons';
 import { Button } from 'antd';

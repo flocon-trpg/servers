@@ -15,7 +15,7 @@ import {
     rc,
     SemVer,
     webServerRequiresUpdate,
-} from '@kizahasi/util';
+} from '@flocon-trpg/utils';
 import { useRouter } from 'next/router';
 import classNames from 'classnames';
 import { flex, flexColumn } from '../utils/className';

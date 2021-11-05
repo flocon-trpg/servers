@@ -1,6 +1,6 @@
 import React from 'react';
-import { CompositeKey, compositeKeyEquals, dualKeyRecordToDualKeyMap } from '@kizahasi/util';
-import { PieceState } from '@kizahasi/flocon-core';
+import { CompositeKey, compositeKeyEquals, dualKeyRecordToDualKeyMap } from '@flocon-trpg/utils';
+import { PieceState } from '@flocon-trpg/core';
 import { ImagePieceValueElement, useImagePieceValues } from './useImagePieceValues';
 import { useBooleanOrCompositeKeyMemo } from '../useBooleanOrCompositeKeyMemo';
 

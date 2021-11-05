@@ -1,4 +1,4 @@
-import { UpOperation } from '@kizahasi/flocon-core';
+import { UpOperation } from '@flocon-trpg/core';
 import { useSelector } from '../store';
 
 const emptyOperate = (operation: UpOperation): void => {

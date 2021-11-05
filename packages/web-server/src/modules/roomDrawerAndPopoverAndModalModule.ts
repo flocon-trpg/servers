@@ -4,8 +4,8 @@ import {
     DicePieceValueState,
     StringPieceValueState,
     PieceState,
-} from '@kizahasi/flocon-core';
-import { CompositeKey } from '@kizahasi/util';
+} from '@flocon-trpg/core';
+import { CompositeKey } from '@flocon-trpg/utils';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DicePieceValueElement } from '../hooks/state/useDicePieceValues';
 import { ImagePieceValueElement } from '../hooks/state/useImagePieceValues';

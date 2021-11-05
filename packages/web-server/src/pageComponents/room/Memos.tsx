@@ -8,7 +8,7 @@ import {
     textDiff,
     toTextUpOperation,
     update,
-} from '@kizahasi/flocon-core';
+} from '@flocon-trpg/core';
 import { useOperate } from '../../hooks/useOperate';
 import { Button, Popover, Tree, Modal, Menu, Dropdown, Input } from 'antd';
 import { DataNode } from 'rc-tree/lib/interface';
