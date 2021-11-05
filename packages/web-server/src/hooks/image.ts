@@ -7,7 +7,7 @@
 
 import { FilePath } from '@flocon-trpg/core';
 import React from 'react';
-import { FilePathFragment } from '../generated/graphql';
+import { FilePathFragment } from '@flocon-trpg/typed-document-node';
 import { analyzeUrl } from '../utils/analyzeUrl';
 import { useSrcFromGraphQL } from './src';
 

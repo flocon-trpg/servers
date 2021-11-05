@@ -19,7 +19,7 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import { InputDie } from '../../components/InputDie';
 import { NewTabLinkify } from '../../components/NewTabLinkify';
-import { FileSourceType, WriteRoomSoundEffectDocument } from '../../generated/graphql';
+import { FileSourceType, WriteRoomSoundEffectDocument } from '@flocon-trpg/typed-document-node';
 import { useBoards } from '../../hooks/state/useBoards';
 import { useCharacters } from '../../hooks/state/useCharacters';
 import { DicePieceValueElement } from '../../hooks/state/useDicePieceValues';

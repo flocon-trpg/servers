@@ -40,7 +40,7 @@ import {
     EditMessageDocument,
     MakeMessageNotSecretDocument,
     WritingMessageStatusType,
-} from '../../generated/graphql';
+} from '@flocon-trpg/typed-document-node';
 import * as Icon from '@ant-design/icons';
 import { MessageFilter, TabConfig } from '../../states/MessagePanelConfig';
 import { Gutter } from 'antd/lib/grid/row';

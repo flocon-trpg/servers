@@ -5,7 +5,7 @@ import {
     PieceValueLogType,
     RoomPrivateMessageFragment,
     RoomPublicMessageFragment,
-} from '../../generated/graphql';
+} from '@flocon-trpg/typed-document-node';
 import { pieceValueLog, privateMessage, publicMessage } from '../../hooks/useRoomMessages';
 import { PrivateChannelSet } from '../../utils/PrivateChannelSet';
 import { PublicChannelNames } from '../../utils/types';

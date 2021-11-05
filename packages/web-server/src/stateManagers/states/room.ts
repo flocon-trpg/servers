@@ -2,7 +2,7 @@ import {
     RoomGetStateFragment,
     RoomOperationFragment,
     RoomOperationInput,
-} from '../../generated/graphql';
+} from '@flocon-trpg/typed-document-node';
 import {
     parseState,
     parseUpOperation,

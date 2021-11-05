@@ -10,7 +10,7 @@ import {
     RoomAsListItemFragment,
     UpdateWritingMessageStatusDocument,
     WritingMessageStatusInputType,
-} from '../../generated/graphql';
+} from '@flocon-trpg/typed-document-node';
 import { Alert, Button, Card, Input, Result, Spin, notification as antdNotification } from 'antd';
 import { Layout, loginAndEntry, success } from '../../layouts/Layout';
 import { FetchResult, useMutation } from '@apollo/client';

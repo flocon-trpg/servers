@@ -1,5 +1,5 @@
 import React from 'react';
-import { GetRoomsListDocument, RoomAsListItemFragment } from '../../generated/graphql';
+import { GetRoomsListDocument, RoomAsListItemFragment } from '@flocon-trpg/typed-document-node';
 import { Layout, loginAndEntry } from '../../layouts/Layout';
 import Link from 'next/link';
 import { Button, Table } from 'antd';

@@ -1,7 +1,7 @@
 import { ApolloError } from '@apollo/client';
 import { AnyAction, Reducer } from '@reduxjs/toolkit';
 import { GraphQLError } from 'graphql';
-import { RoomEventSubscription } from '../generated/graphql';
+import { RoomEventSubscription } from '@flocon-trpg/typed-document-node';
 import { AllRoomMessagesResult } from '../hooks/useRoomMessages';
 import { RoomState } from '../hooks/useRoomState';
 

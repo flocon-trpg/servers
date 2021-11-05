@@ -19,7 +19,7 @@ import {
     IsEntryDocument,
     IsEntryQuery,
     IsEntryQueryVariables,
-} from '../generated/graphql';
+} from '@flocon-trpg/typed-document-node';
 import { Center } from '../components/Center';
 import Link from 'next/link';
 import { NotSignInResult } from '../components/Result/NotSignInResult';

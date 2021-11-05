@@ -1,7 +1,7 @@
 import { ApolloError, useSubscription } from '@apollo/client';
 import React from 'react';
 import { Observable, Subject } from 'rxjs';
-import { RoomEventDocument, RoomEventSubscription } from '../generated/graphql';
+import { RoomEventDocument, RoomEventSubscription } from '@flocon-trpg/typed-document-node';
 
 type Result = {
     observable: Observable<RoomEventSubscription>;

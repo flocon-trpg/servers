@@ -1,11 +1,11 @@
 import { Howl } from 'howler';
 import React from 'react';
-import { FilePathFragment } from '../generated/graphql';
+import { FilePathFragment } from '@flocon-trpg/typed-document-node';
 import { useSelector } from '../store';
 import { analyzeUrl } from '../utils/analyzeUrl';
 import { volumeCap } from '../utils/variables';
 import { success, useSrcFromGraphQL } from './src';
-import { AllRoomMessagesResult, newEvent } from './useRoomMessages';
+import { newEvent } from './useRoomMessages';
 
 // 長過ぎる曲をSEにしようとした場合、何もしないと部屋に再入室しない限りその曲を止めることができない。それを防ぐため、最大15秒までしか流れないようにしている。15秒という長さは適当。
 const musicLengthLimit = 15 * 1000;

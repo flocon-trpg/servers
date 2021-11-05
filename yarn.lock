@@ -1808,7 +1808,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@flocon-trpg/typed-document-node@workspace:*, @flocon-trpg/typed-document-node@workspace:packages/typed-document-node":
+"@flocon-trpg/typed-document-node@workspace:*, @flocon-trpg/typed-document-node@workspace:^, @flocon-trpg/typed-document-node@workspace:packages/typed-document-node":
   version: 0.0.0-use.local
   resolution: "@flocon-trpg/typed-document-node@workspace:packages/typed-document-node"
   dependencies:
@@ -8439,6 +8439,7 @@ __metadata:
     "@apollo/client": ^3.4.15
     "@emotion/react": ^11.4.1
     "@flocon-trpg/core": "workspace:^"
+    "@flocon-trpg/typed-document-node": "workspace:^"
     "@flocon-trpg/utils": "workspace:^"
     "@kizahasi/result": ^1.0.0
     "@monaco-editor/react": ^4.2.2

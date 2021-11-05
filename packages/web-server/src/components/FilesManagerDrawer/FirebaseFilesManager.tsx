@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Button, Dropdown, Menu, Table, Tabs, Upload, notification } from 'antd';
-import { FilePathFragment, FileSourceType } from '../../generated/graphql';
+import { FilePathFragment, FileSourceType } from '@flocon-trpg/typed-document-node';
 import { ColumnGroupType, ColumnType } from 'antd/lib/table';
 import { getStorageForce } from '../../utils/firebaseHelpers';
 import * as Icons from '@ant-design/icons';

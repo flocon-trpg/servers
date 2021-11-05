@@ -2,7 +2,7 @@ import { useLazyQuery } from '@apollo/client';
 import produce from 'immer';
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { GetRoomConnectionsDocument } from '../generated/graphql';
+import { GetRoomConnectionsDocument } from '@flocon-trpg/typed-document-node';
 import { Notification, roomModule } from '../modules/roomModule';
 import { useSelector } from '../store';
 import { useParticipants } from './state/useParticipants';

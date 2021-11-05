@@ -19,7 +19,7 @@ import {
     WritePrivateMessageDocument,
     WritePublicMessageDocument,
     WriteRoomPublicMessageFailureType,
-} from '../../generated/graphql';
+} from '@flocon-trpg/typed-document-node';
 import { UISelector } from '../UISelector';
 import { PrivateMessageChannelSelector } from './PrivateMessageChannelSelector';
 import { PublicMessageChannelSelector } from './PublicMessageChannelSelector';

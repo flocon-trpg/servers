@@ -11,7 +11,7 @@ import {
     RoomEventSubscription,
     GetRoomMessagesFailureType,
     GetMessagesDocument,
-} from '../generated/graphql';
+} from '@flocon-trpg/typed-document-node';
 import { appConsole } from '../utils/appConsole';
 import { PrivateChannelSet, PrivateChannelSets } from '../utils/PrivateChannelSet';
 import { Notification } from '../modules/roomModule';

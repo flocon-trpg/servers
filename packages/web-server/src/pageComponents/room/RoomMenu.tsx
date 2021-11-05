@@ -10,7 +10,7 @@ import {
     PromoteFailureType,
     PromoteToPlayerDocument,
     RequiresPhraseToJoinAsPlayerDocument,
-} from '../../generated/graphql';
+} from '@flocon-trpg/typed-document-node';
 import { roomConfigModule } from '../../modules/roomConfigModule';
 import { useSelector } from '../../store';
 import * as Icon from '@ant-design/icons';

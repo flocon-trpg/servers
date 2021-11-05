@@ -1,4 +1,8 @@
-import { FileSourceType, RoomMessages, RoomPublicChannelFragment } from '../generated/graphql';
+import {
+    FileSourceType,
+    RoomMessages,
+    RoomPublicChannelFragment,
+} from '@flocon-trpg/typed-document-node';
 import { PrivateChannelSet } from './PrivateChannelSet';
 import { escape } from 'html-escaper';
 import moment from 'moment';

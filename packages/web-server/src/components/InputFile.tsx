@@ -1,6 +1,6 @@
 import { Button } from 'antd';
 import * as React from 'react';
-import { FileSourceType } from '../generated/graphql';
+import { FileSourceType } from '@flocon-trpg/typed-document-node';
 import { some } from '../utils/types';
 import { FirebaseStorageLink } from './FirebaseStorageLink';
 import * as Core from '@flocon-trpg/core';

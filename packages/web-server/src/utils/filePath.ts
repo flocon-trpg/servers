@@ -1,4 +1,4 @@
-import { FilePathFragment, FileSourceType } from '../generated/graphql';
+import { FilePathFragment, FileSourceType } from '@flocon-trpg/typed-document-node';
 import * as Core from '@flocon-trpg/core';
 import { getStorageForce } from './firebaseHelpers';
 import { Config } from '../config';

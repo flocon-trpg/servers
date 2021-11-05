@@ -12,7 +12,7 @@ import {
     FilePathFragment,
     FileSourceType,
     GetFilesDocument,
-} from '../../generated/graphql';
+} from '@flocon-trpg/typed-document-node';
 import { FloconUploaderFileLink } from '../FloconUploaderFileLink';
 import { InformationIcon } from '../InformationIcon';
 import { FileType, guessFileType, image, others, sound } from '../../utils/fileType';

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Popover } from 'antd';
 import { FilePath } from '@flocon-trpg/core';
-import { FilePathFragment } from '../generated/graphql';
+import { FilePathFragment } from '@flocon-trpg/typed-document-node';
 import { ImageView } from './ImageView';
 
 type Props = {

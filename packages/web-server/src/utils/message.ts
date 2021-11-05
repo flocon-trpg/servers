@@ -1,4 +1,4 @@
-import { RoomPrivateMessage, RoomPublicMessage } from '../generated/graphql';
+import { RoomPrivateMessage, RoomPublicMessage } from '@flocon-trpg/typed-document-node';
 
 export const isDeleted = (
     message: Omit<RoomPublicMessage | RoomPrivateMessage, 'createdAt'>

@@ -50,7 +50,7 @@ import {
     roomDrawerAndPopoverAndModalModule,
 } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
-import { FilePath, FileSourceType } from '../../generated/graphql';
+import { FilePath, FileSourceType } from '@flocon-trpg/typed-document-node';
 import { ImagePiece } from '../../components/Konva/ImagePiece';
 import { DragEndResult, Vector2 } from '../../utils/types';
 import {

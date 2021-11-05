@@ -7,7 +7,7 @@ import {
     PongDocument,
     PongSubscription,
     PongSubscriptionVariables,
-} from '../../generated/graphql';
+} from '@flocon-trpg/typed-document-node';
 
 type PongObservableResultState =
     | {

@@ -4,7 +4,7 @@ import { useDeepCompareEffect } from 'react-use';
 import { ConfigContext } from '../contexts/ConfigContext';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
-import { FilePathFragment } from '../generated/graphql';
+import { FilePathFragment } from '@flocon-trpg/typed-document-node';
 import { FilePath as FilePathModule } from '../utils/filePath';
 
 export const done = 'done';

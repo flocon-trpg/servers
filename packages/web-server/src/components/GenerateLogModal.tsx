@@ -8,7 +8,7 @@ import {
     GetLogQuery,
     GetLogQueryVariables,
     GetRoomLogFailureType,
-} from '../generated/graphql';
+} from '@flocon-trpg/typed-document-node';
 import { useParticipants } from '../hooks/state/useParticipants';
 import { usePublicChannelNames } from '../hooks/state/usePublicChannelNames';
 import { useReadonlyRef } from '../hooks/useReadonlyRef';

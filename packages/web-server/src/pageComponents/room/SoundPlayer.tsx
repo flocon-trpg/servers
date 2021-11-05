@@ -4,7 +4,7 @@ import {
     FilePathInput,
     FileSourceType,
     WriteRoomSoundEffectDocument,
-} from '../../generated/graphql';
+} from '@flocon-trpg/typed-document-node';
 import * as Icon from '@ant-design/icons';
 import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
 import { FilesManagerDrawerType, some } from '../../utils/types';

@@ -16,7 +16,7 @@ import { NewTabLinkify } from '../NewTabLinkify';
 import {
     GetAvailableGameSystemsDocument,
     GetDiceHelpMessagesDocument,
-} from '../../generated/graphql';
+} from '@flocon-trpg/typed-document-node';
 import { useQuery } from '@apollo/client';
 
 type HelpMessageProps = {

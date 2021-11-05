@@ -3,7 +3,7 @@ import Link from 'next/link';
 import React from 'react';
 import { FilesManagerDrawer } from '../components/FilesManagerDrawer';
 import { QueryResultViewer } from '../components/QueryResultViewer';
-import { GetServerInfoDocument, PrereleaseType } from '../generated/graphql';
+import { GetServerInfoDocument, PrereleaseType } from '@flocon-trpg/typed-document-node';
 import { Layout } from '../layouts/Layout';
 import { FilesManagerDrawerType, none } from '../utils/types';
 import { VERSION } from '../VERSION';

@@ -2,7 +2,7 @@ import React from 'react';
 import { success, useImageFromGraphQL } from '../../hooks/image';
 import * as ReactKonva from 'react-konva';
 import { animated, useSpring, useTransition } from '@react-spring/konva';
-import { RoomPublicMessageFragment } from '../../generated/graphql';
+import { RoomPublicMessageFragment } from '@flocon-trpg/typed-document-node';
 import { interval } from 'rxjs';
 import { isDeleted, toText as toTextCore } from '../../utils/message';
 import { FilePath as CoreFilePath } from '@flocon-trpg/core';

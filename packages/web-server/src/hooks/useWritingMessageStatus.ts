@@ -1,7 +1,7 @@
 import produce from 'immer';
 import React from 'react';
 import { interval } from 'rxjs';
-import { WritingMessageStatusType } from '../generated/graphql';
+import { WritingMessageStatusType } from '@flocon-trpg/typed-document-node';
 import { useSelector } from '../store';
 
 export type WritingMessageStatusResult = ReadonlyMap<
