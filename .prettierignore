@@ -1,3 +1,5 @@
 dist/
 .yarn/
 .yarnrc.yml
+/packages/web-server/.next/
+/packages/web-server/out/
