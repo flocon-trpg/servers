@@ -12,6 +12,7 @@
     },
     "scripts": {
         "build": "rimraf ./dist && tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json",
+        "build-dist": "yarn build",
         "test": "jest"
     },
     "name": "@flocon-trpg/utils",

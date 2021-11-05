@@ -79,6 +79,7 @@
     "scripts": {
         "dev": "node dist/index.js",
         "build": "tsc -p tsconfig.build.json",
+        "build-dist": "yarn build",
         "build-release": "rimraf ./dist && npm run build",
         "gen": "run-s gen:schema gen:codegen",
         "gen:codegen": "graphql-codegen --config codegen.yml",
