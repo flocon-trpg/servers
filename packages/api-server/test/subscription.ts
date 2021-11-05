@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { RoomEventSubscription } from '../generated/graphql';
+import { RoomEventSubscription } from '@flocon-trpg/typed-document-node';
 import _ from 'lodash';
 import { Source, pipe, subscribe } from 'wonka';
 import { OperationResult } from '@urql/core';

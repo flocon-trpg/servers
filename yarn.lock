@@ -1143,6 +1143,7 @@ __metadata:
   resolution: "@flocon-trpg/api-server@workspace:packages/api-server"
   dependencies:
     "@flocon-trpg/core": 0.20.0-beta.11
+    "@flocon-trpg/typed-document-node": "workspace:*"
     "@flocon-trpg/utils": "workspace:^"
     "@graphql-codegen/cli": 2.2.2
     "@graphql-codegen/typed-document-node": 2.2.0
@@ -1254,7 +1255,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@flocon-trpg/typed-document-node@workspace:packages/typed-document-node":
+"@flocon-trpg/typed-document-node@workspace:*, @flocon-trpg/typed-document-node@workspace:packages/typed-document-node":
   version: 0.0.0-use.local
   resolution: "@flocon-trpg/typed-document-node@workspace:packages/typed-document-node"
   dependencies:

@@ -54,6 +54,7 @@
         "yargs": "^17.2.1"
     },
     "devDependencies": {
+        "@flocon-trpg/typed-document-node": "workspace:*",
         "@graphql-codegen/cli": "2.2.2",
         "@graphql-codegen/typed-document-node": "2.2.0",
         "@graphql-codegen/typescript": "2.3.0",

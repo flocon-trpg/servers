@@ -4,7 +4,7 @@ import {
     RoomEventDocument,
     RoomEventSubscription,
     RoomEventSubscriptionVariables,
-} from '../generated/graphql';
+} from '@flocon-trpg/typed-document-node';
 import { Resources } from './resources';
 import { CompositeTestRoomEventSubscription, TestRoomEventSubscription } from './subscription';
 import { createClient as createWsClient } from 'graphql-ws';

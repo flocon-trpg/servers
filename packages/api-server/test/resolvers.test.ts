@@ -56,7 +56,7 @@ import {
     DeleteFilesMutation,
     DeleteFilesMutationVariables,
     DeleteFilesDocument,
-} from '../generated/graphql';
+} from '@flocon-trpg/typed-document-node';
 import { EntryToServerResultType } from '../src/enums/EntryToServerResultType';
 import { ServerConfig } from '../src/configType';
 import { UpOperation, parseState } from '@flocon-trpg/core';
