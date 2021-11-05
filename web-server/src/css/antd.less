@@ -1,0 +1,5 @@
+// dark themeとcompact themeの両方を使う場合、cssのimportでは実現できないため、lessを用いている。
+// next.jsではlessのimportは困難(@zeit/next-lessはまともに使えない)ようなので、cssファイルにコンパイルしてからimportすることで対処している。
+
+@import 'antd/dist/antd.dark.less';
+@import 'antd/dist/antd.compact.less';

@@ -1,0 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap');
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+* {
+    // Firefoxにおけるスクロールバーの設定
+    scrollbar-color: #686868 #141414;
+    scrollbar-width: thin;
+}
+
+// webkitにおけるスクロールバーの設定
+// Firefoxとは見た目が違う。スクロールバーにマウスを合わせたときの色の変化など
+::-webkit-scrollbar {
+    background-color: #141414;
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-corner {
+    background-color: #141414;
+}
+::-webkit-scrollbar-thumb {
+    background-color: #686868;
+}
+
+// body {
+//     padding: $pt-navbar-height 0 0 0;
+// }
+
+// cancel-rndがclassNameに指定されている場合、react-rndが無効化されるようなコードにしている(そのため、単純にemotionなどで置き換えてはいけない)。また、ついでにcursorをautoにしている。
+.cancel-rnd {
+    cursor: auto;
+}
+
+// これがあることで、antdのTabPaneの子要素のheightを100%にできる（Chrome DevToolsを用いて特定。代わりに.ant-tabs-content-topを対象にしてもよさそう）。
+// これによりy方向のスクロールバーを用いて表示することが可能になる。
+.ant-tabs-content {
+    height: 100%;
+}
+
+.flex {
+    display: flex;
+}
+
+.flex-row {
+    flex-direction: row;
+}
+
+.flex-column {
+    flex-direction: column;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.flex-none {
+    flex: none;
+}
+
+.flex-auto {
+    flex: auto;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.justify-items-center {
+    justify-items: center;
+}
