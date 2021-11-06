@@ -1,3 +1,9 @@
 {
-    "extends": ["config:base", ":pinOnlyDevDependencies"]
+    "extends": [
+        "config:base",
+        ":timezone(Asia/Tokyo)",
+        ":pinOnlyDevDependencies",
+        "schedule:daily",
+        "helpers:disableTypesNodeMajor"
+    ]
 }
