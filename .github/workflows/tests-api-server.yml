@@ -91,7 +91,7 @@ jobs:
                           }
                       }
 
-            # does not execute `npm run build` because it already has js files
+            # does not execute `yarn build` because it already has js files
 
             - name: Test
               run: yarn test --ci --coverage --maxWorkers=2
