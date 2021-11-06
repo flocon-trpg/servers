@@ -3631,7 +3631,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jest@npm:27.0.2, @types/jest@npm:^27.0.2":
+"@types/jest@npm:27.0.2":
   version: 27.0.2
   resolution: "@types/jest@npm:27.0.2"
   dependencies:
@@ -8450,7 +8450,7 @@ __metadata:
     "@testing-library/react-hooks": 7.0.2
     "@types/howler": ^2.2.4
     "@types/html-escaper": ^3.0.0
-    "@types/jest": ^27.0.2
+    "@types/jest": 27.0.2
     "@types/lodash": ^4.14.175
     "@types/react": ^17.0.24
     "@types/react-color": ^3.0.5
