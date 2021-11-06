@@ -3286,7 +3286,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/react-hooks@npm:^7.0.2":
+"@testing-library/react-hooks@npm:7.0.2":
   version: 7.0.2
   resolution: "@testing-library/react-hooks@npm:7.0.2"
   dependencies:
@@ -3308,7 +3308,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/react@npm:^12.1.1":
+"@testing-library/react@npm:12.1.2":
   version: 12.1.2
   resolution: "@testing-library/react@npm:12.1.2"
   dependencies:
@@ -7625,7 +7625,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-react@npm:^7.26.0":
+"eslint-plugin-react@npm:7.26.1":
   version: 7.26.1
   resolution: "eslint-plugin-react@npm:7.26.1"
   dependencies:
@@ -8446,8 +8446,8 @@ __metadata:
     "@next/bundle-analyzer": ^11.0.0
     "@react-spring/konva": ^9.2.4
     "@reduxjs/toolkit": ^1.6.1
-    "@testing-library/react": ^12.1.1
-    "@testing-library/react-hooks": ^7.0.2
+    "@testing-library/react": 12.1.2
+    "@testing-library/react-hooks": 7.0.2
     "@types/howler": ^2.2.4
     "@types/html-escaper": ^3.0.0
     "@types/jest": ^27.0.2
@@ -8473,7 +8473,7 @@ __metadata:
     io-ts: ^2.2.16
     io-ts-reporters: ^2.0.0
     jdenticon: ^3.1.1
-    jest: ^27.2.3
+    jest: 27.3.1
     js-file-download: ^0.4.12
     jszip: ^3.7.1
     konva: ^7.2.5
@@ -8481,7 +8481,7 @@ __metadata:
     localforage: ^1.10.0
     lodash: ^4.17.21
     moment: ^2.29.1
-    monaco-editor: ^0.26.1
+    monaco-editor: 0.26.1
     next: ^11.1.2
     npm-run-all: ^4.1.5
     parse-url: ^5.0.7
@@ -8499,7 +8499,7 @@ __metadata:
     sass: ^1.42.1
     serve: ^12.0.1
     sucrase: ^3.20.1
-    ts-jest: ^27.0.5
+    ts-jest: 27.0.7
     ts-node: ^10.2.1
     typescript: ^4.4.3
     url-join: ^4.0.1
@@ -11106,7 +11106,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest@npm:27.3.1, jest@npm:^27.2.3":
+"jest@npm:27.3.1":
   version: 27.3.1
   resolution: "jest@npm:27.3.1"
   dependencies:
@@ -12581,7 +12581,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"monaco-editor@npm:^0.26.1":
+"monaco-editor@npm:0.26.1":
   version: 0.26.1
   resolution: "monaco-editor@npm:0.26.1"
   checksum: 2d531aa1245c891330e398c6ddb63fa9489a3cb4c668e304aa1ead6d5e3a14ee30e601fb94d265f7f00bfb1abe197e6dfcdfbebc1e307ea8efa99b3ecb069278
@@ -15883,7 +15883,7 @@ __metadata:
     "@typescript-eslint/parser": 5.3.0
     eslint: 8.1.0
     eslint-config-prettier: 8.3.0
-    eslint-plugin-react: ^7.26.0
+    eslint-plugin-react: 7.26.1
     eslint-plugin-react-hooks: next
     husky: ^7.0.4
     prettier: 2.4.1
@@ -17665,7 +17665,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-jest@npm:27.0.7, ts-jest@npm:^27.0.5":
+"ts-jest@npm:27.0.7":
   version: 27.0.7
   resolution: "ts-jest@npm:27.0.7"
   dependencies:
