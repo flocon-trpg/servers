@@ -11,8 +11,8 @@
         "node": ">=12"
     },
     "scripts": {
-        "build": "rimraf ./dist && tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json",
-        "build-dist": "yarn build",
+        "build": "rimraf ./dist && yarn build-dist",
+        "build-dist": "tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json",
         "test": "jest"
     },
     "name": "@flocon-trpg/flocon-script",
