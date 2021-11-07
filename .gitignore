@@ -7,6 +7,7 @@ coverage/
 /packages/web-server/.next/
 /packages/web-server/out/
 /packages/web-server/src/css/antd.css
+*.sqlite3
 
 .pnp.*
 .yarn/*
