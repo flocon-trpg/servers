@@ -13,7 +13,6 @@ import { useRouter } from 'next/router';
 import classNames from 'classnames';
 import { flex, flexColumn } from '../utils/className';
 import { useQuery } from '@apollo/client';
-import { clientVersionToString } from '../utils/clientVersion';
 
 const Index: React.FC = () => {
     const [drawerType, setDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
@@ -138,7 +137,7 @@ const Index: React.FC = () => {
                 </ul>
                 <div style={{ height: spacing }} />
                 <Typography.Title level={3}>バージョン情報</Typography.Title>
-                <div>{`クライアント: ${clientVersionToString(VERSION)}`}</div>
+                <div>{`クライアント: ${(VERSION}`}</div>
                 <div>
                     APIサーバー:{' '}
                     {loading ? (
