@@ -1,4 +1,4 @@
-import { Alert, Button, Typography } from 'antd';
+import { Alert, Button, Collapse, Typography } from 'antd';
 import Link from 'next/link';
 import React from 'react';
 import { FilesManagerDrawer } from '../components/FilesManagerDrawer';
@@ -6,20 +6,14 @@ import { QueryResultViewer } from '../components/QueryResultViewer';
 import { GetServerInfoDocument, PrereleaseType } from '@flocon-trpg/typed-document-node';
 import { Layout } from '../layouts/Layout';
 import { FilesManagerDrawerType, none } from '../utils/types';
-import { VERSION } from '../VERSION';
+import { apiServerSatisfies, SupportedApiServers, VERSION } from '../VERSION';
 import * as Icon from '@ant-design/icons';
-import {
-    alpha,
-    apiServerRequiresUpdate,
-    beta,
-    rc,
-    SemVer,
-    webServerRequiresUpdate,
-} from '@flocon-trpg/utils';
+import { alpha, beta, rc, SemVer } from '@flocon-trpg/utils';
 import { useRouter } from 'next/router';
 import classNames from 'classnames';
 import { flex, flexColumn } from '../utils/className';
 import { useQuery } from '@apollo/client';
+import { clientVersionToString } from '../utils/clientVersion';
 
 const Index: React.FC = () => {
     const [drawerType, setDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
@@ -59,33 +53,52 @@ const Index: React.FC = () => {
         });
     })();
 
-    const versionInfo = (() => {
-        if (apiServerSemVer == null) {
-            return null;
+    let versionInfo: JSX.Element | null;
+    if (apiServerSemVer == null) {
+        versionInfo = null;
+    } else {
+        const supportedApiServersAsString =
+            SupportedApiServers.reduce((seed, elem, i) => {
+                if (i === 0) {
+                    return `${seed}">=${elem.toString()}"`;
+                }
+                return `${seed}, ">=${elem.toString()}"`;
+            }, '[') + ']';
+        let alert: JSX.Element;
+        if (apiServerSatisfies({ actual: apiServerSemVer, expected: SupportedApiServers })) {
+            alert = (
+                <Alert
+                    type='success'
+                    showIcon
+                    message='利用しているAPIサーバーのバージョンに対応したクライアントが使われています。'
+                />
+            );
+        } else {
+            alert = (
+                <Alert
+                    type='error'
+                    showIcon
+                    message='クライアントとAPIサーバーの間に互換性がありません。APIサーバーとWebサーバーのいずれかもしくは両方をアップデートすることを推奨します。'
+                />
+            );
         }
-
-        const checkResult = SemVer.check({ api: apiServerSemVer, web: VERSION });
-
-        return (
+        versionInfo = (
             <div className={classNames(flex, flexColumn)}>
-                {(checkResult === apiServerRequiresUpdate ||
-                    checkResult === webServerRequiresUpdate) && (
-                    <Alert
-                        type='error'
-                        showIcon
-                        message='クライアントとAPIサーバーの間に互換性がありません。'
-                    />
-                )}
-                {checkResult === alpha && (
-                    <Alert
-                        type='warning'
-                        showIcon
-                        message='クライアントとAPIサーバーのうち少なくとも一方がalpha版であるため、バージョンに基づく互換性は保証されません。'
-                    />
-                )}
+                {alert}
+                <Collapse ghost>
+                    <Collapse.Panel header='APIサーバー詳細' key='version-info-detais-panel'>
+                        <div className={classNames(flex, flexColumn)}>
+                            <div>{`expected: ${supportedApiServersAsString}, actual: "${apiServerSemVer.toString()}"`}</div>
+                            <div>
+                                ※
+                                prereleaseの比較は、npmのSemVer比較と異なった方法を採用しています
+                            </div>
+                        </div>
+                    </Collapse.Panel>
+                </Collapse>
             </div>
         );
-    })();
+    }
 
     const spacing = 24;
     return (
@@ -125,7 +138,7 @@ const Index: React.FC = () => {
                 </ul>
                 <div style={{ height: spacing }} />
                 <Typography.Title level={3}>バージョン情報</Typography.Title>
-                <div>{`クライアント: ${VERSION.toString()}`}</div>
+                <div>{`クライアント: ${clientVersionToString(VERSION)}`}</div>
                 <div>
                     APIサーバー:{' '}
                     {loading ? (

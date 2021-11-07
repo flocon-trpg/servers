@@ -28,15 +28,6 @@ export type SemverOption = {
     prerelease?: Prerelease | null;
 };
 
-export const ok = 'ok';
-export const apiServerRequiresUpdate = 'apiServerRequiresUpdate';
-export const webServerRequiresUpdate = 'webServerRequiresUpdate';
-type CheckResult =
-    | typeof ok
-    | typeof apiServerRequiresUpdate
-    | typeof webServerRequiresUpdate
-    | typeof alpha;
-
 export class SemVer {
     public readonly major: number;
     public readonly minor: number;
@@ -165,30 +156,5 @@ export class SemVer {
             case '>=':
                 return !SemVer.compareCore(left, '<', right);
         }
-    }
-
-    /**
-     *
-     * @returns apiサーバーとwebサーバーのバージョンの関係に問題がないならば"ok"。alphaの場合、majorとminorが同じでも互換性がある保証はないため、"alpha"が返される。
-     */
-    public static check({ api, web }: { api: SemVer; web: SemVer }): CheckResult {
-        if (api.major === web.major) {
-            if (api.minor < web.minor) {
-                return apiServerRequiresUpdate;
-            }
-            if (api.prerelease?.type === alpha || web.prerelease?.type === alpha) {
-                return alpha;
-            }
-            return ok;
-        }
-
-        if (api.major > web.major) {
-            return webServerRequiresUpdate;
-        }
-        if (api.major < web.major) {
-            return apiServerRequiresUpdate;
-        }
-
-        return ok;
     }
 }

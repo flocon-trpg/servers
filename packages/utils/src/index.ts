@@ -17,17 +17,7 @@ export {
 export { keyNames } from './internal/keyNames';
 export { groupJoinMap } from './internal/groupJoinMap';
 export { groupJoinSet } from './internal/groupJoinSet';
-export {
-    SemVer,
-    alpha,
-    beta,
-    rc,
-    Operator,
-    SemverOption,
-    ok,
-    apiServerRequiresUpdate,
-    webServerRequiresUpdate,
-} from './internal/semver';
+export { SemVer, alpha, beta, rc, Operator, SemverOption } from './internal/semver';
 export {
     CompositeKey,
     stringToCompositeKey,
